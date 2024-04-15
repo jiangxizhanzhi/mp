@@ -1,0 +1,96 @@
+
+
+替换 registry_monitor.py 可以将每个文件都输出一条wazuh数据,这样就能和wazuh采集到的文件变更数据一起进行分页查询
+
+# -*- coding: utf-8 -*-
+import argparse
+import os
+import _winreg as winreg
+import json
+
+if os.name == 'nt':
+    LOG_FILE = "C:\\ossec-agent\\cmd-launcher.log"
+else:
+    LOG_FILE = "/var/ossec/logs/cmd-launcher.log"
+
+def write_debug_file(msg):
+    with open(LOG_FILE, mode="a") as log_file:
+        log_file.write(msg +"\n")
+
+def get_registry_list(location_list):
+    key_type = 0
+    location_prefix = ''
+    arr = []
+    windows_key = {
+        'HKEY_CLASSES_ROOT\\': winreg.HKEY_CLASSES_ROOT,
+        'HKEY_CURRENT_USER\\': winreg.HKEY_CURRENT_USER,
+        'HKEY_LOCAL_MACHINE\\': winreg.HKEY_LOCAL_MACHINE,
+        'HKEY_USERS\\': winreg.HKEY_USERS,
+        'HKEY_CURRENT_CONFIG\\': winreg.HKEY_CURRENT_CONFIG
+    }
+    for location in location_list:
+        for k, v in windows_key.items():
+            if str(k) in location:
+                location = location.replace(k, '')
+                location_prefix = k
+                key_type = v
+                break
+        cur_sep = os.path.sep
+        global key
+        global info_key
+        try:
+            key = winreg.OpenKey(key_type, location)
+            info_key = winreg.QueryInfoKey(key)
+        except BaseException:
+            path=location_prefix + location
+            arr.append(path + "---file_not_exists---")
+            cmd_info = {
+                "sic_launch_id": "5c92e8a3187b40e7b54734c4b03f2000",
+                "sic_launch_input": { "matcher": "cmd", "output_format": "json"},
+                "sic_launch_output": {"reg_path":path ,"exists":False}
+            }
+            write_debug_file(json.dumps(cmd_info))
+            continue
+        for i in range(info_key[0]):
+            subkey_name = winreg.EnumKey(key, i)
+            path=location_prefix + location + cur_sep + subkey_name
+            cmd_info = {
+                "sic_launch_id": "5c92e8a3187b40e7b54734c4b03f2000",
+                "sic_launch_input": { "matcher": "cmd", "output_format": "json"},
+                "sic_launch_output": {"reg_path":path,"is_dir":True,"exists":True}
+            }
+            write_debug_file(json.dumps(cmd_info))
+            arr.append(path)
+        i = 0
+        while True:
+            try:
+                # for n, a in enumerate(winreg.EnumValue(key, i)):
+                #     print(a)
+                reg_enum = winreg.EnumValue(key, i)
+                path=location_prefix + location + cur_sep + reg_enum[0]
+                cmd_info = {
+                    "sic_launch_id": "5c92e8a3187b40e7b54734c4b03f2000",
+                    "sic_launch_input": { "matcher": "cmd", "output_format": "json"},
+                    "sic_launch_output": {"reg_path":path,"is_dir":False,"exists":True}
+                }
+                write_debug_file(json.dumps(cmd_info))
+                arr.append(path)
+                i += 1
+            except OSError:
+                winreg.CloseKey(key)
+                break
+    return arr
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("registries", help="list of files")
+    args = parser.parse_args()
+    registry_path_list = str(args.registries).split(',')
+    # registry_path_list = ['HKEY_CURRENT_USER\AppEvents\EventLabels\.Defaul',
+    #                       'HKEY_CURRENT_USER\AppEvents\EventLabels\ActivatingDocument']
+    # get_registry_list(registry_path)
+    print(get_registry_list(registry_path_list))
+
+
+

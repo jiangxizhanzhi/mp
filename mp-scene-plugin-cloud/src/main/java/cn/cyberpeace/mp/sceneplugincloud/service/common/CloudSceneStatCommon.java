@@ -28,7 +28,7 @@ public class CloudSceneStatCommon extends CloudSceneStatCommonBase<CloudPluginSc
 
     @Override
     protected HumanCondition genNodeCondition(List<String> sceneIds, List<String> nodeIds) {
-        var condition = new HumanCondition()
+        HumanCondition condition = new HumanCondition()
                 .link(SceneModel.class, CloudPluginSceneElementModel.class)
                 .filterLink(SceneModel.class, SceneModel::getId,
                         CloudPluginSceneElementModel.class, CloudPluginSceneElementModel::getScene)
@@ -47,7 +47,7 @@ public class CloudSceneStatCommon extends CloudSceneStatCommonBase<CloudPluginSc
 
     @Override
     protected HumanCondition genNodePortCondition(List<String> sceneIds, List<String> nodeIds) {
-        var condition = new HumanCondition()
+        HumanCondition condition = new HumanCondition()
                 .link(SceneModel.class, SceneElementModel.class, SceneElementPortModel.class, CloudPluginSceneElementPortModel.class)
                 .filterLink(SceneModel.class, SceneModel::getId,
                         SceneElementModel.class, SceneElementModel::getScene)
@@ -113,26 +113,26 @@ public class CloudSceneStatCommon extends CloudSceneStatCommonBase<CloudPluginSc
         }
 
         Map<String, Map<String, List<Object>>> fieldGroupValuesMap = new HashMap<>();
-        for (var sceneDataBO : sceneDataBOs) {
-            var sceneHandler = new SceneHandler(sceneDataBO, null);
+        for (SceneDataBO sceneDataBO : sceneDataBOs) {
+            SceneHandler sceneHandler = new SceneHandler(sceneDataBO, null);
             CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
             pluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
                 if (nodeIds != null && !nodeIds.contains(nodeId)) {
                     return;
                 }
 
-                var groupFieldValue = ClassUtils.getObjFieldValue(cloudElement, groupFieldName);
+                Object groupFieldValue = ClassUtils.getObjFieldValue(cloudElement, groupFieldName);
                 if (groupFieldValue == null) {
                     return;
                 }
-                var groupFieldValueStr = groupFieldValue.toString();
+                String groupFieldValueStr = groupFieldValue.toString();
 
                 statFieldNames.forEach(statFieldName -> {
-                    var statFieldValue = ClassUtils.getObjFieldValue(cloudElement, statFieldName);
+                    Object statFieldValue = ClassUtils.getObjFieldValue(cloudElement, statFieldName);
                     if (statFieldValue == null) {
                         return;
                     }
-                    var groupValuesMap = MapUtils.setDefault(fieldGroupValuesMap, statFieldName, new HashMap<>());
+                    Map<String, List<Object>> groupValuesMap = MapUtils.setDefault(fieldGroupValuesMap, statFieldName, new HashMap<>());
                     MapUtils.setDefault(groupValuesMap, groupFieldValueStr, new ArrayList<>()).add(statFieldValue);
                 });
             });
@@ -154,8 +154,8 @@ public class CloudSceneStatCommon extends CloudSceneStatCommonBase<CloudPluginSc
         }
 
         Map<String, List<Object>> fieldNameValuesMap = new HashMap<>();
-        for (var sceneDataBO : sceneDataBOs) {
-            var sceneHandler = new SceneHandler(sceneDataBO, null);
+        for (SceneDataBO sceneDataBO : sceneDataBOs) {
+            SceneHandler sceneHandler = new SceneHandler(sceneDataBO, null);
             CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
             pluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
                 if (nodeIds != null && !nodeIds.contains(nodeId)) {
@@ -163,7 +163,7 @@ public class CloudSceneStatCommon extends CloudSceneStatCommonBase<CloudPluginSc
                 }
 
                 fieldNames.forEach(fieldName -> {
-                    var fieldValue = ClassUtils.getObjFieldValue(cloudElement, fieldName);
+                    Object fieldValue = ClassUtils.getObjFieldValue(cloudElement, fieldName);
                     if (fieldValue == null) {
                         return;
                     }
@@ -188,17 +188,17 @@ public class CloudSceneStatCommon extends CloudSceneStatCommonBase<CloudPluginSc
         }
 
         Map<String, List<Object>> fieldNameValuesMap = new HashMap<>();
-        for (var sceneDataBO : sceneDataBOs) {
-            var sceneHandler = new SceneHandler(sceneDataBO, null);
+        for (SceneDataBO sceneDataBO : sceneDataBOs) {
+            SceneHandler sceneHandler = new SceneHandler(sceneDataBO, null);
             CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
             pluginHandler.getElementPortMap().forEach((portId, cloudPort) -> {
-                var nodeId = cloudPort.getSrcPort().getElement().getId();
+                String nodeId = cloudPort.getSrcPort().getElement().getId();
                 if (nodeIds != null && !nodeIds.contains(nodeId)) {
                     return;
                 }
 
                 fieldNames.forEach(fieldName -> {
-                    var fieldValue = ClassUtils.getObjFieldValue(cloudPort, fieldName);
+                    Object fieldValue = ClassUtils.getObjFieldValue(cloudPort, fieldName);
                     if (fieldValue == null) {
                         return;
                     }

@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.log.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -31,6 +33,7 @@ import java.util.List;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/operate")
 @Api(tags = "日志模块")
+@AuthTarget(TargetEnum.NO_AUTH)
 public class OperateLogController {
 
     private OperateLogService operateLogService;
@@ -53,6 +56,7 @@ public class OperateLogController {
     }
 
 
+    @AuthTarget({TargetEnum.AUDIT_LOG, TargetEnum.DASHBOARD, TargetEnum.USER_MANAGE})
     @ApiOperation(value = "查询操作日志")
     @GetMapping("/page")
     public ListObjServiceResult<OperationLogPageResponse> page(OperationLogPageRequest request) {
@@ -60,12 +64,14 @@ public class OperateLogController {
         return operateLogService.search(request);
     }
 
+    @AuthTarget(TargetEnum.AUDIT_LOG)
     @GetMapping("/modules")
     @ApiOperation(value = "查询审计日志操作模块")
     public ServiceResult<List<OptionBO>> getModules() {
         return optionService.getIntOptions(LogConstant.MP_COMMON_OPTION_TYPE_LOG_OP_MODULE);
     }
 
+    @AuthTarget(TargetEnum.AUDIT_LOG)
     @GetMapping("/types")
     @ApiOperation(value = "查询审计日志操作类型")
     public ServiceResult<List<OptionBO>> getTypes() {

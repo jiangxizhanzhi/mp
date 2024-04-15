@@ -18,7 +18,7 @@ public class CollectedCsceneBO extends CollectedSceneBO {
     private String callAction;
 
     public static CollectedCsceneBO fromCollectedSceneBO(CollectedSceneBO collectedSceneBO) {
-        var collectedCsceneBO = new CollectedCsceneBO();
+        CollectedCsceneBO collectedCsceneBO = new CollectedCsceneBO();
         collectedCsceneBO.setScene(collectedSceneBO.getScene());
         collectedCsceneBO.setScenePluginData(collectedSceneBO.getScenePluginData());
         return collectedCsceneBO;

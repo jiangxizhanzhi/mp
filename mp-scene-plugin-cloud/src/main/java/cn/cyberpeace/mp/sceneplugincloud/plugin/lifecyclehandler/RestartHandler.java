@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAttachISOData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RestartTaskPool;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +51,7 @@ public class RestartHandler extends HandlerCommon {
             runElementProgress(nodeId, SceneElementModel.Event.RESTART, ElementProcess.RESTART_VIRTUAL_MACHINE, () -> {
                 closeAccessModes(element);
                 // 先判断下虚拟机的真实状态
-                var info = virtualMachine.getConsoleInfo(instanceId, element.getHost());
+                ConsoleInfoGetResult info = virtualMachine.getConsoleInfo(instanceId, element.getHost());
                 if (StringUtils.isNotEmpty(info.getPort()) && Integer.parseInt(info.getPort()) < 0) {
                     virtualMachine.stop(instanceId);
                     virtualMachine.start(instanceId);

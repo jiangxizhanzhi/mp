@@ -8,7 +8,9 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -42,7 +44,7 @@ import java.util.Objects;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "用户管理接口", tags = "AUTH-用户管理接口")
+@Api(value = "用户管理接口", tags = "用户管理接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/users")
@@ -51,6 +53,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation("删除指定id用户")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
@@ -67,6 +70,7 @@ public class UserController {
      * @param ids 数据id集
      * @return 成功数量
      */
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation("批量删除用户")
     @ApiImplicitParam(name="ids", value="用户id列表",dataTypeClass = String[].class)
     @DeleteMapping("/bulk_delete")
@@ -77,7 +81,9 @@ public class UserController {
     }
 
 
-    @ApiOperation(value = "查询指定id数据 附带组织，角色信息", notes = "")
+    @ApiOperation(value = "查询指定id用户(附带组织、角色信息)", notes = "")
+    @AuthTarget(TargetEnum.USER_MANAGE)
+
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
@@ -89,7 +95,8 @@ public class UserController {
     }
 
 
-    @ApiOperation(value = "查询指定id数据 返回有限数据，无登录用户权限拦截", notes = "")
+    @ApiOperation(value = "查询指定id用户(返回有限数据，无登录用户权限拦截)", notes = "")
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
     })
@@ -105,26 +112,28 @@ public class UserController {
         return new ObjServiceResult(null).asResult();
     }
 
-    @ApiOperation(value = "查询指定ids列表 返回有限数据，无登录用户权限拦截", notes = "")
+    @ApiOperation(value = "查询指定ids用户列表(返回有限数据，无登录用户权限拦截)", notes = "")
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiImplicitParams({
             @ApiImplicitParam(name="ids", paramType="body", value="数据ids",dataTypeClass = List.class)
     })
     @PostMapping("/no_restrict/by_ids")
     public ServiceResult<List<UserSimpleBo>> get(@RequestBody List<String> ids) {
-        var userModels = userService.getUserModelNoRestrictByUserIds(ids);
+        List<UserModel> userModels = userService.getUserModelNoRestrictByUserIds(ids);
 
         List<UserSimpleBo> userSimpleBos = new ArrayList<>();
-        userModels.forEach(userModel -> {
+        for (UserModel userModel : userModels) {
             UserSimpleBo userSimpleBo = new UserSimpleBo();
             BeanUtils.copyProperties(userModel, userSimpleBo);
             userSimpleBos.add(userSimpleBo);
-        });
+        }
 
         return ResultCommon.success(userSimpleBos);
     }
 
 
-    @ApiOperation(value = "查询当前登录用户信息 附带组织，角色信息", notes = "")
+    @ApiOperation(value = "查询当前登录用户信息(附带组织，角色信息)", notes = "")
+    @AuthTarget(TargetEnum.NO_AUTH)
     @GetMapping("/current")
     public ServiceResult<UserBo> getCurrentUser() {
         UserBo userBo = userService.getCurrentUserDto();
@@ -132,7 +141,8 @@ public class UserController {
     }
 
 
-    @ApiOperation(value = "创建用户，同时完成组织，角色绑定关系", notes = "")
+    @ApiOperation(value = "新增用户(同时完成组织，角色绑定关系)", notes = "")
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiImplicitParam(name = "createRequest", value = "请求", dataTypeClass = UserRequest.class)
     @PostMapping("/add")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
@@ -143,7 +153,8 @@ public class UserController {
         return ResultCommon.success(userModel);
     }
 
-    @ApiOperation(value = "修改用户，同时完成组织，角色绑定关系", notes = "")
+    @ApiOperation(value = "修改用户(同时完成组织，角色绑定关系)", notes = "")
+    @AuthTarget({TargetEnum.OJ_COURSE, TargetEnum.PERSONAL_CENTER, TargetEnum.PERSONAL_FOLDER, TargetEnum.USER_MANAGE})
     @ApiImplicitParam(name = "modifyRequest", value = "修改请求", dataTypeClass = UserRequest.class)
     @PostMapping("/modify")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更新用户", target = OpTargetEnums.USER)

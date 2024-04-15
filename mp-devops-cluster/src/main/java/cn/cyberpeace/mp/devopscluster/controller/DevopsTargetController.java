@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
@@ -44,7 +46,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 靶标管理类
@@ -54,6 +55,7 @@ import java.util.stream.Collectors;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/target")
 @Api(tags = "靶标管理")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.IMAGE_MANAGE)
 public class DevopsTargetController {
 
     private final TargetConverter targetConverter;
@@ -94,6 +96,7 @@ public class DevopsTargetController {
      * @param request
      * @return
      */
+    @AuthTarget(TargetEnum.DEVOPS_TARGET_GROUP)
     @ApiOperation("查询所有靶标信息")
     @GetMapping("/list")
     public ServiceResult<TargetSceneVO> list(TargetSceneRequest request) {
@@ -103,21 +106,39 @@ public class DevopsTargetController {
 
         Integer category = request.getCategory();
         if (Objects.nonNull(category)) {
-            firstTypeList = firstTypeList.stream().filter(v -> v.getId().equals(category)).collect(Collectors.toList());
+            List<TypeConvertModel> list = new ArrayList<>();
+            for (TypeConvertModel v : firstTypeList) {
+                if (v.getId().equals(category)) {
+                    list.add(v);
+                }
+            }
+            firstTypeList = list;
         }
         Integer secondCategory = request.getSecondCategory();
         if (Objects.nonNull(secondCategory)) {
-            secondTypeList = secondTypeList.stream().filter(v -> v.getId().equals(secondCategory)).collect(Collectors.toList());
+            List<TypeConvertModel> list = new ArrayList<>();
+            for (TypeConvertModel v : secondTypeList) {
+                if (v.getId().equals(secondCategory)) {
+                    list.add(v);
+                }
+            }
+            secondTypeList = list;
         }
 
         List<TargetSceneVO> targetSceneVOS = new ArrayList<>();
         for (TypeConvertModel first : firstTypeList) {
             Integer firstId = first.getId();
-            List<TypeConvertModel> typeConvertModels = secondTypeList.stream()
-                    .filter(v -> v.getL1ParentId().equals(firstId)).collect(Collectors.toList());
-            List<Integer> secondCategories = typeConvertModels.stream()
-                    .map(model -> model.getId())
-                    .collect(Collectors.toList());
+            List<TypeConvertModel> typeConvertModels = new ArrayList<>();
+            for (TypeConvertModel v : secondTypeList) {
+                if (v.getL1ParentId().equals(firstId)) {
+                    typeConvertModels.add(v);
+                }
+            }
+            List<Integer> secondCategories = new ArrayList<>();
+            for (TypeConvertModel model : typeConvertModels) {
+                Integer id = model.getId();
+                secondCategories.add(id);
+            }
             request.setCategory(firstId);
             request.setSecondCategories(secondCategories);
             request.setPage(null);
@@ -127,19 +148,23 @@ public class DevopsTargetController {
                 continue;
             }
             List<Device> secondDeviceList = targetSceneConvertModel.getList();
-            typeConvertModels.forEach(typeConvertModel -> {
+            for (TypeConvertModel typeConvertModel : typeConvertModels) {
                 TargetSceneVO targetSceneVO = new TargetSceneVO();
                 targetSceneVO.setFirstTypeId(firstId);
                 targetSceneVO.setFirstTypeName(first.getName());
                 targetSceneVO.setSecondTypeId(typeConvertModel.getId());
                 targetSceneVO.setSecondTypeName(typeConvertModel.getName());
-                targetSceneVO.setDeviceList(secondDeviceList.stream()
-                        .filter(s -> s.getSecondCategory().equals(typeConvertModel.getId()))
-                        .collect(Collectors.toList()));
+                List<Device> list = new ArrayList<>();
+                for (Device s : secondDeviceList) {
+                    if (s.getSecondCategory().equals(typeConvertModel.getId())) {
+                        list.add(s);
+                    }
+                }
+                targetSceneVO.setDeviceList(list);
                 if (CollectionUtils.isNotEmpty(targetSceneVO.getDeviceList())) {
                     targetSceneVOS.add(targetSceneVO);
                 }
-            });
+            }
         }
         return new Result(new ListResult<>(targetSceneVOS));
     }
@@ -149,6 +174,7 @@ public class DevopsTargetController {
      * @param request
      * @return
      */
+    @AuthTarget(TargetEnum.DEVOPS_TARGET_GROUP)
     @ApiOperation("查询所有靶标信息(带过滤条件)")
     @GetMapping("/listAll")
     public ServiceResult<Device> listAll(TargetSceneRequest request){
@@ -158,21 +184,39 @@ public class DevopsTargetController {
 
         Integer category = request.getCategory();
         if (Objects.nonNull(category)) {
-            firstTypeList = firstTypeList.stream().filter(v -> v.getId().equals(category)).collect(Collectors.toList());
+            List<TypeConvertModel> list = new ArrayList<>();
+            for (TypeConvertModel v : firstTypeList) {
+                if (v.getId().equals(category)) {
+                    list.add(v);
+                }
+            }
+            firstTypeList = list;
         }
 
         if (CollectionUtils.isNotEmpty(request.getSecondCategoryList())) {
-            secondTypeList = secondTypeList.stream().filter(v -> request.getSecondCategoryList().contains(v.getId())).collect(Collectors.toList());
+            List<TypeConvertModel> list = new ArrayList<>();
+            for (TypeConvertModel v : secondTypeList) {
+                if (request.getSecondCategoryList().contains(v.getId())) {
+                    list.add(v);
+                }
+            }
+            secondTypeList = list;
         }
 
         List<Device> deviceList = new ArrayList<>();
         for (TypeConvertModel first : firstTypeList){
             Integer firstId = first.getId();
-            List<TypeConvertModel> typeConvertModels = secondTypeList.stream()
-                    .filter(v -> v.getL1ParentId().equals(firstId)).collect(Collectors.toList());
-            List<Integer> secondCategories = typeConvertModels.stream()
-                    .map(model -> model.getId())
-                    .collect(Collectors.toList());
+            List<TypeConvertModel> typeConvertModels = new ArrayList<>();
+            for (TypeConvertModel v : secondTypeList) {
+                if (v.getL1ParentId().equals(firstId)) {
+                    typeConvertModels.add(v);
+                }
+            }
+            List<Integer> secondCategories = new ArrayList<>();
+            for (TypeConvertModel model : typeConvertModels) {
+                Integer id = model.getId();
+                secondCategories.add(id);
+            }
             request.setCategory(firstId);
             request.setSecondCategories(secondCategories);
             request.setPage(null);
@@ -202,21 +246,39 @@ public class DevopsTargetController {
 
         Integer category = request.getCategory();
         if (Objects.nonNull(category)) {
-            firstTypeList = firstTypeList.stream().filter(v -> v.getId().equals(category)).collect(Collectors.toList());
+            List<TypeConvertModel> list = new ArrayList<>();
+            for (TypeConvertModel v : firstTypeList) {
+                if (v.getId().equals(category)) {
+                    list.add(v);
+                }
+            }
+            firstTypeList = list;
         }
         Integer secondCategory = request.getSecondCategory();
         if (Objects.nonNull(secondCategory)) {
-            secondTypeList = secondTypeList.stream().filter(v -> v.getId().equals(secondCategory)).collect(Collectors.toList());
+            List<TypeConvertModel> list = new ArrayList<>();
+            for (TypeConvertModel v : secondTypeList) {
+                if (v.getId().equals(secondCategory)) {
+                    list.add(v);
+                }
+            }
+            secondTypeList = list;
         }
 
         List<DeviceTargetByTypeVO> targetScenes = new ArrayList<>();
         for (TypeConvertModel first : firstTypeList){
             Integer firstId = first.getId();
-            List<TypeConvertModel> typeConvertModels = secondTypeList.stream()
-                    .filter(v -> v.getL1ParentId().equals(firstId)).collect(Collectors.toList());
-            List<Integer> secondCategories = typeConvertModels.stream()
-                    .map(model -> model.getId())
-                    .collect(Collectors.toList());
+            List<TypeConvertModel> typeConvertModels = new ArrayList<>();
+            for (TypeConvertModel convertModel : secondTypeList) {
+                if (convertModel.getL1ParentId().equals(firstId)) {
+                    typeConvertModels.add(convertModel);
+                }
+            }
+            List<Integer> secondCategories = new ArrayList<>();
+            for (TypeConvertModel model : typeConvertModels) {
+                Integer id = model.getId();
+                secondCategories.add(id);
+            }
             request.setCategory(firstId);
             request.setSecondCategories(secondCategories);
             request.setPage(null);
@@ -227,33 +289,43 @@ public class DevopsTargetController {
             }
             List<DeviceTargetPO> deviceTargetPOList = targetSceneConvertModel.getList();
 
-            List<DeviceTargetVO> deviceTargetVOList = deviceTargetPOList.stream().map(v -> {
-                DeviceTargetVO vo = new DeviceTargetVO();
-                vo.setUuid(v.getUuid());
-                vo.setName(v.getName());
-                vo.setLogo(v.getLogo());
-                vo.setRole(v.getRole());
-                vo.setCategory(v.getMainCategory());
-                vo.setSecondCategory(v.getSubCategory());
-                vo.setThirdCategory(v.getThirdCategory());
-                vo.setImageType(v.getImageType());
-                return vo;
-            }).collect(Collectors.toList());
-            typeConvertModels.forEach(typeConvertModel -> {
+            List<DeviceTargetVO> deviceTargetVOList = new ArrayList<>();
+            for (DeviceTargetPO v : deviceTargetPOList) {
+                DeviceTargetVO deviceTargetVO = getDeviceTargetVO(v);
+                deviceTargetVOList.add(deviceTargetVO);
+            }
+            for (TypeConvertModel typeConvertModel : typeConvertModels) {
                 DeviceTargetByTypeVO targetScene = new DeviceTargetByTypeVO();
                 targetScene.setFirstTypeId(firstId);
                 targetScene.setFirstTypeName(first.getName());
                 targetScene.setSecondTypeId(typeConvertModel.getId());
                 targetScene.setSecondTypeName(typeConvertModel.getName());
-                targetScene.setDeviceList(deviceTargetVOList.stream()
-                        .filter(vo -> vo.getSecondCategory().equals(typeConvertModel.getId()))
-                        .collect(Collectors.toList()));
+                List<DeviceTargetVO> list = new ArrayList<>();
+                for (DeviceTargetVO vo : deviceTargetVOList) {
+                    if (vo.getSecondCategory().equals(typeConvertModel.getId())) {
+                        list.add(vo);
+                    }
+                }
+                targetScene.setDeviceList(list);
                 if (CollectionUtils.isNotEmpty(targetScene.getDeviceList())) {
                     targetScenes.add(targetScene);
                 }
-            });
+            }
         }
         return new Result(new ListResult<>(targetScenes));
+    }
+
+    private static DeviceTargetVO getDeviceTargetVO(DeviceTargetPO v) {
+        DeviceTargetVO vo = new DeviceTargetVO();
+        vo.setUuid(v.getUuid());
+        vo.setName(v.getName());
+        vo.setLogo(v.getLogo());
+        vo.setRole(v.getRole());
+        vo.setCategory(v.getMainCategory());
+        vo.setSecondCategory(v.getSubCategory());
+        vo.setThirdCategory(v.getThirdCategory());
+        vo.setImageType(v.getImageType());
+        return vo;
     }
 
     @ApiOperation("根据UUID查询靶标信息")
@@ -279,6 +351,7 @@ public class DevopsTargetController {
         return new PageResult<>(deviceVOList,targetSceneConvertModel.getTotal());
     }
 
+    @AuthTarget(TargetEnum.DEVOPS_TARGET_GROUP)
     @ApiOperation("查询常用靶标信息")
     @GetMapping("/common-targets")
     public ServiceResult<DeviceVO> getCommonTargets(TargetSceneRequest request){
@@ -288,19 +361,31 @@ public class DevopsTargetController {
         Locale locale = LocaleContextHolder.getLocale();
         if (Objects.equals(locale, Locale.CHINA)) {
             // 常用靶标名称国际化处理
-            deviceVOList.forEach(device -> {
+            for (DeviceVO device : deviceVOList) {
                 device.setImage(device.getName());
                 device.setName(
                         Objects.nonNull(CommonTargetNameEnum.map.get(device.getName())) ?
                                 CommonTargetNameEnum.map.get(device.getName()).toValue() : device.getName());
-            });
+            }
         }
 
         if (Objects.nonNull(request.getImageType())) {
-            deviceVOList = deviceVOList.stream().filter(v -> v.getImageType().equals(request.getImageType().toValue())).collect(Collectors.toList());
+            List<DeviceVO> list = new ArrayList<>();
+            for (DeviceVO v : deviceVOList) {
+                if (v.getImageType().equals(request.getImageType().toValue())) {
+                    list.add(v);
+                }
+            }
+            deviceVOList = list;
         }
         if (Objects.nonNull(request.getRole())) {
-            deviceVOList = deviceVOList.stream().filter(deviceVO -> deviceVO.getRole().equals(request.getRole())).collect(Collectors.toList());
+            List<DeviceVO> list = new ArrayList<>();
+            for (DeviceVO deviceVO : deviceVOList) {
+                if (deviceVO.getRole().equals(request.getRole())) {
+                    list.add(deviceVO);
+                }
+            }
+            deviceVOList = list;
         }
         return new Result(new ListResult(deviceVOList));
     }

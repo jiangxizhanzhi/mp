@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -31,6 +34,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor/event")
+@AuthTarget(TargetEnum.CSCENE_MONITOR_GROUP)
 public class EventMonitorController {
 
     @Autowired
@@ -63,7 +67,12 @@ public class EventMonitorController {
         if (Objects.isNull(eventPercentRequest.getTopCount()) || eventPercentRequest.getTopCount() < 0) {
             eventPercentRequest.setTopCount(5);
         }
-        List<ElementEventPercent> limitList = eventPercents.stream().limit(eventPercentRequest.getTopCount()).collect(Collectors.toList());
+        List<ElementEventPercent> limitList = new ArrayList<>();
+        long limit = eventPercentRequest.getTopCount();
+        for (ElementEventPercent eventPercent : eventPercents) {
+            if (limit-- == 0) break;
+            limitList.add(eventPercent);
+        }
         return ResultCommon.success(limitList);
     }
 

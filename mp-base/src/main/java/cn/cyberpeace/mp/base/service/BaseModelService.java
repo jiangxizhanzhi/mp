@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -68,22 +69,22 @@ public interface BaseModelService<M extends BaseModel, Q> {
     }
 
     default <T extends ModelBO<M, T>> ListObjServiceResult<T> listBO(Q queryParams, boolean withTotal, Class<T> boClass) {
-        var modelResult = list(queryParams, withTotal);
+        ListObjServiceResult<M> modelResult = list(queryParams, withTotal);
         return ModelServiceCommon.toListBOResult(modelResult, boClass);
     }
 
     default <T extends ModelBO<M, T>> ObjServiceResult<T> getBO(String id, String[] fields, Class<T> boClass) {
-        var modelResult = get(id, fields);
+        ObjServiceResult<M> modelResult = get(id, fields);
         return ModelServiceCommon.toBOResult(modelResult, boClass);
     }
 
     default <T extends ModelBO<M, T>> ObjServiceResult<T> createBO(T bo, String[] fields, Class<T> boClass) {
-        var modelResult = create(bo.toModel(), fields);
+        ObjServiceResult<M> modelResult = create(bo.toModel(), fields);
         return ModelServiceCommon.toBOResult(modelResult, boClass);
     }
 
     default <T extends ModelBO<M, T>> ObjServiceResult<T> updateBO(T bo, String[] fields, Class<T> boClass) {
-        var modelResult = update(bo.toModel(), fields);
+        ObjServiceResult<M> modelResult = update(bo.toModel(), fields);
         return ModelServiceCommon.toBOResult(modelResult, boClass);
     }
 
@@ -92,12 +93,20 @@ public interface BaseModelService<M extends BaseModel, Q> {
     }
 
     default <T extends ModelBO<M, T>> ServiceResult<Integer> bulkCreateBO(List<T> bos, Class<T> boClass) {
-        var objs = bos.stream().map(bo -> bo.toModel()).collect(Collectors.toList());
+        List<M> objs = new ArrayList<>();
+        for (T bo : bos) {
+            M model = bo.toModel();
+            objs.add(model);
+        }
         return bulkCreate(objs);
     }
 
     default <T extends ModelBO<M, T>> ServiceResult<Integer> bulkUpdateBO(List<T> bos, Class<T> boClass) {
-        var objs = bos.stream().map(bo -> bo.toModel()).collect(Collectors.toList());
+        List<M> objs = new ArrayList<>();
+        for (T bo : bos) {
+            M model = bo.toModel();
+            objs.add(model);
+        }
         return bulkUpdate(objs);
     }
 
@@ -119,14 +128,14 @@ public interface BaseModelService<M extends BaseModel, Q> {
 
     default <T extends ModelBO<M, T>> ServiceResult<Boolean> exportExcel(Q queryParams, OutputStream os,
                                                                          Class<T> textResourceClass) {
-        var modelResult = list(queryParams, false);
+        ListObjServiceResult<M> modelResult = list(queryParams, false);
         ModelServiceCommon.exportListExcel(modelResult, os, textResourceClass);
         return new ServiceResult<>(true);
     }
 
     default <T extends ModelBO<M, T>> ServiceResult<Integer> importExcel(
             InputStream is, Class<T> textResourceClass) {
-        var objs = ModelServiceCommon.importListExcel(is, textResourceClass);
+        List<M> objs = ModelServiceCommon.importListExcel(is, textResourceClass);
         return bulkCreate(objs);
     }
 

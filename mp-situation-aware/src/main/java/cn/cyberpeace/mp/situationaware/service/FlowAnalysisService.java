@@ -49,7 +49,6 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
@@ -85,7 +84,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.Flow;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -151,7 +150,7 @@ public class FlowAnalysisService extends AbstractBaseService {
                 .getResources(ResourceUtils.CLASSPATH_URL_PREFIX + "suricata/flow.json");
         String json = FileUtils.readLine(resources);
 
-        var flow = JSONObject.parseObject(json,FlowTemplateBO.class);
+        FlowTemplateBO flow = JSONObject.parseObject(json,FlowTemplateBO.class);
 
         String destinationIp = request.getDestinationIp();
 
@@ -218,7 +217,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
         source.put("@timestamp",dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
 
-        var formatter = DateTimeFormatter.ofPattern("yyMMdd");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMMdd");
 
         IndexRequest indexRequest = new IndexRequest(group.concat("_").concat(SESSION3).concat("-").concat(dateTime.format(formatter))).source(source);
 
@@ -248,14 +247,14 @@ public class FlowAnalysisService extends AbstractBaseService {
                 .fixedInterval(DateHistogramInterval.seconds(secondsInterval))
                 .subAggregation(AggregationBuilders.sum("network_bytes").field("network.bytes"));
 
-        var boolQueryBuilder = buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = buildBoolQueryBuilder(request);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.aggregation(aggregationBuilder);
         searchSourceBuilder.trackTotalHits(true);
         searchSourceBuilder.query(boolQueryBuilder);
 
-        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+        SearchRequest searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("sumNetworkBytesByDateHistogramTimestamp >>> Search JSON query: {}", searchRequest.source().toString());
 
@@ -305,13 +304,13 @@ public class FlowAnalysisService extends AbstractBaseService {
                 .fixedInterval(DateHistogramInterval.seconds(secondsInterval))
                 .subAggregation(AggregationBuilders.count("count").field("destination.ip"));
 
-        var boolQueryBuilder = buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = buildBoolQueryBuilder(request);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.aggregation(aggregationBuilder);
         searchSourceBuilder.query(boolQueryBuilder);
 
-        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+        SearchRequest searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("sumNetworkBytesByDateHistogramTimestamp >>> Search JSON query: {}", searchRequest.source().toString());
 
@@ -350,9 +349,9 @@ public class FlowAnalysisService extends AbstractBaseService {
 
         Map<String, String> convertToMap = flowPortProtocolService.convertToMap();
 
-        boList.stream().forEach(v ->
-            v.setProtocol(convertToMap.get(v.getPort()))
-        );
+        for (AttackPortAggregationBO v : boList) {
+            v.setProtocol(convertToMap.get(v.getPort()));
+        }
 
         return boList;
     }
@@ -377,14 +376,14 @@ public class FlowAnalysisService extends AbstractBaseService {
                 .subAggregation(AggregationBuilders.sum("network_bytes").field("network.bytes"))
                 .subAggregation(AggregationBuilders.count("count").field("destination.ip"));
 
-        var boolQueryBuilder = buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = buildBoolQueryBuilder(request);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.aggregation(aggregationBuilder);
         searchSourceBuilder.query(boolQueryBuilder);
         searchSourceBuilder.from(0).size(request.getTopSize());
 
-        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+        SearchRequest searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("groupByDestinationPort  >>> Search JSON query: {}", searchRequest.source().toString());
 
@@ -430,14 +429,14 @@ public class FlowAnalysisService extends AbstractBaseService {
         AggregationBuilder aggregationBuilder = AggregationBuilders.terms("suricata_severity").field("suricata.severity")
                 .subAggregation(AggregationBuilders.terms("destination_ip").field("destination.ip"));
 
-        var boolQueryBuilder = buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = buildBoolQueryBuilder(request);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.aggregation(aggregationBuilder);
         searchSourceBuilder.query(boolQueryBuilder);
         searchSourceBuilder.size(0);
 
-        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+        SearchRequest searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("groupByDestinationIpAndSeverity >>> Search JSON query: {}", searchRequest.source().toString());
 
@@ -457,7 +456,11 @@ public class FlowAnalysisService extends AbstractBaseService {
                 Aggregations bucketAggregations = bucket.getAggregations();
                 ParsedTerms terms = bucketAggregations.get("destination_ip");
                 List<? extends Terms.Bucket> aggregationBuckets = terms.getBuckets();
-                List<String> destinationIpList = aggregationBuckets.stream().map(MultiBucketsAggregation.Bucket::getKeyAsString).collect(Collectors.toList());
+                List<String> destinationIpList = new ArrayList<>();
+                for (Terms.Bucket bucket1 : aggregationBuckets) {
+                    String keyAsString = bucket1.getKeyAsString();
+                    destinationIpList.add(keyAsString);
+                }
                 bo.setDestinationIpList(destinationIpList);
                 return bo;
             }).collect(Collectors.toList());
@@ -474,7 +477,7 @@ public class FlowAnalysisService extends AbstractBaseService {
      */
     public List<FlowLogBO> flowLog(FlowAnalysisRequest request){
 
-        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = this.buildBoolQueryBuilder(request);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(boolQueryBuilder);
@@ -489,7 +492,7 @@ public class FlowAnalysisService extends AbstractBaseService {
             searchSourceBuilder.from(0).size(request.getTopSize());
         }
 
-        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+        SearchRequest searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("flowLog >>>>> Search JSON query: {}", searchRequest.source().toString());
 
@@ -517,7 +520,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     public ListObjResult<FlowLogBO> flowLogWithTotal(FlowAnalysisRequest request){
 
-        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = this.buildBoolQueryBuilder(request);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(boolQueryBuilder);
@@ -532,7 +535,7 @@ public class FlowAnalysisService extends AbstractBaseService {
             searchSourceBuilder.from(0).size(request.getTopSize());
         }
 
-        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+        SearchRequest searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("flowLog >>>>> Search JSON query: {}", searchRequest.source().toString());
 
@@ -569,13 +572,18 @@ public class FlowAnalysisService extends AbstractBaseService {
             return Lists.newArrayList();
         }
         Map<String, FlowClassificationModel> allCategoryDicMap = flowClassificationsService.findAllCategoryDicMap();
-        flowLogBOS.stream().filter(v -> Objects.nonNull(v.getSuricata())).forEach(flowLogBO -> {
-            if (MapUtils.isNotEmpty(allCategoryDicMap)){
-                List<String> categoryList = flowLogBO.getSuricata().getCategory().stream()
-                        .map(c -> this.globalizedWithAttackWay(c,allCategoryDicMap)).collect(Collectors.toList());
-                flowLogBO.getSuricata().setCategory(categoryList);
+        for (FlowLogBO v : flowLogBOS) {
+            if (Objects.nonNull(v.getSuricata())) {
+                if (MapUtils.isNotEmpty(allCategoryDicMap)) {
+                    List<String> categoryList = new ArrayList<>();
+                    for (String c : v.getSuricata().getCategory()) {
+                        String s = this.globalizedWithAttackWay(c, allCategoryDicMap);
+                        categoryList.add(s);
+                    }
+                    v.getSuricata().setCategory(categoryList);
+                }
             }
-        });
+        }
 
         return flowLogBOS;
     }
@@ -611,7 +619,7 @@ public class FlowAnalysisService extends AbstractBaseService {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
 
-        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = this.buildBoolQueryBuilder(request);
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(boolQueryBuilder);
@@ -639,7 +647,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
         searchSourceBuilder.size(0);
 
-        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+        SearchRequest searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("topByAggregationTypeEnum >>>> Search JSON query: {}", searchRequest.source().toString());
         try {
@@ -676,10 +684,10 @@ public class FlowAnalysisService extends AbstractBaseService {
         searchSourceBuilder.aggregation(aggregationBuilder);
         searchSourceBuilder.size(0);
 
-        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
+        SearchRequest searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
-        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = this.buildBoolQueryBuilder(request);
 
         searchRequest.source(searchSourceBuilder.query(boolQueryBuilder));
 
@@ -708,7 +716,7 @@ public class FlowAnalysisService extends AbstractBaseService {
      * @return
      */
     public long count(FlowAnalysisRequest request){
-        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = this.buildBoolQueryBuilder(request);
 
         CountRequest countRequest = new CountRequest();
         countRequest.indices(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
@@ -735,9 +743,9 @@ public class FlowAnalysisService extends AbstractBaseService {
         TeamAttackBO teamAttackResultVO = new TeamAttackBO();
 
         // 1.创建并设置SearchSourceBuilder对象
-        var searchSourceBuilder = new SearchSourceBuilder();
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
-        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
+        BoolQueryBuilder boolQueryBuilder = this.buildBoolQueryBuilder(request);
 
         searchSourceBuilder.aggregation(AggregationBuilders.sum("packageSize").field("network.bytes"));
         searchSourceBuilder.aggregation(AggregationBuilders.terms("attackWay").field("suricata.category").size(request.getTopSize()));
@@ -745,7 +753,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         searchSourceBuilder.trackTotalHits(true);
         searchSourceBuilder.query(boolQueryBuilder);
 
-        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+        SearchRequest searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         log.info("queryOneTeamAttackSumList Search JSON query: {}", searchRequest.source().toString());
 
@@ -757,8 +765,8 @@ public class FlowAnalysisService extends AbstractBaseService {
             //设置攻击手法
             List<AttackWayAggregationBO> attackWayList = ((ParsedStringTerms) response.getAggregations().get("attackWay")).getBuckets().stream()
                     .map(bucket -> {
-                        var parsedBucket = (ParsedStringTerms.ParsedBucket) bucket;
-                        var attackResult = new AttackWayAggregationBO();
+                        ParsedStringTerms.ParsedBucket parsedBucket = (ParsedStringTerms.ParsedBucket) bucket;
+                        AttackWayAggregationBO attackResult = new AttackWayAggregationBO();
                         attackResult.setAggregationType(parsedBucket.getKeyAsString());
                         attackResult.setAttackNumber(parsedBucket.getDocCount());
                         return attackResult;
@@ -782,7 +790,14 @@ public class FlowAnalysisService extends AbstractBaseService {
         if (CollectionUtils.isEmpty(groupList)){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        String[] indices = groupList.stream().filter(v -> v.startsWith("mp_")).map(v -> v.concat("_*")).toArray(String[]::new);
+        List<String> list = new ArrayList<>();
+        for (String v : groupList) {
+            if (v.startsWith("mp_")) {
+                String concat = v.concat("_*");
+                list.add(concat);
+            }
+        }
+        String[] indices = list.toArray(new String[0]);
         DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest();
         deleteIndexRequest.indices(indices);
         deleteIndexRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
@@ -798,20 +813,42 @@ public class FlowAnalysisService extends AbstractBaseService {
      * 攻击手法-攻击次数百分比
      */
     private List<AttackWayAggregationBO> buildTeamAttackWayPercent(List<AttackWayAggregationBO> attackResultVOS) {
-        Long totalNumber = attackResultVOS.stream().mapToLong(AttackWayAggregationBO::getAttackNumber).sum();
+        long sum = 0L;
+        for (AttackWayAggregationBO attackResultVO : attackResultVOS) {
+            long attackNumber = attackResultVO.getAttackNumber();
+            sum += attackNumber;
+        }
+        Long totalNumber = sum;
         if (Long.valueOf(0).equals(totalNumber)) {
             return attackResultVOS;
         }
         for (int i = 0; i < attackResultVOS.size(); i++) {
-            var attack = attackResultVOS.get(i);
+            AttackWayAggregationBO attack = attackResultVOS.get(i);
             if (i > 1 && i == attackResultVOS.size() - 1) {
-                BigDecimal beforeSum = attackResultVOS.subList(0, i).stream().map(AttackWayAggregationBO::getAttackNumberPercent).reduce((a, b) -> a.add(b)).get();
+                boolean seen = false;
+                BigDecimal acc = null;
+                for (AttackWayAggregationBO attackWayAggregationBO : attackResultVOS.subList(0, i)) {
+                    BigDecimal attackNumberPercent = attackWayAggregationBO.getAttackNumberPercent();
+                    if (!seen) {
+                        seen = true;
+                        acc = attackNumberPercent;
+                    } else {
+                        acc = acc.add(attackNumberPercent);
+                    }
+                }
+                BigDecimal beforeSum = (seen ? Optional.of(acc) : Optional.<BigDecimal>empty())
+                        .get();
                 attack.setAttackNumberPercent(BigDecimal.valueOf(100).compareTo(beforeSum) == -1 ? BigDecimal.ZERO : BigDecimal.valueOf(100).subtract(beforeSum));
             } else {
                 attack.setAttackNumberPercent(BigDecimal.valueOf(attack.getAttackNumber()).divide(BigDecimal.valueOf(totalNumber), 4, RoundingMode.HALF_DOWN).multiply(BigDecimal.valueOf(100)));
             }
         }
-        attackResultVOS = attackResultVOS.stream().sorted(Comparator.comparing(AttackWayAggregationBO::getAttackNumberPercent).reversed()).collect(Collectors.toList());
+        List<AttackWayAggregationBO> list = new ArrayList<>();
+        for (AttackWayAggregationBO attackResultVO : attackResultVOS) {
+            list.add(attackResultVO);
+        }
+        list.sort(Comparator.comparing(AttackWayAggregationBO::getAttackNumberPercent).reversed());
+        attackResultVOS = list;
         return attackResultVOS;
     }
 
@@ -821,7 +858,7 @@ public class FlowAnalysisService extends AbstractBaseService {
      * @return
      */
     protected SearchRequest buildSearchRequest(FlowAnalysisRequest request,SearchSourceBuilder searchSourceBuilder){
-        var searchRequest = new SearchRequest();
+        SearchRequest searchRequest = new SearchRequest();
         searchRequest.indices(ArrayUtils.isNotEmpty(request.getIndices()) ? request.getIndices() : this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         searchRequest.source(searchSourceBuilder);
@@ -835,7 +872,7 @@ public class FlowAnalysisService extends AbstractBaseService {
      * @return
      */
     protected BoolQueryBuilder buildBoolQueryBuilder(FlowAnalysisRequest request){
-        var boolQueryBuilder = QueryBuilders.boolQuery();
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder
                 .must(QueryBuilders.existsQuery("suricata.category"))
                 .mustNot(QueryBuilders.termsQuery("suricata.category", ""));
@@ -849,9 +886,23 @@ public class FlowAnalysisService extends AbstractBaseService {
             boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", request.getAttackSeverities()));
         } else {
             if (Objects.nonNull(request.getSeverityEnum())){
-                List<Integer> allSeverityList = Arrays.stream(SeverityEnum.values()).map(Enum::ordinal).collect(Collectors.toList());
-                List<Integer> severityList = request.getSeverityEnum() == SeverityEnum.ALL ? allSeverityList :
-                        allSeverityList.stream().filter(v -> v <= request.getSeverityEnum().ordinal()).collect(Collectors.toList());
+                List<Integer> allSeverityList = new ArrayList<>();
+                for (SeverityEnum severityEnum : SeverityEnum.values()) {
+                    Integer ordinal = severityEnum.ordinal();
+                    allSeverityList.add(ordinal);
+                }
+                List<Integer> severityList;
+                if (request.getSeverityEnum() == SeverityEnum.ALL) {
+                    severityList = allSeverityList;
+                } else {
+                    List<Integer> list = new ArrayList<>();
+                    for (Integer v : allSeverityList) {
+                        if (v <= request.getSeverityEnum().ordinal()) {
+                            list.add(v);
+                        }
+                    }
+                    severityList = list;
+                }
                 boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", severityList));
             }
         }
@@ -928,10 +979,10 @@ public class FlowAnalysisService extends AbstractBaseService {
             return;
         }
         Map<String, FlowClassificationModel> allCategoryDicMap = flowClassificationsService.findAllCategoryDicMap();
-        aggregationBOS.stream().forEach(bo ->{
-            String aggregationType = this.globalizedWithAttackWay(bo.getAggregationType(),allCategoryDicMap);
+        for (AttackWayAggregationBO bo : aggregationBOS) {
+            String aggregationType = this.globalizedWithAttackWay(bo.getAggregationType(), allCategoryDicMap);
             bo.setAggregationType(aggregationType);
-        });
+        }
     }
 
     /**
@@ -967,6 +1018,39 @@ public class FlowAnalysisService extends AbstractBaseService {
             return new String[]{};
         }
         return getIndexResponse.getIndices();
+    }
+
+    public void clearUselessArkimeESIndex(String prefix) {
+        try {
+            GetIndexRequest request = new GetIndexRequest(prefix + "*");
+            request.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+            GetIndexResponse res = restHighLevelClient
+                    .indices()
+                    .get(request, RequestOptions.DEFAULT);
+            String[] allIndex = res.getIndices();
+            if (allIndex == null || allIndex.length == 0) {
+                return;
+            }
+
+            List<String> indexToDelete = new ArrayList<>();
+            for (String index : allIndex) {
+                if (!index.contains("session")) {
+                    indexToDelete.add(index);
+                }
+            }
+            if (indexToDelete.isEmpty()) {
+                return;
+            }
+
+            DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest();
+            deleteIndexRequest.indices(indexToDelete.toArray(new String[]{}));
+            deleteIndexRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+            restHighLevelClient
+                    .indices()
+                    .delete(deleteIndexRequest, RequestOptions.DEFAULT);
+        } catch (Exception e) {
+            log.error("delete arkime es index error , prefix : {} , error : {}", prefix, ExceptionUtils.getStackTrace(e));
+        }
     }
 
 }

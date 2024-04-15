@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.aggregation.controller;
 
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,6 +40,7 @@ public class TargetSceneReferController {
         this.csceneSpecialService = csceneSpecialService;
     }
 
+    @AuthTarget(TargetEnum.REAL_EQUIPMENT_MANAGEMENT)
     @ApiOperation("分页查询")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "name", value = "名称", dataTypeClass = String.class),
@@ -59,16 +63,18 @@ public class TargetSceneReferController {
         Integer to = (page * perPage) > list.size() ? list.size() : page * perPage;
         List<DeviceReferCsceneStat> result = list.subList((page - 1) * perPage, to);
         // 处理状态 todo 可优化
-        List<DeviceReferCsceneInstanceStat> finalResult = result.stream().map(csceneStat -> {
+        List<DeviceReferCsceneInstanceStat> finalResult = new ArrayList<>();
+        for (DeviceReferCsceneStat deviceReferCsceneStat : result) {
             DeviceReferCsceneInstanceStat instanceStat = new DeviceReferCsceneInstanceStat();
-            instanceStat.setCreateUser(csceneStat.getCreateUser());
-            instanceStat.setCreateUsername(csceneStat.getCreateUsername());
-            instanceStat.setCsceneId(csceneStat.getCsceneId());
-            instanceStat.setName(csceneStat.getName());
-            instanceStat.setReferenceImage(csceneStat.getReferenceImage());
-            csceneSpecialService.loadEvent(instanceStat, csceneStat.getCsceneId());
-            return instanceStat;
-        }).collect(Collectors.toList());
+            instanceStat.setCreateUser(deviceReferCsceneStat.getCreateUser());
+            instanceStat.setCreateUsername(deviceReferCsceneStat.getCreateUsername());
+            instanceStat.setCsceneId(deviceReferCsceneStat.getCsceneId());
+            instanceStat.setName(deviceReferCsceneStat.getName());
+            instanceStat.setReferenceImage(deviceReferCsceneStat.getReferenceImage());
+            csceneSpecialService.loadEvent(instanceStat, deviceReferCsceneStat.getCsceneId());
+            DeviceReferCsceneInstanceStat apply = instanceStat;
+            finalResult.add(apply);
+        }
         return new ListObjServiceResult(new ListObjResult(finalResult, list.size())).asResult();
     }
 }

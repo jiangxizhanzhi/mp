@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import javax.websocket.HandshakeResponse;
 import javax.websocket.server.HandshakeRequest;
 import javax.websocket.server.ServerEndpointConfig;
+import java.util.Map;
 
 @Configuration
 public class WebSocketConfig {
@@ -23,7 +24,7 @@ public class WebSocketConfig {
         public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
             super.modifyHandshake(sec, request, response);
 
-            var userProperties = sec.getUserProperties();
+            Map<String, Object> userProperties = sec.getUserProperties();
             userProperties.put(USER_HEADERS_KEY, request.getHeaders());
         }
 

@@ -16,12 +16,13 @@ import java.io.IOException;
  * 通用的远程文件上传controller
  * @param <S> 远程文件操作service
  */
+@Deprecated
 public interface BaseRemoteFileUploadController<S extends BaseRemoteFileService> {
 
     S getRemoteFileService();
 
     static <T extends FileUploadResponse> T toFileUploadResponse(String id, Class<T> responseClazz) {
-        var response = ClassUtils.createInstance(responseClazz);
+        T response = ClassUtils.createInstance(responseClazz);
         response.setId(id);
         return response;
     }

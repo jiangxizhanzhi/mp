@@ -16,7 +16,7 @@ public abstract class BaseMessageReceiver {
     private MessageConverter messageConverter;
 
     private String getMessageBody(Message message) {
-        var body = message.getBody();
+        byte[] body = message.getBody();
         if (body == null) {
             return null;
         }
@@ -26,7 +26,7 @@ public abstract class BaseMessageReceiver {
     public abstract void receive(Message message);
 
     public <T> T parseMessage(Message message, Class<T> resultClass) {
-        var body = getMessageBody(message);
+        String body = getMessageBody(message);
         if (StringUtils.isEmpty(body)) {
             log.error("Message receive with empty body: {}", message);
             return null;

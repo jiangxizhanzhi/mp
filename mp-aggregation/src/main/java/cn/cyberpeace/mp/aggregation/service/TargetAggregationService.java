@@ -55,7 +55,12 @@ public class TargetAggregationService {
             return;
         }
         List<DeviceTargetPO> deviceTargetPOS =  targetPageModel.getList();
-        String[] imageNames = deviceTargetPOS.stream().map(DeviceTargetPO::getName).toArray(String[]::new);
+        List<String> list = new ArrayList<>();
+        for (DeviceTargetPO targetPO : deviceTargetPOS) {
+            String deviceTargetPO1Name = targetPO.getName();
+            list.add(deviceTargetPO1Name);
+        }
+        String[] imageNames = list.toArray(new String[0]);
 
         //引用
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);

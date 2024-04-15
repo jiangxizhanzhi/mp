@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.EntityUsb;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.VirtualUsb;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
@@ -15,6 +17,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.StartT
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -125,7 +128,11 @@ public class StartHandler extends HandlerCommon{
     private void attachVirtualUsbs(CloudPluginSceneElementBO cloudElement) {
         AttachVirtualUsbsData data = new AttachVirtualUsbsData();
         data.setInstanceUuid(cloudElement.getResourceId());
-        var usbUuids = cloudElement.getVirtualUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
+        List<String> usbUuids = new ArrayList<>();
+        for (VirtualUsb u : cloudElement.getVirtualUsbs()) {
+            String uuid = u.getUuid();
+            usbUuids.add(uuid);
+        }
         data.setVirtualUsbUuids(usbUuids);
         virtualMachine.attachVirtualUsbs(data);
     }
@@ -133,7 +140,11 @@ public class StartHandler extends HandlerCommon{
     private void attachEntityUsbs(CloudPluginSceneElementBO cloudElement) {
         AttachEntityUsbsData data = new AttachEntityUsbsData();
         data.setInstanceUuid(cloudElement.getResourceId());
-        List<String> usbUuids = cloudElement.getEntityUsbs().stream().map(u -> u.getUuid()).collect(Collectors.toList());
+        List<String> usbUuids = new ArrayList<>();
+        for (EntityUsb u : cloudElement.getEntityUsbs()) {
+            String uuid = u.getUuid();
+            usbUuids.add(uuid);
+        }
         data.setEntityUsbUuids(usbUuids);
         virtualMachine.attachEntityUsbs(data);
     }

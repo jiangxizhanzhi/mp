@@ -41,7 +41,9 @@ public class ListObjResult<T> extends BaseObjResult<T, ListObjResult<T>> {
     @Override
     public ListObjResult<T> asResult() {
         list.clear();
-        objs.forEach(obj -> list.add(objToResultWithNull(obj, getFields())));
+        for (T obj : objs) {
+            list.add(objToResultWithNull(obj, getFields()));
+        }
         return this;
     }
 }

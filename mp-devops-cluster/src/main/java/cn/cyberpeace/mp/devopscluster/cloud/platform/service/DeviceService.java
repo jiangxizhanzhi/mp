@@ -79,7 +79,7 @@ public class DeviceService extends BaseCpService {
      * @param uuids
      */
     public BaseCloudPlatformResult deleteByIds(List<String> uuids) {
-        var jsonObject = new JSONObject();
+        JSONObject jsonObject = new JSONObject();
         jsonObject.put("uuids", uuids);
         BaseCloudPlatformResult result = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/device/batch_delete",JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
         super.checkResult(result);

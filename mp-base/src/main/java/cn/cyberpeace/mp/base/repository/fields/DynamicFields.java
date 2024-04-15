@@ -62,12 +62,16 @@ public class DynamicFields {
 
         if (obj instanceof List<?>) {
             List<Object> resultList = new ArrayList<>();
-            ((List<?>) obj).forEach(objItem -> resultList.add(apply(objItem)));
+            for (Object objItem : ((List<?>) obj)) {
+                resultList.add(apply(objItem));
+            }
             return resultList;
         }
 
         Map<Object, Object> resultMap = new HashMap<>();
-        fieldsMap.forEach((fieldName, fieldFlag) -> {
+        for (Map.Entry<String, Object> entry : fieldsMap.entrySet()) {
+            String fieldName = entry.getKey();
+            Object fieldFlag = entry.getValue();
             Object fieldValue;
             if (obj instanceof Map) {
                 fieldValue = ((Map<?, ?>) obj).getOrDefault(fieldName, null);
@@ -81,7 +85,7 @@ public class DynamicFields {
             } else if (fieldFlag instanceof DynamicFields) {
                 resultMap.put(fieldName, ((DynamicFields) fieldFlag).apply(fieldValue));
             }
-        });
+        }
 
         return resultMap;
     }
@@ -105,20 +109,24 @@ public class DynamicFields {
         }
 
         if (obj instanceof List<?>) {
-            ((List<?>) obj).forEach(this::applyWithNull);
+            for (Object o : ((List<?>) obj)) {
+                applyWithNull(o);
+            }
             return obj;
         }
 
         if (obj instanceof Map) {
             Map<String, Object> actualObj = (Map<String, Object>) obj;
-            actualObj.forEach((fieldName, fieldValue) -> {
+            for (Map.Entry<String, Object> entry : actualObj.entrySet()) {
+                String fieldName = entry.getKey();
+                Object fieldValue = entry.getValue();
                 Object fieldFlag = fieldsMap.getOrDefault(fieldName, null);
                 if (fieldFlag == null || (fieldFlag instanceof Boolean && !(boolean) fieldFlag)) {
                     actualObj.put(fieldName, null);
                 } else if (fieldFlag instanceof DynamicFields) {
                     ((DynamicFields) fieldFlag).applyWithNull(fieldValue);
                 }
-            });
+            }
         } else {
             final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
             for (String fieldName: ClassUtils.getBeanClassFields(obj.getClass())) {
@@ -141,11 +149,13 @@ public class DynamicFields {
 
     public String[] getFields() {
         List<String> fields = new ArrayList<>();
-        fieldsMap.forEach((field, value) -> {
+        for (Map.Entry<String, Object> entry : fieldsMap.entrySet()) {
+            String field = entry.getKey();
+            Object value = entry.getValue();
             if ((boolean) value) {
                 fields.add(field);
             }
-        });
+        }
         return fields.toArray(new String[0]);
     }
 
@@ -259,7 +269,9 @@ public class DynamicFields {
             return this;
         }
 
-        targetFields.forEach(field -> merge(field, true));
+        for (String field : targetFields) {
+            merge(field, true);
+        }
         return this;
     }
 
@@ -268,7 +280,11 @@ public class DynamicFields {
             return this;
         }
 
-        targetFieldsMap.forEach(this::merge);
+        for (Map.Entry<String, Object> entry : targetFieldsMap.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            merge(key, value);
+        }
         return this;
     }
 
@@ -367,7 +383,7 @@ public class DynamicFields {
             return null;
         }
 
-        var intersectFields = new DynamicFields();
+        DynamicFields intersectFields = new DynamicFields();
         for (String field: targetFields) {
             Object intersectionValue = intersect(field, true);
             if (intersectionValue != null) {
@@ -383,13 +399,13 @@ public class DynamicFields {
             return null;
         }
 
-        var intersectFields = new DynamicFields();
-        targetFields.forEach(field -> {
+        DynamicFields intersectFields = new DynamicFields();
+        for (String field : targetFields) {
             Object intersectionValue = intersect(field, true);
             if (intersectionValue != null) {
                 intersectFields.merge(field, intersectionValue);
             }
-        });
+        }
 
         return intersectFields;
     }
@@ -399,13 +415,15 @@ public class DynamicFields {
             return null;
         }
 
-        var intersectFields = new DynamicFields();
-        targetFieldsMap.forEach((field, value) -> {
+        DynamicFields intersectFields = new DynamicFields();
+        for (Map.Entry<String, Object> entry : targetFieldsMap.entrySet()) {
+            String field = entry.getKey();
+            Object value = entry.getValue();
             Object intersectionValue = intersect(field, value);
             if (intersectionValue != null) {
                 intersectFields.merge(field, intersectionValue);
             }
-        });
+        }
 
         return intersectFields;
     }
@@ -510,7 +528,7 @@ public class DynamicFields {
     }
 
     public DynamicFields subtract(String[] targetFields) {
-        var subtractionFields = new DynamicFields(this);
+        DynamicFields subtractionFields = new DynamicFields(this);
         if (targetFields == null) {
             return subtractionFields;
         }
@@ -526,33 +544,35 @@ public class DynamicFields {
     }
 
     public DynamicFields subtract(List<String> targetFields) {
-        var subtractionFields = new DynamicFields(this);
+        DynamicFields subtractionFields = new DynamicFields(this);
         if (targetFields == null) {
             return subtractionFields;
         }
 
-        targetFields.forEach(field -> {
+        for (String field : targetFields) {
             Object subtractionValue = subtract(field, true);
             if (subtractionValue != null) {
                 subtractionFields.merge(field, subtractionValue);
             }
-        });
+        }
 
         return subtractionFields;
     }
 
     public DynamicFields subtract(Map<String, Object> targetFieldsMap) {
-        var subtractionFields = new DynamicFields(this);
+        DynamicFields subtractionFields = new DynamicFields(this);
         if (targetFieldsMap == null) {
             return subtractionFields;
         }
 
-        targetFieldsMap.forEach((field, value) -> {
+        for (Map.Entry<String, Object> entry : targetFieldsMap.entrySet()) {
+            String field = entry.getKey();
+            Object value = entry.getValue();
             Object subtractionValue = subtract(field, value);
             if (subtractionValue != null) {
                 subtractionFields.merge(field, subtractionValue);
             }
-        });
+        }
 
         return subtractionFields;
     }

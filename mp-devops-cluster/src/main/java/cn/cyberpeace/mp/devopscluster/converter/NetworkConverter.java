@@ -18,6 +18,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -43,24 +44,30 @@ public class NetworkConverter implements BaseConverter{
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(dto,ignoreFields);
         CloudPlatformPageResult<NetworkModel> model = networkService.page(getParams);
-        List<NetworkBO> list = model.getList().stream().map(networkModel -> {
-            NetworkModel.Subnet subnet = networkModel.getSubnet();
-            List<NetworkSubnetBO> subnets = Lists.newArrayList();
-            if (Objects.nonNull(subnet)) {
-                subnets = List.of(new NetworkSubnetBO(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp(), subnet.getFreeIps(), subnet.getUsedIps()));
-            }
-            return NetworkBO.builder().name(networkModel.getName()).networkType(networkModel.getNetworkType())
-                    .status(networkModel.getStatus())
-                    .subnets(subnets).createdAt(networkModel.getCreatedAt())
-                    .downloadSpeed(networkModel.getInBps())
-                    .uploadSpeed(networkModel.getOutBps())
-                    .nodeNum(networkModel.getNodeNum())
-                    .build();
-        }).collect(Collectors.toList());
+        List<NetworkBO> list = new ArrayList<>();
+        for (NetworkModel networkModel : model.getList()) {
+            NetworkBO networkBO = getNetworkBO(networkModel);
+            list.add(networkBO);
+        }
         BasePageBO<NetworkBO> convertModel = new BasePageBO<>();
         convertModel.setList(list);
         convertModel.setTotal(model.getTotal());
         return convertModel;
+    }
+
+    private static NetworkBO getNetworkBO(NetworkModel networkModel) {
+        NetworkModel.Subnet subnet = networkModel.getSubnet();
+        List<NetworkSubnetBO> subnets = Lists.newArrayList();
+        if (Objects.nonNull(subnet)) {
+            subnets = List.of(new NetworkSubnetBO(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp(), subnet.getFreeIps(), subnet.getUsedIps()));
+        }
+        return NetworkBO.builder().name(networkModel.getName()).networkType(networkModel.getNetworkType())
+                .status(networkModel.getStatus())
+                .subnets(subnets).createdAt(networkModel.getCreatedAt())
+                .downloadSpeed(networkModel.getInBps())
+                .uploadSpeed(networkModel.getOutBps())
+                .nodeNum(networkModel.getNodeNum())
+                .build();
     }
 
     /**

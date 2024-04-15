@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +26,8 @@ public abstract class BaseCsceneBO<
     private String createUsername;
     @ApiModelProperty(value = "创建用户姓名")
     private String createName;
-    @ApiModelProperty(value = "角色信息")
+    @ApiModelProperty(value = "角色信息", hidden = true)
+    @Deprecated
     private List<R> roles;
     @ApiModelProperty(value = "场景名称")
     private String name;
@@ -49,9 +51,14 @@ public abstract class BaseCsceneBO<
     @SafeVarargs
     public final <R9 extends BaseCsceneRoleBO<?, R9>, P extends BaseCsceneBO<?, ?, R9, P>> P export(
             Class<P> pClass, Class<R9> roleClass, SerializableFunction<T>... ignoreFieldGetters) {
-        var pObj = super.exportIgnore(pClass, ignoreFieldGetters);
+        P pObj = super.exportIgnore(pClass, ignoreFieldGetters);
         if (roles != null) {
-            pObj.setRoles(roles.stream().map(role -> role.exportIgnore2(roleClass)).collect(Collectors.toList()));
+            List<R9> list = new ArrayList<>();
+            for (R role : roles) {
+                R9 r9 = role.exportIgnore2(roleClass);
+                list.add(r9);
+            }
+            pObj.setRoles(list);
         }
         return pObj;
     }

@@ -1,9 +1,12 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualPort;
@@ -97,7 +100,7 @@ public class RecreateHandler extends HandlerCommon {
             if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate())) {
                 List<String> portIds = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
-                    for (var p : cloudElement.getSrcElement().getPorts()) {
+                    for (SceneElementPortBO p : cloudElement.getSrcElement().getPorts()) {
                         if (StringUtils.isNotEmpty(getPluginHandler().getPort(p.getId()).getResourceId())) {
                             portIds.add(getPluginHandler().getPort(p.getId()).getResourceId());
                         }
@@ -125,7 +128,7 @@ public class RecreateHandler extends HandlerCommon {
                             super.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                             if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
                                 cloudElement.getSrcElement().getPorts().forEach(p -> {
-                                    var pluginPort = getPluginHandler().getPort(p.getId());
+                                    CloudPluginSceneElementPortBO pluginPort = getPluginHandler().getPort(p.getId());
                                     if (pluginPort != null && StringUtils.isNotEmpty(pluginPort.getResourceId())) {
                                         for (int i = 0; i < 5; i++) {
                                             try {
@@ -189,7 +192,7 @@ public class RecreateHandler extends HandlerCommon {
                         () -> {
                             if (cloudElement.getSrcElement() != null && CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
                                 cloudElement.getSrcElement().getPorts().forEach(p -> {
-                                    var connectNetwork = getHandlerUtils().getNetworkByPort(p);
+                                    CloudPluginSceneElementNetworkBO connectNetwork = getHandlerUtils().getNetworkByPort(p);
                                     // 未分配ip并且连接的网络不是外部网络 标识端口未使用
                                     if (StringUtils.isEmpty(p.getIp()) && !HandlerUtils.isExternalNetwork(connectNetwork.getResourceId())) {
                                         p.setUsing(false);
@@ -203,7 +206,7 @@ public class RecreateHandler extends HandlerCommon {
                         () -> {
                             if (cloudElement.getSrcElement() != null && CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
                                 cloudElement.getSrcElement().getPorts().forEach(p -> {
-                                    var connectNetwork = getHandlerUtils().getNetworkByPort(p);
+                                    CloudPluginSceneElementNetworkBO connectNetwork = getHandlerUtils().getNetworkByPort(p);
                                     // 未分配ip并且连接的网络不是外部网络 标识端口未使用
                                     if (StringUtils.isEmpty(p.getIp()) && !HandlerUtils.isExternalNetwork(connectNetwork.getResourceId())) {
                                         p.setUsing(false);
@@ -227,7 +230,7 @@ public class RecreateHandler extends HandlerCommon {
             if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate())) {
                 List<String> portIds = new ArrayList<>();
                 if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
-                    for (var p : cloudElement.getSrcElement().getPorts()) {
+                    for (SceneElementPortBO p : cloudElement.getSrcElement().getPorts()) {
                         if (StringUtils.isNotEmpty(getPluginHandler().getPort(p.getId()).getResourceId())) {
                             portIds.add(getPluginHandler().getPort(p.getId()).getResourceId());
                         };

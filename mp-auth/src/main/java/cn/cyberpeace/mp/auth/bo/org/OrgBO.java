@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.bo.org;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.springframework.beans.BeanUtils;
 
 /**
  * @Description:
@@ -15,4 +16,12 @@ public class OrgBO extends OrgModel {
     @ApiModelProperty(value = "路径")
     private String path;
 
+
+
+    public static OrgBO fromModel(OrgModel orgModel, String path) {
+        OrgBO orgBO = new OrgBO();
+        BeanUtils.copyProperties(orgModel, orgBO);
+        orgBO.setPath(path);
+        return orgBO;
+    }
 }

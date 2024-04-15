@@ -8,7 +8,10 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -28,16 +31,33 @@ public class LocalDateUtils {
      * @return List<String>
      */
     public static List<String> fetchFormatterTime(LocalDateTime startTime, LocalDateTime endTime) {
-        var formatter = DateTimeFormatter.ofPattern("yyMMdd");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMMdd");
         long betweenDay = ChronoUnit.DAYS.between(startTime, endTime);
         long month = ChronoUnit.MONTHS.between(startTime, endTime);
         int days = (int) betweenDay;
         if (month > 1) {
-            return IntStream.range(0, days + 2).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyMM*")))
-                    .distinct().collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            Set<String> uniqueValues = new HashSet<>();
+            int bound = days + 2;
+            for (int i = 0; i < bound; i++) {
+                Integer integer = i;
+                LocalDateTime time = startTime.plusDays(integer);
+                String format = time.format(DateTimeFormatter.ofPattern("yyMM*"));
+                if (uniqueValues.add(format)) {
+                    list.add(format);
+                }
+            }
+            return list;
         }
-        return IntStream.range(0, days + 2).boxed().map(startTime::plusDays).map((time) -> time.format(formatter))
-                .collect(Collectors.toList());
+        List<String> list = new ArrayList<>();
+        int bound = days + 2;
+        for (int i = 0; i < bound; i++) {
+            Integer integer = i;
+            LocalDateTime time = startTime.plusDays(integer);
+            String format = time.format(formatter);
+            list.add(format);
+        }
+        return list;
     }
 
     /**

@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -42,7 +44,9 @@ import java.util.Map;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/cscenes")
 @Data
+@AuthTarget({TargetEnum.CT_AD_LIST, TargetEnum.CT_CFS_LIST, TargetEnum.CT_OPERATION_LIST})
 public class CsceneController implements BaseModelListControllerBase {
+
 
     private CsceneService modelService;
 
@@ -106,6 +110,7 @@ public class CsceneController implements BaseModelListControllerBase {
         this.baseAppConfig = baseAppConfig;
     }
 
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation("授权场景模板")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneAuthorizeRequest.class)
     @PostMapping("/authorize")
@@ -113,6 +118,7 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.csceneAuthorize(request.getTargetIds(), request.getCsceneIds(), request.getAuthType()).asResult();
     }
 
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation("获取指定场景模板授权信息")
     @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class)
     @GetMapping("/get_authorize")
@@ -120,14 +126,16 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.getCsceneAuthorizeInfo(id).asResult();
     }
 
+    @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
     @GetMapping
     public ListObjServiceResult<CsceneBO> list(CsceneQueryParams queryParams) {
         handleQueryParams("list", queryParams);
-        var result = getModelService().listCsceneBO(queryParams, false, null).asResult();
+        ListObjServiceResult<CsceneBO> result = getModelService().listCsceneBO(queryParams, false, null).asResult();
         getModelService().setSharedUser(result.getData().getList(), queryParams);
         return result;
     }
 
+    @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
     @ApiOperation("获取指定id场景模板")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
@@ -146,6 +154,7 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.export(id, null).asResult();
     }
 
+    @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
     @ApiOperation(value = "保存（创建/更新）场景模板", notes = "请忽略test_scenes和app_scenes字段")
     @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
     @PostMapping("/sync")
@@ -153,7 +162,7 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("scene sync,params is {}", JsonCommon.stringify(csceneBO));
         boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
         correctRequestCsceneParamsForSync(csceneBO);
-        var result = modelService.sync(csceneBO, null, true).asResult();
+        ServiceResult<CsceneBO> result = modelService.sync(csceneBO, null, true).asResult();
         if (csceneBO.getType() != null && csceneBO.getType() == CsceneModel.Type.TEMPLATE) {
             if (isUpdate) {
                 CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
@@ -171,7 +180,7 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("scene sync,params is {}", JsonCommon.stringify(csceneBO));
         boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
         correctRequestCsceneParamsForSync(csceneBO);
-        var result = modelService.sync(csceneBO, null, false).asResult();
+        ServiceResult<CsceneBO> result = modelService.sync(csceneBO, null, false).asResult();
         if (csceneBO.getType() != null && csceneBO.getType() == CsceneModel.Type.TEMPLATE) {
             if (isUpdate) {
                 CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
@@ -191,11 +200,12 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<CsceneBO> clone(@RequestParam(required = false) String id,
                                          @RequestBody(required = false) CsceneActionRequest request) {
         request = formatActionRequest(request, id);
-        var result = modelService.clone(request.getId(), null).asResult();
+        ServiceResult<CsceneBO> result = modelService.clone(request.getId(), null).asResult();
         CsceneLogUtils.recordSceneConfigLog(request.getId(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, request.getContext());
         return result;
     }
 
+    @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
     @ApiOperation("删除场景模板")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
@@ -206,7 +216,7 @@ public class CsceneController implements BaseModelListControllerBase {
                                          @RequestBody(required = false) CsceneActionRequest request) {
         log.info("delete cscene config , cscene id is {}", id);
         request = formatActionRequest(request, id);
-        var result = modelService.deleteById(request.getId(), true, false, null).asResult();
+        ServiceResult<Boolean> result = modelService.deleteById(request.getId(), true, false, null).asResult();
         CsceneLogUtils.recordSceneConfigLog(request.getId(), OpTypeEnums.DELETE, CsceneLogUtils.DELETE_SCENE_CONFIG, request.getContext());
         return result;
     }
@@ -216,7 +226,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
         log.info("delete cscene configs , cscene ids is {}", JsonCommon.stringify(ids));
-        var result = modelService.bulkDeleteByIds(ids, true, false, null).asResult();
+        ServiceResult<Integer> result = modelService.bulkDeleteByIds(ids, true, false, null).asResult();
         CsceneLogUtils.recordSceneConfigLog(Arrays.asList(ids), OpTypeEnums.DELETE, CsceneLogUtils.BATCH_DELETE_SCENE_CONFIGS, null);
         return result;
     }
@@ -232,7 +242,7 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("test_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
         request = formatCreateInstanceRequest(request, id);
         correctRequestCsceneParamsForAppInstance(request.getCscene());
-        var result = modelService.createTestInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
+        ServiceResult<CsceneInstanceBO> result = modelService.createTestInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
         CsceneLogUtils.recordSceneInstanceLog(result == null ? null : result.getData(), OpTypeEnums.START, CsceneLogUtils.START_SCENE, request.getContext());
         return result;
     }
@@ -248,7 +258,7 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("app_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
         request = formatCreateInstanceRequest(request, id);
         correctRequestCsceneParamsForAppInstance(request.getCscene());
-        var result = modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
+        ServiceResult<CsceneInstanceBO> result = modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
         CsceneLogUtils.recordSceneInstanceLog(result == null ? null : result.getData(), OpTypeEnums.START, CsceneLogUtils.START_SCENE, request.getContext());
         return result;
     }

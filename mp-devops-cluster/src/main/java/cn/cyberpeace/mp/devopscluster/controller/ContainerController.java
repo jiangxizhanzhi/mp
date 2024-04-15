@@ -2,7 +2,9 @@ package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
@@ -41,6 +43,7 @@ import java.util.stream.Collectors;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/container")
 @Api(tags = "计算实例管理-容器")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.NO_AUTH)
 public class ContainerController {
 
     private final ContainerConverter containerConverter;
@@ -129,6 +132,7 @@ public class ContainerController {
      * @param request
      * @return
      */
+    @AuthTarget(TargetEnum.CLUSTER_MANAGEMENT)
     @ApiOperation("分页查询容器列表")
     @GetMapping("/page")
     public PageResult<ContainerPageVO> page(ContainerPageRequest request){
@@ -144,7 +148,11 @@ public class ContainerController {
      */
     private List<ContainerPageVO> convertBOToPageVO(BasePageBO<ContainerBO> model){
         final List<ContainerBO> modelList = model.getList();
-        List<String> nameList = modelList.stream().map(ContainerBO::getName).collect(Collectors.toList());
+        List<String> nameList = new ArrayList<>();
+        for (ContainerBO containerBO : modelList) {
+            String name = containerBO.getName();
+            nameList.add(name);
+        }
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(nameList);
         Map<String, CsceneNodeInfoBO> source = serviceResult.getSource();
 
@@ -152,9 +160,13 @@ public class ContainerController {
         if (Objects.nonNull(source)) {
             List<CsceneNodeInfoBO> values = new ArrayList<>(source.values());
             if (CollectionUtils.isNotEmpty(values)) {
-                List<String> userIdList = values.stream().map(CsceneNodeInfoBO::getUserId).collect(Collectors.toList());
+                List<String> userIdList = new ArrayList<>();
+                for (CsceneNodeInfoBO value : values) {
+                    String userId = value.getUserId();
+                    userIdList.add(userId);
+                }
                 if (CollectionUtils.isNotEmpty(userIdList)) {
-                    var list = userService.listByUserIds(userIdList.toArray(new String[]{}));
+                    List<UserBo> list = userService.listByUserIds(userIdList.toArray(new String[]{}));
                     if (CollectionUtils.isNotEmpty(list)) {
                         userBoList = list;
                     }
@@ -163,36 +175,49 @@ public class ContainerController {
         }
 
         List<UserBo> tmpUserBoList = userBoList;
-        return modelList.stream().map(containerModel -> {
-            CsceneNodeInfoBO csceneNodeInfoBO = new CsceneNodeInfoBO();
-            if (Objects.nonNull(source.get(containerModel.getName()))) {
-                csceneNodeInfoBO = source.get(containerModel.getName());
-            }
-            String userName = "";
-            String userId = csceneNodeInfoBO.getUserId();
-            if (StringUtils.isNotBlank(userId)) {
-                Optional<UserBo> optional =
-                        tmpUserBoList.stream().filter(userDto -> userDto.getId().equals(userId)).findFirst();
-                if (optional.isPresent()) {
-                    userName = optional.get().getUsername();
+        List<ContainerPageVO> list = new ArrayList<>();
+        for (ContainerBO containerModel : modelList) {
+            ContainerPageVO containerPageVO = getContainerPageVO(source, tmpUserBoList, containerModel);
+            list.add(containerPageVO);
+        }
+        return list;
+    }
+
+    private static ContainerPageVO getContainerPageVO(Map<String, CsceneNodeInfoBO> source, List<UserBo> tmpUserBoList, ContainerBO containerModel) {
+        CsceneNodeInfoBO csceneNodeInfoBO = new CsceneNodeInfoBO();
+        if (Objects.nonNull(source.get(containerModel.getName()))) {
+            csceneNodeInfoBO = source.get(containerModel.getName());
+        }
+        String userName = "";
+        String userId = csceneNodeInfoBO.getUserId();
+        if (StringUtils.isNotBlank(userId)) {
+            Optional<UserBo> optional =
+                    Optional.empty();
+            for (UserBo userDto : tmpUserBoList) {
+                if (userDto.getId().equals(userId)) {
+                    optional = Optional.of(userDto);
+                    break;
                 }
             }
+            if (optional.isPresent()) {
+                userName = optional.get().getUsername();
+            }
+        }
 
-            return ContainerPageVO.builder().name(containerModel.getName())
-                    .sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName())
-                    .id(containerModel.getId())
-                    .image(containerModel.getImage()).node(containerModel.getNode())
-                    .status(containerModel.getStatus()).addressList(containerModel.getAddressList())
-                    .createdAt(containerModel.getCreatedAt())
-                    .userName(userName)
-                    .referenceType(csceneNodeInfoBO.getReferenceType())
-                    .event(csceneNodeInfoBO.getEvent())
-                    .eventStatus(csceneNodeInfoBO.getEventStatus())
-                    .sceneStatus(csceneNodeInfoBO.getSceneStatus())
-                    .sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc())
-                    .runningTime(containerModel.getRunningTime())
-                    .processMessage(csceneNodeInfoBO.getProcessMessage())
-                    .vlanIdList(containerModel.getVlanIdList()).build();
-        }).collect(Collectors.toList());
+        return ContainerPageVO.builder().name(containerModel.getName())
+                .sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName())
+                .id(containerModel.getId())
+                .image(containerModel.getImage()).node(containerModel.getNode())
+                .status(containerModel.getStatus()).addressList(containerModel.getAddressList())
+                .createdAt(containerModel.getCreatedAt())
+                .userName(userName)
+                .referenceType(csceneNodeInfoBO.getReferenceType())
+                .event(csceneNodeInfoBO.getEvent())
+                .eventStatus(csceneNodeInfoBO.getEventStatus())
+                .sceneStatus(csceneNodeInfoBO.getSceneStatus())
+                .sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc())
+                .runningTime(containerModel.getRunningTime())
+                .processMessage(csceneNodeInfoBO.getProcessMessage())
+                .vlanIdList(containerModel.getVlanIdList()).build();
     }
 }

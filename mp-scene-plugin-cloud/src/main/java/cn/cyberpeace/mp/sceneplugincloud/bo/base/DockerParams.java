@@ -38,7 +38,7 @@ public class DockerParams {
         this.environmentStr = StringUtils.EMPTY;
         if (this.environment != null) {
             List<String> enStrs = new ArrayList<>();
-            for (var e : this.environment.entrySet()) {
+            for (Map.Entry<String, String> e : this.environment.entrySet()) {
                 enStrs.add(e.getKey() + "=" + e.getValue());
             }
             this.environmentStr = StringUtils.join(enStrs, ",");

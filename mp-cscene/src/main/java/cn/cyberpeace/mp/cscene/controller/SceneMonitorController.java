@@ -1,10 +1,11 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
@@ -20,11 +21,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +36,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor/scene")
+@AuthTarget(TargetEnum.CSCENE_MONITOR_GROUP)
 public class SceneMonitorController {
 
     @Autowired
@@ -73,7 +71,7 @@ public class SceneMonitorController {
         }
         List<ElementMonitorBasicInfo> result = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(basicInfoList)) {
-            for (var e : basicInfoList) {
+            for (ElementMonitorBasicInfo e : basicInfoList) {
                 if (e.getEvent() != null) {
                     if (e.getEvent() != SceneElementModel.Event.DELETE) {
                         result.add(e);

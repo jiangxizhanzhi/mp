@@ -1,11 +1,14 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.common;
 
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import lombok.Getter;
+
+import java.util.List;
 
 /**
  * @Description
@@ -30,9 +33,9 @@ public class ConfigHandlerUtils {
             return null;
         }
 
-        var srcElement = getPluginHandler().getSrcPort(portId).getElement();
-        var cloudElement = getPluginHandler().getElement(srcElement.getId());
-        var connectedOpaqueSrcPort = getPortConnectedOpaqueSrcPort(portId);
+        SceneConfigElementBO srcElement = getPluginHandler().getSrcPort(portId).getElement();
+        CloudPluginSceneConfigElementBO cloudElement = getPluginHandler().getElement(srcElement.getId());
+        SceneConfigElementPortBO connectedOpaqueSrcPort = getPortConnectedOpaqueSrcPort(portId);
         if (connectedOpaqueSrcPort == null) {
             // 未连接端口情况，如果节点存在其它连接，则忽略该端口
             if (getPluginHandler().getSceneHandler().elementHasConnectedPort(srcElement.getId())) {
@@ -40,41 +43,47 @@ public class ConfigHandlerUtils {
             }
         }
 
-        var connectedOpaqueSrcElement = connectedOpaqueSrcPort != null ? getPluginHandler().getPortSrcElement(connectedOpaqueSrcPort.getId()) : null;
-        var connectedCloudElement = connectedOpaqueSrcElement != null ? getPluginHandler().getElement(connectedOpaqueSrcElement.getId()) : null;
-        var auxiliaryNetworkCloudElement = confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
+        SceneConfigElementBO connectedOpaqueSrcElement = connectedOpaqueSrcPort != null ? getPluginHandler().getPortSrcElement(connectedOpaqueSrcPort.getId()) : null;
+        CloudPluginSceneConfigElementBO connectedCloudElement = connectedOpaqueSrcElement != null ? getPluginHandler().getElement(connectedOpaqueSrcElement.getId()) : null;
+        CloudPluginSceneConfigElementBO auxiliaryNetworkCloudElement = confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
         if (auxiliaryNetworkCloudElement == null) {
             return null;
         }
         return auxiliaryNetworkCloudElement;
     }
 
+    /**
+     * @deprecated
+     * @param portId
+     * @return 替代方法为 cn.cyberpeace.mp.scene.core.plugin.common.BasePluginCommonHandler#getPortConnectedSrcPort(java.lang.String)
+     */
+    @Deprecated
     public SceneConfigElementPortBO getPortConnectedOpaqueSrcPort(String portId) {
-        var connectedSrcPort = getPluginHandler().getPortConnectedSrcPort(portId);
+        SceneConfigElementPortBO connectedSrcPort = getPluginHandler().getPortConnectedSrcPort(portId);
         if (connectedSrcPort == null) {
             return null;
         }
 
-        var connectedSrcElement = getPluginHandler().getPortConnectedSrcElement(portId);
+        SceneConfigElementBO connectedSrcElement = getPluginHandler().getPortConnectedSrcElement(portId);
         if (connectedSrcElement == null) {
             return null;
         }
 
-        var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
+        CloudPluginSceneConfigElementBO connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
         if (connectedCloudElement == null || !Boolean.TRUE.equals(connectedCloudElement.getTransparent())) {
             return connectedSrcPort;
         }
 
-        var transparentSrcPorts = connectedSrcElement.getPorts();
+        List<SceneConfigElementPortBO> transparentSrcPorts = connectedSrcElement.getPorts();
         if (transparentSrcPorts == null) {
             return null;
         }
 
-        for (var transparentSrcPort : transparentSrcPorts) {
+        for (SceneConfigElementPortBO transparentSrcPort : transparentSrcPorts) {
             if (connectedSrcPort.getId().equals(transparentSrcPort.getId())) {
                 continue;
             }
-            var subConnectedSrcPort = getPortConnectedOpaqueSrcPort(transparentSrcPort.getId());
+            SceneConfigElementPortBO subConnectedSrcPort = getPortConnectedOpaqueSrcPort(transparentSrcPort.getId());
             if (subConnectedSrcPort != null) {
                 return subConnectedSrcPort;
             }
@@ -95,8 +104,8 @@ public class ConfigHandlerUtils {
             return null;
         }
 
-        var srcElement = cloudElement.getSrcElement();
-        var connectedElement = connectedCloudElement.getSrcElement();
+        SceneConfigElementBO srcElement = cloudElement.getSrcElement();
+        SceneConfigElementBO connectedElement = connectedCloudElement.getSrcElement();
         Integer type = srcElement.getType();
         Integer connectedType = connectedElement.getType();
         Integer virtualType = cloudElement.getVirtualType();

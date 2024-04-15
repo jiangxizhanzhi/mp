@@ -48,7 +48,7 @@ public class ElementModifyBO extends BaseCsceneBO<CsceneInstanceModel, CsceneIns
 
     @Override
     public CsceneInstanceModel toModel(String... ignoreFields) {
-        var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
+        CsceneInstanceModel obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(CsceneInstanceModel::getScene)));
         if (update != null && update.getTopology() != null && update.getTopology().getScene() != null) {
             obj.setScene(update.getTopology().getScene().getEid());

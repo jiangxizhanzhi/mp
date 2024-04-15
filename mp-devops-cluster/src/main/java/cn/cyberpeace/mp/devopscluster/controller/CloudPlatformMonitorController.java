@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -33,6 +35,7 @@ import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsStatisticsResult;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
@@ -64,6 +67,7 @@ import java.util.stream.Collectors;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor")
 @Api(tags = "云平台监控")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.CLOUD_PLATFORM_MONITORING)
 public class CloudPlatformMonitorController {
 
     private final VmConverter vmConverter;
@@ -161,9 +165,9 @@ public class CloudPlatformMonitorController {
         // dynamips个数
         HypervisorStatisticsVO finalResponse7 = response;
         CompletableFuture totalDynamipsCf = CompletableFuture.runAsync(() -> {
-            var result = new VirtualDynamips().statistics();
+            VirtualDynamipsStatisticsResult result = new VirtualDynamips().statistics();
             int totalDynamips = 0;
-            for (var v : result.getStatics().values()) {
+            for (Integer v : result.getStatics().values()) {
                 totalDynamips += v;
             }
             finalResponse7.setTotalDynamips(totalDynamips);
@@ -190,6 +194,7 @@ public class CloudPlatformMonitorController {
      * 节点管理
      * @return
      */
+    @AuthTarget({TargetEnum.CLOUD_PLATFORM_MONITORING, TargetEnum.DASHBOARD})
     @ApiOperation("节点管理")
     @GetMapping("/hypervisor/page")
     public PageResult<HypervisorPageVO> page(BasePageRequest request){
@@ -197,39 +202,47 @@ public class CloudPlatformMonitorController {
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
-        List<HypervisorPageVO> hypervisorPageRespons =  model.getList().stream().map(hypervisor ->
-                HypervisorPageVO.builder().name(hypervisor.getName())
-                        .ip(hypervisor.getIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
-                        .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
-                        .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed()).totalInstances(hypervisor.getTotalInstances())
-                        .diskUsed(hypervisor.getDiskUsed()).build()
-        ).collect(Collectors.toList());
+        List<HypervisorPageVO> hypervisorPageRespons = new ArrayList<>();
+        for (HypervisorBO hypervisor : model.getList()) {
+            HypervisorPageVO build = HypervisorPageVO.builder().name(hypervisor.getName())
+                    .ip(hypervisor.getIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
+                    .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
+                    .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed()).totalInstances(hypervisor.getTotalInstances())
+                    .diskUsed(hypervisor.getDiskUsed()).build();
+            hypervisorPageRespons.add(build);
+        }
 
         // 获取所有物理主机服务状态
         CloudPlatformPageResult<ServiceStatus> serviceStatusModel = imagesConverter.listServiceStatus();
 
-        hypervisorPageRespons.forEach(v -> {
-            String name = v.getName();
+        for (HypervisorPageVO hypervisorPageRespon : hypervisorPageRespons) {
+            String name = hypervisorPageRespon.getName();
             Optional<ServiceStatus> serviceStatus =
-                    serviceStatusModel.getList().stream().filter(statusModel -> name.equals(statusModel.getHost())).findFirst();
+                    Optional.empty();
+            for (ServiceStatus statusModel : serviceStatusModel.getList()) {
+                if (name.equals(statusModel.getHost())) {
+                    serviceStatus = Optional.of(statusModel);
+                    break;
+                }
+            }
             // 设置物理主机服务状态
-            v.setServiceStatus(serviceStatus.isPresent() && serviceStatus.get().isStatus());
+            hypervisorPageRespon.setServiceStatus(serviceStatus.isPresent() && serviceStatus.get().isStatus());
 
             HypervisorWeightAndMaxInstanceConvertModel weightAndMaxInstances = hypervisorConverter.getWeightAndMaxInstances(new HypervisorWeightAndMaxInstanceDTO(name));
             Integer totalContainers = containerConverter.getTotalContainers(new ContainerPageDTO(name));
-            v.setTotalContainers(totalContainers);
+            hypervisorPageRespon.setTotalContainers(totalContainers);
             if (Objects.nonNull(weightAndMaxInstances)) {
-                v.setWeight(weightAndMaxInstances.getWeight());
-                v.setMaxInstances(weightAndMaxInstances.getMaxInstances());
+                hypervisorPageRespon.setWeight(weightAndMaxInstances.getWeight());
+                hypervisorPageRespon.setMaxInstances(weightAndMaxInstances.getMaxInstances());
             }
-        });
+        }
 
         // 获取 dynamips 数量
         VirtualDynamips virtualDynamips = new VirtualDynamips();
-        var result = virtualDynamips.statistics();
-        hypervisorPageRespons.forEach(v -> {
+        VirtualDynamipsStatisticsResult result = virtualDynamips.statistics();
+        for (HypervisorPageVO v : hypervisorPageRespons) {
             v.setTotalDynamips(result.getStatics().get(v.getName()));
-        });
+        }
         return new PageResult<>(hypervisorPageRespons, model.getTotal());
     }
 
@@ -259,8 +272,11 @@ public class CloudPlatformMonitorController {
     @GetMapping("/service-state")
     public Result<List<HypervisorServiceStateVO>> serviceState(){
         List<HypervisorServiceStateConvertModel> modelList = hypervisorConverter.serviceState();
-        List<HypervisorServiceStateVO> result = modelList.stream().map(m ->
-                new HypervisorServiceStateVO(m.getName(),m.getAlive(),m.getState())).collect(Collectors.toList());
+        List<HypervisorServiceStateVO> result = new ArrayList<>();
+        for (HypervisorServiceStateConvertModel m : modelList) {
+            HypervisorServiceStateVO hypervisorServiceStateVO = new HypervisorServiceStateVO(m.getName(), m.getAlive(), m.getState());
+            result.add(hypervisorServiceStateVO);
+        }
         return new Result<>(result);
     }
 
@@ -275,10 +291,12 @@ public class CloudPlatformMonitorController {
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             return new Result<>();
         }
-        List<VirtualRealSwitchStatusVO> list = model.getList().stream().map(v ->
-                VirtualRealSwitchStatusVO.builder().name(v.getName()).managementIp(v.getManagementIp()).state(v.getState())
-                        .usedPorts(v.getUsedPorts()).ports(v.getPorts()).build()
-        ).collect(Collectors.toList());
+        List<VirtualRealSwitchStatusVO> list = new ArrayList<>();
+        for (VirtualRealSwitchBO v : model.getList()) {
+            VirtualRealSwitchStatusVO build = VirtualRealSwitchStatusVO.builder().name(v.getName()).managementIp(v.getManagementIp()).state(v.getState())
+                    .usedPorts(v.getUsedPorts()).ports(v.getPorts()).build();
+            list.add(build);
+        }
         return new Result<>(list);
     }
 
@@ -322,6 +340,7 @@ public class CloudPlatformMonitorController {
      * @param request
      * @return
      */
+    @AuthTarget({TargetEnum.CLOUD_PLATFORM_MONITORING, TargetEnum.SYSTEM_ALARM})
     @ApiOperation("设备运行监控")
     @GetMapping("/server/state")
     public ServiceResult<List<HypervisorPageVO>> page(AgentNameBasedRequest request){
@@ -329,9 +348,7 @@ public class CloudPlatformMonitorController {
         request.setPageSize(1);
         List<HostState> hostStates = hostStateService.listHostStatesByAgentName(request);
         List<HypervisorPageVO> hypervisorPageVOList = new ArrayList<>();
-        hostStates.forEach(hostState -> {
-
-            // todo 上下行带宽占比
+        for (HostState hostState : hostStates) {// todo 上下行带宽占比
             Double downloadPercent = 0.00;
             Double uploadPercent = 0.00;
             Long maxNetSpeed = hostState.getMaxNetSpeed();
@@ -357,7 +374,7 @@ public class CloudPlatformMonitorController {
                 String uploadSpeed = hostState.getMaxUploadSpeed();
                 uploadSpeed = uploadSpeed.replace("KB/s", "");
                 double us = Double.parseDouble(uploadSpeed);
-                BigDecimal decimal =  formatNumber(us * 8 / (maxNetSpeed * 1024));
+                BigDecimal decimal = formatNumber(us * 8 / (maxNetSpeed * 1024));
 
                 if (us > 0 && decimal.doubleValue() == 0.00) {
                     uploadPercent = 0.01;
@@ -387,7 +404,7 @@ public class CloudPlatformMonitorController {
                     .build();
 
             hypervisorPageVOList.add(hypervisorPageVO);
-        });
+        }
         return ResultCommon.success(hypervisorPageVOList);
     }
 

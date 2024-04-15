@@ -32,7 +32,7 @@ public class DataCollectionFlowTableService{
      */
     public void createDataCollectionFlow(List<String> agentInstanceIds) {
         String createUrl = situationAwareConfig.getWazuhFlowTableUrl() + "/probe/flows";
-        var param = new JSONObject();
+        JSONObject param = new JSONObject();
         param.put("instance_ids", agentInstanceIds);
         try {
             log.info("create data collection flow request params:{}", param.toJSONString());
@@ -51,7 +51,7 @@ public class DataCollectionFlowTableService{
      */
     public void deleteDataCollectionFlow(List<String> agentInstanceIds) {
         String deleteUrl = situationAwareConfig.getWazuhFlowTableUrl() + "/probe/flows";
-        var param = new JSONObject();
+        JSONObject param = new JSONObject();
         param.put("instance_ids", agentInstanceIds);
 
         try {

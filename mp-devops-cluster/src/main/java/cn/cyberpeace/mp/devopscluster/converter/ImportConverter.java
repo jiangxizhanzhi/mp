@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 /**
  * 靶标导入管理
@@ -42,8 +43,14 @@ public class ImportConverter implements BaseConverter{
         try {
             // 获取最大并发启动场景节点数
             ActivationResponse activationResponse = sysActivationService.status();
-            ActivationItem activationItem = activationResponse.getItems().stream().filter(item ->
-                    ("LCS-RES-CR-ACTIVENODES").equals(item.getKey())).findFirst().get();
+            Optional<ActivationItem> found = Optional.empty();
+            for (ActivationItem item : activationResponse.getItems()) {
+                if (("LCS-RES-CR-ACTIVENODES").equals(item.getKey())) {
+                    found = Optional.of(item);
+                    break;
+                }
+            }
+            ActivationItem activationItem = found.get();
             BigDecimal maxCount = new BigDecimal(activationItem.getValue());
             BigDecimal maxSize = new BigDecimal(devopsClusterConfig.getMaxTargetSize());
             // 单位换算倍数

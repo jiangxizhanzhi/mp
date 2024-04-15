@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -34,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/virtual_usb")
 @Api(tags = "靶标管理-USB仿真")
+@AuthTarget(TargetEnum.USB_EMULATION)
 public class VirtualUsbController {
 
     @Autowired
@@ -44,6 +47,7 @@ public class VirtualUsbController {
      * @param queryParams
      * @return
      */
+    @AuthTarget({TargetEnum.DEVOPS_EQUIPMENT_PAGE_GROUP, TargetEnum.USB_EMULATION})
     @ApiOperation("分页查询虚拟USB信息")
     @GetMapping("/page")
     public ListObjServiceResult<VirtualUsbVO> page(VirtualUsbQueryParams queryParams) {

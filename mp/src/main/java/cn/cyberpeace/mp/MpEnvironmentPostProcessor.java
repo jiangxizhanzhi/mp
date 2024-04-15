@@ -7,9 +7,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.FileUrlResource;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * @Description
@@ -34,7 +36,7 @@ public class MpEnvironmentPostProcessor implements EnvironmentPostProcessor {
         try {
             if (StringUtils.isNotBlank(envPath) && new File(envPath).exists()) {
                 // 使用指定文件的env变量
-                var list = new UTF8PropertiesPropertySourceLoader().load("mp_env", new FileUrlResource(envPath));
+                List<PropertySource<?>> list = new UTF8PropertiesPropertySourceLoader().load("mp_env", new FileUrlResource(envPath));
                 log.info("list = {}", list);
                 if (list != null && list.size() != 0) {
                     environment.getPropertySources().addFirst(list.get(0));

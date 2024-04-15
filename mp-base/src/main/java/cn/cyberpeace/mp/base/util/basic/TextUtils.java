@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
@@ -50,8 +51,8 @@ public class TextUtils {
             return null;
         }
 
-        var sb = new StringBuilder();
-        var matcher = linePattern.matcher(str);
+        StringBuilder sb = new StringBuilder();
+        Matcher matcher = linePattern.matcher(str);
         while (matcher.find()) {
             matcher.appendReplacement(sb, matcher.group(1).toUpperCase());
         }
@@ -64,8 +65,8 @@ public class TextUtils {
             return new String[0];
         }
 
-        var result = new String[strs.length];
-        for (var i = 0; i < strs.length; i++) {
+        String[] result = new String[strs.length];
+        for (int i = 0; i < strs.length; i++) {
             result[i] = lineToHump(strs[i]);
         }
         return result;
@@ -76,8 +77,8 @@ public class TextUtils {
             return null;
         }
 
-        var sb = new StringBuilder();
-        var matcher = humpPattern.matcher(str);
+        StringBuilder sb = new StringBuilder();
+        Matcher matcher = humpPattern.matcher(str);
         while (matcher.find()) {
             matcher.appendReplacement(sb, "_" + matcher.group(0).toLowerCase());
         }
@@ -90,8 +91,8 @@ public class TextUtils {
             return new String[0];
         }
 
-        var result = new String[strs.length];
-        for (var i = 0; i < strs.length; i++) {
+        String[] result = new String[strs.length];
+        for (int i = 0; i < strs.length; i++) {
             result[i] = humpToLine(strs[i]);
         }
         return result;
@@ -133,13 +134,13 @@ public class TextUtils {
     }
 
     public static byte[] rawCompress(byte[] bytesToCompress) {
-        var deflater = new Deflater();
+        Deflater deflater = new Deflater();
         deflater.setInput(bytesToCompress);
         deflater.finish();
 
-        var bytesCompressed = new byte[Short.MAX_VALUE];
+        byte[] bytesCompressed = new byte[Short.MAX_VALUE];
         int numberOfBytesAfterCompression = deflater.deflate(bytesCompressed);
-        var returnValues = new byte[numberOfBytesAfterCompression];
+        byte[] returnValues = new byte[numberOfBytesAfterCompression];
         System.arraycopy(bytesCompressed, 0, returnValues, 0, numberOfBytesAfterCompression);
 
         return returnValues;
@@ -148,7 +149,7 @@ public class TextUtils {
     public static byte[] rawDecompress(byte[] bytesToDecompress) {
         byte[] returnValues = null;
 
-        var inflater = new Inflater();
+        Inflater inflater = new Inflater();
         int numberOfBytesToDecompress = bytesToDecompress.length;
         inflater.setInput(bytesToDecompress, 0, numberOfBytesToDecompress);
         int bufferSizeInBytes = numberOfBytesToDecompress;
@@ -156,16 +157,16 @@ public class TextUtils {
         List<Byte> bytesDecompressedSoFar = new ArrayList<>();
         try {
             while (!inflater.needsInput()) {
-                var bytesDecompressedBuffer = new byte[bufferSizeInBytes];
+                byte[] bytesDecompressedBuffer = new byte[bufferSizeInBytes];
                 int numberOfBytesDecompressedThisTime = inflater.inflate(bytesDecompressedBuffer);
                 numberOfBytesDecompressedSoFar += numberOfBytesDecompressedThisTime;
-                for (var b = 0; b < numberOfBytesDecompressedThisTime; b++) {
+                for (int b = 0; b < numberOfBytesDecompressedThisTime; b++) {
                     bytesDecompressedSoFar.add(bytesDecompressedBuffer[b]);
                 }
             }
 
             returnValues = new byte[bytesDecompressedSoFar.size()];
-            for (var b = 0; b < returnValues.length; b++) {
+            for (int b = 0; b < returnValues.length; b++) {
                 returnValues[b] = (byte)(bytesDecompressedSoFar.get(b));
             }
         } catch (DataFormatException dfe) {

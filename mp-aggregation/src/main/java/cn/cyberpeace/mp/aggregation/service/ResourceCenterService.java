@@ -9,10 +9,12 @@ import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageParseRes
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
+import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -91,24 +93,27 @@ public class ResourceCenterService {
     }
 
     public ServiceResult<ExportResult> exportScene(String csceneId, String envPath, String imagePath, String singleImagePath, String sceneNumber, boolean disableImageExport) {
-        var cscene = csceneService.get(csceneId);
+        ObjServiceResult<CsceneModel> cscene = csceneService.get(csceneId);
         if (cscene == null || cscene.getSource() == null || cscene.getSource().getObj() == null) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+            String detail = "[" + csceneId + "]-场景不存在";
+            log.error(detail);
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST, detail);
         }
         String logo = cscene.getSource().getObj().getLogo();
         //存在logo图片则导出
         if (StringUtils.isNotEmpty(logo)) {
             String logoPath = StringUtils.replaceOnce(logo, LOGO_FILE_SUFFIX, "");
-            byte[] content = FsCommon.downloadRawContent(logoPath);
             try {
+                byte[] content = FsCommon.downloadRawContent(logoPath);
                 FileUtils.writeByteArrayToFile(new File(envPath + "/" + LOGO_NAME), content);
-            } catch (IOException e) {
-                log.error("failed to write file ", ExceptionUtils.getStackTrace(e));
-                throw new MpRuntimeException(BaseErrorCode.ERROR);
+            } catch (Exception e) {
+                String detail = "[" + logoPath + "]-场景logo导出失败," + e.getMessage();
+                log.error(detail, e);
+                throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
             }
         }
 
-        var result = new SceneExporter().export(cscene.getSource().getObj().getSceneConfig(), envPath, imagePath, singleImagePath, sceneNumber, disableImageExport);
+        ExportResult result = new SceneExporter().export(cscene.getSource().getObj().getSceneConfig(), envPath, imagePath, singleImagePath, sceneNumber, disableImageExport);
         return new ServiceResult<>(result);
     }
 

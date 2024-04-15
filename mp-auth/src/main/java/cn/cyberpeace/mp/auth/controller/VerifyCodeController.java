@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import com.google.code.kaptcha.Producer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,10 +26,11 @@ import java.io.IOException;
  * @Author shgang
  * @Date 2022/12/27
  */
-@Api(value = "认证相关接口", tags = "AUTH-获取验证码接口")
+@Api(value = "认证相关接口", tags = "认证相关接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/kaptcha")
+@AuthTarget(TargetEnum.NO_AUTH)
 public class VerifyCodeController {
 
     @Resource

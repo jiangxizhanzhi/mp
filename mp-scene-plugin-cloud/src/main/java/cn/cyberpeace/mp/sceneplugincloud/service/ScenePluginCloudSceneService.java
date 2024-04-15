@@ -14,6 +14,8 @@ import cn.cyberpeace.mp.base.util.basic.*;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.base.util.mptool.URLUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
@@ -57,6 +59,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -114,7 +117,7 @@ public class ScenePluginCloudSceneService {
         private CloudPluginSceneBO cloudScene;
 
         public NodeConnectionBO toNewNodeConnection() {
-            var nodeConnection = new NodeConnectionBO();
+            NodeConnectionBO nodeConnection = new NodeConnectionBO();
             nodeConnection.setSceneId(srcScene.getEid());
             nodeConnection.setSceneName(srcScene.getName());
             nodeConnection.setNodeId(cloudElement.getSrcElement().getId());
@@ -127,22 +130,22 @@ public class ScenePluginCloudSceneService {
     private Map<String, AccessModeLinkInfo> collectAccessModeLinkInfo(String sceneId, List<String> nodeIds) {
         Map<String, AccessModeLinkInfo> accessModeLinkInfoMap = new HashMap<>();
 
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
-        var scene = sceneHandler.getScene();
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+        SceneBO scene = sceneHandler.getScene();
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        var cloudScene = pluginHandler.getScene();
+        CloudPluginSceneBO cloudScene = pluginHandler.getScene();
         pluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
             if (nodeIds != null && !nodeIds.isEmpty() && !nodeIds.contains(nodeId)) {
                 return;
             }
-            var cloudPorts = pluginHandler.getPorts(cloudElement);
+            List<CloudPluginSceneElementPortBO> cloudPorts = pluginHandler.getPorts(cloudElement);
             cloudPorts.forEach(cloudPort -> {
-                var accessModes = cloudPort.getAccessModes();
+                List<CloudAccessMode> accessModes = cloudPort.getAccessModes();
                 if (accessModes == null) {
                     return;
                 }
                 accessModes.forEach(accessMode -> {
-                    var accessModeId = accessMode.getId();
+                    String accessModeId = accessMode.getId();
                     if (StringUtils.isEmpty(accessModeId)) {
                         return;
                     }
@@ -156,14 +159,6 @@ public class ScenePluginCloudSceneService {
         return accessModeLinkInfoMap;
     }
 
-    private Map<String, AccessModeLinkInfo> collectAccessModeLinkInfo(List<String> sceneIds, List<String> nodeIds) {
-        Map<String, AccessModeLinkInfo> accessModeLinkInfoMap = new HashMap<>();
-        for (var sceneId : sceneIds) {
-            accessModeLinkInfoMap.putAll(collectAccessModeLinkInfo(sceneId, nodeIds));
-        }
-        return accessModeLinkInfoMap;
-    }
-
     @Data
     @AllArgsConstructor
     private static class ConnectionLinkInfo {
@@ -172,7 +167,7 @@ public class ScenePluginCloudSceneService {
         private AccessModeLinkInfo accessModeLinkInfo;
 
         public NodeConnectionBO toNewNodeConnection() {
-            var nodeConnection = accessModeLinkInfo.toNewNodeConnection();
+            NodeConnectionBO nodeConnection = accessModeLinkInfo.toNewNodeConnection();
             nodeConnection.setUser(sceneConnection.getAccessUser());
             nodeConnection.setConnectionId(sceneConnection.getConnectionId());
             nodeConnection.setConnectionEnableRecording(sceneConnection.getConnectionEnableRecording());
@@ -190,7 +185,7 @@ public class ScenePluginCloudSceneService {
             return connectionLinkInfoMap;
         }
 
-        var condition = new HumanCondition()
+        HumanCondition condition = new HumanCondition()
                 .filterEqual(CloudPluginSceneConnectionModel::getScene, sceneId)
                 .filterNotEqual(CloudPluginSceneConnectionModel::getConnectionId, StringUtils.EMPTY)
                 .filterIn(CloudPluginSceneConnectionModel::getAccessModeId,
@@ -198,11 +193,11 @@ public class ScenePluginCloudSceneService {
         if (!CollectionUtils.isEmpty(userIds)) {
             condition.filterIn(CloudPluginSceneConnectionModel::getAccessUser, userIds.toArray());
         }
-        var sceneConnections = cloudPluginSceneConnectionMapper.list(condition);
+        List<CloudPluginSceneConnectionModel> sceneConnections = cloudPluginSceneConnectionMapper.list(condition);
         sceneConnections.forEach(sceneConnection -> {
-            var connectionId = sceneConnection.getConnectionId();
-            var accessModeLinkInfo = accessModeLinkInfoMap.get(sceneConnection.getAccessModeId());
-            var connectionLinkInfo = new ConnectionLinkInfo(connectionId, sceneConnection, accessModeLinkInfo);
+            String connectionId = sceneConnection.getConnectionId();
+            AccessModeLinkInfo accessModeLinkInfo = accessModeLinkInfoMap.get(sceneConnection.getAccessModeId());
+            ConnectionLinkInfo connectionLinkInfo = new ConnectionLinkInfo(connectionId, sceneConnection, accessModeLinkInfo);
             connectionLinkInfoMap.put(connectionId, connectionLinkInfo);
         });
 
@@ -212,7 +207,7 @@ public class ScenePluginCloudSceneService {
     private Map<String, ConnectionLinkInfo> collectConnectionLinkInfo(List<String> sceneIds, List<String> nodeIds,
                                                                       List<String> userIds) {
         Map<String, ConnectionLinkInfo> connectionLinkInfoMap = new HashMap<>();
-        for (var sceneId : sceneIds) {
+        for (String sceneId : sceneIds) {
             connectionLinkInfoMap.putAll(collectConnectionLinkInfo(sceneId, nodeIds, userIds));
         }
         return connectionLinkInfoMap;
@@ -221,7 +216,7 @@ public class ScenePluginCloudSceneService {
     private List<String> collectRecordingName(String sceneId) {
         List<String> connectionIds = new ArrayList<>();
         HumanCondition condition = new HumanCondition().filterEqual(CloudPluginSceneConnectionModel::getScene, sceneId);
-        var sceneConnections = cloudPluginSceneConnectionMapper.list(condition);
+        List<CloudPluginSceneConnectionModel> sceneConnections = cloudPluginSceneConnectionMapper.list(condition);
         if (CollectionUtils.isEmpty(sceneConnections)) {
             return new ArrayList<>();
         }
@@ -231,7 +226,7 @@ public class ScenePluginCloudSceneService {
             }
         });
         if (CollectionUtils.isNotEmpty(connectionIds)) {
-            var remoteClient = new Remote();
+            Remote remoteClient = new Remote();
             return remoteClient.getRecords(connectionIds);
         }
         return new ArrayList<>();
@@ -243,7 +238,7 @@ public class ScenePluginCloudSceneService {
         }
         List<String> recordingNames = this.collectRecordingName(sceneId);
         if (CollectionUtils.isNotEmpty(recordingNames)) {
-            var remoteClient = new Remote();
+            Remote remoteClient = new Remote();
             remoteClient.deleteRecords(recordingNames);
         }
     }
@@ -262,25 +257,25 @@ public class ScenePluginCloudSceneService {
             return new ServiceResult<>(new ArrayList<>());
         }
 
-        var connectionLinkInfoMap = collectConnectionLinkInfo(sceneIds, nodeIds, userIds);
+        Map<String, ConnectionLinkInfo> connectionLinkInfoMap = collectConnectionLinkInfo(sceneIds, nodeIds, userIds);
         String[] connectionIds = connectionLinkInfoMap.keySet().toArray(new String[0]);
         if (connectionIds.length == 0) {
             return new ServiceResult<>(new ArrayList<>());
         }
 
-        var remoteClient = new Remote();
+        Remote remoteClient = new Remote();
         Map<String, NodeSessionBO> connectionIdSessionMap = new HashMap<>();
         if (monitor) {
-            var monitors = remoteClient.getMonitors(connectionIds);
+            Map<String, GuacamoleMonitorData.MonitorInfo> monitors = remoteClient.getMonitors(connectionIds);
             if (monitors != null) {
                 monitors.forEach((connectionId, monitorData) -> {
-                    var nodeSession = connectionIdSessionMap.getOrDefault(connectionId,
+                    NodeSessionBO nodeSession = connectionIdSessionMap.getOrDefault(connectionId,
                             new NodeSessionBO());
                     String formatUrl = monitorData.getMonitorUrl();
                     CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
                     if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
                         if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
-                            var u = URLUtil.url(formatUrl);
+                            URL u = URLUtil.url(formatUrl);
                             formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
                         }
                     }
@@ -292,16 +287,16 @@ public class ScenePluginCloudSceneService {
         }
 
         if (assistance) {
-            var assistances = remoteClient.getAssistances(connectionIds);
+            Map<String, GuacamoleAssistanceData.AssistanceInfo> assistances = remoteClient.getAssistances(connectionIds);
             if (assistances != null) {
                 assistances.forEach((connectionId, assistanceData) -> {
-                    var nodeSession = connectionIdSessionMap.getOrDefault(connectionId,
+                    NodeSessionBO nodeSession = connectionIdSessionMap.getOrDefault(connectionId,
                             new NodeSessionBO());
                     String formatUrl = assistanceData.getAssistanceUrl();
                     CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
                     if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
                         if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
-                            var u = URLUtil.url(formatUrl);
+                            URL u = URLUtil.url(formatUrl);
                             formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
                         }
                     }
@@ -313,16 +308,16 @@ public class ScenePluginCloudSceneService {
         }
 
         connectionIdSessionMap.forEach((connectionId, nodeSession) -> {
-            var connectionLinkInfo = connectionLinkInfoMap.get(connectionId);
-            var accessModeLinkInfo = connectionLinkInfo.getAccessModeLinkInfo();
-            var srcScene = accessModeLinkInfo.getSrcScene();
-            var cloudElement = accessModeLinkInfo.getCloudElement();
-            var srcElement = cloudElement.getSrcElement();
+            ConnectionLinkInfo connectionLinkInfo = connectionLinkInfoMap.get(connectionId);
+            AccessModeLinkInfo accessModeLinkInfo = connectionLinkInfo.getAccessModeLinkInfo();
+            SceneBO srcScene = accessModeLinkInfo.getSrcScene();
+            CloudPluginSceneElementBO cloudElement = accessModeLinkInfo.getCloudElement();
+            SceneElementBO srcElement = cloudElement.getSrcElement();
             nodeSession.setSceneId(srcScene.getEid());
             nodeSession.setSceneName(srcScene.getName());
             nodeSession.setNodeId(srcElement.getId());
             nodeSession.setNodeName(srcElement.getName());
-            var accessMode = accessModeLinkInfo.getAccessMode();
+            CloudAccessMode accessMode = accessModeLinkInfo.getAccessMode();
             nodeSession.setProtocol(accessMode.getProtocol());
         });
 
@@ -332,14 +327,14 @@ public class ScenePluginCloudSceneService {
     public ListObjServiceResult<NodeRecordingBO> getSceneRemoteRecordings(List<String> sceneIds, List<String> nodeIds,
                                                                           List<String> userIds,
                                                                           RecordingQueryParams queryParams) {
-        var connectionLinkInfoMap = collectConnectionLinkInfo(sceneIds, nodeIds, userIds);
+        Map<String, ConnectionLinkInfo> connectionLinkInfoMap = collectConnectionLinkInfo(sceneIds, nodeIds, userIds);
         String[] connectionIds = connectionLinkInfoMap.keySet().toArray(new String[0]);
         if (connectionIds.length == 0) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
-        var remoteClient = new Remote();
-        var queryData = new GetGuacamoleRecordingData();
+        Remote remoteClient = new Remote();
+        GetGuacamoleRecordingData queryData = new GetGuacamoleRecordingData();
         queryData.setConnectionID(Arrays.asList(connectionIds));
         queryData.setPage(queryParams.getPage());
         queryData.setLimit(queryParams.getPageSize());
@@ -348,14 +343,14 @@ public class ScenePluginCloudSceneService {
         queryData.setEndTime(queryParams.getEndTime());
         ListObjResult<GuacamoleRecordingData.RecordingInfo> rawRecordings = remoteClient.getRecordings(queryData);
         List<NodeRecordingBO> recordings = rawRecordings.getObjs().stream().map(rawRecording -> {
-            var connectionLinkInfo = connectionLinkInfoMap.get(rawRecording.getConnectionId());
-            var accessModeLinkInfo = connectionLinkInfo.getAccessModeLinkInfo();
-            var srcScene = accessModeLinkInfo.getSrcScene();
-            var cloudElement = accessModeLinkInfo.getCloudElement();
-            var srcElement = cloudElement.getSrcElement();
-            var accessMode = accessModeLinkInfo.getAccessMode();
+            ConnectionLinkInfo connectionLinkInfo = connectionLinkInfoMap.get(rawRecording.getConnectionId());
+            AccessModeLinkInfo accessModeLinkInfo = connectionLinkInfo.getAccessModeLinkInfo();
+            SceneBO srcScene = accessModeLinkInfo.getSrcScene();
+            CloudPluginSceneElementBO cloudElement = accessModeLinkInfo.getCloudElement();
+            SceneElementBO srcElement = cloudElement.getSrcElement();
+            CloudAccessMode accessMode = accessModeLinkInfo.getAccessMode();
 
-            var recording = new NodeRecordingBO();
+            NodeRecordingBO recording = new NodeRecordingBO();
             recording.setSceneId(srcScene.getEid());
             recording.setSceneName(srcScene.getName());
             recording.setNodeId(srcElement.getId());
@@ -375,28 +370,28 @@ public class ScenePluginCloudSceneService {
                 if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
                     if (StringUtils.isNotEmpty(recording.getFileUrl())) {
                         String formatUrl = recording.getFileUrl();
-                        var u = URLUtil.url(formatUrl);
+                        URL u = URLUtil.url(formatUrl);
                         formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
                         recording.setFileUrl(formatUrl);
                     }
                     if (StringUtils.isNotEmpty(recording.getPlayUrl())) {
                         String formatUrl = recording.getPlayUrl();
-                        var u = URLUtil.url(formatUrl);
+                        URL u = URLUtil.url(formatUrl);
                         formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
                         recording.setPlayUrl(formatUrl);
                     }
                 }
             }
 
-            var filesizeStr = rawRecording.getFileSize();
+            String filesizeStr = rawRecording.getFileSize();
             if (!StringUtils.isEmpty(filesizeStr)) {
                 recording.setFilesize(IntUtils.fromStr(filesizeStr));
             }
-            var durationStr = rawRecording.getRecortime();
+            String durationStr = rawRecording.getRecortime();
             if (!StringUtils.isEmpty(durationStr)) {
                 recording.setDuration(FloatUtils.fromStr(durationStr));
             }
-            var timeStr = rawRecording.getRecordate();
+            String timeStr = rawRecording.getRecordate();
             if (!StringUtils.isEmpty(timeStr)) {
                 recording.setTime(TimeUtils.utcStringToLocalDateTime(timeStr));
             }
@@ -409,13 +404,13 @@ public class ScenePluginCloudSceneService {
 
     public ServiceResult<NodeConnectionBO> enableRemoteRecording(String sceneId, String nodeId, String userId, String connectionId,
                                                                  CloudScenePluginContext context) {
-        var connectionLinkInfoMap = collectConnectionLinkInfo(sceneId, List.of(nodeId), List.of(userId));
+        Map<String, ConnectionLinkInfo> connectionLinkInfoMap = collectConnectionLinkInfo(sceneId, List.of(nodeId), List.of(userId));
         if (!connectionLinkInfoMap.containsKey(connectionId)) {
             return new ServiceResult<>(null, CloudErrorCode.CONNECTION_NOT_EXIST);
         }
-        var connectionLinkInfo = connectionLinkInfoMap.get(connectionId);
-        var accessModeInfo = connectionLinkInfo.getAccessModeLinkInfo();
-        var extraParam = new CloudSceneConnectionCommon.SceneConnectionEnableRecordingExtraParam();
+        ConnectionLinkInfo connectionLinkInfo = connectionLinkInfoMap.get(connectionId);
+        AccessModeLinkInfo accessModeInfo = connectionLinkInfo.getAccessModeLinkInfo();
+        CloudSceneConnectionCommon.SceneConnectionEnableRecordingExtraParam extraParam = new CloudSceneConnectionCommon.SceneConnectionEnableRecordingExtraParam();
         extraParam.setSceneName(accessModeInfo.getSrcScene().getName());
         extraParam.setNodeName(accessModeInfo.getCloudElement().getSrcElement().getName());
         extraParam.setUsername(userId);
@@ -427,12 +422,12 @@ public class ScenePluginCloudSceneService {
     }
 
     public ServiceResult<NodeConnectionBO> disableRemoteRecording(String sceneId, String nodeId, String userId, String connectionId) {
-        var connectionLinkInfoMap = collectConnectionLinkInfo(sceneId, List.of(nodeId), List.of(userId));
+        Map<String, ConnectionLinkInfo> connectionLinkInfoMap = collectConnectionLinkInfo(sceneId, List.of(nodeId), List.of(userId));
         if (!connectionLinkInfoMap.containsKey(connectionId)) {
             // 不再抛出异常
             return new ServiceResult<>(new NodeConnectionBO());
         }
-        var connectionLinkInfo = connectionLinkInfoMap.get(connectionId);
+        ConnectionLinkInfo connectionLinkInfo = connectionLinkInfoMap.get(connectionId);
 //        CloudSceneConnectionCommon.disableRecording(connectionLinkInfo.getSceneConnection());
         CloudSceneConnectionCommon.convertRecording(connectionLinkInfo.getSceneConnection());
         return new ServiceResult<>(connectionLinkInfo.toNewNodeConnection());
@@ -442,7 +437,7 @@ public class ScenePluginCloudSceneService {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
         CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         if (cloudPlugin != null) {
-            var cloudElement = cloudPlugin.getElement(nodeId);
+            CloudPluginSceneElementBO cloudElement = cloudPlugin.getElement(nodeId);
             if (cloudElement != null) {
                 String resourceId = cloudElement.getResourceId();
                 String url = CloudSceneConnectionCommon.getContainerConsoleUrl(resourceId);
@@ -460,18 +455,18 @@ public class ScenePluginCloudSceneService {
     public ServiceResult<NodeConnectionBO> getSceneRemoteConnection(String sceneId, String nodeId,
                                                                     String accessModeId, String userId,
                                                                     CloudScenePluginContext context) {
-        var accessModeInfoMap = collectAccessModeLinkInfo(sceneId, List.of(nodeId));
-        var accessModeInfo = accessModeInfoMap.getOrDefault(accessModeId, null);
+        Map<String, AccessModeLinkInfo> accessModeInfoMap = collectAccessModeLinkInfo(sceneId, List.of(nodeId));
+        AccessModeLinkInfo accessModeInfo = accessModeInfoMap.getOrDefault(accessModeId, null);
         if (accessModeInfo == null) {
             return new ServiceResult<>(null);
         }
 
-        var nodeConnection = accessModeInfo.toNewNodeConnection();
+        NodeConnectionBO nodeConnection = accessModeInfo.toNewNodeConnection();
         nodeConnection.setUser(userId);
 
-        var accessMode = accessModeInfo.getAccessMode();
+        CloudAccessMode accessMode = accessModeInfo.getAccessMode();
         if (accessMode.getProtocol().equals(AccessMode.Protocol.CONSOLE)) {
-            var virtualType = accessModeInfo.getCloudElement().getVirtualType();
+            Integer virtualType = accessModeInfo.getCloudElement().getVirtualType();
             if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
                 String url = CloudSceneConnectionCommon.getContainerConsoleUrl(accessModeInfo.getCloudElement().getResourceId());
                 String formatUrl = formatUrl(url, accessModeInfo);
@@ -480,11 +475,11 @@ public class ScenePluginCloudSceneService {
             }
         }
 
-        var srcScene = accessModeInfo.getSrcScene();
-        var cloudScene = accessModeInfo.getCloudScene();
-        var cloudElement = accessModeInfo.getCloudElement();
-        var portId = accessModeInfo.getCloudPort().getSrcPort().getId();
-        var sceneConnectionParam = new CloudSceneConnectionCommon.SceneConnectionParam();
+        SceneBO srcScene = accessModeInfo.getSrcScene();
+        CloudPluginSceneBO cloudScene = accessModeInfo.getCloudScene();
+        CloudPluginSceneElementBO cloudElement = accessModeInfo.getCloudElement();
+        String portId = accessModeInfo.getCloudPort().getSrcPort().getId();
+        CloudSceneConnectionCommon.SceneConnectionParam sceneConnectionParam = new CloudSceneConnectionCommon.SceneConnectionParam();
         sceneConnectionParam.setSceneId(sceneId);
         sceneConnectionParam.setSceneElementId(nodeId);
         sceneConnectionParam.setResourceId(cloudElement.getResourceId());
@@ -496,7 +491,7 @@ public class ScenePluginCloudSceneService {
         sceneConnectionParam.setSystemType(cloudElement.getSrcElement() == null ? StringUtils.EMPTY : cloudElement.getSrcElement().getSystemType());
         sceneConnectionParam.setDepartment(context == null ? StringUtils.EMPTY : context.getRequestUserOrg());
         sceneConnectionParam.setEntity(cloudElement.getVirtualType() != null && cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
-        var sceneConnection = CloudSceneConnectionCommon.getOrCreateSceneConnection(sceneConnectionParam);
+        CloudPluginSceneConnectionModel sceneConnection = CloudSceneConnectionCommon.getOrCreateSceneConnection(sceneConnectionParam);
         if (sceneConnection == null) {
             return new ServiceResult<>(null);
         }
@@ -508,14 +503,14 @@ public class ScenePluginCloudSceneService {
 
         if (cloudScene != null && Boolean.TRUE.equals(cloudScene.getEnableRecording())
                 && !Boolean.TRUE.equals(sceneConnection.getConnectionEnableRecording())) {
-            var extraParam = new CloudSceneConnectionCommon.SceneConnectionEnableRecordingExtraParam();
+            CloudSceneConnectionCommon.SceneConnectionEnableRecordingExtraParam extraParam = new CloudSceneConnectionCommon.SceneConnectionEnableRecordingExtraParam();
             extraParam.setSceneName(accessModeInfo.getSrcScene().getName());
             extraParam.setNodeName(accessModeInfo.getCloudElement().getSrcElement().getName());
             extraParam.setUsername(userId);
             extraParam.setDepartment(context == null ? StringUtils.EMPTY : context.getRequestUserOrg());
             extraParam.setSceneId(sceneId);
             extraParam.setNodeId(nodeId);
-            var enableRecordingFlag = CloudSceneConnectionCommon.enableRecording(sceneConnection, extraParam);
+            boolean enableRecordingFlag = CloudSceneConnectionCommon.enableRecording(sceneConnection, extraParam);
             if (enableRecordingFlag) {
                 nodeConnection.setConnectionEnableRecording(sceneConnection.getConnectionEnableRecording());
                 nodeConnection.setConnectionRecordingName(sceneConnection.getConnectionRecordingName());
@@ -529,7 +524,7 @@ public class ScenePluginCloudSceneService {
         String formatUrl = inputUrl;
         if (CloudSingleton.cloudAppConfig.getPublicNetProxyServer()) {
             CloudAccessMode accessMode = modeLinkInfo.getAccessMode();
-            var u = URLUtil.url(inputUrl);
+            URL u = URLUtil.url(inputUrl);
             if (accessMode.getPublicNetProxy() != null) {
                 if (Boolean.TRUE.equals(accessMode.getPublicNetProxy())) {
                     String ip = StringUtils.isNotEmpty(accessMode.getPublicNetProxyIp()) ? accessMode.getPublicNetProxyIp() : CloudSingleton.cloudAppConfig.getPublicNetProxyIp();
@@ -561,7 +556,7 @@ public class ScenePluginCloudSceneService {
         Map<String, Map<Object, Long>> result = new HashMap<>();
         if (!countFieldNames.isEmpty()) {
             countFieldNames.forEach(fieldName -> {
-                var countResult = cloudSceneStatCommon.groupCountElement(sceneIds, nodeIds, fieldName, List.of(fieldName), false);
+                Map<String, Map<Object, Long>> countResult = cloudSceneStatCommon.groupCountElement(sceneIds, nodeIds, fieldName, List.of(fieldName), false);
                 result.put(fieldName, countResult.get(fieldName));
             });
         }
@@ -648,7 +643,7 @@ public class ScenePluginCloudSceneService {
         if (CollectionUtils.isNotEmpty(nodeIds)) {
             humanCondition.filterIn(CloudPluginSceneConnectionModel::getSceneElement, nodeIds.toArray(new String[]{}));
         }
-        var list = cloudPluginSceneConnectionMapper.list(humanCondition);
+        List<CloudPluginSceneConnectionModel> list = cloudPluginSceneConnectionMapper.list(humanCondition);
         if (CollectionUtils.isEmpty(list)) {
             return new ServiceResult<>(new ArrayList<>());
         }
@@ -677,7 +672,7 @@ public class ScenePluginCloudSceneService {
 
     public ServiceResult<List<NodeLinkStatusBO>> linkStatus(String sceneId) {
         try {
-            var list = SceneInstanceLinkCacheUtil.getCached(sceneId);
+            List<NodeLinkStatusBO> list = SceneInstanceLinkCacheUtil.getCached(sceneId);
             SceneInstanceLinkCacheUtil.tryStartCronRefresh();
             return new ServiceResult<>(list);
         } catch (Exception e) {
@@ -687,13 +682,13 @@ public class ScenePluginCloudSceneService {
     }
 
     public ServiceResult<ElementCommandExecBO> execElementCommand(String sceneId, String nodeId, String command, String user) {
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        var node = pluginHandler.getElement(nodeId);
+        CloudPluginSceneElementBO node = pluginHandler.getElement(nodeId);
         if (node != null && node.getVirtualType() != null) {
             if (BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == node.getVirtualType()) {
                 Container container = new Container();
-                var result = container.executeCommand(node.getResourceId(), command,user);
+                ContainerExecuteResult result = container.executeCommand(node.getResourceId(), command,user);
                 if (result.getExitCode() != null && result.getExitCode() == 0) {
                     ElementCommandExecBO execRes = new ElementCommandExecBO();
                     execRes.setOutput(result.getOutput());
@@ -708,12 +703,12 @@ public class ScenePluginCloudSceneService {
                 }
             } else if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == node.getVirtualType()) {
                 VirtualMachine virtualMachine = new VirtualMachine();
-                var param = this.getVirtualMachineUploadFileInfo(pluginHandler, node);
+                VirtualMachinePrivateOperateData param = this.getVirtualMachineUploadFileInfo(pluginHandler, node);
                 if (param != null) {
-                    var execCommandData = new VirtualMachineExecCommandData();
+                    VirtualMachineExecCommandData execCommandData = new VirtualMachineExecCommandData();
                     BeanUtils.copyProperties(param, execCommandData);
                     execCommandData.setCmd(command);
-                    var result = virtualMachine.execCommand(execCommandData);
+                    VirtualMachineExecuteResult result = virtualMachine.execCommand(execCommandData);
                     if (result != null && Boolean.TRUE.equals(result.getSuccess())) {
                         ElementCommandExecBO execRes = new ElementCommandExecBO();
                         execRes.setStatus(true);
@@ -737,9 +732,9 @@ public class ScenePluginCloudSceneService {
     }
 
     public ServiceResult<Boolean> uploadElementFile(String sceneId, String nodeId, String filePath, String filename, String destPath) {
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        var node = pluginHandler.getElement(nodeId);
+        CloudPluginSceneElementBO node = pluginHandler.getElement(nodeId);
         String finalPath = filePath;
         if (StringUtils.startsWith(finalPath, BaseCommon.baseAppConfig.getFdfsOuterHttpServer())) {
             finalPath = StringUtils.replaceOnce(finalPath, BaseCommon.baseAppConfig.getFdfsOuterHttpServer(), "");
@@ -759,7 +754,7 @@ public class ScenePluginCloudSceneService {
                 }
                 try {
                     FsCommon.download(URLUtil.getPath(finalPath), tmpZipFilepath);
-                    var result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
+                    boolean result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
                     return new ServiceResult<>(result);
                 } finally {
                     try {
@@ -769,10 +764,10 @@ public class ScenePluginCloudSceneService {
                     }
                 }
             } else if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == node.getVirtualType()) {
-                var param = this.getVirtualMachineUploadFileInfo(pluginHandler, node);
+                VirtualMachinePrivateOperateData param = this.getVirtualMachineUploadFileInfo(pluginHandler, node);
                 if (param != null) {
-                    var standardSystemType = SystemTypeUtils.getStandardSystemType(node.getSrcElement().getSystemType());
-                    var uploadInfoData = new VirtualMachineUploadFileData();
+                    String standardSystemType = SystemTypeUtils.getStandardSystemType(node.getSrcElement().getSystemType());
+                    VirtualMachineUploadFileData uploadInfoData = new VirtualMachineUploadFileData();
                     BeanUtils.copyProperties(param, uploadInfoData);
                     uploadInfoData.setFile(finalPath);
                     uploadInfoData.setDestPath(destPath + SystemTypeCommandUtils.getPathDelimiter(standardSystemType) + filename);
@@ -786,13 +781,13 @@ public class ScenePluginCloudSceneService {
     }
 
     public ServiceResult<Boolean> uploadElementFile(String sceneId, String nodeId, InputStream inputStream, String filename, String destPath) {
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        var node = pluginHandler.getElement(nodeId);
+        CloudPluginSceneElementBO node = pluginHandler.getElement(nodeId);
         if (node != null && node.getVirtualType() != null) {
             if (BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == node.getVirtualType()) {
                 Container container = new Container();
-                var tmpFileDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, FileUtil.getTmpDirPath(), sceneId, TextUtils.uuid());
+                String tmpFileDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, FileUtil.getTmpDirPath(), sceneId, TextUtils.uuid());
                 new File(tmpFileDir).mkdirs();
                 String tmpZipFilepath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, tmpFileDir, filename);
                 File file = new File(tmpZipFilepath);
@@ -815,11 +810,11 @@ public class ScenePluginCloudSceneService {
                 }
                 return new ServiceResult<>(result);
             } else if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == node.getVirtualType()) {
-                var param = this.getVirtualMachineUploadFileInfo(pluginHandler, node);
+                VirtualMachinePrivateOperateData param = this.getVirtualMachineUploadFileInfo(pluginHandler, node);
                 String finalPath = FsCommon.upload(inputStream);
                 if (param != null) {
-                    var standardSystemType = SystemTypeUtils.getStandardSystemType(node.getSrcElement().getSystemType());
-                    var uploadInfoData = new VirtualMachineUploadFileData();
+                    String standardSystemType = SystemTypeUtils.getStandardSystemType(node.getSrcElement().getSystemType());
+                    VirtualMachineUploadFileData uploadInfoData = new VirtualMachineUploadFileData();
                     BeanUtils.copyProperties(param, uploadInfoData);
                     uploadInfoData.setFile(finalPath);
                     uploadInfoData.setDestPath(destPath + SystemTypeCommandUtils.getPathDelimiter(standardSystemType) + filename);
@@ -834,9 +829,9 @@ public class ScenePluginCloudSceneService {
     }
 
     public ServiceResult<Boolean> deleteElementSnapshot(String sceneId, String nodeId, String snapshotId, String snapshotUuid, String snapshotName) {
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        var node = pluginHandler.getElement(nodeId);
+        CloudPluginSceneElementBO node = pluginHandler.getElement(nodeId);
         if (node != null) {
             SnapshotDeleteParams params = new SnapshotDeleteParams();
             params.setSnapshotName(snapshotName);
@@ -857,11 +852,11 @@ public class ScenePluginCloudSceneService {
     }
 
     private VirtualMachinePrivateOperateData getVirtualMachineUploadFileInfo(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO node) {
-        var ports = node.getSrcElement().getPorts();
+        List<SceneElementPortBO> ports = node.getSrcElement().getPorts();
         if (CollectionUtils.isNotEmpty(ports)) {
-            for (var port : ports) {
+            for (SceneElementPortBO port : ports) {
                 if (CollectionUtils.isNotEmpty(port.getAccessModes())) {
-                    for (var mode : port.getAccessModes()) {
+                    for (AccessMode mode : port.getAccessModes()) {
                         if (Boolean.TRUE.equals(mode.getManageMode()) && AccessMode.Protocol.SSH.equals(mode.getProtocol())) {
                             String networkId = pluginHandler.getPort(port.getId()).getAuxiliaryNetworkId();
                             if (StringUtils.isNotEmpty(networkId)) {
@@ -896,7 +891,7 @@ public class ScenePluginCloudSceneService {
         HumanCondition condition = new HumanCondition()
                 .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
                 .filterIn(CloudPluginSceneConnectionModel::getAccessUser, users.toArray());
-        var list = cloudPluginSceneConnectionMapper.list(condition);
+        List<CloudPluginSceneConnectionModel> list = cloudPluginSceneConnectionMapper.list(condition);
         if (CollectionUtils.isEmpty(list)) {
             return new ServiceResult<>(connectionNumBOS);
         }
@@ -909,12 +904,12 @@ public class ScenePluginCloudSceneService {
         if (CollectionUtils.isEmpty(connectionIds)) {
             return new ServiceResult<>(connectionNumBOS);
         }
-        var monitors = new Remote().getMonitors(connectionIds.toArray(new String[]{}));
+        Map<String, GuacamoleMonitorData.MonitorInfo> monitors = new Remote().getMonitors(connectionIds.toArray(new String[]{}));
         if (monitors == null || monitors.isEmpty()) {
             return new ServiceResult<>(connectionNumBOS);
         }
         Map<String, Set<String>> user2ConnectionIds = new HashMap<>();
-        for (var model : list) {
+        for (CloudPluginSceneConnectionModel model : list) {
             if (!user2ConnectionIds.containsKey(model.getAccessUser())) {
                 user2ConnectionIds.put(model.getAccessUser(), new HashSet<>());
             }
@@ -922,8 +917,8 @@ public class ScenePluginCloudSceneService {
                 user2ConnectionIds.get(model.getAccessUser()).add(model.getConnectionId());
             }
         }
-        for (var node : connectionNumBOS) {
-            var userConnectIds = user2ConnectionIds.get(node.getUser());
+        for (UserConnectionNumBO node : connectionNumBOS) {
+            Set<String> userConnectIds = user2ConnectionIds.get(node.getUser());
             if (userConnectIds != null) {
                 for (String cId : userConnectIds) {
                     if (monitors.keySet().contains(cId)) {
@@ -939,7 +934,7 @@ public class ScenePluginCloudSceneService {
         HumanCondition condition = new HumanCondition()
                 .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
                 .filterEqual(CloudPluginSceneConnectionModel::getAccessUser, user);
-        var connectionModels = cloudPluginSceneConnectionMapper.list(condition);
+        List<CloudPluginSceneConnectionModel> connectionModels = cloudPluginSceneConnectionMapper.list(condition);
         if (CollectionUtils.isEmpty(connectionModels)) {
             return new ServiceResult<>(new ArrayList<>());
         }
@@ -957,7 +952,7 @@ public class ScenePluginCloudSceneService {
             return new ServiceResult<>(new ArrayList<>());
         }
         connectionIdSessionMap.forEach((connectionId, session) -> {
-            var model = connectionId2Model.get(connectionId);
+            CloudPluginSceneConnectionModel model = connectionId2Model.get(connectionId);
             if (model != null) {
                 session.setSceneId(model.getScene());
                 session.setNodeId(model.getSceneElement());
@@ -967,19 +962,19 @@ public class ScenePluginCloudSceneService {
     }
 
     private Map<String, NodeSessionBO> getNodeSessions(String[] connectionIds, boolean monitor, boolean assistance) {
-        var remoteClient = new Remote();
+        Remote remoteClient = new Remote();
         Map<String, NodeSessionBO> connectionIdSessionMap = new HashMap<>();
         if (monitor) {
-            var monitors = remoteClient.getMonitors(connectionIds);
+            Map<String, GuacamoleMonitorData.MonitorInfo> monitors = remoteClient.getMonitors(connectionIds);
             if (monitors != null) {
                 monitors.forEach((connectionId, monitorData) -> {
-                    var nodeSession = connectionIdSessionMap.getOrDefault(connectionId,
+                    NodeSessionBO nodeSession = connectionIdSessionMap.getOrDefault(connectionId,
                             new NodeSessionBO());
                     String formatUrl = monitorData.getMonitorUrl();
                     CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
                     if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
                         if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
-                            var u = URLUtil.url(formatUrl);
+                            URL u = URLUtil.url(formatUrl);
                             formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
                         }
                     }
@@ -990,16 +985,16 @@ public class ScenePluginCloudSceneService {
             }
         }
         if (assistance) {
-            var assistances = remoteClient.getAssistances(connectionIds);
+            Map<String, GuacamoleAssistanceData.AssistanceInfo> assistances = remoteClient.getAssistances(connectionIds);
             if (assistances != null) {
                 assistances.forEach((connectionId, assistanceData) -> {
-                    var nodeSession = connectionIdSessionMap.getOrDefault(connectionId,
+                    NodeSessionBO nodeSession = connectionIdSessionMap.getOrDefault(connectionId,
                             new NodeSessionBO());
                     String formatUrl = assistanceData.getAssistanceUrl();
                     CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
                     if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
                         if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
-                            var u = URLUtil.url(formatUrl);
+                            URL u = URLUtil.url(formatUrl);
                             formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
                         }
                     }
@@ -1019,9 +1014,9 @@ public class ScenePluginCloudSceneService {
      * @return
      */
     public NetworkFlowRateResult networkFlowRate(List<String> portIds, Long totalSecond) {
-        log.info("ScenePluginCloudSceneService.networkFlowRate begin. portIds:{}", portIds);
+        log.debug("ScenePluginCloudSceneService.networkFlowRate begin. portIds:{}", portIds);
         NetworkFlowRateResult result = new Remote().networkFlowRate(portIds, totalSecond);
-        log.info("ScenePluginCloudSceneService.networkFlowRate end. result:{}", result);
+        log.debug("ScenePluginCloudSceneService.networkFlowRate end. result:{}", result);
         return result;
     }
 }

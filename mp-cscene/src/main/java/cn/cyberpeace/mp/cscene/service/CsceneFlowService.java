@@ -43,10 +43,12 @@ import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
 import cn.cyberpeace.mp.flow.service.impl.AsyncPlatFlowTaskService;
 import cn.cyberpeace.mp.flow.util.CommonUtil;
 import cn.cyberpeace.mp.flow.util.ResponseUtils;
+import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -117,20 +119,35 @@ public class CsceneFlowService {
      * @param request
      */
     public void addTask(AddFlowTaskTaskRequest request) {
-        log.info("CsceneFlowService.addTask begin. request:{}", request);
-        var sceneId = csceneInstanceService.getSceneId(request.getId());
+        log.debug("CsceneFlowService.addTask begin. request:{}", request);
+        String sceneId = csceneInstanceService.getSceneId(request.getId());
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
         }
 
         // 过滤未添加流量的节点
-        request.setDetails(request.getDetails().stream().filter(detail -> CollectionUtils.isNotEmpty(detail.getFlowInfos())).collect(Collectors.toList()));
+        List<AddFlowTaskTaskDetail> list = new ArrayList<>();
+        for (AddFlowTaskTaskDetail addFlowTaskTaskDetail : request.getDetails()) {
+            if (CollectionUtils.isNotEmpty(addFlowTaskTaskDetail.getFlowInfos())) {
+                list.add(addFlowTaskTaskDetail);
+            }
+        }
+        request.setDetails(list);
 
         List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList<FlowTaskTaskModel>();
         for (AddFlowTaskTaskDetail detail : request.getDetails()) {
             HumanCondition condition = new HumanCondition();
-            List<String> flowIds = detail.getFlowInfos().stream().map(obj -> obj.getFlowId()).collect(Collectors.toList());
-            Map<String, AddFlowTaskFlowInfo> addFlowTaskFlowInfoMap = detail.getFlowInfos().stream().collect(Collectors.toMap(addFlowTaskFlowInfo -> addFlowTaskFlowInfo.getFlowId(), addFlowTaskFlowInfo -> addFlowTaskFlowInfo));
+            List<String> flowIds = new ArrayList<>();
+            for (AddFlowTaskFlowInfo obj : detail.getFlowInfos()) {
+                String flowId = obj.getFlowId();
+                flowIds.add(flowId);
+            }
+            Map<String, AddFlowTaskFlowInfo> addFlowTaskFlowInfoMap = new HashMap<>();
+            for (AddFlowTaskFlowInfo addFlowTaskFlowInfo : detail.getFlowInfos()) {
+                if (addFlowTaskFlowInfoMap.put(addFlowTaskFlowInfo.getFlowId(), addFlowTaskFlowInfo) != null) {
+                    throw new IllegalStateException("Duplicate key");
+                }
+            }
             condition.filterIn(FlowInfoModel::getId, flowIds.toArray());
             List<FlowInfoModel> flowInfoModelList = flowInfoMapper.list(condition);
             //保存流量任务信息
@@ -149,7 +166,7 @@ public class CsceneFlowService {
 
         TaskCommon.executeTask(() -> asyncAddTask(sceneId, request.getDetails(), flowTaskTaskModelList));
 
-        log.info("CsceneFlowService.addTask end.");
+        log.debug("CsceneFlowService.addTask end.");
     }
 
     public void asyncAddTask(String sceneId, List<AddFlowTaskTaskDetail> addFlowTaskTaskDetails, List<FlowTaskTaskModel> flowTaskTaskModelList) {
@@ -166,7 +183,7 @@ public class CsceneFlowService {
             for (AddFlowTaskTaskDetail detail : addFlowTaskTaskDetails) {
                 scenePluginDataBO.getElements().put(detail.getNodeId(), JsonCommon.beanToSnakeMap(elementBO));
             }
-            var scene = sceneHandler.toData();
+            SceneDataBO scene = sceneHandler.toData();
             scene.getPlugins().put(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY, scenePluginDataBO);
             SceneHandler sceneHandler2 = new SceneHandler(scene, null);
             sceneHandler2.save();
@@ -193,7 +210,7 @@ public class CsceneFlowService {
             String networkId = "";
             if (CollectionUtils.isNotEmpty(sceneHandler.getElement(detail.getNodeId()).getPorts())) {
                 CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-                for (var p : sceneHandler.getElement(detail.getNodeId()).getPorts()) {
+                for (SceneElementPortBO p : sceneHandler.getElement(detail.getNodeId()).getPorts()) {
                     nodeIp = p.getIp();
                     if (StringUtils.isNotEmpty(nodeIp)) {
                         CloudPluginSceneElementNetworkBO cloudPluginSceneElementNetworkBO = cloudPluginHandler.getHandlerUtils().getNetworkByPort(p);
@@ -229,14 +246,14 @@ public class CsceneFlowService {
      */
     @Transactional
     public void deleteTask(String id) {
-        log.info("CsceneFlowService.deleteTask begin. id:{}", id);
+        log.debug("CsceneFlowService.deleteTask begin. id:{}", id);
         flowTaskTaskService.delete(id);
         FlowTaskConfModel flowTaskConfModel = flowTaskConfService.findByTaskId(id);
         if (flowTaskConfModel != null) {
             flowTaskConfService.delete(flowTaskConfModel.getId());
         }
         flowTaskRecordService.deleteByTaskId(id);
-        log.info("CsceneFlowService.deleteTask end.");
+        log.debug("CsceneFlowService.deleteTask end.");
     }
 
     /**
@@ -245,7 +262,7 @@ public class CsceneFlowService {
      * @param request
      */
     public void editTaskConf(EditFlowTaskConfRequest request) {
-        log.info("CsceneFlowService.editTaskConf begin. request:{}", request);
+        log.debug("CsceneFlowService.editTaskConf begin. request:{}", request);
         FlowTaskConf flowTaskConf = request.getFlowTaskConf();
         FlowTaskConfModel flowTaskConfModel = flowTaskConfService.findByTaskId(request.getTaskId());
         flowTaskConfModel.setKeepRunning(request.getKeepRunning());
@@ -253,7 +270,7 @@ public class CsceneFlowService {
         flowTaskConfModel.setRateUnlimited(request.getRateUnlimited());
         flowTaskConfModel.setConf(JsonCommon.stringify(flowTaskConf));
         flowTaskConfService.update(flowTaskConfModel);
-        log.info("CsceneFlowService.editTaskConf end.");
+        log.debug("CsceneFlowService.editTaskConf end.");
     }
 
     /**
@@ -263,7 +280,7 @@ public class CsceneFlowService {
      * @return
      */
     public ListObjServiceResult<FlowTaskPageResponse> taskList(FlowTaskPageQueryParams request) {
-        log.info("CsceneFlowService.taskList begin. request:{}", request);
+        log.debug("CsceneFlowService.taskList begin. request:{}", request);
         String sceneId = csceneInstanceService.getSceneId(request.getId());
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
@@ -275,7 +292,11 @@ public class CsceneFlowService {
         List<FlowTaskPageResponse> flowTaskPageResponseList = flowTaskTaskMapper.pageBySceneId(request);
         //统计实时速率
         if (CollectionUtils.isNotEmpty(flowTaskPageResponseList)) {
-            List<String> ids = flowTaskPageResponseList.stream().map(FlowTaskPageResponse::getId).collect(Collectors.toList());
+            List<String> ids = new ArrayList<>();
+            for (FlowTaskPageResponse flowTaskPageResponse : flowTaskPageResponseList) {
+                String id = flowTaskPageResponse.getId();
+                ids.add(id);
+            }
             List<FlowStatisticalCondition> conditions = this.getRealTimeCondition();
             Map<String, List<FlowRealTimeRate>> tealTimeRateMap = flowTaskRecordService.realTimeRate(ids, conditions);
             for (FlowTaskPageResponse temp : flowTaskPageResponseList) {
@@ -284,21 +305,32 @@ public class CsceneFlowService {
         }
 
         if (CollectionUtils.isNotEmpty(flowTaskPageResponseList)) {
-            String[] nodeIds = flowTaskPageResponseList.stream().map(FlowTaskPageResponse::getNodeId).distinct().toArray(String[]::new);
+            List<String> list = new ArrayList<>();
+            Set<String> uniqueValues = new HashSet<>();
+            for (FlowTaskPageResponse flowTaskPageResponse : flowTaskPageResponseList) {
+                String nodeId = flowTaskPageResponse.getNodeId();
+                if (uniqueValues.add(nodeId)) {
+                    list.add(nodeId);
+                }
+            }
+            String[] nodeIds = list.toArray(new String[0]);
             List<SceneElementModel> sceneElementModelList = csceneInstanceService.listCsceneInstanceNodes(sceneId, nodeIds, SceneElementModel::getNodeId, SceneElementModel::getName);
             if (CollectionUtils.isNotEmpty(sceneElementModelList)) {
-                Map<String, String> nodeIdAndNameMap = sceneElementModelList.stream().collect(Collectors.toMap(SceneElementModel::getNodeId, SceneElementModel::getName, (a, b) -> a));
-                flowTaskPageResponseList.forEach(node -> {
+                Map<String, String> nodeIdAndNameMap = new HashMap<>();
+                for (SceneElementModel sceneElementModel : sceneElementModelList) {
+                    nodeIdAndNameMap.putIfAbsent(sceneElementModel.getNodeId(), sceneElementModel.getName());
+                }
+                for (FlowTaskPageResponse node : flowTaskPageResponseList) {
                     String realNodeName = nodeIdAndNameMap.get(node.getNodeId());
                     if (StringUtils.isNotBlank(realNodeName)) {
                         node.setNodeName(realNodeName);
                     }
-                });
+                }
             }
         }
 
         ListObjServiceResult<FlowTaskPageResponse> result = new ListObjServiceResult(new ListObjResult<>(flowTaskPageResponseList, total).asResult()).asResult();
-        log.info("CsceneFlowService.taskList end. result:{}", result);
+        log.debug("CsceneFlowService.taskList end. result:{}", result);
         return result;
     }
 
@@ -317,7 +349,12 @@ public class CsceneFlowService {
         List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByCondition(request);
         List<String> taskIds = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(flowTaskTaskModels)) {
-            taskIds = flowTaskTaskModels.stream().map(FlowTaskTaskModel::getId).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModels) {
+                String id = flowTaskTaskModel.getId();
+                list.add(id);
+            }
+            taskIds = list;
         }
 
         return ResultCommon.success(taskIds);
@@ -330,13 +367,13 @@ public class CsceneFlowService {
      * @return
      */
     public QueryFlowTaskConfResponse queryConfByTaskId(String taskId) {
-        log.info("CsceneFlowService.queryConfByTaskId begin. taskId:{}", taskId);
+        log.debug("CsceneFlowService.queryConfByTaskId begin. taskId:{}", taskId);
         QueryFlowTaskConfResponse result = new QueryFlowTaskConfResponse();
         FlowTaskConfModel flowTaskConfModel = flowTaskConfService.findByTaskId(taskId);
         BeanUtils.copyProperties(flowTaskConfModel, result);
         FlowTaskConf flowTaskConf = JsonCommon.parse(flowTaskConfModel.getConf(), FlowTaskConf.class);
         result.setFlowTaskConf(flowTaskConf);
-        log.info("CsceneFlowService.queryConfByTaskId end. result:{}", result);
+        log.debug("CsceneFlowService.queryConfByTaskId end. result:{}", result);
         return result;
     }
 
@@ -347,13 +384,13 @@ public class CsceneFlowService {
      * @return
      */
     public FlowSummary queryFlowSummary(String id) {
-        log.info("CsceneFlowService.queryFlowSummary begin. id:{}", id);
+        log.debug("CsceneFlowService.queryFlowSummary begin. id:{}", id);
         String sceneId = csceneInstanceService.getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
         }
         FlowSummary flowSummary = flowTaskRecordService.queryFlowSummary(sceneId);
-        log.info("CsceneFlowService.queryFlowSummary end. flowSummary:{}", flowSummary);
+        log.debug("CsceneFlowService.queryFlowSummary end. flowSummary:{}", flowSummary);
         return flowSummary;
     }
 
@@ -364,7 +401,7 @@ public class CsceneFlowService {
      * @return
      */
     public List<FlowNodeTxBps> top5NodeTxBps(String id) {
-        log.info("CsceneFlowService.top5NodeTxBps begin. id:{}", id);
+        log.debug("CsceneFlowService.top5NodeTxBps begin. id:{}", id);
         String sceneId = csceneInstanceService.getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
@@ -373,7 +410,7 @@ public class CsceneFlowService {
         if (CollectionUtils.isNotEmpty(flowNodeTxBpsList) && flowNodeTxBpsList.size() > 5) {
             flowNodeTxBpsList = flowNodeTxBpsList.subList(0, 5);
         }
-        log.info("CsceneFlowService.top5NodeTxBps end. flowNodeTxBpsList:{}", flowNodeTxBpsList);
+        log.debug("CsceneFlowService.top5NodeTxBps end. flowNodeTxBpsList:{}", flowNodeTxBpsList);
         return flowNodeTxBpsList;
     }
 
@@ -384,7 +421,7 @@ public class CsceneFlowService {
      * @return
      */
     public ArrayNode top5Protocols(String id) {
-        log.info("CsceneFlowService.top5Protocols begin. id:{}", id);
+        log.debug("CsceneFlowService.top5Protocols begin. id:{}", id);
         ArrayNode protocols = JsonCommon.createArrayNode();
         String sceneId = csceneInstanceService.getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
@@ -415,7 +452,7 @@ public class CsceneFlowService {
                 }
             }
         }
-        log.info("CsceneFlowService.top5Protocols end. protocols:{}", protocols);
+        log.debug("CsceneFlowService.top5Protocols end. protocols:{}", protocols);
         return protocols;
     }
 
@@ -426,13 +463,13 @@ public class CsceneFlowService {
      * @return
      */
     public FlowStatisticsInfo flowStatistics(String id) {
-        log.info("CsceneFlowService.flowStatistics begin. id:{}", id);
+        log.debug("CsceneFlowService.flowStatistics begin. id:{}", id);
         String sceneId = csceneInstanceService.getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
         }
         FlowStatisticsInfo flowStatisticsInfo = flowTaskRecordService.flowStatistics(sceneId);
-        log.info("CsceneFlowService.flowStatistics end. flowStatisticsInfo:{}", flowStatisticsInfo);
+        log.debug("CsceneFlowService.flowStatistics end. flowStatisticsInfo:{}", flowStatisticsInfo);
         return flowStatisticsInfo;
     }
 
@@ -443,7 +480,7 @@ public class CsceneFlowService {
      * @return
      */
     public FlowStatisticsAll flowStatisticsAll(String id) {
-        log.info("CsceneFlowService.flowStatisticsAll begin. id:{}", id);
+        log.debug("CsceneFlowService.flowStatisticsAll begin. id:{}", id);
         String sceneId = csceneInstanceService.getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
@@ -454,7 +491,7 @@ public class CsceneFlowService {
         flowStatisticsAll.setTop5NodeTxBpsList(this.top5NodeTxBps(id));
         flowStatisticsAll.setTop5Protocols(this.top5Protocols(id));
         flowStatisticsAll.setTotalRateList(this.totalRate(id));
-        log.info("CsceneFlowService.flowStatisticsAll end. flowStatisticsAll:{}", flowStatisticsAll);
+        log.debug("CsceneFlowService.flowStatisticsAll end. flowStatisticsAll:{}", flowStatisticsAll);
         return flowStatisticsAll;
     }
 
@@ -464,9 +501,9 @@ public class CsceneFlowService {
      * @param taskId
      */
     public void startTask(String taskId) {
-        log.info("CsceneFlowService.startTask begin. taskId:{}", taskId);
+        log.debug("CsceneFlowService.startTask begin. taskId:{}", taskId);
         asyncPlatFlowTaskService.startTask(taskId, null);
-        log.info("CsceneFlowService.startTask end.");
+        log.debug("CsceneFlowService.startTask end.");
     }
 
     /**
@@ -475,9 +512,9 @@ public class CsceneFlowService {
      * @param taskIds
      */
     public void batchStartTasks(List<String> taskIds) {
-        log.info("CsceneFlowService.batchStartTasks begin. taskIds:{}", taskIds);
+        log.debug("CsceneFlowService.batchStartTasks begin. taskIds:{}", taskIds);
         asyncPlatFlowTaskService.batchStartTasks(taskIds, null);
-        log.info("CsceneFlowService.batchStartTasks end.");
+        log.debug("CsceneFlowService.batchStartTasks end.");
     }
 
     /**
@@ -486,9 +523,9 @@ public class CsceneFlowService {
      * @param taskId
      */
     public void stopTask(String taskId) {
-        log.info("CsceneFlowService.stopTask begin. taskId:{}", taskId);
+        log.debug("CsceneFlowService.stopTask begin. taskId:{}", taskId);
         asyncPlatFlowTaskService.stopTask(taskId);
-        log.info("CsceneFlowService.stopTask end.");
+        log.debug("CsceneFlowService.stopTask end.");
     }
 
     /**
@@ -497,9 +534,9 @@ public class CsceneFlowService {
      * @param taskIds
      */
     public void batchStopTasks(List<String> taskIds) {
-        log.info("CsceneFlowService.batchStopTasks begin. taskIds:{}", taskIds);
+        log.debug("CsceneFlowService.batchStopTasks begin. taskIds:{}", taskIds);
         asyncPlatFlowTaskService.batchStopTasks(taskIds);
-        log.info("CsceneFlowService.batchStopTasks end.");
+        log.debug("CsceneFlowService.batchStopTasks end.");
     }
 
     /**
@@ -509,27 +546,45 @@ public class CsceneFlowService {
      * @return
      */
     public List<FlowTaskNode> nodeOption(String id) {
-        log.info("CsceneFlowService.nodeOption begin. id:{}", id);
-        var sceneId = csceneInstanceService.getSceneId(id);
+        log.debug("CsceneFlowService.nodeOption begin. id:{}", id);
+        String sceneId = csceneInstanceService.getSceneId(id);
         List<FlowTaskNode> nodeList = flowTaskTaskService.nodeList(sceneId);
 
         if (CollectionUtils.isNotEmpty(nodeList)) {
-            String[] nodeIds = nodeList.stream().map(FlowTaskNode::getNodeId).distinct().toArray(String[]::new);
+            List<String> list = new ArrayList<>();
+            Set<String> uniqueValues = new HashSet<>();
+            for (FlowTaskNode flowTaskNode : nodeList) {
+                String nodeId = flowTaskNode.getNodeId();
+                if (uniqueValues.add(nodeId)) {
+                    list.add(nodeId);
+                }
+            }
+            String[] nodeIds = list.toArray(new String[0]);
             List<SceneElementModel> sceneElementModelList = csceneInstanceService.listCsceneInstanceNodes(sceneId, nodeIds, SceneElementModel::getNodeId, SceneElementModel::getName);
             if (CollectionUtils.isNotEmpty(sceneElementModelList)) {
-                Map<String, String> nodeIdAndNameMap = sceneElementModelList.stream().collect(Collectors.toMap(SceneElementModel::getNodeId, SceneElementModel::getName, (a, b) -> a));
-                nodeList.forEach(node -> {
+                Map<String, String> nodeIdAndNameMap = new HashMap<>();
+                for (SceneElementModel sceneElementModel : sceneElementModelList) {
+                    nodeIdAndNameMap.putIfAbsent(sceneElementModel.getNodeId(), sceneElementModel.getName());
+                }
+                for (FlowTaskNode node : nodeList) {
                     String realNodeName = nodeIdAndNameMap.get(node.getNodeId());
                     if (StringUtils.isNotBlank(realNodeName)) {
                         node.setNodeName(realNodeName);
                     }
-                });
+                }
             }
         }
 
-        nodeList = nodeList.stream().distinct().collect(Collectors.toList());
+        List<FlowTaskNode> list = new ArrayList<>();
+        Set<FlowTaskNode> uniqueValues = new HashSet<>();
+        for (FlowTaskNode flowTaskNode : nodeList) {
+            if (uniqueValues.add(flowTaskNode)) {
+                list.add(flowTaskNode);
+            }
+        }
+        nodeList = list;
 
-        log.info("CsceneFlowService.nodeOption end. nodeList:{}", nodeList);
+        log.debug("CsceneFlowService.nodeOption end. nodeList:{}", nodeList);
         return nodeList;
     }
 
@@ -539,8 +594,8 @@ public class CsceneFlowService {
      * @return
      */
     public List<FlowStatisticsDetail> totalRate(String id) {
-        log.info("CsceneFlowService.totalRate begin. id:{}", id);
-        var sceneId = csceneInstanceService.getSceneId(id);
+        log.debug("CsceneFlowService.totalRate begin. id:{}", id);
+        String sceneId = csceneInstanceService.getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
         }
@@ -556,13 +611,21 @@ public class CsceneFlowService {
         List<String> portIds = new ArrayList<>();
         CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         Map<String, SceneElementPortBO> portMap = sceneHandler.getElementPortMap();
-        portMap.forEach((key, value) -> {
-            if (cloudPluginHandler.getPort(value.getId()) != null && StringUtils.isNotEmpty(cloudPluginHandler.getPort(value.getId()).getResourceId())) {
-                portIds.add(cloudPluginHandler.getPort(value.getId()).getResourceId());
+        for (Map.Entry<String, SceneElementPortBO> entry : portMap.entrySet()) {
+            String key = entry.getKey();
+            SceneElementPortBO v = entry.getValue();
+            if (cloudPluginHandler.getPort(v.getId()) != null && StringUtils.isNotEmpty(cloudPluginHandler.getPort(v.getId()).getResourceId())) {
+                portIds.add(cloudPluginHandler.getPort(v.getId()).getResourceId());
             }
-        });
+        }
         if (CollectionUtils.isNotEmpty(portIds) && totalSecond > 0) {
-            List<String> newPortIds = portIds.stream().distinct().collect(Collectors.toList());
+            List<String> newPortIds = new ArrayList<>();
+            Set<String> uniqueValues = new HashSet<>();
+            for (String portId : portIds) {
+                if (uniqueValues.add(portId)) {
+                    newPortIds.add(portId);
+                }
+            }
             NetworkFlowRateResult networkFlowRateResult = scenePluginCloudSceneService.networkFlowRate(newPortIds, totalSecond);
             if (networkFlowRateResult != null && networkFlowRateResult.getTimeInt() != null && CollectionUtils.isNotEmpty(networkFlowRateResult.getSumRateList())) {
                 Integer offsetValue = 0 - (networkFlowRateResult.getSumRateList().size() - 1) * networkFlowRateResult.getTimeInt();
@@ -576,7 +639,7 @@ public class CsceneFlowService {
                 }
             }
         }
-        log.info("CsceneFlowService.totalRate end. result:{}", result);
+        log.debug("CsceneFlowService.totalRate end. result:{}", result);
         return result;
     }
 
@@ -586,7 +649,7 @@ public class CsceneFlowService {
      * @return
      */
     private List<FlowStatisticalCondition> getRealTimeCondition() {
-        log.info("CsceneFlowService.getRealTimeCondition begin.");
+        log.debug("CsceneFlowService.getRealTimeCondition begin.");
         LocalDateTime endTime = LocalDateTime.now();
         LocalDateTime startTime = endTime.plusSeconds(-300);
         List<FlowStatisticalCondition> queryList = new ArrayList<FlowStatisticalCondition>();
@@ -601,16 +664,16 @@ public class CsceneFlowService {
             endTime = endTime.minusSeconds(5);
             offSet -= 10;
         }
-        log.info("CsceneFlowService.getRealTimeCondition end. queryList:{}", queryList);
+        log.debug("CsceneFlowService.getRealTimeCondition end. queryList:{}", queryList);
         return queryList;
     }
 
 
     private String getUsableIp(String networkId, SceneHandler sceneHandler) {
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        var elements = new ArrayList<>(pluginHandler.getElementMap().values());
+        ArrayList<CloudPluginSceneElementBO> elements = new ArrayList<>(pluginHandler.getElementMap().values());
         ConnectedNetworkBO findNet = null;
-        for (var e : elements) {
+        for (CloudPluginSceneElementBO e : elements) {
             List<ConnectedNetworkBO> nets = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(e.getDeriveNetworks())) {
                 nets.addAll(e.getDeriveNetworks());
@@ -619,7 +682,7 @@ public class CsceneFlowService {
                 nets.addAll(e.getAccessNetworks());
             }
             boolean finded = false;
-            for (var n : nets) {
+            for (ConnectedNetworkBO n : nets) {
                 if (networkId.equals(n.getNetwork().getResourceId())) {
                     finded = true;
                     findNet = n;
@@ -639,11 +702,14 @@ public class CsceneFlowService {
             if (CollectionUtils.isNotEmpty(findNet.getToPorts())) {
                 ports.addAll(findNet.getToPorts());
             }
-            var ips = ports.stream()
-                    .filter(p -> StringUtils.isNotEmpty(p.getIp()))
-                    .map(p -> p.getIp())
-                    .collect(Collectors.toList());
-            var allocateIp = IpUtils.newRandomIps(findNet.getNetwork().getCidr(), 1, ips, new ArrayList<>(), false);
+            List<String> ips = new ArrayList<>();
+            for (SceneElementPortBO p : ports) {
+                if (StringUtils.isNotEmpty(p.getIp())) {
+                    String ip = p.getIp();
+                    ips.add(ip);
+                }
+            }
+            List<String> allocateIp = IpUtils.newRandomIps(findNet.getNetwork().getCidr(), 1, ips, new ArrayList<>(), false);
             if (CollectionUtils.isNotEmpty(allocateIp)) {
                 return allocateIp.get(0);
             } else {

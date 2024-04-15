@@ -34,8 +34,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant.CPCLOUD_DEVICE;
@@ -68,7 +70,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
      */
     @Override
     public ListObjServiceResult<VirtualUsbVO> virtualUsbPage(VirtualUsbQueryParams queryParams) {
-        log.info("VirtualUsbServiceImpl.virtualUsbPage begin. queryParams:{}", queryParams);
+        log.debug("VirtualUsbServiceImpl.virtualUsbPage begin. queryParams:{}", queryParams);
         queryParams.ensure();
         StringBuffer clouldParams = new StringBuffer("?");
         clouldParams.append("limit=").append(queryParams.getPageSize()).append("&offset=").append(queryParams.getPage());
@@ -94,7 +96,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
             count = pageResult.getTotal();
             responseList = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), VirtualUsb.class);
         }
-        log.info("VirtualUsbServiceImpl.virtualUsbPage end. responseList:{}", responseList);
+        log.debug("VirtualUsbServiceImpl.virtualUsbPage end. responseList:{}", responseList);
         return new ListObjServiceResult(new ListObjResult<>(responseList, count)).asResult();
     }
 
@@ -105,12 +107,12 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
      */
     @Override
     public VirtualUsbVO findByUuid(String uuid) {
-        log.info("VirtualUsbServiceImpl.findByUuid begin. uuid:{}", uuid);
+        log.debug("VirtualUsbServiceImpl.findByUuid begin. uuid:{}", uuid);
         VirtualUsb virtualUsb = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + "/" + uuid, VirtualUsb.class);
         log.info(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + "/" + uuid + ". response: {}", virtualUsb);
         VirtualUsbVO virtualUsbVO = new VirtualUsbVO();
         BeanUtils.copyProperties(virtualUsb, virtualUsbVO);
-        log.info("VirtualUsbServiceImpl.findByUuid end. virtualUsbVO:{}", virtualUsbVO);
+        log.debug("VirtualUsbServiceImpl.findByUuid end. virtualUsbVO:{}", virtualUsbVO);
         return virtualUsbVO;
     }
 
@@ -120,7 +122,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
      */
     @Override
     public void add(VirtualUsbVO virtualUsbVO) {
-        log.info("VirtualUsbServiceImpl.add begin. virtualUsbVO:{}", virtualUsbVO);
+        log.debug("VirtualUsbServiceImpl.add begin. virtualUsbVO:{}", virtualUsbVO);
         StringBuffer clouldParams = new StringBuffer("?");
         clouldParams.append("limit=10").append("&offset=1");
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + clouldParams, CloudPlatformItemsPageResult.class);
@@ -133,7 +135,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         BeanUtils.copyProperties(virtualUsbVO, virtualUsb);
         BaseCloudPlatformResult result = super.sendPost(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB, JsonUtils.toUnderlineJSONString(virtualUsb), BaseCloudPlatformResult.class);
         super.checkResult(result);
-        log.info("VirtualUsbServiceImpl.add end.");
+        log.debug("VirtualUsbServiceImpl.add end.");
     }
 
     /**
@@ -142,12 +144,12 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
      */
     @Override
     public void update(VirtualUsbVO virtualUsbVO) {
-        log.info("VirtualUsbServiceImpl.update begin. virtualUsbVO:{}", virtualUsbVO);
+        log.debug("VirtualUsbServiceImpl.update begin. virtualUsbVO:{}", virtualUsbVO);
         VirtualUsb virtualUsb = new VirtualUsb();
         BeanUtils.copyProperties(virtualUsbVO, virtualUsb);
         BaseCloudPlatformResult result = super.sendPut(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + "/" + virtualUsbVO.getUuid(), JsonUtils.toUnderlineJSONString(virtualUsb), BaseCloudPlatformResult.class);
         super.checkResult(result);
-        log.info("VirtualUsbServiceImpl.update end.");
+        log.debug("VirtualUsbServiceImpl.update end.");
     }
 
     /**
@@ -156,17 +158,17 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
      */
     @Override
     public void delete(VirtualUsbDeleteRequest request) {
-        log.info("VirtualUsbServiceImpl.delete begin. request:{}", request);
+        log.debug("VirtualUsbServiceImpl.delete begin. request:{}", request);
         if (CollectionUtils.isEmpty(request.getUuids())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         this.validUsbCanDelete(request.getUuids());
-        var jsonObject = new JSONObject();
+        JSONObject jsonObject = new JSONObject();
         jsonObject.put("uuids", request.getUuids());
         BaseCloudPlatformResult result = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB, JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
         log.info(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + ". response: {}", result);
         super.checkResult(result);
-        log.info("VirtualUsbServiceImpl.delete end.");
+        log.debug("VirtualUsbServiceImpl.delete end.");
     }
 
     /**
@@ -176,10 +178,10 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
      */
     @Override
     public VirtualUsbStorage fileListByUuid(String uuid) {
-        log.info("VirtualUsbServiceImpl.fileListByUuid begin. uuid:{}", uuid);
+        log.debug("VirtualUsbServiceImpl.fileListByUuid begin. uuid:{}", uuid);
         VirtualUsbStorage virtualUsbStorage = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + "/" + uuid + "/files", VirtualUsbStorage.class);
         log.info(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + "/" + uuid + "/files" + ". response: {}", virtualUsbStorage);
-        log.info("VirtualUsbServiceImpl.fileListByUuid end. virtualUsbStorage:{}", virtualUsbStorage);
+        log.debug("VirtualUsbServiceImpl.fileListByUuid end. virtualUsbStorage:{}", virtualUsbStorage);
         return virtualUsbStorage;
     }
 
@@ -190,7 +192,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
      */
     @Override
     public BaseCloudPlatformResult upload(MultipartFile file, String uuid) {
-        log.info("VirtualUsbServiceImpl.upload begin. uuid:{}", uuid);
+        log.debug("VirtualUsbServiceImpl.upload begin. uuid:{}", uuid);
         List<File> fileList = null;
         try {
             fileList = FileUtils.transferToFileList(Collections.singletonList(file));
@@ -201,10 +203,12 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
             log.error("VirtualUsbServiceImpl.upload error",e);
         } finally {
             if (CollectionUtils.isNotEmpty(fileList)) {
-                fileList.forEach(File::delete);
+                for (File file1 : fileList) {
+                    file1.delete();
+                }
             }
         }
-        log.info("VirtualUsbServiceImpl.upload end.");
+        log.debug("VirtualUsbServiceImpl.upload end.");
         return null;
     }
 
@@ -215,14 +219,14 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
      */
     @Override
     public void deleteFile(String uuid, String fileName) {
-        log.info("VirtualUsbServiceImpl.deleteFile begin. uuid:{}, fileName:{}", uuid, fileName);
+        log.debug("VirtualUsbServiceImpl.deleteFile begin. uuid:{}, fileName:{}", uuid, fileName);
         if (StringUtils.isEmpty(uuid) || StringUtils.isEmpty(fileName)) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         BaseCloudPlatformResult result = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + "/" + uuid + "/file/" + fileName, null, BaseCloudPlatformResult.class);
         log.info(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + "/" + uuid + "/file/" + fileName + ". response: {}", result);
         super.checkResult(result);
-        log.info("VirtualUsbServiceImpl.deleteFile end.");
+        log.debug("VirtualUsbServiceImpl.deleteFile end.");
     }
 
     /**
@@ -231,14 +235,14 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
      */
     @Override
     public void deleteAllFiles(String uuid) {
-        log.info("VirtualUsbServiceImpl.deleteAllFiles begin. uuid:{}", uuid);
+        log.debug("VirtualUsbServiceImpl.deleteAllFiles begin. uuid:{}", uuid);
         if (StringUtils.isEmpty(uuid)) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         BaseCloudPlatformResult result = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + "/" + uuid + "/files", null, BaseCloudPlatformResult.class);
         log.info(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + "/" + uuid + "/files" + ". response: {}", result);
         super.checkResult(result);
-        log.info("VirtualUsbServiceImpl.deleteAllFiles end.");
+        log.debug("VirtualUsbServiceImpl.deleteAllFiles end.");
     }
 
     /**
@@ -249,10 +253,10 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
      */
     @Override
     public String downloadFile(String uuid, String fileName) {
-        log.info("VirtualUsbServiceImpl.downloadFile begin. uuid:{}", uuid);
+        log.debug("VirtualUsbServiceImpl.downloadFile begin. uuid:{}", uuid);
         VirtualUsbDownload virtualUsbDownload = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + "/" + uuid + "/file/" + fileName, VirtualUsbDownload.class);
         log.info(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + "/" + uuid + "/file/" + fileName + ". response: {}", virtualUsbDownload);
-        log.info("VirtualUsbServiceImpl.downloadFile end. virtualUsbDownload:{}", virtualUsbDownload);
+        log.debug("VirtualUsbServiceImpl.downloadFile end. virtualUsbDownload:{}", virtualUsbDownload);
         return virtualUsbDownload.getNginxFileUrl();
     }
 
@@ -268,21 +272,34 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
             List<DeviceReferCsceneStat> usedStateList = usedStateServiceResult.getSource();
             List<String> names = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(referStateList)) {
-                List<String> sceneNames = referStateList.stream()
-                        .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
-                        .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
-                        .collect(Collectors.toList());
+                List<String> sceneNames = new ArrayList<>();
+                for (DeviceReferCsceneStat deviceReferCsceneStat : referStateList) {
+                    if (StringUtils.isNotEmpty(deviceReferCsceneStat.getName())) {
+                        String name = deviceReferCsceneStat.getName();
+                        sceneNames.add(name);
+                    }
+                }
                 names.addAll(sceneNames);
             }
             if (CollectionUtils.isNotEmpty(usedStateList)) {
-                List<String> sceneNames = usedStateList.stream()
-                        .filter(deviceReferCsceneStat -> StringUtils.isNotEmpty(deviceReferCsceneStat.getName()))
-                        .map(deviceReferCsceneStat -> deviceReferCsceneStat.getName())
-                        .collect(Collectors.toList());
+                List<String> sceneNames = new ArrayList<>();
+                for (DeviceReferCsceneStat deviceReferCsceneStat : usedStateList) {
+                    if (StringUtils.isNotEmpty(deviceReferCsceneStat.getName())) {
+                        String name = deviceReferCsceneStat.getName();
+                        sceneNames.add(name);
+                    }
+                }
                 names.addAll(sceneNames);
             }
             if (CollectionUtils.isNotEmpty(names)) {
-                names = names.stream().distinct().collect(Collectors.toList());
+                List<String> list = new ArrayList<>();
+                Set<String> uniqueValues = new HashSet<>();
+                for (String name : names) {
+                    if (uniqueValues.add(name)) {
+                        list.add(name);
+                    }
+                }
+                names = list;
                 String sceneName = StringUtils.join(names, ",");
                 throw new MpRuntimeException(DevopsClusterErrorCode.USB_REFERENCED_SCENE.format(sceneName));
             }

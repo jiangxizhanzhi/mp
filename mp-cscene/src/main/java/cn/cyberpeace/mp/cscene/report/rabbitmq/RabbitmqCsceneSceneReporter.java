@@ -29,7 +29,7 @@ public class RabbitmqCsceneSceneReporter implements SceneReporter {
 
     @Override
     public void reportScene(CollectedSceneBO scene) {
-        var cscene = CollectedCsceneBO.fromCollectedSceneBO(scene);
+        CollectedCsceneBO cscene = CollectedCsceneBO.fromCollectedSceneBO(scene);
         cscene.setCsceneId(CsceneContextHolder.getCsceneInstanceId());
         cscene.setCallAction(CsceneContextHolder.getCallAction());
         log.debug("scene message, type :{}, content :{}, context:{}", MESSAGE_TYPE_SCENE, JsonCommon.stringify(cscene), JsonCommon.stringify(TransferContext.getContextMap()));
@@ -38,7 +38,7 @@ public class RabbitmqCsceneSceneReporter implements SceneReporter {
 
     @Override
     public void reportElement(CollectedSceneElementBO sceneElement) {
-        var csceneElement = CollectedCsceneElementBO.fromCollectedSceneElementBO(sceneElement);
+        CollectedCsceneElementBO csceneElement = CollectedCsceneElementBO.fromCollectedSceneElementBO(sceneElement);
         csceneElement.setCsceneId(CsceneContextHolder.getCsceneInstanceId());
         csceneElement.setCallAction(CsceneContextHolder.getCallAction());
         log.debug("scene message, type :{}, content :{}, context:{}", MESSAGE_TYPE_SCENE_ELEMENT, JsonCommon.stringify(csceneElement), JsonCommon.stringify(TransferContext.getContextMap()));

@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
 import cn.cyberpeace.mp.aggregation.dto.sceneimport.ImageExportRequest;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.ImageExportResult;
 import cn.cyberpeace.mp.aggregation.service.ImageResourceService;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -24,7 +26,8 @@ import javax.annotation.Resource;
 @Api(value = "镜像导入导出相关接口", tags = "镜像导入导出相关接口")
 @Slf4j
 @RestController
-    @RequestMapping(ControllerConstant.BASE_API_PATH + "/images")
+@RequestMapping(ControllerConstant.BASE_API_PATH + "/images")
+@AuthTarget(TargetEnum.ADMIN)
 public class ImageResourceController {
     @Resource
     private ImageResourceService imageResourceService;

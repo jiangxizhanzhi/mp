@@ -182,14 +182,14 @@ mp:
       #      es-ip: ${LOG_ES_IP:10.100.7.1}
       #      es-port: ${LOG_ES_PORT:9205}
       #      es-max-page-size: ${ES_MAX_PAGESIZE:10000}
-      #      log-db: ${MP_DEVOPS_LOG_DB:sql} #日志存储数据库可以配置：es、sql
+      #      log-db: ${MP_DEVOPS_LOG_DB:sql}
       #      dynamic-level-keeping: ${DYNAMIC_LEVEL_KEEPING:true} #动态日志级别保持
     exclude-urls: ${DEVOPS_LOG_EXCLUDE_URLS:/login}
     exclude-methods: ${DEVOPS_LOG_EXCLUDE_METHODS:OPTIONS}
     es-nodes: ${mp.log.ext-var.es-ip}:${mp.log.ext-var.es-port}
     cp-url: http://${mp.common.ext-var.cp-ip}:11111 #云平台地址
     mp-ip: ${mp.common.ext-var.mp-ip}    # MP中台API地址
-    log-db: ${mp.log.ext-var.log-db} #日志存储数据库可以配置：es、sql
+    log-db: ${mp.log.ext-var.log-db} #日志存储数据库可以配置：sql
     es-max-page-size: ${mp.log.ext-var.es-max-page-size}
     dynamic-level-keeping: ${mp.log.ext-var.dynamic-level-keeping} #动态日志级别保持
     dynamic-level-only-root: ${mp.log.ext-var.dynamic-level-only-root}

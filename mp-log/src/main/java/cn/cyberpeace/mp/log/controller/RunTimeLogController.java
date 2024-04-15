@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.log.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -40,6 +42,7 @@ import java.util.List;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/runtime_log")
 @Api(value = "日志模块", tags = "日志模块")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.SYSTEM_LOG)
 public class RunTimeLogController {
 
     private final RuntimeLogService runTimeLogService;
@@ -69,7 +72,7 @@ public class RunTimeLogController {
             throw new MpRuntimeException(LogErrorCode.DOWNLOAD_LOG_FILE_ERROR);
         }
 
-        var httpHeaders = new HttpHeaders();
+        HttpHeaders httpHeaders = new HttpHeaders();
 
         httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         response.setHeader("Content-Disposition", "attachment; filename=" + bo.getDownLoadFileName());

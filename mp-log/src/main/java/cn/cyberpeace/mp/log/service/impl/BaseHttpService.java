@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.log.service.impl;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.log.model.BaseModel;
-import cn.cyberpeace.mp.log.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -69,7 +69,7 @@ public class BaseHttpService {
             log.info(POST_LOG_INFO, url, body, result);
         }
 
-        T model = JsonUtils.toSnakeObject(result, valueType);
+        T model = JsonCommon.snakeParse(result, valueType);
         return model;
     }
 }

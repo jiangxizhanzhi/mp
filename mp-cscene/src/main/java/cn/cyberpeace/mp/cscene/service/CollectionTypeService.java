@@ -51,7 +51,9 @@ public class CollectionTypeService {
         types.add(logEvent("02", CollectionType.TYPE_LOG_EVENT));
         types.add(customCollect("03", CollectionType.TYPE_CUSTOM_COLLECT));
 
-        types.forEach(type -> processCollectionType(type));
+        for (CollectionType type : types) {
+            processCollectionType(type);
+        }
         return types;
     }
 
@@ -65,7 +67,13 @@ public class CollectionTypeService {
         List<String> ruleIdsByCatagories = new ArrayList<>();
         Map<String, String> ruleId2File = scenePluginCollectionSceneService.getRuleId2FileByCodes(appRequest.getCatagories()).getSource();
         if (CollectionUtils.isNotEmpty(ruleId2File.keySet())) {
-            List<String> ruleIds = ruleId2File.keySet().stream().distinct().collect(Collectors.toList());
+            List<String> ruleIds = new ArrayList<>();
+            Set<String> uniqueValues = new HashSet<>();
+            for (String s : ruleId2File.keySet()) {
+                if (uniqueValues.add(s)) {
+                    ruleIds.add(s);
+                }
+            }
             ruleIdsByCatagories.addAll(ruleIds);
         }
 
@@ -75,7 +83,7 @@ public class CollectionTypeService {
             wazuhEventRequest.setStartTime(appRequest.getStartTime());
         } else {
             String translateSceneId = csceneCommonService.translateSceneId(appRequest.getSceneId());
-            var sceneHandler = new SceneHandler(translateSceneId, null, false, null);
+            SceneHandler sceneHandler = new SceneHandler(translateSceneId, null, false, null);
             wazuhEventRequest.setStartTime(sceneHandler.getScene().getCreateTime());
         }
         wazuhEventRequest.setEndTime(Optional.ofNullable(appRequest.getEndTime()).orElse(LocalDateTime.now()));
@@ -89,7 +97,13 @@ public class CollectionTypeService {
         // 根据ruleIdsByCatagories筛选一道
         List<String> filteredRuleIds = null;
         if (CollectionUtil.isNotEmpty(ruleIdsByCatagories)) {
-            filteredRuleIds = ruleIdsByAgentName.stream().filter(rid -> ruleIdsByCatagories.contains(rid)).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (String rid : ruleIdsByAgentName) {
+                if (ruleIdsByCatagories.contains(rid)) {
+                    list.add(rid);
+                }
+            }
+            filteredRuleIds = list;
         } else {
             filteredRuleIds = ruleIdsByAgentName;
         }
@@ -98,19 +112,32 @@ public class CollectionTypeService {
         Map<String, String> ruleId2FileMap = result.getSource();
         Set<String> ruleFiles = new HashSet(ruleId2FileMap.values());
         log.info("ruleFiles:{}", ruleFiles);
-        List<CollectionApp> apps = ruleFiles.stream().sorted().map(r -> {
-            ServiceResult<String> appNameResult = scenePluginCollectionSceneService.ruleFile2AppName(r);
-            String appName = appNameResult.getSource();
-            CollectionApp app = null;
-            if (StringUtils.isNotBlank(appName)) {
-                app = new CollectionApp();
-                app.setName(appName);
+        List<String> toSort = new ArrayList<>();
+        for (String r : ruleFiles) {
+            toSort.add(r);
+        }
+        toSort.sort(null);
+        List<CollectionApp> apps = new ArrayList<>();
+        for (String r : toSort) {
+            CollectionApp collectionApp = getCollectionApp(r);
+            if (collectionApp != null) {
+                apps.add(collectionApp);
             }
-            return app;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        }
 
         log.info("apps:{}", apps);
         return apps;
+    }
+
+    private CollectionApp getCollectionApp(String r) {
+        ServiceResult<String> appNameResult = scenePluginCollectionSceneService.ruleFile2AppName(r);
+        String appName = appNameResult.getSource();
+        CollectionApp app = null;
+        if (StringUtils.isNotBlank(appName)) {
+            app = new CollectionApp();
+            app.setName(appName);
+        }
+        return app;
     }
 
     /**
@@ -253,11 +280,11 @@ public class CollectionTypeService {
         if (CollectionUtils.isEmpty(type.getChildren())) {
             return;
         }
-        type.getChildren().forEach(t -> {
+        for (CollectionType t : type.getChildren()) {
             String key = String.format(SituationBase18nCode.COLLECTION_TYPE_PARENT_I18N_CODE_PREFIX, t.getCode());
             String childrenName = MessageCommonUtil.convertMessage(key);
             t.setName(childrenName);
             processCollectionTypeChildren(t);
-        });
+        }
     }
 }

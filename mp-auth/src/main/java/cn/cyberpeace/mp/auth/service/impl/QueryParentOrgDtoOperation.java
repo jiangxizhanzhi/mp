@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.service.OrgDtoOperation;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class QueryParentOrgDtoOperation implements OrgDtoOperation<OrgDto> {
             return orgDto;
         }
 
-        var objSrvResult = orgService.get(orgDto.getParent());
+        ObjServiceResult<OrgModel> objSrvResult = orgService.get(orgDto.getParent());
         ObjResult<OrgModel> result = objSrvResult.getSource();
         if (result != null) {
             OrgModel parentOrgModel = result.getObj();

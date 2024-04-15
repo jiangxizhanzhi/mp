@@ -90,7 +90,11 @@ public class EventMonitorService {
         List<String> translatedSceneIds = csceneCommonService.translateSceneIds(sceneIds);
         List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0)).getSource();
 
-        List<String> agentNames = elementBOs.stream().map(SceneElementBO::getEid).collect(Collectors.toList());
+        List<String> agentNames = new ArrayList<>();
+        for (SceneElementBO elementBO : elementBOs) {
+            String eid = elementBO.getEid();
+            agentNames.add(eid);
+        }
 
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         wazuhEventRequest.setAgentNames(agentNames);
@@ -126,10 +130,23 @@ public class EventMonitorService {
 
         List<ElementEventPercent> eventPercents = new ArrayList<>();
         List<ElementEventPercent> finalEventPercents = eventPercents;
-        Long sum = aggsMap.values().stream().mapToLong(Long::longValue).sum();
+        long result = 0L;
+        for (Long aLong : aggsMap.values()) {
+            long longValue = aLong.longValue();
+            result += longValue;
+        }
+        Long sum = result;
         Long finalSum = sum + connsCnt;;
-        aggsMap.forEach((agentName, count) -> {
-            Optional<SceneElementBO> elementBOOptional = elementBOs.stream().filter(e -> e.getEid().equals(agentName)).findFirst();
+        for (Map.Entry<String, Long> entry : aggsMap.entrySet()) {
+            String agentName = entry.getKey();
+            Long count = entry.getValue();
+            Optional<SceneElementBO> elementBOOptional = Optional.empty();
+            for (SceneElementBO e : elementBOs) {
+                if (e.getEid().equals(agentName)) {
+                    elementBOOptional = Optional.of(e);
+                    break;
+                }
+            }
 
             if (elementBOOptional.isPresent()) {
                 String nodeId = elementBOOptional.get().getId();
@@ -140,10 +157,15 @@ public class EventMonitorService {
                 ElementEventPercent eventPercent = new ElementEventPercent(nodeId, nodeName, percent, count, request.getType());
                 finalEventPercents.add(eventPercent);
             }
-        });
+        }
 
         log.info("before {}", eventPercents);
-        eventPercents = eventPercents.stream().sorted(Comparator.comparing(ElementEventPercent::getPercent).reversed()).collect(Collectors.toList());
+        List<ElementEventPercent> list = new ArrayList<>();
+        for (ElementEventPercent eventPercent : eventPercents) {
+            list.add(eventPercent);
+        }
+        list.sort(Comparator.comparing(ElementEventPercent::getPercent).reversed());
+        eventPercents = list;
         log.info("{}", eventPercents);
         return eventPercents;
     }
@@ -168,10 +190,30 @@ public class EventMonitorService {
         Map<String, Long> aggsNetConnsMap = aggNetConnsCount(agentNames);
         Map<String, Long> aggsUserChangeMap = aggUserChangeCount(agentNames);
 
-        Long processSum = aggsProcessesMap.values().stream().mapToLong(Long::longValue).sum();
-        Long portSum = aggsPortsMap.values().stream().mapToLong(Long::longValue).sum();
-        Long netConnsSum = aggsNetConnsMap.values().stream().mapToLong(Long::longValue).sum();
-        Long netSysUserSum = aggsUserChangeMap.values().stream().mapToLong(Long::longValue).sum();
+        long sum2 = 0L;
+        for (Long aLong3 : aggsProcessesMap.values()) {
+            long longValue1 = aLong3.longValue();
+            sum2 += longValue1;
+        }
+        Long processSum = sum2;
+        long result1 = 0L;
+        for (Long aLong2 : aggsPortsMap.values()) {
+            long l = aLong2.longValue();
+            result1 += l;
+        }
+        Long portSum = result1;
+        long sum1 = 0L;
+        for (Long aLong1 : aggsNetConnsMap.values()) {
+            long value = aLong1.longValue();
+            sum1 += value;
+        }
+        Long netConnsSum = sum1;
+        long result = 0L;
+        for (Long aLong : aggsUserChangeMap.values()) {
+            long longValue = aLong.longValue();
+            result += longValue;
+        }
+        Long netSysUserSum = result;
 
         Long sum = sumFromEs + processSum + portSum + netConnsSum;
 
@@ -247,13 +289,15 @@ public class EventMonitorService {
      */
     private Map<String, Long> aggProcessCount(List<String> agentNames) {
         Map<String, Long> map = new LinkedHashMap<>();
-        agentNames.forEach(a -> map.put(a, 0L));
+        for (String a : agentNames) {
+            map.put(a, 0L);
+        }
 
-        agentNames.forEach(agentName -> {
+        for (String agentName : agentNames) {
             WazuhMonitorEventsRequest wazuhRequest = buildWazuhMonitorEventsRequest(agentName);
             int sum = dataCollectionService.sumProcessesChangedCountByTimeRange(wazuhRequest);
             map.put(agentName, Long.valueOf(sum));
-        });
+        }
         return map;
     }
 
@@ -267,15 +311,17 @@ public class EventMonitorService {
      */
     private Map<String, Long> aggPortCount(List<String> agentNames) {
         Map<String, Long> map = new LinkedHashMap<>();
-        agentNames.forEach(a -> map.put(a, 0L));
+        for (String a : agentNames) {
+            map.put(a, 0L);
+        }
 
-        agentNames.forEach(agentName -> {
+        for (String agentName : agentNames) {
             if (StringUtils.isNotBlank(agentName)) {
                 WazuhMonitorEventsRequest wazuhRequest = buildWazuhMonitorEventsRequest(agentName);
                 int sum = dataCollectionService.sumNetConnsChangedCountByTimeRange(wazuhRequest);
                 map.put(agentName, Long.valueOf(sum));
             }
-        });
+        }
         return map;
     }
 
@@ -288,15 +334,17 @@ public class EventMonitorService {
      */
     private Map<String, Long> aggNetConnsCount(List<String> agentNames) {
         Map<String, Long> map = new LinkedHashMap<>();
-        agentNames.forEach(a -> map.put(a, 0L));
+        for (String a : agentNames) {
+            map.put(a, 0L);
+        }
 
-        agentNames.forEach(agentName -> {
+        for (String agentName : agentNames) {
             if (StringUtils.isNotBlank(agentName)) {
                 WazuhMonitorEventsRequest wazuhRequest = buildWazuhMonitorEventsRequest(agentName);
                 int sum = dataCollectionService.sumNetConnsChangedCountByTimeRange(wazuhRequest);
                 map.put(agentName, Long.valueOf(sum));
             }
-        });
+        }
         return map;
     }
 
@@ -307,13 +355,15 @@ public class EventMonitorService {
      */
     private Map<String, Long> aggUserChangeCount(List<String> agentNames) {
         Map<String, Long> map = new LinkedHashMap<>();
-        agentNames.forEach(a -> map.put(a, 0L));
+        for (String a : agentNames) {
+            map.put(a, 0L);
+        }
 
-        agentNames.forEach(agentName -> {
+        for (String agentName : agentNames) {
             WazuhMonitorEventsRequest wazuhRequest = buildWazuhMonitorEventsRequest(agentName);
             int sum = dataCollectionService.sumSysUsersChangedCountByTimeRange(wazuhRequest);
             map.put(agentName, Long.valueOf(sum));
-        });
+        }
         return map;
     }
 

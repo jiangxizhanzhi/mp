@@ -3,20 +3,17 @@ package cn.cyberpeace.mp.scenepluginflow.plugin.flow;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.base.util.thread.ThreadUtils;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
 import cn.cyberpeace.mp.flow.bo.BatchStartTaskBO;
 import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
 import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
-import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
 import cn.cyberpeace.mp.flow.response.FlowRecordsResponse;
 import cn.cyberpeace.mp.flow.service.FlowActuatorService;
 import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
 import cn.cyberpeace.mp.flow.service.impl.AsyncPlatFlowTaskService;
 import cn.cyberpeace.mp.flow.service.impl.FlowTaskServiceImpl;
-import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -26,7 +23,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 @Data
 @Component
@@ -64,7 +60,7 @@ public class FlowExecutor {
 
     public String createFlow(String executorId, String targetNetId, String nodeId, String flowId, String fromIps, String toIps,
                              Integer delay, Integer count, Integer interval, Flow flow, String instanceIp) {
-        var addFlowTaskRequest = new AddFlowTaskRequest();
+        AddFlowTaskRequest addFlowTaskRequest = new AddFlowTaskRequest();
         addFlowTaskRequest.setActuatorId(executorId);
         addFlowTaskRequest.setNetworkId(targetNetId);
         addFlowTaskRequest.setFlowId(flowId);
@@ -104,7 +100,7 @@ public class FlowExecutor {
         addFlowTaskRequest.setDelay(delay == null ? DEFAULT_INSTANCE.getDelay() : delay);
         addFlowTaskRequest.setCount(count == null ? DEFAULT_INSTANCE.getCount() : delay);
         addFlowTaskRequest.setIntervalTime(interval == null ? DEFAULT_INSTANCE.getIntervalTime() : interval);
-        var result = flowService3.addFlowTask(addFlowTaskRequest);
+        ServiceResult<FlowTaskModel> result = flowService3.addFlowTask(addFlowTaskRequest);
         if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
@@ -118,7 +114,7 @@ public class FlowExecutor {
     public AddFlowTaskRequest buildFlowTaskRequest(String executorId, String targetNetId, String flowId, String fromIps,
                                                    String toIps, Integer delay, Integer count, Integer interval,
                                                    Flow flow, String instanceIp, String sourceIp, String nodeId) {
-        var addFlowTaskRequest = new AddFlowTaskRequest();
+        AddFlowTaskRequest addFlowTaskRequest = new AddFlowTaskRequest();
         addFlowTaskRequest.setActuatorId(executorId);
         addFlowTaskRequest.setNetworkId(targetNetId);
         addFlowTaskRequest.setFlowId(flowId);
@@ -162,10 +158,8 @@ public class FlowExecutor {
         return addFlowTaskRequest;
     }
 
-    public void startFlow(String taskId, Runnable stopCallback, Consumer<String> errorCallback, String sourceIp) {
-        FlowCacheUtil.taskRunnableCache.put(FlowCacheUtil.RUNNABLE_PREFIX + taskId, ThreadUtils.format(stopCallback));
-        FlowCacheUtil.taskConsumerCache.put(FlowCacheUtil.CONSUMER_PREFIX + taskId, errorCallback);
-        var result = flowService1.startTask(taskId, sourceIp);
+    public void startFlow(String taskId, String sourceIp) {
+        ServiceResult<Boolean> result = flowService1.startTask(taskId, sourceIp);
 //        var result = flowService3.actuator(taskId, TaskActionEnum.START.toValue(), stopCallback, errorCallback);
         if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
@@ -174,19 +168,14 @@ public class FlowExecutor {
 
     public void stopFlow(String taskId) {
 //        var result = flowService3.actuator(taskId, TaskActionEnum.STOP.toValue(), null, null);
-        var result = flowService1.stopTask(taskId);
+        ServiceResult<Boolean> result = flowService1.stopTask(taskId);
         if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
     }
 
-    public void startFlows(BatchStartTaskBO batchStartTaskBO, Consumer<BatchActuatorCallbackResponse> callbackConsumer, int runType) {
-//        BatchActuatorTaskRequest request = new BatchActuatorTaskRequest();
-//        request.setTaskIds(taskIds);
-//        request.setRunType(runType);
-//        request.setTaskAction(TaskActionEnum.START.toValue());
-//        request.setCallbackConsumer(callbackConsumer);
-        var result = flowService1.batchStartTasks(null, batchStartTaskBO);
+    public void startFlows(BatchStartTaskBO batchStartTaskBO) {
+        ServiceResult<Boolean> result = flowService1.batchStartTasks(null, batchStartTaskBO);
         if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
@@ -196,14 +185,14 @@ public class FlowExecutor {
 //        BatchActuatorTaskRequest request = new BatchActuatorTaskRequest();
 //        request.setTaskAction(TaskActionEnum.STOP.toValue());
 //        request.setTaskIds(taskIds);
-        var result = flowService1.batchStopTasks(taskIds);
+        ServiceResult<Boolean> result = flowService1.batchStopTasks(taskIds);
         if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
     }
 
     public void deleteFlow(String taskId) {
-        var result = flowService3.deleteFlowTask(taskId);
+        ServiceResult<Boolean> result = flowService3.deleteFlowTask(taskId);
         if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }

@@ -12,7 +12,10 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
-import cn.cyberpeace.mp.auth.model.*;
+import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.TenantUserModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
@@ -26,12 +29,12 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Aggregation;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
@@ -52,10 +55,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -161,7 +164,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         HumanCondition condition = new HumanCondition();
         condition.filterIn(UserModel::getId, ids.toArray());
         List<UserModel> userModels = getModelMapper().list(condition);
-        userModels.forEach(this::setDefaultIfNoAvatar);
+        for (UserModel userModel : userModels) {
+            setDefaultIfNoAvatar(userModel);
+        }
         return userModels;
     }
 
@@ -215,13 +220,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             List<LocalFileMappingModel> mappingModelList =
                     DefaultImgUtil.listByGroups(Collections.singletonList(DefaultImgDirEnum.AVATAR.getGroup()));
             String defaultAvatar = getDefaultUserAvatar();
-            userBos.forEach(userDto -> {
+            for (UserBo userDto : userBos) {
                 if (StringUtils.isEmpty(userDto.getAvatar())) {
                     userDto.setAvatar(defaultAvatar);
                 }
                 String path = DefaultImgUtil.pickPathToFdfsUrl(userDto.getAvatar(), mappingModelList);
                 userDto.setAvatar(path);
-            });
+            }
         }
     }
 
@@ -247,7 +252,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
         List<UserModel> users = listObjSrvResult.getSource().getObjs();
-        users.stream().forEach(userModel -> setDefaultIfNoAvatar(userModel));
+        for (UserModel userModel : users) {
+            setDefaultIfNoAvatar(userModel);
+        }
         if (CollectionUtils.isNotEmpty(users)) {
             // 转换
             ListObjServiceResult<UserModel> result = new ListObjServiceResult<>();
@@ -277,30 +284,34 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             obj.setIdentifier(null);
         }
         obj.setUpdateTime(LocalDateTime.now());
-        var ret = super.update(obj, fields);
+        ObjServiceResult<UserModel> ret = super.update(obj, fields);
         userCacheService.evictAllUserCache();
         return ret;
     }
 
     @Override
     public ServiceResult<Integer> bulkCreate(List<UserModel> objs) {
-        objs.forEach(UserModel::encodePassword);
+        for (UserModel obj : objs) {
+            obj.encodePassword();
+        }
 
-        var ret = super.bulkCreate(objs);
+        ServiceResult<Integer> ret = super.bulkCreate(objs);
         userCacheService.evictAllUserCache();
         return ret;
     }
 
     @Override
     public ServiceResult<Integer> bulkCreateWithPasswordPreSet(List<UserModel> objs) {
-        var ret = super.bulkCreate(objs);
+        ServiceResult<Integer> ret = super.bulkCreate(objs);
         return ret;
     }
 
     @Override
     public ServiceResult<Integer> bulkUpdate(List<UserModel> objs) {
-        objs.forEach(UserModel::encodePassword);
-        var ret = super.bulkUpdate(objs);
+        for (UserModel obj : objs) {
+            obj.encodePassword();
+        }
+        ServiceResult<Integer> ret = super.bulkUpdate(objs);
         userCacheService.evictAllUserCache();
         return ret;
     }
@@ -315,7 +326,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
         deleteReleated(userId);
 
-        var ret = super.delete(userId);
+        ServiceResult<Boolean> ret = super.delete(userId);
         if (Objects.nonNull(ret.getSource()) && ret.getSource()) {
             userCacheService.evictAllUserCache();
             messageSender.send(Collections.singletonList(userId), AuthConstant.MSG_TYPE_USER_DELETE, AuthConstant.ROUTING_KEY_USER_DELETE, null);
@@ -335,7 +346,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             deleteReleated(userId);
         }
 
-        var ret = super.bulkDelete(userIds);
+        ServiceResult<Integer> ret = super.bulkDelete(userIds);
         if (Objects.nonNull(ret.getSource()) && ret.getSource() > 0) {
             userCacheService.evictAllUserCache();
             messageSender.send(userIds, AuthConstant.MSG_TYPE_USER_DELETE, AuthConstant.ROUTING_KEY_USER_DELETE, null);
@@ -349,11 +360,57 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         ParamCheck.notNull(createRequest, AuthBasei18nCode.REQUEST_PARAMS);
         opUserPermCheckService.checkByTargetRoleIds(createRequest.getRoleIds());
 
+        UserModel userCreated = upsertUserModel(createRequest);
+        String userId = userCreated.getId();
+        log.info("user create success id:{}", userId);
+
+        // 保存组织-用户关系
+        saveUserOrgRelation(createRequest.getOrgIds(), userId);
+        // 保存角色-用户关系
+        saveUserRoleRelation(createRequest.getRoleIds(), userId);
+
+        userCacheService.evictAllUserCache();
+        return userCreated;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public UserModel modify(UserRequest modifyRequest) {
+        if (!opUserPermCheckService.isOperateSelf(Arrays.asList(modifyRequest.getId()))) {
+            // 如果操作的对象不是自己，则进行权限校验
+            opUserPermCheckService.checkByTargetRoleIds(modifyRequest.getRoleIds());
+        }
+
+        UserModel userModified = upsertUserModel(modifyRequest);
+        String userId = userModified.getId();
+
+        saveUserOrgRelation(modifyRequest.getOrgIds(), userId);
+        saveUserRoleRelation(modifyRequest.getRoleIds(), userId);
+
+        userCacheService.evictAllUserCache();
+        messageSender.send(Collections.singletonList(userId), AuthConstant.MSG_TYPE_USER_MODIFY, AuthConstant.ROUTING_KEY_USER_MODIFY, null);
+        return userModified;
+    }
+
+    private UserModel upsertUserModel(UserModel userModel) {
+        if (StringUtils.isNotBlank(userModel.getId())) {
+            UserModel existUser = super.getModelMapper().get(userModel.getId());
+            if (Objects.nonNull(existUser)) {
+                return updateExistUser(userModel);
+            } else {
+                return saveNewUser(userModel);
+            }
+        } else {
+            return saveNewUser(userModel);
+        }
+    }
+
+    private UserModel saveNewUser(UserModel inputUserModel) {
         // 保存用户
         UserModel userModel = new UserModel();
-        BeanUtils.copyProperties(createRequest, userModel);
+        BeanUtils.copyProperties(inputUserModel, userModel);
 
-        String decryptedPwd = PasswordUtils.desDecrypt(createRequest.getPassword());
+        String decryptedPwd = PasswordUtils.desDecrypt(inputUserModel.getPassword());
         userModel.setPassword(decryptedPwd);
         userModel.setTokenSecret(null);
         userModel.setId(null);
@@ -368,60 +425,19 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         createCheckService.check(userModel);
 
         // create中会对密码加密，外层不需要再次加密
-        userModel.setDelayRemindLicenseTime(BeanCommon.getBean(ExpireRemindDateGetter.class).get());
         ObjServiceResult<UserModel> result = create(userModel);
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.USER_ADD_ERROR);
 
-        UserModel userCreated = result.getSource().getObj();
-        String userId = userCreated.getId();
-        log.info("user create success id:{}", userId);
-
-        // 保存组织-用户关系
-        if (CollectionUtils.isNotEmpty(createRequest.getOrgIds())) {
-            createRequest.getOrgIds().forEach(id -> {
-                boolean isOrgExist = orgService.exists(id);
-                if (!isOrgExist) {
-                    log.error("org id:{} not existed!", id);
-                    throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(id));
-                }
-                TenantUserModel tenantUserModel = TenantUserModel.builder().user(userId).org(id).build();
-                var re = tenantUserService.create(tenantUserModel);
-                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
-            });
-        }
-
-        // 保存角色-用户关系
-        if (CollectionUtils.isNotEmpty(createRequest.getRoleIds())) {
-            createRequest.getRoleIds().forEach(id -> {
-                boolean isRoleExist = roleService.exists(id);
-                if (!isRoleExist) {
-                    log.error("role id:{} not existed!", id);
-                    throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED.format(id));
-                }
-                UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
-                var re = userRoleService.create(userRoleModel);
-                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
-            });
-        }
-
-        userCacheService.evictAllUserCache();
-        return userModel;
+        return result.getSource().getObj();
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public UserModel modify(UserRequest modifyRequest) {
-        if (!opUserPermCheckService.isOperateSelf(Arrays.asList(modifyRequest.getId()))) {
-            // 如果操作的对象不是自己，则进行权限校验
-            opUserPermCheckService.checkByTargetRoleIds(modifyRequest.getRoleIds());
-        }
-
+    private UserModel updateExistUser(UserModel inputUserModel) {
         // 保存用户
         UserModel userModel = new UserModel();
-        org.springframework.beans.BeanUtils.copyProperties(modifyRequest, userModel);
+        org.springframework.beans.BeanUtils.copyProperties(inputUserModel, userModel);
 
-        if (StringUtils.isNotBlank(modifyRequest.getPassword())) {
-            String decryptedPwd = PasswordUtils.desDecrypt(modifyRequest.getPassword());
+        if (StringUtils.isNotBlank(inputUserModel.getPassword())) {
+            String decryptedPwd = PasswordUtils.desDecrypt(inputUserModel.getPassword());
             userModel.setPassword(decryptedPwd);
         } else {
             userModel.setPassword(null);
@@ -444,15 +460,37 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
         }
 
-        UserModel userModified = result.getSource().getObj();
-        String userId = userModified.getId();
+        return result.getSource().getObj();
+    }
+
+
+    private void saveUserRoleRelation(List<String> roleIds, String userId) {
+        // 保存角色-用户关系
+        if (CollectionUtils.isNotEmpty(roleIds)) {
+            // 清除原来所有用户关联的角色
+            userRoleService.deleteByUserId(userId);
+
+            roleIds.forEach(id -> {
+                boolean isRoleExist = roleService.exists(id);
+                if (!isRoleExist) {
+                    log.error("role id:{} not existed!", id);
+                    throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED.format(id));
+                }
+                UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
+                var re = userRoleService.create(userRoleModel);
+                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
+            });
+        }
+    }
+
+    private void saveUserOrgRelation(List<String> orgIds, String userId) {
 
         // 保存组织-用户关系
-        if (CollectionUtils.isNotEmpty(modifyRequest.getOrgIds())) {
+        if (CollectionUtils.isNotEmpty(orgIds)) {
             // 清除原来所有用户关联的组织
             tenantUserService.deleteByUserId(userId);
 
-            modifyRequest.getOrgIds().forEach(id -> {
+            orgIds.forEach(id -> {
                 boolean isOrgExist = orgService.exists(id);
                 if (!isOrgExist) {
                     log.error("org id:{} not existed!", id);
@@ -464,28 +502,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             });
         }
 
-
-        // 保存角色-用户关系
-        if (CollectionUtils.isNotEmpty(modifyRequest.getRoleIds())) {
-            // 清除原来所有用户关联的角色
-            userRoleService.deleteByUserId(userId);
-
-            modifyRequest.getRoleIds().forEach(id -> {
-                boolean isRoleExist = roleService.exists(id);
-                if (!isRoleExist) {
-                    log.error("role id:{} not existed!", id);
-                    throw new MpRuntimeException(AuthErrorCode.ROLE_NOT_EXISTED.format(id));
-                }
-                UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
-                var re = userRoleService.create(userRoleModel);
-                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
-            });
-        }
-
-        userCacheService.evictAllUserCache();
-        messageSender.send(Collections.singletonList(userId), AuthConstant.MSG_TYPE_USER_MODIFY, AuthConstant.ROUTING_KEY_USER_MODIFY, null);
-        return userModel;
     }
+
 
     @Override
     @Cacheable(value = CACHE_VAL_USERMODEL_BY_USERNAME)
@@ -511,7 +529,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public boolean resetSelfPwd(String oldPwd, String newPwd) {
-        var currentUser = UserUtils.getLoginUser();
+        UserModel currentUser = UserUtils.getLoginUser();
         if (Objects.isNull(currentUser)) {
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_LOGIN);
         }
@@ -543,7 +561,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
 
-        var source = get(userId).getSource();
+        ObjResult<UserModel> source = get(userId).getSource();
         UserModel user = Objects.isNull(source) ? null : source.getObj();
         if (Objects.isNull(user)) {
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
@@ -772,7 +790,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             // http://10.10.10.10/biz/bug-view-4861.html
             // 2. 保存用户-角色关系 之前的步骤已经处理过roleIdList了
             if (CollectionUtils.isNotEmpty(importUserBo.getRoleIdList())) {
-                List<UserRoleModel> userRoles = importUserBo.getRoleIdList().stream().map(rid -> UserRoleModel.builder().user(userId).role(rid).build()).collect(Collectors.toList());
+                List<UserRoleModel> userRoles = new ArrayList<>();
+                for (String rid : importUserBo.getRoleIdList()) {
+                    UserRoleModel build = UserRoleModel.builder().user(userId).role(rid).build();
+                    userRoles.add(build);
+                }
                 if (CollectionUtils.isNotEmpty(userRoles)) {
                     userRoleModels.addAll(userRoles);
                 }
@@ -781,7 +803,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             // 3. 保存组织-用户关系
             // http://10.10.10.10/biz/bug-view-4861.html
             if (CollectionUtils.isNotEmpty(importUserBo.getOrgIdList())) {
-                List<TenantUserModel> orgUsers = importUserBo.getOrgIdList().stream().map(oid -> TenantUserModel.builder().user(userId).org(oid).build()).collect(Collectors.toList());
+                List<TenantUserModel> orgUsers = new ArrayList<>();
+                for (String oid : importUserBo.getOrgIdList()) {
+                    TenantUserModel build = TenantUserModel.builder().user(userId).org(oid).build();
+                    orgUsers.add(build);
+                }
                 if (CollectionUtils.isNotEmpty(orgUsers)) {
                     tenantUserModels.addAll(orgUsers);
                 }
@@ -794,13 +820,25 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public List<ExportUserBo> exportExcel(List<UserModel> users) {
-        List<ExportUserBo> exportUserBoList = users.stream().map(this::user2ExportUser).filter(Objects::nonNull).collect(Collectors.toList());
+        List<ExportUserBo> exportUserBoList = new ArrayList<>();
+        for (UserModel user : users) {
+            ExportUserBo exportUserBo = user2ExportUser(user);
+            if (exportUserBo != null) {
+                exportUserBoList.add(exportUserBo);
+            }
+        }
         return exportUserBoList;
     }
 
     @Override
     public List<ExportUserEnBo> exportExcelEn(List<UserModel> users) {
-        List<ExportUserEnBo> exportUserList = users.stream().map(this::user2ExportUserEn).filter(Objects::nonNull).collect(Collectors.toList());
+        List<ExportUserEnBo> exportUserList = new ArrayList<>();
+        for (UserModel user : users) {
+            ExportUserEnBo exportUserEnBo = user2ExportUserEn(user);
+            if (exportUserEnBo != null) {
+                exportUserList.add(exportUserEnBo);
+            }
+        }
         return exportUserList;
     }
 
@@ -825,7 +863,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             if (StringUtils.isNotBlank(filepath)) {
                 String httpUrl = FsCommon.genHttpUrl(filepath);
                 UserModel updateUser = UserModel.builder().id(userId).avatar(httpUrl).build();
-                var ret = getModelMapper().update(updateUser);
+                boolean ret = getModelMapper().update(updateUser);
                 userCacheService.evictAllUserCache();
                 return ret;
             } else {
@@ -886,15 +924,25 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             return Collections.emptyList();
         }
         List<OrgBO> allOrgs = orgService.listAll(AuthConstant.DEFAULT_TENANT);
-        Map<String, OrgBO> orgMap = allOrgs.stream().collect(Collectors.toMap(OrgBO::getId, org -> org));
+        Map<String, OrgBO> orgMap = new HashMap<>();
+        for (OrgBO org : allOrgs) {
+            if (orgMap.put(org.getId(), org) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
         Set<String> roleIds = new HashSet<>();
-        userOrgRoleBos.forEach(user -> {
-            if(StringUtils.isNotBlank(user.getRoles())){
+        for (UserOrgRoleBo user : userOrgRoleBos) {
+            if (StringUtils.isNotBlank(user.getRoles())) {
                 roleIds.addAll(Arrays.asList(user.getRoles().split(",")));
             }
-        });
+        }
         List<RoleModel> allRoles = roleService.listByIds(roleIds);
-        Map<String,RoleModel> roleMap = allRoles.stream().collect(Collectors.toMap(RoleModel::getId, role->role));
+        Map<String, RoleModel> roleMap = new HashMap<>();
+        for (RoleModel role : allRoles) {
+            if (roleMap.put(role.getId(), role) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
 
         List<UserBo> userBos = new ArrayList<>();
         for (UserOrgRoleBo userOrgRoleBo : userOrgRoleBos) {
@@ -905,8 +953,16 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             if (StringUtils.isNotBlank(userOrgRoleBo.getOrgs())) {
                 List<String> userOrgIds = Arrays.asList(userOrgRoleBo.getOrgs().split(","));
-                List<OrgBO> userOrgModels = userOrgIds.stream().map(orgMap::get).collect(Collectors.toList());
-                List<List<String>> allorgpath = userOrgModels.stream().map(o -> Arrays.asList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
+                List<OrgBO> userOrgModels = new ArrayList<>();
+                for (String userOrgId : userOrgIds) {
+                    OrgBO orgBO = orgMap.get(userOrgId);
+                    userOrgModels.add(orgBO);
+                }
+                List<List<String>> allorgpath = new ArrayList<>();
+                for (OrgBO o : userOrgModels) {
+                    List<String> list = Arrays.asList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR));
+                    allorgpath.add(list);
+                }
                 userBo.setOrgs(userOrgModels);
                 userBo.setOrgIds(userOrgIds);
                 userBo.setOrgpaths(allorgpath);
@@ -918,10 +974,20 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             if (StringUtils.isNotBlank(userOrgRoleBo.getRoles())) {
                 List<String> userRoleIds = Arrays.asList(userOrgRoleBo.getRoles().split(","));
-                List<RoleModel> userRoleModels = userRoleIds.stream().map(roleMap::get).collect(Collectors.toList());
+                List<RoleModel> userRoleModels = new ArrayList<>();
+                for (String userRoleId : userRoleIds) {
+                    RoleModel roleModel = roleMap.get(userRoleId);
+                    userRoleModels.add(roleModel);
+                }
                 userBo.setRoles(userRoleModels);
 
-                boolean isAdmin = userRoleIds.stream().anyMatch(rid -> Objects.equals(rid, AuthConstant.ROLE_ADMIN_ID));
+                boolean isAdmin = false;
+                for (String rid : userRoleIds) {
+                    if (Objects.equals(rid, AuthConstant.ROLE_ADMIN_ID)) {
+                        isAdmin = true;
+                        break;
+                    }
+                }
                 boolean isSuperUser = Objects.equals(userOrgRoleBo.getId(), AuthConstant.ROOT_USER_ID);
 
                 processIsAdminSuperUser(userBo, isAdmin, isSuperUser);
@@ -948,10 +1014,18 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         if (needOrg) {
             List<OrgBO> orgBOS = tenantUserService.listOrgsByUserId(userModel.getId());
-            List<String> orgIds = orgBOS.stream().map(BaseModel::getId).collect(Collectors.toList());
+            List<String> orgIds = new ArrayList<>();
+            for (OrgBO orgBO : orgBOS) {
+                String id = orgBO.getId();
+                orgIds.add(id);
+            }
 
             //List<List<String>> allorgpath = orgService.getBathPathToList(orgs);
-            List<List<String>> allorgpath = orgBOS.stream().map(o -> Arrays.asList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
+            List<List<String>> allorgpath = new ArrayList<>();
+            for (OrgBO o : orgBOS) {
+                List<String> list = Arrays.asList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR));
+                allorgpath.add(list);
+            }
             userBo.setOrgs(orgBOS);
             userBo.setOrgIds(orgIds);
             userBo.setOrgpaths(allorgpath);
@@ -962,7 +1036,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
             userBo.setRoles(roles);
 
-            boolean isAdmin = roles.stream().anyMatch(r -> Objects.equals(r.getId(), AuthConstant.ROLE_ADMIN_ID));
+            boolean isAdmin = false;
+            for (RoleModel r : roles) {
+                if (Objects.equals(r.getId(), AuthConstant.ROLE_ADMIN_ID)) {
+                    isAdmin = true;
+                    break;
+                }
+            }
             boolean isSuperUser = Objects.equals(userModel.getId(), AuthConstant.ROOT_USER_ID);
 
             processIsAdminSuperUser(userBo, isAdmin, isSuperUser);
@@ -981,7 +1061,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public List<UserModel> listNotAudited() {
         List<UserModel> userModels = getModelMapper().list(new HumanCondition().filterEqual("is_audited", "0"));
-        userModels.stream().forEach(userModel -> setDefaultIfNoAvatar(userModel));
+        for (UserModel userModel : userModels) {
+            setDefaultIfNoAvatar(userModel);
+        }
         return userModels;
     }
 
@@ -989,7 +1071,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public List<UserBo> listByUserIds(String[] userIds) {
         List<UserOrgRoleBo> userOrgRoleBos = getByUserIds(userIds);
         List<UserBo> userBos = userOrgRoleDtos2UserDtos(userOrgRoleBos);
-        userBos.stream().forEach(userDto -> setDefaultIfNoAvatar(userDto));
+        for (UserBo userDto : userBos) {
+            setDefaultIfNoAvatar(userDto);
+        }
         return userBos;
     }
 
@@ -1037,7 +1121,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                         .password(importUserBo.getPassword())
                         .build();
         if (StringUtils.isNotBlank(importUserBo.getExpiredTime())) {
-            var expDate = TimeUtils.stringToLocalDate(importUserBo.getExpiredTime());
+            LocalDate expDate = TimeUtils.stringToLocalDate(importUserBo.getExpiredTime());
             userModel.setExpiredTime(expDate.atTime(23, 59, 59));
         }
         if (StringUtils.isNotBlank(importUserBo.getDescription())) {
@@ -1056,7 +1140,16 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // org path
         List<OrgBO> orgList = tenantUserService.listOrgsByUserId(user.getId());
         // 调整为跟前端逻辑一样，如果存在多个组织，则选择主键最大的一个
-        Optional<OrgBO> optional = orgList.stream().max(Comparator.comparing(OrgBO::getPk));
+        boolean seen = false;
+        OrgBO best = null;
+        Comparator<OrgBO> comparator = Comparator.comparing(OrgBO::getPk);
+        for (OrgBO orgBO : orgList) {
+            if (!seen || comparator.compare(orgBO, best) > 0) {
+                seen = true;
+                best = orgBO;
+            }
+        }
+        Optional<OrgBO> optional = seen ? Optional.of(best) : Optional.empty();
         optional.ifPresent(o -> exportUserBo.setOrg(orgService.getPath(o)));
 
         String statusNormal = MessageCommon.get(AuthBasei18nCode.USER_STATUS_NORMAL);
@@ -1082,7 +1175,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         // role
         List<RoleModel> roleList = userRoleService.listByUserId(user.getId());
-        String roles = roleList.stream().map(RoleModel::getName).collect(Collectors.joining("/"));
+        StringJoiner joiner = new StringJoiner("/");
+        for (RoleModel roleModel : roleList) {
+            String name = roleModel.getName();
+            joiner.add(name);
+        }
+        String roles = joiner.toString();
         log.info("roles:{}", roles);
         exportUserBo.setRoles(roles);
 
@@ -1171,7 +1269,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         condition.setLimit(limit);
         List<UserModel> list = getModelMapper().list(condition);
         if (CollectionUtils.isNotEmpty(list)) {
-            return list.stream().map(UserModel::getUsername).collect(Collectors.toList());
+            List<String> result = new ArrayList<>();
+            for (UserModel userModel : list) {
+                String username = userModel.getUsername();
+                result.add(username);
+            }
+            return result;
         }
         return new ArrayList<>();
     }
@@ -1189,7 +1292,7 @@ class GroupConcat extends Aggregation<GroupConcat> {
     }
 
     public static GroupConcat f(String fieldName) {
-        var aggregation = new GroupConcat();
+        GroupConcat aggregation = new GroupConcat();
         aggregation.setFieldName(fieldName);
         return aggregation;
     }

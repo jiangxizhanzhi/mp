@@ -56,7 +56,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
                 log.error("Parse login data from request error: {}", e.getMessage());
                 return null;
             }
-            var authRequest = processAuthRequest(loginData, request, response);
+            UsernamePasswordAuthenticationToken authRequest = processAuthRequest(loginData, request, response);
             // 认证
             return getAuthenticationManager().authenticate(authRequest);
         } else {
@@ -122,7 +122,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
         }
 
         username = username.trim();
-        var authRequest = new UsernamePasswordAuthenticationToken(username, originPwd);
+        UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(username, originPwd);
         setDetails(request, authRequest);
         return authRequest;
     }

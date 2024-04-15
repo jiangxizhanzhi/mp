@@ -13,11 +13,13 @@ public interface SnakeHttpParam extends HttpParam {
 
     static String toPathString(Object httpParam) {
         Map<String, Object> map = new HashMap<>();
-        BeanUtils.getMap(httpParam).forEach((fieldName, fieldValue) -> {
-            if(!Objects.isNull(fieldValue)){
+        for (Map.Entry<String, Object> entry : BeanUtils.getMap(httpParam).entrySet()) {
+            String fieldName = entry.getKey();
+            Object fieldValue = entry.getValue();
+            if (!Objects.isNull(fieldValue)) {
                 map.put(TextUtils.humpToLine(fieldName), fieldValue);
             }
-        });
+        }
         return URLUtil.buildQuery(map, StandardCharsets.UTF_8);
     }
 

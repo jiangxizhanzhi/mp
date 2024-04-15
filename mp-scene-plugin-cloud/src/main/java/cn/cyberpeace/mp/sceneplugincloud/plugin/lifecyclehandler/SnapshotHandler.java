@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementSnapshotBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
@@ -13,6 +14,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeviceSnapshotParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeviceSnapshotResultData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotResultData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.ResumeTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.SnapshotAddressUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -77,7 +79,7 @@ public class SnapshotHandler extends HandlerCommon {
     private void snapshot(CloudPluginSceneElementBO element, String snapshotId, String snapshotName, String description) {
         // 调用云平台接口 snapshot
         Map<String, Object> extInfo = Collections.singletonMap("sceneId", getPluginHandler().getSourceSceneId());
-        var result = virtualMachine.snapshot(element.getResourceId(), element.getImage(),
+        SnapshotResultData result = virtualMachine.snapshot(element.getResourceId(), element.getImage(),
                 element.getImageUuid(), snapshotName, description, extInfo);
         SceneElementSnapshotBO snapshotBO = new SceneElementSnapshotBO();
         snapshotBO.setId(snapshotId);
@@ -87,10 +89,10 @@ public class SnapshotHandler extends HandlerCommon {
         snapshotBO.setDescription(description);
         element.setImage(result.getImageName());
         getPluginHandler().updateElements(element.getSrcElement().getId());
-        var model = snapshotBO.toModel();
+        SceneElementSnapshotModel model = snapshotBO.toModel();
         model.setScene(getPluginHandler().getSourceSceneId());
         model.setSceneElement(element.getSrcElement().getId());
-        var snapshotMapper = BeanCommon.getBean(SceneElementSnapshotMapper.class);
+        SceneElementSnapshotMapper snapshotMapper = BeanCommon.getBean(SceneElementSnapshotMapper.class);
         snapshotMapper.create(model);
         this.setSnapshotNum(element);
     }
@@ -100,7 +102,7 @@ public class SnapshotHandler extends HandlerCommon {
             try {
                 DeviceSnapshotParam param = new DeviceSnapshotParam();
                 param.setDeviceUuid(element.getImageUuid());
-                var result = remote.getHttpClient().get(CloudUrlConstant.DEVICE_SNAPSHOT, param, DeviceSnapshotResultData.class);
+                DeviceSnapshotResultData result = remote.getHttpClient().get(CloudUrlConstant.DEVICE_SNAPSHOT, param, DeviceSnapshotResultData.class);
                 if (result.getItems() != null) {
                     element.setImageSnapshotNum(result.getItems().size());
                 }

@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.message.FormatMessage;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.report.bo.CollectedCsceneBO;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH)
 @Data
+@AuthTarget(TargetEnum.NO_AUTH)
 public class CsceneReporterController {
 
     @Data

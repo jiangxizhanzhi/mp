@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.BoolUtils;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -19,7 +18,6 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
-import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
@@ -48,6 +46,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.UnpauseHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudScenePluginModelHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 import cn.cyberpeace.mp.sceneplugincloud.util.TopoReformUtils;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
@@ -64,15 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
-
-@ClassFieldClasses({
-        CloudPluginSceneBO.class,
-        CloudPluginSceneElementBO.class,
-        CloudPluginSceneElementPortBO.class,
-        CloudScenePluginContext.class,
-})
 @Component
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
 @Data
@@ -163,14 +154,14 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         allElements.forEach(e -> {
             if (e.getSrcElement().getPorts() != null && e.getSrcElement().getPorts().size() > 0) {
                 e.getSrcElement().getPorts().forEach(p -> {
-                    var pluginPort = this.getPort(p.getId());
-                    var to = getHandlerUtils().getPortConnectedOpaqueSrcPort(p.getId());
+                    CloudPluginSceneElementPortBO pluginPort = this.getPort(p.getId());
+                    SceneElementPortBO to = getHandlerUtils().getPortConnectedOpaqueSrcPort(p.getId());
                     if (pluginPort != null) {
                         if (StringUtils.isNotEmpty(pluginPort.getLogicNetworkId())) {
                             if (e.getSrcElement().getType() == BaseSceneElementModel.Type.TERMINAL) {
                                 // 终端特殊处理一下 如果对端已经有网络 优先加入对端网络
                                 if (to != null) {
-                                    var pluginToPort = this.getPort(to.getId());
+                                    CloudPluginSceneElementPortBO pluginToPort = this.getPort(to.getId());
                                     if (StringUtils.isNotEmpty(pluginToPort.getLogicNetworkId())) {
                                         if (networkBOMap.containsKey(pluginToPort.getLogicNetworkId())) {
                                             ConnectedNetworkBO connectedNetworkBO = new ConnectedNetworkBO(networkBOMap.get(pluginToPort.getLogicNetworkId()).getNetwork(), getHandlerUtils());
@@ -193,7 +184,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                             }
                         } else if (to != null) {
                             // 未构建网络看对端端口
-                            var pluginToPort = this.getPort(to.getId());
+                            CloudPluginSceneElementPortBO pluginToPort = this.getPort(to.getId());
                             if (StringUtils.isNotEmpty(pluginToPort.getLogicNetworkId())) {
                                 if (networkBOMap.containsKey(pluginToPort.getLogicNetworkId())) {
                                     ConnectedNetworkBO connectedNetworkBO = new ConnectedNetworkBO(networkBOMap.get(pluginToPort.getLogicNetworkId()).getNetwork(), getHandlerUtils());
@@ -249,7 +240,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     public void createElementNetworks() {
         List<ConnectedNetworkBO> networks = new ArrayList<>();
         getElementMap().values().forEach(e -> {
-            for (var net : e.getDeriveNetworks()) {
+            for (ConnectedNetworkBO net : e.getDeriveNetworks()) {
                 if (!getHandlerUtils().getCreatedNetworks().contains(net.getNetwork().getId())) {
                     networks.add(net);
                 }
@@ -351,6 +342,10 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             element.setImage(image);
         }
         new RecreateHandler(this, getSceneHandler().getScene().getEvent()).recreateElement(element);
+
+        // 后处理，刷新场景缓存
+        String sceneId = getSceneHandler().getSceneId();
+        SceneInstanceLinkCacheUtil.refresh(sceneId);
     }
 
     @Override
@@ -360,22 +355,22 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
         }
         if (getElement(nodeId).getSrcElement().getType() == BaseSceneElementModel.Type.TERMINAL) {
-            var newElement = getElement(nodeId).getSrcElement();
-            var originElement = originHandler.getElement(nodeId);
+            SceneElementBO newElement = getElement(nodeId).getSrcElement();
+            SceneElementBO originElement = originHandler.getElement(nodeId);
             Map<String, SceneElementPortBO> portId2Port = new HashMap<>();
             CloudScenePluginHandler originHandlerPluginHandler = originHandler.getPluginHandler(PluginConstant.PLUGIN_KEY) ;
             if (CollectionUtils.isNotEmpty(originElement.getPorts())) {
-                for (var p : originElement.getPorts()) {
+                for (SceneElementPortBO p : originElement.getPorts()) {
                     portId2Port.put(p.getId(), p);
                 }
             }
             if (CollectionUtils.isNotEmpty(newElement.getPorts())) {
-                for (var p : newElement.getPorts()) {
+                for (SceneElementPortBO p : newElement.getPorts()) {
                     if (StringUtils.isEmpty(p.getIp())) {
                         if (portId2Port.containsKey(p.getId())) {
-                            var net = originHandlerPluginHandler.getHandlerUtils().getNetworkByPort(p);
+                            CloudPluginSceneElementNetworkBO net = originHandlerPluginHandler.getHandlerUtils().getNetworkByPort(p);
                             if (net != null) {
-                                var ip = IpUtils.newRandomIps(net.getCidr(), 1, Arrays.asList(portId2Port.get(p.getId()).getIp()), net.getAllocationPools(), net.getDhcp());
+                                List<String> ip = IpUtils.newRandomIps(net.getCidr(), 1, Arrays.asList(portId2Port.get(p.getId()).getIp()), net.getAllocationPools(), net.getDhcp());
                                 p.setIp(ip.get(0));
                             }
                         }
@@ -472,38 +467,10 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new SnapshotHandler(this, getSceneHandler().getScene().getEvent()).snapshotElement(element, snapshotId, snapshotName, description);
     }
 
-    public List<String> allocateOuterIps(String auxiliaryNetworkNodeId, int count) {
-        var auxiliaryNetworkCloudElement = getElement(auxiliaryNetworkNodeId);
-        var cidr = auxiliaryNetworkCloudElement.getAuxiliaryNetworkCidr();
-        if (StringUtils.isEmpty(cidr)) {
-            return new ArrayList<>();
-        }
-
-        var portIds = handlerUtils.getAuxiliaryNetworkCloudElementPortIds(auxiliaryNetworkCloudElement);
-        Set<String> existIps = new HashSet<>(handlerUtils.getOuterExistIps(auxiliaryNetworkCloudElement));
-        if (!StringUtils.isEmpty(auxiliaryNetworkCloudElement.getAuxiliaryNetworkRouterIp())) {
-            existIps.add(auxiliaryNetworkCloudElement.getAuxiliaryNetworkRouterIp());
-        }
-        if (portIds != null && !portIds.isEmpty()) {
-            portIds.forEach(portId -> {
-                var port = getSceneHandler().getPort(portId);
-                if (StringUtils.isNotEmpty(port.getIp())) {
-                    existIps.add(port.getIp());
-                }
-            });
-        }
-
-        var ips = IpUtils.newRandomIps(cidr, count, new ArrayList<>(existIps),
-                auxiliaryNetworkCloudElement.getAllocationPools(),
-                BoolUtils.bool(auxiliaryNetworkCloudElement.getAuxiliaryNetworkDhcp()));
-        handlerUtils.addOuterExistIps(auxiliaryNetworkCloudElement, ips);
-        return ips;
-    }
-
     @Override
     public ScenePluginDataBO toData() {
         getElementPortMap().forEach((portId, cloudPort) -> {
-            var auxiliaryNetworkCloudElement = handlerUtils.getPortAuxiliaryNetworkCloudElement(portId);
+            CloudPluginSceneElementBO auxiliaryNetworkCloudElement = handlerUtils.getPortAuxiliaryNetworkCloudElement(portId);
             if (auxiliaryNetworkCloudElement != null && auxiliaryNetworkCloudElement.getRole() != null && auxiliaryNetworkCloudElement.getRole().equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)) {
                 cloudPort.setConnToExtNet(true);
             } else {
@@ -516,17 +483,20 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     @Override
     public void reformTopo() {
         TopoReformUtils topoReformUtils = new TopoReformUtils(this);
-        var coreRouters = getElementMap().values().stream()
-                .filter(e -> ElementTypeUtils.isCoreRouter(e))
-                .collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> coreRouters = new ArrayList<>();
+        for (CloudPluginSceneElementBO e : getElementMap().values()) {
+            if (ElementTypeUtils.isCoreRouter(e)) {
+                coreRouters.add(e);
+            }
+        }
         if (CollectionUtils.isNotEmpty(coreRouters)) {
             // 存在核心路由器 需要新增一个隐藏的交换机节点
-            var hiddenSwitch = topoReformUtils.addAuxiliarySwitchNode();
+            TopoReformUtils.ElementWrapper hiddenSwitch = topoReformUtils.addAuxiliarySwitchNode();
             coreRouters.forEach(c -> {
                 // 交换机新增一个端口
-                var switchPort = topoReformUtils.addAuxiliaryPort(hiddenSwitch.getPluginElement());
+                TopoReformUtils.PortWrapper switchPort = topoReformUtils.addAuxiliaryPort(hiddenSwitch.getPluginElement());
                 // 核心路由器新增一个端口 端口默认有telnet接入方式
-                var coreRouterPort = topoReformUtils.addAuxiliaryPort(c);
+                TopoReformUtils.PortWrapper coreRouterPort = topoReformUtils.addAuxiliaryPort(c);
                 topoReformUtils.addAuxiliaryAccessMode(coreRouterPort.getPluginPort(), AccessMode.Protocol.TELNET);
                 // 交换机和核心路由器新增一根连线
                 topoReformUtils.addConnect(switchPort.getScenePort(), coreRouterPort.getScenePort());
@@ -582,9 +552,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             getElementMap().forEach((id, element) -> {
                 if (CollectionUtils.isNotEmpty(element.getSrcElement().getPorts())) {
                     element.getSrcElement().getPorts().forEach(p -> {
-                        var connectedElement = getPortConnectedSrcElement(p.getId());
+                        SceneElementBO connectedElement = getPortConnectedSrcElement(p.getId());
                         if (connectedElement != null) {
-                            var connectCloudElement = getElement(connectedElement.getId());
+                            CloudPluginSceneElementBO connectCloudElement = getElement(connectedElement.getId());
                             if (connectCloudElement.getRole() != null &&
                                     BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK == connectCloudElement.getRole()) {
                                 if (CollectionUtils.isNotEmpty(p.getAccessModes())) {
@@ -599,7 +569,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                                             }
                                         }
                                     });
-                                    var cloudPort = getPort(p.getId());
+                                    CloudPluginSceneElementPortBO cloudPort = getPort(p.getId());
                                     if (cloudPort != null && CollectionUtils.isNotEmpty(cloudPort.getAccessModes())) {
                                         cloudPort.getAccessModes().forEach(mode -> {
                                             String modeKey = this.getModeKey(mode.getProtocol(), String.valueOf(mode.getPort()), mode.getUsername(), mode.getPassword());
@@ -628,7 +598,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         }
 
         // 网元类型暂时无法准确纠正
-        var isForceCorrectElementType = srcElement.getType() == null
+        boolean isForceCorrectElementType = srcElement.getType() == null
                 || srcElement.getType().equals(BaseSceneElementModel.Type.OTHER);
         // 虚拟化类型可能无法准确纠正，但必须纠正，不然无法正常虚拟化
 
@@ -723,7 +693,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     public void modify(SceneHandler originSceneHandler, List<String> updateElementIds) {
         // 更新前合并下数据
         CloudScenePluginHandler originCloudPlugin = originSceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        for (var originEntry : originCloudPlugin.getElementMap().entrySet()) {
+        for (Map.Entry<String, CloudPluginSceneElementBO> originEntry : originCloudPlugin.getElementMap().entrySet()) {
             String nodeId = originEntry.getKey();
             CloudPluginSceneElementBO originElement = originEntry.getValue();
             CloudPluginSceneElementBO newElement = getElement(nodeId);
@@ -731,7 +701,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                 newElement.setResourceId(originElement.getResourceId());
             }
         }
-        for (var originEntry : originCloudPlugin.getElementPortMap().entrySet()) {
+        for (Map.Entry<String, CloudPluginSceneElementPortBO> originEntry : originCloudPlugin.getElementPortMap().entrySet()) {
             String portId = originEntry.getKey();
             CloudPluginSceneElementPortBO originPort = originEntry.getValue();
             CloudPluginSceneElementPortBO newPort = getPort(portId);
@@ -790,40 +760,74 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
     public List<CloudPluginSceneElementBO> getAuxiliaryNetworkElement() {
-        return getElementMap().values().stream()
-                .filter(cloudElement -> getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
-                .filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty())
-                .collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> list = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudElement : getElementMap().values()) {
+            if (getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId())) {
+                if (!cloudElement.getDeriveNetworks().isEmpty()) {
+                    list.add(cloudElement);
+                }
+            }
+        }
+        return list;
     }
 
     public List<CloudPluginSceneElementBO> getGatewayElements() {
-        return getGatewayElementMap().values().stream()
-                .filter(cloudElement -> getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
-                .collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> list = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudElement : getGatewayElementMap().values()) {
+            if (getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId())) {
+                list.add(cloudElement);
+            }
+        }
+        return list;
     }
 
     public List<CloudPluginSceneElementBO> getFirewallElements() {
-        return getFirewallElementMap().values().stream()
-                .filter(cloudElement -> getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
-                .collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> list = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudElement : getFirewallElementMap().values()) {
+            if (getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId())) {
+                list.add(cloudElement);
+            }
+        }
+        return list;
     }
 
     public List<CloudPluginSceneElementBO> getTerminalExcludeNpcElements() {
-        return getTerminalElementMap().values().stream()
-                .filter(cloudElement -> getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
-                .filter(cloudElement -> cloudElement.getVirtualType() != BaseCloudPluginSceneElementModel.VirtualType.NPC)
-                .collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> list = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudElement : getTerminalElementMap().values()) {
+            if (getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId())) {
+                if (cloudElement.getVirtualType() != BaseCloudPluginSceneElementModel.VirtualType.NPC) {
+                    list.add(cloudElement);
+                }
+            }
+        }
+        return list;
     }
 
     public List<CloudPluginSceneElementBO> getNpcElements() {
-        return getTerminalElementMap().values().stream()
-                .filter(cloudElement -> cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.NPC)
-                .collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> list = new ArrayList<>();
+        for (CloudPluginSceneElementBO cloudElement : getTerminalElementMap().values()) {
+            if (cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.NPC) {
+                list.add(cloudElement);
+            }
+        }
+        return list;
     }
 
     public List<CloudPluginSceneElementBO> getDynamicElements() {
-        return new ArrayList<>(getElementMap().values()).stream()
-                .filter(e -> e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)
-                .collect(Collectors.toList());
+        List<CloudPluginSceneElementBO> list = new ArrayList<>();
+        for (CloudPluginSceneElementBO e : new ArrayList<>(getElementMap().values())) {
+            if (e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS) {
+                list.add(e);
+            }
+        }
+        return list;
+    }
+
+    @Override
+    protected void initClass() {
+        super.sceneBOClass = CloudPluginSceneBO.class;
+        super.elementBOClass = CloudPluginSceneElementBO.class;
+        super.elementPortBOClass = CloudPluginSceneElementPortBO.class;
+        super.contextClass = CloudScenePluginContext.class;
     }
 }

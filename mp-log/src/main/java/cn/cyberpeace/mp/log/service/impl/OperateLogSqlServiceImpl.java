@@ -129,7 +129,11 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
         if (Objects.nonNull(request.getModule())) {
             humanCondition.filterEqual(OperateLogSqlModel::getOpModuleId, request.getModule());
         } else {
-            List<Integer> moduleOrdinals = Arrays.stream(OpModuleEnums.values()).map(m -> m.ordinal()).collect(Collectors.toList());
+            List<Integer> moduleOrdinals = new ArrayList<>();
+            for (OpModuleEnums m : OpModuleEnums.values()) {
+                Integer ordinal = m.ordinal();
+                moduleOrdinals.add(ordinal);
+            }
             moduleOrdinals.add(-1);
             humanCondition.filterIn(OperateLogSqlModel::getOpModuleId, moduleOrdinals.toArray(new Integer[0]));
         }
@@ -137,7 +141,11 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
         if (Objects.nonNull(request.getOpType())) {
             humanCondition.filterEqual(OperateLogSqlModel::getOpTypeId, request.getOpType());
         } else {
-            List<Integer> opTypeOrdinals = Arrays.stream(OpTypeEnums.values()).map(m -> m.ordinal()).collect(Collectors.toList());
+            List<Integer> opTypeOrdinals = new ArrayList<>();
+            for (OpTypeEnums m : OpTypeEnums.values()) {
+                Integer ordinal = m.ordinal();
+                opTypeOrdinals.add(ordinal);
+            }
             opTypeOrdinals.add(-1);
             humanCondition.filterIn(OperateLogSqlModel::getOpTypeId, opTypeOrdinals.toArray(new Integer[0]));
         }

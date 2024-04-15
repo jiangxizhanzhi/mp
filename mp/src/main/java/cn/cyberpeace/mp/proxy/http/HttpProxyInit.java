@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
+import java.util.List;
 
 @Component
 public class HttpProxyInit implements ServletContextInitializer {
@@ -19,12 +20,12 @@ public class HttpProxyInit implements ServletContextInitializer {
 
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
-        var http = proxyConfig.getHttp();
+        List<HttpProxyConfig> http = proxyConfig.getHttp();
         if (http == null || http.isEmpty()) {
             return;
         }
 
-        for (var httpProxyConfig : http) {
+        for (HttpProxyConfig httpProxyConfig : http) {
             ServletRegistration.Dynamic dispatcher = servletContext.addServlet(TextUtils.uuid(), new ProxyServlet());
             dispatcher.addMapping(httpProxyConfig.getUrl());
             dispatcher.setInitParameter(ProxyServlet.P_TARGET_URI, httpProxyConfig.getTargetUrl());

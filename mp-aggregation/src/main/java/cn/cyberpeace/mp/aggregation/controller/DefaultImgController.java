@@ -8,8 +8,10 @@ import cn.cyberpeace.mp.aggregation.service.DefaultImgService;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.auth.constant.DefaultImgStyleEnum;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/default-img")
+@AuthTarget(TargetEnum.NO_AUTH)
 public class DefaultImgController {
 
     @Autowired
@@ -56,7 +59,11 @@ public class DefaultImgController {
         List<String> groupList = Collections.singletonList(defaultImgDirEnum.getGroup());
         List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
         List<String> urlList =
-                modelList.stream().map(model -> FsCommon.genHttpUrl(model.getRemoteFile())).collect(Collectors.toList());
+                new ArrayList<>();
+        for (LocalFileMappingModel model : modelList) {
+            String s = FsCommon.genHttpUrl(model.getRemoteFile());
+            urlList.add(s);
+        }
 
         return ResultCommon.success(urlList);
     }
@@ -77,7 +84,11 @@ public class DefaultImgController {
             List<String> groupList = Collections.singletonList(styleEnum.getGroup());
             List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
             DefaultImgTarget defaultImgTarget = new DefaultImgTarget();
-            List<String> urlList = modelList.stream().map(model -> FsCommon.genHttpUrl(model.getRemoteFile())).collect(Collectors.toList());
+            List<String> urlList = new ArrayList<>();
+            for (LocalFileMappingModel model : modelList) {
+                String s = FsCommon.genHttpUrl(model.getRemoteFile());
+                urlList.add(s);
+            }
             defaultImgTarget.setImgs(urlList);
             defaultImgTarget.setStyle(styleEnum.getStyle());
             defaultImgTarget.setName(styleEnum.getName());
@@ -96,20 +107,11 @@ public class DefaultImgController {
         List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
         Map<String, String> urlMap = new HashMap<>();
         if (CollectionUtils.isNotEmpty(modelList)) {
-            modelList.forEach(model -> urlMap.put(model.getName(), FsCommon.genHttpUrl(model.getRemoteFile())));
+            for (LocalFileMappingModel model : modelList) {
+                urlMap.put(model.getName(), FsCommon.genHttpUrl(model.getRemoteFile()));
+            }
         }
 
         return ResultCommon.success(urlMap);
     }
-
-    /**
-     * 获取多个指定目录下的默认图片
-     * @param defaultImgDirEnums
-     * @return
-     */
-    private List<String> getFileByDefaultImgDirEnums(List<DefaultImgDirEnum> defaultImgDirEnums){
-        return defaultImgDirEnums.stream().map(v -> defaultImgService.getFileByDefaultImgDirEnum(v)).flatMap(List::stream).collect(Collectors.toList());
-    }
-
-
 }

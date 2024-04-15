@@ -8,6 +8,8 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -29,10 +31,11 @@ import java.util.Objects;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "认证相关接口", tags = "AUTH-认证相关接口")
+@Api(value = "认证相关接口", tags = "认证相关接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/authenticate")
+@AuthTarget(TargetEnum.NO_AUTH)
 public class AuthenticateController {
 
     @Autowired

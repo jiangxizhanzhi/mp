@@ -73,7 +73,7 @@ public class ImageMetaData implements Serializable {
             this.environment = environment;
             this.environmentStr = StringUtils.EMPTY;
             if (this.environment != null) {
-                for (var e : this.environment.entrySet()) {
+                for (Map.Entry<String, Object> e : this.environment.entrySet()) {
                     this.environmentStr += String.join(e.getKey(), e.getValue().toString());
                 }
             }

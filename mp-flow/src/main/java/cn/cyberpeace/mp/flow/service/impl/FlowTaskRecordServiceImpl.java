@@ -10,10 +10,10 @@ import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
-import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
+import cn.cyberpeace.mp.flow.response.BatchActuatorResponse;
+import cn.cyberpeace.mp.flow.service.FlowPostService;
 import cn.cyberpeace.mp.flow.service.FlowTaskRecordService;
 import cn.cyberpeace.mp.flow.service.fields.FlowTaskRecordFields;
-import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
 import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +21,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Consumer;
 
 @Service
 @Slf4j
@@ -33,6 +33,10 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
 
     @Autowired
     private FlowTaskTaskMapper flowTaskTaskMapper;
+
+    @Resource
+    private FlowPostService flowPostService;
+
 
     public FlowTaskRecordServiceImpl(FlowTaskRecordMapper stuMapper, FlowTaskRecordFields stuFields) {
         setModelFields(stuFields);
@@ -276,7 +280,7 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         }
 
         // 任务回调处理
-        this.taskCallback(flowTaskTaskModel, msg);
+        this.flowRecordPostProcess(flowTaskTaskModel, msg);
         log.info("FlowTaskRecordServiceImpl.syncRecord end.");
     }
 
@@ -285,72 +289,59 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
      * @param flowTaskTaskModel
      * @param msg
      */
-    private void taskCallback(FlowTaskTaskModel flowTaskTaskModel, String msg) {
+    private void flowRecordPostProcess(FlowTaskTaskModel flowTaskTaskModel, String msg) {
         String taskId = flowTaskTaskModel.getId();
-        Runnable taskRunnable = FlowCacheUtil.taskRunnableCache.getIfPresent(FlowCacheUtil.RUNNABLE_PREFIX + taskId);
-        if (Objects.nonNull(taskRunnable)) {
-            log.info("call task runnable for: {}", taskId);
-            taskRunnable.run();
-            FlowCacheUtil.taskRunnableCache.invalidate(FlowCacheUtil.RUNNABLE_PREFIX + taskId);
-        }
+        log.info("call task post process for: {}", taskId);
+        flowPostService.onFlowTaskOver(flowTaskTaskModel.getSceneId(), flowTaskTaskModel.getNodeId(), flowTaskTaskModel.getFlowId());
 
         if (StringUtils.isNotBlank(msg)) {
             // 有错误信息，代表执行异常
-            Consumer taskConsumer = FlowCacheUtil.taskConsumerCache.getIfPresent(FlowCacheUtil.CONSUMER_PREFIX + taskId);
-            if (Objects.nonNull(taskConsumer)) {
-                log.info("call task consumer for: {}", taskId);
-                taskConsumer.accept(msg);
-                FlowCacheUtil.taskConsumerCache.invalidate(FlowCacheUtil.CONSUMER_PREFIX + taskId);
-            }
+            flowPostService.onFlowTaskError(flowTaskTaskModel.getSceneId(), flowTaskTaskModel.getNodeId(), flowTaskTaskModel.getFlowId(), msg);
         }
 
         // 批量执行校验
         String sceneId = flowTaskTaskModel.getSceneId();
         String nodeId = flowTaskTaskModel.getNodeId();
         log.info("batch tasks run for sceneId: {}", sceneId);
-        Consumer batchTaskConsumer = FlowCacheUtil.taskConsumerCache.getIfPresent(FlowCacheUtil.CONSUMER_PREFIX + sceneId);
-        if (Objects.nonNull(batchTaskConsumer)) {
-            // 判断任务是否都结束
-            HumanCondition condition = new HumanCondition();
-            condition.filterEqual(FlowTaskTaskModel::getSceneId, sceneId);
-            condition.filterEqual(FlowTaskTaskModel::getNodeId, nodeId);
-            List<FlowTaskTaskModel> taskTaskModels = flowTaskTaskMapper.list(condition);
-            if (CollectionUtils.isNotEmpty(taskTaskModels)) {
-                int runningCount = (int) taskTaskModels.stream().filter(taskTaskModel -> taskTaskModel.getTaskStatus() == TaskTaskStatusEnum.RUNNING.toValue()).count();
-                if (runningCount == 0) {
-                    // 回调参数封装
-                    BatchActuatorCallbackResponse batchActuatorCallbackResponse= new BatchActuatorCallbackResponse();
-                    List<FlowTaskModel> successTaskModels = new ArrayList<>();
-                    List<FlowTaskModel> errorTaskModels = new ArrayList<>();
-                    taskTaskModels.forEach(taskTaskModel -> {
-                        FlowTaskModel flowTaskModel = new FlowTaskModel();
-                        flowTaskModel.setFlowId(taskTaskModel.getFlowId());
-                        flowTaskModel.setId(taskTaskModel.getId());
-                        if (TaskTaskStatusEnum.STOPPED.toValue() == taskTaskModel.getTaskStatus()) {
-                            successTaskModels.add(flowTaskModel);
-                        } else {
-                            errorTaskModels.add(flowTaskModel);
-                        }
-                    });
-                    batchActuatorCallbackResponse.setSuccessTaskModels(successTaskModels);
-                    batchActuatorCallbackResponse.setErrorTaskModels(errorTaskModels);
-
-                    log.info("batch tasks accept consumer: {}", batchActuatorCallbackResponse);
-                    batchTaskConsumer.accept(batchActuatorCallbackResponse);
-                    FlowCacheUtil.taskConsumerCache.invalidate(FlowCacheUtil.CONSUMER_PREFIX + sceneId);
-
-                    Runnable batchTaskRunnable = FlowCacheUtil.taskRunnableCache.getIfPresent(FlowCacheUtil.RUNNABLE_PREFIX + sceneId);
-                    if (Objects.nonNull(batchTaskRunnable)) {
-                        log.info("batch tasks run runnable");
-                        batchTaskRunnable.run();
-                        FlowCacheUtil.taskRunnableCache.invalidate(FlowCacheUtil.RUNNABLE_PREFIX + sceneId);
+        // 判断任务是否都结束
+        HumanCondition condition = new HumanCondition();
+        condition.filterEqual(FlowTaskTaskModel::getSceneId, sceneId);
+        condition.filterEqual(FlowTaskTaskModel::getNodeId, nodeId);
+        List<FlowTaskTaskModel> taskTaskModels = flowTaskTaskMapper.list(condition);
+        if (CollectionUtils.isNotEmpty(taskTaskModels)) {
+            long count = 0L;
+            for (FlowTaskTaskModel taskModel : taskTaskModels) {
+                if (taskModel.getTaskStatus() == TaskTaskStatusEnum.RUNNING.toValue()) {
+                    count++;
+                }
+            }
+            int runningCount = (int) count;
+            if (runningCount == 0) {
+                // 回调参数封装
+                BatchActuatorResponse batchActuatorResponse = new BatchActuatorResponse();
+                List<FlowTaskModel> successTaskModels = new ArrayList<>();
+                List<FlowTaskModel> errorTaskModels = new ArrayList<>();
+                for (FlowTaskTaskModel taskTaskModel : taskTaskModels) {
+                    FlowTaskModel flowTaskModel = new FlowTaskModel();
+                    flowTaskModel.setFlowId(taskTaskModel.getFlowId());
+                    flowTaskModel.setId(taskTaskModel.getId());
+                    if (TaskTaskStatusEnum.STOPPED.toValue() == taskTaskModel.getTaskStatus()) {
+                        successTaskModels.add(flowTaskModel);
+                    } else {
+                        errorTaskModels.add(flowTaskModel);
                     }
                 }
-            } else {
-                log.error("no batch tasks for sceneId: {}", sceneId);
+                batchActuatorResponse.setSuccessTaskModels(successTaskModels);
+                batchActuatorResponse.setErrorTaskModels(errorTaskModels);
+
+                log.info("batch tasks accept response: {}", batchActuatorResponse);
+                flowPostService.onNodeFlowTaskError(sceneId, nodeId, batchActuatorResponse);
+
+                log.info("batch tasks run onStop");
+                flowPostService.onStopTaskNode(sceneId, nodeId);
             }
         } else {
-            log.info("batch tasks batchTaskConsumer is null");
+            log.error("no batch tasks for sceneId: {}", sceneId);
         }
     }
 

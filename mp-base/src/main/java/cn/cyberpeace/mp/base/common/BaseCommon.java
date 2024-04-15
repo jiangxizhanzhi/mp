@@ -43,8 +43,8 @@ public class BaseCommon {
      * @return 通用的object mapper对象
      */
     public static ObjectMapper createCommonObjectMapper() {
-        var objectMapper = new ObjectMapper();
-        var javaTimeModule = new JavaTimeModule();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
         javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(dateTimeFormatter));
         javaTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer(dateFormatter));
         javaTimeModule.addSerializer(LocalTime.class, new LocalTimeSerializer(timeFormatter));
@@ -65,7 +65,7 @@ public class BaseCommon {
      * @return 通用的object mapper对象
      */
     public static ObjectMapper createSnakeObjectMapper() {
-        var objectMapper = createCommonObjectMapper();
+        ObjectMapper objectMapper = createCommonObjectMapper();
         objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         return objectMapper;
     }

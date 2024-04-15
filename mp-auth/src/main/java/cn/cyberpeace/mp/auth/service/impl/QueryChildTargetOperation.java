@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @Description:
@@ -32,8 +33,8 @@ public class QueryChildTargetOperation implements TargetOperation<TargetBo> {
 //            return targetDto;
 //        }
 
-        var list = targetService.listByParent(targetBo.getId());
-        var childList = new ArrayList();
+        List<TargetModel> list = targetService.listByParent(targetBo.getId());
+        ArrayList childList = new ArrayList();
         for (TargetModel target : list) {
             TargetBo childDto = new TargetBo();
             BeanUtils.copyProperties(target, childDto);

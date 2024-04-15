@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.scene.constant.CommonSceneStage;
+import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
@@ -25,7 +26,7 @@ public class PrepareHandler extends HandlerCommon {
     }
 
     public void prepare(boolean partialStart) {
-        var stageRecorder = getPluginHandler().getSceneHandler().getSceneStageRecorder();
+        SceneStageRecorder stageRecorder = getPluginHandler().getSceneHandler().getSceneStageRecorder();
         stageRecorder.addStage(CommonSceneStage.INIT);
 
         stageRecorder.addStage(FlowSceneStage.CREATE_FLOW_SIMULATE);

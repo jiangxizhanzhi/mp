@@ -75,7 +75,9 @@ public interface BaseModelMapper<M extends BaseModel> {
 
         Map<String, Class<?>> fieldTypes = ClassUtils.getBeanClassFieldTypes(objClass);
         final BeanWrapper objWrapper = new BeanWrapperImpl(obj);
-        fieldTypes.forEach((fieldName, fieldType) -> {
+        for (Map.Entry<String, Class<?>> entry : fieldTypes.entrySet()) {
+            String fieldName = entry.getKey();
+            Class<?> fieldType = entry.getValue();
             String mapFieldName = null;
             if (map.containsKey(fieldName)) {
                 mapFieldName = fieldName;
@@ -90,7 +92,7 @@ public interface BaseModelMapper<M extends BaseModel> {
                 Object fieldValue = handleRawFieldValue(fieldType, map.get(mapFieldName));
                 objWrapper.setPropertyValue(fieldName, fieldValue);
             }
-        });
+        }
 
         return obj;
     }
@@ -151,21 +153,26 @@ public interface BaseModelMapper<M extends BaseModel> {
     }
 
     private Object[] convertCreateParams(List<M> objs) {
-        var allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
-        String[] createFields = Arrays.stream(allModelFields.getFields())
-                .filter(fieldName -> !fieldName.equals(pkFieldName)).toArray(String[]::new);
-        var createColumnFields = new String[createFields.length];
-        for (var i = 0; i < createFields.length; i++) {
+        DynamicFields allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
+        List<String> list = new ArrayList<>();
+        for (String fieldName : allModelFields.getFields()) {
+            if (!fieldName.equals(pkFieldName)) {
+                list.add(fieldName);
+            }
+        }
+        String[] createFields = list.toArray(new String[0]);
+        String[] createColumnFields = new String[createFields.length];
+        for (int i = 0; i < createFields.length; i++) {
             createColumnFields[i] = TextUtils.humpToLine(createFields[i]);
         }
 
-        var createFieldValuesList = new Object[objs.size()][createFields.length];
-        for (var i = 0; i < objs.size(); i++) {
+        Object[][] createFieldValuesList = new Object[objs.size()][createFields.length];
+        for (int i = 0; i < objs.size(); i++) {
             M obj = objs.get(i);
             obj.initDefault();
 
-            var createFieldValues = new Object[createFields.length];
-            for (var j = 0; j < createFields.length; j++) {
+            Object[] createFieldValues = new Object[createFields.length];
+            for (int j = 0; j < createFields.length; j++) {
                 Object fieldValue = ClassUtils.getObjFieldValue(obj, createFields[j]);
                 if (fieldValue == null) {
                     return new Object[0];
@@ -179,13 +186,18 @@ public interface BaseModelMapper<M extends BaseModel> {
     }
 
     private Object[] convertUpdateParams(List<M> objs) {
-        var sampleObj = objs.get(0);
+        M sampleObj = objs.get(0);
         sampleObj.setUpdateTime(null);
         sampleObj.initDefault(BaseModel::getUpdateTime);
 
-        var allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
-        String[] availableFields = Arrays.stream(allModelFields.getFields())
-                .filter(fieldName -> !fieldName.equals(pkFieldName)).toArray(String[]::new);
+        DynamicFields allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
+        List<String> list = new ArrayList<>();
+        for (String s : allModelFields.getFields()) {
+            if (!s.equals(pkFieldName)) {
+                list.add(s);
+            }
+        }
+        String[] availableFields = list.toArray(new String[0]);
 
         List<String> updateFields = new ArrayList<>();
         List<String> updateColumnFields = new ArrayList<>();
@@ -197,14 +209,14 @@ public interface BaseModelMapper<M extends BaseModel> {
             }
         }
 
-        var updateFieldValuesList = new Object[objs.size()][updateFields.size()];
-        for (var i = 0; i < objs.size(); i++) {
+        Object[][] updateFieldValuesList = new Object[objs.size()][updateFields.size()];
+        for (int i = 0; i < objs.size(); i++) {
             M obj = objs.get(i);
             sampleObj.setUpdateTime(null);
             obj.initDefault(BaseModel::getUpdateTime);
 
-            var updateFieldValues = new Object[updateFields.size()];
-            for (var j = 0; j < updateFields.size(); j++) {
+            Object[] updateFieldValues = new Object[updateFields.size()];
+            for (int j = 0; j < updateFields.size(); j++) {
                 Object fieldValue = ClassUtils.getObjFieldValue(obj, updateFields.get(j));
                 if (fieldValue == null) {
                     return new Object[0];
@@ -224,12 +236,12 @@ public interface BaseModelMapper<M extends BaseModel> {
      */
     private Map<String, List<M>> groupValidFieldsObjs(List<M> objs) {
         Map<String, List<M>> validFieldsObjs = new HashMap<>();
-        objs.forEach(obj -> {
+        for (M obj : objs) {
             String key = DigestUtils.md5Hex(StringUtils.joinWith(":", (Object[]) BeanUtils.getNotNullPropertyNames(obj)));
-            var keyObjs = validFieldsObjs.getOrDefault(key, new ArrayList<>());
+            List<M> keyObjs = validFieldsObjs.getOrDefault(key, new ArrayList<>());
             keyObjs.add(obj);
             validFieldsObjs.put(key, keyObjs);
-        });
+        }
         return validFieldsObjs;
     }
 
@@ -237,7 +249,7 @@ public interface BaseModelMapper<M extends BaseModel> {
     default Class<M> getModelClass() {
         Class<?> actualModelClassSource;
         Class<?> mapperInterface = getMapperInterface();
-        var modelClassAnnotation = mapperInterface.getAnnotation(ModelClass.class);
+        ModelClass modelClassAnnotation = mapperInterface.getAnnotation(ModelClass.class);
         if (modelClassAnnotation != null) {
             actualModelClassSource = modelClassAnnotation.value();
         } else {
@@ -289,12 +301,12 @@ public interface BaseModelMapper<M extends BaseModel> {
     default <T> List<T> list(HumanCondition humanCondition, Class<T> objClass) {
         List<Map<String, Object>> mapList = originList(humanCondition);
         List<T> objs = new ArrayList<>();
-        mapList.forEach(map -> {
-            var obj = mapToObj(map, objClass);
+        for (Map<String, Object> map : mapList) {
+            T obj = mapToObj(map, objClass);
             if (obj != null) {
                 objs.add(obj);
             }
-        });
+        }
         return objs;
     }
 
@@ -397,7 +409,7 @@ public interface BaseModelMapper<M extends BaseModel> {
             return result.addFail(objs);
         }
 
-        var successCount = bulkCreate((String[]) createParams[0], (Object[][]) createParams[1]);
+        int successCount = bulkCreate((String[]) createParams[0], (Object[][]) createParams[1]);
         if (successCount == 0) {
             return result.addFail(objs);
         } else {
@@ -415,7 +427,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         List<Runnable> tasks = new ArrayList<>();
         CollectionUtils.batchHandle(objs, batchSize, batchList -> {
             tasks.add(() -> {
-                var batchResult = bulkCreate(batchList);
+                BulkResult<M> batchResult = bulkCreate(batchList);
                 synchronized (result) {
                     result.add(batchResult);
                 }
@@ -424,7 +436,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         if (concurrent) {
             TaskCommon.runTasks(tasks);
         } else {
-            tasks.forEach(Runnable::run);
+            for (Runnable task : tasks) {
+                task.run();
+            }
         }
         return result;
     }
@@ -439,14 +453,15 @@ public interface BaseModelMapper<M extends BaseModel> {
             return result;
         }
 
-        for (var validFieldsObjs: groupValidFieldsObjs(objs).values()) {
+        for (List<M> validFieldsObjs: groupValidFieldsObjs(objs).values()) {
+            Collections.sort(validFieldsObjs, Comparator.comparing(BaseModel::getId));
             Object[] updateParams = convertUpdateParams(validFieldsObjs);
             if (updateParams.length == 0) {
                 result.addFail(objs);
                 log.error("Service bulk update {} has empty field", objs);
                 continue;
             }
-            var successCount = bulkUpdate((String[]) updateParams[0], (Object[][]) updateParams[1]);
+            int successCount = bulkUpdate((String[]) updateParams[0], (Object[][]) updateParams[1]);
             if (successCount == 0) {
                 result.addFail(objs);
             } else {
@@ -470,7 +485,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         List<Runnable> tasks = new ArrayList<>();
         CollectionUtils.batchHandle(objs, batchSize, batchList -> {
             tasks.add(() -> {
-                var batchResult = bulkUpdate(batchList);
+                BulkResult<M> batchResult = bulkUpdate(batchList);
                 synchronized (result) {
                     result.add(batchResult);
                 }
@@ -479,7 +494,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         if (concurrent) {
             TaskCommon.runTasks(tasks);
         } else {
-            tasks.forEach(Runnable::run);
+            for (Runnable task : tasks) {
+                task.run();
+            }
         }
         return result;
     }
@@ -487,12 +504,12 @@ public interface BaseModelMapper<M extends BaseModel> {
     default List<M> commonList(String tableName, @Param("condition") Condition condition, String[] selectFields) {
         List<Map<String, Object>> mapList = getCommonMapper().list(tableName, condition, selectFields);
         List<M> objs = new ArrayList<>();
-        mapList.forEach(map -> {
-            var obj = mapToObj(map);
+        for (Map<String, Object> map : mapList) {
+            M obj = mapToObj(map);
             if (obj != null) {
                 objs.add(obj);
             }
-        });
+        }
         return objs;
     }
 
@@ -515,7 +532,7 @@ public interface BaseModelMapper<M extends BaseModel> {
 
     @Recommendation
     default M logicGet(String id) {
-        var obj = get(id);
+        M obj = get(id);
         return (obj != null && obj.hasDeleted()) ? null : obj;
     }
 
@@ -569,7 +586,7 @@ public interface BaseModelMapper<M extends BaseModel> {
             return result;
         }
 
-        var successCount = getCommonMapper().bulkDelete(getTableName(), ids);
+        int successCount = getCommonMapper().bulkDelete(getTableName(), ids);
         if (successCount == 0) {
             return result.addFail(Arrays.asList(ids));
         } else {
@@ -587,7 +604,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         List<Runnable> tasks = new ArrayList<>();
         CollectionUtils.batchHandle(Arrays.asList(ids), batchSize, batchList -> {
             tasks.add(() -> {
-                var batchResult = bulkDelete(batchList.toArray(new String[0]));
+                BulkResult<String> batchResult = bulkDelete(batchList.toArray(new String[0]));
                 synchronized (result) {
                     result.add(batchResult);
                 }
@@ -596,7 +613,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         if (concurrent) {
             TaskCommon.runTasks(tasks);
         } else {
-            tasks.forEach(Runnable::run);
+            for (Runnable task : tasks) {
+                task.run();
+            }
         }
         return result;
     }
@@ -616,7 +635,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         List<M> logicObjs = new ArrayList<>();
         List<String> rawIds = new ArrayList<>();
         try {
-            for (var id: ids) {
+            for (String id: ids) {
                 M obj = actualModelClass.getDeclaredConstructor().newInstance();
                 obj.setId(id);
                 if (obj.prepareDeleteFlag()) {
@@ -631,10 +650,15 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
 
         if (!logicObjs.isEmpty()) {
-            var updateResult = bulkUpdate(logicObjs);
+            BulkResult<M> updateResult = bulkUpdate(logicObjs);
             result.addSuccessCount(updateResult.getSuccessCount());
             if (updateResult.getFail() != null) {
-                result.addFail(updateResult.getFail().stream().map(BaseModel::getId).collect(Collectors.toList()));
+                List<String> list = new ArrayList<>();
+                for (M m : updateResult.getFail()) {
+                    String id = m.getId();
+                    list.add(id);
+                }
+                result.addFail(list);
             }
         }
         if (!rawIds.isEmpty()) {
@@ -654,7 +678,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         List<Runnable> tasks = new ArrayList<>();
         CollectionUtils.batchHandle(Arrays.asList(ids), batchSize, batchList -> {
             tasks.add(() -> {
-                var batchResult = bulkLogicDelete(batchList.toArray(new String[0]));
+                BulkResult<String> batchResult = bulkLogicDelete(batchList.toArray(new String[0]));
                 synchronized (result) {
                     result.add(batchResult);
                 }
@@ -663,7 +687,9 @@ public interface BaseModelMapper<M extends BaseModel> {
         if (concurrent) {
             TaskCommon.runTasks(tasks);
         } else {
-            tasks.forEach(Runnable::run);
+            for (Runnable task : tasks) {
+                task.run();
+            }
         }
         return result;
     }

@@ -25,7 +25,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private Boolean external;
     @ApiModelProperty(value = "云平台虚拟化类型")
     private Integer virtualType;
-    @ApiModelProperty(value = "是否透明模式")
+    @ApiModelProperty(value = "是否透明模式",hidden = true)
+    @Deprecated
     private Boolean transparent;
     @ApiModelProperty(value = "是否云平台內置靶標")
     private Boolean isBuildIn;
@@ -268,7 +269,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
 
     @Override
     public M toModel(String... ignoreFields) {
-        var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
+        M obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAllocationPools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getStaticRoutes),

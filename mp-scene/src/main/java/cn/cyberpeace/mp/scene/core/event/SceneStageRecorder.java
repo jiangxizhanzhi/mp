@@ -65,7 +65,7 @@ public class SceneStageRecorder {
         if (this.stagesMap.containsKey(stage.getStage())) {
             return;
         }
-        var stageInfo = new SceneStageRecord(stage);
+        SceneStageRecord stageInfo = new SceneStageRecord(stage);
         this.stages.add(stageInfo);
         this.stagesMap.put(stage.getStage(), stageInfo);
         sceneBO.setStageList(stages);
@@ -73,7 +73,7 @@ public class SceneStageRecorder {
 
     public void startStage(SceneStage stage) {
         if (this.stagesMap.containsKey(stage.getStage())) {
-            var stageRecord = this.stagesMap.get(stage.getStage());
+            SceneStageRecord stageRecord = this.stagesMap.get(stage.getStage());
             stageRecord.setStagePercentage(0);
             this.refreshSceneBO(stageRecord, this.sceneBO);
         }
@@ -81,7 +81,7 @@ public class SceneStageRecorder {
 
     public void endStage(SceneStage stage) {
         if (this.stagesMap.containsKey(stage.getStage())) {
-            var stageRecord = this.stagesMap.get(stage.getStage());
+            SceneStageRecord stageRecord = this.stagesMap.get(stage.getStage());
             stageRecord.setStagePercentage(100);
             this.refreshSceneBO(stageRecord, this.sceneBO);
         }
@@ -98,21 +98,21 @@ public class SceneStageRecorder {
             }
         });
         Collections.sort(temp, Comparator.comparingInt(SceneEventProcess::getOrder));
-        for (var sep : temp) {
+        for (SceneEventProcess sep : temp) {
             if (!this.stageProcessMap.containsKey(sep.getStage())) {
                 this.stageProcessMap.put(sep.getStage(), new ArrayList<>());
             }
             this.stageProcessMap.get(sep.getStage()).add(sep);
         }
 
-        for (var entry : this.stageProcessMap.entrySet()) {
-            var allProcess = entry.getValue();
+        for (Map.Entry<String, List<SceneEventProcess>> entry : this.stageProcessMap.entrySet()) {
+            List<SceneEventProcess> allProcess = entry.getValue();
 
             BigDecimal step = BigDecimal.valueOf(100).divide(BigDecimal.valueOf(allProcess.size() + 1), 4, RoundingMode.DOWN);
             BigDecimal halfStep = step.divide(BigDecimal.valueOf(2), 4, RoundingMode.DOWN);
             for (int i = 0; i < allProcess.size(); i++) {
-                var p = allProcess.get(i);
-                var mid = step.multiply(BigDecimal.valueOf(i + 1));
+                SceneEventProcess p = allProcess.get(i);
+                BigDecimal mid = step.multiply(BigDecimal.valueOf(i + 1));
                 percentageMap.put(p.getProcess() + "_start", mid.subtract(halfStep));
                 percentageMap.put(p.getProcess() + "_end", mid.add(halfStep));
                 processMap.put(p.getProcess(), p);
@@ -122,11 +122,11 @@ public class SceneStageRecorder {
 
     public void progress(String progress) {
         if (this.processMap.containsKey(progress)) {
-            var stage = this.processMap.get(progress).getStage();
-            var percentage = this.percentageMap.get(progress + "_start").intValue();
+            String stage = this.processMap.get(progress).getStage();
+            int percentage = this.percentageMap.get(progress + "_start").intValue();
 
             if (percentage > this.sceneBO.getStagePercentage()) {
-                var stageRecord = this.stagesMap.get(stage);
+                SceneStageRecord stageRecord = this.stagesMap.get(stage);
                 stageRecord.setStagePercentage(percentage);
                 this.refreshSceneBO(stageRecord, this.sceneBO);
             }
@@ -135,11 +135,11 @@ public class SceneStageRecorder {
 
     public void overProgress(String progress) {
         if (this.processMap.containsKey(progress)) {
-            var stage = this.processMap.get(progress).getStage();
-            var percentage = this.percentageMap.get(progress + "_end").intValue();
+            String stage = this.processMap.get(progress).getStage();
+            int percentage = this.percentageMap.get(progress + "_end").intValue();
 
             if (percentage > this.sceneBO.getStagePercentage()) {
-                var stageRecord = this.stagesMap.get(stage);
+                SceneStageRecord stageRecord = this.stagesMap.get(stage);
                 stageRecord.setStagePercentage(percentage);
                 this.refreshSceneBO(stageRecord, this.sceneBO);
             }
@@ -154,7 +154,7 @@ public class SceneStageRecorder {
         BigDecimal total = BigDecimal.valueOf(0);
         BigDecimal current = BigDecimal.valueOf(0);
         if (CollectionUtils.isNotEmpty(stages)) {
-            for (var stage : stages) {
+            for (SceneStageRecord stage : stages) {
                 total = total.add(BigDecimal.valueOf(100));
                 current = current.add(BigDecimal.valueOf(stage.stagePercentage));
             }
@@ -172,7 +172,7 @@ public class SceneStageRecorder {
         BigDecimal total = BigDecimal.valueOf(0);
         BigDecimal current = BigDecimal.valueOf(0);
         if (CollectionUtils.isNotEmpty(stages)) {
-            for (var stage : stages) {
+            for (SceneStageRecord stage : stages) {
                 total = total.add(BigDecimal.valueOf(100));
                 current = current.add(BigDecimal.valueOf(stage.stagePercentage));
             }

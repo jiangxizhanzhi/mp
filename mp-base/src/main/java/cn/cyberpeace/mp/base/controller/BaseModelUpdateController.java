@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @param <M> 数据model
  * @param <S> 数据model对应的service
  */
+@Deprecated
 public interface BaseModelUpdateController<M extends BaseModel, S extends BaseModelService<M, ?>> {
 
     S getModelService();

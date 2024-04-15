@@ -3,16 +3,13 @@ package cn.cyberpeace.mp.auth.service;
 import cn.cyberpeace.mp.auth.common.FileCheckCommon;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.request.common.FileCheckRequest;
-import cn.cyberpeace.mp.auth.util.FileUtils;
-import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
+import cn.cyberpeace.mp.common.util.FileClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 /**
  * @Description: 头像管理service
@@ -33,20 +30,6 @@ public class AvatarService {
         if (!Boolean.TRUE.equals(uploadResult.getSource())) {
             throw new MpRuntimeException(uploadResult.getServiceCode());
         }
-        FileResponseData responseData = new FileResponseData();
-        try {
-            // 上传到服务器
-            String suffix = FileUtils.getSuffix(file.getOriginalFilename());
-            String filepath = FsCommon.upload(file.getInputStream(), suffix);
-            responseData.setFileName(file.getOriginalFilename());
-            responseData.setFilePath(filepath);
-            responseData.setFileType(suffix);
-            responseData.setHttpUrl(FsCommon.genHttpUrl(filepath));
-            responseData.setInnerHttpUrl(FsCommon.genInnerHttpUrl(filepath));
-        } catch (MpRuntimeException | IOException e) {
-            responseData.setSuccess(false);
-            responseData.setMessage(e.getMessage());
-        }
-        return responseData;
+        return FileClient.uploadSample(file);
     }
 }

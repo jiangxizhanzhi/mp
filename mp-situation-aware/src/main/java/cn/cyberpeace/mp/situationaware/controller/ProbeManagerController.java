@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -10,6 +12,7 @@ import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
+import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeAbilityDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
@@ -42,6 +45,7 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/probes")
 @Api(value = "探针管理", tags = "探针管理")
+@AuthTarget({TargetEnum.COLLECTION_TEMPLATE, TargetEnum.CUSTOM_PROBE, TargetEnum.UNIVERSAL_PROBE})
 public class ProbeManagerController {
 
     @Autowired
@@ -68,10 +72,11 @@ public class ProbeManagerController {
         return optionService.getIntOptions(SituationalAwareConstant.MP_COMMON_OPTION_TYPE_SITUATION_OS_TYPE);
     }
 
+    @AuthTarget(TargetEnum.SITUATION_AWARE_GROUP)
     @GetMapping("/page")
     @ApiOperation(value = "分页查询探针，不含探针脚本内容")
     public ListObjServiceResult<ProbeDto> page(ProbePageQueryRequest pageQueryRequest) {
-        log.info("query probe meta request param: {}" ,pageQueryRequest);
+        log.debug("query probe meta request param: {}" ,pageQueryRequest);
         PageInfo<ProbeDto> pageInfo = probeService.page(pageQueryRequest);
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
@@ -131,7 +136,7 @@ public class ProbeManagerController {
     @OperateLog(module = OpModuleEnums.PROBE, type = OpTypeEnums.UPDATE, title = "修改探针", target = OpTargetEnums.PROBE)
     @ApiImplicitParam(name = "probeRequest", value = "修改请求", dataTypeClass = ProbeRequest.class)
     public ServiceResult modifyProbe(@RequestBody @Validated(UpdateGroup.class) ProbeRequest probeRequest) {
-        var oldScript = probeScriptService.getScriptModelByProbeId(probeRequest.getId());
+        ProbeScriptModel oldScript = probeScriptService.getScriptModelByProbeId(probeRequest.getId());
         String oldMd5 = oldScript.getChecksum();
         Integer oldScriptType = oldScript.getScriptType();
         // 判断脚本内容是否有变动，如无变动则不需要重新上传脚本

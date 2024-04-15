@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
@@ -18,6 +20,7 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/flow_group")
 @Api(value = "态势感知-场景的操作接口", tags = "态势感知-场景的操作接口")
+@AuthTarget(TargetEnum.NO_AUTH)
 public class NetworkTrafficGroupController {
 
     @Autowired
@@ -43,7 +46,7 @@ public class NetworkTrafficGroupController {
     @ApiOperation(value = "新增分组信息", notes = "")
     @ApiImplicitParam(name = "groupRequest", value = "新增请求体", dataType = "body", dataTypeClass = GroupRequest.class)
     public ServiceResult addGroup(@RequestBody @Valid GroupRequest groupRequest) {
-        var groupModel = new GroupModel();
+        GroupModel groupModel = new GroupModel();
         BeanUtils.copyProperties(groupRequest, groupModel);
         String res = networkTrafficGroupService.addArkimeImageInstance(groupModel);
         return ServiceResult.builder().detail(res).serviceCode(BaseErrorCode.SUCCESS).build().asResult();

@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin;
 
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -81,7 +82,7 @@ public class BatchSceneHandler {
 
     public LocalDateTime getLatestSceneRunningTime() {
         LocalDateTime dateTime = null;
-        for (var s : id2SceneHandler.values()) {
+        for (SceneHandler s : id2SceneHandler.values()) {
             if (s.getScene().getEvent() == SceneModel.Event.DELETE) {
                 if (dateTime == null) {
                     dateTime = s.getScene().getUpdateTime();
@@ -211,6 +212,11 @@ public class BatchSceneHandler {
         return this.id2SceneHandler.get(sceneId).getPluginHandler(PluginConstant.PLUGIN_KEY);
     }
 
+    public CloudScenePluginHandler getCloudScenePluginHandler(String sceneId) {
+        return this.id2SceneHandler.get(sceneId)
+                .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+    }
+
     private void init() {
         for (String sceneId : sceneIds) {
             SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
@@ -236,7 +242,7 @@ public class BatchSceneHandler {
             if (sceneHandler.getElementMap() != null) {
                 sceneHandler.getElementMap().values().forEach(srcElement -> {
                     this.allNodeId2ElementMap.put(srcElement.getId(), srcElement);
-                    var srcPorts = srcElement.getPorts();
+                    List<SceneElementPortBO> srcPorts = srcElement.getPorts();
                     if (srcPorts == null) {
                         return;
                     }
@@ -258,7 +264,7 @@ public class BatchSceneHandler {
     private void handlerElement(String sceneId, List<SceneElementBO> srcElements, CollectionScenePluginHandler pluginHandler, CloudScenePluginHandler cloudPlugin) {
         srcElements.forEach(srcElement -> {
             this.allEid2ElementMap.put(srcElement.getEid(), srcElement);
-            var srcPorts = srcElement.getPorts();
+            List<SceneElementPortBO> srcPorts = srcElement.getPorts();
             if (srcPorts == null) {
                 return;
             }
@@ -310,7 +316,7 @@ public class BatchSceneHandler {
         } else {
             srcElements = new ArrayList<>();
             nodeIds.forEach(nodeId -> {
-                var srcElement = sceneHandler.getElement(nodeId);
+                SceneElementBO srcElement = sceneHandler.getElement(nodeId);
                 if (srcElement != null) {
                     srcElements.add(srcElement);
                 }
@@ -322,7 +328,7 @@ public class BatchSceneHandler {
     public String getMacByIp(String ip) {
         SceneElementBO elementBO = this.allIp2ElementMap.get(ip);
         if (elementBO != null && CollectionUtils.isNotEmpty(elementBO.getPorts())) {
-            for (var p : elementBO.getPorts()) {
+            for (SceneElementPortBO p : elementBO.getPorts()) {
                 if (ip.equals(p.getIp()) && StringUtils.isNotEmpty(p.getMacAddr())) {
                     return p.getMacAddr();
                 }

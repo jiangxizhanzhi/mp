@@ -38,7 +38,7 @@ public abstract class BaseCloudPluginSceneBO<M extends BaseCloudPluginSceneModel
 
     @Override
     public M toModel(String... ignoreFields) {
-        var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
+        M obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneModel::getDnsNameservers)
         ));
         if (dnsNameservers != null) {

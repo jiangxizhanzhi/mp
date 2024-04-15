@@ -6,7 +6,6 @@ import com.alibaba.excel.EasyExcel;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ExcelCommon {
 
@@ -14,20 +13,32 @@ public class ExcelCommon {
 
     public static List<LinkedHashMap<String, String>> read(InputStream is, Map<String, String> headerFieldMap) {
         List<Map<Integer, String>> sourceLines = EasyExcel.read(is).headRowNumber(0).sheet().doReadSync();
-        var lines = sourceLines.stream().map(sourceLine -> {
+        List<List<String>> lines = new ArrayList<>();
+        for (Map<Integer, String> integerStringMap : sourceLines) {
             List<Object[]> orderingLine = new ArrayList<>();
-            sourceLine.forEach((seq, value) -> orderingLine.add(new Object[]{seq, value}));
-            return orderingLine.stream()
-                    .sorted(Comparator.comparing(item -> (Integer) item[0]))
-                    .map(item -> item[1] == null ? null : (String) item[1])
-                    .collect(Collectors.toList());
-        }).collect(Collectors.toList());
+            for (Map.Entry<Integer, String> entry : integerStringMap.entrySet()) {
+                Integer seq = entry.getKey();
+                String value = entry.getValue();
+                orderingLine.add(new Object[]{seq, value});
+            }
+            List<Object[]> toSort = new ArrayList<>();
+            for (Object[] item : orderingLine) {
+                toSort.add(item);
+            }
+            toSort.sort(Comparator.comparing(item -> (Integer) item[0]));
+            List<String> apply = new ArrayList<>();
+            for (Object[] item : toSort) {
+                String s = item[1] == null ? null : (String) item[1];
+                apply.add(s);
+            }
+            lines.add(apply);
+        }
         return TextResourceBase.lineToMaps(lines, headerFieldMap);
     }
 
     public static <T> List<T> read(InputStream is, Class<T> clazz) {
         Map<String, String> headerFieldMap = TextResourceBase.getHeaderFieldMap(clazz);
-        var maps = read(is, headerFieldMap);
+        List<LinkedHashMap<String, String>> maps = read(is, headerFieldMap);
         return TextResourceBase.mapToObjs(maps, clazz);
     }
 
@@ -37,7 +48,7 @@ public class ExcelCommon {
             return;
         }
 
-        var lines = TextResourceBase.mapToLines(maps, headerFieldMap);
+        List<List<String>> lines = TextResourceBase.mapToLines(maps, headerFieldMap);
         EasyExcel.write(os).sheet().doWrite(lines);
     }
 
@@ -46,9 +57,9 @@ public class ExcelCommon {
             return;
         }
 
-        var clazz = objs.get(0).getClass();
+        Class<?> clazz = objs.get(0).getClass();
         Map<String, String> fieldHeaderMap = TextResourceBase.getFieldHeaderMap(clazz);
-        var maps = TextResourceBase.objToMaps(objs);
+        List<LinkedHashMap<String, String>> maps = TextResourceBase.objToMaps(objs);
         write(maps, os, fieldHeaderMap);
     }
 

@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
+import java.util.List;
+
 @Component
 public class WsProxyInit implements WebSocketConfigurer {
 
@@ -17,12 +19,12 @@ public class WsProxyInit implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        var ws = proxyConfig.getWs();
+        List<WsProxyConfig> ws = proxyConfig.getWs();
         if (ws == null || ws.isEmpty()) {
             return;
         }
 
-        for (var wsProxyConfig : ws) {
+        for (WsProxyConfig wsProxyConfig : ws) {
             String[] allowedOrigins = CollectionUtils.isEmpty(wsProxyConfig.getAllowedOrigins())
                     ? DEFAULT_ALLOWED_ORIGINS : wsProxyConfig.getAllowedOrigins().toArray(new String[0]);
             registry.addHandler(new WsProxyServerHandler(wsProxyConfig.targetConfig()), wsProxyConfig.getUrl())

@@ -1,43 +1,34 @@
 package cn.cyberpeace.mp.scene.util;
 
-import cn.cyberpeace.mp.scene.model.SceneModel;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SceneEventUtils {
-    public static final LoadingCache<String, Long> PAUSE_CACHE =
-            CacheBuilder.newBuilder().maximumSize(100).expireAfterWrite(60, TimeUnit.SECONDS).build(new CacheLoader<String, Long>() {
-        @Override
-        public Long load(String key) throws Exception {
+    private static Map<String, SceneEventInfo> scene = new ConcurrentHashMap<>();
+
+    public static SceneEventInfo tryLockAndGetInfoIfLockFailed(String sceneId, SceneEventInfo eventInfo) {
+        SceneEventInfo sceneEventInfo = scene.putIfAbsent(sceneId, eventInfo);
+        if (sceneEventInfo != null) {
+            return sceneEventInfo;
+        } else {
             return null;
         }
-    });
-
-    public static void addProcessingScene(int event, String sceneId) {
-        if (SceneModel.Event.PAUSE == event) {
-            PAUSE_CACHE.put(sceneId, System.currentTimeMillis());
-        } else if (SceneModel.Event.UNPAUSE == event) {
-            PAUSE_CACHE.put(sceneId, System.currentTimeMillis());
-        }
     }
 
-    public static void removeProcessingScene(int event, String sceneId) {
-        if (SceneModel.Event.PAUSE == event) {
-            PAUSE_CACHE.invalidate(sceneId);
-        } else if (SceneModel.Event.UNPAUSE == event) {
-            PAUSE_CACHE.invalidate(sceneId);
-        }
+    public static void unLock(String sceneId) {
+        scene.remove(sceneId);
     }
 
-    public static boolean hasProcessingScene(int event, String sceneId) {
-        if (SceneModel.Event.PAUSE == event) {
-            return PAUSE_CACHE.getIfPresent(sceneId) != null;
-        } else if (SceneModel.Event.UNPAUSE == event) {
-            return PAUSE_CACHE.getIfPresent(sceneId) != null;
-        }
-        return false;
+    @Getter
+    @Setter
+    public static class SceneEventInfo {
+        private String sceneId;
+        private String nodeId;
+        private String nodeName;
+        private String eventName;
+        private int event;
     }
 }

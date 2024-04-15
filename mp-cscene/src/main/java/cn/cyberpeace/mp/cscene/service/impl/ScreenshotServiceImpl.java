@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service.impl;
 
+import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -111,7 +113,11 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
 
         if (CollectionUtils.isNotEmpty(userBo.getOrgs())) {
             // 封装组织名称，多个以逗号分隔
-            List<String> nameList = userBo.getOrgs().stream().map(OrgModel::getName).collect(Collectors.toList());
+            List<String> nameList = new ArrayList<>();
+            for (OrgBO orgBO : userBo.getOrgs()) {
+                String name = orgBO.getName();
+                nameList.add(name);
+            }
             String userOrgName = Joiner.on(",").join(nameList);
             model.setUserOrgName(userOrgName);
         }
@@ -163,7 +169,12 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
             asyncScreenshotModelService.batchDeleteScreenshot(screenshotModels);
 
             // 删除数据库中文件
-            String[] ids = screenshotModels.stream().map(ScreenshotModel::getId).toArray(String[]::new);
+            List<String> list = new ArrayList<>();
+            for (ScreenshotModel screenshotModel : screenshotModels) {
+                String id = screenshotModel.getId();
+                list.add(id);
+            }
+            String[] ids = list.toArray(new String[0]);
             this.bulkDelete(ids);
             deleteCount = ids.length;
         }
@@ -201,7 +212,11 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         List<ScreenshotModel> screenshotModels = this.getModelMapper().list(condition);
 
         if (CollectionUtils.isNotEmpty(screenshotModels)) {
-            List<String> idList = screenshotModels.stream().map(ScreenshotModel::getId).collect(Collectors.toList());
+            List<String> idList = new ArrayList<>();
+            for (ScreenshotModel screenshotModel : screenshotModels) {
+                String id = screenshotModel.getId();
+                idList.add(id);
+            }
             // 异步删除文件服务器上文件
             asyncScreenshotModelService.batchDeleteScreenshot(screenshotModels);
             bulkDelete(idList.toArray(new String[0]));

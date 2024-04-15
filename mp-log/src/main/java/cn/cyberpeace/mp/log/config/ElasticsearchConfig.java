@@ -32,12 +32,12 @@ public class ElasticsearchConfig {
     private HttpHost[] createHttpHost() {
         Asserts.check(!ObjectUtils.isEmpty(logConfig.getEsNodes()), "ElasticSearch cluster ip address cannot empty");
         String[] ipArray = logConfig.getEsNodes().split(",");
-        var httpHosts = new HttpHost[ipArray.length];
+        HttpHost[] httpHosts = new HttpHost[ipArray.length];
         for (int i = 0, len = ipArray.length; i < len; i++) {
-            var ipAddress = ipArray[i];
+            String ipAddress = ipArray[i];
             String[] values = ipAddress.split(":");
             String ip = values[0];
-            var port = Integer.parseInt(values[1]);
+            int port = Integer.parseInt(values[1]);
             httpHosts[i] = new HttpHost(ip, port, "http");
         }
         return httpHosts;

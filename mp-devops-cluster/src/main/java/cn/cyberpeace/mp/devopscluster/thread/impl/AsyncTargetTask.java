@@ -12,6 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,7 +36,11 @@ public class AsyncTargetTask implements ITask<ServiceResult<Integer>, List<Devic
             return serviceResult.asResult();
         }
 
-        List<Integer> deviceIds = deviceList.stream().map(Device::getId).collect(Collectors.toList());
+        List<Integer> deviceIds = new ArrayList<>();
+        for (Device device1 : deviceList) {
+            Integer id = device1.getId();
+            deviceIds.add(id);
+        }
 
         DeviceAsyncBO bo = targetConverter.getAsyncDeviceIds(deviceIds);
         List<Integer> diffList =  bo.getNotExistedList();
@@ -44,8 +49,12 @@ public class AsyncTargetTask implements ITask<ServiceResult<Integer>, List<Devic
             return ResultCommon.success();
         }
 
-        List<Device> asyncDeviceList = deviceList.stream().filter(device -> diffList.contains(device.getId()))
-                .collect(Collectors.toList());
+        List<Device> asyncDeviceList = new ArrayList<>();
+        for (Device device : deviceList) {
+            if (diffList.contains(device.getId())) {
+                asyncDeviceList.add(device);
+            }
+        }
 
         Integer num = devopsTargetService.insert(asyncDeviceList);
 

@@ -1,20 +1,17 @@
 package cn.cyberpeace.mp.log.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.ISystemStatusInfo;
-import cn.cyberpeace.mp.base.service.code.ServiceCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.thread.taskpool.ThreadPoolInfo;
 import cn.cyberpeace.mp.log.constant.ControllerConstant;
-import cn.cyberpeace.mp.log.request.LogLevelBatchRequest;
-import cn.cyberpeace.mp.log.response.LogLevelResponse;
-import cn.cyberpeace.mp.log.service.ILogSettingService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @ClassName LogDynamicSettingController
@@ -27,6 +24,7 @@ import java.util.List;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/system")
 @Api(tags = "系统运行状态信息")
+@AuthTarget(TargetEnum.NO_AUTH)
 public class SystemStatusInfoController {
 
     @Autowired

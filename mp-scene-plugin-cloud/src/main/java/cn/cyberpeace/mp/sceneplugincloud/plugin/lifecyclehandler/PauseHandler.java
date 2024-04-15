@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.PauseTaskPool;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,10 +45,13 @@ public class PauseHandler extends HandlerCommon {
 
     public void pause() {
         prepareEventProcess(SceneModel.Event.PAUSE, SceneProcess.class, ElementProcess.class);
-        List<Runnable> tasks = getPluginHandler().getElementMap().values().stream()
-                .filter(e -> this.getPluginHandler().getSceneHandler().isHandleNode(e.getSrcElement().getId()))
-                .map(element -> (Runnable) () -> this.pauseElement(element))
-                .collect(Collectors.toList());
+        List<Runnable> tasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO e : getPluginHandler().getElementMap().values()) {
+            if (this.getPluginHandler().getSceneHandler().isHandleNode(e.getSrcElement().getId())) {
+                Runnable runnable = () -> this.pauseElement(e);
+                tasks.add(runnable);
+            }
+        }
         runSceneProgress(SceneProcess.PAUSE_TERMINALS, () -> runTasks(tasks));
     }
 

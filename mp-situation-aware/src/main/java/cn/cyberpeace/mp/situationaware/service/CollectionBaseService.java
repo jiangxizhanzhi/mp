@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.situationaware.service;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -21,7 +22,12 @@ public class CollectionBaseService {
      * @return
      */
     public List<String> agentNamesExcludeNullValue(List<String> agentNames) {
-        List<String> nullExcludedAgentNames = agentNames.stream().filter(Objects::nonNull).collect(Collectors.toList());
+        List<String> nullExcludedAgentNames = new ArrayList<>();
+        for (String agentName : agentNames) {
+            if (Objects.nonNull(agentName)) {
+                nullExcludedAgentNames.add(agentName);
+            }
+        }
         return nullExcludedAgentNames;
     }
 

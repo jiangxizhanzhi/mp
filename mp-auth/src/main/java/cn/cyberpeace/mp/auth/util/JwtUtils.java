@@ -120,10 +120,10 @@ public class JwtUtils {
         if (Objects.isNull(expireSeconds)) {
             expireSeconds = AuthConstant.TOKEN_EXPIRE_TIME;
         }
-        var expireDate = new Date(System.currentTimeMillis() + expireSeconds * AuthConstant.MILLI_TO_SECOND);
+        Date expireDate = new Date(System.currentTimeMillis() + expireSeconds * AuthConstant.MILLI_TO_SECOND);
         String secret = getSecret(user);
         try {
-            var algorithm = Algorithm.HMAC256(jwtSecret);
+            Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
             return JWT.create().withExpiresAt(expireDate).withClaim(AuthConstant.JWT_CLAIM_ID, user.getId())
                     .withClaim(AuthConstant.JWT_CLAIM_USERNAME, user.getUsername()).withClaim(AuthConstant.JWT_CLAIM_KEY, secret).sign(algorithm);
         } catch (JWTCreationException e) {
@@ -154,10 +154,10 @@ public class JwtUtils {
     }
 
     public static UserInfo validateToken(String token) {
-        var user = getUserInfo(token);
+        UserInfo user = getUserInfo(token);
         String jwtSecret = generateJwtSecret(user);
         try {
-            var algorithm = Algorithm.HMAC256(jwtSecret);
+            Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
             JWTVerifier verifier = JWT.require(algorithm).build();
             verifier.verify(token);
         } catch (AlgorithmMismatchException e) {
@@ -201,7 +201,7 @@ public class JwtUtils {
             throw new MpRuntimeException(AuthErrorCode.JWT_DECODE);
         }
 
-        var user = new UserInfo();
+        UserInfo user = new UserInfo();
         user.setId(jwt.getClaim(AuthConstant.JWT_CLAIM_ID).asString());
         user.setUsername(jwt.getClaim(AuthConstant.JWT_CLAIM_USERNAME).asString());
         user.setTokenSecret(jwt.getClaim(AuthConstant.JWT_CLAIM_KEY).asString());

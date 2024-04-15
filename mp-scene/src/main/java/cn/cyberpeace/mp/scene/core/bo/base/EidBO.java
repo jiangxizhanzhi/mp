@@ -18,7 +18,7 @@ public abstract class EidBO<M extends BaseModel, T extends EidBO<M, T>> extends 
 
     @Override
     public M toModel(String... ignoreFields) {
-        var obj = super.toModel(ignoreFields);
+        M obj = super.toModel(ignoreFields);
         obj.setId(eid);
         return obj;
     }

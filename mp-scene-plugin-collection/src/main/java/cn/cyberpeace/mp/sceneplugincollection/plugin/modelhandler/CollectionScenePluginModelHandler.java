@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.modelhandler;
 
-import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -17,20 +16,6 @@ import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneEl
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneElementPortMapper;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneMapper;
 
-
-@ClassFieldClasses({
-        CollectionPluginSceneBO.class,
-        CollectionPluginSceneElementBO.class,
-        CollectionPluginSceneElementPortBO.class,
-        CollectionPluginSceneModel.class,
-        CollectionPluginSceneElementModel.class,
-        CollectionPluginSceneElementPortModel.class,
-})
-@BeanFieldClasses({
-        CollectionPluginSceneMapper.class,
-        CollectionPluginSceneElementMapper.class,
-        CollectionPluginSceneElementPortMapper.class,
-})
 public class CollectionScenePluginModelHandler extends BasePluginModelHandler<
         SceneBO,
         SceneElementBO,
@@ -47,5 +32,22 @@ public class CollectionScenePluginModelHandler extends BasePluginModelHandler<
         CollectionScenePluginHandler> {
     public CollectionScenePluginModelHandler(CollectionScenePluginHandler pluginHandler) {
         init(pluginHandler);
+    }
+
+    @Override
+    protected void initClass() {
+        super.pluginSceneBOClass = CollectionPluginSceneBO.class;
+        super.pluginSceneElementBOClass = CollectionPluginSceneElementBO.class;
+        super.pluginSceneElementPortBOClass = CollectionPluginSceneElementPortBO.class;
+        super.pluginSceneModelClass = CollectionPluginSceneModel.class;
+        super.pluginSceneElementModelClass = CollectionPluginSceneElementModel.class;
+        super.pluginSceneElementPortModelClass = CollectionPluginSceneElementPortModel.class;
+    }
+
+    @Override
+    protected void initMapper() {
+        super.pluginSceneMapper = BeanCommon.getBean(CollectionPluginSceneMapper.class);
+        super.pluginSceneElementMapper = BeanCommon.getBean(CollectionPluginSceneElementMapper.class);
+        super.pluginSceneElementPortMapper = BeanCommon.getBean(CollectionPluginSceneElementPortMapper.class);
     }
 }

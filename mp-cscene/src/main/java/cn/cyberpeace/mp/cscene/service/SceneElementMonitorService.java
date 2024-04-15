@@ -13,7 +13,15 @@ import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.base.util.mptool.NumberUtil;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
-import cn.cyberpeace.mp.cscene.dto.element.*;
+import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
+import cn.cyberpeace.mp.cscene.dto.element.ElementHistogramInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
+import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityCountInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityPieChartInfo;
+import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
@@ -21,6 +29,9 @@ import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
+import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
@@ -39,6 +50,7 @@ import cn.cyberpeace.mp.situationaware.model.FileEventModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoCountModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoModel;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
@@ -55,8 +67,17 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -112,8 +133,8 @@ public class SceneElementMonitorService {
         String sceneId = baseRequest.getSceneId();
         String elementId = baseRequest.getElementIds().get(0);
 
-        var result = csceneInstanceService.getById(sceneId, null);
-        var csceneInstanceBO = result.getSource();
+        ServiceResult<CsceneInstanceBO> result = csceneInstanceService.getById(sceneId, null);
+        CsceneInstanceBO csceneInstanceBO = result.getSource();
 
         ElementMonitorBasicInfo elementMonitorBasicInfo = new ElementMonitorBasicInfo();
         elementMonitorBasicInfo.setSceneId(sceneId);
@@ -149,7 +170,12 @@ public class SceneElementMonitorService {
         List<ConnectionState> connectionStates = new ArrayList<>();
         if (Objects.nonNull(netConns.getSource()) && CollUtil.isNotEmpty(netConns.getSource().getList())) {
             List<WazuhNetworkConnectionModel> list = netConns.getSource().getList();
-            connectionStates = list.stream().map(model -> convertWazuhNetConn2ConnState(model)).collect(Collectors.toList());
+            List<ConnectionState> result = new ArrayList<>();
+            for (WazuhNetworkConnectionModel model : list) {
+                ConnectionState connectionState = convertWazuhNetConn2ConnState(model);
+                result.add(connectionState);
+            }
+            connectionStates = result;
         }
 
         return new ListObjServiceResult<>(new ListObjResult<>(connectionStates, netConns.getSource().getTotal()).asResult()).asResult();
@@ -218,9 +244,15 @@ public class SceneElementMonitorService {
             return;
         }
 
-        var topology = csceneInstanceBO.getScene().getTopology();
-        var topologyElements = topology.getElements();
-        Optional<SceneElementBO> tpoEleOptional = topologyElements.stream().filter(e -> Objects.equals(elementId, e.getId())).findFirst();
+        SceneTopologyBO topology = csceneInstanceBO.getScene().getTopology();
+        List<SceneElementBO> topologyElements = topology.getElements();
+        Optional<SceneElementBO> tpoEleOptional = Optional.empty();
+        for (SceneElementBO e : topologyElements) {
+            if (Objects.equals(elementId, e.getId())) {
+                tpoEleOptional = Optional.of(e);
+                break;
+            }
+        }
 
         if (tpoEleOptional.isPresent()) {
             SceneElementBO tpoEleBO = tpoEleOptional.get();
@@ -236,9 +268,16 @@ public class SceneElementMonitorService {
             return;
         }
 
-        var scenePluginDataBO = csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN);
-        var pluginElements = scenePluginDataBO.getElements();
-        var pluginEleOptional = pluginElements.entrySet().stream().filter(entry -> Objects.equals(entry.getKey(), elementId)).map(Map.Entry::getValue).findFirst();
+        ScenePluginDataBO scenePluginDataBO = csceneInstanceBO.getScene().getPlugins().get(CPCLOUD_PLUGIN);
+        Map<String, Map<String, Object>> pluginElements = scenePluginDataBO.getElements();
+        Optional<Map<String, Object>> pluginEleOptional = Optional.<Map<String, Object>>empty();
+        for (Map.Entry<String, Map<String, Object>> entry : pluginElements.entrySet()) {
+            if (Objects.equals(entry.getKey(), elementId)) {
+                Map<String, Object> value = entry.getValue();
+                pluginEleOptional = Optional.of(value);
+                break;
+            }
+        }
 
         if (pluginEleOptional.isPresent()) {
             CloudPluginSceneElementBO cloudPluginSceneElementBO = JsonCommon.snakeMapToBean(pluginEleOptional.get(), CloudPluginSceneElementBO.class);
@@ -310,26 +349,33 @@ public class SceneElementMonitorService {
         // 参考SystemTypeUtils
         if (StringUtils.isNotBlank(sceneElementBO.getSystemType())) {
             basicInfo.setSystemType(sceneElementBO.getSystemType());
-            var item = SystemTypeUtils.getSystemTypeItem(sceneElementBO.getSystemType());
+            SystemTypeUtils.SystemTypeItem item = SystemTypeUtils.getSystemTypeItem(sceneElementBO.getSystemType());
             basicInfo.setSystemTypeName(item.getName());
         }
 
         // ip, 用户名，登录方式
-        var ports = sceneElementBO.getPorts();
+        List<SceneElementPortBO> ports = sceneElementBO.getPorts();
         List<ElementPort> ePorts = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(ports)) {
-            ePorts = ports.stream().map(p -> {
-                ElementPort port = new ElementPort();
-                port.setIp(p.getIp());
-                port.setName(p.getName());
-                port.setId(p.getId());
-                port.setAccessModes(p.getAccessModes());
-                return port;
-            }).collect(Collectors.toList());
+            List<ElementPort> list = new ArrayList<>();
+            for (SceneElementPortBO p : ports) {
+                ElementPort elementPort = getElementPort(p);
+                list.add(elementPort);
+            }
+            ePorts = list;
         }
         basicInfo.setPorts(ePorts);
 
         formatHostStateBySceneElementBo(basicInfo, sceneElementBO);
+    }
+
+    private static ElementPort getElementPort(SceneElementPortBO p) {
+        ElementPort port = new ElementPort();
+        port.setIp(p.getIp());
+        port.setName(p.getName());
+        port.setId(p.getId());
+        port.setAccessModes(p.getAccessModes());
+        return port;
     }
 
     /**
@@ -387,14 +433,20 @@ public class SceneElementMonitorService {
         basicInfo.setCategory(cpSceneElementBO.getCategory());
     }
 
+    @Deprecated
     public ListObjServiceResult<CollectionHostEventBO> getModifyData(ElementMonitorRequest pageRequest, List<String> ruleGroups,
                                                                      String path) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
-        var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        String sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         // 不传节点id默认查询全部节点
         if (pageRequest.getElementIds() == null || pageRequest.getElementIds().isEmpty()) {
-            pageRequest.setElementIds(sceneHandler.getElementMap().values().stream().map(e -> e.getId()).collect(Collectors.toList()));
+            List<String> list = new ArrayList<>();
+            for (SceneElementBO e : sceneHandler.getElementMap().values()) {
+                String id = e.getId();
+                list.add(id);
+            }
+            pageRequest.setElementIds(list);
         }
         processRequest(pageRequest, sceneHandler);
         HostEventQueryParams hostEventQueryParams = new HostEventQueryParams();
@@ -449,13 +501,15 @@ public class SceneElementMonitorService {
             request.setPath(null);
         }
 
-        Map<String, SceneElementBO> eidMap = sceneHandler.getElementMap().values().stream()
-                .collect(Collectors.toMap(SceneElementBO::getEid, Function.identity(), (v1, v2) -> v2));
+        Map<String, SceneElementBO> eidMap = new HashMap<>();
+        for (SceneElementBO sceneElementBO : sceneHandler.getElementMap().values()) {
+            eidMap.put(sceneElementBO.getEid(), sceneElementBO);
+        }
         ListObjResult<FileEventModel> fileEventModels = dataCollectionService.queryFileOrRegisterEvents(request);
         if (CollectionUtils.isNotEmpty(fileEventModels.getObjs())) {
             List<FileEventModel> list = new ArrayList<>();
             Set<String> exist = new HashSet<>();
-            for (var x : fileEventModels.getObjs()) {
+            for (FileEventModel x : fileEventModels.getObjs()) {
                 if (!exist.contains(x.getAgentId() + x.getFilePath())) {
                     if (StringUtils.isBlank(hostEventQueryParams.getPath())) {
                         list.add(x);
@@ -524,59 +578,11 @@ public class SceneElementMonitorService {
         }
     }
 
-    /**
-     * 按时间分桶查询事件数
-     *
-     * @param pageRequest
-     * @param ruleGroups
-     * @param intervalMinutes
-     * @return
-     */
-    public List<ElementHistogramInfo> listEventHistogram(ElementMonitorRequest pageRequest, List<String> ruleGroups, Integer intervalMinutes, Integer bucketSize) {
-        if (Objects.isNull(intervalMinutes) || Objects.isNull(bucketSize)) {
-            log.error("intervalMinutes:{}, bucketSize:{} should not be null!", intervalMinutes, bucketSize);
-            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
-        }
-        var agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(pageRequest.getSceneId(), pageRequest.getElementIds());
-        if (CollectionUtil.isEmpty(agentNames)) {
-            return Collections.emptyList();
-        }
-
-        List<ElementHistogramInfo> infos = new ArrayList<>();
-        var wazuhEventRequest = buildWazuhRequest(pageRequest);
-        wazuhEventRequest.setAgentNames(agentNames);
-        wazuhEventRequest.setRuleGroups(ruleGroups);
-        wazuhEventRequest.setLevels(pageRequest.getLevels());
-        wazuhEventRequest.setPageSize(0);
-
-        String minBounds = TimeUtils.localTime2yyyyMMddHHmm(wazuhEventRequest.getEndTime().minusMinutes((long) intervalMinutes * (bucketSize)));
-        String maxBounds = TimeUtils.localTime2yyyyMMddHHmm(wazuhEventRequest.getEndTime().minusMinutes(1));
-
-        var resultMap = dataCollectionService.aggsDateHistogram(wazuhEventRequest, intervalMinutes + "m", minBounds, maxBounds);
-
-        if (CollectionUtil.isNotEmpty(resultMap)) {
-            resultMap.forEach((key, value) -> {
-                infos.add(ElementHistogramInfo.builder().time(key).count(Objects.isNull(value) ? 0 : value.intValue()).build());
-            });
-        }
-
-        //LocalDateTime endTime = null;
-        //if (Objects.nonNull(wazuhEventRequest) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
-        //    endTime = wazuhEventRequest.getEndTime();
-        //} else {
-        //    endTime = LocalDateTime.now();
-        //}
-        //var infos = processHistogramList(endTime, bucketSize, intervalMinutes, resultMap);
-        List<ElementHistogramInfo> finalList = infos.stream().limit(bucketSize).collect(Collectors.toList());
-        Collections.reverse(finalList);
-        return finalList;
-    }
-
     @Deprecated
     public List<ElementHistogramInfo> getModifyHistogram(ElementMonitorRequest pageRequest, List<String> ruleGroups, Integer segmentCount) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
-        var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        String sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         LocalDateTime startTime;
         LocalDateTime endTime;
         processRequest(pageRequest, sceneHandler);
@@ -584,7 +590,7 @@ public class SceneElementMonitorService {
         endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
         // 根据配置设置查询的最大条数
         pageRequest.setPageSize(10000);
-        var result = getModifyData(pageRequest, ruleGroups, null);
+        ListObjServiceResult<CollectionHostEventBO> result = getModifyData(pageRequest, ruleGroups, null);
         if (result == null || result.getSource() == null || CollUtil.isEmpty(result.getSource().getObjs())) {
             return new ArrayList<>();
         }
@@ -604,8 +610,8 @@ public class SceneElementMonitorService {
         result.getSource().getObjs().sort(Comparator.comparing(r -> r.getTime()));
         int currentHistogramInfo = 0;
         for (int i = 0; i < result.getSource().getObjs().size(); ) {
-            var collectionData = result.getSource().getObjs().get(i);
-            var histogramInfo = histogramInfos.get(currentHistogramInfo);
+            CollectionHostEventBO collectionData = result.getSource().getObjs().get(i);
+            ElementHistogramInfo histogramInfo = histogramInfos.get(currentHistogramInfo);
             // 超出时间区间的事件放到最后一个区间
             if ((currentHistogramInfo == histogramInfos.size() - 1) || collectionData.getTime().isBefore(histogramInfo.getLocalDateTime())) {
                 histogramInfo.setCount(histogramInfo.getCount() + 1);
@@ -622,16 +628,21 @@ public class SceneElementMonitorService {
         if (CollUtil.isEmpty(pageRequest.getElementIds())) {
             return new ListObjResult<>();
         }
-        var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        String sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         HumanCondition humanCondition = new HumanCondition().currentLink(SceneModel.class)
                 .filterEqual(SceneModel::getId, sceneId);
-        var sceneModel = sceneMapper.list(humanCondition);
+        List<SceneModel> sceneModel = sceneMapper.list(humanCondition);
         boolean isRunning = csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId());
         processVulnerabilityRequest(pageRequest, sceneModel.get(0), isRunning);
         LocalDateTime startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
         LocalDateTime endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
-        Map<String, String> elementEid2Name = sceneHandler.getElementMap().values().stream().collect(Collectors.toMap(e -> e.getEid(), e -> e.getName()));
+        Map<String, String> elementEid2Name = new HashMap<>();
+        for (SceneElementBO e : sceneHandler.getElementMap().values()) {
+            if (elementEid2Name.put(e.getEid(), e.getName()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
         List<String> agentNames = getAgentNames(pageRequest, sceneHandler);
         if (startTime.plusHours(getWazuhVulnerabilityScanInterval()).isEqual(endTime)) {
             processTimeRangeForVulnerabilityInfo(pageRequest, agentNames);
@@ -644,9 +655,9 @@ public class SceneElementMonitorService {
         request.setPageSize(pageRequest.getPageSize());
         request.setAgentNames(agentNames);
         request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
-        var result = dataCollectionService.queryVulnerabilityInfo(request, true);
+        ListObjResult<WazuhVulnerabilityInfoModel> result = dataCollectionService.queryVulnerabilityInfo(request, true);
         List<ElementVulnerabilityInfo> vulnerabilityInfos = new ArrayList<>();
-        result.getObjs().forEach(r -> {
+        for (WazuhVulnerabilityInfoModel r : result.getObjs()) {
             ElementVulnerabilityInfo vulnerabilityInfo = new ElementVulnerabilityInfo();
             vulnerabilityInfo.setNodeName(elementEid2Name.get(r.getAgentName()));
             vulnerabilityInfo.setCve(r.getVulnerability().getCve());
@@ -660,7 +671,7 @@ public class SceneElementMonitorService {
             vulnerabilityInfo.setReferences(r.getVulnerability().getReferences());
             vulnerabilityInfo.setRationale(r.getVulnerability().getRationale());
             vulnerabilityInfos.add(vulnerabilityInfo);
-        });
+        }
         return new ListObjResult<>(vulnerabilityInfos, result.getTotal());
     }
 
@@ -675,15 +686,15 @@ public class SceneElementMonitorService {
         request.setAgentNames(agentNames);
         request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
         int halfScanTime = getWazuhVulnerabilityScanInterval() / 2;
-        var first = dataCollectionService.queryVulnerabilityInfo(request, false);
-        var last = dataCollectionService.queryVulnerabilityInfo(request, true);
+        ListObjResult<WazuhVulnerabilityInfoModel> first = dataCollectionService.queryVulnerabilityInfo(request, false);
+        ListObjResult<WazuhVulnerabilityInfoModel> last = dataCollectionService.queryVulnerabilityInfo(request, true);
         if (CollUtil.isEmpty(first.getObjs()) || CollUtil.isEmpty(last.getObjs())) {
             // 两次上报漏洞信息的间隔超过扫描间隔且查不到数据时，将开始时间往前推扫描间隔的一半进行查询
             pageRequest.setStartTime(TimeUtils.localDateTimeToString(startTime.plusHours(-halfScanTime)));
             return;
         }
-        var firstTime = first.getObjs().get(0).getTime();
-        var lastTime = last.getObjs().get(0).getTime();
+        LocalDateTime firstTime = first.getObjs().get(0).getTime();
+        LocalDateTime lastTime = last.getObjs().get(0).getTime();
         if (firstTime.plusHours(halfScanTime).isBefore(lastTime)) {
             pageRequest.setStartTime(TimeUtils.localDateTimeToString(lastTime.plusHours(-halfScanTime)));
         } else if (firstTime.plusHours(halfScanTime).isAfter(lastTime)) {
@@ -696,11 +707,11 @@ public class SceneElementMonitorService {
         if (CollUtil.isEmpty(pageRequest.getElementIds())) {
             return new ArrayList<>();
         }
-        var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        String sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         HumanCondition humanCondition = new HumanCondition().currentLink(SceneModel.class)
                 .filterEqual(SceneModel::getId, sceneId);
-        var sceneModel = sceneMapper.list(humanCondition);
+        List<SceneModel> sceneModel = sceneMapper.list(humanCondition);
         boolean isRunning = csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId());
         processVulnerabilityRequest(pageRequest, sceneModel.get(0), isRunning);
         List<String> agentNames = getAgentNames(pageRequest, sceneHandler);
@@ -715,21 +726,25 @@ public class SceneElementMonitorService {
         request.setEndTime(endTime);
         request.setAgentNames(agentNames);
         request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
-        var result = dataCollectionService.queryVulnerabilityCountInfo(request,
+        List<WazuhVulnerabilityInfoCountModel> result = dataCollectionService.queryVulnerabilityCountInfo(request,
                 false, "data.vulnerability.severity", "severity");
         if (CollUtil.isEmpty(result)) {
             return new ArrayList<>();
         }
-        result = result.stream()
-                .filter(countModel -> !countModel.getFieldName().equals("-"))
-                .collect(Collectors.toList());
+        List<WazuhVulnerabilityInfoCountModel> list = new ArrayList<>();
+        for (WazuhVulnerabilityInfoCountModel wazuhVulnerabilityInfoCountModel : result) {
+            if (!wazuhVulnerabilityInfoCountModel.getFieldName().equals("-")) {
+                list.add(wazuhVulnerabilityInfoCountModel);
+            }
+        }
+        result = list;
         long i = 0;
         for (WazuhVulnerabilityInfoCountModel countModel : result) {
             i = countModel.getCount() + i;
         }
         long sum = i;
         List<ElementVulnerabilityPieChartInfo> pieChartInfos = new ArrayList<>();
-        result.forEach(r -> {
+        for (WazuhVulnerabilityInfoCountModel r : result) {
             ElementVulnerabilityPieChartInfo pieChartInfo = new ElementVulnerabilityPieChartInfo();
             // 漏洞等级转化为小写，便于前端转化
             pieChartInfo.setSeverity(r.getFieldName().toLowerCase());
@@ -746,7 +761,7 @@ public class SceneElementMonitorService {
             // 计算百分比 单位：%
             pieChartInfo.setPercent(BigDecimal.valueOf(r.getCount()).divide(BigDecimal.valueOf(sum), 4, RoundingMode.HALF_DOWN).multiply(BigDecimal.valueOf(100)).doubleValue());
             pieChartInfos.add(pieChartInfo);
-        });
+        }
         pieChartInfos.sort(Comparator.comparing(ElementVulnerabilityPieChartInfo::getSeverityLevel));
         return pieChartInfos;
     }
@@ -756,11 +771,11 @@ public class SceneElementMonitorService {
         if (CollUtil.isEmpty(pageRequest.getElementIds())) {
             return new ArrayList<>();
         }
-        var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        String sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         HumanCondition humanCondition = new HumanCondition().currentLink(SceneModel.class)
                 .filterEqual(SceneModel::getId, sceneId);
-        var sceneModel = sceneMapper.list(humanCondition);
+        List<SceneModel> sceneModel = sceneMapper.list(humanCondition);
         boolean isRunning = csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId());
         processVulnerabilityRequest(pageRequest, sceneModel.get(0), isRunning);
         List<String> agentNames = getAgentNames(pageRequest, sceneHandler);
@@ -775,15 +790,15 @@ public class SceneElementMonitorService {
         request.setEndTime(endTime);
         request.setAgentNames(agentNames);
         request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
-        var result = dataCollectionService.queryVulnerabilityCountInfo(request,
+        List<WazuhVulnerabilityInfoCountModel> result = dataCollectionService.queryVulnerabilityCountInfo(request,
                 true, "data.vulnerability.package.name", "package_name");
         List<ElementVulnerabilityCountInfo> countInfos = new ArrayList<>();
-        result.forEach(r -> {
+        for (WazuhVulnerabilityInfoCountModel r : result) {
             ElementVulnerabilityCountInfo countInfo = new ElementVulnerabilityCountInfo();
             countInfo.setPackageName(r.getFieldName());
             countInfo.setCount((int) r.getCount());
             countInfos.add(countInfo);
-        });
+        }
         return countInfos;
     }
 
@@ -819,10 +834,14 @@ public class SceneElementMonitorService {
 
     private List<String> getAgentNames(ElementMonitorRequest pageRequest, SceneHandler sceneHandler) {
         List<String> agentNames;
-        agentNames = sceneHandler.getElementMap().values().stream()
-                .filter(e -> pageRequest.getElementIds().contains(e.getId()))
-                .map(e -> e.getEid())
-                .collect(Collectors.toList());
+        List<String> list = new ArrayList<>();
+        for (SceneElementBO e : sceneHandler.getElementMap().values()) {
+            if (pageRequest.getElementIds().contains(e.getId())) {
+                String eid = e.getEid();
+                list.add(eid);
+            }
+        }
+        agentNames = list;
         return agentNames;
     }
 
@@ -958,7 +977,7 @@ public class SceneElementMonitorService {
 
     private List<ElementHistogramInfo> processHistogramList(LocalDateTime endTime, int bucketSize, int invervalMinutes, Map<String, Long> resultMap) {
         List<ElementHistogramInfo> infos = new ArrayList<>();
-        var calculatedTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(), endTime.getMinute() / invervalMinutes * invervalMinutes));
+        LocalDateTime calculatedTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(), endTime.getMinute() / invervalMinutes * invervalMinutes));
 
         //int minutes = LocalDateTime.now().getMinute() / invervalMinutes * invervalMinutes;
         //int hour = Long.valueOf(Duration.between(LocalDate.now().atTime(LocalTime.MIN), LocalDateTime.now()).getSeconds() / 3600).intValue();
@@ -967,7 +986,7 @@ public class SceneElementMonitorService {
 
         for (int i = 0; i < bucketSize; i++) {
             String timeStr = TimeUtils.localTime2yyyyMMddHHmm(calculatedTime);
-            var info = new ElementHistogramInfo();
+            ElementHistogramInfo info = new ElementHistogramInfo();
             if (Objects.nonNull(resultMap) && Objects.nonNull(resultMap.get(timeStr))) {
                 info.setTime(timeStr);
                 info.setCount(resultMap.get(timeStr).intValue());

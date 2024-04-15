@@ -30,9 +30,11 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     private String logo;
     @ApiModelProperty(value = "场景模板拓扑配置")
     private SceneConfigDataBO sceneConfig;
-    @ApiModelProperty(value = "场景模板测试实例")
+    @ApiModelProperty(value = "场景模板测试实例", hidden = true)
+    @Deprecated
     private List<CsceneInstanceBO> testScenes;
-    @ApiModelProperty(value = "场景模板应用实例")
+    @Deprecated
+    @ApiModelProperty(value = "场景模板应用实例", hidden = true)
     private List<CsceneInstanceBO> appScenes;
     @ApiModelProperty(value = "场景上下文属性")
     private CsceneContextBO context;
@@ -54,7 +56,7 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
 
     @Override
     public CsceneModel toModel(String... ignoreFields) {
-        var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
+        CsceneModel obj = super.toModel(ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(CsceneModel::getSceneConfig)));
         if (sceneConfig != null && sceneConfig.getTopology() != null && sceneConfig.getTopology().getScene() != null) {
             obj.setSceneConfig(sceneConfig.getTopology().getScene().getEid());
@@ -64,7 +66,7 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
 
     @Override
     public CsceneBO export() {
-        var csceneBO = super.export();
+        CsceneBO csceneBO = super.export();
         csceneBO.setTestScenes(null);
         csceneBO.setAppScenes(null);
         if (sceneConfig != null) {
@@ -74,7 +76,7 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     }
 
     public CsceneInstanceBO exportToCsceneInstance() {
-        var csceneInstance = export(CsceneInstanceBO.class, CsceneInstaneRoleBO.class,
+        CsceneInstanceBO csceneInstance = export(CsceneInstanceBO.class, CsceneInstaneRoleBO.class,
                 CsceneBO::getType, CsceneBO::getSceneConfig, CsceneBO::getTestScenes, CsceneBO::getAppScenes);
         if (sceneConfig != null) {
             csceneInstance.setScene(sceneConfig.exportToScene());

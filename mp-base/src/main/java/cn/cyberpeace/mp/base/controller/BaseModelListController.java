@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
  * @param <M> 数据model
  * @param <S> 数据model对应的service
  */
+@Deprecated
 public interface BaseModelListController<M extends BaseModel, Q extends QueryParams, S extends BaseModelService<M, Q>>
         extends BaseModelListControllerBase {
 

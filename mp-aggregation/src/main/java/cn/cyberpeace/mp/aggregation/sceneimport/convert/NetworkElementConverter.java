@@ -42,7 +42,9 @@ class NetworkElementConverter implements IConverter {
         // 处理下外部网络
         this.prepareExternalNetwork(container);
         if (CollectionUtils.isNotEmpty(results)) {
-            results.stream().forEach(network -> this.createElementAndPort(network, container));
+            for (NetworkElementParseResult network : results) {
+                this.createElementAndPort(network, container);
+            }
         }
     }
 

@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.cscene.util;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
-import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
+import cn.cyberpeace.mp.cscene.core.BcSceneInstanceHandler;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -38,7 +38,7 @@ public final class NodeLimitUtils {
      * @param instance
      * @return
      */
-    public static UpdateResult addLimitedNodeCount(CsceneInstanceHandler instance) {
+    public static UpdateResult addLimitedNodeCount(BcSceneInstanceHandler instance) {
         int limitedNodeCount = countVirtualElement(instance);
         return addLimitedNodeCount(limitedNodeCount);
     }
@@ -48,7 +48,7 @@ public final class NodeLimitUtils {
      * @param instance
      * @return
      */
-    public static void substractLimitedNodeCount(CsceneInstanceHandler instance) {
+    public static void substractLimitedNodeCount(BcSceneInstanceHandler instance) {
         int limitedNodeCount = countVirtualElement(instance);
         substractLimitedNodeCount(limitedNodeCount);
     }
@@ -114,7 +114,7 @@ public final class NodeLimitUtils {
      * @param handler
      * @return
      */
-    private static int countVirtualElement(CsceneInstanceHandler handler) {
+    private static int countVirtualElement(BcSceneInstanceHandler handler) {
         if (handler == null || handler.getCscene() == null || handler.getCscene().getScene() == null) {
             return 0;
         }
@@ -145,10 +145,10 @@ public final class NodeLimitUtils {
         int elementCount = 0;
         if (cscene != null && cscene.getSceneConfig() != null && cscene.getSceneConfig().getPlugins() != null
                 && cscene.getSceneConfig().getPlugins().containsKey(PluginConstant.PLUGIN_KEY)) {
-            var pluginElements = cscene.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getElements();
+            Map<String, Map<String, Object>> pluginElements = cscene.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getElements();
             if (pluginElements != null) {
-                for (var e : pluginElements.values()) {
-                    var virtualType = e.get("virtual_type");
+                for (Map<String, Object> e : pluginElements.values()) {
+                    Object virtualType = e.get("virtual_type");
                     if (virtualType != null) {
                         if (isLimitedNode(Integer.parseInt(virtualType.toString()))) {
                             elementCount++;
@@ -167,7 +167,8 @@ public final class NodeLimitUtils {
         if (virtualType == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER ||
                 virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE ||
                 virtualType == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE ||
-                virtualType == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
+                virtualType == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER ||
+                virtualType == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS) {
             return true;
         }
         return false;

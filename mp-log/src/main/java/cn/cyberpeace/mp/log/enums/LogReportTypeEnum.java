@@ -35,9 +35,9 @@ public enum LogReportTypeEnum {
     private static Map<String, LogReportTypeEnum> map = new ConcurrentHashMap<>();
 
     static {
-        Arrays.stream(LogReportTypeEnum.values()).forEach(
-                t -> map.put(t.name(), t)
-        );
+        for (LogReportTypeEnum t : LogReportTypeEnum.values()) {
+            map.put(t.name(), t);
+        }
     }
 
     public String getPrefix() {

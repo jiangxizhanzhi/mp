@@ -9,6 +9,7 @@ import java.util.Arrays;
 /**
  * 通用的查询列表的controller base
  */
+@Deprecated
 public interface BaseModelListControllerBase {
 
     /**
@@ -17,7 +18,7 @@ public interface BaseModelListControllerBase {
      * @return boolean
      */
     default boolean isUnlimitPagination(String listFuncName) {
-        var unlimitPaginationAnnotation = getClass().getAnnotation(UnlimitPagination.class);
+        UnlimitPagination unlimitPaginationAnnotation = getClass().getAnnotation(UnlimitPagination.class);
         if (unlimitPaginationAnnotation == null) {
             return false;
         }

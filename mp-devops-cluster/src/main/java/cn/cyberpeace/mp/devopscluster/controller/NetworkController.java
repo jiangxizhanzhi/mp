@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,6 +44,7 @@ import java.util.stream.Collectors;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/network")
 @Api(tags = "网络实例管理-网络")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.NETWORK_MANAGEMENT)
 public class NetworkController {
 
     private final NetworkConverter networkConverter;
@@ -57,33 +61,26 @@ public class NetworkController {
     public PageResult<NetworkPageVO> page(NetworkPageRequest request){
         BasePageBO<NetworkBO> model = networkConverter.page(new NetworkPageDTO(request));
         List<NetworkBO> networks = model.getList();
-        List<NetworkPageVO> networkList = networks.stream().map(networkModel -> {
-            List<NetworkSubnetBO> subnetList = networkModel.getSubnets();
-            List<NetworkPageVO.Subnet> subnets = Lists.newArrayList();
-            if (CollectionUtils.isNotEmpty(subnetList)) {
-                subnets = subnetList.stream().map(subnet -> new NetworkPageVO.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp(), subnet.getFreeIps(), subnet.getUsedIps())).collect(Collectors.toList());
-            }
-            return NetworkPageVO.builder().name(networkModel.getName()).networkType(networkModel.getNetworkType())
-                    .status(networkModel.getStatus()).subnets(subnets).createdAt(networkModel.getCreatedAt())
-                    .downloadSpeed(networkModel.getDownloadSpeed())
-                    .uploadSpeed(networkModel.getUploadSpeed())
-                    //.freeIps(networkModel.getFreeIps())
-                    //.usedIps(networkModel.getUsedIps())
-                    .nodeNum(networkModel.getNodeNum())
-                    .build();
-                }
-        ).collect(Collectors.toList());
+        List<NetworkPageVO> networkList = new ArrayList<>();
+        for (NetworkBO networkModel : networks) {
+            NetworkPageVO pageVO = getNetworkPageVO(networkModel);
+            networkList.add(pageVO);
+        }
 
         // 处理场景信息
-        List<String> networkNames = networkList.stream().map(NetworkPageVO::getName).collect(Collectors.toList());
+        List<String> networkNames = new ArrayList<>();
+        for (NetworkPageVO networkPageVO : networkList) {
+            String name = networkPageVO.getName();
+            networkNames.add(name);
+        }
         Consumer<Map<String, CsceneNodeInfoBO>> consumer = (map) -> {
-            networkList.forEach(net -> {
-                var csceneNodeInfoBO = map.get(net.getName());
+            for (NetworkPageVO net : networkList) {
+                CsceneNodeInfoBO csceneNodeInfoBO = map.get(net.getName());
                 if (Objects.nonNull(csceneNodeInfoBO)) {
                     net.setSceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName());
                     net.setReferenceType(csceneNodeInfoBO.getReferenceType());
                 }
-            });
+            }
         };
 
         sceneInfoService.processSceneInfo(networkNames, consumer);
@@ -91,7 +88,26 @@ public class NetworkController {
         return new PageResult<>(networkList,model.getTotal());
     }
 
-
+    private static NetworkPageVO getNetworkPageVO(NetworkBO networkModel) {
+        List<NetworkSubnetBO> subnetList = networkModel.getSubnets();
+        List<NetworkPageVO.Subnet> subnets = Lists.newArrayList();
+        if (CollectionUtils.isNotEmpty(subnetList)) {
+            List<NetworkPageVO.Subnet> list = new ArrayList<>();
+            for (NetworkSubnetBO subnet : subnetList) {
+                NetworkPageVO.Subnet subnet1 = new NetworkPageVO.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp(), subnet.getFreeIps(), subnet.getUsedIps());
+                list.add(subnet1);
+            }
+            subnets = list;
+        }
+        return NetworkPageVO.builder().name(networkModel.getName()).networkType(networkModel.getNetworkType())
+                .status(networkModel.getStatus()).subnets(subnets).createdAt(networkModel.getCreatedAt())
+                .downloadSpeed(networkModel.getDownloadSpeed())
+                .uploadSpeed(networkModel.getUploadSpeed())
+                //.freeIps(networkModel.getFreeIps())
+                //.usedIps(networkModel.getUsedIps())
+                .nodeNum(networkModel.getNodeNum())
+                .build();
+    }
 
 
     /**

@@ -67,7 +67,7 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
      */
     @Override
     public List<AlarmStatisticsVO> serviceAlarmStatistics(int days) {
-        var list = this.getModelMapper().serviceAlarmStatistics(LocalDateTime.now(), days);
+        List<AlarmStatisticsVO> list = this.getModelMapper().serviceAlarmStatistics(LocalDateTime.now(), days);
 
         return processTrend(list, days);
     }
@@ -78,7 +78,7 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
      */
     @Override
     public List<AlarmStatisticsVO> serverAlarmStatistics(int days) {
-        var list = this.getModelMapper().serverAlarmStatistics(LocalDateTime.now(), days);
+        List<AlarmStatisticsVO> list = this.getModelMapper().serverAlarmStatistics(LocalDateTime.now(), days);
         return processTrend(list, days);
     }
 
@@ -89,7 +89,13 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
         LocalDate date = startDate.plusDays(1);
         while (!date.isAfter(nowDate)) {
             LocalDate finalDate = date;
-            Optional<AlarmStatisticsVO> optional = voList.stream().filter(vo -> vo.getAlarmDate().isEqual(finalDate)).findFirst();
+            Optional<AlarmStatisticsVO> optional = Optional.empty();
+            for (AlarmStatisticsVO alarmStatisticsVO : voList) {
+                if (alarmStatisticsVO.getAlarmDate().isEqual(finalDate)) {
+                    optional = Optional.of(alarmStatisticsVO);
+                    break;
+                }
+            }
             if (optional.isPresent()) {
                 finalList.add(optional.get());
             } else {
@@ -180,44 +186,18 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
         return processedStartTime;
     }
 
-
-    /**
-     * 计算endtime
-     * @param endTime
-     * @param timeSlotEnum
-     * @return
-     */
-    private LocalDateTime processEndTime(LocalDateTime endTime, TimeSlotEnums timeSlotEnum) {
-
-        LocalDateTime processedEndTime = null;
-
-        if (Objects.equals(timeSlotEnum, TimeSlotEnums.DAY)) {
-            // 按天统计
-            processedEndTime = LocalDateTime.of(endTime.plusDays(1).toLocalDate(), LocalTime.MIN);
-        //} else if (Objects.equals(timeSlotEnum, TimeSlotEnums.WEEK)) {
-        //    // 按星期统计
-        //    LocalDate firstDayOfNextWeek = endTime.toLocalDate().with(TemporalAdjusters.next(DayOfWeek.MONDAY));
-        //    processedEndTime = LocalDateTime.of(firstDayOfNextWeek, LocalTime.MIN);
-        } else if (Objects.equals(timeSlotEnum, TimeSlotEnums.MONTH)) {
-            // 按月统计
-            LocalDate firstDayOfNextMonth = endTime.toLocalDate().with(TemporalAdjusters.firstDayOfNextMonth());
-            processedEndTime = LocalDateTime.of(firstDayOfNextMonth, LocalTime.MIN);
-        } else if (Objects.equals(timeSlotEnum, TimeSlotEnums.YEAR)) {
-            // 按年统计
-            LocalDate firstDayOfNextYear = endTime.toLocalDate().with(TemporalAdjusters.firstDayOfNextYear());
-            processedEndTime = LocalDateTime.of(firstDayOfNextYear, LocalTime.MIN);
-        }
-
-        return processedEndTime;
-    }
-
-
     private List<AlarmStatisticsTrendVO> processTrendByDateProcessor(List<AlarmStatisticsTrendVO> trendVOList, TimeUnitProcessor timeUnitProcessor, LocalDateTime startTime, LocalDateTime endTime) {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern(timeUnitProcessor.getDateFormatter());
         List<AlarmStatisticsTrendVO> finalList = new ArrayList<>();
         while (!endTime.isBefore(startTime)) {
             String calculatedTimeBucket = dtf.format(endTime);
-            Optional<AlarmStatisticsTrendVO> optional = trendVOList.stream().filter(vo -> Objects.equals(vo.getTimeBucket(), calculatedTimeBucket)).findFirst();
+            Optional<AlarmStatisticsTrendVO> optional = Optional.empty();
+            for (AlarmStatisticsTrendVO alarmStatisticsTrendVO : trendVOList) {
+                if (Objects.equals(alarmStatisticsTrendVO.getTimeBucket(), calculatedTimeBucket)) {
+                    optional = Optional.of(alarmStatisticsTrendVO);
+                    break;
+                }
+            }
             if (optional.isPresent()) {
                 finalList.add(optional.get());
             } else {
@@ -250,7 +230,7 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
         }
 
         public static DateFormatAggr f(String fieldName, String dateFormatter) {
-            var aggregation = new DateFormatAggr();
+            DateFormatAggr aggregation = new DateFormatAggr();
             aggregation.setFieldName(fieldName);
             aggregation.addCalc(genCalcDateFormatter(dateFormatter));
             return aggregation;

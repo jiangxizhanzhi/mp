@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import org.springframework.stereotype.Component;
 
 import javax.validation.ConstraintViolation;
+import javax.validation.Path;
 import javax.validation.Validator;
 import java.util.Set;
 
@@ -32,10 +33,10 @@ public class ValidationCommon {
 
     public static <T> void handleValidateResult(Set<ConstraintViolation<T>> validateResult) {
         if (!validateResult.isEmpty()) {
-            for (var constraintViolation : validateResult) {
-                var propertyPath = constraintViolation.getPropertyPath();
-                var value = constraintViolation.getInvalidValue();
-                var message = constraintViolation.getMessage();
+            for (ConstraintViolation<T> constraintViolation : validateResult) {
+                Path propertyPath = constraintViolation.getPropertyPath();
+                Object value = constraintViolation.getInvalidValue();
+                String message = constraintViolation.getMessage();
                 throw new MpRuntimeException(BaseErrorCode.FIELD_VALUE_INVALID.format(propertyPath.toString(),
                         value.toString(), message));
             }

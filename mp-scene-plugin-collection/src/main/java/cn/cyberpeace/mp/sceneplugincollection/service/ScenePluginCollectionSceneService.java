@@ -1,13 +1,13 @@
 package cn.cyberpeace.mp.sceneplugincollection.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.service.impl.FdfsRemoteFileServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -18,15 +18,32 @@ import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.base.util.mptool.DatePattern;
 import cn.cyberpeace.mp.base.util.mptool.URLUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerFileGetData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerFileGetResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerGetData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
-import cn.cyberpeace.mp.sceneplugincollection.bo.*;
+import cn.cyberpeace.mp.sceneplugincollection.bo.AttCkTypeCount;
+import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowAttackCountBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupByDestinationIpAndSeverityBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupPortWithProtocolBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigAssetBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigCategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneModel;
@@ -39,13 +56,32 @@ import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneMa
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleMapper;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleTypeMapper;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleTypeRelationMapper;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupByDestinationPortParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowSimulationParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.util.DatetimeUtil;
 import cn.cyberpeace.mp.sceneplugincollection.util.EsHttpUtil;
 import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
-import cn.cyberpeace.mp.situationaware.bo.*;
+import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackPortAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackSeverityAndDestinationIpAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
+import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
-import cn.cyberpeace.mp.situationaware.model.*;
+import cn.cyberpeace.mp.situationaware.model.FileEventModel;
+import cn.cyberpeace.mp.situationaware.model.FlowClassificationModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhSystemUserModel;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
@@ -80,7 +116,17 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -133,9 +179,6 @@ public class ScenePluginCollectionSceneService {
     @Autowired
     private CollectionPluginSceneMapper collectionPluginSceneMapper;
 
-    @Autowired
-    private FdfsRemoteFileServiceImpl fdfsRemoteFileService;
-
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(List<String> sceneIds, FlowQueryParams queryParams) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, queryParams.getNodeIds());
@@ -151,7 +194,7 @@ public class ScenePluginCollectionSceneService {
         if (CollectionUtils.isNotEmpty(queryParams.getSourceNodeIds())) {
             List<String> ips = new ArrayList<>();
             for (String nodeId : queryParams.getSourceNodeIds()) {
-                var nodeIps = batchSceneHandler.getIpsByNodeId(nodeId);
+                List<String> nodeIps = batchSceneHandler.getIpsByNodeId(nodeId);
                 if (CollectionUtils.isNotEmpty(nodeIps)) {
                     ips.addAll(nodeIps);
                 }
@@ -166,7 +209,7 @@ public class ScenePluginCollectionSceneService {
         if (CollectionUtils.isNotEmpty(queryParams.getTargetNodeIds())) {
             List<String> ips = new ArrayList<>();
             for (String nodeId : queryParams.getTargetNodeIds()) {
-                var nodeIps = batchSceneHandler.getIpsByNodeId(nodeId);
+                List<String> nodeIps = batchSceneHandler.getIpsByNodeId(nodeId);
                 if (CollectionUtils.isNotEmpty(nodeIps)) {
                     ips.addAll(nodeIps);
                 }
@@ -240,30 +283,52 @@ public class ScenePluginCollectionSceneService {
             EsHttpUtil.updateDataMaxQueryNum(batchSceneHandler.getFlowCollectors().get(0), flowLogBOSResult.getTotal());
         }
 
-        var flowLogBOS = flowLogBOSResult.getObjs();
+        List<FlowLogBO> flowLogBOS = flowLogBOSResult.getObjs();
         Map<String, FlowClassificationModel> allCategoryDicMap = flowClassificationsService.findAllCategoryDicMap();
-        flowLogBOS.stream().filter(v -> Objects.nonNull(v.getSuricata())).forEach(flowLogBO -> {
-            if (MapUtils.isNotEmpty(allCategoryDicMap)) {
-                List<String> categoryList;
-                List<String> categoryListAtt;
-                if (CollectionUtils.isNotEmpty(queryParams.getAttackTypes())) {
-                    categoryList = flowLogBO.getSuricata().getCategory().stream()
-                            .map(c -> this.globalizedWithAttackWay(queryParams.getAttackTypes().get(0), allCategoryDicMap)).collect(Collectors.toList());
-                    categoryListAtt = flowLogBO.getSuricata().getCategory().stream()
-                            .map(c -> this.globalizedWithAttCkWay(queryParams.getAttackTypes().get(0), allCategoryDicMap)).collect(Collectors.toList());
-                } else {
-                    categoryList = flowLogBO.getSuricata().getCategory().stream()
-                            .map(c -> this.globalizedWithAttackWay(c, allCategoryDicMap)).collect(Collectors.toList());
-                    categoryListAtt = flowLogBO.getSuricata().getCategory().stream()
-                            .map(c -> this.globalizedWithAttCkWay(c, allCategoryDicMap)).collect(Collectors.toList());
+        for (FlowLogBO v : flowLogBOS) {
+            if (Objects.nonNull(v.getSuricata())) {
+                if (MapUtils.isNotEmpty(allCategoryDicMap)) {
+                    List<String> categoryList;
+                    List<String> categoryListAtt;
+                    if (CollectionUtils.isNotEmpty(queryParams.getAttackTypes())) {
+                        List<String> list = new ArrayList<>();
+                        for (String s : v.getSuricata().getCategory()) {
+                            String globalizedWithAttackWay = this.globalizedWithAttackWay(queryParams.getAttackTypes().get(0), allCategoryDicMap);
+                            list.add(globalizedWithAttackWay);
+                        }
+                        categoryList = list;
+                        List<String> result = new ArrayList<>();
+                        for (String c : v.getSuricata().getCategory()) {
+                            String s = this.globalizedWithAttCkWay(queryParams.getAttackTypes().get(0), allCategoryDicMap);
+                            result.add(s);
+                        }
+                        categoryListAtt = result;
+                    } else {
+                        List<String> list = new ArrayList<>();
+                        for (String s : v.getSuricata().getCategory()) {
+                            String globalizedWithAttackWay = this.globalizedWithAttackWay(s, allCategoryDicMap);
+                            list.add(globalizedWithAttackWay);
+                        }
+                        categoryList = list;
+                        List<String> result = new ArrayList<>();
+                        for (String c : v.getSuricata().getCategory()) {
+                            String s = this.globalizedWithAttCkWay(c, allCategoryDicMap);
+                            result.add(s);
+                        }
+                        categoryListAtt = result;
+                    }
+
+                    v.getSuricata().setCategory(categoryList);
+                    v.getSuricata().setCategoryAtt(categoryListAtt);
                 }
-
-                flowLogBO.getSuricata().setCategory(categoryList);
-                flowLogBO.getSuricata().setCategoryAtt(categoryListAtt);
             }
-        });
+        }
 
-        List<CollectionFlowBO> list = flowLogBOSResult.getObjs().stream().map(flowLogBO -> this.buildCollectionFlowBOFrom(flowLogBO, batchSceneHandler.getAllMac2ElementMapForNodes(), batchSceneHandler.getAllIp2ElementMapForScene(), batchSceneHandler.getAllMac2SceneIdMap())).collect(Collectors.toList());
+        List<CollectionFlowBO> list = new ArrayList<>();
+        for (FlowLogBO flowLogBO : flowLogBOSResult.getObjs()) {
+            CollectionFlowBO collectionFlowBO = this.buildCollectionFlowBOFrom(flowLogBO, batchSceneHandler.getAllMac2ElementMapForNodes(), batchSceneHandler.getAllIp2ElementMapForScene(), batchSceneHandler.getAllMac2SceneIdMap());
+            list.add(collectionFlowBO);
+        }
         return new ListObjServiceResult<>(new ListObjResult<>(list, flowLogBOSResult.getTotal()));
     }
 
@@ -294,7 +359,7 @@ public class ScenePluginCollectionSceneService {
     }
 
     public ListObjServiceResult<CollectionHostStateBO> listHostStates(String sceneId, HostStateQueryParams queryParams) {
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         // 没有采集插件
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         if (pluginHandler == null) {
@@ -304,7 +369,7 @@ public class ScenePluginCollectionSceneService {
         List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
         Map<String, SceneElementBO> agentName2Element = new HashMap<>();
         srcElements.forEach(srcElement -> {
-            var collectionElement = pluginHandler.getElement(srcElement.getId());
+            CollectionPluginSceneElementBO collectionElement = pluginHandler.getElement(srcElement.getId());
             if (collectionElement == null || CollectionUtils.isEmpty(collectionElement.getProbes())) {
                 return;
             }
@@ -318,7 +383,7 @@ public class ScenePluginCollectionSceneService {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
         // 构建查询参数
-        var request = new WazuhMonitorEventsRequest();
+        WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
         request.setPageNum(queryParams.getPage());
         // todo 暂时最多取 1000 条
         request.setPageSize(Optional.ofNullable(queryParams.getPageSize()).orElse(1000));
@@ -337,7 +402,7 @@ public class ScenePluginCollectionSceneService {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
         // 构建查询参数
-        var request = new WazuhMonitorEventsRequest();
+        WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
         request.setPageNum(queryParams.getPage());
         request.setPageSize(Optional.ofNullable(queryParams.getPageSize()).orElse(1000));
         request.setAgentNames(agentNames);
@@ -354,7 +419,7 @@ public class ScenePluginCollectionSceneService {
             return Collections.emptyMap();
         }
         // 构建查询参数
-        var request = new WazuhMonitorEventsRequest();
+        WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
         int topSize = queryParams.getPageSize();
         request.setAgentNames(agentNames);
         // 开始时间,默认为场景创建时间
@@ -367,9 +432,11 @@ public class ScenePluginCollectionSceneService {
     private ListObjServiceResult<CollectionHostStateBO> doQueryHostStateEventsWithTimeRange(String sceneId, Map<String, SceneElementBO> agentName2Element, WazuhMonitorEventsRequest request) {
         // 执行查询
         List<WazuhHostStateModel> result = dataCollectionService.queryHostStateEventsWithTimeRange(request);
-        List<CollectionHostStateBO> hostStates = result.stream().map(srcHostState -> {
-            return hostStateModel2BO(sceneId, agentName2Element, srcHostState);
-        }).collect(Collectors.toList());
+        List<CollectionHostStateBO> hostStates = new ArrayList<>();
+        for (WazuhHostStateModel srcHostState : result) {
+            CollectionHostStateBO collectionHostStateBO = hostStateModel2BO(sceneId, agentName2Element, srcHostState);
+            hostStates.add(collectionHostStateBO);
+        }
         return new ListObjServiceResult<>(new ListObjResult<>(hostStates, result.size()));
     }
 
@@ -379,9 +446,11 @@ public class ScenePluginCollectionSceneService {
         Map<String, List<WazuhHostStateModel>> map = dataCollectionService.mapHostStatesByAgentNamesWithTimeRange(request, topSize);
         Map<String, List<CollectionHostStateBO>> convertedMap = new HashMap<>();
         map.forEach((agentName, result) -> {
-            List<CollectionHostStateBO> hostStates = result.stream().map(srcHostState -> {
-                return hostStateModel2BO(sceneId, agentName2Element, srcHostState);
-            }).collect(Collectors.toList());
+            List<CollectionHostStateBO> hostStates = new ArrayList<>();
+            for (WazuhHostStateModel srcHostState : result) {
+                CollectionHostStateBO collectionHostStateBO = hostStateModel2BO(sceneId, agentName2Element, srcHostState);
+                hostStates.add(collectionHostStateBO);
+            }
 
             convertedMap.put(agentName, hostStates);
         });
@@ -418,7 +487,7 @@ public class ScenePluginCollectionSceneService {
         hostState.setMaxNetSpeed(srcHostState.getMaxNetSpeed());
         // todo 进程，端口，网络连接，磁盘使用率
         if (CollectionUtil.isNotEmpty(agentName2Element)) {
-            var srcElement = agentName2Element.getOrDefault(srcHostState.getAgentName(), null);
+            SceneElementBO srcElement = agentName2Element.getOrDefault(srcHostState.getAgentName(), null);
             if (srcElement != null) {
                 hostState.setNodeId(srcElement.getId());
                 hostState.setNodeName(srcElement.getName());
@@ -437,7 +506,7 @@ public class ScenePluginCollectionSceneService {
      */
     public ListObjServiceResult<CollectionHostEventBO> listHostEvents(String sceneId, HostEventQueryParams queryParams) {
         log.info("sceneId:{}, scroll:{}", sceneId, queryParams.getScroll());
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         if (pluginHandler == null) {
@@ -445,7 +514,7 @@ public class ScenePluginCollectionSceneService {
         }
         Map<String, SceneElementBO> agentNameElementMap = new HashMap<>();
         srcElements.forEach(srcElement -> {
-            var collectionElement = pluginHandler.getElement(srcElement.getId());
+            CollectionPluginSceneElementBO collectionElement = pluginHandler.getElement(srcElement.getId());
             if (collectionElement == null || CollectionUtils.isEmpty(collectionElement.getProbes())) {
                 return;
             }
@@ -463,7 +532,13 @@ public class ScenePluginCollectionSceneService {
         List<String> ruleIdsByCatagories = new ArrayList<>();
         Map<String, String> ruleId2File = getRuleId2FileByCodes(queryParams.getCatagories()).getSource();
         if (CollectionUtils.isNotEmpty(ruleId2File.keySet())) {
-            List<String> ruleIds = ruleId2File.keySet().stream().distinct().collect(Collectors.toList());
+            List<String> ruleIds = new ArrayList<>();
+            Set<String> uniqueValues = new HashSet<>();
+            for (String s : ruleId2File.keySet()) {
+                if (uniqueValues.add(s)) {
+                    ruleIds.add(s);
+                }
+            }
             ruleIdsByCatagories.addAll(ruleIds);
         }
 
@@ -471,7 +546,13 @@ public class ScenePluginCollectionSceneService {
         List<String> ruleIdsByAppNames = new ArrayList<>();
         Map<String, String> ruleId2AppNames = getRuleId2FileByFiles(queryParams.getAppNames());
         if (CollectionUtils.isNotEmpty(ruleId2AppNames.keySet())) {
-            List<String> ruleIds = ruleId2AppNames.keySet().stream().distinct().collect(Collectors.toList());
+            List<String> ruleIds = new ArrayList<>();
+            Set<String> uniqueValues = new HashSet<>();
+            for (String s : ruleId2AppNames.keySet()) {
+                if (uniqueValues.add(s)) {
+                    ruleIds.add(s);
+                }
+            }
             ruleIdsByAppNames.addAll(ruleIds);
         }
 
@@ -481,7 +562,15 @@ public class ScenePluginCollectionSceneService {
         WazuhEventRequest request = genWazuhEventRequest(queryParams, sceneHandler.getScene().getCreateTime(), new ArrayList<>(agentNameElementMap.keySet()));
         if (CollectionUtils.isNotEmpty(ruleIdsByCatagories) && CollectionUtils.isNotEmpty(ruleIdsByAppNames)) {
             // 取交集
-            List<String> intersectionRuleIds = ruleIdsByCatagories.stream().filter(item -> ruleIdsByAppNames.contains(item)).distinct().collect(Collectors.toList());
+            List<String> intersectionRuleIds = new ArrayList<>();
+            Set<String> uniqueValues = new HashSet<>();
+            for (String item : ruleIdsByCatagories) {
+                if (ruleIdsByAppNames.contains(item)) {
+                    if (uniqueValues.add(item)) {
+                        intersectionRuleIds.add(item);
+                    }
+                }
+            }
             request.setRuleIds(intersectionRuleIds);
         } else {
             List<String> ruleIds = new ArrayList<>();
@@ -491,12 +580,12 @@ public class ScenePluginCollectionSceneService {
                 request.setRuleIds(ruleIds);
             }
         }
-        var result = dataCollectionService.queryFileEvents(request);
+        ListObjResult<FileEventModel> result = dataCollectionService.queryFileEvents(request);
 
         CloudScenePluginHandler cloudScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         List<CollectionHostEventBO> hostEvents = new ArrayList<>();
         result.getObjs().forEach(srcHostEvent -> {
-            var hostEvent = new CollectionHostEventBO();
+            CollectionHostEventBO hostEvent = new CollectionHostEventBO();
             hostEvent.setSceneId(sceneId);
             hostEvent.setType(srcHostEvent.getFileEventType().name());
             if (StringUtils.isEmpty(srcHostEvent.getAction())) {
@@ -517,15 +606,15 @@ public class ScenePluginCollectionSceneService {
             if (CollectionUtils.isNotEmpty(queryParams.getCatagories())) {
                 hostEvent.setAppName(ruleFile2AppName(ruleId2Files.getOrDefault(srcHostEvent.getRuleId(), "")).getSource());
             }
-            var srcElement = agentNameElementMap.getOrDefault(srcHostEvent.getAgentName(), null);
+            SceneElementBO srcElement = agentNameElementMap.getOrDefault(srcHostEvent.getAgentName(), null);
             if (srcElement != null) {
                 hostEvent.setNodeId(srcElement.getId());
                 hostEvent.setNodeName(srcElement.getName());
                 hostEvent.setSystemType(srcElement.getSystemType());
-                var item = SystemTypeUtils.getSystemTypeItem(srcElement.getSystemType());
+                SystemTypeUtils.SystemTypeItem item = SystemTypeUtils.getSystemTypeItem(srcElement.getSystemType());
                 hostEvent.setSystemTypeName(item.getName());
                 if (cloudScenePluginHandler != null) {
-                    var cloudElement = cloudScenePluginHandler.getElement(srcElement.getId());
+                    CloudPluginSceneElementBO cloudElement = cloudScenePluginHandler.getElement(srcElement.getId());
                     if (cloudElement != null) {
                         hostEvent.setVirtualType(cloudElement.getVirtualType());
                     }
@@ -592,7 +681,7 @@ public class ScenePluginCollectionSceneService {
      */
     public ListObjServiceResult<CollectionHostEventBO> scrollHostEvents(String sceneId, String scrollId, HostEventQueryParams queryParams) {
         log.info("sceneId:{}, scrollId:{}", sceneId, scrollId);
-        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         if (pluginHandler == null) {
@@ -600,7 +689,7 @@ public class ScenePluginCollectionSceneService {
         }
         Map<String, SceneElementBO> agentNameElementMap = new HashMap<>();
         srcElements.forEach(srcElement -> {
-            var collectionElement = pluginHandler.getElement(srcElement.getId());
+            CollectionPluginSceneElementBO collectionElement = pluginHandler.getElement(srcElement.getId());
             if (collectionElement == null || CollectionUtils.isEmpty(collectionElement.getProbes())) {
                 return;
             }
@@ -617,7 +706,7 @@ public class ScenePluginCollectionSceneService {
 
         if (CollectionUtils.isNotEmpty(result.getObjs())) {
             result.getObjs().forEach(srcHostEvent -> {
-                var hostEvent = new CollectionHostEventBO();
+                CollectionHostEventBO hostEvent = new CollectionHostEventBO();
                 hostEvent.setSceneId(sceneId);
                 hostEvent.setType(srcHostEvent.getFileEventType().name());
                 hostEvent.setEventDesc(srcHostEvent.getAction());
@@ -631,15 +720,15 @@ public class ScenePluginCollectionSceneService {
                 hostEvent.setMd5Before(srcHostEvent.getMd5Before());
                 hostEvent.setMd5After(srcHostEvent.getMd5After());
                 hostEvent.setScrollId(srcHostEvent.getScrollId());
-                var srcElement = agentNameElementMap.getOrDefault(srcHostEvent.getAgentName(), null);
+                SceneElementBO srcElement = agentNameElementMap.getOrDefault(srcHostEvent.getAgentName(), null);
                 if (srcElement != null) {
                     hostEvent.setNodeId(srcElement.getId());
                     hostEvent.setNodeName(srcElement.getName());
                     hostEvent.setSystemType(srcElement.getSystemType());
-                    var item = SystemTypeUtils.getSystemTypeItem(srcElement.getSystemType());
+                    SystemTypeUtils.SystemTypeItem item = SystemTypeUtils.getSystemTypeItem(srcElement.getSystemType());
                     hostEvent.setSystemTypeName(item.getName());
                     if (cloudScenePluginHandler != null) {
-                        var cloudElement = cloudScenePluginHandler.getElement(srcElement.getId());
+                        CloudPluginSceneElementBO cloudElement = cloudScenePluginHandler.getElement(srcElement.getId());
                         if (cloudElement != null) {
                             hostEvent.setVirtualType(cloudElement.getVirtualType());
                         }
@@ -918,7 +1007,11 @@ public class ScenePluginCollectionSceneService {
         // 执行查询
         List<AttackSeverityAndDestinationIpAggregationBO> boList = flowAnalysisService.groupByDestinationIpAndSeverity(request);
 
-        List<AttackSeverityAndDestinationIpAggregationBO> sortedList = boList.stream().sorted(Comparator.comparing(AttackSeverityAndDestinationIpAggregationBO::getSeverity)).collect(Collectors.toList());
+        List<AttackSeverityAndDestinationIpAggregationBO> sortedList = new ArrayList<>();
+        for (AttackSeverityAndDestinationIpAggregationBO severityAndDestinationIpAggregationBO : boList) {
+            sortedList.add(severityAndDestinationIpAggregationBO);
+        }
+        sortedList.sort(Comparator.comparing(attackSeverityAndDestinationIpAggregationBO -> attackSeverityAndDestinationIpAggregationBO.getSeverity()));
 
         List<String> destinationIpList = new ArrayList<>();
 
@@ -929,7 +1022,12 @@ public class ScenePluginCollectionSceneService {
             result.setSeverity(bo.getSeverity());
             List<String> ipList = bo.getDestinationIpList();
             if (CollectionUtils.isNotEmpty(ipList)) {
-                List<String> ips = ipList.stream().filter(v -> !destinationIpList.contains(v)).collect(Collectors.toList());
+                List<String> ips = new ArrayList<>();
+                for (String v : ipList) {
+                    if (!destinationIpList.contains(v)) {
+                        ips.add(v);
+                    }
+                }
                 result.setDestinationIpList(ips);
                 result.setNum(ips.size());
                 destinationIpList.addAll(ips);
@@ -1033,7 +1131,7 @@ public class ScenePluginCollectionSceneService {
         // 为计算平均值,往前多取一个周期的数据
         params.setStartTime(startTime.minus(intervalSeconds, ChronoUnit.SECONDS));
         params.setEndTime(endTime);
-        var queryResult = this.listHostStates(sceneIds.get(0), params).getSource();
+        ListObjResult<CollectionHostStateBO> queryResult = this.listHostStates(sceneIds.get(0), params).getSource();
         return processIntervalSizeBOS(startTime, intervalSeconds, execCal, queryResult, false);
     }
 
@@ -1054,7 +1152,7 @@ public class ScenePluginCollectionSceneService {
         // 为计算平均值,往前多取一个周期的数据
         params.setStartTime(startTime.minus(intervalSeconds, ChronoUnit.SECONDS));
         params.setEndTime(endTime);
-        var queryResult = this.listHostStates(sceneIds.get(0), params).getSource();
+        ListObjResult<CollectionHostStateBO> queryResult = this.listHostStates(sceneIds.get(0), params).getSource();
         return processIntervalSizeBOS(startTime, intervalSeconds, execCal, queryResult, true);
     }
 
@@ -1065,7 +1163,7 @@ public class ScenePluginCollectionSceneService {
         // 为计算平均值,往前多取一个周期的数据
         params.setStartTime(startTime.minus(intervalSeconds, ChronoUnit.SECONDS));
         params.setEndTime(endTime);
-        var queryResult = this.listHostStatesByAgentNames(agentNames, params).getSource();
+        ListObjResult<CollectionHostStateBO> queryResult = this.listHostStatesByAgentNames(agentNames, params).getSource();
         return processIntervalSizeBOS(startTime, intervalSeconds, execCal, queryResult, false);
     }
 
@@ -1126,7 +1224,7 @@ public class ScenePluginCollectionSceneService {
         } else {
             srcElements = new ArrayList<>();
             nodeIds.forEach(nodeId -> {
-                var srcElement = sceneHandler.getElement(nodeId);
+                SceneElementBO srcElement = sceneHandler.getElement(nodeId);
                 if (srcElement != null) {
                     srcElements.add(srcElement);
                 }
@@ -1197,17 +1295,17 @@ public class ScenePluginCollectionSceneService {
     private List<String> loadMac2ElementBOMapAndGetEnableMac(Map<String, SceneElementBO> mac2ElementMap, List<SceneElementBO> srcElements, CollectionScenePluginHandler pluginHandler) {
         List<String> enableMac = new ArrayList<>();
         srcElements.forEach(srcElement -> {
-            var srcPorts = srcElement.getPorts();
+            List<SceneElementPortBO> srcPorts = srcElement.getPorts();
             if (srcPorts == null) {
                 return;
             }
             srcPorts.forEach(srcPort -> {
-                var macAddr = srcPort.getMacAddr();
+                String macAddr = srcPort.getMacAddr();
                 if (StringUtils.isEmpty(macAddr)) {
                     return;
                 }
                 mac2ElementMap.put(macAddr, srcElement);
-                var collectionPort = pluginHandler.getPort(srcPort.getId());
+                CollectionPluginSceneElementPortBO collectionPort = pluginHandler.getPort(srcPort.getId());
                 if (collectionPort == null || !Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {
                     return;
                 }
@@ -1434,9 +1532,17 @@ public class ScenePluginCollectionSceneService {
 
         int skip = (page - 1) * pageSize;
         log.info("skip:{}, limit:{}", skip, pageSize);
-        List<WazuhProcessModel> resultList = totalList.stream().filter(Objects::nonNull).skip(skip).limit(pageSize).collect(Collectors.toList());
+        List<WazuhProcessModel> resultList = totalList.stream()
+                .filter(wazuhProcessModel -> Objects.nonNull(wazuhProcessModel))
+                .skip(skip)
+                .limit(pageSize)
+                .collect(Collectors.toList());
 
-        List<Process> processes = resultList.stream().map(p -> convertWazuhProcess2Process(p)).collect(Collectors.toList());
+        List<Process> processes = new ArrayList<>();
+        for (WazuhProcessModel p : resultList) {
+            Process process = convertWazuhProcess2Process(p);
+            processes.add(process);
+        }
 
         return new ListObjServiceResult<>(new ListObjResult<>(processes, totalList.size()).asResult()).asResult();
     }
@@ -1467,7 +1573,11 @@ public class ScenePluginCollectionSceneService {
 
         int skip = (page - 1) * pageSize;
         log.info("skip:{}, limit:{}", skip, pageSize);
-        List<WazuhSystemUserModel> resultList = totalList.stream().filter(Objects::nonNull).skip(skip).limit(pageSize).collect(Collectors.toList());
+        List<WazuhSystemUserModel> resultList = totalList.stream()
+                .filter(wazuhSystemUserModel -> Objects.nonNull(wazuhSystemUserModel))
+                .skip(skip)
+                .limit(pageSize)
+                .collect(Collectors.toList());
 
         List<SystemUser> systemUsers = resultList.stream().map(u -> {
             SystemUser systemUser = new SystemUser();
@@ -1571,7 +1681,11 @@ public class ScenePluginCollectionSceneService {
         Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
 
         // 根据每一个有效的eid(agentName)查询ElementBO
-        List<SceneElementBO> elementBOS = nodeId2Eidmap.values().stream().map(eid -> batchSceneHandler.getNodeByEid(eid)).collect(Collectors.toList());
+        List<SceneElementBO> elementBOS = new ArrayList<>();
+        for (String eid : nodeId2Eidmap.values()) {
+            SceneElementBO nodeByEid = batchSceneHandler.getNodeByEid(eid);
+            elementBOS.add(nodeByEid);
+        }
         return new ServiceResult<>(elementBOS);
     }
 
@@ -1604,7 +1718,7 @@ public class ScenePluginCollectionSceneService {
         CloudSceneConfigPluginHandler cloudConfigPlugin = sceneConfigHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         sceneConfigAsset.setNodeCount(sceneConfigHandler.getElementMap().values().size());
         sceneConfigHandler.getElementMap().values().forEach(e -> {
-            var cloudElement = cloudConfigPlugin.getElement(e.getId());
+            CloudPluginSceneConfigElementBO cloudElement = cloudConfigPlugin.getElement(e.getId());
             Integer category = cloudElement.getCategory();
             if (!category2CountInfo.containsKey(category)) {
                 category2CountInfo.put(category, new SceneConfigCategoryGroupBO(category));
@@ -1628,10 +1742,10 @@ public class ScenePluginCollectionSceneService {
             List<String> flowCollectors = batchSceneHandler.getFlowCollectors();
             if (CollectionUtils.isNotEmpty(flowCollectors)) {
                 flowAnalysisService.delete(flowCollectors);
-                var model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
+                CollectionPluginSceneModel model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
                 if (model != null && StringUtils.isNotEmpty(model.getFlowFile())) {
                     String key = URLUtil.url(model.getFlowFile()).getPath();
-                    fdfsRemoteFileService.delete(key);
+                    FsCommon.delete(key);
                 }
             }
 
@@ -1652,8 +1766,13 @@ public class ScenePluginCollectionSceneService {
      */
     private List<String> getTypeIds(List<String> types) {
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeModel.class).filterIn(CollectionPluginWazuhRuleTypeModel::getType, types.toArray());
-        var typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
-        return typeModels.stream().map(t -> t.getId()).collect(Collectors.toList());
+        List<CollectionPluginWazuhRuleTypeModel> typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
+        List<String> list = new ArrayList<>();
+        for (CollectionPluginWazuhRuleTypeModel t : typeModels) {
+            String id = t.getId();
+            list.add(id);
+        }
+        return list;
     }
 
     /**
@@ -1664,8 +1783,13 @@ public class ScenePluginCollectionSceneService {
      */
     private List<String> getTypeIdsByCodes(List<String> codes) {
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeModel.class).filterIn(CollectionPluginWazuhRuleTypeModel::getCode, codes.toArray());
-        var typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
-        return typeModels.stream().map(t -> t.getId()).collect(Collectors.toList());
+        List<CollectionPluginWazuhRuleTypeModel> typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
+        List<String> list = new ArrayList<>();
+        for (CollectionPluginWazuhRuleTypeModel t : typeModels) {
+            String id = t.getId();
+            list.add(id);
+        }
+        return list;
     }
 
     /**
@@ -1676,8 +1800,13 @@ public class ScenePluginCollectionSceneService {
      */
     private List<String> getTypes(List<String> typeIds) {
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeModel.class).filterIn(CollectionPluginWazuhRuleTypeModel::getId, typeIds.toArray());
-        var typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
-        return typeModels.stream().map(t -> t.getType()).collect(Collectors.toList());
+        List<CollectionPluginWazuhRuleTypeModel> typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
+        List<String> list = new ArrayList<>();
+        for (CollectionPluginWazuhRuleTypeModel t : typeModels) {
+            String type = t.getType();
+            list.add(type);
+        }
+        return list;
     }
 
     /**
@@ -1707,8 +1836,14 @@ public class ScenePluginCollectionSceneService {
             return new ServiceResult<>(new HashMap<>());
         }
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleModel.class).filterIn(CollectionPluginWazuhRuleModel::getId, ruleIds.toArray());
-        var ruleModels = collectionPluginWazuhRuleMapper.list(humanCondition);
-        return new ServiceResult<>(ruleModels.stream().collect(Collectors.toMap(r -> r.getId(), r -> r.getFile())));
+        List<CollectionPluginWazuhRuleModel> ruleModels = collectionPluginWazuhRuleMapper.list(humanCondition);
+        Map<String, String> map = new HashMap<>();
+        for (CollectionPluginWazuhRuleModel r : ruleModels) {
+            if (map.put(r.getId(), r.getFile()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
+        return new ServiceResult<>(map);
     }
 
     /**
@@ -1722,16 +1857,22 @@ public class ScenePluginCollectionSceneService {
             return new HashMap<>();
         }
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleModel.class);
-        var a = humanCondition.filterOrStart();
+        HumanCondition.OrConditionProxy a = humanCondition.filterOrStart();
         for (String f : files) {
             a.orContains(CollectionPluginWazuhRuleModel::getFile, f);
         }
         a.filterOrEnd();
-        var ruleModels = collectionPluginWazuhRuleMapper.list(humanCondition);
+        List<CollectionPluginWazuhRuleModel> ruleModels = collectionPluginWazuhRuleMapper.list(humanCondition);
         if (CollectionUtils.isEmpty(ruleModels)) {
             return new HashMap<>();
         }
-        return ruleModels.stream().collect(Collectors.toMap(r -> r.getId(), r -> r.getFile()));
+        Map<String, String> map = new HashMap<>();
+        for (CollectionPluginWazuhRuleModel r : ruleModels) {
+            if (map.put(r.getId(), r.getFile()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
+        return map;
     }
 
     /**
@@ -1746,16 +1887,23 @@ public class ScenePluginCollectionSceneService {
         }
         List<String> typeIds = getTypeIdsByCodes(codes);
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class).filterIn(CollectionPluginWazuhRuleTypeRelationModel::getTypeId, typeIds.toArray());
-        var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
+        List<CollectionPluginWazuhRuleTypeRelationModel> relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
         if (CollectionUtils.isEmpty(relationModels)) {
             return new ServiceResult<>(new HashMap<>());
         }
-        List<String> ruleIds = relationModels.stream().distinct().map(r -> r.getRuleId()).collect(Collectors.toList());
+        List<String> ruleIds = new ArrayList<>();
+        Set<CollectionPluginWazuhRuleTypeRelationModel> uniqueValues = new HashSet<>();
+        for (CollectionPluginWazuhRuleTypeRelationModel r : relationModels) {
+            if (uniqueValues.add(r)) {
+                String ruleId = r.getRuleId();
+                ruleIds.add(ruleId);
+            }
+        }
         return getRuleId2FileByIds(ruleIds);
     }
 
     public ServiceResult<String> exportFlowPcap(String sceneId, String taskId) {
-        var model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
+        CollectionPluginSceneModel model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
         if (model != null && StringUtils.isNotEmpty(model.getFlowFile())) {
             return new ServiceResult<>(model.getFlowFile());
         }
@@ -1766,7 +1914,7 @@ public class ScenePluginCollectionSceneService {
             return new ServiceResult<>(StringUtils.EMPTY);
         }
         String containName = flowCollectors.get(0);
-        var result = this.exportFlowPcap(sceneId, containName, taskId);
+        ServiceResult<String> result = this.exportFlowPcap(sceneId, containName, taskId);
         return result;
     }
 
@@ -1788,7 +1936,7 @@ public class ScenePluginCollectionSceneService {
     public ServiceResult<String> exportFlowPcap(String sceneId, String containName, String taskId) {
         // containerName -> containerId
         Container container = new Container();
-        var containerResult = container.getContainerByName(containName);
+        ContainerGetData containerResult = container.getContainerByName(containName);
         if (containerResult == null) {
             log.error("find no containerId by containName {}", containName);
             return new ServiceResult<>(StringUtils.EMPTY);
@@ -1862,7 +2010,7 @@ public class ScenePluginCollectionSceneService {
                     throw new RuntimeException(e);
                 }
                 try {
-                    var stepResult = container.executeCommand(containerId, "cat /opt/arkime/" + dirName + "/step");
+                    ContainerExecuteResult stepResult = container.executeCommand(containerId, "cat /opt/arkime/" + dirName + "/step");
                     if (stepResult != null && stepResult.getExitCode() != null && stepResult.getOutput() != null) {
                         if (stepResult.getOutput().contains("success")) {
                             break;
@@ -1888,7 +2036,7 @@ public class ScenePluginCollectionSceneService {
             fileGetData.setFilePath(dir + "/flow.zip");
             fileGetData.setHostname(host);
             fileGetData.setZunContainerId(containerId);
-            var object = container.retrieveFile(fileGetData);
+            ContainerFileGetResult object = container.retrieveFile(fileGetData);
             return new ServiceResult<>(object.getUrl());
         } catch (Exception e) {
             e.printStackTrace();
@@ -1903,7 +2051,7 @@ public class ScenePluginCollectionSceneService {
 
     public ServiceResult<List<AttCkTypeCount>> getSceneAttCkTypeCountTrend(String sceneId, LocalDateTime startTime, LocalDateTime endTime) {
         BatchSceneHandler sceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), new ArrayList<>());
-        var allElementEids = new ArrayList<>(sceneHandler.getAllEid2ElementMap().keySet());
+        ArrayList<String> allElementEids = new ArrayList<>(sceneHandler.getAllEid2ElementMap().keySet());
 
         WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
         request.setAgentNames(allElementEids);
@@ -1911,7 +2059,7 @@ public class ScenePluginCollectionSceneService {
         request.setEndTime(endTime == null ? LocalDateTime.now() : endTime);
 
         List<AttCkTypeCount> list = new ArrayList<>();
-        var counts = dataCollectionService.getAttCkTypeCountTrend(request, 3600);
+        Map<String, Long> counts = dataCollectionService.getAttCkTypeCountTrend(request, 3600);
         if (!counts.isEmpty()) {
             counts.forEach((k, v) -> list.add(new AttCkTypeCount(k, v.longValue())));
         }
@@ -1920,7 +2068,7 @@ public class ScenePluginCollectionSceneService {
 
     public ServiceResult<List<AttCkTypeCount>> getSceneAttCkTypeCountInfo(String sceneId) {
         BatchSceneHandler sceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), new ArrayList<>());
-        var allElementEids = new ArrayList<>(sceneHandler.getAllEid2ElementMap().keySet());
+        ArrayList<String> allElementEids = new ArrayList<>(sceneHandler.getAllEid2ElementMap().keySet());
 
         WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
         request.setAgentNames(allElementEids);
@@ -1928,52 +2076,12 @@ public class ScenePluginCollectionSceneService {
         request.setEndTime(LocalDateTime.now());
 
         List<AttCkTypeCount> list = new ArrayList<>();
-        var counts = dataCollectionService.getAttCkTypeCountInfo(request);
+        Map<String, Long> counts = dataCollectionService.getAttCkTypeCountInfo(request);
         if (!counts.isEmpty()) {
             counts.forEach((k, v) -> list.add(new AttCkTypeCount(k, v.longValue())));
         }
         return new ServiceResult<>(list);
     }
-
-    /**
-     * 根据规则类型获取规则id2file map
-     *
-     * @param types 类型集合
-     * @return 规则id2file Map
-     */
-    private Map<String, String> getRuleId2FileByTypes(List<String> types) {
-        if (CollectionUtils.isEmpty(types)) {
-            return new HashMap<>();
-        }
-        List<String> typeIds = getTypeIds(types);
-        HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class).filterIn(CollectionPluginWazuhRuleTypeRelationModel::getTypeId, typeIds.toArray());
-        var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
-        if (CollectionUtils.isEmpty(relationModels)) {
-            return new HashMap<>();
-        }
-        List<String> ruleIds = relationModels.stream().distinct().map(r -> r.getRuleId()).collect(Collectors.toList());
-        return getRuleId2FileByIds(ruleIds).getSource();
-    }
-
-    /**
-     * 根据规则id集合获取类型集合
-     *
-     * @param ruleIds
-     * @return 类型集合
-     */
-    private List<String> getTypesByRuleIds(List<String> ruleIds) {
-        if (CollectionUtils.isEmpty(ruleIds)) {
-            return new ArrayList<>();
-        }
-        HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class).filterIn(CollectionPluginWazuhRuleTypeRelationModel::getRuleId, ruleIds.toArray());
-        var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
-        if (CollectionUtils.isEmpty(relationModels)) {
-            return new ArrayList<>();
-        }
-        List<String> typeIds = relationModels.stream().distinct().map(r -> r.getTypeId()).collect(Collectors.toList());
-        return getTypes(typeIds);
-    }
-
 
     private WazuhMonitorEventsRequest buildWazuhMonitorEventsRequest(ListPageInfoQueryParams listPageInfoQueryParams) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);

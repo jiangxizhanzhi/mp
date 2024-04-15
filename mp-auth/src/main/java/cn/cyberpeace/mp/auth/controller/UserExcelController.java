@@ -14,7 +14,9 @@ import cn.cyberpeace.mp.auth.request.user.UserExportRequest;
 import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.util.ExcelCheck;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -47,7 +49,7 @@ import java.util.Objects;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
-@Api(value = "用户导入导出Excel管理接口", tags = "AUTH-用户导入导出Excel接口")
+@Api(value = "用户导入导出Excel管理接口", tags = "用户管理接口")
 @Slf4j
 @Controller
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/users")
@@ -72,6 +74,7 @@ public class UserExcelController {
     private TenantUserService tenantUserService;
 
 
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "导出用户数据excel", notes = "")
     @ApiImplicitParam(name = "exportRequest", value = "导出请求", dataTypeClass = UserExportRequest.class)
     @PostMapping("/excel/export")
@@ -107,6 +110,7 @@ public class UserExcelController {
     }
 
 
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "通过excel导入用户数据", notes = "")
     @ApiImplicitParam(name="file", value="文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/excel/import")
@@ -126,6 +130,7 @@ public class UserExcelController {
     }
 
 
+    @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "下载用户导入excel模板", notes = "")
     @GetMapping("/excel/template")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")

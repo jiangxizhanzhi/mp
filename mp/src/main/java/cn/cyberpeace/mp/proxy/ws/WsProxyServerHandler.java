@@ -45,7 +45,7 @@ public class WsProxyServerHandler extends AbstractWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        var nextHop = nextHops.remove(session.getId());
+        NextHop nextHop = nextHops.remove(session.getId());
         if (nextHop != null) {
             nextHop.getClientSession().close(status);
         }

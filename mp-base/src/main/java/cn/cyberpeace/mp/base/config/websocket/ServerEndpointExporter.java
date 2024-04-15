@@ -91,8 +91,8 @@ public class ServerEndpointExporter extends WebApplicationObjectSupport
         if (context != null) {
             String[] customEndpointBeanNames = context.getBeanNamesForAnnotation(ServerEndpoint.class);
             for (String beanName : customEndpointBeanNames) {
-                var endpointClass = context.getType(beanName);
-                var serverEndpoint = endpointClass.getAnnotation(ServerEndpoint.class);
+                Class<?> endpointClass = context.getType(beanName);
+                ServerEndpoint serverEndpoint = endpointClass.getAnnotation(ServerEndpoint.class);
                 if (ServerEndpointConfig.Configurator.class.equals(serverEndpoint.configurator())) {
                     AnnotationUtil.setValue(serverEndpoint, "configurator", WebSocketConfig.Configurator.class);
                 }

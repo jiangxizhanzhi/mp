@@ -28,7 +28,7 @@ public class SecurityService {
      */
     public String authenticate() {
         log.info("retrieve wazuh token...");
-        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + "/security/user/authenticate?raw=true";
+        String requestUrl = situationAwareConfig.getWazuhBaseUrl() + "/security/user/authenticate?raw=true";
         return WazuhHttpsUtils.sendGetWithAuth(requestUrl, situationAwareConfig.getWazuhUsername(), situationAwareConfig.getWazuhPassword());
     }
 

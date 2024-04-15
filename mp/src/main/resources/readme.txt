@@ -1,7 +1,7 @@
 1. application-std.yml 为标准配置模板，application-ext.yml为从std文件中提取得外部配置变量，如果需要为某一个变量配置外部变量，如：
    mp:
     log:
-     log-db: ${MP_DEVOPS_LOG_DB:sql} #日志存储数据库可以配置：es、sql
+     log-db: ${MP_DEVOPS_LOG_DB:sql}
    可以在log下面增加一行ext-var: 然后将需要绑定到外部得变量拷贝一份放置ext-var下一级，然后在原有变量中引用外部变量（解耦防腐作用），如下：
    mp:
      log:

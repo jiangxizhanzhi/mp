@@ -24,6 +24,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -169,13 +170,13 @@ public class RealEquipmentService extends BaseCpService {
         List<TargetConnection> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),TargetConnection.class);
         DevopsClusterConfig config = BeanCommon.getBean(DevopsClusterConfig.class);
         if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
-            list.forEach(l -> {
+            for (TargetConnection l : list) {
                 if (StringUtils.isEmpty(config.getPublicNetProxyIp())) {
-                    return;
+                    continue;
                 }
-                var u = URLUtils.url(l.getUrl());
+                URL u = URLUtils.url(l.getUrl());
                 l.setUrl(StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp()));
-            });
+            }
         }
         CloudPlatformPageResult<TargetConnection> model = new CloudPlatformPageResult<>();
         model.setList(list);
@@ -187,7 +188,7 @@ public class RealEquipmentService extends BaseCpService {
      * @return
      */
     public List<Hypervisor> hypervisorList() {
-        log.info("RealEquipmentService.hypervisorList begin.");
+        log.debug("RealEquipmentService.hypervisorList begin.");
         CloudPlatformResult result = super.sendGet(URL_VERSION + "/hypervisors", CloudPlatformResult.class);
         super.checkResult(result);
         List<Hypervisor> hypervisorList = JSONObject.parseArray(JSONObject.toJSONString(((JSONObject)result.getData()).getJSONArray("list")), Hypervisor.class);
@@ -199,7 +200,7 @@ public class RealEquipmentService extends BaseCpService {
                 }
             }
         }
-        log.info("RealEquipmentService.hypervisorList end. rtnList:{}", rtnList);
+        log.debug("RealEquipmentService.hypervisorList end. rtnList:{}", rtnList);
         return rtnList;
     }
 
@@ -208,7 +209,7 @@ public class RealEquipmentService extends BaseCpService {
      * @return
      */
     public ListObjServiceResult<EntityUsb> physicalUsbListByHost(String hostName) {
-        log.info("RealEquipmentService.physicalUsbListByHost begin. hostName:{}", hostName);
+        log.debug("RealEquipmentService.physicalUsbListByHost begin. hostName:{}", hostName);
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY_USB + "?host=" + hostName, CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<EntityUsb> responseList = new ArrayList<>();
@@ -217,7 +218,7 @@ public class RealEquipmentService extends BaseCpService {
             count = pageResult.getTotal();
             responseList = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), EntityUsb.class);
         }
-        log.info("RealEquipmentService.physicalUsbListByHost end.");
+        log.debug("RealEquipmentService.physicalUsbListByHost end.");
         return new ListObjServiceResult(new ListObjResult<>(responseList, count)).asResult();
     }
 }

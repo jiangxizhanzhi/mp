@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.flow.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -41,10 +43,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @Description: 流量信息控制器
@@ -55,6 +57,7 @@ import java.util.stream.Collectors;
 @Api(tags = "流量管理接口")
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/info")
+@AuthTarget({TargetEnum.DYNAMIC_TRAFFIC_LIST, TargetEnum.STATIC_TRAFFIC_LIST, TargetEnum.TRAFFIC_SCHEME_LIST})
 public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowInfoQueryParams, FlowInfoService>
         implements FlowPrefixConstant {
 
@@ -92,6 +95,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @param ids
      * @return
      */
+    @AuthTarget({TargetEnum.DYNAMIC_TRAFFIC_LIST, TargetEnum.STATIC_TRAFFIC_LIST})
     @ApiOperation("批量删除流量信息")
     @ApiImplicitParam(name = "ids", value = "流量ID集合", dataTypeClass = String[].class)
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.DELETE, title = "删除流量", target = OpTargetEnums.FLOW_INFO)
@@ -114,6 +118,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @param queryParams
      * @return
      */
+    @AuthTarget({TargetEnum.STATIC_TRAFFIC_LIST, TargetEnum.FLOW_GROUP})
     @ApiOperation("分页查询流量信息")
     @GetMapping("/page")
     public ListObjServiceResult<FlowInfoResponse> pageFlowInfo(FlowInfoQueryParams queryParams) {
@@ -131,6 +136,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @param id
      * @return
      */
+    @AuthTarget(TargetEnum.STATIC_TRAFFIC_LIST)
     @ApiOperation("背景流量详情")
     @ApiImplicitParam(name = "id", value = "流量ID", dataTypeClass = String.class)
     @GetMapping("/background")
@@ -143,6 +149,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @param addRequest
      * @return
      */
+    @AuthTarget(TargetEnum.STATIC_TRAFFIC_LIST)
     @ApiOperation("新增背景流量")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增背景流量", target = OpTargetEnums.FLOW_INFO)
     @PostMapping("/background")
@@ -155,6 +162,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @param modifyRequest
      * @return
      */
+    @AuthTarget(TargetEnum.STATIC_TRAFFIC_LIST)
     @ApiOperation("更新背景流量")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.UPDATE, title = "更新背景流量", target = OpTargetEnums.FLOW_INFO)
     @PatchMapping("/background")
@@ -167,6 +175,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @param id
      * @return
      */
+    @AuthTarget(TargetEnum.DYNAMIC_TRAFFIC_LIST)
     @ApiOperation("攻击流量详情")
     @ApiImplicitParam(name = "id", value = "流量ID", dataTypeClass = String.class)
     @GetMapping("/attack")
@@ -179,6 +188,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @param addRequest
      * @return
      */
+    @AuthTarget(TargetEnum.DYNAMIC_TRAFFIC_LIST)
     @ApiOperation("新增攻击流量")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增攻击流量", target = OpTargetEnums.FLOW_INFO)
     @PostMapping("/attack")
@@ -191,6 +201,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @param modifyRequest
      * @return
      */
+    @AuthTarget(TargetEnum.DYNAMIC_TRAFFIC_LIST)
     @ApiOperation("更新攻击流量")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.UPDATE, title = "更新攻击流量", target = OpTargetEnums.FLOW_INFO)
     @PatchMapping("/attack")
@@ -203,6 +214,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @param request
      * @return
      */
+    @AuthTarget(TargetEnum.FLOW_GROUP)
     @ApiOperation("根据集合id批量查询")
     @GetMapping("/list_by_collection_ids")
     public ServiceResult<List<FlowInfoResponse>> listByCollectionIds(ListByCollectionIdsRequest request) {
@@ -337,7 +349,11 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     public ServiceResult deleteCategories(@RequestBody DeleteCategoryRequest request){
         log.info("FlowInfoController.deleteCategories begin. request:{}", request);
         List<OptionModel> optionModels = optionService.findByIds(request.getIds());
-        List<String> codeList = optionModels.stream().map(OptionModel::getCode).collect(Collectors.toList());
+        List<String> codeList = new ArrayList<>();
+        for (OptionModel optionModel : optionModels) {
+            String code = optionModel.getCode();
+            codeList.add(code);
+        }
         if (flowServiceImpl.checkCategoryUsed(codeList)) {
             return ResultCommon.fail(FlowErrorCode.CATEGORY_HAS_USED);
         }

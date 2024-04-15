@@ -1,16 +1,17 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
-import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.common.PluginSceneEventHandlerCommon;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
@@ -41,19 +42,19 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
      * 检查接入方式可用性
      */
     public void checkAccessModes(CloudPluginSceneElementBO cloudElement) {
-        var cloudPorts = getPluginHandler().getPorts(cloudElement);
+        List<CloudPluginSceneElementPortBO> cloudPorts = getPluginHandler().getPorts(cloudElement);
         // 同样ip、端口可能对应多个接入方式
         Map<String, List<CloudAccessMode>> ipAccessModesMap = new HashMap<>();
         cloudPorts.forEach(cloudPort -> {
             if (Boolean.TRUE.equals(cloudPort.getSrcPort().getIsAuxiliary())) {
                 return;
             }
-            var accessModes = cloudPort.getAccessModes();
+            List<CloudAccessMode> accessModes = cloudPort.getAccessModes();
             if (accessModes == null) {
                 return;
             }
             accessModes.forEach(accessMode -> {
-                var protocol = accessMode.getProtocol();
+                String protocol = accessMode.getProtocol();
                 // console特殊模式可直接接入，不用检查
                 if (AccessMode.Protocol.CONSOLE.equals(protocol)) {
                     accessMode.setAvailable(true);
@@ -68,58 +69,44 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
                     return;
                 }
 
-                var ip = accessMode.getAccessIp();
+                String ip = accessMode.getAccessIp();
                 if (StringUtils.isEmpty(ip)) {
                     return;
                 }
 
-                var port = accessMode.getAccessPort();
-                var portStr = StringUtils.EMPTY;
+                Integer port = accessMode.getAccessPort();
+                String portStr = StringUtils.EMPTY;
                 if (port != null && port.compareTo(0) > 0) {
                     portStr = port.toString();
                 }
-                var ipPortKey = String.format("%s:%s", ip, portStr);
-                var ipAccessModes = ipAccessModesMap.getOrDefault(ipPortKey, new ArrayList<>());
+                String ipPortKey = String.format("%s:%s", ip, portStr);
+                List<CloudAccessMode> ipAccessModes = ipAccessModesMap.getOrDefault(ipPortKey, new ArrayList<>());
                 ipAccessModes.add(accessMode);
                 ipAccessModesMap.put(ipPortKey, ipAccessModes);
             });
         });
 
         // 检查接入连通性
-        var nodeId = cloudElement.getSrcElement().getId();
+        String nodeId = cloudElement.getSrcElement().getId();
         ipAccessModesMap.forEach((ipPortKey, accessModes) -> {
-            var ip = accessModes.get(0).getAccessIp();
-            var port = accessModes.get(0).getAccessPort();
-            var protocol = accessModes.get(0).getProtocol();
-            Runnable checkSuccessCallback = () -> {
-                accessModes.forEach(accessMode -> accessMode.setAvailable(true));
-                getPluginHandler().asyncAckElementChanged(nodeId, true);
-                if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
-                    getPluginHandler().getSceneHandler().updateSceneElementWithPlugins(nodeId);
-                }
-            };
-
-            Runnable checkTimeoutCallback = () -> {
-                accessModes.forEach(accessMode -> accessMode.setAvailable(true));
-                String sceneId = getPluginHandler().getSceneHandler().getSceneId();
-                SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
-                var dbElement = sceneHandler.getElement(nodeId);
-                if (dbElement != null && dbElement.getEvent() == getPluginHandler().getSrcElement(nodeId).getEvent()) {
-                    log.info("check access mode timeout , update access info , sceneId {},nodeId {}", sceneId, nodeId);
-                    getPluginHandler().asyncAckElementChanged(nodeId, true);
-                    if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
-                        getPluginHandler().getSceneHandler().updateSceneElementWithPlugins(nodeId);
-                    }
-                } else {
-                    log.info("check access mode timeout , element event has been changed , do not update, sceneId {},nodeId {}", sceneId, nodeId);
-                }
-            };
+            String ip = accessModes.get(0).getAccessIp();
+            Integer port = accessModes.get(0).getAccessPort();
+            String protocol = accessModes.get(0).getProtocol();
 
             if (port == null || port.compareTo(0) <= 0) {
-                TaskCommon.executeTask(() -> NetworkUtils.probeHost(ip, checkSuccessCallback, checkSuccessCallback));
+                TaskCommon.executeTask(() -> {
+                    NetworkUtils.probeHost(ip);
+                    this.checkSuccessCallback(ipAccessModesMap, nodeId);
+                });
             } else {
-                TaskCommon.executeTask(
-                        () -> NetworkUtils.probePort(protocol, ip, port, checkSuccessCallback, checkTimeoutCallback));
+                TaskCommon.executeTask(() -> {
+                    boolean flag = NetworkUtils.probePort(protocol, ip, port);
+                    if (flag) {
+                        this.checkSuccessCallback(ipAccessModesMap, nodeId);
+                    } else {
+                        this.checkTimeoutCallback(ipAccessModesMap, nodeId);
+                    }
+                });
             }
         });
     }
@@ -128,21 +115,21 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
      * 关闭接入方式可用性
      */
     public void closeAccessModes(CloudPluginSceneElementBO cloudElement) {
-        var cloudPorts = getPluginHandler().getPorts(cloudElement);
-        var closeFlag = false;
-        for (var cloudPort : cloudPorts) {
-            var accessModes = cloudPort.getAccessModes();
+        List<CloudPluginSceneElementPortBO> cloudPorts = getPluginHandler().getPorts(cloudElement);
+        boolean closeFlag = false;
+        for (CloudPluginSceneElementPortBO cloudPort : cloudPorts) {
+            List<CloudAccessMode> accessModes = cloudPort.getAccessModes();
             if (accessModes == null) {
                 return;
             }
-            for (var accessMode : accessModes) {
+            for (CloudAccessMode accessMode : accessModes) {
                 accessMode.setAvailable(false);
                 closeFlag = true;
             }
         }
 
         if (closeFlag) {
-            var nodeId = cloudElement.getSrcElement().getId();
+            String nodeId = cloudElement.getSrcElement().getId();
             try {
                 getPluginHandler().asyncAckElementChanged(nodeId, true);
                 if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
@@ -197,5 +184,33 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
 //        } else {
 //            return null;
 //        }
+    }
+
+    private void checkSuccessCallback(Map<String, List<CloudAccessMode>> ipAccessModesMap, String nodeId) {
+        ipAccessModesMap.forEach((ipPortKey, accessModes) -> {
+            accessModes.forEach(accessMode -> accessMode.setAvailable(true));
+            getPluginHandler().asyncAckElementChanged(nodeId, true);
+            if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+                getPluginHandler().getSceneHandler().updateSceneElementWithPlugins(nodeId);
+            }
+        });
+    }
+
+    private void checkTimeoutCallback(Map<String, List<CloudAccessMode>> ipAccessModesMap, String nodeId) {
+        ipAccessModesMap.forEach((ipPortKey, accessModes) -> {
+            accessModes.forEach(accessMode -> accessMode.setAvailable(true));
+            String sceneId = getPluginHandler().getSceneHandler().getSceneId();
+            SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
+            SceneElementBO dbElement = sceneHandler.getElement(nodeId);
+            if (dbElement != null && dbElement.getEvent().equals(getPluginHandler().getSrcElement(nodeId).getEvent())) {
+                log.info("check access mode timeout , update access info , sceneId {},nodeId {}", sceneId, nodeId);
+                getPluginHandler().asyncAckElementChanged(nodeId, true);
+                if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+                    getPluginHandler().getSceneHandler().updateSceneElementWithPlugins(nodeId);
+                }
+            } else {
+                log.info("check access mode timeout , element event has been changed , do not update, sceneId {},nodeId {}", sceneId, nodeId);
+            }
+        });
     }
 }

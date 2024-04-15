@@ -100,18 +100,22 @@ public class ImagesByUuidSocketServer {
         if (MapUtils.isEmpty(websocketMap)){
             return;
         }
-        websocketMap.forEach((k,v) -> {
-            if (v.uuid.equals(uuid)){
+        for (Map.Entry<Session, ImagesByUuidSocketServer> entry : websocketMap.entrySet()) {
+            Session k = entry.getKey();
+            ImagesByUuidSocketServer v = entry.getValue();
+            if (v.uuid.equals(uuid)) {
                 v.sendMessage(wsInfo);
             }
-        });
+        }
     }
 
     /**
      * 批量发给指定UUID
      */
     public void batchSendInfo(String json, List<String> uuids) {
-        uuids.forEach(uuid -> sendInfo(uuid, json));
+        for (String s : uuids) {
+            sendInfo(s, json);
+        }
     }
 
     /**
@@ -121,6 +125,10 @@ public class ImagesByUuidSocketServer {
         if (MapUtils.isEmpty(websocketMap)){
             return;
         }
-        websocketMap.forEach((k, v) -> v.sendMessage(json));
+        for (Map.Entry<Session, ImagesByUuidSocketServer> entry : websocketMap.entrySet()) {
+            Session k = entry.getKey();
+            ImagesByUuidSocketServer v = entry.getValue();
+            v.sendMessage(json);
+        }
     }
 }

@@ -27,14 +27,14 @@ public class VrClearJob extends AbstractClearJob<VirtualRouterGetData> {
     @Override
     protected Map<String, VirtualRouterGetData> getEid2Node(List<VirtualRouterGetData> vrs) {
         Map<String, VirtualRouterGetData> result = new HashMap<>();
-        vrs.forEach(vr -> {
+        for (VirtualRouterGetData vr : vrs) {
             if (vr.getName() != null && vr.getId() != null) {
                 String eid = super.getEid(vr.getName());
                 if (StringUtils.isNotEmpty(eid)) {
                     result.put(eid, vr);
                 }
             }
-        });
+        }
         return result;
     }
 

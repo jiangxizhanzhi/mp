@@ -52,43 +52,43 @@ public class VirtualDynamips extends CloudClient {
     }
 
     public boolean pause(String instanceId) {
-        var actionData = new VirtualDynamicActionData();
+        VirtualDynamicActionData actionData = new VirtualDynamicActionData();
         actionData.setAction(VirtualDynamicActionData.SUSPEND);
         return doAction(instanceId, actionData);
     }
 
     public boolean unPause(String instanceId) {
-        var actionData = new VirtualDynamicActionData();
+        VirtualDynamicActionData actionData = new VirtualDynamicActionData();
         actionData.setAction(VirtualDynamicActionData.RESUME);
         return doAction(instanceId, actionData);
     }
 
     public boolean suspend(String instanceId) {
-        var actionData = new VirtualDynamicActionData();
+        VirtualDynamicActionData actionData = new VirtualDynamicActionData();
         actionData.setAction(VirtualDynamicActionData.SUSPEND);
         return doAction(instanceId, actionData);
     }
 
     public boolean resume(String instanceId) {
-        var actionData = new VirtualDynamicActionData();
+        VirtualDynamicActionData actionData = new VirtualDynamicActionData();
         actionData.setAction(VirtualDynamicActionData.RESUME);
         return doAction(instanceId, actionData);
     }
 
     public boolean start(String instanceId) {
-        var actionData = new VirtualDynamicActionData();
+        VirtualDynamicActionData actionData = new VirtualDynamicActionData();
         actionData.setAction(VirtualDynamicActionData.START);
         return doAction(instanceId, actionData);
     }
 
     public boolean stop(String instanceId) {
-        var actionData = new VirtualDynamicActionData();
+        VirtualDynamicActionData actionData = new VirtualDynamicActionData();
         actionData.setAction(VirtualDynamicActionData.STOP);
         return doAction(instanceId, actionData);
     }
 
     public boolean reboot(String instanceId) {
-        var actionData = new VirtualDynamicActionData();
+        VirtualDynamicActionData actionData = new VirtualDynamicActionData();
         actionData.setAction(VirtualDynamicActionData.REBOOT);
         return doAction(instanceId, actionData);
     }
@@ -96,7 +96,7 @@ public class VirtualDynamips extends CloudClient {
     public DynamipsInfoItems getPortInfo() {
         DynamipsInfoParam type = new DynamipsInfoParam();
         type.setType("port");
-        var result = getHttpClient().get(CloudUrlConstant.GET_DYNAMIPS_INFO, type, new TypeReference<DynamipsInfoItems>() {
+        DynamipsInfoItems result = getHttpClient().get(CloudUrlConstant.GET_DYNAMIPS_INFO, type, new TypeReference<DynamipsInfoItems>() {
         });
         return result;
     }
@@ -104,7 +104,7 @@ public class VirtualDynamips extends CloudClient {
     public DynamipsTypeInfoItems getTypeInfo() {
         DynamipsInfoParam type = new DynamipsInfoParam();
         type.setType("flavor");
-        var result = getHttpClient().get(CloudUrlConstant.GET_DYNAMIPS_INFO, type,
+        DynamipsTypeInfoItems result = getHttpClient().get(CloudUrlConstant.GET_DYNAMIPS_INFO, type,
                 new TypeReference<DynamipsTypeInfoItems>() {
         });
         return result;
@@ -121,14 +121,14 @@ public class VirtualDynamips extends CloudClient {
     }
 
     public VirtualDynamipsListResult list(VirtualDynamipsListParam param) {
-        var result = getHttpClient().get(CloudUrlConstant.LIST_DYNAMIPS, param,
+        VirtualDynamipsListResult result = getHttpClient().get(CloudUrlConstant.LIST_DYNAMIPS, param,
                 new TypeReference<VirtualDynamipsListResult>() {
         });
         return result;
     }
 
     public VirtualDynamipsStatisticsResult statistics() {
-        var result = getHttpClient().get(CloudUrlConstant.STATISTICS_DYNAMIPS, null,
+        VirtualDynamipsStatisticsResult result = getHttpClient().get(CloudUrlConstant.STATISTICS_DYNAMIPS, null,
                 new TypeReference<VirtualDynamipsStatisticsResult>() {
                 });
         if (result == null || result.getStatics() == null) {
@@ -140,7 +140,7 @@ public class VirtualDynamips extends CloudClient {
     }
 
     private boolean doAction(String instanceId, CloudHttpData httpData) {
-        var result = cloudPost(CloudUrlConstant.VIRTUAL_DYNAMIPS_LIFE_CONTROL_URL.replace("{instance_id}", instanceId), httpData, null, new TypeReference<CloudResponse<Object>>() {
+        CloudResponse<Object> result = cloudPost(CloudUrlConstant.VIRTUAL_DYNAMIPS_LIFE_CONTROL_URL.replace("{instance_id}", instanceId), httpData, null, new TypeReference<CloudResponse<Object>>() {
         }, false);
         if (result != null && !result.getSuccess()) {
             if (result.getMessage() != null) {

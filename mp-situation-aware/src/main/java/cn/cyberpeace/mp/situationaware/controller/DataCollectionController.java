@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -28,6 +30,7 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/wazuh")
 @Api(value = "态势感知-场景监控事件查询接口", tags = "态势感知-场景监控事件查询接口")
+@AuthTarget(TargetEnum.NO_AUTH)
 public class DataCollectionController {
 
     @Autowired

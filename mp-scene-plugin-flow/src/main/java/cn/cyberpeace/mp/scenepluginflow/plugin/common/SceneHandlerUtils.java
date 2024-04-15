@@ -3,15 +3,17 @@ package cn.cyberpeace.mp.scenepluginflow.plugin.common;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.thread.ThreadUtils;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
 import cn.cyberpeace.mp.flow.bo.BatchStartTaskBO;
 import cn.cyberpeace.mp.flow.bo.TaskSipBO;
 import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
-import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
 import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
-import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
+import cn.cyberpeace.mp.scene.constant.SceneSingleton;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
@@ -25,12 +27,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Callable;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 @Data
 @Slf4j
@@ -66,31 +67,15 @@ public class SceneHandlerUtils {
         flow.setStatusText(null);
     }
 
-    private boolean startFlow(Flow flow, Runnable stopCallback) {
-        var taskId = flow.getTaskId();
-
-        Consumer<String> formatStopCallback = new Consumer<String>() {
-            @Override
-            public void accept(String s) {
-                errorFLow(flow, s);
-                if (Objects.nonNull(stopCallback)) {
-                    stopCallback.run();
-                }
-            }
-        };
-
+    private boolean startFlow(Flow flow) {
+        String taskId = flow.getTaskId();
         try {
             log.info("start flow for taskId:[{}]", taskId);
             String sourceIp = flow.getSourceIp();
             if (StringUtils.isBlank(sourceIp)) {
                 sourceIp = "127.0.0.1";
             }
-            flowExecutor.startFlow(taskId, () -> {
-                successOffFLow(flow);
-                if (stopCallback != null) {
-                    stopCallback.run();
-                }
-            }, formatStopCallback, sourceIp);
+            flowExecutor.startFlow(taskId, sourceIp);
         } catch (Exception e) {
             log.error("start flow for taskId:[{}] error", taskId, e);
             errorFLow(flow, e.getMessage());
@@ -102,7 +87,7 @@ public class SceneHandlerUtils {
         return true;
     }
 
-    private boolean startFlows(List<Flow> flows, Runnable stopCallback, int runType) {
+    private boolean startFlows(List<Flow> flows, int runType) {
         BatchStartTaskBO batchStartTaskBO = new BatchStartTaskBO();
         List<TaskSipBO> taskSipBOList = new ArrayList<>();
         flows.forEach(flow -> {
@@ -114,32 +99,20 @@ public class SceneHandlerUtils {
         batchStartTaskBO.setTaskSipList(taskSipBOList);
         batchStartTaskBO.setRunType(runType);
 
-        var taskIds = flows.stream()
-                .map(f -> f.getTaskId())
-                .collect(Collectors.toList());
-        Map<String, Flow> flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
+        List<String> taskIds = new ArrayList<>();
+        for (Flow f : flows) {
+            String taskId = f.getTaskId();
+            taskIds.add(taskId);
+        }
+        Map<String, Flow> flowMap = new HashMap<>();
+        for (Flow flow1 : flows) {
+            if (flowMap.put(flow1.getId(), flow1) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
         try {
             log.info("start flows for taskIds:[{}]", taskIds);
-
-            Consumer<BatchActuatorCallbackResponse> callbackConsumer = new Consumer<BatchActuatorCallbackResponse>() {
-                @Override
-                public void accept(BatchActuatorCallbackResponse batchActuatorCallbackResponse) {
-                    log.info("batch tasks run callbackConsumer");
-                    batchActuatorCallbackResponse.getErrorTaskModels().forEach(flowTaskModel -> {
-                        errorFLow(flowMap.get(flowTaskModel.getFlowId()), "Flow execute error");
-                    });
-                    batchActuatorCallbackResponse.getSuccessTaskModels().forEach(flowTaskModel -> {
-                        successOffFLow(flowMap.get(flowTaskModel.getFlowId()));
-                    });
-                }
-            };
-
-            String sceneId = pluginHandler.getSourceSceneId();
-            FlowCacheUtil.taskConsumerCache.put(FlowCacheUtil.CONSUMER_PREFIX + sceneId, callbackConsumer);
-            if (Objects.nonNull(stopCallback)) {
-                FlowCacheUtil.taskRunnableCache.put(FlowCacheUtil.RUNNABLE_PREFIX + sceneId, ThreadUtils.format(stopCallback));
-            }
-            flowExecutor.startFlows(batchStartTaskBO, callbackConsumer, runType);
+            flowExecutor.startFlows(batchStartTaskBO);
         } catch (MpRuntimeException e) {
             log.error("start flows for taskIds:[{}] error", taskIds, e);
             flows.forEach(flow -> {
@@ -189,22 +162,22 @@ public class SceneHandlerUtils {
         flowExecutor.deleteByNodeIdAndSceneId(nodeId, sceneId);
     }
 
-    public boolean startFlow(FlowPluginSceneElementBO flowElement, Flow flow,String sourceIp, Runnable stopCallback,
-                             boolean async, Runnable asyncCallback) {
-        var taskId = flow.getTaskId();
+    public boolean startFlow(FlowPluginSceneElementBO flowElement, Flow flow,String sourceIp,
+                             boolean async) {
+        String taskId = flow.getTaskId();
         if (!StringUtils.isEmpty(taskId)) {
-            return startFlow(flow, stopCallback);
+            return startFlow(flow);
         } else {
             log.info("taskId is empty");
         }
 
-        var flowId = flow.getId();
+        String flowId = flow.getId();
         if (StringUtils.isEmpty(flowId)) {
             errorFLow(flow, "Empty flow id");
             return false;
         }
 
-        var executorId = pluginHandler.getScene().getExecutor();
+        String executorId = pluginHandler.getScene().getExecutor();
         if (StringUtils.isEmpty(executorId)) {
             errorFLow(flow, "Empty executor id");
             return false;
@@ -217,8 +190,8 @@ public class SceneHandlerUtils {
             return false;
         }
 
-        var srcElement = flowElement.getSrcElement();
-        var srcPorts = srcElement.getPorts();
+        SceneElementBO srcElement = flowElement.getSrcElement();
+        List<SceneElementPortBO> srcPorts = srcElement.getPorts();
         if (srcPorts == null) {
             errorFLow(flow, "Network port not found");
             return false;
@@ -226,8 +199,8 @@ public class SceneHandlerUtils {
 
         String networkId = null;
         String ip = null;
-        for (var srcPort : srcPorts) {
-            var cloudPort = cloudPluginHandler.getPort(srcPort.getId());
+        for (SceneElementPortBO srcPort : srcPorts) {
+            CloudPluginSceneElementPortBO cloudPort = cloudPluginHandler.getPort(srcPort.getId());
             networkId = cloudPort.getAuxiliaryNetworkId();
             ip = srcPort.getIp();
             if (!StringUtils.isEmpty(networkId) && !StringUtils.isEmpty(ip)) {
@@ -256,15 +229,14 @@ public class SceneHandlerUtils {
             if (CollectionUtils.isNotEmpty(flowTaskTaskModels)) {
                 flowTaskId = flowTaskTaskModels.get(0).getId();
             }
-//            try {
-//                flowTaskId = flowExecutor.createFlow(executorId, flowNetworkId, srcElement.getEid(), flowId, fromIps, flowIp, null, null, null, flow, finalIp);
-//                log.info("flowExecutor createFlow success:[{}]", flowTaskId);
-//            } catch (Exception e) {
-//                errorFLow(flow, e.getMessage());
-//                return false;
-//            }
             flow.setTaskId(flowTaskId);
-            return startFlow(flow, stopCallback);
+            boolean res = startFlow(flow);
+            SceneHandler handler = pluginHandler.getSceneHandler();
+            handler.asyncAckElementChanged(flowElement.getSrcElement().getId(), true, true);
+            if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+                handler.updateSceneElementWithPlugins(flowElement.getSrcElement().getId());
+            }
+            return res;
         };
         if (async) {
             TaskCommon.executeTask(() -> {
@@ -272,9 +244,6 @@ public class SceneHandlerUtils {
                     start.call();
                 } catch (Exception e) {
                     log.info("Start flow error: ", e);
-                }
-                if (asyncCallback != null) {
-                    asyncCallback.run();
                 }
             });
             return true;
@@ -289,7 +258,7 @@ public class SceneHandlerUtils {
     }
 
     public boolean stopFlow(Flow flow) {
-        var taskId = flow.getTaskId();
+        String taskId = flow.getTaskId();
         if (StringUtils.isEmpty(taskId)) {
             errorFLow(flow, "Empty task id");
             return false;
@@ -305,15 +274,13 @@ public class SceneHandlerUtils {
         return true;
     }
 
-    public boolean startFlows(FlowPluginSceneElementBO flowElement, List<FlowWithSourceIp> flowWithSourceIps, Runnable stopCallback,
+    public boolean startFlows(FlowPluginSceneElementBO flowElement, List<FlowWithSourceIp> flowWithSourceIps,
                               boolean async, Runnable asyncCallback, int runType, String nodeId) {
-//        // 需要创建流量任务的流量
-//        var needCreateTaskFlows = flowWithSourceIps.stream()
-//                .filter(f -> StringUtils.isEmpty(f.getFlow().getTaskId()))
-//                .collect(Collectors.toList());
-        var flows = flowWithSourceIps.stream()
-                .map(f -> f.getFlow())
-                .collect(Collectors.toList());
+        List<Flow> flows = new ArrayList<>();
+        for (FlowWithSourceIp f : flowWithSourceIps) {
+            Flow fFlow = f.getFlow();
+            flows.add(fFlow);
+        }
 
         String sceneId = pluginHandler.getSourceSceneId();
         List<FlowTaskTaskModel> flowTaskTaskModels = flowTaskTaskService.listByNodeIdAndSceneId(nodeId, sceneId);
@@ -334,119 +301,17 @@ public class SceneHandlerUtils {
             });
         }
 
-        return startFlows(flows, stopCallback, runType);
-//        if (needCreateTaskFlows.isEmpty()) {
-//            return startFlows(flows, stopCallback, runType);
-//        } else {
-//            log.info("taskIds has null value");
-//        }
-//
-//        var executorId = pluginHandler.getScene().getExecutor();
-//        if (StringUtils.isEmpty(executorId)) {
-//            flows.forEach(flow -> {
-//                errorFLow(flow, "Empty executor id");
-//            });
-//            return false;
-//        }
-//
-//        CloudScenePluginHandler cloudPluginHandler = pluginHandler.getSceneHandler()
-//                .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-//        if (cloudPluginHandler == null) {
-//            flows.forEach(flow -> {
-//                errorFLow(flow, "Cloud plugin not found");
-//            });
-//            return false;
-//        }
-//
-//        var srcElement = flowElement.getSrcElement();
-//        var srcPorts = srcElement.getPorts();
-//        if (srcPorts == null) {
-//            flows.forEach(flow -> {
-//                errorFLow(flow, "Network port not found");
-//            });
-//            return false;
-//        }
-//
-//        String networkId = null;
-//        String ip = null;
-//        for (var srcPort : srcPorts) {
-//            var cloudPort = cloudPluginHandler.getPort(srcPort.getId());
-//            networkId = cloudPort.getAuxiliaryNetworkId();
-//            ip = srcPort.getIp();
-//            if (!StringUtils.isEmpty(networkId) && !StringUtils.isEmpty(ip)) {
-//                break;
-//            }
-//        }
-//
-//        if (StringUtils.isEmpty(networkId)) {
-//            flows.forEach(flow -> {
-//                errorFLow(flow, "Empty network id");
-//            });
-//            return false;
-//        }
-//
-//        if (StringUtils.isEmpty(ip)) {
-//            flows.forEach(flow -> {
-//                errorFLow(flow, "Empty ip");
-//            });
-//            return false;
-//        }
-//
-//        // 将流量id为空的流量状态置为错误
-//        var emptyIdFlows = needCreateTaskFlows.stream()
-//                .filter(flow -> flow.getFlow().getId() == null)
-//                .collect(Collectors.toList());
-//        if (!emptyIdFlows.isEmpty()) {
-//            emptyIdFlows.forEach(flow -> {
-//                errorFLow(flow.getFlow(), "Empty flow id");
-//            });
-//        }
-//
-//        // 流量id不为空的流量创建流量任务
-//        var newFlows = needCreateTaskFlows.stream()
-//                .filter(flow -> flow.getFlow().getId() != null)
-//                .collect(Collectors.toList());
-//        // 最终需要执行的流量集合
-//        var executeFlows = flows.stream()
-//                .filter(flow -> StringUtils.isNotEmpty(flow.getId()))
-//                .collect(Collectors.toList());
-//        if (newFlows.isEmpty()) {
-//            return false;
-//        }
-//        executeFlows.forEach(flow -> {
-//            preparingFLow(flow);
-//        });
-//
-//        Callable<Boolean> start = () -> {
-//            return startFlows(executeFlows, stopCallback, runType);
-//        };
-//        if (async) {
-//            TaskCommon.executeTask(() -> {
-//                try {
-//                    start.call();
-//                } catch (Exception e) {
-//                    log.info("Start flows error: ", e);
-//                }
-//                if (asyncCallback != null) {
-//                    asyncCallback.run();
-//                }
-//            });
-//            return true;
-//        } else {
-//            try {
-//                return start.call();
-//            } catch (Exception e) {
-//                log.info("Start flows error: ", e);
-//                return false;
-//            }
-//        }
+        return startFlows(flows, runType);
     }
 
     public boolean stopFlows(List<Flow> flows) {
-        List<String> taskIds = flows.stream()
-                .filter(flow -> flow.getTaskId() != null)
-                .map(flow -> flow.getTaskId())
-                .collect(Collectors.toList());
+        List<String> taskIds = new ArrayList<>();
+        for (Flow flow1 : flows) {
+            if (flow1.getTaskId() != null) {
+                String taskId = flow1.getTaskId();
+                taskIds.add(taskId);
+            }
+        }
         if (taskIds.isEmpty()) {
             flows.forEach(flow -> {
                 errorFLow(flow, "Empty task id");
@@ -469,7 +334,7 @@ public class SceneHandlerUtils {
     }
 
     public boolean  deleteFlow(Flow flow) {
-        var taskId = flow.getTaskId();
+        String taskId = flow.getTaskId();
         if (!StringUtils.isEmpty(taskId)) {
             try {
                 flowExecutor.deleteFlow(taskId);

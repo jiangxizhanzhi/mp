@@ -13,12 +13,12 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.base.util.mptool.HttpRequest;
 import cn.cyberpeace.mp.base.util.mptool.NumberUtil;
-import cn.cyberpeace.mp.cscene.CscenePluginDataRecordService;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneAttCkTypeCountInfo;
+import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
@@ -62,7 +62,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -108,32 +107,38 @@ public class HostStateService {
     public List<HostState> getHostStatesFromWazuh(String sceneId, String agentName, LocalDateTime startTime, LocalDateTime endTime) {
         List<CollectionHostStateBO> hostStateBOS = foo(agentName, startTime, endTime);
 
-        List<HostState> hostStates = hostStateBOS.stream().map(hostStateBO -> {
-            HostState hs = new HostState();
-            hs.setAgentName(hostStateBO.getAgentName());
-            hs.setCpuCount(hostStateBO.getCpuCount());
-            hs.setCpuPercent(Objects.nonNull(hostStateBO.getCpuPercent()) ? NumberUtil.round(hostStateBO.getCpuPercent(), 2).doubleValue() : hostStateBO.getCpuPercent());
-            hs.setMemoryFree(hostStateBO.getMemoryFree());
-            hs.setMemoryTotal(hostStateBO.getMemoryTotal());
-            // todo 节点内存利用率 统一为Double？
-//            hs.setMemoryPercent(Objects.nonNull(hostStateBO.getMemoryPercent() ? NumberUtil.round(hostStateBO.getMemoryPercent(), 2).doubleValue() : hostStateBO.getMemoryPercent()));
-            hs.setDiskSpace(hostStateBO.getDiskSpace());
-            hs.setDiskPercent(hostStateBO.getDiskPercent());
-            //hs.setDiskUsed(hostStateBO.getDiskUsed());
-            hs.setDiskUnused(hostStateBO.getDiskUnused());
-            hs.setSceneId(sceneId);
-//            hs.setElementId(hostStateBO.getNodeId());
-            hs.setTime(hostStateBO.getTime());
-            return hs;
-        }).collect(Collectors.toList());
+        List<HostState> hostStates = new ArrayList<>();
+        for (CollectionHostStateBO hostStateBO : hostStateBOS) {
+            HostState hostState = getHostState(sceneId, hostStateBO);
+            hostStates.add(hostState);
+        }
 
         return hostStates;
+    }
+
+    private static HostState getHostState(String sceneId, CollectionHostStateBO hostStateBO) {
+        HostState hs = new HostState();
+        hs.setAgentName(hostStateBO.getAgentName());
+        hs.setCpuCount(hostStateBO.getCpuCount());
+        hs.setCpuPercent(Objects.nonNull(hostStateBO.getCpuPercent()) ? NumberUtil.round(hostStateBO.getCpuPercent(), 2).doubleValue() : hostStateBO.getCpuPercent());
+        hs.setMemoryFree(hostStateBO.getMemoryFree());
+        hs.setMemoryTotal(hostStateBO.getMemoryTotal());
+        // todo 节点内存利用率 统一为Double？
+//            hs.setMemoryPercent(Objects.nonNull(hostStateBO.getMemoryPercent() ? NumberUtil.round(hostStateBO.getMemoryPercent(), 2).doubleValue() : hostStateBO.getMemoryPercent()));
+        hs.setDiskSpace(hostStateBO.getDiskSpace());
+        hs.setDiskPercent(hostStateBO.getDiskPercent());
+        //hs.setDiskUsed(hostStateBO.getDiskUsed());
+        hs.setDiskUnused(hostStateBO.getDiskUnused());
+        hs.setSceneId(sceneId);
+//            hs.setElementId(hostStateBO.getNodeId());
+        hs.setTime(hostStateBO.getTime());
+        return hs;
     }
 
 
     private List<CollectionHostStateBO> foo(String agentName, LocalDateTime startTime, LocalDateTime endTime) {
         // 构建查询参数
-        var request = new WazuhMonitorEventsRequest();
+        WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
         request.setPageNum(1);
         // todo 设置最多读取最大条数
         request.setPageSize(situationAwareConfig.getWazuhEsMaxPageSize());
@@ -145,27 +150,33 @@ public class HostStateService {
 
         // 执行查询
         List<WazuhHostStateModel> result = dataCollectionService.queryHostStateEventsWithTimeRange(request);
-        List<CollectionHostStateBO> hostStateBOs = result.stream().map(srcHostState -> {
-            CollectionHostStateBO hostStateBO = new CollectionHostStateBO();
-            hostStateBO.setCpuCount(srcHostState.getCpuCount());
-            hostStateBO.setCpuPercent(srcHostState.getCpuTotalPercent());
-            // 内存统一使用单位M
-            hostStateBO.setMemoryTotal(this.byte2MB(srcHostState.getMemoryTotal()));
-            hostStateBO.setMemoryFree(this.byte2MB(srcHostState.getMemoryFree()));
-            // 磁盘统一使用单位G
-            hostStateBO.setDiskSpace(this.byte2GB(srcHostState.getDiskTotal()));
-            hostStateBO.setMemoryPercent(srcHostState.getMemoryPercent());
-            hostStateBO.setTime(srcHostState.getTime());
-            // todo 进程，端口，网络连接，磁盘使用率
+        List<CollectionHostStateBO> hostStateBOs = new ArrayList<>();
+        for (WazuhHostStateModel srcHostState : result) {
+            CollectionHostStateBO collectionHostStateBO = getCollectionHostStateBO(srcHostState);
+            hostStateBOs.add(collectionHostStateBO);
+        }
+
+        return hostStateBOs;
+    }
+
+    private CollectionHostStateBO getCollectionHostStateBO(WazuhHostStateModel srcHostState) {
+        CollectionHostStateBO hostStateBO = new CollectionHostStateBO();
+        hostStateBO.setCpuCount(srcHostState.getCpuCount());
+        hostStateBO.setCpuPercent(srcHostState.getCpuTotalPercent());
+        // 内存统一使用单位M
+        hostStateBO.setMemoryTotal(this.byte2MB(srcHostState.getMemoryTotal()));
+        hostStateBO.setMemoryFree(this.byte2MB(srcHostState.getMemoryFree()));
+        // 磁盘统一使用单位G
+        hostStateBO.setDiskSpace(this.byte2GB(srcHostState.getDiskTotal()));
+        hostStateBO.setMemoryPercent(srcHostState.getMemoryPercent());
+        hostStateBO.setTime(srcHostState.getTime());
+        // todo 进程，端口，网络连接，磁盘使用率
 //            var srcElement = agentName2Element.getOrDefault(srcHostState.getAgentName(), null);
 //            if (srcElement != null) {
 //                hostState.setNodeId(srcElement.getId());
 //                hostState.setNodeName(srcElement.getName());
 //            }
-            return hostStateBO;
-        }).collect(Collectors.toList());
-
-        return hostStateBOs;
+        return hostStateBO;
     }
 
     private long byte2MB(long num) {
@@ -216,7 +227,12 @@ public class HostStateService {
             log.error("cp cloud ip or port is null...");
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
-        List<String> agentNames = getAgentNames().stream().filter(name -> Objects.nonNull(name) && name.contains("controller")).collect(Collectors.toList());
+        List<String> agentNames = new ArrayList<>();
+        for (String name : getAgentNames()) {
+            if (Objects.nonNull(name) && name.contains("controller")) {
+                agentNames.add(name);
+            }
+        }
         return processHostStateTrendByAgentNames(agentNames, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
     }
 
@@ -226,7 +242,7 @@ public class HostStateService {
         if (Objects.isNull(endTime)) {
             endTime = LocalDateTime.now();
             if (CollectionUtils.isNotEmpty(sceneIds)) {
-                var result = csceneSpecialService.getSceneStateInfo(sceneIds.get(0));
+                ServiceResult<SceneStateInfo> result = csceneSpecialService.getSceneStateInfo(sceneIds.get(0));
                 if (!result.getSource().isRunning() && result.getSource().getSceneModel() != null) {
                     endTime = result.getSource().getSceneModel().getUpdateTime();
                 }
@@ -334,48 +350,56 @@ public class HostStateService {
         queryParams.setPageSize(request.getPageSize());
         Map<String, List<CollectionHostStateBO>> map = csceneInstanceService.mapHostStatesByAgentNames(request.getAgentNames(), queryParams);
         Map<String, List<HostState>> convertedMap = new HashMap<>();
-        map.forEach((k, v) -> {
+        for (Map.Entry<String, List<CollectionHostStateBO>> entry : map.entrySet()) {
+            String k = entry.getKey();
+            List<CollectionHostStateBO> v = entry.getValue();
             List<HostState> hostStates = collectionHostStateBOs2HostStates(v);
             convertedMap.put(k, hostStates);
-        });
+        }
 
         return convertedMap;
     }
 
 
     private List<HostState> collectionHostStateBOs2HostStates(List<CollectionHostStateBO> hostStateBOS) {
-        List<HostState> hostStates = hostStateBOS.stream().map(hostStateBO -> {
-            HostState hs = new HostState();
-            hs.setAgentName(hostStateBO.getAgentName());
-            hs.setCpuFreq(hostStateBO.getCpuFreq());
-            hs.setCpuCount(hostStateBO.getCpuCount());
-            hs.setCpuPercent(Objects.nonNull(hostStateBO.getCpuPercent()) ? NumberUtil.round(hostStateBO.getCpuPercent(), 2).doubleValue() : hostStateBO.getCpuPercent());
-
-            hs.setMemoryFree(hostStateBO.getMemoryFree());
-            hs.setMemoryTotal(hostStateBO.getMemoryTotal());
-            hs.setMemoryPercent(Objects.nonNull(hostStateBO.getMemoryPercent()) ? NumberUtil.round(hostStateBO.getMemoryPercent(), 2).doubleValue() : hostStateBO.getMemoryPercent());
-
-            hs.setDiskSpace(hostStateBO.getDiskSpace());
-            hs.setDiskPercent(hostStateBO.getDiskPercent());
-            //hs.setDiskUsed(hostStateBO.getDiskUsed());
-            hs.setDiskUnused(hostStateBO.getDiskUnused());
-
-            hs.setSceneId(hostStateBO.getSceneId());
-            hs.setElementId(hostStateBO.getNodeId());
-            hs.setTime(hostStateBO.getTime());
-
-            hs.setDownloadSpeed(hostStateBO.getDownloadSpeed());
-            hs.setUploadSpeed(hostStateBO.getUploadSpeed());
-            hs.setMaxDownloadSpeed(hostStateBO.getMaxDownloadSpeed());
-            hs.setMaxUploadSpeed(hostStateBO.getMaxUploadSpeed());
-            hs.setMaxNetSpeed(hostStateBO.getMaxNetSpeed());
-            hs.setDiskReadBytes(hostStateBO.getDiskReadBytes());
-            hs.setDiskWriteBytes(hostStateBO.getDiskWriteBytes());
-            hs.setDiskIoPercent(hostStateBO.getDiskIoPercent());
-            return hs;
-        }).collect(Collectors.toList());
+        List<HostState> hostStates = new ArrayList<>();
+        for (CollectionHostStateBO hostStateBO : hostStateBOS) {
+            HostState hostState = getHostState(hostStateBO);
+            hostStates.add(hostState);
+        }
 
         return hostStates;
+    }
+
+    private static HostState getHostState(CollectionHostStateBO hostStateBO) {
+        HostState hs = new HostState();
+        hs.setAgentName(hostStateBO.getAgentName());
+        hs.setCpuFreq(hostStateBO.getCpuFreq());
+        hs.setCpuCount(hostStateBO.getCpuCount());
+        hs.setCpuPercent(Objects.nonNull(hostStateBO.getCpuPercent()) ? NumberUtil.round(hostStateBO.getCpuPercent(), 2).doubleValue() : hostStateBO.getCpuPercent());
+
+        hs.setMemoryFree(hostStateBO.getMemoryFree());
+        hs.setMemoryTotal(hostStateBO.getMemoryTotal());
+        hs.setMemoryPercent(Objects.nonNull(hostStateBO.getMemoryPercent()) ? NumberUtil.round(hostStateBO.getMemoryPercent(), 2).doubleValue() : hostStateBO.getMemoryPercent());
+
+        hs.setDiskSpace(hostStateBO.getDiskSpace());
+        hs.setDiskPercent(hostStateBO.getDiskPercent());
+        //hs.setDiskUsed(hostStateBO.getDiskUsed());
+        hs.setDiskUnused(hostStateBO.getDiskUnused());
+
+        hs.setSceneId(hostStateBO.getSceneId());
+        hs.setElementId(hostStateBO.getNodeId());
+        hs.setTime(hostStateBO.getTime());
+
+        hs.setDownloadSpeed(hostStateBO.getDownloadSpeed());
+        hs.setUploadSpeed(hostStateBO.getUploadSpeed());
+        hs.setMaxDownloadSpeed(hostStateBO.getMaxDownloadSpeed());
+        hs.setMaxUploadSpeed(hostStateBO.getMaxUploadSpeed());
+        hs.setMaxNetSpeed(hostStateBO.getMaxNetSpeed());
+        hs.setDiskReadBytes(hostStateBO.getDiskReadBytes());
+        hs.setDiskWriteBytes(hostStateBO.getDiskWriteBytes());
+        hs.setDiskIoPercent(hostStateBO.getDiskIoPercent());
+        return hs;
     }
 
 
@@ -424,9 +448,9 @@ public class HostStateService {
         }
 
         List<HostState> hostStates = new ArrayList<>();
-        hostStateMap.entrySet().forEach(entry -> {
+        for (Map.Entry<LocalDateTime, HostState> entry : hostStateMap.entrySet()) {
             hostStates.add(entry.getValue());
-        });
+        }
         hostStates.sort(Comparator.comparing(HostState::getTime));
 
         return hostStates;
@@ -457,8 +481,12 @@ public class HostStateService {
             } else {
                 endTime = LocalDateTime.now();
             }
-            var dataModels = dataRecordService.getData(listPageInfoQueryParams, CollectionPluginSceneDataModel.Type.PORT, startTime, endTime);
-            var ports = dataModels.stream().map(d -> JsonCommon.parse(d.getData(), Port.class)).collect(Collectors.toList());
+            List<CollectionPluginSceneDataModel> dataModels = dataRecordService.getData(listPageInfoQueryParams, CollectionPluginSceneDataModel.Type.PORT, startTime, endTime);
+            ArrayList<Object> ports = new ArrayList<>();
+            for (CollectionPluginSceneDataModel d : dataModels) {
+                Port parse = JsonCommon.parse(d.getData(), Port.class);
+                ports.add(parse);
+            }
             return new ListObjServiceResult(new ListObjResult<>(ports, ports.size()).asResult()).asResult();
         } else {
             return scenePluginCollectionSceneService.listPagePorts(listPageInfoQueryParams).asResult();
@@ -478,7 +506,7 @@ public class HostStateService {
         ListObjServiceResult<Process> listResult = scenePluginCollectionSceneService.listPageProcess(listPageInfoQueryParams).asResult();
         List<Process> processes = listResult.getSource().getList();
         // KB -> MB
-        processes.forEach(p -> {
+        for (Process p : processes) {
             if (Objects.nonNull(p.getSize())) {
                 Long megabytes = DataSize.ofKilobytes(p.getSize()).toMegabytes();
                 p.setSize(megabytes);
@@ -488,7 +516,7 @@ public class HostStateService {
                 Long megabytes = DataSize.ofKilobytes(p.getVmSize()).toMegabytes();
                 p.setVmSize(megabytes);
             }
-        });
+        }
 
         return listResult;
     }
@@ -539,10 +567,12 @@ public class HostStateService {
             } else {
                 endTime = LocalDateTime.now();
             }
-            var dataModels = dataRecordService.getData(listPageInfoQueryParams, CollectionPluginSceneDataModel.Type.NETIFACE, startTime, endTime);
-            var netifaces = dataModels.stream().map(d -> {
-                return JsonCommon.parse(d.getData(), Netiface.class);
-            }).collect(Collectors.toList());
+            List<CollectionPluginSceneDataModel> dataModels = dataRecordService.getData(listPageInfoQueryParams, CollectionPluginSceneDataModel.Type.NETIFACE, startTime, endTime);
+            ArrayList<Object> netifaces = new ArrayList<>();
+            for (CollectionPluginSceneDataModel d : dataModels) {
+                Netiface parse = JsonCommon.parse(d.getData(), Netiface.class);
+                netifaces.add(parse);
+            }
             return new ListObjServiceResult(new ListObjResult<>(netifaces, netifaces.size()).asResult()).asResult();
         } else {
             ListObjServiceResult<Netiface> netifacesResult = scenePluginCollectionSceneService.listNetifaces(listPageInfoQueryParams).asResult();
@@ -552,15 +582,15 @@ public class HostStateService {
 
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> getSceneAttCkTypeCountTrend(BaseSceneElementRequest request,LocalDateTime startTime,LocalDateTime endTime) {
         List<IntervalSizeBO<LocalDateTime, Long>> result = new ArrayList<>();
-        var sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
+        List<String> sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
         if (CollectionUtils.isEmpty(sceneIds)) {
             return new ServiceResult<>(result);
         }
 
-        var listServiceResult = scenePluginCollectionSceneService.getSceneAttCkTypeCountTrend(sceneIds.get(0), startTime, endTime);
-        var list = listServiceResult.getSource();
+        ServiceResult<List<AttCkTypeCount>> listServiceResult = scenePluginCollectionSceneService.getSceneAttCkTypeCountTrend(sceneIds.get(0), startTime, endTime);
+        List<AttCkTypeCount> list = listServiceResult.getSource();
         if (CollectionUtils.isNotEmpty(list)) {
-            for (var count : list) {
+            for (AttCkTypeCount count : list) {
                 LocalDateTime time = TimeUtils.stringToLocalDateTime(count.getType(), TimeUtils.tzMillsDateTimeFormatter).atZone(ZoneOffset.UTC).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
                 IntervalSizeBO<LocalDateTime, Long> v = new IntervalSizeBO<>(time, time, count.getTimes());
                 result.add(v);
@@ -570,17 +600,17 @@ public class HostStateService {
     }
 
     public ServiceResult<SceneAttCkTypeCountInfo> getSceneAttCkTypeCountInfo(BaseSceneElementRequest request) {
-        var sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
+        List<String> sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
         if (CollectionUtils.isEmpty(sceneIds)) {
             return new ServiceResult<>(new SceneAttCkTypeCountInfo()).asResult();
         }
-        var listServiceResult = scenePluginCollectionSceneService.getSceneAttCkTypeCountInfo(sceneIds.get(0));
-        var list = listServiceResult.getSource();
+        ServiceResult<List<AttCkTypeCount>> listServiceResult = scenePluginCollectionSceneService.getSceneAttCkTypeCountInfo(sceneIds.get(0));
+        List<AttCkTypeCount> list = listServiceResult.getSource();
         SceneAttCkTypeCountInfo attCkTypeCountInfo = new SceneAttCkTypeCountInfo();
         attCkTypeCountInfo.setTotalTimes(0L);
         attCkTypeCountInfo.setList(new ArrayList<>());
         if (CollectionUtils.isNotEmpty(list)) {
-            for (var count : list) {
+            for (AttCkTypeCount count : list) {
                 attCkTypeCountInfo.setTotalTimes(attCkTypeCountInfo.getTotalTimes() + count.getTimes());
                 AttCkTypeCount attCkTypeCount = new AttCkTypeCount();
                 attCkTypeCount.setTimes(count.getTimes());
@@ -616,7 +646,11 @@ public class HostStateService {
             return new ArrayList<>();
         }
         List<Map<String, String>> list = (List<Map<String, String>>) data.get("list");
-        List<String> agentNames = list.stream().map(map -> map.getOrDefault("hostname", "")).collect(Collectors.toList());
+        List<String> agentNames = new ArrayList<>();
+        for (Map<String, String> map : list) {
+            String hostname = map.getOrDefault("hostname", "");
+            agentNames.add(hostname);
+        }
         return agentNames;
     }
 

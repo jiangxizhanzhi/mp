@@ -1,0 +1,18 @@
+package cn.cyberpeace.mp.job.base.schedule;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target({ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MpScheduled {
+    String id();
+
+    String description();
+
+    String cron();
+
+    int initialDelaySeconds() default 0;
+}

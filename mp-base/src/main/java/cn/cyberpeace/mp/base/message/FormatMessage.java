@@ -26,7 +26,7 @@ public class FormatMessage<T> {
     }
 
     public FormatMessage(T data, String type, Map<String, Object> context) {
-        var allContext = TransferContext.getContextMap();
+        Map<String, Object> allContext = TransferContext.getContextMap();
         if (context != null) {
             allContext.putAll(context);
         }

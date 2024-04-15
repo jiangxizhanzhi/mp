@@ -1,13 +1,10 @@
 dependencies {
     implementation project(':mp-base')
-    implementation project(':mp-common')
     implementation project(':mp-auth')
-    implementation project(':mp-front-admin')
     implementation project(':mp-log')
     implementation project(':mp-cscene')
     implementation project(':mp-scene-plugin-collection')
     implementation project(':mp-scene-plugin-cloud')
-    implementation project(':mp-auth-base')
     implementation project(':mp-situation-aware')
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
 }

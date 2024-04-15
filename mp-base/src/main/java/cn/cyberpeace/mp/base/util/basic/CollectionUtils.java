@@ -17,14 +17,14 @@ public class CollectionUtils {
             return;
         }
 
-        var allSize = values.size();
-        var startIndex = 0;
-        var endIndex = startIndex + batchSize;
+        int allSize = values.size();
+        int startIndex = 0;
+        int endIndex = startIndex + batchSize;
         while (startIndex < allSize) {
             if (endIndex > allSize) {
                 endIndex = allSize;
             }
-            var batchList = values.subList(startIndex, endIndex);
+            List<T> batchList = values.subList(startIndex, endIndex);
             batchHandler.accept(batchList);
             startIndex = endIndex;
             endIndex = startIndex + batchSize;

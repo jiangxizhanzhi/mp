@@ -19,7 +19,7 @@ public class MessagesConfig {
      */
     @Bean
     public MessageSource messageSource() {
-        var messageSource = new ReloadableResourceBundleMessageSource();
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
         List<String> basenames = new ArrayList<>();
         for (String moduleName: ModuleUtils.MODULE_NAMES) {
             basenames.add("classpath:i18n/" + moduleName);

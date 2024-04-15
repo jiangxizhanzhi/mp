@@ -46,7 +46,7 @@ public abstract class BaseSceneElementPortConnectionBO<M extends BaseSceneElemen
 
     @Override
     public M toModel(String... ignoreFields) {
-        var obj = super.toModel(ignoreFields);
+        M obj = super.toModel(ignoreFields);
         obj.setConnectionId(id);
         obj.setSourcePortId(source);
         obj.setTargetPortId(target);

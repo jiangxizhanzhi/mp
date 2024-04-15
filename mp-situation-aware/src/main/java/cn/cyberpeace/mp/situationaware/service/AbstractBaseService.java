@@ -9,6 +9,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -40,7 +41,7 @@ public abstract class AbstractBaseService {
             return new String[]{};
         }
         List<String> indexList = indexListBuilder(groupList,startDate,endDate);
-        var indexArray = new String[indexList.size()];
+        String[] indexArray = new String[indexList.size()];
         return indexList.toArray(indexArray);
     }
 
@@ -58,8 +59,14 @@ public abstract class AbstractBaseService {
             return Lists.newArrayList();
         }
         return groupList
-                .stream().map(groupId -> dateStringList.stream().map(dateString -> sessionIndexFormatter(groupId, dateString))
-                        .collect(Collectors.toList()))
+                .stream().map(groupId -> {
+                    List<String> list = new ArrayList<>();
+                    for (String dateString : dateStringList) {
+                        String s = sessionIndexFormatter(groupId, dateString);
+                        list.add(s);
+                    }
+                    return list;
+                })
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }

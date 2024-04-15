@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.ExtNodeInfo;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -19,12 +21,12 @@ class ConnectionDisplayElementConvert implements IConverter {
     public void convert2BO(ConvertDataContainer container) {
 
         if (CollectionUtils.isNotEmpty(container.getConnections()) && CollectionUtils.isNotEmpty(container.getPortId2Protocol().values())) {
-            var portId2Protocol = container.getPortId2Protocol();
-            container.getConnections().forEach(c -> {
+            Map<String, ExtNodeInfo.PortProtocolExportInfo> portId2Protocol = container.getPortId2Protocol();
+            for (SceneConfigElementPortConnectionBO c : container.getConnections()) {
                 if (portId2Protocol.get(c.getSource()) != null) {
-                    var vertices = portId2Protocol.get(c.getSource()).getVertices();
+                    String vertices = portId2Protocol.get(c.getSource()).getVertices();
                     if (StringUtils.isNotEmpty(vertices)) {
-                        var verticesList = JsonCommon.parse(vertices, new TypeReference<List<Map<String, Object>>>() {
+                        List<Map<String, Object>> verticesList = JsonCommon.parse(vertices, new TypeReference<>() {
                         });
                         c.setVertices(verticesList);
                     } else {
@@ -33,9 +35,9 @@ class ConnectionDisplayElementConvert implements IConverter {
                     c.setDisplayContext(portId2Protocol.get(c.getSource()).getDisplayContext());
                     c.setType(portId2Protocol.get(c.getSource()).getType());
                 } else if (portId2Protocol.get(c.getTarget()) != null) {
-                    var vertices = portId2Protocol.get(c.getTarget()).getVertices();
+                    String vertices = portId2Protocol.get(c.getTarget()).getVertices();
                     if (StringUtils.isNotEmpty(vertices)) {
-                        var verticesList = JsonCommon.parse(vertices, new TypeReference<List<Map<String, Object>>>() {
+                        List<Map<String, Object>> verticesList = JsonCommon.parse(vertices, new TypeReference<>() {
                         });
                         c.setVertices(verticesList);
                     } else {
@@ -44,7 +46,7 @@ class ConnectionDisplayElementConvert implements IConverter {
                     c.setDisplayContext(portId2Protocol.get(c.getTarget()).getDisplayContext());
                     c.setType(portId2Protocol.get(c.getTarget()).getType());
                 }
-            });
+            }
         }
     }
 

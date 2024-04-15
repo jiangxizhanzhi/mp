@@ -1,8 +1,5 @@
 package cn.cyberpeace.mp.scene.core.plugin.base;
 
-import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.cyberpeace.mp.base.common.stereotype.BeanFieldNames;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldNames;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
@@ -21,87 +18,75 @@ import cn.cyberpeace.mp.scene.core.plugin.repository.BasePluginSceneMapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 场景插件model实现处理基类
  *
- * @param <S0> 表模型类   场景模板/场景实例
- * @param <E0> 表模型类   网元节点
- * @param <P0> 表模型类   网元端口
- * @param <S> 业务模型类   场景模板/场景实例
- * @param <E> 业务模型类   网元节点
- * @param <P> 业务模型类   网元端口
- * @param <M1> mapper类  场景模板/场景实例
- * @param <M2> mapper类  网元节点
- * @param <M3> mapper类  网元端口
- * @param <H> 场景插件处理类
+ * @param <TPluginSceneModel> 表模型类   场景模板/场景实例
+ * @param <TPluginSceneElementModel> 表模型类   网元节点
+ * @param <TPluginSceneElementPortModel> 表模型类   网元端口
+ * @param <TPluginSceneBO> 业务模型类   场景模板/场景实例
+ * @param <TPluginSceneElementBO> 业务模型类   网元节点
+ * @param <TPluginSceneElementPortBO> 业务模型类   网元端口
+ * @param <1> mapper类  场景模板/场景实例
+ * @param <TPluginSceneElementMapper> mapper类  网元节点
+ * @param <TPluginSceneElementPortMapper> mapper类  网元端口
+ * @param <TPluginHandler> 场景插件处理类
  */
-@ClassFieldNames({
-    "pluginSceneBOClass",
-    "pluginSceneElementBOClass",
-    "pluginSceneElementPortBOClass",
-    "pluginSceneModelClass",
-    "pluginSceneElementModelClass",
-    "pluginSceneElementPortModelClass",
-})
-@BeanFieldNames({
-    "pluginSceneMapper",
-    "pluginSceneElementMapper",
-    "pluginSceneElementPortMapper",
-})
-public class BasePluginModelHandler<
-        S9 extends BaseSceneBO<?, S9>,
-        E9 extends BaseSceneElementBO<?, P9, E9>,
-        P9 extends BaseSceneElementPortBO<?, P9, E9>,
-        S0 extends BasePluginSceneModel,
-        E0 extends BasePluginSceneElementModel,
-        P0 extends BasePluginSceneElementPortModel,
-        S extends BasePluginSceneBO<S0, S, S9>,
-        E extends BasePluginSceneElementBO<E0, E, E9>,
-        P extends BasePluginSceneElementPortBO<P0, P, P9>,
-        M1 extends BasePluginSceneMapper<S0>,
-        M2 extends BasePluginSceneElementMapper<E0>,
-        M3 extends BasePluginSceneElementPortMapper<P0>,
-        H extends BasePluginHandler<S, E, P, ?>> {
-    private H scenePluginHandler;
+public abstract class BasePluginModelHandler<
+        TSceneBO extends BaseSceneBO<?, TSceneBO>,
+        TSceneElementBO extends BaseSceneElementBO<?, TSceneElementPortBO, TSceneElementBO>,
+        TSceneElementPortBO extends BaseSceneElementPortBO<?, TSceneElementPortBO, TSceneElementBO>,
+        TPluginSceneModel extends BasePluginSceneModel,
+        TPluginSceneElementModel extends BasePluginSceneElementModel,
+        TPluginSceneElementPortModel extends BasePluginSceneElementPortModel,
+        TPluginSceneBO extends BasePluginSceneBO<TPluginSceneModel, TPluginSceneBO, TSceneBO>,
+        TPluginSceneElementBO extends BasePluginSceneElementBO<TPluginSceneElementModel, TPluginSceneElementBO, TSceneElementBO>,
+        TPluginSceneElementPortBO extends BasePluginSceneElementPortBO<TPluginSceneElementPortModel, TPluginSceneElementPortBO, TSceneElementPortBO>,
+        TPluginSceneMapper extends BasePluginSceneMapper<TPluginSceneModel>,
+        TPluginSceneElementMapper extends BasePluginSceneElementMapper<TPluginSceneElementModel>,
+        TPluginSceneElementPortMapper extends BasePluginSceneElementPortMapper<TPluginSceneElementPortModel>,
+        TPluginHandler extends BasePluginHandler<TPluginSceneBO, TPluginSceneElementBO, TPluginSceneElementPortBO, ?>> {
+    private TPluginHandler sceneTPluginHandler;
 
     // 通过ClassFieldNames注解和实现类ClassFieldClasses注解，初始化调用ClassUtils.loadClassFields(this)设置
-    private Class<S> pluginSceneBOClass;
-    private Class<E> pluginSceneElementBOClass;
-    private Class<P> pluginSceneElementPortBOClass;
-    private Class<S0> pluginSceneModelClass;
-    private Class<E0> pluginSceneElementModelClass;
-    private Class<P0> pluginSceneElementPortModelClass;
+    protected Class<TPluginSceneBO> pluginSceneBOClass;
+    protected Class<TPluginSceneElementBO> pluginSceneElementBOClass;
+    protected Class<TPluginSceneElementPortBO> pluginSceneElementPortBOClass;
+    protected Class<TPluginSceneModel> pluginSceneModelClass;
+    protected Class<TPluginSceneElementModel> pluginSceneElementModelClass;
+    protected Class<TPluginSceneElementPortModel> pluginSceneElementPortModelClass;
 
     // 通过BeanFieldNames注解和实现类BeanFieldClasses注解，初始化调用BeanUtils.loadBeanFields(this)设置
-    private M1 pluginSceneMapper;
-    private M2 pluginSceneElementMapper;
-    private M3 pluginSceneElementPortMapper;
+    protected TPluginSceneMapper pluginSceneMapper;
+    protected TPluginSceneElementMapper pluginSceneElementMapper;
+    protected TPluginSceneElementPortMapper pluginSceneElementPortMapper;
 
     /**
      * 载入场景基础
      * @param scene 表模型-场景基础
      */
-    public void loadScene(S0 scene) {
+    public void loadScene(TPluginSceneModel scene) {
         if (scene == null) {
             return;
         }
-        var sceneBO = ClassUtils.createInstance(pluginSceneBOClass);
+        TPluginSceneBO sceneBO = ClassUtils.createInstance(pluginSceneBOClass);
         sceneBO.fromModel(scene);
-        scenePluginHandler.setScene(sceneBO);
+        sceneTPluginHandler.setScene(sceneBO);
     }
 
     /**
      * 载入网元节点
      * @param elements 表模型-网元节点
      */
-    public void loadElements(List<E0> elements) {
+    public void loadElements(List<TPluginSceneElementModel> elements) {
         if (elements == null) {
             return;
         }
-        var elementMap = scenePluginHandler.getElementMap();
+        Map<String, TPluginSceneElementBO> elementMap = sceneTPluginHandler.getElementMap();
         elements.forEach(element -> {
-            var elementBO = ClassUtils.createInstance(pluginSceneElementBOClass);
+            TPluginSceneElementBO elementBO = ClassUtils.createInstance(pluginSceneElementBOClass);
             elementBO.fromModel(element);
             elementMap.put(element.getSceneElement(), elementBO);
         });
@@ -111,13 +96,13 @@ public class BasePluginModelHandler<
      * 载入网元端口数据
      * @param elementPorts 表模型-网元端口
      */
-    public void loadElementPorts(List<P0> elementPorts) {
+    public void loadElementPorts(List<TPluginSceneElementPortModel> elementPorts) {
         if (elementPorts == null) {
             return;
         }
-        var elementPortMap = scenePluginHandler.getElementPortMap();
+        Map<String, TPluginSceneElementPortBO> elementPortMap = sceneTPluginHandler.getElementPortMap();
         elementPorts.forEach(elementPort -> {
-            var elementPortBO = ClassUtils.createInstance(pluginSceneElementPortBOClass);
+            TPluginSceneElementPortBO elementPortBO = ClassUtils.createInstance(pluginSceneElementPortBOClass);
             elementPortBO.fromModel(elementPort);
             elementPortMap.put(elementPort.getSceneElementPort(), elementPortBO);
         });
@@ -127,8 +112,8 @@ public class BasePluginModelHandler<
      * 从数据库读取场景
      * @return 表模型-场景对象
      */
-    public S0 readScene() {
-        var sceneId = scenePluginHandler.getSourceSceneId();
+    public TPluginSceneModel readScene() {
+        String sceneId = sceneTPluginHandler.getSourceSceneId();
         return pluginSceneMapper.first(new HumanCondition().filterEqual(BasePluginSceneModel::getScene, sceneId));
     }
 
@@ -137,12 +122,12 @@ public class BasePluginModelHandler<
      * @param elementIds 网元节点id
      * @return 表模型-网元节点
      */
-    public List<E0> readElements(String... elementIds) {
+    public List<TPluginSceneElementModel> readElements(String... elementIds) {
         if (elementIds.length == 0) {
             return new ArrayList<>();
         }
 
-        var sceneId = scenePluginHandler.getSourceSceneId();
+        String sceneId = sceneTPluginHandler.getSourceSceneId();
         return pluginSceneElementMapper.list(new HumanCondition()
                 .filterEqual(BasePluginSceneElementModel::getScene, sceneId)
                 .filterIn(BasePluginSceneElementModel::getSceneElement, elementIds));
@@ -153,12 +138,12 @@ public class BasePluginModelHandler<
      * @param elementPortIds 网元节点端口id
      * @return 表模型-网元端口
      */
-    public List<P0> readElementPorts(String... elementPortIds) {
+    public List<TPluginSceneElementPortModel> readElementPorts(String... elementPortIds) {
         if (elementPortIds.length == 0) {
             return new ArrayList<>();
         }
 
-        var sceneId = scenePluginHandler.getSourceSceneId();
+        String sceneId = sceneTPluginHandler.getSourceSceneId();
         return pluginSceneElementPortMapper.list(new HumanCondition()
                 .filterEqual(BasePluginSceneElementPortModel::getScene, sceneId)
                 .filterIn(BasePluginSceneElementPortModel::getSceneElementPort, elementPortIds));
@@ -168,19 +153,19 @@ public class BasePluginModelHandler<
      * 保存场景属性数据
      */
     public boolean saveScene() {
-        var scene = scenePluginHandler.getScene();
+        TPluginSceneBO scene = sceneTPluginHandler.getScene();
         if (scene == null) {
             return true;
         }
 
-        var existScene = readScene();
-        var sceneId = scenePluginHandler.getSourceSceneId();
-        S0 sceneObj = scene.toModel();
+        TPluginSceneModel existScene = readScene();
+        String sceneId = sceneTPluginHandler.getSourceSceneId();
+        TPluginSceneModel sceneObj = scene.toModel();
         sceneObj.setScene(sceneId);
         if (existScene != null) {
             sceneObj.setId(existScene.getId());
         }
-        var result = pluginSceneMapper.save(sceneObj);
+        boolean result = pluginSceneMapper.save(sceneObj);
         scene.fromModel(sceneObj);
         return result;
     }
@@ -189,15 +174,15 @@ public class BasePluginModelHandler<
      * 删除场景属性数据
      */
     public boolean deleteScene() {
-        var scene = scenePluginHandler.getScene();
+        TPluginSceneBO scene = sceneTPluginHandler.getScene();
         if (scene == null) {
             return true;
         }
 
-        var sceneId = scenePluginHandler.getSourceSceneId();
-        S0 sceneObj = scene.toModel();
+        String sceneId = sceneTPluginHandler.getSourceSceneId();
+        TPluginSceneModel sceneObj = scene.toModel();
         sceneObj.setScene(sceneId);
-        var result = pluginSceneMapper.filterDelete(new HumanCondition()
+        int result = pluginSceneMapper.filterDelete(new HumanCondition()
                 .filterEqual(BasePluginSceneModel::getScene, sceneId));
 
         return result > 0;
@@ -208,21 +193,21 @@ public class BasePluginModelHandler<
      * @param elementIds 网元节点id
      */
     public int createElements(String... elementIds) {
-        var sceneId = scenePluginHandler.getSourceSceneId();
+        String sceneId = sceneTPluginHandler.getSourceSceneId();
 
         // 删除存在的
         deleteElements(elementIds);
 
         // 创建
-        var elementMap = scenePluginHandler.getElementMap();
-        List<E0> elements = new ArrayList<>();
+        Map<String, TPluginSceneElementBO> elementMap = sceneTPluginHandler.getElementMap();
+        List<TPluginSceneElementModel> elements = new ArrayList<>();
         for (String elementId : elementIds) {
-            var elementBO = elementMap.getOrDefault(elementId, null);
+            TPluginSceneElementBO elementBO = elementMap.getOrDefault(elementId, null);
             if (elementBO == null) {
                 continue;
             }
 
-            E0 element = elementBO.toModel();
+            TPluginSceneElementModel element = elementBO.toModel();
             element.setScene(sceneId);
             element.setSceneElement(elementId);
             elements.add(element);
@@ -235,26 +220,26 @@ public class BasePluginModelHandler<
      * @param elementIds 网元节点id
      */
     public int updateElements(String... elementIds) {
-        var elementMap = scenePluginHandler.getElementMap();
-        List<E0> updatingElements = new ArrayList<>();
+        Map<String, TPluginSceneElementBO> elementMap = sceneTPluginHandler.getElementMap();
+        List<TPluginSceneElementModel> updatingElements = new ArrayList<>();
         List<String> creatingElementIds = new ArrayList<>(Arrays.asList(elementIds));
         // 更新已存在的
-        List<E0> existElements = readElements(elementIds);
+        List<TPluginSceneElementModel> existElements = readElements(elementIds);
         existElements.forEach(existElement -> {
-            var elementId = existElement.getSceneElement();
+            String elementId = existElement.getSceneElement();
             creatingElementIds.remove(elementId);
-            var elementBO = elementMap.getOrDefault(elementId, null);
+            TPluginSceneElementBO elementBO = elementMap.getOrDefault(elementId, null);
             if (elementBO == null) {
                 return;
             }
-            var element = elementBO.toModel();
+            TPluginSceneElementModel element = elementBO.toModel();
             element.setId(existElement.getId());
             updatingElements.add(element);
         });
-        var updateCount = pluginSceneElementMapper.bulkUpdate(updatingElements).getSuccessCount();
+        int updateCount = pluginSceneElementMapper.bulkUpdate(updatingElements).getSuccessCount();
 
         // 创建不存在的
-        var createCount = createElements(creatingElementIds.toArray(new String[0]));
+        int createCount = createElements(creatingElementIds.toArray(new String[0]));
 
         return updateCount + createCount;
     }
@@ -267,7 +252,7 @@ public class BasePluginModelHandler<
         if (elementIds.length == 0) {
             return 0;
         }
-        var sceneId = scenePluginHandler.getSourceSceneId();
+        String sceneId = sceneTPluginHandler.getSourceSceneId();
         return pluginSceneElementMapper.filterDelete(new HumanCondition()
                 .filterEqual(BasePluginSceneElementModel::getScene, sceneId)
                 .filterIn(BasePluginSceneElementModel::getSceneElement, elementIds));
@@ -278,21 +263,21 @@ public class BasePluginModelHandler<
      * @param elementPortIds 网元端口id
      */
     public int createElementPorts(String... elementPortIds) {
-        var sceneId = scenePluginHandler.getSourceSceneId();
+        String sceneId = sceneTPluginHandler.getSourceSceneId();
 
         // 删除存在的
         deleteElementPorts(elementPortIds);
 
         // 创建
-        var elementPortMap = scenePluginHandler.getElementPortMap();
-        List<P0> elementPorts = new ArrayList<>();
+        Map<String, TPluginSceneElementPortBO> elementPortMap = sceneTPluginHandler.getElementPortMap();
+        List<TPluginSceneElementPortModel> elementPorts = new ArrayList<>();
         for (String elementPortId : elementPortIds) {
-            var elementPortBO = elementPortMap.getOrDefault(elementPortId, null);
+            TPluginSceneElementPortBO elementPortBO = elementPortMap.getOrDefault(elementPortId, null);
             if (elementPortBO == null) {
                 continue;
             }
 
-            P0 elementPort = elementPortBO.toModel();
+            TPluginSceneElementPortModel elementPort = elementPortBO.toModel();
             elementPort.setScene(sceneId);
             elementPort.setSceneElementPort(elementPortId);
             elementPorts.add(elementPort);
@@ -305,26 +290,26 @@ public class BasePluginModelHandler<
      * @param elementPortIds 网元端口id
      */
     public int updateElementPorts(String... elementPortIds) {
-        var elementPortMap = scenePluginHandler.getElementPortMap();
-        List<P0> updatingElementPorts = new ArrayList<>();
+        Map<String, TPluginSceneElementPortBO> elementPortMap = sceneTPluginHandler.getElementPortMap();
+        List<TPluginSceneElementPortModel> updatingElementPorts = new ArrayList<>();
         List<String> creatingElementPortIds = new ArrayList<>(Arrays.asList(elementPortIds));
         // 更新已存在的
-        List<P0> existElementPorts = readElementPorts(elementPortIds);
+        List<TPluginSceneElementPortModel> existElementPorts = readElementPorts(elementPortIds);
         existElementPorts.forEach(existElementPort -> {
-            var elementPortId = existElementPort.getSceneElementPort();
+            String elementPortId = existElementPort.getSceneElementPort();
             creatingElementPortIds.remove(elementPortId);
-            var elementPortBO = elementPortMap.getOrDefault(elementPortId, null);
+            TPluginSceneElementPortBO elementPortBO = elementPortMap.getOrDefault(elementPortId, null);
             if (elementPortBO == null) {
                 return;
             }
-            var elementPort = elementPortBO.toModel();
+            TPluginSceneElementPortModel elementPort = elementPortBO.toModel();
             elementPort.setId(existElementPort.getId());
             updatingElementPorts.add(elementPort);
         });
-        var updateCount = pluginSceneElementPortMapper.bulkUpdate(updatingElementPorts).getSuccessCount();
+        int updateCount = pluginSceneElementPortMapper.bulkUpdate(updatingElementPorts).getSuccessCount();
 
         // 创建不存在的
-        var createCount = createElementPorts(creatingElementPortIds.toArray(new String[0]));
+        int createCount = createElementPorts(creatingElementPortIds.toArray(new String[0]));
 
         return updateCount + createCount;
     }
@@ -338,7 +323,7 @@ public class BasePluginModelHandler<
             return 0;
         }
 
-        var sceneId = scenePluginHandler.getSourceSceneId();
+        String sceneId = sceneTPluginHandler.getSourceSceneId();
         return pluginSceneElementPortMapper.filterDelete(new HumanCondition()
                 .filterEqual(BasePluginSceneElementPortModel::getScene, sceneId)
                 .filterIn(BasePluginSceneElementPortModel::getSceneElementPort, elementPortIds));
@@ -347,10 +332,16 @@ public class BasePluginModelHandler<
     /**
      * 初始化
      */
-    public void init(H scenePluginHandler) {
-        ClassUtils.loadClassFields(this);
-        BeanCommon.loadBeanFields(this);
+    public void init(TPluginHandler sceneTPluginHandler) {
+        this.initClass();
+        this.initMapper();
 
-        this.scenePluginHandler = scenePluginHandler;
+        this.sceneTPluginHandler = sceneTPluginHandler;
     }
+
+    protected abstract void initClass() ;
+
+
+    protected abstract void initMapper() ;
+
 }

@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.base.common.MessageCommon;
 public interface ServiceCode {
 
     default void setCode(String code, String message) {
-        var innerCode = getInnerCode();
+        InnerCode innerCode = getInnerCode();
         innerCode.setCode(code);
         innerCode.setMessage(message);
     }

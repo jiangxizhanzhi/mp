@@ -59,23 +59,23 @@ class ImageInfoConverter implements IConverter {
                     cloudPluginElement.setInitSupport(true);
                 }
                 if (CollectionUtils.isNotEmpty(element.getPorts())) {
-                    element.getPorts().forEach(port -> {
+                    for (SceneConfigElementPortBO port : element.getPorts()) {
                         if (CollectionUtils.isNotEmpty(port.getAccessModes())) {
-                            port.getAccessModes().forEach(mode -> {
+                            for (AccessMode mode : port.getAccessModes()) {
                                 if (mode.getProxy() == null) {
                                     mode.setProxy(true);
                                 }
-                            });
+                            }
                         }
                         CloudPluginSceneConfigElementPortBO pluginPort = pluginPorts.get(port.getId());
                         if (pluginPort != null && CollectionUtils.isNotEmpty(pluginPort.getAccessModes())) {
-                            pluginPort.getAccessModes().forEach(mode -> {
+                            for (CloudAccessMode mode : pluginPort.getAccessModes()) {
                                 if (mode.getProxy() == null) {
                                     mode.setProxy(true);
                                 }
-                            });
+                            }
                         }
-                    });
+                    }
                 }
             } else {
                 // 有镜像信息 增加role init_support proxy的默认值,还要读取其他值
@@ -113,11 +113,11 @@ class ImageInfoConverter implements IConverter {
                     portBO.getAccessModes().addAll(this.getManageAccessModes(imageInfo.getManageAccessModes()));
                 }
                 portBO.getAccessModes().addAll(this.getAccessModes(imageInfo.getAccessModes(),portBO.getAccessModes()));
-                portBO.getAccessModes().forEach(mode -> {
-                    if (mode.getProxy() == null) {
-                        mode.setProxy(true);
+                for (AccessMode accessMode : portBO.getAccessModes()) {
+                    if (accessMode.getProxy() == null) {
+                        accessMode.setProxy(true);
                     }
-                });
+                }
                 CloudPluginSceneConfigElementPortBO pluginPort = pluginPorts.get(portBO.getId());
                 pluginPort.setNat(imageInfo.getNat());
                 if (pluginPort.getAccessModes() == null) {
@@ -126,18 +126,20 @@ class ImageInfoConverter implements IConverter {
                     pluginPort.getAccessModes().addAll(this.getManageCloudAccessModes(imageInfo.getManageAccessModes()));
                 }
                 pluginPort.getAccessModes().addAll(this.getCloudAccessModes(imageInfo.getAccessModes(), pluginPort.getAccessModes()));
-                pluginPort.getAccessModes().forEach(mode -> {
+                for (CloudAccessMode mode : pluginPort.getAccessModes()) {
                     if (mode.getProxy() == null) {
                         mode.setProxy(true);
                     }
-                });
+                }
             }
         }
     }
 
     private List<AccessMode> getManageAccessModes(List<AccessModeParseResult> results) {
-        var result = getAccessModes(results, new ArrayList<>());
-        result.forEach(r -> r.setManageMode(true));
+        List<AccessMode> result = getAccessModes(results, new ArrayList<>());
+        for (AccessMode r : result) {
+            r.setManageMode(true);
+        }
         return result;
     }
 
@@ -146,17 +148,18 @@ class ImageInfoConverter implements IConverter {
             return new ArrayList<>();
         }
         List<AccessMode> filterResults = new ArrayList<>();
-        var list = results.stream()
-                .map(result -> {
-                    AccessMode accessMode = new AccessMode();
-                    this.loadAccessModeInfo(accessMode, result);
-                    return accessMode;
-                }).collect(Collectors.toList());
+        List<AccessMode> list = new ArrayList<>();
+        for (AccessModeParseResult accessModeParseResult : results) {
+            AccessMode accessMode = new AccessMode();
+            this.loadAccessModeInfo(accessMode, accessModeParseResult);
+            AccessMode apply = accessMode;
+            list.add(apply);
+        }
         Set<String> existAccessModeKey = new HashSet<>();
         if (CollectionUtils.isNotEmpty(existAccessMode)) {
-            existAccessMode.forEach(m -> {
+            for (AccessMode m : existAccessMode) {
                 existAccessModeKey.add(StringUtils.joinWith(":", m.getProtocol(), m.getPort(), m.getUsername(), m.getPassword()));
-            });
+            }
         }
         for (AccessMode accessMode : list) {
             if (accessMode.getProtocol() != null) {
@@ -170,8 +173,10 @@ class ImageInfoConverter implements IConverter {
     }
 
     private List<CloudAccessMode> getManageCloudAccessModes(List<AccessModeParseResult> results) {
-        var result = getCloudAccessModes(results, new ArrayList<>());
-        result.forEach(r -> r.setManageMode(true));
+        List<CloudAccessMode> result = getCloudAccessModes(results, new ArrayList<>());
+        for (CloudAccessMode r : result) {
+            r.setManageMode(true);
+        }
         return result;
     }
 
@@ -180,17 +185,18 @@ class ImageInfoConverter implements IConverter {
             return new ArrayList<>();
         }
         List<CloudAccessMode> filterResults = new ArrayList<>();
-        var list = results.stream()
-                .map(result -> {
-                    CloudAccessMode accessMode = new CloudAccessMode();
-                    this.loadAccessModeInfo(accessMode, result);
-                    return accessMode;
-                }).collect(Collectors.toList());
+        List<CloudAccessMode> list = new ArrayList<>();
+        for (AccessModeParseResult accessModeParseResult : results) {
+            CloudAccessMode accessMode = new CloudAccessMode();
+            this.loadAccessModeInfo(accessMode, accessModeParseResult);
+            CloudAccessMode apply = accessMode;
+            list.add(apply);
+        }
         Set<String> existAccessModeKey = new HashSet<>();
         if (CollectionUtils.isNotEmpty(existAccessMode)) {
-            existAccessMode.forEach(m -> {
+            for (CloudAccessMode m : existAccessMode) {
                 existAccessModeKey.add(StringUtils.joinWith(":", m.getProtocol(), m.getPort(), m.getUsername(), m.getPassword()));
-            });
+            }
         }
         for (CloudAccessMode accessMode : list) {
             if (accessMode.getProtocol() != null) {

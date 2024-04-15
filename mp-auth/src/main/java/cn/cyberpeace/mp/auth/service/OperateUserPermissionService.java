@@ -11,11 +11,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -98,7 +94,13 @@ public class OperateUserPermissionService extends OperatePermissionService {
 
         // 自己可以查自己
         // 去重
-        List<String> distinctUIds = targetUserIds.stream().distinct().collect(Collectors.toList());
+        List<String> distinctUIds = new ArrayList<>();
+        Set<String> uniqueValues = new HashSet<>();
+        for (String targetUserId : targetUserIds) {
+            if (uniqueValues.add(targetUserId)) {
+                distinctUIds.add(targetUserId);
+            }
+        }
         if (distinctUIds.size() == 1) {
             UserModel currentLoginUser = UserUtils.getLoginUser();
             if (Objects.nonNull(currentLoginUser) && Objects.equals(currentLoginUser.getId(), targetUserIds.get(0))) {
@@ -115,7 +117,11 @@ public class OperateUserPermissionService extends OperatePermissionService {
         }
 
         List<RoleModel> roleModels = userRoleService.listByUserIds(targetUserIds);
-        List<String> targetRoleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
+        List<String> targetRoleIds = new ArrayList<>();
+        for (RoleModel roleModel : roleModels) {
+            String id = roleModel.getId();
+            targetRoleIds.add(id);
+        }
         super.checkByTargetRoleIdsForSearching(targetRoleIds);
     }
 
@@ -131,7 +137,13 @@ public class OperateUserPermissionService extends OperatePermissionService {
 
         // 自己可以查自己
         // 去重
-        List<String> distinctUIds = targetUserIds.stream().distinct().collect(Collectors.toList());
+        List<String> distinctUIds = new ArrayList<>();
+        Set<String> uniqueValues = new HashSet<>();
+        for (String targetUserId : targetUserIds) {
+            if (uniqueValues.add(targetUserId)) {
+                distinctUIds.add(targetUserId);
+            }
+        }
         if (distinctUIds.size() == 1) {
             UserModel currentLoginUser = UserUtils.getLoginUser();
             if (Objects.nonNull(currentLoginUser) && Objects.equals(currentLoginUser.getId(), targetUserIds.get(0))) {
@@ -140,7 +152,11 @@ public class OperateUserPermissionService extends OperatePermissionService {
         }
 
         List<RoleModel> roleModels = userRoleService.listByUserIds(targetUserIds);
-        List<String> targetRoleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
+        List<String> targetRoleIds = new ArrayList<>();
+        for (RoleModel roleModel : roleModels) {
+            String id = roleModel.getId();
+            targetRoleIds.add(id);
+        }
         super.checkByTargetRoleIds(targetRoleIds);
     }
 
@@ -154,7 +170,11 @@ public class OperateUserPermissionService extends OperatePermissionService {
             return;
         }
         List<RoleModel> roleModels = roleService.listByNames(targetRoleNames);
-        List<String> targetRoleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
+        List<String> targetRoleIds = new ArrayList<>();
+        for (RoleModel roleModel : roleModels) {
+            String id = roleModel.getId();
+            targetRoleIds.add(id);
+        }
         super.checkByTargetRoleIds(targetRoleIds);
     }
 

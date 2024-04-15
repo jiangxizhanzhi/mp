@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,17 +40,23 @@ public class OpenFlowConverter implements BaseConverter{
         params.setOffset(request.getOffset());
         CloudPlatformPageResult<OpenFlow> model = openFlowService.page(params);
         List<OpenFlow> openFlows = model.getList();
-        List<OpenFlowVO> openFlowVOS = openFlows.stream().map(v -> {
-            OpenFlowVO openFlowVO = openFlowVoConverter.sourceToTarget(v);
-            Map<String, Object> matchConditionMap = convertMatchCondition(v.getMatchCondition());
-            OpenFlowMatchConditionVO openFlowMatchConditionVO = JsonUtils.mapToBean(matchConditionMap, OpenFlowMatchConditionVO.class);
-            openFlowVO.setOpenFlowMatchConditionVO(openFlowMatchConditionVO);
-            return openFlowVO;
-        }).collect(Collectors.toList());
+        List<OpenFlowVO> openFlowVOS = new ArrayList<>();
+        for (OpenFlow v : openFlows) {
+            OpenFlowVO openFlowVO = getOpenFlowVO(v);
+            openFlowVOS.add(openFlowVO);
+        }
         OpenFlowPageConverterModel convertModel = new OpenFlowPageConverterModel();
         convertModel.setOpenFlowVOS(openFlowVOS);
         convertModel.setTotal(model.getTotal());
         return convertModel;
+    }
+
+    private OpenFlowVO getOpenFlowVO(OpenFlow v) {
+        OpenFlowVO openFlowVO = openFlowVoConverter.sourceToTarget(v);
+        Map<String, Object> matchConditionMap = convertMatchCondition(v.getMatchCondition());
+        OpenFlowMatchConditionVO openFlowMatchConditionVO = JsonUtils.mapToBean(matchConditionMap, OpenFlowMatchConditionVO.class);
+        openFlowVO.setOpenFlowMatchConditionVO(openFlowMatchConditionVO);
+        return openFlowVO;
     }
 
     /**

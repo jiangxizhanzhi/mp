@@ -87,9 +87,9 @@ public class ImagesConverter implements BaseConverter{
         }
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
         Map<String,DeviceTargetPO> supportExports = new HashMap<>();
-        deviceTargetPOS.stream().forEach(d -> {
-            supportExports.put(d.getUuid(), d);
-        });
+        for (DeviceTargetPO d1 : deviceTargetPOS) {
+            supportExports.put(d1.getUuid(), d1);
+        }
         Map<String, Integer> orderMap = new HashMap<String, Integer>();
         if (CollectionUtils.isNotEmpty(deviceTargetPOS)) {
             for (int i=0; i<deviceTargetPOS.size(); i++) {
@@ -97,20 +97,30 @@ public class ImagesConverter implements BaseConverter{
             }
         }
 
-        List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
+        List<Integer> ids = new ArrayList<>();
+        for (DeviceTargetPO po : deviceTargetPOS) {
+            String id = po.getId();
+            Integer parseInt = Integer.parseInt(id);
+            ids.add(parseInt);
+        }
         if (CollectionUtils.isEmpty(ids)){
             imageConvertPageModel.setList(Lists.newArrayList());
             return imageConvertPageModel;
         }
         List<Device> deviceList = this.findByIds(ids);
         if (CollectionUtils.isNotEmpty(deviceList)) {
-            deviceList = deviceList.stream().sorted((o1, o2) -> {
+            List<Device> list = new ArrayList<>();
+            for (Device device : deviceList) {
+                list.add(device);
+            }
+            list.sort((o1, o2) -> {
                 if (orderMap.get(o1.getUuid()) > orderMap.get(o2.getUuid())) {
                     return 1;
                 } else {
                     return -1;
                 }
-            }).collect(Collectors.toList());
+            });
+            deviceList = list;
         }
         POLogoUtils.changeLogoPathToUrl(deviceList);
 
@@ -119,17 +129,40 @@ public class ImagesConverter implements BaseConverter{
             return imageConvertPageModel;
         }
 
-        List<String> targetUuids = deviceTargetPOS.stream().map(DeviceTargetPO::getUuid).collect(Collectors.toList());
+        List<String> targetUuids = new ArrayList<>();
+        for (DeviceTargetPO targetPO : deviceTargetPOS) {
+            String uuid = targetPO.getUuid();
+            targetUuids.add(uuid);
+        }
 
         List<ImageAuthTotalCount> imageAuthTotalCounts = devopsTargetAuthService.totalCount(targetUuids);
 
-        Map<String, Integer> imageAuthTotalCountsMap = imageAuthTotalCounts.stream().collect(Collectors.toMap(ImageAuthTotalCount::getTarget, ImageAuthTotalCount::getTotal));
+        Map<String, Integer> imageAuthTotalCountsMap = new HashMap<>();
+        for (ImageAuthTotalCount imageAuthTotalCount : imageAuthTotalCounts) {
+            if (imageAuthTotalCountsMap.put(imageAuthTotalCount.getTarget(), imageAuthTotalCount.getTotal()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
 
-        Map<String, PublicEnum> targetMap = deviceTargetPOS.stream().collect(Collectors.toMap(DeviceTargetPO::getUuid, DeviceTargetPO::getIsPublic));
+        Map<String, PublicEnum> targetMap = new HashMap<>();
+        for (DeviceTargetPO deviceTargetPO : deviceTargetPOS) {
+            if (targetMap.put(deviceTargetPO.getUuid(), deviceTargetPO.getIsPublic()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
 
-        Map<String, DeviceTargetPO> deviceTargetPOMap = deviceTargetPOS.stream().collect(Collectors.toMap(DeviceTargetPO::getUuid, (d) -> d));
+        Map<String, DeviceTargetPO> deviceTargetPOMap = new HashMap<>();
+        for (DeviceTargetPO d : deviceTargetPOS) {
+            if (deviceTargetPOMap.put(d.getUuid(), d) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
 
-        List<ImageConvertModel> modelList = deviceList.stream().map(this::wrapperImageConvertModel).collect(Collectors.toList());
+        List<ImageConvertModel> modelList = new ArrayList<>();
+        for (Device device : deviceList) {
+            ImageConvertModel convertModel = wrapperImageConvertModel(device);
+            modelList.add(convertModel);
+        }
 
         if (CollectionUtils.isNotEmpty(modelList)) {
             for (ImageConvertModel imageConvertModel : modelList) {
@@ -184,12 +217,19 @@ public class ImagesConverter implements BaseConverter{
      */
     public List<ImageTargetConvertModel> findByUuids(List<String> uuids) {
         List<DeviceTargetPO> deviceTargetPOList = deviceTargetMapper.findByUuids(uuids);
-        return deviceTargetPOList.stream().map(v -> {
-            ImageTargetConvertModel model = new ImageTargetConvertModel();
-            model.setUuid(v.getUuid());
-            model.setName(v.getName());
-            return model;
-        }).collect(Collectors.toList());
+        List<ImageTargetConvertModel> list = new ArrayList<>();
+        for (DeviceTargetPO v : deviceTargetPOList) {
+            ImageTargetConvertModel imageTargetConvertModel = getImageTargetConvertModel(v);
+            list.add(imageTargetConvertModel);
+        }
+        return list;
+    }
+
+    private static ImageTargetConvertModel getImageTargetConvertModel(DeviceTargetPO v) {
+        ImageTargetConvertModel model = new ImageTargetConvertModel();
+        model.setUuid(v.getUuid());
+        model.setName(v.getName());
+        return model;
     }
 
     /**
@@ -211,16 +251,22 @@ public class ImagesConverter implements BaseConverter{
     public void build(ImagesBuildRequest request) {
         DeviceQuickCreateCloudPlatformModel model = new DeviceQuickCreateCloudPlatformModel(request.getName(),request.getImageName());
         List<InstallerDTO> installerDTOList = request.getInstallerDTOList();
-        List<QuickCreateParam> quickCreateParams = installerDTOList.stream().map(v -> {
-            QuickCreateParam params = new QuickCreateParam();
-            params.setInstallerUuid(v.getUuid());
-            params.setSettings(v.getDockerInstallerData().getStartUpParameterList());
-            params.setFile(v.getDockerInstallerData().getFile());
-            return params;
-        }).collect(Collectors.toList());
+        List<QuickCreateParam> quickCreateParams = new ArrayList<>();
+        for (InstallerDTO v : installerDTOList) {
+            QuickCreateParam quickCreateParam = getQuickCreateParam(v);
+            quickCreateParams.add(quickCreateParam);
+        }
         model.setQuickCreateParams(quickCreateParams);
         Device device = imagesService.quickCreate(model);
         devopsTargetService.insert(Collections.singletonList(device));
+    }
+
+    private static QuickCreateParam getQuickCreateParam(InstallerDTO v) {
+        QuickCreateParam params = new QuickCreateParam();
+        params.setInstallerUuid(v.getUuid());
+        params.setSettings(v.getDockerInstallerData().getStartUpParameterList());
+        params.setFile(v.getDockerInstallerData().getFile());
+        return params;
     }
 
     /**
@@ -254,12 +300,12 @@ public class ImagesConverter implements BaseConverter{
         devopsTargetAuthService.deleteByTargets(imageIds);
 
         PublicEnum isAllPublic = request.getIsAllPublic();
-        imageIds.forEach(imageId -> {
+        for (String s : imageIds) {
             DeviceTargetPO deviceTargetPO = new DeviceTargetPO();
             deviceTargetPO.setIsPublic(isAllPublic);
-            deviceTargetPO.setUuid(imageId);
+            deviceTargetPO.setUuid(s);
             deviceTargetMapper.updateById(deviceTargetPO);
-        });
+        }
         //再新增权限数据
         List<String> userIds = request.getUserIds();
         if (PublicEnum.PRIVATE == isAllPublic){
@@ -269,17 +315,23 @@ public class ImagesConverter implements BaseConverter{
             }
         }
         if (PublicEnum.ALL_PUBLIC != isAllPublic && CollectionUtils.isNotEmpty(userIds)){
-            imageIds.forEach(imageId -> {
-                List<DeviceTargetAuthPO> authModelList = userIds.stream().map(userId -> {
-                    DeviceTargetAuthPO deviceTargetAuthPO = new DeviceTargetAuthPO();
-                    deviceTargetAuthPO.setOwner(userId);
-                    deviceTargetAuthPO.setTarget(imageId);
-                    return deviceTargetAuthPO;
-                }).collect(Collectors.toList());
+            for (String imageId : imageIds) {
+                List<DeviceTargetAuthPO> authModelList = new ArrayList<>();
+                for (String userId : userIds) {
+                    DeviceTargetAuthPO deviceTargetAuthPO = getDeviceTargetAuthPO(imageId, userId);
+                    authModelList.add(deviceTargetAuthPO);
+                }
                 devopsTargetAuthService.bulkCreate(authModelList);
-            });
+            }
         }
 
+    }
+
+    private static DeviceTargetAuthPO getDeviceTargetAuthPO(String imageId, String userId) {
+        DeviceTargetAuthPO deviceTargetAuthPO = new DeviceTargetAuthPO();
+        deviceTargetAuthPO.setOwner(userId);
+        deviceTargetAuthPO.setTarget(imageId);
+        return deviceTargetAuthPO;
     }
 
     /**
@@ -292,8 +344,16 @@ public class ImagesConverter implements BaseConverter{
         if (CollectionUtils.isEmpty(deviceTargetAuthPOS)){
             return Lists.newArrayList();
         }
-        List<String> userIds = deviceTargetAuthPOS.stream().map(DeviceTargetAuthPO::getOwner).collect(Collectors.toList());
-        return userService.listByUserIds(userIds.stream().toArray(String[]::new));
+        List<String> userIds = new ArrayList<>();
+        for (DeviceTargetAuthPO deviceTargetAuthPO : deviceTargetAuthPOS) {
+            String owner = deviceTargetAuthPO.getOwner();
+            userIds.add(owner);
+        }
+        List<String> list = new ArrayList<>();
+        for (String userId : userIds) {
+            list.add(userId);
+        }
+        return userService.listByUserIds(list.toArray(new String[0]));
     }
 
     /**
@@ -341,7 +401,7 @@ public class ImagesConverter implements BaseConverter{
         }
         String insctanceCreateUser = Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : StringUtils.EMPTY;
         scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser));
-        var updateTargetModel = new DeviceTargetPO();
+        DeviceTargetPO updateTargetModel = new DeviceTargetPO();
         updateTargetModel.setUuid(uuid);
         updateTargetModel.setInstanceCreateUser(insctanceCreateUser);
         deviceTargetMapper.updateById(updateTargetModel);
@@ -356,7 +416,7 @@ public class ImagesConverter implements BaseConverter{
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         scenariosService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(), request.getImageType()));
-        var updateTargetModel = new DeviceTargetPO();
+        DeviceTargetPO updateTargetModel = new DeviceTargetPO();
         updateTargetModel.setUuid(request.getUuid());
         updateTargetModel.setInstanceCreateUser(StringUtils.EMPTY);
         deviceTargetMapper.updateById(updateTargetModel);
@@ -391,7 +451,9 @@ public class ImagesConverter implements BaseConverter{
             CloudPlatformPageResult<Device> model = deviceService.findByIds(notExistedList);
             List<Device> deviceList = model.getList();
             if (CollectionUtils.isNotEmpty(deviceList)) {
-                deviceList.stream().forEach(device -> device.setIsHide(Objects.nonNull(isHide) ? isHide : Boolean.FALSE));
+                for (Device device : deviceList) {
+                    device.setIsHide(Objects.nonNull(isHide) ? isHide : Boolean.FALSE);
+                }
                 result += devopsTargetService.insert(deviceList);
             }
         }
@@ -399,7 +461,9 @@ public class ImagesConverter implements BaseConverter{
             CloudPlatformPageResult<Device> model = deviceService.findByIds(existedList);
             List<Device> deviceList = model.getList();
             if (CollectionUtils.isNotEmpty(deviceList)) {
-                deviceList.forEach(device -> devopsTargetService.updateById(device));
+                for (Device device : deviceList) {
+                    devopsTargetService.updateById(device);
+                }
                 result+= existedList.size();
             }
         }

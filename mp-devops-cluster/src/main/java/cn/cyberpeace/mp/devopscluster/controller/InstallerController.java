@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -43,6 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -56,6 +59,7 @@ import java.util.stream.Collectors;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/service")
 @Api(tags = "靶标管理-服务管理")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.SERVICE_MANAGE)
 public class InstallerController {
 
     private final InstallerConverter installerConverter;
@@ -71,14 +75,16 @@ public class InstallerController {
     public PageResult<InstallerPageVO> page(InstallerPageRequest request){
         BasePageBO<InstallerConvertModel> model = installerConverter.page(request);
 
-        List<InstallerPageVO> list = model.getList().stream().map(installer ->
-                InstallerPageVO.builder().uuid(installer.getUuid()).name(installer.getName())
-                        .logo(installer.getLogo()).description(installer.getDescription())
-                        .categories(installer.getCategories()).deployType(installer.getDeployType())
-                        .startUpParameterList(installer.getStartUpParameterList())
-                        .file(Objects.nonNull(installer.getExtDocker()) ? installer.getExtDocker().getFile() : null)
-                        .build()
-        ).collect(Collectors.toList());
+        List<InstallerPageVO> list = new ArrayList<>();
+        for (InstallerConvertModel installer : model.getList()) {
+            InstallerPageVO build = InstallerPageVO.builder().uuid(installer.getUuid()).name(installer.getName())
+                    .logo(installer.getLogo()).description(installer.getDescription())
+                    .categories(installer.getCategories()).deployType(installer.getDeployType())
+                    .startUpParameterList(installer.getStartUpParameterList())
+                    .file(Objects.nonNull(installer.getExtDocker()) ? installer.getExtDocker().getFile() : null)
+                    .build();
+            list.add(build);
+        }
 
         return new PageResult<>(list,model.getTotal());
     }

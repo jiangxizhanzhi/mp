@@ -26,7 +26,9 @@ public class AsyncScreenshotModelService {
     public void batchDeleteScreenshot(List<ScreenshotModel> screenshotModels) {
         try {
             if (CollectionUtils.isNotEmpty(screenshotModels)) {
-                screenshotModels.forEach(model -> FsCommon.delete(model.getFile()));
+                for (ScreenshotModel model : screenshotModels) {
+                    FsCommon.delete(model.getFile());
+                }
             }
         } catch (Exception e) {
             log.error("delete screenshot file error", e);

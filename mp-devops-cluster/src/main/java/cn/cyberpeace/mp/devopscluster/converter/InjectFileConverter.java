@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.devopscluster.model.common.InjectFile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,9 +31,11 @@ public class InjectFileConverter {
      */
     public BasePageBO<InjectFileConvertModel> list(String deviceUuid) {
         CloudPlatformPageResult<InjectFile> model = injectFileService.list(deviceUuid);
-        List<InjectFileConvertModel> list = model.getList().stream().map(item ->
-                new InjectFileConvertModel(item.getUuid(), item.getName(), item.getDestPath(), item.getSize(),item.getStatus()))
-                .collect(Collectors.toList());
+        List<InjectFileConvertModel> list = new ArrayList<>();
+        for (InjectFile item : model.getList()) {
+            InjectFileConvertModel injectFileConvertModel = new InjectFileConvertModel(item.getUuid(), item.getName(), item.getDestPath(), item.getSize(), item.getStatus());
+            list.add(injectFileConvertModel);
+        }
         BasePageBO<InjectFileConvertModel> convertModel = new BasePageBO<>();
         convertModel.setList(list);
         convertModel.setSuccess(model.isSuccess());

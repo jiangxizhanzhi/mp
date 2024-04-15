@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.CheckUtils;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -23,15 +22,12 @@ import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowPortMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
 import cn.cyberpeace.mp.flow.request.*;
-import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
 import cn.cyberpeace.mp.flow.service.*;
 import cn.cyberpeace.mp.flow.util.*;
-import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
-import joptsimple.internal.Strings;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -42,12 +38,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * @Description: 流量任务异步执行服务类
@@ -380,8 +371,16 @@ public class AsyncPlatFlowTaskService {
             return;
         }
 
-        List<String> flowPortIds = flowTaskModels.stream().map(FlowTaskModel::getFlowPortId).collect(Collectors.toList());
-        List<String> thirdTaskIds = flowTaskModels.stream().map(FlowTaskModel::getThirdTaskId).collect(Collectors.toList());
+        List<String> flowPortIds = new ArrayList<>();
+        for (FlowTaskModel taskModel : flowTaskModels) {
+            String flowPortId = taskModel.getFlowPortId();
+            flowPortIds.add(flowPortId);
+        }
+        List<String> thirdTaskIds = new ArrayList<>();
+        for (FlowTaskModel flowTaskModel : flowTaskModels) {
+            String thirdTaskId = flowTaskModel.getThirdTaskId();
+            thirdTaskIds.add(thirdTaskId);
+        }
         String delUrl = "";
         if (ResourceTypeEnum.PACP.toValue() == resourceType) {
             log.info("start to delete app task");
@@ -451,6 +450,7 @@ public class AsyncPlatFlowTaskService {
      * 异步新增虚拟机、添加网口
      *
      */
+    @Deprecated
     @Async
     public void addExecutor(String uuid, List<FlowNetworkInfo> networkInfos) {
         this.addFlowExecutor(uuid, String.valueOf(System.currentTimeMillis()), networkInfos);
@@ -537,12 +537,15 @@ public class AsyncPlatFlowTaskService {
                         .build();
                 flowPortMapper.create(flowPortModel);
 
-                String extNetId = externalNetId;
                 // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
                 String finalFixedIp = fixedIp;
-                NetworkUtils.probePort(fixedIp, 22, 1000, 1000, 1000 * 60 * 10,
-                        null, 0, () -> checkTrexServer(finalFixedIp, networkInfos, flowActuatorModel, extNetId)
-                        , () -> log.error("Trex vm start error:{}", addVmRequest.getName()));
+                boolean flag = NetworkUtils.probePort(fixedIp, 22, 1000, 1000,
+                        1000 * 60 * 10, null, 0);
+                if (flag) {
+                    checkTrexServer(finalFixedIp, networkInfos, flowActuatorModel, externalNetId);
+                } else {
+                    log.error("Trex vm start error:{}", addVmRequest.getName());
+                }
 
             } else {
                 log.error("add trex vm error");
@@ -626,9 +629,13 @@ public class AsyncPlatFlowTaskService {
 
                 // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
                 String finalFixedIp = fixedIp;
-                NetworkUtils.probePort(fixedIp, 22, 1000, 1000, 1000 * 60 * 10,
-                        null, 0, () -> checkStartTrex(finalFixedIp),
-                        () -> log.error("Trex vm start error:{}", addVmRequest.getName()));
+                boolean flag = NetworkUtils.probePort(fixedIp, 22, 1000, 1000,
+                        1000 * 60 * 10, null, 0);
+                if (flag) {
+                    checkStartTrex(finalFixedIp);
+                } else {
+                    log.error("Trex vm start error:{}", addVmRequest.getName());
+                }
 
             } else {
                 log.error("add trex vm error");
@@ -782,7 +789,12 @@ public class AsyncPlatFlowTaskService {
         if (Objects.nonNull(batchStartTaskBO)) {
             // 有batchStartTaskBO，是靶场测评调用
             runType = batchStartTaskBO.getRunType();
-            taskIds = batchStartTaskBO.getTaskSipList().stream().map(TaskSipBO::getTaskId).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (TaskSipBO taskSipBO : batchStartTaskBO.getTaskSipList()) {
+                String taskId = taskSipBO.getTaskId();
+                list.add(taskId);
+            }
+            taskIds = list;
         }
 
         // 任务存在校验
@@ -794,13 +806,22 @@ public class AsyncPlatFlowTaskService {
 
         // 任务状态校验
         List<String> notRunningTaskIds = new ArrayList<>();
-        List<FlowTaskTaskModel> notRunningTasks = flowTaskTaskModels.stream().filter(flowTaskTaskModel ->
-                TaskTaskStatusEnum.RUNNING.toValue() != flowTaskTaskModel.getTaskStatus() && TaskTaskStatusEnum.INITING.toValue() != flowTaskTaskModel.getTaskStatus() && TaskTaskStatusEnum.PREPARING.toValue() != flowTaskTaskModel.getTaskStatus()).collect(Collectors.toList());
+        List<FlowTaskTaskModel> notRunningTasks = new ArrayList<>();
+        for (FlowTaskTaskModel taskTaskModel : flowTaskTaskModels) {
+            if (TaskTaskStatusEnum.RUNNING.toValue() != taskTaskModel.getTaskStatus() && TaskTaskStatusEnum.INITING.toValue() != taskTaskModel.getTaskStatus() && TaskTaskStatusEnum.PREPARING.toValue() != taskTaskModel.getTaskStatus()) {
+                notRunningTasks.add(taskTaskModel);
+            }
+        }
         if (CollectionUtils.isEmpty(notRunningTasks)) {
             log.error("some tasks are already running");
             throw new MpRuntimeException(FlowErrorCode.TASK_IS_RUNNING);
         } else {
-            notRunningTaskIds = notRunningTasks.stream().map(FlowTaskTaskModel::getId).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (FlowTaskTaskModel notRunningTask : notRunningTasks) {
+                String id = notRunningTask.getId();
+                list.add(id);
+            }
+            notRunningTaskIds = list;
             flowTaskTaskModels = flowTaskTaskService.listByTaskIds(notRunningTaskIds);
         }
 
@@ -822,17 +843,28 @@ public class AsyncPlatFlowTaskService {
         flowTaskRecordService.batchUpdateStatus(0, taskIds);
 
         List<FlowTaskStart> flowTaskStartList = new ArrayList<>();
-        flowTaskTaskModels.forEach(flowTaskTaskModel -> {
-            // 解析任务配置
-            FlowTaskConfModel flowTaskConfModel = flowTaskConfModels.stream().filter(taskConfModel ->
-                    taskConfModel.getTaskId().equals(flowTaskTaskModel.getId())).findFirst().get();
+        for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModels) {// 解析任务配置
+            Optional<FlowTaskConfModel> result = Optional.empty();
+            for (FlowTaskConfModel taskConfModel : flowTaskConfModels) {
+                if (taskConfModel.getTaskId().equals(flowTaskTaskModel.getId())) {
+                    result = Optional.of(taskConfModel);
+                    break;
+                }
+            }
+            FlowTaskConfModel flowTaskConfModel = result.get();
             FlowTaskConf flowTaskConf = JSONObject.parseObject(flowTaskConfModel.getConf(), FlowTaskConf.class);
 
             if (Objects.nonNull(batchStartTaskBO)) {
                 // 靶场测评，不支持持续运行
                 flowTaskConfModel.setKeepRunning(0);
-                TaskSipBO sipBO = batchStartTaskBO.getTaskSipList().stream().filter(taskSipBO ->
-                        flowTaskTaskModel.getId().equals(taskSipBO.getTaskId())).findFirst().get();
+                Optional<TaskSipBO> found = Optional.empty();
+                for (TaskSipBO taskSipBO : batchStartTaskBO.getTaskSipList()) {
+                    if (flowTaskTaskModel.getId().equals(taskSipBO.getTaskId())) {
+                        found = Optional.of(taskSipBO);
+                        break;
+                    }
+                }
+                TaskSipBO sipBO = found.get();
 
                 // 设置源ip
                 String sourceIp = sipBO.getSourceIp();
@@ -878,7 +910,7 @@ public class AsyncPlatFlowTaskService {
                     .attackConfs(flowTaskConf.getAttackConfs())
                     .build();
             flowTaskStartList.add(flowTaskStart);
-        });
+        }
 
         BatchStartFlowTaskRequest batchStartFlowTaskRequest = BatchStartFlowTaskRequest.builder()
                 .action(TaskActionEnum.START.toValue())
@@ -972,10 +1004,6 @@ public class AsyncPlatFlowTaskService {
                 reloadTrex(flowActuatorModel.getIp().split(BaseConstants.COLON)[0]);
             }
             return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
-        } finally {
-            // 清除任务回调缓存
-            FlowCacheUtil.taskRunnableCache.invalidate(FlowCacheUtil.RUNNABLE_PREFIX + taskId);
-            FlowCacheUtil.taskConsumerCache.invalidate(FlowCacheUtil.CONSUMER_PREFIX + taskId);
         }
     }
 
@@ -1002,13 +1030,22 @@ public class AsyncPlatFlowTaskService {
 
         List<String> runningTaskIds = new ArrayList<>();
         // 任务状态校验
-        List<FlowTaskTaskModel> runningTasks = flowTaskTaskModels.stream().filter(flowTaskTaskModel ->
-                TaskStatusEnum.RUNNING.toValue() == flowTaskTaskModel.getTaskStatus()).collect(Collectors.toList());
+        List<FlowTaskTaskModel> runningTasks = new ArrayList<>();
+        for (FlowTaskTaskModel taskTaskModel : flowTaskTaskModels) {
+            if (TaskStatusEnum.RUNNING.toValue() == taskTaskModel.getTaskStatus()) {
+                runningTasks.add(taskTaskModel);
+            }
+        }
         if (CollectionUtils.isEmpty(runningTasks)) {
             log.error("some tasks are not running");
             throw new MpRuntimeException(FlowErrorCode.NO_RUNNING_TASK_TO_STOP);
         } else {
-            runningTaskIds = runningTasks.stream().map(FlowTaskTaskModel::getId).collect(Collectors.toList());
+            List<String> list = new ArrayList<>();
+            for (FlowTaskTaskModel runningTask : runningTasks) {
+                String id = runningTask.getId();
+                list.add(id);
+            }
+            runningTaskIds = list;
         }
 
         BatchStopFlowTaskRequest batchStopFlowTaskRequest = BatchStopFlowTaskRequest.builder()
@@ -1045,9 +1082,6 @@ public class AsyncPlatFlowTaskService {
                 reloadTrex(flowActuatorModel.getIp().split(BaseConstants.COLON)[0]);
             }
             return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
-        } finally {
-            // 清除任务回调缓存
-            FlowCacheUtil.taskConsumerCache.invalidate(FlowCacheUtil.CONSUMER_PREFIX + flowTaskTaskModels.get(0).getSceneId());
         }
     }
 
@@ -1080,9 +1114,13 @@ public class AsyncPlatFlowTaskService {
         serverInfo.setPassword("111111");
         SshUtil.refreshDir(serverInfo, commands, TGN_PATH, "/opt/project_dirs");
 
-        NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
-                null, 0, () -> flowPortService.batchCreatePorts(networkInfos, flowActuatorModel,
-                        extNetId), () -> log.error("Trex vm start error:{}", fixedIp));
+        boolean flag = NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
+                null, 0);
+        if (flag) {
+            flowPortService.batchCreatePorts(networkInfos, flowActuatorModel, extNetId);
+        } else {
+            log.error("Trex vm start error:{}", fixedIp);
+        }
     }
 
     /**
@@ -1097,8 +1135,11 @@ public class AsyncPlatFlowTaskService {
         serverInfo.setPassword("111111");
         SshUtil.refreshDir(serverInfo, commands, TGN_PATH, "/opt/project_dirs");
 
-        NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
-                null, 0, null, () -> log.error("Trex vm start error:{}", fixedIp));
+        boolean flag = NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
+                null, 0);
+        if (!flag) {
+            log.error("Trex vm start error:{}", fixedIp);
+        }
     }
 
     /**
@@ -1109,7 +1150,7 @@ public class AsyncPlatFlowTaskService {
      */
     private void delPorts(FlowActuatorModel flowActuatorModel, List<String> flowPortIds) {
         List<FlowPortModel> flowPortModels = flowPortMapper.selectByPortIds(flowPortIds);
-        flowPortModels.forEach(flowPortModel -> {
+        for (FlowPortModel flowPortModel : flowPortModels) {
             try {
                 // 删除网口信息
                 if (StringUtils.isNotBlank(flowPortModel.getServerPortId())) {
@@ -1136,7 +1177,7 @@ public class AsyncPlatFlowTaskService {
             } catch (Exception e) {
                 log.error("del port error, {}", ExceptionUtils.getStackTrace(e));
             }
-        });
+        }
     }
 
     /**
@@ -1167,299 +1208,15 @@ public class AsyncPlatFlowTaskService {
     public void deleteFlowFile(List<FlowInfoModel> infoModelList) {
         try {
             if (CollectionUtils.isNotEmpty(infoModelList)) {
-                infoModelList.forEach(infoModel -> {
+                for (FlowInfoModel infoModel : infoModelList) {
                     String filePath = ResourceTypeEnum.SCRIPT.toValue() == infoModel.getResourceType() ? infoModel.getScriptFile() : infoModel.getPcapFile();
                     FsCommon.delete(filePath);
-                });
+                }
             }
         } catch (Exception e) {
             log.error("delete flow file error, {}", ExceptionUtils.getStackTrace(e));
         }
     }
-
-    /**
-     * 2秒一次轮询任务状态，当任务结束时执行回调方法
-     * @param taskId
-     * @param flowActuatorModel
-     * @param callback
-     * @param errorCallback
-     * @throws InterruptedException
-     */
-    public void refreshTaskStatus(String taskId, FlowActuatorModel flowActuatorModel, Runnable callback, Consumer<String> errorCallback) {
-        String host = flowActuatorModel.getIp();
-        FlowTaskModel flowTaskModel = flowTaskMapper.get(taskId);
-        if (Objects.isNull(flowTaskModel)) {
-            log.error("flowTaskModel is empty for [{}]", taskId);
-            return;
-        }
-
-        // 轮询校验任务是否跑完，完成时调用回调方法，最多轮询24小时
-        CheckUtils.loopCheck(() -> checkTaskJobStopped(flowTaskModel, host, errorCallback), 2000, 1000 * 60 * 60 * 24,
-                () -> refreshTaskStatusStopCheck(flowTaskModel.getId()), 1, () -> taskJobStoppedCallback(flowTaskModel.getId(), callback), () -> log.error("task job running status get failed：[{}]", taskId), "CheckTaskJobStopped");
-    }
-
-
-    /**
-     * 2秒一次批量轮询任务状态，当所有任务结束时执行回调方法
-     * @param flowTaskModels
-     * @param flowActuatorModel
-     * @param consumer
-     */
-    public void batchRefreshTaskStatus(List<FlowTaskModel> flowTaskModels, FlowActuatorModel flowActuatorModel, Consumer<BatchActuatorCallbackResponse> consumer) {
-        String host = flowActuatorModel.getIp();
-        // 轮询校验批量任务是否跑完，完成时调用回调方法，最多轮询60分钟
-        CheckUtils.loopCheck(() -> batchCheckTaskJobStopped(flowTaskModels, host, consumer), 2000, 1000 * 60 * 60,
-                null, 1, null, () -> log.error("batch get task job running status failed"), "BatchCheckTaskJobStopped");
-
-    }
-
-    /**
-     * 刷新任务状态停止校验方法
-     * @param taskId
-     * @return
-     */
-    private Boolean refreshTaskStatusStopCheck(String taskId) {
-        FlowTaskModel flowTaskModel = flowTaskMapper.get(taskId);
-        if (Objects.isNull(flowTaskModel)) {
-            log.error("flowTaskModel is empty for [{}]", taskId);
-            return false;
-        }
-
-        return TaskStatusEnum.STOPED.toValue() == flowTaskModel.getTaskStatus();
-    }
-
-    /**
-     * 流量任务停止时回调方法
-     * @param taskId
-     * @param call
-     */
-    private void taskJobStoppedCallback(String taskId, Runnable call) {
-        FlowTaskModel oldFlowTaskModel = flowTaskMapper.get(taskId);
-        if (Objects.isNull(oldFlowTaskModel)) {
-            log.info("flowTaskModel is empty for taskId:{}", taskId);
-            return;
-        }
-
-        FlowTaskModel flowTaskModel = new FlowTaskModel();
-        flowTaskModel.setId(taskId);
-        flowTaskModel.setTaskStatus(TaskStatusEnum.STOPED.toValue());
-        flowTaskModel.setUpdateTime(LocalDateTime.now());
-
-        // 更新本地任务状态
-        flowTaskMapper.updateTaskInfo(flowTaskModel);
-
-        // 执行回调通知方法
-        if (Objects.nonNull(call)) {
-            log.info("start to run callback function");
-            call.run();
-        }
-
-        if (Objects.equals(CustomFlagEnum.YES.toValue(), oldFlowTaskModel.getCustomFlag())) {
-            // 自定义流量，运行后直接删除网口
-            String actuatorId = oldFlowTaskModel.getActuatorId();
-            FlowActuatorModel flowActuatorModel = this.getFlowActuatorModel(actuatorId);
-            if (Objects.isNull(flowActuatorModel)) {
-                log.error("del ports failed for actuator is empty");
-                return;
-            }
-
-            List<String> flowPortIds = Collections.singletonList(oldFlowTaskModel.getFlowPortId());
-            this.delPorts(flowActuatorModel, flowPortIds);
-
-            flowTaskModel.setFlowPortId(Strings.EMPTY);
-            // 删除任务关联网口
-            flowTaskMapper.updateTaskInfo(flowTaskModel);
-        }
-
-    }
-
-    /**
-     * 流量任务停止时回调方法
-     * @param taskId
-     * @param call
-     */
-    private void jobStoppedCallback(String taskId, Consumer<String> call, String errMsg) {
-        FlowTaskModel oldFlowTaskModel = flowTaskMapper.get(taskId);
-        if (Objects.isNull(oldFlowTaskModel)) {
-            log.info("flowTaskModel is empty for taskId:{}", taskId);
-            return;
-        }
-
-        FlowTaskModel flowTaskModel = new FlowTaskModel();
-        flowTaskModel.setId(taskId);
-        flowTaskModel.setTaskStatus(TaskStatusEnum.STOPED.toValue());
-        flowTaskModel.setUpdateTime(LocalDateTime.now());
-
-        // 更新本地任务状态
-        flowTaskMapper.updateTaskInfo(flowTaskModel);
-
-        // 执行回调通知方法
-        if (Objects.nonNull(call)) {
-            log.info("start to run callback function");
-            call.accept(errMsg);
-        }
-
-        if (Objects.equals(CustomFlagEnum.YES.toValue(), oldFlowTaskModel.getCustomFlag())) {
-            // 自定义流量，运行后直接删除网口
-            String actuatorId = oldFlowTaskModel.getActuatorId();
-            FlowActuatorModel flowActuatorModel = this.getFlowActuatorModel(actuatorId);
-            if (Objects.isNull(flowActuatorModel)) {
-                log.error("del ports failed for actuator is empty");
-                return;
-            }
-
-            List<String> flowPortIds = Collections.singletonList(oldFlowTaskModel.getFlowPortId());
-            this.delPorts(flowActuatorModel, flowPortIds);
-
-            flowTaskModel.setFlowPortId(Strings.EMPTY);
-            // 删除任务关联网口
-            flowTaskMapper.updateTaskInfo(flowTaskModel);
-        }
-
-    }
-
-    /**
-     * 校验任务状态是否已停止
-     * @param flowTaskModel
-     * @param hostUrl
-     * @param errorCallback
-     * @return
-     */
-    private Boolean checkTaskJobStopped(FlowTaskModel flowTaskModel, String hostUrl, Consumer<String> errorCallback) {
-        Boolean result = false;
-        if (StringUtils.isBlank(flowTaskModel.getThirdTaskId())) {
-            log.warn("no thirdTaskIds to query");
-            return result;
-        }
-
-        if (StringUtils.isBlank(hostUrl)) {
-            log.error("hostUrl is empty");
-            return result;
-        }
-
-        try {
-            JSONObject statusObj = new JSONObject();
-            JSONArray statusArray = new JSONArray();
-            statusArray.addAll(Collections.singletonList(flowTaskModel.getThirdTaskId()));
-            statusObj.put("uuids", statusArray);
-
-            String statusRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(hostUrl) + "/tasks/standards/many",
-                    statusObj.toJSONString());
-            JSONObject statusRspObj = JSONObject.parseObject(statusRsp);
-            log.info("query task status response:{}", statusRspObj.toJSONString());
-            if (ResponseUtils.checkResponse(statusRspObj)) {
-                JSONArray rows = statusRspObj.getJSONObject(BaseConstants.STR_DATA).getJSONArray("rows");
-                if (Objects.nonNull(rows)) {
-                    Integer taskStatus = rows.getJSONObject(0).getInteger("status");
-                    // 任务状态为已停止或者停止中，表示任务运行结束
-                    if (TaskStatusEnum.STOPED.toValue() == taskStatus || TaskStatusEnum.STOPING.toValue() == taskStatus) {
-                        // 判断任务是否运行成功
-                        Integer isSuccess = rows.getJSONObject(0).getInteger("result");
-                        if (Objects.nonNull(isSuccess) && 1 == isSuccess) {
-                            log.info("flow execute success:[{}]", flowTaskModel.getId());
-                            result = true;
-                        } else {
-                            FlowInfoModel flowInfoModel = flowInfoMapper.get(flowTaskModel.getFlowId());
-                            // 运行失败，更新任务状态为已停止，调用失败回调方法
-                            String errMsg = rows.getJSONObject(0).getString("result_detail");
-                            if (Objects.nonNull(flowInfoModel) && flowInfoModel.getResourceType() == ResourceTypeEnum.SCRIPT.toValue()) {
-                                // 脚本执行报错，添加前缀
-                                errMsg = MessageCommonUtil.convertMessage("scriptFlowError").concat(errMsg).replace("\\n\'", "");
-                            }
-                            log.error("flow [{}] execute error for: {}", flowTaskModel.getId(), errMsg);
-                            jobStoppedCallback(flowTaskModel.getId(), errorCallback, errMsg);
-                        }
-
-                    }
-                }
-            } else {
-                log.error("query task status failed");
-            }
-        } catch (Exception e) {
-            log.error("query task status error", e);
-        }
-
-        return result;
-    }
-
-    /**
-     * 批量校验任务状态是否已停止
-     * @param flowTaskModels
-     * @param hostUrl
-     * @param consumer
-     * @return
-     */
-    private Boolean batchCheckTaskJobStopped(List<FlowTaskModel> flowTaskModels, String hostUrl, Consumer<BatchActuatorCallbackResponse> consumer) {
-        if (StringUtils.isBlank(hostUrl)) {
-            log.error("hostUrl is empty");
-            return false;
-        }
-
-        List<String> taskIds = flowTaskModels.stream().map(FlowTaskModel::getId).collect(Collectors.toList());
-        List<String> thirdTaskIds = flowTaskModels.stream().map(FlowTaskModel::getThirdTaskId).collect(Collectors.toList());
-        try {
-            JSONObject statusObj = new JSONObject();
-            JSONArray statusArray = new JSONArray();
-            statusArray.addAll(thirdTaskIds);
-            statusObj.put("uuids", statusArray);
-
-            String statusRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(hostUrl) + "/tasks/standards/many",
-                    statusObj.toJSONString());
-            JSONObject statusRspObj = JSONObject.parseObject(statusRsp);
-            log.info("batch query task status response:{}", statusRspObj.toJSONString());
-            if (ResponseUtils.checkResponse(statusRspObj)) {
-                JSONArray rows = statusRspObj.getJSONObject(BaseConstants.STR_DATA).getJSONArray("rows");
-                if (Objects.nonNull(rows)) {
-                    // 校验是否有运行中的任务
-                    long count = rows.stream().filter(row ->
-                            TaskStatusEnum.INIT.toValue() == ((JSONObject) row).getInteger("status")
-                                    || TaskStatusEnum.RUNNING.toValue() == ((JSONObject) row).getInteger("status")).count();
-                    if (count > 0) {
-                        log.info("batch actuator task is still running for hostUrl: {}", hostUrl);
-                        return false;
-                    }
-
-                    List<FlowTaskModel> successTaskModels = new ArrayList<>();
-                    List<FlowTaskModel> errorTaskModels = new ArrayList<>();
-                    rows.forEach(row -> {
-                        JSONObject resultObj = (JSONObject) row;
-                        String thirdTaskId = resultObj.getString("uuid");
-                        FlowTaskModel taskModel = flowTaskModels.stream().filter(task -> Objects.equals(task.getThirdTaskId(), thirdTaskId)).findFirst().get();
-
-                        // 判断任务是否运行成功
-                        Integer isSuccess = resultObj.getInteger("result");
-                        if (Objects.nonNull(isSuccess) && 1 == isSuccess) {
-                            log.info("flow execute success:[{}]", taskModel.getId());
-                            successTaskModels.add(taskModel);
-                        } else {
-                            // 运行失败，更新任务状态为已停止，调用失败回调方法
-                            log.info("flow execute error:[{}]", taskModel.getId());
-                            errorTaskModels.add(taskModel);
-                        }
-                    });
-
-                    // 批量更新流量任务状态为停止
-                    flowTaskMapper.batchUpdateTaskStatus(TaskStatusEnum.STOPED.toValue(), null, taskIds);
-
-                    if (Objects.nonNull(consumer)) {
-                        BatchActuatorCallbackResponse callbackResponse = new BatchActuatorCallbackResponse();
-                        callbackResponse.setSuccessTaskModels(successTaskModels);
-                        callbackResponse.setErrorTaskModels(errorTaskModels);
-                        consumer.accept(callbackResponse);
-                    }
-
-                    return true;
-                }
-            } else {
-                log.error("batch query task status failed");
-            }
-        } catch (Exception e) {
-            log.error("batch query task status error", e);
-        }
-
-        return false;
-    }
-
 
     /**
      * 上传流量文件

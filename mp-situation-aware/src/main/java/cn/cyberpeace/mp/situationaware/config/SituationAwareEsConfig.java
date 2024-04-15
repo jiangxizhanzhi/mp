@@ -36,12 +36,12 @@ public class SituationAwareEsConfig {
         String wazuhEsNodes = situationAwareConfig.getWazuhEsNodes();
         Asserts.check(!ObjectUtils.isEmpty(wazuhEsNodes), "ElasticSearch cluster ip address cannot empty");
         String[] ipArray = wazuhEsNodes.split(",");
-        var httpHosts = new HttpHost[ipArray.length];
+        HttpHost[] httpHosts = new HttpHost[ipArray.length];
         for (int i = 0, len = ipArray.length; i < len; i++) {
-            var ipAddress = ipArray[i];
+            String ipAddress = ipArray[i];
             String[] values = ipAddress.split(":");
             String ip = values[0];
-            var port = Integer.parseInt(values[1]);
+            int port = Integer.parseInt(values[1]);
             httpHosts[i] = new HttpHost(ip, port, "http");
         }
         return httpHosts;
@@ -56,12 +56,12 @@ public class SituationAwareEsConfig {
         String elasticsearchNodes = situationAwareConfig.getArkimeEsNodes();
         Asserts.check(!ObjectUtils.isEmpty(elasticsearchNodes), "ElasticSearch cluster ip address cannot empty");
         String[] ipArray = elasticsearchNodes.split(",");
-        var httpHosts = new HttpHost[ipArray.length];
+        HttpHost[] httpHosts = new HttpHost[ipArray.length];
         for (int i = 0, len = ipArray.length; i < len; i++) {
-            var ipAddress = ipArray[i];
+            String ipAddress = ipArray[i];
             String[] values = ipAddress.split(":");
             String ip = values[0];
-            var port = Integer.parseInt(values[1]);
+            int port = Integer.parseInt(values[1]);
             httpHosts[i] = new HttpHost(ip, port, "http");
         }
         return httpHosts;

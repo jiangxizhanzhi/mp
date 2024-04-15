@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.flow.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "流量脚本模板接口")
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/scriptdemo")
+@AuthTarget(TargetEnum.NO_AUTH)
 public class FlowScriptDemoController extends BaseModelController<FlowScriptDemoModel, QueryParams, FlowScriptDemoService> {
 
     @Autowired

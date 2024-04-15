@@ -18,22 +18,6 @@ public class AggregationSwagger2Config {
     @Autowired
     private Swagger2Config swagger2Config;
 
-    /**
-     * @Deprecated
-     */
-    @Bean
-    public Docket apiBase() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .apiInfo(swagger2Config.apiInfo())
-                .enableUrlTemplating(true)
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.base"))
-                .paths(PathSelectors.any())
-                .build()
-                .globalRequestParameters(Collections.singletonList(AuthSwagger2Config.authParameter))
-                .groupName("base");
-    }
-
     @Bean
     public Docket apiAggregation() {
         return new Docket(DocumentationType.SWAGGER_2)

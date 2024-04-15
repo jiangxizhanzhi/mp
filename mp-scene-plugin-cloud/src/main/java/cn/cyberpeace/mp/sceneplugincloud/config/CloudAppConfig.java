@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 @Slf4j
 @Configuration
@@ -195,9 +194,13 @@ public class CloudAppConfig {
     public List<String> getCidrPool() {
         if (cachedCidrs == null) {
             List<String> cidrPool = new ArrayList<>();
-            IntStream.range(172, 173).forEach(cidrA -> IntStream.range(0, 255)
-                    .forEach(cidrB -> IntStream.range(0, 255)
-                            .forEach(cidrC -> cidrPool.add(String.format("%d.%d.%d.0/24", cidrA, cidrB, cidrC)))));
+            for (int cidrA = 172; cidrA < 173; cidrA++) {
+                for (int cidrB = 0; cidrB < 255; cidrB++) {
+                    for (int cidrC = 0; cidrC < 255; cidrC++) {
+                        cidrPool.add(String.format("%d.%d.%d.0/24", cidrA, cidrB, cidrC));
+                    }
+                }
+            }
             cachedCidrs = cidrPool;
         }
         List<String> cidrPool = new ArrayList<>();
@@ -225,7 +228,7 @@ public class CloudAppConfig {
             return externalNetCidr;
         }
 
-        var netId = getExternalNetId();
+        String netId = getExternalNetId();
         if (StringUtils.isEmpty(netId)) {
             return null;
         }
@@ -256,7 +259,7 @@ public class CloudAppConfig {
         if (networkData != null) {
             mgmtNetId = networkData.getId();
         } else {
-            var message = "Unable to find mgmt network with name `mgmt`";
+            String message = "Unable to find mgmt network with name `mgmt`";
             log.error("Try to get mgmt net failed: {}", message);
             throw new MpRuntimeException(message);
         }

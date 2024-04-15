@@ -37,13 +37,13 @@ public class DecoderService extends RequestProcessor {
      * @return 解析器
      */
     public ListObjServiceResult<Decoder> pageDecoders(BasePageRequest pageRequest) {
-        var uri = "/decoders";
-        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;
+        String uri = "/decoders";
+        String requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;
 
         List<NameValuePair> params = processRequestParams(pageRequest);
 
         log.info("requestUrl:{}", requestUrl);
-        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
+        String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
         BaseResponse<Decoder> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
         List<Decoder> decoders = result.getData().getAffectedItems();

@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -18,6 +19,7 @@ import java.nio.charset.StandardCharsets;
  * 通用的远程文件下载controller
  * @param <S> 远程文件操作service
  */
+@Deprecated
 public interface BaseRemoteFileDownloadController<S extends BaseRemoteFileService> {
 
     S getRemoteFileService();
@@ -42,7 +44,7 @@ public interface BaseRemoteFileDownloadController<S extends BaseRemoteFileServic
         String encodedFilename = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20").replace("%2B", "+");
         response.setHeader("Content-Disposition", String.format("attachment;filename=\"%s\"", encodedFilename));
         response.setContentType("application/octet-stream;charset=utf-8");
-        var os = response.getOutputStream();
+        ServletOutputStream os = response.getOutputStream();
         getRemoteFileService().download(id, os);
     }
 

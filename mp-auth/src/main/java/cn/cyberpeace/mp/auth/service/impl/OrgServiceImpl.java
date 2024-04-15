@@ -30,13 +30,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -203,7 +198,13 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             while (StringUtils.isNotBlank(orgModel.getParent())) {
                 String parentId = orgModel.getParent();
                 Optional<OrgModel> orgModelOptional =
-                        orgModelList.stream().filter(org -> org.getId().equals(parentId)).findFirst();
+                        Optional.empty();
+                for (OrgModel org : orgModelList) {
+                    if (org.getId().equals(parentId)) {
+                        orgModelOptional = Optional.of(org);
+                        break;
+                    }
+                }
                 if (orgModelOptional.isPresent()) {
                     orgModel = orgModelOptional.get();
                     path = orgModel.getName().concat(AuthConstant.ORG_PATH_SEPARATOR).concat(path);
@@ -252,7 +253,13 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
                     while (StringUtils.isNotBlank(orgModel.getParent())) {
                         String parentId = orgModel.getParent();
                         Optional<OrgModel> orgModelOptional =
-                                allOrgModelList.stream().filter(org -> org.getId().equals(parentId)).findFirst();
+                                Optional.empty();
+                        for (OrgModel org : allOrgModelList) {
+                            if (org.getId().equals(parentId)) {
+                                orgModelOptional = Optional.of(org);
+                                break;
+                            }
+                        }
                         if (orgModelOptional.isPresent()) {
                             orgModel = orgModelOptional.get();
                             pathList.add(0, orgModel.getName());
@@ -286,7 +293,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
         deleteReleated(orgId);
 
-        var ret = super.delete(orgId);
+        ServiceResult<Boolean> ret = super.delete(orgId);
         if (Objects.nonNull(ret.getSource()) && ret.getSource()) {
             userCacheService.evictAllUserCache();
             messageSender.send(Collections.singletonList(orgId), AuthConstant.MSG_TYPE_ORG_DELETE, AuthConstant.ROUTING_KEY_ORG_DELETE, null);
@@ -306,7 +313,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
             deleteReleated(id);
         }
-        var ret = super.bulkDelete(ids);
+        ServiceResult<Integer> ret = super.bulkDelete(ids);
         if (Objects.nonNull(ret.getSource()) && ret.getSource() > 0) {
             userCacheService.evictAllUserCache();
             messageSender.send(Collections.singletonList(ids), AuthConstant.MSG_TYPE_ORG_DELETE, AuthConstant.ROUTING_KEY_ORG_DELETE, null);
@@ -323,12 +330,14 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
                                 .filterOrEnd();
         List<OrgModel> orgs = getModelMapper().list(humanCondition);
         List<OrgBO> orgBOS =
-                orgs.stream().map(orgModel -> {
-                    OrgBO orgBO = new OrgBO();
-                    BeanUtils.copyProperties(orgModel, orgBO);
-                    orgBO.setPath(this.getPath(orgModel));
-                    return orgBO;
-                }).collect(Collectors.toList());
+                new ArrayList<>();
+        for (OrgModel org : orgs) {
+            OrgBO orgBO = new OrgBO();
+            BeanUtils.copyProperties(org, orgBO);
+            orgBO.setPath(this.getPath(org));
+            OrgBO apply = orgBO;
+            orgBOS.add(apply);
+        }
         return orgBOS;
     }
 
@@ -337,12 +346,14 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         ParamCheck.notBlank(parentId, AuthBasei18nCode.ORG_PARENT);
         List<OrgModel> orgs = listByParentId(parentId);
         List<OrgBO> orgBOS =
-                orgs.stream().map(orgModel -> {
-                    OrgBO orgBO = new OrgBO();
-                    BeanUtils.copyProperties(orgModel, orgBO);
-                    orgBO.setPath(this.getPath(orgModel));
-                    return orgBO;
-                }).collect(Collectors.toList());
+                new ArrayList<>();
+        for (OrgModel org : orgs) {
+            OrgBO orgBO = new OrgBO();
+            BeanUtils.copyProperties(org, orgBO);
+            orgBO.setPath(this.getPath(org));
+            OrgBO apply = orgBO;
+            orgBOS.add(apply);
+        }
         return orgBOS;
     }
 
@@ -350,14 +361,21 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     public List<OrgBO> listAll(String tenantId) {
         List<OrgModel> orgs = orgPathService.listByTenant(tenantId);
         // 租户所有组织使用了缓存，下面的组装路径需要使用Map索引，否则会导致过多查找
-        Map<String, OrgModel> orgMap = orgs.stream().collect(Collectors.toMap(OrgModel::getId, org -> org));
+        Map<String, OrgModel> orgMap = new HashMap<>();
+        for (OrgModel orgModel : orgs) {
+            if (orgMap.put(orgModel.getId(), orgModel) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
         List<OrgBO> orgBOS =
-                orgs.stream().map(orgModel -> {
-                    OrgBO orgBO = new OrgBO();
-                    BeanUtils.copyProperties(orgModel, orgBO);
-                    orgBO.setPath(this.getOrgPath(orgModel, orgMap));
-                    return orgBO;
-                }).collect(Collectors.toList());
+                new ArrayList<>();
+        for (OrgModel org : orgs) {
+            OrgBO orgBO = new OrgBO();
+            BeanUtils.copyProperties(org, orgBO);
+            orgBO.setPath(this.getOrgPath(org, orgMap));
+            OrgBO apply = orgBO;
+            orgBOS.add(apply);
+        }
         return orgBOS;
     }
 
@@ -412,30 +430,15 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Override
     public OrgBO getByPath(String path) {
         ParamCheck.notBlank(path, AuthBasei18nCode.ORG_PATH);
-        OrgModel orgModel = null;
         if (StringUtils.isNotBlank(path)) {
-            String[] pathArray = path.split(AuthConstant.ORG_PATH_SEPARATOR);
-            String parentId = StringUtils.EMPTY;
-            for (int i = 0; i < pathArray.length; i++) {
-                String p = pathArray[i].trim();
-                OrgModel tmpModel;
-                List<OrgModel> orgModelList = listByParentIdAndName(parentId, p);
-                if (CollectionUtils.isNotEmpty(orgModelList)) {
-                    tmpModel = orgModelList.get(0);
-                    parentId = tmpModel.getId();
+            List<String> pathList = Arrays.stream(path.split(AuthConstant.ORG_PATH_SEPARATOR)).map(StringUtils::trim)
+                    .collect(Collectors.toList());
+            List<OrgModel> orgModelList = listByPathNames(pathList);
+            return OrgBO.fromModel(getLastOrgByPath(pathList, orgModelList), path);
 
-                    // 最后一个，获取组织
-                    if (i == (pathArray.length - 1)) {
-                        orgModel = tmpModel;
-                        OrgBO orgBO = new OrgBO();
-                        BeanUtils.copyProperties(orgModel, orgBO);
-                        orgBO.setPath(path);
-                        return orgBO;
-                    }
-                }
-            }
+        } else {
+            throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED);
         }
-        return null;
     }
 
     @Override
@@ -561,11 +564,11 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     // 组织树排序
     private void sortTree(List<OrgDto> orgs) {
-        orgs.forEach(o -> {
+        for (OrgDto o : orgs) {
             if (CollectionUtils.isNotEmpty(o.getChildren())) {
                 sortTree(o.getChildren());
             }
-        });
+        }
 
         orgs.sort((o1, o2) -> o1.getPk() - o2.getPk());
     }
@@ -582,6 +585,56 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
                 filterEqual(OrgModel::getParent, parentId).
                 filterEqual(OrgModel::getName, name);
         return getModelMapper().list(humanCondition);
+    }
+
+    private List<OrgModel> listByPathNames(List<String> pathList) {
+        if (CollectionUtils.isEmpty(pathList)) {
+            return Collections.emptyList();
+        } else {
+            return getModelMapper().list(new HumanCondition().filterIn(OrgModel::getName, pathList.toArray()));
+        }
+    }
+
+    private OrgModel getLastOrgByPath(List<String> pathList, List<OrgModel> orgModelList) {
+        String path = String.join("/", pathList);
+
+        Map<String, List<OrgModel>> orgNameMap = orgModelList.stream().collect(Collectors.groupingBy(OrgModel::getName, Collectors.toList()));
+        List<OrgModel> lastOrgNodeModels = orgNameMap.get(pathList.get(pathList.size() - 1));
+        if (CollectionUtils.isEmpty(lastOrgNodeModels)) {
+            throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(path));
+        }
+
+
+        for (OrgModel orgModel : lastOrgNodeModels) {
+            String targetOrgPath = getOrgPathByLastOrg(orgModel, orgModelList);
+            if (path.equals(targetOrgPath)) {
+                return orgModel;
+            }
+        }
+        throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(path));
+    }
+
+    private String getOrgPathByLastOrg(OrgModel lastOrgModel, List<OrgModel> fullOrgModelList) {
+        if (CollectionUtils.isEmpty(fullOrgModelList)) {
+            return StringUtils.EMPTY;
+        } else {
+            Map<String, OrgModel> idToOrgModelMap = fullOrgModelList.stream().collect(Collectors.toMap(OrgModel::getId,
+                    Function.identity()));
+            List<OrgModel> pathOrgList = new ArrayList<>();
+            OrgModel tempModel = lastOrgModel;
+            pathOrgList.add(tempModel);
+            while (StringUtils.isNotBlank(tempModel.getParent())) {
+                tempModel = idToOrgModelMap.get(tempModel.getParent());
+                if (Objects.isNull(tempModel)) {
+                    break;
+                }
+                pathOrgList.add(tempModel);
+            }
+            Collections.reverse(pathOrgList);
+            return pathOrgList.stream().map(OrgModel::getName).collect(Collectors.joining("/"));
+
+        }
+
     }
 
 }

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.common;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.StaticRoute;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
@@ -60,7 +61,7 @@ public class VyosNetworkCommandUtils {
     public static List<String> genNetworkCmdList(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler) {
         ConfigParamsWrapper paramsWrapper = new ConfigParamsWrapper(element, pluginHandler);
         List<String> result = new ArrayList<>();
-        for (var builder : builderChains) {
+        for (NetworkingCmdBuilder builder : builderChains) {
             List<String> cmds = builder.build(paramsWrapper);
             result.addAll(cmds);
         }
@@ -70,7 +71,7 @@ public class VyosNetworkCommandUtils {
     public static List<String> genModifyNetworkCmdList(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler) {
         ConfigParamsWrapper paramsWrapper = new ConfigParamsWrapper(element, pluginHandler);
         List<String> result = new ArrayList<>();
-        for (var builder : modifyBuilderChains) {
+        for (NetworkingCmdBuilder builder : modifyBuilderChains) {
             List<String> cmds = builder.build(paramsWrapper);
             result.addAll(cmds);
         }
@@ -90,10 +91,14 @@ public class VyosNetworkCommandUtils {
             if (CollectionUtils.isEmpty(element.getSrcElement().getPorts())) {
                 this.pluginPorts = new ArrayList<>();
             } else {
-                pluginPorts = element.getSrcElement().getPorts().stream()
-                        .map(p -> pluginHandler.getPort(p.getId()))
-                        .filter(p -> p != null)
-                        .collect(Collectors.toList());
+                List<CloudPluginSceneElementPortBO> list = new ArrayList<>();
+                for (SceneElementPortBO p : element.getSrcElement().getPorts()) {
+                    CloudPluginSceneElementPortBO port = pluginHandler.getPort(p.getId());
+                    if (port != null) {
+                        list.add(port);
+                    }
+                }
+                pluginPorts = list;
             }
         }
     }
@@ -124,7 +129,7 @@ public class VyosNetworkCommandUtils {
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             CloudPluginSceneElementBO element = paramsWrapper.element;
-            var ports = element.getSrcElement().getPorts();
+            List<SceneElementPortBO> ports = element.getSrcElement().getPorts();
             Map<String, Integer> portId2Order = new HashMap<>();
             ports.forEach(p -> portId2Order.put(p.getId(), p.getOrder()));
 
@@ -164,7 +169,7 @@ public class VyosNetworkCommandUtils {
                 if (StringUtils.isNotEmpty(p.getOspfIp()) && StringUtils.isNotEmpty(p.getOspfArea())) {
                     String ospfIp = p.getOspfIp();
                     if (!ospfIp.contains("/")) {
-                        var net = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
+                        CloudPluginSceneElementNetworkBO net = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
                         if (net != null && StringUtils.isNotEmpty(net.getCidr()) && net.getCidr().contains("/")) {
                             ospfIp = ospfIp + net.getCidr().substring(net.getCidr().indexOf("/"));
                         } else {
@@ -199,9 +204,12 @@ public class VyosNetworkCommandUtils {
             if (CollectionUtils.isEmpty(paramsWrapper.pluginPorts)) {
                 return new ArrayList<>();
             }
-            var bgpPorts = paramsWrapper.pluginPorts.stream()
-                    .filter(p -> StringUtils.isNotEmpty(p.getBgpAs()))
-                    .collect(Collectors.toList());
+            List<CloudPluginSceneElementPortBO> bgpPorts = new ArrayList<>();
+            for (CloudPluginSceneElementPortBO pluginPort : paramsWrapper.pluginPorts) {
+                if (StringUtils.isNotEmpty(pluginPort.getBgpAs())) {
+                    bgpPorts.add(pluginPort);
+                }
+            }
             if (CollectionUtils.isEmpty(bgpPorts)) {
                 return new ArrayList<>();
             }
@@ -211,7 +219,7 @@ public class VyosNetworkCommandUtils {
                 if (bgpPorts.contains(p)) {
                     // 端口有bgp配置 根据配置创建命
                     String interfaceIp = null;
-                    var network = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
+                    CloudPluginSceneElementNetworkBO network = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
                     if (network != null && StringUtils.isNotEmpty(network.getCidr())) {
                         interfaceIp = p.getSrcPort().getIp() + "/" + network.getCidr().split("/")[1];
                     } else {
@@ -227,7 +235,7 @@ public class VyosNetworkCommandUtils {
                 } else if (!Boolean.TRUE.equals(p.getSrcPort().getIsAuxiliary())) {
                     // 非辅助端口 且 bgp无配置 设置下地址,宣告下网络
                     String interfaceIp = null;
-                    var network = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
+                    CloudPluginSceneElementNetworkBO network = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
                     if (network != null && StringUtils.isNotEmpty(network.getCidr())) {
                         interfaceIp = p.getSrcPort().getIp() + "/" + network.getCidr().split("/")[1];
                     } else {
@@ -257,9 +265,12 @@ public class VyosNetworkCommandUtils {
             if (CollectionUtils.isEmpty(paramsWrapper.pluginPorts)) {
                 return new ArrayList<>();
             }
-            var ripPorts = paramsWrapper.pluginPorts.stream()
-                    .filter(p -> StringUtils.isNotEmpty(p.getRipIp()))
-                    .collect(Collectors.toList());
+            List<CloudPluginSceneElementPortBO> ripPorts = new ArrayList<>();
+            for (CloudPluginSceneElementPortBO pluginPort : paramsWrapper.pluginPorts) {
+                if (StringUtils.isNotEmpty(pluginPort.getRipIp())) {
+                    ripPorts.add(pluginPort);
+                }
+            }
             if (CollectionUtils.isEmpty(ripPorts)) {
                 return new ArrayList<>();
             }
@@ -271,7 +282,7 @@ public class VyosNetworkCommandUtils {
                 if (ripPorts.contains(p)) {
                     // 端口有bgp配置 根据配置创建命令
                     if (StringUtils.isNotEmpty(p.getRipIp())) {
-                        var network = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
+                        CloudPluginSceneElementNetworkBO network = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
                         String interfaceIp = null;
 //                        if (network != null && StringUtils.isNotEmpty(network.getCidr())) {
 //                            interfaceIp = p.getSrcPort().getIp() + "/" + network.getCidr().split("/")[1];
@@ -354,21 +365,21 @@ public class VyosNetworkCommandUtils {
     }
 
     public static boolean isQosChange(CloudPluginSceneElementBO originElement, CloudScenePluginHandler originPluginHandler, CloudPluginSceneElementBO newElement, CloudScenePluginHandler newPluginHandler) {
-        var originWrapper = new ConfigParamsWrapper(originElement, originPluginHandler);
-        var newWrapper = new ConfigParamsWrapper(newElement, newPluginHandler);
+        ConfigParamsWrapper originWrapper = new ConfigParamsWrapper(originElement, originPluginHandler);
+        ConfigParamsWrapper newWrapper = new ConfigParamsWrapper(newElement, newPluginHandler);
         Set<String> originKeys = new HashSet<>();
         Set<String> newKeys = new HashSet<>();
         if (CollectionUtils.isNotEmpty(originWrapper.pluginPorts)) {
-            var ports = originWrapper.pluginPorts;
-            for (var p : ports) {
+            List<CloudPluginSceneElementPortBO> ports = originWrapper.pluginPorts;
+            for (CloudPluginSceneElementPortBO p : ports) {
                 Integer delay = p.getSrcPort().getDelay();
                 Integer loss = p.getSrcPort().getLoss();
                 originKeys.add(p.getSrcPort().getId() + "_" + (delay == null ? "0" : delay) + "_" + (loss == null ? "0" : loss));
             }
         }
         if (CollectionUtils.isNotEmpty(newWrapper.pluginPorts)) {
-            var ports = newWrapper.pluginPorts;
-            for (var p : ports) {
+            List<CloudPluginSceneElementPortBO> ports = newWrapper.pluginPorts;
+            for (CloudPluginSceneElementPortBO p : ports) {
                 Integer delay = p.getSrcPort().getDelay();
                 Integer loss = p.getSrcPort().getLoss();
                 newKeys.add(p.getSrcPort().getId() + "_" + (delay == null ? "0" : delay) + "_" + (loss == null ? "0" : loss));
@@ -387,13 +398,13 @@ public class VyosNetworkCommandUtils {
     }
 
     private static boolean isProtocolsChange(ConfigParamsWrapper originWrapper, ConfigParamsWrapper newWrapper) {
-        var originCloudElement = originWrapper.element;
-        var newCloudElement = newWrapper.element;
+        CloudPluginSceneElementBO originCloudElement = originWrapper.element;
+        CloudPluginSceneElementBO newCloudElement = newWrapper.element;
         if (!StringUtils.equals(originCloudElement.getOspfRouterId(), newCloudElement.getOspfRouterId())) {
             return true;
         }
-        var originPorts = originWrapper.pluginPorts;
-        var newPorts = newWrapper.pluginPorts;
+        List<CloudPluginSceneElementPortBO> originPorts = originWrapper.pluginPorts;
+        List<CloudPluginSceneElementPortBO> newPorts = newWrapper.pluginPorts;
         return isProtocolsChange(originPorts, newPorts);
     }
 
@@ -424,7 +435,7 @@ public class VyosNetworkCommandUtils {
 
     private static Set<String> keys(List<CloudPluginSceneElementPortBO> ports) {
         Set<String> keys = new HashSet<>();
-        for (var p : ports) {
+        for (CloudPluginSceneElementPortBO p : ports) {
             keys.add(ospfKey(p));
             keys.add(ripKey(p));
             keys.add(bgpKey(p));
@@ -433,7 +444,7 @@ public class VyosNetworkCommandUtils {
     }
 
     private static String ripKey(CloudPluginSceneElementPortBO portBO) {
-        var result = Arrays.asList("rip",
+        List<String> result = Arrays.asList("rip",
                 Optional.ofNullable(portBO.getRipIp()).orElse(StringUtils.EMPTY),
                 Optional.ofNullable(portBO.getRipPear()).orElse(StringUtils.EMPTY));
         return StringUtils.join(result, "_");
@@ -441,14 +452,14 @@ public class VyosNetworkCommandUtils {
 
 
     private static String ospfKey(CloudPluginSceneElementPortBO portBO) {
-        var result = Arrays.asList("ospf",
+        List<String> result = Arrays.asList("ospf",
                 Optional.ofNullable(portBO.getOspfArea()).orElse(StringUtils.EMPTY),
                 Optional.ofNullable(portBO.getOspfIp()).orElse(StringUtils.EMPTY));
         return StringUtils.join(result, "_");
     }
 
     private static String bgpKey(CloudPluginSceneElementPortBO portBO) {
-        var result = Arrays.asList("bgp",
+        List<String> result = Arrays.asList("bgp",
                 Optional.ofNullable(portBO.getBgpAs()).orElse(StringUtils.EMPTY),
                 Optional.ofNullable(portBO.getBgpPeer()).orElse(StringUtils.EMPTY),
                 Optional.ofNullable(portBO.getBgpIp()).orElse(StringUtils.EMPTY),

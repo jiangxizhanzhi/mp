@@ -31,9 +31,9 @@ public class YmlParseResultV2 {
         result.setShape(shape);
         result.setNetworks(new ArrayList<>());
         if (CollectionUtils.isNotEmpty(networks)) {
-            networks.forEach(n -> {
+            for (NetworkElementParseResultV2 n : networks) {
                 result.getNetworks().add(n.convert());
-            });
+            }
         }
         return result;
     }

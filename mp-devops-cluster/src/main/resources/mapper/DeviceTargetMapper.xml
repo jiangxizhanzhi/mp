@@ -123,6 +123,9 @@
             <if test="createUserName != null">
                 and i.create_user_name like CONCAT('%',#{createUserName},'%')
             </if>
+            <if test="initSupport != null">
+                and i.init_support = #{initSupport}
+            </if>
 
         </where>
     </sql>

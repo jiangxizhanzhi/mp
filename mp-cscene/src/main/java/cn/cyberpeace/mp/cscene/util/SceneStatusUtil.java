@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.util;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
@@ -11,6 +12,7 @@ import lombok.Getter;
 import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,13 +28,13 @@ public class SceneStatusUtil {
         if (en == null || zh == null) {
             en = new HashMap<>();
             zh = new HashMap<>();
-            var optionService = (OptionService) BeanCommon.getBean("sysOptionServiceImpl");
-            var optionModels = optionService.findByType(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_STATUS);
-            optionModels.forEach(optionModel -> {
+            OptionService optionService = (OptionService) BeanCommon.getBean("sysOptionServiceImpl");
+            List<OptionModel> optionModels = optionService.findByType(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_STATUS);
+            for (OptionModel optionModel : optionModels) {
                 Integer status = Integer.parseInt(optionModel.getCode());
                 en.put(status, optionModel.getEnName());
                 zh.put(status, optionModel.getZhName());
-            });
+            }
             // 添加删除中的场景实例状态
             en.put(CsceneInstanceStatQueryParams.SceneStatus.DELETING, "Deleting");
             zh.put(CsceneInstanceStatQueryParams.SceneStatus.DELETING, "正在删除");

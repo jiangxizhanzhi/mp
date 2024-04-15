@@ -129,7 +129,12 @@ public class LogSettingServiceImpl implements ILogSettingService {
             batchSetLogLevel(logLevelRequestList, logLevelList, poList, rootLevel, loggerContext);
             if (dynamicLevelKeeping) {
                 //批量删除，再插入，事务
-                String[] ids = poList.stream().map(e -> e.getLogName()).collect(Collectors.toList()).toArray(new String[poList.size()]);
+                List<String> list = new ArrayList<>();
+                for (MpLogLevelPO e : poList) {
+                    String logName = e.getLogName();
+                    list.add(logName);
+                }
+                String[] ids = list.toArray(new String[poList.size()]);
                 mpLogLevelMapper.bulkLogicDelete(ids);
                 mpLogLevelMapper.bulkCreate(poList);
                 //配置文件中设置日志级别
@@ -144,17 +149,18 @@ public class LogSettingServiceImpl implements ILogSettingService {
     private void batchSetLogLevel(List<LogLevelBO> logLevelRequestList, List<LogLevelResponse> logLevelList, List<MpLogLevelPO> poList, String[] rootLevel, LoggerContext loggerContext) {
         for (Logger logger : loggerContext.getLoggerList()) {
             try {
-                logLevelRequestList.stream().filter(e -> logger.getName().equals(getUpperLogNameIfRoot(e.getLogName())))
-                        .forEach(e -> {
-                            logger.setLevel(getTargetLogLevel(e.getLogName(), e.getLogLevel(), logger));
-                            //设置查询设置结果
-                            String level = getLevelStr(logger);
-                            if (ROOT.equalsIgnoreCase(logger.getName())) {
-                                rootLevel[0] = level;
-                            }
-                            logLevelList.add(new LogLevelResponse(logger.getName(), level));
-                            poList.add(new MpLogLevelPO(logger.getName(), logger.getName(), level));
-                        });
+                for (LogLevelBO e : logLevelRequestList) {
+                    if (logger.getName().equals(getUpperLogNameIfRoot(e.getLogName()))) {
+                        logger.setLevel(getTargetLogLevel(e.getLogName(), e.getLogLevel(), logger));
+                        //设置查询设置结果
+                        String level = getLevelStr(logger);
+                        if (ROOT.equalsIgnoreCase(logger.getName())) {
+                            rootLevel[0] = level;
+                        }
+                        logLevelList.add(new LogLevelResponse(logger.getName(), level));
+                        poList.add(new MpLogLevelPO(logger.getName(), logger.getName(), level));
+                    }
+                }
             } catch (Exception e) {
                 log.warn(e.getMessage(), e);
             }
@@ -232,7 +238,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
         }
         if (LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
             LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-            list.forEach(e -> {
+            for (MpLogLevelPO e : list) {
                 try {
                     Logger logger = loggerContext.getLogger(e.getLogName());
                     Level level = getTargetLogLevel(e.getLogName(), e.getLogLevel(), logger);
@@ -241,7 +247,7 @@ public class LogSettingServiceImpl implements ILogSettingService {
                     log.warn(ex.getMessage(), ex);
                 }
 
-            });
+            }
         }
     }
 

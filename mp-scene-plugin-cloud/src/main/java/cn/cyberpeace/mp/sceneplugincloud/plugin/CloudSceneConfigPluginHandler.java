@@ -2,9 +2,9 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.mptool.URLUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
@@ -26,14 +26,12 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import javax.validation.ConstraintViolation;
+import java.net.URL;
+import java.util.Set;
+
 
 @Slf4j
-@ClassFieldClasses({
-        CloudPluginSceneConfigBO.class,
-        CloudPluginSceneConfigElementBO.class,
-        CloudPluginSceneConfigElementPortBO.class,
-        Object.class,
-})
 @Component
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
 public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<CloudPluginSceneConfigBO,
@@ -50,7 +48,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         }
 
         // 网元类型暂时无法准确纠正
-        var isForceCorrectElementType = srcElement.getType() == null
+        boolean isForceCorrectElementType = srcElement.getType() == null
                 || srcElement.getType().equals(BaseSceneElementModel.Type.OTHER);
         // 虚拟化类型可能无法准确纠正，但必须纠正，不然无法正常虚拟化
 
@@ -144,7 +142,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
     @Override
     public void correctData() {
         getElementMap().forEach((nodeId, element) -> {
-            var srcElement = getSrcElement(nodeId);
+            SceneConfigElementBO srcElement = getSrcElement(nodeId);
             // 纠正 role imageType 对应 type virtualType
             Integer role = element.getRole();
             String imageType = element.getImageType();
@@ -155,15 +153,15 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
 
     @Override
     public void validate() {
-        for (var srcPort : getSceneHandler().getElementPortMap().values()) {
+        for (SceneConfigElementPortBO srcPort : getSceneHandler().getElementPortMap().values()) {
             // 验证ip是否在cidr内
-            var ip = srcPort.getIp();
+            String ip = srcPort.getIp();
             if (!StringUtils.isEmpty(ip)) {
                 // TODO: 这里未初始化辅助网络，判断不准
-                var auxiliaryNetworkCloudElement = handlerUtils.getPortAuxiliaryNetworkCloudElement(srcPort.getId());
+                CloudPluginSceneConfigElementBO auxiliaryNetworkCloudElement = handlerUtils.getPortAuxiliaryNetworkCloudElement(srcPort.getId());
                 if (auxiliaryNetworkCloudElement != null) {
                     String cidr;
-                    var role = auxiliaryNetworkCloudElement.getRole();
+                    Integer role = auxiliaryNetworkCloudElement.getRole();
                     if (role != null && role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)) {
                         cidr = CloudSingleton.cloudAppConfig.getExternalNetCidr();
                     } else {
@@ -183,14 +181,14 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
             });
         }
         // 是否有节点连接了外部网络 而且外部网络设置了平台的地址
-        var u = URLUtil.url(CloudSingleton.cloudAppConfig.getCpcloudServer());
-        for (var element : getSceneHandler().getElementMap().values()) {
+        URL u = URLUtil.url(CloudSingleton.cloudAppConfig.getCpcloudServer());
+        for (SceneConfigElementBO element : getSceneHandler().getElementMap().values()) {
             if (CollectionUtils.isNotEmpty(element.getPorts())) {
-                for (var port : element.getPorts()) {
+                for (SceneConfigElementPortBO port : element.getPorts()) {
                     if (StringUtils.isNotEmpty(port.getIp()) && port.getIp().equals(u.getHost())) {
-                        var connectElement = getSceneHandler().getPortConnectedElement(port.getId());
+                        SceneConfigElementBO connectElement = getSceneHandler().getPortConnectedElement(port.getId());
                         if (connectElement != null) {
-                            var cloudElement = getElement(connectElement.getId());
+                            CloudPluginSceneConfigElementBO cloudElement = getElement(connectElement.getId());
                             if (cloudElement.getRole() != null && BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK == cloudElement.getRole()) {
                                 throw new MpRuntimeException(CloudErrorCode.IP_CONFLICT_WITH_SERVER);
                             }
@@ -264,7 +262,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
     public ScenePluginDataBO toData() {
         try {
             getElementPortMap().forEach((portId, cloudPort) -> {
-                var auxiliaryNetworkCloudElement = handlerUtils.getPortAuxiliaryNetworkCloudElement(portId);
+                CloudPluginSceneConfigElementBO auxiliaryNetworkCloudElement = handlerUtils.getPortAuxiliaryNetworkCloudElement(portId);
                 if (auxiliaryNetworkCloudElement != null && auxiliaryNetworkCloudElement.getRole() != null && auxiliaryNetworkCloudElement.getRole().equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)) {
                     cloudPort.setConnToExtNet(true);
                 } else {
@@ -279,7 +277,15 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
 
     @Override
     protected void validateData(BaseScenePluginDataBO validateData) {
-        var validateResult = CloudScenePluginValidation.validate(validateData);
+        Set<ConstraintViolation<BaseScenePluginDataBO>> validateResult = CloudScenePluginValidation.validate(validateData);
         CloudScenePluginValidation.handleValidateResult(validateResult);
+    }
+
+    @Override
+    protected void initClass() {
+        super.sceneBOClass = CloudPluginSceneConfigBO.class;
+        super.elementBOClass = CloudPluginSceneConfigElementBO.class;
+        super.elementPortBOClass = CloudPluginSceneConfigElementPortBO.class;
+        super.contextClass = Object.class;
     }
 }

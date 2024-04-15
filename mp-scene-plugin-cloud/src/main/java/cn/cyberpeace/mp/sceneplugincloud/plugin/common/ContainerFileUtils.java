@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.scene.util.SceneFileUtils;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -93,7 +94,7 @@ public class ContainerFileUtils {
         List<String> commands = new ArrayList<>();
         commands.add(VERSION_TEST_COMMAND);
         commands.addAll(extraCommands);
-        var result = containerClient.executeCommand(containerId, StringUtils.join(commands, " && "));
+        ContainerExecuteResult result = containerClient.executeCommand(containerId, StringUtils.join(commands, " && "));
         if (result.getExitCode() == null || result.getExitCode() != 0 || StringUtils.isEmpty(result.getOutput())) {
             return false;
         }
@@ -109,24 +110,24 @@ public class ContainerFileUtils {
         } else if (output.contains("release 5")) {
             return prepareCentos5Unzip(containerClient, containerId);
         } else {
-            var unzipLocalFilepath = getUnzipLocalFilepath();
+            String unzipLocalFilepath = getUnzipLocalFilepath();
             if (StringUtils.isEmpty(unzipLocalFilepath)) {
                 return false;
             }
-            var flag = containerClient.copyFile(containerId, unzipLocalFilepath, UNZIP_DST_PATH);
+            boolean flag = containerClient.copyFile(containerId, unzipLocalFilepath, UNZIP_DST_PATH);
             containerClient.executeCommand(containerId, String.format("chmod +x %s", UNZIP_DST_PATH + UNZIP_EXECUTOR_NAME));
             return flag;
         }
     }
 
     public static boolean prepareApkUnzip(Container containerClient, String containerId) {
-        var result = containerClient.executeCommand(containerId, "sh -c \"command -v apk\"");
+        ContainerExecuteResult result = containerClient.executeCommand(containerId, "sh -c \"command -v apk\"");
         if (result.getExitCode() != null && result.getExitCode() == 0 && StringUtils.isNotEmpty(result.getOutput()) && result.getOutput().contains("/apk")) {
-            var apkUnzipLocalFilepath = getApkUnzipLocalFilepath();
+            String apkUnzipLocalFilepath = getApkUnzipLocalFilepath();
             if (StringUtils.isEmpty(apkUnzipLocalFilepath)) {
                 return false;
             }
-            var flag = containerClient.copyFile(containerId, apkUnzipLocalFilepath, UNZIP_DST_PATH);
+            boolean flag = containerClient.copyFile(containerId, apkUnzipLocalFilepath, UNZIP_DST_PATH);
             containerClient.executeCommand(containerId, String.format("apk add --no-network %s", UNZIP_DST_PATH + APK_UNZIP_EXECUTOR_NAME));
             return flag;
         }
@@ -134,32 +135,32 @@ public class ContainerFileUtils {
     }
 
     public static boolean prepareCentos6Unzip(Container containerClient, String containerId) {
-        var unzipLocalFilepath = getCentos6UnzipLocalFilepath();
+        String unzipLocalFilepath = getCentos6UnzipLocalFilepath();
         if (StringUtils.isEmpty(unzipLocalFilepath)) {
             return false;
         }
-        var flag = containerClient.copyFile(containerId, unzipLocalFilepath, "/tmp");
+        boolean flag = containerClient.copyFile(containerId, unzipLocalFilepath, "/tmp");
         containerClient.executeCommand(containerId, String.format("rpm -ivh %s", "/tmp/" + CENTOS6_UNZIP_EXECUTOR_NAME));
         return flag;
     }
 
     public static boolean prepareCentos5Unzip(Container containerClient, String containerId) {
-        var unzipLocalFilepath = getCentos5UnzipLocalFilepath();
+        String unzipLocalFilepath = getCentos5UnzipLocalFilepath();
         if (StringUtils.isEmpty(unzipLocalFilepath)) {
             return false;
         }
-        var flag = containerClient.copyFile(containerId, unzipLocalFilepath, UNZIP_DST_PATH);
+        boolean flag = containerClient.copyFile(containerId, unzipLocalFilepath, UNZIP_DST_PATH);
         containerClient.executeCommand(containerId, String.format("chmod +x %s", UNZIP_DST_PATH + CENTOS5_UNZIP_EXECUTOR_NAME));
         containerClient.executeCommand(containerId, String.format("mv %s /usr/bin/unzip", UNZIP_DST_PATH + CENTOS5_UNZIP_EXECUTOR_NAME));
         return flag;
     }
 
     public static boolean prepareZipFile(Container containerClient, String containerId, String fileUrl, String unzipDir) {
-        var toPath = StringUtils.join(unzipDir, SceneFileUtils.ZIP_FILE_SUFFIX);
+        String toPath = StringUtils.join(unzipDir, SceneFileUtils.ZIP_FILE_SUFFIX);
         containerClient.executeCommand(containerId, CommandUtils.linuxMkDir(unzipDir));
-        var filename = FileUtil.getName(toPath);
-        var tmpZipFilepath = FsCommon.downloadTmp(URLUtil.getPath(fileUrl), filename);
-        var toDir = toPath.substring(0, toPath.length() - filename.length());;
+        String filename = FileUtil.getName(toPath);
+        String tmpZipFilepath = FsCommon.downloadTmp(URLUtil.getPath(fileUrl), filename);
+        String toDir = toPath.substring(0, toPath.length() - filename.length());;
         try {
             containerClient.copyFile(containerId, tmpZipFilepath, toDir);
         } finally {
@@ -171,13 +172,13 @@ public class ContainerFileUtils {
     }
 
     public static boolean prepareZipFile(Container containerClient, String containerId, String fileUrl,String standardSystemType, String unzipDir,boolean unzipDirExists) {
-        var toPath = StringUtils.join(unzipDir, SceneFileUtils.ZIP_FILE_SUFFIX);
+        String toPath = StringUtils.join(unzipDir, SceneFileUtils.ZIP_FILE_SUFFIX);
         if (!unzipDirExists) {
             containerClient.executeCommand(containerId, CommandUtils.linuxMkDir(unzipDir));
         }
-        var filename = FileUtil.getName(toPath);
-        var tmpZipFilepath = FsCommon.downloadTmp(URLUtil.getPath(fileUrl), filename);
-        var toDir = toPath.substring(0, toPath.length() - filename.length());
+        String filename = FileUtil.getName(toPath);
+        String tmpZipFilepath = FsCommon.downloadTmp(URLUtil.getPath(fileUrl), filename);
+        String toDir = toPath.substring(0, toPath.length() - filename.length());
         try {
             containerClient.copyFile(containerId, tmpZipFilepath, toDir);
         } finally {

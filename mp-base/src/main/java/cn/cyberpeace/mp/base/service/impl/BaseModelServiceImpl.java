@@ -53,8 +53,8 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         }
 
         if (lastSearchFields != null) {
-            var orCondition = humanCondition.filterOrStart();
-            for (var searchField : lastSearchFields) {
+            HumanCondition.OrConditionProxy orCondition = humanCondition.filterOrStart();
+            for (String searchField : lastSearchFields) {
                 orCondition.orIContains(searchField, search);
             }
             orCondition.filterOrEnd();
@@ -62,7 +62,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
     }
 
     public HumanCondition getHumanCondition(String[] selectFields) {
-        var humanCondition = new HumanCondition();
+        HumanCondition humanCondition = new HumanCondition();
         if (selectFields != null) {
             humanCondition.select(selectFields);
         }
@@ -73,7 +73,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
     public HumanCondition getHumanCondition(String[] selectFields, String[] ids, String[] exclude,
                                             String search, String[] searchFields,
                                             String[] orders, Integer page, Integer pageSize) {
-        var humanCondition = getHumanCondition(selectFields);
+        HumanCondition humanCondition = getHumanCondition(selectFields);
         if (ids != null && ids.length > 0) {
             humanCondition.filterIn(BaseModel::getId, ids);
         }
@@ -122,7 +122,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         DynamicFields validModelFields = actualModelFields != null ?
                 actualModelFields.getValidFields(queryParams.getFields()) : null;
         String[] selectFields = validModelFields != null ? validModelFields.getFields() : null;
-        var humanCondition = getHumanCondition(selectFields, queryParams.getIds(), queryParams.getExclude(),
+        HumanCondition humanCondition = getHumanCondition(selectFields, queryParams.getIds(), queryParams.getExclude(),
                 queryParams.getSearch(), queryParams.getSearchFields(), queryParams.getOrders(), queryParams.getPage(),
                 queryParams.getPageSize());
         loadListFilterCondition(humanCondition, queryParams);
@@ -130,7 +130,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
                 CustomConditionClass.class));
 
         List<M> data;
-        var total = 0;
+        int total = 0;
         try {
             data = getModelMapper().list(humanCondition);
             if (withTotal) {
@@ -151,7 +151,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         F actualModelFields = getModelFields();
         DynamicFields validModelFields = actualModelFields != null ? actualModelFields.getValidFields(fields) : null;
         String[] selectFields = validModelFields != null ? validModelFields.getFields() : null;
-        var humanCondition = getHumanCondition(selectFields);
+        HumanCondition humanCondition = getHumanCondition(selectFields);
         M obj;
         try {
             obj = getModelMapper().get(id, humanCondition);
@@ -248,7 +248,9 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
     public ServiceResult<Integer> bulkCreate(List<M> objs) {
         F actualModelFields = getModelFields();
         if (actualModelFields != null) {
-            objs.forEach(actualModelFields::clearNotWritableFields);
+            for (M obj : objs) {
+                actualModelFields.clearNotWritableFields(obj);
+            }
         }
 
         int result;
@@ -274,7 +276,9 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
     public ServiceResult<Integer> bulkUpdate(List<M> objs) {
         F actualModelFields = getModelFields();
         if (actualModelFields != null) {
-            objs.forEach(obj -> actualModelFields.clearNotWritableFields(obj, true));
+            for (M obj : objs) {
+                actualModelFields.clearNotWritableFields(obj, true);
+            }
         }
 
         int result;

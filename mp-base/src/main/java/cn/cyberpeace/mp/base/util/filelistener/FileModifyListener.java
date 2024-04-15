@@ -5,10 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.StandardWatchEventKinds;
-import java.nio.file.WatchKey;
+import java.nio.file.*;
 
 @Slf4j
 public abstract class FileModifyListener {
@@ -30,7 +27,7 @@ public abstract class FileModifyListener {
 
         if (!FileUtil.exist(filepath)) {
             FileUtil.mkParentDirs(filepath);
-            var file = new File(filepath);
+            File file = new File(filepath);
             try {
                 if (!file.createNewFile()) {
                     log.warn("File({}) already exist", filepath);
@@ -66,17 +63,17 @@ public abstract class FileModifyListener {
     }
 
     protected void listen() {
-        var fileDir = FileUtil.getParent(filepath, 1);
-        var filename = FileUtil.getName(filepath);
-        var path = FileSystems.getDefault().getPath(fileDir);
-        try (var watchService = FileSystems.getDefault().newWatchService()) {
+        String fileDir = FileUtil.getParent(filepath, 1);
+        String filename = FileUtil.getName(filepath);
+        Path path = FileSystems.getDefault().getPath(fileDir);
+        try (WatchService watchService = FileSystems.getDefault().newWatchService()) {
             watchKey = path.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
             while (true) {
-                var wk = watchService.take();
-                for (var event : wk.pollEvents()) {
+                WatchKey wk = watchService.take();
+                for (WatchEvent<?> event : wk.pollEvents()) {
                     Path changed = (Path) event.context();
                     if (changed.endsWith(filename)) {
-                        var lastModified = new File(filepath).lastModified();
+                        long lastModified = new File(filepath).lastModified();
                         if (fileLastModified == null || fileLastModified != lastModified) {
                             log.debug("File({}) watch changed", filepath);
                             fileLastModified = lastModified;

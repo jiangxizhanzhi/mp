@@ -64,15 +64,18 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
             return;
         }
 
-        List<FlowNetworkInfo> createNetworkinfos = networkInfos.stream().collect(
-                Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(
-                        Comparator.comparing(FlowNetworkInfo::getNetworkId))), ArrayList::new));
+        TreeSet<FlowNetworkInfo> flowNetworkInfos = new TreeSet<>(
+                Comparator.comparing(FlowNetworkInfo::getNetworkId));
+        for (FlowNetworkInfo info : networkInfos) {
+            flowNetworkInfos.add(info);
+        }
+        List<FlowNetworkInfo> createNetworkinfos = new ArrayList<>(flowNetworkInfos);
 //        // 过滤外部网络id
 //        createNetworkinfos = createNetworkinfos.stream().filter(networkInfo -> !networkInfo.getNetworkId().equals(externalNetId)).collect(Collectors.toList());
 
         List<FlowPortModel> flowPortModels = new ArrayList<>();
-        createNetworkinfos.forEach(networkInfo -> {
-            String networkId = networkInfo.getNetworkId();
+        for (FlowNetworkInfo flowNetworkInfo : createNetworkinfos) {
+            String networkId = flowNetworkInfo.getNetworkId();
             if (!externalNetId.equals(networkId)) {
                 try {
                     JSONObject addPortReq = new JSONObject();
@@ -101,7 +104,7 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
                         serverMac = clientMac;
                         serverIp = clientIp;
                         serverPortId = clientPortId;
-                        networkInfo.setMac(clientMac);
+                        flowNetworkInfo.setMac(clientMac);
                     } else {
                         log.error("【{}】add client port error for networkId: {}", flowActuatorModel.getTitle(), networkId);
                         throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
@@ -111,11 +114,11 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
                             .serverIp(serverIp)
                             .serverMac(serverMac)
                             .serverPortId(serverPortId)
-                            .serverGateway(networkInfo.getIp()) // 目标ip作为网关地址
+                            .serverGateway(flowNetworkInfo.getIp()) // 目标ip作为网关地址
                             .clientIp(clientIp)
                             .clientMac(clientMac)
                             .clientPortId(clientPortId)
-                            .clientGateway(networkInfo.getIp()) // 目标ip作为网关地址
+                            .clientGateway(flowNetworkInfo.getIp()) // 目标ip作为网关地址
                             .networkId(networkId)
                             .actuatorId(flowActuatorModel.getId())
                             .build();
@@ -126,23 +129,23 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
                     throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
                 }
             }
-        });
+        }
 
         // 批量新增网口信息
         getModelMapper().bulkCreate(flowPortModels);
         String outIp = cpIp.substring(0, cpIp.lastIndexOf(".")).concat(".254");
         // 流量发生器初始化网口信息
-        networkInfos.forEach(networkInfo -> {
-            createNetworkinfos.forEach(createNetworkinfo -> {
+        for (FlowNetworkInfo networkInfo : networkInfos) {
+            for (FlowNetworkInfo createNetworkinfo : createNetworkinfos) {
                 if (networkInfo.getNetworkId().equals(createNetworkinfo.getNetworkId())) {
                     networkInfo.setMac(createNetworkinfo.getMac());
                 }
-            });
+            }
 
             if (StringUtils.isBlank(networkInfo.getIp())) {
                 networkInfo.setIp(outIp);
             }
-        });
+        }
         JSONObject taskInitObj = new JSONObject();
         taskInitObj.put("network_infos", networkInfos);
         String taskInitRsp;

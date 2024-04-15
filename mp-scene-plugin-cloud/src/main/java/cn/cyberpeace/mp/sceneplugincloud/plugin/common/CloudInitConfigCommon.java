@@ -107,7 +107,7 @@ public class CloudInitConfigCommon {
             }
             list.add(userData);
             if (!this.dnsList.isEmpty()) {
-                for (var d : this.dnsList) {
+                for (String d : this.dnsList) {
                     list.add(String.format("echo %s >> %s", d, WINDOWS_HOSTS_PATH));
                 }
             }
@@ -145,10 +145,13 @@ public class CloudInitConfigCommon {
                         }
                     }
                 });
-                List<String> formatCommands = splitCmds.stream()
-                        .filter(s -> StringUtils.isNotEmpty(s))
-                        .map(s -> "  - " + s)
-                        .collect(Collectors.toList());
+                List<String> formatCommands = new ArrayList<>();
+                for (String s : splitCmds) {
+                    if (StringUtils.isNotEmpty(s)) {
+                        String s1 = "  - " + s;
+                        formatCommands.add(s1);
+                    }
+                }
                 list.addAll(formatCommands);
             }
 
@@ -213,7 +216,7 @@ public class CloudInitConfigCommon {
                     "  " + "  permissions: \"0644\"",
                     "  " + "  content: |"
             ));
-            for (var dns : dnsList) {
+            for (String dns : dnsList) {
                 result.add("  " + "    " + dns);
             }
             result.add("  " + "  append: True");

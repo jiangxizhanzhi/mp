@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Firewall;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -33,6 +36,7 @@ import java.util.stream.Collectors;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/firewall")
 @Api(tags = "网络实例管理-防火墙")
 @RequiredArgsConstructor
+@AuthTarget(TargetEnum.NETWORK_MANAGEMENT)
 public class FirewallController {
 
     private final FirewallConverter firewallConverter;
@@ -53,18 +57,32 @@ public class FirewallController {
 
         int total = list.size();
         int skip = (request.getPage() - 1) * request.getPerPage();
-        List<FirewallPageVO> firewallList = list.stream().skip(skip).limit(request.getPerPage()).collect(Collectors.toList());
+        List<FirewallPageVO> firewallList = new ArrayList<>();
+        long limit = request.getPerPage();
+        long toSkip = skip;
+        for (FirewallPageVO pageVO : list) {
+            if (toSkip > 0) {
+                toSkip--;
+                continue;
+            }
+            if (limit-- == 0) break;
+            firewallList.add(pageVO);
+        }
 
         // 处理场景信息
-        List<String> resourceNames = firewallList.stream().map(FirewallPageVO::getName).collect(Collectors.toList());
+        List<String> resourceNames = new ArrayList<>();
+        for (FirewallPageVO firewallPageVO : firewallList) {
+            String name = firewallPageVO.getName();
+            resourceNames.add(name);
+        }
         Consumer<Map<String, CsceneNodeInfoBO>> consumer = (map) -> {
-            firewallList.forEach(firewall -> {
-                var csceneNodeInfoBO = map.get(firewall.getName());
+            for (FirewallPageVO firewall : firewallList) {
+                CsceneNodeInfoBO csceneNodeInfoBO = map.get(firewall.getName());
                 if (Objects.nonNull(csceneNodeInfoBO)) {
                     firewall.setSceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName());
                     firewall.setReferenceType(csceneNodeInfoBO.getReferenceType());
                 }
-            });
+            }
         };
 
         sceneInfoService.processSceneInfo(resourceNames, consumer);
@@ -78,16 +96,24 @@ public class FirewallController {
      * @return
      */
     private List<FirewallPageVO> convertBOToPageVO(BasePageBO<Firewall> model){
-        return model.getList().stream().map(firewall ->
-        {
-            if (StringUtils.isNotBlank(firewall.getName()) && firewall.getName().startsWith("MP_SCENE_")) {
-                return new FirewallPageVO(firewall.getName(),
-                        Objects.nonNull(firewall.getIngressFirewallPolicy()) ? firewall.getIngressFirewallPolicy().getName() : null,
-                        Objects.nonNull(firewall.getEgressFirewallPolicy()) ? firewall.getEgressFirewallPolicy().getName() : null,
-                        firewall.getDescription(),firewall.getStatus());
+        List<FirewallPageVO> list = new ArrayList<>();
+        for (Firewall firewall : model.getList()) {
+            FirewallPageVO firewallPageVO = getFirewallPageVO(firewall);
+            if (firewallPageVO != null) {
+                list.add(firewallPageVO);
             }
-            return null;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        }
+        return list;
+    }
+
+    private static FirewallPageVO getFirewallPageVO(Firewall firewall) {
+        if (StringUtils.isNotBlank(firewall.getName()) && firewall.getName().startsWith("MP_SCENE_")) {
+            return new FirewallPageVO(firewall.getName(),
+                    Objects.nonNull(firewall.getIngressFirewallPolicy()) ? firewall.getIngressFirewallPolicy().getName() : null,
+                    Objects.nonNull(firewall.getEgressFirewallPolicy()) ? firewall.getEgressFirewallPolicy().getName() : null,
+                    firewall.getDescription(), firewall.getStatus());
+        }
+        return null;
     }
 
 }

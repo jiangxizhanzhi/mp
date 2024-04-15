@@ -1,10 +1,8 @@
 gradle.ext {
     version = '0.0.1'
     appmodules = [
-        'mp-common',
         'mp-aggregation',
         'mp-auth',
-        'mp-auth-base',
         'mp-devops-cluster',
         'mp-scene',
         'mp-scene-plugin-cloud',
@@ -13,10 +11,7 @@ gradle.ext {
         'mp-cscene',
         'mp-situation-aware',
         'mp-log',
-        'mp-flow',
-        'mp-front-admin',
-        'mp-front-admin-business',
-        'mp-front-business'
+        'mp-flow'
     ]
 
     flyway = [

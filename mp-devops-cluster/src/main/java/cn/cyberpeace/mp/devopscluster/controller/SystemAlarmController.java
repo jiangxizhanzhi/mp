@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -48,6 +50,7 @@ import java.util.Objects;
 @Api(tags = "告警信息接口")
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/system_alarm")
+@AuthTarget(TargetEnum.SYSTEM_ALARM)
 public class SystemAlarmController extends BaseModelController<SystemAlarmModel, QueryParams, SystemAlarmService> {
 
     @Autowired
@@ -93,12 +96,12 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
      */
     private void changeServiceName(List<SystemAlarmModel> systemAlarmModels) {
         if (CollectionUtils.isNotEmpty(systemAlarmModels)) {
-            systemAlarmModels.forEach(model -> {
+            for (SystemAlarmModel model : systemAlarmModels) {
                 String originServerName = model.getServername();
                 String newName = MessageCommon.get(model.getServername());
                 model.setServername(newName);
                 model.setAlarmMsg(StringUtils.replaceOnce(model.getAlarmMsg(), originServerName, newName));
-            });
+            }
         }
     }
 
@@ -137,7 +140,7 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
     @ApiOperation("系统告警趋势")
     @GetMapping("/trend")
     public ServiceResult<List<AlarmStatisticsTrendVO>> getSystemAlarmTrend(AlarmTrendRequest trendRequest) {
-        var result = alarmStatisticsService.alarmTrend(trendRequest.getTypes(), trendRequest.getUnit(),
+        List<AlarmStatisticsTrendVO> result = alarmStatisticsService.alarmTrend(trendRequest.getTypes(), trendRequest.getUnit(),
                 trendRequest.getCount(), trendRequest.getStartTime(), trendRequest.getEndTime());
         return ResultCommon.success(result);
     }
