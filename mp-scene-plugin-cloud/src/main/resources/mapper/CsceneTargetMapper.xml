@@ -3,7 +3,14 @@
 <mapper namespace="cn.cyberpeace.mp.sceneplugincloud.repository.CsceneTargetMapper">
 
 
-    <select id="findByEid" resultType="cn.cyberpeace.mp.scene.core.bo.CsceneTargetBO">
+    <select id="findByEid" resultType="cn.cyberpeace.mp.sceneplugincloud.bo.CsceneTargetBO">
         select * from mp_devops_target where uuid = #{ids}
     </select>
+    <select id="findByUUid" resultType="cn.cyberpeace.mp.sceneplugincloud.bo.CsceneTargetBO">
+        select * from mp_devops_target where uuid in
+        <foreach item="item" collection="uuids" open="(" separator="," close=")">
+        #{item}
+        </foreach>
+    </select>
+
 </mapper>

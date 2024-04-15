@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.BoolUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
-import cn.cyberpeace.mp.scene.core.bo.CsceneTargetBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -17,11 +16,9 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.bo.*;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.BaseCloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CsceneTargetMapper;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
@@ -199,20 +196,23 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                 });
             }
         });
-        //
-        for(var e:getElementMap().values()){
-            String uuid = e.getImageUuid();
-            if (!StringUtils.isBlank(uuid)){
-                CsceneTargetMapper bean = BeanCommon.getBean(CsceneTargetMapper.class);
-                String place = bean.findByEid(uuid).getPlace();
-                if (place != null){
-                    e.getSrcElement().setPlace(null);
-                }
-                e.getSrcElement().setPlace(place);
+        //增加place字段
+        Collection<CloudPluginSceneElementBO> values = getElementMap().values();
+        List<String> uuids = values.stream().map(BaseCloudPluginSceneElementBO::getImageUuid).collect(Collectors.toList());
+        CsceneTargetMapper bean = BeanCommon.getBean(CsceneTargetMapper.class);
+        List<CsceneTargetBO> byUUid = bean.findByUUid(uuids);
+        List<CsceneTargetBO> list = byUUid.stream().filter(Objects::nonNull).collect(Collectors.toList());
+        HashMap<String, String> map = new HashMap<>();
+        for (CsceneTargetBO csceneTargetBO : list) {
+            map.put(csceneTargetBO.getUuid(),csceneTargetBO.getPlace());
+        }
+        for (CloudPluginSceneElementBO value : values) {
+            String imageUuid = value.getImageUuid();
+            if (map.containsKey(imageUuid)){
+                value.getSrcElement().setPlace(map.get(imageUuid));
             }
         }
     }
-
     @Override
     public void reloadData() {
         setScene(null);
