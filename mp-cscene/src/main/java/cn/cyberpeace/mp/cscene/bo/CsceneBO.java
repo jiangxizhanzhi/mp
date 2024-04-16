@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -82,5 +83,35 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
             csceneInstance.setScene(sceneConfig.exportToScene());
         }
         return csceneInstance;
+    }
+
+    public int getTotalCpu(){
+        int cpu = 0 ;
+        for (BaseSceneElementBO e : this.sceneConfig.getTopology().getElements()) {
+            if (e.getCpu() != null) {
+                cpu += e.getCpu();
+            }
+        }
+        return cpu;
+    }
+
+    public int getTotalDisk(){
+        int disk = 0 ;
+        for (BaseSceneElementBO e : this.sceneConfig.getTopology().getElements()) {
+            if (e.getDisk() != null) {
+                disk += e.getDisk();
+            }
+        }
+        return disk;
+    }
+
+    public int getTotalRam(){
+        int ram = 0 ;
+        for (BaseSceneElementBO e : this.sceneConfig.getTopology().getElements()) {
+            if (e.getRam() != null) {
+                ram += e.getRam();
+            }
+        }
+        return ram;
     }
 }
