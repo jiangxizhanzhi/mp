@@ -109,6 +109,9 @@ public class CsceneSpecialService {
         private String csceneId;
         private Integer elementType;
         private Integer elementTypeCount;
+        private Integer cpu;
+        private Integer disk;
+        private Integer ram;
     }
 
     @Data
@@ -135,7 +138,7 @@ public class CsceneSpecialService {
 
         Map<String, CsceneStat> statMap = new HashMap<>();
         for (String id : ids) {
-            CsceneStat csceneStat = new CsceneStat(id, 0, 0, 0, 0, 0, 0, 0);
+            CsceneStat csceneStat = new CsceneStat(id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
             statMap.put(id, csceneStat);
         }
 
@@ -150,7 +153,10 @@ public class CsceneSpecialService {
                 .currentLink(SceneConfigElementModel.class)
                 .groupBy(SceneConfigElementModel::getType)
                 .selectAs(SceneConfigElementModel::getType, CsceneElementStat::getElementType)
-                .selectAs(Count.f(SceneConfigElementModel::getType), CsceneElementStat::getElementTypeCount);
+                .selectAs(Count.f(SceneConfigElementModel::getType), CsceneElementStat::getElementTypeCount)
+                .selectAs(Sum.f(SceneConfigElementModel::getCpu), CsceneElementStat::getCpu)
+                .selectAs(Sum.f(SceneConfigElementModel::getDisk), CsceneElementStat::getDisk)
+                .selectAs(Sum.f(SceneConfigElementModel::getRam), CsceneElementStat::getRam);
         List<CsceneElementStat> csceneElementStats = csceneMapper.list(elementStatCondition, CsceneElementStat.class);
         for (CsceneElementStat csceneElementStat : csceneElementStats) {
             CsceneStat stat = statMap.get(csceneElementStat.getCsceneId());
@@ -165,6 +171,15 @@ public class CsceneSpecialService {
                 stat.setTerminalCount(csceneElementStat.getElementTypeCount());
             } else if (elementType.equals(BaseSceneElementModel.Type.NPC)) {
                 stat.setNpcCount(csceneElementStat.getElementTypeCount());
+            }
+            if (csceneElementStat.getCpu() != null) {
+                stat.setTotalCpu(stat.getTotalCpu() + csceneElementStat.getCpu());
+            }
+            if (csceneElementStat.getRam() != null) {
+                stat.setTotalRam(stat.getTotalRam() + csceneElementStat.getRam());
+            }
+            if (csceneElementStat.getDisk() != null) {
+                stat.setTotalDisk(stat.getTotalDisk() + csceneElementStat.getDisk());
             }
         }
 
