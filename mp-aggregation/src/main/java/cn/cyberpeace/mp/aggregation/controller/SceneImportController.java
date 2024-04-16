@@ -50,7 +50,7 @@ public class SceneImportController {
             log.info(detail);
             return ResultCommon.fail(detail);
         }
-        ServiceResult<CsceneBO> serviceResult = resourceCenterService.importByYmlConfig(request.getPath(), request.getImagePath(), request.getImagePathList(), request.getSceneFilePath());
+        ServiceResult<CsceneBO> serviceResult = resourceCenterService.importByConfig(request.getPath(), request.getImagePath(), request.getImagePathList(), request.getSceneFilePath());
         return ResultCommon.success(serviceResult.getSource().getId());
     }
 
