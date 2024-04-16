@@ -17,8 +17,10 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
-import cn.cyberpeace.mp.scene.core.bo.*;
-import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
@@ -30,15 +32,12 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Api(value = "场景模板", tags = "CSCENE-场景模板")
@@ -315,5 +314,16 @@ public class CsceneController implements BaseModelListControllerBase {
         returnData.getTopology().setScene(csceneBO.getSceneConfig().getTopology().getScene());
         csceneBO.setSceneConfig(newConfigHandler.toData());
         return new ServiceResult<>(csceneBO).asResult();
+    }
+
+
+    @ApiOperation("添加载荷")
+    @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
+    @PostMapping("/add_load")
+    public ServiceResult<Object> addLoad(@RequestBody CsceneBO csceneBO) {
+        log.info("scene add_load,params is {}", JsonCommon.stringify(csceneBO));
+        boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
+        correctRequestCsceneParamsForSync(csceneBO);
+        return modelService.addLoad(csceneBO).asResult();
     }
 }

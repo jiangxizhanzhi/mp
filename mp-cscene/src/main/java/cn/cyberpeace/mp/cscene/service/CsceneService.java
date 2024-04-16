@@ -37,13 +37,22 @@ import cn.cyberpeace.mp.cscene.service.taskpool.CsceneSnapshotDeleteTaskPool;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneConfigElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.Load;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import lombok.Data;
@@ -54,6 +63,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -83,6 +93,16 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     @Autowired
     private UserService userService;
+
+    @Resource
+    private CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper;
+
+    @Resource
+    private SceneElementMapper sceneElementMapper;
+
+    @Resource
+    private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
+
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
         if (csceneIds == null || csceneIds.length == 0) {
@@ -704,5 +724,100 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             ids = sceneElementModels.stream().map(SceneElementModel::getNodeId).collect(Collectors.toList());
         }
         return ids;
+    }
+
+    public ServiceResult<Object> addLoad(CsceneBO csceneBO) {
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(csceneBO.getSceneConfig(), false, null);
+        sceneConfigHandler.validate();
+        if (sceneConfigHandler.getScene() != null) {
+            sceneConfigHandler.getScene().setCreateTime(null);
+        }
+        SceneConfigElementMapper sceneConfigElementMapper = sceneConfigHandler.getSceneElementMapper();
+
+//        过滤出所有load节点 数据库过滤出要新增节点
+        String sceneId = csceneBO.getId();
+        String sceneConfigId = sceneConfigHandler.getSceneId();
+
+
+        CloudSceneConfigPluginHandler cloudSceneConfigPluginHandler = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        Map<String, CloudPluginSceneConfigElementBO> pluginElementMap = cloudSceneConfigPluginHandler.getElementMap();
+
+        List<CloudPluginSceneConfigElementBO> savingElementList = pluginElementMap.entrySet().stream()
+                .filter(entry -> BaseCloudPluginSceneElementModel.ImageType.LOAD.equals(entry.getValue().getImageType()))
+                .map(entry -> entry.getValue())
+                .collect(Collectors.toList());
+        if (savingElementList.size() > 1 || savingElementList.size() == 0) {
+            return new ServiceResult<>(null, BaseErrorCode.ERROR);
+        }
+        SceneConfigElementBO srcElement = savingElementList.get(0).getSrcElement();
+        String elementId = savingElementList.get(0).getSrcElement().getId();
+        HumanCondition targetCondition = new HumanCondition()
+                .filterEqual(CloudPluginSceneConfigElementModel::getImageType, BaseCloudPluginSceneElementModel.ImageType.LOAD)
+                .filterEqual(CloudPluginSceneConfigElementModel::getScene, sceneConfigId)
+                .filterEqual(CloudPluginSceneConfigElementModel::getSceneElement, elementId)
+                .distinct();
+
+        List<CloudPluginSceneConfigElementModel> existTargetList = cloudPluginSceneConfigElementMapper.list(targetCondition);
+        CloudPluginSceneConfigElementModel cloudPluginSceneConfigElementModel = savingElementList.get(0).toModel();
+        SceneConfigElementModel sceneConfigElementModel = srcElement.toModel();
+
+        if (existTargetList.size() == 0) {
+//            实例场景保存
+            SceneElementModel sceneElementModel = new SceneElementModel();
+            BeanUtils.copyProperties(sceneConfigElementModel, sceneElementModel);
+            sceneElementModel.setScene(sceneId);
+            sceneElementMapper.create(sceneElementModel);
+            CloudPluginSceneElementModel cloudPluginSceneElementModel = new CloudPluginSceneElementModel();
+            BeanUtils.copyProperties(cloudPluginSceneConfigElementModel, cloudPluginSceneElementModel);
+            cloudPluginSceneElementModel.setScene(sceneId);
+            cloudPluginSceneElementModel.setSceneElement(elementId);
+            cloudPluginSceneElementMapper.create(cloudPluginSceneElementModel);
+
+//            保存节点
+            cloudPluginSceneConfigElementModel.setScene(sceneConfigId);
+            cloudPluginSceneConfigElementModel.setSceneElement(elementId);
+            boolean b = cloudPluginSceneConfigElementMapper.create(cloudPluginSceneConfigElementModel);
+            sceneConfigElementModel.setScene(sceneConfigId);
+            boolean b1 = sceneConfigElementMapper.create(sceneConfigElementModel);
+            System.out.println(b + " " + b1);
+//          启动拓扑 保存启动日志
+            Map data = new Load().create(
+                    cloudPluginSceneElementModel.getLoadTaskName(),
+                    cloudPluginSceneConfigElementModel.getLoadTaskDescribe(),
+                    cloudPluginSceneConfigElementModel.getLoadToolId(),
+                    cloudPluginSceneConfigElementModel.getLoadExecCommand());
+            cloudPluginSceneConfigElementModel.setResourceId(data.get("id").toString());
+            cloudPluginSceneConfigElementModel.setLoadResourceInstanceId(data.get("instanceId").toString());
+            cloudPluginSceneConfigElementMapper.update(cloudPluginSceneConfigElementModel);
+
+        } else {
+//            删除节点
+            cloudPluginSceneConfigElementMapper.delete(existTargetList.get(0).getId());
+            HumanCondition deleteCondition = new HumanCondition()
+                    .filterEqual(SceneConfigElementModel::getScene, sceneConfigId)
+                    .filterEqual(SceneConfigElementModel::getNodeId, elementId)
+                    .distinct();
+            sceneConfigElementMapper.list(deleteCondition).forEach(e -> {
+                sceneConfigElementMapper.delete(e.getId());
+            });
+
+            deleteCondition = new HumanCondition()
+                    .filterEqual(SceneElementModel::getScene, sceneId)
+                    .filterEqual(SceneElementModel::getNodeId, elementId)
+                    .distinct();
+            sceneElementMapper.list(deleteCondition).forEach(e -> {
+                sceneElementMapper.delete(e.getId());
+            });
+
+            deleteCondition = new HumanCondition()
+                    .filterEqual(CloudPluginSceneElementModel::getScene, sceneId)
+                    .filterEqual(CloudPluginSceneElementModel::getSceneElement, elementId)
+                    .distinct();
+            cloudPluginSceneElementMapper.list(deleteCondition).forEach(e -> {
+                cloudPluginSceneElementMapper.delete(e.getId());
+            });
+
+        }
+        return new ServiceResult<>(true);
     }
 }

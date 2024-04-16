@@ -27,10 +27,7 @@ import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
-import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
-import cn.cyberpeace.mp.cscene.dto.scene.SceneInfo;
-import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
-import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.cscene.dto.scene.*;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
@@ -49,28 +46,32 @@ import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
-import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
+import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneConfigElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.Load;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -93,6 +94,7 @@ import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.cache.Cache;
 import com.google.common.collect.Lists;
 import lombok.Data;
@@ -105,6 +107,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -185,6 +188,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Resource
     private SceneElementMapper sceneElementMapper;
+
+    @Resource
+    private SceneConfigElementMapper sceneConfigElementMapper;
+    @Resource
+    private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
+
+    @Resource
+    private CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper;
+
 
     // expires in 10 minutes
     private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -1789,4 +1801,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         return sceneElementMapper.list(humanCondition);
     }
+
+
 }

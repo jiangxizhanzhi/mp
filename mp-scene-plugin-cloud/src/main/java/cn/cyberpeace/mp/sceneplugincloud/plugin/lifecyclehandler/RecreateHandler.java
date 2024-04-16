@@ -286,8 +286,7 @@ public class RecreateHandler extends HandlerCommon {
                                         }
                                     });
                                 }
-                                new Load()
-                                        .create(cloudElement);
+                                new Load().create(cloudElement);
                             });
                 }
             } else {
