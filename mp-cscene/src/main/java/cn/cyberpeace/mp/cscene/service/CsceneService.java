@@ -780,7 +780,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             sceneConfigElementModel.setScene(sceneConfigId);
             boolean b1 = sceneConfigElementMapper.create(sceneConfigElementModel);
             System.out.println(b + " " + b1);
-//          启动拓扑 保存启动日志
+//          启动拓扑
             Map data = new Load().create(
                     cloudPluginSceneElementModel.getLoadTaskName(),
                     cloudPluginSceneConfigElementModel.getLoadTaskDescribe(),

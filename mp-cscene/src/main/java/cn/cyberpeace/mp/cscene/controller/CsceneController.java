@@ -316,13 +316,16 @@ public class CsceneController implements BaseModelListControllerBase {
         return new ServiceResult<>(csceneBO).asResult();
     }
 
-
+    /**
+     * 测试参数：由/cscene/cscenes/sync 保存的场景模板接口返回数据结构 最外层id换为场景id
+     * @param csceneBO
+     * @return
+     */
     @ApiOperation("添加载荷")
     @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
     @PostMapping("/add_load")
     public ServiceResult<Object> addLoad(@RequestBody CsceneBO csceneBO) {
         log.info("scene add_load,params is {}", JsonCommon.stringify(csceneBO));
-        boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
         correctRequestCsceneParamsForSync(csceneBO);
         return modelService.addLoad(csceneBO).asResult();
     }
