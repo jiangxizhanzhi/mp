@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.core.CsceneHandler;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.dto.scene.CsceneLoadDto;
 import cn.cyberpeace.mp.cscene.model.CsceneAuthModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
@@ -38,12 +39,24 @@ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
+import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.repository.SceneConfigElementMapper;
+import cn.cyberpeace.mp.scene.repository.SceneConfigMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.Load;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import lombok.Data;
@@ -54,6 +67,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -83,6 +97,21 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     @Autowired
     private UserService userService;
+
+    @Resource
+    private CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper;
+
+    @Resource
+    private SceneMapper sceneMapper;
+    @Resource
+    private SceneConfigMapper sceneConfigMapper;
+    @Resource
+    private SceneElementMapper sceneElementMapper;
+    @Resource
+    private SceneConfigElementMapper sceneConfigElementMapper;
+    @Resource
+    private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
+
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
         if (csceneIds == null || csceneIds.length == 0) {
@@ -704,5 +733,132 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             ids = sceneElementModels.stream().map(SceneElementModel::getNodeId).collect(Collectors.toList());
         }
         return ids;
+    }
+
+    public ServiceResult<Object> addLoad(CsceneLoadDto csceneLoadDto) {
+//        过滤出所有load节点 数据库过滤出要新增节点
+        String sceneId = csceneLoadDto.getSceneId();
+//        根据场景id获取对应模板
+        HumanCondition selectHumanCondition = new HumanCondition()
+                .link(CsceneInstanceModel.class)
+                .link(CsceneModel.class)
+                .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getCscene,
+                        CsceneModel.class, CsceneModel::getId)
+                .link(SceneConfigModel.class)
+                .filterLink(CsceneModel.class, CsceneModel::getSceneConfig,
+                        SceneConfigModel.class, SceneConfigModel::getId)
+                .link(CloudPluginSceneConfigElementModel.class)
+                .filterLink(SceneConfigModel.class, SceneConfigModel::getId,
+                        CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
+                .currentLink(CsceneInstanceModel.class)
+                .filterEqual(CsceneInstanceModel::getScene, csceneLoadDto.getSceneId())
+                .currentLink(CloudPluginSceneConfigElementModel.class)
+                .filterEqual(CloudPluginSceneConfigElementModel::getSceneElement, csceneLoadDto.getSceneConfigElement().getId())
+                .select(new HumanCondition().toDefaultSelectFields(CloudPluginSceneConfigElementModel.class));
+        List<CloudPluginSceneConfigElementModel> list = cloudPluginSceneConfigElementMapper.list(selectHumanCondition);
+
+        HumanCondition selectSceneConfigModelHumanCondition = new HumanCondition()
+                .link(CsceneInstanceModel.class)
+                .link(CsceneModel.class)
+                .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getCscene,
+                        CsceneModel.class, CsceneModel::getId)
+                .link(SceneConfigModel.class)
+                .filterLink(CsceneModel.class, CsceneModel::getSceneConfig,
+                        SceneConfigModel.class, SceneConfigModel::getId)
+                .currentLink(CsceneInstanceModel.class)
+                .filterEqual(CsceneInstanceModel::getScene, csceneLoadDto.getSceneId())
+                .select(new HumanCondition().toDefaultSelectFields(SceneConfigModel.class));
+        List<SceneConfigModel> sceneConfigModelList = sceneConfigMapper.list(selectSceneConfigModelHumanCondition);
+
+        if (list.size() > 0) {
+//            删除模板节点
+            cloudPluginSceneConfigElementMapper.delete(list.get(0).getId());
+            HumanCondition deleteCondition = new HumanCondition()
+                    .filterEqual(SceneConfigElementModel::getScene, list.get(0).getScene())
+                    .filterEqual(SceneConfigElementModel::getNodeId, csceneLoadDto.getSceneConfigElement().getId())
+                    .distinct();
+            sceneConfigElementMapper.list(deleteCondition).forEach(e -> {
+                sceneConfigElementMapper.delete(e.getId());
+            });
+
+//            删除场景节点
+            deleteCondition = new HumanCondition()
+                    .filterEqual(SceneElementModel::getScene, sceneId)
+                    .filterEqual(SceneElementModel::getNodeId, csceneLoadDto.getSceneConfigElement().getId())
+                    .distinct();
+            sceneElementMapper.list(deleteCondition).forEach(e -> {
+                sceneElementMapper.delete(e.getId());
+            });
+
+            deleteCondition = new HumanCondition()
+                    .filterEqual(CloudPluginSceneElementModel::getScene, sceneId)
+                    .filterEqual(CloudPluginSceneElementModel::getSceneElement, csceneLoadDto.getSceneConfigElement().getId())
+                    .distinct();
+            cloudPluginSceneElementMapper.list(deleteCondition).forEach(e -> {
+                cloudPluginSceneElementMapper.delete(e.getId());
+            });
+        } else {
+//            增加
+            //            实例场景保存
+            SceneConfigElementModel sceneConfigElementModel = csceneLoadDto.getSceneConfigElement().toModel();
+            CloudPluginSceneConfigElementModel cloudPluginSceneConfigElementModel = csceneLoadDto.getPluginSceneConfigElement().toModel();
+
+            SceneElementModel sceneElementModel = new SceneElementModel();
+            BeanUtils.copyProperties(sceneConfigElementModel, sceneElementModel);
+            sceneElementModel.setScene(sceneId);
+            sceneElementMapper.create(sceneElementModel);
+            CloudPluginSceneElementModel cloudPluginSceneElementModel = new CloudPluginSceneElementModel();
+            BeanUtils.copyProperties(cloudPluginSceneConfigElementModel, cloudPluginSceneElementModel);
+            cloudPluginSceneElementModel.setScene(sceneId);
+            cloudPluginSceneElementModel.setSceneElement(csceneLoadDto.getSceneConfigElement().getId());
+            cloudPluginSceneElementMapper.create(cloudPluginSceneElementModel);
+
+//            保存模板节点
+            cloudPluginSceneConfigElementModel.setScene(sceneConfigModelList.get(0).getId());
+            cloudPluginSceneConfigElementModel.setSceneElement(csceneLoadDto.getSceneConfigElement().getId());
+            cloudPluginSceneConfigElementMapper.create(cloudPluginSceneConfigElementModel);
+            sceneConfigElementModel.setScene(sceneConfigModelList.get(0).getId());
+            sceneConfigElementModel.setNodeId(csceneLoadDto.getSceneConfigElement().getId());
+            sceneConfigElementMapper.create(sceneConfigElementModel);
+
+            Load load = new Load();
+            Map data = load.create(
+                    cloudPluginSceneElementModel.getLoadTaskName(),
+                    cloudPluginSceneConfigElementModel.getLoadTaskDescribe(),
+                    cloudPluginSceneConfigElementModel.getLoadToolId(),
+                    cloudPluginSceneConfigElementModel.getLoadExecCommand());
+            cloudPluginSceneElementModel.setResourceId(data.get("id").toString());
+            cloudPluginSceneElementModel.setLoadResourceInstanceId(data.get("instanceId").toString());
+            cloudPluginSceneElementMapper.update(cloudPluginSceneElementModel);
+
+            HumanCondition humanCondition = new HumanCondition()
+                    .filterEqual(SceneModel::getId, sceneId)
+                    .filterOrStart()
+                    .orAndStart()
+                    .andEqual(SceneModel::getEvent, SceneModel.Event.CREATE)
+                    .andEqual(SceneModel::getEventStatus, EventStatus.OVER)
+                    .orAndEnd()
+                    .orAndStart()
+                    .andEqual(SceneModel::getEvent, SceneModel.Event.UNPAUSE)
+                    .andEqual(SceneModel::getEventStatus, EventStatus.OVER)
+                    .orAndEnd()
+                    .orAndStart()
+                    .andEqual(SceneModel::getEvent, SceneModel.Event.RESUME)
+                    .andEqual(SceneModel::getEventStatus, EventStatus.OVER)
+                    .orAndEnd()
+                    .orAndStart()
+                    .andIn(SceneModel::getEvent, new Integer[]{
+                            SceneModel.Event.START, SceneModel.Event.STOP, SceneModel.Event.RESTART,
+                            SceneModel.Event.SNAPSHOT, SceneModel.Event.MODIFY
+                    })
+                    .andNotEqual(SceneModel::getEventStatus, EventStatus.ABNORMAL)
+                    .orAndEnd()
+                    .filterOrEnd();
+//              判断场景是否在启动状态 启动载荷
+            if (sceneMapper.list(humanCondition).size() > 0) {
+                load.start(cloudPluginSceneElementModel.getLoadResourceInstanceId());
+            }
+        }
+        return new ServiceResult<>(true);
     }
 }

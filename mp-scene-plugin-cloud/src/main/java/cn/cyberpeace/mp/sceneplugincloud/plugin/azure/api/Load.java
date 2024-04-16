@@ -1,13 +1,16 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.LoadUrlConstant;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -20,20 +23,37 @@ import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
  * @create 2022-09-08 15:03
  */
 @Slf4j
+@Component
 public class Load {
 
-    //    @Value("${load.url}")
-    public String loadUrl = "http://10.108.1.10:5002";
+    private String loadUrl;
+
+
+    public Load() {
+        loadUrl = BeanCommon.getBean(CloudAppConfig.class).loadUrl;
+    }
 
     public void create(CloudPluginSceneElementBO cloudElement) {
-//        创建任务
-//        "taskName，任务名称
-        //taskDescribe，任务描述
-        //toolId，所使用的工具ID
-        //execCommand，访问工具控制页面执行的命令，vmware平台不需要"
+        Map data = create(cloudElement.getLoadTaskName(),
+                cloudElement.getLoadTaskDescribe(),
+                cloudElement.getLoadToolId(),
+                cloudElement.getLoadExecCommand());
 
+//            回写id
+        cloudElement.setResourceId(data.get("id").toString());
+        cloudElement.setLoadResourceInstanceId(data.get("instanceId").toString());
+
+//        启动实例
+        start(data.get("instanceId").toString());
+    }
+
+    public Map create(String taskName, String taskDescribe, String toolId, String execCommand) {
+        // 创建任务
         HashMap<String, Object> formMap = new HashMap<>();
-        formMap.put("taskName", cloudElement.getSrcElement().getEid());
+        formMap.put("taskName", taskName);
+        formMap.put("taskDescribe", taskDescribe);
+        formMap.put("toolId", toolId);
+        formMap.put("execCommand", execCommand);
         HashMap<String, String> headersMap = new HashMap<>();
         headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
 
@@ -51,26 +71,9 @@ public class Load {
             log.error("{} request error:", loadUrl + LoadUrlConstant.CREATE_TASK_URL, e);
             throw new MpRuntimeException("load task create post request failed");
         }
-        /*"code,创建任务结果，0表示创建成功，1表示创建失败
-            taskInfo，任务信息"
-        */
+
         Map data = (Map) dataMap.get("data");
-//            回写id
-        cloudElement.setResourceId(data.get("id").toString());
-        cloudElement.setLoadResourceInstanceId(data.get("instanceId").toString());
-//            创建任务成功后启动实例
-        formMap.clear();
-        formMap.put("instanceId", data.get("instanceId"));
-        try {
-            result = HttpUtils.sendHttpPost(loadUrl + LoadUrlConstant.START_INSTANCE_URL, JSON.toJSONString(formMap), headersMap);
-            dataMap = JsonUtils.parseMap(result);
-            if (!"0".equals(dataMap.get("code").toString())) {
-                throw new MpRuntimeException("load instance start post request failed");
-            }
-        } catch (IOException e) {
-            log.error("{} request error:", loadUrl + LoadUrlConstant.START_INSTANCE_URL, e);
-            throw new MpRuntimeException("load instance start post request failed");
-        }
+        return data;
     }
 
     public void delete(CloudPluginSceneElementBO cloudElement) {

@@ -90,3 +90,6 @@ mp:
     authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/reset_menu_visibility,/sys/activation/license_status,/sys/activation/status,/sys/activation/machinecode,/sys/config/public,/config/single_ip,/file/**,/actuator/**
   frontbusiness:
     url-ac-filter-exclude-urls: /api/mp/actuator/info,/api/mp/actuator/health,/api/mp/config/single_ip,/api/mp/file/**,/api/mp/actuator/**
+
+load:
+  url: http://10.108.1.10:5002

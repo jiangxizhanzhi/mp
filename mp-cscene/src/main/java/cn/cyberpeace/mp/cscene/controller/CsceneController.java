@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
+import cn.cyberpeace.mp.cscene.dto.scene.CsceneLoadDto;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -315,5 +316,16 @@ public class CsceneController implements BaseModelListControllerBase {
         returnData.getTopology().setScene(csceneBO.getSceneConfig().getTopology().getScene());
         csceneBO.setSceneConfig(newConfigHandler.toData());
         return new ServiceResult<>(csceneBO).asResult();
+    }
+
+    /**
+     * @param csceneLoadDto
+     * @return
+     */
+    @ApiOperation("添加载荷")
+    @ApiImplicitParam(name = "csceneLoadDto", value = "请求体", dataTypeClass = CsceneLoadDto.class)
+    @PostMapping("/add_load")
+    public ServiceResult<Object> addLoad(@RequestBody CsceneLoadDto csceneLoadDto) {
+        return modelService.addLoad(csceneLoadDto).asResult();
     }
 }

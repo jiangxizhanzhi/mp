@@ -33,7 +33,24 @@ public class OutLoadServiceImpl  {
     }
 
     public Boolean updateTaskInfo(JSONObject requestData) {
-        return null;
+        String url = "http://10.108.1.10:5002/stgj/task/modify";
+        Map<String, String> formMap = new HashMap();
+        formMap.put("id", requestData.get("taskId") != null ? requestData.get("taskId").toString() : "");
+        formMap.put("execCommand", requestData.get("param_list") != null ? requestData.get("param_list").toString() : "");
+        //请求头设置
+        HashMap<String, String> headersMap = new HashMap<>();
+        headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
+
+        try {
+            String result = HttpUtils.sendHttpGet(url, formMap, 2000);
+            Map<String, Object> dataMap = JsonUtils.parseMap(result);
+            if ("0".equals(dataMap.get("code").toString())) {
+                return true;
+            }
+        } catch (IOException e) {
+            return null;
+        }
+        return false;
     }
 
     public Boolean deleteTask(JSONObject requestData) {
@@ -45,11 +62,43 @@ public class OutLoadServiceImpl  {
     }
 
     public Boolean startInstance(JSONObject requestData) {
-        return null;
+        String url = "http://10.108.1.10:5002/stgj/instance/start";
+        Map<String, String> formMap = new HashMap();
+        formMap.put("load_id", requestData.get("instanceId") != null ? requestData.get("instanceId").toString() : "");
+        //请求头设置
+        HashMap<String, String> headersMap = new HashMap<>();
+        headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
+
+        try {
+            String result = HttpUtils.sendHttpGet(url, formMap, 2000);
+            Map<String, Object> dataMap = JsonUtils.parseMap(result);
+            if ("0".equals(dataMap.get("code").toString())) {
+                return true;
+            }
+        } catch (IOException e) {
+            return null;
+        }
+        return false;
     }
 
     public Boolean stopInstance(JSONObject requestData) {
-        return null;
+        String url = "http://10.108.1.10:5002/stgj/instance/stop";
+        Map<String, String> formMap = new HashMap();
+        formMap.put("load_id", requestData.get("instanceId") != null ? requestData.get("instanceId").toString() : "");
+        //请求头设置
+        HashMap<String, String> headersMap = new HashMap<>();
+        headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
+
+        try {
+            String result = HttpUtils.sendHttpGet(url, formMap, 2000);
+            Map<String, Object> dataMap = JsonUtils.parseMap(result);
+            if ("0".equals(dataMap.get("code").toString())) {
+                return true;
+            }
+        } catch (IOException e) {
+            return null;
+        }
+        return false;
     }
 
     public Boolean pauseInstance(JSONObject requestData) {
