@@ -67,6 +67,12 @@ public class JiangXiHaiboAuthServiceImpl implements ThirdAuthService {
                 userService.updateUserHaiboToken(userModel, token);
 
             }
+        } else {
+            String errorMessage = "用户信息请求验证失败";
+            if (Objects.nonNull(response) && StringUtils.isNotBlank(response.getMessage())) {
+                errorMessage = response.getMessage();
+            }
+            throw new MpRuntimeException(errorMessage);
         }
     }
 

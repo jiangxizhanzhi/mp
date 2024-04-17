@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.service.ThirdAuthService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,9 +30,22 @@ public class ThirdSsoController {
 
     @GetMapping
     @ApiOperation("赛宁第三方登录接口，重定向到赛宁个人主页")
-    public String loginAndRedirectToHomePage(@RequestParam("token") String token, HttpServletRequest request, HttpServletResponse response) {
+    public String loginAndRedirectToHomePage(@RequestParam("token") String token, @RequestParam(name = "type", required = false) String type,
+                                             @RequestParam(name = "course_id", required = false) String courseId,
+                                             @RequestParam(name = "lesson_id", required = false) String lessonId,
+                                             HttpServletRequest request, HttpServletResponse response) {
         thirdLoginService.loginByToken(token, request, response);
         // 重定向到另一个域名的页面
-        return String.format("redirect:%s", authConfig.getMpHomePageViewUrl());
+        String redirectUrl = authConfig.getMpHomePageViewUrl();
+        if (StringUtils.isNotBlank(type)) {
+            if ("course".equals(type)) {
+                if (StringUtils.isNotBlank(lessonId) && StringUtils.isNotBlank(courseId)) {
+                    redirectUrl = String.format(authConfig.getMpLessonViewUrl(), courseId, lessonId);
+                } else if (StringUtils.isNotBlank(courseId)) {
+                    redirectUrl = String.format(authConfig.getMpCourseViewUrl(), courseId);
+                }
+            }
+        }
+        return String.format("redirect:%s", redirectUrl);
     }
 }
