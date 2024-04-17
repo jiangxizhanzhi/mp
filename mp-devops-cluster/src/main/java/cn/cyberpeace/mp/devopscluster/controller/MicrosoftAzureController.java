@@ -101,12 +101,15 @@ public class MicrosoftAzureController {
     @ApiOperation(value = "云镜像管理同步", notes = "")
     @GetMapping("/synchronousCloudData")
     public ServiceResult synchronousCloudData(@RequestBody(required = false) JSONObject requestData) throws Exception {
-        JSONObject synchronousCloudData = microsoftAzureConverter.synchronousCloudData(requestData);
-        if (synchronousCloudData.get("code") != null && synchronousCloudData.get("code").equals("200")) {
-            return new ServiceResult<>(synchronousCloudData).asResult();
-        } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, synchronousCloudData.get("message") != null
-                    ? synchronousCloudData.get("message").toString() : "同步失败").asResult();
+        if(requestData != null){
+            JSONObject synchronousCloudData = microsoftAzureConverter.synchronousCloudData(requestData);
+            if (synchronousCloudData.get("code") != null && synchronousCloudData.get("code").equals("200")) {
+                return new ServiceResult(synchronousCloudData).asResult();
+            }else{
+                return new ServiceResult(null, BaseErrorCode.ERROR, synchronousCloudData.get("message") != null
+                        ? synchronousCloudData.get("message").toString() : "同步失败").asResult();
+            }
         }
+        return new ServiceResult(null, BaseErrorCode.ERROR, "同步失败").asResult();
     }
 }

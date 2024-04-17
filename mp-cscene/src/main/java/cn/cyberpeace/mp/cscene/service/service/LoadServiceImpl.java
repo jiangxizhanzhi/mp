@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.service.service;
 
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoadStageBind;
 import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.poi.hssf.usermodel.*;
@@ -416,9 +417,28 @@ public class LoadServiceImpl {
         String interfaceType = requestData.get("interfaceType") != null ? requestData.get("interfaceType").toString() : "";
         //部署类型
         String deployment = requestData.get("deployment") != null ? requestData.get("deployment").toString() : "";
-        List<JSONObject> paramList = requestData.get("paramList") != null ? (List<JSONObject>) requestData.get("paramList") : new ArrayList();
-        String paramListString = paramList != null ? paramList.toString() : "";
-        Boolean stageBindLoad = loadMapper.stageBindLoad(addType, sceneId, stageId, loadId, interfaceType, deployment, paramListString);
+        String paramList = requestData.get("paramList") != null ? requestData.get("paramList").toString() : "";
+
+        //根据loadId创建任务
+        JSONObject request = new JSONObject();
+        request.put("taskName", requestData);
+        request.put("taskDescribe", requestData);
+        request.put("toolId", loadId);
+        request.put("execCommand", paramList);
+        Map<String, Object> task = outLoadService.createTask(request);
+        String taskId;
+        if (task != null && task.get("data") != null) {
+            Map<String, Object> data = (Map<String, Object>) task.get("data");
+            if (data != null && data.get("id") != null) {
+                taskId = data.get("id").toString();
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+        //新建绑定关系
+        Boolean stageBindLoad = loadMapper.stageBindLoad(addType, sceneId, stageId, taskId, loadId, interfaceType, deployment, paramList);
         return stageBindLoad;
     }
 
@@ -487,6 +507,82 @@ public class LoadServiceImpl {
             data = loadMapper.getLoadListByIds(newList);
         }
         return data;
+    }
+
+    public List<MpDevopsLoad> getToolByLoopholes(JSONObject requestData) {
+        return null;
+    }
+
+    public List<MpDevopsLoad> getToolBytactics(JSONObject requestData) {
+        return null;
+    }
+
+    /**
+     * 阶段载荷开始执行
+     */
+    public Map<String, Object> startTool(JSONObject requestData) {
+        String taskId = requestData.get("taskId") != null ? requestData.get("taskId").toString() : "";
+        if (taskId.equals("")) {
+            return null;
+        }
+        //开始执行,根据taskId获取访问链接
+        JSONObject request = new JSONObject();
+        request.put("taskId", taskId);
+        Map<String, Object> result = outLoadService.getTaskNet(request);
+        return result;
+    }
+
+    public Boolean updateLoadParam(JSONObject requestData) {
+        String pk = requestData.get("pk") != null ? requestData.get("pk").toString() : "";
+        if (pk.equals("")) {
+            return false;
+        }
+        //todo 校验参数列表字段值
+        String paramList = requestData.get("paramList") != null ? requestData.get("paramList").toString() : "";
+        Boolean updateBindByPk = loadMapper.updateBindByPk(pk, requestData);
+        //todo 重新加载配置重启载荷服务
+        return updateBindByPk;
+    }
+
+    public List stageBindLoadList(String sceneId) {
+        List<MpDevopsLoadStageBind> stageBindLoadList = loadMapper.stageBindLoadList(sceneId);
+        //返回数据
+        List<Map<String, Object>> resultList = new ArrayList<>();
+        //根据stageId分类
+        if (stageBindLoadList != null && stageBindLoadList.size() > 0) {
+            Map<String, List<MpDevopsLoadStageBind>> map = new HashMap<>();
+            for (int i = 0; i < stageBindLoadList.size(); i++) {
+                String stageId = stageBindLoadList.get(i).getStageId();
+                if (map.containsKey(stageId)) {
+                    map.get(stageId).add(stageBindLoadList.get(i));
+                } else {
+                    List<MpDevopsLoadStageBind> list = new ArrayList<>();
+                    list.add(stageBindLoadList.get(i));
+                    map.put(stageId, list);
+                }
+            }
+            //map转换成List<Map>
+            if (map != null && map.size() > 0) {
+                for (Map.Entry<String, List<MpDevopsLoadStageBind>> entry : map.entrySet()) {
+                    Map<String, Object> resultMap = new HashMap<>();
+                    resultMap.put("stageId", entry.getKey());
+                    resultMap.put("data", entry.getValue());
+                    resultList.add(resultMap);
+                }
+            }
+        }
+        return resultList;
+    }
+
+    public Boolean deleteLoadBind(JSONObject requestData) {
+        String pk = requestData.get("pk") != null ? requestData.get("pk").toString() : "";
+        if (pk.equals("")) {
+            return false;
+        }
+        Boolean deleteLoadByPk = loadMapper.deleteLoadBindByPk(pk);
+        //todo 删除载荷服务,关闭实例
+
+        return deleteLoadByPk;
     }
 }
 

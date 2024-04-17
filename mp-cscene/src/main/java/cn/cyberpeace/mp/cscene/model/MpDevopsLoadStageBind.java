@@ -31,6 +31,10 @@ public class MpDevopsLoadStageBind extends BaseModel {
      */
     private String stageId;
     /**
+     * 任务id
+     */
+    private String taskId;
+    /**
      * 载荷id
      */
     private String loadId;

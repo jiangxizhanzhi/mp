@@ -41,4 +41,8 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
     List<MpSysCodeEnum> getSqlByCodes(@Param("param") List<JSONObject> codes);
 
     List<DeviceCloudTargetPO> getCloudTargetListByCodes(@Param("param") List<MpSysCodeEnum> filteredList);
+
+    Boolean deleteCloudTarget();
+
+    Boolean batchInsertCloudTarget(@Param("param") List<DeviceCloudTargetPO> list);
 }

@@ -2,6 +2,91 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper">
 
+    <insert id="batchInsertCloudTarget">
+        INSERT INTO mp_devops_cloud_target (
+        id,
+        uuid,
+        name,
+        logo,
+        role,
+        main_category,
+        sub_category,
+        third_category,
+        image_type,
+        is_public,
+        quick_create_support,
+        in_position,
+        reference_status,
+        use_status,
+        parent_system_type,
+        parent_system_status,
+        offer_name,
+        publisher_name,
+        sku,
+        version,
+        generations,
+        system_type,
+        system_architecure,
+        language,
+        image_status,
+        base_image_support,
+        init_support,
+        create_time,
+        update_time,
+        image_source,
+        is_import,
+        is_hide,
+        instance_state,
+        is_init,
+        instance_create_user,
+        support_export,
+        create_user_name,
+        create_user
+        ) VALUES
+        <foreach collection="param" item="item" index="index" separator=",">
+            (
+                #{item.id},
+                #{item.uuid},
+                #{item.name},
+                #{item.logo},
+                #{item.role},
+                #{item.mainCategory},
+                #{item.subCategory},
+                #{item.thirdCategory},
+                #{item.imageType},
+                #{item.isPublic},
+                #{item.quickCreateSupport},
+                #{item.inPosition},
+                #{item.referenceStatus},
+                #{item.useStatus},
+                #{item.parentSystemType},
+                #{item.parentSystemStatus},
+                #{item.offerName},
+                #{item.publisherName},
+                #{item.sku},
+                #{item.version},
+                #{item.generations},
+                #{item.systemType},
+                #{item.systemArchitecure},
+                #{item.language},
+                #{item.imageStatus},
+                #{item.baseImageSupport},
+                #{item.initSupport},
+                #{item.createTime},
+                #{item.updateTime},
+                #{item.imageSource},
+                #{item.isImport},
+                #{item.isHide},
+                #{item.instanceState},
+                #{item.isInit},
+                #{item.instanceCreateUser},
+                #{item.supportExport},
+                #{item.createUserName},
+                #{item.createUser}
+            )
+        </foreach>
+    </insert>
+
     <update id="updateCloudTarget">
         UPDATE
             mp_devops_cloud_target
@@ -38,6 +123,12 @@
             mp_devops_cloud_target
         WHERE
             pk = #{pk}
+    </delete>
+
+    <delete id="deleteCloudTarget">
+        DELETE
+        FROM
+            mp_devops_cloud_target
     </delete>
 
     <select id="getCloudTargetList" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO">

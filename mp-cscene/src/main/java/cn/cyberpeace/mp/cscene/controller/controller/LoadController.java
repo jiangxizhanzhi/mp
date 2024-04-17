@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import com.alibaba.fastjson.JSONObject;
@@ -300,7 +301,7 @@ public class LoadController {
      * */
     @ApiOperation(value = "载荷执行结果导入", notes = "")
     @PostMapping("/importLoadExecutionResult")
-    public ServiceResult importLoadExecutionResult(@RequestParam(value = "file", required = true) MultipartFile file) throws IOException {
+    public ServiceResult importLoadExecutionResult(@RequestParam(value = "file") MultipartFile file) throws IOException {
         Boolean importLoadExecutionResult = LoadService.importLoadExecutionResult(file);
         if (importLoadExecutionResult) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
@@ -339,10 +340,94 @@ public class LoadController {
                 }
             }
         }
-        return new ServiceResult<>(null, BaseErrorCode.PARAMS_INVALID, "addType参数无效").asResult();
+        return new ServiceResult<>(null, BaseErrorCode.PARAMS_INVALID, "参数无效").asResult();
     }
 
-    //todo 根据靶标漏洞List获取载荷
+    /**
+     * 根据靶标漏洞List获取载荷
+     */
+    @ApiOperation(value = "根据靶标漏洞List获取载荷", notes = "")
+    @PostMapping("/getToolByLoopholes")
+    public ServiceResult getToolByLoopholes(@RequestBody JSONObject requestData) {
+        if (requestData != null) {
+            List<MpDevopsLoad> getToolByLoopholes = LoadService.getToolByLoopholes(requestData);
+            return new ServiceResult<>(getToolByLoopholes, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+        } else {
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, "根据靶标漏洞List获取载荷失败");
+        }
+    }
 
-    //todo 根据关联技战术获取载荷
+    /**
+     * 根据关联技战术获取载荷
+     */
+    @ApiOperation(value = "根据关联技战术获取载荷", notes = "")
+    @GetMapping("/getToolBytactics")
+    public ServiceResult getToolBytactics(@RequestParam(value = "tactics", required = false) String tactics) {
+        JSONObject requestData = new JSONObject();
+        requestData.put("tactics", tactics);
+        if (requestData != null) {
+            List<MpDevopsLoad> getToolBytactics = LoadService.getToolBytactics(requestData);
+            return new ServiceResult<>(getToolBytactics, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+        } else {
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, "根据关联技战术获取载荷失败");
+        }
+    }
+
+    /**
+     * 阶段载荷执行(根据taskId获取访问链接)
+     */
+    @ApiOperation(value = "阶段载荷执行", notes = "")
+    @GetMapping("/startTool")
+    public ServiceResult startTool(@RequestParam(value = "taskId", required = false) String taskId) {
+        JSONObject requestData = new JSONObject();
+        requestData.put("taskId", taskId);
+        if (requestData != null) {
+            Map<String, Object> startTool = LoadService.startTool(requestData);
+            if (startTool != null) {
+                return new ServiceResult<>(startTool, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            }
+        }
+        return new ServiceResult<>(null, BaseErrorCode.ERROR, "阶段载荷开始执行失败");
+    }
+
+    /**
+     * 阶段载荷参数设置
+     */
+    @ApiOperation(value = "阶段载荷参数设置", notes = "")
+    @PutMapping("/updateLoadParam")
+    public ServiceResult updateLoadParam(@RequestBody JSONObject requestData) {
+        if (requestData != null) {
+            Boolean updateLoadParam = LoadService.updateLoadParam(requestData);
+            if (updateLoadParam) {
+                return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            }
+        }
+        return new ServiceResult<>(null, BaseErrorCode.ERROR, "阶段载荷参数设置失败");
+    }
+
+    /**
+     * 阶段载荷移除
+     */
+    @ApiOperation(value = "阶段载荷移除", notes = "")
+    @DeleteMapping("/deleteLoad")
+    public ServiceResult deleteLoad(@RequestBody JSONObject requestData) {
+        if (requestData != null) {
+            Boolean deleteLoadBind = LoadService.deleteLoadBind(requestData);
+            if (deleteLoadBind) {
+                return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            }
+        }
+        return new ServiceResult<>(null, BaseErrorCode.ERROR, "阶段载荷参数移除失败");
+    }
+
+    /*
+     * 阶段测试绑定载荷页面
+     * */
+    @ApiOperation(value = "阶段测试绑定载荷页面", notes = "")
+    @GetMapping("/stageBindLoadList")
+    public ServiceResult stageBindLoadList(@RequestParam(value = "taskId", required = false) String sceneId) {
+        List stageBindLoadList = LoadService.stageBindLoadList(sceneId);
+        return new ServiceResult<>(stageBindLoadList, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+    }
+
 }
