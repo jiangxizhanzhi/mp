@@ -1,14 +1,9 @@
 package cn.cyberpeace.mp.cscene.service.service;
 
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.cscene.model.*;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoadStageBind;
 import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
-import cn.cyberpeace.mp.scene.model.SceneConfigModel;
-import cn.cyberpeace.mp.scene.model.SceneModel;
-import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
-import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
-import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
-import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
@@ -18,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -39,12 +33,6 @@ public class LoadServiceImpl {
 
     @Autowired
     OutLoadServiceImpl outLoadService;
-
-    @Resource
-    private CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper;
-
-    @Resource
-    private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
 
     /*
      * 载荷页面
@@ -550,51 +538,9 @@ public class LoadServiceImpl {
             return false;
         }
         //todo 校验参数列表字段值
-        String paramList = requestData.get("param_list") != null ? requestData.get("param_list").toString() : "";
+        String paramList = requestData.get("paramList") != null ? requestData.get("paramList").toString() : "";
         Boolean updateBindByPk = loadMapper.updateBindByPk(pk, requestData);
         //todo 重新加载配置重启载荷服务
-        outLoadService.updateTaskInfo(requestData);
-        outLoadService.stopInstance(requestData);
-        outLoadService.startInstance(requestData);
-//        修改场景节点载荷参数 根
-        HumanCondition humanCondition = new HumanCondition()
-                .filterEqual(CloudPluginSceneElementModel::getResourceId, requestData.get("task_id"))
-                .filterEqual(CloudPluginSceneElementModel::getLoadResourceInstanceId, requestData.get("load_id"));
-        List<CloudPluginSceneElementModel> list = cloudPluginSceneElementMapper.list(humanCondition);
-        list.forEach(cloudPluginSceneElementModel -> {
-            cloudPluginSceneElementModel.setLoadExecCommand(paramList);
-            cloudPluginSceneElementMapper.update(cloudPluginSceneElementModel);
-//            据场景找到对应的场景模板再根据scene_element修改场景模板节点
-            HumanCondition selectHumanCondition = new HumanCondition()
-                    .link(CsceneInstanceModel.class)
-                    .link(CsceneModel.class)
-                    .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getCscene,
-                            CsceneModel.class, SceneModel::getId)
-                    .link(SceneConfigModel.class)
-                    .filterLink(CsceneModel.class, CsceneModel::getSceneConfig,
-                            SceneConfigModel.class, SceneConfigModel::getId)
-                    .link(CloudPluginSceneConfigElementModel.class)
-                    .filterLink(SceneConfigModel.class, SceneConfigModel::getId,
-                            CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
-                    .currentLink(CsceneInstanceModel.class)
-                    .filterEqual(CsceneInstanceModel::getScene, requestData.get("scene_id"))
-                    .currentLink(CloudPluginSceneConfigElementModel.class)
-                    .filterEqual(CloudPluginSceneConfigElementModel::getSceneElement, cloudPluginSceneElementModel.getSceneElement())
-                    .select(new HumanCondition().toDefaultSelectFields(CloudPluginSceneConfigElementModel.class));
-
-            for (CloudPluginSceneConfigElementModel cloudPluginSceneConfigElementModel : cloudPluginSceneConfigElementMapper.list(selectHumanCondition)) {
-                cloudPluginSceneConfigElementModel.setLoadExecCommand(paramList);
-                cloudPluginSceneConfigElementMapper.update(cloudPluginSceneConfigElementModel);
-            }
-
-
-        });
-
-/*        for (CloudPluginSceneConfigElementModel cloudPluginSceneConfigElementModel : cloudPluginSceneConfigElementMapper.list(humanCondition)) {
-            cloudPluginSceneConfigElementModel.setLoadExecCommand(paramList);
-            cloudPluginSceneConfigElementMapper.update(cloudPluginSceneConfigElementModel);
-        }*/
-
         return updateBindByPk;
     }
 

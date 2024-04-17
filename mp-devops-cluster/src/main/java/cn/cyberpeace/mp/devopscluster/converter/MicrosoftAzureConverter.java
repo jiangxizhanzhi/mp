@@ -26,8 +26,6 @@ import com.azure.core.management.Region;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.resourcemanager.AzureResourceManager;
-import com.azure.resourcemanager.compute.fluent.models.VirtualMachineImageInner;
-import com.azure.resourcemanager.compute.fluent.models.VirtualMachineImageProperties;
 import com.azure.resourcemanager.compute.models.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -132,8 +130,40 @@ public class MicrosoftAzureConverter implements BaseConverter {
         List localImages = getLocalImages();
         result.put("localImagesList", localImages);
 
+        //todo 将三份数据同步至数据表中
+        List<DeviceCloudTargetPO> list = new ArrayList<>();
 
-        return result;
+        for (int i = 0; i < dockerImages.size(); i++) {
+            DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
+            deviceCloudTarget.setName(((JSONObject) dockerImages.get(i)).get("repositoryName").toString());
+            deviceCloudTarget.setImageType("container");
+            list.add(deviceCloudTarget);
+        }
+
+        for (int i = 0; i < images.size(); i++) {
+            DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
+            deviceCloudTarget.setPublisherName(((JSONObject) images.get(i)).get("PublisherName").toString());
+            deviceCloudTarget.setOfferName(((JSONObject) images.get(i)).get("offerName").toString());
+            deviceCloudTarget.setSku(((JSONObject) images.get(i)).get("skuName").toString());
+            //镜像类型
+            deviceCloudTarget.setImageType("VM:" + ((JSONObject) images.get(i)).get("operatingSystemType").toString());
+            list.add(deviceCloudTarget);
+        }
+
+        for (int i = 0; i < localImages.size(); i++) {
+            DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
+            deviceCloudTarget.setName(((JSONObject) localImages.get(i)).get("imageName").toString());
+            deviceCloudTarget.setImageType("VM");
+            list.add(deviceCloudTarget);
+        }
+
+        Boolean deleteCloudTarget = microsoftAzureMapper.deleteCloudTarget();
+        Boolean batchInsertCloudTarget = microsoftAzureMapper.batchInsertCloudTarget(list);
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("result", list);
+        jsonObject.put("code", "200");
+        return jsonObject;
     }
 
     /**
@@ -203,13 +233,13 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 JSONObject jsonObject = new JSONObject();
 
                 System.out.println("repositoryName:" + name);
-                jsonObject.put("repositoryName",name);
+                jsonObject.put("repositoryName", name);
 
                 System.out.println("Image Digest: " + imageTag.getDigest());
-                jsonObject.put("Image Digest",imageTag.getDigest());
+                jsonObject.put("Image Digest", imageTag.getDigest());
 
                 System.out.println("Image Tags: " + imageTag.getTags());
-                jsonObject.put("Image Tags",imageTag.getTags());
+                jsonObject.put("Image Tags", imageTag.getTags());
 
                 System.out.println("--------------");
                 jsonList.add(jsonObject);
@@ -249,34 +279,38 @@ public class MicrosoftAzureConverter implements BaseConverter {
         int firstTime = 0;
         for (VirtualMachinePublisher publisher : virtualMachinePublishers) {
             //todo 筛选出需要的VM镜像
-            if(publisher.name() != null && publisher.name().equals("Canonical")){
-                if(firstTime < 10){
+            if (publisher.name() != null && publisher.name().equals("Canonical")) {
+                if (firstTime < 1) {
                     System.out.println("PublisherName: " + publisher.name());
                     // 获取发布者的所有产品(offer)
                     VirtualMachineOffers offers = publisher.offers();
                     PagedIterable<VirtualMachineOffer> list = offers.list();
                     firstTime++;
+                    int secondTime = 0;
                     for (VirtualMachineOffer offer : list) {
-                        System.out.println("offerName: " + offer.name());
-                        // 获取该产品的所有SKU
-                        VirtualMachineSkus skus = offer.skus();
-                        PagedIterable<VirtualMachineSku> skuList = skus.list();
-                        for (VirtualMachineSku sku : skuList) {
-                            System.out.println("skuName: " + sku.name());
-                            // 获取每个SKU的所有版本（image versions）
-                            PagedIterable<VirtualMachineImage> imageList = sku.images().list();
-                            int time = 0;
-                            for (VirtualMachineImage image : imageList) {
-                                if(time<1){
-                                    OperatingSystemTypes operatingSystemTypes = image.osDiskImage().operatingSystem();
-                                    JSONObject third = new JSONObject();
-                                    third.put("imageVersion",image.version());
-                                    third.put("PublisherName",publisher.name());
-                                    third.put("offerName", offer.name());
-                                    third.put("skuName", sku.name());
-                                    third.put("operatingSystemType",operatingSystemTypes);
-                                    result.add(third);
-                                    time++;
+                        if (secondTime < 5) {
+                            secondTime++;
+                            System.out.println("offerName: " + offer.name());
+                            // 获取该产品的所有SKU
+                            VirtualMachineSkus skus = offer.skus();
+                            PagedIterable<VirtualMachineSku> skuList = skus.list();
+                            for (VirtualMachineSku sku : skuList) {
+                                System.out.println("skuName: " + sku.name());
+                                // 获取每个SKU的所有版本（image versions）
+                                PagedIterable<VirtualMachineImage> imageList = sku.images().list();
+                                int time = 0;
+                                for (VirtualMachineImage image : imageList) {
+                                    if (time < 1) {
+                                        OperatingSystemTypes operatingSystemTypes = image.osDiskImage().operatingSystem();
+                                        JSONObject third = new JSONObject();
+                                        third.put("imageVersion", image.version());
+                                        third.put("PublisherName", publisher.name());
+                                        third.put("offerName", offer.name());
+                                        third.put("skuName", sku.name());
+                                        third.put("operatingSystemType", operatingSystemTypes);
+                                        result.add(third);
+                                        time++;
+                                    }
                                 }
                             }
                         }
@@ -312,8 +346,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
         // 打印我上传的映像列表
         for (VirtualMachineCustomImage image : list) {
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("imageName",image.name());
-            System.out.println("Image Name: " + image.name());
+            jsonObject.put("imageName", image.name());
+            System.out.println("imageName: " + image.name());
             System.out.println("-------------");
             imageList.add(jsonObject);
         }

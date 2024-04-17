@@ -15,7 +15,7 @@ import java.util.*;
 import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
 
 @Service
-public class OutLoadServiceImpl  {
+public class OutLoadServiceImpl {
 
     @Autowired
     private OutLoadMapper outLoadMapper;
@@ -24,12 +24,49 @@ public class OutLoadServiceImpl  {
         return null;
     }
 
-    public Boolean createTask(JSONObject requestData) {
-        return null;
+    public Map<String, Object> createTask(JSONObject requestData) {
+
+        //todo 根据载荷同步设置获取具体地址、认证和协议
+        String url = "http://10.108.1.10:5002/stgj/task/create";
+        Map<String, Object> formMap = new HashMap();
+        formMap.put("taskName", requestData.get("taskName") != null ? requestData.get("taskName").toString() : "");
+        formMap.put("taskDescribe", requestData.get("taskDescribe") != null ? requestData.get("taskDescribe").toString() : "");
+        formMap.put("toolId", requestData.get("toolId") != null ? requestData.get("toolId").toString() : "");
+        formMap.put("execCommand", requestData.get("execCommand") != null ? requestData.get("execCommand").toString() : "");
+
+        //请求头设置
+        HashMap<String, String> headersMap = new HashMap<>();
+        headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
+
+        String result = null;
+        try {
+            result = HttpUtils.sendHttpPost(url, formMap, headersMap);
+        } catch (IOException e) {
+            return null;
+        }
+        Map<String, Object> dataMap;
+        dataMap = JsonUtils.parseMap(result);
+        return dataMap;
     }
 
-    public JSONObject getTaskNet(JSONObject requestData) {
-        return null;
+    public Map<String, Object> getTaskNet(JSONObject requestData) {
+        //todo 根据载荷同步设置获取具体地址、认证和协议
+        String url = "http://10.108.1.10:5002/stgj/task/enter";
+        Map<String, String> formMap = new HashMap();
+        formMap.put("taskId", requestData.get("taskId") != null ? requestData.get("taskId").toString() : "");
+        //请求头设置
+        HashMap<String, String> headersMap = new HashMap<>();
+        headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
+
+        String result = null;
+        try {
+            result = HttpUtils.sendHttpGet(url, formMap, 2000);
+        } catch (IOException e) {
+            return null;
+        }
+        Map<String, Object> dataMap;
+        dataMap = JsonUtils.parseMap(result);
+        return dataMap;
     }
 
     public Boolean updateTaskInfo(JSONObject requestData) {
@@ -139,7 +176,7 @@ public class OutLoadServiceImpl  {
         dataMap = JsonUtils.parseMap(result);
         if ("0".equals(dataMap.get("code").toString())) {
             LinkedHashMap data = (LinkedHashMap) dataMap.get("data");
-            if(data != null && data.get("toolList") != null && data.get("toolList") instanceof List){
+            if (data != null && data.get("toolList") != null && data.get("toolList") instanceof List) {
                 dataList = (List) data.get("toolList");
             }
         }
