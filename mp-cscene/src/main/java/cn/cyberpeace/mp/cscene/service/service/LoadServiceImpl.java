@@ -593,7 +593,7 @@ public class LoadServiceImpl {
         return deleteLoadByPk;
     }
 
-    public List getLoadResultBySceneId(String sceneId) {
+    public List<JSONObject> getLoadResultBySceneId(String sceneId) {
         //查询该场景绑定的载荷及记录
         List<JSONObject> loadResultBySceneId = loadMapper.getLoadResultBySceneId(sceneId);
         return loadResultBySceneId;
