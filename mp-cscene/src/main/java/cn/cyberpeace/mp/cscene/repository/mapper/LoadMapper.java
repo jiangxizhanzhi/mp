@@ -33,6 +33,8 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     Boolean addLoadExecutionResult(@Param("param") JSONObject requestData);
 
+    Boolean addLoadExecutionOutResult(@Param("param") List<JSONObject> requestData);
+
     Boolean addLoad(@Param("param") JSONObject requestData);
 
     Boolean stageBindLoad(String addType, String sceneId, String stageId, String taskId, String loadId,
@@ -57,4 +59,6 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
     List<MpDevopsLoadStageBind> stageBindLoadList(String sceneId);
 
     Boolean deleteLoadBindByPk(String pk);
+
+    List<JSONObject> getLoadResultBySceneId(String sceneId);
 }
