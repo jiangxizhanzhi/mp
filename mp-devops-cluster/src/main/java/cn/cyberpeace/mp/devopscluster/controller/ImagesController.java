@@ -750,6 +750,7 @@ public class ImagesController {
             }
         }
         vo.setCreateUserName(model.getCreateUserName());
+        vo.setUpdateTime(model.getUpdateTime());
         return vo;
     }
 

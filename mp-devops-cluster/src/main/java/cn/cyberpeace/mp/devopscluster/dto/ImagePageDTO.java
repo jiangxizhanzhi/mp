@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.request.ImagePageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.TargetSceneRequest;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -184,6 +185,12 @@ public class ImagePageDTO extends BasePageDTO{
      */
     private Integer useDuration;
 
+    @ApiModelProperty(value = "开始时间")
+    private String startTime;
+
+    @ApiModelProperty(value = "结束时间")
+    private String endTime;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }
@@ -226,6 +233,8 @@ public class ImagePageDTO extends BasePageDTO{
             this.setOrders(request.getOrders());
             this.setOrdersType("asc");
         }
+        this.setStartTime(request.getStartTime());
+        this.setEndTime(request.getEndTime());
     }
 
     /**

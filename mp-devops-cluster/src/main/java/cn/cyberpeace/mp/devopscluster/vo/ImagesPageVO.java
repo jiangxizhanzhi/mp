@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 /**
  * 镜像分页返回信息
  */
@@ -137,5 +139,8 @@ public class ImagesPageVO extends ImageVO {
 
     @ApiModelProperty("靶标创建用户名称")
     private String createUserName;
+
+    @ApiModelProperty("更新时间")
+    private LocalDateTime updateTime;
 
 }

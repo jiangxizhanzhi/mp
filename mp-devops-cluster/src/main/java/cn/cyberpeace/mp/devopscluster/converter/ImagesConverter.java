@@ -553,6 +553,7 @@ public class ImagesConverter implements BaseConverter {
         target.setBusinessTag(source.getBusinessTag());
         target.setReferenceNums(source.getReferenceNums());
         target.setUseDuration(source.getUseDuration());
+        target.setUpdateTime(source.getUpdateTime());
     }
 
     private void setImageBusinessProperties(Device target, ImageRequest source) {

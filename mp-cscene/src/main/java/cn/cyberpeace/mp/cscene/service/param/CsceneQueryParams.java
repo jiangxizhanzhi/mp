@@ -17,4 +17,10 @@ import lombok.NoArgsConstructor;
 public class CsceneQueryParams extends QueryParams {
     @ApiModelProperty(value = "模板类型")
     private Integer type;
+
+    @ApiModelProperty(value = "开始时间")
+    private String startTime;
+
+    @ApiModelProperty(value = "结束时间")
+    private String endTime;
 }

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.Objects;
 
 
@@ -107,6 +108,13 @@ public class ImagePageRequest extends BasePageRequest {
 
     @ApiModelProperty(value = "业务标签")
     private Integer businessTag;
+
+    @ApiModelProperty(value = "开始时间")
+    private String startTime;
+
+    @ApiModelProperty(value = "结束时间")
+    private String endTime;
+
 
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;

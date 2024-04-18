@@ -40,6 +40,8 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     private Integer resourceOccupiedNums;
     @ApiModelProperty(value = "更新时间")
     private LocalDateTime updateTime;
+    @ApiModelProperty(value = "更新时间")
+    private LocalDateTime createTime;
 
     @Override
     public CsceneModel createModel() {

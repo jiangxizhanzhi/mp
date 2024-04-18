@@ -35,6 +35,8 @@ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLegalUtils;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigTopologyBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
@@ -228,6 +230,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (type != null) {
             humanCondition.filterEqual(CsceneModel::getType, type);
         }
+        if(null != queryParams.getStartTime() && null != queryParams.getEndTime()){
+            humanCondition.filterGreaterThanOrEqual(CsceneModel::getCreateTime, queryParams.getStartTime()).filterLessThanOrEqual(CsceneModel::getCreateTime, queryParams.getEndTime());
+        }
     }
 
     public ServiceResult<CsceneAuthorizeBO> getCsceneAuthorizeInfo(String csceneId) {
@@ -336,11 +341,25 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             new ListObjServiceResult<>(null, listResult.getServiceCode(), listResult.getDetail());
         }
 
+        if(Arrays.asList(queryParams.getOrders()).contains("resourceOccupiedNums") || Arrays.asList(queryParams.getOrders()).contains("-resourceOccupiedNums")){
+            HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneModel::getType, queryParams.getType());
+            if(!StringUtils.isEmpty(queryParams.getSearch())){
+                humanCondition.filterContains(CsceneModel::getName, queryParams.getSearch());
+            }
+            if(!StringUtils.isEmpty(queryParams.getStartTime()) && !StringUtils.isEmpty(queryParams.getEndTime())){
+                humanCondition.filterGreaterThanOrEqual(CsceneModel::getCreateTime, queryParams.getStartTime());
+                humanCondition.filterLessThanOrEqual(CsceneModel::getCreateTime, queryParams.getEndTime());
+            }
+            List<CsceneModel> list = this.getModelMapper().list(humanCondition);
+            int total = getModelMapper().total(humanCondition);
+            listResult = new ListObjServiceResult<>(new ListObjResult<>(list, total));
+        }
         var csceneObjMap = listResult.getSource().getObjs().stream()
                 .collect(Collectors.toMap(BaseModel::getId, x -> x));
         var csceneRoleObjMap = readCsceneRoles(csceneObjMap.keySet()
                 .toArray(new String[0])).stream().collect(Collectors.groupingBy(CsceneRoleModel::getCscene));
         List<CsceneBO> csceneBOs = new ArrayList<>();
+        List<CsceneBO> res;
         Map<String, CsceneBO> csceneBOMap = new HashMap<>();
         csceneObjMap.forEach((csceneId, csceneObj) -> {
             var roleObjs = csceneRoleObjMap.getOrDefault(csceneId, new ArrayList<>());
@@ -357,9 +376,31 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                         temp.setCreateName(userModel.getName());
                     }
                 }
+                SceneConfigDataBO sceneConfig = temp.getSceneConfig();
+                SceneConfigTopologyBO topology = sceneConfig.getTopology();
+                List<SceneConfigElementBO> elements = topology.getElements();
+                temp.setResourceOccupiedNums(elements.size());
             }
         }
-        return new ListObjServiceResult<>(new ListObjResult<>(csceneBOs, listResult.getSource().getTotal()));
+        res = csceneBOs;
+        if(Arrays.asList(queryParams.getOrders()).contains("resourceOccupiedNums") || Arrays.asList(queryParams.getOrders()).contains("-resourceOccupiedNums")){
+            int size = res.size();
+            Integer page = queryParams.getPage();
+            Integer rows = queryParams.getPerPage();
+            int pageStart = page == 1 ? 0 : (page - 1) * rows;//截取的开始位置
+            int pageEnd = Math.min(size, page * rows);//截取的结束位置
+            if (Arrays.asList(queryParams.getOrders()).contains("-resourceOccupiedNums")) {
+                res = res.stream().sorted(Comparator.comparing(CsceneBO::getResourceOccupiedNums).reversed()).collect(Collectors.toList());
+            }
+            if (Arrays.asList(queryParams.getOrders()).contains("resourceOccupiedNums")) {
+                res = res.stream().sorted(Comparator.comparing(CsceneBO::getResourceOccupiedNums)).collect(Collectors.toList());
+            }
+            if(size>pageStart){
+                res =res.subList(pageStart, pageEnd);
+            }
+
+        }
+        return new ListObjServiceResult<>(new ListObjResult<>(res, listResult.getSource().getTotal()));
     }
 
     public void setSharedUser(List<CsceneBO> csceneBOs, CsceneQueryParams queryParams) {
