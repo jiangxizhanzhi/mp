@@ -22,6 +22,8 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.Objects;
 
 @Slf4j
@@ -50,7 +52,9 @@ public class JiangXiHaiboAuthServiceImpl implements ThirdAuthService {
 
     @Override
     public void loginByToken(String token, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
-        RequestEntity<Void> request = RequestEntity.get(VERIFY_USER_BY_TOKEN, token)
+        String encodeToken = URLEncoder.encode(token, Charset.forName("utf-8"));
+        log.info("origin token:{},encode token:{}", encodeToken);
+        RequestEntity<Void> request = RequestEntity.get(VERIFY_USER_BY_TOKEN, encodeToken)
                 .accept(MediaType.APPLICATION_JSON).build();
         HaiboResponse<HaiboUser> response = camelRestTemplate.exchange(request, new ParameterizedTypeReference<HaiboResponse<HaiboUser>>() {
         }).getBody();
