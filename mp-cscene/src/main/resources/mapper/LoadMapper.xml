@@ -36,6 +36,43 @@
                 #{param.defaultCmd})
     </insert>
 
+    <insert id="addLoadExecutionOutResult">
+        INSERT INTO mp_devops_load_scene_result_log
+        (id,
+         tool_name,
+         action_type,
+         run_table,
+         source,
+         control_type,
+         result_type,
+         result_log,
+         result_status,
+         tool_description,
+         tool_platform,
+         creator_id,
+         create_time,
+         control_port,
+         default_cmd)
+        VALUES
+        <foreach item="item" collection="param" separator=",">
+            (#{item.id},
+             #{item.toolName},
+             #{item.actionType},
+             #{item.runTable},
+             #{item.source},
+             #{item.controlType},
+             #{item.resultType},
+             #{item.resultLog},
+             #{item.resultStatus},
+             #{item.toolDescription},
+             #{item.toolPlatform},
+             #{item.creatorId},
+             #{item.createTime},
+             #{item.controlPort},
+             #{item.defaultCmd})
+        </foreach>
+    </insert>
+
     <insert id="addLoad">
         INSERT INTO mp_devops_load
         (id,
@@ -436,6 +473,23 @@
         *
         FROM
         mp_devops_load_stage_bind
+        <where>
+            <if test="sceneId != null and sceneId != ''">
+                and scene_id = #{sceneId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getLoadResultBySceneId" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+        bind.scene_id,
+        bind.stage_id,
+        bind.load_id,
+        log.tool_name,
+        log.create_time
+        FROM
+        mp_devops_load_stage_bind bind
+        INNER JOIN mp_devops_load_scene_result_log log ON bind.load_id = log.id
         <where>
             <if test="sceneId != null and sceneId != ''">
                 and scene_id = #{sceneId}

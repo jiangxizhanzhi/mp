@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONPObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +62,7 @@ public class LoadController {
      * */
     @ApiOperation(value = "查询载荷", notes = "")
     @GetMapping("/getLoadByPk")
-    public ServiceResult getLoadList(@RequestParam(value = "pk", required = true) String pk) {
+    public ServiceResult getLoadList(@RequestParam(value = "pk") String pk) {
         JSONObject requestData = new JSONObject();
         requestData.put("pk", pk);
         JSONObject result = LoadService.getLoadList(requestData);
@@ -159,7 +160,7 @@ public class LoadController {
      * */
     @ApiOperation(value = "根据场景id获取绑定的载荷", notes = "")
     @GetMapping("/getLoadBySceneId")
-    public ServiceResult getLoadBySceneId(@RequestParam(value = "sceneId", required = true) String sceneId) {
+    public ServiceResult getLoadBySceneId(@RequestParam(value = "sceneId") String sceneId) {
         List list = LoadService.getLoadBySceneId(sceneId);
         return new ServiceResult<>(list, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
@@ -231,7 +232,7 @@ public class LoadController {
      * */
     @ApiOperation(value = "code码对应组", notes = "")
     @GetMapping("/getNamesByCode")
-    public ServiceResult getNamesByCode(@RequestParam(value = "code", required = true) String code) {
+    public ServiceResult getNamesByCode(@RequestParam(value = "code") String code) {
         JSONObject requestData = new JSONObject();
         requestData.put("code", code);
         List<JSONObject> list = LoadService.getNamesByCode(requestData);
@@ -243,7 +244,7 @@ public class LoadController {
      * */
     @ApiOperation(value = "载荷执行结果详情", notes = "")
     @GetMapping("/getLoadExecutionResultByPk")
-    public ServiceResult getLoadExecutionResultById(@RequestParam(value = "pk", required = true) String pk) {
+    public ServiceResult getLoadExecutionResultById(@RequestParam(value = "pk") String pk) {
         JSONObject requestData = new JSONObject();
         requestData.put("pk", pk);
         List<MpDevopsLoadSceneLog> list = LoadService.getLoadExecutionResult(requestData);
@@ -288,12 +289,28 @@ public class LoadController {
     @ApiOperation(value = "新增载荷执行结果", notes = "")
     @PostMapping("/addLoadExecutionResult")
     public ServiceResult addLoadExecutionResult(@RequestBody(required = false) JSONObject requestData) {
-        Boolean addLoadExecutionResult = LoadService.addLoadExecutionResult(requestData);
-        if (addLoadExecutionResult) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-        } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "新增载荷执行结果失败").asResult();
+        if(requestData != null){
+            Boolean addLoadExecutionResult = LoadService.addLoadExecutionResult(requestData);
+            if (addLoadExecutionResult) {
+                return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            }
         }
+        return new ServiceResult<>(null, BaseErrorCode.ERROR, "新增载荷执行结果失败").asResult();
+    }
+
+    /*
+     * 批量新增载荷执行结果
+     * */
+    @ApiOperation(value = "批量新增载荷执行结果", notes = "")
+    @PostMapping("/addLoadExecutionOutResult")
+    public ServiceResult addLoadExecutionOutResult(@RequestBody(required = false) List<JSONObject> requestData) {
+        if(requestData != null){
+            Boolean addLoadExecutionOutResult = LoadService.addLoadExecutionOutResult(requestData);
+            if (addLoadExecutionOutResult) {
+                return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            }
+        }
+        return new ServiceResult<>(null, BaseErrorCode.ERROR, "批量新增载荷执行结果失败").asResult();
     }
 
     /*

@@ -227,13 +227,21 @@ public class LoadServiceImpl {
      * 新增载荷执行结果
      * */
     public Boolean addLoadExecutionResult(JSONObject requestData) {
-        Boolean addLoadExecutionResult;
-        if (requestData != null) {
-            addLoadExecutionResult = loadMapper.addLoadExecutionResult(requestData);
-        } else {
-            return false;
-        }
+        Boolean addLoadExecutionResult = loadMapper.addLoadExecutionResult(requestData);
         return addLoadExecutionResult;
+    }
+
+    /*
+     * 批量新增载荷执行结果
+     * */
+    public Boolean addLoadExecutionOutResult(List<JSONObject> requestData) {
+        Boolean addLoadExecutionOutResult;
+        if (requestData.size() > 0) {
+            addLoadExecutionOutResult = loadMapper.addLoadExecutionOutResult(requestData);
+        } else {
+            return true;
+        }
+        return addLoadExecutionOutResult;
     }
 
     /*
@@ -583,6 +591,12 @@ public class LoadServiceImpl {
         //todo 删除载荷服务,关闭实例
 
         return deleteLoadByPk;
+    }
+
+    public List getLoadResultBySceneId(String sceneId) {
+        //查询该场景绑定的载荷及记录
+        List<JSONObject> loadResultBySceneId = loadMapper.getLoadResultBySceneId(sceneId);
+        return loadResultBySceneId;
     }
 }
 
