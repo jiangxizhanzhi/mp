@@ -486,13 +486,13 @@
         bind.stage_id,
         bind.load_id,
         log.tool_name,
-        log.create_time
+        DATE_FORMAT(log.create_time, '%Y-%m-%d %H:%i:%S') AS create_time
         FROM
         mp_devops_load_stage_bind bind
         INNER JOIN mp_devops_load_scene_result_log log ON bind.load_id = log.id
         <where>
             <if test="sceneId != null and sceneId != ''">
-                and scene_id = #{sceneId}
+                and bind.scene_id = #{sceneId}
             </if>
         </where>
     </select>

@@ -442,9 +442,19 @@ public class LoadController {
      * */
     @ApiOperation(value = "阶段测试绑定载荷页面", notes = "")
     @GetMapping("/stageBindLoadList")
-    public ServiceResult stageBindLoadList(@RequestParam(value = "taskId", required = false) String sceneId) {
+    public ServiceResult stageBindLoadList(@RequestParam(value = "sceneId", required = false) String sceneId) {
         List stageBindLoadList = LoadService.stageBindLoadList(sceneId);
         return new ServiceResult<>(stageBindLoadList, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+    }
+
+    /*
+     * 查询该场景绑定的载荷及记录
+     * */
+    @ApiOperation(value = "查询该场景绑定的载荷及记录", notes = "")
+    @GetMapping("/getLoadResultBySceneId")
+    public ServiceResult getLoadResultBySceneId(@RequestParam(value = "sceneId") String sceneId) {
+        List<JSONObject> getLoadResultBySceneId = LoadService.getLoadResultBySceneId(sceneId);
+        return new ServiceResult<>(getLoadResultBySceneId, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
 }
