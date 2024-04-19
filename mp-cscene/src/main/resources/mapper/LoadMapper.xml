@@ -36,7 +36,7 @@
                 #{param.defaultCmd})
     </insert>
 
-    <insert id="addLoadExecutionOutResult">
+    <insert id="addResult">
         INSERT INTO mp_devops_load_scene_result_log
         (id,
          tool_name,
@@ -53,23 +53,58 @@
          create_time,
          control_port,
          default_cmd)
+        VALUES (#{param.id},
+                #{param.toolName},
+                #{param.actionType},
+                #{param.runTable},
+                #{param.source},
+                #{param.controlType},
+                #{param.resultType},
+                #{param.resultLog},
+                #{param.resultStatus},
+                #{param.toolDescription},
+                #{param.toolPlatform},
+                #{param.creatorId},
+                #{param.createTime},
+                #{param.controlPort},
+                #{param.defaultCmd});
+        SELECT LAST_INSERT_ID();
+    </insert>
+
+    <insert id="addLoadExecutionOutResult">
+        INSERT INTO mp_devops_load_scene_result_log
+        (id,
+        tool_name,
+        action_type,
+        run_table,
+        source,
+        control_type,
+        result_type,
+        result_log,
+        result_status,
+        tool_description,
+        tool_platform,
+        creator_id,
+        create_time,
+        control_port,
+        default_cmd)
         VALUES
         <foreach item="item" collection="param" separator=",">
             (#{item.id},
-             #{item.toolName},
-             #{item.actionType},
-             #{item.runTable},
-             #{item.source},
-             #{item.controlType},
-             #{item.resultType},
-             #{item.resultLog},
-             #{item.resultStatus},
-             #{item.toolDescription},
-             #{item.toolPlatform},
-             #{item.creatorId},
-             #{item.createTime},
-             #{item.controlPort},
-             #{item.defaultCmd})
+            #{item.toolName},
+            #{item.actionType},
+            #{item.runTable},
+            #{item.source},
+            #{item.controlType},
+            #{item.resultType},
+            #{item.resultLog},
+            #{item.resultStatus},
+            #{item.toolDescription},
+            #{item.toolPlatform},
+            #{item.creatorId},
+            #{item.createTime},
+            #{item.controlPort},
+            #{item.defaultCmd})
         </foreach>
     </insert>
 
@@ -147,12 +182,12 @@
 
     <insert id="addLoads">
         INSERT INTO mp_devops_load (id, tool_name, tool_platform, tool_description,
-                                    action_type, run_table, source, control_type, creator_id,
-                                    create_time, control_port, default_cmd, read_me, update_time)
+        action_type, run_table, source, control_type, creator_id,
+        create_time, control_port, default_cmd, read_me, update_time)
         VALUES
         <foreach item="item" collection="param" separator=",">
             (#{item.id}, #{item.toolName}, #{item.toolPlatform}, #{item.toolDescription},
-             #{item.actionType}, #{item.runTable}, #{item.source}, #{item.controlType}, #{item.creatorId},
+            #{item.actionType}, #{item.runTable}, #{item.source}, #{item.controlType}, #{item.creatorId},
             #{item.createTime}, #{item.controlPort}, #{item.defaultCmd}, #{item.readMe}, #{item.updateTime})
         </foreach>
     </insert>
@@ -269,30 +304,30 @@
 
     <update id="updateBindByPk">
         UPDATE mp_devops_load_stage_bind
-            <set>
-                <if test="param != null and param.loadId != null and param.loadId != ''">
-                    load_id = #{param.loadId},
-                </if>
-                <if test="param != null and param.addType != null and param.addType != ''">
-                    add_type = #{param.addType},
-                </if>
-                <if test="param != null and param.sceneId != null and param.sceneId != ''">
-                    scene_id = #{param.sceneId},
-                </if>
-                <if test="param != null and param.stageId != null and param.stageId != ''">
-                    stage_id = #{param.stageId},
-                </if>
-                <if test="param != null and param.interfaceType != null and param.interfaceType != ''">
-                    interface_type = #{param.interfaceType},
-                </if>
-                <if test="param != null and param.deployment != null and param.deployment != ''">
-                    deployment = #{param.deployment},
-                </if>
-                <if test="param != null and param.paramList != null and param.paramList != ''">
-                    param_list = #{param.paramList},
-                </if>
-                pk = #{pk}
-            </set>
+        <set>
+            <if test="param != null and param.loadId != null and param.loadId != ''">
+                load_id = #{param.loadId},
+            </if>
+            <if test="param != null and param.addType != null and param.addType != ''">
+                add_type = #{param.addType},
+            </if>
+            <if test="param != null and param.sceneId != null and param.sceneId != ''">
+                scene_id = #{param.sceneId},
+            </if>
+            <if test="param != null and param.stageId != null and param.stageId != ''">
+                stage_id = #{param.stageId},
+            </if>
+            <if test="param != null and param.interfaceType != null and param.interfaceType != ''">
+                interface_type = #{param.interfaceType},
+            </if>
+            <if test="param != null and param.deployment != null and param.deployment != ''">
+                deployment = #{param.deployment},
+            </if>
+            <if test="param != null and param.paramList != null and param.paramList != ''">
+                param_list = #{param.paramList},
+            </if>
+            pk = #{pk}
+        </set>
         WHERE
         pk = #{pk}
     </update>
@@ -310,7 +345,8 @@
     </delete>
 
     <delete id="deleteData">
-        delete from mp_devops_load
+        delete
+        from mp_devops_load
     </delete>
 
     <delete id="deleteLoadBindByPk">
@@ -434,11 +470,8 @@
     </select>
 
     <select id="getSynchronousDataSource" resultType="com.alibaba.fastjson.JSONObject">
-        SELECT
-        *
-        FROM
-        mp_devops_load_source
-            LIMIT 1
+        SELECT *
+        FROM mp_devops_load_source LIMIT 1
     </select>
 
     <select id="getNamesByCode" resultType="com.alibaba.fastjson.JSONObject">
@@ -453,14 +486,14 @@
         </where>
     </select>
 
-    <select id="getLoadListByIds" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoad">
+    <select id="getToolListByloadPks" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoad">
         SELECT
         *
         FROM
         mp_devops_load
         <where>
             <if test="param != null and param.size != 0">
-                and id in
+                and pk in
                 <foreach collection="param" item="item" separator="," open="(" close=")">
                     #{item}
                 </foreach>
@@ -480,19 +513,32 @@
         </where>
     </select>
 
-    <select id="getLoadResultBySceneId" resultType="com.alibaba.fastjson.JSONObject">
+    <select id="getLoadResultByLoads" resultType="com.alibaba.fastjson.JSONObject">
         SELECT
-        bind.scene_id,
-        bind.stage_id,
-        bind.load_id,
+        log.id as tool_id,
         log.tool_name,
         DATE_FORMAT(log.create_time, '%Y-%m-%d %H:%i:%S') AS create_time
         FROM
-        mp_devops_load_stage_bind bind
-        INNER JOIN mp_devops_load_scene_result_log log ON bind.load_id = log.id
+        mp_devops_load_scene_result_log log
         <where>
+            <if test="param != null and param.size != 0">
+                and log.id in
+                <foreach collection="param" item="item" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="getLoadsBySceneId" resultType="java.lang.String">
+        SELECT
+        scene_element
+        FROM
+        mp_sceneplugincloud_scene_element
+        <where>
+            and image_type = 'load'
             <if test="sceneId != null and sceneId != ''">
-                and bind.scene_id = #{sceneId}
+                and scene = #{sceneId}
             </if>
         </where>
     </select>

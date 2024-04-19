@@ -33,6 +33,8 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     Boolean addLoadExecutionResult(@Param("param") JSONObject requestData);
 
+    Integer addResult(@Param("param") JSONObject requestData);
+
     Boolean addLoadExecutionOutResult(@Param("param") List<JSONObject> requestData);
 
     Boolean addLoad(@Param("param") JSONObject requestData);
@@ -52,7 +54,7 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     List<JSONObject> getNamesByCode(@Param("param") JSONObject requestData);
 
-    List<MpDevopsLoad> getLoadListByIds(@Param("param") List<String> newList);
+    List<MpDevopsLoad> getToolListByloadPks(@Param("param") List<String> newList);
 
     Boolean updateBindByPk(String pk, @Param("param") JSONObject requestData);
 
@@ -60,5 +62,7 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     Boolean deleteLoadBindByPk(String pk);
 
-    List<JSONObject> getLoadResultBySceneId(String sceneId);
+    List<String> getLoadsBySceneId(String sceneId);
+
+    List<JSONObject> getLoadResultByLoads(@Param("param") List<String> loadIds);
 }

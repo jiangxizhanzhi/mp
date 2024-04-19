@@ -72,7 +72,7 @@
                 #{item.imageStatus},
                 #{item.baseImageSupport},
                 #{item.initSupport},
-                #{item.createTime},
+                now(),
                 #{item.updateTime},
                 #{item.imageSource},
                 #{item.isImport},
@@ -129,6 +129,12 @@
         DELETE
         FROM
             mp_devops_cloud_target
+        WHERE
+            pk in (
+                <foreach collection="param" item="item" index="index" separator=",">
+                    #{item.pk}
+                </foreach>
+            )
     </delete>
 
     <select id="getCloudTargetList" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO">

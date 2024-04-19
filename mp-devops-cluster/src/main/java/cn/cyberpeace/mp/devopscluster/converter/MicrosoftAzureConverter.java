@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
+import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
+import cn.cyberpeace.mp.auth.service.MicrosoftAzureLoginService;
 import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
@@ -48,6 +50,9 @@ public class MicrosoftAzureConverter implements BaseConverter {
     private MicrosoftAzureMapper microsoftAzureMapper;
 
     @Autowired
+    private MicrosoftAzureLoginService microsoftAzureLoginService;
+
+    @Autowired
     private TargetConverter targetConverter;
 
     @Autowired
@@ -75,16 +80,17 @@ public class MicrosoftAzureConverter implements BaseConverter {
     public JSONObject getCloudTargetListByCodes(List<JSONObject> codes) {
         List<MpSysCodeEnum> sqls = microsoftAzureMapper.getSqlByCodes(codes);
         for (int i = 0; i < sqls.size(); i++) {
-            if (sqls.get(i).getSupplement().contains("**")) {
+            if (sqls.get(i).getSupplement() != null && sqls.get(i).getSupplement().contains("**")) {
                 for (int j = 0; j < codes.size(); j++) {
-                    if (codes.get(j).get("code").toString().equals(sqls.get(i).getCode())) {
+                    if (codes.get(j).get("code") != null && sqls.get(i).getCode() != null &&
+                            codes.get(j).get("code").toString().equals(sqls.get(i).getCode())) {
                         sqls.get(i).setRemark(sqls.get(i).getSupplement().replace("**", codes.get(j).get("value").toString()));
                     }
                 }
             }
         }
         List<MpSysCodeEnum> filteredList = sqls.stream()
-                .filter(s -> !s.getSupplement().isEmpty())
+                .filter(s -> s.getSupplement() != null && !s.getSupplement().isEmpty())
                 .collect(Collectors.toList());
         List<DeviceCloudTargetPO> list = microsoftAzureMapper.getCloudTargetListByCodes(filteredList);
         JSONObject result = new JSONObject();
@@ -105,10 +111,10 @@ public class MicrosoftAzureConverter implements BaseConverter {
      * 云镜像管理同步
      */
     @Transactional
-    public JSONObject synchronousCloudData(JSONObject requestData) throws Exception {
+    public JSONObject synchronousCloudData(String requestData) throws Exception {
 
 //        // 获取资源管理器
-        var azureResourceManager = IAzureResourceManager.getInstance(1).getManager();
+//        var azureResourceManager = IAzureResourceManager.getInstance(1).getManager();
 
 //        //获取当前微软云使用账号
 //        JSONObject request = new JSONObject();
@@ -116,23 +122,18 @@ public class MicrosoftAzureConverter implements BaseConverter {
 //        MicrosoftAzureUserModel localAzurer = microsoftAzureLoginService.getLocalAzurer(request);
 
         JSONObject result = new JSONObject();
-        result.put("code", "200");
-
         //获取docker镜像
         List dockerImages = getDockerImages();
         result.put("dockerImageList", dockerImages);
-
         //获取微软云镜像
         List images = getImages();
         result.put("imagesList", images);
-
         //获取本地镜像
         List localImages = getLocalImages();
         result.put("localImagesList", localImages);
 
         //todo 将三份数据同步至数据表中
         List<DeviceCloudTargetPO> list = new ArrayList<>();
-
         for (int i = 0; i < dockerImages.size(); i++) {
             DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
             deviceCloudTarget.setName(((JSONObject) dockerImages.get(i)).get("repositoryName").toString());
@@ -156,13 +157,25 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTarget.setImageType("VM");
             list.add(deviceCloudTarget);
         }
-
-        Boolean deleteCloudTarget = microsoftAzureMapper.deleteCloudTarget();
+        //拿到所有数据库数据
+        List<DeviceCloudTargetPO> cloudTargetList = microsoftAzureMapper.getCloudTargetList(null);
+        //保存同步数据
         Boolean batchInsertCloudTarget = microsoftAzureMapper.batchInsertCloudTarget(list);
-
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("result", list);
+        jsonObject.put("result", result);
+        jsonObject.put("data", list);
         jsonObject.put("code", "200");
+        if(batchInsertCloudTarget){
+            //删除已经存在的数据
+            Boolean deleteCloudTarget = microsoftAzureMapper.deleteCloudTarget(cloudTargetList);
+            if(!deleteCloudTarget){
+                jsonObject.put("message", "原数据未删除,请重新同步");
+                jsonObject.put("code", "201");
+            }
+        }else{
+            jsonObject.put("message", "同步数据保存失败");
+            jsonObject.put("code", "201");
+        }
         return jsonObject;
     }
 
@@ -429,16 +442,18 @@ public class MicrosoftAzureConverter implements BaseConverter {
     /**
      * 查询所有镜像管理分类
      */
-    public List getImageCategories(String code) {
-        String parentCode = ParentCodeEnum.PARENT_MIXCLOUD_CATEGORY_TYPE.getCode();
+    public List getImageCategories(String cloudCode) {
+        if(cloudCode == null || cloudCode.equals("")){
+            cloudCode = ParentCodeEnum.PARENT_MIXCLOUD_CATEGORY_TYPE.getCode();
 //        PARENT_MIXCLOUD_CATEGORY_TYPE("1002", "混合云配置项菜单"),
 //        PARENT_PRIVATECLOUD_CATEGORY_TYPE("1003", "私有云配置项菜单"),
 //        PARENT_PUBLICCLOUD_CATEGORY_TYPE("1004", "公有云配置项菜单");
+        }
 
         //查询所有数据
-        List<MpSysCodeEnum> data = microsoftAzureMapper.getAlldata(code);
+        List<MpSysCodeEnum> data = microsoftAzureMapper.getAlldata(cloudCode);
         //根据parentCode字段将data数据按照父子关系处理返回新的List<MpSysCodeEnum>数据
-        List<MpSysCodeEnum> dtoTreeList = getDtoTreeList(data, code);
+        List<MpSysCodeEnum> dtoTreeList = getDtoTreeList(data, cloudCode);
         return dtoTreeList;
     }
 

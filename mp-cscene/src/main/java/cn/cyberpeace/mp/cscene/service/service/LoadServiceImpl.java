@@ -37,7 +37,7 @@ public class LoadServiceImpl {
     private LoadMapper loadMapper;
 
     @Autowired
-    OutLoadServiceImpl outLoadService;
+    private OutLoadServiceImpl outLoadService;
 
     @Resource
     private CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper;
@@ -512,18 +512,12 @@ public class LoadServiceImpl {
     /*
      * 根据载荷执行结果工具列表
      * */
-    public List<MpDevopsLoad> getToolListByResult(JSONObject requestData) {
-        List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResultStatistics(requestData);
-        List<String> newList = new ArrayList();
-        for (int i = 0; i < list.size(); i++) {
-            if (!newList.contains("list.get(i).getId()")) {
-                newList.add(list.get(i).getId());
-            }
-        }
+    public List<MpDevopsLoad> getToolListByloadPks(JSONObject requestData) {
+        List<String> ids = (List<String>) requestData.get("pks");
         //根据ids查询工具
         List<MpDevopsLoad> data = new ArrayList<>();
-        if (newList != null && newList.size() > 0) {
-            data = loadMapper.getLoadListByIds(newList);
+        if (ids != null && ids.size() > 0) {
+            data = loadMapper.getToolListByloadPks(ids);
         }
         return data;
     }
@@ -537,17 +531,45 @@ public class LoadServiceImpl {
     }
 
     /**
-     * 阶段载荷开始执行
+     * 获取阶段载荷访问地址
      */
-    public Map<String, Object> startTool(JSONObject requestData) {
+    public Map<String, Object> getTaskNet(JSONObject requestData) {
         String taskId = requestData.get("taskId") != null ? requestData.get("taskId").toString() : "";
         if (taskId.equals("")) {
             return null;
         }
-        //开始执行,根据taskId获取访问链接
+        String instanceId = requestData.get("instanceId") != null ? requestData.get("instanceId").toString() : "";
+        if (instanceId.equals("")) {
+            return null;
+        }
+        //执行
+        Boolean startInstance = outLoadService.startInstance(requestData);
+        if (!startInstance) {
+            return null;
+        }
+        //log表新增初始数据
+        Integer pk = loadMapper.addResult(requestData);
+        //todo 开始执行,根据taskId获取访问链接,可能还需要日志的主键对准颗粒度
         JSONObject request = new JSONObject();
         request.put("taskId", taskId);
         Map<String, Object> result = outLoadService.getTaskNet(request);
+        return result;
+    }
+
+    /**
+     * 阶段载荷开始执行
+     */
+    public JSONObject startTool(JSONObject requestData) {
+        //todo 执行载荷,返回以下信息
+        // 触发执行载荷“burpsuit” 成功，载荷执行主机“载荷机10.8.12.3”
+        // 主机地址:云主机10.125.100.3 ; 事件:检查到进程新增,进程PID：12489,命令：shell
+        String instanceId = requestData.get("instanceId") != null ? requestData.get("instanceId").toString() : "";
+        if (instanceId.equals("")) {
+            return null;
+        }
+        Boolean startInstance = outLoadService.startInstance(requestData);
+        JSONObject result = new JSONObject();
+        result.put("startInstance", startInstance);
         return result;
     }
 
@@ -563,7 +585,7 @@ public class LoadServiceImpl {
         outLoadService.updateTaskInfo(requestData);
         outLoadService.stopInstance(requestData);
         outLoadService.startInstance(requestData);
-//        修改场景节点载荷参数 根
+//        修改场景节点载荷参数
         HumanCondition humanCondition = new HumanCondition()
                 .filterEqual(CloudPluginSceneElementModel::getResourceId, requestData.get("task_id"))
                 .filterEqual(CloudPluginSceneElementModel::getLoadResourceInstanceId, requestData.get("load_id"));
@@ -571,7 +593,7 @@ public class LoadServiceImpl {
         list.forEach(cloudPluginSceneElementModel -> {
             cloudPluginSceneElementModel.setLoadExecCommand(paramList);
             cloudPluginSceneElementMapper.update(cloudPluginSceneElementModel);
-//            据场景找到对应的场景模板再根据scene_element修改场景模板节点
+//            根据场景找到对应的场景模板再根据scene_element修改场景模板节点
             HumanCondition selectHumanCondition = new HumanCondition()
                     .link(CsceneInstanceModel.class)
                     .link(CsceneModel.class)
@@ -593,10 +615,7 @@ public class LoadServiceImpl {
                 cloudPluginSceneConfigElementModel.setLoadExecCommand(paramList);
                 cloudPluginSceneConfigElementMapper.update(cloudPluginSceneConfigElementModel);
             }
-
-
         });
-
         return updateBindByPk;
     }
 
@@ -642,9 +661,15 @@ public class LoadServiceImpl {
     }
 
     public List<JSONObject> getLoadResultBySceneId(String sceneId) {
-        //查询该场景绑定的载荷及记录
-        List<JSONObject> loadResultBySceneId = loadMapper.getLoadResultBySceneId(sceneId);
-        return loadResultBySceneId;
+        List<String> loadIds = loadMapper.getLoadsBySceneId(sceneId);
+        List<JSONObject> loadResultBySceneId = null;
+        if (loadIds != null && loadIds.size() > 0) {
+            //查询该场景绑定的载荷及记录
+            loadResultBySceneId = loadMapper.getLoadResultByLoads(loadIds);
+            return loadResultBySceneId;
+        } else {
+            return loadResultBySceneId;
+        }
     }
 }
 

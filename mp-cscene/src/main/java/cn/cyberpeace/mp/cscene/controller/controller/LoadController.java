@@ -8,7 +8,6 @@ import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONPObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +57,19 @@ public class LoadController {
     }
 
     /*
+     * 根据pks获取载荷列表
+     * */
+    @ApiOperation(value = "根据pks获取载荷列表", notes = "")
+    @PostMapping("/getToolListByloadPks")
+    public ServiceResult getToolListByloadPks(@RequestBody(required = false) JSONObject requestData) {
+        if (requestData != null) {
+            List<MpDevopsLoad> getToolListByloadPks = LoadService.getToolListByloadPks(requestData);
+            return new ServiceResult(getToolListByloadPks, BaseErrorCode.SUCCESS).asResult();
+        }
+        return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID).asResult();
+    }
+
+    /*
      * 查询载荷
      * */
     @ApiOperation(value = "查询载荷", notes = "")
@@ -81,9 +93,9 @@ public class LoadController {
     public ServiceResult updateLoadByPk(@RequestBody(required = false) JSONObject requestData) {
         Boolean updateLoadByPk = LoadService.updateLoadByPk(requestData);
         if (updateLoadByPk) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "修改失败").asResult();
+            return new ServiceResult(null, BaseErrorCode.ERROR, "修改失败").asResult();
         }
     }
 
@@ -95,9 +107,9 @@ public class LoadController {
     public ServiceResult addLoad(@RequestBody(required = false) JSONObject requestData) {
         Boolean addLoad = LoadService.addLoad(requestData);
         if (addLoad) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "新增失败").asResult();
+            return new ServiceResult(null, BaseErrorCode.ERROR, "新增失败").asResult();
         }
     }
 
@@ -109,9 +121,9 @@ public class LoadController {
     public ServiceResult deleteLoadByPk(@RequestBody(required = false) JSONObject requestData) {
         Boolean deleteLoadByPk = LoadService.deleteLoadByPk(requestData);
         if (deleteLoadByPk) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.DATA_NOT_EXIST, "删除失败,请检查列表中是否存在该数据").asResult();
+            return new ServiceResult(null, BaseErrorCode.DATA_NOT_EXIST, "删除失败,请检查列表中是否存在该数据").asResult();
         }
     }
 
@@ -123,9 +135,9 @@ public class LoadController {
     public ServiceResult synchronousData() {
         Boolean synchronousData = LoadService.synchronousData();
         if (synchronousData) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "载荷数据同步失败").asResult();
+            return new ServiceResult(null, BaseErrorCode.ERROR, "载荷数据同步失败").asResult();
         }
     }
 
@@ -149,9 +161,9 @@ public class LoadController {
     public ServiceResult synchronousDataSource(@RequestBody(required = false) JSONObject requestData) {
         Boolean synchronousDataSource = LoadService.synchronousDataSource(requestData);
         if (synchronousDataSource) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "载荷数据同步设置保存失败").asResult();
+            return new ServiceResult(null, BaseErrorCode.ERROR, "载荷数据同步设置保存失败").asResult();
         }
     }
 
@@ -162,7 +174,7 @@ public class LoadController {
     @GetMapping("/getLoadBySceneId")
     public ServiceResult getLoadBySceneId(@RequestParam(value = "sceneId") String sceneId) {
         List list = LoadService.getLoadBySceneId(sceneId);
-        return new ServiceResult<>(list, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+        return new ServiceResult(list, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
     /*
@@ -193,7 +205,7 @@ public class LoadController {
         request.put("beginTime", beginTimeLocalDateTime != null ? beginTimeLocalDateTime.toString() : null);
         request.put("overTime", overTimeLocalDateTime != null ? overTimeLocalDateTime.toString() : null);
         Map<String, Integer> map = LoadService.getLoadExecutionResultStatistics(request);
-        return new ServiceResult<>(map, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+        return new ServiceResult(map, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
     /*
@@ -236,7 +248,7 @@ public class LoadController {
         JSONObject requestData = new JSONObject();
         requestData.put("code", code);
         List<JSONObject> list = LoadService.getNamesByCode(requestData);
-        return new ServiceResult<>(list, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+        return new ServiceResult(list, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
     /*
@@ -249,9 +261,9 @@ public class LoadController {
         requestData.put("pk", pk);
         List<MpDevopsLoadSceneLog> list = LoadService.getLoadExecutionResult(requestData);
         if (list != null && list.size() == 1) {
-            return new ServiceResult<>(list.get(0), BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            return new ServiceResult(list.get(0), BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "查询载荷执行结果详情失败").asResult();
+            return new ServiceResult(null, BaseErrorCode.ERROR, "查询载荷执行结果详情失败").asResult();
         }
     }
 
@@ -263,9 +275,9 @@ public class LoadController {
     public ServiceResult deleteLoadExecutionResultByPk(@RequestBody(required = false) JSONObject requestData) {
         Boolean deleteLoadExecutionResultByPk = LoadService.deleteLoadExecutionResultByPk(requestData);
         if (deleteLoadExecutionResultByPk) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "删除载荷执行结果失败").asResult();
+            return new ServiceResult(null, BaseErrorCode.ERROR, "删除载荷执行结果失败").asResult();
         }
     }
 
@@ -277,9 +289,9 @@ public class LoadController {
     public ServiceResult updateLoadExecutionResultByPk(@RequestBody(required = false) JSONObject requestData) {
         Boolean updateLoadExecutionResultByPk = LoadService.updateLoadExecutionResultByPk(requestData);
         if (updateLoadExecutionResultByPk) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "修改载荷执行结果失败").asResult();
+            return new ServiceResult(null, BaseErrorCode.ERROR, "修改载荷执行结果失败").asResult();
         }
     }
 
@@ -289,13 +301,13 @@ public class LoadController {
     @ApiOperation(value = "新增载荷执行结果", notes = "")
     @PostMapping("/addLoadExecutionResult")
     public ServiceResult addLoadExecutionResult(@RequestBody(required = false) JSONObject requestData) {
-        if(requestData != null){
+        if (requestData != null) {
             Boolean addLoadExecutionResult = LoadService.addLoadExecutionResult(requestData);
             if (addLoadExecutionResult) {
-                return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+                return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
             }
         }
-        return new ServiceResult<>(null, BaseErrorCode.ERROR, "新增载荷执行结果失败").asResult();
+        return new ServiceResult(null, BaseErrorCode.ERROR, "新增载荷执行结果失败").asResult();
     }
 
     /*
@@ -304,13 +316,13 @@ public class LoadController {
     @ApiOperation(value = "批量新增载荷执行结果", notes = "")
     @PostMapping("/addLoadExecutionOutResult")
     public ServiceResult addLoadExecutionOutResult(@RequestBody(required = false) List<JSONObject> requestData) {
-        if(requestData != null){
+        if (requestData != null) {
             Boolean addLoadExecutionOutResult = LoadService.addLoadExecutionOutResult(requestData);
             if (addLoadExecutionOutResult) {
-                return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+                return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
             }
         }
-        return new ServiceResult<>(null, BaseErrorCode.ERROR, "批量新增载荷执行结果失败").asResult();
+        return new ServiceResult(null, BaseErrorCode.ERROR, "批量新增载荷执行结果失败").asResult();
     }
 
     /*
@@ -321,9 +333,9 @@ public class LoadController {
     public ServiceResult importLoadExecutionResult(@RequestParam(value = "file") MultipartFile file) throws IOException {
         Boolean importLoadExecutionResult = LoadService.importLoadExecutionResult(file);
         if (importLoadExecutionResult) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "载荷执行结果导入失败").asResult();
+            return new ServiceResult(null, BaseErrorCode.ERROR, "载荷执行结果导入失败").asResult();
         }
     }
 
@@ -336,9 +348,9 @@ public class LoadController {
                                                    @RequestBody(required = false) JSONObject requestData) throws IOException {
         Boolean exportLoadExecutionResult = LoadService.exportLoadExecutionResult(request, response, requestData);
         if (exportLoadExecutionResult) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "载荷执行结果导出失败").asResult();
+            return new ServiceResult(null, BaseErrorCode.ERROR, "载荷执行结果导出失败").asResult();
         }
     }
 
@@ -353,11 +365,11 @@ public class LoadController {
             if (addType.equals("name") || addType.equals("loopholes") || addType.equals("tactics")) {
                 Boolean stageBindLoad = LoadService.stageBindLoad(addType, requestData);
                 if (stageBindLoad) {
-                    return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+                    return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
                 }
             }
         }
-        return new ServiceResult<>(null, BaseErrorCode.PARAMS_INVALID, "参数无效").asResult();
+        return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID, "参数无效").asResult();
     }
 
     /**
@@ -368,9 +380,9 @@ public class LoadController {
     public ServiceResult getToolByLoopholes(@RequestBody JSONObject requestData) {
         if (requestData != null) {
             List<MpDevopsLoad> getToolByLoopholes = LoadService.getToolByLoopholes(requestData);
-            return new ServiceResult<>(getToolByLoopholes, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            return new ServiceResult(getToolByLoopholes, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "根据靶标漏洞List获取载荷失败");
+            return new ServiceResult(null, BaseErrorCode.ERROR, "根据靶标漏洞List获取载荷失败");
         }
     }
 
@@ -384,27 +396,53 @@ public class LoadController {
         requestData.put("tactics", tactics);
         if (requestData != null) {
             List<MpDevopsLoad> getToolBytactics = LoadService.getToolBytactics(requestData);
-            return new ServiceResult<>(getToolBytactics, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            return new ServiceResult(getToolBytactics, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "根据关联技战术获取载荷失败");
+            return new ServiceResult(null, BaseErrorCode.ERROR, "根据关联技战术获取载荷失败");
         }
     }
 
     /**
-     * 阶段载荷执行(根据taskId获取访问链接)
+     * 阶段载荷接入(根据taskId获取访问链接)
+     */
+    @ApiOperation(value = "阶段载荷接入", notes = "")
+    @GetMapping("/getTaskNet")
+    public ServiceResult getTaskNet(@RequestParam(value = "taskId", required = false) String taskId,
+                                    @RequestParam(value = "instanceId", required = false) String instanceId) {
+        JSONObject requestData = new JSONObject();
+        requestData.put("taskId", taskId);
+        requestData.put("instanceId", instanceId);
+        if (requestData != null) {
+            Map<String, Object> getTaskNet = LoadService.getTaskNet(requestData);
+            if (getTaskNet != null) {
+                return new ServiceResult(getTaskNet, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            }
+        }
+        return new ServiceResult(null, BaseErrorCode.ERROR, "阶段载荷接入失败");
+    }
+
+    /**
+     * 阶段载荷执行
      */
     @ApiOperation(value = "阶段载荷执行", notes = "")
     @GetMapping("/startTool")
-    public ServiceResult startTool(@RequestParam(value = "taskId", required = false) String taskId) {
+    public ServiceResult startTool(@RequestParam(value = "taskId", required = false) String taskId,
+                                   @RequestParam(value = "sceneId", required = false) String sceneId,
+                                   @RequestParam(value = "loadId", required = false) String loadId) {
         JSONObject requestData = new JSONObject();
         requestData.put("taskId", taskId);
+        requestData.put("sceneId", sceneId);
+        requestData.put("loadId", loadId);
         if (requestData != null) {
-            Map<String, Object> startTool = LoadService.startTool(requestData);
+            JSONObject startTool = LoadService.startTool(requestData);
             if (startTool != null) {
-                return new ServiceResult<>(startTool, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+                return new ServiceResult(startTool, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+            } else {
+                return new ServiceResult(null, BaseErrorCode.ERROR, "阶段载荷执行失败");
             }
+        } else {
+            return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID, "参数缺失");
         }
-        return new ServiceResult<>(null, BaseErrorCode.ERROR, "阶段载荷开始执行失败");
     }
 
     /**
@@ -416,10 +454,10 @@ public class LoadController {
         if (requestData != null) {
             Boolean updateLoadParam = LoadService.updateLoadParam(requestData);
             if (updateLoadParam) {
-                return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+                return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
             }
         }
-        return new ServiceResult<>(null, BaseErrorCode.ERROR, "阶段载荷参数设置失败");
+        return new ServiceResult(null, BaseErrorCode.ERROR, "阶段载荷参数设置失败");
     }
 
     /**
@@ -431,10 +469,10 @@ public class LoadController {
         if (requestData != null) {
             Boolean deleteLoadBind = LoadService.deleteLoadBind(requestData);
             if (deleteLoadBind) {
-                return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+                return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
             }
         }
-        return new ServiceResult<>(null, BaseErrorCode.ERROR, "阶段载荷参数移除失败");
+        return new ServiceResult(null, BaseErrorCode.ERROR, "阶段载荷参数移除失败");
     }
 
     /*
@@ -444,7 +482,7 @@ public class LoadController {
     @GetMapping("/stageBindLoadList")
     public ServiceResult stageBindLoadList(@RequestParam(value = "sceneId", required = false) String sceneId) {
         List stageBindLoadList = LoadService.stageBindLoadList(sceneId);
-        return new ServiceResult<>(stageBindLoadList, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+        return new ServiceResult(stageBindLoadList, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
     /*
@@ -454,7 +492,7 @@ public class LoadController {
     @GetMapping("/getLoadResultBySceneId")
     public ServiceResult getLoadResultBySceneId(@RequestParam(value = "sceneId") String sceneId) {
         List<JSONObject> getLoadResultBySceneId = LoadService.getLoadResultBySceneId(sceneId);
-        return new ServiceResult<>(getLoadResultBySceneId, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+        return new ServiceResult(getLoadResultBySceneId, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
 }

@@ -51,9 +51,9 @@ public class MicrosoftAzureLoginController {
     public ServiceResult<MicrosoftAzureUserModel> addAzurer(@RequestBody(required = true) JSONObject requestData) {
         Boolean addAzurer = microsoftAzureLoginService.addAzurer(requestData);
         if(addAzurer){
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS);
+            return new ServiceResult<>(null, BaseErrorCode.SUCCESS,"新增成功");
         }else{
-            return new ServiceResult<>(null, BaseErrorCode.ERROR);
+            return new ServiceResult<>(null, BaseErrorCode.ERROR,"新增失败");
         }
     }
 
