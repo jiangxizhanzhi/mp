@@ -127,6 +127,10 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private DockerParams dockerParams;
 
     //    Azure虚拟机镜像属性
+    @ApiModelProperty(value = "虚拟机类型（linux/windows）")
+    private String vmType;
+    @ApiModelProperty(value = "虚拟机大小")
+    private String vmSizeType;
     @ApiModelProperty(value = "发布者信息")
     private String publisher;
     @ApiModelProperty(value = "产品报价")

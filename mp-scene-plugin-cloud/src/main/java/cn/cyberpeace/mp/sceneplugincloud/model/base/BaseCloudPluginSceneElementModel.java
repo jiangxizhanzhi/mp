@@ -132,6 +132,10 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
 
     //    Azure虚拟机镜像属性
     @DefaultStr
+    private String vmType;
+    @DefaultStr
+    private String vmSizeType;
+    @DefaultStr
     private String publisher;
     @DefaultStr
     private String offer;

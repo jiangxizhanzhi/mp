@@ -38,7 +38,6 @@ public class Load {
                 cloudElement.getLoadTaskDescribe(),
                 cloudElement.getLoadToolId(),
                 cloudElement.getLoadExecCommand());
-
 //            回写id
         cloudElement.setResourceId(data.get("id").toString());
         cloudElement.setLoadResourceInstanceId(data.get("instanceId").toString());

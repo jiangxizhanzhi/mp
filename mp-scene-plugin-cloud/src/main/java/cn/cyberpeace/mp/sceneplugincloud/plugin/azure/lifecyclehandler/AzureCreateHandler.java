@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class AzureCreateHandler extends CreateHandler {
@@ -49,7 +50,22 @@ public class AzureCreateHandler extends CreateHandler {
         // 先创建辅助网络
         List<CloudPluginSceneElementBO> filteredAuxiliaryNetworkElements = this.filterAuxiliaryNetworkElements(allElements);
         List<Runnable> createAuxiliaryNetworkTasks = new ArrayList<>();
-        for (CloudPluginSceneElementBO element : filteredAuxiliaryNetworkElements) {
+        List<String> cidrList = filteredAuxiliaryNetworkElements.stream()
+                .flatMap(cloudElement -> cloudElement.getDeriveNetworks().stream())
+                .map(cloudElement -> cloudElement.getNetwork().getCidr())
+                .collect(Collectors.toList());
+
+        String nodeIdd = filteredAuxiliaryNetworkElements.get(0).getSrcElement().getId();
+        // 封装创建网络的任务
+        AzureVirtualNetCreateTask taskk = new AzureVirtualNetCreateTask(resourceService, getPluginHandler(), filteredAuxiliaryNetworkElements.get(0), cidrList);
+        // 格式化任务执行过程，添加 runElementProgress
+        Runnable formatTaskk = this.formatElementTask(nodeIdd, stepPercentage, CreateHandler.ElementProcess.CREATE_AUXILIARY_NETWORK, taskk);
+        // 添加格式化后的任务到列表
+        createAuxiliaryNetworkTasks.add(formatTaskk);
+
+        /*for (CloudPluginSceneElementBO element : filteredAuxiliaryNetworkElements) {
+//            筛选出所有cidr
+
             String nodeId = element.getSrcElement().getId();
             // 封装创建网络的任务
             AzureVirtualNetCreateTask task = new AzureVirtualNetCreateTask(resourceService, getPluginHandler(), element);
@@ -57,11 +73,17 @@ public class AzureCreateHandler extends CreateHandler {
             Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_AUXILIARY_NETWORK, task);
             // 添加格式化后的任务到列表
             createAuxiliaryNetworkTasks.add(formatTask);
-        }
+        }*/
         if (!createAuxiliaryNetworkTasks.isEmpty()) {
             // 执行 创建所有网络
             runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> runTasks(createAuxiliaryNetworkTasks));
         }
+//        保存网络id
+        String azureNetworkId = filteredAuxiliaryNetworkElements.get(0).getDeriveNetworks().get(0).getNetwork().getResourceId();
+        filteredAuxiliaryNetworkElements.stream()
+                .flatMap(cloudElement -> cloudElement.getDeriveNetworks().stream())
+                .forEach(cloudElement -> cloudElement.getNetwork().setResourceId(azureNetworkId));
+
 
         // 再创建终端 终端分虚拟机、容器、和web服务
         List<Runnable> createTerminalTasks = new ArrayList<>();

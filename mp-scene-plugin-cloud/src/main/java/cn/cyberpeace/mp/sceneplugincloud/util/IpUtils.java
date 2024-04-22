@@ -20,8 +20,9 @@ public class IpUtils {
 
     /**
      * 随机网段 0/24
-     * @param allCidrs cidr池
-     * @param count 随机数量
+     *
+     * @param allCidrs     cidr池
+     * @param count        随机数量
      * @param excludeCidrs 排除的网段
      * @return 随机网段列表
      */
@@ -39,11 +40,12 @@ public class IpUtils {
 
     /**
      * 随机ip
-     * @param cidr 网段
-     * @param count 随机数量
-     * @param excludeIps 排除的ip
+     *
+     * @param cidr            网段
+     * @param count           随机数量
+     * @param excludeIps      排除的ip
      * @param allocationPools 地址池
-     * @param abandonDhcp 是否去除dhcp地址
+     * @param abandonDhcp     是否去除dhcp地址
      * @return 随机ip列表
      */
     public static List<String> newRandomIps(String cidr, int count, List<String> excludeIps,
@@ -181,9 +183,10 @@ public class IpUtils {
 
     /**
      * 分配默认路由ip，默认路由ip有特殊限制，必须在地址池外
-     * @param cidr 网段
-     * @param count 随机数量
-     * @param excludeIps 排除的ip
+     *
+     * @param cidr            网段
+     * @param count           随机数量
+     * @param excludeIps      排除的ip
      * @param allocationPools 地址池
      * @return 随机ip列表
      */
@@ -231,6 +234,7 @@ public class IpUtils {
 
     /**
      * 获取cidr段可用ip列表
+     *
      * @param cidr cidr
      * @return ip列表
      */
@@ -249,6 +253,7 @@ public class IpUtils {
 
     /**
      * 获取cidr段ip列表
+     *
      * @param cidr cidr
      * @return ip列表
      */
@@ -258,8 +263,9 @@ public class IpUtils {
 
     /**
      * 获取范围可用ip列表
+     *
      * @param ipFrom 开始ip
-     * @param ipTo 结束ip
+     * @param ipTo   结束ip
      * @return ip列表
      */
     public static List<String> getRangeIps(String ipFrom, String ipTo) {
@@ -268,6 +274,7 @@ public class IpUtils {
 
     /**
      * 获取地址池ips列表
+     *
      * @param allocationPools 地址池
      * @return ips列表
      */
@@ -291,6 +298,7 @@ public class IpUtils {
 
     /**
      * 获取ip地址的下一个地址
+     *
      * @param ip ip地址
      * @return 下一个ip地址
      */
@@ -308,7 +316,8 @@ public class IpUtils {
 
     /**
      * 判断ip是否在cidr内
-     * @param ip ip地址
+     *
+     * @param ip   ip地址
      * @param cidr cidr
      * @return ip是否在cidr内
      */
@@ -347,6 +356,7 @@ public class IpUtils {
 
     /**
      * 获取cidr段最后一个ip地址
+     *
      * @param cidr cidr
      * @return 最后一个ip地址
      */
@@ -357,6 +367,7 @@ public class IpUtils {
 
     /**
      * 获取ip地址的上一个地址
+     *
      * @param ip ip地址
      * @return 上一个ip地址
      */
@@ -374,6 +385,7 @@ public class IpUtils {
 
     /**
      * 获取cidr段第一个ip地址
+     *
      * @param cidr cidr
      * @return 第一个ip地址
      */
@@ -384,8 +396,9 @@ public class IpUtils {
 
     /**
      * 获取地址段内随机ip
+     *
      * @param begin 第一个ip地址long
-     * @param size 地址段大小
+     * @param size  地址段大小
      * @return 随机ip地址
      */
     private static String randomIp(long begin, long size) {
@@ -394,7 +407,6 @@ public class IpUtils {
     }
 
     /**
-     *
      * @param size 地址池大小
      * @return 随机地址池序号
      */
@@ -404,6 +416,7 @@ public class IpUtils {
 
     /**
      * 获取地址池Ip总数
+     *
      * @param allocationPools 地址池集合
      * @return 地址池Ip总数
      */
@@ -430,10 +443,9 @@ public class IpUtils {
     }
 
     /**
-     *
-     * @param begin 开始ip long
-     * @param last 结束ip long
-     * @param excludeIps 排除的ip集合
+     * @param begin           开始ip long
+     * @param last            结束ip long
+     * @param excludeIps      排除的ip集合
      * @param allocationPools ip地址池
      * @return 默认路由可分配ip大小
      */
@@ -462,10 +474,9 @@ public class IpUtils {
     }
 
     /**
-     *
      * @param allocationPools 地址池集合
-     * @param begin cidr开始ip long
-     * @param last cidr结束ip long
+     * @param begin           cidr开始ip long
+     * @param last            cidr结束ip long
      * @return 地址池与cidr交集大小
      */
     private static int getAvailableAllocationPoolIpSize(List<AllocationPool> allocationPools, long begin, long last) {
@@ -485,10 +496,9 @@ public class IpUtils {
     }
 
     /**
-     *
      * @param allocationPools 地址池集合
-     * @param begin cidr开始ip long
-     * @param last cidr结束ip long
+     * @param begin           cidr开始ip long
+     * @param last            cidr结束ip long
      * @return 与cidr有交集的地址池集合
      */
     private static List<AllocationPool> getAvailableAllocationPool(List<AllocationPool> allocationPools, long begin, long last) {
@@ -506,9 +516,8 @@ public class IpUtils {
     }
 
     /**
-     *
      * @param allocationPools 地址池
-     * @param ip ip地址
+     * @param ip              ip地址
      * @return ip是否在地址池内
      */
     private static boolean isInPools(List<AllocationPool> allocationPools, String ip) {
@@ -525,10 +534,9 @@ public class IpUtils {
     }
 
     /**
-     *
-     * @param ip 需要判断的地址 long
+     * @param ip    需要判断的地址 long
      * @param start 地址段起始ip long
-     * @param end 地址段结束ip long
+     * @param end   地址段结束ip long
      * @return ip是否在地址段内
      */
     private static boolean isInRange(long ip, long start, long end) {
@@ -540,6 +548,7 @@ public class IpUtils {
     /**
      * 通过掩码位数格式化ip地址
      * 192.168.10.254/24 -> 192.168.10.0/24
+     *
      * @param cidrIp
      * @return
      */
@@ -561,6 +570,23 @@ public class IpUtils {
             String[] info = cidrIp.split("/");
             String maskBit = info[1];
             return netIp + "/" + maskBit;
+        }
+    }
+
+    /**
+     * 提取ip地址/cidr中的网络部分
+     *
+     * @param ipAddress IP地址
+     * @return 网络部分
+     */
+    public static String extractNetworkPart(String ipAddress) {
+        String[] parts = ipAddress.split("\\.");
+        if (parts.length == 4) {
+            return String.join(".", parts[0], parts[1], parts[2]);
+        } else if (parts.length > 4 && parts[4].contains("/")) {
+            return String.join(".", parts[0], parts[1], parts[2]);
+        } else {
+            throw new IllegalArgumentException("Invalid IP address format");
         }
     }
 }

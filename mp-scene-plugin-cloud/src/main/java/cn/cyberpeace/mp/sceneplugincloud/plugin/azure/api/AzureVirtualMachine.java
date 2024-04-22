@@ -1,16 +1,19 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api;
 
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.models.*;
 import com.azure.resourcemanager.network.models.Network;
 import com.azure.resourcemanager.network.models.NetworkInterface;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -50,7 +53,7 @@ public class AzureVirtualMachine {
         String groupName = pluginHandler.getSourceSceneId();
 
         // azure todo 调用微软云api 查询或者创建一个 flavor
-        VirtualMachineSizeTypes flavor = VirtualMachineSizeTypes.STANDARD_B1S;
+        VirtualMachineSizeTypes flavor = StringUtils.isNotBlank(cloudElement.getVmSizeType()) ? VirtualMachineSizeTypes.fromString(cloudElement.getVmSizeType()) : VirtualMachineSizeTypes.STANDARD_B1S;
 
         // 调用微软云api 创建虚拟机 回写虚拟机id
         // 虚拟机镜像、名称等信息
@@ -63,19 +66,32 @@ public class AzureVirtualMachine {
         // 取第一块网卡
         // azure todo 调整 root name
         VirtualNic virtualNic = virtualNics.get(0);
+//        设置登录信息
+        String userNmae = null;
+        String password = null;
+        for (VirtualNic.AccessMode accessMode : virtualNic.getAccessModes()) {
+            if (StringUtils.isNotBlank(accessMode.getUsername()) && StringUtils.isNotBlank(accessMode.getPassword())) {
+                userNmae = accessMode.getUsername();
+                password = accessMode.getPassword();
+            }
+        }
+        String netId = virtualNics.stream()
+                .filter(v -> StringUtils.isNotBlank(v.getNetworkId()))
+                .map(v -> v.getNetworkId()).findFirst()
+                .get();
         VirtualMachine.DefinitionStages.WithCreate creater;
-        if (cloudElement.getPublisher().toLowerCase().contains("microsoft") || cloudElement.getPublisher().toLowerCase().contains("windows")) {
+        if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudElement.getVmType())) {
             creater = resourceService.getManager().virtualMachines()
                     .define(vmName)
                     .withRegion(region)
                     .withNewResourceGroup(groupName)
-                    .withExistingPrimaryNetwork(azureResourceManager.networks().getById(virtualNic.getNetworkId()))
-                    .withSubnet("sub")
+                    .withExistingPrimaryNetwork(azureResourceManager.networks().getById(netId))
+                    .withSubnet(IpUtils.extractNetworkPart(virtualNic.getFixedIp()))
                     .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp())
                     .withoutPrimaryPublicIPAddress()
                     .withLatestWindowsImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
-                    .withAdminUsername("azureuser")
-                    .withAdminPassword("Azure12345678")
+                    .withAdminUsername(StringUtils.isBlank(userNmae) ? "azureuser" : userNmae)
+                    .withAdminPassword(StringUtils.isBlank(password) ? "Azure12345678" : password)
                     .withUnmanagedDisks()
                     .defineUnmanagedDataDisk("disk-1")
                     .withNewVhd(cloudElement.getSrcElement().getDisk())
@@ -88,13 +104,13 @@ public class AzureVirtualMachine {
                     .define(vmName)
                     .withRegion(region)
                     .withNewResourceGroup(groupName)
-                    .withExistingPrimaryNetwork(azureResourceManager.networks().getById(virtualNic.getNetworkId()))
-                    .withSubnet("sub")
+                    .withExistingPrimaryNetwork(azureResourceManager.networks().getById(netId))
+                    .withSubnet(IpUtils.extractNetworkPart(virtualNic.getFixedIp()))
                     .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp())
                     .withoutPrimaryPublicIPAddress()
                     .withLatestLinuxImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
-                    .withRootUsername("root1")
-                    .withRootPassword("ycxx123#") // 必须要是6位以上,且有一个特殊字符
+                    .withRootUsername(StringUtils.isBlank(userNmae) ? "root1" : userNmae)
+                    .withRootPassword(StringUtils.isBlank(password) ? "ycxx123#" : password) // 必须要是6位以上,且有一个特殊字符
                     .withUnmanagedDisks()
                     .defineUnmanagedDataDisk("disk-1")
                     .withNewVhd(cloudElement.getSrcElement().getDisk())
@@ -103,17 +119,17 @@ public class AzureVirtualMachine {
                     .withSize(flavor);
         }
 
+
         // 加其他网卡
         for (int i = 1; i < virtualNics.size(); i++) {
             VirtualNic nic = virtualNics.get(i);
-            String netId = virtualNics.get(i).getNetworkId();
             Network azureNetwork = azureResourceManager.networks().getById(netId);
             NetworkInterface ni = azureResourceManager.networkInterfaces()
-                    .define("nic" + i)
+                    .define("nic" + nic.getFixedIp())
                     .withRegion(region)
                     .withNewResourceGroup(groupName)
                     .withExistingPrimaryNetwork(azureNetwork)
-                    .withSubnet("sub")
+                    .withSubnet(IpUtils.extractNetworkPart(nic.getFixedIp()))
                     .withPrimaryPrivateIPAddressStatic(nic.getFixedIp())
                     .create();
             creater.withExistingSecondaryNetworkInterface(ni);
