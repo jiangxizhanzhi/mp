@@ -50,7 +50,6 @@ import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImagesRebootInstanceRequest;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
-import cn.cyberpeace.mp.devopscluster.utils.MyCompare;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.devopscluster.vo.ImageVO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
@@ -177,21 +176,6 @@ public class ImagesConverter implements BaseConverter {
             }
         }
 
-        String orders = dto.getOrders();
-        Boolean isReverse = false;
-        if(orders.contains("-")){
-            orders = orders.replace("-","");
-            isReverse = true;
-        }
-        modelList = modelList.stream().sorted(new MyCompare<>(orders, isReverse)).collect(Collectors.toList());
-        int size = modelList.size();
-        Integer page = dto.getOffset();
-        Integer rows = dto.getLimit();
-        int pageStart = page == 1 ? 0 : (page - 1) * rows;//截取的开始位置
-        int pageEnd = Math.min(size, page * rows);//截取的结束位置
-        if(size>pageStart){
-            modelList =modelList.subList(pageStart, pageEnd);
-        }
         imageConvertPageModel.setList(modelList);
         return imageConvertPageModel;
     }

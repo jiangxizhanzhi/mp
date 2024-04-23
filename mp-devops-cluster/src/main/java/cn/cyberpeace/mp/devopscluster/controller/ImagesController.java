@@ -35,7 +35,9 @@ import cn.cyberpeace.mp.devopscluster.service.upload.ISOUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.InjectFileUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.SshPrivateKeyUploadService;
 import cn.cyberpeace.mp.devopscluster.task.CleanJob;
+import cn.cyberpeace.mp.devopscluster.utils.MyCompare;
 import cn.cyberpeace.mp.devopscluster.utils.URLUtils;
+import cn.cyberpeace.mp.devopscluster.utils.VmCompare;
 import cn.cyberpeace.mp.devopscluster.vo.*;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
@@ -63,12 +65,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -135,10 +132,40 @@ public class ImagesController {
     @ApiOperation("分页查询")
     @GetMapping("/page")
     public PageResult<ImagesPageVO> page(ImagePageRequest request) {
-        BasePageBO<ImageConvertModel> model = imagesConverter.page(new ImagePageDTO(request));
-        List<ImagesPageVO> list = convertBOToPageVO(model);
+        String orders = request.getOrders();
+        ImagePageDTO dto = new ImagePageDTO(request);
+        if("disk".equals(dto.getOrders()) || "-disk".equals(dto.getOrders())){
+            dto.setOrders(null);
+        }
+        BasePageBO<ImageConvertModel> model = imagesConverter.page(dto);
+        List<ImagesPageVO> modelList = convertBOToPageVO(model);
+        if("disk".equals(orders) || "-disk".equals(orders)){
+            VmCompare vmCompare = new VmCompare();
+            List<ImagesPageVO> noDisks = modelList.stream().filter(imagesPageVO -> imagesPageVO.getImageType().equals("dynamips") || null == imagesPageVO.getExtVm()).collect(Collectors.toList());
+            modelList = modelList.stream().filter(pageVO -> !noDisks.contains(pageVO)).collect(Collectors.toList());
+            modelList.sort(vmCompare);
+            if("-disk".equals(orders)){
+                Collections.reverse(modelList);
+            }
+            modelList.addAll(noDisks);
+        } else {
+            boolean isReverse = false;
+            if(orders.contains("-")){
+                orders = orders.replace("-","");
+                isReverse = true;
+            }
+            modelList = modelList.stream().sorted(new MyCompare<>(orders, isReverse)).collect(Collectors.toList());
+        }
+        int size = modelList.size();
+        Integer page = dto.getOffset();
+        Integer rows = dto.getLimit();
+        int pageStart = page;//截取的开始位置
+        int pageEnd = Math.min(size, page + rows);//截取的结束位置
+        if(size>pageStart){
+            modelList =modelList.subList(pageStart, pageEnd);
+        }
 
-        return new PageResult<>(list, model.getTotal());
+        return new PageResult<>(modelList, model.getTotal());
     }
 
     /**
