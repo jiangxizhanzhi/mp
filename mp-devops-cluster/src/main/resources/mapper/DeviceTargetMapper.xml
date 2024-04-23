@@ -300,9 +300,6 @@
         <if test="orders == null or orders == ''">
             ORDER BY i.create_time desc,i.pk desc
         </if>
-        <if test="offset != null and limit != null">
-            limit #{offset}, #{limit}
-        </if>
     </select>
 
     <select id="findByUuid" parameterType="java.lang.String" resultMap="BaseResultMap">
