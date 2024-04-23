@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
+import cn.cyberpeace.mp.cscene.util.HardwareLimitUtils;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -148,6 +149,10 @@ public class BcSceneConfigHandler extends BaseCsceneHandler<
         if (!updateResult.isSuccess()) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT.format(String.valueOf(updateResult.getLimitNode()),
                     String.valueOf(updateResult.getExistNode()), String.valueOf(updateResult.getCurrentNode())));
+        }
+        HardwareLimitUtils.UpdateResult hardwareResult = HardwareLimitUtils.addHardware(instanceHandler.getCscene());
+        if (!hardwareResult.isSuccess()) {
+            throw new MpRuntimeException(hardwareResult.getMessage());
         }
         instanceHandler.create();
         CsceneInstanceBO result = instanceHandler.toData();

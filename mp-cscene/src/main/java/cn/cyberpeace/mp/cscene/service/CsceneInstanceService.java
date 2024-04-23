@@ -56,6 +56,7 @@ import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
+import cn.cyberpeace.mp.cscene.util.HardwareLimitUtils;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
@@ -685,6 +686,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 SceneHostStateReportScheduleService.removeCsceneInstance(id);
                 BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(id, context);
                 NodeLimitUtils.substractLimitedNodeCount(instanceHandler);
+                HardwareLimitUtils.substractHardware(instanceHandler.getCscene());
                 String sceneId = this.getSceneId(id);
                 boolean flag = instanceHandler.delete(logic);
                 if (sceneId != null) {

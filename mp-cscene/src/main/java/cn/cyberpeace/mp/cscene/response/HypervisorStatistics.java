@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devopscluster.model.common;
+package cn.cyberpeace.mp.cscene.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
