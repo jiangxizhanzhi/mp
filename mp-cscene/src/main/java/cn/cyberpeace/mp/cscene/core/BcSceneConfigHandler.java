@@ -145,7 +145,7 @@ public class BcSceneConfigHandler extends BaseCsceneHandler<
         this.checkVlanIds(getCscene());
         BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(csceneInstance, getContext());
         // 节点数量增加失败 说明已到达数量上限
-        NodeLimitUtils.UpdateResult updateResult = NodeLimitUtils.addLimitedNodeCount(instanceHandler);
+        NodeLimitUtils.UpdateResult updateResult = NodeLimitUtils.addLimitedNodeCount(instanceHandler.getCscene());
         if (!updateResult.isSuccess()) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT.format(String.valueOf(updateResult.getLimitNode()),
                     String.valueOf(updateResult.getExistNode()), String.valueOf(updateResult.getCurrentNode())));
