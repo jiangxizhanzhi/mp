@@ -87,16 +87,17 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
         Map<String, Map<String, Object>> pluginElements = this.sceneConfig.getPlugins().get("cpcloud").getElements();
         for (BaseSceneElementBO e : this.sceneConfig.getTopology().getElements()) {
             var node = pluginElements.get(e.getId());
-            int nodeCpu = e.getCpu() == null?0:e.getCpu();
-            int nodeDisk = e.getDisk() == null?0:e.getDisk();
-            int nodeRam = e.getRam() == null?0:e.getRam();
-            if(BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(node.get("image_type"))){
+            int nodeCpu = e.getCpu() == null ? 0 : e.getCpu();
+            int nodeDisk = e.getDisk() == null ? 0 : e.getDisk();
+            int nodeRam = e.getRam() == null ? 0 : e.getRam();
+            if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(node.get("image_type"))) {
                 nodeCpu = 1;
                 nodeRam = 512;
+                disk = 10;
             }
-            cpu+=nodeCpu;
-            disk+=nodeDisk;
-            ram+=nodeRam;
+            cpu += nodeCpu;
+            disk += nodeDisk;
+            ram += nodeRam;
         }
         this.setTotalCpu(cpu);
         this.setTotalRam(ram);
