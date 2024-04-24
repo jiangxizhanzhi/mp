@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.cscene.bo;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
+import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
@@ -91,9 +93,10 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
             int nodeDisk = e.getDisk() == null ? 0 : e.getDisk();
             int nodeRam = e.getRam() == null ? 0 : e.getRam();
             if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(node.get("image_type"))) {
-                nodeCpu = 1;
-                nodeRam = 512;
-                disk = 10;
+                CsceneAppConfig config = BeanCommon.getBean(CsceneAppConfig.class);
+                nodeCpu = config.getDefaultContainerCpuCount();
+                nodeRam = config.getDefaultContainerRamCount();
+                disk = config.getDefaultContainerDiskCount();
             }
             cpu += nodeCpu;
             disk += nodeDisk;

@@ -82,6 +82,16 @@ public class CsceneAppConfig {
     @Value("${mp.cscene.enable_node_limit_db_check:true}")
     private Boolean enableNodeLimitDbCheck;
 
+    @Value("${mp.cscene.default-container-cpu-count:1}")
+    private int defaultContainerCpuCount;
+
+    @Value("${mp.cscene.default-container-ram-count:512}")
+    private int defaultContainerRamCount;
+
+    @Value("${mp.cscene.default-container-disk-count:10}")
+    private int defaultContainerDiskCount;
+
+
     @Autowired
     private MessageSource messageSource;
 

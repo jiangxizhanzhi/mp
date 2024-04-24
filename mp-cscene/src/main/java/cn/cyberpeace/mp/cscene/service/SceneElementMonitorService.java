@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -12,6 +13,7 @@ import cn.cyberpeace.mp.base.util.mptool.CollUtil;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.base.util.mptool.NumberUtil;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.element.ElementHistogramInfo;
@@ -391,17 +393,18 @@ public class SceneElementMonitorService {
         }
         if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(elementMonitorBasicInfo.getImageType())) {
             //容器默认 1CPU 512MB内存 10GB硬盘
-            elementMonitorBasicInfo.getHostState().setCpuCount(1);
+            CsceneAppConfig config = BeanCommon.getBean(CsceneAppConfig.class);
+            elementMonitorBasicInfo.getHostState().setCpuCount(config.getDefaultContainerCpuCount());
             if (sceneElementBO.getRam() > 0) {
                 elementMonitorBasicInfo.getHostState().setMemoryTotal(sceneElementBO.getRam().longValue());
             } else {
-                elementMonitorBasicInfo.getHostState().setMemoryTotal(512L);
+                elementMonitorBasicInfo.getHostState().setMemoryTotal((long) config.getDefaultContainerRamCount());
             }
 
             if (sceneElementBO.getDisk() > 0) {
                 elementMonitorBasicInfo.getHostState().setDiskSpace(sceneElementBO.getDisk().longValue());
             } else {
-                elementMonitorBasicInfo.getHostState().setDiskSpace(10L);
+                elementMonitorBasicInfo.getHostState().setDiskSpace((long) config.getDefaultContainerDiskCount());
             }
         } else {
             elementMonitorBasicInfo.getHostState().setCpuCount(sceneElementBO.getCpu());

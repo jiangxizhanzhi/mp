@@ -273,6 +273,9 @@ mp:
     enable-command-change: ${mp.cscene.ext-var.enable-command-change}
     cron-job-expression: ${mp.cscene.ext-var.cron-job-expression}
     enable-node-limit-db-check: ${mp.cscene.ext-var.enable-node-limit-db-check}
+    default-container-cpu-count: ${mp.cscene.ext-var.default-container-cpu-count}
+    default-container-ram-count: ${mp.cscene.ext-var.default-container-ram-count}
+    default-container-disk-count: ${mp.cscene.ext-var.default-container-disk-count}
     cp-ip: ${mp.common.ext-var.cp-ip}
     cp-port: ${mp.common.ext-var.cp-port}
   scene:
