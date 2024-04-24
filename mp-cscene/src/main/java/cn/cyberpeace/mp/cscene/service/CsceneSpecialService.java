@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.CsceneInstanceInfo;
@@ -183,6 +184,15 @@ public class CsceneSpecialService {
             }
         }
 
+        // 单独统计下各个场景里面容器的cpu、内存、磁盘
+        var config = BeanCommon.getBean(CsceneAppConfig.class);
+        var list = csceneMapper.listContainerHardware(ids, config.getDefaultContainerCpuCount(), config.getDefaultContainerRamCount(), config.getDefaultContainerDiskCount());
+        for (var se : list) {
+            CsceneStat stat = statMap.get(se.getScene());
+            stat.setTotalCpu(stat.getTotalCpu() + se.getCpu());
+            stat.setTotalRam(stat.getTotalRam() + se.getRam());
+            stat.setTotalDisk(stat.getTotalDisk() + se.getDisk());
+        }
 
         HumanCondition virtualStatCondition = new HumanCondition()
                 .link(CsceneModel.class, CloudPluginSceneConfigElementModel.class)

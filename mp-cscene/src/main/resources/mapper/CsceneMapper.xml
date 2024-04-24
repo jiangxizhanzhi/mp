@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.cscene.repository.CsceneMapper">
+    <select id="listContainerHardware" parameterType="java.util.Map"
+            resultType="cn.cyberpeace.mp.scene.model.SceneConfigElementModel">
+        SELECT
+        c.id as scene,
+        SUM(CASE WHEN a.cpu = 0 THEN 1 ELSE 0 END) AS cpu,
+        SUM(CASE WHEN a.ram = 0 THEN 512 ELSE 0 END) AS ram,
+        SUM(CASE WHEN a.disk = 0 THEN 10 ELSE 0 END) AS disk
+        FROM
+        mp_scene_scene_config_element a,
+        mp_sceneplugincloud_scene_config_element b ,
+        mp_cscene_cscene c
+        where c.id in
+        <foreach collection="ids" separator="," open="(" close=")" item="item">
+            #{item}
+        </foreach>
+          and a.scene = c.scene_config
+          and b.scene = c.scene_config
+          and a.node_id = b.scene_element
+          and b.image_type = 'container';</select>
+</mapper>
