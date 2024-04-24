@@ -685,7 +685,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 // 移除定时任务
                 SceneHostStateReportScheduleService.removeCsceneInstance(id);
                 BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(id, context);
-                NodeLimitUtils.substractLimitedNodeCount(instanceHandler);
+                NodeLimitUtils.substractLimitedNodeCount(instanceHandler.getCscene());
                 HardwareLimitUtils.substractHardware(instanceHandler.getCscene());
                 String sceneId = this.getSceneId(id);
                 boolean flag = instanceHandler.delete(logic);
