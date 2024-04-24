@@ -43,6 +43,9 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     private Integer resourceOccupiedNums;
     @ApiModelProperty(value = "更新时间")
     private LocalDateTime updateTime;
+    private Integer TotalCpu ;
+    private Integer TotalRam ;
+    private Integer TotalDisk ;
 
     @Override
     public CsceneModel createModel() {
@@ -73,7 +76,26 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
         if (sceneConfig != null) {
             csceneBO.setSceneConfig(sceneConfig.export());
         }
+        csceneBO.calHardware();
         return this;
+    }
+
+    public void calHardware(){
+        int cpu = 0 ,ram = 0 ,disk = 0 ;
+        for (BaseSceneElementBO e : this.sceneConfig.getTopology().getElements()) {
+            if (e.getCpu() != null) {
+                cpu += e.getCpu();
+            }
+            if(e.getRam() != null){
+                ram += e.getRam();
+            }
+            if(e.getDisk() != null){
+                disk += e.getDisk();
+            }
+        }
+        this.setTotalCpu(cpu);
+        this.setTotalRam(ram);
+        this.setTotalDisk(disk);
     }
 
     public CsceneInstanceBO exportToCsceneInstance() {
@@ -85,33 +107,4 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
         return csceneInstance;
     }
 
-    public int getTotalCpu(){
-        int cpu = 0 ;
-        for (BaseSceneElementBO e : this.sceneConfig.getTopology().getElements()) {
-            if (e.getCpu() != null) {
-                cpu += e.getCpu();
-            }
-        }
-        return cpu;
-    }
-
-    public int getTotalDisk(){
-        int disk = 0 ;
-        for (BaseSceneElementBO e : this.sceneConfig.getTopology().getElements()) {
-            if (e.getDisk() != null) {
-                disk += e.getDisk();
-            }
-        }
-        return disk;
-    }
-
-    public int getTotalRam(){
-        int ram = 0 ;
-        for (BaseSceneElementBO e : this.sceneConfig.getTopology().getElements()) {
-            if (e.getRam() != null) {
-                ram += e.getRam();
-            }
-        }
-        return ram;
-    }
 }
