@@ -573,6 +573,8 @@ public class CsceneDataModifier {
         handlerNodeCommand(csceneBO.getSceneConfig());
         correctVlanId(csceneBO);
         csceneBO.setEnableRecording(getOutputEnableRecording(csceneBO.getSceneConfig()));
+        csceneBO.calHardware();
+        csceneBO.setResourceOccupiedNums(NodeLimitUtils.calLimitedNodesNum(csceneBO));
     }
 
     public static void correctVlanId(CsceneBO csceneBO) {

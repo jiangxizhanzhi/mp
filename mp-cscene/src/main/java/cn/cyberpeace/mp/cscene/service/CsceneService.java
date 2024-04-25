@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.core.BcSceneConfigHandler;
@@ -378,10 +379,26 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     public ServiceResult<CsceneBO> getById(String id, boolean withInstance, CsceneContextBO context) {
-        BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(id, context);
-        CsceneBO cscene = bcSceneConfigHandler.toData(withInstance);
-        cscene.setResourceOccupiedNums(NodeLimitUtils.calLimitedNodesNum(cscene));
-        return new ServiceResult<>(cscene);
+        CsceneModel csceneModel = this.getModelMapper().get(id);
+        if (csceneModel == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(csceneModel.getSceneConfig(), null, null);
+        SceneConfigDataBO sceneConfigData = sceneConfigHandler.toData();
+        CsceneBO csceneBO = new CsceneBO();
+        csceneBO.fromModel(csceneModel);
+        csceneBO.setSceneConfig(sceneConfigData);
+        csceneBO.setRoles(new ArrayList<>());
+        List<CsceneRoleModel> roleModels = this.csceneRoleMapper.list(new HumanCondition().filterEqual(CsceneRoleModel::getCscene, id));
+        if (roleModels != null) {
+            for (CsceneRoleModel roleModel : roleModels) {
+                CsceneRoleBO roleBO = new CsceneRoleBO();
+                roleBO.fromModel(roleModel);
+                csceneBO.getRoles().add(roleBO);
+            }
+        }
+        CsceneDataModifier.correctReturnCsceneData(csceneBO);
+        return new ServiceResult<>(csceneBO);
     }
 
     public ServiceResult<CsceneBO> export(String id, CsceneContextBO context) {
