@@ -11,9 +11,9 @@
                SUM(x.disk) as disk
         from (select a.id                                                                   as cscene_id,
                      b.node_id                                                              as node_id,
-                     CASE WHEN b.cpu = 0 and c.image_type = 'container' THEN #{cpu} ELSE 0 END   as cpu,
-                     CASE WHEN b.ram = 0 and c.image_type = 'container' THEN #{ram} ELSE 0 END as ram,
-                     CASE WHEN b.disk = 0 and c.image_type = 'container' THEN #{disk} ELSE 0 END as disk,
+                     CASE WHEN b.cpu = 0 and c.image_type = 'container' THEN #{cpu} ELSE b.cpu END   as cpu,
+                     CASE WHEN b.ram = 0 and c.image_type = 'container' THEN #{ram} ELSE b.ram END as ram,
+                     CASE WHEN b.disk = 0 and c.image_type = 'container' THEN #{disk} ELSE b.disk END as disk,
                      b.type                                                                 as type,
                      c.image_type                                                           as image_type
               from mp_cscene_cscene a,
