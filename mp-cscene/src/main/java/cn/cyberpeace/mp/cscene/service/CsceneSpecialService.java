@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.CsceneInstanceInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
+import cn.cyberpeace.mp.cscene.model.CsceneElementStat;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountActivitySceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
@@ -71,7 +72,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -106,16 +106,6 @@ public class CsceneSpecialService {
     }
 
     @Data
-    public static class CsceneElementStat {
-        private String csceneId;
-        private Integer elementType;
-        private Integer elementTypeCount;
-        private Integer cpu;
-        private Integer disk;
-        private Integer ram;
-    }
-
-    @Data
     public static class CsceneTestInstanceStat {
         private String csceneId;
         private Integer testInstanceCount;
@@ -143,22 +133,8 @@ public class CsceneSpecialService {
             statMap.put(id, csceneStat);
         }
 
-        HumanCondition elementStatCondition = new HumanCondition()
-                .link(CsceneModel.class, SceneConfigElementModel.class)
-                .filterLink(CsceneModel.class, CsceneModel::getSceneConfig,
-                        SceneConfigElementModel.class, SceneConfigElementModel::getScene)
-                .currentLink(CsceneModel.class)
-                .filterIn(CsceneModel::getId, ids)
-                .groupBy(CsceneModel::getId)
-                .selectAs(CsceneModel::getId, CsceneElementStat::getCsceneId)
-                .currentLink(SceneConfigElementModel.class)
-                .groupBy(SceneConfigElementModel::getType)
-                .selectAs(SceneConfigElementModel::getType, CsceneElementStat::getElementType)
-                .selectAs(Count.f(SceneConfigElementModel::getType), CsceneElementStat::getElementTypeCount)
-                .selectAs(Sum.f(SceneConfigElementModel::getCpu), CsceneElementStat::getCpu)
-                .selectAs(Sum.f(SceneConfigElementModel::getDisk), CsceneElementStat::getDisk)
-                .selectAs(Sum.f(SceneConfigElementModel::getRam), CsceneElementStat::getRam);
-        List<CsceneElementStat> csceneElementStats = csceneMapper.list(elementStatCondition, CsceneElementStat.class);
+        var config = BeanCommon.getBean(CsceneAppConfig.class);
+        List<CsceneElementStat> csceneElementStats  = csceneMapper.statGroupByType(ids, config.getDefaultContainerCpuCount(), config.getDefaultContainerRamCount(), config.getDefaultContainerDiskCount());
         for (CsceneElementStat csceneElementStat : csceneElementStats) {
             CsceneStat stat = statMap.get(csceneElementStat.getCsceneId());
             Integer elementType = csceneElementStat.getElementType();
@@ -182,16 +158,6 @@ public class CsceneSpecialService {
             if (csceneElementStat.getDisk() != null) {
                 stat.setTotalDisk(stat.getTotalDisk() + csceneElementStat.getDisk());
             }
-        }
-
-        // 单独统计下各个场景里面容器的cpu、内存、磁盘
-        var config = BeanCommon.getBean(CsceneAppConfig.class);
-        var list = csceneMapper.listContainerHardware(ids, config.getDefaultContainerCpuCount(), config.getDefaultContainerRamCount(), config.getDefaultContainerDiskCount());
-        for (var se : list) {
-            CsceneStat stat = statMap.get(se.getScene());
-            stat.setTotalCpu(stat.getTotalCpu() + se.getCpu());
-            stat.setTotalRam(stat.getTotalRam() + se.getRam());
-            stat.setTotalDisk(stat.getTotalDisk() + se.getDisk());
         }
 
         HumanCondition virtualStatCondition = new HumanCondition()
