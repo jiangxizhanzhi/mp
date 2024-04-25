@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.containerinstance.models.ContainerGroup;
@@ -30,6 +31,11 @@ public class AzureContainer {
     }
 
     public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics) {
+        VirtualNic virtualNic = virtualNics.get(0);
+        String networkId = virtualNic.getNetworkId();
+        String fixedIp = virtualNic.getFixedIp();
+        String subnetName = IpUtils.extractNetworkPart(fixedIp);
+
         String groupName = pluginHandler.getSourceSceneId();
         // 调用微软云api 创建虚拟机 回写虚拟机id
         // 虚拟机镜像、名称等信息
@@ -40,8 +46,8 @@ public class AzureContainer {
 //        TODO 注册表信息如何获取 是否只使用一个祖册表 多个注册表是否在同一个资源组 若不在容器镜像参数要包含资源组、注册表名、等信息
         Registry registrytest0407 = azureResourceManager.containerRegistries().getByResourceGroup("container-registry", "registrytest0407");
         RegistryCredentials acrCredentials = registrytest0407.getCredentials();
-        String imageName = cloudElement.getImage();
-//        String imageName = registrytest0407.loginServerUrl() + "/samples/" + "nginx";
+//        String imageName = cloudElement.getImage();
+        String imageName = registrytest0407.loginServerUrl() + "/samples/" + "nginx";
         ContainerGroup container = azureResourceManager
                 .containerGroups()
                 .define(containerGroupName)
@@ -52,22 +58,21 @@ public class AzureContainer {
                 .withPrivateImageRegistry(registrytest0407.loginServerUrl(), acrCredentials.username(), acrCredentials.accessKeys().get(AccessKeyType.PRIMARY))
                 .withoutVolume()
                 .defineContainerInstance(containerName)
-                .withImage(imageName)
 //                TODO 前端未传先写死
+                .withImage(imageName)
                 .withExternalTcpPort(80)
-//                .withoutPorts()
-//                TODO 设置网络
-//                .withEnvironmentVariables(Collections.singletonList(new EnvironmentVariable().withName("KEY").withValue("VALUE")))
-//                .withVolumeMountSetting("/mnt/myvolume1", "rw")
                 .withCpuCoreCount(0.5)
                 .withMemorySizeInGB(0.8)
+//                    上面的简写方法 默认cpu1 memorySize1.5
+//                .withContainerInstance(imageName, 80)
                 .attach()
+//                TODO 设置网络
+                .withNewNetworkProfileOnExistingVirtualNetwork(networkId, subnetName)
                 .withRestartPolicy(ContainerGroupRestartPolicy.NEVER)
-                .withDnsPrefix(containerGroupName)
                 .create();
 
         // azure todo  怎么添加网卡呢?
-        for (var virtualNic : virtualNics) {
+        for (var virtualNic1 : virtualNics) {
             // azure todo  怎么添加网卡呢?
         }
 

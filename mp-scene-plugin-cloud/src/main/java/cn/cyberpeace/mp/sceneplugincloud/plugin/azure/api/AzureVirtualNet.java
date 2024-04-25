@@ -9,7 +9,8 @@ import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.network.models.Network;
 
-import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AzureVirtualNet {
     private IAzureResourceManager resourceService;
@@ -24,7 +25,8 @@ public class AzureVirtualNet {
         this.region = resourceService.getRegin();
     }
 
-    public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<String> cidrList) {
+    public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, ConcurrentHashMap<String, Boolean> cidrContainerMap) {
+        String vmType = cloudElement.getVmType();
 //        for (int i = 0; i < cloudElement.getDeriveNetworks().size(); i++) {
         var net = cloudElement.getDeriveNetworks().get(0).getNetwork();
         // azure todo 网络名称用节点 eid+序号
@@ -38,14 +40,26 @@ public class AzureVirtualNet {
                 .define(netName)
                 .withRegion(this.region)
                 .withExistingResourceGroup(groupName);
-                    /*.withAddressSpace(cidr)
-                    .withSubnet("sub", cidr)
-                    .create();*/
-        cidrList.stream().forEach(cidr -> {
-            createdNet.withAddressSpace(cidr)
-                    .withSubnet(IpUtils.extractNetworkPart(cidr), cidr);
-        });
+
+        for (Map.Entry<String, Boolean> entry : cidrContainerMap.entrySet()) {
+            Boolean value = entry.getValue();
+            if (value) {
+//                连接容器的子网需要加子网委托
+                createdNet
+                        .withAddressSpace(entry.getKey())
+                        .defineSubnet(IpUtils.extractNetworkPart(entry.getKey()))
+                        .withAddressPrefix(entry.getKey())
+                        .withDelegation("Microsoft.ContainerInstance/containerGroups")
+                        .attach();
+            } else {
+                createdNet
+                        .withAddressSpace(entry.getKey())
+                        .withSubnet(IpUtils.extractNetworkPart(entry.getKey()), entry.getKey());
+            }
+
+        }
         Network network = createdNet.create();
+
 
         // azure todo 回写网络id
         net.setResourceId(network.id());

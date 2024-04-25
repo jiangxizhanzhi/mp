@@ -13,7 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 public class AzureCreateHandler extends CreateHandler {
@@ -50,30 +51,43 @@ public class AzureCreateHandler extends CreateHandler {
         // 先创建辅助网络
         List<CloudPluginSceneElementBO> filteredAuxiliaryNetworkElements = this.filterAuxiliaryNetworkElements(allElements);
         List<Runnable> createAuxiliaryNetworkTasks = new ArrayList<>();
-        List<String> cidrList = filteredAuxiliaryNetworkElements.stream()
-                .flatMap(cloudElement -> cloudElement.getDeriveNetworks().stream())
-                .map(cloudElement -> cloudElement.getNetwork().getCidr())
-                .collect(Collectors.toList());
+        ConcurrentHashMap<String, Boolean> cidrContainerMap = new ConcurrentHashMap<>();
+//        筛选出所有cidr是否连接容器
+        allElements.forEach(cloudElement -> {
+            cloudElement.getDeriveNetworks().forEach(connectedNetworkBO -> {
+                String cidr = connectedNetworkBO.getNetwork().getCidr();
+                AtomicReference<Boolean> isContainer = new AtomicReference<>(false);
+                connectedNetworkBO
+                        .getToPorts()
+                        .stream()
+                        .filter(sceneElementPortBO -> null != sceneElementPortBO)
+                        .map(sceneElementPortBO -> sceneElementPortBO.getElement().getId())
+                        .forEach(id -> {
+                            // 根据id 从allElements取出对应的element
+                            CloudPluginSceneElementBO cloudElement1 = allElements
+                                    .stream()
+                                    .filter(cloudElement2 -> cloudElement2.getSrcElement().getId().equals(id))
+                                    .findFirst()
+                                    .get();
+                            if (null != cloudElement1) {
+                                if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(cloudElement1.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == cloudElement1.getVirtualType()) {
+                                    isContainer.set(true);
+                                }
+                            }
+                        });
+                cidrContainerMap.put(cidr, isContainer.get());
+            });
+
+        });
 
         String nodeIdd = filteredAuxiliaryNetworkElements.get(0).getSrcElement().getId();
         // 封装创建网络的任务
-        AzureVirtualNetCreateTask taskk = new AzureVirtualNetCreateTask(resourceService, getPluginHandler(), filteredAuxiliaryNetworkElements.get(0), cidrList);
+        AzureVirtualNetCreateTask taskk = new AzureVirtualNetCreateTask(resourceService, getPluginHandler(), filteredAuxiliaryNetworkElements.get(0), cidrContainerMap);
         // 格式化任务执行过程，添加 runElementProgress
         Runnable formatTaskk = this.formatElementTask(nodeIdd, stepPercentage, CreateHandler.ElementProcess.CREATE_AUXILIARY_NETWORK, taskk);
         // 添加格式化后的任务到列表
         createAuxiliaryNetworkTasks.add(formatTaskk);
 
-        /*for (CloudPluginSceneElementBO element : filteredAuxiliaryNetworkElements) {
-//            筛选出所有cidr
-
-            String nodeId = element.getSrcElement().getId();
-            // 封装创建网络的任务
-            AzureVirtualNetCreateTask task = new AzureVirtualNetCreateTask(resourceService, getPluginHandler(), element);
-            // 格式化任务执行过程，添加 runElementProgress
-            Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_AUXILIARY_NETWORK, task);
-            // 添加格式化后的任务到列表
-            createAuxiliaryNetworkTasks.add(formatTask);
-        }*/
         if (!createAuxiliaryNetworkTasks.isEmpty()) {
             // 执行 创建所有网络
             runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> runTasks(createAuxiliaryNetworkTasks));
