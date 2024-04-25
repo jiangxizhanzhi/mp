@@ -132,22 +132,6 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return (int) activeVirtualDeviceCount;
     }
 
-    private int getSceneConfigVirtualDeviceCount(String sceneConfigId) {
-        String groupFieldName = BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualType);
-        Map<Object, Long> elementCountMap = scenePluginCloudSceneConfigService
-                .groupCountElement(List.of(sceneConfigId), null, List.of(groupFieldName))
-                .getSource().get(groupFieldName);
-        long virtualDeviceCount = elementCountMap.getOrDefault(
-                BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, 0L) +
-                elementCountMap.getOrDefault(
-                        BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0L) +
-                elementCountMap.getOrDefault(
-                        BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0L) +
-                elementCountMap.getOrDefault(
-                        BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS, 0L);
-        return (int) virtualDeviceCount;
-    }
-
     private void checkSceneEditNodeLimit(int count) {
         int sceneEditNodeLimit = csceneAppConfig.getSceneEditNodeLimit();
         if (count > sceneEditNodeLimit) {
@@ -166,51 +150,6 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             log.error("Get element count error: ", e);
         }
         checkSceneEditNodeLimit(elementCount);
-    }
-
-    private void checkSceneUsingNodeLimit(int count) {
-        int activeVirtualDeviceCount = getActiveVirtualDeviceCount();
-        int sceneUsingNodeLimit = csceneAppConfig.getSceneUsingNodeLimit();
-        if (activeVirtualDeviceCount + count > sceneUsingNodeLimit) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT.format(String.valueOf(sceneUsingNodeLimit),
-                    String.valueOf(activeVirtualDeviceCount), String.valueOf(count)));
-        }
-    }
-
-    private void checkSceneUsingNodeLimit(String csceneId, CsceneBO cscene) {
-        if (!Boolean.TRUE.equals(csceneAppConfig.getEnableNodeLimitDbCheck())) {
-            return;
-        }
-        int elementCount = 0;
-        if (cscene == null) {
-            String sceneConfigId = getSceneConfigId(csceneId);
-            elementCount = getSceneConfigVirtualDeviceCount(sceneConfigId);
-        } else {
-            // TODO 获取需要虚拟化的节点数量
-            try {
-                Map<String, Map<String, Object>> pluginElements = cscene.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getElements();
-                if (pluginElements != null) {
-                    for (Map<String, Object> e : pluginElements.values()) {
-                        Object virtualType = e.get("virtual_type");
-                        if (virtualType != null) {
-                            if (Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER ||
-                                    Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE ||
-                                    Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE ||
-                                    Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS
-                            ) {
-                                elementCount++;
-                            }
-                        }
-                    }
-                }
-            } catch (NullPointerException e) {
-                // do nothing
-            } catch (Exception e) {
-                log.error("Get element count error: ", e);
-            }
-        }
-
-        checkSceneUsingNodeLimit(elementCount);
     }
 
     @Autowired
@@ -562,7 +501,6 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     public ServiceResult<CsceneInstanceBO> createTestInstance(String csceneId, boolean unique,
                                                               CsceneContextBO context) {
-        checkSceneUsingNodeLimit(csceneId, null);
 
         BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(csceneId, context);
         return new ServiceResult<>(bcSceneConfigHandler.createTestInstance(unique));
@@ -570,7 +508,6 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     public ServiceResult<CsceneInstanceBO> createTestInstance(String csceneId, boolean unique, CsceneBO cscene,
                                                               CsceneContextBO context) {
-        checkSceneUsingNodeLimit(csceneId, cscene);
 
         BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(csceneId, context);
         return new ServiceResult<>(bcSceneConfigHandler.createTestInstance(unique, cscene));
@@ -581,7 +518,6 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (createContext == null) {
             return createTestInstance(csceneId, unique, new CsceneContextBO());
         }
-        checkSceneUsingNodeLimit(csceneId, createContext.getCscene());
 
         BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(csceneId, createContext.getContext());
         CsceneBO cscene = createContext.getCscene();
@@ -615,7 +551,6 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique, CsceneContextBO context) {
-        checkSceneUsingNodeLimit(csceneId, null);
 
         BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(csceneId, context);
         return new ServiceResult<>(bcSceneConfigHandler.createAppInstance(unique));
@@ -623,7 +558,6 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     public ServiceResult<CsceneInstanceBO> createAppInstance(String csceneId, boolean unique, CsceneBO cscene,
                                                              CsceneContextBO context) {
-        checkSceneUsingNodeLimit(csceneId, cscene);
 
         BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(csceneId, context);
         return new ServiceResult<>(bcSceneConfigHandler.createAppInstance(unique, cscene));
@@ -634,7 +568,6 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (createContext == null) {
             return createAppInstance(csceneId, unique, new CsceneContextBO());
         }
-        checkSceneUsingNodeLimit(csceneId, createContext.getCscene());
 
         BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(csceneId, createContext.getContext());
         CsceneBO cscene = createContext.getCscene();
