@@ -45,11 +45,11 @@ public class CloudDevopsTargetController {
     /**
      * 查询所有云靶标信息
      */
-    @ApiOperation("查询所有信息(带过滤条件)")
+    @ApiOperation("微软云服务节点列表获取")
     @PostMapping("/getTarget")
     public ListObjServiceResult getTarget(@RequestBody(required = false) List<JSONObject> codes) {
         JSONObject result = microsoftAzureConverter.getCloudTargetListByCodes(codes);
-        return new ListObjServiceResult((List) result.get("source"), (int) result.get("total")).asResult();
+        return new ListObjServiceResult((List) result.get("list"), (int) result.get("total")).asResult();
     }
 
     /**

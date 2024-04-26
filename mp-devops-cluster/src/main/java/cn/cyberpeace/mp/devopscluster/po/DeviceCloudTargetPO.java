@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,181 +18,91 @@ import lombok.NoArgsConstructor;
 public class DeviceCloudTargetPO extends BaseModel {
 
     /**
-     * 镜像UUID
+     * 主键
      */
-    private String uuid;
-
+    private Integer pk;
     /**
-     * 名称
+     * 服务ID
+     */
+    private String id;
+    /**
+     * 服务名称
      */
     private String name;
-
     /**
-     * 图标
+     * 云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储 )
      */
-    private String logo;
-
+    private Integer cloudServiceType;
     /**
-     * 角色
+     * 源类型(1:云平台 2:用户上传)
      */
-    private Integer role;
-
-    /**
-     * 分类
-     */
-    private Integer mainCategory;
-
-    /**
-     * 子分类
-     */
-    private Integer subCategory;
-
-    /**
-     * 子分类
-     */
-    private Integer thirdCategory;
-
-    /**
-     * 镜像类型
-     */
-    private String imageType;
-
-    /**
-     * 是否导入
-     */
-    private Boolean isImport;
-
-    /**
-     * 是否公开
-     */
-    private Integer isPublic;
-
-    /**
-     * 是否支持快速创建
-     */
-    private Boolean quickCreateSupport;
-
-    /**
-     * 在位状态
-     */
-    private Integer inPosition;
-
-    /**
-     * 使用状态
-     */
-    private Integer useStatus;
-
-    /**
-     * 引用状态
-     */
-    private Integer referenceStatus;
-
-    /**
-     * 系统类型(操作系统)
-     */
-    private Integer parentSystemType;
-
-    /**
-     * 系统类型状态(操作系统)
-     */
-    private Integer parentSystemStatus;
-
-    /**
-     * 代系
-     */
-    private Integer generations;
-
-    /**
-     * 版本号
-     */
-    private Integer version;
-
-    /**
-     * offerName
-     */
-    private String offerName;
-
+    private Integer sourceType;
     /**
      * publisherName
      */
     private String publisherName;
-
+    /**
+     * offerName
+     */
+    private String offerName;
     /**
      * sku
      */
     private String sku;
-
     /**
-     * 系统类型
+     * 操作系统
      */
-    private Integer systemType;
-
+    private String operatingSystem;
     /**
-     * 系统架构
+     * 操作系统状态
      */
-    private String systemArchitecure;
-
+    private String operatingSystemStatus;
     /**
-     * 系统语言
+     * 用户上传镜像名称
      */
-    private String language;
-
+    private String uploadTargetName;
     /**
-     * 镜像状态
+     * 镜像类型：vm，container,simple, entity
      */
-    private Integer imageStatus;
-
+    private String imageType;
     /**
-     * 系统镜像类型，1：基础镜像，2：CP-CLOUD已有镜像，3：自定义上传
+     * 是否公开，0：私有，1：自定义，2：公开
      */
-    private Integer imageSource;
-
+    private Integer isPublic;
     /**
-     * 是否支持基础镜像
+     * 是否支持快速构建，0：不支持，1：支持
      */
-    private Boolean baseImageSupport;
-
+    private Integer quickCreateSupport;
     /**
-     * 是否支持cloud init
+     * 是否导入，0：false,1:true
      */
-    private Boolean initSupport;
-
+    private Integer isImport;
     /**
-     * 是否隐藏
+     * 是否隐藏，0：false,1:true
      */
-    private Boolean isHide = Boolean.FALSE;
-
+    private Integer isHide;
     /**
-     * 是否初始靶标
+     * 创建时间
      */
-    private Boolean isInit = Boolean.FALSE;
-
+    private LocalDateTime createTime;
     /**
-     * 镜像状态 0:没有实例，1：创建中，2创建成功，3创建失败
+     * 更新时间
      */
-    @DefaultInt
-    private Integer instanceState;
-
+    private LocalDateTime updateTime;
+    /**
+     * 靶标创建用户
+     */
+    private String createUser;
     /**
      * 靶标实例创建用户
      */
     private String instanceCreateUser;
-
     /**
-     * 是否支持导出
+     * 角色
      */
-    @DefaultBool
-    private Boolean supportExport ;
-
+    private Integer role;
     /**
-     * 靶标创建用户
+     * 图标地址
      */
-    @DefaultStr
-    private String createUser ;
-
-    /**
-     * 靶标创建用户名
-     */
-    @DefaultStr
-    private String createUserName;
+    private String logo;
 }

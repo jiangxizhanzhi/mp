@@ -70,4 +70,48 @@ public interface FileSuffixConstant {
         add("rar");
     }};
 
+    /**
+     * 载荷附件上传支持后缀
+     */
+    List<String> LOAD_UPLOAD_FILE_LIST = new ArrayList<>(){{
+        add("zip");
+        add("rar");
+    }};
+
+    /**
+     * 载荷帮助上传支持后缀
+     */
+    List<String> LOAD_UPLOAD_FILE_README_LIST = new ArrayList<>(){{
+        add("doc");
+        add("docx");
+        add("xml");
+        add("pdf");
+        add("html");
+        add("markdown");
+    }};
+
+    /**
+     * 载荷上传图片支持后缀
+     */
+    List<String> LOAD_UPLOAD_IMAGE_LIST = new ArrayList<>(){{
+        add("tiff");
+        add("pjp");
+        add("jfif");
+        add("bmp");
+        add("gif");
+        add("svg");
+        add("png");
+        add("xbm");
+        add("dib");
+        add("jxl");
+        add("jpeg");
+        add("svgz");
+        add("jpg");
+        add("webp");
+        add("ico");
+        add("tif");
+        add("pjpeg");
+        add("avif");
+    }};
+
 }

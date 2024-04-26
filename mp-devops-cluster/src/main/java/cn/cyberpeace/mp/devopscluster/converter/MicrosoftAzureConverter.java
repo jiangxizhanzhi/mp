@@ -1,22 +1,26 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
-import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
 import cn.cyberpeace.mp.auth.service.MicrosoftAzureLoginService;
 import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.CloudDevice;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtCloudVm;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.enums.CommonTargetNameEnum;
+import cn.cyberpeace.mp.devopscluster.enums.ImageTypeEnum;
+import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.MpSysCodeEnum;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO;
+import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper;
 import cn.cyberpeace.mp.devopscluster.request.TargetSceneRequest;
+import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.devopscluster.vo.DeviceVO;
 import cn.cyberpeace.mp.devopscluster.vo.TypeAllVO;
 import cn.cyberpeace.mp.devopscluster.vo.convert.DeviceVoConverter;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import com.alibaba.fastjson.JSONObject;
 import com.azure.containers.containerregistry.ContainerRegistryClient;
 import com.azure.containers.containerregistry.ContainerRegistryClientBuilder;
@@ -29,6 +33,7 @@ import com.azure.core.management.profile.AzureProfile;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.models.*;
+import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
@@ -37,10 +42,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -84,7 +86,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 for (int j = 0; j < codes.size(); j++) {
                     if (codes.get(j).get("code") != null && sqls.get(i).getCode() != null &&
                             codes.get(j).get("code").toString().equals(sqls.get(i).getCode())) {
-                        sqls.get(i).setRemark(sqls.get(i).getSupplement().replace("**", codes.get(j).get("value").toString()));
+                        sqls.get(i).setSupplement(sqls.get(i).getSupplement().replace("**", codes.get(j).get("value").toString()));
                     }
                 }
             }
@@ -93,9 +95,39 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 .filter(s -> s.getSupplement() != null && !s.getSupplement().isEmpty())
                 .collect(Collectors.toList());
         List<DeviceCloudTargetPO> list = microsoftAzureMapper.getCloudTargetListByCodes(filteredList);
+        //结果转Device集合
+        List<CloudDevice> deviceList = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            CloudDevice device = new CloudDevice();
+            device.setDeleted(false);
+            device.setName(list.get(i).getName());
+            device.setLogo(list.get(i).getLogo());
+            //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储 )
+            switch (list.get(i).getCloudServiceType()) {
+                case 1:
+                case 2:
+                    device.getExtCloudVm().setTargetPk(list.get(i).getPk());
+                    device.getExtCloudVm().setPublisherName(list.get(i).getPublisherName());
+                    device.getExtCloudVm().setOfferName(list.get(i).getOfferName());
+                    device.getExtCloudVm().setSku(list.get(i).getSku());
+                    device.getExtCloudVm().setImageOSType(list.get(i).getImageType());
+                    device.getExtCloudVm().setSourceType(list.get(i).getSourceType());
+                    break;
+                case 3:
+                    device.getExtCloudDocker().setSourceType(list.get(i).getSourceType());
+                    device.getExtCloudDocker().setUploadImageName(list.get(i).getUploadTargetName());
+                    break;
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                default:
+            }
+            deviceList.add(device);
+        }
         JSONObject result = new JSONObject();
-        result.put("source", list);
-        result.put("total", list.size());
+        result.put("list", deviceList);
+        result.put("total", deviceList.size());
         return result;
     }
 
@@ -121,19 +153,28 @@ public class MicrosoftAzureConverter implements BaseConverter {
 //        request.put("cloudType",1);
 //        MicrosoftAzureUserModel localAzurer = microsoftAzureLoginService.getLocalAzurer(request);
 
+        //目前是根据配置的环境信息去获取微软云资源
         JSONObject result = new JSONObject();
-        //获取docker镜像
+        //todo 将数据同步至数据表中
+        List<DeviceCloudTargetPO> list = new ArrayList<>();
+
+        //获取用户 docker镜像
         List dockerImages = getDockerImages();
         result.put("dockerImageList", dockerImages);
-        //获取微软云镜像
+        //获取微软云 docker镜像
+        List cloudDockerImages = getCloudDockerImages();
+        result.put("cloudDockerImageList", cloudDockerImages);
+        //获取微软云 虚拟机镜像
         List images = getImages();
         result.put("imagesList", images);
-        //获取本地镜像
+        //获取用户 虚拟机镜像
         List localImages = getLocalImages();
         result.put("localImagesList", localImages);
+        //获取微软云存储服务
+        List microsoftCloudStorageServiceList = getMicrosoftCloudStorageServiceList();
+        result.put("microsoftCloudStorageServiceList", microsoftCloudStorageServiceList);
 
-        //todo 将三份数据同步至数据表中
-        List<DeviceCloudTargetPO> list = new ArrayList<>();
+        //docker镜像
         for (int i = 0; i < dockerImages.size(); i++) {
             DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
             deviceCloudTarget.setName(((JSONObject) dockerImages.get(i)).get("repositoryName").toString());
@@ -141,16 +182,19 @@ public class MicrosoftAzureConverter implements BaseConverter {
             list.add(deviceCloudTarget);
         }
 
+        //微软云镜像
         for (int i = 0; i < images.size(); i++) {
             DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
             deviceCloudTarget.setPublisherName(((JSONObject) images.get(i)).get("PublisherName").toString());
             deviceCloudTarget.setOfferName(((JSONObject) images.get(i)).get("offerName").toString());
             deviceCloudTarget.setSku(((JSONObject) images.get(i)).get("skuName").toString());
             //镜像类型
-            deviceCloudTarget.setImageType("VM:" + ((JSONObject) images.get(i)).get("operatingSystemType").toString());
+            deviceCloudTarget.setImageType("VM");
+            //todo 系统类型 ((JSONObject) images.get(i)).get("operatingSystemType").toString()
             list.add(deviceCloudTarget);
         }
 
+        //微软云本地镜像
         for (int i = 0; i < localImages.size(); i++) {
             DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
             deviceCloudTarget.setName(((JSONObject) localImages.get(i)).get("imageName").toString());
@@ -180,7 +224,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
     }
 
     /**
-     * 获取存储账号内所有容器
+     * 获取存储账号内所有内容
      */
     public void getBlobContainer() {
 //        /**
@@ -258,6 +302,24 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 jsonList.add(jsonObject);
             }
         }
+        return jsonList;
+    }
+
+    /**
+     * 获取微软云 docker镜像
+     */
+    public List getCloudDockerImages() {
+        String endpoint = "https://registrytest0407.azurecr.io";
+        // 使用DefaultAzureCredential进行身份验证，适用于多种环境，如本地开发、Azure Functions、App Service等
+        // 如果需要特定的身份验证方式，可以使用对应的AzureIdentity类，如ClientSecretCredential等
+        ContainerRegistryClient containerRegistryClient = new ContainerRegistryClientBuilder()
+                .endpoint(endpoint)
+                .credential(new DefaultAzureCredentialBuilder().build())
+                .buildClient();
+
+        //收集元素
+        List<JSONObject> jsonList = new ArrayList<>();
+
         return jsonList;
     }
 
@@ -368,6 +430,14 @@ public class MicrosoftAzureConverter implements BaseConverter {
     }
 
     /**
+     * 微软云存储服务列表
+     */
+    public List getMicrosoftCloudStorageServiceList() {
+
+        return null;
+    }
+
+    /**
      * 云镜像删除
      */
     @Transactional
@@ -402,41 +472,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
     public DeviceCloudTargetPO getCloudTargetByPk(JSONObject requestData) {
         DeviceCloudTargetPO data = microsoftAzureMapper.getCloudTargetByPk(requestData.get("pk").toString());
-        if (data != null) {
-            return data;
-        } else {
-            return new DeviceCloudTargetPO();
-        }
-    }
-
-    public TypeAllVO imageCategories(Boolean isAll) {
-        if (Objects.isNull(isAll)) {
-            isAll = Boolean.FALSE;
-        }
-        TypeAllConvertModel roles = typeConverter.findRoles(isAll);
-        TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type(isAll);
-        TypeAllConvertModel imageType = typeConverter.findImageType(isAll);
-        TypeAllConvertModel diskFormat = typeConverter.findDiskFormat();
-        TypeAllVO allResponse = new TypeAllVO();
-        allResponse.setRole(Objects.nonNull(roles) ? roles.getIdIntegerModelList() : null);
-        var firstTypeList = Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getFirstTypeList() : null;
-        if (CollectionUtils.isNotEmpty(firstTypeList)) {
-            for (int i = 0; i < firstTypeList.size(); i++) {
-                if (firstTypeList.get(i).getId() == 5) {
-                    firstTypeList.remove(i);
-                    break;
-                }
-            }
-        }
-        allResponse.setFirstTypeList(firstTypeList);
-        allResponse.setSecondTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getSecondTypeList() : null);
-        allResponse.setThirdTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getThirdTypeList() : null);
-        allResponse.setImageType(Objects.nonNull(imageType) ? imageType.getIdStringModelList() : null);
-        allResponse.setHwDiskBusList(typeConverter.findHwDiskBus());
-        allResponse.setHwVifModelList(typeConverter.findHwVifModel());
-        allResponse.setHwVideoModelList(typeConverter.findHwVideoModel());
-        allResponse.setDiskFormat(Objects.nonNull(diskFormat) ? diskFormat.getIdStringModelList() : null);
-        return allResponse;
+        return data;
     }
 
     /**
@@ -504,44 +540,73 @@ public class MicrosoftAzureConverter implements BaseConverter {
         return menuDto;
     }
 
-    /**
-     * 查询所有信息(带过滤条件)--操作系统、应用系统、网络设备、安全设备内靶标
-     */
-    public List getTarget(TargetSceneRequest request) {
-        TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
-        List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
-        List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
+//    /**
+//     * 查询所有信息(带过滤条件)--操作系统、应用系统、网络设备、安全设备内靶标
+//     */
+//    public List getTarget(TargetSceneRequest request) {
+//        BasePageBO<Device> targetSceneConvertModel = allTarget(new ImagePageDTO(request));
+//        List<Device> deviceList = targetSceneConvertModel.getList();
+//        return deviceList;
+//    }
 
-        Integer category = request.getCategory();
-        if (Objects.nonNull(category)) {
-            firstTypeList = firstTypeList.stream().filter(v -> v.getId().equals(category)).collect(Collectors.toList());
-        }
+//    /**
+//     * 查询所有靶标数据
+//     * @param dto
+//     * @return
+//     */
+//    public BasePageBO<Device> allTarget(ImagePageDTO dto) {
+//        BasePageBO<DeviceTargetPO> targetPageModel = this.page(dto);
+//
+//        List<DeviceTargetPO> deviceTargetPOS = targetPageModel.getList();
+//        Map<String,DeviceTargetPO> supportExports = new HashMap<>();
+//        deviceTargetPOS.stream().forEach(d -> {
+//            supportExports.put(d.getUuid(), d);
+//        });
+//
+//        List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
+//
+//        BasePageBO<Device> sceneConvertModel = new BasePageBO<>();
+//        sceneConvertModel.setTotal(targetPageModel.getTotal());
+//        if (CollectionUtils.isEmpty(ids)){
+//            sceneConvertModel.setList(Lists.newArrayList());
+//            return sceneConvertModel;
+//        }
+//        CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
+//
+//        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
+//            sceneConvertModel.setList(Lists.newArrayList());
+//            return sceneConvertModel;
+//        }
+//        for (var d : model.getList()) {
+//            if (ImageTypeEnum.CONTAINER.toValue().equals(d.getImageType()) && supportExports.containsKey(d.getUuid())) {
+//                if (d.getExtDocker() != null) {
+//                    d.getExtDocker().setInitSupport(supportExports.get(d.getUuid()).getInitSupport());
+//                }
+//            }
+//        }
+//        POLogoUtils.changeLogoPathToUrl(model.getList());
+//        sceneConvertModel.setList(model.getList());
+//        return sceneConvertModel;
+//    }
 
-        if (CollectionUtils.isNotEmpty(request.getSecondCategoryList())) {
-            secondTypeList = secondTypeList.stream().filter(v -> request.getSecondCategoryList().contains(v.getId())).collect(Collectors.toList());
-        }
-
-        List<Device> deviceList = new ArrayList<>();
-        for (TypeConvertModel first : firstTypeList) {
-            Integer firstId = first.getId();
-            List<TypeConvertModel> typeConvertModels = secondTypeList.stream()
-                    .filter(v -> v.getL1ParentId().equals(firstId)).collect(Collectors.toList());
-            List<Integer> secondCategories = typeConvertModels.stream()
-                    .map(model -> model.getId())
-                    .collect(Collectors.toList());
-            request.setCategory(firstId);
-            request.setSecondCategories(secondCategories);
-            request.setPage(null);
-            request.setPerPage(null);
-            BasePageBO<Device> targetSceneConvertModel = targetConverter.allTarget(new ImagePageDTO(request));
-            if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())) {
-                continue;
-            }
-            List<Device> secondDeviceList = targetSceneConvertModel.getList();
-            deviceList.addAll(secondDeviceList);
-        }
-        return deviceList;
-    }
+//    /**
+//     * 分页查询
+//     * @param dto
+//     * @return
+//     */
+//    public BasePageBO<DeviceTargetPO> page(ImagePageDTO dto) {
+//        Integer total = devopsTargetService.totalCount(dto);
+//        BasePageBO<DeviceTargetPO> targetPageModel = new BasePageBO<>();
+//        targetPageModel.setTotal(total);
+//        if (total == 0){
+//            targetPageModel.setList(Lists.newArrayList());
+//            return targetPageModel;
+//        }
+//        List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
+//        POLogoUtils.changeLogoPathToUrl(deviceTargetPOS);
+//        targetPageModel.setList(deviceTargetPOS);
+//        return targetPageModel;
+//    }
 
     /**
      * 查询常用靶标信息

@@ -133,9 +133,9 @@ public class LoadController {
     @ApiOperation(value = "载荷数据同步", notes = "")
     @GetMapping("/synchronousData")
     public ServiceResult synchronousData() {
-        Boolean synchronousData = LoadService.synchronousData();
-        if (synchronousData) {
-            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+        JSONObject synchronousData = LoadService.synchronousData();
+        if (synchronousData != null) {
+            return new ServiceResult(synchronousData, BaseErrorCode.SUCCESS, "载荷数据同步成功").asResult();
         } else {
             return new ServiceResult(null, BaseErrorCode.ERROR, "载荷数据同步失败").asResult();
         }
@@ -244,9 +244,11 @@ public class LoadController {
      * */
     @ApiOperation(value = "code码对应组", notes = "")
     @GetMapping("/getNamesByCode")
-    public ServiceResult getNamesByCode(@RequestParam(value = "code") String code) {
+    public ServiceResult getNamesByCode(@RequestParam(value = "code") String code,
+                                        @RequestParam(value = "isFull", required = false) String isFull) {
         JSONObject requestData = new JSONObject();
         requestData.put("code", code);
+        requestData.put("isFull", isFull);
         List<JSONObject> list = LoadService.getNamesByCode(requestData);
         return new ServiceResult(list, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }

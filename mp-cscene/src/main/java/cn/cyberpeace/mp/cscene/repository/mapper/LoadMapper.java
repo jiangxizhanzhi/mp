@@ -54,6 +54,8 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     List<JSONObject> getNamesByCode(@Param("param") JSONObject requestData);
 
+    List<JSONObject> getAllSubordinatesByCode(@Param("param") JSONObject requestData);
+
     List<MpDevopsLoad> getToolListByloadPks(@Param("param") List<String> newList);
 
     Boolean updateBindByPk(String pk, @Param("param") JSONObject requestData);

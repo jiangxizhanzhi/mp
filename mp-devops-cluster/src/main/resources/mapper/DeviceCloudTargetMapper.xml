@@ -5,84 +5,48 @@
     <insert id="batchInsertCloudTarget">
         INSERT INTO mp_devops_cloud_target (
         id,
-        uuid,
         name,
-        logo,
-        role,
-        main_category,
-        sub_category,
-        third_category,
+        cloud_service_type,
+        publisher_name,
+        offer_name,
+        sku,
+        operating_system,
+        operating_system_status,
+        upload_target_name,
         image_type,
         is_public,
         quick_create_support,
-        in_position,
-        reference_status,
-        use_status,
-        parent_system_type,
-        parent_system_status,
-        offer_name,
-        publisher_name,
-        sku,
-        version,
-        generations,
-        system_type,
-        system_architecure,
-        language,
-        image_status,
-        base_image_support,
-        init_support,
-        create_time,
-        update_time,
-        image_source,
         is_import,
         is_hide,
-        instance_state,
-        is_init,
+        create_time,
+        update_time,
+        create_user,
         instance_create_user,
-        support_export,
-        create_user_name,
-        create_user
+        role,
+        logo
         ) VALUES
         <foreach collection="param" item="item" index="index" separator=",">
             (
                 #{item.id},
-                #{item.uuid},
                 #{item.name},
-                #{item.logo},
-                #{item.role},
-                #{item.mainCategory},
-                #{item.subCategory},
-                #{item.thirdCategory},
+                #{item.cloudServiceType},
+                #{item.publisherName},
+                #{item.offerName},
+                #{item.sku},
+                #{item.operatingSystem},
+                #{item.operatingSystemStatus},
+                #{item.uploadTargetName},
                 #{item.imageType},
                 #{item.isPublic},
                 #{item.quickCreateSupport},
-                #{item.inPosition},
-                #{item.referenceStatus},
-                #{item.useStatus},
-                #{item.parentSystemType},
-                #{item.parentSystemStatus},
-                #{item.offerName},
-                #{item.publisherName},
-                #{item.sku},
-                #{item.version},
-                #{item.generations},
-                #{item.systemType},
-                #{item.systemArchitecure},
-                #{item.language},
-                #{item.imageStatus},
-                #{item.baseImageSupport},
-                #{item.initSupport},
-                now(),
-                #{item.updateTime},
-                #{item.imageSource},
                 #{item.isImport},
                 #{item.isHide},
-                #{item.instanceState},
-                #{item.isInit},
+                now(),
+                #{item.updateTime},
+                #{item.createUser},
                 #{item.instanceCreateUser},
-                #{item.supportExport},
-                #{item.createUserName},
-                #{item.createUser}
+                #{item.role},
+                #{item.logo}
             )
         </foreach>
     </insert>
@@ -97,20 +61,20 @@
             <if test="param != null and param.logo != null">
                 logo = #{param.logo},
             </if>
-            <if test="param != null and param.parentSystemType != null">
-                system_type = #{param.parentSystemType},
+            <if test="param != null and param.operatingSystem != null">
+                operating_system = #{param.operatingSystem},
             </if>
-            <if test="param != null and param.parentSystemStatus != null">
-                image_type = #{param.parentSystemStatus},
+            <if test="param != null and param.operatingSystemStatus != null">
+                operating_system_status = #{param.operatingSystemStatus},
             </if>
-            <if test="param != null and param.generations != null">
-                reference_status = #{param.generations},
+            <if test="param != null and param.publisherName != null">
+                publisher_name = #{param.publisherName},
+            </if>
+            <if test="param != null and param.offerName != null">
+                offer_name = #{param.offerName},
             </if>
             <if test="param != null and param.sku != null">
-                support_export = #{param.sku},
-            </if>
-            <if test="param != null and param.createUser != null">
-                system_architecure = #{param.createUser},
+                sku = #{param.sku},
             </if>
                 update_time = now()
         WHERE
@@ -146,8 +110,8 @@
             <if test="param != null and param.name != null and param.name != ''">
                 and name like concat('%', #{param.name}, '%')
             </if>
-            <if test="param != null and param.systemType != null and param.systemType != ''">
-                and system_type = #{param.systemType}
+            <if test="param != null and param.operatingSystem != null and param.operatingSystem != ''">
+                and operating_system = #{param.operatingSystem}
             </if>
         </where>
         <if test="param != null and param.offset != null and param.pageSize != null">
@@ -164,8 +128,8 @@
             <if test="param != null and param.name != null and param.name != ''">
                 and name like concat('%', #{param.name}, '%')
             </if>
-            <if test="param != null and param.systemType != null and param.systemType != ''">
-                and system_type = #{param.systemType}
+            <if test="param != null and param.operatingSystem != null and param.operatingSystem != ''">
+                and operating_system = #{param.operatingSystem}
             </if>
         </where>
     </select>
@@ -224,7 +188,7 @@
 
     <select id="getSqlByCodes" resultType="cn.cyberpeace.mp.devopscluster.model.MpSysCodeEnum">
         SELECT
-            code,remark
+            code,supplement
         FROM
             mp_sys_code_enum
         <where>
@@ -244,8 +208,8 @@
             mp_devops_cloud_target
         <where>
             <if test="param != null and param.size != 0">
-                <foreach collection="param" item="item">
-                    #{item.remark}
+                <foreach collection="param" item="item" separator=" ">
+                    ${item.supplement}
                 </foreach>
             </if>
         </where>

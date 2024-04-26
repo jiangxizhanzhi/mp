@@ -65,11 +65,13 @@ public class LoadServiceImpl {
      * 载荷数据同步
      * */
     @Transactional
-    public Boolean synchronousData() {
-        JSONObject requestData = new JSONObject();
-        List<LinkedHashMap> toolList = outLoadService.getToolList(requestData);
+    public JSONObject synchronousData() {
+        //同步设置
+        JSONObject synchronousDataSource = getSynchronousDataSource(new JSONObject());
+
+        List<LinkedHashMap> toolList = outLoadService.getToolList(new JSONObject());
         if (toolList == null || toolList.isEmpty()) {
-            return false;
+            return null;
         }
         List<JSONObject> list = new ArrayList<>();
         for (LinkedHashMap tool : toolList) {
@@ -80,13 +82,18 @@ public class LoadServiceImpl {
         try {
             Boolean deleteData = loadMapper.deleteData();
             if (deleteData) {
-                return loadMapper.addLoads(list);
+                if(!loadMapper.addLoads(list)){
+                    return null;
+                }
             }
         } catch (Exception e) {
             // 记录错误日志、回滚事务等
             throw e; // 或者包装成自定义异常抛出
         }
-        return true;
+        JSONObject requestData = new JSONObject();
+        requestData.put("source",synchronousDataSource);
+        requestData.put("dataNum",list.size());
+        return requestData;
     }
 
     private JSONObject convertToolToJSONObject(LinkedHashMap tool) {
@@ -150,6 +157,11 @@ public class LoadServiceImpl {
         Boolean addLoad;
         if (requestData != null) {
             addLoad = loadMapper.addLoad(requestData);
+            if(requestData.get("loopholes") != null){
+                String[] loopholes = requestData.get("loopholes").toString().split(";");
+                //todo 载荷与漏洞的绑定
+                System.out.println(loopholes);
+            }
         } else {
             return false;
         }
@@ -506,6 +518,9 @@ public class LoadServiceImpl {
      * 获取code码对应组
      * */
     public List<JSONObject> getNamesByCode(JSONObject requestData) {
+        if(requestData != null && requestData.get("isFull") != null && requestData.get("isFull").equals("1")){
+            return loadMapper.getAllSubordinatesByCode(requestData);
+        }
         return loadMapper.getNamesByCode(requestData);
     }
 
