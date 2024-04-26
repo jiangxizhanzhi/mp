@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.ThirdAuthService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -59,6 +60,8 @@ public class JiangXiHaiboAuthServiceImpl implements ThirdAuthService {
         HaiboResponse<HaiboUser> response = camelRestTemplate.exchange(request, new ParameterizedTypeReference<HaiboResponse<HaiboUser>>() {
         }).getBody();
 
+        log.info("haibo response is {}", JsonCommon.stringify(response));
+
         if (Objects.nonNull(response) && response.responseSuccessFlag()) {
             HaiboUser haiboUser = response.data;
             UserModel userModel = userService.getUserModelById(haiboUser.getUserId());
@@ -67,7 +70,9 @@ public class JiangXiHaiboAuthServiceImpl implements ThirdAuthService {
                 throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
             } else {
                 String newJwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userModel.getId(), userModel.getUsername(), userModel.getTokenSecret()));
+                log.info("write jwt token {}", newJwt);
                 JwtAuthenticationFilter.addJWTCookieToResponse(httpServletResponse, newJwt);
+                log.info("write jwt token success");
                 userService.updateUserHaiboToken(userModel, token);
 
             }

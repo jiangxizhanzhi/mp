@@ -34,6 +34,7 @@ public class ThirdSsoController {
                                              @RequestParam(name = "course_id", required = false) String courseId,
                                              @RequestParam(name = "lesson_id", required = false) String lessonId,
                                              HttpServletRequest request, HttpServletResponse response) {
+        log.info("token {} , type {} , course_id {} , lesson_id {}", token, token, courseId, lessonId);
         thirdLoginService.loginByToken(token, request, response);
         // 重定向到另一个域名的页面
         String redirectUrl = authConfig.getMpHomePageViewUrl();
@@ -46,6 +47,7 @@ public class ThirdSsoController {
                 }
             }
         }
+        log.info("redirect {}", redirectUrl);
         return String.format("redirect:%s", redirectUrl);
     }
 }
