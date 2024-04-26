@@ -26,12 +26,12 @@ import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
 @Component
 public class Load {
 
-    private String loadUrl;
+    private String loadUrl = "http://10.108.1.10:5002";
 
 
-    public Load() {
-        loadUrl = BeanCommon.getBean(CloudAppConfig.class).loadUrl;
-    }
+//    public Load() {
+//        loadUrl = BeanCommon.getBean(CloudAppConfig.class).loadUrl;
+//    }
 
     public void create(CloudPluginSceneElementBO cloudElement) {
         Map data = create(cloudElement.getLoadTaskName(),
