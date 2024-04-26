@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
@@ -51,10 +52,21 @@ public class JiangXiHaiboAuthServiceImpl implements ThirdAuthService {
         this.LOGOUT_USER_BY_TOKEN = String.format("%s?token={token}", authConfig.getHaiboLogoutUrl());
     }
 
+    public HaiboUser getHaiboUser(String token) {
+        String encodeToken = URLEncoder.encode(token, Charset.forName("utf-8"));
+        log.info("origin token:{},encode token:{}", encodeToken);
+        RequestEntity<Void> request = RequestEntity.get(VERIFY_USER_BY_TOKEN, encodeToken)
+                .accept(MediaType.APPLICATION_JSON).build();
+        HaiboResponse<HaiboUser> response = camelRestTemplate.exchange(request, new ParameterizedTypeReference<HaiboResponse<HaiboUser>>() {
+        }).getBody();
+        log.info("haibo response is {}", JsonCommon.stringify(response));
+        return response.getData();
+    }
+
     @Override
     public void loginByToken(String token, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         String encodeToken = URLEncoder.encode(token, Charset.forName("utf-8"));
-        log.info("origin token:{},encode token:{}", encodeToken);
+        log.info("origin token:{},encode token:{}", token, encodeToken);
         RequestEntity<Void> request = RequestEntity.get(VERIFY_USER_BY_TOKEN, encodeToken)
                 .accept(MediaType.APPLICATION_JSON).build();
         HaiboResponse<HaiboUser> response = camelRestTemplate.exchange(request, new ParameterizedTypeReference<HaiboResponse<HaiboUser>>() {
@@ -130,5 +142,6 @@ public class JiangXiHaiboAuthServiceImpl implements ThirdAuthService {
         private String name;
         private String token;
         private String username;
+        private List<String> courses ;
     }
 }

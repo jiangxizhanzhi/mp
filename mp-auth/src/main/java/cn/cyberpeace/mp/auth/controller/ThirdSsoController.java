@@ -2,7 +2,12 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.ThirdAuthService;
+import cn.cyberpeace.mp.auth.service.impl.JiangXiHaiboAuthServiceImpl;
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -49,5 +54,12 @@ public class ThirdSsoController {
         }
         log.info("redirect {}", redirectUrl);
         return String.format("redirect:%s", redirectUrl);
+    }
+
+    @GetMapping("/get_user_by_token")
+    @ApiOperation("赛宁第三方登录接口，重定向到赛宁个人主页")
+    public JiangXiHaiboAuthServiceImpl.HaiboUser getHaiboUser(@RequestParam("token") String token) {
+        log.info("token {}", token);
+        return BeanCommon.getBean(JiangXiHaiboAuthServiceImpl.class).getHaiboUser(token);
     }
 }
