@@ -1186,8 +1186,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    public void updateUserHaiboToken(UserModel userModel, String haiboToken) {
+    public void updateUserHaiboToken(UserModel userModel, String haiboToken,String courses) {
         userModel.setHaiboToken(haiboToken);
+        userModel.setCourses(courses);
         userModel.setPassword(null);
         this.update(userModel);
     }

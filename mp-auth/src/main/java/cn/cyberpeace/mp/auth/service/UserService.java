@@ -119,5 +119,5 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
    void upsertThirdUser(ThirdUserRequest thirdUserRequest);
 
-    void updateUserHaiboToken(UserModel userModel, String haiboToken);
+    void updateUserHaiboToken(UserModel userModel, String haiboToken,String courses) ;
 }

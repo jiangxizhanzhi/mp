@@ -62,6 +62,7 @@ public class ThirdSsoController {
     @ApiOperation("赛宁第三方登录接口，重定向到赛宁个人主页")
     public JiangXiHaiboAuthServiceImpl.HaiboUser getHaiboUser(@RequestParam("token") String token) {
         log.info("token {}", token);
+        token = StringUtils.replace(token, " ", "+");
         return BeanCommon.getBean(JiangXiHaiboAuthServiceImpl.class).getHaiboUser(token);
     }
 }

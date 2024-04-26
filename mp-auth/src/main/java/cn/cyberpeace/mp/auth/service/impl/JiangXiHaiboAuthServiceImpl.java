@@ -85,7 +85,7 @@ public class JiangXiHaiboAuthServiceImpl implements ThirdAuthService {
                 log.info("write jwt token {}", newJwt);
                 JwtAuthenticationFilter.addJWTCookieToResponse(httpServletResponse, newJwt);
                 log.info("write jwt token success");
-                userService.updateUserHaiboToken(userModel, token);
+                userService.updateUserHaiboToken(userModel, token, JsonCommon.stringify(haiboUser.getCourses()));
 
             }
         } else {
