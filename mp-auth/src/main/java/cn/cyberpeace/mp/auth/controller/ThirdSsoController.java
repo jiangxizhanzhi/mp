@@ -16,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -56,7 +57,8 @@ public class ThirdSsoController {
         return String.format("redirect:%s", redirectUrl);
     }
 
-    @GetMapping("/get_user_by_token")
+    @ResponseBody
+    @GetMapping(value = "/get_user_by_token")
     @ApiOperation("赛宁第三方登录接口，重定向到赛宁个人主页")
     public JiangXiHaiboAuthServiceImpl.HaiboUser getHaiboUser(@RequestParam("token") String token) {
         log.info("token {}", token);
