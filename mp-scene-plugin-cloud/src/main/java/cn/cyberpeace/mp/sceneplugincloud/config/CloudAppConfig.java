@@ -183,7 +183,6 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.dhcp_ip_allocate:true}")
     private Boolean dhcpIpAllocate;
 
-//    @Value("${load.url}")
     public String loadUrl = "http://10.108.1.10:5002";
 
     @Autowired
