@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.service.service;
 
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -10,12 +11,12 @@ import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.cscene.model.*;
 import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
+import cn.cyberpeace.mp.cscene.websocket.WebSocketServer;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
-import com.alibaba.excel.util.ListUtils;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
@@ -28,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.websocket.Session;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -129,6 +131,42 @@ public class LoadServiceImpl {
         requestData.put("source",synchronousDataSource);
         requestData.put("dataNum",list.size());
         return requestData;
+    }
+
+    public void synchronousData(Session session) throws IOException {
+        //同步设置
+        MpDevopsLoadSource synchronousDataSource = getSynchronousDataSource(new JSONObject());
+        WebSocketServer webSocketServer = WebSocketServer.sessionPools.get(session);
+        webSocketServer.sendMessage(session, "正在连接载荷管理机:"+synchronousDataSource.getIp()+"......成功");
+        OutLoadServiceImpl outLoadService = BeanCommon.getBean(OutLoadServiceImpl.class);
+        List<LinkedHashMap> toolList = outLoadService.getToolList(new JSONObject());
+        if (toolList == null || toolList.isEmpty()) {
+            webSocketServer.sendMessage(session,"获取载荷列表失败,会话关闭！");
+            webSocketServer.onClose(session);
+        }
+        webSocketServer.sendMessage(session, "正在同步载荷......完成！");
+        List<JSONObject> list = new ArrayList<>();
+        for (LinkedHashMap tool : toolList) {
+            if (tool != null) {
+                list.add(convertToolToJSONObject(tool));
+            }
+        }
+        try {
+            Boolean deleteData = loadMapper.deleteData();
+            if (deleteData) {
+                if(!loadMapper.addLoads(list)){
+                    webSocketServer.sendMessage(session,"载荷列表入库失败,会话关闭！");
+                    webSocketServer.onClose(session);
+                }
+            }
+        } catch (Exception e) {
+            // 记录错误日志、回滚事务等
+            throw e; // 或者包装成自定义异常抛出
+        }
+
+        webSocketServer.sendMessage(session,"共同步"+list.size()+"个载荷");
+        webSocketServer.sendMessage(session,"载荷列表同步成功,会话关闭！");
+        webSocketServer.onClose(session);
     }
 
     private JSONObject convertToolToJSONObject(LinkedHashMap tool) {

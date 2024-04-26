@@ -28,7 +28,7 @@ public class CommonFileController {
      *
      * @return 文件id/url
      */
-    @ApiOperation("上传文件")
+    @ApiOperation(value = "上传文件", notes = "")
     @PostMapping("/file_upload")
     public ServiceResult uploadFile(@RequestParam(value = "file") MultipartFile file,
                                     @RequestParam(value = "upload_type", required = false) String uploadType)

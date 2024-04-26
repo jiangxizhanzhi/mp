@@ -154,9 +154,9 @@ public class OutLoadServiceImpl {
     public List getToolList(JSONObject requestData) {
         //todo 根据载荷同步设置获取具体地址、认证和协议
         String url = "http://10.108.1.10:5002/stgj/tool/list";
-        url = url + "?pagenum=" + requestData.get("pagenum") != null ? requestData.get("pagenum").toString() : "1" +
-                "&pagesize=" + requestData.get("pagesize") != null ? requestData.get("pagesize").toString() : "20" +
-                "&keyword=" + requestData.get("keyword") != null ? requestData.get("keyword").toString() : "";
+        url = url + "?pagenum=" + (requestData != null && requestData.get("pagenum") != null ? requestData.get("pagenum").toString() : "1") +
+                "&pagesize=" + (requestData != null && requestData.get("pagesize") != null ? requestData.get("pagesize").toString() : "20") +
+                "&keyword=" + (requestData != null && requestData.get("keyword") != null ? requestData.get("keyword").toString() : "");
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
         headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
