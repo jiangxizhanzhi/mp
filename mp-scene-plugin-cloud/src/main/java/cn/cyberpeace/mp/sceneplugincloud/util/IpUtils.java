@@ -8,6 +8,8 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
 
 @Slf4j
@@ -588,5 +590,28 @@ public class IpUtils {
         } else {
             throw new IllegalArgumentException("Invalid IP address format");
         }
+    }
+
+    /**
+     * 获取五个微软云保留ip
+     * @param cidr
+     * @return
+     */
+    public static String[] getSpecificIPsFromCIDR(String cidr){
+        // Parse the CIDR string into an InetAddress and its prefix length
+        String[] cidrParts = cidr.split("/");
+        String ipAddressStr = cidrParts[0];
+        String baseIP = extractNetworkPart(ipAddressStr);
+
+        // Generate the requested IP addresses with specific tailing octets
+        String[] specificIPs = {
+                baseIP + ".0",
+                baseIP + ".1",
+                baseIP + ".2",
+                baseIP + ".3",
+                baseIP + ".255"
+        };
+
+        return specificIPs;
     }
 }

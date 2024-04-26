@@ -47,7 +47,8 @@ public class AzureContainer {
         Registry registrytest0407 = azureResourceManager.containerRegistries().getByResourceGroup("container-registry", "registrytest0407");
         RegistryCredentials acrCredentials = registrytest0407.getCredentials();
 //        String imageName = cloudElement.getImage();
-        String imageName = registrytest0407.loginServerUrl() + "/samples/" + "nginx";
+//        String imageName = registrytest0407.loginServerUrl() + "/samples/" + "nginx";
+        String imageName = registrytest0407.loginServerUrl() + "/" + cloudElement.getImage();
         ContainerGroup container = azureResourceManager
                 .containerGroups()
                 .define(containerGroupName)
