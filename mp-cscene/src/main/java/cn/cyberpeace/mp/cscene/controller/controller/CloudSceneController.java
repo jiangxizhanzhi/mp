@@ -1,20 +1,18 @@
 package cn.cyberpeace.mp.cscene.controller.controller;
 
+import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseRemoteFileUploadController;
 import cn.cyberpeace.mp.base.controller.response.FsFileUploadResponse;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
-import cn.cyberpeace.mp.common.service.MarkdownFileService;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.service.service.CloudSceneServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -30,6 +28,7 @@ public class CloudSceneController {
 
     /**
      * 上传图片
+     *
      * @return 文件id
      */
     @ApiOperation("上传图片")
@@ -39,12 +38,13 @@ public class CloudSceneController {
         ServiceResult uploadResult = cloudSceneServiceImpl.uploadImage
                 (file.getInputStream(), FileUtil.getSuffix(file.getOriginalFilename()));
         return BaseRemoteFileUploadController.toFileUploadResponseResult
-               (uploadResult, FsFileUploadResponse.class)
-               .asResult();
+                        (uploadResult, FsFileUploadResponse.class)
+                .asResult();
     }
 
     /**
      * 上传文件
+     *
      * @return 文件id
      */
     @ApiOperation("上传文件")
@@ -55,8 +55,20 @@ public class CloudSceneController {
         ServiceResult uploadResult = cloudSceneServiceImpl.uploadFile
                 (file.getInputStream(), FileUtil.getSuffix(file.getOriginalFilename()), uploadType);
         return BaseRemoteFileUploadController.toFileUploadResponseResult
-               (uploadResult, FsFileUploadResponse.class)
-               .asResult();
+                        (uploadResult, FsFileUploadResponse.class)
+                .asResult();
+    }
+
+    /**
+     * 根据相对地址获取文件名称
+     *
+     * @return 文件名称
+     */
+    @ApiOperation("根据相对地址获取文件名称")
+    @GetMapping("/getFileNameByRelativeUrl")
+    public ServiceResult getFileNameByRelativeUrl(@RequestParam(value = "fileUrl") String fileUrl) {
+        String fileName = cloudSceneServiceImpl.getFileNameByRelativeUrl(fileUrl);
+        return new ServiceResult(fileName, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
 }

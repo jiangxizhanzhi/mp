@@ -17,11 +17,7 @@ public class FsCommon {
 
     public FsCommon(@Autowired BaseAppConfig baseAppConfig, @Autowired FdfsCommon fdfsCommon,
                     @Autowired LfsCommon lfsCommon) {
-        if ("fdfs".equals(baseAppConfig.getFileServer())) {
-            FsCommon.fileClient = FdfsCommon.fdfsClient;
-        } else {
             FsCommon.fileClient = LfsCommon.lfsClient;
-        }
     }
 
     public static String genHttpUrl(String fileKey) {

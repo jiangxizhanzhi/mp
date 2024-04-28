@@ -112,6 +112,25 @@ public interface FileSuffixConstant {
         add("tif");
         add("pjpeg");
         add("avif");
+
+        add("TIFF");
+        add("PJP");
+        add("JFIF");
+        add("BMP");
+        add("GIF");
+        add("SVG");
+        add("PNG");
+        add("XBM");
+        add("DIB");
+        add("JXL");
+        add("JPEG");
+        add("SVGZ");
+        add("JPG");
+        add("WEBP");
+        add("ICO");
+        add("TIF");
+        add("PJPEG");
+        add("AVIF");
     }};
 
 }

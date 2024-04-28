@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.service.service;
 import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.common.constant.CommonErrorCode;
 import cn.cyberpeace.mp.common.constant.FileSuffixConstant;
 import cn.cyberpeace.mp.common.service.MarkdownFileService;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +49,6 @@ public class CloudSceneServiceImpl {
 
     //文件上传
     public ServiceResult<String> uploadFile(InputStream is, String fileSuffix, String uploadType) {
-
         //检验文件格式
         switch (uploadType) {
             case "attachment":
@@ -65,5 +66,11 @@ public class CloudSceneServiceImpl {
         return markdownFileService.upload(is, fileSuffix);
     }
 
+    public String getFileNameByRelativeUrl(String fileUrl) {
+        File file = FileUtil.file(fileUrl);
+        System.out.println(file.getName());
+        System.out.println(file.length());
+        return null;
+    }
 }
 

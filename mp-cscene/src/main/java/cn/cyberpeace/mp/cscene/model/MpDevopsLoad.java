@@ -59,14 +59,17 @@ public class MpDevopsLoad extends BaseModel {
      * 附件
      */
     private String attachment;
+    private String attachmentName;
     /**
      * 帮助文档
      */
     private String readMe;
+    private String readMeName;
     /**
      * 封面
      */
     private String cover;
+    private String coverName;
     /**
      * 默认命令
      */

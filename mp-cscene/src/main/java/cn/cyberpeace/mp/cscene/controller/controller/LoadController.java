@@ -79,6 +79,8 @@ public class LoadController {
         requestData.put("pk", pk);
         JSONObject result = LoadService.getLoadList(requestData);
         if (result != null && result.get("source") != null && ((List) result.get("source")).size() == 1) {
+            MpDevopsLoad source = (MpDevopsLoad) ((List) result.get("source")).get(0);
+
             return new ServiceResult(((List) result.get("source")).get(0), BaseErrorCode.SUCCESS).asResult();
         } else {
             return new ServiceResult(null, BaseErrorCode.DATA_NOT_EXIST, "不存在该载荷").asResult();
@@ -89,7 +91,7 @@ public class LoadController {
      * 修改载荷
      * */
     @ApiOperation(value = "修改载荷", notes = "")
-    @PutMapping("/updateLoadByPk")
+    @PatchMapping("/updateLoadByPk")
     public ServiceResult updateLoadByPk(@RequestBody(required = false) JSONObject requestData) {
         Boolean updateLoadByPk = LoadService.updateLoadByPk(requestData);
         if (updateLoadByPk) {

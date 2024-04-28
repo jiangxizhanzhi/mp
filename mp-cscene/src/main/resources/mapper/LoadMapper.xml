@@ -122,8 +122,11 @@
          control_port,
          default_cmd,
          read_me,
+         read_me_name,
          cover,
+         cover_name,
          attachment,
+         attachment_name,
          create_time,
          update_time)
         VALUES (UUID(),
@@ -138,8 +141,11 @@
                 #{param.controlPort},
                 #{param.defaultCmd},
                 #{param.readMe},
+                #{param.readMeName},
                 #{param.cover},
+                #{param.coverName},
                 #{param.attachment},
+                #{param.attachmentName},
                 now(),
                 now())
     </insert>
@@ -218,11 +224,20 @@
             <if test="param != null and param.cover != null and param.cover != ''">
                 cover = #{param.cover},
             </if>
+            <if test="param != null and param.coverName != null and param.coverName != ''">
+                cover_name = #{param.coverName},
+            </if>
             <if test="param != null and param.readMe != null and param.readMe != ''">
                 read_me = #{param.readMe},
             </if>
+            <if test="param != null and param.readMeName != null and param.readMeName != ''">
+                read_me_name = #{param.readMeName},
+            </if>
             <if test="param != null and param.attachment != null and param.attachment != ''">
                 attachment = #{param.attachment},
+            </if>
+            <if test="param != null and param.attachmentName != null and param.attachmentName != ''">
+                attachment_name = #{param.attachmentName},
             </if>
             <if test="param != null and param.controlType != null and param.controlType != ''">
                 control_type = #{param.controlType},
