@@ -325,7 +325,7 @@ public class BaseCpService {
      * @param api 接口URL
      * @return
      */
-    private String buildUrl(String api){
+    protected String buildUrl(String api){
         return devopsClusterConfig.getCpUrl().concat(api);
     }
 
