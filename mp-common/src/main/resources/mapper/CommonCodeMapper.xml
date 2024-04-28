@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.common.repository.CommonCodeMapper">
+
+    <select id="getNextLevelDataByCode" resultType="cn.cyberpeace.mp.base.bo.MpSysCodeEnum">
+        SELECT
+            *
+        FROM
+            mp_sys_code_enum
+        WHERE
+            parent_code = #{code}
+    </select>
+
+    <select id="getNextAllDataByCode" resultType="cn.cyberpeace.mp.base.bo.MpSysCodeEnum">
+        WITH RECURSIVE recursion ( CODE, code_name, parent_code, remark, STATUS, LEVEL ) AS (
+        SELECT
+        T1.CODE,
+        T1.code_name,
+        T1.parent_code,
+        T1.remark,
+        T1.STATUS,
+        T1.LEVEL
+        FROM
+        mp_sys_code_enum T1
+        <where>
+            <if test="code != null and code != ''">
+                and T1.CODE = #{code}
+            </if>
+        </where>
+        UNION ALL
+        SELECT
+        T2.CODE,
+        T2.code_name,
+        T2.parent_code,
+        T2.remark,
+        T2.STATUS,
+        T2.LEVEL
+        FROM
+        mp_sys_code_enum T2,
+        recursion T3
+        WHERE
+        T2.parent_code = T3.CODE
+        ) SELECT
+        *
+        FROM
+        recursion T
+        ORDER BY
+        T.LEVEL
+    </select>
+
+</mapper>
