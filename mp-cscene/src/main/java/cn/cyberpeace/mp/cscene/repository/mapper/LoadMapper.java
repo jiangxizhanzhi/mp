@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadStageBind;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.annotations.Mapper;
@@ -46,7 +47,7 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     Boolean addSynchronousDataSource(@Param("param") JSONObject requestData);
 
-    JSONObject getSynchronousDataSource();
+    MpDevopsLoadSource getSynchronousDataSource();
 
     Boolean addLoads(@Param("param") List<JSONObject> list);
 

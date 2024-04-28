@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
@@ -151,7 +152,7 @@ public class LoadController {
     public ServiceResult getSynchronousDataSource(@RequestParam(value = "pk", required = false) String pk) {
         JSONObject requestData = new JSONObject();
         requestData.put("pk", pk);
-        JSONObject result = LoadService.getSynchronousDataSource(requestData);
+        MpDevopsLoadSource result = LoadService.getSynchronousDataSource(requestData);
         return new ServiceResult(result, BaseErrorCode.SUCCESS).asResult();
     }
 

@@ -67,7 +67,7 @@ public class LoadServiceImpl {
     @Transactional
     public JSONObject synchronousData() {
         //同步设置
-        JSONObject synchronousDataSource = getSynchronousDataSource(new JSONObject());
+        MpDevopsLoadSource synchronousDataSource = getSynchronousDataSource(new JSONObject());
 
         List<LinkedHashMap> toolList = outLoadService.getToolList(new JSONObject());
         if (toolList == null || toolList.isEmpty()) {
@@ -509,8 +509,8 @@ public class LoadServiceImpl {
     /*
      * 载荷数据同步设置查看
      * */
-    public JSONObject getSynchronousDataSource(JSONObject requestData) {
-        JSONObject result = loadMapper.getSynchronousDataSource();
+    public MpDevopsLoadSource getSynchronousDataSource(JSONObject requestData) {
+        MpDevopsLoadSource result = loadMapper.getSynchronousDataSource();
         return result;
     }
 

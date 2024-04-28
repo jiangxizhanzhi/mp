@@ -49,8 +49,11 @@ public class CommonCodeServiceImpl {
         List<MpSysCodeEnum> topCodeList = new ArrayList<>();
         MpSysCodeEnum topCode = new MpSysCodeEnum();
         for (MpSysCodeEnum menu : list) {
-            if (parentCode.equals(menu.getParentCode())) {
+            if (parentCode.equals(menu.getCode())) {
+                //最上级
                 topCode = menu;
+            }
+            if (parentCode.equals(menu.getParentCode())) {
                 //找到顶层目录
                 MpSysCodeEnum menuDto = new MpSysCodeEnum();
                 //将实体类的数据转成dto

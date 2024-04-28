@@ -500,9 +500,12 @@
         </where>
     </select>
 
-    <select id="getSynchronousDataSource" resultType="com.alibaba.fastjson.JSONObject">
-        SELECT *
-        FROM mp_devops_load_source LIMIT 1
+    <select id="getSynchronousDataSource" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource">
+        SELECT
+            *
+        FROM
+            mp_devops_load_source
+                LIMIT 1
     </select>
 
     <select id="getNamesByCode" resultType="com.alibaba.fastjson.JSONObject">
