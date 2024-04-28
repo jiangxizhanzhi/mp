@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.util.FileClient;
 import cn.cyberpeace.mp.cscene.model.ScreenshotModel;
@@ -44,6 +45,13 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
     @Autowired
     public ScreenshotController(ScreenshotService screenshotService) {
         setModelService(screenshotService);
+    }
+
+    @AuthTarget({TargetEnum.RESOURCE_USAGE_MANAGEMENT})
+    @ApiOperation("截屏列表")
+    @Override
+    public ListObjServiceResult<ScreenshotModel> list(ScreenshotQueryParams queryParams) {
+        return super.list(queryParams);
     }
 
     @AuthTarget({TargetEnum.COURSES, TargetEnum.OJ_ALL_COURSE})

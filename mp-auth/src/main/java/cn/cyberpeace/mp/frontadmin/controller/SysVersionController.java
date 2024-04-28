@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.frontadmin.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.frontadmin.response.SysVersionResponse;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequestMapping("/sys/version")
+@AuthTarget(TargetEnum.NO_AUTH)
 public class SysVersionController {
 
     @Autowired
