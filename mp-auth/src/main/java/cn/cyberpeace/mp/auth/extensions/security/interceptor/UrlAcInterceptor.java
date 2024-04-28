@@ -81,6 +81,8 @@ public class UrlAcInterceptor implements HandlerInterceptor {
 
 
             if (CollectionUtils.isEmpty(neededOneOfTheTargets)) {
+                log.error("method {}#{} not config auth info", ((HandlerMethod) handler).getBeanType()
+                        .getName(), ((HandlerMethod) handler).getMethod().getName());
                 throw new MpRuntimeException(AuthErrorCode.INTERFACE_NOT_CONFIG_AUTH_INFO);
                 //包含no_auth, 该接口不需要权限
             } else if (neededOneOfTheTargets.contains(TargetEnum.NO_AUTH.getTargets()[0])){
