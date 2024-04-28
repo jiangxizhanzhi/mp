@@ -2,11 +2,10 @@ package cn.cyberpeace.mp.auth.config;
 
 import cn.cyberpeace.mp.auth.model.BlacklistModel;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
-import cn.hutool.core.io.FileUtil;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.pattern.PathPatternParser;
 
@@ -36,7 +35,7 @@ public class BlacklistConfig implements ApplicationRunner {
         if (new File(dataPath).exists()) {
             List<String> items;
             try {
-                items = FileUtil.readUtf8Lines(dataPath);
+                items = FileUtil.readUtf8Lines(new File(dataPath));
             } catch (Exception ex) {
                 log.error("read blacklist.txt error", ex);
                 return;
