@@ -784,6 +784,9 @@ public class InitiateHandler extends HandlerCommon {
             if (CollectionUtils.isNotEmpty(gatewayIpPool)) {
                 existIps.addAll(gatewayIpPool);
             }
+//            来自于微软云要过滤五个ip
+            String[] specificIPsFromCIDR = IpUtils.getSpecificIPsFromCIDR(network.getCidr());
+            existIps.addAll(Arrays.asList(specificIPsFromCIDR));
             List<String> ipPool = IpUtils.newRandomIps(network.getCidr(), requireCount, new ArrayList<>(existIps), element.getAllocationPools(), BoolUtils.bool(element.getDhcp()));
             ipPool.addAll(gatewayIpPool);
             if (!portIps.contains(network.getGateway())) {
