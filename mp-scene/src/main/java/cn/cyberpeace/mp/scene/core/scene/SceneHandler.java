@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.scene.core.scene;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
@@ -956,7 +957,7 @@ public class SceneHandler extends BaseSceneHandler<
                 getPlugins().get(i).snapshotElementV2(nodeId, snapshotId, snapshotName, description);
             }
         } catch (Exception e) {
-            throw new MpRuntimeException(e.getMessage());
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format(e.getMessage()));
         }
         element.setEvent(SceneElementModel.Event.SNAPSHOT);
         element.setEventStatus(EventStatus.OVER);
