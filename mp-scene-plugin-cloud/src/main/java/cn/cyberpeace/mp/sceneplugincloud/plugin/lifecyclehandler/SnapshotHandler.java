@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementSnapshotBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
+import cn.cyberpeace.mp.scene.core.event.base.ProcessStatus;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
@@ -73,6 +74,31 @@ public class SnapshotHandler extends HandlerCommon {
             runElementProgress(nodeId, SceneElementModel.Event.SNAPSHOT, ElementProcess.SNAPSHOT_DYNAMIPS, () -> {
                 this.snapshot(element, snapshotId, snapshotName, description);
             });
+        }
+    }
+
+    public void snapshotElementV2(CloudPluginSceneElementBO element, String snapshotId, String snapshotName, String description) {
+        String nodeId = element.getSrcElement().getId();
+        Integer virtualType = element.getVirtualType();
+        if (virtualType == null) {
+            log.warn("Element({}) {} has no virtual type", element.getSrcElement().getEid(), element.getSrcElement()
+                    .getId());
+            return;
+        }
+        try {
+            element.getSrcElement().setProcess(SceneProcess.SNAPSHOT_TERMINALS.getProcess());
+            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                this.snapshot(element, snapshotId, snapshotName, description);
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                this.snapshot(element, snapshotId, snapshotName, description);
+            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
+                this.snapshot(element, snapshotId, snapshotName, description);
+            }
+            element.getSrcElement().setProcessStatus(ProcessStatus.OVER);
+        } catch (Exception e) {
+            element.getSrcElement().setProcessStatus(ProcessStatus.ABNORMAL);
+            element.getSrcElement().setProcessMessage(e.getMessage());
+            throw e;
         }
     }
 

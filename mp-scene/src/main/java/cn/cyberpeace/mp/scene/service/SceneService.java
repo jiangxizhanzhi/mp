@@ -651,6 +651,31 @@ public class SceneService {
         }
     }
 
+
+    public ServiceResult<Boolean> snapshotElementSyncV2(String id, String nodeId, String snapshotId, String snapshotName, String description, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+
+        SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(id, nodeId, sceneHandler.getElement(nodeId)
+                .getName(), SceneElementModel.Event.SNAPSHOT);
+        SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
+        if (originLockInfo == null) {
+            // 锁获取成功 没有其他线程执行操作
+            try {
+                sceneHandler.snapshotElementV2(nodeId, snapshotId, snapshotName, description);
+            } finally {
+                SceneEventUtils.unLock(id);
+            }
+            return new ServiceResult<>(true);
+        } else if (originLockInfo.getEvent() == SceneElementModel.Event.SNAPSHOT) {
+            // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
+            return new ServiceResult<>(true);
+        } else {
+            // 其他线程执行场景的其他操作 则返回报错
+            throw this.createOperateException(originLockInfo);
+        }
+    }
+
     private SceneEventUtils.SceneEventInfo createSceneEventInfo(String id, String nodeId, String nodeName, int event) {
         SceneEventUtils.SceneEventInfo eventInfo = new SceneEventUtils.SceneEventInfo();
         String action = MessageCommon.get(SceneEventHandler.EVENT_NAME_MAP.get(event));

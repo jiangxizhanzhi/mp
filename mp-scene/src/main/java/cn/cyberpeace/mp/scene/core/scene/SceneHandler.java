@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.scene.core.scene;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
 import cn.cyberpeace.mp.scene.constant.CommonSceneStage;
@@ -943,6 +944,23 @@ public class SceneHandler extends BaseSceneHandler<
             return;
         }
         overElementEvent(nodeId, SceneElementModel.Event.SNAPSHOT);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            updateSceneElementWithPlugins(nodeId);
+        }
+    }
+
+    public void snapshotElementV2(String nodeId, String snapshotId, String snapshotName, String description) {
+        SceneElementBO element = getElement(nodeId);
+        try {
+            for (int i = getPlugins().size() - 1; i >= 0; i--) {
+                getPlugins().get(i).snapshotElementV2(nodeId, snapshotId, snapshotName, description);
+            }
+        } catch (Exception e) {
+            throw new MpRuntimeException(e.getMessage());
+        }
+        element.setEvent(SceneElementModel.Event.SNAPSHOT);
+        element.setEventStatus(EventStatus.OVER);
+        updateSceneElement(nodeId);
         if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
             updateSceneElementWithPlugins(nodeId);
         }

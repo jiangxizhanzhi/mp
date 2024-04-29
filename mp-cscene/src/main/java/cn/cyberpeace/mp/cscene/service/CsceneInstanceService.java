@@ -1483,32 +1483,29 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         // 先保存cscene中的关联信息
         String snapshotId = csceneSnapshotService.saveCsceneSnapshot(csceneId, csceneInstanceId, nodeId, snapshotName).getSource();
 
-        // 异步创建快照
-        ElementTaskPool.getInstance().executeTask(() -> {
-            // 打快照
-            String sceneId = csceneInstance.getScene();
-            if (sceneId == null) {
-                throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
-            }
-            boolean result = this.sceneService
-                    .snapshotElementSync(sceneId, nodeId, snapshotId, snapshotName, description, context.toSceneContext())
-                    .getSource();
+        // 打快照
+        String sceneId = csceneInstance.getScene();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        boolean result = this.sceneService.snapshotElementSyncV2(sceneId, nodeId, snapshotId, snapshotName, description, context != null ? context.toSceneContext() : null)
+                .getSource();
 
-            // 更新场景模板靶标的快照、cscene中的关联信息
-            SceneInfo sceneInfo = this.getSceneInfo(id);
-            if (StringUtils.isNotEmpty(sceneInfo.getSceneConfigId())) {
-                if (result) {
-                    SceneElementSnapshotModel model = sceneSnapshotService.getElementSnapshot(snapshotId).getSource();
-                    if (model != null) {
-                        scenePluginCloudSceneConfigService.updateElementImage(sceneInfo.getSceneConfigId(), nodeId, SnapshotAddressUtils.parseAddress(model.getAddress()).getImageName());
-                        SnapshotAddressUtils.SnapshotAddressInfo parseResult = SnapshotAddressUtils.parseAddress(model.getAddress());
-                        csceneSnapshotService.updateCsceneSnapshotRelativeInfo(snapshotId, parseResult.getSnapshotUuid(), model.getSourceName());
-                    } else {
-                        log.error("do not find snapshot from scene snapshot , id is {}", snapshotId);
-                    }
+        // 更新场景模板靶标的快照、cscene中的关联信息
+        SceneInfo sceneInfo = this.getSceneInfo(id);
+        if (StringUtils.isNotEmpty(sceneInfo.getSceneConfigId())) {
+            if (result) {
+                SceneElementSnapshotModel model = sceneSnapshotService.getElementSnapshot(snapshotId).getSource();
+                if (model != null) {
+                    scenePluginCloudSceneConfigService.updateElementImage(sceneInfo.getSceneConfigId(), nodeId, SnapshotAddressUtils.parseAddress(model.getAddress())
+                            .getImageName());
+                    SnapshotAddressUtils.SnapshotAddressInfo parseResult = SnapshotAddressUtils.parseAddress(model.getAddress());
+                    csceneSnapshotService.updateCsceneSnapshotRelativeInfo(snapshotId, parseResult.getSnapshotUuid(), model.getSourceName());
+                } else {
+                    log.error("do not find snapshot from scene snapshot , id is {}", snapshotId);
                 }
             }
-        });
+        }
         return new ServiceResult<>(true);
     }
 

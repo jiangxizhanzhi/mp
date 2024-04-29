@@ -468,6 +468,15 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
     @Override
+    public void snapshotElementV2(String nodeId, String snapshotId, String snapshotName, String description) {
+        CloudPluginSceneElementBO element = getElement(nodeId);
+        if (element == null) {
+            throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
+        }
+        new SnapshotHandler(this, getSceneHandler().getScene().getEvent()).snapshotElementV2(element, snapshotId, snapshotName, description);
+    }
+
+    @Override
     public ScenePluginDataBO toData() {
         getElementPortMap().forEach((portId, cloudPort) -> {
             CloudPluginSceneElementBO auxiliaryNetworkCloudElement = handlerUtils.getPortAuxiliaryNetworkCloudElement(portId);
