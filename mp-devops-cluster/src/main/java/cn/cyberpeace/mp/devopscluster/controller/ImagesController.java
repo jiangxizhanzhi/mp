@@ -139,6 +139,9 @@ public class ImagesController {
         }
         BasePageBO<ImageConvertModel> model = imagesConverter.page(dto);
         List<ImagesPageVO> modelList = convertBOToPageVO(model);
+        if(StringUtils.isEmpty(orders)){
+            return new PageResult<>(modelList, model.getTotal());
+        }
         if("disk".equals(orders) || "-disk".equals(orders)){
             VmCompare vmCompare = new VmCompare();
             List<ImagesPageVO> noDisks = modelList.stream().filter(imagesPageVO -> imagesPageVO.getImageType().equals("dynamips") || null == imagesPageVO.getExtVm()).collect(Collectors.toList());
