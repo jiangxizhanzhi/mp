@@ -42,6 +42,7 @@ public class CommonFileServiceImpl extends BaseRemoteFileServiceImpl {
                 }
                 break;
             default:
+                return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID, "请传递正确的uploadType参数进行文件校验").asResult();
         }
         var uploadResult = super.upload(inputStream, fileSuffix);
         if (!uploadResult.judgeSuccess()) {

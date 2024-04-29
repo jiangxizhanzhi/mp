@@ -52,15 +52,14 @@ public class OutLoadServiceImpl {
     public Map<String, Object> getTaskNet(JSONObject requestData) {
         //todo 根据载荷同步设置获取具体地址、认证和协议
         String url = "http://10.108.1.10:5002/stgj/task/enter";
-        Map<String, String> formMap = new HashMap();
-        formMap.put("taskId", requestData.get("taskId") != null ? requestData.get("taskId").toString() : "");
+        url = url + "?taskId=" + requestData.get("taskId") != null ? requestData.get("taskId").toString() : "";
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
         headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
 
         String result = null;
         try {
-            result = HttpUtils.sendHttpGet(url, formMap, 2000);
+            result = HttpUtils.sendHttpGet(url, headersMap, 2000);
         } catch (IOException e) {
             return null;
         }
@@ -71,15 +70,14 @@ public class OutLoadServiceImpl {
 
     public Boolean updateTaskInfo(JSONObject requestData) {
         String url = "http://10.108.1.10:5002/stgj/task/modify";
-        Map<String, String> formMap = new HashMap();
-        formMap.put("id", requestData.get("taskId") != null ? requestData.get("taskId").toString() : "");
-        formMap.put("execCommand", requestData.get("param_list") != null ? requestData.get("param_list").toString() : "");
+        url = url + "?id=" + requestData.get("id") != null ? requestData.get("id").toString() : "" +
+                "&execCommand=" + requestData.get("execCommand") != null ? requestData.get("execCommand").toString() : "";
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
         headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
 
         try {
-            String result = HttpUtils.sendHttpGet(url, formMap, 2000);
+            String result = HttpUtils.sendHttpGet(url, headersMap, 2000);
             Map<String, Object> dataMap = JsonUtils.parseMap(result);
             if ("0".equals(dataMap.get("code").toString())) {
                 return true;
@@ -100,14 +98,14 @@ public class OutLoadServiceImpl {
 
     public Boolean startInstance(JSONObject requestData) {
         String url = "http://10.108.1.10:5002/stgj/instance/start";
-        Map<String, String> formMap = new HashMap();
-        formMap.put("load_id", requestData.get("instanceId") != null ? requestData.get("instanceId").toString() : "");
+        url = url + "?load_id=" + requestData.get("instanceId") != null ? requestData.get("instanceId").toString() : "";
+
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
         headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
 
         try {
-            String result = HttpUtils.sendHttpGet(url, formMap, 2000);
+            String result = HttpUtils.sendHttpGet(url, headersMap, 2000);
             Map<String, Object> dataMap = JsonUtils.parseMap(result);
             if ("0".equals(dataMap.get("code").toString())) {
                 return true;
@@ -120,14 +118,13 @@ public class OutLoadServiceImpl {
 
     public Boolean stopInstance(JSONObject requestData) {
         String url = "http://10.108.1.10:5002/stgj/instance/stop";
-        Map<String, String> formMap = new HashMap();
-        formMap.put("load_id", requestData.get("instanceId") != null ? requestData.get("instanceId").toString() : "");
+        url = url + "?load_id=" + requestData.get("instanceId") != null ? requestData.get("instanceId").toString() : "";
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
         headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
 
         try {
-            String result = HttpUtils.sendHttpGet(url, formMap, 2000);
+            String result = HttpUtils.sendHttpGet(url, headersMap, 2000);
             Map<String, Object> dataMap = JsonUtils.parseMap(result);
             if ("0".equals(dataMap.get("code").toString())) {
                 return true;
@@ -157,10 +154,9 @@ public class OutLoadServiceImpl {
     public List getToolList(JSONObject requestData) {
         //todo 根据载荷同步设置获取具体地址、认证和协议
         String url = "http://10.108.1.10:5002/stgj/tool/list";
-        Map<String, String> formMap = new HashMap();
-        formMap.put("pagenum", requestData.get("pagenum") != null ? requestData.get("pagenum").toString() : "1");
-        formMap.put("pagesize", requestData.get("pagesize") != null ? requestData.get("pagesize").toString() : "20");
-        formMap.put("keyword", requestData.get("keyword") != null ? requestData.get("keyword").toString() : "");
+        url = url + "?pagenum=" + requestData.get("pagenum") != null ? requestData.get("pagenum").toString() : "1" +
+                "&pagesize=" + requestData.get("pagesize") != null ? requestData.get("pagesize").toString() : "20" +
+                "&keyword=" + requestData.get("keyword") != null ? requestData.get("keyword").toString() : "";
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
         headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
@@ -168,7 +164,7 @@ public class OutLoadServiceImpl {
         List dataList = new ArrayList();
         String result = null;
         try {
-            result = HttpUtils.sendHttpGet(url, formMap, 2000);
+            result = HttpUtils.sendHttpGet(url, headersMap, 2000);
         } catch (IOException e) {
             return dataList;
         }

@@ -1,6 +1,12 @@
 package cn.cyberpeace.mp.cscene.service.service;
 
+import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.ServletUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.cscene.model.*;
 import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
@@ -8,6 +14,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementMode
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
+import com.alibaba.excel.util.ListUtils;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
@@ -29,6 +36,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+
+import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
 
 @Service
 public class LoadServiceImpl {
@@ -53,12 +62,37 @@ public class LoadServiceImpl {
         Integer pageSize = requestData.get("pageSize") != null ? requestData.getInteger("pageSize") : 10;
         requestData.put("pageSize", pageSize);
         requestData.put("offset", (pageNum - 1) * pageSize);
+        //sql改动时,数量的接口也需要改动
         List<MpDevopsLoad> list = loadMapper.getLoadList(requestData);
-        Integer total = loadMapper.getLoadListotal(requestData);
         JSONObject result = new JSONObject();
         result.put("source", list);
-        result.put("total", total);
+        result.put("total", list.size());
         return result;
+    }
+
+    public List getBindLoopholes(Integer pk) {
+        //todo 服务地址
+        String url = "http://10.108.1.10:80/api/vuln/admin/vuln/load_code";
+        url = url + "?load_id=" + pk.toString();
+        //请求头设置
+        HashMap<String, String> headersMap = new HashMap<>();
+        String token = JwtCommon.getToken();
+        headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
+        headersMap.put("Authorization", token);
+
+        String result = null;
+        try {
+            result = HttpUtils.sendHttpGet(url, headersMap, 2000);
+        } catch (IOException e) {
+            return null;
+        }
+        List list = new ArrayList();
+        Map<String, Object> dataMap = JsonUtils.parseMap(result);
+        if(dataMap != null && dataMap.get("code") != null &&
+                dataMap.get("code").equals("VULN-000000") && dataMap.get("data") != null){
+            list = (List) dataMap.get("data");
+        }
+        return list;
     }
 
     /*
@@ -153,19 +187,16 @@ public class LoadServiceImpl {
     /*
      * 新增载荷
      * */
-    public Boolean addLoad(JSONObject requestData) {
-        Boolean addLoad;
+    public ServiceResult addLoad(JSONObject requestData) {
         if (requestData != null) {
-            addLoad = loadMapper.addLoad(requestData);
-            if(requestData.get("loopholes") != null){
-                String[] loopholes = requestData.get("loopholes").toString().split(";");
-                //todo 载荷与漏洞的绑定
-                System.out.println(loopholes);
+            Boolean addLoad = loadMapper.addLoad(requestData);
+            if(!addLoad){
+                return new ServiceResult(null, BaseErrorCode.ERROR, "载荷数据新增失败").asResult();
             }
+            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return false;
+            return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID, "无参数").asResult();
         }
-        return addLoad;
     }
 
     /*
@@ -512,16 +543,6 @@ public class LoadServiceImpl {
     public MpDevopsLoadSource getSynchronousDataSource(JSONObject requestData) {
         MpDevopsLoadSource result = loadMapper.getSynchronousDataSource();
         return result;
-    }
-
-    /*
-     * 获取code码对应组
-     * */
-    public List<JSONObject> getNamesByCode(JSONObject requestData) {
-        if(requestData != null && requestData.get("isFull") != null && requestData.get("isFull").equals("1")){
-            return loadMapper.getAllSubordinatesByCode(requestData);
-        }
-        return loadMapper.getNamesByCode(requestData);
     }
 
     /*

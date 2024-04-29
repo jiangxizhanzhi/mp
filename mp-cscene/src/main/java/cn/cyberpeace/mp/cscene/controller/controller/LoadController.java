@@ -80,9 +80,10 @@ public class LoadController {
         requestData.put("pk", pk);
         JSONObject result = LoadService.getLoadList(requestData);
         if (result != null && result.get("source") != null && ((List) result.get("source")).size() == 1) {
-            MpDevopsLoad source = (MpDevopsLoad) ((List) result.get("source")).get(0);
-
-            return new ServiceResult(((List) result.get("source")).get(0), BaseErrorCode.SUCCESS).asResult();
+            MpDevopsLoad load = (MpDevopsLoad) ((List) result.get("source")).get(0);
+            List loopholes = LoadService.getBindLoopholes(load.getPk());
+            load.setLoopholes(loopholes);
+            return new ServiceResult(load, BaseErrorCode.SUCCESS).asResult();
         } else {
             return new ServiceResult(null, BaseErrorCode.DATA_NOT_EXIST, "不存在该载荷").asResult();
         }
@@ -108,12 +109,8 @@ public class LoadController {
     @ApiOperation(value = "新增载荷", notes = "")
     @PostMapping("/addLoad")
     public ServiceResult addLoad(@RequestBody(required = false) JSONObject requestData) {
-        Boolean addLoad = LoadService.addLoad(requestData);
-        if (addLoad) {
-            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-        } else {
-            return new ServiceResult(null, BaseErrorCode.ERROR, "新增失败").asResult();
-        }
+        ServiceResult addLoad = LoadService.addLoad(requestData);
+        return addLoad;
     }
 
     /*
@@ -240,20 +237,6 @@ public class LoadController {
         request.put("overTime", overTimeLocalDateTime != null ? overTimeLocalDateTime.toString() : null);
         List<MpDevopsLoadSceneLog> list = LoadService.getLoadExecutionResult(request);
         return new ListObjServiceResult(list, list.size()).asResult();
-    }
-
-    /*
-     * code码对应组
-     * */
-    @ApiOperation(value = "code码对应组", notes = "")
-    @GetMapping("/getNamesByCode")
-    public ServiceResult getNamesByCode(@RequestParam(value = "code") String code,
-                                        @RequestParam(value = "isFull", required = false) String isFull) {
-        JSONObject requestData = new JSONObject();
-        requestData.put("code", code);
-        requestData.put("isFull", isFull);
-        List<JSONObject> list = LoadService.getNamesByCode(requestData);
-        return new ServiceResult(list, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
     /*

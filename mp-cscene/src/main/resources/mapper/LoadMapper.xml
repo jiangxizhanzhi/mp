@@ -411,6 +411,7 @@
                 and control_type = #{param.controlType}
             </if>
         </where>
+        order by create_time desc
         <if test="param != null and param.offset != null and param.pageSize != null">
             limit #{param.offset}, #{param.pageSize}
         </if>
@@ -473,61 +474,12 @@
         </if>
     </select>
 
-    <select id="getLoadListotal" resultType="java.lang.Integer">
-        SELECT
-        count(0)
-        FROM
-        mp_devops_load
-        <where>
-            <if test="param != null and param.pk != null and param.pk != ''">
-                and pk = #{param.pk}
-            </if>
-            <if test="param != null and param.toolName != null and param.toolName != ''">
-                and tool_name like concat('%', #{param.toolName}, '%')
-            </if>
-            <if test="param != null and param.actionType != null and param.actionType != ''">
-                and action_type = #{param.actionType}
-            </if>
-            <if test="param != null and param.runTable != null and param.runTable != ''">
-                and run_table = #{param.runTable}
-            </if>
-            <if test="param != null and param.source != null and param.source != ''">
-                and source = #{param.source}
-            </if>
-            <if test="param != null and param.controlType != null and param.controlType != ''">
-                and control_type = #{param.controlType}
-            </if>
-        </where>
-    </select>
-
     <select id="getSynchronousDataSource" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource">
         SELECT
             *
         FROM
             mp_devops_load_source
                 LIMIT 1
-    </select>
-
-    <select id="getNamesByCode" resultType="com.alibaba.fastjson.JSONObject">
-        SELECT
-        pk,
-        code,
-        code_name,
-        is_type,
-        supplement,
-        remark,
-        parent_code,
-        level,
-        status,
-        creator,
-        DATE_FORMAT(create_time, '%Y-%m-%d %H:%i:%S') AS create_time
-        FROM
-        mp_sys_code_enum
-        <where>
-            <if test="param != null and param.code != null and param.code != ''">
-                and parent_code = #{param.code}
-            </if>
-        </where>
     </select>
 
     <select id="getToolListByloadPks" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoad">
@@ -586,42 +538,4 @@
             </if>
         </where>
     </select>
-
-    <select id="getAllSubordinatesByCode" resultType="com.alibaba.fastjson.JSONObject">
-        WITH RECURSIVE recursion ( CODE, code_name, parent_code, remark, STATUS, LEVEL ) AS (
-            SELECT
-                T1.CODE,
-                T1.code_name,
-                T1.parent_code,
-                T1.remark,
-                T1.STATUS,
-                T1.LEVEL
-            FROM
-                mp_sys_code_enum T1
-            <where>
-                <if test="param != null and param.code != null and param.code != ''">
-                    and T1.CODE = #{param.code}
-                </if>
-            </where>
-            UNION ALL
-            SELECT
-                T2.CODE,
-                T2.code_name,
-                T2.parent_code,
-                T2.remark,
-                T2.STATUS,
-                T2.LEVEL
-            FROM
-                mp_sys_code_enum T2,
-                recursion T3
-            WHERE
-                T2.parent_code = T3.CODE
-        ) SELECT
-            *
-        FROM
-            recursion T
-        ORDER BY
-            T.LEVEL
-    </select>
-
 </mapper>
