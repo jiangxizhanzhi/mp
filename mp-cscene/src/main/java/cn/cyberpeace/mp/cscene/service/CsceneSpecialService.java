@@ -34,6 +34,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneSnapshotMapper;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.SceneStatusUtil;
+import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
@@ -158,6 +159,15 @@ public class CsceneSpecialService {
             if (csceneElementStat.getDisk() != null) {
                 stat.setTotalDisk(stat.getTotalDisk() + csceneElementStat.getDisk());
             }
+        }
+
+        FlowConfig flowConfig = BeanCommon.getBean(FlowConfig.class);
+        List<CsceneElementStat> flowStats = csceneMapper.statGroupByFlow(ids, flowConfig.getTrexCpu(), flowConfig.getTrexRam(), flowConfig.getTrexDisk());
+        for (CsceneElementStat elementStat : flowStats) {
+            CsceneStat stat = statMap.get(elementStat.getCsceneId());
+            stat.setTotalDisk(stat.getTotalDisk() + elementStat.getDisk());
+            stat.setTotalRam(stat.getTotalRam() + elementStat.getRam());
+            stat.setTotalCpu(stat.getTotalCpu() + elementStat.getCpu());
         }
 
         HumanCondition virtualStatCondition = new HumanCondition()

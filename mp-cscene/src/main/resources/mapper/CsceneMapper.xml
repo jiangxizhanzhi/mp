@@ -28,4 +28,16 @@
                 and b.node_id = c.scene_element) as x
         GROUP BY x.cscene_id , x.type;
     </select>
+
+    <select id="statGroupByFlow" parameterType="java.util.List"
+            resultType="cn.cyberpeace.mp.cscene.model.CsceneElementStat">
+        select a.id as csceneId , #{cpu} as cpu , #{ram} as ram , #{disk} as disk
+        from mp_cscene_cscene a,
+        mp_scenepluginflow_scene_config b
+        where a.scene_config = b.scene
+        and a.id in
+        <foreach collection="ids" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
 </mapper>
