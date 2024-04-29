@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.service.service;
 
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -288,7 +289,7 @@ public class LoadServiceImpl {
     /*
      * 批量新增载荷执行结果
      * */
-    public Boolean addLoadExecutionOutResult(List<JSONObject> requestData) {
+    public Boolean addLoadExecutionOutResult(List<MpDevopsLoadSceneLog> requestData) {
         Boolean addLoadExecutionOutResult;
         if (requestData.size() > 0) {
             addLoadExecutionOutResult = loadMapper.addLoadExecutionOutResult(requestData);
@@ -360,10 +361,11 @@ public class LoadServiceImpl {
      * 载荷执行结果导出
      * */
     public Boolean exportLoadExecutionResult(HttpServletRequest request, HttpServletResponse response,
-                                             JSONObject requestData) throws IOException {
+                                             MpDevopsLoadSceneLog requestData) throws IOException {
         //导出文件xlsx
         try {
-            List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResultStatistics(requestData);
+            JSONObject requestDataObject =  JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
+            List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResultStatistics(requestDataObject);
             Date date = new Date();
             //格式化当前时间格式
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss");

@@ -31,7 +31,7 @@ public class CommonFileController {
     @ApiOperation("上传文件")
     @PostMapping("/file_upload")
     public ServiceResult uploadFile(@RequestParam(value = "file") MultipartFile file,
-                                    @RequestParam(value = "uploadType", required = false) String uploadType)
+                                    @RequestParam(value = "upload_type", required = false) String uploadType)
             throws IOException {
         ServiceResult uploadResult = commonFileService.uploadFile
                 (file.getInputStream(), file.getOriginalFilename(), FileUtil.getSuffix(file.getOriginalFilename()), uploadType);

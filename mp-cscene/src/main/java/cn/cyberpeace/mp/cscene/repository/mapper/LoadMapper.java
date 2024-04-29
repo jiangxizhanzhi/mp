@@ -34,7 +34,7 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     Integer addResult(@Param("param") JSONObject requestData);
 
-    Boolean addLoadExecutionOutResult(@Param("param") List<JSONObject> requestData);
+    Boolean addLoadExecutionOutResult(@Param("param") List<MpDevopsLoadSceneLog> requestData);
 
     Boolean addLoad(@Param("param") JSONObject requestData);
 

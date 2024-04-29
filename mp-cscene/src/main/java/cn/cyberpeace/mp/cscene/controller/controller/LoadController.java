@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller.controller;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -40,10 +41,10 @@ public class LoadController {
     @GetMapping("/getLoadList")
     public ListObjServiceResult getLoadList(@RequestParam(value = "per_page", defaultValue = "10") Integer pageSize,
                                             @RequestParam(value = "page", defaultValue = "1") Integer pageNum,
-                                            @RequestParam(value = "actionType", required = false) String actionType,
-                                            @RequestParam(value = "runTable", required = false) String runTable,
-                                            @RequestParam(value = "toolName", required = false) String toolName,
-                                            @RequestParam(value = "controlType", required = false) String controlType,
+                                            @RequestParam(value = "action_type", required = false) String actionType,
+                                            @RequestParam(value = "run_table", required = false) String runTable,
+                                            @RequestParam(value = "tool_name", required = false) String toolName,
+                                            @RequestParam(value = "control_type", required = false) String controlType,
                                             @RequestParam(value = "source", required = false) String source) {
         JSONObject requestData = new JSONObject();
         requestData.put("pageNum", pageNum);
@@ -62,9 +63,10 @@ public class LoadController {
      * */
     @ApiOperation(value = "根据pks获取载荷列表", notes = "")
     @PostMapping("/getToolListByloadPks")
-    public ServiceResult getToolListByloadPks(@RequestBody(required = false) JSONObject requestData) {
+    public ServiceResult getToolListByloadPks(@RequestBody(required = false) MpDevopsLoad requestData) {
+        JSONObject jsonObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
         if (requestData != null) {
-            List<MpDevopsLoad> getToolListByloadPks = LoadService.getToolListByloadPks(requestData);
+            List<MpDevopsLoad> getToolListByloadPks = LoadService.getToolListByloadPks(jsonObject);
             return new ServiceResult(getToolListByloadPks, BaseErrorCode.SUCCESS).asResult();
         }
         return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID).asResult();
@@ -94,8 +96,9 @@ public class LoadController {
      * */
     @ApiOperation(value = "修改载荷", notes = "")
     @PatchMapping("/updateLoadByPk")
-    public ServiceResult updateLoadByPk(@RequestBody(required = false) JSONObject requestData) {
-        Boolean updateLoadByPk = LoadService.updateLoadByPk(requestData);
+    public ServiceResult updateLoadByPk(@RequestBody(required = false) MpDevopsLoad requestData) {
+        JSONObject jsonObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
+        Boolean updateLoadByPk = LoadService.updateLoadByPk(jsonObject);
         if (updateLoadByPk) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
@@ -108,8 +111,9 @@ public class LoadController {
      * */
     @ApiOperation(value = "新增载荷", notes = "")
     @PostMapping("/addLoad")
-    public ServiceResult addLoad(@RequestBody(required = false) JSONObject requestData) {
-        ServiceResult addLoad = LoadService.addLoad(requestData);
+    public ServiceResult addLoad(@RequestBody(required = false) MpDevopsLoad requestData) {
+        JSONObject jsonObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
+        ServiceResult addLoad = LoadService.addLoad(jsonObject);
         return addLoad;
     }
 
@@ -118,8 +122,9 @@ public class LoadController {
      * */
     @ApiOperation(value = "删除载荷", notes = "")
     @DeleteMapping("/deleteLoadByPk")
-    public ServiceResult deleteLoadByPk(@RequestBody(required = false) JSONObject requestData) {
-        Boolean deleteLoadByPk = LoadService.deleteLoadByPk(requestData);
+    public ServiceResult deleteLoadByPk(@RequestBody(required = false) MpDevopsLoad requestData) {
+        JSONObject jsonObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
+        Boolean deleteLoadByPk = LoadService.deleteLoadByPk(jsonObject);
         if (deleteLoadByPk) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
@@ -158,8 +163,9 @@ public class LoadController {
      * */
     @ApiOperation(value = "载荷数据同步设置保存", notes = "")
     @PostMapping("/synchronousDataSource")
-    public ServiceResult synchronousDataSource(@RequestBody(required = false) JSONObject requestData) {
-        Boolean synchronousDataSource = LoadService.synchronousDataSource(requestData);
+    public ServiceResult synchronousDataSource(@RequestBody(required = false) MpDevopsLoadSource requestData) {
+        JSONObject jsonObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
+        Boolean synchronousDataSource = LoadService.synchronousDataSource(jsonObject);
         if (synchronousDataSource) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
@@ -167,12 +173,14 @@ public class LoadController {
         }
     }
 
+//**********************************************************************************************************//
+
     /*
      * 根据场景id获取绑定的载荷
      * */
     @ApiOperation(value = "根据场景id获取绑定的载荷", notes = "")
     @GetMapping("/getLoadBySceneId")
-    public ServiceResult getLoadBySceneId(@RequestParam(value = "sceneId") String sceneId) {
+    public ServiceResult getLoadBySceneId(@RequestParam(value = "scene_id") String sceneId) {
         List list = LoadService.getLoadBySceneId(sceneId);
         return new ServiceResult(list, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
@@ -182,7 +190,8 @@ public class LoadController {
      * */
     @ApiOperation(value = "载荷执行结果统计", notes = "")
     @PostMapping("/getLoadExecutionResultStatistics")
-    public ServiceResult getLoadExecutionResultStatistics(@RequestBody(required = false) JSONObject request) {
+    public ServiceResult getLoadExecutionResultStatistics(@RequestBody(required = false) MpDevopsLoadSceneLog requestData) {
+        JSONObject request = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
         String sceneId = request.get("sceneId") != null && !request.get("sceneId").toString().equals("") ? request.get("sceneId").toString() : "";
         if (sceneId.equals("")) {
             return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "sceneId不能为空").asResult();
@@ -213,7 +222,8 @@ public class LoadController {
      * */
     @ApiOperation(value = "载荷执行结果", notes = "")
     @PostMapping("/getLoadExecutionResult")
-    public ListObjServiceResult getLoadExecutionResult(@RequestBody(required = false) JSONObject request) {
+    public ListObjServiceResult getLoadExecutionResult(@RequestBody(required = false) MpDevopsLoadSceneLog requestData) {
+        JSONObject request = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
         String sceneId = request.get("sceneId") != null && !request.get("sceneId").toString().equals("") ? request.get("sceneId").toString() : "";
         if (sceneId.equals("")) {
             return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "sceneId不能为空").asResult();
@@ -260,7 +270,8 @@ public class LoadController {
      * */
     @ApiOperation(value = "删除载荷执行结果", notes = "")
     @DeleteMapping("/deleteLoadExecutionResultByPk")
-    public ServiceResult deleteLoadExecutionResultByPk(@RequestBody(required = false) JSONObject requestData) {
+    public ServiceResult deleteLoadExecutionResultByPk(@RequestBody(required = false) MpDevopsLoadSceneLog request) {
+        JSONObject requestData = JsonCommon.snakeParse(JsonCommon.stringify(request), JSONObject.class);
         Boolean deleteLoadExecutionResultByPk = LoadService.deleteLoadExecutionResultByPk(requestData);
         if (deleteLoadExecutionResultByPk) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
@@ -274,7 +285,8 @@ public class LoadController {
      * */
     @ApiOperation(value = "修改载荷执行结果", notes = "")
     @PutMapping("/updateLoadExecutionResultByPk")
-    public ServiceResult updateLoadExecutionResultByPk(@RequestBody(required = false) JSONObject requestData) {
+    public ServiceResult updateLoadExecutionResultByPk(@RequestBody(required = false) MpDevopsLoadSceneLog request) {
+        JSONObject requestData = JsonCommon.snakeParse(JsonCommon.stringify(request), JSONObject.class);
         Boolean updateLoadExecutionResultByPk = LoadService.updateLoadExecutionResultByPk(requestData);
         if (updateLoadExecutionResultByPk) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
@@ -288,7 +300,8 @@ public class LoadController {
      * */
     @ApiOperation(value = "新增载荷执行结果", notes = "")
     @PostMapping("/addLoadExecutionResult")
-    public ServiceResult addLoadExecutionResult(@RequestBody(required = false) JSONObject requestData) {
+    public ServiceResult addLoadExecutionResult(@RequestBody(required = false) MpDevopsLoadSceneLog request) {
+        JSONObject requestData = JsonCommon.snakeParse(JsonCommon.stringify(request), JSONObject.class);
         if (requestData != null) {
             Boolean addLoadExecutionResult = LoadService.addLoadExecutionResult(requestData);
             if (addLoadExecutionResult) {
@@ -303,7 +316,7 @@ public class LoadController {
      * */
     @ApiOperation(value = "批量新增载荷执行结果", notes = "")
     @PostMapping("/addLoadExecutionOutResult")
-    public ServiceResult addLoadExecutionOutResult(@RequestBody(required = false) List<JSONObject> requestData) {
+    public ServiceResult addLoadExecutionOutResult(@RequestBody(required = false) List<MpDevopsLoadSceneLog> requestData) {
         if (requestData != null) {
             Boolean addLoadExecutionOutResult = LoadService.addLoadExecutionOutResult(requestData);
             if (addLoadExecutionOutResult) {
@@ -333,7 +346,7 @@ public class LoadController {
     @ApiOperation(value = "载荷执行结果导出", notes = "")
     @PostMapping("/exportLoadExecutionResult")
     public ServiceResult exportLoadExecutionResult(HttpServletRequest request, HttpServletResponse response,
-                                                   @RequestBody(required = false) JSONObject requestData) throws IOException {
+                                                   @RequestBody(required = false) MpDevopsLoadSceneLog requestData) throws IOException {
         Boolean exportLoadExecutionResult = LoadService.exportLoadExecutionResult(request, response, requestData);
         if (exportLoadExecutionResult) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();

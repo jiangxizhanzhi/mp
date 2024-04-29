@@ -54,7 +54,7 @@ public class CommonCodeController {
     @ApiOperation("根据code查找下级所有(树级)")
     @GetMapping("/getNextAllTreeDataByCode")
     public ServiceResult getNextAllTreeDataByCode(@RequestParam(value = "code") String code,
-                                                  @RequestParam(value = "includeSelf", required = false) Boolean includeSelf) {
+                                                  @RequestParam(value = "include_self", required = false) Boolean includeSelf) {
         List<MpSysCodeEnum> getNextAllDataByCode = commonCodeService.getNextAllTreeDataByCode(code,includeSelf);
         return new ServiceResult(getNextAllDataByCode, BaseErrorCode.SUCCESS).asResult();
     }
