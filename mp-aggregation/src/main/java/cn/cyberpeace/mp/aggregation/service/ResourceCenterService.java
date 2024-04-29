@@ -125,7 +125,7 @@ public class ResourceCenterService {
         csceneBO.setLogo(fdfsLogoFilePath);
 
         // 保存
-        return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
+        return csceneService.syncForImport(csceneBO, new CsceneContextBO());
     }
 
     private Device getByImageName(String imageName){
@@ -201,7 +201,7 @@ public class ResourceCenterService {
         CsceneBO csceneBO = cSceneBoConverter.convert(ymlParseResult, imageInfos, fdfsSceneFilePath);
         csceneBO.setLogo(fdfsLogoFilePath);
         // 保存
-        return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
+        return csceneService.syncForImport(csceneBO, new CsceneContextBO());
     }
 
     public ServiceResult<ExportResult> exportScene(String csceneId, String envPath, String imagePath, String singleImagePath, String sceneNumber, boolean disableImageExport) {
