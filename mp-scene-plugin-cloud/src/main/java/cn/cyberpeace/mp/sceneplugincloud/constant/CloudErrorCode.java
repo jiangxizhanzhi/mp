@@ -17,7 +17,12 @@ public enum CloudErrorCode implements ErrorCode {
     NODE_CREATE_TIMEOUT("MP-110709", "node_create_timeout"),
     OPERATING_ERRORS("MP-110710", "operating_errors"),
     UN_SUPPORT_STATIC_ROUTE("MP-110711", "un_support_static_route"),
-    UN_SUPPORT_OPERATE("MP-110712", "un_support_operate");
+    UN_SUPPORT_OPERATE("MP-110712", "un_support_operate"),
+    IP_CONFLICT_WITH_RESERVED_IP("MP-110713", "ip_conflict_with_Reserved_ip"),
+    USERNAME_NOT_ALLOWED("MP-110714", "username_not_allowed"),
+    PASSWORD_NOT_ALLOWED("MP-110715", "password_not_allowed"),
+    INVALID_USERNAME("MP-110716", "invalid_username"),
+    INVALID_PASSWORD("MP-110717", "invalid_password");
 
     CloudErrorCode(String code, String message) {
         setCode(code, "sceneplugincloud.error_code." + message);

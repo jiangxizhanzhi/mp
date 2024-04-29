@@ -8,8 +8,6 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.*;
 
 @Slf4j
@@ -334,9 +332,8 @@ public class IpUtils {
             beginIp = newIps[0];
             lastIp = newIps[1];
         }
-        long size = Ipv4Util.ipv4ToLong(lastIp) - Ipv4Util.ipv4ToLong(beginIp);
         long ipLong = Ipv4Util.ipv4ToLong(ip);
-        return (ipLong - Ipv4Util.ipv4ToLong(beginIp)) <= size;
+        return ipLong <= Ipv4Util.ipv4ToLong(lastIp) && ipLong >= Ipv4Util.ipv4ToLong(beginIp);
     }
 
     public static boolean newIsInCidr2(String ip, String cidr) {
@@ -594,10 +591,11 @@ public class IpUtils {
 
     /**
      * 获取五个微软云保留ip
+     *
      * @param cidr
      * @return
      */
-    public static String[] getSpecificIPsFromCIDR(String cidr){
+    public static String[] getSpecificIPsFromCIDR(String cidr) {
         // Parse the CIDR string into an InetAddress and its prefix length
         String[] cidrParts = cidr.split("/");
         String ipAddressStr = cidrParts[0];
