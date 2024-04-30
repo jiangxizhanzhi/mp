@@ -23,7 +23,7 @@ public class WebSocketServer {
     public static ConcurrentHashMap<Session, WebSocketServer> sessionPools = new ConcurrentHashMap<>();
 
     //发送消息
-    public void sendMessage(Session session, String message) throws IOException {
+    public synchronized void sendMessage(Session session, String message) throws IOException {
         if(session != null){
             synchronized (session) {
 //                System.out.println("发送数据：" + message);
