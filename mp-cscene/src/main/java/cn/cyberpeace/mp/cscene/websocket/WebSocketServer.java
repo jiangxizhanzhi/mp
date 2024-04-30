@@ -11,8 +11,8 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-//注入 HttpSessionConfigurator.class配置httpSession类
-@ServerEndpoint(value = "/ws/webSocket")
+//该路径免认证    /ws/devops/cluster/*
+@ServerEndpoint(value = "/ws/devops/cluster/webSocket")
 @Component
 public class WebSocketServer {
 
