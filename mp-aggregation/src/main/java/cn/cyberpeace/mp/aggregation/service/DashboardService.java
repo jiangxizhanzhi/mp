@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
+import cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
@@ -66,6 +67,8 @@ public class DashboardService {
 
     private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
 
+    private MicrosoftAzureMapper microsoftAzureMapper;
+
     @Autowired
     private UserOnlineRecordService userOnlineRecordService;
 
@@ -76,7 +79,8 @@ public class DashboardService {
                             CsceneInstanceMapper csceneInstanceMapper,
                             CloudPluginSceneElementMapper cloudPluginSceneElementMapper,
                             ScenePluginCloudSceneService scenePluginCloudSceneService,
-                            DevopsTargetService devopsTargetService) {
+                            DevopsTargetService devopsTargetService,
+                            MicrosoftAzureMapper microsoftAzureMapper) {
         this.deviceService = deviceService;
         this.csceneInstanceService = csceneInstanceService;
         this.csceneSpecialService = csceneSpecialService;
@@ -84,6 +88,7 @@ public class DashboardService {
         this.cloudPluginSceneElementMapper = cloudPluginSceneElementMapper;
         this.scenePluginCloudSceneService = scenePluginCloudSceneService;
         this.devopsTargetService = devopsTargetService;
+        this.microsoftAzureMapper = microsoftAzureMapper;
     }
 
     /**
@@ -128,6 +133,8 @@ public class DashboardService {
         int npc = all.get("npc") == null ? 0 : Integer.parseInt(all.get("npc").toString());
         int dynamips = all.get("dynamips") == null ? 0 : Integer.parseInt(all.get("dynamips").toString());
         all.put("other", npc + dynamips);
+        int cloudTarget = microsoftAzureMapper.getCloudTargetListTotal(null);
+        all.put("cloud_target", cloudTarget);
         targetStatics.put("entity", devopsTargetService.countEntityTarget());
         targetStatics.put("virtual", devopsTargetService.countVmTarget());
         response.setTargetStatics(targetStatics);
