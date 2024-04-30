@@ -18,16 +18,13 @@ public class UserResourceResponse {
     @ApiModelProperty("容器数量")
     private Integer containerCount;
 
-    @ApiModelProperty("实装设备数量")
-    private Integer entityCount;
-
-    @ApiModelProperty("场景数量")
-    private Integer sceneCount;
-
     @ApiModelProperty("虚拟机数量")
     private Integer vmCount;
 
-    @ApiModelProperty("dynamips数量")
-    private Integer dynamips;
+    @ApiModelProperty("应用云靶标")
+    private Integer cloudElementCount;
+
+    @ApiModelProperty("load数量")
+    private Integer loadCount;
 
 }

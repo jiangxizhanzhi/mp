@@ -18,15 +18,19 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountActivitySceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
+import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
+import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.UserConnectionNumBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
@@ -121,6 +125,7 @@ public class DashboardService {
 
     /**
      * 仪表盘-资源统计
+     *
      * @return
      */
     public ResourceStatisticsResponse resourceStatistics() {
@@ -145,6 +150,7 @@ public class DashboardService {
 
     /**
      * 统计活动场景总数和场景占比
+     *
      * @return
      */
     public UserSummarySceneResponse countActivityScene() {
@@ -178,40 +184,80 @@ public class DashboardService {
                 .builder()
                 .containerCount(0)
                 .vmCount(0)
-                .entityCount(0)
-                .sceneCount(0)
-                .dynamips(0)
+                .loadCount(0)
+                .cloudElementCount(0)
                 .build();
         var user = UserCommon.getCurrentUser();
         if (user == null) {
             return userResource;
         }
-        var condition = new HumanCondition()
+        HumanCondition selectHumanCondition = new HumanCondition()
+                .link(CloudPluginSceneElementModel.class)
+                .link(SceneModel.class)
+                .filterLink(CloudPluginSceneElementModel.class, CloudPluginSceneElementModel::getScene,
+                        SceneModel.class, SceneModel::getId)
+                .currentLink(SceneModel.class)
+                .filterEqual(SceneModel::getDeleted, false)
+                .link(CsceneInstanceModel.class)
+                .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getScene,
+                        SceneModel.class, SceneModel::getId)
+                .currentLink(CsceneInstanceModel.class)
                 .filterEqual(CsceneInstanceModel::getDeleted, false)
-                .filterEqual(CsceneInstanceModel::getCreateUser, user.getId());
-        List<CsceneInstanceModel> csceneInstances;
-        try {
-            csceneInstances = csceneInstanceMapper.list(condition);
-        } catch (Exception e) {
-            throw new MpRuntimeException(BaseErrorCode.ERROR);
-        }
-        if (csceneInstances.isEmpty()) {
-            return userResource;
-        }
+                .filterEqual(CsceneInstanceModel::getCreateUser, user.getId())
+                .link(CsceneModel.class)
+                .filterLink(CsceneModel.class, CsceneModel::getId,
+                        CsceneInstanceModel.class, CsceneInstanceModel::getCscene)
+                .currentLink(CsceneModel.class)
+                .filterEqual(CsceneModel::getDeleted, false)
+                .link(SceneConfigModel.class)
+                .filterLink(SceneConfigModel.class, SceneConfigModel::getId,
+                        CsceneModel.class, CsceneModel::getSceneConfig)
+                .currentLink(SceneConfigModel.class)
+                .filterEqual(SceneConfigModel::getDeleted, false)
+                .select(SceneConfigModel::getCloudType)
+                .currentLink(CloudPluginSceneElementModel.class)
+                .select(CloudPluginSceneElementModel::getId)
+                .select(CloudPluginSceneElementModel::getVirtualType);
+        List<Map<String, Object>> maps = csceneInstanceMapper.originList(selectHumanCondition);
 
-        userResource.setSceneCount(csceneInstances.size());
-        List<String> sceneIds = csceneInstances.stream()
-                .filter(csceneInstance -> !StringUtils.isEmpty(csceneInstance.getScene()))
-                .map(csceneInstance -> csceneInstance.getScene())
-                .collect(Collectors.toList());
-        var fieldName = BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementModel::getVirtualType);
-        var result = scenePluginCloudSceneService
-                .groupCountElement(sceneIds, null, List.of(fieldName)).getSource().get(fieldName);
-        userResource.setVmCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, 0L).intValue());
-        userResource.setContainerCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0L).intValue());
-        userResource.setEntityCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0L).intValue());
-        userResource.setDynamips(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS, 0L).intValue());
+        long cloudElementCount = maps.stream()
+                .filter(map -> map.get("cloud_type") != null && map.get("virtual_type") != null
+                        && (BaseSceneModel.CloudType.PUBLIC == (Integer) map.get("cloud_type") ||
+                        BaseSceneModel.CloudType.PRIVATE == (Integer) map.get("cloud_type") ||
+                        BaseSceneModel.CloudType.MIX == (Integer) map.get("cloud_type"))
+                        && (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == (Integer) map.get("virtual_type") ||
+                        BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == (Integer) map.get("virtual_type")))
+                .count();
+        long loadCount = maps.stream()
+                .filter(map -> map.get("cloud_type") != null && map.get("virtual_type") != null
+                        && (BaseSceneModel.CloudType.PUBLIC == (Integer) map.get("cloud_type") ||
+                        BaseSceneModel.CloudType.PRIVATE == (Integer) map.get("cloud_type") ||
+                        BaseSceneModel.CloudType.MIX == (Integer) map.get("cloud_type"))
+                        && BaseCloudPluginSceneElementModel.VirtualType.LOAD == (Integer) map.get("virtual_type"))
+                .count();
+
+        long virtualMachineCount = maps.stream()
+                .filter(map -> map.get("cloud_type") != null && map.get("virtual_type") != null
+                        && BaseSceneModel.CloudType.DEFAULT == (Integer) map.get("cloud_type")
+                        && BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == (Integer) map.get("virtual_type"))
+                .count();
+        long containerCout = maps.stream()
+                .filter(map -> map.get("cloud_type") != null && map.get("virtual_type") != null
+                        && BaseSceneModel.CloudType.DEFAULT == (Integer) map.get("cloud_type")
+                        && BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == (Integer) map.get("virtual_type"))
+                .count();
+        userResource.setVmCount((int)virtualMachineCount);
+        userResource.setContainerCount((int)containerCout);
+        userResource.setCloudElementCount((int) cloudElementCount);
+        userResource.setLoadCount((int) loadCount);
         return userResource;
+    }
+    private long countElements(List<Map<String, Object>> maps, int cloudType, int virtualType) {
+        return maps.stream()
+                .filter(map -> map.get("cloud_type") != null && map.get("virtual_type") != null
+                        && cloudType == (Integer) map.get("cloud_type")
+                        && virtualType == (Integer) map.get("virtual_type"))
+                .count();
     }
 
     public ServiceResult<SceneBusinessSummary> groupCountResourceByRole() {
@@ -285,6 +331,7 @@ public class DashboardService {
 
     /**
      * 查询用户会话
+     *
      * @param userId
      * @return
      */
