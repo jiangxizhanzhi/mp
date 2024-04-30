@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.cscene.websocket;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
