@@ -175,13 +175,19 @@ public class LoadServiceImpl {
         jsonObject.put("id", tool.get("id"));
         jsonObject.put("controlPort", tool.get("controlPort"));
         jsonObject.put("controlType", tool.get("controlType"));
+        jsonObject.put("runTable", tool.get("runTable"));
+        jsonObject.put("actionType", tool.get("actionType"));
         jsonObject.put("creatorId", tool.get("creatorId"));
         jsonObject.put("defaultCmd", tool.get("defaultCmd"));
-        jsonObject.put("imageName", tool.get("imageName"));
         jsonObject.put("toolDescription", tool.get("toolDescribe")); //这里的键名与原始数据中的键名不一致
         jsonObject.put("toolName", tool.get("toolName"));
         jsonObject.put("toolPlatform", tool.get("toolPlatform"));
-        jsonObject.put("readMe", tool.get("toolReadme"));
+        jsonObject.put("readMe", tool.get("readMe"));
+        jsonObject.put("readMeName", tool.get("readMeName"));
+        jsonObject.put("cover", tool.get("cover"));
+        jsonObject.put("coverName", tool.get("coverName"));
+        jsonObject.put("attachment", tool.get("attachment"));
+        jsonObject.put("attachmentName", tool.get("attachmentName"));
 
         Object createTimeObj = tool.get("createTime");
         if (createTimeObj != null) {

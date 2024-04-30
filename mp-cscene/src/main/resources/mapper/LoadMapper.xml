@@ -191,14 +191,50 @@
     </insert>
 
     <insert id="addLoads">
-        INSERT INTO mp_devops_load (id, tool_name, tool_platform, tool_description,
-        action_type, run_table, source, control_type, creator_id,
-        create_time, control_port, default_cmd, read_me, update_time)
+        INSERT INTO mp_devops_load (
+        id,
+        tool_name,
+        tool_description,
+        tool_platform,
+        action_type,
+        run_table,
+        control_type,
+        control_port,
+        source,
+        cover,
+        cover_name,
+        attachment,
+        attachment_name,
+        read_me,
+        read_me_name,
+        default_cmd,
+        update_time,
+        create_time,
+        synchronization_time,
+        creator_id)
         VALUES
         <foreach item="item" collection="param" separator=",">
-            (#{item.id}, #{item.toolName}, #{item.toolPlatform}, #{item.toolDescription},
-            #{item.actionType}, #{item.runTable}, #{item.source}, #{item.controlType}, #{item.creatorId},
-            #{item.createTime}, #{item.controlPort}, #{item.defaultCmd}, #{item.readMe}, #{item.updateTime})
+            (#{item.id},
+             #{item.toolName},
+             #{item.toolDescription},
+             #{item.toolPlatform},
+             #{item.actionType},
+             #{item.runTable},
+             #{item.controlType},
+             #{item.controlPort},
+             #{item.source},
+             #{item.cover},
+             #{item.coverName},
+             #{item.attachment},
+             #{item.attachmentName},
+             #{item.readMe},
+             #{item.readMeName},
+             #{item.defaultCmd},
+             now(),
+             now(),
+             now(),
+             #{item.creatorId}
+             )
         </foreach>
     </insert>
 
