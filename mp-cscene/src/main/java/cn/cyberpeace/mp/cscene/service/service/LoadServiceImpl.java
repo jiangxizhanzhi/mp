@@ -134,17 +134,27 @@ public class LoadServiceImpl {
     }
 
     public void synchronousData(Session session) throws IOException {
-        //同步设置
+        //推送的消息返回格式
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("code", "MP-synchronousData-by-outService");
+        JSONObject data = new JSONObject();
+        //同步设置获取
         MpDevopsLoadSource synchronousDataSource = getSynchronousDataSource(new JSONObject());
+
         WebSocketServer webSocketServer = WebSocketServer.sessionPools.get(session);
-        webSocketServer.sendMessage(session, "正在连接载荷管理机:"+synchronousDataSource.getIp()+"......成功");
+        sendErrorMessage(webSocketServer, session, jsonObject, data, 1, "正在连接载荷管理机:"+synchronousDataSource.getIp()+"......成功", true);
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+        }
         OutLoadServiceImpl outLoadService = BeanCommon.getBean(OutLoadServiceImpl.class);
         List<LinkedHashMap> toolList = outLoadService.getToolList(new JSONObject());
         if (toolList == null || toolList.isEmpty()) {
-            webSocketServer.sendMessage(session,"获取载荷列表失败,会话关闭！");
-            webSocketServer.onClose(session);
+            sendErrorMessage(webSocketServer, session, jsonObject, data, 2, "获取载荷列表失败,会话关闭！", false);
         }
-        webSocketServer.sendMessage(session, "正在同步载荷......完成！");
+        sendErrorMessage(webSocketServer, session, jsonObject, data, 2, "正在同步载荷......完成！", true);
+        jsonObject.put("data",data);
+        webSocketServer.sendMessage(session, jsonObject.toString());
         List<JSONObject> list = new ArrayList<>();
         for (LinkedHashMap tool : toolList) {
             if (tool != null) {
@@ -155,18 +165,30 @@ public class LoadServiceImpl {
             Boolean deleteData = loadMapper.deleteData();
             if (deleteData) {
                 if(!loadMapper.addLoads(list)){
-                    webSocketServer.sendMessage(session,"载荷列表入库失败,会话关闭！");
-                    webSocketServer.onClose(session);
+                    sendErrorMessage(webSocketServer, session, jsonObject, data, 3, "载荷数据入库失败,会话关闭！", false);
                 }
             }
         } catch (Exception e) {
             // 记录错误日志、回滚事务等
             throw e; // 或者包装成自定义异常抛出
         }
-
-        webSocketServer.sendMessage(session,"共同步"+list.size()+"个载荷");
-        webSocketServer.sendMessage(session,"载荷列表同步成功,会话关闭！");
+        data.put("stage3","载荷数据入库成功！");
+        sendErrorMessage(webSocketServer, session, jsonObject, data, 3, "载荷数据入库成功！", true);
+        data.put("stage4","共同步"+list.size()+"个载荷");
+        sendErrorMessage(webSocketServer, session, jsonObject, data, 4, "共同步"+list.size()+"个载荷", true);
+        data.put("stage5","载荷列表同步成功,会话关闭！");
+        sendErrorMessage(webSocketServer, session, jsonObject, data, 5, "载荷列表同步成功,会话关闭！", true);
         webSocketServer.onClose(session);
+    }
+
+    private void sendErrorMessage(WebSocketServer webSocketServer, Session session, JSONObject jsonObject, JSONObject data,
+                                  Integer sort, String message, Boolean result) throws IOException {
+        data.put("stage" + sort, message);
+        jsonObject.put("data", data);
+        webSocketServer.sendMessage(session, jsonObject.toString());
+        if(!result) {
+            webSocketServer.onClose(session);
+        }
     }
 
     private JSONObject convertToolToJSONObject(LinkedHashMap tool) {
