@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.mptool.URLUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
@@ -26,6 +27,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Pattern;
+
 
 @Slf4j
 @ClassFieldClasses({
@@ -38,6 +43,11 @@ import org.springframework.stereotype.Component;
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
 public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<CloudPluginSceneConfigBO,
         CloudPluginSceneConfigElementBO, CloudPluginSceneConfigElementPortBO, Object> {
+
+    private static final String[] disallowedUsernames = {"administrator", "admin", "user", "user1", "test", "user2", "test1", "user3", "admin1", "1", "123", "a", "actuser", "adm", "admin2", "aspnet", "backup", "console", "david", "guest", "john", "owner", "root", "server", "sql", "support", "support_388945a0", "sys", "test2", "test3", "user4", "user5"};
+    private static final Pattern validUsernamePattern = Pattern.compile("[a-zA-Z_][a-zA-Z0-9_-]{0,63}");
+    private static final String[] disallowedPasswords = {"abc@123", "P@$$w0rd", "P@ssw0rd", "P@ssword123", "Pa$$word", "pass@word1", "Password!", "Password1", "Password22", "iloveyou!"};
+    private static final Pattern validPasswordPattern = Pattern.compile("^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\\W_]+$)(?![a-z0-9]+$)(?![a-z\\W_]+$)(?![0-9\\W_]+$)[a-zA-Z0-9\\W_]{12,72}$");
 
     private CloudSceneConfigPluginModelHandler pluginModelHandler;
 
@@ -173,6 +183,34 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                     }
                     if (!StringUtils.isEmpty(cidr) && !IpUtils.newIsInCidr(ip, cidr)) {
                         throw new MpRuntimeException(CloudErrorCode.INVALID_IP_ON_CIDR.format(ip, cidr));
+                    } else if (!StringUtils.isEmpty(cidr) && Arrays.asList(IpUtils.getSpecificIPsFromCIDR(cidr)).contains(ip)) {
+                        throw new MpRuntimeException(CloudErrorCode.IP_CONFLICT_WITH_RESERVED_IP.format(ip));
+                    }
+                }
+            }
+
+//            根据微软云创建虚拟机规则验证用户名、密码
+            List<AccessMode> accessModes = srcPort.getAccessModes();
+            if (accessModes.size() > 0) {
+                for (AccessMode accessMode : accessModes) {
+                    if (StringUtils.isNotBlank(accessMode.getUsername())) {
+                        boolean isUsernameAllowed = Arrays.stream(disallowedUsernames)
+                                .noneMatch(accessMode.getUsername()::equalsIgnoreCase);
+                        boolean matches = !validUsernamePattern.matcher(accessMode.getUsername()).matches();
+                        if (!isUsernameAllowed) {
+                            throw new MpRuntimeException(CloudErrorCode.USERNAME_NOT_ALLOWED.format(accessMode.getUsername()));
+                        } else if (!validUsernamePattern.matcher(accessMode.getUsername()).matches()) {
+                            throw new MpRuntimeException(CloudErrorCode.INVALID_USERNAME.format(accessMode.getUsername()));
+                        }
+                    }
+                    if (StringUtils.isNotBlank(accessMode.getPassword())) {
+                        boolean isPasswordAllowed = Arrays.stream(disallowedPasswords)
+                                .noneMatch(accessMode.getPassword()::equalsIgnoreCase);
+                        if (!isPasswordAllowed) {
+                            throw new MpRuntimeException(CloudErrorCode.PASSWORD_NOT_ALLOWED.format(accessMode.getPassword()));
+                        } else if (!validPasswordPattern.matcher(accessMode.getPassword()).matches()) {
+                            throw new MpRuntimeException(CloudErrorCode.INVALID_PASSWORD.format(accessMode.getPassword()));
+                        }
                     }
                 }
             }
