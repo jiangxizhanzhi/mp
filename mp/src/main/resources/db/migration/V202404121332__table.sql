@@ -1,2 +1,15 @@
 -- v5.5
 ALTER TABLE mp_sceneplugincollection_scene_config_element ADD COLUMN edited TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否有添加过探针' ;
+
+create table mp_event_tracking_record
+(
+    pk          int auto_increment comment '主键' primary key,
+    id          varchar(64) not null comment 'ID',
+    module      varchar(256) not null comment '模块',
+    category    varchar(256) not null comment '分类',
+    action      varchar(1024) not null comment '动作',
+    target      varchar(1024) not null comment '操作目标',
+    create_time datetime(6) not null comment '创建时间',
+    update_time datetime(6) not null comment '更新时间',
+    index       module_cat (`module`, `category`)
+) comment '埋点表';
