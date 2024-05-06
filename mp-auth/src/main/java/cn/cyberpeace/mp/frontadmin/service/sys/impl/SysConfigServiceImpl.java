@@ -4,12 +4,14 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.frontadmin.constant.AdminBasei18nCode;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.constant.SysConfigConstant;
@@ -26,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +86,14 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         ParamCheck.notEmpty(keyName, AdminBasei18nCode.SYS_CONFIG_KEY_NAME);
         HumanCondition condition = new HumanCondition()
                 .filterEqual(SysConfigModel::getKeyName, keyName);
-        return getModelMapper().first(condition);
+        SysConfigModel model = getModelMapper().first(condition);
+        if ("copyright".equals(model.getKeyName())) {
+            String year = "@2021-" + LocalDate.now().getYear();
+            String split = MessageCommon.get("admim.front.split");
+            model.setValue(year + split + model.getValue());
+            model.setInitValue(year + split + model.getInitValue());
+        }
+        return model;
     }
 
     @Override
