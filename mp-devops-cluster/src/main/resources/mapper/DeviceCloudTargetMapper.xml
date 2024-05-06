@@ -7,8 +7,9 @@
         id,
         name,
         cloud_service_type,
-        publisher_name,
-        offer_name,
+        source_type,
+        publisher,
+        offer,
         sku,
         operating_system,
         operating_system_status,
@@ -30,8 +31,9 @@
                 #{item.id},
                 #{item.name},
                 #{item.cloudServiceType},
-                #{item.publisherName},
-                #{item.offerName},
+                #{item.sourceType},
+                #{item.publisher},
+                #{item.offer},
                 #{item.sku},
                 #{item.operatingSystem},
                 #{item.operatingSystemStatus},
@@ -67,11 +69,11 @@
             <if test="param != null and param.operatingSystemStatus != null">
                 operating_system_status = #{param.operatingSystemStatus},
             </if>
-            <if test="param != null and param.publisherName != null">
-                publisher_name = #{param.publisherName},
+            <if test="param != null and param.publisher != null">
+                publisher = #{param.publisher},
             </if>
-            <if test="param != null and param.offerName != null">
-                offer_name = #{param.offerName},
+            <if test="param != null and param.offer != null">
+                offer = #{param.offer},
             </if>
             <if test="param != null and param.sku != null">
                 sku = #{param.sku},
