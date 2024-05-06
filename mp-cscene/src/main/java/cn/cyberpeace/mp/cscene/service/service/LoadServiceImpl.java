@@ -66,9 +66,10 @@ public class LoadServiceImpl {
         requestData.put("pageSize", pageSize);
         requestData.put("offset", (pageNum - 1) * pageSize);
         List<MpDevopsLoad> list = loadMapper.getLoadList(requestData);
+        Integer total = loadMapper.getLoadListNum(requestData);
         JSONObject result = new JSONObject();
         result.put("source", list);
-        result.put("total", list.size());
+        result.put("total", total);
         return result;
     }
 

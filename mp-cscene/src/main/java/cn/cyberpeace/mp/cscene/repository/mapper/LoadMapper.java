@@ -62,4 +62,6 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
     List<String> getLoadsBySceneId(String sceneId);
 
     List<JSONObject> getLoadResultByLoads(@Param("param") List<String> loadIds);
+
+    Integer getLoadListNum(@Param("param") JSONObject requestData);
 }
