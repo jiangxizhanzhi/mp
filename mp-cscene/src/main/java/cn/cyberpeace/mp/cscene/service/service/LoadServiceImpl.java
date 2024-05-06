@@ -301,15 +301,15 @@ public class LoadServiceImpl {
         List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResultStatistics(requestData);
         Map<String, Integer> map = new HashMap();
         //请求次数
-        map.put("askTimes", 0);
+        map.put("ask_times", 0);
         //成功次数
-        map.put("successTimes", 0);
+        map.put("success_times", 0);
         //失败次数
-        map.put("failTimes", 0);
+        map.put("fail_times", 0);
         //已有结果
-        map.put("haveResult", 0);
+        map.put("have_result", 0);
         //暂无结果
-        map.put("noResultForTheTime", 0);
+        map.put("no_result_for_the_time", 0);
         for (int i = 0; i < list.size(); i++) {
             //todo 统计
         }
