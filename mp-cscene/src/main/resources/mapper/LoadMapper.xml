@@ -442,9 +442,9 @@
     <select id="getLoadExecutionResultStatistics" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog">
         SELECT
         log.*,
-        load.action_type,
-        load.run_table,
-        load.control_type
+        mdl.action_type,
+        mdl.run_table,
+        mdl.control_type
         FROM
         mp_devops_load_scene_result_log log
         inner join
