@@ -134,16 +134,6 @@
         </where>
     </select>
 
-    <select id="getSingleLayerList" resultType="com.alibaba.fastjson.JSONObject">
-        SELECT
-            e.code as parentSystemType,
-            e.code_name
-        FROM
-            mp_sys_code_enum e
-        WHERE
-            e.parent_code = #{parentCode}
-    </select>
-
     <select id="getCloudTargetByPk" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO">
         SELECT
             *

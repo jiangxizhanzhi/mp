@@ -515,7 +515,9 @@
             *
         FROM
             mp_devops_load_source
-                LIMIT 1
+        ORDER BY
+            create_time DESC
+            LIMIT 1
     </select>
 
     <select id="getToolListByloadPks" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoad">

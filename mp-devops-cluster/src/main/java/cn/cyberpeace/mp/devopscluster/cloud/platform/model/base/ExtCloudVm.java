@@ -110,14 +110,14 @@ public class ExtCloudVm implements Serializable {
     private Integer sourceType;
 
     /**
-     * publisher_name(微软云镜像参数)
+     * publisher(微软云镜像参数)
      */
-    private String publisherName;
+    private String publisher;
 
     /**
-     * offer_name(微软云镜像参数)
+     * offer(微软云镜像参数)
      */
-    private String offerName;
+    private String offer;
 
     /**
      * sku(微软云镜像参数)

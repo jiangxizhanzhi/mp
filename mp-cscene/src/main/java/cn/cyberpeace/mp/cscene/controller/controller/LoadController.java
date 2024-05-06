@@ -59,6 +59,19 @@ public class LoadController {
     }
 
     /*
+     * 载荷列表(ojj调用)
+     * */
+    @ApiOperation(value = "载荷列表", notes = "")
+    @GetMapping("/getLoadListByMp")
+    public ListObjServiceResult getLoadListByMp() {
+        JSONObject requestData = new JSONObject();
+        requestData.put("pageNum", 1);
+        requestData.put("pageSize", 1000);
+        JSONObject result = LoadService.getLoadList(requestData);
+        return new ListObjServiceResult((List) result.get("source"), (int) result.get("total")).asResult();
+    }
+
+    /*
      * 根据pks获取载荷列表
      * */
     @ApiOperation(value = "根据pks获取载荷列表", notes = "")

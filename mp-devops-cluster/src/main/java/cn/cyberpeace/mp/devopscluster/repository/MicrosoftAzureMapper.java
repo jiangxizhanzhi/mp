@@ -27,13 +27,6 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
 
     Integer updateCloudTarget(@Param("pk") String pk, @Param("param") JSONObject requestData);
 
-    /**
-     * 获取系统码表下一级数据
-     * @param parentCode
-     * @return
-     */
-    List<JSONObject> getSingleLayerList(@Param("parentCode") String parentCode);
-
     DeviceCloudTargetPO getCloudTargetByPk(@Param("pk") String pk);
 
     List<MpSysCodeEnum> getAlldata(String code);

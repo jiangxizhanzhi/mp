@@ -98,8 +98,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 case 1:
                 case 2:
                     device.getExtCloudVm().setTargetPk(list.get(i).getPk());
-                    device.getExtCloudVm().setPublisherName(list.get(i).getPublisherName());
-                    device.getExtCloudVm().setOfferName(list.get(i).getOfferName());
+                    device.getExtCloudVm().setPublisher(list.get(i).getPublisher());
+                    device.getExtCloudVm().setOffer(list.get(i).getOffer());
                     device.getExtCloudVm().setSku(list.get(i).getSku());
                     device.getExtCloudVm().setImageOSType(list.get(i).getImageType());
                     device.getExtCloudVm().setSourceType(list.get(i).getSourceType());
@@ -120,14 +120,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
         result.put("list", deviceList);
         result.put("total", deviceList.size());
         return result;
-    }
-
-    /**
-     * 操作系统下拉框
-     */
-    public List<JSONObject> getOS() {
-        List<JSONObject> oslist = microsoftAzureMapper.getSingleLayerList(ParentCodeEnum.PARENT_SYSTEM_TYPE.getCode());
-        return oslist;
     }
 
     /**
@@ -170,18 +162,27 @@ public class MicrosoftAzureConverter implements BaseConverter {
             DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
             deviceCloudTarget.setName(((JSONObject) dockerImages.get(i)).get("repositoryName").toString());
             deviceCloudTarget.setImageType("container");
+            //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
+            deviceCloudTarget.setCloudServiceType(2);
+            //源类型(1:云平台 2:用户上传)
+            deviceCloudTarget.setSourceType(2);
             list.add(deviceCloudTarget);
         }
 
         //微软云镜像
         for (int i = 0; i < images.size(); i++) {
             DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
-            deviceCloudTarget.setPublisherName(((JSONObject) images.get(i)).get("PublisherName").toString());
-            deviceCloudTarget.setOfferName(((JSONObject) images.get(i)).get("offerName").toString());
+            deviceCloudTarget.setPublisher(((JSONObject) images.get(i)).get("PublisherName").toString());
+            deviceCloudTarget.setOffer(((JSONObject) images.get(i)).get("offerName").toString());
             deviceCloudTarget.setSku(((JSONObject) images.get(i)).get("skuName").toString());
             //镜像类型
             deviceCloudTarget.setImageType("VM");
-            //todo 系统类型 ((JSONObject) images.get(i)).get("operatingSystemType").toString()
+            //操作系统
+            deviceCloudTarget.setOperatingSystem(((JSONObject) images.get(i)).get("operatingSystem").toString());
+            //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
+            deviceCloudTarget.setCloudServiceType(2);
+            //源类型(1:云平台 2:用户上传)
+            deviceCloudTarget.setSourceType(1);
             list.add(deviceCloudTarget);
         }
 
@@ -190,6 +191,10 @@ public class MicrosoftAzureConverter implements BaseConverter {
             DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
             deviceCloudTarget.setName(((JSONObject) localImages.get(i)).get("imageName").toString());
             deviceCloudTarget.setImageType("VM");
+            //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
+            deviceCloudTarget.setCloudServiceType(2);
+            //源类型(1:云平台 2:用户上传)
+            deviceCloudTarget.setSourceType(2);
             list.add(deviceCloudTarget);
         }
         //拿到所有数据库数据
@@ -373,7 +378,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
                                         third.put("PublisherName", publisher.name());
                                         third.put("offerName", offer.name());
                                         third.put("skuName", sku.name());
-                                        third.put("operatingSystemType", operatingSystemTypes);
+                                        third.put("operatingSystem", operatingSystemTypes);
                                         result.add(third);
                                         time++;
                                     }
@@ -452,13 +457,9 @@ public class MicrosoftAzureConverter implements BaseConverter {
             Integer pk = microsoftAzureMapper.updateCloudTarget(requestData.get("pk").toString(), requestData);
             if (pk > 0) {
                 return true;
-            } else {
-                //影响行数为0
-                return false;
             }
-        } else {
-            return false;
         }
+        return false;
     }
 
     public DeviceCloudTargetPO getCloudTargetByPk(JSONObject requestData) {

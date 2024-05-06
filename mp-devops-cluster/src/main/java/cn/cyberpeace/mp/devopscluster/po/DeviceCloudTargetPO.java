@@ -38,13 +38,13 @@ public class DeviceCloudTargetPO extends BaseModel {
      */
     private Integer sourceType;
     /**
-     * publisherName
+     * publisher
      */
-    private String publisherName;
+    private String publisher;
     /**
-     * offerName
+     * offer
      */
-    private String offerName;
+    private String offer;
     /**
      * sku
      */

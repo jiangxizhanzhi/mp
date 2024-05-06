@@ -65,7 +65,6 @@ public class LoadServiceImpl {
         Integer pageSize = requestData.get("pageSize") != null ? requestData.getInteger("pageSize") : 10;
         requestData.put("pageSize", pageSize);
         requestData.put("offset", (pageNum - 1) * pageSize);
-        //sql改动时,数量的接口也需要改动
         List<MpDevopsLoad> list = loadMapper.getLoadList(requestData);
         JSONObject result = new JSONObject();
         result.put("source", list);
@@ -287,6 +286,9 @@ public class LoadServiceImpl {
      * */
     public List getLoadBySceneId(String sceneId) {
         //todo 需要场景载荷关联表
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("pageNum",1);
+        jsonObject.put("pageSize",100);
         JSONObject loadList = getLoadList(new JSONObject());
         return (List) loadList.get("source");
     }

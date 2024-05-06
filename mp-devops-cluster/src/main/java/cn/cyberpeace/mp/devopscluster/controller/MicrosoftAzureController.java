@@ -1,12 +1,12 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.MicrosoftAzureConverter;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO;
-import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -38,7 +38,7 @@ public class MicrosoftAzureController {
     public ListObjServiceResult getCloudTargetList(@RequestParam(value = "per_page", defaultValue = "10") Integer pageSize,
                                                    @RequestParam(value = "page", defaultValue = "1") Integer pageNum,
                                                    @RequestParam(value = "name", required = false) String name,
-                                                   @RequestParam(value = "operatingSystem", required = false) String operatingSystem) {
+                                                   @RequestParam(value = "operating_system", required = false) String operatingSystem) {
         JSONObject requestData = new JSONObject();
         requestData.put("name", name);
         requestData.put("operatingSystem", operatingSystem);
@@ -50,22 +50,13 @@ public class MicrosoftAzureController {
     }
 
     /**
-     * 操作系统下拉框
-     */
-    @ApiOperation(value = "操作系统下拉框", notes = "")
-    @GetMapping("/getOS")
-    public ServiceResult getOS() {
-        List<JSONObject> os = microsoftAzureConverter.getOS();
-        return new Result(os).asResult();
-    }
-
-    /**
      * 云镜像删除
      */
     @ApiOperation(value = "云镜像删除", notes = "")
     @DeleteMapping("/delete")
-    public ServiceResult deleteCloudTarget(@RequestBody(required = false) JSONObject requestData) {
-        Boolean deleteCloudTarget = microsoftAzureConverter.deleteCloudTarget(requestData);
+    public ServiceResult deleteCloudTarget(@RequestBody(required = false) DeviceCloudTargetPO requestData) {
+        JSONObject jsonObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
+        Boolean deleteCloudTarget = microsoftAzureConverter.deleteCloudTarget(jsonObject);
         if (deleteCloudTarget) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS).asResult();
         } else {
@@ -75,7 +66,7 @@ public class MicrosoftAzureController {
 
     @ApiOperation(value = "云镜像管理页面pk查询", notes = "")
     @GetMapping("/getByPk")
-    public ServiceResult<DeviceCloudTargetPO> getCloudTargetByPk(@RequestParam(value = "pk", required = true) String pk) {
+    public ServiceResult<DeviceCloudTargetPO> getCloudTargetByPk(@RequestParam(value = "pk") String pk) {
         JSONObject requestData = new JSONObject();
         requestData.put("pk", pk);
         return new ServiceResult<>(microsoftAzureConverter.getCloudTargetByPk(requestData)).asResult();
@@ -86,8 +77,9 @@ public class MicrosoftAzureController {
      */
     @ApiOperation(value = "云镜像编辑", notes = "")
     @PutMapping("/update")
-    public ServiceResult updateCloudTarget(@RequestBody(required = false) JSONObject requestData) {
-        Boolean updateCloudTarget = microsoftAzureConverter.updateCloudTarget(requestData);
+    public ServiceResult updateCloudTarget(@RequestBody(required = false) DeviceCloudTargetPO requestData) {
+        JSONObject jsonObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
+        Boolean updateCloudTarget = microsoftAzureConverter.updateCloudTarget(jsonObject);
         if (updateCloudTarget) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS).asResult();
         } else {
