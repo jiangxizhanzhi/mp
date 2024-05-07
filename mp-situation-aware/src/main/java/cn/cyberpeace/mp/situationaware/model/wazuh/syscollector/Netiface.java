@@ -46,7 +46,7 @@ public class Netiface {
     private String ip;
 
     @ApiModelProperty("主机名称")
-    private String elementName;
+    private String nodeName;
 
     /**
      * 接收或者发送的包

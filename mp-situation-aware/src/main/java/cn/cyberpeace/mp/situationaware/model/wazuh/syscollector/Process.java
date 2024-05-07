@@ -118,6 +118,6 @@ public class Process {
     private int level;
 
     @ApiModelProperty("主机名称")
-    private String elementName;
+    private String nodeName;
 
 }
