@@ -176,7 +176,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTarget.setOffer(((JSONObject) images.get(i)).get("offerName").toString());
             deviceCloudTarget.setSku(((JSONObject) images.get(i)).get("skuName").toString());
             //镜像类型
-            deviceCloudTarget.setImageType("VM");
+            deviceCloudTarget.setImageType("vm");
             //操作系统
             deviceCloudTarget.setOperatingSystem(((JSONObject) images.get(i)).get("operatingSystem").toString());
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
@@ -190,7 +190,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         for (int i = 0; i < localImages.size(); i++) {
             DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
             deviceCloudTarget.setName(((JSONObject) localImages.get(i)).get("imageName").toString());
-            deviceCloudTarget.setImageType("VM");
+            deviceCloudTarget.setImageType("vm");
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
             deviceCloudTarget.setCloudServiceType(2);
             //源类型(1:云平台 2:用户上传)

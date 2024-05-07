@@ -73,6 +73,7 @@ public class LoadServiceImpl {
         return result;
     }
 
+    //调用ojj服务
     public List getBindLoopholes(Integer pk) {
         //todo 服务地址
         String url = "http://10.108.1.10:80/api/vuln/admin/vuln/load_code";
@@ -644,24 +645,13 @@ public class LoadServiceImpl {
      * 获取阶段载荷访问地址
      */
     public Map<String, Object> getTaskNet(JSONObject requestData) {
-        String taskId = requestData.get("taskId") != null ? requestData.get("taskId").toString() : "";
-        if (taskId.equals("")) {
-            return null;
-        }
-        String instanceId = requestData.get("instanceId") != null ? requestData.get("instanceId").toString() : "";
-        if (instanceId.equals("")) {
-            return null;
-        }
         //执行
         Boolean startInstance = outLoadService.startInstance(requestData);
         if (!startInstance) {
             return null;
         }
-        //log表新增初始数据
-        Integer pk = loadMapper.addResult(requestData);
-        //todo 开始执行,根据taskId获取访问链接,可能还需要日志的主键对准颗粒度
         JSONObject request = new JSONObject();
-        request.put("taskId", taskId);
+        request.put("taskId", requestData.get("taskId"));
         Map<String, Object> result = outLoadService.getTaskNet(request);
         return result;
     }
@@ -677,6 +667,9 @@ public class LoadServiceImpl {
         if (instanceId.equals("")) {
             return null;
         }
+        //log表新增初始数据
+        Integer pk = loadMapper.addResult(requestData);
+        //todo 开始执行,还需要日志的主键对准颗粒度
         Boolean startInstance = outLoadService.startInstance(requestData);
         JSONObject result = new JSONObject();
         result.put("startInstance", startInstance);
@@ -780,6 +773,32 @@ public class LoadServiceImpl {
         } else {
             return loadResultBySceneId;
         }
+    }
+
+    //调用ojj方法
+    public List getStagesBySceneId(String sceneId) {
+        //todo 服务地址
+        String url = "http://10.108.1.10:80/api/vuln/admin/vuln/load_code";
+        url = url + "?scene_id=" + sceneId;
+        //请求头设置
+        HashMap<String, String> headersMap = new HashMap<>();
+        String token = JwtCommon.getToken();
+        headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
+        headersMap.put("Authorization", token);
+
+        String result = null;
+        try {
+            result = HttpUtils.sendHttpGet(url, headersMap, 2000);
+        } catch (IOException e) {
+            return null;
+        }
+        List list = new ArrayList();
+        Map<String, Object> dataMap = JsonUtils.parseMap(result);
+        if(dataMap != null && dataMap.get("code") != null &&
+                dataMap.get("code").equals("VULN-000000") && dataMap.get("data") != null){
+            list = (List) dataMap.get("data");
+        }
+        return list;
     }
 }
 

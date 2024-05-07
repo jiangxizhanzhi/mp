@@ -325,6 +325,16 @@ public class LoadController {
     }
 
     /*
+     * 根据场景获取阶段列表
+     * */
+    @ApiOperation(value = "查询载荷", notes = "")
+    @GetMapping("/getStagesBySceneId")
+    public ServiceResult getStagesBySceneId(@RequestParam(value = "scene_id") String sceneId) {
+        List StageList = LoadService.getStagesBySceneId(sceneId);
+        return new ServiceResult(StageList, BaseErrorCode.SUCCESS).asResult();
+    }
+
+    /*
      * 批量新增载荷执行结果
      * */
     @ApiOperation(value = "批量新增载荷执行结果", notes = "")
@@ -421,9 +431,15 @@ public class LoadController {
      */
     @ApiOperation(value = "阶段载荷接入", notes = "")
     @GetMapping("/getTaskNet")
-    public ServiceResult getTaskNet(@RequestParam(value = "taskId", required = false) String taskId,
-                                    @RequestParam(value = "instanceId", required = false) String instanceId) {
+    public ServiceResult getTaskNet(@RequestParam(value = "scene_id") String sceneId,
+                                    @RequestParam(value = "stage_id") String stageId,
+                                    @RequestParam(value = "id") String id,
+                                    @RequestParam(value = "task_id") String taskId,
+                                    @RequestParam(value = "instance_id") String instanceId) {
         JSONObject requestData = new JSONObject();
+        requestData.put("sceneId", sceneId);
+        requestData.put("stageId", stageId);
+        requestData.put("id", id);
         requestData.put("taskId", taskId);
         requestData.put("instanceId", instanceId);
         if (requestData != null) {
@@ -440,13 +456,17 @@ public class LoadController {
      */
     @ApiOperation(value = "阶段载荷执行", notes = "")
     @GetMapping("/startTool")
-    public ServiceResult startTool(@RequestParam(value = "taskId", required = false) String taskId,
-                                   @RequestParam(value = "sceneId", required = false) String sceneId,
-                                   @RequestParam(value = "loadId", required = false) String loadId) {
+    public ServiceResult startTool(@RequestParam(value = "scene_id") String sceneId,
+                                   @RequestParam(value = "stage_id") String stageId,
+                                   @RequestParam(value = "id") String id,
+                                   @RequestParam(value = "task_id") String taskId,
+                                   @RequestParam(value = "instance_id") String instanceId) {
         JSONObject requestData = new JSONObject();
-        requestData.put("taskId", taskId);
         requestData.put("sceneId", sceneId);
-        requestData.put("loadId", loadId);
+        requestData.put("stageId", stageId);
+        requestData.put("id", id);
+        requestData.put("taskId", taskId);
+        requestData.put("instanceId", instanceId);
         if (requestData != null) {
             JSONObject startTool = LoadService.startTool(requestData);
             if (startTool != null) {

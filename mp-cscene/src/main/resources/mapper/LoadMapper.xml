@@ -6,6 +6,8 @@
         INSERT INTO mp_devops_load_scene_result_log
         (id,
          scene_id,
+         stage_id,
+         task_id,
          result_type,
          result_log,
          result_status,
@@ -14,6 +16,8 @@
         VALUES (
                 #{param.id},
                 #{param.sceneId},
+                #{param.stageId},
+                #{param.taskId},
                 #{param.resultType},
                 #{param.resultLog},
                 #{param.resultStatus},
@@ -276,52 +280,34 @@
         UPDATE
         mp_devops_load_scene_result_log
         <set>
-            <if test="param != null and param.resultLog != null and param.resultLog != ''">
-                result_log = #{param.resultLog},
+            <if test="param != null and param.id != null and param.id != ''">
+                id = #{param.id},
+            </if>
+            <if test="param != null and param.stageId != null and param.stageId != ''">
+                stage_id = #{param.stageId},
+            </if>
+            <if test="param != null and param.sceneId != null and param.sceneId != ''">
+                scene_id = #{param.sceneId},
+            </if>
+            <if test="param != null and param.taskId != null and param.taskId != ''">
+                task_id = #{param.taskId},
+            </if>
+            <if test="param != null and param.resultStatus != null and param.resultStatus != ''">
+                result_status = #{param.resultStatus},
             </if>
             <if test="param != null and param.resultType != null and param.resultType != ''">
                 result_type = #{param.resultType},
             </if>
-            <if test="param != null and param.resultStatus != null and param.resultStatus != ''">
-                result_status = #{param.resultStatus},
-            </if>
-            <if test="param != null and param.toolDescription != null and param.toolDescription != ''">
-                tool_description = #{param.toolDescription},
-            </if>
-            <if test="param != null and param.toolPlatform != null and param.toolPlatform != ''">
-                tool_platform = #{param.toolPlatform},
-            </if>
-            <if test="param != null and param.readMe != null and param.readMe != ''">
-                read_me = #{param.readMe},
-            </if>
-            <if test="param != null and param.controlPort != null and param.controlPort != ''">
-                control_port = #{param.controlPort},
-            </if>
-            <if test="param != null and param.resultStatus != null and param.resultStatus != ''">
-                result_status = #{param.resultStatus},
-            </if>
-            <if test="param != null and param.defaultCmd != null and param.defaultCmd != ''">
-                default_cmd = #{param.defaultCmd},
-            </if>
-            <if test="param != null and param.id != null and param.id != ''">
-                id = #{param.id},
-            </if>
-            <if test="param != null and param.toolName != null and param.toolName != ''">
-                tool_name = #{param.toolName},
-            </if>
-            <if test="param != null and param.runTable != null and param.runTable != ''">
-                run_table = #{param.runTable},
+            <if test="param != null and param.resultLog != null and param.resultLog != ''">
+                result_log = #{param.resultLog},
             </if>
             <if test="param != null and param.createTime != null and param.createTime != ''">
                 create_time = #{param.createTime},
             </if>
-            <if test="param != null and param.controlType != null and param.controlType != ''">
-                control_type = #{param.controlType},
-            </if>
             <if test="param != null and param.creatorId != null and param.creatorId != ''">
                 creator_id = #{param.creatorId},
             </if>
-            pk = #{pk}
+                update_time = now()
         </set>
         WHERE
         pk = #{pk}

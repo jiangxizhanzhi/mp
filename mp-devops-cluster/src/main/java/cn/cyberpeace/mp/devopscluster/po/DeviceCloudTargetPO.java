@@ -105,4 +105,12 @@ public class DeviceCloudTargetPO extends BaseModel {
      * 图标地址
      */
     private String logo;
+    /**
+     * 版本号
+     */
+    private Double version;
+    /**
+     * 代系
+     */
+    private String generation;
 }
