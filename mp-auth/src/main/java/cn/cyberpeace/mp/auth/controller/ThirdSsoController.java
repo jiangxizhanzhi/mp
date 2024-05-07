@@ -49,7 +49,11 @@ public class ThirdSsoController {
                 if (StringUtils.isNotBlank(lessonId) && StringUtils.isNotBlank(courseId)) {
                     redirectUrl = String.format(authConfig.getMpLessonViewUrl(), courseId, lessonId);
                 } else if (StringUtils.isNotBlank(courseId)) {
-                    redirectUrl = String.format(authConfig.getMpCourseViewUrl(), courseId);
+                    if ("A000000001".equals(courseId)) {
+                        redirectUrl = String.format(authConfig.getMpCourseViewUrl(), courseId);
+                    }else{
+                        redirectUrl = String.format(authConfig.getMpCourseViewUrl(), courseId);
+                    }
                 }
             }
         }

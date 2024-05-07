@@ -219,6 +219,7 @@ mp:
       token-url: ${mp.auth.ext-var.haibo.token-url}
       mp-homepage-view-url: ${mp.auth.ext-var.haibo.mp-homepage-view-url}
       mp-course-view-url: ${mp.auth.ext-var.haibo.mp-course-view-url}
+      mp-practice-view-url: ${mp.auth.ext-var.haibo.mp-practice-view-url}
       mp-lesson-view-url: ${mp.auth.ext-var.haibo.mp-lesson-view-url}
       logout-url: ${mp.auth.ext-var.haibo.logout-url}
   # mp-front-admin 模块配置

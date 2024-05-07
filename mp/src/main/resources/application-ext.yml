@@ -94,6 +94,7 @@ mp:
         token-url: ${HAIBO_TOKEN_URL:https://api.haibo-tech.cn/User/VerifyUser}
         mp-homepage-view-url: ${MP_HOMEPAGE_VIEW_URL:http://10.100.1.28/page/mg/personal}
         mp-course-view-url: ${MP_COURSE_VIEW_URL:http://10.100.1.28/page/mg/oj/all-course/detail/%s/}
+        mp-practice-view-url: ${MP_PRACTICE_VIEW_URL:http://10.100.1.28/page/mg/oj/practice}
         mp-lesson-view-url: ${MP_LESSON_VIEW_URL:http://10.100.1.28/page/mg/oj/all-course/lesson/%s/%s/}
         logout-url: ${HAIBO_LOGOUT_URL:https://api.haibo-tech.cn/User/LoginOff}
   frontbusiness:

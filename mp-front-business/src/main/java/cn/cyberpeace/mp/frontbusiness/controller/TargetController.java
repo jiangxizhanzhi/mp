@@ -6,12 +6,15 @@ import cn.cyberpeace.mp.auth.service.MenuConfigService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,6 +62,22 @@ public class TargetController {
     @GetMapping("/current_user/tree")
     public ServiceResult getTree() {
         List<String> menuIdents = userPermissionService.listMenuIdentsByLoginUser();
+
+        String coursesStr = UserUtils.getLoginUser().getCourses();
+        if (StringUtils.isEmpty(coursesStr)) {
+            menuIdents.remove("practice-folder");
+            menuIdents.remove("oj-practice");
+            menuIdents.remove("oj-practice-capture-flag");
+        } else {
+            List<String> courses = JsonCommon.parse(coursesStr, new TypeReference<List<String>>() {
+            });
+            if (courses == null || !courses.contains("A000000001")) {
+                menuIdents.remove("practice-folder");
+                menuIdents.remove("oj-practice");
+                menuIdents.remove("oj-practice-capture-flag");
+            }
+        }
+
         var result = menuConfigService.getUserTreeMenuBy(UserUtils.getLoginUser().getId(), menuIdents);
         return ServiceResult.builder().source(result).build().asResult();
     }

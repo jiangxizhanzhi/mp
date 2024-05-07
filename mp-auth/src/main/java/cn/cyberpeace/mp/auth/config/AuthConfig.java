@@ -65,6 +65,9 @@ public class AuthConfig {
     @Value("${mp.auth.haibo.mp-course-view-url}")
     private String mpCourseViewUrl;
 
+    @Value("${mp.auth.haibo.mp-practice-view-url}")
+    private String mpPracticeViewUrl;
+
     @Value("${mp.auth.haibo.mp-lesson-view-url}")
     private String mpLessonViewUrl;
 

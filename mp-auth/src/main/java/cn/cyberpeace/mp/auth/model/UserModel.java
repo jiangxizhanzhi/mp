@@ -139,7 +139,7 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultStr
     private String haiboToken;
 
-    @ApiModelProperty(value = "haiboToken")
+    @ApiModelProperty(value = "用户在海博购买的课程id列表")
     @DefaultStr
     private String courses;
 
