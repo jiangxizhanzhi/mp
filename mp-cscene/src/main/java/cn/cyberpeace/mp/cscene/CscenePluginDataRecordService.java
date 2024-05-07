@@ -64,7 +64,7 @@ public class CscenePluginDataRecordService {
                     var ports = collectionSceneService.listPagePorts(element.getSrcElement().getEid());
                     if (CollectionUtils.isNotEmpty(ports)) {
                         var models = ports.stream().map(p -> {
-                            p.setElementName(elementName);
+                            p.setNodeName(elementName);
                             CollectionPluginSceneDataModel model = new CollectionPluginSceneDataModel();
                             model.setType(CollectionPluginSceneDataModel.Type.PORT);
                             model.setScene(instance.getScene());
@@ -77,7 +77,7 @@ public class CscenePluginDataRecordService {
                     var netifaces = collectionSceneService.listNetifaces(element.getSrcElement().getEid());
                     if (CollectionUtils.isNotEmpty(netifaces)) {
                         var models = netifaces.stream().map(n -> {
-                            n.setElementName(elementName);
+                            n.setNodeName(elementName);
                             CollectionPluginSceneDataModel model = new CollectionPluginSceneDataModel();
                             model.setType(CollectionPluginSceneDataModel.Type.NETIFACE);
                             model.setScene(instance.getScene());
@@ -95,7 +95,7 @@ public class CscenePluginDataRecordService {
                     var logfiles = logFileService.pageByElementId(request).getSource().getObjs();
                     if (CollectionUtils.isNotEmpty(logfiles)) {
                         var models = logfiles.stream().map(n -> {
-                            n.setElementName(elementName);
+                            n.setNodeName(elementName);
                             CollectionPluginSceneDataModel model = new CollectionPluginSceneDataModel();
                             model.setType(CollectionPluginSceneDataModel.Type.LOGFile);
                             model.setScene(instance.getScene());

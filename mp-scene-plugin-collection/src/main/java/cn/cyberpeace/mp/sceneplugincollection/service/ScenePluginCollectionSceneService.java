@@ -1414,8 +1414,8 @@ public class ScenePluginCollectionSceneService {
         Integer total = 0;
         for (int i = 0; i < listPageInfoQueryParams.getNodeIds().size() ; i++) {
             WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
-            String elementName = batchSceneHandler.getNodeId2NodenameMap().get(listPageInfoQueryParams.getNodeIds().get(0));
-            wazuhRequest.setAgentNames(Lists.newArrayList(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0))));
+            String elementName = batchSceneHandler.getNodeId2NodenameMap().get(listPageInfoQueryParams.getNodeIds().get(i));
+            wazuhRequest.setAgentNames(Lists.newArrayList(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(i))));
             wazuhRequest.setPageSize(1);
             // 默认24小时
             LocalDateTime endTime = LocalDateTime.now();
@@ -2014,7 +2014,7 @@ public class ScenePluginCollectionSceneService {
         process.setDescription(wazuhProcess.getDescription());
         process.setTime(wazuhProcess.getTime());
         process.setLevel(wazuhProcess.getLevel());
-        process.setElementName(elementName);
+        process.setNodeName(elementName);
         return process;
     }
 

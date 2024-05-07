@@ -51,7 +51,7 @@ public class Port {
     private String agentId;
 
     @ApiModelProperty("主机名称")
-    private String elementName;
+    private String nodeName;
 
     @Data
     @ApiModel("本地端口")
