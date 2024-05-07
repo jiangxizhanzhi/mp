@@ -9,8 +9,6 @@ import cn.cyberpeace.mp.aggregation.response.UserSummarySceneResponse;
 import cn.cyberpeace.mp.auth.bo.user.UserOnlineReportBo;
 import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
@@ -30,7 +28,6 @@ import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.UserConnectionNumBO;
-import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
@@ -246,18 +243,11 @@ public class DashboardService {
                         && BaseSceneModel.CloudType.DEFAULT == (Integer) map.get("cloud_type")
                         && BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == (Integer) map.get("virtual_type"))
                 .count();
-        userResource.setVmCount((int)virtualMachineCount);
-        userResource.setContainerCount((int)containerCout);
+        userResource.setVmCount((int) virtualMachineCount);
+        userResource.setContainerCount((int) containerCout);
         userResource.setCloudElementCount((int) cloudElementCount);
         userResource.setLoadCount((int) loadCount);
         return userResource;
-    }
-    private long countElements(List<Map<String, Object>> maps, int cloudType, int virtualType) {
-        return maps.stream()
-                .filter(map -> map.get("cloud_type") != null && map.get("virtual_type") != null
-                        && cloudType == (Integer) map.get("cloud_type")
-                        && virtualType == (Integer) map.get("virtual_type"))
-                .count();
     }
 
     public ServiceResult<SceneBusinessSummary> groupCountResourceByRole() {
