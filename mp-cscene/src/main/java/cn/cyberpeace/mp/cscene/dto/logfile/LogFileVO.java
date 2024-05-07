@@ -31,4 +31,7 @@ public class LogFileVO extends LogFileBasicDto {
     @ApiModelProperty("接入时间")
     private LocalDateTime accessTime;
 
+    @ApiModelProperty("节点名称")
+    private String elementName;
+
 }

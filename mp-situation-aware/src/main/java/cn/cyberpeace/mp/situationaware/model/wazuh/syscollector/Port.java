@@ -50,6 +50,8 @@ public class Port {
     @JSONField(name = "agent_id")
     private String agentId;
 
+    @ApiModelProperty("主机名称")
+    private String elementName;
 
     @Data
     @ApiModel("本地端口")

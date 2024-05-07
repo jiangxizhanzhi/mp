@@ -117,4 +117,7 @@ public class Process {
     @ApiModelProperty(value = "级别")
     private int level;
 
+    @ApiModelProperty("主机名称")
+    private String elementName;
+
 }

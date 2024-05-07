@@ -1407,38 +1407,46 @@ public class ScenePluginCollectionSceneService {
         int pageSize = listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize();
         int page = listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage();
 
-        WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
-        wazuhRequest.setAgentNames(Lists.newArrayList(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0))));
-        wazuhRequest.setPageSize(1);
-        // 默认24小时
-        LocalDateTime endTime = LocalDateTime.now();
-        if (StringUtils.isNotEmpty(listPageInfoQueryParams.getStartTime())) {
-            wazuhRequest.setStartTime(TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getStartTime()));
-        } else {
-            wazuhRequest.setStartTime(endTime.minusHours(collectionAppConfig.getHoursRange()));
+        if (listPageInfoQueryParams.getNodeIds() == null) {
+            listPageInfoQueryParams.setNodeIds(new ArrayList<>(batchSceneHandler.getNodeId2NodenameMap().keySet()));
         }
-        if (StringUtils.isNotEmpty(listPageInfoQueryParams.getEndTime())) {
-            wazuhRequest.setEndTime(TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getEndTime()));
-        } else {
-            wazuhRequest.setEndTime(endTime);
+        List<Process> processes = new ArrayList<>();
+        Integer total = 0;
+        for (int i = 0; i < listPageInfoQueryParams.getNodeIds().size() ; i++) {
+            WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
+            String elementName = batchSceneHandler.getNodeId2NodenameMap().get(listPageInfoQueryParams.getNodeIds().get(0));
+            wazuhRequest.setAgentNames(Lists.newArrayList(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0))));
+            wazuhRequest.setPageSize(1);
+            // 默认24小时
+            LocalDateTime endTime = LocalDateTime.now();
+            if (StringUtils.isNotEmpty(listPageInfoQueryParams.getStartTime())) {
+                wazuhRequest.setStartTime(TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getStartTime()));
+            } else {
+                wazuhRequest.setStartTime(endTime.minusHours(collectionAppConfig.getHoursRange()));
+            }
+            if (StringUtils.isNotEmpty(listPageInfoQueryParams.getEndTime())) {
+                wazuhRequest.setEndTime(TimeUtils.stringToLocalDateTime(listPageInfoQueryParams.getEndTime()));
+            } else {
+                wazuhRequest.setEndTime(endTime);
+            }
+            if (CollectionUtils.isNotEmpty(listPageInfoQueryParams.getLevels())) {
+                wazuhRequest.setLevels(listPageInfoQueryParams.getLevels());
+            }
+
+            if (wazuhRequest.getAgentNames().contains(null)) {
+                return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
+            }
+
+            List<WazuhProcessModel> totalList = dataCollectionService.queryProcessesWithTimeRange(wazuhRequest);
+            total += totalList.size();
+
+            int skip = (page - 1) * pageSize;
+            log.info("skip:{}, limit:{}", skip, pageSize);
+            List<WazuhProcessModel> resultList = totalList.stream().filter(Objects::nonNull).skip(skip).limit(pageSize).collect(Collectors.toList());
+
+            processes.addAll(resultList.stream().map(p -> convertWazuhProcess2Process(p, elementName)).collect(Collectors.toList()));
         }
-        if (CollectionUtils.isNotEmpty(listPageInfoQueryParams.getLevels())) {
-            wazuhRequest.setLevels(listPageInfoQueryParams.getLevels());
-        }
-
-        if (wazuhRequest.getAgentNames().contains(null)) {
-            return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
-        }
-
-        List<WazuhProcessModel> totalList = dataCollectionService.queryProcessesWithTimeRange(wazuhRequest);
-
-        int skip = (page - 1) * pageSize;
-        log.info("skip:{}, limit:{}", skip, pageSize);
-        List<WazuhProcessModel> resultList = totalList.stream().filter(Objects::nonNull).skip(skip).limit(pageSize).collect(Collectors.toList());
-
-        List<Process> processes = resultList.stream().map(p -> convertWazuhProcess2Process(p)).collect(Collectors.toList());
-
-        return new ListObjServiceResult<>(new ListObjResult<>(processes, totalList.size()).asResult()).asResult();
+        return new ListObjServiceResult<>(new ListObjResult<>(processes, total).asResult()).asResult();
     }
 
 
@@ -1988,7 +1996,7 @@ public class ScenePluginCollectionSceneService {
     }
 
 
-    private Process convertWazuhProcess2Process(WazuhProcessModel wazuhProcess) {
+    private Process convertWazuhProcess2Process(WazuhProcessModel wazuhProcess, String elementName) {
         if (Objects.isNull(wazuhProcess)) {
             return null;
         }
@@ -2006,6 +2014,7 @@ public class ScenePluginCollectionSceneService {
         process.setDescription(wazuhProcess.getDescription());
         process.setTime(wazuhProcess.getTime());
         process.setLevel(wazuhProcess.getLevel());
+        process.setElementName(elementName);
         return process;
     }
 
