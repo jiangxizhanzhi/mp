@@ -8,9 +8,11 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.common.service.FileService;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
@@ -47,6 +49,8 @@ import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CsceneTargetBO;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CsceneTargetMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -65,7 +69,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -104,6 +110,9 @@ public class ImagesController {
 
     @Autowired
     private SysConfigService sysConfigService;
+
+    @Autowired
+    private CsceneTargetMapper csceneTargetMapper;
 
     @NonNull
     private InjectFileUploadService injectFileUploadService;
@@ -242,6 +251,53 @@ public class ImagesController {
         }
         this.imagesConverter.setImageBusinessProperties(imagesByIdVO, model);
         return new Result<>(imagesByIdVO);
+    }
+
+
+    /**
+     * 构建
+     */
+    @ApiOperation("离线升级")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImageRequest.class)
+    @PostMapping("/upgrade/offline")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "快速构建镜像", target = OpTargetEnums.IMAGE)
+    public ServiceResult imageUpgradeOffline(@RequestBody ImageRequest request) {
+
+        // 查看镜像是否有关联基础镜像 -若有关联 无法升级 无关联则删除基础镜像
+        // 无基础镜像时 删除原镜像
+        ImageConvertModel model = imagesConverter.findByUuid(request.getUuid());
+        ExtImageInfo extImageInfo = model.getExtImageInfo();
+        ImagePageRequest imagePageRequest = new ImagePageRequest();
+        ImagePageDTO dto = new ImagePageDTO(imagePageRequest);
+        BasePageBO<ImageConvertModel> models = imagesConverter.page(dto);
+        String name = model.getName();
+        List<ImagesPageVO> modelList = convertBOToPageVO(models);
+        List<ExtImageInfo> collect = modelList.stream().map(ImagesPageVO::getExtImageInfo).collect(Collectors.toList());
+        long count = collect.stream().filter(s -> s.getBaseImageName().equals(name)).count();
+        if(count > 0){
+            ResultCommon.fail("The image is referenced as the base image and cannot be deleted!");
+        }
+        String baseImageName = extImageInfo.getBaseImageName();
+        CsceneTargetBO byName = csceneTargetMapper.findByName(baseImageName);
+        String[]imageNames = new String[]{name};
+        ServiceResult<Map<String, List<DeviceReferCsceneStat>>> mapServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);
+        Map<String, List<DeviceReferCsceneStat>> data = mapServiceResult.getData();
+        List<DeviceReferCsceneStat> deviceReferCsceneStats = data.get(name);
+        if(!deviceReferCsceneStats.isEmpty() || null != byName){
+            ResultCommon.fail("The image cannot be upgraded because it is running or being referenced!");
+        }
+        ImagesDeleteRequest imagesDeleteRequest = new ImagesDeleteRequest();
+        List<String> images = new ArrayList<>();
+        images.add(request.getUuid());
+        imagesDeleteRequest.setImageIds(images);
+        imagesConverter.delete(imagesDeleteRequest);
+        // 新建
+        ImageRequest imageRequest = new ImageRequest();
+        BeanUtils.copyProperties(request ,imageRequest);
+        imageRequest.setLogo(FsCommon.getFileKey(imageRequest.getLogo()));
+        validImageRequest(imageRequest);
+        imagesConverter.add(imageRequest);
+        return ResultCommon.success();
     }
 
 

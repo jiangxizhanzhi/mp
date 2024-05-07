@@ -6,6 +6,10 @@
     <select id="findByEid" resultType="cn.cyberpeace.mp.sceneplugincloud.bo.CsceneTargetBO">
         select * from mp_devops_target where uuid = #{ids}
     </select>
+
+    <select id="findByName" resultType="cn.cyberpeace.mp.sceneplugincloud.bo.CsceneTargetBO">
+        select * from mp_devops_target where name = #{name} and instance_state != 0
+    </select>
     <select id="findByUUid" resultType="cn.cyberpeace.mp.sceneplugincloud.bo.CsceneTargetBO">
         select * from mp_devops_target where uuid in
         <foreach item="item" collection="uuids" open="(" separator="," close=")">

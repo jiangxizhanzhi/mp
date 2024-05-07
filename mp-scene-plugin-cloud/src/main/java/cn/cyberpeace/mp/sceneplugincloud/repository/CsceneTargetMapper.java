@@ -15,5 +15,8 @@ import java.util.List;
 @ModelClass(CsceneTargetBO.class)
 public interface CsceneTargetMapper extends BaseModelMapper<CsceneTargetBO> {
     CsceneTargetBO  findByEid(@Param("ids") String ids);
+
+    CsceneTargetBO  findByName(@Param("name") String name);
+
     List<CsceneTargetBO > findByUUid(@Param("uuids") List<String> uuids);
 }
