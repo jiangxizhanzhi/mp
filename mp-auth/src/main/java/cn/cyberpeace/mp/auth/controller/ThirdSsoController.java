@@ -40,7 +40,7 @@ public class ThirdSsoController {
                                              @RequestParam(name = "course_id", required = false) String courseId,
                                              @RequestParam(name = "lesson_id", required = false) String lessonId,
                                              HttpServletRequest request, HttpServletResponse response) {
-        log.info("token {} , type {} , course_id {} , lesson_id {}", token, token, courseId, lessonId);
+        log.info("token {} , type {} , course_id {} , lesson_id {}", token, type, courseId, lessonId);
         thirdLoginService.loginByToken(token, request, response);
         // 重定向到另一个域名的页面
         String redirectUrl = authConfig.getMpHomePageViewUrl();
@@ -50,7 +50,7 @@ public class ThirdSsoController {
                     redirectUrl = String.format(authConfig.getMpLessonViewUrl(), courseId, lessonId);
                 } else if (StringUtils.isNotBlank(courseId)) {
                     if ("A000000001".equals(courseId)) {
-                        redirectUrl = String.format(authConfig.getMpCourseViewUrl(), courseId);
+                        redirectUrl = String.format(authConfig.getMpPracticeViewUrl(), courseId);
                     }else{
                         redirectUrl = String.format(authConfig.getMpCourseViewUrl(), courseId);
                     }
