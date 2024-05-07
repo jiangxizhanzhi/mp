@@ -48,4 +48,16 @@
         T.LEVEL
     </select>
 
+    <select id="getNextLevelDatasByCodes" resultType="cn.cyberpeace.mp.base.bo.MpSysCodeEnum">
+        SELECT
+            *
+        FROM
+            mp_sys_code_enum
+        WHERE
+            parent_code in
+        <foreach collection="codes" item="code" open="(" separator="," close=")">
+            #{code}
+        </foreach>
+    </select>
+
 </mapper>

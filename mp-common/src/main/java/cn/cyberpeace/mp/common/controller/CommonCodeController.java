@@ -35,6 +35,17 @@ public class CommonCodeController {
     }
 
     /**
+     * 根据code查找下级
+     * @return List<MpSysCodeEnum>
+     */
+    @ApiOperation("根据codes查找下级")
+    @GetMapping("/getNextLevelDatasByCodes")
+    public ServiceResult getNextLevelDataByCode(@RequestParam(value = "codes") String[] codes) {
+        List<MpSysCodeEnum> getNextLevelDataByCode = commonCodeService.getNextLevelDatasByCodes(codes);
+        return new ServiceResult(getNextLevelDataByCode, BaseErrorCode.SUCCESS).asResult();
+    }
+
+    /**
      * 根据code查找下级所有(平级)
      * @return List<MpSysCodeEnum>
      */

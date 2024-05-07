@@ -20,6 +20,11 @@ public class MpDevopsLoadSceneLog extends MpDevopsLoad {
     private String sceneId;
 
     /**
+     * 任务id
+     */
+    private String taskId;
+
+    /**
      * 结果日志
      */
     private String resultLog;
@@ -33,4 +38,14 @@ public class MpDevopsLoadSceneLog extends MpDevopsLoad {
      * 结果类型
      */
     private String resultType;
+
+    /**
+     * 阶段id
+     */
+    private String stageId;
+
+    /**
+     * 阶段名称
+     */
+    private String stageName;
 }

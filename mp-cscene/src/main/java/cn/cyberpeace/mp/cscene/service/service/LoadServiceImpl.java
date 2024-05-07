@@ -286,7 +286,7 @@ public class LoadServiceImpl {
      * 根据场景id获取绑定的载荷
      * */
     public List getLoadBySceneId(String sceneId) {
-        //todo 需要场景载荷关联表
+        //节点表
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("pageNum",1);
         jsonObject.put("pageSize",100);

@@ -89,5 +89,9 @@ public class CommonCodeServiceImpl {
         }
         return menuDto;
     }
+
+    public List<MpSysCodeEnum> getNextLevelDatasByCodes(String[] codes) {
+        return commonCodeMapper.getNextLevelDatasByCodes(codes);
+    }
 }
 
