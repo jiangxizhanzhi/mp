@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.cscene.service.LogFileService;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneDataModel;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneDataMapper;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
@@ -59,9 +60,11 @@ public class CscenePluginDataRecordService {
                 }
                 List<CollectionPluginSceneDataModel> result = new ArrayList<>();
                 for (var element : collectPlugin.getElementMap().values()) {
+                    String elementName = element.getSrcElement().getName();
                     var ports = collectionSceneService.listPagePorts(element.getSrcElement().getEid());
                     if (CollectionUtils.isNotEmpty(ports)) {
                         var models = ports.stream().map(p -> {
+                            p.setElementName(elementName);
                             CollectionPluginSceneDataModel model = new CollectionPluginSceneDataModel();
                             model.setType(CollectionPluginSceneDataModel.Type.PORT);
                             model.setScene(instance.getScene());
@@ -74,6 +77,7 @@ public class CscenePluginDataRecordService {
                     var netifaces = collectionSceneService.listNetifaces(element.getSrcElement().getEid());
                     if (CollectionUtils.isNotEmpty(netifaces)) {
                         var models = netifaces.stream().map(n -> {
+                            n.setElementName(elementName);
                             CollectionPluginSceneDataModel model = new CollectionPluginSceneDataModel();
                             model.setType(CollectionPluginSceneDataModel.Type.NETIFACE);
                             model.setScene(instance.getScene());
@@ -91,6 +95,7 @@ public class CscenePluginDataRecordService {
                     var logfiles = logFileService.pageByElementId(request).getSource().getObjs();
                     if (CollectionUtils.isNotEmpty(logfiles)) {
                         var models = logfiles.stream().map(n -> {
+                            n.setElementName(elementName);
                             CollectionPluginSceneDataModel model = new CollectionPluginSceneDataModel();
                             model.setType(CollectionPluginSceneDataModel.Type.LOGFile);
                             model.setScene(instance.getScene());
@@ -114,10 +119,13 @@ public class CscenePluginDataRecordService {
     public List<CollectionPluginSceneDataModel> getData(TimeListPageInfoQueryParams params, int type,
                                                         LocalDateTime startTime, LocalDateTime endTime) {
         String sceneId = params.getSceneIds().get(0);
-        String nodeId = params.getNodeIds().get(0);
+        if (params.getNodeIds() == null) {
+            SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+            params.setNodeIds(new ArrayList<>(sceneHandler.getElementMap().keySet()));
+        }
         return collectionPluginSceneDataMapper.list(new HumanCondition()
                 .filterEqual(CollectionPluginSceneDataModel::getScene, sceneId)
-                .filterEqual(CollectionPluginSceneDataModel::getSceneElement, nodeId)
+                .filterIn(CollectionPluginSceneDataModel::getSceneElement, params.getNodeIds().toArray())
                 .filterEqual(CollectionPluginSceneDataModel::getType, type)
                 .filterGreaterThan(CollectionPluginSceneDataModel::getCreateTime, startTime)
                 .filterLessThan(CollectionPluginSceneDataModel::getCreateTime, endTime)
