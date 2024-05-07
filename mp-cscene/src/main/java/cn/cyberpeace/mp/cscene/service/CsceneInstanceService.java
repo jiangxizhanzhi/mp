@@ -823,12 +823,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return scenePluginCollectionSceneService.listHostStates(sceneId, queryParams);
     }
 
-    public ListObjServiceResult<CloudPluginSceneElementModel> listLoads(String id) {
+    public List<CloudPluginSceneElementModel> listLoads(String id) {
         HumanCondition humanCondition = new HumanCondition()
                 .filterEqual(CloudPluginSceneElementModel::getScene, id)
                 .filterEqual(CloudPluginSceneElementModel::getVirtualType, BaseCloudPluginSceneElementModel.VirtualType.LOAD);
         List<CloudPluginSceneElementModel> list = cloudPluginSceneElementMapper.list(humanCondition);
-        return new ListObjServiceResult<>(new ListObjResult<>(list, list.size()));
+        return list;
     }
 
     public ListObjServiceResult<CollectionHostStateBO> listHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams) {

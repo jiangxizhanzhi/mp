@@ -96,7 +96,8 @@ public class LoadController {
         JSONObject result = LoadService.getLoadList(requestData);
         if (result != null && result.get("source") != null && ((List) result.get("source")).size() == 1) {
             MpDevopsLoad load = (MpDevopsLoad) ((List) result.get("source")).get(0);
-            List loopholes = LoadService.getBindLoopholes(load.getPk());
+            //todo 修改id
+            List loopholes = LoadService.getBindLoopholes(load.getPk().toString());
             load.setLoopholes(loopholes);
             return new ServiceResult(load, BaseErrorCode.SUCCESS).asResult();
         } else {

@@ -1,16 +1,19 @@
 package cn.cyberpeace.mp.cscene.service.service;
 
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
+import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.cscene.model.*;
 import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
+import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.websocket.WebSocketServer;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
@@ -39,6 +42,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
 
@@ -57,6 +61,9 @@ public class LoadServiceImpl {
     @Resource
     private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
 
+    @Autowired
+    private CsceneInstanceService csceneInstanceService;
+
     /*
      * 载荷页面
      * */
@@ -74,10 +81,10 @@ public class LoadServiceImpl {
     }
 
     //调用ojj服务
-    public List getBindLoopholes(Integer pk) {
+    public List getBindLoopholes(String pk) {
         //todo 服务地址
         String url = "http://10.108.1.10:80/api/vuln/admin/vuln/load_code";
-        url = url + "?load_id=" + pk.toString();
+        url = url + "?load_id=" + pk;
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
         String token = JwtCommon.getToken();
@@ -288,11 +295,25 @@ public class LoadServiceImpl {
      * */
     public List getLoadBySceneId(String sceneId) {
         //节点表
+//        List<CloudPluginSceneElementModel> loadList = csceneInstanceService.listLoads(sceneId);
+//        List<String> loadIds = loadList.stream()
+//                .map(CloudPluginSceneElementModel::getLoadToolId)
+//                .filter(Objects::nonNull)
+//                .distinct()
+//                .collect(Collectors.toList());
+//        List<MpDevopsLoad> getLoadByPks = new ArrayList<>();
+//        if(loadIds!=null && loadIds.size()>0){
+//            getLoadByPks = loadMapper.getLoadByPks(loadIds);
+//        }
+//        return getLoadByPks;
+
+        //暂用这个
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("pageNum",1);
         jsonObject.put("pageSize",100);
-        JSONObject loadList = getLoadList(new JSONObject());
-        return (List) loadList.get("source");
+        JSONObject loads = getLoadList(new JSONObject());
+        List<MpDevopsLoad> getLoadByPks = (List) loads.get("source");
+        return getLoadByPks;
     }
 
     /*

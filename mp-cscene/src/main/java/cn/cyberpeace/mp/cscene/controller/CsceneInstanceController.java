@@ -884,7 +884,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
     })
     @GetMapping(value = "/list_loads", params = "id")
-    public ListObjServiceResult<CloudPluginSceneElementModel> listLoads(@RequestParam String id) {
-        return modelService.listLoads(id).asResult();
+    public List<CloudPluginSceneElementModel> listLoads(@RequestParam String id) {
+        return modelService.listLoads(id);
     }
 }
