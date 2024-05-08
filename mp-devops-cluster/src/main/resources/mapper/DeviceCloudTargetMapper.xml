@@ -87,8 +87,18 @@
         DELETE
         FROM
             mp_devops_cloud_target
-        WHERE
-            pk = #{pk}
+        <where>
+            <if test="pk != null and pk != ''">
+                or pk = #{pk}
+            </if>
+            <if test="param != null and param.size != 0">
+                or pk in (
+                <foreach collection="param" item="item" index="index" separator=",">
+                    #{item}
+                </foreach>
+                )
+            </if>
+        </where>
     </delete>
 
     <delete id="deleteCloudTarget">

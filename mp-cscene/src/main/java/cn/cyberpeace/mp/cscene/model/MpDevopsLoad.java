@@ -28,6 +28,10 @@ public class MpDevopsLoad extends BaseModel {
      */
     private String toolName;
     /**
+     * 镜像名称
+     */
+    private String imageName;
+    /**
      * 工具描述
      */
     private String toolDescription;

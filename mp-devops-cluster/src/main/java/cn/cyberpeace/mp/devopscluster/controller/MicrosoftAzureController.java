@@ -54,9 +54,8 @@ public class MicrosoftAzureController {
      */
     @ApiOperation(value = "云镜像删除", notes = "")
     @DeleteMapping("/delete")
-    public ServiceResult deleteCloudTarget(@RequestBody(required = false) DeviceCloudTargetPO requestData) {
-        JSONObject jsonObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
-        Boolean deleteCloudTarget = microsoftAzureConverter.deleteCloudTarget(jsonObject);
+    public ServiceResult deleteCloudTarget(@RequestBody(required = false) JSONObject requestData) {
+        Boolean deleteCloudTarget = microsoftAzureConverter.deleteCloudTarget(requestData);
         if (deleteCloudTarget) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS).asResult();
         } else {

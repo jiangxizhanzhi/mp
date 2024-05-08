@@ -438,17 +438,18 @@ public class MicrosoftAzureConverter implements BaseConverter {
      */
     @Transactional
     public Boolean deleteCloudTarget(JSONObject requestData) {
-        if (requestData != null && requestData.get("pk") != null && !requestData.get("pk").toString().equals("")) {
-            Integer pk = microsoftAzureMapper.deleteByPk(requestData.get("pk").toString());
+        if (requestData != null && (requestData.get("pk") != null && !requestData.get("pk").toString().equals("") ||
+                                    requestData.get("pks") != null)) {
+            List<String> pks = null;
+            if(requestData.get("pks") != null && requestData.get("pks") instanceof List){
+                pks = (List<String>) requestData.get("pks");
+            }
+            Integer pk = microsoftAzureMapper.deleteByPk(requestData.get("pk").toString(),pks);
             if (pk > 0) {
                 return true;
-            } else {
-                //影响行数为0
-                return false;
             }
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Transactional

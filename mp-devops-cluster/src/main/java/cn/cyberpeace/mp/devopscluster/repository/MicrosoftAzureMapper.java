@@ -23,7 +23,7 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
 
     Integer getCloudTargetListTotal(@Param("param") JSONObject requestData);
 
-    Integer deleteByPk(String pk);
+    Integer deleteByPk(@Param("pk") String pk, @Param("param") List<String> pks);
 
     Integer updateCloudTarget(@Param("pk") String pk, @Param("param") JSONObject requestData);
 
