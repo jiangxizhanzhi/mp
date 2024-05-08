@@ -170,6 +170,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTarget.setOperatingSystemStatus("专业化");
             deviceCloudTarget.setGeneration("第一代");
             deviceCloudTarget.setVersion("0.0.1");
+            deviceCloudTarget.setLogo("/api/mp/file/710/017/93dde93031be465c3a7bb20381f4cd6e.png");
             list.add(deviceCloudTarget);
         }
 
@@ -190,7 +191,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTarget.setSourceType(1);
             deviceCloudTarget.setOperatingSystemStatus("专业化");
             deviceCloudTarget.setGeneration("第一代");
-            deviceCloudTarget.setVersion("0.0.1");
+            deviceCloudTarget.setVersion(((JSONObject)images.get(i)).get("imageVersion") != null ? ((JSONObject) images.get(i)).get("imageVersion").toString() : "");
+            deviceCloudTarget.setLogo("/api/mp/file/710/017/93dde93031be465c3a7bb20381f4cd6e.png");
             list.add(deviceCloudTarget);
         }
 
@@ -206,6 +208,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTarget.setOperatingSystemStatus("专业化");
             deviceCloudTarget.setGeneration("第一代");
             deviceCloudTarget.setVersion("0.0.1");
+            deviceCloudTarget.setLogo("/api/mp/file/710/017/93dde93031be465c3a7bb20381f4cd6e.png");
             list.add(deviceCloudTarget);
         }
         //拿到所有数据库数据
@@ -457,8 +460,12 @@ public class MicrosoftAzureConverter implements BaseConverter {
             if(requestData.get("pks") != null && requestData.get("pks") instanceof List){
                 pks = (List<String>) requestData.get("pks");
             }
-            Integer pk = microsoftAzureMapper.deleteByPk(requestData.get("pk").toString(),pks);
-            if (pk > 0) {
+            String pk = "";
+            if(requestData.get("pk") != null && !requestData.get("pk").toString().equals("")){
+                pk = requestData.get("pk").toString();
+            }
+            Integer deleteByPk = microsoftAzureMapper.deleteByPk(pk,pks);
+            if (deleteByPk > 0) {
                 return true;
             }
         }
