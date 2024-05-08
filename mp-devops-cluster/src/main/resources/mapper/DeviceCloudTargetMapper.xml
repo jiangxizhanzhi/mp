@@ -24,7 +24,9 @@
         create_user,
         instance_create_user,
         role,
-        logo
+        logo,
+        generation,
+        version
         ) VALUES
         <foreach collection="param" item="item" index="index" separator=",">
             (
@@ -48,7 +50,9 @@
                 #{item.createUser},
                 #{item.instanceCreateUser},
                 #{item.role},
-                #{item.logo}
+                #{item.logo},
+                #{item.generation},
+                #{item.version}
             )
         </foreach>
     </insert>

@@ -161,11 +161,15 @@ public class MicrosoftAzureConverter implements BaseConverter {
         for (int i = 0; i < dockerImages.size(); i++) {
             DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
             deviceCloudTarget.setName(((JSONObject) dockerImages.get(i)).get("repositoryName").toString());
+            deviceCloudTarget.setUploadTargetName(((JSONObject) dockerImages.get(i)).get("repositoryName").toString());
             deviceCloudTarget.setImageType("container");
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
             deviceCloudTarget.setCloudServiceType(2);
             //源类型(1:云平台 2:用户上传)
             deviceCloudTarget.setSourceType(2);
+            deviceCloudTarget.setOperatingSystemStatus("专业化");
+            deviceCloudTarget.setGeneration("第一代");
+            deviceCloudTarget.setVersion("0.0.1");
             list.add(deviceCloudTarget);
         }
 
@@ -184,6 +188,9 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTarget.setCloudServiceType(2);
             //源类型(1:云平台 2:用户上传)
             deviceCloudTarget.setSourceType(1);
+            deviceCloudTarget.setOperatingSystemStatus("专业化");
+            deviceCloudTarget.setGeneration("第一代");
+            deviceCloudTarget.setVersion("0.0.1");
             list.add(deviceCloudTarget);
         }
 
@@ -196,6 +203,9 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTarget.setCloudServiceType(2);
             //源类型(1:云平台 2:用户上传)
             deviceCloudTarget.setSourceType(2);
+            deviceCloudTarget.setOperatingSystemStatus("专业化");
+            deviceCloudTarget.setGeneration("第一代");
+            deviceCloudTarget.setVersion("0.0.1");
             list.add(deviceCloudTarget);
         }
         //拿到所有数据库数据
@@ -401,6 +411,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
         // 替换为您的实际订阅ID
         String subscriptionId = "c87ba926-f7c2-4d53-8b8e-89245dc92e26";
+
         // 指定要查询的区域
         Region region = Region.US_EAST;
 
