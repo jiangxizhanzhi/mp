@@ -172,13 +172,14 @@ public class MicrosoftAzureConverter implements BaseConverter {
         //微软云镜像
         for (int i = 0; i < images.size(); i++) {
             DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
-            deviceCloudTarget.setPublisher(((JSONObject) images.get(i)).get("PublisherName").toString());
-            deviceCloudTarget.setOffer(((JSONObject) images.get(i)).get("offerName").toString());
-            deviceCloudTarget.setSku(((JSONObject) images.get(i)).get("skuName").toString());
+            deviceCloudTarget.setName(((JSONObject)images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "");
+            deviceCloudTarget.setPublisher(((JSONObject)images.get(i)).get("PublisherName") != null ? ((JSONObject) images.get(i)).get("PublisherName").toString() : "");
+            deviceCloudTarget.setOffer(((JSONObject)images.get(i)).get("offerName") != null ? ((JSONObject) images.get(i)).get("offerName").toString() : "");
+            deviceCloudTarget.setSku(((JSONObject)images.get(i)).get("skuName") != null ? ((JSONObject) images.get(i)).get("skuName").toString() : "");
             //镜像类型
             deviceCloudTarget.setImageType("vm");
             //操作系统
-            deviceCloudTarget.setOperatingSystem(((JSONObject) images.get(i)).get("operatingSystem").toString());
+            deviceCloudTarget.setOperatingSystem(((JSONObject)images.get(i)).get("operatingSystem") != null ? ((JSONObject) images.get(i)).get("operatingSystem").toString() : "");
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
             deviceCloudTarget.setCloudServiceType(2);
             //源类型(1:云平台 2:用户上传)
@@ -374,6 +375,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
                                     if (time < 1) {
                                         OperatingSystemTypes operatingSystemTypes = image.osDiskImage().operatingSystem();
                                         JSONObject third = new JSONObject();
+                                        third.put("imageName", publisher.name());
                                         third.put("imageVersion", image.version());
                                         third.put("PublisherName", publisher.name());
                                         third.put("offerName", offer.name());
