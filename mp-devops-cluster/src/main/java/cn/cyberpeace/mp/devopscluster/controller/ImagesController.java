@@ -279,12 +279,17 @@ public class ImagesController {
         }
         String baseImageName = extImageInfo.getBaseImageName();
         CsceneTargetBO byName = csceneTargetMapper.findByName(baseImageName);
+        if(null != byName){
+            ResultCommon.fail("The image cannot be upgraded because it is running or being referenced!");
+        }
         String[]imageNames = new String[]{name};
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> mapServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);
         Map<String, List<DeviceReferCsceneStat>> data = mapServiceResult.getData();
-        List<DeviceReferCsceneStat> deviceReferCsceneStats = data.get(name);
-        if(!deviceReferCsceneStats.isEmpty() || null != byName){
-            ResultCommon.fail("The image cannot be upgraded because it is running or being referenced!");
+        if(null != data){
+            List<DeviceReferCsceneStat> deviceReferCsceneStats = data.get(name);
+            if(!deviceReferCsceneStats.isEmpty()){
+                ResultCommon.fail("The image cannot be upgraded because it is running or being referenced!");
+            }
         }
         ImagesDeleteRequest imagesDeleteRequest = new ImagesDeleteRequest();
         List<String> images = new ArrayList<>();
