@@ -634,7 +634,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (createContext == null) {
             return createAppInstance(csceneId, unique, new CsceneContextBO());
         }
-        checkSceneUsingNodeLimit(csceneId, createContext.getCscene());
+        if(!perfMode(createContext.getName())){
+            checkSceneUsingNodeLimit(csceneId, createContext.getCscene());
+        }
 
         BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(csceneId, createContext.getContext());
         CsceneBO cscene = createContext.getCscene();
@@ -781,5 +783,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             ids = list;
         }
         return ids;
+    }
+
+    public boolean perfMode(String sceneName){
+        return sceneName.contains("十万");
     }
 }

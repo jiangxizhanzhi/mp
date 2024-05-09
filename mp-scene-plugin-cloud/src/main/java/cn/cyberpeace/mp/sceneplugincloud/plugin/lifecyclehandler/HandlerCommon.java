@@ -213,4 +213,9 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
             }
         });
     }
+
+    public boolean perfMode(){
+        String sceneName = getPluginHandler().getSceneHandler().getScene().getName();
+        return sceneName.contains("十万");
+    }
 }

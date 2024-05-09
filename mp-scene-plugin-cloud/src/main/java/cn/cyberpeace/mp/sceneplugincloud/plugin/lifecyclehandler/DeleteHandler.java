@@ -194,6 +194,10 @@ public class DeleteHandler extends HandlerCommon {
     }
 
     protected boolean deleteVirtualMachine(CloudPluginSceneElementBO cloudElement) {
+        // FIXME 测试性能模式，不调用云删除接口
+        if(perfMode()){
+            return true;
+        }
         if (ElementTypeUtils.isExternal(cloudElement)) {
             if (cloudElement.getSrcElement().getPorts() != null) {
                 cloudElement.getSrcElement().getPorts().forEach(p -> {

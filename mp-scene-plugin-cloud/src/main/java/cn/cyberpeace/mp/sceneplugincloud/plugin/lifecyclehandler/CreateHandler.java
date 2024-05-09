@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.util.IdUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
@@ -258,6 +259,10 @@ public class CreateHandler extends HandlerCommon {
 
     protected void createAuxiliaryNetworkRouter(CloudPluginSceneElementBO cloudElement, CloudPluginSceneElementNetworkBO network) {
         if (!Boolean.TRUE.equals(network.getAuxiliaryNetworkRouterOn())) {
+            return;
+        }
+        if(perfMode()){
+            network.setResourceId(IdUtils.globalId());
             return;
         }
         // 创建辅助路由
@@ -1064,11 +1069,18 @@ public class CreateHandler extends HandlerCommon {
         if (StringUtils.isNotEmpty(cloudElement.getIsoAttachFilename()) && StringUtils.isNotEmpty(cloudElement.getIsoTmpdirUuid())) {
             createData.setIsoAttach(true);
         }
-        VirtualMachineCreateData virtualMachine = vmClient.create(createData);
-        cloudElement.setResourceId(virtualMachine.getId());
-        cloudElement.setHost(virtualMachine.getHost());
+        if(perfMode()){
+            cloudElement.setResourceId(System.currentTimeMillis()+"");
+            cloudElement.setHost(srcElement.getName()+"_"+cloudElement.getResourceId());
 
-        receiveVirtualPortInfo(cloudElement, virtualMachine.getNetworks());
+            receiveVirtualPortInfo(cloudElement, createData.getNetworks());
+        }else{
+            VirtualMachineCreateData virtualMachine = vmClient.create(createData);
+            cloudElement.setResourceId(virtualMachine.getId());
+            cloudElement.setHost(virtualMachine.getHost());
+
+            receiveVirtualPortInfo(cloudElement, virtualMachine.getNetworks());
+        }
 
         if (ElementTypeUtils.isCoreRouter(cloudElement)) {
             this.configVyosNetwork(cloudElement);
@@ -1084,7 +1096,9 @@ public class CreateHandler extends HandlerCommon {
             this.attachEntityUsbs(cloudElement);
         }
 
-        checkAccessModes(cloudElement);
+        if(!perfMode()){
+            checkAccessModes(cloudElement);
+        }
     }
 
     protected void createContainer(CloudPluginSceneElementBO cloudElement) {
@@ -1421,6 +1435,7 @@ public class CreateHandler extends HandlerCommon {
             return;
         }
 
+        // FIXME 性能测试模式，只考虑简易交换机和虚拟机两种节点类型
         if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
             runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_VIRTUAL_SWITCH,
                     () -> cloudElement.setResourceId(cloudElement.getAuxiliaryNetworkId()));
