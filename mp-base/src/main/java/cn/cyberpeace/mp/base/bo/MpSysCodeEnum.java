@@ -31,6 +31,11 @@ public class MpSysCodeEnum {
 	private String remark;
 
 	/**
+	 * 类型
+	 */
+	private String type;
+
+	/**
 	 * 补充
 	 */
 	private String supplement;

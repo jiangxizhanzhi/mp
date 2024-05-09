@@ -386,6 +386,14 @@
     <delete id="deleteData">
         delete
         from mp_devops_load
+        <where>
+            <if test="param != null and param.size != 0">
+                and id not in
+                <foreach collection="param" item="item" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
     </delete>
 
     <delete id="deleteLoadBindByPk">
@@ -402,6 +410,21 @@
         <where>
             <if test="param != null and param.pk != null and param.pk != ''">
                 and pk = #{param.pk}
+            </if>
+            <if test="param != null and param.pks != null and param.pks != ''">
+                and pk in
+                <foreach collection="param.pks" item="item" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="param != null and param.id != null and param.id != ''">
+                and id = #{param.id}
+            </if>
+            <if test="param != null and param.ids != null and param.ids != ''">
+                and id in
+                <foreach collection="param.ids" item="item" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
             </if>
             <if test="param != null and param.toolName != null and param.toolName != ''">
                 and tool_name like concat('%', #{param.toolName}, '%')
@@ -436,20 +459,18 @@
         mp_devops_load_scene_result_log log
         inner join
         mp_devops_load mdl
-        on log.id = mdl.pk
+        on log.id = mdl.id
         <where>
             <if test="param != null and param.pk != null and param.pk != ''">
-                and log.pk = #{param.pk}
+                and mdl.pk = #{param.pk}
             </if>
             <if test="param != null and param.pks != null and param.pks.size != 0">
-                and log.pk in
+                and mdl.pk in
                 <foreach collection="param.pks" item="item" separator="," open="(" close=")">
                     #{item}
                 </foreach>
             </if>
-            <if test="param != null and param.sceneId != null and param.sceneId != ''">
-                and log.scene_id = #{param.sceneId}
-            </if>
+
             <if test="param != null and param.id != null and param.id != ''">
                 and log.id = #{param.id}
             </if>
@@ -458,6 +479,10 @@
                 <foreach collection="param.ids" item="item" separator="," open="(" close=")">
                     #{item}
                 </foreach>
+            </if>
+
+            <if test="param != null and param.sceneId != null and param.sceneId != ''">
+                and log.scene_id = #{param.sceneId}
             </if>
             <if test="param != null and param.toolName != null and param.toolName != ''">
                 and mdl.tool_name like concat('%', #{param.toolName}, '%')
@@ -589,6 +614,21 @@
         <where>
             <if test="param != null and param.size != 0">
                 and pk in
+                <foreach collection="param" item="item" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="getLoadByIds" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoad">
+        SELECT
+        *
+        FROM
+        mp_devops_load
+        <where>
+            <if test="param != null and param.size != 0">
+                and id in
                 <foreach collection="param" item="item" separator="," open="(" close=")">
                     #{item}
                 </foreach>

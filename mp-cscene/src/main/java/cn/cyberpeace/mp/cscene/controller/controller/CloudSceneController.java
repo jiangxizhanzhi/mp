@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.cscene.controller.controller;
 
-import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseRemoteFileUploadController;
 import cn.cyberpeace.mp.base.controller.response.FsFileUploadResponse;

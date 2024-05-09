@@ -208,7 +208,7 @@ public class LoadController {
         JSONObject request = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
         String sceneId = request.get("sceneId") != null && !request.get("sceneId").toString().equals("") ? request.get("sceneId").toString() : "";
         if (sceneId.equals("")) {
-            return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "sceneId不能为空").asResult();
+            return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "scene_id不能为空").asResult();
         }
         //将time转换成LocaldateTime
         LocalDateTime beginTimeLocalDateTime = null;
@@ -240,7 +240,7 @@ public class LoadController {
         JSONObject request = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
         String sceneId = request.get("sceneId") != null && !request.get("sceneId").toString().equals("") ? request.get("sceneId").toString() : "";
         if (sceneId.equals("")) {
-            return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "sceneId不能为空").asResult();
+            return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "scene_id不能为空").asResult();
         }
         //将time转换成LocaldateTime
         LocalDateTime beginTimeLocalDateTime = null;
@@ -261,6 +261,16 @@ public class LoadController {
         request.put("overTime", overTimeLocalDateTime != null ? overTimeLocalDateTime.toString() : null);
         List<MpDevopsLoadSceneLog> list = LoadService.getLoadExecutionResult(request);
         return new ListObjServiceResult(list, list.size()).asResult();
+    }
+
+    /*
+     * 3D态势-载荷攻击TOP5
+     * */
+    @ApiOperation(value = "3D态势-载荷攻击TOP5", notes = "")
+    @GetMapping("/getTop5Loads")
+    public ServiceResult getTop5Loads(@RequestParam(value = "scene_id") String sceneId) {
+        Map<String, Integer> getTop5Loads = LoadService.getTop5Loads(sceneId);
+        return new ServiceResult(getTop5Loads, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
     /*
@@ -529,5 +539,4 @@ public class LoadController {
         List<JSONObject> getLoadResultBySceneId = LoadService.getLoadResultBySceneId(sceneId);
         return new ServiceResult(getLoadResultBySceneId, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
-
 }

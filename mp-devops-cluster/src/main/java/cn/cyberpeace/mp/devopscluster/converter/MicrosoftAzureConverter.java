@@ -2,10 +2,10 @@ package cn.cyberpeace.mp.devopscluster.converter;
 
 import cn.cyberpeace.mp.auth.service.MicrosoftAzureLoginService;
 import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
+import cn.cyberpeace.mp.base.bo.MpSysCodeEnum;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.CloudDevice;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.enums.CommonTargetNameEnum;
-import cn.cyberpeace.mp.devopscluster.model.MpSysCodeEnum;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper;
 import cn.cyberpeace.mp.devopscluster.request.TargetSceneRequest;

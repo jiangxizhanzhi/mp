@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.devopscluster.repository;
 
+import cn.cyberpeace.mp.base.bo.MpSysCodeEnum;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
-import cn.cyberpeace.mp.devopscluster.model.MpSysCodeEnum;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.annotations.Mapper;

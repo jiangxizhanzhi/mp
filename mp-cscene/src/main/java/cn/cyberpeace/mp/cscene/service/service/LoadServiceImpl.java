@@ -125,7 +125,23 @@ public class LoadServiceImpl {
             }
         }
         try {
-            Boolean deleteData = loadMapper.deleteData();
+            //收集id相同的数据
+            List<String> loadIds = new ArrayList<>();
+            //id相同的loadId不需要同步
+            List<MpDevopsLoad> loadList = loadMapper.getLoadList(new JSONObject());
+            for (int i = 0; i < list.size(); i++) {
+                for (int j = 0; j < loadList.size(); j++) {
+                    if(list.get(i).get("id") != null && loadList.get(j).getId() != null){
+                        if(list.get(i).get("id").toString().equals(loadList.get(j).getId())){
+                            loadIds.add(list.get(i).get("id").toString());
+                            //删除相同项
+                            list.remove(list.get(i));
+                        }
+                    }
+                }
+            }
+
+            Boolean deleteData = loadMapper.deleteData(loadIds);
             if (deleteData) {
                 if(!loadMapper.addLoads(list)){
                     return null;
@@ -169,7 +185,23 @@ public class LoadServiceImpl {
             }
         }
         try {
-            Boolean deleteData = loadMapper.deleteData();
+            //收集id相同的数据
+            List<String> loadIds = new ArrayList<>();
+            //id相同的loadId不需要同步
+            List<MpDevopsLoad> loadList = loadMapper.getLoadList(new JSONObject());
+            for (int i = 0; i < list.size(); i++) {
+                for (int j = 0; j < loadList.size(); j++) {
+                    if(list.get(i).get("id") != null && loadList.get(j).getId() != null){
+                        if(list.get(i).get("id").equals(loadList.get(j).getId())){
+                            loadIds.add(list.get(i).get("id").toString());
+                            //删除相同项
+                            list.remove(list.get(i));
+                        }
+                    }
+                }
+            }
+
+            Boolean deleteData = loadMapper.deleteData(loadIds);
             if (deleteData) {
                 if(!loadMapper.addLoads(list)){
                     sendMessage(webSocketServer, session, jsonObject, data, 3, "载荷数据入库失败,会话关闭！", false);
@@ -820,6 +852,49 @@ public class LoadServiceImpl {
             list = (List) dataMap.get("data");
         }
         return list;
+    }
+
+    public Map<String, Integer> getTop5Loads(String sceneId) {
+        List<MpDevopsLoadSceneLog> loadExecutionResult = getLoadExecutionResult(new JSONObject());
+        //计算id出现次数最多的五条
+        Map<String, Integer> map = new HashMap<>();
+        if (loadExecutionResult != null && loadExecutionResult.size() > 0) {
+            for (int i = 0; i < loadExecutionResult.size(); i++) {
+                String id = loadExecutionResult.get(i).getId();
+                if (map.containsKey(id)) {
+                    map.put(id, map.get(id) + 1);
+                } else {
+                    map.put(id, 1);
+                }
+            }
+        }
+        List<String> idList = new ArrayList<>();
+        //根据map的value值大小取出前五条
+        if (map != null && map.size() > 0) {
+            //排序
+            List<Map.Entry<String, Integer>> list = new ArrayList<>(map.entrySet());
+            Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
+                public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+                    return o2.getValue().compareTo(o1.getValue());
+                }
+            });
+           //取前五条
+            if (list.size() > 5) {
+                list = list.subList(0, 5);
+            }else{
+                list = list.subList(0, list.size());
+            }
+            //取出list中所有的key
+            for (int i = 0; i < list.size(); i++) {
+                idList.add(list.get(i).getKey());
+            }
+        }
+        List<MpDevopsLoad> loadByIds = loadMapper.getLoadByIds(idList);
+        Map<String, Integer> newMap = new HashMap();
+        for(MpDevopsLoad load : loadByIds){
+            newMap.put(load.getToolName(),map.get(load.getId()));
+        }
+        return newMap;
     }
 }
 
