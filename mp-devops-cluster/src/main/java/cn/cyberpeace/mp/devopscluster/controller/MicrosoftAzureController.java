@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.MicrosoftAzureConverter;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO;
+import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -63,12 +64,14 @@ public class MicrosoftAzureController {
         }
     }
 
-    @ApiOperation(value = "云镜像管理页面pk查询", notes = "")
-    @GetMapping("/getByPk")
-    public ServiceResult<DeviceCloudTargetPO> getCloudTargetByPk(@RequestParam(value = "pk") String pk) {
+    @ApiOperation(value = "云镜像管理页面id查询", notes = "")
+    @GetMapping("/getById")
+    public ServiceResult<DeviceCloudTargetVO> getCloudTargetByPk(@RequestParam(value = "cloud_service_type") String cloudServiceType,
+                                                                 @RequestParam(value = "id") String id) {
         JSONObject requestData = new JSONObject();
-        requestData.put("pk", pk);
-        return new ServiceResult<>(microsoftAzureConverter.getCloudTargetByPk(requestData)).asResult();
+        requestData.put("id", id);
+        requestData.put("cloudServiceType", cloudServiceType);
+        return new ServiceResult<>(microsoftAzureConverter.getCloudTargetById(requestData)).asResult();
     }
 
     /**
@@ -76,7 +79,7 @@ public class MicrosoftAzureController {
      */
     @ApiOperation(value = "云镜像编辑", notes = "")
     @PutMapping("/update")
-    public ServiceResult updateCloudTarget(@RequestBody(required = false) DeviceCloudTargetPO requestData) {
+    public ServiceResult updateCloudTarget(@RequestBody(required = false) DeviceCloudTargetVO requestData) {
         JSONObject jsonObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
         Boolean updateCloudTarget = microsoftAzureConverter.updateCloudTarget(jsonObject);
         if (updateCloudTarget) {

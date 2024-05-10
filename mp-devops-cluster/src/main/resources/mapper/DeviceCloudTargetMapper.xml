@@ -7,96 +7,180 @@
         id,
         name,
         cloud_service_type,
-        source_type,
-        publisher,
-        offer,
-        sku,
         operating_system,
         operating_system_status,
-        upload_target_name,
-        image_type,
-        is_public,
-        quick_create_support,
-        is_import,
-        is_hide,
-        create_time,
-        update_time,
-        create_user,
-        instance_create_user,
-        role,
-        logo,
+        version,
         generation,
-        version
+        create_time,
+        update_time
         ) VALUES
         <foreach collection="param" item="item" index="index" separator=",">
             (
                 #{item.id},
                 #{item.name},
                 #{item.cloudServiceType},
-                #{item.sourceType},
-                #{item.publisher},
-                #{item.offer},
-                #{item.sku},
                 #{item.operatingSystem},
                 #{item.operatingSystemStatus},
-                #{item.uploadTargetName},
-                #{item.imageType},
-                #{item.isPublic},
-                #{item.quickCreateSupport},
-                #{item.isImport},
-                #{item.isHide},
-                now(),
-                #{item.updateTime},
-                #{item.createUser},
-                #{item.instanceCreateUser},
-                #{item.role},
-                #{item.logo},
+                #{item.version},
                 #{item.generation},
-                #{item.version}
+                now(),
+                now()
             )
         </foreach>
     </insert>
 
-    <update id="updateCloudTarget">
+    <insert id="batchInsertCloudTargetCalculate">
+        INSERT INTO mp_devops_cloud_target_calculate (
+        `link_id`,
+        `name`,
+        `source_type`,
+        `publisher`,
+        `offer`,
+        `sku`,
+        `operating_system`,
+        `operating_system_status`,
+        `is_public`,
+        `quick_create_support`,
+        `is_import`,
+        `is_hide`,
+        `create_time`,
+        `update_time`,
+        `logo`,
+        `version`,
+        `generation`
+        ) VALUES
+        <foreach collection="param" item="item" index="index" separator=",">
+            (
+            #{item.linkId},
+            #{item.name},
+            #{item.sourceType},
+            #{item.publisher},
+            #{item.offer},
+            #{item.sku},
+            #{item.operatingSystem},
+            #{item.operatingSystemStatus},
+            #{item.isPublic},
+            #{item.quickCreateSupport},
+            #{item.isImport},
+            #{item.isHide},
+            now(),
+            now(),
+            #{item.logo},
+            #{item.version},
+            #{item.generation}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="batchInsertCloudTargetContainer">
+        INSERT INTO mp_devops_cloud_target_container (
+        `link_id`,
+        `name`,
+        `source_type`,
+        `upload_target_name`,
+        `operating_system`,
+        `operating_system_status`,
+        `is_public`,
+        `quick_create_support`,
+        `is_import`,
+        `is_hide`,
+        `create_time`,
+        `update_time`,
+        `logo`,
+        `version`,
+        `generation`
+        ) VALUES
+        <foreach collection="param" item="item" index="index" separator=",">
+            (
+            #{item.linkId},
+            #{item.name},
+            #{item.sourceType},
+            #{item.uploadTargetName},
+            #{item.operatingSystem},
+            #{item.operatingSystemStatus},
+            #{item.isPublic},
+            #{item.quickCreateSupport},
+            #{item.isImport},
+            #{item.isHide},
+            now(),
+            now(),
+            #{item.logo},
+            #{item.version},
+            #{item.generation}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateCloudCalculateTarget">
         UPDATE
-            mp_devops_cloud_target
+            mp_devops_cloud_target_calculate
         SET
-            <if test="param != null and param.name != null">
-                name = #{param.name},
-            </if>
             <if test="param != null and param.logo != null">
                 logo = #{param.logo},
             </if>
-            <if test="param != null and param.operatingSystem != null">
-                operating_system = #{param.operatingSystem},
-            </if>
-            <if test="param != null and param.operatingSystemStatus != null">
-                operating_system_status = #{param.operatingSystemStatus},
-            </if>
-            <if test="param != null and param.publisher != null">
-                publisher = #{param.publisher},
-            </if>
-            <if test="param != null and param.offer != null">
-                offer = #{param.offer},
-            </if>
-            <if test="param != null and param.sku != null">
-                sku = #{param.sku},
-            </if>
                 update_time = now()
         WHERE
-            pk = #{pk}
+            link_id = #{id}
     </update>
 
-    <delete id="deleteByPk">
+    <update id="updateCloudContainerTarget">
+        UPDATE
+            mp_devops_cloud_target_container
+        SET
+        <if test="param != null and param.logo != null">
+            logo = #{param.logo},
+        </if>
+            update_time = now()
+        WHERE
+            link_id = #{id}
+    </update>
+
+    <delete id="deleteByIds">
         DELETE
         FROM
             mp_devops_cloud_target
         <where>
-            <if test="pk != null and pk != ''">
-                or pk = #{pk}
+            <if test="id != null and id != ''">
+                or id = #{id}
             </if>
             <if test="param != null and param.size != 0">
-                or pk in (
+                or id in (
+                <foreach collection="param" item="item" index="index" separator=",">
+                    #{item}
+                </foreach>
+                )
+            </if>
+        </where>
+    </delete>
+
+    <delete id="deleteCalculatesByIds">
+        DELETE
+        FROM
+        mp_devops_cloud_target_calculate
+        <where>
+            <if test="id != null and id != ''">
+                or link_id = #{id}
+            </if>
+            <if test="param != null and param.size != 0">
+                or link_id in (
+                <foreach collection="param" item="item" index="index" separator=",">
+                    #{item}
+                </foreach>
+                )
+            </if>
+        </where>
+    </delete>
+
+    <delete id="deleteContainersByIds">
+        DELETE
+        FROM
+        mp_devops_cloud_target_container
+        <where>
+            <if test="id != null and id != ''">
+                or link_id = #{id}
+            </if>
+            <if test="param != null and param.size != 0">
+                or link_id in (
                 <foreach collection="param" item="item" index="index" separator=",">
                     #{item}
                 </foreach>
@@ -109,12 +193,45 @@
         DELETE
         FROM
             mp_devops_cloud_target
-        WHERE
-            pk in (
+        <where>
+            <if test="param != null and param.size != 0">
+                pk in (
                 <foreach collection="param" item="item" index="index" separator=",">
-                    #{item.pk}
+                    #{item}
                 </foreach>
-            )
+                )
+            </if>
+        </where>
+    </delete>
+
+    <delete id="deleteCloudTargetCalculate">
+        DELETE
+        FROM
+            mp_devops_cloud_target_calculate
+        <where>
+            <if test="param != null and param.size != 0">
+                pk in (
+                <foreach collection="param" item="item" index="index" separator=",">
+                    #{item}
+                </foreach>
+                )
+            </if>
+        </where>
+    </delete>
+
+    <delete id="deleteCloudTargetContainer">
+        DELETE
+        FROM
+            mp_devops_cloud_target_container
+        <where>
+            <if test="param != null and param.size != 0">
+                pk in (
+                <foreach collection="param" item="item" index="index" separator=",">
+                    #{item}
+                </foreach>
+                )
+            </if>
+        </where>
     </delete>
 
     <select id="getCloudTargetList" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO">
@@ -125,6 +242,9 @@
         <where>
             <if test="param != null and param.name != null and param.name != ''">
                 and name like concat('%', #{param.name}, '%')
+            </if>
+            <if test="param != null and param.cloudServiceType != null and param.cloudServiceType != ''">
+                and cloud_service_type = #{param.cloudServiceType}
             </if>
             <if test="param != null and param.operatingSystem != null and param.operatingSystem != ''">
                 and operating_system = #{param.operatingSystem}
@@ -150,13 +270,52 @@
         </where>
     </select>
 
-    <select id="getCloudTargetByPk" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO">
+    <select id="getCloudTargetCalculateById" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO">
         SELECT
-            *
+            `link_id` as id,
+            `name`,
+            `source_type`,
+            `publisher`,
+            `offer`,
+            `sku`,
+            `operating_system`,
+            `operating_system_status`,
+            `is_public`,
+            `quick_create_support`,
+            `is_import`,
+            `is_hide`,
+            `create_time`,
+            `update_time`,
+            `logo`,
+            `version`,
+            `generation`
         FROM
-            mp_devops_cloud_target
+            mp_devops_cloud_target_calculate
         WHERE
-            pk = #{pk}
+            link_id = #{id}
+    </select>
+
+    <select id="getCloudTargetContainerById" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO">
+        SELECT
+            `link_id` as id,
+            `name`,
+            `source_type`,
+            `upload_target_name`,
+            `operating_system`,
+            `operating_system_status`,
+            `is_public`,
+            `quick_create_support`,
+            `is_import`,
+            `is_hide`,
+            `create_time`,
+            `update_time`,
+            `logo`,
+            `version`,
+            `generation`
+        FROM
+            mp_devops_cloud_target_container
+        WHERE
+            link_id = #{id}
     </select>
 
     <select id="getAlldata" resultType="cn.cyberpeace.mp.base.bo.MpSysCodeEnum">
@@ -222,4 +381,15 @@
             </if>
         </where>
     </select>
+
+    <select id="getCloudTargetCalculateList"
+            resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetCalculate">
+        select * from mp_devops_cloud_target_calculate
+    </select>
+
+    <select id="getCloudTargetContainerList"
+            resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetContainer">
+        select * from mp_devops_cloud_target_container
+    </select>
+
 </mapper>
