@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
 import cn.cyberpeace.mp.scene.constant.CommonSceneStage;
@@ -13,6 +14,7 @@ import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneAreaNodeConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
@@ -35,12 +37,16 @@ import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementPortBO;
 import cn.cyberpeace.mp.scene.model.SceneAreaModel;
+import cn.cyberpeace.mp.scene.model.SceneAreaNodeConnectionModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPluginModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPortConnectionModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.ScenePieceModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaNodeConnectionModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneAreaMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementPluginMapper;
@@ -80,6 +86,7 @@ public class SceneHandler extends BaseSceneHandler<
         SceneElementModel,
         SceneElementPortModel,
         SceneElementPortConnectionModel,
+        SceneAreaNodeConnectionModel,
         SceneElementPluginModel,
         ScenePieceModel,
         SceneBO,
@@ -87,6 +94,7 @@ public class SceneHandler extends BaseSceneHandler<
         SceneElementPortBO,
         SceneElementBO,
         SceneElementPortConnectionBO,
+        SceneAreaNodeConnectionBO,
         ScenePieceBO,
         SceneTopologyBO,
         SceneDataBO,
@@ -188,6 +196,7 @@ public class SceneHandler extends BaseSceneHandler<
         super.sceneElementPortConnectionMapper = BeanCommon.getBean(SceneElementPortConnectionMapper.class);
         super.sceneElementPluginMapper = BeanCommon.getBean(SceneElementPluginMapper.class);
         super.scenePieceMapper = BeanCommon.getBean(ScenePieceMapper.class);
+
     }
 
     @Override

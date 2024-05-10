@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.util.basic.MapUtils;
 import cn.cyberpeace.mp.base.util.define.ListTreeNode;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneAreaNodeConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneDataBO;
@@ -26,6 +27,7 @@ import cn.cyberpeace.mp.scene.core.plugin.base.BasePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.scene.model.SceneConfigElementPortConnectionModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaNodeConnectionModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPluginModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortConnectionModel;
@@ -38,6 +40,7 @@ import cn.cyberpeace.mp.scene.repository.base.BaseSceneElementPluginMapper;
 import cn.cyberpeace.mp.scene.repository.base.BaseSceneElementPortConnectionMapper;
 import cn.cyberpeace.mp.scene.repository.base.BaseSceneElementPortMapper;
 import cn.cyberpeace.mp.scene.repository.base.BaseSceneMapper;
+import cn.cyberpeace.mp.scene.repository.base.BaseSceneNodeConnectionMapper;
 import cn.cyberpeace.mp.scene.repository.base.BaseScenePieceMapper;
 import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
@@ -93,6 +96,7 @@ public abstract class BaseSceneHandler<
         TSceneElementModel extends BaseSceneElementModel,
         TSceneElementPortModel extends BaseSceneElementPortModel,
         TSceneElementPortConnectionModel extends BaseSceneElementPortConnectionModel,
+        TSceneAreaNodeConnectionModel extends BaseSceneAreaNodeConnectionModel,
         TSceneElementPluginModel extends BaseSceneElementPluginModel,
         TScenePieceModel extends BaseScenePieceModel,
         TSceneBO extends BaseSceneBO<TSceneModel, TSceneBO>,
@@ -100,12 +104,13 @@ public abstract class BaseSceneHandler<
         TSceneElementPortBO extends BaseSceneElementPortBO<TSceneElementPortModel, TSceneElementPortBO, TSceneElementBO>,
         TSceneElementBO extends BaseSceneElementBO<TSceneElementModel, TSceneElementPortBO, TSceneElementBO>,
         TSceneElementPortConnectionBO extends BaseSceneElementPortConnectionBO<TSceneElementPortConnectionModel, TSceneElementPortConnectionBO>,
+        TSceneAreaNodeConnectionBO extends BaseSceneAreaNodeConnectionBO<TSceneAreaNodeConnectionModel,TSceneAreaNodeConnectionBO>,
         TScenePieceBO extends BaseScenePieceBO<TScenePieceModel, TScenePieceBO>,
-        TSceneTopologyBO extends BaseSceneTopologyBO<TSceneModel, TSceneAreaModel, TSceneElementModel, TSceneElementPortModel, TSceneElementPortConnectionModel, TScenePieceModel, TSceneBO, TSceneAreaBO, TSceneElementPortBO, TSceneElementBO, TSceneElementPortConnectionBO, TScenePieceBO, TSceneTopologyBO>,
-        TSceneDataBO extends BaseSceneDataBO<TSceneModel, TSceneAreaModel, TSceneElementModel, TSceneElementPortModel, TSceneElementPortConnectionModel, TScenePieceModel, TSceneBO, TSceneAreaBO, TSceneElementPortBO, TSceneElementBO, TSceneElementPortConnectionBO, TScenePieceBO, TSceneTopologyBO, TSceneDataBO>,
+        TSceneTopologyBO extends BaseSceneTopologyBO<TSceneModel, TSceneAreaModel, TSceneElementModel, TSceneElementPortModel, TSceneElementPortConnectionModel, TScenePieceModel, TSceneAreaNodeConnectionModel, TSceneBO, TSceneAreaBO, TSceneElementPortBO, TSceneElementBO, TSceneElementPortConnectionBO, TSceneAreaNodeConnectionBO,TScenePieceBO, TSceneTopologyBO>,
+        TSceneDataBO extends BaseSceneDataBO<TSceneModel, TSceneAreaModel, TSceneElementModel, TSceneElementPortModel, TSceneElementPortConnectionModel,TSceneAreaNodeConnectionModel, TScenePieceModel, TSceneBO, TSceneAreaBO, TSceneElementPortBO, TSceneElementBO, TSceneElementPortConnectionBO, TSceneAreaNodeConnectionBO,TScenePieceBO, TSceneTopologyBO, TSceneDataBO>,
         TSceneContextBO extends BaseSceneContextBO,
         TScenePluginHandler extends BasePluginHandler<?, ?, ?, ?>,
-        TSceneHandler extends BaseSceneHandler<TSceneModel, TSceneAreaModel, TSceneElementModel, TSceneElementPortModel, TSceneElementPortConnectionModel, TSceneElementPluginModel, TScenePieceModel, TSceneBO, TSceneAreaBO, TSceneElementPortBO, TSceneElementBO, TSceneElementPortConnectionBO, TScenePieceBO, TSceneTopologyBO, TSceneDataBO, TSceneContextBO, TScenePluginHandler, TSceneHandler>> {
+        TSceneHandler extends BaseSceneHandler<TSceneModel, TSceneAreaModel, TSceneElementModel, TSceneElementPortModel, TSceneElementPortConnectionModel,TSceneAreaNodeConnectionModel, TSceneElementPluginModel, TScenePieceModel, TSceneBO, TSceneAreaBO, TSceneElementPortBO, TSceneElementBO, TSceneElementPortConnectionBO,TSceneAreaNodeConnectionBO, TScenePieceBO, TSceneTopologyBO, TSceneDataBO, TSceneContextBO, TScenePluginHandler, TSceneHandler>> {
 
     /** 上下文 */
     private TSceneContextBO context;
@@ -120,21 +125,25 @@ public abstract class BaseSceneHandler<
     /** 碎片节点集合 */
     private final Map<String, TScenePieceBO> pieceMap = new ConcurrentHashMap<>();
     /** 区域节点集合 */
-    private final Map<String, TSceneAreaBO> areaMap = new ConcurrentHashMap<>();
+    protected final Map<String, TSceneAreaBO> areaMap = new ConcurrentHashMap<>();
     /** 网元节点集合 */
-    private final Map<String, TSceneElementBO> elementMap = new ConcurrentHashMap<>();
+    protected final Map<String, TSceneElementBO> elementMap = new ConcurrentHashMap<>();
     /** 网元端口集合 */
-    private final Map<String, TSceneElementPortBO> elementPortMap = new ConcurrentHashMap<>();
+    protected final Map<String, TSceneElementPortBO> elementPortMap = new ConcurrentHashMap<>();
     /** 网元端口连接集合 */
     private final Map<String, TSceneElementPortConnectionBO> elementPortConnectionMap = new ConcurrentHashMap<>();
     /** 区域外连接端口id集合 */
     private final Set<String> outerConnectionPortIds = new CopyOnWriteArraySet<>();
     /** 场景插件数据，key为插件代号 */
-    private final Map<String, ScenePluginDataBO> scenePluginData = new ConcurrentHashMap<>();
+    protected final Map<String, ScenePluginDataBO> scenePluginData = new ConcurrentHashMap<>();
+
+    protected final Map<String, TSceneAreaNodeConnectionBO> areaNodeConnectionMap = new ConcurrentHashMap<>();
+    protected final Set<String> outerConnectionNodeIds = new CopyOnWriteArraySet<>();
+    protected final Map<String, String> nodeIdConnectedNodeIdMap = new ConcurrentHashMap<>();
 
     // 辅助变量
     /** 端口所属节点映射 */
-    private final Map<String, TSceneElementBO> portIdElementMap = new ConcurrentHashMap<>();
+    protected final Map<String, TSceneElementBO> portIdElementMap = new ConcurrentHashMap<>();
     /** 端口连接端口映射 */
     private final Map<String, String> portIdConnectedPortIdMap = new ConcurrentHashMap<>();
 
@@ -146,6 +155,7 @@ public abstract class BaseSceneHandler<
     protected Class<TSceneElementBO> sceneElementBOClass;
     protected Class<TSceneElementPortBO> sceneElementPortBOClass;
     protected Class<TSceneElementPortConnectionBO> sceneElementPortConnectionBOClass;
+    protected Class<TSceneAreaNodeConnectionBO> sceneNodeConnectionBOClass;
     protected Class<TScenePieceBO> scenePieceBOClass;
     protected Class<TSceneModel> sceneModelClass;
     protected Class<TSceneAreaModel> sceneAreaModelClass;
@@ -164,12 +174,13 @@ public abstract class BaseSceneHandler<
     protected BaseSceneElementPortConnectionMapper<TSceneElementPortConnectionModel> sceneElementPortConnectionMapper;
     protected BaseSceneElementPluginMapper<TSceneElementPluginModel> sceneElementPluginMapper;
     protected BaseScenePieceMapper<TScenePieceModel> scenePieceMapper;
+    protected BaseSceneNodeConnectionMapper sceneNodeConnectionMapper;
 
     /** 插件数据处理对象集合 */
     private final List<TScenePluginHandler> plugins = new CopyOnWriteArrayList<>();
     private final Map<String, TScenePluginHandler> pluginMap = new ConcurrentHashMap<>();
     /** 网元对应节点插件关系，一个网元节点对于多个插件 */
-    private final Map<String, List<TSceneElementPluginModel>> elementIdPluginsMap = new ConcurrentHashMap<>();
+    protected final Map<String, List<TSceneElementPluginModel>> elementIdPluginsMap = new ConcurrentHashMap<>();
 
     private Object getPluginContext(String pluginKey) {
         if (context == null) {
@@ -1908,5 +1919,132 @@ public abstract class BaseSceneHandler<
 
     public void addPort(String portId, TSceneElementBO element) {
         this.portIdElementMap.put(portId, element);
+    }
+
+    public void reloadOut() {
+        areaMap.clear();
+        elementMap.clear();
+        elementPortMap.clear();
+        portIdElementMap.clear();
+        scenePluginData.clear();
+        elementIdPluginsMap.clear();
+
+        var outNodeConnection = readAreaNodeConnectionsByNodeIds(areaId);
+        String[] outNodeIds = outNodeConnection.stream()
+                .map(c1 -> c1.getSourceNodeId().equals(areaId) ? c1.getTargetNodeId() : c1.getSourceNodeId())
+                .toArray(String[]::new);
+        if (outNodeIds.length == 0) {
+            return;
+        }
+
+        loadAreas(readAreasByNodeIds(outNodeIds));
+        loadElements(readElementsByNodeIds(outNodeIds));
+        loadElementPorts(readElementPortsByNodeIds(outNodeIds));
+        loadElementPlugins(readElementPluginsByNodeIds(outNodeIds));
+        Map<String, List<String>> pluginKeyElementIds = new HashMap<>();
+        Map<String, List<String>> pluginKeyElementPortIds = new HashMap<>();
+        Map<String, TSceneElementBO> elementEidElementBOMap = new HashMap<>();
+        elementMap.forEach((elementBOId, elementBO) -> elementEidElementBOMap.put(elementBO.getEid(), elementBO));
+        elementIdPluginsMap.forEach((elementId, elementPlugins) -> {
+            var element = elementEidElementBOMap.getOrDefault(elementId, null);
+            if (element == null) {
+                return;
+            }
+
+            var elementPorts = element.getPorts();
+
+            elementPlugins.forEach(elementPlugin -> {
+                String pluginKey = elementPlugin.getPluginKey();
+
+                List<String> elementIds = pluginKeyElementIds.getOrDefault(pluginKey, new ArrayList<>());
+                elementIds.add(element.getId());
+                pluginKeyElementIds.put(pluginKey, elementIds);
+
+                if (elementPorts != null) {
+                    elementPorts.forEach(elementPort -> {
+                        List<String> elementPortIds = pluginKeyElementPortIds.getOrDefault(pluginKey, new ArrayList<>());
+                        elementPortIds.add(elementPort.getId());
+                        pluginKeyElementPortIds.put(pluginKey, elementPortIds);
+                    });
+                }
+            });
+        });
+        initPlugins(pluginKeyElementIds, pluginKeyElementPortIds);
+    }
+
+    private List<TSceneAreaNodeConnectionModel> readAreaNodeConnectionsByNodeIds(String... nodeIds) {
+        if (nodeIds.length == 0) {
+            return new ArrayList<>();
+        }
+        var condition = new HumanCondition()
+                .filterEqual(BaseSceneAreaNodeConnectionModel::getScene, sceneId)
+                .filterOrStart()
+                .orIn(BaseSceneAreaNodeConnectionModel::getSourceNodeId, nodeIds)
+                .orIn(BaseSceneAreaNodeConnectionModel::getTargetNodeId, nodeIds)
+                .filterOrEnd();
+
+        return sceneNodeConnectionMapper.list(condition);
+    }
+
+    private List<TSceneAreaModel> readAreasByNodeIds(String... nodeIds) {
+        if (nodeIds.length == 0) {
+            return new ArrayList<>();
+        }
+        var condition = new HumanCondition()
+                .filterEqual(BaseSceneAreaModel::getScene, sceneId)
+                .filterIn(BaseSceneAreaModel::getNodeId, nodeIds);
+
+        return sceneAreaMapper.list(condition);
+    }
+
+    private List<TSceneElementModel> readElementsByNodeIds(String... nodeIds) {
+        if (nodeIds.length == 0) {
+            return new ArrayList<>();
+        }
+        var condition = new HumanCondition()
+                .filterEqual(BaseSceneElementModel::getScene, sceneId)
+                .filterIn(BaseSceneElementModel::getNodeId, nodeIds);
+
+        return sceneElementMapper.list(condition);
+    }
+
+    private List<TSceneElementPortModel> readElementPortsByNodeIds(String... nodeIds) {
+        if (nodeIds.length == 0) {
+            return new ArrayList<>();
+        }
+        var condition = new HumanCondition()
+                .link(sceneElementPortModelClass, sceneElementModelClass)
+                .filterLink(sceneElementPortModelClass, BaseSceneElementPortModel::getSceneElement,
+                            sceneElementModelClass, BaseSceneElementModel::getId)
+                .currentLink(sceneElementPortModelClass)
+                .filterEqual(BaseSceneElementPortModel::getScene, sceneId)
+                .currentLink(sceneElementModelClass)
+                .filterIn(BaseSceneElementModel::getNodeId, nodeIds);
+
+        return sceneElementPortMapper.list(condition);
+    }
+
+    private List<TSceneElementPluginModel> readElementPluginsByNodeIds(String... nodeIds) {
+        if (nodeIds.length == 0) {
+            return new ArrayList<>();
+        }
+        var condition = new HumanCondition()
+                .link(sceneElementPluginModelClass, sceneElementModelClass)
+                .filterLink(sceneElementPluginModelClass, BaseSceneElementPluginModel::getScene,
+                            sceneElementModelClass, BaseSceneElementModel::getScene)
+                .filterLink(sceneElementPluginModelClass, BaseSceneElementPluginModel::getSceneElement,
+                            sceneElementModelClass, BaseSceneElementModel::getId)
+                .currentLink(sceneElementPluginModelClass)
+                .filterEqual(BaseSceneElementPluginModel::getScene, sceneId)
+                .currentLink(sceneElementModelClass)
+                .filterIn(BaseSceneElementModel::getNodeId, nodeIds);
+
+        return sceneElementPluginMapper.list(condition);
+    }
+
+    public void initLazy(String sceneId, String areaId, boolean isAreaMode) {
+        this.sceneId = sceneId;
+        this.areaId = areaId;
+        this.isAreaMode = isAreaMode;
     }
 }

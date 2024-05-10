@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scene.core.bo.base;
 
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaNodeConnectionModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortConnectionModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortModel;
@@ -23,13 +24,15 @@ public abstract class BaseSceneTopologyBO<
         P0 extends BaseSceneElementPortModel,
         C0 extends BaseSceneElementPortConnectionModel,
         P1 extends BaseScenePieceModel,
+        C1 extends BaseSceneAreaNodeConnectionModel,
         S extends BaseSceneBO<S0, S>,
         A extends BaseSceneAreaBO<A0, A>,
         P extends BaseSceneElementPortBO<P0, P, E>,
         E extends BaseSceneElementBO<E0, P, E>,
         C extends BaseSceneElementPortConnectionBO<C0, C>,
+        C2 extends BaseSceneAreaNodeConnectionBO<C1, C2>,
         P2 extends BaseScenePieceBO<P1, P2>,
-        T extends BaseSceneTopologyBO<S0, A0, E0, P0, C0, P1, S, A, P, E, C, P2, T>> {
+        T extends BaseSceneTopologyBO<S0, A0, E0, P0, C0, P1, C1, S, A, P, E, C, C2, P2, T>> {
     @ApiModelProperty(value = "场景基础数据")
     @Valid
     private S scene;
@@ -44,6 +47,9 @@ public abstract class BaseSceneTopologyBO<
     @ApiModelProperty(value = "连接数据")
     @Valid
     private List<C> connections;
+    @ApiModelProperty(value = "节点和区域的连接数据")
+    @Valid
+    private List<C2> nodeConnections;
     @ApiModelProperty(value = "碎片数据")
     @Valid
     private List<P2> pieces;
@@ -84,6 +90,9 @@ public abstract class BaseSceneTopologyBO<
             }
             setPieces(list);
         }
+        if (nodeConnections != null) {
+            setNodeConnections(nodeConnections.stream().map(EidBO::export).collect(Collectors.toList()));
+        }
         return (T) this;
     }
 
@@ -92,10 +101,11 @@ public abstract class BaseSceneTopologyBO<
             P9 extends BaseSceneElementPortBO<?, P9, E9>,
             E9 extends BaseSceneElementBO<?, P9, E9>,
             C9 extends BaseSceneElementPortConnectionBO<?, C9>,
+            C10 extends BaseSceneAreaNodeConnectionBO<?,C10>,
             P7 extends BaseScenePieceBO<?, P7>,
-            P8 extends BaseSceneTopologyBO<?, ?, ?, ?, ?, ?, S9, A9, P9, E9, C9, P7, P8>> P8 export(
+            P8 extends BaseSceneTopologyBO<?, ?, ?,?, ?, ?, ?, S9, A9, P9, E9, C9, C10, P7, P8>> P8 export(
             Class<P8> pClass, Class<S9> sceneClass, Class<A9> areaClass, Class<E9> elementClass, Class<P9> portClass,
-            Class<C9> connectionClass, Class<P7> pieceClass) {
+            Class<C9> connectionClass,Class<C10> nodeConnectionClass, Class<P7> pieceClass) {
         P8 pObj = ClassUtils.createInstance(pClass);
         pObj.setAreaId(areaId);
         if (scene != null) {
@@ -132,6 +142,10 @@ public abstract class BaseSceneTopologyBO<
                 list.add(export);
             }
             pObj.setPieces(list);
+        }
+        if(nodeConnections != null){
+            pObj.setNodeConnections(nodeConnections.stream().map(nodeConnection -> nodeConnection.export(nodeConnectionClass))
+                                            .collect(Collectors.toList()));
         }
         return pObj;
     }

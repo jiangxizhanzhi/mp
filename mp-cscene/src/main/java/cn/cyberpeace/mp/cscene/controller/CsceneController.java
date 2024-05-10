@@ -19,6 +19,8 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -38,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Api(value = "场景模板", tags = "CSCENE-场景模板")
 @Slf4j
@@ -143,6 +146,25 @@ public class CsceneController implements BaseModelListControllerBase {
     @GetMapping(params = "id")
     public ServiceResult<CsceneBO> get(@RequestParam String id) {
         return modelService.getById(id, false, null).asResult();
+    }
+
+    @ApiOperation("获取指定id场景模板")
+    @GetMapping("/get_by_area")
+    public ServiceResult<CsceneBO> getByArea(@RequestParam String id, @RequestParam(required = false) String areaId) {
+        if (areaId == null) {
+            areaId = StringUtils.EMPTY;
+        }
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(id, areaId, true, null);
+        SceneConfigDataBO dataBO = sceneConfigHandler.toData();
+
+        SceneConfigHandler out = new SceneConfigHandler(id, areaId, true, true);
+        out.reloadOut();
+        SceneConfigDataBO extraSceneConfig = out.toData();
+
+        this.mergeSceneConfig(dataBO, extraSceneConfig);
+        CsceneBO csceneBO = new CsceneBO();
+        csceneBO.setSceneConfig(dataBO);
+        return new ServiceResult<>(csceneBO).asResult();
     }
 
     @ApiOperation("导出指定id场景模板")
@@ -278,5 +300,26 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenes(
             @RequestParam String[] images) {
         return csceneSpecialService.statDeviceReferCscenes(images).asResult();
+    }
+
+    private void mergeSceneConfig(SceneConfigDataBO originSceneConfig, SceneConfigDataBO extraSceneConfig) {
+        if (Objects.nonNull(originSceneConfig) && Objects.nonNull(extraSceneConfig)) {
+            if (Objects.nonNull(originSceneConfig.getTopology()) && Objects.nonNull(extraSceneConfig.getTopology())) {
+                originSceneConfig.getTopology().getElements().addAll(extraSceneConfig.getTopology().getElements());
+                originSceneConfig.getTopology().getAreas().addAll(extraSceneConfig.getTopology().getAreas());
+                originSceneConfig.getTopology().getConnections().addAll(extraSceneConfig.getTopology().getConnections());
+                originSceneConfig.getTopology().getNodeConnections().addAll(extraSceneConfig.getTopology().getNodeConnections());
+            }
+            if (Objects.nonNull(originSceneConfig.getPlugins()) && Objects.nonNull(extraSceneConfig.getPlugins())) {
+                extraSceneConfig.getPlugins().forEach(((s, scenePluginDataBO) -> {
+                    if (originSceneConfig.getPlugins().containsKey(s)) {
+                        originSceneConfig.getPlugins().get(s).getElements().putAll(scenePluginDataBO.getElements());
+                        originSceneConfig.getPlugins().get(s).getElementPorts().putAll(scenePluginDataBO.getElementPorts());
+                    } else {
+                        originSceneConfig.getPlugins().put(s, scenePluginDataBO);
+                    }
+                }));
+            }
+        }
     }
 }
