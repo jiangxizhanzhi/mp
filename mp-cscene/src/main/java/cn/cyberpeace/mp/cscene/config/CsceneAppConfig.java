@@ -86,39 +86,41 @@ public class CsceneAppConfig {
     private MessageSource messageSource;
 
     public int getSceneEditNodeLimit() {
-        String value = null;
-        try {
-            value = sysActivationService.getValueByKey(sceneEditNodeLimitKey);
-        } catch (Exception e) {
-            log.error("Get config {} error: {}", sceneEditNodeLimitKey, e);
-        }
-        if (value == null) {
-            return sceneEditNodeLimit;
-        }
-
-        Integer limit = IntUtils.fromStr(value);
-        if (limit.equals(0)) {
-            log.warn("SceneEditNodeLimit({}) parse as 0", value);
-        }
-        return limit;
+        return Integer.MAX_VALUE;
+        //String value = null;
+        //try {
+        //    value = sysActivationService.getValueByKey(sceneEditNodeLimitKey);
+        //} catch (Exception e) {
+        //    log.error("Get config {} error: {}", sceneEditNodeLimitKey, e);
+        //}
+        //if (value == null) {
+        //    return sceneEditNodeLimit;
+        //}
+        //
+        //Integer limit = IntUtils.fromStr(value);
+        //if (limit.equals(0)) {
+        //    log.warn("SceneEditNodeLimit({}) parse as 0", value);
+        //}
+        //return limit;
     }
 
     public int getSceneUsingNodeLimit() {
-        String value = null;
-        try {
-            value = sysActivationService.getValueByKey(sceneUsingNodeLimitKey);
-        } catch (Exception e) {
-            log.error("Get config {} error: {}", sceneUsingNodeLimitKey, e);
-        }
-        if (value == null) {
-            return sceneUsingNodeLimit;
-        }
-
-        Integer limit = IntUtils.fromStr(value);
-        if (limit.equals(0)) {
-            log.warn("SceneUsingNodeLimit({}) parse as 0", value);
-        }
-        return limit;
+        return Integer.MAX_VALUE;
+        //String value = null;
+        //try {
+        //    value = sysActivationService.getValueByKey(sceneUsingNodeLimitKey);
+        //} catch (Exception e) {
+        //    log.error("Get config {} error: {}", sceneUsingNodeLimitKey, e);
+        //}
+        //if (value == null) {
+        //    return sceneUsingNodeLimit;
+        //}
+        //
+        //Integer limit = IntUtils.fromStr(value);
+        //if (limit.equals(0)) {
+        //    log.warn("SceneUsingNodeLimit({}) parse as 0", value);
+        //}
+        //return limit;
     }
 
     public boolean getSceneEnableRecording() {
