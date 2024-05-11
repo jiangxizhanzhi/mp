@@ -37,6 +37,8 @@
         `publisher`,
         `offer`,
         `sku`,
+        `sub_type`,
+        `calculate_type`,
         `operating_system`,
         `operating_system_status`,
         `is_public`,
@@ -57,6 +59,8 @@
             #{item.publisher},
             #{item.offer},
             #{item.sku},
+            #{item.subType},
+            #{item.calculateType},
             #{item.operatingSystem},
             #{item.operatingSystemStatus},
             #{item.isPublic},
@@ -428,15 +432,4 @@
             and target.cloud_service_type = #{cloudServiceType}
         </where>
     </select>
-
-    <select id="getCloudTargetCalculateList"
-            resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetCalculate">
-        select * from mp_devops_cloud_target_calculate
-    </select>
-
-    <select id="getCloudTargetContainerList"
-            resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetContainer">
-        select * from mp_devops_cloud_target_container
-    </select>
-
 </mapper>
