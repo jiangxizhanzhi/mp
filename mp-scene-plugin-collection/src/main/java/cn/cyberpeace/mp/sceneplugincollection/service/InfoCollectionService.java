@@ -2,11 +2,9 @@ package cn.cyberpeace.mp.sceneplugincollection.service;
 
 
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.sceneplugincollection.util.FilePortUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -53,7 +51,7 @@ public class InfoCollectionService {
      * 文件导出 (Json,Xml,Xlsx)
      * @param response
      */
-    public void exportFile(HttpServletResponse response, Object obj, String fileName) {
+    public void exportFile(HttpServletResponse response, String type) {
 
 
 
