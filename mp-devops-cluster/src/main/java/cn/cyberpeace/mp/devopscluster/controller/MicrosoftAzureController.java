@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.MicrosoftAzureConverter;
-import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;

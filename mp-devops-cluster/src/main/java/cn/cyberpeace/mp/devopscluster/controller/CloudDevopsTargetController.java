@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.MicrosoftAzureConverter;
 import cn.cyberpeace.mp.devopscluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devopscluster.vo.DeviceVO;
+import cn.cyberpeace.mp.devopscluster.vo.TargerRequestVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import com.alibaba.fastjson.JSONObject;
@@ -47,8 +48,8 @@ public class CloudDevopsTargetController {
      */
     @ApiOperation("微软云服务节点列表获取")
     @PostMapping("/getTarget")
-    public ListObjServiceResult getTarget(@RequestBody(required = false) List<JSONObject> codes) {
-        JSONObject result = microsoftAzureConverter.getCloudTargetListByCodes(codes);
+    public ListObjServiceResult getTarget(@RequestBody TargerRequestVO request) {
+        JSONObject result = microsoftAzureConverter.getCloudTargetListByCodes(request);
         return new ListObjServiceResult((List) result.get("list"), (int) result.get("total")).asResult();
     }
 

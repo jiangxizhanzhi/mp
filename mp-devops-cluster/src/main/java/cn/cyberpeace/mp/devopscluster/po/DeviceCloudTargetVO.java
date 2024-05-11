@@ -28,6 +28,14 @@ public class DeviceCloudTargetVO extends BaseModel {
      */
     private Integer cloudServiceType;
     /**
+     * 计算类型
+     */
+    private String calculateType;
+    /**
+     * 子类型
+     */
+    private String subType;
+    /**
      * 操作系统
      */
     private String operatingSystem;

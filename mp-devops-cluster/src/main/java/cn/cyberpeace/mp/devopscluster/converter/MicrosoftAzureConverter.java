@@ -2,7 +2,8 @@ package cn.cyberpeace.mp.devopscluster.converter;
 
 import cn.cyberpeace.mp.auth.service.MicrosoftAzureLoginService;
 import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
-import cn.cyberpeace.mp.base.bo.MpSysCodeEnum;
+import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
+import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.CloudDevice;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
@@ -14,6 +15,8 @@ import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO;
 import cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper;
 import cn.cyberpeace.mp.devopscluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devopscluster.vo.DeviceVO;
+import cn.cyberpeace.mp.devopscluster.vo.MpSysCodeMenuVO;
+import cn.cyberpeace.mp.devopscluster.vo.TargerRequestVO;
 import cn.cyberpeace.mp.devopscluster.vo.convert.DeviceVoConverter;
 import com.alibaba.fastjson.JSONObject;
 import com.azure.containers.containerregistry.ContainerRegistryClient;
@@ -71,56 +74,106 @@ public class MicrosoftAzureConverter implements BaseConverter {
         return result;
     }
 
-    public JSONObject getCloudTargetListByCodes(List<JSONObject> codes) {
-        List<MpSysCodeEnum> sqls = microsoftAzureMapper.getSqlByCodes(codes);
+    private JSONObject getReturnData(String cloudServiceType,String tableName,TargerRequestVO request,Integer total){
+        List<MpSysCodeMenuVO> codes = request.getCodes();
+        List<MpSysCodeMenu> sqls = microsoftAzureMapper.getSqlByCodes(codes);
         for (int i = 0; i < sqls.size(); i++) {
-            if (sqls.get(i).getSupplement() != null && sqls.get(i).getSupplement().contains("**")) {
+            if (sqls.get(i).getSupplement() != null && !sqls.get(i).getSupplement().equals("") && sqls.get(i).getSupplement().contains("**")) {
                 for (int j = 0; j < codes.size(); j++) {
-                    if (codes.get(j).get("code") != null && sqls.get(i).getCode() != null &&
-                            codes.get(j).get("code").toString().equals(sqls.get(i).getCode())) {
-                        sqls.get(i).setSupplement(sqls.get(i).getSupplement().replace("**", codes.get(j).get("value").toString()));
+                    if (codes.get(j).getCode() != null && sqls.get(i).getCode() != null &&
+                            codes.get(j).getCode().equals(sqls.get(i).getCode())) {
+                        sqls.get(i).setSupplement("and "+tableName+"."+sqls.get(i).getSupplement().replace("**", codes.get(j).getValue()));
                     }
                 }
+            }else if(sqls.get(i).getSupplement() != null && !sqls.get(i).getSupplement().equals("")){
+                sqls.get(i).setSupplement("and "+tableName+"."+sqls.get(i).getSupplement());
             }
         }
-        List<MpSysCodeEnum> filteredList = sqls.stream()
+        List<MpSysCodeMenu> filteredList = sqls.stream()
                 .filter(s -> s.getSupplement() != null && !s.getSupplement().isEmpty())
                 .collect(Collectors.toList());
-//        List<DeviceCloudTargetPO> list = microsoftAzureMapper.getCloudTargetListByCodes(filteredList);
-//        //结果转Device集合
-//        List<CloudDevice> deviceList = new ArrayList<>();
-//        for (int i = 0; i < list.size(); i++) {
-//            CloudDevice device = new CloudDevice();
-//            device.setDeleted(false);
-//            device.setName(list.get(i).getName());
-//            device.setLogo(list.get(i).getLogo());
-//            //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储 )
-//            switch (list.get(i).getCloudServiceType()) {
-//                case 1:
-//                case 2:
-//                    device.getExtCloudVm().setTargetPk(list.get(i).getPk());
-//                    device.getExtCloudVm().setPublisher(list.get(i).getPublisher());
-//                    device.getExtCloudVm().setOffer(list.get(i).getOffer());
-//                    device.getExtCloudVm().setSku(list.get(i).getSku());
-//                    device.getExtCloudVm().setImageOSType(list.get(i).getImageType());
-//                    device.getExtCloudVm().setSourceType(list.get(i).getSourceType());
-//                    break;
-//                case 3:
-//                    device.getExtCloudDocker().setSourceType(list.get(i).getSourceType());
-//                    device.getExtCloudDocker().setUploadImageName(list.get(i).getUploadTargetName());
-//                    break;
-//                case 4:
-//                case 5:
-//                case 6:
-//                case 7:
-//                default:
-//            }
-//            deviceList.add(device);
-//        }
+        Integer offset = 0;
+        Integer pageSize = 10;
+        if(request.getPage() != null && request.getPerPage() != null){
+            offset = (request.getPage() - 1) * request.getPerPage();
+            pageSize = request.getPerPage();
+        }
+        //需要同时修改sql
+        List<DeviceCloudTargetVO> list = microsoftAzureMapper.getCloudTargetListByCodes(Integer.parseInt(cloudServiceType),filteredList,offset,pageSize);
+        Integer totalNum = microsoftAzureMapper.getCloudTargetListByCodesNum(Integer.parseInt(cloudServiceType),filteredList);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("data",list);
+        jsonObject.put("total",totalNum);
+        return jsonObject;
+    }
+
+    public JSONObject getCloudTargetListByCodes(TargerRequestVO request) {
+        List<DeviceCloudTargetVO> vos = null;
+        Integer total = 0;
+        switch (request.getCloudServiceType()) {
+            case "1":
+                break;
+            case "2":
+                JSONObject calculate = getReturnData(request.getCloudServiceType(), "calculate", request, total);
+                vos = (List<DeviceCloudTargetVO>) calculate.get("data");
+                total = (Integer) calculate.get("total");
+                break;
+            case "3":
+                JSONObject container = getReturnData(request.getCloudServiceType(), "container", request, total);
+                vos = (List<DeviceCloudTargetVO>) container.get("data");
+                total = (Integer) container.get("total");
+                break;
+            case "4":
+                break;
+            case "5":
+                break;
+            case "6":
+                break;
+            case "7":
+                break;
+            default:
+        }
+        //结果转Device集合
+        List<CloudDevice> convert = convert(vos,total);
         JSONObject result = new JSONObject();
-        result.put("list", null);
-        result.put("total", null);
+        result.put("list", convert);
+        result.put("total", total);
         return result;
+    }
+
+    //结果转Device集合
+    private List<CloudDevice> convert(List<DeviceCloudTargetVO> vos,Integer total){
+        List<CloudDevice> deviceList = new ArrayList<>();
+        for (int i = 0; i < vos.size(); i++) {
+            CloudDevice device = new CloudDevice();
+            device.setDeleted(false);
+            device.setTotal(total);
+            device.setName(vos.get(i).getName());
+            device.setLogo(vos.get(i).getLogo());
+            //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储 )
+            switch (vos.get(i).getCloudServiceType()) {
+                case 1:
+                case 2:
+                    device.getExtCloudVm().setTargetPk(vos.get(i).getPk());
+                    device.getExtCloudVm().setPublisher(vos.get(i).getPublisher());
+                    device.getExtCloudVm().setOffer(vos.get(i).getOffer());
+                    device.getExtCloudVm().setSku(vos.get(i).getSku());
+                    device.getExtCloudVm().setImageOSType(vos.get(i).getOperatingSystem());
+                    device.getExtCloudVm().setSourceType(vos.get(i).getSourceType());
+                    break;
+                case 3:
+                    device.getExtCloudDocker().setSourceType(vos.get(i).getSourceType());
+                    device.getExtCloudDocker().setUploadImageName(vos.get(i).getUploadTargetName());
+                    break;
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                default:
+            }
+            deviceList.add(device);
+        }
+        return deviceList;
     }
 
     /**
@@ -587,9 +640,9 @@ public class MicrosoftAzureConverter implements BaseConverter {
         }
 
         //查询所有数据
-        List<MpSysCodeEnum> data = microsoftAzureMapper.getAlldata(cloudCode);
-        //根据parentCode字段将data数据按照父子关系处理返回新的List<MpSysCodeEnum>数据
-        List<MpSysCodeEnum> dtoTreeList = getDtoTreeList(data, cloudCode);
+        List<MpSysCodeMenu> data = microsoftAzureMapper.getAlldata(cloudCode);
+        //根据parentCode字段将data数据按照父子关系处理返回新的List<MpSysCodeMenu>数据
+        List<MpSysCodeMenu> dtoTreeList = getDtoTreeList(data, cloudCode);
         return dtoTreeList;
     }
 
@@ -599,15 +652,15 @@ public class MicrosoftAzureConverter implements BaseConverter {
      * @param list
      * @return
      */
-    public static List<MpSysCodeEnum> getDtoTreeList(List<MpSysCodeEnum> list, String parentCode) {
-        List<MpSysCodeEnum> dtos = new ArrayList<>();
+    public static List<MpSysCodeMenu> getDtoTreeList(List<MpSysCodeMenu> list, String parentCode) {
+        List<MpSysCodeMenu> dtos = new ArrayList<>();
         if (list == null || list.isEmpty()) {
             return dtos;
         }
-        for (MpSysCodeEnum menu : list) {
+        for (MpSysCodeMenu menu : list) {
             if (parentCode.equals(menu.getParentCode())) {
                 //找到顶层目录
-                MpSysCodeEnum menuDto = new MpSysCodeEnum();
+                MpSysCodeMenu menuDto = new MpSysCodeMenu();
                 //将实体类的数据转成dto
                 BeanUtils.copyProperties(menu, menuDto);
                 //获取该实体类下的所有子级
@@ -624,14 +677,14 @@ public class MicrosoftAzureConverter implements BaseConverter {
      * @param list
      * @return
      */
-    private static MpSysCodeEnum findChildren(MpSysCodeEnum menuDto, List<MpSysCodeEnum> list) {
-        for (MpSysCodeEnum menu : list) {
+    private static MpSysCodeMenu findChildren(MpSysCodeMenu menuDto, List<MpSysCodeMenu> list) {
+        for (MpSysCodeMenu menu : list) {
             if (menuDto.getCode().equals(menu.getParentCode())) {
                 //此时menu是menuDto下的子级
                 if (menuDto.getChildren() == null) {
-                    menuDto.setChildren(new ArrayList<MpSysCodeEnum>());
+                    menuDto.setChildren(new ArrayList<MpSysCodeMenu>());
                 }
-                MpSysCodeEnum dto = new MpSysCodeEnum();
+                MpSysCodeMenu dto = new MpSysCodeMenu();
                 BeanUtils.copyProperties(menu, dto);
                 //递归
                 menuDto.getChildren().add(findChildren(dto, list));

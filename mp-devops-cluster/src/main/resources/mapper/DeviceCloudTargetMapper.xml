@@ -197,7 +197,7 @@
             <if test="param != null and param.size != 0">
                 pk in (
                 <foreach collection="param" item="item" index="index" separator=",">
-                    #{item}
+                    #{item.pk}
                 </foreach>
                 )
             </if>
@@ -212,7 +212,7 @@
             <if test="param != null and param.size != 0">
                 pk in (
                 <foreach collection="param" item="item" index="index" separator=",">
-                    #{item}
+                    #{item.pk}
                 </foreach>
                 )
             </if>
@@ -227,7 +227,7 @@
             <if test="param != null and param.size != 0">
                 pk in (
                 <foreach collection="param" item="item" index="index" separator=",">
-                    #{item}
+                    #{item.pk}
                 </foreach>
                 )
             </if>
@@ -318,7 +318,7 @@
             link_id = #{id}
     </select>
 
-    <select id="getAlldata" resultType="cn.cyberpeace.mp.base.bo.MpSysCodeEnum">
+    <select id="getAlldata" resultType="cn.cyberpeace.mp.base.bo.MpSysCodeMenu">
         WITH RECURSIVE recursion ( CODE, code_name, parent_code, type, remark, STATUS, LEVEL ) AS (
 	SELECT
 		T1.CODE,
@@ -329,7 +329,7 @@
 		T1.STATUS,
 		T1.LEVEL
 	FROM
-		mp_sys_code_enum T1
+		mp_sys_code_menu T1
 	WHERE
 		T1.CODE = #{code} UNION ALL
 	SELECT
@@ -341,23 +341,23 @@
 		T2.STATUS,
 		T2.LEVEL
 	FROM
-		mp_sys_code_enum T2,
+		mp_sys_code_menu T2,
 		recursion T3
 	WHERE
 		T2.parent_code = T3.CODE
 	) SELECT
-                  *
+            *
       FROM
-                  recursion T
+            recursion T
       ORDER BY
-	              T.LEVEL
+            T.code
     </select>
 
-    <select id="getSqlByCodes" resultType="cn.cyberpeace.mp.base.bo.MpSysCodeEnum">
+    <select id="getSqlByCodes" resultType="cn.cyberpeace.mp.base.bo.MpSysCodeMenu">
         SELECT
             code,supplement
         FROM
-            mp_sys_code_enum
+            mp_sys_code_menu
         <where>
             <if test="param != null and param.size != 0">
                 code in
@@ -368,17 +368,64 @@
         </where>
     </select>
 
-    <select id="getCloudTargetListByCodes" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO">
-        SELECT
-            *
-        FROM
-            mp_devops_cloud_target
+    <select id="getCloudTargetListByCodes" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO">
+        <if test="cloudServiceType != null and cloudServiceType == 2">
+            SELECT
+            target.id,
+            target.cloud_service_type,
+            calculate.*
+            FROM
+            mp_devops_cloud_target target
+            inner join mp_devops_cloud_target_calculate calculate on target.id = calculate.link_id
+        </if>
+
+        <if test="cloudServiceType != null and cloudServiceType == 3">
+            SELECT
+            target.id,
+            target.cloud_service_type,
+            container.*
+            FROM
+            mp_devops_cloud_target target
+            inner join mp_devops_cloud_target_container container on target.id = container.link_id
+        </if>
+
         <where>
             <if test="param != null and param.size != 0">
                 <foreach collection="param" item="item" separator=" ">
                     ${item.supplement}
                 </foreach>
             </if>
+            and target.cloud_service_type = #{cloudServiceType}
+            <if test="offset != null and pageSize != null">
+                limit #{offset}, #{pageSize}
+            </if>
+        </where>
+    </select>
+
+    <select id="getCloudTargetListByCodesNum" resultType="java.lang.Integer">
+        <if test="cloudServiceType != null and cloudServiceType == 2">
+            SELECT
+            count(0)
+            FROM
+            mp_devops_cloud_target target
+            inner join mp_devops_cloud_target_calculate calculate on target.id = calculate.link_id
+        </if>
+
+        <if test="cloudServiceType != null and cloudServiceType == 3">
+            SELECT
+            count(0)
+            FROM
+            mp_devops_cloud_target target
+            inner join mp_devops_cloud_target_container container on target.id = container.link_id
+        </if>
+
+        <where>
+            <if test="param != null and param.size != 0">
+                <foreach collection="param" item="item" separator=" ">
+                    ${item.supplement}
+                </foreach>
+            </if>
+            and target.cloud_service_type = #{cloudServiceType}
         </where>
     </select>
 

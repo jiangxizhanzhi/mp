@@ -1,17 +1,20 @@
 package cn.cyberpeace.mp.devopscluster.repository;
 
 import cn.cyberpeace.mp.base.bo.MpSysCodeEnum;
+import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetCalculate;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetContainer;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO;
+import cn.cyberpeace.mp.devopscluster.vo.MpSysCodeMenuVO;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -44,11 +47,16 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
 
     DeviceCloudTargetVO getCloudTargetContainerById(@Param("id") String id);
 
-    List<MpSysCodeEnum> getAlldata(String code);
+    LinkedList<MpSysCodeMenu> getAlldata(String code);
 
-    List<MpSysCodeEnum> getSqlByCodes(@Param("param") List<JSONObject> codes);
+    List<MpSysCodeMenu> getSqlByCodes(@Param("param") List<MpSysCodeMenuVO> codes);
 
-    List<DeviceCloudTargetPO> getCloudTargetListByCodes(@Param("param") List<MpSysCodeEnum> filteredList);
+    List<DeviceCloudTargetVO> getCloudTargetListByCodes(@Param("cloudServiceType") Integer cloudServiceType,
+                                                        @Param("param") List<MpSysCodeMenu> filteredList,
+                                                        @Param("offset") Integer offset, @Param("pageSize") Integer pageSize);
+
+    Integer getCloudTargetListByCodesNum(@Param("cloudServiceType") Integer cloudServiceType,@Param("param") List<MpSysCodeMenu> filteredList);
+
 
     Boolean deleteCloudTarget(@Param("param") List<DeviceCloudTargetPO> cloudTargetList);
 

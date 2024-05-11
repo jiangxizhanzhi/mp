@@ -854,7 +854,7 @@ public class LoadServiceImpl {
         return list;
     }
 
-    public Map<String, Integer> getTop5Loads(String sceneId) {
+    public LinkedList<JSONObject> getTop5Loads(String sceneId) {
         List<MpDevopsLoadSceneLog> loadExecutionResult = getLoadExecutionResult(new JSONObject());
         //计算id出现次数最多的五条
         Map<String, Integer> map = new HashMap<>();
@@ -890,11 +890,14 @@ public class LoadServiceImpl {
             }
         }
         List<MpDevopsLoad> loadByIds = loadMapper.getLoadByIds(idList);
-        Map<String, Integer> newMap = new HashMap();
+        LinkedList<JSONObject> returnList = new LinkedList<>();
         for(MpDevopsLoad load : loadByIds){
-            newMap.put(load.getToolName(),map.get(load.getId()));
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("load_name",load.getToolName());
+            jsonObject.put("attack_num",map.get(load.getId()));
+            returnList.add(jsonObject);
         }
-        return newMap;
+        return returnList;
     }
 }
 

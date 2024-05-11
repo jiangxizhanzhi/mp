@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -269,7 +270,7 @@ public class LoadController {
     @ApiOperation(value = "3D态势-载荷攻击TOP5", notes = "")
     @GetMapping("/getTop5Loads")
     public ServiceResult getTop5Loads(@RequestParam(value = "scene_id") String sceneId) {
-        Map<String, Integer> getTop5Loads = LoadService.getTop5Loads(sceneId);
+        LinkedList<JSONObject> getTop5Loads = LoadService.getTop5Loads(sceneId);
         return new ServiceResult(getTop5Loads, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
