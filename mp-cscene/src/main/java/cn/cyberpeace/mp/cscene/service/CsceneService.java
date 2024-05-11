@@ -24,15 +24,10 @@ import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.core.CsceneHandler;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.CsceneLoadDto;
-import cn.cyberpeace.mp.cscene.model.CsceneAuthModel;
-import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
-import cn.cyberpeace.mp.cscene.model.CsceneModel;
-import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
-import cn.cyberpeace.mp.cscene.repository.CsceneAuthMapper;
-import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
-import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
-import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
+import cn.cyberpeace.mp.cscene.model.*;
+import cn.cyberpeace.mp.cscene.repository.*;
 import cn.cyberpeace.mp.cscene.service.filed.CsceneModelFields;
+import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneSnapshotDeleteTaskPool;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
@@ -111,6 +106,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     private SceneConfigElementMapper sceneConfigElementMapper;
     @Resource
     private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
+    @Resource
+    private AzureVimSizeMapper azureVimSizeMapper;
 
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
@@ -860,5 +857,12 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             }
         }
         return new ServiceResult<>(true);
+    }
+
+    public ListObjServiceResult<AzureVmSize> vmSizeList(CsceneInstanceStatQueryParams queryParams) {
+        HumanCondition humanCondition = new HumanCondition()
+                .pagination(queryParams.getPage(), queryParams.getPageSize());
+        List<AzureVmSize> list = azureVimSizeMapper.list(humanCondition);
+        return new ListObjServiceResult<>(new ListObjResult<>(list, list.size()));
     }
 }

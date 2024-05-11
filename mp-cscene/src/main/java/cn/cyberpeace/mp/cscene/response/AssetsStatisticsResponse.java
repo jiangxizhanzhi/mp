@@ -62,6 +62,29 @@ public class AssetsStatisticsResponse {
     @ApiModelProperty("应用系统数量")
     private int applicationSystemCount;
 
+    /**
+     * 虚拟机数量
+     */
+    @ApiModelProperty("虚拟机数量")
+    private int vmCount;
+
+    /**
+     * 容器数量
+     */
+    @ApiModelProperty("容器数量")
+    private int containerCount;
+
+    /**
+     * web数量
+     */
+    @ApiModelProperty("web数量")
+    private int webCount;
+
+    /**
+     * 边界设备数量
+     */
+    @ApiModelProperty("边界设备数量")
+    private int peripheryCount;
 
 
 }

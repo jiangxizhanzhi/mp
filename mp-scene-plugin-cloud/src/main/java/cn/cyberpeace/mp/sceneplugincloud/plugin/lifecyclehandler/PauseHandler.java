@@ -69,7 +69,7 @@ public class PauseHandler extends HandlerCommon {
             return;
         }
         String instanceId = element.getResourceId();
-//        判断是否是微软云
+//        判断是否是微软云 容器无暂停操作
         Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
         if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
             if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {

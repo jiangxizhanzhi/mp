@@ -9,15 +9,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAnalysisSummary;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackConfigInfo;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowPcapFileInfo;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
-import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
+import cn.cyberpeace.mp.cscene.dto.flow.*;
 import cn.cyberpeace.mp.cscene.request.common.AssetsStatisticsRequest;
 import cn.cyberpeace.mp.cscene.request.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
@@ -32,6 +24,10 @@ import cn.cyberpeace.mp.cscene.service.FlowAttackTypeConvert;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigAssetBO;
@@ -53,11 +49,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -239,7 +231,7 @@ public class FlowMonitorController {
                     resultMap.put(newType, resultMap.get(newType) + flowAttackTypeCount.getTimes());
                 }
             }
-            for (String key:resultMap.keySet()){
+            for (String key : resultMap.keySet()) {
                 FlowAttackTypeCount flowAttackTypeCount = new FlowAttackTypeCount();
                 String key2 = key.replaceAll(" ", "_");
                 String attackTypeName = MessageCommon.get("cscene.attck." + key2.toLowerCase());
@@ -346,7 +338,36 @@ public class FlowMonitorController {
             List<CategoryGroupBO> networkList = categoryGroups.stream().filter(group -> group.getCategory() == 3).collect(Collectors.toList());
             // 安全设备
             List<CategoryGroupBO> ssList = categoryGroups.stream().filter(group -> group.getCategory() == 4).collect(Collectors.toList());
-            AssetsStatisticsResponse response = AssetsStatisticsResponse.builder().sceneId(id).assetsTotal(sceneAssetsBO.getNodeCount()).ipTotal(sceneAssetsBO.getIpCount()).operationSystemCount(CollectionUtils.isNotEmpty(osList) ? osList.get(0).getElements().size() : 0).applicationSystemCount(CollectionUtils.isNotEmpty(asList) ? asList.get(0).getElements().size() : 0).networkCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0).safetySystemCount(CollectionUtils.isNotEmpty(ssList) ? ssList.get(0).getElements().size() : 0).build();
+//            虚拟机、容器分类1 边界设备分类3
+            SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
+            CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+            // 虚拟机
+            List<SceneElementBO> vmList = categoryGroups.stream()
+                    .filter(group -> group.getCategory() == 1)
+                    .flatMap(group -> group.getElements().stream())
+                    .filter(element -> BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudPlugin.getElement(element.getId()).getImageType()))
+                    .collect(Collectors.toList());
+            // 容器
+            List<SceneElementBO> containerList = categoryGroups.stream()
+                    .filter(group -> group.getCategory() == 1)
+                    .flatMap(group -> group.getElements().stream())
+                    .filter(element -> BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(cloudPlugin.getElement(element.getId()).getImageType()))
+                    .collect(Collectors.toList());
+            AssetsStatisticsResponse response =
+                    AssetsStatisticsResponse.builder().sceneId(id)
+                            .assetsTotal(sceneAssetsBO.getNodeCount())
+                            .ipTotal(sceneAssetsBO.getIpCount())
+                            .operationSystemCount(CollectionUtils.isNotEmpty(osList) ? osList.get(0).getElements().size() : 0)
+                            .applicationSystemCount(CollectionUtils.isNotEmpty(asList) ? asList.get(0).getElements().size() : 0)
+                            .networkCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0)
+                            .safetySystemCount(CollectionUtils.isNotEmpty(ssList) ? ssList.get(0).getElements().size() : 0)
+                            .vmCount(CollectionUtils.isNotEmpty(vmList) ? vmList.size() : 0)
+                            .containerCount(CollectionUtils.isNotEmpty(containerList) ? containerList.size() : 0)
+//                            TODO 目前没有做Azure web
+                            .webCount(0)
+//                            暂定 可能不准确
+                            .peripheryCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0)
+                            .build();
             responseList.add(response);
         });
 
