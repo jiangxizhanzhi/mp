@@ -13,7 +13,7 @@ public final class BaseCloudPlatformConstant {
     /**
      * cpcloud平台URL前缀
      */
-    public static final String CPCLOUD_URL = "/cpcloud";
+    public static final String CPCLOUD_URL = "/cloud";
 
     /**
      * cpcloud平台info模块URL前缀

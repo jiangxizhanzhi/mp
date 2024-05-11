@@ -1,15 +1,68 @@
 package cn.cyberpeace.mp.sceneplugincloud.constant;
 
 public class CloudUrlConstant {
-    public static final String MACVLAN_CONTAINER_CREATE_URL = "/v1/scenarios/macvlan_container";
-    public static final String CONTAINER_CREATE_URL = "/v1/scenarios/container";
-    public static final String CONTAINER_RESIZE_URL = "/v1/containers/{container_id}";
-    public static final String CONTAINER_DELETE_URL = "/v1/scenarios/container";
-    public static final String CONTAINER_ADD_PORT_URL = "/v1/scenarios/attach_network";
-    public static final String CONTAINER_DELETE_PORT_URL = "/v1/scenarios/detach_network";
-    public static final String CONTAINER_GET_URL = "/v1/scenarios/container/%s";
+    /**
+     * macvlan, 30s版本没有
+     */
+    public static final String MACVLAN_CONTAINER_CREATE_URL = "/cloud/v1/scenarios/macvlan_container";
+    /**
+     * 修改节点接口，可以不用
+     */
+    public static final String CONTAINER_RESIZE_URL = "/cloud/v1/containers/{container_id}";
+    /**
+     * 修改节点接口，可以不用
+     */
+    public static final String CONTAINER_ADD_PORT_URL = "/cloud/v1/scenarios/attach_network";
+    /**
+     * 修改节点接口，可以不用
+     */
+    public static final String CONTAINER_DELETE_PORT_URL = "/cloud/v1/scenarios/detach_network";
+
+    /**
+     *
+     * todo
+     * 从容器中复制文件接口，目前cloud接口没有。
+     * 主要用于给容器按照unzip以及获取容器中文件。
+     * 会影响到数据采集和流量。
+     *
+     * 1. 会影响到容器解压安装wazuh
+     */
     public static final String CONTAINER_COPY_FILE_URL = "/v1/containers/%s/archive";
-    public static final String CONTAINER_EXECUTE_COMMAND_URL = "/v1/containers/%s/execute";
+
+    /**
+     * 容器获取接入url接口，
+     */
+    public static final String CONTAINER_GET_URL = "/cloud/v1/scenarios/container/%s";
+
+    /**********************************************************************************************/
+
+
+
+    /**
+     * 容器创建接口，这个是必须的
+     */
+    public static final String CONTAINER_CREATE_URL = "/cloud/v1/scenarios/container";
+    /**
+     * 容器删除接口，这个也是必须的。
+     */
+    public static final String CONTAINER_DELETE_URL = "/cloud/v1/scenarios/container";
+
+    /**
+     * 获取容器console 连接
+     */
+    public static final String CONTAINER_ACTION_URL = "/cloud/v1/container/{container_id}/{action}";
+
+
+
+
+
+
+    /**
+     * 容器执行命令接口
+     */
+    public static final String CONTAINER_EXECUTE_COMMAND_URL = "/cloud/v1/container/%s/exec";
+
+
 
     public static final String ENTITY_NODE_CREATE_URL = "/v1/scenarios/entity_node";
     public static final String ENTITY_NODE_DELETE_URL = "/v1/scenarios/entity_node";
@@ -29,6 +82,10 @@ public class CloudUrlConstant {
     public static final String VIRTUAL_MACHINE_CREATE_URL = "/v1/scenarios/vm";
     public static final String VIRTUAL_MACHINE_DELETE_URL = "/v1/scenarios/vm";
 
+
+    public static final String VIRTUAL_MACHINE_ACCESS_URL = "/cloud/v1/vm/console";
+
+
     public static final String VIRTUAL_MACHINE_SNAPSHOT_URL = "/v1/scenarios/node_snapshot";
     public static final String VIRTUAL_MACHINE_DEL_SNAPSHOT_URL = "/v1/scenarios/device_snapshot";
 
@@ -43,8 +100,8 @@ public class CloudUrlConstant {
     public static final String CONSOLE_INFO_GET_URL = "/cpcloud/instance_control/v1/console";
     public static final String COM_INFO_GET_URL = "/cpcloud/instance_control/v1/telnet";
 
-    public static final String CREATE_CONNECTION_URL = "/cpcloud/guacamole/v1/connection";
-    public static final String DELETE_CONNECTION_URL = "/cpcloud/guacamole/v1/connection";
+    public static final String CREATE_CONNECTION_URL = "/cloud/v1/guacamole/connection";
+    public static final String DELETE_CONNECTION_URL = "/cloud/v1/guacamole/connection";
     public static final String EXPIRE_ALL_CONNECT = "/cpcloud/guacamole/v1/logout";
     public static final String GET_CONNECTION_URL = "/cpcloud/guacamole/v1/connection";
     public static final String GET_MONITOR_URL = "/cpcloud/guacamole/v1/monitor";

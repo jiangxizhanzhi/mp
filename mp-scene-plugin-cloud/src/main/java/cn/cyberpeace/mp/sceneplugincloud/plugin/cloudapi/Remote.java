@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
@@ -12,13 +13,15 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.*;
 
 @Slf4j
 public class Remote extends CloudClient {
@@ -33,6 +36,16 @@ public class Remote extends CloudClient {
         return result;
     }
 
+    public boolean deleteConnection(String connectionId) {
+        var result = getHttpClient().delete(CloudUrlConstant.CREATE_CONNECTION_URL, new DisableGuacamoleRecordingData(connectionId),
+                null, DisableGuacamoleRecordingResult.class);
+        if (!Boolean.TRUE.equals(result.getSuccess())) {
+            log.error("delete connection error,connection id:{},message: {}", connectionId, result.getMessages());
+        }
+        return result.getSuccess();
+    }
+
+    @Deprecated
     public GuacamoleGetConnectionUrlResult getConnectionUrl(String connectionId, String userId) {
         GuacamoleGetConnectionUrlResult result = getHttpClient().get(CloudUrlConstant.GET_CONNECTION_URL,
                 new GuacamoleGetConnectionUrlParam(connectionId, userId), GuacamoleGetConnectionUrlResult.class);
@@ -41,6 +54,51 @@ public class Remote extends CloudClient {
         }
 
         return result;
+    }
+
+    public GetConnectionUrlResult getNoVncConnectionUrl(GetConnectionUrlParam param) {
+        var res = getHttpClient().get(CloudUrlConstant.VIRTUAL_MACHINE_ACCESS_URL,
+                param, GetConnectionUrlResult.class);
+        return res;
+    }
+
+    public GetConnectionUrlResult getContainerConnectionUrl(GetConnectionUrlParam param) {
+        var res = getHttpClient().post(CloudUrlConstant.CONTAINER_ACTION_URL.replace("{container_id}", param.getVmId())
+                .replace("{action}", "console"), null, null, GetConnectionUrlResult.class);
+        return res;
+    }
+
+    public void getConnectionFile(GetConnectionUrlParam param, HttpServletResponse response) {
+//        BufferedInputStream bin = null;
+        OutputStream os = null;
+        try {
+            URL url = new URL(CloudSingleton.cloudAppConfig.getCpcloudServer() + CloudUrlConstant.VIRTUAL_MACHINE_ACCESS_URL +
+                    "?vm_id=" + param.getVmId() + "&console_type=" + param.getConsoleType());
+            // 建立连接
+            URLConnection urlConnection = url.openConnection();
+            // http的连接类
+            HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnection;
+            // 设置字符编码
+            httpURLConnection.setRequestProperty("Charset", "UTF-8");
+            // 打开到此 URL引用的资源的通信链接
+            httpURLConnection.connect();
+//            bin = new BufferedInputStream(httpURLConnection.getInputStream());
+            os = response.getOutputStream();
+            int len = 0;
+            byte[] buffer = new byte[1024 * 5];
+
+            try (BufferedInputStream bin = new BufferedInputStream(httpURLConnection.getInputStream())) {
+                while ((len = bin.read(buffer)) > 0) {
+                    os.write(buffer, 0, len);
+                }
+                os.flush();
+            }
+        } catch (Exception e) {
+            log.error("download connection file error", e);
+        } finally {
+//            IOUtils.closeQuietly(bin);
+            IOUtils.closeQuietly(os);
+        }
     }
 
     public String getContainerConsoleUrl(String containerId) {

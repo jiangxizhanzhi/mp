@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class NetworkService extends BaseCpService {
 
+    private static final String LIST_NETWORKS = "/cloud/v1/network";
+
     private static final String NETWORKS = "/networks";
 
 
@@ -33,7 +35,7 @@ public class NetworkService extends BaseCpService {
      * @return
      */
     public CloudPlatformPageResult<NetworkModel> page(String getParams){
-        return super.page(BaseCloudPlatformConstant.URL_VERSION + NETWORKS + getParams, NetworkModel.class);
+        return super.page(LIST_NETWORKS + getParams, NetworkModel.class);
     }
 
 
@@ -42,6 +44,7 @@ public class NetworkService extends BaseCpService {
      * @param getParams
      * @return
      */
+    @Deprecated
     public CloudPlatformResult<VlanIpStockModel> vlanIpStock(String getParams){
         CloudPlatformResult result = super.sendGet(BaseCloudPlatformConstant.URL_VERSION + NETWORKS + "/vlan_ip_stock" + getParams, CloudPlatformResult.class);
         super.checkResult(result);
@@ -57,6 +60,7 @@ public class NetworkService extends BaseCpService {
      * @param getParams
      * @return
      */
+    @Deprecated
     public CloudPlatformPageResult<ElasticIpModel> pageElasticIp(String getParams){
         return super.page(BaseCloudPlatformConstant.URL_VERSION + NETWORKS + "/floatingips" + getParams, ElasticIpModel.class);
     }
@@ -65,6 +69,7 @@ public class NetworkService extends BaseCpService {
      *
      * @return
      */
+    @Deprecated
     public CloudPlatformPageResult<NetworkAgentModel> agentsStateFromNetworks(){
         return super.page(BaseCloudPlatformConstant.URL_VERSION + NETWORKS + "/agents", NetworkAgentModel.class);
     }

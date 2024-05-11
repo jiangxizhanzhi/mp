@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.message.FormatMessage;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
@@ -14,7 +15,6 @@ import cn.cyberpeace.mp.devopscluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devopscluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
-import cn.cyberpeace.mp.devopscluster.utils.JsonUtils;
 import cn.cyberpeace.mp.devopscluster.vo.ImagesPageVO;
 import cn.cyberpeace.mp.devopscluster.ws.ImagesByUuidSocketServer;
 import cn.cyberpeace.mp.devopscluster.ws.ImagesConnectSocketServer;
@@ -57,7 +57,7 @@ public class WebSocketNoticeController {
     @GetMapping("/images/connection")
     public ServiceResult connection(@RequestParam String uuid){
         CloudPlatformPageResult<TargetConnection> connection = imagesService.connection(uuid);
-        imagesConnectSocketServer.batchSendInfo(JsonUtils.toUnderlineJSONString(new FormatMessage<>(connection.getList(),"MP-image-connection")), Arrays.asList(uuid));
+        imagesConnectSocketServer.batchSendInfo(JsonUtils.snakeStringify(new FormatMessage<>(connection.getList(), "MP-image-connection")), Arrays.asList(uuid));
         return ResultCommon.success();
     }
 
@@ -79,7 +79,7 @@ public class WebSocketNoticeController {
                 .authTotal(convertModel.getAuthTotal()).isPublic(convertModel.getIsPublic()).extSystemInfo(convertModel.getExtSystemInfo())
                 .extGateway(convertModel.getExtGateway()).extVm(convertModel.getExtVm()).extImageInfo(convertModel.getExtImageInfo())
                 .extDocker(convertModel.getExtDocker()).build();
-        imagesByUuidSocketServer.batchSendInfo(JsonUtils.toUnderlineJSONString(new FormatMessage<>(pageVO,"MP-device-by-uuid")));
+        imagesByUuidSocketServer.batchSendInfo(JsonUtils.snakeStringify(new FormatMessage<>(pageVO,"MP-device-by-uuid")));
         return ResultCommon.success();
     }
 

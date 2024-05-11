@@ -320,6 +320,7 @@ public class Container extends CloudClient {
                 }, true);
     }
 
+    @Deprecated
     public MacvlanContainerCreateData createMacvlanContainer(MacvlanContainerCreateData createData) {
         heavyConcurrentWait();
 

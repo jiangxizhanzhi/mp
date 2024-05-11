@@ -1,20 +1,21 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
-import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Joiner;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
-import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant.CPCLOUD_DEVICE;
-import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
+import java.util.Map;
 
 /**
  * 靶标
@@ -24,7 +25,25 @@ import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudP
 @Slf4j
 public class DeviceService extends BaseCpService {
 
-    private static final String DEVICE = "/device";
+    /**
+     * 分页查询靶标信息
+     */
+    private static final String LIST_VIRTUAL_DEVICES = "/cloud/v1/device/virtual_device";
+
+    /**
+     * 根据uuid查询靶标的具体信息
+     */
+    private static final String GET_DEVICE_BY_UUID = "/cloud/v1/device/{uuid}";
+
+    /**
+     * 根据多个uuid批量查设备信息
+     */
+    private static final String LIST_DEVICES_BY_IDS = "/cloud/v1/device/byid";
+
+    /**
+     * 根据多个uuid批量删除虚拟靶标
+     */
+    private static final String DELETE_DEVICES_BY_UUIDS = "/cloud/v1/device/batch_delete";
 
     public DeviceService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
@@ -35,14 +54,13 @@ public class DeviceService extends BaseCpService {
      * @param params
      * @return
      */
-    public CloudPlatformPageResult<Device> page(String params){
-        CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + DEVICE + "/lists" + params, CloudPlatformItemsPageResult.class);
+    public List<Device> page(String params){
+
+        CloudPlatformItemsPageResult<Device> pageResult = super.sendGet(LIST_VIRTUAL_DEVICES + params,
+                new TypeReference<CloudPlatformItemsPageResult<Device>>() {
+        });
         super.checkResult(pageResult);
-        List<Device> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),Device.class);
-        CloudPlatformPageResult<Device> model = new CloudPlatformPageResult<>();
-        model.setList(list);
-        model.setTotal(pageResult.getTotal());
-        return model;
+        return pageResult.getData().getItems();
     }
 
     /**
@@ -51,7 +69,8 @@ public class DeviceService extends BaseCpService {
      * @return
      */
     public Device findByUuid(String uuid){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + DEVICE + "/" + uuid, Device.class);
+        String api = UriComponentsBuilder.fromPath(GET_DEVICE_BY_UUID).buildAndExpand(uuid).toUriString();
+        return super.sendGet(api, Device.class);
     }
 
     /**
@@ -59,19 +78,21 @@ public class DeviceService extends BaseCpService {
      * @param ids
      * @return
      */
-    public CloudPlatformPageResult<Device> findByIds(List<Integer> ids) {
-        CloudPlatformPageResult<Device> model = new CloudPlatformPageResult<>();
-        model.setList(new ArrayList<>());
+    public List<Device> findByIds(List<Integer> ids) {
+        List<Device> allDevices = new ArrayList<>();
         // 一次最多查询500个靶标信息
         for (int i = 0; i < ids.size(); i += 500) {
             int index = Math.min(i + 500, ids.size());
             List<Integer> newIds = ids.subList(i, index);
-            CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + DEVICE + "/byid?ids=" + Joiner.on(",").join(newIds), CloudPlatformItemsPageResult.class);
+            Map<String, String> body = new HashMap<>();
+            body.put("ids", Joiner.on(",").join(newIds));
+            CloudPlatformItemsPageResult<Device> pageResult = super.sendPost(LIST_DEVICES_BY_IDS, JsonUtils.snakeStringify(body), new TypeReference<CloudPlatformItemsPageResult<Device>>() {
+            });
             super.checkResult(pageResult);
-            List<Device> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), Device.class);
-            model.getList().addAll(list);
+            List<Device> list = pageResult.getData().getItems();
+            allDevices.addAll(list);
         }
-        return model;
+        return allDevices;
     }
 
     /**
@@ -81,7 +102,7 @@ public class DeviceService extends BaseCpService {
     public BaseCloudPlatformResult deleteByIds(List<String> uuids) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("uuids", uuids);
-        BaseCloudPlatformResult result = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/device/batch_delete",JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
+        BaseCloudPlatformResult result = super.sendDelete(DELETE_DEVICES_BY_UUIDS, JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
         super.checkResult(result);
         return result;
     }

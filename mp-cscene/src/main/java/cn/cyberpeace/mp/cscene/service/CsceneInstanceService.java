@@ -76,22 +76,19 @@ import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
-import cn.cyberpeace.mp.sceneplugincloud.bo.AccessUserBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.ElementCommandExecBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.NodeLinkStatusBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.*;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginContext;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetConnectionUrlParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
+import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConnectionCommon;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.SnapshotAddressUtils;
@@ -133,6 +130,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -1200,6 +1198,95 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
 
         return new ServiceResult<>(null);
+    }
+
+    public ServiceResult<String> getConnectionUrl(String sceneId, String nodeId, String accessModeId, HttpServletResponse response) {
+        Map<String, ScenePluginCloudSceneService.AccessModeLinkInfo> accessModeInfoMap = collectAccessModeLinkInfo(sceneId, List.of(nodeId));
+        ScenePluginCloudSceneService.AccessModeLinkInfo accessModeInfo = accessModeInfoMap.getOrDefault(accessModeId, null);
+        if (accessModeInfo == null) {
+            return new ServiceResult<>(null);
+        }
+
+        NodeConnectionBO nodeConnection = accessModeInfo.toNewNodeConnection();
+        nodeConnection.setUser(userId);
+
+        CloudAccessMode accessMode = accessModeInfo.getAccessMode();
+
+
+
+
+        var sceneHandler = new SceneHandler(sceneId, null, null);
+        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        CloudPluginSceneBO cloudScene = pluginHandler.getScene();
+        pluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
+            if (nodeIds != null && !nodeIds.isEmpty() && !nodeIds.contains(nodeId)) {
+                return;
+            }
+            List<CloudPluginSceneElementPortBO> cloudPorts = pluginHandler.getPorts(cloudElement);
+            cloudPorts.forEach(cloudPort -> {
+                List<CloudAccessMode> accessModes = cloudPort.getAccessModes();
+                if (accessModes == null) {
+                    return;
+                }
+                accessModes.forEach(accessMode -> {
+                    String accessModeId = accessMode.getId();
+                    if (StringUtils.isEmpty(accessModeId)) {
+                        return;
+                    }
+
+                    accessModeLinkInfoMap.put(accessModeId,
+                            new ScenePluginCloudSceneService.AccessModeLinkInfo(accessModeId, accessMode, cloudPort, cloudElement, scene, cloudScene));
+                });
+            });
+        });
+
+
+
+
+        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        var cloudElement = cloudPlugin.getElement(nodeId);
+        GetConnectionUrlParam param = new GetConnectionUrlParam();
+        param.setVmId(cloudElement.getResourceId());
+        param.setConsoleType(protocol);
+        return new ServiceResult<>(CloudSceneConnectionCommon.getConnectionUrl(param, response).getData());
+    }
+
+    private String getProtocolByAccessModeId(String accessModeId, SceneHandler sceneHandler, String targetNodeId) {
+        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        CloudPluginSceneBO cloudScene = pluginHandler.getScene();
+        CloudPluginSceneElementBO cloudPluginSceneElementBO = pluginHandler.getElementMap().get(targetNodeId);
+        if (Objects.isNull(cloudPluginSceneElementBO)) {
+            throw new MpRuntimeException("节点信息不存在");
+        } else {
+            List<CloudPluginSceneElementPortBO> ports = pluginHandler.getPorts(cloudPluginSceneElementBO);
+            if (CollectionUtils.isEmpty(ports)) {
+                throw new MpRuntimeException("接入信息不存在");
+            } else {
+
+            }
+        }
+        pluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
+            if (nodeIds != null && !nodeIds.isEmpty() && !nodeIds.contains(nodeId)) {
+                return;
+            }
+            List<CloudPluginSceneElementPortBO> cloudPorts = pluginHandler.getPorts(cloudElement);
+            cloudPorts.forEach(cloudPort -> {
+                List<CloudAccessMode> accessModes = cloudPort.getAccessModes();
+                if (accessModes == null) {
+                    return;
+                }
+                accessModes.forEach(accessMode -> {
+                    String accessModeId = accessMode.getId();
+                    if (StringUtils.isEmpty(accessModeId)) {
+                        return;
+                    }
+
+                    accessModeLinkInfoMap.put(accessModeId,
+                            new ScenePluginCloudSceneService.AccessModeLinkInfo(accessModeId, accessMode, cloudPort, cloudElement, scene, cloudScene));
+                });
+            });
+        });
+
     }
 
     public ServiceResult<NodeConnectionBO> getRemoteConnection(String id, String nodeId, String accessModeId, CsceneContextBO context) {

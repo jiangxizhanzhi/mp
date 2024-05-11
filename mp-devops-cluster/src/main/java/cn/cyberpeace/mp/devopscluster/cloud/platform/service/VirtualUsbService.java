@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @Author: guquan
  * @Date：2023/4/17 10:27
  */
+@Deprecated
 public interface VirtualUsbService {
 
     /**

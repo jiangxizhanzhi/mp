@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
@@ -37,7 +36,6 @@ import cn.cyberpeace.mp.devopscluster.service.upload.CustomImageUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.ISOUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.InjectFileUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.SshPrivateKeyUploadService;
-import cn.cyberpeace.mp.devopscluster.utils.URLUtils;
 import cn.cyberpeace.mp.devopscluster.vo.*;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
@@ -61,13 +59,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 镜像管理
@@ -297,13 +289,6 @@ public class ImagesController {
             }
         }
         String downloadUrl = imagesConverter.export(uuid, imageName);
-        DevopsClusterConfig config = BeanCommon.getBean(DevopsClusterConfig.class);
-        if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
-            if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
-                URL u = URLUtils.url(downloadUrl);
-                downloadUrl = StringUtils.replaceOnce(downloadUrl, u.getHost(), config.getPublicNetProxyIp());
-            }
-        }
         return new Result<>(downloadUrl);
     }
 

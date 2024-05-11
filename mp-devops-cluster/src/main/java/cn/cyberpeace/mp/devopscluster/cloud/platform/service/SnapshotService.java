@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
@@ -16,7 +17,6 @@ import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.DeviceAndSnapshotCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.model.SnapshotCreate;
 import cn.cyberpeace.mp.devopscluster.request.SnapshotDeleteRequest;
-import cn.cyberpeace.mp.devopscluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -36,6 +36,7 @@ import java.util.Map;
  */
 @Service
 @Slf4j
+@Deprecated(since = "30s的云平台获取snapshot是虚机和docker分开的")
 public class SnapshotService extends BaseCpService {
 
     private static final String SNAPSHOT = "/snapshot";
@@ -59,7 +60,7 @@ public class SnapshotService extends BaseCpService {
     public CloudPlatformPageResult<Snapshot> list(String deviceUuid){
         CloudPlatformItemsPageResult pageResult =  super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + SNAPSHOT + "?device_uuid=" + deviceUuid, CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
-        List<Snapshot> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),Snapshot.class);
+        List<Snapshot> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getData().getItems()),Snapshot.class);
         CloudPlatformPageResult<Snapshot> model = new CloudPlatformPageResult<>();
         model.setList(list);
         return model;
@@ -79,7 +80,7 @@ public class SnapshotService extends BaseCpService {
      * 创建
      */
     public Snapshot create(SnapshotCreate snapshotCreate){
-        return super.sendPost(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + SNAPSHOT, JsonUtils.toUnderlineJSONString(snapshotCreate), Snapshot.class);
+        return super.sendPost(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + SNAPSHOT, JsonUtils.snakeStringify(snapshotCreate), Snapshot.class);
     }
 
     /**

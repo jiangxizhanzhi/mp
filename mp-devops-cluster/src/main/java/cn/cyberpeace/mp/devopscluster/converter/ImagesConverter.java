@@ -41,7 +41,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -366,9 +365,7 @@ public class ImagesConverter implements BaseConverter{
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         if(ImageTypeEnum.VM.toValue().equals(request.getImageType())) {
-            VmActionCloudPlatformModel model = new VmActionCloudPlatformModel();
-            model.setReboot(new VmActionCloudPlatformModel.Reboot("HARD"));
-            vmService.action(model,request.getInstanceId());
+            vmService.action("reboot", request.getInstanceId());
         }
         else if(ImageTypeEnum.CONTAINER.toValue().equals(request.getImageType())) {
             ContainerActionCloudPlatformModel model = new ContainerActionCloudPlatformModel();
@@ -377,7 +374,6 @@ public class ImagesConverter implements BaseConverter{
             containerService.action(model, request.getInstanceId());
         } else if (ImageTypeEnum.DYNAMIPS.toValue().equals(request.getImageType())) {
             throw new MpRuntimeException(CloudErrorCode.UN_SUPPORT_OPERATE);
-//            dynamipsService.reboot(request.getInstanceId());
         }
     }
 
@@ -427,8 +423,7 @@ public class ImagesConverter implements BaseConverter{
      * @param ids
      */
     public List<Device> findByIds(List<Integer> ids){
-        CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
-        return model.getList();
+        return deviceService.findByIds(ids);
     }
 
     /**
@@ -448,8 +443,7 @@ public class ImagesConverter implements BaseConverter{
         }
         Integer result = NumberUtils.INTEGER_ZERO;
         if (CollectionUtils.isNotEmpty(notExistedList)) {
-            CloudPlatformPageResult<Device> model = deviceService.findByIds(notExistedList);
-            List<Device> deviceList = model.getList();
+            List<Device> deviceList = deviceService.findByIds(notExistedList);
             if (CollectionUtils.isNotEmpty(deviceList)) {
                 for (Device device : deviceList) {
                     device.setIsHide(Objects.nonNull(isHide) ? isHide : Boolean.FALSE);
@@ -458,8 +452,7 @@ public class ImagesConverter implements BaseConverter{
             }
         }
         if (CollectionUtils.isNotEmpty(existedList)){
-            CloudPlatformPageResult<Device> model = deviceService.findByIds(existedList);
-            List<Device> deviceList = model.getList();
+            List<Device> deviceList = deviceService.findByIds(existedList);
             if (CollectionUtils.isNotEmpty(deviceList)) {
                 for (Device device : deviceList) {
                     devopsTargetService.updateById(device);

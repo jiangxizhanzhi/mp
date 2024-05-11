@@ -41,8 +41,8 @@ public class TypeConverter {
      * @return
      */
     public TypeAllConvertModel findL1AndL2AndL3Type() {
-        CloudPlatformPageResult<TypeTreeItemModel> l1AndL2AndL3Type = typeService.findL1AndL2AndL3Type(Boolean.FALSE);
-        return convertTypeTreeItemModel(l1AndL2AndL3Type);
+        List<TypeTreeItemModel> l1AndL2AndL3Types = typeService.findL1AndL2AndL3Type(Boolean.FALSE);
+        return convertTypeTreeItemModel(l1AndL2AndL3Types);
     }
 
     /**
@@ -50,8 +50,8 @@ public class TypeConverter {
      * @return
      */
     public TypeAllConvertModel findL1AndL2AndL3Type(Boolean isAll) {
-        CloudPlatformPageResult<TypeTreeItemModel> l1AndL2AndL3Type = typeService.findL1AndL2AndL3Type(isAll);
-        return convertTypeTreeItemModel(l1AndL2AndL3Type);
+        List<TypeTreeItemModel> l1AndL2AndL3Types = typeService.findL1AndL2AndL3Type(isAll);
+        return convertTypeTreeItemModel(l1AndL2AndL3Types);
     }
 
     /**
@@ -59,9 +59,9 @@ public class TypeConverter {
      * @return
      */
     public ListResult<TargetType> findL1AndL2Type() {
-        CloudPlatformPageResult<TargetType> l1AndL2Type = typeService.findL1AndL2Type();
+        List<TargetType> l1AndL2Types = typeService.findL1AndL2Type();
 
-        List<TargetType> targetTypes = Optional.ofNullable(l1AndL2Type).map(CloudPlatformPageResult::getList).orElse(Collections.emptyList());
+        List<TargetType> targetTypes = Optional.ofNullable(l1AndL2Types).orElse(Collections.emptyList());
         // task-view-12214 底层增加了id为6的工控设备, 但是目前基线版本，前台不需要展示。
         if (CollectionUtils.isNotEmpty(targetTypes)) {
             List<TargetType> list = new ArrayList<>();
@@ -297,10 +297,10 @@ public class TypeConverter {
 
     /**
      * 转换Type
-     * @param l1AndL2AndL3Type
+     * @param l1AndL2AndL3Types
      * @return
      */
-    private TypeAllConvertModel convertTypeTreeItemModel(CloudPlatformPageResult<TypeTreeItemModel> l1AndL2AndL3Type){
+    private TypeAllConvertModel convertTypeTreeItemModel(List<TypeTreeItemModel> l1AndL2AndL3Types){
         boolean industriaControl = false;
         SysConfigModel model = sysConfigService.getByKeyName("system_type");
         if (Objects.nonNull(model)) {
@@ -314,7 +314,7 @@ public class TypeConverter {
         List<TypeConvertModel> firstTypeList = new ArrayList<>();
         List<TypeConvertModel> secondTypeList = new ArrayList<>();
         List<TypeConvertModel> thirdTypeList = new ArrayList<>();
-        for (TypeTreeItemModel item : l1AndL2AndL3Type.getList()){
+        for (TypeTreeItemModel item : l1AndL2AndL3Types){
             // 非工控类型，过滤工控设备
             if (!industriaControl && item.getL1Id() == 6) {
                 continue;

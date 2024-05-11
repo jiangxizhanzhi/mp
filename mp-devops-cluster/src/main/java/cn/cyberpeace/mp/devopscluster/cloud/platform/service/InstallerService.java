@@ -24,6 +24,7 @@ import java.util.Map;
  */
 @Service
 @Slf4j
+@Deprecated()
 public class InstallerService extends BaseCpService {
 
     private static final String INSTALLER = "/installer";
@@ -42,7 +43,7 @@ public class InstallerService extends BaseCpService {
     public CloudPlatformPageResult<Installer> page(String getParams){
         CloudPlatformItemsPageResult pageResult = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + INSTALLER + LISTS + getParams, CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
-        List<Installer> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),Installer.class);
+        List<Installer> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getData().getItems()),Installer.class);
         CloudPlatformPageResult<Installer> model = new CloudPlatformPageResult<>();
         model.setList(list);
         model.setTotal(pageResult.getTotal());
@@ -88,4 +89,15 @@ public class InstallerService extends BaseCpService {
         super.checkResult(result);
         return result;
     }
+
+
+    public static final String GET_VM_SNAPSHOT_LIST = "/cloud/v1/vm/{vm_id}/snapshot";
+    public static final String VM_ACTION_URL = "/cloud/v1/vm/{vm_id}/{action}";
+
+    public static final String CONTAINER_ACTION_URL = "/cloud/v1/container/{container_id}/{action}";
+    public static final String GET_CONTAINER_SNAPSHOT_LIST = "/cloud/v1/container/{container_id}/snapshot";
+
+    public static final String DEVICE_CONNECTION_URL = "/cloud/v1/device/connection";
+
+    public static final String DEVICE_ROLE_OPS_URL = "/cloud/v1/device/role_by_ops";
 }

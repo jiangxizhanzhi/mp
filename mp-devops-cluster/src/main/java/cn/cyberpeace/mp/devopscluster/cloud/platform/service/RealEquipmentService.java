@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.EntityUsb;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.SnmpParams;
@@ -15,7 +16,6 @@ import cn.cyberpeace.mp.devopscluster.model.SnmpCloudPlatform;
 import cn.cyberpeace.mp.devopscluster.model.SnmpInterfaceResourceCloudPlatform;
 import cn.cyberpeace.mp.devopscluster.model.common.Hypervisor;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
-import cn.cyberpeace.mp.devopscluster.utils.JsonUtils;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.devopscluster.utils.URLUtils;
 import com.alibaba.fastjson.JSONObject;
@@ -57,7 +57,7 @@ public class RealEquipmentService extends BaseCpService {
     public CloudPlatformPageResult<Device> page(String getParams){
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/lists" + getParams, CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
-        List<Device> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),Device.class);
+        List<Device> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getData().getItems()),Device.class);
         POLogoUtils.changeLogoPathToUrl(list);
         CloudPlatformPageResult<Device> model = new CloudPlatformPageResult<>();
         model.setList(list);
@@ -71,7 +71,7 @@ public class RealEquipmentService extends BaseCpService {
      * @return
      */
     public Device add(Device device){
-        Device result = super.sendPost(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/lists", JsonUtils.toUnderlineJSONString(device),Device.class);
+        Device result = super.sendPost(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/lists", JsonUtils.snakeStringify(device),Device.class);
         super.checkResult(result);
         return result;
     }
@@ -83,7 +83,7 @@ public class RealEquipmentService extends BaseCpService {
      * @return
      */
     public Device update(String uuid,Device device){
-        Device result = super.sendPut(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/" + uuid,JsonUtils.toUnderlineJSONString(device),Device.class);
+        Device result = super.sendPut(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/" + uuid,JsonUtils.snakeStringify(device),Device.class);
         super.checkResult(result);
         return result;
     }
@@ -95,7 +95,7 @@ public class RealEquipmentService extends BaseCpService {
      */
     public SnmpInterfaceResourceCloudPlatform interfacesResource(SnmpParams snmp){
         snmp.setDataType("interfaces");
-        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + SNMP, JsonUtils.toUnderlineJSONString(snmp), SnmpInterfaceResourceCloudPlatform.class);
+        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + SNMP, JsonUtils.snakeStringify(snmp), SnmpInterfaceResourceCloudPlatform.class);
     }
 
 
@@ -106,7 +106,7 @@ public class RealEquipmentService extends BaseCpService {
      */
     public SnmpCloudPlatform snmpForCpu(SnmpParams snmp){
         snmp.setDataType("cpu");
-        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + SNMP, JsonUtils.toUnderlineJSONString(snmp), SnmpCloudPlatform.class);
+        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + SNMP, JsonUtils.snakeStringify(snmp), SnmpCloudPlatform.class);
     }
 
     /**
@@ -116,7 +116,7 @@ public class RealEquipmentService extends BaseCpService {
      */
     public SnmpCloudPlatform snmpForMem(SnmpParams snmp){
         snmp.setDataType("mem");
-        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + SNMP, JsonUtils.toUnderlineJSONString(snmp), SnmpCloudPlatform.class);
+        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + SNMP, JsonUtils.snakeStringify(snmp), SnmpCloudPlatform.class);
     }
 
     /**
@@ -126,7 +126,7 @@ public class RealEquipmentService extends BaseCpService {
      */
     public SnmpCloudPlatform snmpForDisk(SnmpParams snmp){
         snmp.setDataType("disk");
-        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + SNMP, JsonUtils.toUnderlineJSONString(snmp), SnmpCloudPlatform.class);
+        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + SNMP, JsonUtils.snakeStringify(snmp), SnmpCloudPlatform.class);
     }
 
     /**
@@ -137,7 +137,7 @@ public class RealEquipmentService extends BaseCpService {
     public CloudPlatformPageResult<RealEquipmentByParams> findBySwitchName(String switchName){
         CloudPlatformItemsPageResult pageResult =  super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/switch_map?switch_name=" + switchName,CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
-        List<RealEquipmentByParams> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),RealEquipmentByParams.class);
+        List<RealEquipmentByParams> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getData().getItems()),RealEquipmentByParams.class);
         POLogoUtils.changeLogoPathToUrl(list);
         CloudPlatformPageResult<RealEquipmentByParams> model = new CloudPlatformPageResult<>();
         model.setList(list);
@@ -152,7 +152,7 @@ public class RealEquipmentService extends BaseCpService {
     public CloudPlatformPageResult<RealEquipmentByParams> findBySerialPort(String serialPort){
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/ccm_map?ccm_server_name=" + serialPort,CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
-        List<RealEquipmentByParams> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),RealEquipmentByParams.class);
+        List<RealEquipmentByParams> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getData().getItems()),RealEquipmentByParams.class);
         POLogoUtils.changeLogoPathToUrl(list);
         CloudPlatformPageResult<RealEquipmentByParams> model = new CloudPlatformPageResult<>();
         model.setList(list);
@@ -167,7 +167,7 @@ public class RealEquipmentService extends BaseCpService {
     public CloudPlatformPageResult<TargetConnection> connection(String deviceUuid){
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/connection?device_uuid=" + deviceUuid,CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
-        List<TargetConnection> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),TargetConnection.class);
+        List<TargetConnection> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getData().getItems()),TargetConnection.class);
         DevopsClusterConfig config = BeanCommon.getBean(DevopsClusterConfig.class);
         if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
             for (TargetConnection l : list) {
@@ -214,9 +214,9 @@ public class RealEquipmentService extends BaseCpService {
         super.checkResult(pageResult);
         List<EntityUsb> responseList = new ArrayList<>();
         Integer count = 0;
-        if (Objects.nonNull(pageResult) && CollectionUtils.isNotEmpty(pageResult.getItems())) {
+        if (Objects.nonNull(pageResult) && CollectionUtils.isNotEmpty(pageResult.getData().getItems())) {
             count = pageResult.getTotal();
-            responseList = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), EntityUsb.class);
+            responseList = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getData().getItems()), EntityUsb.class);
         }
         log.debug("RealEquipmentService.physicalUsbListByHost end.");
         return new ListObjServiceResult(new ListObjResult<>(responseList, count)).asResult();

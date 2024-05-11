@@ -55,6 +55,7 @@ import java.util.Set;
  */
 @Service
 @Slf4j
+@Deprecated
 public class ScreenrecordService extends BaseCpService {
 
     public ScreenrecordService(DevopsClusterConfig devopsClusterConfig) {

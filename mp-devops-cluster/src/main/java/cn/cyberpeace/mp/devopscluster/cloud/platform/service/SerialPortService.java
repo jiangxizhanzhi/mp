@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
+@Deprecated
 public class SerialPortService extends BaseCpService {
 
     public SerialPortService(DevopsClusterConfig devopsClusterConfig) {

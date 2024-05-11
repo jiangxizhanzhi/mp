@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.VirtualUsb;
@@ -19,7 +20,6 @@ import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devopscluster.request.VirtualUsbDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.queryparam.VirtualUsbQueryParams;
 import cn.cyberpeace.mp.devopscluster.utils.FileUtils;
-import cn.cyberpeace.mp.devopscluster.utils.JsonUtils;
 import cn.cyberpeace.mp.devopscluster.vo.VirtualUsbVO;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant.CPCLOUD_DEVICE;
 import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
@@ -92,9 +91,9 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         super.checkResult(pageResult);
         List<VirtualUsb> responseList = new ArrayList<>();
         Integer count = 0;
-        if (Objects.nonNull(pageResult) && CollectionUtils.isNotEmpty(pageResult.getItems())) {
+        if (Objects.nonNull(pageResult) && CollectionUtils.isNotEmpty(pageResult.getData().getItems())) {
             count = pageResult.getTotal();
-            responseList = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), VirtualUsb.class);
+            responseList = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getData().getItems()), VirtualUsb.class);
         }
         log.debug("VirtualUsbServiceImpl.virtualUsbPage end. responseList:{}", responseList);
         return new ListObjServiceResult(new ListObjResult<>(responseList, count)).asResult();
@@ -133,7 +132,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         }
         VirtualUsb virtualUsb = new VirtualUsb();
         BeanUtils.copyProperties(virtualUsbVO, virtualUsb);
-        BaseCloudPlatformResult result = super.sendPost(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB, JsonUtils.toUnderlineJSONString(virtualUsb), BaseCloudPlatformResult.class);
+        BaseCloudPlatformResult result = super.sendPost(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB, JsonUtils.snakeStringify(virtualUsb), BaseCloudPlatformResult.class);
         super.checkResult(result);
         log.debug("VirtualUsbServiceImpl.add end.");
     }
@@ -147,7 +146,7 @@ public class VirtualUsbServiceImpl extends BaseCpService implements VirtualUsbSe
         log.debug("VirtualUsbServiceImpl.update begin. virtualUsbVO:{}", virtualUsbVO);
         VirtualUsb virtualUsb = new VirtualUsb();
         BeanUtils.copyProperties(virtualUsbVO, virtualUsb);
-        BaseCloudPlatformResult result = super.sendPut(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + "/" + virtualUsbVO.getUuid(), JsonUtils.toUnderlineJSONString(virtualUsb), BaseCloudPlatformResult.class);
+        BaseCloudPlatformResult result = super.sendPut(CPCLOUD_DEVICE + URL_VERSION + VIRTUAL_USB + "/" + virtualUsbVO.getUuid(), JsonUtils.snakeStringify(virtualUsb), BaseCloudPlatformResult.class);
         super.checkResult(result);
         log.debug("VirtualUsbServiceImpl.update end.");
     }

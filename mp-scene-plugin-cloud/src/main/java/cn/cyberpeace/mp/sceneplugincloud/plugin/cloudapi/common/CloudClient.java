@@ -34,7 +34,7 @@ public abstract class CloudClient {
         if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getCloudHeavyConcurrentDelayEnable())) {
             synchronized (syncObj) {
                 try {
-                    Thread.sleep(CloudSingleton.cloudAppConfig.getCloudHeavyConcurrentDelay());
+                    syncObj.wait(CloudSingleton.cloudAppConfig.getCloudHeavyConcurrentDelay());
                 } catch (InterruptedException e) {
                     log.error("Cloud heavy concurrent wait interrupted: ", e);
                 }

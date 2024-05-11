@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -23,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 初始化注册MP信息到云平台
@@ -32,6 +30,11 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class InitRegisterService extends BaseCpService {
+
+    private static final String DEVICE_REGISTER = "/cloud/v1/device/register_mp";
+
+    private static final String DEVICE_LIST_ALL = "/cloud/v1/device/lists?limit=9999&is_internal=false";
+
 
     public InitRegisterService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
@@ -51,7 +54,7 @@ public class InitRegisterService extends BaseCpService {
     public BaseCloudPlatformResult register(String url) {
         Map<String, Object> map = new HashMap<>();
         map.put("ip_port", url);
-        BaseCloudPlatformResult pageResult = super.sendPost(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + "/register_mp", JSONObject.toJSONString(map), BaseCloudPlatformResult.class);
+        BaseCloudPlatformResult pageResult = super.sendPost(DEVICE_REGISTER, JSONObject.toJSONString(map), BaseCloudPlatformResult.class);
         super.checkResult(pageResult);
         return pageResult;
     }
@@ -63,16 +66,15 @@ public class InitRegisterService extends BaseCpService {
     public Integer initTarget() {
         CloudPlatformItemsPageResult result = new CloudPlatformItemsPageResult();
         try {
-            result = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION +
-                    "/device/lists?limit=9999&is_internal=false", CloudPlatformItemsPageResult.class);
+            result = super.sendGet(DEVICE_LIST_ALL, CloudPlatformItemsPageResult.class);
         } catch (Exception e) {
             log.error("get init target error: {}", ExceptionUtils.getStackTrace(e));
         }
         Integer res = NumberUtils.INTEGER_ZERO;
-        if (CollectionUtils.isEmpty(result.getItems())) {
+        if (CollectionUtils.isEmpty(result.getData().getItems())) {
             return res;
         }
-        List<Device> deviceList = JSON.parseArray(JSON.toJSONString(result.getItems()), Device.class);
+        List<Device> deviceList = JSON.parseArray(JSON.toJSONString(result.getData().getItems()), Device.class);
         List<String> uuids = new ArrayList<>();
         for (Device device2 : deviceList) {
             String deviceUuid = device2.getUuid();

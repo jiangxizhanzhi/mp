@@ -13,7 +13,6 @@ import cn.cyberpeace.mp.devopscluster.converter.bo.DeviceAsyncBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.enums.ImageTypeEnum;
-import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
@@ -27,8 +26,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 靶标
@@ -92,21 +93,21 @@ public class TargetConverter{
             sceneConvertModel.setList(Lists.newArrayList());
             return sceneConvertModel;
         }
-        CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
+        List<Device> deviceList = deviceService.findByIds(ids);
 
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
+        if (CollectionUtils.isEmpty(deviceList)){
             sceneConvertModel.setList(Lists.newArrayList());
             return sceneConvertModel;
         }
-        for (Device d : model.getList()) {
+        for (Device d : deviceList) {
             if (ImageTypeEnum.CONTAINER.toValue().equals(d.getImageType()) && supportExports.containsKey(d.getUuid())) {
                 if (d.getExtDocker() != null) {
                     d.getExtDocker().setInitSupport(supportExports.get(d.getUuid()).getInitSupport());
                 }
             }
         }
-        POLogoUtils.changeLogoPathToUrl(model.getList());
-        sceneConvertModel.setList(model.getList());
+        POLogoUtils.changeLogoPathToUrl(deviceList);
+        sceneConvertModel.setList(deviceList);
         return sceneConvertModel;
     }
 
@@ -130,13 +131,12 @@ public class TargetConverter{
      * @return
      */
     public List<Device> getCommonTargets(String name) {
-        CloudPlatformPageResult<Device> model = null;
+        List<Device> deviceList = new ArrayList<>();
         try {
-            model = deviceService.page("?limit=9999&is_internal=true&name=" + URLEncoder.encode(name, "utf-8"));
+            deviceList = deviceService.page("?limit=9999&is_internal=true&name=" + URLEncoder.encode(name, "utf-8"));
         } catch (UnsupportedEncodingException e) {
             throw new MpRuntimeException("encode failed");
         }
-        List<Device> deviceList = model.getList();
         POLogoUtils.changeLogoPathToUrl(deviceList);
         return deviceList;
     }
@@ -340,8 +340,7 @@ public class TargetConverter{
      * @return
      */
     public List<Device> multiAsync(Integer offset,Integer limit){
-        CloudPlatformPageResult<Device> model = deviceService.page("?offset=" + offset + "&limit=" + limit);
-        return model.getList();
+        return deviceService.page("?offset=" + offset + "&limit=" + limit);
     }
 
     /**

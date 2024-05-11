@@ -18,6 +18,8 @@ import java.util.List;
 @Slf4j
 public class ISOService extends BaseCpService {
 
+    private static final String UPLOAD_ISO_FILE = "/cloud/v1/device/upload?type=iso";
+
     public ISOService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }
@@ -30,8 +32,7 @@ public class ISOService extends BaseCpService {
     public BaseCloudPlatformResult upload(List<File> files) {
         BaseCloudPlatformResult result = null;
         try {
-            result = super.sendFormDataPost(BaseCloudPlatformConstant.CPCLOUD_DEVICE +
-                    BaseCloudPlatformConstant.URL_VERSION + "/iso", files, BaseCloudPlatformResult.class);
+            result = super.sendFormDataPost(UPLOAD_ISO_FILE, files, BaseCloudPlatformResult.class);
         } catch (IOException e) {
             log.error("upload file error", e);
         } finally {

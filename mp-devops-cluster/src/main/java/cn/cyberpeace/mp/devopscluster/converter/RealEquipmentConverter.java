@@ -34,13 +34,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
 
 /**
  * 实装管理
@@ -111,15 +106,15 @@ public class RealEquipmentConverter implements BaseConverter{
             convertModel.setList(Lists.newArrayList());
             return convertModel;
         }
-        CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
+        List<Device> deviceList = deviceService.findByIds(ids);
 
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
+        if (CollectionUtils.isEmpty(deviceList)){
             convertModel.setList(Lists.newArrayList());
             return convertModel;
         }
-        POLogoUtils.changeLogoPathToUrl(model.getList());
+        POLogoUtils.changeLogoPathToUrl(deviceList);
         List<RealEquipmentBO> modelList = new ArrayList<>();
-        for (Device device : model.getList()) {
+        for (Device device : deviceList) {
             RealEquipmentBO realEquipmentBO = getRealEquipmentBO(referStateMap, useStateMap, device);
             modelList.add(realEquipmentBO);
         }
@@ -288,9 +283,9 @@ public class RealEquipmentConverter implements BaseConverter{
                         ids.add(parseInt);
                     }
                     if (CollectionUtils.isNotEmpty(ids)) {
-                        CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
-                        if (model != null && CollectionUtils.isNotEmpty(model.getList())) {
-                            devopsTargetService.updateInPosition(model.getList());
+                        List<Device> deviceList = deviceService.findByIds(ids);
+                        if (CollectionUtils.isNotEmpty(deviceList)) {
+                            devopsTargetService.updateInPosition(deviceList);
                         }
                     }
                     IN_POSITION_UPDATE_TIME = System.currentTimeMillis();

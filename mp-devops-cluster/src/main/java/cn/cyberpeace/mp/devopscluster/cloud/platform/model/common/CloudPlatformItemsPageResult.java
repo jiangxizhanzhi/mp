@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,7 +15,26 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CloudPlatformItemsPageResult extends BaseCloudPlatformResult {
+public class CloudPlatformItemsPageResult<T> extends BaseCloudPlatformResult {
 
-    private List<?> items = new ArrayList<>();
+    private CloudPlatformItemData<T> data;
+
+    private List<?> items;
+
+    private Integer total;
+
+
+
+
+
+
+
+    @Data
+    public static class CloudPlatformItemData<T> {
+        private Integer total;
+        private List<T> items;
+
+        private List<T> list;
+
+    }
 }
