@@ -2,17 +2,14 @@ package cn.cyberpeace.mp.sceneplugincollection.controller;
 
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.sceneplugincollection.bo.ImportFileBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.InfoCollectionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -32,18 +29,16 @@ public class InfoCollectionController {
 
     /**
      * 文件导入 (Json,Xml,Xlsx)
-     *
-     * @param file
-     * @return
      */
     @ApiOperation("文件导入 (Json,Xml,Xlsx)")
     @PostMapping("/import")
-    public ServiceResult<String> importFile(@RequestBody MultipartFile file) {
+    public ServiceResult<Boolean> importFile(@RequestBody ImportFileBO bo) {
         // 校验文件
-        if (file.isEmpty() || StringUtils.isEmpty(file.getOriginalFilename())){
-            return ResultCommon.fail("文件不能为空");
-        }
-        return infoCollectionService.importFile(file);
+//        if (file.isEmpty() || StringUtils.isEmpty(file.getOriginalFilename())){
+//            return ResultCommon.fail("文件不能为空");
+//        }
+//        infoCollectionService.importFile(file);
+        return ResultCommon.success(true);
     }
 
     /**
@@ -51,9 +46,13 @@ public class InfoCollectionController {
      * @param response
      */
     @ApiOperation("文件导出 (Json,Xml,Xlsx)")
-    @PostMapping("/export")
-    public void exportFile(HttpServletResponse response, Object obj, String fileName) {
-        infoCollectionService.exportFile(response, obj, fileName);
+    @GetMapping("/export/")
+    public ServiceResult<Boolean> exportFile(HttpServletResponse response,
+                                             @ApiParam(value = "导出格式(json、xml、xlsx)", required = true) String type,
+                                             @ApiParam(value = "场景id", required = true) String sceneId,
+                                             @ApiParam(value = "节点id") String nodeId) {
+        infoCollectionService.exportFile(response, type);
+        return ResultCommon.success(true);
     }
 
 }
