@@ -3,8 +3,6 @@ package cn.cyberpeace.mp.devopscluster.converter;
 import cn.cyberpeace.mp.auth.service.MicrosoftAzureLoginService;
 import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
-import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
-import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.CloudDevice;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.enums.CommonTargetNameEnum;
@@ -80,9 +78,12 @@ public class MicrosoftAzureConverter implements BaseConverter {
         for (int i = 0; i < sqls.size(); i++) {
             if (sqls.get(i).getSupplement() != null && !sqls.get(i).getSupplement().equals("") && sqls.get(i).getSupplement().contains("**")) {
                 for (int j = 0; j < codes.size(); j++) {
-                    if (codes.get(j).getCode() != null && sqls.get(i).getCode() != null &&
-                            codes.get(j).getCode().equals(sqls.get(i).getCode())) {
-                        sqls.get(i).setSupplement("and "+tableName+"."+sqls.get(i).getSupplement().replace("**", codes.get(j).getValue()));
+                    if (codes.get(j).getCode() != null && sqls.get(i).getCode() != null && codes.get(j).getCode().equals(sqls.get(i).getCode())) {
+                        if(codes.get(j).getValue() != null && !codes.get(j).getValue().equals("")){
+                            sqls.get(i).setSupplement("and "+tableName+"."+sqls.get(i).getSupplement().replace("**", codes.get(j).getValue()));
+                        }else{
+                            sqls.get(i).setSupplement("");
+                        }
                     }
                 }
             }else if(sqls.get(i).getSupplement() != null && !sqls.get(i).getSupplement().equals("")){
@@ -216,7 +217,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         for (int i = 0; i < dockerImages.size(); i++) {
             //主表元素
             DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
-            deviceCloudTarget.setName(((JSONObject)dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
+            deviceCloudTarget.setName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
             String id = String.valueOf(UUID.randomUUID());
             deviceCloudTarget.setId(id);
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
@@ -230,9 +231,9 @@ public class MicrosoftAzureConverter implements BaseConverter {
             //容器副表元素
             DeviceCloudTargetContainer deviceCloudTargetContainer = new DeviceCloudTargetContainer();
             deviceCloudTargetContainer.setLinkId(id);
-            deviceCloudTargetContainer.setName(((JSONObject)dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
+            deviceCloudTargetContainer.setName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
             deviceCloudTargetContainer.setSourceType(2);
-            deviceCloudTargetContainer.setUploadTargetName(((JSONObject)dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
+            deviceCloudTargetContainer.setUploadTargetName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
             deviceCloudTargetContainer.setOperatingSystem("linux");
             deviceCloudTargetContainer.setOperatingSystemStatus("专业化");
             deviceCloudTargetContainer.setIsPublic(2);
@@ -252,27 +253,29 @@ public class MicrosoftAzureConverter implements BaseConverter {
         for (int i = 0; i < images.size(); i++) {
             //主表元素
             DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
-            deviceCloudTarget.setName(((JSONObject)images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "");
+            deviceCloudTarget.setName(((JSONObject) images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "");
             String id = String.valueOf(UUID.randomUUID());
             deviceCloudTarget.setId(id);
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
             deviceCloudTarget.setCloudServiceType(2);
-            deviceCloudTarget.setOperatingSystem(((JSONObject)images.get(i)).get("operatingSystem") != null ? ((JSONObject) images.get(i)).get("operatingSystem").toString() : "");
+            deviceCloudTarget.setOperatingSystem(((JSONObject) images.get(i)).get("operatingSystem") != null ? ((JSONObject) images.get(i)).get("operatingSystem").toString() : "");
             deviceCloudTarget.setOperatingSystemStatus("专业化");
             deviceCloudTarget.setGeneration("第一代");
-            deviceCloudTarget.setVersion(((JSONObject)images.get(i)).get("imageVersion") != null ? ((JSONObject) images.get(i)).get("imageVersion").toString() : "");
+            deviceCloudTarget.setVersion(((JSONObject) images.get(i)).get("imageVersion") != null ? ((JSONObject) images.get(i)).get("imageVersion").toString() : "");
             list.add(deviceCloudTarget);
 
             //计算副表元素
             DeviceCloudTargetCalculate deviceCloudTargetCalculate = new DeviceCloudTargetCalculate();
             deviceCloudTargetCalculate.setLinkId(id);
-            deviceCloudTargetCalculate.setName(((JSONObject)images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "");
+            deviceCloudTargetCalculate.setName(((JSONObject) images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "");
             deviceCloudTargetCalculate.setSourceType(1);
-            deviceCloudTargetCalculate.setPublisher(((JSONObject)images.get(i)).get("PublisherName") != null ? ((JSONObject) images.get(i)).get("PublisherName").toString() : "");
-            deviceCloudTargetCalculate.setOffer(((JSONObject)images.get(i)).get("offerName") != null ? ((JSONObject) images.get(i)).get("offerName").toString() : "");
-            deviceCloudTargetCalculate.setSku(((JSONObject)images.get(i)).get("skuName") != null ? ((JSONObject) images.get(i)).get("skuName").toString() : "");
-            deviceCloudTargetCalculate.setOperatingSystem(((JSONObject)images.get(i)).get("operatingSystem") != null ? ((JSONObject) images.get(i)).get("operatingSystem").toString() : "");
+            deviceCloudTargetCalculate.setPublisher(((JSONObject) images.get(i)).get("PublisherName") != null ? ((JSONObject) images.get(i)).get("PublisherName").toString() : "");
+            deviceCloudTargetCalculate.setOffer(((JSONObject) images.get(i)).get("offerName") != null ? ((JSONObject) images.get(i)).get("offerName").toString() : "");
+            deviceCloudTargetCalculate.setSku(((JSONObject) images.get(i)).get("skuName") != null ? ((JSONObject) images.get(i)).get("skuName").toString() : "");
+            deviceCloudTargetCalculate.setOperatingSystem(((JSONObject) images.get(i)).get("operatingSystem") != null ? ((JSONObject) images.get(i)).get("operatingSystem").toString() : "");
             deviceCloudTargetCalculate.setOperatingSystemStatus("专业化");
+            deviceCloudTargetCalculate.setCalculateType("paas");
+            deviceCloudTargetCalculate.setSubType("vm");
             deviceCloudTargetCalculate.setIsPublic(2);
             deviceCloudTargetCalculate.setQuickCreateSupport(1);
             deviceCloudTargetCalculate.setIsImport(0);
@@ -281,7 +284,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTargetCalculate.setIsPublic(2);
             deviceCloudTargetCalculate.setLogo("/api/mp/file/710/017/93dde93031be465c3a7bb20381f4cd6e.png");
             deviceCloudTargetCalculate.setGeneration("第一代");
-            deviceCloudTargetCalculate.setVersion(((JSONObject)images.get(i)).get("imageVersion") != null ? ((JSONObject) images.get(i)).get("imageVersion").toString() : "");
+            deviceCloudTargetCalculate.setVersion(((JSONObject) images.get(i)).get("imageVersion") != null ? ((JSONObject) images.get(i)).get("imageVersion").toString() : "");
             calculateList.add(deviceCloudTargetCalculate);
         }
 
@@ -289,28 +292,30 @@ public class MicrosoftAzureConverter implements BaseConverter {
         for (int i = 0; i < localImages.size(); i++) {
             //主表元素
             DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
-            deviceCloudTarget.setName(((JSONObject)localImages.get(i)).get("imageName") != null ? ((JSONObject) localImages.get(i)).get("imageName").toString() : "");
+            deviceCloudTarget.setName(((JSONObject) localImages.get(i)).get("imageName") != null ? ((JSONObject) localImages.get(i)).get("imageName").toString() : "");
             String id = String.valueOf(UUID.randomUUID());
             deviceCloudTarget.setId(id);
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
             deviceCloudTarget.setCloudServiceType(2);
-            deviceCloudTarget.setOperatingSystem(((JSONObject)localImages.get(i)).get("operatingSystem") != null ? ((JSONObject) localImages.get(i)).get("operatingSystem").toString() : "");
+            deviceCloudTarget.setOperatingSystem(((JSONObject) localImages.get(i)).get("operatingSystem") != null ? ((JSONObject) localImages.get(i)).get("operatingSystem").toString() : "");
             deviceCloudTarget.setOperatingSystemStatus("专业化");
             deviceCloudTarget.setGeneration("第一代");
-            deviceCloudTarget.setVersion(((JSONObject)localImages.get(i)).get("imageVersion") != null ? ((JSONObject) localImages.get(i)).get("imageVersion").toString() : "");
+            deviceCloudTarget.setVersion(((JSONObject) localImages.get(i)).get("imageVersion") != null ? ((JSONObject) localImages.get(i)).get("imageVersion").toString() : "");
 
             list.add(deviceCloudTarget);
 
             //计算副表元素
             DeviceCloudTargetCalculate deviceCloudTargetCalculate = new DeviceCloudTargetCalculate();
             deviceCloudTargetCalculate.setLinkId(id);
-            deviceCloudTargetCalculate.setName(((JSONObject)localImages.get(i)).get("imageName") != null ? ((JSONObject) localImages.get(i)).get("imageName").toString() : "");
+            deviceCloudTargetCalculate.setName(((JSONObject) localImages.get(i)).get("imageName") != null ? ((JSONObject) localImages.get(i)).get("imageName").toString() : "");
             deviceCloudTargetCalculate.setSourceType(2);
-            deviceCloudTargetCalculate.setPublisher(((JSONObject)localImages.get(i)).get("PublisherName") != null ? ((JSONObject) localImages.get(i)).get("PublisherName").toString() : "");
-            deviceCloudTargetCalculate.setOffer(((JSONObject)localImages.get(i)).get("offerName") != null ? ((JSONObject) localImages.get(i)).get("offerName").toString() : "");
-            deviceCloudTargetCalculate.setSku(((JSONObject)localImages.get(i)).get("skuName") != null ? ((JSONObject) localImages.get(i)).get("skuName").toString() : "");
-            deviceCloudTargetCalculate.setOperatingSystem(((JSONObject)localImages.get(i)).get("operatingSystem") != null ? ((JSONObject) localImages.get(i)).get("operatingSystem").toString() : "");
+            deviceCloudTargetCalculate.setPublisher(((JSONObject) localImages.get(i)).get("PublisherName") != null ? ((JSONObject) localImages.get(i)).get("PublisherName").toString() : "");
+            deviceCloudTargetCalculate.setOffer(((JSONObject) localImages.get(i)).get("offerName") != null ? ((JSONObject) localImages.get(i)).get("offerName").toString() : "");
+            deviceCloudTargetCalculate.setSku(((JSONObject) localImages.get(i)).get("skuName") != null ? ((JSONObject) localImages.get(i)).get("skuName").toString() : "");
+            deviceCloudTargetCalculate.setOperatingSystem(((JSONObject) localImages.get(i)).get("operatingSystem") != null ? ((JSONObject) localImages.get(i)).get("operatingSystem").toString() : "");
             deviceCloudTargetCalculate.setOperatingSystemStatus("专业化");
+            deviceCloudTargetCalculate.setCalculateType("paas");
+            deviceCloudTargetCalculate.setSubType("vm");
             deviceCloudTargetCalculate.setIsPublic(2);
             deviceCloudTargetCalculate.setQuickCreateSupport(1);
             deviceCloudTargetCalculate.setIsImport(0);
@@ -319,43 +324,52 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTargetCalculate.setIsPublic(2);
             deviceCloudTargetCalculate.setLogo("/api/mp/file/710/017/93dde93031be465c3a7bb20381f4cd6e.png");
             deviceCloudTargetCalculate.setGeneration("第一代");
-            deviceCloudTargetCalculate.setVersion(((JSONObject)localImages.get(i)).get("imageVersion") != null ? ((JSONObject) localImages.get(i)).get("imageVersion").toString() : "");
+            deviceCloudTargetCalculate.setVersion(((JSONObject) localImages.get(i)).get("imageVersion") != null ? ((JSONObject) localImages.get(i)).get("imageVersion").toString() : "");
             calculateList.add(deviceCloudTargetCalculate);
         }
-
-        //拿到所有主表数据
-        List<DeviceCloudTargetPO> cloudTargetList = microsoftAzureMapper.getCloudTargetList(null);
-        List<DeviceCloudTargetCalculate> allCalculateList = microsoftAzureMapper.getCloudTargetCalculateList(null);
-        List<DeviceCloudTargetContainer> allContainerList = microsoftAzureMapper.getCloudTargetContainerList(null);
-
-        //保存同步数据
-        Boolean batchInsertCloudTarget = microsoftAzureMapper.batchInsertCloudTarget(list);
-        Boolean batchInsertCloudTargetCalculate = microsoftAzureMapper.batchInsertCloudTargetCalculate(calculateList);
-        Boolean batchInsertCloudTargetContainer = microsoftAzureMapper.batchInsertCloudTargetContainer(containerList);
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("result", result);
-        jsonObject.put("data", list);
+//        jsonObject.put("result", result);
+//        jsonObject.put("data", list);
         jsonObject.put("code", "200");
-        if(batchInsertCloudTarget && batchInsertCloudTargetCalculate && batchInsertCloudTargetContainer) {
-            //删除已经存在的数据
-            Boolean deleteCloudTarget = true;
-            if (cloudTargetList != null && cloudTargetList.size() > 0) {
-                deleteCloudTarget = microsoftAzureMapper.deleteCloudTarget(cloudTargetList);
+        microsoftAzureMapper.deleteCloudTarget(null);
+        microsoftAzureMapper.deleteCloudTargetCalculate(null);
+        microsoftAzureMapper.deleteCloudTargetContainer(null);
+        //保存同步数据
+        Boolean batchInsertCloudTarget = true;
+        if (list != null && list.size() > 0) {
+            //list按照一千数量间隔批量插入数据
+            for (int i = 0; i < list.size(); i += 1000) {
+                List<DeviceCloudTargetPO> subList = list.subList(i, i + 1000 > list.size() ? list.size() : i + 1000);
+                Boolean insertFlag = microsoftAzureMapper.batchInsertCloudTarget(subList);
+                if(!insertFlag){
+                    batchInsertCloudTarget = false;
+                }
             }
-            Boolean deleteCloudTargetCalculate = true;
-            if (allCalculateList != null && allCalculateList.size() > 0) {
-                deleteCloudTargetCalculate = microsoftAzureMapper.deleteCloudTargetCalculate(allCalculateList);
+        }
+        Boolean batchInsertCloudTargetCalculate = true;
+        if (calculateList != null && calculateList.size() > 0) {
+            //list按照一千数量间隔批量插入数据
+            for (int i = 0; i < calculateList.size(); i += 1000) {
+                List<DeviceCloudTargetCalculate> subList = calculateList.subList(i, i + 1000 > calculateList.size() ? calculateList.size() : i + 1000);
+                Boolean insertFlag = microsoftAzureMapper.batchInsertCloudTargetCalculate(subList);
+                if(!insertFlag){
+                    batchInsertCloudTargetCalculate = false;
+                }
             }
-            Boolean deleteCloudTargetContainer = true;
-            if (allContainerList != null && allContainerList.size() > 0) {
-                deleteCloudTargetContainer = microsoftAzureMapper.deleteCloudTargetContainer(allContainerList);
+        }
+        Boolean batchInsertCloudTargetContainer = true;
+        if (containerList != null && containerList.size() > 0) {
+            //list按照一千数量间隔批量插入数据
+            for (int i = 0; i < containerList.size(); i += 1000) {
+                List<DeviceCloudTargetContainer> subList = containerList.subList(i, i + 1000 > containerList.size() ? containerList.size() : i + 1000);
+                Boolean insertFlag = microsoftAzureMapper.batchInsertCloudTargetContainer(subList);
+                if(!insertFlag){
+                    batchInsertCloudTargetContainer = false;
+                }
             }
-            if (!deleteCloudTarget || !deleteCloudTargetCalculate || !deleteCloudTargetContainer) {
-                jsonObject.put("message", "原数据未删除,请重新同步");
-                jsonObject.put("code", "201");
-            }
-        }else{
-            jsonObject.put("message", "同步数据保存失败");
+        }
+        if (!batchInsertCloudTarget || !batchInsertCloudTargetCalculate || !batchInsertCloudTargetContainer) {
+            jsonObject.put("message", "同步数据批量保存有错误插入");
             jsonObject.put("code", "201");
         }
         return jsonObject;
@@ -492,45 +506,49 @@ public class MicrosoftAzureConverter implements BaseConverter {
         int firstTime = 0;
         for (VirtualMachinePublisher publisher : virtualMachinePublishers) {
             //todo 筛选出需要的VM镜像
-            if (publisher.name() != null && publisher.name().equals("Canonical")) {
-                if (firstTime < 1) {
+//            if (publisher.name() != null && publisher.name().equals("Canonical")) {
+                if (firstTime < 100) {
+                    firstTime++;
                     System.out.println("PublisherName: " + publisher.name());
                     // 获取发布者的所有产品(offer)
                     VirtualMachineOffers offers = publisher.offers();
                     PagedIterable<VirtualMachineOffer> list = offers.list();
-                    firstTime++;
                     int secondTime = 0;
                     for (VirtualMachineOffer offer : list) {
-                        if (secondTime < 5) {
+                        if (secondTime < 1) {
                             secondTime++;
                             System.out.println("offerName: " + offer.name());
                             // 获取该产品的所有SKU
                             VirtualMachineSkus skus = offer.skus();
                             PagedIterable<VirtualMachineSku> skuList = skus.list();
+                            int thirdTime = 0;
                             for (VirtualMachineSku sku : skuList) {
-                                System.out.println("skuName: " + sku.name());
-                                // 获取每个SKU的所有版本（image versions）
-                                PagedIterable<VirtualMachineImage> imageList = sku.images().list();
-                                int time = 0;
-                                for (VirtualMachineImage image : imageList) {
-                                    if (time < 1) {
-                                        OperatingSystemTypes operatingSystemTypes = image.osDiskImage().operatingSystem();
-                                        JSONObject third = new JSONObject();
-                                        third.put("imageName", publisher.name());
-                                        third.put("imageVersion", image.version());
-                                        third.put("PublisherName", publisher.name());
-                                        third.put("offerName", offer.name());
-                                        third.put("skuName", sku.name());
-                                        third.put("operatingSystem", operatingSystemTypes);
-                                        result.add(third);
-                                        time++;
+                                if(thirdTime < 1){
+                                    thirdTime++;
+                                    System.out.println("skuName: " + sku.name());
+                                    // 获取每个SKU的所有版本（image versions）
+                                    PagedIterable<VirtualMachineImage> imageList = sku.images().list();
+                                    int time = 0;
+                                    for (VirtualMachineImage image : imageList) {
+                                        if (time < 1) {
+                                            time++;
+                                            OperatingSystemTypes operatingSystemTypes = image.osDiskImage().operatingSystem();
+                                            JSONObject third = new JSONObject();
+                                            third.put("imageName", publisher.name());
+                                            third.put("imageVersion", image.version());
+                                            third.put("PublisherName", publisher.name());
+                                            third.put("offerName", offer.name());
+                                            third.put("skuName", sku.name());
+                                            third.put("operatingSystem", operatingSystemTypes);
+                                            result.add(third);
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
+//            }
         }
         return result;
     }
