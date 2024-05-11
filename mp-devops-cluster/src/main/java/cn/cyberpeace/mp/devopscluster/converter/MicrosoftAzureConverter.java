@@ -74,7 +74,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         return result;
     }
 
-    private JSONObject getReturnData(String cloudServiceType,String tableName,TargerRequestVO request,Integer total){
+    private JSONObject getReturnData(String cloudServiceType,String tableName,TargerRequestVO request){
         List<MpSysCodeMenuVO> codes = request.getCodes();
         List<MpSysCodeMenu> sqls = microsoftAzureMapper.getSqlByCodes(codes);
         for (int i = 0; i < sqls.size(); i++) {
@@ -114,12 +114,12 @@ public class MicrosoftAzureConverter implements BaseConverter {
             case "1":
                 break;
             case "2":
-                JSONObject calculate = getReturnData(request.getCloudServiceType(), "calculate", request, total);
+                JSONObject calculate = getReturnData(request.getCloudServiceType(), "calculate", request);
                 vos = (List<DeviceCloudTargetVO>) calculate.get("data");
                 total = (Integer) calculate.get("total");
                 break;
             case "3":
-                JSONObject container = getReturnData(request.getCloudServiceType(), "container", request, total);
+                JSONObject container = getReturnData(request.getCloudServiceType(), "container", request);
                 vos = (List<DeviceCloudTargetVO>) container.get("data");
                 total = (Integer) container.get("total");
                 break;
