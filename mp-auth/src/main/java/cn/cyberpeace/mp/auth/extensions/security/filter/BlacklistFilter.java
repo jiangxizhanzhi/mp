@@ -7,11 +7,10 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.server.PathContainer;
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -47,12 +46,14 @@ public class BlacklistFilter extends OncePerRequestFilter {
             String method = request.getMethod();
             String uri = request.getRequestURI();
 
-            // 快速失败模式，不使用流过滤
-            for (BlacklistModel.AccessItem item : blacklistModel.getPatterns()) {
-                if (StringUtils.isEmpty(item.getMethod()) || method.equals(item.getMethod())) {
-                    if (item.getPattern().matches(PathContainer.parsePath(uri))) {
-                        denyAccess(response, uri);
-                        return;
+            if (CollectionUtils.isNotEmpty(blacklistModel.getPatterns())) {
+                // 快速失败模式，不使用流过滤
+                for (BlacklistModel.AccessItem item : blacklistModel.getPatterns()) {
+                    if (StringUtils.isEmpty(item.getMethod()) || method.equals(item.getMethod())) {
+                        if (item.getPattern().matches(PathContainer.parsePath(uri))) {
+                            denyAccess(response, uri);
+                            return;
+                        }
                     }
                 }
             }
