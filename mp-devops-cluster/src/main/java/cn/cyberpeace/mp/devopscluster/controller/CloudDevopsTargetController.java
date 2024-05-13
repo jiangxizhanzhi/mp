@@ -100,10 +100,10 @@ public class CloudDevopsTargetController {
      * */
     @ApiOperation(value = "查询节点详情", notes = "")
     @GetMapping("/getDetailsByTarget")
-    public ServiceResult getDetailsByTarget(@RequestParam(value = "pk") String pk,
+    public ServiceResult getDetailsByTarget(@RequestParam(value = "id") String id,
                                             @RequestParam(value = "catagory") Integer catagory,
                                             @RequestParam(value = "cloud_service_type") String cloudServiceType) {
-        return microsoftAzureConverter.getDetailsByTarget(pk,catagory,cloudServiceType);
+        return microsoftAzureConverter.getDetailsByTarget(id,catagory,cloudServiceType);
     }
 
 }
