@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.BlacklistModel;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
@@ -24,6 +26,7 @@ import javax.annotation.Resource;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/blacklist")
+@AuthTarget(TargetEnum.NO_AUTH)
 public class BlacklistController {
     @Resource
     private BlacklistModel blacklistModel;
@@ -45,4 +48,7 @@ public class BlacklistController {
     public ObjServiceResult<Boolean> getBlacklistFlag() {
         return new ObjServiceResult<>(blacklistModel.isEnabled()).asResult();
     }
+
+
+
 }
