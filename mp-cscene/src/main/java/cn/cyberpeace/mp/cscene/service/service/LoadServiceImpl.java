@@ -1,12 +1,10 @@
 package cn.cyberpeace.mp.cscene.service.service;
 
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
-import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
@@ -42,7 +40,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
 
@@ -73,6 +70,10 @@ public class LoadServiceImpl {
         requestData.put("pageSize", pageSize);
         requestData.put("offset", (pageNum - 1) * pageSize);
         List<MpDevopsLoad> list = loadMapper.getLoadList(requestData);
+        //list中每个成员的category赋值2
+        list.forEach(item -> {
+            item.setCategory(2);
+        });
         Integer total = loadMapper.getLoadListNum(requestData);
         JSONObject result = new JSONObject();
         result.put("source", list);
@@ -81,10 +82,10 @@ public class LoadServiceImpl {
     }
 
     //调用ojj服务
-    public List getBindLoopholes(String pk) {
+    public List getBindLoopholes(String id) {
         //todo 服务地址
         String url = "http://10.108.1.10:80/api/vuln/admin/vuln/load_code";
-        url = url + "?load_id=" + pk;
+        url = url + "?load_id=" + id;
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
         String token = JwtCommon.getToken();

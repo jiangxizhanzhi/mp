@@ -33,7 +33,7 @@ import java.util.Map;
 public class LoadController {
 
     @Autowired
-    private LoadServiceImpl LoadService;
+    private LoadServiceImpl loadService;
 
     /*
      * 载荷页面
@@ -55,7 +55,7 @@ public class LoadController {
         requestData.put("toolName", toolName);
         requestData.put("controlType", controlType);
         requestData.put("source", source);
-        JSONObject result = LoadService.getLoadList(requestData);
+        JSONObject result = loadService.getLoadList(requestData);
         return new ListObjServiceResult((List) result.get("source"), (int) result.get("total")).asResult();
     }
 
@@ -68,7 +68,7 @@ public class LoadController {
         JSONObject requestData = new JSONObject();
         requestData.put("pageNum", 1);
         requestData.put("pageSize", 1000);
-        JSONObject result = LoadService.getLoadList(requestData);
+        JSONObject result = loadService.getLoadList(requestData);
         return new ListObjServiceResult((List) result.get("source"), (int) result.get("total")).asResult();
     }
 
@@ -80,7 +80,7 @@ public class LoadController {
     public ServiceResult getToolListByloadPks(@RequestBody(required = false) MpDevopsLoad requestData) {
         JSONObject jsonObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
         if (requestData != null) {
-            List<MpDevopsLoad> getToolListByloadPks = LoadService.getToolListByloadPks(jsonObject);
+            List<MpDevopsLoad> getToolListByloadPks = loadService.getToolListByloadPks(jsonObject);
             return new ServiceResult(getToolListByloadPks, BaseErrorCode.SUCCESS).asResult();
         }
         return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID).asResult();
@@ -94,11 +94,10 @@ public class LoadController {
     public ServiceResult getLoadList(@RequestParam(value = "pk") String pk) {
         JSONObject requestData = new JSONObject();
         requestData.put("pk", pk);
-        JSONObject result = LoadService.getLoadList(requestData);
+        JSONObject result = loadService.getLoadList(requestData);
         if (result != null && result.get("source") != null && ((List) result.get("source")).size() == 1) {
             MpDevopsLoad load = (MpDevopsLoad) ((List) result.get("source")).get(0);
-            //todo 修改id
-            List loopholes = LoadService.getBindLoopholes(load.getPk().toString());
+            List loopholes = loadService.getBindLoopholes(load.getId());
             load.setLoopholes(loopholes);
             return new ServiceResult(load, BaseErrorCode.SUCCESS).asResult();
         } else {
@@ -113,7 +112,7 @@ public class LoadController {
     @PatchMapping("/updateLoadByPk")
     public ServiceResult updateLoadByPk(@RequestBody(required = false) MpDevopsLoad requestData) {
         JSONObject jsonObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
-        Boolean updateLoadByPk = LoadService.updateLoadByPk(jsonObject);
+        Boolean updateLoadByPk = loadService.updateLoadByPk(jsonObject);
         if (updateLoadByPk) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
@@ -128,7 +127,7 @@ public class LoadController {
     @PostMapping("/addLoad")
     public ServiceResult addLoad(@RequestBody(required = false) MpDevopsLoad requestData) {
         JSONObject jsonObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
-        ServiceResult addLoad = LoadService.addLoad(jsonObject);
+        ServiceResult addLoad = loadService.addLoad(jsonObject);
         return addLoad;
     }
 
@@ -139,7 +138,7 @@ public class LoadController {
     @DeleteMapping("/deleteLoadByPk")
     public ServiceResult deleteLoadByPk(@RequestBody(required = false) MpDevopsLoad requestData) {
         JSONObject jsonObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
-        Boolean deleteLoadByPk = LoadService.deleteLoadByPk(jsonObject);
+        Boolean deleteLoadByPk = loadService.deleteLoadByPk(jsonObject);
         if (deleteLoadByPk) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
@@ -153,7 +152,7 @@ public class LoadController {
     @ApiOperation(value = "载荷数据同步", notes = "")
     @GetMapping("/synchronousData")
     public ServiceResult synchronousData() {
-        JSONObject synchronousData = LoadService.synchronousData();
+        JSONObject synchronousData = loadService.synchronousData();
         if (synchronousData != null) {
             return new ServiceResult(synchronousData, BaseErrorCode.SUCCESS, "载荷数据同步成功").asResult();
         } else {
@@ -169,7 +168,7 @@ public class LoadController {
     public ServiceResult getSynchronousDataSource(@RequestParam(value = "pk", required = false) String pk) {
         JSONObject requestData = new JSONObject();
         requestData.put("pk", pk);
-        MpDevopsLoadSource result = LoadService.getSynchronousDataSource(requestData);
+        MpDevopsLoadSource result = loadService.getSynchronousDataSource(requestData);
         return new ServiceResult(result, BaseErrorCode.SUCCESS).asResult();
     }
 
@@ -180,7 +179,7 @@ public class LoadController {
     @PostMapping("/synchronousDataSource")
     public ServiceResult synchronousDataSource(@RequestBody(required = false) MpDevopsLoadSource requestData) {
         JSONObject jsonObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
-        Boolean synchronousDataSource = LoadService.synchronousDataSource(jsonObject);
+        Boolean synchronousDataSource = loadService.synchronousDataSource(jsonObject);
         if (synchronousDataSource) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
@@ -196,7 +195,7 @@ public class LoadController {
     @ApiOperation(value = "根据场景id获取绑定的载荷", notes = "")
     @GetMapping("/getLoadBySceneId")
     public ServiceResult getLoadBySceneId(@RequestParam(value = "scene_id") String sceneId) {
-        List list = LoadService.getLoadBySceneId(sceneId);
+        List list = loadService.getLoadBySceneId(sceneId);
         return new ServiceResult(list, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
@@ -228,7 +227,7 @@ public class LoadController {
         }
         request.put("beginTime", beginTimeLocalDateTime != null ? beginTimeLocalDateTime.toString() : null);
         request.put("overTime", overTimeLocalDateTime != null ? overTimeLocalDateTime.toString() : null);
-        Map<String, Integer> map = LoadService.getLoadExecutionResultStatistics(request);
+        Map<String, Integer> map = loadService.getLoadExecutionResultStatistics(request);
         return new ServiceResult(map, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
@@ -260,7 +259,7 @@ public class LoadController {
         }
         request.put("beginTime", beginTimeLocalDateTime != null ? beginTimeLocalDateTime.toString() : null);
         request.put("overTime", overTimeLocalDateTime != null ? overTimeLocalDateTime.toString() : null);
-        List<MpDevopsLoadSceneLog> list = LoadService.getLoadExecutionResult(request);
+        List<MpDevopsLoadSceneLog> list = loadService.getLoadExecutionResult(request);
         return new ListObjServiceResult(list, list.size()).asResult();
     }
 
@@ -270,7 +269,7 @@ public class LoadController {
     @ApiOperation(value = "3D态势-载荷攻击TOP5", notes = "")
     @GetMapping("/getTop5Loads")
     public ServiceResult getTop5Loads(@RequestParam(value = "scene_id") String sceneId) {
-        LinkedList<JSONObject> getTop5Loads = LoadService.getTop5Loads(sceneId);
+        LinkedList<JSONObject> getTop5Loads = loadService.getTop5Loads(sceneId);
         return new ServiceResult(getTop5Loads, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
@@ -282,7 +281,7 @@ public class LoadController {
     public ServiceResult getLoadExecutionResultById(@RequestParam(value = "pk") String pk) {
         JSONObject requestData = new JSONObject();
         requestData.put("pk", pk);
-        List<MpDevopsLoadSceneLog> list = LoadService.getLoadExecutionResult(requestData);
+        List<MpDevopsLoadSceneLog> list = loadService.getLoadExecutionResult(requestData);
         if (list != null && list.size() == 1) {
             return new ServiceResult(list.get(0), BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
@@ -297,7 +296,7 @@ public class LoadController {
     @DeleteMapping("/deleteLoadExecutionResultByPk")
     public ServiceResult deleteLoadExecutionResultByPk(@RequestBody(required = false) MpDevopsLoadSceneLog request) {
         JSONObject requestData = JsonCommon.snakeParse(JsonCommon.stringify(request), JSONObject.class);
-        Boolean deleteLoadExecutionResultByPk = LoadService.deleteLoadExecutionResultByPk(requestData);
+        Boolean deleteLoadExecutionResultByPk = loadService.deleteLoadExecutionResultByPk(requestData);
         if (deleteLoadExecutionResultByPk) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
@@ -312,7 +311,7 @@ public class LoadController {
     @PutMapping("/updateLoadExecutionResultByPk")
     public ServiceResult updateLoadExecutionResultByPk(@RequestBody(required = false) MpDevopsLoadSceneLog request) {
         JSONObject requestData = JsonCommon.snakeParse(JsonCommon.stringify(request), JSONObject.class);
-        Boolean updateLoadExecutionResultByPk = LoadService.updateLoadExecutionResultByPk(requestData);
+        Boolean updateLoadExecutionResultByPk = loadService.updateLoadExecutionResultByPk(requestData);
         if (updateLoadExecutionResultByPk) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
@@ -328,7 +327,7 @@ public class LoadController {
     public ServiceResult addLoadExecutionResult(@RequestBody(required = false) MpDevopsLoadSceneLog request) {
         JSONObject requestData = JsonCommon.snakeParse(JsonCommon.stringify(request), JSONObject.class);
         if (requestData != null) {
-            Boolean addLoadExecutionResult = LoadService.addLoadExecutionResult(requestData);
+            Boolean addLoadExecutionResult = loadService.addLoadExecutionResult(requestData);
             if (addLoadExecutionResult) {
                 return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
             }
@@ -342,7 +341,7 @@ public class LoadController {
     @ApiOperation(value = "查询载荷", notes = "")
     @GetMapping("/getStagesBySceneId")
     public ServiceResult getStagesBySceneId(@RequestParam(value = "scene_id") String sceneId) {
-        List StageList = LoadService.getStagesBySceneId(sceneId);
+        List StageList = loadService.getStagesBySceneId(sceneId);
         return new ServiceResult(StageList, BaseErrorCode.SUCCESS).asResult();
     }
 
@@ -353,7 +352,7 @@ public class LoadController {
     @PostMapping("/addLoadExecutionOutResult")
     public ServiceResult addLoadExecutionOutResult(@RequestBody(required = false) List<MpDevopsLoadSceneLog> requestData) {
         if (requestData != null) {
-            Boolean addLoadExecutionOutResult = LoadService.addLoadExecutionOutResult(requestData);
+            Boolean addLoadExecutionOutResult = loadService.addLoadExecutionOutResult(requestData);
             if (addLoadExecutionOutResult) {
                 return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
             }
@@ -367,7 +366,7 @@ public class LoadController {
     @ApiOperation(value = "载荷执行结果导入", notes = "")
     @PostMapping("/importLoadExecutionResult")
     public ServiceResult importLoadExecutionResult(@RequestParam(value = "file") MultipartFile file) throws IOException {
-        Boolean importLoadExecutionResult = LoadService.importLoadExecutionResult(file);
+        Boolean importLoadExecutionResult = loadService.importLoadExecutionResult(file);
         if (importLoadExecutionResult) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
@@ -382,7 +381,7 @@ public class LoadController {
     @PostMapping("/exportLoadExecutionResult")
     public ServiceResult exportLoadExecutionResult(HttpServletRequest request, HttpServletResponse response,
                                                    @RequestBody(required = false) MpDevopsLoadSceneLog requestData) throws IOException {
-        Boolean exportLoadExecutionResult = LoadService.exportLoadExecutionResult(request, response, requestData);
+        Boolean exportLoadExecutionResult = loadService.exportLoadExecutionResult(request, response, requestData);
         if (exportLoadExecutionResult) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
@@ -399,7 +398,7 @@ public class LoadController {
         if (requestData != null && requestData.get("addType") != null && !requestData.get("addType").toString().equals("")) {
             String addType = requestData.get("addType").toString();
             if (addType.equals("name") || addType.equals("loopholes") || addType.equals("tactics")) {
-                Boolean stageBindLoad = LoadService.stageBindLoad(addType, requestData);
+                Boolean stageBindLoad = loadService.stageBindLoad(addType, requestData);
                 if (stageBindLoad) {
                     return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
                 }
@@ -415,7 +414,7 @@ public class LoadController {
     @PostMapping("/getToolByLoopholes")
     public ServiceResult getToolByLoopholes(@RequestBody JSONObject requestData) {
         if (requestData != null) {
-            List<MpDevopsLoad> getToolByLoopholes = LoadService.getToolByLoopholes(requestData);
+            List<MpDevopsLoad> getToolByLoopholes = loadService.getToolByLoopholes(requestData);
             return new ServiceResult(getToolByLoopholes, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
             return new ServiceResult(null, BaseErrorCode.ERROR, "根据靶标漏洞List获取载荷失败");
@@ -431,7 +430,7 @@ public class LoadController {
         JSONObject requestData = new JSONObject();
         requestData.put("tactics", tactics);
         if (requestData != null) {
-            List<MpDevopsLoad> getToolBytactics = LoadService.getToolBytactics(requestData);
+            List<MpDevopsLoad> getToolBytactics = loadService.getToolBytactics(requestData);
             return new ServiceResult(getToolBytactics, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
             return new ServiceResult(null, BaseErrorCode.ERROR, "根据关联技战术获取载荷失败");
@@ -455,7 +454,7 @@ public class LoadController {
         requestData.put("taskId", taskId);
         requestData.put("instanceId", instanceId);
         if (requestData != null) {
-            Map<String, Object> getTaskNet = LoadService.getTaskNet(requestData);
+            Map<String, Object> getTaskNet = loadService.getTaskNet(requestData);
             if (getTaskNet != null) {
                 return new ServiceResult(getTaskNet, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
             }
@@ -480,7 +479,7 @@ public class LoadController {
         requestData.put("taskId", taskId);
         requestData.put("instanceId", instanceId);
         if (requestData != null) {
-            JSONObject startTool = LoadService.startTool(requestData);
+            JSONObject startTool = loadService.startTool(requestData);
             if (startTool != null) {
                 return new ServiceResult(startTool, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
             } else {
@@ -498,7 +497,7 @@ public class LoadController {
     @PutMapping("/updateLoadParam")
     public ServiceResult updateLoadParam(@RequestBody JSONObject requestData) {
         if (requestData != null) {
-            Boolean updateLoadParam = LoadService.updateLoadParam(requestData);
+            Boolean updateLoadParam = loadService.updateLoadParam(requestData);
             if (updateLoadParam) {
                 return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
             }
@@ -513,7 +512,7 @@ public class LoadController {
     @DeleteMapping("/deleteLoad")
     public ServiceResult deleteLoad(@RequestBody JSONObject requestData) {
         if (requestData != null) {
-            Boolean deleteLoadBind = LoadService.deleteLoadBind(requestData);
+            Boolean deleteLoadBind = loadService.deleteLoadBind(requestData);
             if (deleteLoadBind) {
                 return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
             }
@@ -527,7 +526,7 @@ public class LoadController {
     @ApiOperation(value = "阶段测试绑定载荷页面", notes = "")
     @GetMapping("/stageBindLoadList")
     public ServiceResult stageBindLoadList(@RequestParam(value = "sceneId", required = false) String sceneId) {
-        List stageBindLoadList = LoadService.stageBindLoadList(sceneId);
+        List stageBindLoadList = loadService.stageBindLoadList(sceneId);
         return new ServiceResult(stageBindLoadList, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
@@ -537,7 +536,7 @@ public class LoadController {
     @ApiOperation(value = "查询该场景绑定的载荷及记录", notes = "")
     @GetMapping("/getLoadResultBySceneId")
     public ServiceResult getLoadResultBySceneId(@RequestParam(value = "sceneId") String sceneId) {
-        List<JSONObject> getLoadResultBySceneId = LoadService.getLoadResultBySceneId(sceneId);
+        List<JSONObject> getLoadResultBySceneId = loadService.getLoadResultBySceneId(sceneId);
         return new ServiceResult(getLoadResultBySceneId, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 }

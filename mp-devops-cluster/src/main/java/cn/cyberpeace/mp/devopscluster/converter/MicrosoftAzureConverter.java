@@ -3,6 +3,10 @@ package cn.cyberpeace.mp.devopscluster.converter;
 import cn.cyberpeace.mp.auth.service.MicrosoftAzureLoginService;
 import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
+import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.CloudDevice;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.enums.CommonTargetNameEnum;
@@ -55,6 +59,9 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
     @Autowired
     private DeviceVoConverter deviceVoConverter;
+
+    @Autowired
+    private LoadServiceImpl loadService;
 
     /**
      * 云镜像管理页面分页查询
@@ -135,7 +142,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             default:
         }
         //结果转Device集合
-        List<CloudDevice> convert = convert(vos,total);
+        List<CloudDevice> convert = convert(vos,total,request.getCloudServiceType());
         JSONObject result = new JSONObject();
         result.put("list", convert);
         result.put("total", total);
@@ -143,14 +150,17 @@ public class MicrosoftAzureConverter implements BaseConverter {
     }
 
     //结果转Device集合
-    private List<CloudDevice> convert(List<DeviceCloudTargetVO> vos,Integer total){
+    private List<CloudDevice> convert(List<DeviceCloudTargetVO> vos,Integer total,String cloudServiceType){
         List<CloudDevice> deviceList = new ArrayList<>();
         for (int i = 0; i < vos.size(); i++) {
             CloudDevice device = new CloudDevice();
             device.setDeleted(false);
             device.setTotal(total);
+            device.setCloudServiceType(cloudServiceType);
             device.setName(vos.get(i).getName());
             device.setLogo(vos.get(i).getLogo());
+            //1:云靶标 2:载荷 3:边界网络设备
+            device.setCategory(1);
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储 )
             switch (vos.get(i).getCloudServiceType()) {
                 case 1:
@@ -804,5 +814,38 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceVOList = deviceVOList.stream().filter(deviceVO -> deviceVO.getRole().equals(request.getRole())).collect(Collectors.toList());
         }
         return deviceVOList;
+    }
+
+    public ServiceResult getDetailsByTarget(String id, Integer catagory, String cloudServiceType) {
+        //1:云靶标 2:载荷 3:边界网络设备
+        switch (catagory) {
+            case 1:
+                JSONObject requestDataCase1 = new JSONObject();
+                requestDataCase1.put("id",id);
+                requestDataCase1.put("cloudServiceType",cloudServiceType);
+                DeviceCloudTargetVO cloudTargetById = getCloudTargetById(requestDataCase1);
+                if(cloudTargetById!=null){
+                    return new ServiceResult(cloudTargetById, BaseErrorCode.SUCCESS).asResult();
+                }else{
+                    return new ServiceResult(null, BaseErrorCode.DATA_NOT_EXIST, "未找到对应的云靶标").asResult();
+                }
+            case 2:
+                JSONObject requestDataCase2 = new JSONObject();
+                requestDataCase2.put("id", id);
+                JSONObject result = loadService.getLoadList(requestDataCase2);
+                if (result != null && result.get("source") != null && ((List) result.get("source")).size() == 1) {
+                    MpDevopsLoad load = (MpDevopsLoad) ((List) result.get("source")).get(0);
+                    List loopholes = loadService.getBindLoopholes(load.getId());
+                    load.setLoopholes(loopholes);
+                    return new ServiceResult(load, BaseErrorCode.SUCCESS).asResult();
+                }else{
+                    return new ServiceResult(null, BaseErrorCode.DATA_NOT_EXIST, "未找到对应的载荷").asResult();
+                }
+            case 3:
+                break;
+            default:
+                return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID, "catagory参数错误").asResult();
+        }
+        return new ServiceResult(null, BaseErrorCode.SUCCESS).asResult();
     }
 }

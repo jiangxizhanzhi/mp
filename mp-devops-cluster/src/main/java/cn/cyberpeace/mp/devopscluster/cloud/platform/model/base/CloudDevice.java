@@ -67,6 +67,12 @@ public class CloudDevice extends BaseCloudPlatformResult {
     private String image;
 
     /**
+     * 云服务类型
+     */
+    @ApiModelProperty(value = "云服务类型")
+    private String cloudServiceType;
+
+    /**
      * 描述
      */
     @ApiModelProperty(value = "描述")
