@@ -51,7 +51,7 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     Boolean deleteData(@Param("param") List<String> ids);
 
-    List<MpDevopsLoad> getToolListByloadPks(@Param("param") List<String> newList);
+    List<MpDevopsLoad> getToolListByloadIds(@Param("param") List<String> ids);
 
     Boolean updateBindByPk(String pk, @Param("param") JSONObject requestData);
 

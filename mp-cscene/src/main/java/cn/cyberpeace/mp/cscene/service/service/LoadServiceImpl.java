@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.cscene.model.*;
 import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
+import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.websocket.WebSocketServer;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
@@ -677,12 +678,12 @@ public class LoadServiceImpl {
     /*
      * 根据载荷执行结果工具列表
      * */
-    public List<MpDevopsLoad> getToolListByloadPks(JSONObject requestData) {
-        List<String> ids = (List<String>) requestData.get("pks");
+    public List<MpDevopsLoad> getToolListByloadIds(IdsRequest requestData) {
+        List<String> ids = requestData.getIds();
         //根据ids查询工具
         List<MpDevopsLoad> data = new ArrayList<>();
         if (ids != null && ids.size() > 0) {
-            data = loadMapper.getToolListByloadPks(ids);
+            data = loadMapper.getToolListByloadIds(ids);
         }
         return data;
     }

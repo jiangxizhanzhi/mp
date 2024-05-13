@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
+import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
@@ -73,14 +74,13 @@ public class LoadController {
     }
 
     /*
-     * 根据pks获取载荷列表
+     * 根据ids获取载荷列表
      * */
-    @ApiOperation(value = "根据pks获取载荷列表", notes = "")
-    @PostMapping("/getToolListByloadPks")
-    public ServiceResult getToolListByloadPks(@RequestBody(required = false) MpDevopsLoad requestData) {
-        JSONObject jsonObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
+    @ApiOperation(value = "根据ids获取载荷列表", notes = "")
+    @PostMapping("/getToolListByloadIds")
+    public ServiceResult getToolListByloadIds(@RequestBody IdsRequest requestData) {
         if (requestData != null) {
-            List<MpDevopsLoad> getToolListByloadPks = loadService.getToolListByloadPks(jsonObject);
+            List<MpDevopsLoad> getToolListByloadPks = loadService.getToolListByloadIds(requestData);
             return new ServiceResult(getToolListByloadPks, BaseErrorCode.SUCCESS).asResult();
         }
         return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID).asResult();

@@ -521,14 +521,14 @@
             LIMIT 1
     </select>
 
-    <select id="getToolListByloadPks" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoad">
+    <select id="getToolListByloadIds" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoad">
         SELECT
         *
         FROM
         mp_devops_load
         <where>
             <if test="param != null and param.size != 0">
-                and pk in
+                and id in
                 <foreach collection="param" item="item" separator="," open="(" close=")">
                     #{item}
                 </foreach>
