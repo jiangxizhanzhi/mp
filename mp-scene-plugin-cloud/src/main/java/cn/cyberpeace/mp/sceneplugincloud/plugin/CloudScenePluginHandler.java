@@ -200,16 +200,18 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         Collection<CloudPluginSceneElementBO> values = getElementMap().values();
         List<String> uuids = values.stream().map(BaseCloudPluginSceneElementBO::getImageUuid).collect(Collectors.toList());
         CsceneTargetMapper bean = BeanCommon.getBean(CsceneTargetMapper.class);
-        List<CsceneTargetBO> byUUid = bean.findByUUid(uuids);
-        List<CsceneTargetBO> list = byUUid.stream().filter(Objects::nonNull).collect(Collectors.toList());
-        HashMap<String, String> map = new HashMap<>();
-        for (CsceneTargetBO csceneTargetBO : list) {
-            map.put(csceneTargetBO.getUuid(),csceneTargetBO.getPlace());
-        }
-        for (CloudPluginSceneElementBO value : values) {
-            String imageUuid = value.getImageUuid();
-            if (map.containsKey(imageUuid)){
-                value.getSrcElement().setPlace(map.get(imageUuid));
+        if(!uuids.isEmpty()){
+            List<CsceneTargetBO> byUUid = bean.findByUUid(uuids);
+            List<CsceneTargetBO> list = byUUid.stream().filter(Objects::nonNull).collect(Collectors.toList());
+            HashMap<String, String> map = new HashMap<>();
+            for (CsceneTargetBO csceneTargetBO : list) {
+                map.put(csceneTargetBO.getUuid(),csceneTargetBO.getPlace());
+            }
+            for (CloudPluginSceneElementBO value : values) {
+                String imageUuid = value.getImageUuid();
+                if (map.containsKey(imageUuid)){
+                    value.getSrcElement().setPlace(map.get(imageUuid));
+                }
             }
         }
     }

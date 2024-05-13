@@ -40,6 +40,13 @@ public enum CsceneErrorCode implements ErrorCode {
     SCENE_INSTANCE_STILL_NEED_CLEAR("MP-110293", "scene_instance_still_need_clear"),
     SCENE_REFERENCE_ERROR("MP-110294", "scene_reference_error"),
     PARAMS_FIELD_ERROR("MP-110300", "params_field_error"),
+    FILE_CONTENT_INVALID("MP-110301", "file_content_invalid"),
+    FILE_TYPE_ERROR("MP-110302", "file_type_error"),
+    FILE_READ_FAIL("MP-110303", "file_read_fail"),
+    FILE_COPY_FAIL("MP-110304", "file_copy_fail"),
+    FAILED_TO_WRITE_FILE("MP-110305", "failed_to_write_file"),
+    NOT_SUPPORT_FILE_TYPE("MP-110306", "not_support_file_type"),
+    FILE_DELETE_FAILED("MP-110307", "file_delete_failed"),
     ;
 
     CsceneErrorCode(String code, String message) {

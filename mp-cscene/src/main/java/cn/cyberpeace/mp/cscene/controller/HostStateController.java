@@ -5,16 +5,16 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
-import cn.cyberpeace.mp.cscene.dto.scene.SceneAttCkTypeCountInfo;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
-import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
+import cn.cyberpeace.mp.cscene.util.FileUtil;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +25,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -142,4 +146,94 @@ public class HostStateController {
         return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
     }
 
+    @ApiOperation(value = "主机信息json导出")
+    @GetMapping("/export/hosts")
+    public void exportHosts(HttpServletResponse response, HostStateTrendRequest hostStateTrendRequest) {
+        List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String fileName = "/cpms/host.json";
+        File file = new File(fileName);
+        if (file.exists()) {
+            FileUtil.deleteDir(file);
+        }
+        try{
+            String jsonString = objectMapper.writeValueAsString(hostStates);
+            objectMapper.writeValue(file, jsonString);
+            response.setContentType("application/octet-stream;charset=UTF-8");
+            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName,"UTF-8").replaceAll("\\+","%20"));
+
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        FileUtil.setResponse(file, true, response);
+    }
+
+
+    @ApiOperation(value = "主机信息json导出")
+    @GetMapping("/export/hosts/acquisition")
+    public void exportHostAcquisition(HttpServletResponse response, HostStateTrendRequest hostStateTrendRequest) {
+        List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String fileName = "/cpms/host_acqu.json";
+        File file = new File(fileName);
+        if (file.exists()) {
+            FileUtil.deleteDir(file);
+        }
+        try{
+            String jsonString = objectMapper.writeValueAsString(hostStates);
+            objectMapper.writeValue(file, jsonString);
+            response.setContentType("application/octet-stream;charset=UTF-8");
+            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName,"UTF-8").replaceAll("\\+","%20"));
+
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        FileUtil.setResponse(file, true, response);
+    }
+
+
+
+    @ApiOperation(value = "流量采集数据json导出")
+    @GetMapping("/export/flow/acquisition")
+    public void exportFlowAcquisition(HttpServletResponse response, HostStateTrendRequest hostStateTrendRequest) {
+        List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String fileName = "/cpms/flow.json";
+        File file = new File(fileName);
+        if (file.exists()) {
+            FileUtil.deleteDir(file);
+        }
+        try{
+            String jsonString = objectMapper.writeValueAsString(hostStates);
+            objectMapper.writeValue(file, jsonString);
+            response.setContentType("application/octet-stream;charset=UTF-8");
+            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName,"UTF-8").replaceAll("\\+","%20"));
+
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        FileUtil.setResponse(file, true, response);
+    }
+
+    @ApiOperation(value = "漏洞数据json导出")
+    @GetMapping("/export/vuln")
+    public void exportVulnerabilityInfo(HttpServletResponse response, HostStateTrendRequest hostStateTrendRequest) {
+        List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String fileName = "/cpms/vlun.json";
+        File file = new File(fileName);
+        if (file.exists()) {
+            FileUtil.deleteDir(file);
+        }
+        try{
+            String jsonString = objectMapper.writeValueAsString(hostStates);
+            objectMapper.writeValue(file, jsonString);
+            response.setContentType("application/octet-stream;charset=UTF-8");
+            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName,"UTF-8").replaceAll("\\+","%20"));
+
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        FileUtil.setResponse(file, true, response);
+    }
 }
