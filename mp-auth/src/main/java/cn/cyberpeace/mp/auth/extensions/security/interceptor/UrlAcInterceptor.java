@@ -68,6 +68,9 @@ public class UrlAcInterceptor implements HandlerInterceptor {
 
     private boolean validateAuthTargetByHandlerMethod(HttpServletRequest request, Object handler) {
         if (handler instanceof HandlerMethod) {
+            if (!((HandlerMethod) handler).getBeanType().getPackageName().startsWith("cn.cyberpeace")) {
+                return true;
+            }
             AuthTarget authTargetOnClass = ((HandlerMethod) handler).getBeanType().getAnnotation(AuthTarget.class);
             AuthTarget authTargetOnMethod = ((HandlerMethod) handler).getMethod().getAnnotation(AuthTarget.class);
             Set<String> neededOneOfTheTargets = new HashSet<>();

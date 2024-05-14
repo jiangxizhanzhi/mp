@@ -133,6 +133,7 @@ public class FlowAnalysisRequest {
     private AggregationTypeEnum aggregationTypeEnum;
 
     @ApiModelProperty("攻击类型是否国际化")
+    @Builder.Default
     private boolean attackTypeI18 = true;
 
     @ApiModelProperty(value = "索引",hidden = true)
