@@ -53,6 +53,7 @@ import cn.cyberpeace.mp.scene.repository.SceneElementPluginMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementPortConnectionMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
+import cn.cyberpeace.mp.scene.repository.SceneNodeConnectionMapper;
 import cn.cyberpeace.mp.scene.repository.ScenePieceMapper;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -196,6 +197,7 @@ public class SceneHandler extends BaseSceneHandler<
         super.sceneElementPortConnectionMapper = BeanCommon.getBean(SceneElementPortConnectionMapper.class);
         super.sceneElementPluginMapper = BeanCommon.getBean(SceneElementPluginMapper.class);
         super.scenePieceMapper = BeanCommon.getBean(ScenePieceMapper.class);
+        super.sceneNodeConnectionMapper = BeanCommon.getBean(SceneNodeConnectionMapper.class);
 
     }
 
@@ -217,6 +219,7 @@ public class SceneHandler extends BaseSceneHandler<
         super.sceneElementPluginModelClass = SceneElementPluginModel.class;
         super.scenePieceModelClass = ScenePieceModel.class;
         super.sceneHandlerClass = SceneHandler.class;
+        super.sceneNodeConnectionBOClass = SceneAreaNodeConnectionBO.class;
 
         Field field = ClassUtils.getField(this.getClass(), "scenePluginHandlerInterface", true, false);
         ClassUtils.setFieldValue(field, this, ScenePluginHandler.class);

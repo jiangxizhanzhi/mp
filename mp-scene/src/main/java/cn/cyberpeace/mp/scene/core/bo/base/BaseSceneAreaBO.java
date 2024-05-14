@@ -9,4 +9,8 @@ public abstract class BaseSceneAreaBO<M extends BaseSceneAreaModel, T extends Ba
         extends BaseSceneNodeBO<M, T> {
     @ApiModelProperty(value = "展开标记")
     private Boolean open;
+
+    @ApiModelProperty(value = "区域类型")
+    private Integer type;
+
 }

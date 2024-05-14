@@ -74,9 +74,13 @@ public class LicenseService {
         if (Objects.isNull(INSTANCE)) {
             log.info("init INSTANCE...");
             try {
+                log.info("-----------------------------------1");
+                System.load(frontAdminConfig.getLicenseDir() + File.separator + "license.so");
                 INSTANCE = (Awesome) Native.loadLibrary(frontAdminConfig.getLicenseDir() + File.separator + "license.so", Awesome.class);
+                log.info("-----------------------------------2");
                 log.info("load license.so success!");
-            } catch (Exception e) {
+            } catch (Throwable e) {
+                log.info("-----------------------------------2");
                 log.error("load license.so error, {}", ExceptionUtils.getStackTrace(e));
                 throw e;
             }

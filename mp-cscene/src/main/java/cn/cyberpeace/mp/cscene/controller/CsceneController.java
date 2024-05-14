@@ -150,14 +150,17 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @ApiOperation("获取指定id场景模板")
     @GetMapping("/get_by_area")
-    public ServiceResult<CsceneBO> getByArea(@RequestParam String id, @RequestParam(required = false) String areaId) {
+    public ServiceResult<CsceneBO> getByArea(@RequestParam String id, @RequestParam(required = false,name = "area_id") String areaId) {
         if (areaId == null) {
             areaId = StringUtils.EMPTY;
         }
-        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(id, areaId, true, null);
+
+        String sceneId = this.modelService.get(id).getSource().getObj().getSceneConfig();
+
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, areaId, true, null);
         SceneConfigDataBO dataBO = sceneConfigHandler.toData();
 
-        SceneConfigHandler out = new SceneConfigHandler(id, areaId, true, true);
+        SceneConfigHandler out = new SceneConfigHandler(sceneId, areaId, true, true);
         out.reloadOut();
         SceneConfigDataBO extraSceneConfig = out.toData();
 
