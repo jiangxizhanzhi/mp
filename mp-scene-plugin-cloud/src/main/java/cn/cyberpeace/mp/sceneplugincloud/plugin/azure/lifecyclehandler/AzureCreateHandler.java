@@ -98,7 +98,6 @@ public class AzureCreateHandler extends CreateHandler {
                 .flatMap(cloudElement -> cloudElement.getDeriveNetworks().stream())
                 .forEach(cloudElement -> cloudElement.getNetwork().setResourceId(azureNetworkId));
 
-
         // 再创建终端 终端分虚拟机、容器、和web服务
         List<Runnable> createTerminalTasks = new ArrayList<>();
         // 虚拟机
@@ -107,7 +106,7 @@ public class AzureCreateHandler extends CreateHandler {
         for (CloudPluginSceneElementBO element : filteredVirtualMachineElements) {
             String nodeId = element.getSrcElement().getId();
             List<VirtualNic> virtualNics = this.genVirutalNics(element);
-            AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics);
+            AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics,combineInitCommand(element));
             Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_VIRTUAL_MACHINE, task);
             createVirtualMachineTasks.add(formatTask);
         }

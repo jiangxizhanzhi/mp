@@ -257,7 +257,7 @@ public class RecreateHandler extends HandlerCommon {
                                 }
                                 List<VirtualNic> virtualNics = this.genVirutalNics(cloudElement);
                                 AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
-                                azureVirtualMachine.create(getPluginHandler(), cloudElement, virtualNics);
+                                azureVirtualMachine.create(getPluginHandler(), cloudElement, virtualNics, combineInitCommand(cloudElement));
                             });
                 } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
                     runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_CONTAINER,

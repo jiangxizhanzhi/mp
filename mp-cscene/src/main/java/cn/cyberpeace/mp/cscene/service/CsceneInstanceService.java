@@ -1812,4 +1812,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
 
+    public List<String> vulnList(String id) {
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(CloudPluginSceneElementModel::getScene, id);
+        List<CloudPluginSceneElementModel> list = cloudPluginSceneElementMapper.list(humanCondition);
+        List<String> vulnList = list.stream()
+                .filter(e -> Objects.nonNull(e.getVulnCode()))
+                .flatMap(e -> Arrays.stream(e.getVulnCode().split(";")))
+                .distinct()
+                .filter(e -> !e.isEmpty())
+                .collect(Collectors.toList());
+        return vulnList;
+    }
 }

@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -78,6 +79,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
+
+    @Autowired
+    private CsceneCommonService csceneCommonService;
 
     private CsceneInstanceActionRequest formatActionRequest(CsceneInstanceActionRequest request, String paramId) {
         if (request == null) {
@@ -578,6 +582,21 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(1));
         azureVirtualMachine.VirtualMachinelist();
         return new ServiceResult<Boolean>(true).asResult();
+    }
+
+    @ApiOperation("查sku列表（同步用）")
+    @PostMapping("/sku_list")
+    public ServiceResult<Boolean> skuList(@RequestBody(required = false) CsceneInstanceActionRequest request) throws IOException {
+        AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(1));
+        azureVirtualMachine.listsAllAvailableResourceSKUsForTheSpecifiedRegion();
+        return new ServiceResult<Boolean>(true).asResult();
+    }
+
+    @ApiOperation("查漏洞列表）")
+    @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
+    @GetMapping("/vuln_ist")
+    public ServiceResult<List> vulnList(@RequestParam(required = false) String id) {
+        return new ServiceResult(modelService.vulnList(id)).asResult();
     }
 
     @ApiOperation("暂停场景实例")

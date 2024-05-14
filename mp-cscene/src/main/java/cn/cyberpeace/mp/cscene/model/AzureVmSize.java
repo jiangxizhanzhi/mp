@@ -16,7 +16,7 @@ public class AzureVmSize extends BaseModel {
     @ApiModelProperty(value = "名称")
     private String name;
     @ApiModelProperty(value = "cpu")
-    private Integer vCpu;
+    private Integer vcpu;
     @ApiModelProperty(value = "内存")
     private Integer ram;
     @ApiModelProperty(value = "最多可用数据盘数")

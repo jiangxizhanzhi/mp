@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
@@ -137,6 +138,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private String offer;
     @ApiModelProperty(value = "产品SKU（Stock Keeping Unit）编码")
     private String sku;
+    //    漏洞
+    @ApiModelProperty(value = "漏洞")
+    private String vulnCode;
 
     // gns3 属性
     @ApiModelProperty(value = "gns3 platform")

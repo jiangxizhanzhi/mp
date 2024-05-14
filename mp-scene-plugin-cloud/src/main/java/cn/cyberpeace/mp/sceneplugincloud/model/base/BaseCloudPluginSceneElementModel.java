@@ -141,6 +141,9 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String offer;
     @DefaultStr
     private String sku;
+//    漏洞
+    @DefaultStr
+    private String vulnCode;
 
     // 靶标属性
     @DefaultInt

@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
+import com.azure.resourcemanager.compute.fluent.models.ResourceSkuInner;
 import com.azure.resourcemanager.compute.models.*;
 import com.azure.resourcemanager.network.models.Network;
 import com.azure.resourcemanager.network.models.NetworkInterface;
@@ -18,8 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class AzureVirtualMachine {
     private IAzureResourceManager resourceService;
@@ -49,7 +49,36 @@ public class AzureVirtualMachine {
 
     }
 
-    public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics) {
+    public void listsAllAvailableResourceSKUsForTheSpecifiedRegion() throws IOException {
+        PagedIterable<ResourceSkuInner> list = azureResourceManager
+                .virtualMachines()
+                .manager()
+                .serviceClient()
+                .getResourceSkus()
+                .list();
+        /*for (ResourceSkuInner sku : list) {
+            System.out.println("SKU: " + sku.name());
+
+            List<ResourceSkuCosts> costs = sku.costs();
+
+            System.out.println("-------------------------------------");
+        }*/
+        // 使用 Set 来存储已经出现过的 sku.name()，保证不重复
+        Set<String> uniqueNames = new HashSet<>();
+        PrintWriter writer = new PrintWriter(new FileWriter("C:\\Users\\liyah\\Desktop\\output4.txt", true));
+        for (ResourceSkuInner sku : list) {
+            if (!uniqueNames.contains(sku.name())) {
+                // 如果当前 sku.name() 没有出现过，则添加到 uniqueNames 集合中，并保留这个 sku 作为第一个唯一的 sku
+                uniqueNames.add(sku.name());
+                writer.println(sku.name() + "------" + sku.resourceType());
+            }
+        }
+        writer.close();
+
+
+    }
+
+    public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData) {
         String groupName = pluginHandler.getSourceSceneId();
 
         // azure todo 调用微软云api 查询或者创建一个 flavor
@@ -93,6 +122,7 @@ public class AzureVirtualMachine {
                     .withAdminUsername(StringUtils.isBlank(userNmae) ? "azureuser" : userNmae)
                     .withAdminPassword(StringUtils.isBlank(password) ? "Azure12345678" : password)
                     .withUnmanagedDisks()
+                    .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()))
                     .defineUnmanagedDataDisk("disk-1")
                     .withNewVhd(cloudElement.getSrcElement().getDisk())
                     .withLun(1)
@@ -112,6 +142,7 @@ public class AzureVirtualMachine {
                     .withRootUsername(StringUtils.isBlank(userNmae) ? "root1" : userNmae)
                     .withRootPassword(StringUtils.isBlank(password) ? "ycxx123#" : password) // 必须要是6位以上,且有一个特殊字符
                     .withUnmanagedDisks()
+                    .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()))
                     .defineUnmanagedDataDisk("disk-1")
                     .withNewVhd(cloudElement.getSrcElement().getDisk())
                     .withLun(1)

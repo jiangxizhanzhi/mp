@@ -552,7 +552,7 @@ public class CreateHandler extends HandlerCommon {
         return entityInterfaces;
     }
 
-    private String combineInitCommand(CloudPluginSceneElementBO cloudElement) {
+    protected String combineInitCommand(CloudPluginSceneElementBO cloudElement) {
         var srcElement = cloudElement.getSrcElement();
         List<String> commands = new ArrayList<>();
 
