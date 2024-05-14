@@ -27,6 +27,7 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.situationaware.model.FlowClassificationFromJsonModel;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
+import cn.cyberpeace.mp.situationaware.service.ClassificationAnalyseService;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.utils.FileUtils;
 import lombok.Data;
@@ -54,28 +55,15 @@ import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogra
 import org.elasticsearch.search.aggregations.metrics.ParsedValueCount;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.time.*;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -99,8 +87,11 @@ public class TaiShiGuidesService {
     @Resource
     private CsceneInstanceService csceneInstanceService;
 
+    @Autowired
+    private ClassificationAnalyseService classificationAnalyseService;
+
     public List<FlowClassificationDto> listAllFlowClassifications() {
-        FlowClassificationFromJsonModel flowClassificationFromJsonModel = flowMonitorService.getFlowClassificationFromJsonModel();
+        FlowClassificationFromJsonModel flowClassificationFromJsonModel = classificationAnalyseService.getFlowClassificationInfoFromJson();
         List<FlowClassificationDto> flowClassificationDtoList = FlowClassificationDto.getDtoListFromModel(flowClassificationFromJsonModel);
         List<FlowClassificationDto> attackTypeNotEmptyDtoList = new ArrayList<>();
         for (FlowClassificationDto dto : flowClassificationDtoList) {

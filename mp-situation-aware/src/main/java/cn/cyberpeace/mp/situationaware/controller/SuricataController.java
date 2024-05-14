@@ -4,20 +4,20 @@ import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.situationaware.bo.SuricataData;
 import cn.cyberpeace.mp.situationaware.constant.SuricataConstant;
 import cn.cyberpeace.mp.situationaware.request.SuricataQueryRequest;
+import cn.cyberpeace.mp.situationaware.request.SuricataRuleRequest;
 import cn.cyberpeace.mp.situationaware.service.SuricataService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /*
  * @BelongsPackage: cn.cyberpeace.mp.situationaware.controller
@@ -54,6 +54,26 @@ public class SuricataController {
     @GetMapping("/rule/protocols")
     public ServiceResult querySuricataRulesAllProtocols(){
         return suricataService.queryAllProtocols();
+    }
+
+    @ApiOperation(value = "查询流量分析规则所有的分类类别")
+    @GetMapping("/rule/classtype")
+    public ServiceResult<List<String>> listAllClassTypes() {
+        return new ServiceResult<>(suricataService.queryAllClassType()).asResult();
+    }
+
+    @ApiOperation(value = "解析用户输入的规则")
+    @PostMapping("/rule/analyse")
+    public ServiceResult<SuricataData> analyseSuricataRule(@RequestBody SuricataRuleRequest suricataRuleRequest) {
+        return new ServiceResult<>(suricataService.analyseRule(suricataRuleRequest.getMetadata())).asResult();
+    }
+
+    @ApiOperation(value = "保存用户编辑的规则")
+    @PostMapping("/rule/save")
+    public ServiceResult<Boolean> saveSuricataRule(@RequestBody SuricataRuleRequest suricataRuleRequest) {
+        suricataService.saveRule(suricataRuleRequest);
+        return new ServiceResult<>(Boolean.TRUE).asResult();
+
     }
 
 }
