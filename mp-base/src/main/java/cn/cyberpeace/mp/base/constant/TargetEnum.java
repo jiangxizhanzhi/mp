@@ -36,7 +36,7 @@ public enum TargetEnum {
     DYNAMIC_TRAFFIC_LIST(new String[]{"dynamic-traffic-list"}),
     EXERCISES(new String[]{"exercises"}),
     FLAGS_SOLVE(new String[]{"flags-solve"}),
-    FRONT_ALL(new String[]{"front-all"}),
+    FRONT_ALL(new String[]{"front_all"}),
     GHDB_LIBRARY(new String[]{"ghdb-library"}),
     GROUP_TRAINING(new String[]{"group-training"}),
     IMAGE_MANAGE(new String[]{"image-manage"}),
