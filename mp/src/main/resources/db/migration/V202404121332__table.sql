@@ -33,3 +33,6 @@ CREATE TABLE `mp_scene_scene_node_connection`
     UNIQUE KEY (`source_node`, `target_node`),
     UNIQUE KEY (`scene`, `source_node_id`, `target_node_id`)
 ) COMMENT ='场景实例节点连线信息表';
+
+alter table mp_scene_scene_config_area add column type tinyint(2) comment '区域类型 0:普通区域 1:层级区域' default 0 after open;
+alter table mp_scene_scene_area add column type tinyint(2) comment '区域类型 0:普通区域 1:层级区域' default 0 after open;

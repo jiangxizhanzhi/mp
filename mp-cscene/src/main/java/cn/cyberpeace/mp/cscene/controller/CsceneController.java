@@ -19,14 +19,17 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,7 +40,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -168,6 +173,75 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneBO csceneBO = new CsceneBO();
         csceneBO.setSceneConfig(dataBO);
         return new ServiceResult<>(csceneBO).asResult();
+    }
+
+    @ApiOperation("查询场景拓扑区域树形结构")
+    @ApiImplicitParam(name = "id", value = "场景拓扑id", dataTypeClass = String.class)
+    @GetMapping("/tree")
+    public ServiceResult<SceneAreaTreeBO> getSceneConfigAreaTree(@RequestParam String id) {
+        String sceneId = this.modelService.get(id).getSource().getObj().getSceneConfig();
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, null, null);
+        SceneAreaTreeBO sceneAreaTree = new SceneAreaTreeBO();
+        SceneConfigDataBO result = sceneConfigHandler.toData();
+        if (result != null && result.getTopology() != null && CollectionUtils.isNotEmpty(result.getTopology().getAreas())) {
+            var areas = result.getTopology().getAreas();
+            Map<String, List<SceneConfigAreaBO>> parentId2Children = new HashMap<>();
+            areas.stream()
+                    .filter(sceneConfigAreaBO -> StringUtils.isNotEmpty(sceneConfigAreaBO.getArea()))
+                    .forEach(sceneConfigAreaBO -> {
+                        if (CollectionUtils.isEmpty(parentId2Children.get(sceneConfigAreaBO.getArea()))) {
+                            parentId2Children.put(sceneConfigAreaBO.getArea(), new ArrayList<>());
+                        }
+                        parentId2Children.get(sceneConfigAreaBO.getArea()).add(sceneConfigAreaBO);
+                    });
+            areas.stream()
+                    .filter(sceneConfigAreaBO -> StringUtils.isEmpty(sceneConfigAreaBO.getArea()))
+                    .forEach(sceneConfigAreaBO -> {
+                        if (sceneConfigAreaBO.getType() == BaseSceneAreaModel.Type.LAYER) {
+                            var area = getTreeArea(sceneConfigAreaBO, parentId2Children);
+                            sceneAreaTree.getAreaList().add(area);
+                        } else {
+                            if (CollectionUtils.isNotEmpty(parentId2Children.get(sceneConfigAreaBO.getId()))) {
+                                parentId2Children.get(sceneConfigAreaBO.getId()).stream()
+                                        .filter(a -> a.getType() == BaseSceneAreaModel.Type.LAYER)
+                                        .forEach(sceneConfigAreaBO1 -> {
+                                            var area = getTreeArea(sceneConfigAreaBO1, parentId2Children);
+                                            sceneAreaTree.getAreaList().add(area);
+                                        });
+                            }
+                        }
+                    });
+        }
+        return new ServiceResult<>(sceneAreaTree).asResult();
+    }
+
+    private SceneAreaTreeBO.Area getTreeArea(SceneConfigAreaBO sceneConfigAreaBO, Map<String, List<SceneConfigAreaBO>> parentId2Children) {
+        SceneAreaTreeBO.Area area = new SceneAreaTreeBO.Area();
+        area.setId(sceneConfigAreaBO.getId());
+        area.setName(sceneConfigAreaBO.getName());
+        area.setDescription(sceneConfigAreaBO.getDescription());
+        area.setDisplayContext(sceneConfigAreaBO.getDisplayContext());
+        processChildren(area.getId(), area, parentId2Children);
+        return area;
+    }
+
+    private void processChildren(String parentId, SceneAreaTreeBO.Area area, Map<String, List<SceneConfigAreaBO>> parentId2Children) {
+        if (CollectionUtils.isNotEmpty(parentId2Children.get(parentId))) {
+            parentId2Children.get(parentId).forEach(sceneConfigAreaBO -> {
+                if (sceneConfigAreaBO.getType() == BaseSceneAreaModel.Type.LAYER) {
+                    SceneAreaTreeBO.Area child = new SceneAreaTreeBO.Area();
+                    child.setLabel(parentId);
+                    child.setId(sceneConfigAreaBO.getId());
+                    child.setName(sceneConfigAreaBO.getName());
+                    child.setDescription(sceneConfigAreaBO.getDescription());
+                    child.setDisplayContext(sceneConfigAreaBO.getDisplayContext());
+                    processChildren(child.getId(), child, parentId2Children);
+                    area.getChildren().add(child);
+                } else {
+                    processChildren(sceneConfigAreaBO.getId(), area, parentId2Children);
+                }
+            });
+        }
     }
 
     @ApiOperation("导出指定id场景模板")
