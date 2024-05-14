@@ -93,6 +93,10 @@ public class UrlAcInterceptor implements HandlerInterceptor {
                 Set<String> existTargets = new HashSet<>(userPermissionService.listMenuIdentsByLoginUser());
                 String commonTarget = neededOneOfTheTargets.stream().filter(existTargets::contains)
                         .findAny().orElse("");
+                if (StringUtils.isBlank(commonTarget)) {
+                    log.info("existTargets = {}", existTargets);
+                    log.info("needTargets = {}", neededOneOfTheTargets);
+                }
                 return StringUtils.isNotBlank(commonTarget);
             }
 
