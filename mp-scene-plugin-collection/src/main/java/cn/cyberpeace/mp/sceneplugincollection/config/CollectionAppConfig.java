@@ -37,11 +37,38 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.wazuh_server_host:127.0.0.1}")
     private String wazuhServerHost;
 
+    @Value("${mp.sceneplugincollection.azurePublic.wazuh-server-host:127.0.0.1}")
+    private String wazuhPublicServerHost;
+
+    @Value("${mp.sceneplugincollection.azurePrivate.wazuh-server-host:127.0.0.1}")
+    private String wazuhPrivateServerHost;
+
+    @Value("${mp.sceneplugincollection.azureMixed.wazuh-server-host:127.0.0.1}")
+    private String wazuhMixedServerHost;
+
     @Value("${mp.sceneplugincollection.wazuh_remote_port:8514}")
     private Integer wazuhRemotePort;
 
+    @Value("${mp.sceneplugincollection.azurePublic.wazuh-remote-port:9200}")
+    private Integer wazuhPublicRemotePort;
+
+    @Value("${mp.sceneplugincollection.azurePrivate.wazuh-remote-port:9200}")
+    private Integer wazuhPrivateRemotePort;
+
+    @Value("${mp.sceneplugincollection.azureMixed.wazuh-remote-port:9200}")
+    private Integer wazuhMixedRemotePort;
+
     @Value("${mp.sceneplugincollection.wazuh_auth_port:8515}")
     private Integer wazuhAuthPort;
+
+    @Value("${mp.sceneplugincollection.azurePublic.wazuh_auth_port:9200}")
+    private Integer wazuhPublicAuthPort;
+
+    @Value("${mp.sceneplugincollection.azurePrivate.wazuh_auth_port:9200}")
+    private Integer wazuhPrivateAuthPort;
+
+    @Value("${mp.sceneplugincollection.azureMixed.wazuh_auth_port:9200}")
+    private Integer wazuhMixedAuthPort;
 
     @Value("${mp.sceneplugincollection.wazuh_vulnerability_scan_interval:6}")
     private Integer wazuhVulnerabilityScanInterval;

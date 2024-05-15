@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
+import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
 import cn.cyberpeace.mp.auth.service.MicrosoftAzureLoginService;
 import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
@@ -25,10 +26,12 @@ import com.azure.containers.containerregistry.ContainerRegistryClient;
 import com.azure.containers.containerregistry.ContainerRegistryClientBuilder;
 import com.azure.containers.containerregistry.ContainerRepository;
 import com.azure.containers.containerregistry.models.ArtifactManifestProperties;
+import com.azure.core.credential.TokenCredential;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.AzureEnvironment;
 import com.azure.core.management.Region;
 import com.azure.core.management.profile.AzureProfile;
+import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.models.*;
@@ -191,15 +194,15 @@ public class MicrosoftAzureConverter implements BaseConverter {
      * 云镜像管理同步
      */
     @Transactional
-    public JSONObject synchronousCloudData(String requestData) throws Exception {
+    public JSONObject synchronousCloudData(String cloudType) throws Exception {
 
 //        // 获取资源管理器
 //        var azureResourceManager = IAzureResourceManager.getInstance(1).getManager();
 
-//        //获取当前微软云使用账号
-//        JSONObject request = new JSONObject();
-//        request.put("cloudType",1);
-//        MicrosoftAzureUserModel localAzurer = microsoftAzureLoginService.getLocalAzurer(request);
+        //获取当前微软云使用账号
+        JSONObject request = new JSONObject();
+        request.put("cloudType",cloudType);
+        MicrosoftAzureUserModel localAzurer = microsoftAzureLoginService.getLocalAzurer(request);
 
         //目前是根据配置的环境信息去获取微软云资源
         JSONObject result = new JSONObject();
@@ -207,16 +210,16 @@ public class MicrosoftAzureConverter implements BaseConverter {
         List<DeviceCloudTargetPO> list = new ArrayList<>();
 
         //获取用户 docker镜像
-        List dockerImages = getDockerImages();
+        List dockerImages = getDockerImages(localAzurer);
         result.put("dockerImageList", dockerImages);
         //获取微软云 docker镜像
-        List cloudDockerImages = getCloudDockerImages();
+        List cloudDockerImages = getCloudDockerImages(localAzurer);
         result.put("cloudDockerImageList", cloudDockerImages);
         //获取微软云 虚拟机镜像
-        List images = getImages();
+        List images = getImages(localAzurer);
         result.put("imagesList", images);
         //获取用户 虚拟机镜像
-        List localImages = getLocalImages();
+        List localImages = getLocalImages(localAzurer);
         result.put("localImagesList", localImages);
         //获取微软云存储服务
         List microsoftCloudStorageServiceList = getMicrosoftCloudStorageServiceList();
@@ -427,7 +430,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
     /**
      * docker镜像--暂定存放在容器注册表内
      */
-    public List getDockerImages() {
+    public List getDockerImages(MicrosoftAzureUserModel localAzurer) {
         String endpoint = "https://registrytest0407.azurecr.io";
         // 使用DefaultAzureCredential进行身份验证，适用于多种环境，如本地开发、Azure Functions、App Service等
         // 如果需要特定的身份验证方式，可以使用对应的AzureIdentity类，如ClientSecretCredential等
@@ -435,6 +438,17 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 .endpoint(endpoint)
                 .credential(new DefaultAzureCredentialBuilder().build())
                 .buildClient();
+
+//        TokenCredential tokenCredential = new ClientSecretCredentialBuilder()
+//                .clientId(localAzurer.getAzureClientId())
+//                .clientSecret(localAzurer.getAzureClientSecret())
+//                .tenantId(localAzurer.getAzureTenantId())
+//                .build();
+//        // 初始化ContainerRegistryClient
+//        ContainerRegistryClient containerRegistryClient = new ContainerRegistryClientBuilder()
+//                .endpoint(endpoint)
+//                .credential(tokenCredential)
+//                .buildClient();
 
         //收集元素
         List<JSONObject> jsonList = new ArrayList<>();
@@ -470,7 +484,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
     /**
      * 获取微软云 docker镜像
      */
-    public List getCloudDockerImages() {
+    public List getCloudDockerImages(MicrosoftAzureUserModel localAzurer) {
         String endpoint = "https://registrytest0407.azurecr.io";
         // 使用DefaultAzureCredential进行身份验证，适用于多种环境，如本地开发、Azure Functions、App Service等
         // 如果需要特定的身份验证方式，可以使用对应的AzureIdentity类，如ClientSecretCredential等
@@ -478,6 +492,17 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 .endpoint(endpoint)
                 .credential(new DefaultAzureCredentialBuilder().build())
                 .buildClient();
+
+//        TokenCredential tokenCredential = new ClientSecretCredentialBuilder()
+//                .clientId(localAzurer.getAzureClientId())
+//                .clientSecret(localAzurer.getAzureClientSecret())
+//                .tenantId(localAzurer.getAzureTenantId())
+//                .build();
+//        // 初始化ContainerRegistryClient
+//        ContainerRegistryClient containerRegistryClient = new ContainerRegistryClientBuilder()
+//                .endpoint(endpoint)
+//                .credential(tokenCredential)
+//                .buildClient();
 
         //收集元素
         List<JSONObject> jsonList = new ArrayList<>();
@@ -488,7 +513,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
     /**
      * 虚拟机市场镜像
      */
-    public List getImages() {
+    public List getImages(MicrosoftAzureUserModel localAzurer) {
         String subscriptionId = "c87ba926-f7c2-4d53-8b8e-89245dc92e26"; // 替换为您的实际订阅ID
 
         // 使用DefaultAzureCredential进行身份验证，适用于多种环境，如本地开发、Azure Functions、App Service等
@@ -517,7 +542,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         for (VirtualMachinePublisher publisher : virtualMachinePublishers) {
             //todo 筛选出需要的VM镜像
 //            if (publisher.name() != null && publisher.name().equals("Canonical")) {
-                if (firstTime < 100) {
+                if (firstTime < 10) {
                     firstTime++;
                     System.out.println("PublisherName: " + publisher.name());
                     // 获取发布者的所有产品(offer)
@@ -566,7 +591,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
     /**
      * 虚拟机镜像--暂定存放在映像内
      */
-    public List getLocalImages() {
+    public List getLocalImages(MicrosoftAzureUserModel localAzurer) {
 
         // 替换为您的实际订阅ID
         String subscriptionId = "c87ba926-f7c2-4d53-8b8e-89245dc92e26";

@@ -26,12 +26,70 @@ public class WazuhCommon {
 
     private static WazuhProbeConfig wazuhProbeConfig;
 
-    private static Integer getWazuhRemotePort(){
-        return CollectionSingleton.collectionAppConfig.getWazuhRemotePort();
+    private static Integer getWazuhRemotePort(Integer cloudType){
+        Integer wazuhRemoteHost = 0;
+        switch (cloudType) {
+            case 1:
+                wazuhRemoteHost = CollectionSingleton.collectionAppConfig.getWazuhRemotePort();
+                break;
+            case 2:
+                wazuhRemoteHost = CollectionSingleton.collectionAppConfig.getWazuhPublicRemotePort();
+                break;
+            case 3:
+                wazuhRemoteHost = CollectionSingleton.collectionAppConfig.getWazuhPrivateRemotePort();
+                break;
+            case 4:
+                wazuhRemoteHost = CollectionSingleton.collectionAppConfig.getWazuhMixedRemotePort();
+                break;
+            default:
+                wazuhRemoteHost = CollectionSingleton.collectionAppConfig.getWazuhRemotePort();
+                break;
+        }
+        return wazuhRemoteHost;
     }
 
-    private static Integer getWazuhAuthPort(){
-        return CollectionSingleton.collectionAppConfig.getWazuhAuthPort();
+    private static Integer getWazuhAuthPort(Integer cloudType){
+        Integer wazuhAuthPort = 0;
+        switch (cloudType) {
+            case 1:
+                wazuhAuthPort = CollectionSingleton.collectionAppConfig.getWazuhAuthPort();
+                break;
+            case 2:
+                wazuhAuthPort = CollectionSingleton.collectionAppConfig.getWazuhPublicAuthPort();
+                break;
+            case 3:
+                wazuhAuthPort = CollectionSingleton.collectionAppConfig.getWazuhPrivateAuthPort();
+                break;
+            case 4:
+                wazuhAuthPort = CollectionSingleton.collectionAppConfig.getWazuhMixedAuthPort();
+                break;
+            default:
+                wazuhAuthPort = CollectionSingleton.collectionAppConfig.getWazuhAuthPort();
+                break;
+        }
+        return wazuhAuthPort;
+    }
+
+    private static String getMetadataFileServer(Integer cloudType){
+        String metadataFileServer;
+        switch (cloudType) {
+            case 1:
+                metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+                break;
+            case 2:
+                metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataPublicFileServer();
+                break;
+            case 3:
+                metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataPrivateFileServer();
+                break;
+            case 4:
+                metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataMixedFileServer();
+                break;
+            default:
+                metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+                break;
+        }
+        return metadataFileServer;
     }
 
     public static final String WAZUH_AGENT_GROUP = "wazuh_agent_installer";
@@ -70,7 +128,7 @@ public class WazuhCommon {
 
     private WazuhCommon() {}
 
-    public static List<String> generateWazuhAgentInstallScript(String systemType, String agentName, String wazuhHost,
+    public static List<String> generateWazuhAgentInstallScript(Integer cloudType, String systemType, String agentName, String wazuhHost,
                                                                WazuhControl.ControlConfigParam controlParam, boolean isContainer) {
         if (wazuhProbeConfig == null) {
             wazuhProbeConfig = BeanCommon.getBean(WazuhProbeConfig.class);
@@ -81,7 +139,7 @@ public class WazuhCommon {
                 LocalFileMappingModel::getRemoteFile));
 
         String osType = SystemTypeCommandUtils.getOsType(systemType);
-        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+        String metadataFileServer = getMetadataFileServer(cloudType);
         List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>(controlParam.getProbeParams());
         List<WazuhControl.ControlProbeParam> defaultProbeParams;
         defaultProbeParams = getDefaultProbeParams(nameFileMap, metadataFileServer, agentName, wazuhProbeConfig);
@@ -100,8 +158,8 @@ public class WazuhCommon {
                             "call c:\\wazuha\\uninstall.bat",
                             String.format("set SIC_WAZUH_MANAGER_IP=%s", wazuhHost),
                             String.format("set SIC_WAZUH_AGENT_NAME=%s", agentName),
-                            String.format("set SIC_WAZUH_MANAGER_REMOTE_PORT=%d", getWazuhRemotePort()),
-                            String.format("set SIC_WAZUH_MANAGER_AUTH_PORT=%d", getWazuhAuthPort()),
+                            String.format("set SIC_WAZUH_MANAGER_REMOTE_PORT=%d", getWazuhRemotePort(cloudType)),
+                            String.format("set SIC_WAZUH_MANAGER_AUTH_PORT=%d", getWazuhAuthPort(cloudType)),
                             String.format("unzip -q %s -d %s\\agent-installer", InstallerUtils.INSTALLER_REPLACEMENT,
                                     windowsInstallDir),
                             String.format("cd %s\\agent-installer\\agent-windows", windowsInstallDir),
@@ -123,7 +181,7 @@ public class WazuhCommon {
                             "sh /opt/wazuha/uninstall.sh",
                             String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
                                             "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
-                                    wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
+                                    wazuhHost, agentName, getWazuhRemotePort(cloudType), getWazuhAuthPort(cloudType)),
                             String.format("unzip -o -q %s/%s -d %s/agent-installer", linuxInstallDir,
                                     WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
                             String.format("cd %s/agent-installer/agent-linux", linuxInstallDir),

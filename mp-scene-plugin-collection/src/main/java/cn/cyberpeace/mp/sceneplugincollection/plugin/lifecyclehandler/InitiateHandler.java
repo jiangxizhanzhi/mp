@@ -74,6 +74,8 @@ public class InitiateHandler extends HandlerCommon {
         prepareEventProcess(SceneModel.Event.INITIATE, SceneProcess.class, ElementProcess.class);
 
         var scene = getPluginHandler().getScene();
+        //当前云类型
+        Integer cloudType = scene.getSrcScene().getCloudType() != null ? scene.getSrcScene().getCloudType() : 1;
         // 全局开启流量采集
         if (Boolean.TRUE.equals(CollectionSingleton.collectionAppConfig.getEnableFlowCollect())
                 || Boolean.TRUE.equals(scene.getEnableFlowCollect()) || Boolean.TRUE.equals(scene.getEnableFlowMirror())) {
@@ -200,7 +202,7 @@ public class InitiateHandler extends HandlerCommon {
                         controlParam = this.getControlConfigParam(collectionElement.getProbes(), srcElement.getEid(),
                                 systemType, this.getLocationMap());
                     }
-                    var probeInstallScript = getProbeCollector().generateProbeInstallScript(systemType,
+                    var probeInstallScript = getProbeCollector().generateProbeInstallScript(cloudType, systemType,
                             srcElement.getEid(), collectionId, controlParam, isContainer);
                     var initCommands = srcElement.getInitCommands();
                     if (initCommands == null) {

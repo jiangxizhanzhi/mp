@@ -16,8 +16,26 @@ public class ProbeCollector {
 
     private DataCollectionFlowTableService dataCollectionFlowTableService;
 
-    private String getWazuhHost(String collectorId) {
-        return CollectionSingleton.collectionAppConfig.getWazuhServerHost();
+    private String getWazuhHost(Integer cloudType, String collectorId) {
+        String wazuhHost = "";
+        switch (cloudType) {
+            case 1:
+                wazuhHost = CollectionSingleton.collectionAppConfig.getWazuhServerHost();
+                break;
+            case 2:
+                wazuhHost = CollectionSingleton.collectionAppConfig.getWazuhPublicServerHost();
+                break;
+            case 3:
+                wazuhHost = CollectionSingleton.collectionAppConfig.getWazuhPrivateServerHost();
+                break;
+            case 4:
+                wazuhHost = CollectionSingleton.collectionAppConfig.getWazuhMixedServerHost();
+                break;
+            default:
+                wazuhHost = CollectionSingleton.collectionAppConfig.getWazuhServerHost();
+                break;
+        }
+        return wazuhHost;
     }
 
     @Autowired
@@ -43,9 +61,9 @@ public class ProbeCollector {
     public void deleteCollector(String collectorId) {
     }
 
-    public List<String> generateProbeInstallScript(String systemType, String agentName, String collectorId,
+    public List<String> generateProbeInstallScript(Integer cloudType, String systemType, String agentName, String collectorId,
                                                    WazuhControl.ControlConfigParam controlParam, boolean isContainer) {
-        return WazuhCommon.generateWazuhAgentInstallScript(systemType, agentName, getWazuhHost(collectorId), controlParam, isContainer);
+        return WazuhCommon.generateWazuhAgentInstallScript(cloudType, systemType, agentName, getWazuhHost(cloudType, collectorId), controlParam, isContainer);
     }
 
 }

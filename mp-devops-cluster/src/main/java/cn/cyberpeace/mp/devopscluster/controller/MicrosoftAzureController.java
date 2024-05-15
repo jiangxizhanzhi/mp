@@ -93,9 +93,9 @@ public class MicrosoftAzureController {
      */
     @ApiOperation(value = "云镜像管理同步", notes = "")
     @GetMapping("/synchronousCloudData")
-    public ServiceResult synchronousCloudData(@RequestParam(value = "request_data", required = false) String requestData) throws Exception {
-        if(requestData != null){
-            JSONObject synchronousCloudData = microsoftAzureConverter.synchronousCloudData(requestData);
+    public ServiceResult synchronousCloudData(@RequestParam(value = "cloud_type", required = false) String cloudType) throws Exception {
+        if(cloudType != null && !cloudType.equals("")){
+            JSONObject synchronousCloudData = microsoftAzureConverter.synchronousCloudData(cloudType);
             if (synchronousCloudData.get("code") != null && synchronousCloudData.get("code").equals("200")) {
                 return new ServiceResult(synchronousCloudData).asResult();
             }else{
