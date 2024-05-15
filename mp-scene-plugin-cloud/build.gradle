@@ -2,6 +2,7 @@ dependencies {
     implementation project(':mp-base')
     implementation project(':mp-scene')
     implementation project(':mp-auth')
+    implementation project(':mp-situation-aware')
     implementation 'com.azure:azure-identity:1.3.2'
     implementation 'com.azure.resourcemanager:azure-resourcemanager:2.6.0'
     implementation 'com.azure:azure-storage-blob:12.8.0'

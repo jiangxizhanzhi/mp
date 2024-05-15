@@ -171,6 +171,17 @@ public class AzureVirtualMachine {
         cloudElement.setResourceId(vm.id());
     }
 
+    public RunCommandResult runCommand(CloudPluginSceneElementBO cloudElement, List<String> scriptContentList) {
+//        TODO 已创建的虚拟机只能输入命令 不能直接运行脚本 1.所有安装脚本在启动时放入虚拟机（无后新增探针脚本） 2.探针脚本放文件服务 安装时先下载探针脚本后命令启动
+        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(cloudElement.getResourceId());
+        String createFileCommand = "echo '你好' > /home/root22/hello22.txt";
+//        linux:RunShellScript windows:RunPowerShellScript
+        RunCommandInput inputCommand = new RunCommandInput()
+                .withCommandId("RunShellScript")
+                .withScript(scriptContentList);
+        return virtualMachine.runCommand(inputCommand);
+    }
+
     public void delete(CloudPluginSceneElementBO cloudElement) {
         VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(cloudElement.getResourceId());
         virtualMachine.deallocate();//停机，释放资源

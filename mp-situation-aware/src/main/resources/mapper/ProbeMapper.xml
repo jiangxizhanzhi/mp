@@ -217,13 +217,22 @@
 
   <select id="listProbeDtos" resultType="cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto">
     select
-      p.*, ps.script_type, ps.script_url
+      p.*, ps.script_type, ps.script_url,ifnull(msesp.status,0) status
     <if test="condition.needScriptContent != null and condition.needScriptContent == true">
       , ps.script_content
     </if>
     from mp_situation_probe p
-    left join mp_situation_probe_script ps
-    on p.id = ps.probe_id
+    left join mp_situation_probe_script ps on p.id = ps.probe_id
+    left join mp_scene_element_situation_probe msesp on p.id = msesp.probe_id
+    <choose>
+      <when test="condition.scenceId != null and condition.scenceId != '' and condition.nodeId != null and condition.nodeId != ''">
+        AND msesp.scene = #{condition.scenceId}
+        AND msesp.scene_element = #{condition.nodeId}
+      </when>
+      <otherwise>
+        AND msesp.id = null
+      </otherwise>
+    </choose>
     <where>
       p.is_deleted = 0
       <if test="condition.ids != null and condition.ids.length > 0">

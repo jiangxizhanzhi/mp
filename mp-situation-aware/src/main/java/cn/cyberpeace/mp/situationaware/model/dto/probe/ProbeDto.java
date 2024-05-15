@@ -50,4 +50,10 @@ public class ProbeDto extends ProbeModel {
     @DefaultStr
     private String creatorName;
 
+    /**
+     * 状态
+     */
+    @ApiModelProperty(value = "安装状态")
+    @DefaultStr
+    private String status;
 }

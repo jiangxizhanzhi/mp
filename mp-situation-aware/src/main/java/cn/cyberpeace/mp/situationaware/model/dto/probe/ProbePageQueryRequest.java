@@ -39,4 +39,10 @@ public class ProbePageQueryRequest extends BasePageRequest {
     @ApiModelProperty(value = "null:全部, 0:shell 1:python 2:bat")
     private Integer[] scriptTypes;
 
+    @ApiModelProperty(value = "场景id")
+    private String scenceId;
+
+    @ApiModelProperty(value = "nodeId")
+    private String nodeId;
+
 }

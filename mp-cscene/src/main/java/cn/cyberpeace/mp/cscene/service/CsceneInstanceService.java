@@ -58,10 +58,12 @@ import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.SceneElementSituationProbeModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneConfigElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.scene.repository.SceneElementSituationProbeMapper;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
@@ -71,6 +73,8 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
@@ -92,11 +96,15 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
+import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
+import cn.cyberpeace.mp.situationaware.repository.ProbeScriptMapper;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import com.azure.resourcemanager.compute.models.InstanceViewStatus;
+import com.azure.resourcemanager.compute.models.RunCommandResult;
 import com.google.common.cache.Cache;
 import com.google.common.collect.Lists;
 import lombok.Data;
@@ -197,6 +205,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Resource
     private CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper;
+
+    @Resource
+    private ProbeScriptMapper probeScriptMapper;
+    @Resource
+    private SceneElementSituationProbeMapper sceneElementSituationProbeMapper;
 
 
     // expires in 10 minutes
@@ -1823,5 +1836,46 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 .filter(e -> !e.isEmpty())
                 .collect(Collectors.toList());
         return vulnList;
+    }
+
+    public ServiceResult<Boolean> elementInstallProbes(String id, String nodeId, List<String> probeIds, CsceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
+        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        CloudPluginSceneElementBO element = cloudPlugin.getElement(nodeId);
+        Integer cloudType = sceneHandler.getScene().getCloudType();
+        AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+
+        //        根据探针id 查询探针信息
+        HumanCondition humanCondition = new HumanCondition()
+                .filterIn(ProbeScriptModel::getProbeId, probeIds.toArray())
+                .orderBy(ProbeScriptModel::getCreateTime);
+        List<ProbeScriptModel> scriptModelList = probeScriptMapper.list(humanCondition);
+//        TODO 假设存的是下载并启动脚本命令
+        List<String> scriptContentList = scriptModelList.stream().map(ProbeScriptModel::getScriptContent).collect(Collectors.toList());
+
+        RunCommandResult runCommandResult = azureVirtualMachine.runCommand(element, scriptContentList);
+        for (int i = 0; i < runCommandResult.value().size(); i++) {
+            HumanCondition probeHumanCondition = new HumanCondition()
+                    .filterEqual(SceneElementSituationProbeModel::getProbeId, scriptModelList.get(i).getProbeId())
+                    .filterEqual(SceneElementSituationProbeModel::getScene, id)
+                    .filterEqual(SceneElementSituationProbeModel::getSceneElement, nodeId);
+            List<SceneElementSituationProbeModel> list = sceneElementSituationProbeMapper.list(probeHumanCondition);
+            SceneElementSituationProbeModel sceneElementSituationProbeModel;
+            if (list.size() > 0) {
+                sceneElementSituationProbeModel = list.get(0);
+            } else {
+                sceneElementSituationProbeModel = new SceneElementSituationProbeModel();
+                sceneElementSituationProbeModel.setScene(id);
+                sceneElementSituationProbeModel.setSceneElement(nodeId);
+                sceneElementSituationProbeModel.setProbeId(scriptModelList.get(i).getProbeId());
+            }
+            InstanceViewStatus instanceViewStatus = runCommandResult.value().get(i);
+//            TODO 获取结果
+            if ("ProvisioningState/succeeded".equals(instanceViewStatus.code())) {
+                sceneElementSituationProbeModel.setStatus(1);
+                sceneElementSituationProbeMapper.save(sceneElementSituationProbeModel);
+            }
+        }
+        return new ServiceResult<>(true);
     }
 }

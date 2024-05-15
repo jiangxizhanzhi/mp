@@ -44,4 +44,10 @@ public class ProbeSearchCondition {
     // 是否显示脚本内容, 默认不显示
     @Builder.Default
     private Boolean needScriptContent = false;
+
+    @ApiModelProperty(value = "场景id")
+    private String scenceId;
+
+    @ApiModelProperty(value = "nodeId")
+    private String nodeId;
 }

@@ -155,6 +155,18 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return request;
     }
 
+    private CsceneInstanceNodeProbesActionRequest formatNodeProbesActionRequest(
+            CsceneInstanceNodeProbesActionRequest request, String paramId, String paramNodeId, List<String> paramProbeIds) {
+        if (request == null) {
+            request = new CsceneInstanceNodeProbesActionRequest();
+        }
+        request = (CsceneInstanceNodeProbesActionRequest) formatNodeActionRequest(request, paramId, paramNodeId);
+        if (paramProbeIds != null && paramProbeIds.size() > 0) {
+            request.setProbeIds(paramProbeIds);
+        }
+        return request;
+    }
+
     private CsceneInstanceNodeConnectionActionRequest formatNodeConnectionActionRequest(
             CsceneInstanceNodeConnectionActionRequest request, String paramId, String paramNodeId,
             String paramConnectionId) {
@@ -905,5 +917,21 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @GetMapping(value = "/list_loads", params = "id")
     public List<CloudPluginSceneElementModel> listLoads(@RequestParam String id) {
         return modelService.listLoads(id);
+    }
+
+    @ApiOperation("节点探针安装")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "node_id", value = "节点id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "probeIds", value = "探针id集合", dataTypeClass = List.class),
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeProbesActionRequest.class),
+    })
+    @PostMapping("/element_install_probes")
+    public ServiceResult<Boolean> elementInstallProbes(@RequestParam(required = false) String id,
+                                                       @RequestParam(value = "node_id", required = false) String nodeId,
+                                                       @RequestParam(value = "probeIds", required = false) List<String> probeIds,
+                                                       @RequestBody(required = false) CsceneInstanceNodeProbesActionRequest request) {
+        request = formatNodeProbesActionRequest(request, id, nodeId, probeIds);
+        return modelService.elementInstallProbes(request.getId(), request.getNodeId(), request.getProbeIds(), request.getContext()).asResult();
     }
 }
