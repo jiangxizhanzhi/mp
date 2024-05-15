@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.devopscluster.controller;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.MicrosoftAzureConverter;
@@ -84,9 +83,6 @@ public class CloudDevopsTargetController {
 
     /**
      * 查询所有靶标信息
-     *
-     * @param request
-     * @return
      */
     @ApiOperation("查询常用靶标信息")
     @GetMapping("/getCommonTargets")

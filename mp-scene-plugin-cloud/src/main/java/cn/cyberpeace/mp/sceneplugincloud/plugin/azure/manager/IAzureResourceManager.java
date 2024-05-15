@@ -1,12 +1,18 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager;
 
+import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
+import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 
 public interface IAzureResourceManager {
     AzureResourceManager getManager();
+
+    TokenCredential getTokenCredential();
+
+    MicrosoftAzureUserModel getUser();
 
     Region getRegin();
 
