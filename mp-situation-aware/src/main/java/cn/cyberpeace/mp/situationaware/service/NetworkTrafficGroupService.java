@@ -154,7 +154,7 @@ public class NetworkTrafficGroupService {
         environment.put("SIC_ARKIME_ELASTICSEARCH", "http://" + situationAwareConfig.getArkimeEsHost() + ":" + situationAwareConfig.getArkimeEsPort());
         environment.put("SIC_ARKIME_INSTALL_DIR", "/opt/arkime");
         environment.put("SIC_ARKIME_ELASTICSEARCH_PREFIX", instanceId);
-        environment.put("MP_API_HOST", "http://"+ commonAppConfig.getMpIp() + ":" + commonAppConfig.getMpPort());
+        environment.put("MP_API_HOST", commonAppConfig.getMpIp() + ":" + commonAppConfig.getMpPort());
 
         environment.put("ES_HOST", situationAwareConfig.getArkimeEsHost());
         environment.put("ES_PORT", situationAwareConfig.getArkimeEsPort());
