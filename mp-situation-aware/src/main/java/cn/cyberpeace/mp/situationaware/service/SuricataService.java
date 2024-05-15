@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.util.LocaleUtil;
 import cn.cyberpeace.mp.situationaware.bo.SuricataData;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
+import cn.cyberpeace.mp.situationaware.event.SuricataRuleUpdateEventPublisher;
 import cn.cyberpeace.mp.situationaware.model.SuricataRuleModel;
 import cn.cyberpeace.mp.situationaware.repository.SuricataRuleMapper;
 import cn.cyberpeace.mp.situationaware.request.SuricataQueryRequest;
@@ -36,7 +37,8 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static cn.cyberpeace.mp.situationaware.constant.SuricataConstant.*;
+import static cn.cyberpeace.mp.situationaware.constant.SuricataConstant.STARTWITH_STR;
+import static cn.cyberpeace.mp.situationaware.constant.SuricataConstant.SURICATA_RULE_FIELD_VALUE_PK_FIRST;
 
 /*
  * @BelongsPackage: cn.cyberpeace.mp.situationaware.service
@@ -55,6 +57,8 @@ public class SuricataService {
 
     @Resource
     private ClassificationAnalyseService classificationAnalyseService;
+    @Resource
+    private SuricataRuleUpdateEventPublisher suricataRuleUpdateEventPublisher;
 
     
     /**
@@ -98,6 +102,10 @@ public class SuricataService {
             } else {
                 suricataRuleMapper.update(suricataRuleModel);
             }
+
+            //通知更新suricata文件
+            suricataRuleUpdateEventPublisher.publishEvent(this.getClass().getName());
+
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw new MpRuntimeException(SituationalAwareErrorCode.SURICATA_FORMAT_ERROR);
@@ -116,9 +124,12 @@ public class SuricataService {
             suricataRuleMapper.bulkCreate(convertRuleList,1000,true);
         stopWatch.stop();
         log.info("import spend time is {}",stopWatch.getTotalTimeMillis());
+
+        //通知更新suricata文件
+        suricataRuleUpdateEventPublisher.publishEvent(this.getClass().getName());
+
         return bulkResult.getSuccessCount() > 0;
     }
-
 
     public void convertAllRuleDataToRuleFile(String filePath) {
         try {
