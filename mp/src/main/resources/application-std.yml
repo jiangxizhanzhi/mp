@@ -92,6 +92,10 @@ management:
 # 中台各模块相关配置
 mp:
   common: #公用配置
+    cp-ip: ${mp.common.ext-var.cp-ip}                # 云平台适配层接口地址
+    cp-port: ${mp.common.ext-var.cp-port}                # 云平台适配层接口地址
+    mp-ip: ${mp.common.ext-var.mp-ip}          # MP中台地址
+    mp-port: ${mp.common.ext-var.mp-port}           # MP中台地址       # MP中台地址
   #    ext-var:
   #      mp-ip: ${MP_API_IP:10.100.1.12}          # MP中台地址
   #      mp-port: ${MP_API_PORT:8001}

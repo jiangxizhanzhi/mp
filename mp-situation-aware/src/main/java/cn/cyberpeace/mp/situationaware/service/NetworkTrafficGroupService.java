@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.common.config.CommonAppConfig;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
@@ -33,6 +34,8 @@ public class NetworkTrafficGroupService {
 
     @Autowired
     private SituationAwareConfig situationAwareConfig;
+    @Autowired
+    private CommonAppConfig commonAppConfig;
 
     /**
      * 索引前缀
@@ -151,6 +154,7 @@ public class NetworkTrafficGroupService {
         environment.put("SIC_ARKIME_ELASTICSEARCH", "http://" + situationAwareConfig.getArkimeEsHost() + ":" + situationAwareConfig.getArkimeEsPort());
         environment.put("SIC_ARKIME_INSTALL_DIR", "/opt/arkime");
         environment.put("SIC_ARKIME_ELASTICSEARCH_PREFIX", instanceId);
+        environment.put("MP_API_HOST", "http://"+ commonAppConfig.getMpIp() + ":" + commonAppConfig.getMpPort());
 
         environment.put("ES_HOST", situationAwareConfig.getArkimeEsHost());
         environment.put("ES_PORT", situationAwareConfig.getArkimeEsPort());
