@@ -74,7 +74,7 @@ public class SysNoticeController {
 
 
     @ApiOperation("阅读公告")
-    @AuthTarget({TargetEnum.FRONT_ALL, TargetEnum.SYSTEM_NOTICE_FOLDER})
+    @AuthTarget(TargetEnum.NO_AUTH)
     @ApiImplicitParam(name = "id", value = "公告ID", dataTypeClass = String.class)
     @PostMapping("/read/{id}")
     public ServiceResult read(@PathVariable String id) {
@@ -114,6 +114,7 @@ public class SysNoticeController {
 
     @ApiOperation("查询所有公告(分页)")
     @GetMapping("/page")
+    @AuthTarget(TargetEnum.NO_AUTH)
     public ServiceResult<SysNoticeDto> page(SysNoticePageRequest pageRequest) {
         pageRequest.ensure();
         return noticeService.page(pageRequest);
@@ -176,12 +177,14 @@ public class SysNoticeController {
 
     @ApiOperation(value = "查询系统公告类型")
     @GetMapping("/types")
+    @AuthTarget(TargetEnum.NO_AUTH)
     public ServiceResult<List<OptionBO>> getTypes() {
         return optionService.getIntOptions(FrontAdminConstant.MP_COMMON_OPTION_TYPE_FRONT_ADMIN_NOTICE_TYPE);
     }
 
     @ApiOperation("延期提醒")
     @PostMapping("/delay_notice")
+    @AuthTarget(TargetEnum.NO_AUTH)
     public ServiceResult<Boolean> delayNotice(@RequestBody DelayNoticeRequest delayNoticeRequest) {
         Boolean result = noticeService.delayNotice(delayNoticeRequest);
 
