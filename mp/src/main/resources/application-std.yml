@@ -263,6 +263,18 @@ mp:
     wazuh-godfs-server: http://${mp.situationaware.ext-var.wazuh-ip}:11888
     wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
     wazuh-run-command-http-callback-url: http://${mp.situationaware.ext-var.wazuh-ip}:${mp.situationaware.ext-var.self-port}/api/mp/scene_plugin_collection/wazuh_run_command_result
+    azurePublic:
+      wazuh-server-host: 20.2.80.26
+      wazuh-remote-port: 9200
+      wazuh-auth-port: 9200
+    azurePrivate:
+      wazuh-server-host: 20.2.80.26
+      wazuh-remote-port: 9200
+      wazuh-auth-port: 9200
+    azureMixed:
+      wazuh-server-host: 20.2.80.26
+      wazuh-remote-port: 9200
+      wazuh-auth-port: 9200
   cscene:
     has-own-recording-set: ${mp.cscene.ext-var.has-own-recording-set}
     scene-error-creating-seconds: ${mp.cscene.ext-var.scene-error-creating-seconds}
