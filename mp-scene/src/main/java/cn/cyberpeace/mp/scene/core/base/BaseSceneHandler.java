@@ -61,6 +61,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -1359,8 +1361,8 @@ public abstract class BaseSceneHandler<
             var nodeConnectionBO = ClassUtils.createInstance(sceneNodeConnectionBOClass);
             nodeConnectionBO.fromModel(nodeConnection);
             areaNodeConnectionMap.put(nodeConnectionKey(nodeConnectionBO), nodeConnectionBO);
-            nodeIdConnectedNodeIdMap.put(nodeConnectionBO.getSource(), nodeConnectionBO.getTarget());
-            nodeIdConnectedNodeIdMap.put(nodeConnectionBO.getTarget(), nodeConnectionBO.getSource());
+            nodeIdConnectedNodeIdMap.put(nodeConnectionBO.getSourceNodeId(), nodeConnectionBO.getTarget());
+            nodeIdConnectedNodeIdMap.put(nodeConnectionBO.getTargetNodeId(), nodeConnectionBO.getSource());
         });
     }
 
@@ -2099,13 +2101,17 @@ public abstract class BaseSceneHandler<
     }
 
     private String nodeConnectionKey(TSceneAreaNodeConnectionBO nodeConnection) {
-        return StringUtils.joinWith(":", nodeConnection.getSource(),
-                                    nodeConnection.getTarget());
+        return StringUtils.joinWith(":", nodeConnection.getSourceNodeId(),
+                                    nodeConnection.getTargetNodeId());
     }
 
     private String nodeConnectionKey(TSceneAreaNodeConnectionModel nodeConnection) {
-        return StringUtils.joinWith(":", nodeConnection.getSourceNodeId(),
-                                    nodeConnection.getTargetNodeId());
+        String sourceNodeId = nodeConnection.getSourceNodeId();
+        sourceNodeId = parseNodeId(sourceNodeId);
+        String targetNodeId = nodeConnection.getTargetNodeId();
+        targetNodeId = parseNodeId(targetNodeId);
+        return StringUtils.joinWith(":", sourceNodeId,
+                                    targetNodeId);
     }
 
     private DiffTargets<TSceneAreaNodeConnectionModel> saveNodeConnections(Map<String, TSceneAreaNodeConnectionModel> existNodeConnectionMap) {
@@ -2130,9 +2136,11 @@ public abstract class BaseSceneHandler<
             nodeConnection.setScene(sceneId);
 
             String sourceNodeId = nodeConnection.getSourceNodeId();
+            sourceNodeId = parseNodeId(sourceNodeId);
             String sourceNodeEid = getNodeEid(sourceNodeId, outerElementMap, outerAreaMap);
 
             String targetNodeId = nodeConnection.getTargetNodeId();
+            targetNodeId = parseNodeId(targetNodeId);
             String targetNodeEid = getNodeEid(targetNodeId, outerElementMap, outerAreaMap);
 
             nodeConnection.setSourceNode(sourceNodeEid);
@@ -2147,6 +2155,17 @@ public abstract class BaseSceneHandler<
                 .forEach(nodeConnection -> areaNodeConnectionMap
                         .get(nodeConnectionKey(nodeConnection)).fromModel(nodeConnection));
         return diff;
+    }
+
+    private String parseNodeId(String input){
+        String regex = "port_(.+)_layer_[0-9]+";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            String extracted = matcher.group(1);
+            return extracted;
+        }
+        return input;
     }
 
     private String getNodeEid(String nodeId, Map<String, TSceneElementModel> outerElementMap, Map<String, TSceneAreaModel> outerAreaMap) {
@@ -2210,8 +2229,8 @@ public abstract class BaseSceneHandler<
         Map<String, List<String>> outerConnectionNodeIdConnectionsMap = new HashMap<>();
         Map<String, TSceneAreaNodeConnectionBO> validConnectionMap = new HashMap<>();
         nodeConnections.forEach(nodeConnection -> {
-            String sourceNodeId = nodeConnection.getSource();
-            String targetNodeId = nodeConnection.getTarget();
+            String sourceNodeId = nodeConnection.getSourceNodeId();
+            String targetNodeId = nodeConnection.getTargetNodeId();
             if (!elementMap.containsKey(sourceNodeId) && !elementMap.containsKey(targetNodeId) &&
                     !areaMap.containsKey(sourceNodeId) && !areaMap.containsKey(targetNodeId)) {
                 return;
@@ -2254,8 +2273,8 @@ public abstract class BaseSceneHandler<
 
         validConnectionMap.forEach((key, connection) -> {
             areaNodeConnectionMap.put(key, connection);
-            nodeIdConnectedNodeIdMap.put(connection.getSource(), connection.getTarget());
-            nodeIdConnectedNodeIdMap.put(connection.getTarget(), connection.getSource());
+            nodeIdConnectedNodeIdMap.put(connection.getSourceNodeId(), connection.getTargetNodeId());
+            nodeIdConnectedNodeIdMap.put(connection.getTargetNodeId(), connection.getSourceNodeId());
         });
     }
 

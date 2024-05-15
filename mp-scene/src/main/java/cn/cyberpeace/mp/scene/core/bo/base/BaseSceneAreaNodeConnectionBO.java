@@ -4,6 +4,9 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaNodeConnectionModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * 基础场景节点连接bo
  *
@@ -67,5 +70,24 @@ public abstract class BaseSceneAreaNodeConnectionBO<M extends BaseSceneAreaNodeC
         obj.setSourceNodeId(source);
         obj.setTargetNodeId(target);
         return obj;
+    }
+
+    public String getSourceNodeId() {
+        return parseNodeId(source);
+    }
+
+    public String getTargetNodeId() {
+        return parseNodeId(target);
+    }
+
+    private String parseNodeId(String input){
+        String regex = "port_(.+)_layer_[0-9]+";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            String extracted = matcher.group(1);
+            return extracted;
+        }
+        return input;
     }
 }
