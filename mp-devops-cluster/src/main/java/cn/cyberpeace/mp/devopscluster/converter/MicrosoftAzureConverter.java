@@ -99,7 +99,11 @@ public class MicrosoftAzureConverter implements BaseConverter {
                     }
                 }
             }else if(sqls.get(i).getSupplement() != null && !sqls.get(i).getSupplement().equals("")){
-                sqls.get(i).setSupplement("and "+tableName+"."+sqls.get(i).getSupplement());
+                if(sqls.get(i).getSupplement().contains(".")){
+                    sqls.get(i).setSupplement("and "+sqls.get(i).getSupplement());
+                }else{
+                    sqls.get(i).setSupplement("and "+tableName+"."+sqls.get(i).getSupplement());
+                }
             }
         }
         List<MpSysCodeMenu> filteredList = sqls.stream()
