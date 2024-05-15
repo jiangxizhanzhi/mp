@@ -307,7 +307,7 @@ public class BcSceneConfigHandler extends BaseCsceneHandler<
 
     @Override
     public void saveScene(CsceneBO csceneBO) {
-        csceneBO.setSceneConfig(sceneConfigService.sync(csceneBO.getSceneConfig(), false, null).getSource());
+        csceneBO.setSceneConfig(sceneConfigService.sync(csceneBO.getSceneConfig(), true, null).getSource());
     }
 
     @Override
