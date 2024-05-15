@@ -66,6 +66,27 @@ public class MenuConfigService {
             return new ArrayList<>();
         }
         List<TargetBo> tree = toTree(targets);
+
+        // 将后台的菜单添加返回到前台中
+        List<TargetBo> backChildren = null;
+        for (TargetBo node : tree){
+            if ("后台".equals(node.getName())){
+                backChildren = node.getChildren();
+            }
+            if ("前台".equals(node.getName()) && null != backChildren){
+                node.getChildren().addAll(backChildren);
+                backChildren = null;
+            }
+        }
+        if (null != backChildren){
+            for (TargetBo node : tree) {
+                if ("前台".equals(node.getName())){
+                    node.getChildren().addAll(backChildren);
+                }
+            }
+        }
+
+        // 排序
         sortTree(tree);
         return tree;
     }
