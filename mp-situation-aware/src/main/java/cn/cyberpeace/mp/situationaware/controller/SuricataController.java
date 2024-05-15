@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.common.constant.CommonConstant;
 import cn.cyberpeace.mp.situationaware.bo.SuricataData;
 import cn.cyberpeace.mp.situationaware.constant.SuricataConstant;
 import cn.cyberpeace.mp.situationaware.request.SuricataQueryRequest;
@@ -73,7 +75,14 @@ public class SuricataController {
     public ServiceResult<Boolean> saveSuricataRule(@RequestBody SuricataRuleRequest suricataRuleRequest) {
         suricataService.saveRule(suricataRuleRequest);
         return new ServiceResult<>(Boolean.TRUE).asResult();
+    }
 
+    @ApiOperation(value = "获取流量规则文件存储路径")
+    @GetMapping("/rule/file_path")
+    @AuthTarget(TargetEnum.NO_AUTH)
+    public ServiceResult<String> getSuricataRuleFilePath() {
+        return new ServiceResult<>(LocalFileMappingCommon.getMapping(CommonConstant.SURICATA_RULE_GROUP, CommonConstant.SURICATA_RULE_FILE_NAME)
+                .getRemoteFile()).asResult();
     }
 
 }

@@ -13,7 +13,6 @@ import java.util.List;
 @Component
 public class FlowCollector {
 
-    public static final String SURICATA_RULE_GROUP = "suricata_rule";
 
     private NetworkTrafficGroupService networkTrafficGroupService;
 
