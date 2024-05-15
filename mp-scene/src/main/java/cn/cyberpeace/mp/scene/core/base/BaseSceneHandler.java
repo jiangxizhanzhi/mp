@@ -1345,7 +1345,9 @@ public abstract class BaseSceneHandler<
 
         nodeConnections.forEach(nodeConnection -> {
             String sourceNodeId = nodeConnection.getSourceNodeId();
+            sourceNodeId = parseNodeId(sourceNodeId);
             String targetNodeId = nodeConnection.getTargetNodeId();
+            targetNodeId = parseNodeId(targetNodeId);
             if (!elementMap.containsKey(sourceNodeId) && !elementMap.containsKey(targetNodeId) &&
                     !areaMap.containsKey(sourceNodeId) && !areaMap.containsKey(targetNodeId)) {
                 return;
