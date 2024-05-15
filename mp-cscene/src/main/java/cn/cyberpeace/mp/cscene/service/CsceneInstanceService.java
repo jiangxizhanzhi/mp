@@ -1201,54 +1201,56 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<String> getConnectionUrl(String sceneId, String nodeId, String accessModeId, HttpServletResponse response) {
-        Map<String, ScenePluginCloudSceneService.AccessModeLinkInfo> accessModeInfoMap = collectAccessModeLinkInfo(sceneId, List.of(nodeId));
-        ScenePluginCloudSceneService.AccessModeLinkInfo accessModeInfo = accessModeInfoMap.getOrDefault(accessModeId, null);
-        if (accessModeInfo == null) {
-            return new ServiceResult<>(null);
-        }
-
-        NodeConnectionBO nodeConnection = accessModeInfo.toNewNodeConnection();
-        nodeConnection.setUser(userId);
-
-        CloudAccessMode accessMode = accessModeInfo.getAccessMode();
-
-
-
-
-        var sceneHandler = new SceneHandler(sceneId, null, null);
-        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-        CloudPluginSceneBO cloudScene = pluginHandler.getScene();
-        pluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
-            if (nodeIds != null && !nodeIds.isEmpty() && !nodeIds.contains(nodeId)) {
-                return;
-            }
-            List<CloudPluginSceneElementPortBO> cloudPorts = pluginHandler.getPorts(cloudElement);
-            cloudPorts.forEach(cloudPort -> {
-                List<CloudAccessMode> accessModes = cloudPort.getAccessModes();
-                if (accessModes == null) {
-                    return;
-                }
-                accessModes.forEach(accessMode -> {
-                    String accessModeId = accessMode.getId();
-                    if (StringUtils.isEmpty(accessModeId)) {
-                        return;
-                    }
-
-                    accessModeLinkInfoMap.put(accessModeId,
-                            new ScenePluginCloudSceneService.AccessModeLinkInfo(accessModeId, accessMode, cloudPort, cloudElement, scene, cloudScene));
-                });
-            });
-        });
-
-
-
-
-        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-        var cloudElement = cloudPlugin.getElement(nodeId);
-        GetConnectionUrlParam param = new GetConnectionUrlParam();
-        param.setVmId(cloudElement.getResourceId());
-        param.setConsoleType(protocol);
-        return new ServiceResult<>(CloudSceneConnectionCommon.getConnectionUrl(param, response).getData());
+        // todo 构建异常，先注释掉
+        //Map<String, ScenePluginCloudSceneService.AccessModeLinkInfo> accessModeInfoMap = collectAccessModeLinkInfo(sceneId, List.of(nodeId));
+        //ScenePluginCloudSceneService.AccessModeLinkInfo accessModeInfo = accessModeInfoMap.getOrDefault(accessModeId, null);
+        //if (accessModeInfo == null) {
+        //    return new ServiceResult<>(null);
+        //}
+        //
+        //NodeConnectionBO nodeConnection = accessModeInfo.toNewNodeConnection();
+        //nodeConnection.setUser(userId);
+        //
+        //CloudAccessMode accessMode = accessModeInfo.getAccessMode();
+        //
+        //
+        //
+        //
+        //var sceneHandler = new SceneHandler(sceneId, null, null);
+        //CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        //CloudPluginSceneBO cloudScene = pluginHandler.getScene();
+        //pluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
+        //    if (nodeIds != null && !nodeIds.isEmpty() && !nodeIds.contains(nodeId)) {
+        //        return;
+        //    }
+        //    List<CloudPluginSceneElementPortBO> cloudPorts = pluginHandler.getPorts(cloudElement);
+        //    cloudPorts.forEach(cloudPort -> {
+        //        List<CloudAccessMode> accessModes = cloudPort.getAccessModes();
+        //        if (accessModes == null) {
+        //            return;
+        //        }
+        //        accessModes.forEach(accessMode -> {
+        //            String accessModeId = accessMode.getId();
+        //            if (StringUtils.isEmpty(accessModeId)) {
+        //                return;
+        //            }
+        //
+        //            accessModeLinkInfoMap.put(accessModeId,
+        //                    new ScenePluginCloudSceneService.AccessModeLinkInfo(accessModeId, accessMode, cloudPort, cloudElement, scene, cloudScene));
+        //        });
+        //    });
+        //});
+        //
+        //
+        //
+        //
+        //CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        //var cloudElement = cloudPlugin.getElement(nodeId);
+        //GetConnectionUrlParam param = new GetConnectionUrlParam();
+        //param.setVmId(cloudElement.getResourceId());
+        //param.setConsoleType(protocol);
+        //return new ServiceResult<>(CloudSceneConnectionCommon.getConnectionUrl(param, response).getData());
+        return null;
     }
 
     private String getProtocolByAccessModeId(String accessModeId, SceneHandler sceneHandler, String targetNodeId) {
@@ -1265,28 +1267,30 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
             }
         }
-        pluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
-            if (nodeIds != null && !nodeIds.isEmpty() && !nodeIds.contains(nodeId)) {
-                return;
-            }
-            List<CloudPluginSceneElementPortBO> cloudPorts = pluginHandler.getPorts(cloudElement);
-            cloudPorts.forEach(cloudPort -> {
-                List<CloudAccessMode> accessModes = cloudPort.getAccessModes();
-                if (accessModes == null) {
-                    return;
-                }
-                accessModes.forEach(accessMode -> {
-                    String accessModeId = accessMode.getId();
-                    if (StringUtils.isEmpty(accessModeId)) {
-                        return;
-                    }
+        // todo 构建异常，先注释掉
+        //pluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
+        //    if (nodeIds != null && !nodeIds.isEmpty() && !nodeIds.contains(nodeId)) {
+        //        return;
+        //    }
+        //    List<CloudPluginSceneElementPortBO> cloudPorts = pluginHandler.getPorts(cloudElement);
+        //    cloudPorts.forEach(cloudPort -> {
+        //        List<CloudAccessMode> accessModes = cloudPort.getAccessModes();
+        //        if (accessModes == null) {
+        //            return;
+        //        }
+        //        accessModes.forEach(accessMode -> {
+        //            String accessModeId = accessMode.getId();
+        //            if (StringUtils.isEmpty(accessModeId)) {
+        //                return;
+        //            }
+        //
+        //            accessModeLinkInfoMap.put(accessModeId,
+        //                    new ScenePluginCloudSceneService.AccessModeLinkInfo(accessModeId, accessMode, cloudPort, cloudElement, scene, cloudScene));
+        //        });
+        //    });
+        //});
 
-                    accessModeLinkInfoMap.put(accessModeId,
-                            new ScenePluginCloudSceneService.AccessModeLinkInfo(accessModeId, accessMode, cloudPort, cloudElement, scene, cloudScene));
-                });
-            });
-        });
-
+        return null;
     }
 
     public ServiceResult<NodeConnectionBO> getRemoteConnection(String id, String nodeId, String accessModeId, CsceneContextBO context) {
