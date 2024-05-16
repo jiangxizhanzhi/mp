@@ -1,153 +1,72 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
-import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DynamipsInfoItems;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DynamipsInfoParam;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DynamipsSendRuleData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DynamipsTypeInfoItems;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamicActionData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamicCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamicDeleteData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsListParam;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsListResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsStatisticsResult;
-import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
-import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 public class VirtualDynamips extends CloudClient {
-
-    public VirtualDynamicCreateData create(VirtualDynamicCreateData createData) {
+    /**
+     * 创建dynamips
+     *
+     * @param createData
+     * @return
+     */
+    public DynamipCreateResult create(DynamipCreateData createData) {
         heavyConcurrentWait();
-        VirtualDynamicCreateData response = getHttpClient().post(CloudUrlConstant.CREATE_DYNAMIPS, createData, null, new TypeReference<>() {
-        });
-        log.info("create dynamips ,request is {} , result is {}", JsonCommon.stringify(createData),
-                JsonCommon.stringify(response));
-        return response;
+        CloudResponse<DynamipCreateResult> result = cloudPost(CloudUrlConstant.DYNAMIPS_CREATE_URL, createData,
+                null, new TypeReference<>() {
+                }, true);
+        return result.getData();
     }
 
-    public void delete(List<String> resourceIds) {
+    /**
+     * 删除dynamip设备
+     *
+     * @param data
+     * @return
+     */
+    public boolean delete(DeleteDynamipData data) {
         heavyConcurrentWait();
-        VirtualDynamicDeleteData deleteData = new VirtualDynamicDeleteData();
-        deleteData.setVms(resourceIds);
-        cloudDelete(CloudUrlConstant.DELETE_DYNAMIPS, deleteData, null, new TypeReference<CloudResponse<Object>>() {
+        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.DYNAMIPS_DELETE_URL, data,
+                null, new TypeReference<>() {
+                }, true);
+        return true;
+    }
+
+    /**
+     * 读取所有的dynamips镜像列表
+     *
+     * @return
+     */
+    public List<DynamipsImageGetData> getImages() {
+        CloudResponse<CloudListData<DynamipsImageGetData>> result = cloudGet(CloudUrlConstant.DYNAMIPS_IMAGE_GET_URL, null, new TypeReference<>() {
         }, true);
-    }
-
-    public boolean restart(String instanceId) {
-        this.suspend(instanceId);
-        this.resume(instanceId);
-        return true;
-    }
-
-    public boolean pause(String instanceId) {
-        VirtualDynamicActionData actionData = new VirtualDynamicActionData();
-        actionData.setAction(VirtualDynamicActionData.SUSPEND);
-        return doAction(instanceId, actionData);
-    }
-
-    public boolean unPause(String instanceId) {
-        VirtualDynamicActionData actionData = new VirtualDynamicActionData();
-        actionData.setAction(VirtualDynamicActionData.RESUME);
-        return doAction(instanceId, actionData);
-    }
-
-    public boolean suspend(String instanceId) {
-        VirtualDynamicActionData actionData = new VirtualDynamicActionData();
-        actionData.setAction(VirtualDynamicActionData.SUSPEND);
-        return doAction(instanceId, actionData);
-    }
-
-    public boolean resume(String instanceId) {
-        VirtualDynamicActionData actionData = new VirtualDynamicActionData();
-        actionData.setAction(VirtualDynamicActionData.RESUME);
-        return doAction(instanceId, actionData);
-    }
-
-    public boolean start(String instanceId) {
-        VirtualDynamicActionData actionData = new VirtualDynamicActionData();
-        actionData.setAction(VirtualDynamicActionData.START);
-        return doAction(instanceId, actionData);
-    }
-
-    public boolean stop(String instanceId) {
-        VirtualDynamicActionData actionData = new VirtualDynamicActionData();
-        actionData.setAction(VirtualDynamicActionData.STOP);
-        return doAction(instanceId, actionData);
-    }
-
-    public boolean reboot(String instanceId) {
-        VirtualDynamicActionData actionData = new VirtualDynamicActionData();
-        actionData.setAction(VirtualDynamicActionData.REBOOT);
-        return doAction(instanceId, actionData);
-    }
-
-    public DynamipsInfoItems getPortInfo() {
-        DynamipsInfoParam type = new DynamipsInfoParam();
-        type.setType("port");
-        DynamipsInfoItems result = getHttpClient().get(CloudUrlConstant.GET_DYNAMIPS_INFO, type, new TypeReference<DynamipsInfoItems>() {
-        });
-        return result;
-    }
-
-    public DynamipsTypeInfoItems getTypeInfo() {
-        DynamipsInfoParam type = new DynamipsInfoParam();
-        type.setType("flavor");
-        DynamipsTypeInfoItems result = getHttpClient().get(CloudUrlConstant.GET_DYNAMIPS_INFO, type,
-                new TypeReference<DynamipsTypeInfoItems>() {
-        });
-        return result;
-    }
-
-    public void sendRule(String instanceId, List<String> cmds) {
-        if (CollectionUtils.isEmpty(cmds)) {
-            return;
+        if (result != null && result.getData() != null && result.getData().getList() != null && !result.getData().getList().isEmpty()) {
+            return result.getData().getList();
         }
-        DynamipsSendRuleData data = new DynamipsSendRuleData();
-        data.setCmds(cmds);
-        getHttpClient().post(CloudUrlConstant.DYNAMIPS_SEND_RULE.replace("{instance_id}", instanceId), data, null, new TypeReference<Object>() {
-        });
+        return new ArrayList<>();
     }
 
-    public VirtualDynamipsListResult list(VirtualDynamipsListParam param) {
-        VirtualDynamipsListResult result = getHttpClient().get(CloudUrlConstant.LIST_DYNAMIPS, param,
-                new TypeReference<VirtualDynamipsListResult>() {
-        });
-        return result;
-    }
-
-    public VirtualDynamipsStatisticsResult statistics() {
-        VirtualDynamipsStatisticsResult result = getHttpClient().get(CloudUrlConstant.STATISTICS_DYNAMIPS, null,
-                new TypeReference<VirtualDynamipsStatisticsResult>() {
-                });
-        if (result == null || result.getStatics() == null) {
-            result = new VirtualDynamipsStatisticsResult();
-            result.setStatics(new HashMap<>());
-            return result;
+    /**
+     * 获取dynamips对象状态
+     *
+     * @param id 资源ID
+     * @return
+     */
+    public DynamipGetResult getDynamips(String id) {
+        CloudResponse<DynamipGetResult> result = cloudGet(CloudUrlConstant.DYNAMIPS_GET_URL + "?id=" + id, null, new TypeReference<>() {
+        }, true);
+        if (result != null && result.getData() != null) {
+            return result.getData();
         }
-        return result;
-    }
-
-    private boolean doAction(String instanceId, CloudHttpData httpData) {
-        CloudResponse<Object> result = cloudPost(CloudUrlConstant.VIRTUAL_DYNAMIPS_LIFE_CONTROL_URL.replace("{instance_id}", instanceId), httpData, null, new TypeReference<CloudResponse<Object>>() {
-        }, false);
-        if (result != null && !result.getSuccess()) {
-            if (result.getMessage() != null) {
-                String convertMessage = CloudMessageConvertUtil.getMessage(result.getMessage());
-                throw new MpRuntimeException(CloudErrorCode.OPERATING_ERRORS.format(convertMessage));
-            }
-        }
-        return true;
+        return null;
     }
 }

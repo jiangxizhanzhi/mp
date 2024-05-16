@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param;
 
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.FirewallRule;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,8 +13,13 @@ import java.util.List;
 @NoArgsConstructor
 public class VirtualFirewallCreateData implements CloudHttpData {
     private String name;
+    private List<VirtualRouterCreateData.StaticRoute> routeStatics;
+    private List<VirtualRouterNic> networks;
+    private List<VirtualNic> network;
+
     private List<Rule> ingressRules;
     private List<Rule> egressRules;
+    private List<FirewallRule> rules;
     private List<String> ports;
 
     private String id;

@@ -12,6 +12,11 @@ import java.util.List;
 @NoArgsConstructor
 public class VirtualMachineCreateData implements CloudHttpData {
     private String name;
+    private String templateId;
+    private String osType;
+    private String rootPassword;
+    private String displayType;
+    private Boolean run;
     private String image;
     private Integer cpu;
     private Integer ram;
@@ -19,11 +24,15 @@ public class VirtualMachineCreateData implements CloudHttpData {
     private String requestUser;
     private String scene;
     private String department;
-    private String host;
+    private String runHost;
     private String hostname;
     private String userData;
-    private List<VirtualNic> networks;
-    private Boolean isoAttach;
+    private List<VirtualNic> network;
+    private String hwVifModel;
+    private Boolean virtioConsole = false;
+    private Boolean mainCloud;
+    private Boolean extremeSpeed = true;
+    private String customScript;
 
     private String id;
 }

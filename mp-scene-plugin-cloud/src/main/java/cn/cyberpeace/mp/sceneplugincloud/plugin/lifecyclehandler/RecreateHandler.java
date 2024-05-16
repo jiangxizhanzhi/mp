@@ -218,12 +218,6 @@ public class RecreateHandler extends HandlerCommon {
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_ENTITY_NODE,
                         () -> createEntityNode(cloudElement));
-            } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
-                runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_DYNAMIPS,
-                        () -> {
-                            createVirtualDynamips(cloudElement);
-                            configDynamic(List.of(cloudElement));
-                        } );
             }
 
             //通知云平台需要统计环境总速率的端口

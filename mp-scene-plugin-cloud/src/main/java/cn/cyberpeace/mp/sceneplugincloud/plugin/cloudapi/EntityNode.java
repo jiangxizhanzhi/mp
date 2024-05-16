@@ -7,9 +7,12 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.util.List;
 
+@Slf4j
 public class EntityNode extends CloudClient {
 
     /**
@@ -17,13 +20,48 @@ public class EntityNode extends CloudClient {
      * @param createData
      * @return EntityNodeCreateData
      */
-    public EntityNodeCreateData create(EntityNodeCreateData createData) {
+    public String create(EntityNodeCreateData createData) {
         heavyConcurrentWait();
 
-        CloudResponse<EntityNodeCreateData> result = cloudPost(CloudUrlConstant.ENTITY_NODE_CREATE_URL, createData, null,
-                new TypeReference<CloudResponse<EntityNodeCreateData>>() {
+        CloudResponse<String> result = cloudPost(CloudUrlConstant.ENTITY_NODE_CREATE_URL, createData, null,
+                new TypeReference<CloudResponse<String>>() {
                 }, true);
         return result.getData();
+    }
+
+    public boolean delete(EntityNodeDeleteData deleteData) {
+        heavyConcurrentWait();
+
+        try {
+
+            CloudResponse<Object> result = cloudDelete(CloudUrlConstant.ENTITY_NODE_DELETE_URL, deleteData, null,
+                    new TypeReference<CloudResponse<Object>>() {
+                    }, true);
+            return true;
+        } catch (Exception e) {
+            log.error("EntityNode delete error.", e);
+            if (super.excludeDeleteException(e)) {
+                return true;
+            }
+            throw e;
+        }
+    }
+
+    public LogicalSwitchCreateData createLogicalSwitch(LogicalSwitchCreateData createData) {
+        CloudResponse<LogicalSwitchCreateData> result = cloudPost(CloudUrlConstant.LOGICAL_SWITCH_CREATE_URL, createData,
+                null, new TypeReference<CloudResponse<LogicalSwitchCreateData>>() {
+                }, true);
+        return result.getData();
+    }
+
+    public void deleteLogicalSwitch(LogicalSwitchDeleteData deleteData) {
+        try {
+            cloudDelete(CloudUrlConstant.LOGICAL_SWITCH_DELETE_URL, deleteData, null,
+                    new TypeReference<CloudResponse<Object>>() {
+                    }, true);
+        } catch (Exception e) {
+            log.error("delete logical switch error:{}", ExceptionUtils.getStackTrace(e));
+        }
     }
 
     /**
@@ -31,6 +69,7 @@ public class EntityNode extends CloudClient {
      * @param data
      * @return List<EntityNodeMibFileResult>
      */
+    @Deprecated
     public CloudResponse<List<EntityNodeMibFileResult>> uploadAndParseMibFile(EntityNodeMibUploadData data,EntityNodeMibUploadParam param) {
         return cloudPost(CloudUrlConstant.ENTITY_NODE_MIB_UPLOAD_URL, data, param,
             new TypeReference<CloudResponse<List<EntityNodeMibFileResult>>>() {
@@ -42,6 +81,7 @@ public class EntityNode extends CloudClient {
      * @param param
      * @return List<MibResultData>
      */
+    @Deprecated
     public List<MibResultData> getMibNodeInfo(MibNodeQueryParam param) {
         try {
             CloudResponse<List<MibResultData>> result = cloudGet(CloudUrlConstant.ENTITY_NODE_MIB_NODE_INFO_URL, param,
@@ -53,28 +93,6 @@ public class EntityNode extends CloudClient {
                 throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
             }
             throw new MpRuntimeException(e.getMessage());
-        }
-    }
-
-    /**
-     * @description: 删除实装设备接口配置
-     * @param deleteData
-     * @return boolean
-     */
-    public boolean delete(EntityNodeDeleteData deleteData) {
-        heavyConcurrentWait();
-
-        try {
-
-            CloudResponse<Object> result = cloudDelete(CloudUrlConstant.ENTITY_NODE_DELETE_URL, deleteData, null,
-                    new TypeReference<CloudResponse<Object>>() {
-                    }, true);
-            return true;
-        } catch (Exception e) {
-            if (super.excludeDeleteException(e)) {
-                return true;
-            }
-            throw e;
         }
     }
 }

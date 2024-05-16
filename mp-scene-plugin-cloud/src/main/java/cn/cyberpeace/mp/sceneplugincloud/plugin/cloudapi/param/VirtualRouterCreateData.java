@@ -12,8 +12,9 @@ import java.util.List;
 @NoArgsConstructor
 public class VirtualRouterCreateData implements CloudHttpData {
     private String name;
-    private List<StaticRoute> routes;
-    private List<VirtualNic> networks;
+    private List<StaticRoute> routeStatics;
+    private List<VirtualRouterNic> networks;
+    private List<VirtualNic> network;
 
     private String id;
     private ExternalGatewayInfo externalGatewayInfo;

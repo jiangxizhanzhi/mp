@@ -123,10 +123,7 @@ public class DeleteHandler extends HandlerCommon {
                 vrClient.delete(virtualRouterDeleteData);
             }
             if (StringUtils.isNotEmpty(n.getNetwork().getResourceId())) {
-                VirtualSwitchDeleteData deleteData = new VirtualSwitchDeleteData();
-                deleteData.setEntityNetwork(n.getNetwork().getVlan());
-                deleteData.setIds(List.of(n.getNetwork().getResourceId()));
-                vsClient.delete(deleteData);
+                vsClient.deleteById(n.getNetwork().getResourceId());
             }
         });
 //        var resourceId = cloudElement.getAuxiliaryNetworkId();

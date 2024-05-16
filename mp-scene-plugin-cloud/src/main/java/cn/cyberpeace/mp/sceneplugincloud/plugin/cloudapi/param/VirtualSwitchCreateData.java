@@ -12,6 +12,12 @@ import java.util.List;
 @NoArgsConstructor
 public class VirtualSwitchCreateData implements CloudHttpData {
     private String name;
+    private String comment;
+    private String mtu;
+    private String subnetName;
+    private String cidr;
+    private String gateway;
+    private List<String> subnetDns;
     private Boolean entityNetwork;
     private Boolean configSwitch;
     private Integer segmentationId;
@@ -56,3 +62,4 @@ public class VirtualSwitchCreateData implements CloudHttpData {
         }
     }
 }
+

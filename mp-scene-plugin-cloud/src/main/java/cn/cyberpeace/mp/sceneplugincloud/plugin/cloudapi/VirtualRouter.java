@@ -2,21 +2,18 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CommonQueryParam;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDeleteData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterGetData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterUpdateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class VirtualRouter extends CloudClient {
+
+    private static final String ROUTER_ID = "{router_id}";
+
 
     public VirtualRouterCreateData create(VirtualRouterCreateData createData) {
         heavyConcurrentWait();
@@ -24,18 +21,7 @@ public class VirtualRouter extends CloudClient {
         CloudResponse<VirtualRouterCreateData> result = cloudPost(CloudUrlConstant.VIRTUAL_ROUTER_CREATE_URL, createData,
                 null, new TypeReference<CloudResponse<VirtualRouterCreateData>>() {
                 }, true);
-        VirtualRouterCreateData virtualRouterData = result.getData();
-        VirtualRouterCreateData.ExternalGatewayInfo externalGatewayInfo = virtualRouterData.getExternalGatewayInfo();
-        if (externalGatewayInfo != null) {
-            List<VirtualNic> networks = virtualRouterData.getNetworks();
-            networks = networks == null ? new ArrayList<>() : networks;
-            VirtualNic externalNetwork = new VirtualNic();
-            externalNetwork.setNetworkId(externalGatewayInfo.getNetworkId());
-            externalNetwork.setFixedIp(externalGatewayInfo.getFixedIp());
-            networks.add(externalNetwork);
-            virtualRouterData.setNetworks(networks);
-        }
-        return virtualRouterData;
+        return result.getData();
     }
 
     public boolean delete(VirtualRouterDeleteData deleteData) {
@@ -47,10 +33,29 @@ public class VirtualRouter extends CloudClient {
         return true;
     }
 
-    public boolean update(String resourceId, VirtualRouterUpdateData updateData) {
+    public VirtualRouterModifyData modify(VirtualRouterModifyData data, String routerId) {
         heavyConcurrentWait();
-        CloudResponse<Object> result = cloudPatch(CloudUrlConstant.VIRTUAL_ROUTER_UPDATE_URL.replace("{router_id}", resourceId), updateData, null,
-                new TypeReference<CloudResponse<Object>>() {
+
+        CloudResponse<VirtualRouterModifyData> result = cloudPatch(CloudUrlConstant.VIRTUAL_ROUTER_MODIFY_URL
+                .replace(ROUTER_ID, routerId), data, null, new TypeReference<CloudResponse<VirtualRouterModifyData>>() {
+        }, true);
+        return result.getData();
+    }
+
+    public boolean bindNetwork(String routerId, VirtualRouterBindNetworkData data) {
+        heavyConcurrentWait();
+
+        CloudResponse<Object> result = cloudPost(CloudUrlConstant.VIRTUAL_ROUTER_BIND_NETWORK_URL.replace(ROUTER_ID, routerId),
+                data, null, new TypeReference<CloudResponse<Object>>() {
+                }, true);
+        return true;
+    }
+
+    public boolean unbindNetwork(String routerId, VirtualRouterUnbindNetworkData data) {
+        heavyConcurrentWait();
+
+        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_ROUTER_UNBIND_NETWORK_URL.replace(ROUTER_ID, routerId),
+                data, null, new TypeReference<CloudResponse<Object>>() {
                 }, true);
         return true;
     }

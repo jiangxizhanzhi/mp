@@ -8,12 +8,14 @@ import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
@@ -54,7 +56,7 @@ public class CreateHandler extends HandlerCommon {
     protected void bindProbeCollectAgent(CollectionPluginSceneElementBO collectionElement, String probeCollectorId) {
         SceneElementBO srcElement = collectionElement.getSrcElement();
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
-                .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+                .getPluginHandler(PluginConstant.PLUGIN_KEY);
         CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(srcElement.getId());
         if (cloudElement == null) {
             return;
@@ -81,14 +83,16 @@ public class CreateHandler extends HandlerCommon {
         virtualNics.add(externalVirtualNic);
 
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
-                .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+                .getPluginHandler(PluginConstant.PLUGIN_KEY);
         routerPorts.forEach(routerPort -> {
             CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(routerPort.getSceneElement());
             String networkId = null;
+            String networkCidr = null;
             if (CollectionUtils.isNotEmpty(cloudElement.getDeriveNetworks())) {
                 for (ConnectedNetworkBO deriveNet : cloudElement.getDeriveNetworks()) {
                     if (deriveNet.getNetwork().getExcloudIps().contains(routerPort.getIp())) {
                         networkId = deriveNet.getNetwork().getResourceId();
+                        networkCidr = deriveNet.getNetwork().getCidr();
                     }
                 }
             }
@@ -99,10 +103,17 @@ public class CreateHandler extends HandlerCommon {
             VirtualNic virtualNic = new VirtualNic();
             virtualNic.setNetworkId(networkId);
             virtualNic.setFixedIp(routerPort.getIp());
+            virtualNic.setCidr(networkCidr);
             virtualNics.add(virtualNic);
         });
         getSceneProbeRouterPortMapper().bulkUpdate(routerPorts);
-        createData.setNetworks(virtualNics);
+        createData.setNetworks(virtualNics.stream().map(virtualNic -> {
+            VirtualRouterNic virtualRouterNic = new VirtualRouterNic();
+            virtualRouterNic.setId(virtualNic.getNetworkId());
+            virtualRouterNic.setFixedIp(virtualNic.getFixedIp());
+            virtualRouterNic.setCidr(virtualNic.getCidr());
+            return virtualRouterNic;
+        }).collect(Collectors.toList()));
         VirtualRouterCreateData virtualRouter = vrClient.create(createData);
         getPluginHandler().getScene().setProbeRouter(virtualRouter.getId());
     }
@@ -117,7 +128,7 @@ public class CreateHandler extends HandlerCommon {
         Set<String> mirrorVmInstanceIds = new HashSet<>();
         Set<String> mirrorContainerInstanceIds = new HashSet<>();
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
-                .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+                .getPluginHandler(PluginConstant.PLUGIN_KEY);
         boolean creatFlowCollector = false;
         for (Map.Entry<String, CollectionPluginSceneElementPortBO> entry : getPluginHandler().getElementPortMap().entrySet()) {
             String portId = entry.getKey();

@@ -50,7 +50,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualPortCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualPortCreateResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterUpdateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterModifyData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchUpdateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
@@ -355,7 +355,7 @@ public class ElementModifyHandler extends HandlerCommon {
     }
 
     private void doStaticRouteChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
-        VirtualRouterUpdateData updateData = new VirtualRouterUpdateData();
+        VirtualRouterModifyData updateData = new VirtualRouterModifyData();
         List<VirtualRouterCreateData.StaticRoute> staticRoutes = newCloudElement.getStaticRoutes().stream().map(h -> {
             VirtualRouterCreateData.StaticRoute staticRoute = new VirtualRouterCreateData.StaticRoute();
             staticRoute.setDestination(h.getDestination());

@@ -28,10 +28,21 @@ public abstract class BaseSceneElementPortConnectionBO<M extends BaseSceneElemen
     private Boolean unidirectional;
     @ApiModelProperty(value = "显示参数")
     private String displayContext;
-    @ApiModelProperty(value = "连线类型")
+    @ApiModelProperty(value = "线型配置")
     private String type;
+    @ApiModelProperty(value = "带宽")
+    private Integer bandwidth;
+    @ApiModelProperty(value = "延迟")
+    private Integer delay;
+    @ApiModelProperty(value = "丢包率")
+    private Integer loss;
     @ApiModelProperty(value = "路径点")
     private List<Map<String, Object>> vertices;
+    /**
+     * vlan号
+     */
+    @ApiModelProperty(value = "不同子靶场连接连线的vlanNumber")
+    private Integer vlanNumber;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {

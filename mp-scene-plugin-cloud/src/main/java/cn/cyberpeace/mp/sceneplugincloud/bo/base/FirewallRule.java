@@ -21,4 +21,6 @@ public class FirewallRule {
     private String action;
     @ApiModelProperty(value = "方向")
     private String direction;
+    @ApiModelProperty(value = "优先级")
+    private Integer priority;
 }

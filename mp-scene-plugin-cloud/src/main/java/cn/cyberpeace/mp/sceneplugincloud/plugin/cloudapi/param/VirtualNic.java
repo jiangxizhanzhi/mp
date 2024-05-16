@@ -11,30 +11,32 @@ import java.util.List;
 @NoArgsConstructor
 public class VirtualNic {
     private String networkId;
+    private String vnicName;
+    private String cidr;
+    private String gateway;
     private String vlanMode;
     private String fixedIp;
     private String fwdnsInterfaceIp;
     private String macAddress;
-    private List<QosRule> qosRules;
+    private QosRule qosRule;
     private Boolean enableExternal;
     private List<AccessMode> accessModes;
     private String firewallId;
+    private Boolean special;
 
     private String portId;
     private String qosId;
     private String floatingip;
     private String floatingipId;
+    private String vnicId;
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
     public static class QosRule {
-        private Integer maxKbps;
-        private Integer maxBurstKbps;
-        private String direction;
+        private Integer rate;
+        private Integer delay;
         private Integer lossPercent;
-        private Integer delayMs;
-        private Integer delayCorrelationMs;
     }
 
     @Data

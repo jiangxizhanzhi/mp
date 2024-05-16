@@ -12,6 +12,12 @@ import java.util.List;
 @NoArgsConstructor
 public class EntityNodeCreateData implements CloudHttpData {
     private String name;
+    private String mac;
+    private String networkId;
+    private String physicalSwitch;
+    private String logicalSwitch;
+    private String ipAddr;
+    private String psPortName;
     private String requestUser;
     private String scene;
     private String department;

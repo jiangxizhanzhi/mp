@@ -37,6 +37,7 @@ public class CloudUrlConstant {
     /**********************************************************************************************/
 
 
+    /*******************容器接口******************/
 
     /**
      * 容器创建接口，这个是必须的
@@ -52,11 +53,6 @@ public class CloudUrlConstant {
      */
     public static final String CONTAINER_ACTION_URL = "/cloud/v1/container/{container_id}/{action}";
 
-
-
-
-
-
     /**
      * 容器执行命令接口
      */
@@ -64,26 +60,49 @@ public class CloudUrlConstant {
 
 
 
-    public static final String ENTITY_NODE_CREATE_URL = "/v1/scenarios/entity_node";
-    public static final String ENTITY_NODE_DELETE_URL = "/v1/scenarios/entity_node";
+    /*******************实体设备接口*****************/
 
-    public static final String VIRTUAL_FIREWALL_CREATE_URL = "/v1/scenarios/virtual_firewall";
-    public static final String VIRTUAL_FIREWALL_UPDATE_URL = "/v1/scenarios/update_virtual_firewall_rule";
-    public static final String VIRTUAL_FIREWALL_DELETE_URL = "/v1/scenarios/virtual_firewall";
+    public static final String ENTITY_NODE_CREATE_URL = "/cloud/v1/physical/physical_port";
+    public static final String ENTITY_NODE_DELETE_URL = "/cloud/v1/physical/physical_port";
 
-    public static final String VIRTUAL_ROUTER_CREATE_URL = "/v1/scenarios/virtual_router";
-    public static final String VIRTUAL_ROUTER_UPDATE_URL = "/v1/routers/{router_id}";
-    public static final String VIRTUAL_ROUTER_DELETE_URL = "/v1/scenarios/virtual_router";
+    public static final String LOGICAL_SWITCH_CREATE_URL = "/cloud/v1/physical/logical_switch";
+    public static final String LOGICAL_SWITCH_DELETE_URL = "/cloud/v1/physical/logical_switch";
 
-    public static final String VIRTUAL_SWITCH_CREATE_URL = "/v1/scenarios/virtual_switch";
-    public static final String VIRTUAL_SWITCH_UPDATE_URL = "/v1/networks/{network_id}";
-    public static final String VIRTUAL_SWITCH_DELETE_URL = "/v1/scenarios/virtual_switch";
 
-    public static final String VIRTUAL_MACHINE_CREATE_URL = "/v1/scenarios/vm";
-    public static final String VIRTUAL_MACHINE_DELETE_URL = "/v1/scenarios/vm";
+    /****************firewall**********************/
+    public static final String VIRTUAL_FIREWALL_CREATE_URL = "/cloud/v1/scenarios/firewall";
+    public static final String VIRTUAL_FIREWALL_DELETE_URL = "/cloud/v1/scenarios/firewall";
+    public static final String VIRTUAL_FIREWALL_POLICY_CREATE_URL = "/cloud/v1/scenarios/firewall_policy";
 
+
+    /*********************dynamips*********************/
+
+    public static final String DYNAMIPS_CREATE_URL = "/cloud/v1/scenarios/dynamips";
+    public static final String DYNAMIPS_DELETE_URL = "/cloud/v1/scenarios/dynamips";
+    public static final String DYNAMIPS_GET_URL = "/cloud/v1/scenarios/dynamips";
+    public static final String DYNAMIPS_IMAGE_GET_URL = "/cloud/v1/scenarios/dynamips/images";
+
+
+    /**************************router****************************/
+    public static final String VIRTUAL_ROUTER_CREATE_URL = "/cloud/v1/scenarios/virtual_router";
+    public static final String VIRTUAL_ROUTER_DELETE_URL = "/cloud/v1/scenarios/virtual_router";
+    public static final String VIRTUAL_ROUTER_MODIFY_URL = "/cloud/v1/routers/{router_id}";
+    //这个用来做虚实结合，多靶场的
+    public static final String VIRTUAL_ROUTER_BIND_NETWORK_URL = "/cloud/v1/router/{router_id}/network";
+    public static final String VIRTUAL_ROUTER_UNBIND_NETWORK_URL = "/cloud/v1/router/{router_id}/network";
+
+    /*****************网络*********************/
+    public static final String NETWORK_CREATE_URL = "/cloud/v1/network";
+    public static final String NETWORK_DELETE_URL = "/cloud/v1/network/{network_id}";
+    public static final String NETWORK_ACL_CREATE_URL = "/cloud/v1/network/{network_id}/acl";
+    public static final String NETWORK_ACL_DELETE_URL = "/cloud/v1/network/{network_id}/acl";
+
+
+    /*****************************************************************************************************/
 
     public static final String VIRTUAL_MACHINE_ACCESS_URL = "/cloud/v1/vm/console";
+    public static final String VIRTUAL_MACHINE_CREATE_URL = "/cloud/v1/scenarios/vm";
+    public static final String VIRTUAL_MACHINE_DELETE_URL = "/cloud/v1/scenarios/vm";
 
 
     public static final String VIRTUAL_MACHINE_SNAPSHOT_URL = "/v1/scenarios/node_snapshot";
@@ -94,6 +113,13 @@ public class CloudUrlConstant {
     public static final String CONTAINER_LIFE_CONTROL_URL = "/v1/containers/{instance_id}/action";
 
     public static final String VIRTUAL_INTERNET_CREATE_URL = "/v1/scenarios/virtual_internet";
+
+    public static final String VIRTUAL_SWITCH_UPDATE_URL = "/v1/networks/{network_id}";
+
+
+
+
+
     public static final String NETWORK_QUERY_URL = "/v1/networks";
     public static final String NETWORK_GET_URL = "/v1/networks/%s";
 
