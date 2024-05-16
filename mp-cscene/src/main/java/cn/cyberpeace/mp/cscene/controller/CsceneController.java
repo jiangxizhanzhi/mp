@@ -6,11 +6,13 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.controller.request.AreaUpdateRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
@@ -25,7 +27,9 @@ import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.scene.model.SceneConfigAreaModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
+import cn.cyberpeace.mp.scene.repository.SceneConfigAreaMapper;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -179,6 +183,22 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneBO csceneBO = new CsceneBO();
         csceneBO.setSceneConfig(dataBO);
         return new ServiceResult<>(csceneBO).asResult();
+    }
+
+    @ApiOperation("更新区域显示参数")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = AreaUpdateRequest.class)
+    @PostMapping("/update_area")
+    public ServiceResult<Boolean> updateArea(@RequestBody AreaUpdateRequest request) {
+
+        String id = this.modelService.get(request.getSceneId()).getSource().getObj().getSceneConfig();
+
+        var sceneConfigAreaMapper = BeanCommon.getBean(SceneConfigAreaMapper.class);
+        SceneConfigAreaModel sceneConfigAreaModel = sceneConfigAreaMapper.list(new HumanCondition().select(SceneConfigAreaModel::getId)
+                                                                                       .filterEqual(SceneConfigAreaModel::getScene, id)
+                                                                                       .filterEqual(SceneConfigAreaModel::getNodeId, request.getAreaId()))
+                .get(0);
+        sceneConfigAreaModel.setDisplayContext(request.getDisplayContext());
+        return new ServiceResult<>(sceneConfigAreaMapper.update(sceneConfigAreaModel)).asResult();
     }
 
     @ApiOperation("更新场景拓扑(模板拖拽)")
