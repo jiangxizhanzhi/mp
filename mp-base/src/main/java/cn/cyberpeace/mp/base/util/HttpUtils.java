@@ -51,7 +51,7 @@ public class HttpUtils {
     /**
      * 默认超时时间
      */
-    private static final Integer DEFAULT_TIME_OUT = 600;
+    private static final Integer DEFAULT_TIME_OUT = 600 * 1000;
 
     /**
      * 发送一个Post请求
