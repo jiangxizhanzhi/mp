@@ -27,10 +27,6 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
 
     List<DeviceCloudTargetPO> getCloudTargetList(@Param("param") JSONObject requestData);
 
-    List<DeviceCloudTargetCalculate> getCloudTargetCalculateList(@Param("param") JSONObject requestData);
-
-    List<DeviceCloudTargetContainer> getCloudTargetContainerList(@Param("param") JSONObject requestData);
-
     Integer getCloudTargetListTotal(@Param("param") JSONObject requestData);
 
     Integer deleteByIds(@Param("id") String id, @Param("param") List<String> ids);

@@ -24,6 +24,10 @@ public class DeviceCloudTargetVO extends BaseModel {
      */
     private String name;
     /**
+     * 镜像类型(container、vm)
+     */
+    private String imageType;
+    /**
      * 云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储 )
      */
     private Integer cloudServiceType;

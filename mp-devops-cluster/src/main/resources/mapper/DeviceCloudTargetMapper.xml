@@ -6,6 +6,7 @@
         INSERT INTO mp_devops_cloud_target (
         id,
         name,
+        image_type,
         cloud_service_type,
         operating_system,
         operating_system_status,
@@ -18,6 +19,7 @@
             (
                 #{item.id},
                 #{item.name},
+                #{item.imageType},
                 #{item.cloudServiceType},
                 #{item.operatingSystem},
                 #{item.operatingSystemStatus},
@@ -376,6 +378,7 @@
         <if test="cloudServiceType != null and cloudServiceType == 2">
             SELECT
             target.id,
+            target.image_type,
             target.cloud_service_type,
             calculate.*
             FROM
@@ -386,6 +389,7 @@
         <if test="cloudServiceType != null and cloudServiceType == 3">
             SELECT
             target.id,
+            target.image_type,
             target.cloud_service_type,
             container.*
             FROM

@@ -151,7 +151,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             default:
         }
         //结果转Device集合
-        List<CloudDevice> convert = convert(vos,total,request.getCloudServiceType());
+        List<CloudDevice> convert = convert(vos,total);
         JSONObject result = new JSONObject();
         result.put("list", convert);
         result.put("total", total);
@@ -159,13 +159,14 @@ public class MicrosoftAzureConverter implements BaseConverter {
     }
 
     //结果转Device集合
-    private List<CloudDevice> convert(List<DeviceCloudTargetVO> vos,Integer total,String cloudServiceType){
+    private List<CloudDevice> convert(List<DeviceCloudTargetVO> vos,Integer total){
         List<CloudDevice> deviceList = new ArrayList<>();
         for (int i = 0; i < vos.size(); i++) {
             CloudDevice device = new CloudDevice();
             device.setDeleted(false);
             device.setTotal(total);
-            device.setCloudServiceType(cloudServiceType);
+            device.setCloudServiceType(vos.get(i).getCloudServiceType().toString());
+            device.setImageType(vos.get(i).getImageType());
             device.setName(vos.get(i).getName());
             device.setLogo(vos.get(i).getLogo());
             //1:云靶标 2:载荷 3:边界网络设备
@@ -234,6 +235,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTarget.setName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
             String id = String.valueOf(UUID.randomUUID());
             deviceCloudTarget.setId(id);
+            //镜像类型(container、vm)
+            deviceCloudTarget.setImageType("container");
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
             deviceCloudTarget.setCloudServiceType(3);
             deviceCloudTarget.setOperatingSystem("linux");
@@ -270,6 +273,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTarget.setName(((JSONObject) images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "");
             String id = String.valueOf(UUID.randomUUID());
             deviceCloudTarget.setId(id);
+            //镜像类型(container、vm)
+            deviceCloudTarget.setImageType("vm");
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
             deviceCloudTarget.setCloudServiceType(2);
             deviceCloudTarget.setOperatingSystem(((JSONObject) images.get(i)).get("operatingSystem") != null ? ((JSONObject) images.get(i)).get("operatingSystem").toString() : "");
@@ -309,6 +314,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTarget.setName(((JSONObject) localImages.get(i)).get("imageName") != null ? ((JSONObject) localImages.get(i)).get("imageName").toString() : "");
             String id = String.valueOf(UUID.randomUUID());
             deviceCloudTarget.setId(id);
+            //镜像类型(container、vm)
+            deviceCloudTarget.setImageType("vm");
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
             deviceCloudTarget.setCloudServiceType(2);
             deviceCloudTarget.setOperatingSystem(((JSONObject) localImages.get(i)).get("operatingSystem") != null ? ((JSONObject) localImages.get(i)).get("operatingSystem").toString() : "");
