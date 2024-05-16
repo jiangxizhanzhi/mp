@@ -1,17 +1,20 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneSyncRequest;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -23,6 +26,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
+import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -46,6 +50,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Api(value = "场景模板", tags = "CSCENE-场景模板")
 @Slf4j
@@ -173,6 +179,155 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneBO csceneBO = new CsceneBO();
         csceneBO.setSceneConfig(dataBO);
         return new ServiceResult<>(csceneBO).asResult();
+    }
+
+    @ApiOperation("更新场景拓扑(模板拖拽)")
+    @PostMapping("/sync_with_template")
+    public ServiceResult<CsceneBO> syncWithTemplate(@RequestBody CsceneSyncRequest request) {
+        String id = this.modelService.get(request.getId()).getSource().getObj().getSceneConfig();
+        String templateId = this.modelService.get(request.getId()).getSource().getObj().getSceneConfig();
+
+        SceneConfigService sceneConfigService = BeanCommon.getBean(SceneConfigService.class);
+
+        var originSceneConfig = sceneConfigService.get(id, false, null, null).getSource();
+        var templateSceneConfig = sceneConfigService.get(templateId, false, null, null).getSource();
+        this.removeId(templateSceneConfig);
+        this.updateOldId(templateSceneConfig);
+        if (StringUtils.isNotEmpty(request.getAreaId())) {
+            this.modifyAreaId(templateSceneConfig, request.getAreaId());
+        }
+        this.mergeSceneConfig(originSceneConfig, templateSceneConfig);
+        sceneConfigService.sync(originSceneConfig, false, null);
+        var res = sceneConfigService.get(request.getId(), true, request.getAreaId(), null).getSource();
+        var csceneBO = new CsceneBO();
+        csceneBO.setSceneConfig(res);
+        return new ServiceResult<>(csceneBO).asResult();
+    }
+
+    private void modifyAreaId(SceneConfigDataBO sceneConfigDataBO, String areaId) {
+        if (Objects.nonNull(sceneConfigDataBO) && Objects.nonNull(sceneConfigDataBO.getTopology())) {
+            sceneConfigDataBO.getTopology().getAreas().forEach(sceneConfigAreaBO -> {
+                if (StringUtils.isEmpty(sceneConfigAreaBO.getArea())) {
+                    sceneConfigAreaBO.setArea(areaId);
+                }
+            });
+            sceneConfigDataBO.getTopology().getElements().forEach(sceneConfigElementBO -> {
+                if (StringUtils.isEmpty(sceneConfigElementBO.getArea())) {
+                    sceneConfigElementBO.setArea(areaId);
+                }
+            });
+        }
+    }
+
+    private void removeId(SceneConfigDataBO sceneConfigDataBO) {
+        if (Objects.isNull(sceneConfigDataBO)) {
+            return;
+        }
+        if (sceneConfigDataBO.getTopology() != null) {
+            var topology = sceneConfigDataBO.getTopology();
+            topology.getScene().setEid(null);
+            topology.getElements().forEach(sceneElementBO -> {
+                sceneElementBO.setEid(null);
+                if (CollectionUtils.isEmpty(sceneElementBO.getPorts())) {
+                    return;
+                }
+                sceneElementBO.getPorts().forEach(p -> p.setEid(null));
+            });
+            topology.getAreas().forEach(sceneAreaBO -> sceneAreaBO.setEid(null));
+            topology.getConnections().forEach(sceneElementPortConnectionBO -> sceneElementPortConnectionBO.setEid(null));
+            topology.getNodeConnections().forEach(sceneNodeConnectionBO -> sceneNodeConnectionBO.setEid(null));
+            topology.getPieces().forEach(scenePieceBO -> scenePieceBO.setEid(null));
+        }
+        if (sceneConfigDataBO.getPlugins() != null) {
+            sceneConfigDataBO.getPlugins().values().forEach(scenePluginDataBO -> {
+                if (Objects.nonNull(scenePluginDataBO.getScene())) {
+                    scenePluginDataBO.getScene().remove("id");
+                }
+                if (Objects.nonNull(scenePluginDataBO.getElements()) && CollectionUtils.isNotEmpty(scenePluginDataBO.getElements().values())) {
+                    scenePluginDataBO.getElements().values().forEach(map -> map.remove("id"));
+                }
+                if (Objects.nonNull(scenePluginDataBO.getElementPorts()) && CollectionUtils.isNotEmpty(scenePluginDataBO.getElementPorts().values())) {
+                    scenePluginDataBO.getElementPorts().values().forEach(map -> map.remove("id"));
+                }
+            });
+        }
+    }
+
+    private void updateOldId(SceneConfigDataBO sceneConfigDataBO) {
+        Map<String, String> oldId2New = new HashMap<>();
+        if (Objects.isNull(sceneConfigDataBO)) {
+            return;
+        }
+        // 构建新老id的映射
+
+        if (Objects.nonNull(sceneConfigDataBO.getTopology())) {
+            var topology = sceneConfigDataBO.getTopology();
+            topology.getAreas().forEach(a -> {
+                String nodeId = TextUtils.uuid();
+                oldId2New.put(a.getId(), nodeId);
+                a.setId(nodeId);
+            });
+            topology.getAreas().forEach(a -> a.setArea(oldId2New.get(a.getArea())));
+            topology.getElements().forEach(e -> {
+                String oldNodeId = e.getId();
+                String newNodeId = TextUtils.uuid();
+                oldId2New.put(oldNodeId, newNodeId);
+                e.setId(newNodeId);
+                e.setArea(oldId2New.get(e.getArea()));
+                if (CollectionUtils.isEmpty(e.getPorts())) {
+                    return;
+                }
+                for (var p : e.getPorts()) {
+                    String portId = p.getId().replace(oldNodeId, newNodeId);
+                    oldId2New.put(p.getId(), portId);
+                    p.setId(portId);
+                }
+            });
+            topology.getConnections().forEach(c -> {
+                String nodeId = TextUtils.uuid();
+                oldId2New.put(c.getId(), nodeId);
+                c.setId(nodeId);
+                c.setSource(oldId2New.get(c.getSource()));
+                c.setTarget(oldId2New.get(c.getTarget()));
+            });
+            topology.getNodeConnections().forEach(nc -> {
+                String nodeId = TextUtils.uuid();
+                oldId2New.put(nc.getId(), nodeId);
+                nc.setId(nodeId);
+
+                String sourceNodeId = parseNodeId(nc.getSourceNodeId());
+                String newSourceNodeId = oldId2New.get(sourceNodeId);
+                String targetNodeId = parseNodeId(nc.getTargetNodeId());
+                String newTargetNodeId = oldId2New.get(targetNodeId);
+
+                nc.setSource(nc.getSource().replace(sourceNodeId, newSourceNodeId));
+                nc.setTarget(nc.getTarget().replace(targetNodeId, newTargetNodeId));
+            });
+        }
+        if (sceneConfigDataBO.getPlugins() != null) {
+            sceneConfigDataBO.getPlugins().values().forEach(scenePluginDataBO -> {
+                if (Objects.nonNull(scenePluginDataBO.getElements()) && !scenePluginDataBO.getElements().isEmpty()) {
+                    var elementMap = scenePluginDataBO.getElements();
+                    oldId2New.forEach((oldId, newId) -> {
+                        if (Objects.isNull(elementMap.get(oldId))) {
+                            return;
+                        }
+                        elementMap.put(newId, elementMap.get(oldId));
+                        elementMap.remove(oldId);
+                    });
+                }
+                if (Objects.nonNull(scenePluginDataBO.getElementPorts()) && !scenePluginDataBO.getElementPorts().isEmpty()) {
+                    var portMap = scenePluginDataBO.getElementPorts();
+                    oldId2New.forEach((oldId, newId) -> {
+                        if (Objects.isNull(portMap.get(oldId))) {
+                            return;
+                        }
+                        portMap.put(newId, portMap.get(oldId));
+                        portMap.remove(oldId);
+                    });
+                }
+            });
+        }
     }
 
     @ApiOperation("查询场景拓扑区域树形结构")
@@ -398,5 +553,16 @@ public class CsceneController implements BaseModelListControllerBase {
                 }));
             }
         }
+    }
+
+    private String parseNodeId(String input){
+        String regex = "port_(.+)_layer_[0-9]+";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            String extracted = matcher.group(1);
+            return extracted;
+        }
+        return input;
     }
 }
