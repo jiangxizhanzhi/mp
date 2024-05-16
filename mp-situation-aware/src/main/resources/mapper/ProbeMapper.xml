@@ -234,7 +234,7 @@
       </otherwise>
     </choose>
     <where>
-      p.is_deleted = 0
+      p.is_deleted = 0 and (msesp.deleted != 1 or msesp.deleted is null )
       <if test="condition.ids != null and condition.ids.length > 0">
         AND p.id in
         <foreach item="pid" index="index" collection="condition.ids" open="(" separator="," close=")">

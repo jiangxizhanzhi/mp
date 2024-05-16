@@ -934,4 +934,52 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         request = formatNodeProbesActionRequest(request, id, nodeId, probeIds);
         return modelService.elementInstallProbes(request.getId(), request.getNodeId(), request.getProbeIds(), request.getContext()).asResult();
     }
+
+    @ApiOperation("节点探针删除")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "node_id", value = "节点id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "probeIds", value = "探针id集合", dataTypeClass = List.class),
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeProbesActionRequest.class),
+    })
+    @PostMapping("/element_delete_probes")
+    public ServiceResult<Boolean> elementDeleteProbes(@RequestParam(required = false) String id,
+                                                      @RequestParam(value = "node_id", required = false) String nodeId,
+                                                      @RequestParam(value = "probeIds", required = false) List<String> probeIds,
+                                                      @RequestBody(required = false) CsceneInstanceNodeProbesActionRequest request) {
+        request = formatNodeProbesActionRequest(request, id, nodeId, probeIds);
+        return modelService.elementDeleteProbes(request.getId(), request.getNodeId(), request.getProbeIds(), request.getContext()).asResult();
+    }
+
+    @ApiOperation("节点探针卸载")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "node_id", value = "节点id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "probeIds", value = "探针id集合", dataTypeClass = List.class),
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeProbesActionRequest.class),
+    })
+    @PostMapping("/element_uninstall_probes")
+    public ServiceResult<Boolean> elementUninstallProbes(@RequestParam(required = false) String id,
+                                                         @RequestParam(value = "node_id", required = false) String nodeId,
+                                                         @RequestParam(value = "probeIds", required = false) List<String> probeIds,
+                                                         @RequestBody(required = false) CsceneInstanceNodeProbesActionRequest request) {
+        request = formatNodeProbesActionRequest(request, id, nodeId, probeIds);
+        return modelService.elementUninstallProbes(request.getId(), request.getNodeId(), request.getProbeIds(), request.getContext()).asResult();
+    }
+
+    @ApiOperation("节点探针重启")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "node_id", value = "节点id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "probeIds", value = "探针id集合", dataTypeClass = List.class),
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeProbesActionRequest.class),
+    })
+    @PostMapping("/element_restart_probes")
+    public ServiceResult<Boolean> elementRestartProbes(@RequestParam(required = false) String id,
+                                                       @RequestParam(value = "node_id", required = false) String nodeId,
+                                                       @RequestParam(value = "probeIds", required = false) List<String> probeIds,
+                                                       @RequestBody(required = false) CsceneInstanceNodeProbesActionRequest request) {
+        request = formatNodeProbesActionRequest(request, id, nodeId, probeIds);
+        return modelService.elementRestartProbes(request.getId(), request.getNodeId(), request.getProbeIds(), request.getContext()).asResult();
+    }
 }

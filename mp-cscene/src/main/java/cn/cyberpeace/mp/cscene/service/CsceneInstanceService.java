@@ -66,6 +66,7 @@ import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementSituationProbeMapper;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
+import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
@@ -1839,22 +1840,74 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> elementInstallProbes(String id, String nodeId, List<String> probeIds, CsceneContextBO context) {
-        SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
-        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-        CloudPluginSceneElementBO element = cloudPlugin.getElement(nodeId);
-        Integer cloudType = sceneHandler.getScene().getCloudType();
-        AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+        //        根据探针id 查询探针信息
+        HumanCondition humanCondition = new HumanCondition()
+                .filterIn(ProbeScriptModel::getProbeId, probeIds.toArray())
+                .orderBy(ProbeScriptModel::getCreateTime);
+        List<ProbeScriptModel> scriptModelList = probeScriptMapper.list(humanCondition);
+//        TODO 下载并启动脚本命令
+        List<String> scriptContentList = scriptModelList.stream().map(ProbeScriptModel::getScriptContent).collect(Collectors.toList());
+
+        save(id, nodeId, scriptContentList, scriptModelList, SceneElementSituationProbeModel.ProbeStatus.RUNNING.getValue(), false);
+
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> elementDeleteProbes(String id, String nodeId, List<String> probeIds, CsceneContextBO context) {
+//          1. 查询探针是否安装 若安装需卸载
+        //        根据探针id 查询探针信息
+        HumanCondition humanCondition = new HumanCondition()
+                .filterIn(ProbeScriptModel::getProbeId, probeIds.toArray())
+                .orderBy(ProbeScriptModel::getCreateTime);
+        List<ProbeScriptModel> scriptModelList = probeScriptMapper.list(humanCondition);
+//        TODO 卸载探针命令
+        List<String> scriptContentList = scriptModelList.stream().map(ProbeScriptModel::getScriptContent).collect(Collectors.toList());
+//          2. 删除
+        save(id, nodeId, scriptContentList, scriptModelList, SceneElementSituationProbeModel.ProbeStatus.NOT_INSTALL.getValue(), true);
+
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> elementUninstallProbes(String id, String nodeId, List<String> probeIds, CsceneContextBO context) {
 
         //        根据探针id 查询探针信息
         HumanCondition humanCondition = new HumanCondition()
                 .filterIn(ProbeScriptModel::getProbeId, probeIds.toArray())
                 .orderBy(ProbeScriptModel::getCreateTime);
         List<ProbeScriptModel> scriptModelList = probeScriptMapper.list(humanCondition);
-//        TODO 假设存的是下载并启动脚本命令
+//        TODO 卸载探针命令
         List<String> scriptContentList = scriptModelList.stream().map(ProbeScriptModel::getScriptContent).collect(Collectors.toList());
 
-        RunCommandResult runCommandResult = azureVirtualMachine.runCommand(element, scriptContentList);
-        for (int i = 0; i < runCommandResult.value().size(); i++) {
+        save(id, nodeId, scriptContentList, scriptModelList, SceneElementSituationProbeModel.ProbeStatus.NOT_INSTALL.getValue(), false);
+        return new ServiceResult<>(true);
+    }
+
+
+    public ServiceResult<Boolean> elementRestartProbes(String id, String nodeId, List<String> probeIds, CsceneContextBO context) {
+        //        根据探针id 查询探针信息
+        HumanCondition humanCondition = new HumanCondition()
+                .filterIn(ProbeScriptModel::getProbeId, probeIds.toArray())
+                .orderBy(ProbeScriptModel::getCreateTime);
+        List<ProbeScriptModel> scriptModelList = probeScriptMapper.list(humanCondition);
+//        TODO 重启探针命令
+        List<String> scriptContentList = scriptModelList.stream().map(ProbeScriptModel::getScriptContent).collect(Collectors.toList());
+
+        runCommandResult(id, nodeId, scriptContentList);
+        return new ServiceResult<>(true);
+    }
+
+    /**
+     * 保存节点探针关联信息
+     *
+     * @param id
+     * @param nodeId
+     * @param scriptContentList
+     * @param scriptModelList
+     * @param status
+     */
+    private void save(String id, String nodeId, List<String> scriptContentList, List<ProbeScriptModel> scriptModelList, int status, Boolean isDelete) {
+//        先更新状态为更新
+        for (int i = 0; i < scriptModelList.size(); i++) {
             HumanCondition probeHumanCondition = new HumanCondition()
                     .filterEqual(SceneElementSituationProbeModel::getProbeId, scriptModelList.get(i).getProbeId())
                     .filterEqual(SceneElementSituationProbeModel::getScene, id)
@@ -1869,13 +1922,63 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 sceneElementSituationProbeModel.setSceneElement(nodeId);
                 sceneElementSituationProbeModel.setProbeId(scriptModelList.get(i).getProbeId());
             }
-            InstanceViewStatus instanceViewStatus = runCommandResult.value().get(i);
-//            TODO 获取结果
-            if ("ProvisioningState/succeeded".equals(instanceViewStatus.code())) {
-                sceneElementSituationProbeModel.setStatus(1);
-                sceneElementSituationProbeMapper.save(sceneElementSituationProbeModel);
-            }
+            sceneElementSituationProbeModel.setStatus(SceneElementSituationProbeModel.ProbeStatus.UPDATING.getValue());
+            sceneElementSituationProbeMapper.save(sceneElementSituationProbeModel);
         }
-        return new ServiceResult<>(true);
+
+        SceneTaskPool.getInstance().executeTask(() -> {
+            RunCommandResult runCommandResult = runCommandResult(id, nodeId, scriptContentList);
+            for (int i = 0; i < scriptModelList.size(); i++) {
+                HumanCondition probeHumanCondition = new HumanCondition()
+                        .filterEqual(SceneElementSituationProbeModel::getProbeId, scriptModelList.get(i).getProbeId())
+                        .filterEqual(SceneElementSituationProbeModel::getScene, id)
+                        .filterEqual(SceneElementSituationProbeModel::getSceneElement, nodeId);
+                List<SceneElementSituationProbeModel> list = sceneElementSituationProbeMapper.list(probeHumanCondition);
+                SceneElementSituationProbeModel sceneElementSituationProbeModel;
+                if (list.size() > 0) {
+                    sceneElementSituationProbeModel = list.get(0);
+                } else {
+                    sceneElementSituationProbeModel = new SceneElementSituationProbeModel();
+                    sceneElementSituationProbeModel.setScene(id);
+                    sceneElementSituationProbeModel.setSceneElement(nodeId);
+                    sceneElementSituationProbeModel.setProbeId(scriptModelList.get(i).getProbeId());
+                }
+                InstanceViewStatus instanceViewStatus = runCommandResult.value().get(i);
+//            TODO 获取结果
+                if ("ProvisioningState/succeeded".equals(instanceViewStatus.code())) {
+                    sceneElementSituationProbeModel.setStatus(status);
+                    sceneElementSituationProbeModel.setDeleted(isDelete);
+                    sceneElementSituationProbeMapper.save(sceneElementSituationProbeModel);
+                }
+            }
+        });
+
     }
+
+    //    异步微软云操作转
+    private void saveAsync(String id, String nodeId, List<ProbeScriptModel> scriptModelList, Runnable r) {
+
+        r.run();
+    }
+
+
+    /**
+     * 微软云虚拟机操作-执行命令
+     *
+     * @param id
+     * @param nodeId
+     * @param scriptContentList
+     * @return
+     */
+    private static RunCommandResult runCommandResult(String id, String nodeId, List<String> scriptContentList) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
+        Integer cloudType = sceneHandler.getScene().getCloudType();
+        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        CloudPluginSceneElementBO element = cloudPlugin.getElement(nodeId);
+        AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+        RunCommandResult runCommandResult = azureVirtualMachine.runCommand(element, scriptContentList);
+        return runCommandResult;
+    }
+
+
 }
