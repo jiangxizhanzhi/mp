@@ -974,6 +974,7 @@ public class SceneHandler extends BaseSceneHandler<
         element.setEvent(SceneElementModel.Event.SNAPSHOT);
         element.setEventStatus(EventStatus.OVER);
         updateSceneElement(nodeId);
+        asyncAckElementChanged(nodeId, false, false);
         if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
             updateSceneElementWithPlugins(nodeId);
         }
