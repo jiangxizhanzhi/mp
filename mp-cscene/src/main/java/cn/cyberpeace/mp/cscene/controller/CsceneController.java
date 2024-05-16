@@ -153,7 +153,7 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.getById(id, false, null).asResult();
     }
 
-    @ApiOperation("获取指定id场景模板")
+    @ApiOperation("根据区域获取指定id场景模板")
     @GetMapping("/get_by_area")
     public ServiceResult<CsceneBO> getByArea(@RequestParam String id, @RequestParam(required = false,name = "area_id") String areaId) {
         if (areaId == null) {
