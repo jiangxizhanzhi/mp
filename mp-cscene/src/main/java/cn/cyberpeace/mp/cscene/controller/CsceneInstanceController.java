@@ -226,9 +226,12 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     }
 
     @ApiOperation("查询场景实例")
-    @ApiImplicitParams({@ApiImplicitParam(name = "sceneId", value = "场景实例id", dataTypeClass = String.class), @ApiImplicitParam(name = "areaId", value = "场景实例区域id", dataTypeClass = String.class)})
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "areaId", value = "场景实例区域id", dataTypeClass = String.class)
+    })
     @GetMapping("get_by_area")
-    public ServiceResult<CsceneInstanceBO> getByArea(@RequestParam String id, @RequestParam(required = false) String areaId) {
+    public ServiceResult<CsceneInstanceBO> getByArea(@RequestParam String id, @RequestParam(required = false,name = "area_id") String areaId) {
         String sceneId = this.modelService.get(id).getSource().getObj().getScene();
         SceneHandler sceneHandler = new SceneHandler(sceneId, areaId, true, null);
 
