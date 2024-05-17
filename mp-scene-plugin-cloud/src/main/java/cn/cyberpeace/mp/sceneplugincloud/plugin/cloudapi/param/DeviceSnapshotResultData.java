@@ -25,6 +25,8 @@ public class DeviceSnapshotResultData implements CloudHttpData {
 
     private String requestId;
 
+    private Data data;
+
     @Getter
     @Setter
     @AllArgsConstructor
@@ -37,5 +39,11 @@ public class DeviceSnapshotResultData implements CloudHttpData {
         private String description;
         private String imageName;
         private Boolean deleted;
+    }
+
+    @lombok.Data
+    public static class Data {
+        private List<Snapshot> list;
+        private Integer total;
     }
 }

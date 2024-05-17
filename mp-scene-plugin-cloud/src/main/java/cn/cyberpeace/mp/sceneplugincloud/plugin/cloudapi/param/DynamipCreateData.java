@@ -35,6 +35,7 @@ public class DynamipCreateData implements CloudHttpData {
 
         // 固定参数取值
         @JsonProperty(value = "mainBoardType")
+        @Builder.Default
         private String mainBoardType = "npe-400";
     }
 
@@ -45,6 +46,7 @@ public class DynamipCreateData implements CloudHttpData {
     public static class BoardCards{
         private List<Network> networks;
         // 固定参数取值
+        @Builder.Default
         private String type = "PA-4E";
     }
     @Data

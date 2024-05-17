@@ -1,20 +1,15 @@
 package cn.cyberpeace.mp.sceneplugincloud.service.common;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.util.basic.IntUtils;
-import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
-import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudElementAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
-import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ComInfoGetResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetConnectionUrlParam;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetConnectionUrlResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleGetConnectionUrlResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,7 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import javax.servlet.http.HttpServletResponse;
 
 @Slf4j
 @Component
@@ -34,6 +29,16 @@ public class CloudSceneConnectionCommon {
     @Autowired
     private CloudSceneConnectionCommon(CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper) {
         CloudSceneConnectionCommon.cloudPluginSceneConnectionMapper = cloudPluginSceneConnectionMapper;
+    }
+
+    @Data
+    public static class SdnConnectionParam {
+        private String userId;
+        private String sdnIp;
+        private String protocol;
+        private Integer port;
+        private String username;
+        private String password;
     }
 
     @Data
@@ -65,166 +70,72 @@ public class CloudSceneConnectionCommon {
         private String department;
     }
 
-    public static CloudPluginSceneConnectionModel getOrCreateSceneConnection(SceneConnectionParam param) {
-        String sceneId = param.getSceneId();
-        String sceneElementId = param.getSceneElementId();
-        String sceneElementPortId = param.getSceneElementPortId();
-        CloudAccessMode cloudAccessMode = param.getCloudAccessMode();
-        String userId = param.getUserId();
-        String accessModeId = cloudAccessMode.getId();
-        if (StringUtils.isEmpty(accessModeId)) {
-            log.error("Get or create scene({}) element({}) port({}) {} connection error: empty access mode id",
-                    sceneId, sceneElementId, sceneElementPortId, cloudAccessMode.getProtocol());
-            return null;
+    public static GetConnectionUrlResult getConnectionUrl(GetConnectionUrlParam param, HttpServletResponse response) {
+        var remoteClient = new Remote();
+        if (CloudElementAccessMode.Protocol.VNC.equals(param.getConsoleType())) {
+            param.setConsoleType(CloudElementAccessMode.Protocol.NO_VNC);
+            return remoteClient.getNoVncConnectionUrl(param);
+        } else if (CloudElementAccessMode.Protocol.CONSOLE.equals(param.getConsoleType())) {
+            return remoteClient.getContainerConnectionUrl(param);
+        } else if (CloudElementAccessMode.Protocol.SPICE.equals(param.getConsoleType())) {
+            remoteClient.getConnectionFile(param, response);
+        } else {
+            return remoteClient.getNoVncConnectionUrl(param);
         }
+        return new GetConnectionUrlResult();
+    }
 
-        boolean isConsole = cloudAccessMode.getProtocol().equals(AccessMode.Protocol.CONSOLE);
-        boolean isCom = cloudAccessMode.getProtocol().equals(AccessMode.Protocol.COM);
-        if ((!isConsole && !isCom) && StringUtils.isEmpty(cloudAccessMode.getAccessIp())) {
-            log.error("Get or create scene({}) element({}) port({}) {} connection error: empty access ip",
-                    sceneId, sceneElementId, sceneElementPortId, cloudAccessMode.getProtocol());
-            return null;
-        }
+    public static CloudPluginSceneConnectionModel getOrCreateSceneConnection(SceneConnectionParam param) {
+        var sceneId = param.getSceneId();
+        var sceneElementId = param.getSceneElementId();
+        var userId = param.getUserId();
 
         CloudPluginSceneConnectionModel sceneConnection = cloudPluginSceneConnectionMapper.first(new HumanCondition()
                 .filterEqual(CloudPluginSceneConnectionModel::getScene, sceneId)
                 .filterEqual(CloudPluginSceneConnectionModel::getSceneElement, sceneElementId)
-                .filterEqual(CloudPluginSceneConnectionModel::getSceneElementPort, sceneElementPortId)
-                .filterEqual(CloudPluginSceneConnectionModel::getAccessModeId, accessModeId)
                 .filterEqual(CloudPluginSceneConnectionModel::getAccessUser, userId)
                 .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
                 .reverseOrderBy(CloudPluginSceneConnectionModel::getCreateTime));
-        if (sceneConnection != null && StringUtils.isNotEmpty(sceneConnection.getConnectionId())) {
-            sceneConnection = null;
-        }
 
-        // console信息可能会变，获取最新的console信息
-        String resourceId = param.getResourceId();
-        String resourceHost = param.getResourceHost();
-        String accessIp = sceneConnection == null ? cloudAccessMode.getAccessIp() : sceneConnection.getAccessIp();
-        Integer accessPort = sceneConnection == null ? cloudAccessMode.getAccessPort() : sceneConnection.getAccessPort();
-        if (isConsole && !StringUtils.isEmpty(resourceId) && !StringUtils.isEmpty(resourceHost)) {
-            VirtualMachine vmClient = new VirtualMachine();
-            ConsoleInfoGetResult consoleInfo = null;
-            try {
-                consoleInfo = vmClient.getConsoleInfo(resourceId, resourceHost);
-            } catch (Exception e) {
-                log.error("Get instance({}, {}) console info error:", resourceHost, resourceId, e);
-            }
-            // console信息不同，需要创建新的连接
-            if (consoleInfo != null) {
-                String latestConsoleIp = consoleInfo.getIpAddress();
-                Integer latestConsolePort = IntUtils.fromStr(consoleInfo.getPort());
-                if (latestConsoleIp != null) {
-                    sceneConnection = null;
-                    accessIp = latestConsoleIp;
-                    accessPort = latestConsolePort;
-                }
-            } else {
-                log.error("Get instance({}, {}) console empty info", resourceHost, resourceId);
-            }
-        } else if (isCom && !StringUtils.isEmpty(resourceId) && !StringUtils.isEmpty(resourceHost)) {
-            VirtualMachine vmClient = new VirtualMachine();
-            ComInfoGetResult comInfoGetResult = null;
-            try {
-                comInfoGetResult = vmClient.getComInfo(resourceId, resourceHost);
-            } catch (Exception e) {
-                log.error("Get instance({}, {}) console info error:", resourceHost, resourceId, e);
-            }
-            // com信息不同，需要创建新的连接
-            if (comInfoGetResult != null) {
-                String latestConsoleIp = comInfoGetResult.getIpAddress();
-                Integer latestConsolePort = IntUtils.fromStr(comInfoGetResult.getPort());
-                if (latestConsoleIp != null
-                        && (!latestConsoleIp.equals(accessIp) || !latestConsolePort.equals(accessPort))) {
-                    sceneConnection = null;
-                    accessIp = latestConsoleIp;
-                    accessPort = latestConsolePort;
-                }
-            } else {
-                log.error("Get instance({}, {}) console empty info", resourceHost, resourceId);
-            }
-        }
-        if (StringUtils.isEmpty(accessIp) || accessPort == null) {
-            log.error("Get or create scene({}) element({}) port({}) {} connection error: empty access ip({}) or port({})",
-                    sceneId, sceneElementId, sceneElementPortId, cloudAccessMode.getProtocol(), accessIp, accessPort);
-            return null;
-        }
-
-        if (sceneConnection == null) {
+        // com信息可能会变，获取最新的com信息
+        var resourceId = param.getResourceId();
+        var vmClient = new VirtualMachine();
+        var comInfo = vmClient.getComInfo(resourceId);
+        if (sceneConnection == null || !sceneConnection.getAccessIp().equals(comInfo.getAddress())) {
             sceneConnection = new CloudPluginSceneConnectionModel();
             sceneConnection.setScene(sceneId);
             sceneConnection.setSceneElement(sceneElementId);
-            sceneConnection.setSceneElementPort(sceneElementPortId);
-            sceneConnection.setAccessModeId(accessModeId);
             sceneConnection.setAccessUser(userId);
-            sceneConnection.setProtocol(cloudAccessMode.getProtocol());
-            sceneConnection.setPort(cloudAccessMode.getPort());
-            sceneConnection.setUsername(cloudAccessMode.getUsername());
-            sceneConnection.setPassword(cloudAccessMode.getPassword());
-            sceneConnection.setAccessIp(accessIp);
-            sceneConnection.setAccessPort(accessPort);
+            sceneConnection.setAccessIp(comInfo.getAddress());
+            sceneConnection.setAccessPort(Integer.parseInt(comInfo.getPort()));
         }
-
-        boolean dataUpdateFlag = false;
-        Remote remoteClient = new Remote();
+        var dataUpdateFlag = false;
+        var remoteClient = new Remote();
         if (StringUtils.isEmpty(sceneConnection.getConnectionId())) {
-            GuacamoleCreateConnectionData guacamoleCreateConnectionData = new GuacamoleCreateConnectionData();
-            guacamoleCreateConnectionData.setScene(param.getSceneName());
+            var guacamoleCreateConnectionData = new GuacamoleCreateConnectionData();
             guacamoleCreateConnectionData.setUsername(userId);
-            guacamoleCreateConnectionData.setDepartment(param.getDepartment());
-            guacamoleCreateConnectionData.setHost(param.getResourceHost());
-            guacamoleCreateConnectionData.setFlag(false);
-            GuacamoleCreateConnectionData.ConnectionParams connectionParams = new GuacamoleCreateConnectionData.ConnectionParams();
-            // 协议的特殊处理
-            String protocol = null;
-            if (Boolean.TRUE.equals(param.getEntity()) && sceneConnection.getProtocol().equals(AccessMode.Protocol.CONSOLE)) {
-                // 实体节点的console协议使用telnet代替
-                protocol = AccessMode.Protocol.TELNET;
-            } else if (sceneConnection.getProtocol().equals(AccessMode.Protocol.CONSOLE)) {
-                protocol = AccessMode.Protocol.VNC;
-            } else if (sceneConnection.getProtocol().equals(AccessMode.Protocol.COM)) {
-                protocol = AccessMode.Protocol.TELNET;
-            } else {
-                protocol = sceneConnection.getProtocol();
-            }
-            connectionParams.setProtocol(protocol);
-            // windows系统的rdp连接,需要禁用字形缓存
-            if (AccessMode.Protocol.RDP.equals(protocol) && SystemTypeCommandUtils.isWindows(SystemTypeUtils.getStandardSystemType(param.getSystemType()))) {
-                connectionParams.setDisableGlyphCaching(true);
-            }
-            connectionParams.setPort(sceneConnection.getAccessPort().toString());
-            if (Boolean.TRUE.equals(cloudAccessMode.getPrivateKeyEnable())) {
-                connectionParams.setPrivateKeyPath(cloudAccessMode.getPrivateKeyPath());
-                if (StringUtils.isNotEmpty(sceneConnection.getUsername())) {
-                    connectionParams.setUsername(sceneConnection.getUsername());
-                }
-            } else {
-                connectionParams.setUsername(sceneConnection.getUsername());
-                connectionParams.setPassword(sceneConnection.getPassword());
-            }
-            connectionParams.setHostname(sceneConnection.getAccessIp());
-            guacamoleCreateConnectionData.setConnectionParams(connectionParams);
-            GuacamoleCreateConnectionResult result = remoteClient.createConnection(guacamoleCreateConnectionData);
+            guacamoleCreateConnectionData.setVmId(resourceId);
+            GuacamoleCreateConnectionData.ConnectionParams params = new GuacamoleCreateConnectionData.ConnectionParams();
+            params.setUsername(comInfo.getUser());
+            params.setHostname(comInfo.getAddress());
+            params.setPort(comInfo.getPort());
+            params.setNeedPrivateKey(true);
+            params.setCommand("connect --vm-id=" + resourceId);
+            guacamoleCreateConnectionData.setConnectionParams(params);
+            var result = remoteClient.createConnection(guacamoleCreateConnectionData);
             if (result == null || StringUtils.isEmpty(result.getConnectionId())) {
                 log.error("Create scene connection[{}] with empty result: {}", guacamoleCreateConnectionData, result);
                 return null;
             } else {
                 sceneConnection.setConnectionId(result.getConnectionId());
+                sceneConnection.setConnectionUrl(result.getUrl());
+                sceneConnection.setConnectionRecordingName(result.getConnectionName());
                 dataUpdateFlag = true;
             }
         }
 
-        GuacamoleGetConnectionUrlResult result = remoteClient.getConnectionUrl(sceneConnection.getConnectionId(), userId);
-        if (result == null || StringUtils.isEmpty(result.getUrl())) {
-            log.error("Get scene connection[{}] url with empty result: {}", sceneConnection.getConnectionId(), result);
-        } else {
-            if (!result.getUrl().equals(sceneConnection.getConnectionUrl())) {
-                sceneConnection.setConnectionUrl(result.getUrl());
-                sceneConnection.setAccessTokenExpireTime(LocalDateTime.now()
-                        .plusSeconds(CloudSingleton.cloudAppConfig.getRemoteConnectionTokenExpireSeconds()));
-                dataUpdateFlag = true;
-            }
+        if (StringUtils.isEmpty(sceneConnection.getConnectionUrl())) {
+            log.error("Get scene connection[{}] url with empty result: {}", sceneConnection.getConnectionId(), JsonCommon.stringify(sceneConnection));
         }
 
         if (dataUpdateFlag) {
@@ -232,6 +143,56 @@ public class CloudSceneConnectionCommon {
         }
 
         return sceneConnection;
+    }
+
+
+    public static CloudPluginSceneConnectionModel getOrCreateSdnConnection(SdnConnectionParam param) {
+        CloudPluginSceneConnectionModel sdnConnection = cloudPluginSceneConnectionMapper.first(new HumanCondition()
+                .filterEqual(CloudPluginSceneConnectionModel::getAccessIp, param.getSdnIp())
+                .filterEqual(CloudPluginSceneConnectionModel::getProtocol, param.getProtocol())
+                .filterEqual(CloudPluginSceneConnectionModel::getPort, param.getPort())
+                .filterEqual(CloudPluginSceneConnectionModel::getAccessUser, param.getUserId())
+                .filterEqual(CloudPluginSceneConnectionModel::getUsername, param.getUsername())
+                .filterEqual(CloudPluginSceneConnectionModel::getPassword, param.getPassword())
+                .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
+                .reverseOrderBy(CloudPluginSceneConnectionModel::getPk));
+        if (sdnConnection != null) {
+            return sdnConnection;
+        }
+
+        sdnConnection = new CloudPluginSceneConnectionModel();
+        sdnConnection.setAccessIp(param.getSdnIp());
+        sdnConnection.setProtocol(param.getProtocol());
+        sdnConnection.setPort(param.getPort());
+        sdnConnection.setAccessUser(param.getUserId());
+        sdnConnection.setUsername(param.getUsername());
+        sdnConnection.setPassword(param.getPassword());
+
+        var remoteClient = new Remote();
+        var guacamoleCreateConnectionData = new GuacamoleCreateConnectionData();
+        guacamoleCreateConnectionData.setUsername(param.getUserId());
+        GuacamoleCreateConnectionData.ConnectionParams params = new GuacamoleCreateConnectionData.ConnectionParams();
+        params.setProtocol(param.getProtocol());
+        params.setHostname(param.getSdnIp());
+        params.setPort(param.getPort().toString());
+        params.setUsername(param.getUsername());
+        params.setPassword(param.getPassword());
+        guacamoleCreateConnectionData.setConnectionParams(params);
+        var result = remoteClient.createConnection(guacamoleCreateConnectionData);
+        if (result == null || StringUtils.isEmpty(result.getConnectionId())) {
+            log.error("Create sdn connection[{}] with empty result: {}", guacamoleCreateConnectionData, result);
+            return null;
+        } else {
+            sdnConnection.setConnectionId(result.getConnectionId());
+            sdnConnection.setConnectionUrl(result.getUrl());
+            sdnConnection.setConnectionRecordingName(result.getConnectionName());
+        }
+        if (StringUtils.isEmpty(sdnConnection.getConnectionUrl())) {
+            log.error("Get sdn connection[{}] url with empty result: {}", sdnConnection.getConnectionId(), JsonCommon.stringify(sdnConnection));
+        }
+
+        cloudPluginSceneConnectionMapper.save(sdnConnection);
+        return sdnConnection;
     }
 
     public static boolean enableRecording(CloudPluginSceneConnectionModel sceneConnection,

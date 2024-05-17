@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -19,6 +20,7 @@ import java.util.Map;
  */
 @Service
 @Slf4j
+@Deprecated
 public class DynamipsService {
 
     private VirtualDynamips virtualDynamips;
@@ -27,12 +29,13 @@ public class DynamipsService {
         virtualDynamips = new VirtualDynamips();
     }
 
+
     public Map<String, Object> getTypeInfo() {
-        return virtualDynamips.getTypeInfo().getItems();
+        return Collections.emptyMap();
     }
 
     public DynamicImageInfo getInfo(String platform) {
-        DynamipsInfoItems result = virtualDynamips.getPortInfo();
+        DynamipsInfoItems result = new DynamipsInfoItems();
         DynamicImageInfo imageInfo = new DynamicImageInfo();
         imageInfo.setPlatforms(new ArrayList<>());
         imageInfo.setDetails(new ArrayList<>());
@@ -55,7 +58,5 @@ public class DynamipsService {
     }
 
     public void reboot(String instanceId) {
-        boolean result = virtualDynamips.reboot(instanceId);
-        log.info("reboot {} dynamips result is {}", instanceId, result);
     }
 }

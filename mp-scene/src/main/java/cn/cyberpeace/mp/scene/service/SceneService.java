@@ -651,6 +651,20 @@ public class SceneService {
         }
     }
 
+    public ServiceResult<Boolean> deleteElementSnapshot(String id, String nodeId, String snapshotId, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        sceneHandler.deleteElementSnapshot(nodeId, snapshotId);
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> elementSnapshotAction(String id, String nodeId, String snapshotId, String action, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        sceneHandler.elementSnapshotAction(nodeId, snapshotId, action);
+        return new ServiceResult<>(true);
+    }
+
     private SceneEventUtils.SceneEventInfo createSceneEventInfo(String id, String nodeId, String nodeName, int event) {
         SceneEventUtils.SceneEventInfo eventInfo = new SceneEventUtils.SceneEventInfo();
         String action = MessageCommon.get(SceneEventHandler.EVENT_NAME_MAP.get(event));

@@ -146,7 +146,7 @@ public class ElementCreateHandler extends HandlerCommon {
                     pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
                 }
             });
-            this.createHandler.createAuxiliaryNetworkRouter(cloudElement, connectedNetwork.network);
+            this.createHandler.createAuxiliaryNetworkRouter(cloudElement, connectedNetwork.network, index++);
         }
     }
 

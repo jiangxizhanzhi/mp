@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @Description
@@ -77,7 +76,6 @@ public class ResumeHandler extends HandlerCommon {
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RESUME, Arrays.asList(ElementProcess.RESUME_DYNAMIPS));
             runElementProgress(nodeId, SceneElementModel.Event.RESUME, ElementProcess.RESUME_DYNAMIPS, () -> {
-                virtualDynamips.resume(instanceId);
             });
         } else {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RESUME, Arrays.asList(ElementProcess.RESUME_NODE));

@@ -18,4 +18,7 @@ public class RouterConfigCmdData implements CloudHttpData {
     private Integer serialPort;
     private List<String> cmds;
     private String cmd;
+
+    private String vendor;
+    private List<String> commands;
 }

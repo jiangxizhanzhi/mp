@@ -34,9 +34,14 @@ public class VirtualNic {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class QosRule {
+        private Integer maxKbps;
+        private Integer maxBurstKbps;
+        private String direction;
         private Integer rate;
         private Integer delay;
         private Integer lossPercent;
+        private Integer delayMs;
+        private Integer delayCorrelationMs;
     }
 
     @Data

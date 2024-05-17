@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.devopscluster.service;
 
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.devopscluster.constant.MonitorConstant;
 import cn.cyberpeace.mp.devopscluster.converter.HypervisorConverter;
@@ -30,18 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -303,7 +292,7 @@ public class MonitorScriptControlService {
         probeParam.setInterval(monitorProbe.getInterval());
 
         String[] params = {MonitorConstant.OP_STATUS, StringUtils.join(monitorProbe.getServiceList(), ",")};
-        probeParam.setScriptParam(StringUtils.joinWith(StringUtils.SPACE, params));
+        probeParam.setScriptParam(StringUtils.joinWith(StringUtils.SPACE, (Object[]) params));
         return probeParam;
     }
 

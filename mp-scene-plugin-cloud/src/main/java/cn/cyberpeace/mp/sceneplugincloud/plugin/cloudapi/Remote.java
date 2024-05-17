@@ -37,7 +37,7 @@ public class Remote extends CloudClient {
     }
 
     public boolean deleteConnection(String connectionId) {
-        var result = getHttpClient().delete(CloudUrlConstant.CREATE_CONNECTION_URL, new DisableGuacamoleRecordingData(connectionId),
+        var result = getHttpClient().delete(CloudUrlConstant.DELETE_CONNECTION_URL, new DisableGuacamoleRecordingData(connectionId),
                 null, DisableGuacamoleRecordingResult.class);
         if (!Boolean.TRUE.equals(result.getSuccess())) {
             log.error("delete connection error,connection id:{},message: {}", connectionId, result.getMessages());

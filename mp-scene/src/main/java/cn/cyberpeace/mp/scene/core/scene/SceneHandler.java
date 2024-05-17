@@ -948,6 +948,42 @@ public class SceneHandler extends BaseSceneHandler<
         }
     }
 
+    public void deleteElementSnapshot(String nodeId, String snapshotId) {
+        SceneElementBO element = getElement(nodeId);
+        prepareElementEvent(element, SceneElementModel.Event.SNAPSHOT);
+        startElementEvent(nodeId, SceneElementModel.Event.SNAPSHOT);
+        try {
+            for (ScenePluginHandler plugin : getPlugins()) {
+                plugin.deleteElementSnapshot(nodeId, snapshotId);
+            }
+        } catch (Exception e) {
+            errorElement(nodeId, SceneElementModel.Event.SNAPSHOT, e.getMessage());
+            return;
+        }
+        overElementEvent(nodeId, SceneElementModel.Event.SNAPSHOT);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            updateSceneElementWithPlugins(nodeId);
+        }
+    }
+
+    public void elementSnapshotAction(String nodeId, String snapshotId, String action) {
+        SceneElementBO element = getElement(nodeId);
+        prepareElementEvent(element, SceneElementModel.Event.SNAPSHOT);
+        startElementEvent(nodeId, SceneElementModel.Event.SNAPSHOT);
+        try {
+            for (ScenePluginHandler plugin : getPlugins()) {
+                plugin.elementSnapshotAction(nodeId, snapshotId, action);
+            }
+        } catch (Exception e) {
+            errorElement(nodeId, SceneElementModel.Event.SNAPSHOT, e.getMessage());
+            return;
+        }
+        overElementEvent(nodeId, SceneElementModel.Event.SNAPSHOT);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            updateSceneElementWithPlugins(nodeId);
+        }
+    }
+
     @Override
     public SceneDataBO toData() {
         SceneDataBO sceneDataBO = super.toData();

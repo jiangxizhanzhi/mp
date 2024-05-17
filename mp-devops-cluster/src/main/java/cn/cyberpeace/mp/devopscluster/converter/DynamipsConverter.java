@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.devopscluster.converter;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.devopscluster.converter.bo.InstanceBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
-import cn.cyberpeace.mp.devopscluster.dto.InstancePageDTO;
 import cn.cyberpeace.mp.devopscluster.request.DynamipsInstancePageRequest;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamicCreateData;
@@ -18,7 +17,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 虚拟机管理
@@ -27,6 +25,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@Deprecated
 public class DynamipsConverter implements BaseConverter {
 
     /**
@@ -42,7 +41,7 @@ public class DynamipsConverter implements BaseConverter {
         param.setOffset(request.getOffset());
         param.setSortKey(request.getOrder());
         param.setSortDir(request.getSort());
-        VirtualDynamipsListResult result = virtualDynamips.list(param);
+        VirtualDynamipsListResult result = new VirtualDynamipsListResult();
         if (result == null || CollectionUtils.isEmpty(result.getItems())) {
             BasePageBO<InstanceBO> convertModel = new BasePageBO<>();
             convertModel.setList(new ArrayList<>());

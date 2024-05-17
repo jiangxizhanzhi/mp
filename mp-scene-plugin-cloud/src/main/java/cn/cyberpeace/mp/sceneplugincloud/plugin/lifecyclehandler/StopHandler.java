@@ -82,7 +82,6 @@ public class StopHandler extends HandlerCommon{
                     StopHandler.ElementProcess.STOP_DYNAMIPS));
             runElementProgress(nodeId, SceneElementModel.Event.STOP, StopHandler.ElementProcess.STOP_DYNAMIPS, () -> {
                 //关闭接入方式可用
-                virtualDynamips.stop(instanceId);
             });
         } else {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.STOP, Arrays.asList(

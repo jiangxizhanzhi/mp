@@ -17,12 +17,14 @@ import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.util.*;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudElementAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.*;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSceneStage;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
+import cn.cyberpeace.mp.sceneplugincloud.constant.ElementAccessModeConstant;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -35,6 +37,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -221,7 +224,7 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
-    private void createAuxiliaryNetworkRouter(CloudPluginSceneElementBO cloudElement, CloudPluginSceneElementNetworkBO network, int index) {
+    protected void createAuxiliaryNetworkRouter(CloudPluginSceneElementBO cloudElement, CloudPluginSceneElementNetworkBO network, int index) {
         if (!Boolean.TRUE.equals(network.getAuxiliaryNetworkRouterOn())) {
             return;
         }
@@ -1033,6 +1036,9 @@ public class CreateHandler extends HandlerCommon {
             return;
         }
         SceneElementBO srcElement = cloudElement.getSrcElement();
+
+
+
         VirtualMachineCreateData createData = new VirtualMachineCreateData();
         createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
         createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
@@ -1041,18 +1047,34 @@ public class CreateHandler extends HandlerCommon {
         createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
         createData.setDisk(IntUtils.zeroNull(srcElement.getDisk()));
 
-
-
-        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getEntityUsbs()) && StringUtils.isNotEmpty(cloudElement.getEntityUsbs().get(0).getHost())) {
-            createData.setHost(cloudElement.getEntityUsbs().get(0).getHost());
+        //todo 接入待修改
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getAccessMode())) {
+            List<String> protocols = cloudElement.getAccessMode().stream()
+                    .map(cloudElementAccessMode -> cloudElementAccessMode.getProtocol().toLowerCase())
+                    .collect(Collectors.toList());
+            if (protocols.contains(CloudElementAccessMode.Protocol.SPICE) && protocols.contains(CloudElementAccessMode.Protocol.VNC)) {
+                createData.setDisplayType(ElementAccessModeConstant.SPICE_AND_VNC);
+            } else if (protocols.contains(CloudElementAccessMode.Protocol.SPICE)) {
+                createData.setDisplayType(ElementAccessModeConstant.SPICE);
+            } else {
+                createData.setDisplayType(ElementAccessModeConstant.VNC);
+            }
+            // 有com接入方式时开启串口接入
+            if (protocols.contains(CloudElementAccessMode.Protocol.COM)) {
+                createData.setVirtioConsole(true);
+            }
+        } else {
+            createData.setDisplayType(ElementAccessModeConstant.SPICE_AND_VNC);
         }
+
+
+
+        // todo cloud-init不用userdata字段, 用custome_script字段
         if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
-            createData.setUserData(TextUtils.emptyNull(combineInitCommand(cloudElement)));
+            createData.setCustomScript(TextUtils.emptyNull(combineInitCommand(cloudElement)));
         }
-        createData.setNetworks(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
-        if (StringUtils.isNotEmpty(cloudElement.getIsoAttachFilename()) && StringUtils.isNotEmpty(cloudElement.getIsoTmpdirUuid())) {
-            createData.setIsoAttach(true);
-        }
+        createData.setNetwork(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
+
         VirtualMachineCreateData virtualMachine = vmClient.create(createData);
         cloudElement.setResourceId(virtualMachine.getId());
         cloudElement.setHost(virtualMachine.getRunHost());
@@ -1247,75 +1269,6 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
-    protected void createVirtualDynamips(CloudPluginSceneElementBO cloudElement) {
-        VirtualDynamicCreateData createData = new VirtualDynamicCreateData();
-        List<VirtualDynamicCreateData.Network> networks = new ArrayList<>();
-        createData.setNetworks(networks);
-        SceneElementBO srcElement = cloudElement.getSrcElement();
-        createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
-        createData.setImage(cloudElement.getImage());
-        createData.setPortSum(cloudElement.getWanPortNumber());
-        Map<String, SceneElementPortBO> portName2Port = new HashMap<>();
-        if (srcElement.getPorts() != null) {
-            Set<String> netIds = new HashSet<>();
-            for (SceneElementPortBO port : srcElement.getPorts()) {
-                portName2Port.put(port.getName(), port);
-                CloudPluginSceneElementNetworkBO net = getHandlerUtils().getNetworkByPort(port);
-                if (net != null && StringUtils.isNotEmpty(net.getResourceId()) && !netIds.contains(net.getResourceId())) {
-                    VirtualDynamicCreateData.Network network = new VirtualDynamicCreateData.Network();
-                    network.setNetworkId(net.getResourceId());
-                    network.setSlotPort(port.getName());
-                    network.setFixedIp(port.getIp());
-                    networks.add(network);
-                    netIds.add(net.getResourceId());
-                } else {
-                    port.setIp(StringUtils.EMPTY);
-                }
-            }
-        }
-        VirtualDynamicCreateData result = vdClient.create(createData);
-
-        cloudElement.setResourceId(result.getId());
-        if (result.getNetworks() != null) {
-            for (VirtualDynamicCreateData.Network networkPort : result.getNetworks()) {
-                SceneElementPortBO port = portName2Port.get(networkPort.getSlotPort());
-                if (port != null) {
-                    port.setIp(networkPort.getFixedIp());
-                    port.setMacAddr(networkPort.getMacAddress());
-                    getPluginHandler().getPort(port.getId()).setResourceId(networkPort.getPortId());
-                    CloudPluginSceneElementPortBO cloudPort = getPluginHandler().getPort(port.getId());
-                    if (cloudPort != null && cloudPort.getAccessModes() != null) {
-                        cloudPort.getAccessModes().forEach(a -> {
-                            if (AccessMode.Protocol.TELNET.equals(a.getProtocol())) {
-                                a.setAccessIp(result.getTelnetHost());
-                                a.setAccessPort(result.getTelnetPort());
-                            }
-                        });
-                    }
-                }
-            }
-        }
-
-        List<CloudPluginSceneElementPortBO> cloudPorts = getPluginHandler().getPorts(cloudElement);
-        // 同样ip、端口可能对应多个接入方式
-        if (cloudPorts != null) {
-            cloudPorts.forEach(cloudPort -> {
-                if (Boolean.TRUE.equals(cloudPort.getSrcPort().getIsAuxiliary())) {
-                    return;
-                }
-                List<CloudAccessMode> accessModes = cloudPort.getAccessModes();
-                if (accessModes == null) {
-                    return;
-                }
-                for (CloudAccessMode accessMode : accessModes) {
-                    if (AccessMode.Protocol.TELNET.equals(accessMode.getProtocol())) {
-                        accessMode.setAvailable(true);
-                    }
-                }
-            });
-        }
-
-    }
 
     public CreateHandler(CloudScenePluginHandler pluginHandler) {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.CREATE);
@@ -1470,8 +1423,6 @@ public class CreateHandler extends HandlerCommon {
                     () -> createEntityNode(cloudElement));
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.NPC)) {
             runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_NPC, () -> recordNpcNode(cloudElement));
-        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
-            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_DYNAMIC, () -> createVirtualDynamips(cloudElement));
         }
     }
 
@@ -1485,69 +1436,39 @@ public class CreateHandler extends HandlerCommon {
         if (org.apache.commons.collections4.CollectionUtils.isEmpty(elementBO.getSrcElement().getPorts())) {
             return;
         }
-        // 查询串口地址
-        SerialPortQueryResult port = vmRouter.queryPort(elementBO.getResourceId());
-        if (port == null || StringUtils.isEmpty(port.getPort()) || StringUtils.isEmpty(port.getHost())) {
-            log.error("get Serial Port failed , resource id is {} , port result is {}", elementBO.getResourceId(), JsonCommon.stringify(port));
-            return;
-        }
-
-        // 拼接组网命令
-        CloudPluginSceneElementPortBO defaultPort = getPluginHandler().getPort(elementBO.getSrcElement().getPorts().get(0).getId());
-        List<String> cmds = VyosNetworkCommandUtils.genNetworkCmdList(elementBO, getPluginHandler());
+        List<String> cmds = new ArrayList<>(List.of("configure"));
+        cmds.addAll(VyosNetworkCommandUtils.genNetworkCmdList(elementBO, getPluginHandler()));
+        cmds.addAll(List.of("commit", "save", "exit"));
         if (org.apache.commons.collections4.CollectionUtils.isEmpty(cmds)) {
             log.error("no network config , element id is {} ", elementBO.getSrcElement().getId());
             return;
         }
-        RouterConfigCmdData buildNetwork = new RouterConfigCmdData();
-        buildNetwork.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
-        buildNetwork.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
-        buildNetwork.setCmds(cmds);
+        var buildNetwork = new RouterConfigCmdData();
+        buildNetwork.setVendor("vyos");
+        buildNetwork.setCommands(cmds);
 
-        // 开启dhcp
-        RouterConfigCmdData openDhcp = new RouterConfigCmdData();
-        openDhcp.setSerialIp(port.getHost());
-        openDhcp.setSerialPort(Integer.parseInt(port.getPort()));
-        openDhcp.setCmds(VyosNetworkCommandUtils.genOpenDhcpCommands(elementBO.getSrcElement().getPorts().size()));
-        boolean openDhcpResult = false;
         boolean buildNetworkResult = false;
         int tryTimes = 5;
         Exception exception = null;
         for (int i = 0; i < tryTimes; i++) {
-            // 先等2s,等待串口可用
-            waitSeconds(2000);
-            try {
-                openDhcpResult = vmRouter.createConfig(openDhcp);
-            } catch (Exception e) {
-                log.error("failed to open dhcp , try time {}", i, e);
-                openDhcpResult = false;
-            }
-            // 失败可能是串口仍不可用,需要重试
-            if (!openDhcpResult) {
-                continue;
-            }
             // 发送拼接网络的命令
             try {
-                buildNetworkResult = vmRouter.createConfig(buildNetwork);
+                var startTime = LocalDateTime.now();
+                buildNetworkResult = vmRouter.sendCommand(buildNetwork, elementBO.getResourceId());
             } catch (Exception e) {
                 log.error("failed to build network , try time {}", i);
                 exception = e;
-                buildNetworkResult = false;
             }
-            if (!buildNetworkResult) {
+            if (buildNetworkResult) {
                 // 设置失败需要重试
-                continue;
-            } else {
-                // dhcp设置的ip可用之后 即可执行后续的命令
                 break;
             }
         }
-        if (openDhcpResult == false || buildNetworkResult == false) {
-            log.error("build vyos network failed ,openDhcp {} , buildNetwork {} , resource id is {} , params is {} , ", openDhcp, buildNetwork, elementBO.getResourceId(), JsonCommon.stringify(openDhcp));
+        if (!buildNetworkResult) {
+            log.error("build vyos network failed , buildNetwork {} , resource id is {} ", JsonCommon.stringify(buildNetwork), elementBO.getResourceId());
             if (exception != null) {
                 log.error("failed to build network ", exception);
             }
-            return;
         }
     }
 

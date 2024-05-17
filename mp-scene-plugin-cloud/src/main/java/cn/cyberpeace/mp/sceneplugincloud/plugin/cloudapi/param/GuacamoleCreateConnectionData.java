@@ -17,15 +17,18 @@ public class GuacamoleCreateConnectionData implements CloudHttpData {
     private String host;
     private ConnectionParams connectionParams;
 
+    private String vmId;
+    private String privateKeyPath;
+
     @Data
     @NoArgsConstructor
     public static class ConnectionParams {
-        private Boolean disableGlyphCaching;
-        private String protocol;
+        private String protocol = "ssh";
         private String hostname;
         private String port;
         private String username;
         private String password;
-        private String privateKeyPath;
+        private Boolean needPrivateKey;
+        private String command;
     }
 }

@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudElementAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.validation.stereotype.VlanId;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -55,6 +56,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private Integer lanPortNumber;
     @ApiModelProperty(value = "lan口类型")
     private String lanPortType;
+
+    @ApiModelProperty(value = "接入方式")
+    private List<CloudElementAccessMode> accessMode;
 
     // 虚拟交换机属性
     @ApiModelProperty(value = "虚拟交换机cidr地址段")

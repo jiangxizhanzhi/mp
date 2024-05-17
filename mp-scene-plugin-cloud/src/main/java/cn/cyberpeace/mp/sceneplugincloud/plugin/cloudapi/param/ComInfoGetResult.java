@@ -10,9 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ComInfoGetResult implements CloudHttpData {
-    private String host;
     private String port;
-    private String ipAddress;
-    private Boolean success;
-    private String requestId;
+    private String address;
+    private String user;
 }

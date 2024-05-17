@@ -58,6 +58,11 @@ public class CloudUrlConstant {
      */
     public static final String CONTAINER_EXECUTE_COMMAND_URL = "/cloud/v1/container/%s/exec";
 
+    public static final String CONTAINER_LIFE_CONTROL_URL = "/cloud/v1/container/{container_id}/{action}";
+    public static final String CONTAINER_SNAPSHOT_URL = "/cloud/v1/container/{container_id}/snapshot";
+    public static final String CONTAINER_DELETE_SNAPSHOT_URL = "/cloud/v1/container/{container_id}/snapshot/{image_id}";
+    public static final String CONTAINER_SNAPSHOT_ACTION_URL = "/cloud/v1/container/{container_id}/snapshot/{image_id}/{action}";
+
 
 
     /*******************实体设备接口*****************/
@@ -73,6 +78,7 @@ public class CloudUrlConstant {
     public static final String VIRTUAL_FIREWALL_CREATE_URL = "/cloud/v1/scenarios/firewall";
     public static final String VIRTUAL_FIREWALL_DELETE_URL = "/cloud/v1/scenarios/firewall";
     public static final String VIRTUAL_FIREWALL_POLICY_CREATE_URL = "/cloud/v1/scenarios/firewall_policy";
+    public static final String VIRTUAL_FIREWALL_UPDATE_URL = "/cloud/v1/scenarios/firewall_policy";
 
 
     /*********************dynamips*********************/
@@ -97,22 +103,67 @@ public class CloudUrlConstant {
     public static final String NETWORK_ACL_CREATE_URL = "/cloud/v1/network/{network_id}/acl";
     public static final String NETWORK_ACL_DELETE_URL = "/cloud/v1/network/{network_id}/acl";
 
-
-    /*****************************************************************************************************/
-
+    /***********************虚机**********************/
     public static final String VIRTUAL_MACHINE_ACCESS_URL = "/cloud/v1/vm/console";
     public static final String VIRTUAL_MACHINE_CREATE_URL = "/cloud/v1/scenarios/vm";
     public static final String VIRTUAL_MACHINE_DELETE_URL = "/cloud/v1/scenarios/vm";
+    public static final String GET_VM_LIST_URL = "/cloud/v1/vm";
+    public static final String VIRTUAL_MACHINE_SNAPSHOT_URL = "/cloud/v1/vm/{vm_id}/snapshot";
+    public static final String VIRTUAL_MACHINE_DELETE_SNAPSHOT_URL = "/cloud/v1/vm/{vm_id}/snapshot/{snapshot_id}";
+    public static final String VIRTUAL_MACHINE_SNAPSHOT_LIST = "/cloud/v1/vm/{vm_id}/snapshot";
+    public static final String VIRTUAL_MACHINE_SNAPSHOT_ACTION_URL = "/cloud/v1/vm/{vm_id}/snapshot/{snapshot_id}/{action}";
+    public static final String VIRTUAL_MACHINE_LIFE_CONTROL_URL = "/cloud/v1/vm/{vm_id}/{action}";
+    public static final String VIRTUAL_MACHINE_EXEC_CMD = "/cloud/v1/vm/exec";
+    public static final String VIRTUAL_MACHINE_COM_EXEC_CMD = "/cloud/v1/vm/{vm_id}/com_exec";
+    public static final String VIRTUAL_MACHINE_MODIFY_URL = "/cloud/v1/vm/{vm_id}";
 
 
-    public static final String VIRTUAL_MACHINE_SNAPSHOT_URL = "/v1/scenarios/node_snapshot";
+
+
+
+
+    /*****************获取模板id******************/
+    public static final String VIRTUAL_DEVICE_GET = "/cloud/v1/device/template_by_device";
+    public static final String VIRTUAL_INTERNET_CREATE_URL = "/cloud/v1/scenarios/virtual_internet";
+
+    /************connect*************************/
+    public static final String COM_INFO_GET_URL = "/cloud/v1/vm/{vm_id}/com";
+    public static final String CREATE_CONNECTION_URL = "/cloud/v1/guacamole/connection";
+    public static final String DELETE_CONNECTION_URL = "/cloud/v1/guacamole/connection";
+    public static final String QOS_CREATE_URL = "/cloud/v1/qos";
+    public static final String INSTANCE_MODIFY_NETWORK = "/cloud/v1/scenarios/node/network";
+
+
+    /********************physic_switch***************/
+    public static final String GET_PHYSICAL_SWITCH_PORT_CONNECTION = "/cloud/v1/physical/l1_switch";
+    public static final String GET_PHYSICAL_PORT_URL = "/cloud/v1/physical/l1_switch_ports";
+    public static final String ADD_PHYSICAL_SWITCH_PORT_CONNECTION = "/cloud/v1/physical/l1_switch";
+    public static final String DELETE_PHYSICAL_SWITCH_PORT_CONNECTION = "/cloud/v1/physical/l1_switch";
+
+    /*****************mirror************************/
+    public static final String CREATE_MIRROR_URL = "/cloud/v1/mirror";
+    public static final String DELETE_MIRROR_URL = "/cloud/v1/mirror/{mirror_id}";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /*****************************************************************************************************/
+
+
+
     public static final String VIRTUAL_MACHINE_DEL_SNAPSHOT_URL = "/v1/scenarios/device_snapshot";
 
-    public static final String VIRTUAL_MACHINE_LIFE_CONTROL_URL = "/v1/instances/{instance_id}/action";
     public static final String VIRTUAL_MACHINE_RESIZE_URL = "/v1/scenarios/instance_resize";
-    public static final String CONTAINER_LIFE_CONTROL_URL = "/v1/containers/{instance_id}/action";
-
-    public static final String VIRTUAL_INTERNET_CREATE_URL = "/v1/scenarios/virtual_internet";
 
     public static final String VIRTUAL_SWITCH_UPDATE_URL = "/v1/networks/{network_id}";
 
@@ -124,10 +175,8 @@ public class CloudUrlConstant {
     public static final String NETWORK_GET_URL = "/v1/networks/%s";
 
     public static final String CONSOLE_INFO_GET_URL = "/cpcloud/instance_control/v1/console";
-    public static final String COM_INFO_GET_URL = "/cpcloud/instance_control/v1/telnet";
 
-    public static final String CREATE_CONNECTION_URL = "/cloud/v1/guacamole/connection";
-    public static final String DELETE_CONNECTION_URL = "/cloud/v1/guacamole/connection";
+
     public static final String EXPIRE_ALL_CONNECT = "/cpcloud/guacamole/v1/logout";
     public static final String GET_CONNECTION_URL = "/cpcloud/guacamole/v1/connection";
     public static final String GET_MONITOR_URL = "/cpcloud/guacamole/v1/monitor";
@@ -150,7 +199,6 @@ public class CloudUrlConstant {
 
     public static final String GET_ALL_CONTAINER_URL = "/v1/containers";
     public static final String DELETE_CONTAINER_URL = "/v1/containers/{container_id}";
-    public static final String GET_ALL_INSTANCE_URL = "/v1/instances";
     public static final String DELETE_INSTANCE_URL = "/v1/instances/{instance_id}";
     public static final String GET_INSTANCE_URL = "/v1/instances/{instance_id}";
     public static final String DELETE_NETWORK_URL = "/v1/networks/{network_id}";

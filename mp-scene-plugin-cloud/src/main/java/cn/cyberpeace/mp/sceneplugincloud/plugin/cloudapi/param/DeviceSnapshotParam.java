@@ -13,4 +13,6 @@ import lombok.Setter;
 @Setter
 public class DeviceSnapshotParam implements CloudHttpParam {
     private String deviceUuid;
+    private Integer limit;
+    private Integer offset;
 }

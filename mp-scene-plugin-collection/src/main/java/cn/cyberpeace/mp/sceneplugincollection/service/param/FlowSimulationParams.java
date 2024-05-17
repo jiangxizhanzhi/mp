@@ -43,6 +43,7 @@ public class FlowSimulationParams {
     @ApiModelProperty("流量大小")
     private Integer networkBytes;
 
+    @Builder.Default
     @ApiModelProperty("随机生成攻击手法")
     private Boolean shuffleCategory = Boolean.FALSE;
 

@@ -13,7 +13,11 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeviceSnapshotParam;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeviceSnapshotResultData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
 import lombok.Getter;
@@ -32,6 +36,8 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
 
     @Getter
     private HandlerUtils handlerUtils;
+
+    private final Remote remote = new Remote();
 
     public HandlerCommon(CloudScenePluginHandler pluginHandler, TaskPool taskPool, int event) {
         super(pluginHandler, taskPool, event);
@@ -212,5 +218,22 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
                 log.info("check access mode timeout , element event has been changed , do not update, sceneId {},nodeId {}", sceneId, nodeId);
             }
         });
+    }
+
+    public void setSnapshotNum(CloudPluginSceneElementBO element) {
+        if (StringUtils.isNotEmpty(element.getImageUuid())) {
+            try {
+                DeviceSnapshotParam param = new DeviceSnapshotParam();
+                param.setOffset(1);
+                param.setLimit(1);
+                var result = remote.getHttpClient().get(CloudUrlConstant.VIRTUAL_MACHINE_SNAPSHOT_LIST
+                        .replace("{vm_id}", element.getResourceId()), param, DeviceSnapshotResultData.class);
+                if (result.getData() != null) {
+                    element.setImageSnapshotNum(result.getData().getTotal());
+                }
+            } catch (Exception e) {
+                log.error("failed to get image snapshot num , vm id is {}", element.getResourceId(), e);
+            }
+        }
     }
 }

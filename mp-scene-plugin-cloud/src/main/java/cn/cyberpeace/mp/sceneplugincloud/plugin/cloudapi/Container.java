@@ -3,13 +3,11 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.http.HttpResult;
-import cn.cyberpeace.mp.base.util.mptool.ExceptionUtil;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
-import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -23,6 +21,9 @@ import java.util.Optional;
 
 @Slf4j
 public class Container extends CloudClient {
+
+    private static final String CONTAINER_ID = "{container_id}";
+
 
     public ContainerCreateData create(ContainerCreateData createData) {
         heavyConcurrentWait();
@@ -189,45 +190,40 @@ public class Container extends CloudClient {
     }
 
     public boolean restart(String instanceId) {
-        return this.doAction(instanceId, new ContainerRestartData());
+        return this.doAction(instanceId, "reboot");
     }
 
     public boolean pause(String instanceId) {
-        return this.doAction(instanceId, new ContainerPauseData());
+        return this.doAction(instanceId, "stop");
     }
 
     public boolean unPause(String instanceId) {
-        return this.doAction(instanceId, new ContainerUnPauseData());
+        return this.doAction(instanceId, "start");
     }
 
     public boolean start(String instanceId) {
-        return this.doAction(instanceId, new ContainerStartData());
+        return this.doAction(instanceId, "start");
     }
 
     public boolean stop(String instanceId) {
-        return this.doAction(instanceId, new ContainerStopData());
+        return this.doAction(instanceId, "stop");
     }
 
     public boolean suspend(String instanceId) {
-        return this.doAction(instanceId, new ContainerSuspendData());
+        return this.doAction(instanceId, "suspend");
     }
 
     public boolean resume(String instanceId) {
-        return this.doAction(instanceId, new ContainerResumeData());
+        return this.doAction(instanceId, "resume");
     }
 
-    private boolean doAction(String instanceId, CloudHttpData httpData) {
+    private boolean doAction(String instanceId, String action) {
         try {
-            cloudPost(CloudUrlConstant.CONTAINER_LIFE_CONTROL_URL.replace("{instance_id}", instanceId), httpData, null, new TypeReference<CloudResponse<Object>>() {
+            cloudPost(CloudUrlConstant.CONTAINER_LIFE_CONTROL_URL.replace(CONTAINER_ID, instanceId)
+                    .replace("{action}", action), null, null, new TypeReference<CloudResponse<Object>>() {
             }, true);
             return true;
         } catch (Exception e) {
-            log.info("change container state but it is already that state", ExceptionUtil.stacktraceToString(e));
-            if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
-                return true;
-            } else if (e.getMessage() != null && e.getMessage().contains("has stopped")) {
-                return start(instanceId);
-            }
             throw new MpRuntimeException(e.getMessage());
         }
     }
@@ -327,6 +323,26 @@ public class Container extends CloudClient {
         CloudResponse<MacvlanContainerCreateData> result = cloudPost(CloudUrlConstant.MACVLAN_CONTAINER_CREATE_URL, createData, null,
                 new TypeReference<CloudResponse<MacvlanContainerCreateData>>() {
                 }, true);
+        return result.getData();
+    }
+
+    public String snapshot(String containerId, ContainerSnapshotData data) {
+        var result = cloudPost(CloudUrlConstant.CONTAINER_SNAPSHOT_URL.replace(CONTAINER_ID,
+                containerId), data, null, new TypeReference<CloudResponse<String>>() {
+        }, true);
+        return result.getData();
+    }
+
+    public void deleteSnapshot(String containerId, String snapshotId) {
+        cloudPost(CloudUrlConstant.CONTAINER_DELETE_SNAPSHOT_URL.replace(CONTAINER_ID,
+                containerId).replace("{image_id}", snapshotId), null, null, new TypeReference<CloudResponse<Object>>() {
+        }, true);
+    }
+
+    public ContainerSnapshotActionResult snapshotAction(String containerId, String snapshotId, String action) {
+        var result = cloudPost(CloudUrlConstant.CONTAINER_SNAPSHOT_ACTION_URL.replace(CONTAINER_ID,
+                containerId).replace("{image_id}", snapshotId).replace("{action}", action), null, null, new TypeReference<CloudResponse<ContainerSnapshotActionResult>>() {
+        }, true);
         return result.getData();
     }
 

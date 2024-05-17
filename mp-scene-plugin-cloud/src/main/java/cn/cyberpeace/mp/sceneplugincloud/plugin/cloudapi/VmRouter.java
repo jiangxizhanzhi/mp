@@ -24,4 +24,10 @@ public class VmRouter extends CloudClient {
         }, true);
         return response.getData();
     }
+
+    public boolean sendCommand(RouterConfigCmdData createData, String vmId) {
+        CloudResponse<Object> response = cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_COM_EXEC_CMD.replace("{vm_id}", vmId), createData, null, new TypeReference<>() {
+        }, true);
+        return response.isSuccess();
+    }
 }

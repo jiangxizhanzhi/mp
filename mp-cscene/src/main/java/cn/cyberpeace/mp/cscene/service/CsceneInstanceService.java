@@ -17,18 +17,12 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.base.util.mptool.CacheUtil;
 import cn.cyberpeace.mp.base.util.mptool.CollUtil;
-import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneUpdateBO;
-import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
-import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
-import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
@@ -40,11 +34,7 @@ import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
-import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
-import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
-import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
-import cn.cyberpeace.mp.cscene.model.CsceneModel;
-import cn.cyberpeace.mp.cscene.model.CsceneSnapshotModel;
+import cn.cyberpeace.mp.cscene.model.*;
 import cn.cyberpeace.mp.cscene.report.bo.CollectedCsceneElementCommonBO;
 import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
@@ -57,13 +47,7 @@ import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
-import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
-import cn.cyberpeace.mp.scene.core.bo.SceneBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
+import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
@@ -77,7 +61,6 @@ import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
-import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -102,11 +85,7 @@ import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataCountParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
@@ -133,15 +112,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
@@ -1200,59 +1171,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(null);
     }
 
-    public ServiceResult<String> getConnectionUrl(String sceneId, String nodeId, String accessModeId, HttpServletResponse response) {
-        // todo 构建异常，先注释掉
-        //Map<String, ScenePluginCloudSceneService.AccessModeLinkInfo> accessModeInfoMap = collectAccessModeLinkInfo(sceneId, List.of(nodeId));
-        //ScenePluginCloudSceneService.AccessModeLinkInfo accessModeInfo = accessModeInfoMap.getOrDefault(accessModeId, null);
-        //if (accessModeInfo == null) {
-        //    return new ServiceResult<>(null);
-        //}
-        //
-        //NodeConnectionBO nodeConnection = accessModeInfo.toNewNodeConnection();
-        //nodeConnection.setUser(userId);
-        //
-        //CloudAccessMode accessMode = accessModeInfo.getAccessMode();
-        //
-        //
-        //
-        //
-        //var sceneHandler = new SceneHandler(sceneId, null, null);
-        //CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-        //CloudPluginSceneBO cloudScene = pluginHandler.getScene();
-        //pluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
-        //    if (nodeIds != null && !nodeIds.isEmpty() && !nodeIds.contains(nodeId)) {
-        //        return;
-        //    }
-        //    List<CloudPluginSceneElementPortBO> cloudPorts = pluginHandler.getPorts(cloudElement);
-        //    cloudPorts.forEach(cloudPort -> {
-        //        List<CloudAccessMode> accessModes = cloudPort.getAccessModes();
-        //        if (accessModes == null) {
-        //            return;
-        //        }
-        //        accessModes.forEach(accessMode -> {
-        //            String accessModeId = accessMode.getId();
-        //            if (StringUtils.isEmpty(accessModeId)) {
-        //                return;
-        //            }
-        //
-        //            accessModeLinkInfoMap.put(accessModeId,
-        //                    new ScenePluginCloudSceneService.AccessModeLinkInfo(accessModeId, accessMode, cloudPort, cloudElement, scene, cloudScene));
-        //        });
-        //    });
-        //});
-        //
-        //
-        //
-        //
-        //CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-        //var cloudElement = cloudPlugin.getElement(nodeId);
-        //GetConnectionUrlParam param = new GetConnectionUrlParam();
-        //param.setVmId(cloudElement.getResourceId());
-        //param.setConsoleType(protocol);
-        //return new ServiceResult<>(CloudSceneConnectionCommon.getConnectionUrl(param, response).getData());
-        return null;
-    }
-
     private String getProtocolByAccessModeId(String accessModeId, SceneHandler sceneHandler, String targetNodeId) {
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         CloudPluginSceneBO cloudScene = pluginHandler.getScene();
@@ -1320,6 +1238,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         } finally {
             CsceneContextHolder.resetContext();
         }
+    }
+
+    public ServiceResult<String> getConnectionUrl(String sceneId, String nodeId, String protocol, HttpServletResponse response) {
+        var sceneHandler = new SceneHandler(sceneId, null, null);
+        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        var cloudElement = cloudPlugin.getElement(nodeId);
+        GetConnectionUrlParam param = new GetConnectionUrlParam();
+        param.setVmId(cloudElement.getResourceId());
+        param.setConsoleType(protocol);
+        return new ServiceResult<>(CloudSceneConnectionCommon.getConnectionUrl(param, response).getData());
     }
 
     public ServiceResult<NodeConnectionBO> getRemoteTtyConnection(String id, String nodeId) {
@@ -1668,11 +1596,18 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
         String sceneId = sceneInfo.getSceneId();
         csceneSnapshotService.logicDeleteCsceneSnapshot(csceneInstance.getCscene(), nodeId, snapshotId);
-        Boolean result = scenePluginCloudSceneService.deleteElementSnapshot(sceneId, nodeId, snapshot.getId(), snapshotId, snapshot.getName()).getSource();
+        Boolean result = sceneService.deleteElementSnapshot(sceneId, nodeId, snapshotId, null).getSource();
         if (result) {
             csceneSnapshotService.deleteCsceneSnapshotRelativeInfo(csceneInstance.getCscene(), nodeId, snapshotId);
         }
         return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<Boolean> elementSnapshotAction(String id, String nodeId, String snapshotId, String action, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        sceneHandler.elementSnapshotAction(nodeId, snapshotId, action);
+        return new ServiceResult<>(true);
     }
 
     private <T> List<String> getReferCsceneNames(List<T> usingList, Function<T, String> getName, int nameSize) {

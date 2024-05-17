@@ -12,16 +12,7 @@ import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * @Description
@@ -34,6 +25,7 @@ public class VyosNetworkCommandUtils {
     private static List<NetworkingCmdBuilder> modifyBuilderChains = new ArrayList<>();
 
     static {
+        builderChains.add(new RouterIpCmdBuilder());
         builderChains.add(new StaticRouteCmdBuilder());
         builderChains.add(new OSPFCmdBuilder());
         builderChains.add(new BGPCmdBuilder());
@@ -105,6 +97,32 @@ public class VyosNetworkCommandUtils {
 
     private interface NetworkingCmdBuilder {
         List<String> build(ConfigParamsWrapper paramsWrapper);
+    }
+
+    private static class RouterIpCmdBuilder implements NetworkingCmdBuilder {
+        private static String SET_INTERFACE_IP = "set interfaces ethernet eth%s address %s";
+        private static String SET_INTERFACE_MTU = "set interfaces ethernet eth%s mtu 1442";
+
+        @Override
+        public List<String> build(ConfigParamsWrapper paramsWrapper) {
+            CloudPluginSceneElementBO element = paramsWrapper.element;
+            var ports = element.getSrcElement().getPorts();
+            List<String> cmds = new ArrayList<>();
+            ports.forEach(p -> {
+                String routerIp = p.getIp();
+                var net = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p);
+                if (net != null && StringUtils.isNotEmpty(net.getCidr()) && net.getCidr().contains("/")) {
+                    routerIp = routerIp + "/" + net.getCidr().split("/")[1];
+                } else {
+                    routerIp = routerIp + "/24";
+                }
+                cmds.addAll(List.of(
+                        String.format(SET_INTERFACE_IP, p.getOrder() - 1, routerIp),
+                        String.format(SET_INTERFACE_MTU, p.getOrder() - 1)
+                ));
+            });
+            return cmds;
+        }
     }
 
     private static class RouterNameCmdBuilder implements NetworkingCmdBuilder {
