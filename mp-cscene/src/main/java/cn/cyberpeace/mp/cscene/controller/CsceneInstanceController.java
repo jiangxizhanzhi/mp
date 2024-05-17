@@ -42,6 +42,7 @@ import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -78,6 +79,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Api(value = "场景实例", tags = "CSCENE-场景实例")
 @Slf4j
@@ -221,6 +223,41 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<CsceneInstanceBO> get(@RequestParam String id,
                                                @RequestParam(required = false) String accessUserId) {
         return modelService.getById(id, new CsceneContextBO(accessUserId, null)).asResult();
+    }
+
+    @ApiOperation("查询场景实例")
+    @ApiImplicitParams({@ApiImplicitParam(name = "sceneId", value = "场景实例id", dataTypeClass = String.class), @ApiImplicitParam(name = "areaId", value = "场景实例区域id", dataTypeClass = String.class)})
+    @GetMapping("get_by_area")
+    public ServiceResult<CsceneInstanceBO> getByArea(@RequestParam String id, @RequestParam(required = false) String areaId) {
+        String sceneId = this.modelService.get(id).getSource().getObj().getScene();
+        SceneHandler sceneHandler = new SceneHandler(sceneId, areaId, true, null);
+
+        var res = sceneHandler.toData();
+
+        SceneHandler sceneHandler1 = new SceneHandler(id, areaId, true, null);
+        sceneHandler.reloadOut();
+        var outNodes = sceneHandler1.toData();
+
+        if (Objects.nonNull(res) && Objects.nonNull(outNodes)) {
+            if (Objects.nonNull(res.getTopology()) && Objects.nonNull(outNodes.getTopology())) {
+                res.getTopology().getElements().addAll(outNodes.getTopology().getElements());
+                res.getTopology().getAreas().addAll(outNodes.getTopology().getAreas());
+            }
+            if (Objects.nonNull(res.getPlugins()) && Objects.nonNull(outNodes.getPlugins())) {
+                outNodes.getPlugins().forEach(((s, scenePluginDataBO) -> {
+                    if (res.getPlugins().containsKey(s)) {
+                        res.getPlugins().get(s).getElements().putAll(scenePluginDataBO.getElements());
+                        res.getPlugins().get(s).getElementPorts().putAll(scenePluginDataBO.getElementPorts());
+                    } else {
+                        res.getPlugins().put(s, scenePluginDataBO);
+                    }
+                }));
+            }
+        }
+
+        var csceneInstance = new CsceneInstanceBO();
+        csceneInstance.setScene(res);
+        return new ServiceResult<>(csceneInstance).asResult();
     }
 
     @AuthTarget(TargetEnum.CSCENE_INSTANCE_GROUP)

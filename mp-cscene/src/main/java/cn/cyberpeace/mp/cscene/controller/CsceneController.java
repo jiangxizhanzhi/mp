@@ -193,10 +193,13 @@ public class CsceneController implements BaseModelListControllerBase {
         String id = this.modelService.get(request.getSceneId()).getSource().getObj().getSceneConfig();
 
         var sceneConfigAreaMapper = BeanCommon.getBean(SceneConfigAreaMapper.class);
-        SceneConfigAreaModel sceneConfigAreaModel = sceneConfigAreaMapper.list(new HumanCondition().select(SceneConfigAreaModel::getId)
+        SceneConfigAreaModel sceneConfigAreaModel = sceneConfigAreaMapper.first(new HumanCondition().select(SceneConfigAreaModel::getId)
                                                                                        .filterEqual(SceneConfigAreaModel::getScene, id)
-                                                                                       .filterEqual(SceneConfigAreaModel::getNodeId, request.getAreaId()))
-                .get(0);
+                                                                                       .filterEqual(SceneConfigAreaModel::getNodeId, request.getAreaId()));
+        if (sceneConfigAreaModel == null) {
+            log.error("scene {} ,  area {} not find , ", request.getSceneId(), request.getAreaId());
+            return new ServiceResult<>(true).asResult();
+        }
         sceneConfigAreaModel.setDisplayContext(request.getDisplayContext());
         return new ServiceResult<>(sceneConfigAreaMapper.update(sceneConfigAreaModel)).asResult();
     }
