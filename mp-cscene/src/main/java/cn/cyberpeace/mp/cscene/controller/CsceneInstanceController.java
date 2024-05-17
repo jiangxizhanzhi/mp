@@ -233,8 +233,11 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     })
     @GetMapping(params = "id")
     public ServiceResult<CsceneInstanceBO> get(@RequestParam String id,
-                                               @RequestParam(required = false) String accessUserId) {
-        return modelService.getById(id, new CsceneContextBO(accessUserId, null)).asResult();
+                                               @RequestParam(required = false) String accessUserId,@RequestParam(required = false,name = "area_id") String areaId) {
+        if (areaId == null) {
+            areaId = "";
+        }
+        return modelService.getById(id, areaId, new CsceneContextBO(accessUserId, null)).asResult();
     }
 
     @ApiOperation("查询场景拓扑区域树形结构")
@@ -341,6 +344,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
         var csceneInstance = new CsceneInstanceBO();
         csceneInstance.setScene(res);
+        CsceneDataModifier.correctReturnCsceneData(csceneInstance);
         return new ServiceResult<>(csceneInstance).asResult();
     }
 

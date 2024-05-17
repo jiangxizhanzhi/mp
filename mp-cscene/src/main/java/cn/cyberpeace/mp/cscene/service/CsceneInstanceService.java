@@ -669,7 +669,18 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<CsceneInstanceBO> getById(String id, CsceneContextBO context) {
-        BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(id, context);
+        BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(id, null, context);
+        CsceneInstanceBO data = instanceHandler.toData();
+        SceneBO scene = data.getScene().getTopology().getScene();
+        SceneStageRecorder recorder = SceneStageRecorder.getRecorder(scene.getEid());
+        if (recorder != null) {
+            recorder.refreshSceneBO(scene);
+        }
+        return new ServiceResult<>(data);
+    }
+
+    public ServiceResult<CsceneInstanceBO> getById(String id, String areaId, CsceneContextBO context) {
+        BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(id,areaId, context);
         CsceneInstanceBO data = instanceHandler.toData();
         SceneBO scene = data.getScene().getTopology().getScene();
         SceneStageRecorder recorder = SceneStageRecorder.getRecorder(scene.getEid());
