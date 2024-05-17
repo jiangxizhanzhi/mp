@@ -322,7 +322,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         var res = sceneHandler.toData();
 
         SceneHandler sceneHandler1 = new SceneHandler(sceneId, areaId, true, true);
-        sceneHandler.reloadOut();
+        sceneHandler1.reloadOut();
         var outNodes = sceneHandler1.toDataV2();
 
         if (Objects.nonNull(res) && Objects.nonNull(outNodes)) {
