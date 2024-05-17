@@ -157,10 +157,14 @@ public class CsceneController implements BaseModelListControllerBase {
     @ApiOperation("获取指定id场景模板")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "area_id", value = "区域id", dataTypeClass = String.class)
     })
     @GetMapping(params = "id")
-    public ServiceResult<CsceneBO> get(@RequestParam String id) {
-        return modelService.getById(id, false, null).asResult();
+    public ServiceResult<CsceneBO> get(@RequestParam String id,@RequestParam(value = "area_id",required = false) String areaId) {
+        if (areaId == null) {
+            areaId = "";
+        }
+        return modelService.getById(id, areaId, false, null).asResult();
     }
 
     @ApiOperation("根据区域获取指定id场景模板")

@@ -10,9 +10,17 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
-import cn.cyberpeace.mp.cscene.bo.*;
+import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
+import cn.cyberpeace.mp.cscene.bo.CsceneUpdateBO;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
+import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
+import cn.cyberpeace.mp.cscene.bo.SceneAreaTreeBO;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -39,10 +47,12 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
-import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
+import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -62,6 +72,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -77,6 +88,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -225,6 +237,75 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return modelService.getById(id, new CsceneContextBO(accessUserId, null)).asResult();
     }
 
+    @ApiOperation("查询场景拓扑区域树形结构")
+    @ApiImplicitParam(name = "id", value = "场景拓扑id", dataTypeClass = String.class)
+    @GetMapping("/tree")
+    public ServiceResult<SceneAreaTreeBO> getSceneConfigAreaTree(@RequestParam String id) {
+        String sceneId = this.modelService.get(id).getSource().getObj().getScene();
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
+        SceneAreaTreeBO sceneAreaTree = new SceneAreaTreeBO();
+        SceneDataBO result = sceneHandler.toData();
+        if (result != null && result.getTopology() != null && CollectionUtils.isNotEmpty(result.getTopology().getAreas())) {
+            var areas = result.getTopology().getAreas();
+            Map<String, List<SceneAreaBO>> parentId2Children = new HashMap<>();
+            areas.stream()
+                    .filter(sceneConfigAreaBO -> StringUtils.isNotEmpty(sceneConfigAreaBO.getArea()))
+                    .forEach(sceneConfigAreaBO -> {
+                        if (CollectionUtils.isEmpty(parentId2Children.get(sceneConfigAreaBO.getArea()))) {
+                            parentId2Children.put(sceneConfigAreaBO.getArea(), new ArrayList<>());
+                        }
+                        parentId2Children.get(sceneConfigAreaBO.getArea()).add(sceneConfigAreaBO);
+                    });
+            areas.stream()
+                    .filter(sceneConfigAreaBO -> StringUtils.isEmpty(sceneConfigAreaBO.getArea()))
+                    .forEach(sceneConfigAreaBO -> {
+                        if (sceneConfigAreaBO.getType() == BaseSceneAreaModel.Type.LAYER) {
+                            var area = getTreeArea(sceneConfigAreaBO, parentId2Children);
+                            sceneAreaTree.getAreaList().add(area);
+                        } else {
+                            if (CollectionUtils.isNotEmpty(parentId2Children.get(sceneConfigAreaBO.getId()))) {
+                                parentId2Children.get(sceneConfigAreaBO.getId()).stream()
+                                        .filter(a -> a.getType() == BaseSceneAreaModel.Type.LAYER)
+                                        .forEach(sceneConfigAreaBO1 -> {
+                                            var area = getTreeArea(sceneConfigAreaBO1, parentId2Children);
+                                            sceneAreaTree.getAreaList().add(area);
+                                        });
+                            }
+                        }
+                    });
+        }
+        return new ServiceResult<>(sceneAreaTree).asResult();
+    }
+
+    private SceneAreaTreeBO.Area getTreeArea(SceneAreaBO sceneConfigAreaBO, Map<String, List<SceneAreaBO>> parentId2Children) {
+        SceneAreaTreeBO.Area area = new SceneAreaTreeBO.Area();
+        area.setId(sceneConfigAreaBO.getId());
+        area.setName(sceneConfigAreaBO.getName());
+        area.setDescription(sceneConfigAreaBO.getDescription());
+        area.setDisplayContext(sceneConfigAreaBO.getDisplayContext());
+        processChildren(area.getId(), area, parentId2Children);
+        return area;
+    }
+
+    private void processChildren(String parentId, SceneAreaTreeBO.Area area, Map<String, List<SceneAreaBO>> parentId2Children) {
+        if (CollectionUtils.isNotEmpty(parentId2Children.get(parentId))) {
+            parentId2Children.get(parentId).forEach(sceneConfigAreaBO -> {
+                if (sceneConfigAreaBO.getType() == BaseSceneAreaModel.Type.LAYER) {
+                    SceneAreaTreeBO.Area child = new SceneAreaTreeBO.Area();
+                    child.setLabel(parentId);
+                    child.setId(sceneConfigAreaBO.getId());
+                    child.setName(sceneConfigAreaBO.getName());
+                    child.setDescription(sceneConfigAreaBO.getDescription());
+                    child.setDisplayContext(sceneConfigAreaBO.getDisplayContext());
+                    processChildren(child.getId(), child, parentId2Children);
+                    area.getChildren().add(child);
+                } else {
+                    processChildren(sceneConfigAreaBO.getId(), area, parentId2Children);
+                }
+            });
+        }
+    }
+
     @ApiOperation("查询场景实例")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
@@ -237,9 +318,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
         var res = sceneHandler.toData();
 
-        SceneHandler sceneHandler1 = new SceneHandler(id, areaId, true, null);
+        SceneHandler sceneHandler1 = new SceneHandler(sceneId, areaId, true, true);
         sceneHandler.reloadOut();
-        var outNodes = sceneHandler1.toData();
+        var outNodes = sceneHandler1.toDataV2();
 
         if (Objects.nonNull(res) && Objects.nonNull(outNodes)) {
             if (Objects.nonNull(res.getTopology()) && Objects.nonNull(outNodes.getTopology())) {

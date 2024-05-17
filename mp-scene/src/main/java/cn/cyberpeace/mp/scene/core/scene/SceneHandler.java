@@ -188,6 +188,14 @@ public class SceneHandler extends BaseSceneHandler<
         this.setSceneStageRecorder(new SceneStageRecorder(this.getScene()));
     }
 
+    public SceneHandler(String sceneId, String areaId, boolean isAreaMode, boolean lazyMode) {
+        if (lazyMode) {
+            initLazy(sceneId, areaId, isAreaMode);
+        } else {
+            init(sceneId, areaId, isAreaMode, null);
+        }
+    }
+
     @Override
     protected void initMapper() {
         super.sceneMapper = BeanCommon.getBean(SceneMapper.class);
@@ -984,6 +992,11 @@ public class SceneHandler extends BaseSceneHandler<
     public SceneDataBO toData() {
         SceneDataBO sceneDataBO = super.toData();
         sceneDataBO.getTopology().getScene().setProgressPercentage(this.calculateProgressPercentage());
+        return sceneDataBO;
+    }
+
+    public SceneDataBO toDataV2() {
+        SceneDataBO sceneDataBO = super.toData();
         return sceneDataBO;
     }
 
