@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scene.core.base;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.ValidationCommon;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
@@ -504,6 +505,87 @@ public abstract class BaseSceneHandler<
     }
 
     /**
+     * 从场景业务数据初始化
+     * @param sceneDataBO 场景业务数据
+     */
+    public void initPart(TSceneDataBO sceneDataBO, boolean isAreaMode) {
+        this.initMapper();
+        this.initClass();
+        this.isAreaMode = isAreaMode;
+        outerFromData(sceneDataBO);
+    }
+
+    /**
+     * 保存当前场景外部数据
+     */
+    public void saveOut() {
+        if (elementMap.isEmpty()) {
+            return;
+        }
+        Map<String, TSceneElementModel> existElementMap = readElementsByNodeIds(elementMap.keySet().toArray(new String[0])).stream()
+                .collect(Collectors.toMap(BaseSceneElementModel::getNodeId, x -> x));
+        if (existElementMap.isEmpty()) {
+            return;
+        }
+        int updateCount = updateOuterElements(existElementMap);
+    }
+
+    /**
+     * 更新外部网元节点
+     * @param existElementMap 已存在的外部网元节点
+     * @return 更新成功的数量
+     */
+    private int updateOuterElements(Map<String, TSceneElementModel> existElementMap) {
+        // 目前只保存其他区域里的坐标属性
+        Map<String, TSceneElementModel> savingElementMap = existElementMap.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
+                    TSceneElementModel element = entry.getValue();
+                    TSceneElementBO elementBO = elementMap.get(element.getNodeId());
+                    element.setOuterPosition2(JsonCommon.stringify(elementBO.getOuterPosition2()));
+                    return element;
+                }));
+        return sceneElementMapper.bulkUpdate(new ArrayList<>(savingElementMap.values())).getSuccessCount();
+    }
+
+    /**
+     * 从场景业务数据载入外部场景元素
+     */
+    private void outerFromData(TSceneDataBO sceneDataBO) {
+        var topology = sceneDataBO.getTopology();
+        var srcScene = (topology == null || topology.getScene() == null) ? ClassUtils.createInstance(sceneBOClass)
+                : topology.getScene();
+        loadSceneBO(srcScene);
+        sceneId = scene.getEid();
+
+        if (topology != null) {
+            areaId = topology.getAreaId();
+            loadOuterElementBOs(topology.getElements());
+        }
+    }
+
+    /**
+     * 载入外部网元节点数据
+     * @param elements 业务模型-网元节点
+     */
+    private void loadOuterElementBOs(List<TSceneElementBO> elements) {
+        if (elements == null) {
+            return;
+        }
+
+        elements.forEach(element -> {
+            if (isValidAreaNode(element)) {
+                return;
+            }
+            if (element.getOuterPosition2() == null) {
+                element.setOuterPosition2(new HashMap<>());
+            }
+            element.getOuterPosition2().put(areaId == null ? StringUtils.EMPTY : areaId, element.getPosition2());
+
+            elementMap.put(element.getId(), element);
+        });
+    }
+
+    /**
      * 载入场景插件数据
      * @param scenePluginData 插件代号：插件数据
      */
@@ -571,6 +653,10 @@ public abstract class BaseSceneHandler<
         elements.forEach(element -> {
             TSceneElementBO elementBO = ClassUtils.createInstance(sceneElementBOClass);
             elementBO.fromModel(element);
+            if (isAreaMode && !elementBO.getOuterPosition2().isEmpty() &&
+                    !isValidAreaNode(elementBO)) {
+                elementBO.setPosition2(elementBO.getOuterPosition2().get(areaId));
+            }
             elementMap.put(elementBO.getId(), elementBO);
         });
     }

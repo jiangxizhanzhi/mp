@@ -51,6 +51,16 @@ public class SceneConfigService {
         return new ServiceResult<>(sceneConfigHandler.toData());
     }
 
+    public ServiceResult<SceneConfigDataBO> saveOutNodes(SceneConfigDataBO sceneConfigDataBO) {
+        if (sceneConfigDataBO == null) {
+            return new ServiceResult<>();
+        }
+        SceneConfigHandler sceneConfigHandler;
+        sceneConfigHandler = new SceneConfigHandler(sceneConfigDataBO, true);
+        sceneConfigHandler.saveOut();
+        return new ServiceResult<>(sceneConfigHandler.toData());
+    }
+
     public ServiceResult<Boolean> delete(String id, boolean logic, SceneConfigContextBO context) {
         SceneConfigHandler sceneConfigHandler;
         try {

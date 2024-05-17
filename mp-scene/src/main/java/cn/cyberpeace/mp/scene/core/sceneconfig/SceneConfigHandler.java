@@ -86,6 +86,14 @@ public class SceneConfigHandler extends BaseSceneHandler<
         }
     }
 
+    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO, boolean partMode) {
+        if (partMode) {
+            initPart(sceneConfigDataBO, true);
+        } else {
+            init(sceneConfigDataBO, true, null);
+        }
+    }
+
     @Override
     protected void initMapper() {
         super.sceneMapper = BeanCommon.getBean(SceneConfigMapper.class);

@@ -56,3 +56,9 @@ CREATE TABLE `mp_scene_scene_config_node_connection`
 
 alter table mp_scene_scene_config_area add column type tinyint(2) comment '区域类型 0:普通区域 1:层级区域' default 0 after open;
 alter table mp_scene_scene_area add column type tinyint(2) comment '区域类型 0:普通区域 1:层级区域' default 0 after open;
+alter table mp_scene_scene_element add outer_position2 varchar(255) NOT NULL comment '外部2d坐标';
+alter table mp_scene_scene_config_element add outer_position2 varchar(255) NOT NULL  comment '外部2d坐标';
+alter table mp_scene_scene_area add outer_position2 varchar(255) NOT NULL comment '外部2d坐标';
+alter table mp_scene_scene_config_area add outer_position2 varchar(255) NOT NULL comment '外部2d坐标';
+alter table mp_scene_scene_piece add outer_position2 varchar(255) NOT NULL comment '外部2d坐标';
+alter table mp_scene_scene_config_piece add outer_position2 varchar(255) NOT NULL comment '外部2d坐标';

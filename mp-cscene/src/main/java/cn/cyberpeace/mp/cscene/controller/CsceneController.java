@@ -302,6 +302,11 @@ public class CsceneController implements BaseModelListControllerBase {
                 oldId2New.put(oldNodeId, newNodeId);
                 e.setId(newNodeId);
                 e.setArea(oldId2New.get(e.getArea()));
+                if (!e.getOuterPosition2().isEmpty()) {
+                    Map<String, String> newOuterPosition2 = new HashMap<>();
+                    e.getOuterPosition2().forEach((area, position2) -> newOuterPosition2.put(oldId2New.get(area), position2));
+                    e.setOuterPosition2(newOuterPosition2);
+                }
                 if (CollectionUtils.isEmpty(e.getPorts())) {
                     return;
                 }
