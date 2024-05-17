@@ -51,6 +51,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.ConstraintViolation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -865,6 +866,20 @@ public abstract class BaseSceneHandler<
             filterAreaIds = new String[]{currentAreaId};
         }
         if (filterAreaIds.length > 0) {
+
+            var elements = sceneElementMapper.list(new HumanCondition()
+                                                           .filterEqual(BaseSceneElementModel::getScene,sceneId)
+                                                           .filterIn(BaseSceneElementModel::getArea, filterAreaIds));
+            List<String> nodeIds = new ArrayList<>();
+            elements.forEach(e -> nodeIds.add(e.getNodeId()));
+
+            var connections = sceneElementPortConnectionMapper.list(new HumanCondition().filterEqual(BaseSceneElementPortConnectionModel::getScene,sceneId)
+                                                          .filterOrStart()
+                                                          .orIn(BaseSceneElementPortConnectionModel::getSourceElement,nodeIds.toArray(new String[]{}))
+                                                          .orIn(BaseSceneElementPortConnectionModel::getTargetElement,nodeIds.toArray(new String[]{}))
+                                                          .filterOrEnd());
+
+
             condition.link(sceneElementPortConnectionModelClass, sceneElementModelClass)
                     .filterOrStart()
                     .orLink(sceneElementPortConnectionModelClass, BaseSceneElementPortConnectionModel::getSourceElement,
@@ -1129,8 +1144,18 @@ public abstract class BaseSceneHandler<
                 TSceneElementBO targetElement = portIdElementMap.getOrDefault(targetPortBO.getId(), null);
                 targetElementId = targetElement == null ? null : targetElement.getEid();
             }
-            if (sourcePortId == null || targetPortId == null) {
-                return;
+            if (sourcePortId == null) {
+                var a = sceneElementPortMapper.first(new HumanCondition().filterEqual(BaseSceneElementPortModel::getScene, sceneId)
+                                                             .filterEqual(BaseSceneElementPortModel::getPortId, elementPortConnection.getSourcePortId()));
+                sourceElementId = a.getSceneElement();
+                sourcePortId = a.getId();
+            }
+
+            if(targetPortId == null){
+                var a = sceneElementPortMapper.first(new HumanCondition().filterEqual(BaseSceneElementPortModel::getScene, sceneId)
+                                                             .filterEqual(BaseSceneElementPortModel::getPortId, elementPortConnection.getTargetPortId()));
+                targetElementId = a.getSceneElement();
+                targetPortId = a.getId();
             }
             elementPortConnection.setSourceElement(sourceElementId);
             elementPortConnection.setTargetElement(targetElementId);
