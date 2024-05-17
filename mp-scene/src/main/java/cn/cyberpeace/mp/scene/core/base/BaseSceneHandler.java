@@ -26,7 +26,6 @@ import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.exception.SceneUpdateException;
 import cn.cyberpeace.mp.scene.core.plugin.base.BasePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
-import cn.cyberpeace.mp.scene.model.SceneAreaNodeConnectionModel;
 import cn.cyberpeace.mp.scene.model.SceneConfigElementPortConnectionModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaNodeConnectionModel;
@@ -573,14 +572,9 @@ public abstract class BaseSceneHandler<
         }
 
         elements.forEach(element -> {
-            if (isValidAreaNode(element)) {
-                return;
-            }
             if (element.getOuterPosition2() == null) {
                 element.setOuterPosition2(new HashMap<>());
             }
-            element.getOuterPosition2().put(areaId == null ? StringUtils.EMPTY : areaId, element.getPosition2());
-
             elementMap.put(element.getId(), element);
         });
     }
@@ -2068,9 +2062,16 @@ public abstract class BaseSceneHandler<
         elementIdPluginsMap.clear();
 
         var outNodeConnection = readAreaNodeConnectionsByNodeIds(areaId);
-        String[] outNodeIds = outNodeConnection.stream()
-                .map(c1 -> c1.getSourceNodeId().equals(areaId) ? c1.getTargetNodeId() : c1.getSourceNodeId())
-                .toArray(String[]::new);
+        String[] outNodeIds = new String[outNodeConnection.size()];
+        for (int i = 0; i < outNodeConnection.size(); i++) {
+            String source = parseNodeId(outNodeConnection.get(i).getSourceNodeId());
+            String target = parseNodeId(outNodeConnection.get(i).getTargetNodeId());
+            if (source.equals(areaId)) {
+                outNodeIds[i] = target;
+            } else {
+                outNodeIds[i] = source;
+            }
+        }
         if (outNodeIds.length == 0) {
             return;
         }
@@ -2114,14 +2115,26 @@ public abstract class BaseSceneHandler<
         if (nodeIds.length == 0) {
             return new ArrayList<>();
         }
-        var condition = new HumanCondition()
-                .filterEqual(BaseSceneAreaNodeConnectionModel::getScene, sceneId)
-                .filterOrStart()
-                .orIn(BaseSceneAreaNodeConnectionModel::getSourceNodeId, nodeIds)
-                .orIn(BaseSceneAreaNodeConnectionModel::getTargetNodeId, nodeIds)
-                .filterOrEnd();
 
-        return sceneNodeConnectionMapper.list(condition);
+        List<TSceneAreaNodeConnectionModel> list = sceneNodeConnectionMapper.list(new HumanCondition().filterEqual(BaseSceneAreaNodeConnectionModel::getScene, sceneId));
+        List<TSceneAreaNodeConnectionModel> result = new ArrayList<>();
+        for (var l : list) {
+            for(String nodeId:nodeIds){
+                if (l.getSourceNodeId().contains(nodeId) || l.getTargetNodeId().contains(nodeId)) {
+                    result.add(l);
+                    break;
+                }
+            }
+        }
+        return result;
+//        var condition = new HumanCondition()
+//                .filterEqual(BaseSceneAreaNodeConnectionModel::getScene, sceneId)
+//                .filterOrStart()
+//                .orIn(BaseSceneAreaNodeConnectionModel::getSourceNodeId, nodeIds)
+//                .orIn(BaseSceneAreaNodeConnectionModel::getTargetNodeId, nodeIds)
+//                .filterOrEnd();
+//
+//        return sceneNodeConnectionMapper.list(condition);
     }
 
     private List<TSceneAreaModel> readAreasByNodeIds(String... nodeIds) {

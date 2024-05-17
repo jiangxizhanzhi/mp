@@ -86,6 +86,9 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
 
     public void calHardware(){
         int cpu = 0 ,ram = 0 ,disk = 0 ;
+        if(!this.sceneConfig.getPlugins().containsKey("cpcloud")) {
+            return;
+        }
         Map<String, Map<String, Object>> pluginElements = this.sceneConfig.getPlugins().get("cpcloud").getElements();
         for (BaseSceneElementBO e : this.sceneConfig.getTopology().getElements()) {
             var node = pluginElements.get(e.getId());
