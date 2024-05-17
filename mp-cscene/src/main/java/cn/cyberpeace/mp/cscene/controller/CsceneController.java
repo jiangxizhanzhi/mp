@@ -186,6 +186,7 @@ public class CsceneController implements BaseModelListControllerBase {
         this.mergeSceneConfig(dataBO, extraSceneConfig);
         CsceneBO csceneBO = new CsceneBO();
         csceneBO.setSceneConfig(dataBO);
+        CsceneDataModifier.correctReturnCsceneData(csceneBO);
         return new ServiceResult<>(csceneBO).asResult();
     }
 
