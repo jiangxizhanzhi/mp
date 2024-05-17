@@ -2120,6 +2120,9 @@ public abstract class BaseSceneHandler<
         List<TSceneAreaNodeConnectionModel> result = new ArrayList<>();
         for (var l : list) {
             for(String nodeId:nodeIds){
+                if (StringUtils.isEmpty(nodeId)) {
+                    continue;
+                }
                 if (l.getSourceNodeId().contains(nodeId) || l.getTargetNodeId().contains(nodeId)) {
                     result.add(l);
                     break;
