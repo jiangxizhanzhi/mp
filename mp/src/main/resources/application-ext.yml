@@ -89,8 +89,8 @@ mp:
       monitor-business-restart-restrict: ${MP_MONITOR_BIZ_SRV_RESTART_RESTRICT_LIST:}
   common: #公用配置
     ext-var:
-      mp-ip: ${MP_API_IP:10.100.7.1}          # MP中台地址
-      mp-port: ${MP_API_PORT:8001}
+      mp-ip: ${MP_API_IP:10.100.25.1}          # MP中台地址
+      mp-port: ${MP_API_PORT:8002}
       cp-ip: ${CP_IP:10.4.1.57}                # 云平台适配层接口地址
       cp-port: ${CP_PORT:9999}
       public-net-proxy: ${MP_PUBLIC_NET_PROXY:false}
@@ -107,19 +107,19 @@ mp:
       fdfs-inner-file-port: ${FDFS_INNER_FILE_SERVER_PORT:8888}
       fdfs-outer-http-server: ${FDFS_FILE_SERVER_ADDR:/fdfs}
       file-server: ${FILE_SERVER:lfs}
-      lfs-inner-http-url: ${LFS_INNER_HTTP_PROTOCOL:http}://${MP_API_IP:10.100.7.1}:${MP_API_PORT:8001}${LFS_INNER_HTTP_URL:/api/mp/file/%s}
+      lfs-inner-http-url: ${LFS_INNER_HTTP_PROTOCOL:http}://${MP_API_IP:10.100.25.1}:${MP_API_PORT:8002}${LFS_INNER_HTTP_URL:/api/mp/file/%s}
       lfs-outer-http-url: ${LFS_OUTER_HTTP_URL:/api/mp/file/%s}
   # mp-situationaware 模块配置
   situationaware:
     ext-var:
-      wazuh-ip: ${WAZUH_IP:10.100.7.1}
+      wazuh-ip: ${WAZUH_IP:10.100.25.1}
       wazuh-port: ${WAZUH_PORT:15500}
       wazuh-username: ${WAZUH_USERNAME:wazuh}
       wazuh-password: ${WAZUH_PASSWORD:Abcd123#}
-      wazuh-es-ip: ${WAZUH_ES_IP:10.100.7.1}
+      wazuh-es-ip: ${WAZUH_ES_IP:10.100.25.1}
       wazuh-es-port: ${WAZUH_ES_PORT:9205}
       wazuh-es-max-page-size: ${ES_MAX_PAGESIZE:10000}
-      arkime-es-host: ${ARKIME_ES_IP:10.100.7.1}
+      arkime-es-host: ${ARKIME_ES_IP:10.100.25.1}
       arkime-es-port: ${ARKIME_ES_PORT:9205}
       arkime-image-name: ${ARKIME_IMAGE_NAME:mp_arkime:v2}
       arkime-disk: ${ARKIME_DISK:50}
@@ -130,7 +130,7 @@ mp:
   # mp-log 模块
   log:
     ext-var:
-      es-ip: ${LOG_ES_IP:10.100.7.1}
+      es-ip: ${LOG_ES_IP:10.66.66.1}
       es-port: ${LOG_ES_PORT:9205}
       es-max-page-size: ${ES_MAX_PAGESIZE:10000}
       log-db: ${MP_DEVOPS_LOG_DB:sql}
@@ -139,7 +139,7 @@ mp:
   # mp-auth 模块配置
   auth:
     ext-var:
-      authenticate-jwt-secret: ${MP_AUTH_JWT_SECRET:a668b6fec22144f38a6f72f8a5aa7326}
+      authenticate-jwt-secret: ${MP_AUTH_JWT_SECRET:1af50587ec1f42d5838a5681e08bb6f3}
       authenticate-encoder-iterations: ${MP_AUTH_ENCODER_ITERATIONS:10000}
       logout-keep-secret-user: ${MP_AUTH_LOGOUT_KEEP_SECRET_USER:3cf215471268482c88a9986283e38c27}
       max-import-user-size: ${MP_MAX_IMPORT_USER_SIZE:1000}

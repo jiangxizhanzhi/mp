@@ -477,8 +477,6 @@ public class ImagesController {
         CloudPlatformPageResult<Flavor> page = flavorService.page(getParams);
         List<Flavor> listToSort = new ArrayList<>();
         for (Flavor flavor : page.getList()) {
-            String nameMessage = flavor.getName();
-            flavor.setRam(Integer.valueOf(nameMessage.split("C",-1)[0]));
             listToSort.add(flavor);
         }
         listToSort.sort(Comparator.comparing(Flavor::getDisk));
@@ -486,6 +484,10 @@ public class ImagesController {
         for (Flavor flavor : listToSort) {
             toSort.add(flavor);
         }
+        toSort.forEach(flavor -> {
+            String ram = flavor.getName().split("/")[1];
+            flavor.setRam(Integer.parseInt(ram.substring(0, ram.length()-1)));
+        });
         toSort.sort(Comparator.comparing(Flavor::getRam));
         List<Flavor> flavorList = new ArrayList<>();
         for (Flavor flavor : toSort) {
