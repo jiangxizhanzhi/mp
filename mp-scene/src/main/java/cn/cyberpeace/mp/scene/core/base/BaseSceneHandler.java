@@ -2206,11 +2206,22 @@ public abstract class BaseSceneHandler<
             }
             List<String> containedAreaIds = new ArrayList<>();
             containedAreas.forEach(a -> containedAreaIds.add(a.getNodeId()));
-            condition.filterEqual(BaseSceneAreaNodeConnectionModel::getScene, sceneId)
-                    .filterOrStart()
-                    .orIn(BaseSceneAreaNodeConnectionModel::getSourceNodeId, containedAreaIds.toArray(new String[]{}))
-                    .orIn(BaseSceneAreaNodeConnectionModel::getTargetNodeId, containedAreaIds.toArray(new String[]{}))
-                    .filterOrEnd();
+//            condition.filterEqual(BaseSceneAreaNodeConnectionModel::getScene, sceneId)
+//                    .filterOrStart()
+//                    .orIn(BaseSceneAreaNodeConnectionModel::getSourceNodeId, containedAreaIds.toArray(new String[]{}))
+//                    .orIn(BaseSceneAreaNodeConnectionModel::getTargetNodeId, containedAreaIds.toArray(new String[]{}))
+//                    .filterOrEnd();
+            List<TSceneAreaNodeConnectionModel> list = sceneNodeConnectionMapper.list(new HumanCondition().filterEqual(BaseSceneAreaNodeConnectionModel::getScene, sceneId));
+            List<TSceneAreaNodeConnectionModel> result = new ArrayList<>();
+            for (var l : list) {
+                for (String areaId : containedAreaIds) {
+                    if (l.getSourceNodeId().contains(areaId) || l.getTargetNodeId().contains(areaId)) {
+                        result.add(l);
+                        break;
+                    }
+                }
+            }
+            return result;
         } else {
             condition.filterEqual(BaseSceneAreaNodeConnectionModel::getScene, sceneId);
         }
