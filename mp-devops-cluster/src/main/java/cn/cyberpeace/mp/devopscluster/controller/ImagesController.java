@@ -477,6 +477,8 @@ public class ImagesController {
         CloudPlatformPageResult<Flavor> page = flavorService.page(getParams);
         List<Flavor> listToSort = new ArrayList<>();
         for (Flavor flavor : page.getList()) {
+            String nameMessage = flavor.getName();
+            flavor.setRam(Integer.valueOf(nameMessage.split("C",-1)[0]));
             listToSort.add(flavor);
         }
         listToSort.sort(Comparator.comparing(Flavor::getDisk));

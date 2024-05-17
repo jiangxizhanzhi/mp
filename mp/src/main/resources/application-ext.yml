@@ -48,8 +48,8 @@ mp:
       enable-command-change: ${MP_ENABLE_COMMAND_CHANGE:false}
       cron-job-expression: ${MP_CRON_JOB_EXPRESSION:0 0/15 * * * ?}
       enable-node-limit-db-check: ${MP_ENABLE_NODE_LIMIT_DB_CHECK:true}
-      cp-ip: ${CP_IP:10.100.7.1}
-      cp-port: ${CP_PORT:11111}
+      cp-ip: ${CP_IP:10.4.1.57}
+      cp-port: ${CP_PORT:9999}
   frontbusiness:
     ext-var:
       url-ac-filter-enabled: ${MP_FRONTBUSINESS_URLACFILTER_ENABLED:true}
@@ -91,8 +91,8 @@ mp:
     ext-var:
       mp-ip: ${MP_API_IP:10.100.7.1}          # MP中台地址
       mp-port: ${MP_API_PORT:8001}
-      cp-ip: ${CP_IP:10.100.7.1}                # 云平台适配层接口地址
-      cp-port: ${CP_PORT:11111}
+      cp-ip: ${CP_IP:10.4.1.57}                # 云平台适配层接口地址
+      cp-port: ${CP_PORT:9999}
       public-net-proxy: ${MP_PUBLIC_NET_PROXY:false}
       public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:}
       public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:}
