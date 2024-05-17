@@ -36,6 +36,7 @@ public class DynamipsService {
 
     public DynamicImageInfo getInfo(String platform) {
         DynamipsInfoItems result = new DynamipsInfoItems();
+        result.setItems(Collections.emptyMap());
         DynamicImageInfo imageInfo = new DynamicImageInfo();
         imageInfo.setPlatforms(new ArrayList<>());
         imageInfo.setDetails(new ArrayList<>());
