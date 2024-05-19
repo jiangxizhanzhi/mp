@@ -50,6 +50,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.ConstraintViolation;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1184,7 +1185,11 @@ public abstract class BaseSceneHandler<
         });
 
         DiffTargets<TSceneElementPortConnectionModel> diff = diffTargets(savingElementPortConnectionMap, existElementPortConnectionMap);
-        saveDiff(sceneElementPortConnectionMapper, diff);
+        try {
+            saveDiff(sceneElementPortConnectionMapper, diff);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         ListUtils.union(diff.getAddingTargets(), diff.getUpdatingTargets())
                 .forEach(elementPortConnection -> elementPortConnectionMap
                         .get(elementPortConnectionKey(elementPortConnection)).fromModel(elementPortConnection));
