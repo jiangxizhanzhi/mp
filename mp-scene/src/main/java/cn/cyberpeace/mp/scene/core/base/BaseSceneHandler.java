@@ -852,6 +852,22 @@ public abstract class BaseSceneHandler<
         return sceneElementPortMapper.list(condition);
     }
 
+    private List<TSceneElementPortConnectionModel> readElementPortConnectionsByNodeIds(List<String> nodeIds) {
+        var list = sceneElementPortConnectionMapper.list(new HumanCondition().filterEqual(BaseSceneElementPortConnectionModel::getScene, sceneId)
+                                                      .filterOrStart()
+                                                      .orIn(BaseSceneElementPortConnectionModel::getSourceElement, nodeIds.toArray(new String[]{}))
+                                                      .orIn(BaseSceneElementPortConnectionModel::getTargetElement, nodeIds.toArray(new String[]{}))
+                                                      .filterOrEnd());
+        List<TSceneElementPortConnectionModel> result = new ArrayList<>();
+        for(TSceneElementPortConnectionModel l:list){
+            if (nodeIds.contains(l.getSourceElement()) && nodeIds.contains(l.getTargetElement())) {
+                continue;
+            }
+            result.add(l);
+        }
+        return result;
+    }
+
     /**
      * 从数据库读取网元端口连接
      * @param areaIds 父区域节点
@@ -876,10 +892,8 @@ public abstract class BaseSceneHandler<
             List<TSceneElementPortConnectionModel> connections = new ArrayList<>();
             if (!nodeIds.isEmpty()) {
                 connections = sceneElementPortConnectionMapper.list(new HumanCondition().filterEqual(BaseSceneElementPortConnectionModel::getScene, sceneId)
-                                                                            .filterOrStart()
-                                                                            .orIn(BaseSceneElementPortConnectionModel::getSourceElement, nodeIds.toArray(new String[]{}))
-                                                                            .orIn(BaseSceneElementPortConnectionModel::getTargetElement, nodeIds.toArray(new String[]{}))
-                                                                            .filterOrEnd());
+                                                                            .filterIn(BaseSceneElementPortConnectionModel::getSourceElement, nodeIds.toArray(new String[]{}))
+                                                                            .filterIn(BaseSceneElementPortConnectionModel::getTargetElement, nodeIds.toArray(new String[]{})));
             }
             return connections;
 
@@ -2089,6 +2103,7 @@ public abstract class BaseSceneHandler<
         portIdElementMap.clear();
         scenePluginData.clear();
         elementIdPluginsMap.clear();
+        elementPortConnectionMap.clear();
 
         var outNodeConnection = readAreaNodeConnectionsByNodeIds(areaId);
         String[] outNodeIds = new String[outNodeConnection.size()];
@@ -2109,6 +2124,9 @@ public abstract class BaseSceneHandler<
         loadElements(readElementsByNodeIds(outNodeIds));
         loadElementPorts(readElementPortsByNodeIds(outNodeIds));
         loadElementPlugins(readElementPluginsByNodeIds(outNodeIds));
+        List<String> eids = new ArrayList<>();
+        elementMap.values().forEach(e -> eids.add(e.getEid()));
+        loadConnections(readElementPortConnectionsByNodeIds(eids));
         Map<String, List<String>> pluginKeyElementIds = new HashMap<>();
         Map<String, List<String>> pluginKeyElementPortIds = new HashMap<>();
         Map<String, TSceneElementBO> elementEidElementBOMap = new HashMap<>();
