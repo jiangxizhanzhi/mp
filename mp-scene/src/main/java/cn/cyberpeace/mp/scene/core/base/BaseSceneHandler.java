@@ -871,7 +871,7 @@ public abstract class BaseSceneHandler<
                                                            .filterEqual(BaseSceneElementModel::getScene,sceneId)
                                                            .filterIn(BaseSceneElementModel::getArea, filterAreaIds));
             List<String> nodeIds = new ArrayList<>();
-            elements.forEach(e -> nodeIds.add(e.getNodeId()));
+            elements.forEach(e -> nodeIds.add(e.getId()));
 
             List<TSceneElementPortConnectionModel> connections = new ArrayList<>();
             if (!nodeIds.isEmpty()) {
