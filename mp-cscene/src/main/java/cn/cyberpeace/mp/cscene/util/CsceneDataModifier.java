@@ -575,13 +575,17 @@ public class CsceneDataModifier {
         csceneBO.setEnableRecording(getOutputEnableRecording(csceneBO.getSceneConfig()));
         csceneBO.calHardware();
         csceneBO.setResourceOccupiedNums(NodeLimitUtils.calLimitedNodesNum(csceneBO));
-        Set<String> nodeIds = new HashSet<>();
-        csceneBO.getSceneConfig().getTopology().getElements().forEach(e -> nodeIds.add(e.getId()));
+        Set<String> portIds = new HashSet<>();
+        csceneBO.getSceneConfig().getTopology().getElements().forEach(e -> {
+            if(e.getPorts() != null){
+                e.getPorts().forEach(p -> portIds.add(p.getId()));
+            }
+        });
         var list = csceneBO.getSceneConfig().getTopology().getConnections();
         var it = list.iterator();
         while (it.hasNext()){
             var d = it.next();
-            if(!nodeIds.contains(d.getSource()) || !nodeIds.contains(d.getTarget())){
+            if(!portIds.contains(d.getSource()) || !portIds.contains(d.getTarget())){
                 it.remove();
             }
         }
