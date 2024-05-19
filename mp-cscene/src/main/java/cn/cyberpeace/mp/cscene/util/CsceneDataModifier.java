@@ -575,6 +575,16 @@ public class CsceneDataModifier {
         csceneBO.setEnableRecording(getOutputEnableRecording(csceneBO.getSceneConfig()));
         csceneBO.calHardware();
         csceneBO.setResourceOccupiedNums(NodeLimitUtils.calLimitedNodesNum(csceneBO));
+        Set<String> nodeIds = new HashSet<>();
+        csceneBO.getSceneConfig().getTopology().getElements().forEach(e -> nodeIds.add(e.getId()));
+        var list = csceneBO.getSceneConfig().getTopology().getConnections();
+        var it = list.iterator();
+        while (it.hasNext()){
+            var d = it.next();
+            if(!nodeIds.contains(d.getSource()) || !nodeIds.contains(d.getTarget())){
+                it.remove();
+            }
+        }
     }
 
     public static void correctVlanId(CsceneBO csceneBO) {
