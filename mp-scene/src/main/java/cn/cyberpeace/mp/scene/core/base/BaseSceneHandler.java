@@ -873,25 +873,29 @@ public abstract class BaseSceneHandler<
             List<String> nodeIds = new ArrayList<>();
             elements.forEach(e -> nodeIds.add(e.getNodeId()));
 
-            var connections = sceneElementPortConnectionMapper.list(new HumanCondition().filterEqual(BaseSceneElementPortConnectionModel::getScene,sceneId)
-                                                          .filterOrStart()
-                                                          .orIn(BaseSceneElementPortConnectionModel::getSourceElement,nodeIds.toArray(new String[]{}))
-                                                          .orIn(BaseSceneElementPortConnectionModel::getTargetElement,nodeIds.toArray(new String[]{}))
-                                                          .filterOrEnd());
+            List<TSceneElementPortConnectionModel> connections = new ArrayList<>();
+            if (!nodeIds.isEmpty()) {
+                connections = sceneElementPortConnectionMapper.list(new HumanCondition().filterEqual(BaseSceneElementPortConnectionModel::getScene, sceneId)
+                                                                            .filterOrStart()
+                                                                            .orIn(BaseSceneElementPortConnectionModel::getSourceElement, nodeIds.toArray(new String[]{}))
+                                                                            .orIn(BaseSceneElementPortConnectionModel::getTargetElement, nodeIds.toArray(new String[]{}))
+                                                                            .filterOrEnd());
+            }
+            return connections;
 
 
-            condition.link(sceneElementPortConnectionModelClass, sceneElementModelClass)
-                    .filterOrStart()
-                    .orLink(sceneElementPortConnectionModelClass, BaseSceneElementPortConnectionModel::getSourceElement,
-                            sceneElementModelClass, BaseSceneElementModel::getId)
-                    .orLink(sceneElementPortConnectionModelClass, BaseSceneElementPortConnectionModel::getTargetElement,
-                            sceneElementModelClass, BaseSceneElementModel::getId)
-                    .filterOrEnd()
-                    .currentLink(sceneElementPortConnectionModelClass)
-                    .filterEqual(BaseSceneElementPortConnectionModel::getScene, sceneId)
-                    .currentLink(sceneElementModelClass)
-                    .filterIn(BaseSceneElementModel::getArea, filterAreaIds)
-                    .distinct();
+//            condition.link(sceneElementPortConnectionModelClass, sceneElementModelClass)
+//                    .filterOrStart()
+//                    .orLink(sceneElementPortConnectionModelClass, BaseSceneElementPortConnectionModel::getSourceElement,
+//                            sceneElementModelClass, BaseSceneElementModel::getId)
+//                    .orLink(sceneElementPortConnectionModelClass, BaseSceneElementPortConnectionModel::getTargetElement,
+//                            sceneElementModelClass, BaseSceneElementModel::getId)
+//                    .filterOrEnd()
+//                    .currentLink(sceneElementPortConnectionModelClass)
+//                    .filterEqual(BaseSceneElementPortConnectionModel::getScene, sceneId)
+//                    .currentLink(sceneElementModelClass)
+//                    .filterIn(BaseSceneElementModel::getArea, filterAreaIds)
+//                    .distinct();
         } else {
             condition.filterEqual(BaseSceneElementPortConnectionModel::getScene, sceneId);
         }
