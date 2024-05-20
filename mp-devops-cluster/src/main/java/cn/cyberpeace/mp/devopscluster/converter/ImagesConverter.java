@@ -195,8 +195,8 @@ public class ImagesConverter implements BaseConverter{
      */
     @Transactional
     public void add(ImageRequest request) {
-        request.setModelId(TextUtils.uuid());
-        request.setModelCode(TextUtils.uuid());
+        request.setModelId(TextUtils.uuid().substring(0, 15));
+        request.setModelCode(TextUtils.uuid().substring(0, 15));
         Device device = imagesService.add(convertRequest(request));
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
         device.setOsVersion(request.getOsVersion());
