@@ -1,7 +1,10 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.createtasks;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.DevopsLoadSourceModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.Load;
+import cn.cyberpeace.mp.sceneplugincloud.repository.DevopsLoadSourceMapper;
 
 /**
  * 载荷创建任务
@@ -14,7 +17,9 @@ public class LoadCreateTask implements Runnable {
 
     public LoadCreateTask(
             CloudPluginSceneElementBO element) {
-        this.load = new Load();
+        DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
+        DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
+        this.load = new Load(synchronousDataSource);
         this.element = element;
     }
 

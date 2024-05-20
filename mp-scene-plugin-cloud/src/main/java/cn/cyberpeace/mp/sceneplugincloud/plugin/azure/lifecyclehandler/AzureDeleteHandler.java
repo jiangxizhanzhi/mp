@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.createtasks.LoadCreateTask;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.deletetasks.LoadDeleteTask;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.DeleteHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +32,7 @@ public class AzureDeleteHandler extends DeleteHandler {
     public void delete() {
         this.prepareEventProcess();
 
-//        int stepPercentage = this.getStepPercentage();
+        int stepPercentage = this.getStepPercentage();
 //        List<CloudPluginSceneElementBO> allElements = new ArrayList<>(getPluginHandler().getElementMap().values());
 //
 //        // 再删除终端 终端分虚拟机、容器、和web服务
@@ -84,10 +86,24 @@ public class AzureDeleteHandler extends DeleteHandler {
 //        if (!deleteAuxiliaryNetworkTasks.isEmpty()) {
 //            runSceneProgress(SceneProcess.DELETE_AUXILIARY_NETWORKS, () -> runTasks(deleteAuxiliaryNetworkTasks));
 //        }
-//
-        // 最后删除资源组
-        String groupName = getPluginHandler().getSourceSceneId();
-        resourceService.getManager().resourceGroups().deleteByName(groupName);
+//        删除载荷
+
+        List<CloudPluginSceneElementBO> allElements = new ArrayList<>(getPluginHandler().getElementMap().values());
+        List<CloudPluginSceneElementBO> filteredLoadElements = filterLoadElements(allElements);
+        List<Runnable> deleteLoadTasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO element : filteredLoadElements) {
+            String nodeId = element.getSrcElement().getId();
+            LoadDeleteTask task = new LoadDeleteTask(element);
+            Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, DeleteHandler.ElementProcess.DELETE_LOAD, task);
+            deleteLoadTasks.add(formatTask);
+        }
+        if (!deleteLoadTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.DELETE_TERMINALS, () -> runTasks(deleteLoadTasks));
+        }
+
+        // 最后删除资源组 TODO 测试载荷暂时去除
+        /*String groupName = getPluginHandler().getSourceSceneId();
+        resourceService.getManager().resourceGroups().deleteByName(groupName);*/
     }
 
     private Runnable formatElementTask(String nodeId, int stepPercentage, EventProcess elementProcess, Runnable action) {
@@ -108,6 +124,15 @@ public class AzureDeleteHandler extends DeleteHandler {
         return filterElements;
     }
 
+    private List<CloudPluginSceneElementBO> filterLoadElements(List<CloudPluginSceneElementBO> allElements) {
+        List<CloudPluginSceneElementBO> filterElements = new ArrayList<>();
+        for (var c : allElements) {
+            if (BaseCloudPluginSceneElementModel.ImageType.LOAD.equals(c.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.LOAD == c.getVirtualType()) {
+                filterElements.add(c);
+            }
+        }
+        return filterElements;
+    }
     private List<CloudPluginSceneElementBO> filterVirtualMachineElements(List<CloudPluginSceneElementBO> allElements) {
         List<CloudPluginSceneElementBO> filterElements = new ArrayList<>();
         for (var c : allElements) {

@@ -1,16 +1,14 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api;
 
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
-import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.LoadUrlConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.DevopsLoadSourceModel;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,17 +21,17 @@ import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
  * @create 2022-09-08 15:03
  */
 @Slf4j
-@Component
 public class Load {
 
-    private String loadUrl = "http://10.108.1.10:5002";
+    private String loadUrl;
 
+    public Load(DevopsLoadSourceModel devopsLoadSourceModel) {
+        loadUrl = devopsLoadSourceModel.getIp();
+    }
 
-//    public Load() {
-//        loadUrl = BeanCommon.getBean(CloudAppConfig.class).loadUrl;
-//    }
 
     public void create(CloudPluginSceneElementBO cloudElement) {
+
         Map data = create(cloudElement.getLoadTaskName(),
                 cloudElement.getLoadTaskDescribe(),
                 cloudElement.getLoadToolId(),

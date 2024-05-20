@@ -44,6 +44,25 @@ public class AzureCreateHandler extends CreateHandler {
         int stepPercentage = this.getStepPercentage();
         List<CloudPluginSceneElementBO> allElements = new ArrayList<>(getPluginHandler().getElementMap().values());
 
+        // 再创建终端 终端分虚拟机、容器、和web服务
+        List<Runnable> createTerminalTasks = new ArrayList<>();
+        // 载荷
+        List<CloudPluginSceneElementBO> filteredLoadElements = this.filterLoadElements(allElements);
+        List<Runnable> createLoadTasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO element : filteredLoadElements) {
+            String nodeId = element.getSrcElement().getId();
+            LoadCreateTask task = new LoadCreateTask(element);
+            Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_LOAD, task);
+            createLoadTasks.add(formatTask);
+        }
+
+        createTerminalTasks.addAll(createLoadTasks);
+
+        if (!createTerminalTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
+        }
+/* TODO 测试载荷暂时去除
+
         // 创建微软云的资源组
         String groupName = getPluginHandler().getSourceSceneId();
         new AzureResourceGroup(resourceService).create(groupName);
@@ -79,25 +98,26 @@ public class AzureCreateHandler extends CreateHandler {
             });
 
         });
+        if (!filteredAuxiliaryNetworkElements.isEmpty()) {
+            String nodeIdd = filteredAuxiliaryNetworkElements.get(0).getSrcElement().getId();
+            // 封装创建网络的任务
+            AzureVirtualNetCreateTask taskk = new AzureVirtualNetCreateTask(resourceService, getPluginHandler(), filteredAuxiliaryNetworkElements.get(0), cidrContainerMap);
+            // 格式化任务执行过程，添加 runElementProgress
+            Runnable formatTaskk = this.formatElementTask(nodeIdd, stepPercentage, CreateHandler.ElementProcess.CREATE_AUXILIARY_NETWORK, taskk);
+            // 添加格式化后的任务到列表
+            createAuxiliaryNetworkTasks.add(formatTaskk);
 
-        String nodeIdd = filteredAuxiliaryNetworkElements.get(0).getSrcElement().getId();
-        // 封装创建网络的任务
-        AzureVirtualNetCreateTask taskk = new AzureVirtualNetCreateTask(resourceService, getPluginHandler(), filteredAuxiliaryNetworkElements.get(0), cidrContainerMap);
-        // 格式化任务执行过程，添加 runElementProgress
-        Runnable formatTaskk = this.formatElementTask(nodeIdd, stepPercentage, CreateHandler.ElementProcess.CREATE_AUXILIARY_NETWORK, taskk);
-        // 添加格式化后的任务到列表
-        createAuxiliaryNetworkTasks.add(formatTaskk);
-
-        if (!createAuxiliaryNetworkTasks.isEmpty()) {
-            // 执行 创建所有网络
-            runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> runTasks(createAuxiliaryNetworkTasks));
-        }
+            if (!createAuxiliaryNetworkTasks.isEmpty()) {
+                // 执行 创建所有网络
+                runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> runTasks(createAuxiliaryNetworkTasks));
+            }
 //        保存网络id
-        String azureNetworkId = filteredAuxiliaryNetworkElements.get(0).getDeriveNetworks().get(0).getNetwork().getResourceId();
-        filteredAuxiliaryNetworkElements.stream()
-                .flatMap(cloudElement -> cloudElement.getDeriveNetworks().stream())
-                .forEach(cloudElement -> cloudElement.getNetwork().setResourceId(azureNetworkId));
+            String azureNetworkId = filteredAuxiliaryNetworkElements.get(0).getDeriveNetworks().get(0).getNetwork().getResourceId();
+            filteredAuxiliaryNetworkElements.stream()
+                    .flatMap(cloudElement -> cloudElement.getDeriveNetworks().stream())
+                    .forEach(cloudElement -> cloudElement.getNetwork().setResourceId(azureNetworkId));
 
+        }
         // 再创建终端 终端分虚拟机、容器、和web服务
         List<Runnable> createTerminalTasks = new ArrayList<>();
         // 虚拟机
@@ -106,7 +126,7 @@ public class AzureCreateHandler extends CreateHandler {
         for (CloudPluginSceneElementBO element : filteredVirtualMachineElements) {
             String nodeId = element.getSrcElement().getId();
             List<VirtualNic> virtualNics = this.genVirutalNics(element);
-            AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics,combineInitCommand(element));
+            AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics, combineInitCommand(element));
             Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_VIRTUAL_MACHINE, task);
             createVirtualMachineTasks.add(formatTask);
         }
@@ -149,7 +169,7 @@ public class AzureCreateHandler extends CreateHandler {
 
         if (!createTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
-        }
+        }*/
     }
 
     private List<CloudPluginSceneElementBO> filterLoadElements(List<CloudPluginSceneElementBO> allElements) {

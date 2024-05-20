@@ -1,10 +1,12 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.DevopsLoadSourceModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureContainer;
@@ -15,6 +17,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualPort;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.repository.DevopsLoadSourceMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -65,7 +68,9 @@ public class RecreateHandler extends HandlerCommon {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RECREATE, Arrays.asList(ElementProcess.RECREATE_LOAD));
             runElementProgress(nodeId, SceneElementModel.Event.RECREATE, ElementProcess.RECREATE_LOAD, () -> {
                 closeAccessModes(element);
-                Load load = new Load();
+                DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
+                DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
+                Load load = new Load(synchronousDataSource);
                 load.recreate(element);
             });
         } else {
@@ -162,7 +167,9 @@ public class RecreateHandler extends HandlerCommon {
                 } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
                     runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_LOAD,
                             () -> {
-                                Load load = new Load();
+                                DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
+                                DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
+                                Load load = new Load(synchronousDataSource);
                                 load.delete(cloudElement);
                                 closeAccessModes(cloudElement);
                                 this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
@@ -286,7 +293,10 @@ public class RecreateHandler extends HandlerCommon {
                                         }
                                     });
                                 }
-                                new Load().create(cloudElement);
+                                DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
+                                DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
+                                new Load(synchronousDataSource).create(cloudElement);
+
                             });
                 }
             } else {

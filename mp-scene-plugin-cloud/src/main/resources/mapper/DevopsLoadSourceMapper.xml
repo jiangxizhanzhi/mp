@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.sceneplugincloud.repository.DevopsLoadSourceMapper">
+
+    <select id="getSynchronousDataSource" resultType="cn.cyberpeace.mp.sceneplugincloud.model.DevopsLoadSourceModel">
+        SELECT
+            *
+        FROM
+            mp_devops_load_source
+        ORDER BY
+            create_time DESC
+            LIMIT 1
+    </select>
+</mapper>

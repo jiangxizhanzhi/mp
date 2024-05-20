@@ -596,12 +596,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return new ServiceResult<Boolean>(true).asResult();
     }
 
-    @ApiOperation("查sku列表（同步用）")
-    @PostMapping("/sku_list")
-    public ServiceResult<Boolean> skuList(@RequestBody(required = false) CsceneInstanceActionRequest request) throws IOException {
-        AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(1));
-        azureVirtualMachine.listsAllAvailableResourceSKUsForTheSpecifiedRegion();
-        return new ServiceResult<Boolean>(true).asResult();
+    @ApiOperation("同步云虚拟机尺寸大小表")
+    @PostMapping("/sync_vm_size")
+    public ServiceResult<Boolean> syncVmSize(@RequestBody(required = false) CsceneInstanceActionRequest request) throws IOException {
+        return modelService.syncVmSize().asResult();
     }
 
     @ApiOperation("查漏洞列表）")

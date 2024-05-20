@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureContainer;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.Load;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.deletetasks.LoadDeleteTask;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
@@ -461,8 +462,8 @@ public class DeleteHandler extends HandlerCommon {
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_LOAD,
                         () -> {
-                            Load load = new Load();
-                            load.delete(cloudElement);
+                            LoadDeleteTask task = new LoadDeleteTask(cloudElement);
+                            task.run();
                             this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                         });
             }

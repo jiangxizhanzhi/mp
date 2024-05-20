@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.BaseObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -31,13 +32,11 @@ import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
-import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
-import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
-import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
-import cn.cyberpeace.mp.cscene.model.CsceneModel;
+import cn.cyberpeace.mp.cscene.model.*;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.report.bo.CollectedCsceneElementCommonBO;
 import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
+import cn.cyberpeace.mp.cscene.repository.AzureVimSizeMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
@@ -117,6 +116,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -211,6 +211,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     private ProbeScriptMapper probeScriptMapper;
     @Resource
     private SceneElementSituationProbeMapper sceneElementSituationProbeMapper;
+    @Resource
+    private AzureVimSizeMapper azureVimSizeMapper;
+
 
 
     // expires in 10 minutes
@@ -1955,13 +1958,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     }
 
-    //    异步微软云操作转
-    private void saveAsync(String id, String nodeId, List<ProbeScriptModel> scriptModelList, Runnable r) {
-
-        r.run();
-    }
-
-
     /**
      * 微软云虚拟机操作-执行命令
      *
@@ -1981,4 +1977,22 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
 
+    public ServiceResult<Boolean> syncVmSize() throws IOException {
+        AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(1));
+        List<Map<String, String>> dataMaps = azureVirtualMachine.listsAllAvailableResourceSKUsForTheSpecifiedRegion();
+        if (dataMaps != null && !dataMaps.isEmpty()) {
+//            清空表
+            azureVimSizeMapper.truncate();
+            //list按照一千数量间隔批量插入数据
+            for (int i = 0; i < dataMaps.size(); i += 1000) {
+                List<Map<String, String>> subList = dataMaps.subList(i, i + 1000 > dataMaps.size() ? dataMaps.size() : i + 1000);
+                Boolean aBoolean = azureVimSizeMapper.batchInsert(subList);
+                if(!aBoolean){
+                    new MpRuntimeException("批量插入数据失败");
+                }
+            }
+
+        }
+        return new ServiceResult<>(true);
+    }
 }

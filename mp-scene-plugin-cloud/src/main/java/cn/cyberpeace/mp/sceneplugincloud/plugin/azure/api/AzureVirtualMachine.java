@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.Region;
+import com.azure.core.util.Context;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.fluent.models.ResourceSkuInner;
 import com.azure.resourcemanager.compute.models.*;
@@ -20,6 +21,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class AzureVirtualMachine {
     private IAzureResourceManager resourceService;
@@ -49,33 +51,34 @@ public class AzureVirtualMachine {
 
     }
 
-    public void listsAllAvailableResourceSKUsForTheSpecifiedRegion() throws IOException {
+    public List<Map<String,String>> listsAllAvailableResourceSKUsForTheSpecifiedRegion() throws IOException {
+        ArrayList<Map<String,String>> dataMaps = new ArrayList<>();
         PagedIterable<ResourceSkuInner> list = azureResourceManager
                 .virtualMachines()
                 .manager()
                 .serviceClient()
                 .getResourceSkus()
                 .list();
-        /*for (ResourceSkuInner sku : list) {
-            System.out.println("SKU: " + sku.name());
 
-            List<ResourceSkuCosts> costs = sku.costs();
-
-            System.out.println("-------------------------------------");
-        }*/
         // 使用 Set 来存储已经出现过的 sku.name()，保证不重复
         Set<String> uniqueNames = new HashSet<>();
-        PrintWriter writer = new PrintWriter(new FileWriter("C:\\Users\\liyah\\Desktop\\output4.txt", true));
         for (ResourceSkuInner sku : list) {
-            if (!uniqueNames.contains(sku.name())) {
-                // 如果当前 sku.name() 没有出现过，则添加到 uniqueNames 集合中，并保留这个 sku 作为第一个唯一的 sku
-                uniqueNames.add(sku.name());
-                writer.println(sku.name() + "------" + sku.resourceType());
+            if (ComputeResourceType.VIRTUALMACHINES.toString().equals(sku.resourceType())) {
+                String name = sku.name();
+                List<String> locations = sku.locations();
+                if (!uniqueNames.contains(sku.name()) && (locations.contains(Region.ASIA_EAST.label())||locations.contains(Region.ASIA_EAST.name()))) {
+                    // 如果当前 sku.name() 没有出现过，则添加到 uniqueNames 集合中，并保留这个 sku 作为第一个唯一的 sku
+                    uniqueNames.add(sku.name());
+                    // 将 capabilities 转换为一个 Map，并直接添加到 dataMap 中
+                    Map<String, String> capabilityMap = sku.capabilities().stream()
+                            .collect(Collectors.toMap(ResourceSkuCapabilities::name, ResourceSkuCapabilities::value));
+                    // 添加 name 和 capabilityMap 到 dataMap
+                    capabilityMap.put("name",name);
+                    dataMaps.add(capabilityMap);
+                }
             }
         }
-        writer.close();
-
-
+        return dataMaps;
     }
 
     public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData) {
