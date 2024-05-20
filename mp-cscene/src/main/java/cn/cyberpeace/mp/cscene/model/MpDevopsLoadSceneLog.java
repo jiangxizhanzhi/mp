@@ -1,8 +1,11 @@
 package cn.cyberpeace.mp.cscene.model;
 
 import cn.cyberpeace.mp.base.model.stereotype.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * 载荷同步表(MpDevopsLoad)实体类
@@ -13,6 +16,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table("mp_devops_load_scene_result_log")
 public class MpDevopsLoadSceneLog extends MpDevopsLoad {
+
+    /**
+     * 工具ids
+     */
+    @JsonIgnore
+    private List<String> ids;
 
     /**
      * 工具实例id
@@ -53,4 +62,16 @@ public class MpDevopsLoadSceneLog extends MpDevopsLoad {
      * 阶段名称
      */
     private String stageName;
+
+    /**
+     * 开始时间
+     */
+    @JsonIgnore
+    private String beginTime;
+
+    /**
+     * 结束时间
+     */
+    @JsonIgnore
+    private String finishTime;
 }

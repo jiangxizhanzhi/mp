@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -213,13 +214,13 @@ public class LoadController {
         }
         //将time转换成LocaldateTime
         LocalDateTime beginTimeLocalDateTime = null;
-        LocalDateTime overTimeLocalDateTime = null;
-        if (request.get("beginTime") != null && request.get("overTime") != null) {
+        LocalDateTime finishTimeLocalDateTime = null;
+        if (request.get("beginTime") != null && request.get("finishTime") != null) {
             try {
                 beginTimeLocalDateTime = LocalDateTime.parse(request.get("beginTime").toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                overTimeLocalDateTime = LocalDateTime.parse(request.get("overTime").toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                finishTimeLocalDateTime = LocalDateTime.parse(request.get("finishTime").toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                 //比较时间
-                if (beginTimeLocalDateTime.isAfter(overTimeLocalDateTime)) {
+                if (beginTimeLocalDateTime.isAfter(finishTimeLocalDateTime)) {
                     return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "结束时间不能小于开始时间");
                 }
             } catch (Exception e) {
@@ -227,7 +228,7 @@ public class LoadController {
             }
         }
         request.put("beginTime", beginTimeLocalDateTime != null ? beginTimeLocalDateTime.toString() : null);
-        request.put("overTime", overTimeLocalDateTime != null ? overTimeLocalDateTime.toString() : null);
+        request.put("finishTime", finishTimeLocalDateTime != null ? finishTimeLocalDateTime.toString() : null);
         Map<String, Integer> map = loadService.getLoadExecutionResultStatistics(request);
         return new ServiceResult(map, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
@@ -245,13 +246,13 @@ public class LoadController {
         }
         //将time转换成LocaldateTime
         LocalDateTime beginTimeLocalDateTime = null;
-        LocalDateTime overTimeLocalDateTime = null;
-        if (request.get("beginTime") != null && request.get("overTime") != null) {
+        LocalDateTime finishTimeLocalDateTime = null;
+        if (request.get("beginTime") != null && request.get("finishTime") != null) {
             try {
                 beginTimeLocalDateTime = LocalDateTime.parse(request.get("beginTime").toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                overTimeLocalDateTime = LocalDateTime.parse(request.get("overTime").toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                finishTimeLocalDateTime = LocalDateTime.parse(request.get("finishTime").toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                 //比较时间
-                if (beginTimeLocalDateTime.isAfter(overTimeLocalDateTime)) {
+                if (beginTimeLocalDateTime.isAfter(finishTimeLocalDateTime)) {
                     return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "结束时间不能小于开始时间");
                 }
             } catch (Exception e) {
@@ -259,7 +260,7 @@ public class LoadController {
             }
         }
         request.put("beginTime", beginTimeLocalDateTime != null ? beginTimeLocalDateTime.toString() : null);
-        request.put("overTime", overTimeLocalDateTime != null ? overTimeLocalDateTime.toString() : null);
+        request.put("finishTime", finishTimeLocalDateTime != null ? finishTimeLocalDateTime.toString() : null);
         List<MpDevopsLoadSceneLog> list = loadService.getLoadExecutionResult(request);
         return new ListObjServiceResult(list, list.size()).asResult();
     }
@@ -295,9 +296,8 @@ public class LoadController {
      * */
     @ApiOperation(value = "删除载荷执行结果", notes = "")
     @DeleteMapping("/deleteLoadExecutionResultByPk")
-    public ServiceResult deleteLoadExecutionResultByPk(@RequestBody(required = false) MpDevopsLoadSceneLog request) {
-        JSONObject requestData = JsonCommon.snakeParse(JsonCommon.stringify(request), JSONObject.class);
-        Boolean deleteLoadExecutionResultByPk = loadService.deleteLoadExecutionResultByPk(requestData);
+    public ServiceResult deleteLoadExecutionResultByPk(@RequestBody MpDevopsLoadSceneLog request) {
+        Boolean deleteLoadExecutionResultByPk = loadService.deleteLoadExecutionResultByPk(request);
         if (deleteLoadExecutionResultByPk) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
@@ -310,9 +310,8 @@ public class LoadController {
      * */
     @ApiOperation(value = "修改载荷执行结果", notes = "")
     @PutMapping("/updateLoadExecutionResultByPk")
-    public ServiceResult updateLoadExecutionResultByPk(@RequestBody(required = false) MpDevopsLoadSceneLog request) {
-        JSONObject requestData = JsonCommon.snakeParse(JsonCommon.stringify(request), JSONObject.class);
-        Boolean updateLoadExecutionResultByPk = loadService.updateLoadExecutionResultByPk(requestData);
+    public ServiceResult updateLoadExecutionResultByPk(@RequestBody MpDevopsLoadSceneLog request) {
+        Boolean updateLoadExecutionResultByPk = loadService.updateLoadExecutionResultByPk(request);
         if (updateLoadExecutionResultByPk) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
@@ -325,13 +324,10 @@ public class LoadController {
      * */
     @ApiOperation(value = "新增载荷执行结果", notes = "")
     @PostMapping("/addLoadExecutionResult")
-    public ServiceResult addLoadExecutionResult(@RequestBody(required = false) MpDevopsLoadSceneLog request) {
-        JSONObject requestData = JsonCommon.snakeParse(JsonCommon.stringify(request), JSONObject.class);
-        if (requestData != null) {
-            Boolean addLoadExecutionResult = loadService.addLoadExecutionResult(requestData);
-            if (addLoadExecutionResult) {
-                return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-            }
+    public ServiceResult addLoadExecutionResult(@RequestBody MpDevopsLoadSceneLog request) {
+        Boolean addLoadExecutionResult = loadService.addLoadExecutionResult(request);
+        if (addLoadExecutionResult) {
+            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         }
         return new ServiceResult(null, BaseErrorCode.ERROR, "新增载荷执行结果失败").asResult();
     }

@@ -29,9 +29,9 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     Boolean deleteLoadExecutionResultByPk(String pk);
 
-    Boolean updateLoadExecutionResultByPk(String pk, @Param("param") JSONObject requestData);
+    Boolean updateLoadExecutionResultByPk(String pk, @Param("param") MpDevopsLoadSceneLog requestData);
 
-    Boolean addLoadExecutionResult(@Param("param") JSONObject requestData);
+    Boolean addLoadExecutionResult(@Param("param") MpDevopsLoadSceneLog requestData);
 
     Integer addResult(@Param("param") JSONObject requestData);
 

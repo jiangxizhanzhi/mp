@@ -553,8 +553,8 @@
             <if test="param != null and param.beginTime != null and param.beginTime != ''">
                 and log.create_time &gt;= #{param.beginTime}
             </if>
-            <if test="param != null and param.overTime != null and param.overTime != ''">
-                and log.create_time &lt;= #{param.overTime}
+            <if test="param != null and param.finishTime != null and param.finishTime != ''">
+                and log.create_time &lt;= #{param.finishTime}
             </if>
         </where>
         <if test="param != null and param.offset != null and param.pageSize != null">

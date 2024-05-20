@@ -420,10 +420,10 @@ public class LoadServiceImpl {
     /*
      * 删除载荷执行结果
      * */
-    public Boolean deleteLoadExecutionResultByPk(JSONObject requestData) {
+    public Boolean deleteLoadExecutionResultByPk(MpDevopsLoadSceneLog requestData) {
         Boolean deleteLoadExecutionResultByPk;
-        if (requestData != null && requestData.get("pk") != null && !requestData.get("pk").toString().equals("")) {
-            deleteLoadExecutionResultByPk = loadMapper.deleteLoadExecutionResultByPk(requestData.get("pk").toString());
+        if (requestData.getPk() != null && !requestData.getPk().equals("")) {
+            deleteLoadExecutionResultByPk = loadMapper.deleteLoadExecutionResultByPk(requestData.getPk().toString());
         } else {
             return false;
         }
@@ -433,10 +433,10 @@ public class LoadServiceImpl {
     /*
      * 修改载荷执行结果
      * */
-    public Boolean updateLoadExecutionResultByPk(JSONObject requestData) {
+    public Boolean updateLoadExecutionResultByPk(MpDevopsLoadSceneLog requestData) {
         Boolean updateLoadExecutionResultByPk;
-        if (requestData != null && requestData.get("pk") != null && !requestData.get("pk").toString().equals("")) {
-            updateLoadExecutionResultByPk = loadMapper.updateLoadExecutionResultByPk(requestData.get("pk").toString(), requestData);
+        if (requestData.getPk() != null && !requestData.getPk().equals("")) {
+            updateLoadExecutionResultByPk = loadMapper.updateLoadExecutionResultByPk(requestData.getPk().toString(), requestData);
         } else {
             return false;
         }
@@ -446,7 +446,7 @@ public class LoadServiceImpl {
     /*
      * 新增载荷执行结果
      * */
-    public Boolean addLoadExecutionResult(JSONObject requestData) {
+    public Boolean addLoadExecutionResult(MpDevopsLoadSceneLog requestData) {
         Boolean addLoadExecutionResult = loadMapper.addLoadExecutionResult(requestData);
         return addLoadExecutionResult;
     }
