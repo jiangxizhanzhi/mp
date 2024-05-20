@@ -66,7 +66,7 @@ public class ImagesService extends BaseCpService {
                 throw new MpRuntimeException(DevopsClusterErrorCode.REQUEST_CLOUD_INTERFACE_BUSINESS_ERROR.format(message));
             }
         }
-        return JsonCommon.snakeParse(res.getData().toString(), Device.class);
+        return JsonCommon.snakeParse(JsonCommon.snakeStringify(res.getData()), Device.class);
     }
 
     /**
@@ -92,7 +92,7 @@ public class ImagesService extends BaseCpService {
 
         CloudPlatformResult res = super.sendPut(api, JsonUtils.snakeStringify(device), CloudPlatformResult.class);
         super.checkResult(res);
-        return JsonCommon.snakeParse(res.getData().toString(), Device.class);
+        return JsonCommon.snakeParse(JsonCommon.snakeStringify(res.getData()), Device.class);
     }
 
     /**
@@ -104,7 +104,7 @@ public class ImagesService extends BaseCpService {
 
         CloudPlatformResult result = super.sendGet(api, 10 * 60 * 1000, CloudPlatformResult.class);
         super.checkResult(result);
-        List<String> urls = JsonCommon.parse(result.getData().toString(), new TypeReference<List<String>>() {
+        List<String> urls = JsonCommon.parse(JsonCommon.snakeStringify(result.getData()), new TypeReference<List<String>>() {
         });
         if (CollectionUtils.isNotEmpty(urls)) {
             return urls.get(0);
