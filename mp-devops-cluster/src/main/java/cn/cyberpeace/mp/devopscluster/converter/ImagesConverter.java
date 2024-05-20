@@ -529,6 +529,8 @@ public class ImagesConverter implements BaseConverter{
         device.setExtVm(extVm);
         device.setExtDocker(extDocker);
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE );
+        device.setModelId(request.getModelId());
+        device.setModelCode(request.getModelCode());
         return device;
     }
 
