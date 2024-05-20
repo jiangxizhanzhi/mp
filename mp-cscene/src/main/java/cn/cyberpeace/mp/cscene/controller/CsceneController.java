@@ -465,7 +465,7 @@ public class CsceneController implements BaseModelListControllerBase {
                 StringUtils.isNotEmpty(res.getTopology().getScene().getName())) {
             file = new File(res.getTopology().getScene().getName());
         } else {
-            file = new File(res.getTopology().getScene().getEid());
+            file = new File(id);
         }
 
         InputStream fis = null;
