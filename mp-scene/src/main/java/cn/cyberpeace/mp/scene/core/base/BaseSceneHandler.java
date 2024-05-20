@@ -333,7 +333,7 @@ public abstract class BaseSceneHandler<
 
         // 节点所属区域也在区域内并且是展开的
         TSceneAreaBO parentArea = nodeArea != null ? areaMap.getOrDefault(nodeArea, null) : null;
-        return parentArea != null && parentArea.getOpen();
+        return parentArea != null && Boolean.TRUE.equals(parentArea.getOpen());
     }
 
     /**
