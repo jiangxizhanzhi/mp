@@ -62,3 +62,8 @@ alter table mp_scene_scene_area add outer_position2 varchar(255) NOT NULL commen
 alter table mp_scene_scene_config_area add outer_position2 varchar(255) NOT NULL comment '外部2d坐标';
 alter table mp_scene_scene_piece add outer_position2 varchar(255) NOT NULL comment '外部2d坐标';
 alter table mp_scene_scene_config_piece add outer_position2 varchar(255) NOT NULL comment '外部2d坐标';
+alter table mp_scene_scene_element_port add column usable tinyint(1) comment '是否可用' default 1 after type;
+alter table mp_scene_scene_config_element_port add column usable tinyint(1) comment '是否可用' default 1 after type;
+alter table `mp_situation_suricatarule` add column class_type_cn varchar(1024) NOT NULL DEFAULT '' COMMENT "流量规则分类类型中文";
+alter table `mp_situation_suricatarule` add column class_type_en varchar(1024) NOT NULL DEFAULT '' COMMENT "流量规则分类类型英文";
+alter table `mp_situation_suricatarule` add column rule_gen_type int(2) NOT NULL DEFAULT 0 COMMENT "规则生成类型0-预定义，用户不能编辑 1-自定义，用户可以编辑";
