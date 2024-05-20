@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.service.code.ServiceCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -30,7 +29,7 @@ public class MpRuntimeExceptionHandler {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public ServiceResult<Object> b2bRuntimeExceptionHandler(MpRuntimeException ex) {
-        log.error(LOGGER_FORMAT, ex.getMessage(), ex.getDetail());
+        log.error(ex.getMessage(), ex);
         ServiceCode serviceCode = ex.getServiceCode();
         if (serviceCode == null) {
             serviceCode = BaseErrorCode.ERROR;
@@ -43,7 +42,7 @@ public class MpRuntimeExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public ServiceResult<Object> validationExceptionHandle(BindException ex) {
-        log.error(ex.getMessage());
+        log.error(ex.getMessage(), ex);
         ObjectError objectError = ex.getBindingResult().getAllErrors().get(0);
         BindingResult bindingResult = ex.getBindingResult();
         String detail = objectError.getDefaultMessage();
@@ -62,7 +61,7 @@ public class MpRuntimeExceptionHandler {
     @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
     @ResponseBody
     public ServiceResult handException(Exception ex) {
-        log.error(ex.getMessage());
+        log.error(ex.getMessage(), ex);
         return new ServiceResult(null,BaseErrorCode.GATEWAY_TIME_OUT).asResult();
     }
 
@@ -70,7 +69,7 @@ public class MpRuntimeExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     public ServiceResult<Object> handleException(Exception ex){
-        log.error(LOGGER_FORMAT, ex.getMessage(), ExceptionUtils.getStackTrace(ex));
+        log.error(ex.getMessage(), ex);
         return new ServiceResult<>(null, BaseErrorCode.ERROR, ex.getMessage()).asResult();
     }
 }
