@@ -11,6 +11,11 @@ import lombok.NoArgsConstructor;
 public class LoadRequest{
 
     /**
+     * 工具实例id
+     */
+    private String instanceId;
+
+    /**
      * 任务id
      */
     private String taskId;

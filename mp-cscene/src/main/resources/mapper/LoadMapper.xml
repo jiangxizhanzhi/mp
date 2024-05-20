@@ -29,6 +29,7 @@
     <insert id="addResult">
         INSERT INTO mp_devops_load_scene_result_log
         (id,
+         instance_id,
          scene_id,
          stage_id,
          task_id,
@@ -39,6 +40,7 @@
          create_time,
          creator_id)
         VALUES (#{param.id},
+                #{param.instanceId},
                 #{param.sceneId},
                 #{param.stageId},
                 #{param.taskId},
@@ -63,7 +65,14 @@
                 </if>
                     update_time = now()
             </set>
-            where task_id = #{item.taskId}
+            <where>
+                <if test="item.taskId != null and item.taskId != ''">
+                    AND task_id = #{item.taskId}
+                </if>
+                <if test="item.instanceId != null and item.instanceId != ''">
+                    AND instance_id = #{item.instanceId}
+                </if>
+            </where>
         </foreach>
     </update>
 

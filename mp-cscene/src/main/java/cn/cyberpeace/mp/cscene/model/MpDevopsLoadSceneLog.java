@@ -15,6 +15,11 @@ import lombok.NoArgsConstructor;
 public class MpDevopsLoadSceneLog extends MpDevopsLoad {
 
     /**
+     * 工具实例id
+     */
+    private String instanceId;
+
+    /**
      * 场景id
      */
     private String sceneId;
