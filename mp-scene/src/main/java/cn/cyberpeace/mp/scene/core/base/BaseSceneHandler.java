@@ -527,6 +527,20 @@ public abstract class BaseSceneHandler<
             return;
         }
         int updateCount = updateOuterElements(existElementMap);
+        List<String> nodeIds = new ArrayList<>();
+        existElementMap.values().forEach(e -> nodeIds.add(e.getNodeId()));
+        var ports = readElementPortsByNodeIds(nodeIds.toArray(new String[]{}));
+        List<TSceneElementPortModel> updateModels = new ArrayList<>();
+        ports.forEach(p ->{
+            TSceneElementPortBO bo = elementPortMap.get(p.getPortId());
+            if(bo != null){
+                p.setUsable(bo.getUsable());
+                updateModels.add(p);
+            }
+        });
+        if (CollectionUtils.isNotEmpty(updateModels)) {
+            sceneElementPortMapper.bulkUpdate(updateModels);
+        }
     }
 
     /**
@@ -543,7 +557,8 @@ public abstract class BaseSceneHandler<
                     element.setOuterPosition2(JsonCommon.stringify(elementBO.getOuterPosition2()));
                     return element;
                 }));
-        return sceneElementMapper.bulkUpdate(new ArrayList<>(savingElementMap.values())).getSuccessCount();
+        int res = sceneElementMapper.bulkUpdate(new ArrayList<>(savingElementMap.values())).getSuccessCount();
+        return res;
     }
 
     /**
@@ -572,10 +587,16 @@ public abstract class BaseSceneHandler<
         }
 
         elements.forEach(element -> {
+            if (isValidAreaNode(element)) {
+                return;
+            }
             if (element.getOuterPosition2() == null) {
                 element.setOuterPosition2(new HashMap<>());
             }
+            element.getOuterPosition2().put(areaId == null ? StringUtils.EMPTY : areaId, element.getPosition2());
+
             elementMap.put(element.getId(), element);
+            element.getPorts().forEach(p -> elementPortMap.put(p.getId(), p));
         });
     }
 

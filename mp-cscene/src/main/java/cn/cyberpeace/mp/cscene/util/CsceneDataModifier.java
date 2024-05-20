@@ -937,6 +937,34 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void handlerPortUsable(CsceneBO csceneBO) {
+        if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getTopology() == null) {
+            return;
+        }
+        var topo = csceneBO.getSceneConfig().getTopology();
+        var connections = topo.getConnections();
+        if (CollectionUtils.isEmpty(connections)) {
+            return;
+        }
+        Set<String> usedPortIds = new HashSet<>();
+        connections.forEach(c -> {
+            usedPortIds.add(c.getTarget());
+            usedPortIds.add(c.getSource());
+        });
+        for (SceneConfigElementBO e : topo.getElements()) {
+            if (e.getPorts() == null) {
+                continue;
+            }
+            for (SceneConfigElementPortBO p : e.getPorts()) {
+                if (usedPortIds.contains(p.getId())) {
+                    p.setUsable(false);
+                } else {
+                    p.setUsable(true);
+                }
+            }
+        }
+    }
+
     public static void checkCloudElement(CsceneBO csceneBO) {
         if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getPlugins() == null || csceneBO.getSceneConfig().getPlugins().get("cpcloud") == null) {
             return;
