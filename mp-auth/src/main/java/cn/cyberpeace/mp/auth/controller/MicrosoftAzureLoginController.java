@@ -29,7 +29,7 @@ public class MicrosoftAzureLoginController {
     @GetMapping("/list")
     public ListObjServiceResult getMicrosoftAzureUserList(@RequestParam(value = "per_page", defaultValue = "10") Integer pageSize,
                                                           @RequestParam(value = "page", defaultValue = "1") Integer pageNum,
-                                                          @RequestParam(value = "cloudType", required = false) String cloudType) {
+                                                          @RequestParam(value = "cloud_type", required = false) String cloudType) {
         JSONObject requestData = new JSONObject();
         requestData.put("cloudType", cloudType);
         requestData.put("pageNum", pageNum);
@@ -39,7 +39,7 @@ public class MicrosoftAzureLoginController {
 
     @ApiOperation(value = "获取当前云类型账号信息", notes = "")
     @GetMapping("/getLocalAzurer")
-    public ServiceResult<MicrosoftAzureUserModel> getLocalAzurer(@RequestParam(value = "cloudType", required = true) String cloudType) {
+    public ServiceResult<MicrosoftAzureUserModel> getLocalAzurer(@RequestParam(value = "cloud_type") String cloudType) {
         JSONObject requestData = new JSONObject();
         requestData.put("cloudType", cloudType);
         MicrosoftAzureUserModel localAzurer = microsoftAzureLoginService.getLocalAzurer(requestData);
@@ -48,7 +48,7 @@ public class MicrosoftAzureLoginController {
 
     @ApiOperation(value = "增加微软云用户", notes = "")
     @PostMapping("/addAzurer")
-    public ServiceResult<MicrosoftAzureUserModel> addAzurer(@RequestBody(required = true) JSONObject requestData) {
+    public ServiceResult<MicrosoftAzureUserModel> addAzurer(@RequestBody MicrosoftAzureUserModel requestData) {
         Boolean addAzurer = microsoftAzureLoginService.addAzurer(requestData);
         if(addAzurer){
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS,"新增成功");
@@ -59,25 +59,25 @@ public class MicrosoftAzureLoginController {
 
     @ApiOperation(value = "删除微软云用户", notes = "")
     @DeleteMapping("/deleteAzurer")
-    public ServiceResult<MicrosoftAzureUserModel> deleteAzurer(@RequestBody(required = true) JSONObject requestData) {
+    public ServiceResult<MicrosoftAzureUserModel> deleteAzurer(@RequestBody MicrosoftAzureUserModel requestData) {
         Boolean deleteAzurer = null;
-        if (requestData != null && requestData.get("pk") != null && !requestData.get("pk").toString().equals("")) {
-            deleteAzurer = microsoftAzureLoginService.deleteAzurer(requestData.get("pk").toString());
+        if (requestData != null && requestData.getPk() != null && !requestData.getPk().equals("")) {
+            deleteAzurer = microsoftAzureLoginService.deleteAzurer(requestData.getPk().toString());
             if (deleteAzurer) {
-                return new ServiceResult<>(null, BaseErrorCode.SUCCESS);
+                return new ServiceResult<>(null, BaseErrorCode.SUCCESS,"删除用户成功");
             }
         }
-        return new ServiceResult<>(null, BaseErrorCode.ERROR);
+        return new ServiceResult<>(null, BaseErrorCode.ERROR,"删除用户失败");
     }
 
     @ApiOperation(value = "修改账号信息", notes = "")
     @PutMapping("/updateLocalAzurer")
-    public ServiceResult<MicrosoftAzureUserModel> updateLocalAzurer(@RequestBody(required = true) JSONObject requestData) {
+    public ServiceResult<MicrosoftAzureUserModel> updateLocalAzurer(@RequestBody MicrosoftAzureUserModel requestData) {
         Boolean updateLocalAzurer = microsoftAzureLoginService.updateLocalAzurer(requestData);
         if(updateLocalAzurer){
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS);
+            return new ServiceResult<>(null, BaseErrorCode.SUCCESS,"修改账号信息成功");
         }else{
-            return new ServiceResult<>(null, BaseErrorCode.ERROR);
+            return new ServiceResult<>(null, BaseErrorCode.ERROR,"修改账号信息失败");
         }
     }
 }

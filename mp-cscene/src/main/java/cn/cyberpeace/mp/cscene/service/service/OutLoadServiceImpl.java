@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.service.service;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.repository.mapper.OutLoadMapper;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +21,17 @@ public class OutLoadServiceImpl {
     @Autowired
     private OutLoadMapper outLoadMapper;
 
+    @Autowired
+    private LoadServiceImpl loadService;
+
     public List getTaskList(JSONObject requestData) {
         return null;
     }
 
     public Map<String, Object> createTask(JSONObject requestData) {
-
-        //todo 根据载荷同步设置获取具体地址、认证和协议
-        String url = "http://10.108.1.10:5002/stgj/task/create";
+        MpDevopsLoadSource synchronousDataSource = loadService.getSynchronousDataSource(new JSONObject());
+        String ip = synchronousDataSource.getIp() != null ? synchronousDataSource.getIp() : "http://10.108.1.10:5002";
+        String url = ip + "/stgj/task/create";
         Map<String, Object> formMap = new HashMap();
         formMap.put("taskName", requestData.get("taskName") != null ? requestData.get("taskName").toString() : "");
         formMap.put("taskDescribe", requestData.get("taskDescribe") != null ? requestData.get("taskDescribe").toString() : "");
@@ -50,9 +54,9 @@ public class OutLoadServiceImpl {
     }
 
     public Map<String, Object> getTaskNet(JSONObject requestData) {
-        //todo 根据载荷同步设置获取具体地址、认证和协议
-        String url = "http://10.108.1.10:5002/stgj/task/enter";
-        url = url + "?taskId=" + requestData.get("taskId") != null ? requestData.get("taskId").toString() : "";
+        MpDevopsLoadSource synchronousDataSource = loadService.getSynchronousDataSource(new JSONObject());
+        String ip = synchronousDataSource.getIp() != null ? synchronousDataSource.getIp() : "http://10.108.1.10:5002";
+        String url = ip + "/stgj/task/enter?taskId=" + (requestData.get("taskId") != null ? requestData.get("taskId").toString() : "");
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
         headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
@@ -69,9 +73,10 @@ public class OutLoadServiceImpl {
     }
 
     public Boolean updateTaskInfo(JSONObject requestData) {
-        String url = "http://10.108.1.10:5002/stgj/task/modify";
-        url = url + "?id=" + requestData.get("id") != null ? requestData.get("id").toString() : "" +
-                "&execCommand=" + requestData.get("execCommand") != null ? requestData.get("execCommand").toString() : "";
+        MpDevopsLoadSource synchronousDataSource = loadService.getSynchronousDataSource(new JSONObject());
+        String ip = synchronousDataSource.getIp() != null ? synchronousDataSource.getIp() : "http://10.108.1.10:5002";
+        String url = ip + "/stgj/task/modify?id=" + (requestData.get("id") != null ? requestData.get("id").toString() : "") +
+                "&execCommand=" + (requestData.get("execCommand") != null ? requestData.get("execCommand").toString() : "");
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
         headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
@@ -96,29 +101,31 @@ public class OutLoadServiceImpl {
         return null;
     }
 
-    public Boolean startInstance(JSONObject requestData) {
-        String url = "http://10.108.1.10:5002/stgj/instance/start";
-        url = url + "?load_id=" + requestData.get("instanceId") != null ? requestData.get("instanceId").toString() : "";
+    public Map<String, Object> startInstance(JSONObject requestData) {
+        MpDevopsLoadSource synchronousDataSource = loadService.getSynchronousDataSource(new JSONObject());
+        String ip = synchronousDataSource.getIp() != null ? synchronousDataSource.getIp() : "http://10.108.1.10:5002";
+        String url = ip + "/stgj/instance/start";
+        Map<String, Object> formMap = new HashMap();
+        formMap.put("instanceId", requestData.get("instanceId") != null ? requestData.get("instanceId").toString() : "");
 
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
         headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
 
+        String result = null;
         try {
-            String result = HttpUtils.sendHttpGet(url, headersMap, 2000);
-            Map<String, Object> dataMap = JsonUtils.parseMap(result);
-            if ("0".equals(dataMap.get("code").toString())) {
-                return true;
-            }
+            result = HttpUtils.sendHttpPost(url, formMap, headersMap);
         } catch (IOException e) {
             return null;
         }
-        return false;
+        Map<String, Object> dataMap = JsonUtils.parseMap(result);
+        return dataMap;
     }
 
     public Boolean stopInstance(JSONObject requestData) {
-        String url = "http://10.108.1.10:5002/stgj/instance/stop";
-        url = url + "?load_id=" + requestData.get("instanceId") != null ? requestData.get("instanceId").toString() : "";
+        MpDevopsLoadSource synchronousDataSource = loadService.getSynchronousDataSource(new JSONObject());
+        String ip = synchronousDataSource.getIp() != null ? synchronousDataSource.getIp() : "http://10.108.1.10:5002";
+        String url = ip + "/stgj/instance/stop?load_id=" + (requestData.get("instanceId") != null ? requestData.get("instanceId").toString() : "");
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
         headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
@@ -152,9 +159,9 @@ public class OutLoadServiceImpl {
     }
 
     public List getToolList(JSONObject requestData) {
-        //todo 根据载荷同步设置获取具体地址、认证和协议
-        String url = "http://10.108.1.10:5002/stgj/tool/list";
-        url = url + "?pagenum=" + (requestData != null && requestData.get("pagenum") != null ? requestData.get("pagenum").toString() : "1") +
+        MpDevopsLoadSource synchronousDataSource = loadService.getSynchronousDataSource(new JSONObject());
+        String ip = synchronousDataSource.getIp() != null ? synchronousDataSource.getIp() : "http://10.108.1.10:5002";
+        String url = ip + "/stgj/tool/list?pagenum=" + (requestData != null && requestData.get("pagenum") != null ? requestData.get("pagenum").toString() : "1") +
                 "&pagesize=" + (requestData != null && requestData.get("pagesize") != null ? requestData.get("pagesize").toString() : "20") +
                 "&keyword=" + (requestData != null && requestData.get("keyword") != null ? requestData.get("keyword").toString() : "");
         //请求头设置

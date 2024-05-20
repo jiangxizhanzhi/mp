@@ -56,8 +56,11 @@
         DELETE
         FROM
             mp_auth_cloud_user
-        WHERE
-            pk = #{pk}
+        <where>
+            <if test="pk != null and pk != ''">
+                pk = #{pk}
+            </if>
+        </where>
     </delete>
 
     <select id="getMicrosoftAzureUserList" resultType="cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel">

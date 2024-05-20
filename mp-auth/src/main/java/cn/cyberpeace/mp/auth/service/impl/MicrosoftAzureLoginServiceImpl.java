@@ -38,7 +38,7 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
 
     @Override
     @Transactional
-    public Boolean addAzurer(JSONObject requestData) {
+    public Boolean addAzurer(MicrosoftAzureUserModel requestData) {
         if(requestData != null){
             Boolean addAzurer = microsoftAzureLoginMapper.addAzurer(requestData);
             if(addAzurer){
@@ -51,25 +51,21 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
     @Override
     @Transactional
     public Boolean deleteAzurer(String pk) {
-        if(pk != null && !pk.equals("")){
-            Boolean deleteAzurer = microsoftAzureLoginMapper.deleteAzurer(pk);
-            if(deleteAzurer){
-                return true;
-            }
+        if(pk == null || pk.equals("")){
+            return false;
         }
-        return false;
+        Boolean deleteAzurer = microsoftAzureLoginMapper.deleteAzurer(pk);
+        return deleteAzurer;
     }
 
     @Override
     @Transactional
-    public Boolean updateLocalAzurer(JSONObject requestData) {
-        if (requestData != null && requestData.get("pk") != null && !requestData.get("pk").toString().equals("")) {
-            Boolean updateLocalAzurer = microsoftAzureLoginMapper.updateLocalAzurer(requestData.get("pk").toString(),requestData);
-            if(updateLocalAzurer){
-                return true;
-            }
+    public Boolean updateLocalAzurer(MicrosoftAzureUserModel requestData) {
+        if(requestData == null || requestData.getPk() == null || requestData.getPk().equals("")){
+            return false;
         }
-        return false;
+        Boolean updateLocalAzurer = microsoftAzureLoginMapper.updateLocalAzurer(requestData.getPk().toString(),requestData);
+        return updateLocalAzurer;
     }
 
 }

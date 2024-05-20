@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadStageBind;
+import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -34,7 +35,7 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     Integer addResult(@Param("param") JSONObject requestData);
 
-    Boolean addLoadExecutionOutResult(@Param("param") List<MpDevopsLoadSceneLog> requestData);
+    Boolean updateLoadExecutionOutResult(@Param("param") List<LoadRequest> requestData);
 
     Boolean addLoad(@Param("param") JSONObject requestData);
 
@@ -68,4 +69,6 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
     List<MpDevopsLoad> getLoadByPks(@Param("param") List<String> loadPks);
 
     List<MpDevopsLoad> getLoadByIds(@Param("param") List<String> loadIds);
+
+    Boolean batchUpdateData(@Param("param") List<JSONObject> sameLoads);
 }

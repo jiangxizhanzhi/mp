@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
+import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
 import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import com.alibaba.fastjson.JSONObject;
@@ -350,10 +351,10 @@ public class LoadController {
      * */
     @ApiOperation(value = "批量新增载荷执行结果", notes = "")
     @PostMapping("/addLoadExecutionOutResult")
-    public ServiceResult addLoadExecutionOutResult(@RequestBody(required = false) List<MpDevopsLoadSceneLog> requestData) {
+    public ServiceResult addLoadExecutionOutResult(@RequestBody(required = false) List<LoadRequest> requestData) {
         if (requestData != null) {
-            Boolean addLoadExecutionOutResult = loadService.addLoadExecutionOutResult(requestData);
-            if (addLoadExecutionOutResult) {
+            Boolean updateLoadExecutionOutResult = loadService.updateLoadExecutionOutResult(requestData);
+            if (updateLoadExecutionOutResult) {
                 return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
             }
         }
@@ -478,15 +479,11 @@ public class LoadController {
         requestData.put("id", id);
         requestData.put("taskId", taskId);
         requestData.put("instanceId", instanceId);
-        if (requestData != null) {
-            JSONObject startTool = loadService.startTool(requestData);
-            if (startTool != null) {
-                return new ServiceResult(startTool, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-            } else {
-                return new ServiceResult(null, BaseErrorCode.ERROR, "阶段载荷执行失败");
-            }
+        Map<String, Object> startTool = loadService.startTool(requestData);
+        if (startTool != null && startTool.get("code") != null && startTool.get("code").toString().equals("0")) {
+            return new ServiceResult(startTool, BaseErrorCode.SUCCESS, "阶段载荷执行成功").asResult();
         } else {
-            return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID, "参数缺失");
+            return new ServiceResult(null, BaseErrorCode.ERROR, "阶段载荷执行失败");
         }
     }
 

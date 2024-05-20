@@ -116,8 +116,8 @@ public class OutLoadController {
     @ApiOperation(value = "启动实例", notes = "")
     @PostMapping("/startInstance")
     public ServiceResult<Boolean> startInstance(@RequestBody(required = true) JSONObject requestData) {
-        Boolean startInstance = outLoadService.startInstance(requestData);
-        if (startInstance) {
+        Map<String, Object> startInstance = outLoadService.startInstance(requestData);
+        if (startInstance != null && startInstance.get("code") != null && startInstance.get("code").toString().equals("0")) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
         } else {
             return new ServiceResult<>(null, BaseErrorCode.ERROR, "启动实例失败");

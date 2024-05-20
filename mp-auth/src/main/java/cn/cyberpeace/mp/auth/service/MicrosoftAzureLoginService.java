@@ -21,7 +21,7 @@ public interface MicrosoftAzureLoginService {
     /**
      * 增加微软云用户
      */
-    Boolean addAzurer(JSONObject requestData);
+    Boolean addAzurer(MicrosoftAzureUserModel requestData);
 
     /**
      * 删除微软云用户
@@ -31,5 +31,5 @@ public interface MicrosoftAzureLoginService {
     /**
      * 修改微软云用户
      */
-    Boolean updateLocalAzurer(JSONObject requestData);
+    Boolean updateLocalAzurer(MicrosoftAzureUserModel requestData);
 }

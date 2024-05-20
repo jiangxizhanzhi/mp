@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -79,7 +81,7 @@ public class CommonCodeServiceImpl {
             if (menuDto.getCode().equals(menu.getParentCode())) {
                 //此时menu是menuDto下的子级
                 if (menuDto.getChildren() == null) {
-                    menuDto.setChildren(new ArrayList<MpSysCodeEnum>());
+                    menuDto.setChildren(new ArrayList<>());
                 }
                 MpSysCodeEnum dto = new MpSysCodeEnum();
                 BeanUtils.copyProperties(menu, dto);
@@ -92,6 +94,18 @@ public class CommonCodeServiceImpl {
 
     public List<MpSysCodeEnum> getNextLevelDatasByCodes(String[] codes) {
         return commonCodeMapper.getNextLevelDatasByCodes(codes);
+    }
+
+    public Map<String,String> getNextLevelMapsByCodes(String code) {
+        Map<String,String> map = new HashMap<>();
+        List<MpSysCodeEnum> nextLevelDatasByCodes = commonCodeMapper.getNextAllDataByCode(code);
+        //map收集nextLevelDatasByCodes中每个成员中的code和codeName
+        for (MpSysCodeEnum mpSysCodeEnum : nextLevelDatasByCodes) {
+            if(mpSysCodeEnum.getCode()!=null && !mpSysCodeEnum.getCode().equals("")){
+                map.put(mpSysCodeEnum.getCode(),mpSysCodeEnum.getCodeName());
+            }
+        }
+        return map;
     }
 }
 
