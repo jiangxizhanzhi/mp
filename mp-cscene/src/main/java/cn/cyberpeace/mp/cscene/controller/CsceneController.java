@@ -224,7 +224,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @PostMapping("/sync_with_template")
     public ServiceResult<CsceneBO> syncWithTemplate(@RequestBody CsceneSyncRequest request) {
         String id = this.modelService.get(request.getId()).getSource().getObj().getSceneConfig();
-        String templateId = this.modelService.get(request.getId()).getSource().getObj().getSceneConfig();
+        String templateId = this.modelService.get(request.getTemplateId()).getSource().getObj().getSceneConfig();
 
         SceneConfigService sceneConfigService = BeanCommon.getBean(SceneConfigService.class);
 
