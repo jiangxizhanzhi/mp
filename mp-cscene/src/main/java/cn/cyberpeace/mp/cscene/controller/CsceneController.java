@@ -48,6 +48,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -439,6 +449,59 @@ public class CsceneController implements BaseModelListControllerBase {
     @GetMapping(value = "/export", params = "id")
     public ServiceResult<CsceneBO> export(@RequestParam String id) {
         return modelService.export(id, null).asResult();
+    }
+
+    @ApiOperation("导出指定id场景模板（分层）")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
+    })
+    @GetMapping(value = "/export_file", params = "id")
+    public void exportFile(@RequestParam String id, HttpServletResponse response) {
+        var csceneBO = modelService.export(id, null).getSource();
+        File file;
+        var res = csceneBO.getSceneConfig();
+        if (Objects.nonNull(res.getTopology()) && Objects.nonNull(res.getTopology().getScene()) &&
+                StringUtils.isNotEmpty(res.getTopology().getScene().getName())) {
+            file = new File(res.getTopology().getScene().getName());
+        } else {
+            file = new File(res.getTopology().getScene().getEid());
+        }
+
+        InputStream fis = null;
+        OutputStream outputStream = null;
+        if (!file.exists()) {
+            try {
+                String filename = file.getName();
+                file.createNewFile();
+                FileWriter fileWriter = new FileWriter(file);
+                fileWriter.write(JsonCommon.stringify(csceneBO));
+                fileWriter.close();
+
+                FileInputStream fileInputStream = new FileInputStream(file);
+                fis = new BufferedInputStream(fileInputStream);
+                byte[] buffer = new byte[fis.available()];
+                fis.read(buffer);
+
+                response.reset();
+                response.setCharacterEncoding("UTF-8");
+                response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("scene.json", StandardCharsets.UTF_8));
+                response.addHeader("Content-Length", "" + file.length());
+                outputStream = new BufferedOutputStream(response.getOutputStream());
+                response.setContentType("application/octet-stream");
+                outputStream.write(buffer);
+                outputStream.flush();
+            } catch (Exception e) {
+                log.error("create file error", e);
+            } finally {
+                try {
+                    outputStream.close();
+                    fis.close();
+                    file.delete();
+                } catch (Exception e) {
+
+                }
+            }
+        }
     }
 
     @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
