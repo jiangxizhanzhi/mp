@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class BaseSceneAreaModel extends BaseSceneNodeModel {
+    @Deprecated
     @DefaultBool
     private Boolean open;
 
