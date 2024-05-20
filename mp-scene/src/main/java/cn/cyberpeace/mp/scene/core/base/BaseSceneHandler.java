@@ -1134,12 +1134,13 @@ public abstract class BaseSceneHandler<
      * @return 更新的网元节点，包含添加的、更新属性的、删除的
      */
     private DiffTargets<TSceneElementModel> saveElements(Map<String, TSceneElementModel> existElementMap) {
-        Map<String, TSceneElementModel> savingElementMap = elementMap.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
-                    TSceneElementModel element = entry.getValue().toModel();
-                    element.setScene(sceneId);
-                    return element;
-                }));
+        Map<String, TSceneElementModel> savingElementMap = new HashMap<>();
+        for (var e : elementMap.entrySet()) {
+            var v= e.getValue();
+            TSceneElementModel element = v.toModel();
+            element.setScene(sceneId);
+            savingElementMap.put(e.getKey(), element);
+        }
         DiffTargets<TSceneElementModel> diff = diffTargets(savingElementMap, existElementMap);
         saveDiff(sceneElementMapper, diff);
         ListUtils.union(diff.getAddingTargets(), diff.getUpdatingTargets())

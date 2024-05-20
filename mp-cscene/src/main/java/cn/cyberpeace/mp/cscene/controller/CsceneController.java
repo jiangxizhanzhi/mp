@@ -237,7 +237,7 @@ public class CsceneController implements BaseModelListControllerBase {
         }
         this.mergeSceneConfig(originSceneConfig, templateSceneConfig);
         sceneConfigService.sync(originSceneConfig, false, null);
-        var res = sceneConfigService.get(request.getId(), true, request.getAreaId(), null).getSource();
+        var res = sceneConfigService.get(id, true, request.getAreaId(), null).getSource();
         var csceneBO = new CsceneBO();
         csceneBO.setSceneConfig(res);
         return new ServiceResult<>(csceneBO).asResult();
