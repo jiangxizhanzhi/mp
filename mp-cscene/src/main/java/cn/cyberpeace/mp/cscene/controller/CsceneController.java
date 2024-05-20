@@ -240,6 +240,7 @@ public class CsceneController implements BaseModelListControllerBase {
         var res = sceneConfigService.get(id, true, request.getAreaId(), null).getSource();
         var csceneBO = new CsceneBO();
         csceneBO.setSceneConfig(res);
+        CsceneDataModifier.correctReturnCsceneData(csceneBO);
         return new ServiceResult<>(csceneBO).asResult();
     }
 
