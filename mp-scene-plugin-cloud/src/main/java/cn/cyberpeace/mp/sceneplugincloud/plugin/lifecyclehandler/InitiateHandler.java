@@ -25,22 +25,11 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CoreType;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.InitiateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -191,7 +180,7 @@ public class InitiateHandler extends HandlerCommon {
 
         // 分配 fwdnsInterfaceIp
         setFwdnsInterfaceIps(cloudElements);
-        this.initiateForSingleNode(noEventElements);
+//        this.initiateForSingleNode(noEventElements);
     }
 
     public void initiateForSingleNode(List<CloudPluginSceneElementBO> noEventElements) {

@@ -20,18 +20,18 @@ public class ContainerCreateData implements CloudHttpData {
     private String requestUser;
     private String scene;
     private String department;
-    private String host;
-    private List<VirtualNic> networks;
+    private String runHost;
+    private List<VirtualNic> network;
 
     private Boolean interactive;
     private Boolean tty;
     private Boolean run;
-    private Boolean privileged;
+    private Boolean privilege;
     private Boolean keepNicsSequence;
     private String command;
     private String postCommand;
     private String workdir;
-        private Map<String, String> environment;
+    private Map<String, String> environment;
     private String hostname;
 
     private String id;

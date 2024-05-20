@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -514,10 +513,11 @@ public class CreateHandler extends HandlerCommon {
         SceneBO srcScene = getPluginHandler().getSrcScene();
         String sceneId = srcScene.getEid();
         String sceneFileUrl = srcScene.getFile();
+        // 下载场景文件，什么情况下需要这个？
         if (!StringUtils.isEmpty(sceneFileUrl)) {
             commands.addAll(SceneFileUtils.genSceneFileInitCommand(standardSystemType, sceneFileUrl, sceneId));
         }
-
+        //节点文件，什么情况下需要？固定从169.254.169.254下载文件, 如果功能启用，要修改成mp下载
         String elementFileUrl = srcElement.getFile();
         if (!StringUtils.isEmpty(elementFileUrl)) {
             commands.addAll(SceneFileUtils.genElementFileInitCommand(standardSystemType, elementFileUrl, sceneId,
@@ -537,7 +537,6 @@ public class CreateHandler extends HandlerCommon {
             commands.add("echo \"169.254.169.254     res.cr.com\" >>/etc/hosts");
         }
 
-        // TODO: 应用安装
 
         // TODO: 快速创建安装
         if (Boolean.TRUE.equals(cloudElement.getQuickCreateSupport())) {
@@ -792,6 +791,8 @@ public class CreateHandler extends HandlerCommon {
                 cloudPort.setFloatingIp(virtualNic.getFloatingip());
                 cloudPort.setFloatingIpId(virtualNic.getFloatingipId());
                 cloudPort.setAuxiliaryNetworkId(virtualNic.getNetworkId());
+                cloudPort.setVnicId(virtualNic.getVnicId());
+
 
                 List<VirtualNic.AccessMode> accessModesData = virtualNic.getAccessModes();
                 if (accessModesData != null && !accessModesData.isEmpty()) {
@@ -1047,10 +1048,15 @@ public class CreateHandler extends HandlerCommon {
         createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
         createData.setDisk(IntUtils.zeroNull(srcElement.getDisk()));
 
-        //todo 接入待修改
-        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getAccessMode())) {
-            List<String> protocols = cloudElement.getAccessMode().stream()
-                    .map(cloudElementAccessMode -> cloudElementAccessMode.getProtocol().toLowerCase())
+
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+            List<AccessMode> accessModes = cloudElement.getSrcElement().getPorts().stream().filter(port -> Objects.nonNull(port.getAccessModes()))
+                    .flatMap(port -> port.getAccessModes().stream()).collect(Collectors.toList());
+
+            List<String> protocols = accessModes.stream()
+                    .map(AccessMode::getProtocol)
+                    .filter(StringUtils::isNotBlank)
+                    .map(String::toLowerCase)
                     .collect(Collectors.toList());
             if (protocols.contains(CloudElementAccessMode.Protocol.SPICE) && protocols.contains(CloudElementAccessMode.Protocol.VNC)) {
                 createData.setDisplayType(ElementAccessModeConstant.SPICE_AND_VNC);
@@ -1063,9 +1069,27 @@ public class CreateHandler extends HandlerCommon {
             if (protocols.contains(CloudElementAccessMode.Protocol.COM)) {
                 createData.setVirtioConsole(true);
             }
-        } else {
-            createData.setDisplayType(ElementAccessModeConstant.SPICE_AND_VNC);
+
         }
+
+
+        if (createData.getNetwork() != null) {
+            log.info("set switch nic info is {}", JsonCommon.stringify(cloudElement));
+            createData.getNetwork().forEach(c -> c.setSpecial(false));
+
+            for (var virtualNic : createData.getNetwork()) {
+                if (HandlerUtils.isExternalNetwork(virtualNic.getNetworkId())) {
+                    createData.setMainCloud(true);
+                    break;
+                }
+            }
+        }
+        String systemType = SystemTypeUtils.getStandardSystemType(cloudElement.getSrcElement().getSystemType());
+        String osType = SystemTypeCommandUtils.getOsType(systemType);
+        createData.setOsType(osType);
+
+
+
 
 
 
@@ -1087,33 +1111,24 @@ public class CreateHandler extends HandlerCommon {
     }
 
     protected void createContainer(CloudPluginSceneElementBO cloudElement) {
-        List<ConnectedNetworkBO> allNets = new ArrayList<>();
-        allNets.addAll(Optional.ofNullable(cloudElement.getAccessNetworks()).orElse(new ArrayList<>()));
-        allNets.addAll(Optional.ofNullable(cloudElement.getDeriveNetworks()).orElse(new ArrayList<>()));
-        CloudPluginSceneElementNetworkBO macvlanNet = null;
-        for (ConnectedNetworkBO net : allNets) {
-            if (BaseCloudPluginSceneElementModel.NetMode.MACVLAN.equals(net.network.getNetMode())) {
-                macvlanNet = net.network;
-                break;
-            }
-        }
+
         SceneElementBO srcElement = cloudElement.getSrcElement();
         ContainerCreateData createData = new ContainerCreateData();
         createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
-//        createData.setDepartment(Optional.ofNullable(getHandlerUtils().getRequestUserOrg()).orElse(StringUtils.EMPTY));
-//        createData.setScene(Optional.ofNullable(getPluginHandler().getSrcScene().getName()).orElse(StringUtils.EMPTY));
         createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
-        createData.setImage(cloudElement.getImage());
-        // todo 暂时不传
-//        createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
-//        createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
-//        createData.setDisk(IntUtils.zeroNull(srcElement.getDisk()));
+        createData.setImage(cloudElement.getImageUuid());
 
+        if (srcElement.getCpu() != null && srcElement.getCpu() > 0) {
+            createData.setCpu(srcElement.getCpu());
+        }
         if (srcElement.getRam() != null && srcElement.getRam() > 1) {
             createData.setRam(srcElement.getRam());
         }
         if (srcElement.getDisk() != null && srcElement.getDisk() > 1) {
             createData.setDisk(srcElement.getDisk());
+        }
+        if (StringUtils.isNotEmpty(cloudElement.getHost())) {
+            createData.setRunHost(cloudElement.getHost());
         }
 
         // 容器参数
@@ -1121,43 +1136,22 @@ public class CreateHandler extends HandlerCommon {
             DockerParams dockerParams = cloudElement.getDockerParams();
             createData.setEnvironment(dockerParams.getEnvironment());
             createData.setInteractive(dockerParams.getInteractive());
-            createData.setPrivileged(dockerParams.getPrivileged());
+            createData.setPrivilege(dockerParams.getPrivileged());
             createData.setRun(dockerParams.getRun());
         }
 
-        // 容器初始化命令通过execContainerInitCommand执行
-//        if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
-//            createData.setPostCommand(TextUtils.emptyNull(combineInitCommand(cloudElement)));
-//        }
-        if (macvlanNet != null) {
-            MacvlanContainerCreateData macvlanContainerCreateData = new MacvlanContainerCreateData();
-            BeanUtils.copyProperties(createData, macvlanContainerCreateData);
-            macvlanContainerCreateData.setIp(cloudElement.getSrcElement().getPorts().get(0).getIp());
-            macvlanContainerCreateData.setMacvlanId(macvlanNet.getVlanId());
-            macvlanContainerCreateData.setGatewayIp(macvlanNet.getGateway());
-            macvlanContainerCreateData.setCidr(macvlanNet.getCidr());
-            if (StringUtils.isNotEmpty(cloudElement.getHost())) {
-                macvlanContainerCreateData.setHost(cloudElement.getHost());
-            }
-            MacvlanContainerCreateData container = containerClient.createMacvlanContainer(macvlanContainerCreateData);
-            cloudElement.setResourceId(container.getId());
-            cloudElement.setHost(container.getHost());
-            execContainerInitCommand(cloudElement);
-            receiveVirtualPortInfo(cloudElement);
-        } else {
-            createData.setNetworks(CollectionUtils.emptyNull(
-                    this.genVirutalNics(cloudElement)
-            ));
-            ContainerCreateData container = containerClient.create(createData);
-            cloudElement.setResourceId(container.getId());
-            cloudElement.setHost(container.getHost());
+        createData.setNetwork(CollectionUtils.emptyNull(
+                this.genVirutalNics(cloudElement)
+        ));
+        ContainerCreateData container = containerClient.create(createData);
+        cloudElement.setResourceId(container.getId());
+        cloudElement.setHost(container.getRunHost());
 
-            receiveVirtualPortInfo(cloudElement, container.getNetworks());
+        receiveVirtualPortInfo(cloudElement, container.getNetwork());
 
-            execContainerInitCommand(cloudElement);
+        execContainerInitCommand(cloudElement);
 
-            checkAccessModes(cloudElement);
-        }
+        checkAccessModes(cloudElement);
     }
 
     /**
@@ -1357,18 +1351,6 @@ public class CreateHandler extends HandlerCommon {
 
 
         getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CONFIG);
-
-        //通知云平台需要统计环境总速率的端口
-        if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate())) {
-            List<String> portIds = new ArrayList<>();
-            Map<String, CloudPluginSceneElementPortBO> portMap = getPluginHandler().getElementPortMap();
-            portMap.forEach((key,value) -> {
-                if (StringUtils.isNotEmpty(value.getResourceId())) {
-                    portIds.add(value.getResourceId());
-                }
-            });
-            vpClient.syncFlowPortInfo(portIds, "add");
-        }
     }
 
     protected void prepareEventProcess() {

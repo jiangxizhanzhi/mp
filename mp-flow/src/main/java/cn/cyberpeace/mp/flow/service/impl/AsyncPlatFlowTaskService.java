@@ -465,7 +465,7 @@ public class AsyncPlatFlowTaskService {
         // 获取外部networkId，用于管理端口
         String externalNetId = "";
         try {
-            String getNetworkRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/scenarios/virtual_internet", new JSONObject().toJSONString());
+            String getNetworkRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/cloud/v1/scenarios/virtual_internet", new JSONObject().toJSONString());
             JSONObject getNetworkObj = JSONObject.parseObject(getNetworkRsp);
             log.info("get network response:{}", getNetworkObj.toJSONString());
             if (BaseConstants.SUCCESS_ZERO.equals(getNetworkObj.getString(BaseConstants.STR_CODE))) {
@@ -491,7 +491,7 @@ public class AsyncPlatFlowTaskService {
 
         try {
             // 创建trex虚拟机
-            String addVmRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/scenarios/vm",
+            String addVmRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/cloud/v1/scenarios/vm",
                     JsonUtils.snakeStringify(addVmRequest));
             JSONObject addVmObj = JSONObject.parseObject(addVmRsp);
             log.info("add trex vm response:{}", addVmObj.toJSONString());
@@ -571,7 +571,7 @@ public class AsyncPlatFlowTaskService {
         // 获取外部networkId，用于管理端口
         String externalNetId = "";
         try {
-            String getNetworkRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/scenarios/virtual_internet", new JSONObject().toJSONString());
+            String getNetworkRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/cloud/v1/scenarios/virtual_internet", new JSONObject().toJSONString());
             JSONObject getNetworkObj = JSONObject.parseObject(getNetworkRsp);
             log.info("get network response:{}", getNetworkObj.toJSONString());
             if (BaseConstants.SUCCESS_ZERO.equals(getNetworkObj.getString(BaseConstants.STR_CODE))) {
@@ -597,7 +597,7 @@ public class AsyncPlatFlowTaskService {
 
         try {
             // 创建trex虚拟机
-            String addVmRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/scenarios/vm",
+            String addVmRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/cloud/v1/scenarios/vm",
                     JsonUtils.snakeStringify(addVmRequest));
             JSONObject addVmObj = JSONObject.parseObject(addVmRsp);
             log.info("add trex vm response:{}", addVmObj.toJSONString());

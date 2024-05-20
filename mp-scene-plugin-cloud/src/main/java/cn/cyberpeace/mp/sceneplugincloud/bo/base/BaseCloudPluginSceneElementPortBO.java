@@ -49,6 +49,10 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
     @ApiModelProperty(value = "辅助网络id")
     private String auxiliaryNetworkId;
 
+    @ApiModelProperty(value = "是否已连通")
+    private Boolean connected;
+    @ApiModelProperty(value = "网卡id")
+    private String vnicId;
     @ApiModelProperty(value = "qos id")
     private String qosId;
     @ApiModelProperty(value = "接入方式")
