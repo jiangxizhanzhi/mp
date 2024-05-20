@@ -331,7 +331,7 @@ public abstract class BaseSceneHandler<
         }
 
         TSceneAreaBO parentArea = nodeArea != null ? areaMap.getOrDefault(nodeArea, null) : null;
-        return parentArea != null && isLayerArea(parentArea);
+        return parentArea != null && StringUtils.equals(parentArea.getArea(), areaId);
     }
 
     /**
