@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.*;
@@ -194,8 +195,14 @@ public class ImagesConverter implements BaseConverter{
      */
     @Transactional
     public void add(ImageRequest request) {
+        request.setModelId(TextUtils.uuid());
         Device device = imagesService.add(convertRequest(request));
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
+        device.setOsVersion(request.getOsVersion());
+        device.setImagePath(request.getImagePath());
+        device.setNetIfCnt(request.getNetIfCnt());
+        device.setBrand(request.getBrand());
+        device.setInnerApps(request.getInnerApps());
         devopsTargetService.insert(Collections.singletonList(device));
     }
 
@@ -472,15 +479,20 @@ public class ImagesConverter implements BaseConverter{
     protected Device convertRequest(ImageRequest request){
         Device device = new Device();
         device.setName(request.getName());
+        device.setDeviceVersion(request.getDeviceVersion());
+        device.setParentName(request.getParentName());
         device.setDescription(request.getDescription());
         device.setLogo(DefaultImgUtil.fdfsUrlToPath(request.getLogo()));
         Integer role  = request.getRole();
         device.setRole(role);
+        device.setRoleId(request.getRoleId());
         device.setCategory(request.getCategory());
         device.setSecondCategory(request.getSecondCategory());
         device.setL3Category(request.getThirdCategory());
         device.setImageType(request.getImageType());
         device.setMaintype(MainTypeEnum.NORMAL.ordinal());
+        device.setRootPassword(request.getRootPassword());
+        device.setUsername(request.getUsername());
         final ExtVm extVm = request.getExtVm();
         if (Objects.nonNull(extVm) && CollectionUtils.isNotEmpty(request.getAccessProtocolList())) {
             extVm.setAccessProtocols(request.getAccessProtocolList());
@@ -490,6 +502,9 @@ public class ImagesConverter implements BaseConverter{
         if (Objects.nonNull(extImageInfo) && StringUtils.isNotBlank(extImageInfo.getUploadType())
                 && extImageInfo.getUploadType().equals(UploadTypeEnum.FTP.getDesc())){
             extImageInfo.setUserFilename(extImageInfo.getFtpFilename());
+            extImageInfo.setFilename(extImageInfo.getFtpFilename());
+        } else {
+            extImageInfo.setFilename(extImageInfo.getUserFilename());
         }
         //解决外部网络靶标-镜像状态问题
         if (StringUtils.isNotBlank(request.getImageType())) {

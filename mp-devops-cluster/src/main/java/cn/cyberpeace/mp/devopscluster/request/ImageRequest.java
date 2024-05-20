@@ -44,6 +44,18 @@ public class ImageRequest extends BaseRequest {
     private String name;
 
     /**
+     * 版本
+     */
+    @ApiModelProperty(value = "版本")
+    private String deviceVersion;
+
+    /**
+     * 父靶标名称
+     */
+    @ApiModelProperty(value = "父靶标名称")
+    private String parentName;
+
+    /**
      * 描述
      */
     @ApiModelProperty(value = "描述")
@@ -60,6 +72,10 @@ public class ImageRequest extends BaseRequest {
      */
     @ApiModelProperty(value = "角色：网络/网关/终端")
     private Integer role;
+    /**
+     * 唯一标识靶标类型,兼容运维类型
+     */
+    private Integer roleId;
 
 
     /**
@@ -124,4 +140,42 @@ public class ImageRequest extends BaseRequest {
 
     @ApiModelProperty(value = "是否隐藏")
     private Boolean isHide = Boolean.FALSE;
+
+
+    @ApiModelProperty(value = "操作系统版本")
+    private String osVersion;
+
+    @ApiModelProperty(value = "网卡数量")
+    private Integer netIfCnt;
+
+    @ApiModelProperty(value = "镜像位置")
+    private String imagePath;
+
+
+    @ApiModelProperty(value = "是否支持用户行为")
+    private Boolean behaveSupport;
+
+    @ApiModelProperty(value = "靶标类型")
+    private Integer deviceIdentify;
+
+    @ApiModelProperty(value = "管理员用户密码")
+    private String rootPassword;
+
+    @ApiModelProperty(value = "品牌")
+    private String brand;
+
+    @ApiModelProperty("内置应用")
+    private String innerApps;
+
+    /**
+     * 创建用户名
+     */
+    private String username;
+
+    @ApiModelProperty("模型ID")
+    private String modelId;
+
+    @ApiModelProperty("模型Code")
+    private String modelCode;
 }
+
