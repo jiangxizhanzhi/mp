@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.bo.ImportTemplateBO;
 import cn.cyberpeace.mp.cscene.bo.SceneAreaTreeBO;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.AreaUpdateRequest;
@@ -64,6 +65,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
@@ -584,6 +586,38 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneDataModifier.removeEidWhenCreate(csceneBO);
         modelService.sync(csceneBO, null, false);
         return new ServiceResult<>(csceneBO).asResult();
+    }
+
+    @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
+    @ApiOperation(value = "导入场景模板")
+    @ApiImplicitParam(name = "importTemplateBO", value = "请求体", dataTypeClass = ImportTemplateBO.class)
+    @PostMapping("/import_template")
+    public ServiceResult<CsceneBO> importTemplate(ImportTemplateBO importTemplateBO) {
+        InputStream inputStream = null;
+        try {
+            inputStream = importTemplateBO.getFile().getInputStream();
+            var bytes = inputStream.readAllBytes();
+            CsceneBO csceneBO = JsonCommon.parse(new String(bytes, StandardCharsets.UTF_8), CsceneBO.class);
+
+            String id = this.modelService.get(importTemplateBO.getId()).getSource().getObj().getSceneConfig();
+            SceneConfigService sceneConfigService = BeanCommon.getBean(SceneConfigService.class);
+            var originSceneConfig = sceneConfigService.get(id, false, null, null).getSource();
+            var templateSceneConfig = csceneBO.getSceneConfig();
+
+            this.removeId(templateSceneConfig);
+            this.updateOldId(templateSceneConfig);
+            this.modifyAreaId(templateSceneConfig, importTemplateBO.getAreaId());
+            this.mergeSceneConfig(originSceneConfig, templateSceneConfig);
+            sceneConfigService.sync(originSceneConfig, false, null);
+            var res = sceneConfigService.get(id, true, importTemplateBO.getAreaId(), null).getSource();
+
+            var resultBO = new CsceneBO();
+            resultBO.setSceneConfig(res);
+            CsceneDataModifier.correctReturnCsceneData(resultBO);
+            return new ServiceResult<>(resultBO).asResult();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
