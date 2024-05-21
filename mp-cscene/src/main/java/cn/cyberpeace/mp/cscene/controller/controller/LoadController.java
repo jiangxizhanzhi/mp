@@ -153,8 +153,8 @@ public class LoadController {
      * */
     @ApiOperation(value = "载荷数据同步", notes = "")
     @GetMapping("/synchronousData")
-    public ServiceResult synchronousData() {
-        JSONObject synchronousData = loadService.synchronousData();
+    public ServiceResult synchronousData(@RequestParam(value = "is_need_message",defaultValue = "true") Boolean isNeedMessage) {
+        JSONObject synchronousData = loadService.synchronousData(isNeedMessage);
         if (synchronousData != null) {
             return new ServiceResult(synchronousData, BaseErrorCode.SUCCESS, "载荷数据同步成功").asResult();
         } else {
@@ -197,7 +197,7 @@ public class LoadController {
     @ApiOperation(value = "根据场景id获取绑定的载荷", notes = "")
     @GetMapping("/getLoadBySceneId")
     public ServiceResult getLoadBySceneId(@RequestParam(value = "scene_id") String sceneId) {
-        List list = loadService.getLoadBySceneId(sceneId);
+        List<MpDevopsLoad> list = loadService.getLoadBySceneId(sceneId);
         return new ServiceResult(list, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
@@ -457,30 +457,6 @@ public class LoadController {
             }
         }
         return new ServiceResult(null, BaseErrorCode.ERROR, "阶段载荷接入失败");
-    }
-
-    /**
-     * 阶段载荷执行
-     */
-    @ApiOperation(value = "阶段载荷执行", notes = "")
-    @GetMapping("/startTool")
-    public ServiceResult startTool(@RequestParam(value = "scene_id") String sceneId,
-                                   @RequestParam(value = "stage_id") String stageId,
-                                   @RequestParam(value = "id") String id,
-                                   @RequestParam(value = "task_id") String taskId,
-                                   @RequestParam(value = "instance_id") String instanceId) {
-        JSONObject requestData = new JSONObject();
-        requestData.put("sceneId", sceneId);
-        requestData.put("stageId", stageId);
-        requestData.put("id", id);
-        requestData.put("taskId", taskId);
-        requestData.put("instanceId", instanceId);
-        Map<String, Object> startTool = loadService.startTool(requestData);
-        if (startTool != null && startTool.get("code") != null && startTool.get("code").toString().equals("0")) {
-            return new ServiceResult(startTool, BaseErrorCode.SUCCESS, "阶段载荷执行成功").asResult();
-        } else {
-            return new ServiceResult(null, BaseErrorCode.ERROR, "阶段载荷执行失败");
-        }
     }
 
     /**

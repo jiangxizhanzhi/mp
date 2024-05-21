@@ -117,17 +117,45 @@ public class LoadServiceImpl {
      * 载荷数据同步
      * */
     @Transactional
-    public JSONObject synchronousData() {
+    public synchronized JSONObject synchronousData(Boolean isNeedMessage) {
+        //推送的消息返回格式
+        Map jsonObject = new LinkedHashMap<>();
+        jsonObject.put("code", "MP-synchronousData-by-outService");
+        Map data = new LinkedHashMap<>();
+
         //同步设置
         MpDevopsLoadSource synchronousDataSource = getSynchronousDataSource(new JSONObject());
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("pagenum", 1);
-        jsonObject.put("pagesize", 1000);
+
+        if(isNeedMessage){
+            //给所有当前登录的session推送消息
+            WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
+                sendMessage(webSocketServer, session, jsonObject, data, 1, "正在连接载荷管理机:"+synchronousDataSource.getIp()+"......成功", true);
+            });
+        }
+
+        JSONObject request = new JSONObject();
+        request.put("pagenum", 1);
+        request.put("pagesize", 1000);
         //通过部署的载荷服务器获取载荷列表
-        List<LinkedHashMap> initialToolList = outLoadService.getToolList(jsonObject);
+        List<LinkedHashMap> initialToolList = outLoadService.getToolList(request);
+
         if (initialToolList == null || initialToolList.isEmpty()) {
+            if(isNeedMessage){
+                //给所有当前登录的session推送消息
+                WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
+                    sendMessage(webSocketServer, session, jsonObject, data, 2, "获取载荷列表失败,会话关闭！", false);
+                });
+            }
             return null;
         }
+
+        //给所有当前登录的session推送消息
+        if(isNeedMessage){
+            WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
+                sendMessage(webSocketServer, session, jsonObject, data, 2, "正在获取同步载荷......完成！", true);
+            });
+        }
+
         //准备新增到数据库的载荷列表
         List<JSONObject> list = new ArrayList<>();
         for (LinkedHashMap tool : initialToolList) {
@@ -137,36 +165,49 @@ public class LoadServiceImpl {
             }
         }
         List<JSONObject> sameLoads;
-        try {
-            //本地的载荷列表数据
-            List<MpDevopsLoad> nowLoadList = loadMapper.getLoadList(new JSONObject());
-            //收集id相同的数据,id相同的loadId不需要新增,只需要修改
-            sameLoads = new ArrayList<>();
-            for (int i = 0; i < list.size(); i++) {
-                for (int j = 0; j < nowLoadList.size(); j++) {
-                    if (list.get(i).get("id") != null && nowLoadList.get(j).getId() != null) {
-                        if (list.get(i).get("id").toString().equals(nowLoadList.get(j).getId())) {
-                            sameLoads.add(list.get(i));
-                            //删除相同项
-                            list.remove(list.get(i));
-                        }
+
+        //本地的载荷列表数据
+        List<MpDevopsLoad> nowLoadList = loadMapper.getLoadList(new JSONObject());
+        //收集id相同的数据,id相同的loadId不需要新增,只需要修改
+        sameLoads = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            for (int j = 0; j < nowLoadList.size(); j++) {
+                if (list.get(i).get("id") != null && nowLoadList.get(j).getId() != null) {
+                    if (list.get(i).get("id").toString().equals(nowLoadList.get(j).getId())) {
+                        sameLoads.add(list.get(i));
+                        //删除相同项
+                        list.remove(list.get(i));
                     }
                 }
             }
-            //更新本地数据
-            Boolean deleteData = true;
-            if (sameLoads != null && sameLoads.size() > 0) {
-                deleteData = loadMapper.batchUpdateData(sameLoads);
-            }
-            if (deleteData && list != null && !list.isEmpty()) {
-                if (!loadMapper.addLoads(list)) {
-                    return null;
-                }
-            }
-        } catch (Exception e) {
-            // 记录错误日志、回滚事务等
-            throw e; // 或者包装成自定义异常抛出
         }
+        //更新本地数据
+        Boolean deleteData = true;
+        if (sameLoads != null && sameLoads.size() > 0) {
+            deleteData = loadMapper.batchUpdateData(sameLoads);
+        }
+        if (deleteData && list != null && !list.isEmpty()) {
+            if (!loadMapper.addLoads(list)) {
+                if(isNeedMessage){
+                    WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
+                        sendMessage(webSocketServer, session, jsonObject, data, 3, "载荷数据入库失败,会话关闭！", false);
+                    });
+                }
+                return null;
+            }
+        }
+
+        if(isNeedMessage){
+            WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
+                data.put("stage3","载荷数据入库成功！");
+                sendMessage(webSocketServer, session, jsonObject, data, 3, "载荷数据入库成功！", true);
+                data.put("stage4","共同步"+list.size()+"个载荷");
+                sendMessage(webSocketServer, session, jsonObject, data, 4, "共同步"+list.size()+"个载荷以及更新"+sameLoads.size()+"条载荷", true);
+                data.put("stage5","载荷列表同步成功,会话关闭！");
+                sendMessage(webSocketServer, session, jsonObject, data, 5, "载荷列表同步成功,会话关闭！", true);
+            });
+        }
+
         JSONObject requestData = new JSONObject();
         //同步设置来源
         requestData.put("source", synchronousDataSource);
@@ -245,16 +286,20 @@ public class LoadServiceImpl {
     }
 
     private void sendMessage(WebSocketServer webSocketServer, Session session, Map map, Map data,
-                                  Integer sort, String message, Boolean result) throws IOException {
-        data.put("stage" + sort, message);
-        map.put("data", data);
-        // 将LinkedHashMap转换为JSONObject
-        JSONObject object = new JSONObject(map);
-        // 将JSONObject转换为JSON字符串
-        String jsonString = object.toJSONString();
-        webSocketServer.sendMessage(session, jsonString);
-        if(!result) {
-            webSocketServer.onClose(session);
+                                  Integer sort, String message, Boolean result){
+        try {
+            data.put("stage" + sort, message);
+            map.put("data", data);
+            // 将LinkedHashMap转换为JSONObject
+            JSONObject object = new JSONObject(map);
+            // 将JSONObject转换为JSON字符串
+            String jsonString = object.toJSONString();
+            webSocketServer.sendMessage(session, jsonString);
+            if(!result) {
+                webSocketServer.onClose(session);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -352,7 +397,7 @@ public class LoadServiceImpl {
     /*
      * 根据场景id获取绑定的载荷
      * */
-    public List getLoadBySceneId(String sceneId) {
+    public List<MpDevopsLoad> getLoadBySceneId(String sceneId) {
         //节点表
 //        List<CloudPluginSceneElementModel> loadList = csceneInstanceService.listLoads(sceneId);
 //        List<String> loadIds = loadList.stream()
@@ -737,39 +782,8 @@ public class LoadServiceImpl {
     public Map<String, Object> getTaskNet(JSONObject requestData) {
         //新增执行结果日志
         Integer pk = addResultLog(requestData);
-        //执行
-        Map<String, Object> startInstance = outLoadService.startInstance(requestData);
-        Boolean updateResultLog = updateResultLog(pk, startInstance);
-        if(!updateResultLog){
-            return null;
-        }
-        Boolean flag = true;
-        if (startInstance == null || startInstance.get("code") == null || !startInstance.get("code").toString().equals("0")) {
-            flag = false;
-        }
-        Map<String, Object> result = null;
-        if(flag){
-            result = outLoadService.getTaskNet(requestData);
-        }
+        Map<String, Object> result = outLoadService.getTaskNet(requestData);
         return result;
-    }
-
-    /**
-     * 阶段载荷开始执行
-     */
-    public Map<String, Object> startTool(JSONObject requestData) {
-        //todo 执行载荷,返回以下信息
-        // 触发执行载荷“burpsuit” 成功，载荷执行主机“载荷机10.8.12.3”
-        // 主机地址:云主机10.125.100.3 ; 事件:检查到进程新增,进程PID：12489,命令：shell
-        //log表新增初始数据
-        Integer pk = addResultLog(requestData);
-        Map<String, Object> startInstance = outLoadService.startInstance(requestData);
-        Boolean updateResultLog = updateResultLog(pk, startInstance);
-        if(!updateResultLog){
-            return null;
-        }
-        JSONObject result = new JSONObject();
-        return startInstance;
     }
 
     private Integer addResultLog(JSONObject requestData){

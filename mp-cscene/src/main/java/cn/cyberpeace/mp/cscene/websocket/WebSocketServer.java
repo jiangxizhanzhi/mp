@@ -39,9 +39,9 @@ public class WebSocketServer {
             sessionPools.put(session, this);
             addOnlineCount();
             System.out.println(param + "加入webSocket! 当前人数为" + onlineNum);
-            LoadServiceImpl bean = BeanCommon.getBean(LoadServiceImpl.class);
-            bean.synchronousData(session);
-        } catch (IOException e) {
+//            LoadServiceImpl bean = BeanCommon.getBean(LoadServiceImpl.class);
+//            bean.synchronousData(session);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
