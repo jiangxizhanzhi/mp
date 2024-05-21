@@ -31,7 +31,11 @@ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaNodeConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
+import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneConfigAreaModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
@@ -238,9 +242,7 @@ public class CsceneController implements BaseModelListControllerBase {
         var templateSceneConfig = sceneConfigService.get(templateId, false, null, null).getSource();
         this.removeId(templateSceneConfig);
         this.updateOldId(templateSceneConfig);
-        if (StringUtils.isNotEmpty(request.getAreaId())) {
-            this.modifyAreaId(templateSceneConfig, request.getAreaId());
-        }
+        this.modifyAreaId(templateSceneConfig, request.getAreaId());
         this.mergeSceneConfig(originSceneConfig, templateSceneConfig);
         sceneConfigService.sync(originSceneConfig, false, null);
         var res = sceneConfigService.get(id, true, request.getAreaId(), null).getSource();
@@ -252,16 +254,17 @@ public class CsceneController implements BaseModelListControllerBase {
 
     private void modifyAreaId(SceneConfigDataBO sceneConfigDataBO, String areaId) {
         if (Objects.nonNull(sceneConfigDataBO) && Objects.nonNull(sceneConfigDataBO.getTopology())) {
-            sceneConfigDataBO.getTopology().getAreas().forEach(sceneConfigAreaBO -> {
+            for (SceneConfigAreaBO sceneConfigAreaBO : sceneConfigDataBO.getTopology().getAreas()) {
+                // 只需要改变模板中的第一层拓扑
                 if (StringUtils.isEmpty(sceneConfigAreaBO.getArea())) {
                     sceneConfigAreaBO.setArea(areaId);
                 }
-            });
-            sceneConfigDataBO.getTopology().getElements().forEach(sceneConfigElementBO -> {
+            }
+            for (SceneConfigElementBO sceneConfigElementBO : sceneConfigDataBO.getTopology().getElements()) {
                 if (StringUtils.isEmpty(sceneConfigElementBO.getArea())) {
                     sceneConfigElementBO.setArea(areaId);
                 }
-            });
+            }
         }
     }
 
@@ -300,7 +303,6 @@ public class CsceneController implements BaseModelListControllerBase {
     }
 
     private void updateOldId(SceneConfigDataBO sceneConfigDataBO) {
-        Map<String, String> oldId2New = new HashMap<>();
         if (Objects.isNull(sceneConfigDataBO)) {
             return;
         }
@@ -308,76 +310,112 @@ public class CsceneController implements BaseModelListControllerBase {
 
         if (Objects.nonNull(sceneConfigDataBO.getTopology())) {
             var topology = sceneConfigDataBO.getTopology();
-            topology.getAreas().forEach(a -> {
-                String nodeId = TextUtils.uuid();
-                oldId2New.put(a.getId(), nodeId);
-                a.setId(nodeId);
-            });
-            topology.getAreas().forEach(a -> a.setArea(oldId2New.get(a.getArea())));
-            topology.getElements().forEach(e -> {
+            // 构建area的新老id映射
+            Map<String, String> idMap = new HashMap<>();
+            idMap.put("","");
+            for (SceneConfigAreaBO sceneConfigAreaBO : topology.getAreas()) {
+                if (StringUtils.isNotEmpty(sceneConfigAreaBO.getId())) {
+                    String nodeId = TextUtils.uuid();
+                    idMap.put(sceneConfigAreaBO.getId(), nodeId);
+                }
+            }
+
+            // 构建element的新老id映射
+            for (SceneConfigElementBO sceneConfigElementBO : topology.getElements()) {
+                if (StringUtils.isNotEmpty(sceneConfigElementBO.getId())) {
+                    String oldNodeId = sceneConfigElementBO.getId();
+                    String nodeId = TextUtils.uuid();
+                    idMap.put(oldNodeId, nodeId);
+                    if (CollectionUtils.isNotEmpty(sceneConfigElementBO.getPorts())) {
+                        for (var p : sceneConfigElementBO.getPorts()) {
+                            idMap.put(p.getId(), p.getId().replace(oldNodeId, nodeId));
+                        }
+                    }
+                }
+            }
+
+            // 替换area为新的id
+            for (SceneConfigAreaBO a : topology.getAreas()) {
+                a.setId(idMap.get(a.getId()));
+                a.setArea(idMap.get(a.getArea()));
+            }
+
+            // 替换element为新的id
+            for (SceneConfigElementBO e : topology.getElements()) {
                 String oldNodeId = e.getId();
-                String newNodeId = TextUtils.uuid();
-                oldId2New.put(oldNodeId, newNodeId);
+                String newNodeId = idMap.get(oldNodeId);
+                String oldAreaId = e.getArea();
+                String newAreaId = idMap.get(oldAreaId);
                 e.setId(newNodeId);
-                e.setArea(oldId2New.get(e.getArea()));
+                e.setArea(newAreaId);
                 if (!e.getOuterPosition2().isEmpty()) {
                     Map<String, String> newOuterPosition2 = new HashMap<>();
-                    e.getOuterPosition2().forEach((area, position2) -> newOuterPosition2.put(oldId2New.get(area), position2));
+                    for (Map.Entry<String, String> entry : e.getOuterPosition2().entrySet()) {
+                        String area = entry.getKey();
+                        String position2 = entry.getValue();
+                        newOuterPosition2.put(idMap.get(area), position2);
+                    }
                     e.setOuterPosition2(newOuterPosition2);
                 }
-                if (CollectionUtils.isEmpty(e.getPorts())) {
-                    return;
+                if (CollectionUtils.isNotEmpty(e.getPorts())) {
+                    for (var p : e.getPorts()) {
+                        p.setId(idMap.get(p.getId()));
+                    }
                 }
-                for (var p : e.getPorts()) {
-                    String portId = p.getId().replace(oldNodeId, newNodeId);
-                    oldId2New.put(p.getId(), portId);
-                    p.setId(portId);
-                }
-            });
-            topology.getConnections().forEach(c -> {
+            }
+
+            Map<String, String> connectionIdMap = new HashMap<>();
+            for (SceneConfigElementPortConnectionBO c : topology.getConnections()) {
                 String nodeId = TextUtils.uuid();
-                oldId2New.put(c.getId(), nodeId);
+                connectionIdMap.put(c.getId(), nodeId);
                 c.setId(nodeId);
-                c.setSource(oldId2New.get(c.getSource()));
-                c.setTarget(oldId2New.get(c.getTarget()));
-            });
-            topology.getNodeConnections().forEach(nc -> {
+                c.setSource(idMap.get(c.getSource()));
+                c.setTarget(idMap.get(c.getTarget()));
+            }
+
+            Map<String,String> nodeConnectionIdMap = new HashMap<>();
+            for (SceneConfigAreaNodeConnectionBO nc : topology.getNodeConnections()) {
                 String nodeId = TextUtils.uuid();
-                oldId2New.put(nc.getId(), nodeId);
+                nodeConnectionIdMap.put(nc.getId(), nodeId);
                 nc.setId(nodeId);
 
                 String sourceNodeId = parseNodeId(nc.getSourceNodeId());
-                String newSourceNodeId = oldId2New.get(sourceNodeId);
+                String newSourceNodeId = idMap.get(sourceNodeId);
                 String targetNodeId = parseNodeId(nc.getTargetNodeId());
-                String newTargetNodeId = oldId2New.get(targetNodeId);
+                String newTargetNodeId = idMap.get(targetNodeId);
 
                 nc.setSource(nc.getSource().replace(sourceNodeId, newSourceNodeId));
                 nc.setTarget(nc.getTarget().replace(targetNodeId, newTargetNodeId));
-            });
-        }
-        if (sceneConfigDataBO.getPlugins() != null) {
-            sceneConfigDataBO.getPlugins().values().forEach(scenePluginDataBO -> {
-                if (Objects.nonNull(scenePluginDataBO.getElements()) && !scenePluginDataBO.getElements().isEmpty()) {
-                    var elementMap = scenePluginDataBO.getElements();
-                    oldId2New.forEach((oldId, newId) -> {
-                        if (Objects.isNull(elementMap.get(oldId))) {
-                            return;
+            }
+
+            if (sceneConfigDataBO.getPlugins() != null) {
+                for (ScenePluginDataBO scenePluginDataBO : sceneConfigDataBO.getPlugins().values()) {
+                    if (Objects.nonNull(scenePluginDataBO.getElements()) && !scenePluginDataBO.getElements()
+                            .isEmpty()) {
+                        var elementMap = scenePluginDataBO.getElements();
+                        for (Map.Entry<String, String> entry : idMap.entrySet()) {
+                            String oldId = entry.getKey();
+                            String newId = entry.getValue();
+                            var value = elementMap.remove(oldId);
+                            if (value != null) {
+                                elementMap.put(newId, value);
+                            }
                         }
-                        elementMap.put(newId, elementMap.get(oldId));
-                        elementMap.remove(oldId);
-                    });
-                }
-                if (Objects.nonNull(scenePluginDataBO.getElementPorts()) && !scenePluginDataBO.getElementPorts().isEmpty()) {
-                    var portMap = scenePluginDataBO.getElementPorts();
-                    oldId2New.forEach((oldId, newId) -> {
-                        if (Objects.isNull(portMap.get(oldId))) {
-                            return;
+                    }
+                    if (Objects.nonNull(scenePluginDataBO.getElementPorts()) && !scenePluginDataBO.getElementPorts()
+                            .isEmpty()) {
+                        var portMap = scenePluginDataBO.getElementPorts();
+                        for (Map.Entry<String, String> entry : idMap.entrySet()) {
+                            String oldId = entry.getKey();
+                            String newId = entry.getValue();
+                            var value = portMap.remove(oldId);
+                            if (value != null) {
+                                portMap.put(newId, value);
+                            }
                         }
-                        portMap.put(newId, portMap.get(oldId));
-                        portMap.remove(oldId);
-                    });
+                    }
                 }
-            });
+            }
         }
     }
 

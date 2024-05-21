@@ -78,16 +78,20 @@ public abstract class BasePluginHandler<TSceneBO, TPluginSceneElementBO, TPlugin
 
         Map<String, Map<String, Object>> elementMapSrc = pluginData.getElements();
         if (elementMapSrc != null) {
-            elementMapSrc.forEach((nodeId, elementData) -> {
+            for (Map.Entry<String, Map<String, Object>> entry : elementMapSrc.entrySet()) {
+                String nodeId = entry.getKey();
+                Map<String, Object> elementData = entry.getValue();
                 elementMap.put(nodeId, JsonCommon.snakeMapToBean(elementData, elementBOClass));
-            });
+            }
         }
 
         Map<String, Map<String, Object>> elementPortMapSrc = pluginData.getElementPorts();
         if (elementPortMapSrc != null) {
-            elementPortMapSrc.forEach((portId, elementPortData) -> {
+            for (Map.Entry<String, Map<String, Object>> entry : elementPortMapSrc.entrySet()) {
+                String portId = entry.getKey();
+                Map<String, Object> elementPortData = entry.getValue();
                 elementPortMap.put(portId, JsonCommon.snakeMapToBean(elementPortData, elementPortBOClass));
-            });
+            }
         }
 
         // 验证数据字段
