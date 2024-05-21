@@ -195,6 +195,8 @@ public class ImagesController {
         } else {
             imagesByIdVO.setAllowChangeIso(true);
         }
+        imagesByIdVO.setModelId(model.getModelId());
+        imagesByIdVO.setModelCode(model.getModelCode());
         return new Result<>(imagesByIdVO);
     }
 

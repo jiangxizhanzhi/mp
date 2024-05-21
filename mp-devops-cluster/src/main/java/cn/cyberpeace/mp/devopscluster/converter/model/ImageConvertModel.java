@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devopscluster.converter.model;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -145,5 +146,15 @@ public class ImageConvertModel extends BasePageConvertModel{
      * 靶标创建用户名称
      */
     private String createUserName;
+
+    /**
+     * 模型ID
+     */
+    private String modelId;
+
+    /**
+     * 模型CODE
+     */
+    private String modelCode;
 
 }

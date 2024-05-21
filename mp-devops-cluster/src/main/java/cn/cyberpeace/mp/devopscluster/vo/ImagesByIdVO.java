@@ -137,4 +137,9 @@ public class ImagesByIdVO extends BaseVO {
      */
     @ApiModelProperty(value = "容器信息")
     private ExtDocker extDocker;
+
+    @ApiModelProperty("模型ID")
+    private String modelId;
+    @ApiModelProperty("模型Code")
+    private String modelCode;
 }
