@@ -590,7 +590,9 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
     @ApiOperation(value = "导入场景模板")
-    @ApiImplicitParam(name = "importTemplateBO", value = "请求体", dataTypeClass = ImportTemplateBO.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "importTemplateBO", value = "请求体", dataTypeClass = ImportTemplateBO.class)
+    })
     @PostMapping("/import_template")
     public ServiceResult<CsceneBO> importTemplate(ImportTemplateBO importTemplateBO) {
         InputStream inputStream = null;
