@@ -540,7 +540,7 @@ public class CsceneController implements BaseModelListControllerBase {
         csceneBO.setName(createTemplateBO.getName());
         csceneBO.getSceneConfig().getTopology().getScene().setName(createTemplateBO.getName());
         csceneBO.getSceneConfig().getTopology().getScene().setDescription(createTemplateBO.getDescription());
-        csceneBO.setType(1);
+        csceneBO.setType(CsceneModel.Type.TEMPLATE);
         csceneBO.setId(null);
         CsceneDataModifier.removeEidWhenCreate(csceneBO);
         modelService.sync(csceneBO, null, false);
