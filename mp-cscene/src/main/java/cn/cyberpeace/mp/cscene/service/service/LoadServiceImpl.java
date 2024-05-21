@@ -125,6 +125,15 @@ public class LoadServiceImpl {
 
         //同步设置
         MpDevopsLoadSource synchronousDataSource = getSynchronousDataSource(new JSONObject());
+        if(synchronousDataSource == null){
+            if(isNeedMessage){
+                //给所有当前登录的session推送消息
+                WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
+                    sendMessage(webSocketServer, session, jsonObject, data, 1, "获取载荷平台ip失败,会话关闭！", false);
+                });
+            }
+            return null;
+        }
 
         if(isNeedMessage){
             //给所有当前登录的session推送消息
@@ -197,6 +206,13 @@ public class LoadServiceImpl {
             }
         }
 
+        //睡眠两秒
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         if(isNeedMessage){
             WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
                 data.put("stage3","载荷数据入库成功！");
@@ -220,10 +236,13 @@ public class LoadServiceImpl {
         Map jsonObject = new LinkedHashMap<>();
         jsonObject.put("code", "MP-synchronousData-by-outService");
         Map data = new LinkedHashMap<>();
-
+        WebSocketServer webSocketServer = WebSocketServer.sessionPools.get(session);
         //同步设置获取
         MpDevopsLoadSource synchronousDataSource = getSynchronousDataSource(new JSONObject());
-        WebSocketServer webSocketServer = WebSocketServer.sessionPools.get(session);
+        if(synchronousDataSource == null){
+            sendMessage(webSocketServer, session, jsonObject, data, 1, "获取载荷平台ip失败,会话关闭！", false);
+        }
+
         sendMessage(webSocketServer, session, jsonObject, data, 1, "正在连接载荷管理机:"+synchronousDataSource.getIp()+"......成功", true);
         try {
             Thread.sleep(500);
