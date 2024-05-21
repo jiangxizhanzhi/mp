@@ -10,7 +10,13 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.cscene.bo.*;
+import cn.cyberpeace.mp.cscene.bo.CreateTemplateBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneAuthorizeBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneStat;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.bo.SceneAreaTreeBO;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.AreaUpdateRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
@@ -507,7 +513,7 @@ public class CsceneController implements BaseModelListControllerBase {
     }
 
     @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
-    @ApiOperation(value = "保存（创建/更新）场景模板", notes = "请忽略test_scenes和app_scenes字段")
+    @ApiOperation(value = "保存（创建/更新）场景", notes = "请忽略test_scenes和app_scenes字段")
     @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
     @PostMapping("/sync")
     public ServiceResult<CsceneBO> sync(@RequestBody CsceneBO csceneBO) {
@@ -523,6 +529,22 @@ public class CsceneController implements BaseModelListControllerBase {
             }
         }
         return result;
+    }
+
+    @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
+    @ApiOperation(value = "创建场景模板")
+    @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
+    @PostMapping("/sync_template")
+    public ServiceResult<CsceneBO> syncTemplate(@RequestBody CreateTemplateBO createTemplateBO) {
+        var csceneBO = modelService.getById(createTemplateBO.getId(), null, false, null).getSource();
+        csceneBO.setName(createTemplateBO.getName());
+        csceneBO.getSceneConfig().getTopology().getScene().setName(createTemplateBO.getName());
+        csceneBO.getSceneConfig().getTopology().getScene().setDescription(createTemplateBO.getDescription());
+        csceneBO.setType(1);
+        csceneBO.setId(null);
+        CsceneDataModifier.removeEidWhenCreate(csceneBO);
+        modelService.sync(csceneBO, null, false);
+        return new ServiceResult<>(csceneBO).asResult();
     }
 
     @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
