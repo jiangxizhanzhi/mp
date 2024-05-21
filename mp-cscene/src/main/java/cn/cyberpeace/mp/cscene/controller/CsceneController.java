@@ -571,7 +571,7 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
     @ApiOperation(value = "创建场景模板")
-    @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
+    @ApiImplicitParam(name = "createTemplateBO", value = "请求体", dataTypeClass = CreateTemplateBO.class)
     @PostMapping("/create_template")
     public ServiceResult<CsceneBO> syncTemplate(@RequestBody CreateTemplateBO createTemplateBO) {
         var csceneBO = modelService.getById(createTemplateBO.getId(), null, false, null).getSource();
