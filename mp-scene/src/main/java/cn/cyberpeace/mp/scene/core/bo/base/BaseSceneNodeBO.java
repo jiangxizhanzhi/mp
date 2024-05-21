@@ -50,7 +50,6 @@ public abstract class BaseSceneNodeBO<M extends BaseSceneNodeModel, T extends Ba
         obj.setNodeId(id);
         obj.setId(this.getEid());
         if (outerPosition2 != null) {
-            System.out.println(outerPosition2);
             obj.setOuterPosition2(JsonCommon.stringify(outerPosition2));
         }
         return obj;
