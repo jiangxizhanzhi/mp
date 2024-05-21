@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaNodeConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
@@ -56,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @Description
@@ -304,6 +304,8 @@ public class CsceneDataModifier {
                 List<SceneConfigElementPortConnectionBO> connectionBOS = csceneBO.getSceneConfig().getTopology().getConnections();
                 List<SceneConfigAreaBO> areaBOS = csceneBO.getSceneConfig().getTopology().getAreas();
                 List<SceneConfigPieceBO> pieceBOS = csceneBO.getSceneConfig().getTopology().getPieces();
+                List<SceneConfigAreaNodeConnectionBO> nodeConnectionBOS = csceneBO.getSceneConfig().getTopology()
+                        .getNodeConnections();
                 List<CsceneRoleBO> roles = csceneBO.getRoles();
                 if (CollectionUtils.isNotEmpty(elementBOS)) {
                     for (SceneConfigElementBO bo : elementBOS) {
@@ -338,6 +340,11 @@ public class CsceneDataModifier {
                                 ch.setId(null);
                             }
                         }
+                    }
+                }
+                if(CollectionUtils.isNotEmpty(nodeConnectionBOS)){
+                    for (SceneConfigAreaNodeConnectionBO n : nodeConnectionBOS) {
+                        n.setEid(null);
                     }
                 }
             }
