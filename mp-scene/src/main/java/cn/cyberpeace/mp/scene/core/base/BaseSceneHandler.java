@@ -570,7 +570,7 @@ public abstract class BaseSceneHandler<
         List<TSceneElementPortConnectionModel> existsPortConnections = readElementPortConnectionsByNodeEids(outerNodeEids);
         Map<String, TSceneElementPortConnectionModel> existsPortConnectionsMap = new HashMap<>();
         for (TSceneElementPortConnectionModel e : existsPortConnections) {
-            existsPortConnectionsMap.put(e.getId(), e);
+            existsPortConnectionsMap.put(elementPortConnectionKey(e), e);
         }
 
         Map<String, TSceneElementPortConnectionModel> saveingPortConnectionsMap = new HashMap<>();
