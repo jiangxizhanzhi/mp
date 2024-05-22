@@ -118,12 +118,8 @@ public class SnapshotConverter {
      */
     public void create(SnapshotRequest request) {
         ScenariosSnapshot snapshotCreate = new ScenariosSnapshot();
-        snapshotCreate.setDeviceUuid(request.getUuid());
+        snapshotCreate.setInstanceUuid(request.getInstanceUuid());
         snapshotCreate.setImageType(request.getImageType());
-        if (StringUtils.isNotEmpty(request.getName())) {
-            request.setName(request.getName().trim());
-        }
-        snapshotCreate.setName(request.getName());
         snapshotCreate.setDescription(request.getDescription());
         scenariosService.create(snapshotCreate);
     }

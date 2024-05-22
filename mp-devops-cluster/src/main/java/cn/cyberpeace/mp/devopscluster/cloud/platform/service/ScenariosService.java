@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.params.ScenariosSnapshot;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.*;
 import cn.cyberpeace.mp.devopscluster.model.common.ServiceStatus;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +22,8 @@ public class ScenariosService extends BaseCpService {
 
     private static final String DELETE_OR_CREATE_IMAGE_INSTANCE = "/cloud/v1/device/device_instance";
 
-
     private static final String SCENARIOS = "/scenarios";
+    private static final String SNAPSHOT = "/snapshot";
 
     public ScenariosService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
@@ -32,8 +33,19 @@ public class ScenariosService extends BaseCpService {
      * 创建快照
      */
     @Deprecated
-    public BaseCloudPlatformResult create(ScenariosSnapshot snapshotCreate){
-        BaseCloudPlatformResult result = super.sendPost(  BaseCloudPlatformConstant.URL_VERSION + SCENARIOS + "/device_snapshot", JsonUtils.snakeStringify(snapshotCreate), BaseCloudPlatformResult.class);
+    public BaseCloudPlatformResult  create(ScenariosSnapshot snapshotCreate){
+
+        String url = BaseCloudPlatformConstant.CPCLOUD_URL + BaseCloudPlatformConstant.URL_VERSION;
+        if ("vm".equals(snapshotCreate.getImageType())){
+            url = url + "/vm/" + snapshotCreate.getInstanceUuid() + SNAPSHOT;
+        }else if ("container".equals(snapshotCreate.getImageType())){
+            url = url + "/container/" + snapshotCreate.getInstanceUuid() + SNAPSHOT;
+        }
+
+        // 新平台只需要快照描述信息
+        JSONObject messageJson = new JSONObject();
+        messageJson.put("description", snapshotCreate.getDescription());
+        BaseCloudPlatformResult result = super.sendPost(url, messageJson.toJSONString(), BaseCloudPlatformResult.class);
         super.checkResult(result);
         return result;
     }

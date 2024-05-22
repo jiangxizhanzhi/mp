@@ -11,22 +11,16 @@ import lombok.NoArgsConstructor;
 public class SnapshotRequest {
 
     /**
-     * 镜像ID
+     * 虚拟机/容器ID
      */
-    @ApiModelProperty(value = "镜像ID")
-    private String uuid;
+    @ApiModelProperty(value = "虚拟机/容器ID")
+    private String instanceUuid;
 
     /**
      * 镜像类型
      */
     @ApiModelProperty(value = "镜像类型")
     private String imageType;
-
-    /**
-     * 名称
-     */
-    @ApiModelProperty(value = "镜像名称")
-    private String name;
 
     /**
      * 描述
