@@ -20,6 +20,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -75,7 +76,7 @@ public class NetworkTrafficGroupService {
         }
         JSONArray networkList = (JSONArray) JSONPath.eval(JSON.parse(result), "$.data.list");
         AtomicReference<String> containerId = new AtomicReference<>("");
-        networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> groupId.equals(json.get("name"))).findFirst().ifPresent(container ->{
+        networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> groupId.equals(json.get("name"))).findFirst().ifPresent(container -> {
             containerId.set((String) container.get("id"));
         });
 
@@ -89,7 +90,7 @@ public class NetworkTrafficGroupService {
             HttpUtils.sendDelete(deleteUrl, deleteParam.toJSONString());
 
         } catch (IOException e) {
-            log.error("deleete  arkime Image instance error, {}",ExceptionUtils.getStackTrace(e));
+            log.error("deleete  arkime Image instance error, {}", ExceptionUtils.getStackTrace(e));
             log.error(SituationalAwareErrorCode.ARKIME_DELETE_ERROR.getMessage(), ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_DELETE_ERROR, ExceptionUtils.getStackTrace(e));
         }
@@ -150,11 +151,11 @@ public class NetworkTrafficGroupService {
         paramObject.put("privileged", true);
 
         try {
-            log.info("create arkime Image instance param {}",paramObject.toJSONString());
+            log.info("create arkime Image instance param {}", paramObject.toJSONString());
             var result = HttpUtils.sendPost(url, paramObject.toJSONString());
-            BaseCloudPlatformResult  model = JsonUtils.toSnakeObject(result, BaseCloudPlatformResult.class);
-            if (Objects.isNull(model) || !model.getCode().equals("0")){
-                throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR,model.getMessage());
+            BaseCloudPlatformResult model = JsonUtils.toSnakeObject(result, BaseCloudPlatformResult.class);
+            if (Objects.isNull(model) || !model.getCode().equals("0")) {
+                throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR, model.getMessage());
             }
             log.info("create arkime Image instance res {}", result);
         } catch (Exception e) {
@@ -165,6 +166,7 @@ public class NetworkTrafficGroupService {
 
     /**
      * 场景绑定流量镜像
+     *
      * @param networkTrafficMirrorRequest
      */
     public void doBindingEntityNetworkTrafficMirror(NetworkTrafficMirrorRequest networkTrafficMirrorRequest) {
@@ -185,6 +187,7 @@ public class NetworkTrafficGroupService {
 
     /**
      * 场景绑定流量镜像
+     *
      * @param networkTrafficMirrorRequest
      */
     public void doBindingNetworkTrafficMirror(NetworkTrafficMirrorRequest networkTrafficMirrorRequest) {
@@ -209,6 +212,7 @@ public class NetworkTrafficGroupService {
 
     /**
      * 接触场景绑定流量镜像
+     *
      * @param networkTrafficMirrorRequest
      */
     public void deleteNetworkTrafficMirror(NetworkTrafficMirrorRequest networkTrafficMirrorRequest) {
@@ -223,7 +227,7 @@ public class NetworkTrafficGroupService {
         }
         paramObject.put("dst_node", dstNodes);
         try {
-            String res  = HttpUtils.sendDelete(url, paramObject.toJSONString());
+            String res = HttpUtils.sendDelete(url, paramObject.toJSONString());
             log.info("delete Network traffic mirror message {}", res);
         } catch (IOException e) {
             log.error("binding mirror error param:{}, {}", networkTrafficMirrorRequest, ExceptionUtils.getStackTrace(e));
@@ -251,5 +255,19 @@ public class NetworkTrafficGroupService {
             log.error("binding mirror error param:{}, {}", networkTrafficMirrorRequest, ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(SituationalAwareErrorCode.BINDING_MIRROR_ERROR, ExceptionUtils.getStackTrace(e));
         }
+    }
+
+    public HashMap<String, String> getArkimeEnvironment(String instanceId) {
+        //设置环境变量
+        HashMap<String, String> environment = new HashMap<>();
+
+        environment.put("SIC_ARKIME_ELASTICSEARCH", "http://" + situationAwareConfig.getArkimeEsHost() + ":" + situationAwareConfig.getArkimeEsPort());
+        environment.put("SIC_ARKIME_INSTALL_DIR", "/opt/arkime");
+        environment.put("SIC_ARKIME_ELASTICSEARCH_PREFIX", instanceId);
+
+        environment.put("ES_HOST", situationAwareConfig.getArkimeEsHost());
+        environment.put("ES_PORT", situationAwareConfig.getArkimeEsPort());
+        environment.put("ES_PREFIX", instanceId);
+        return environment;
     }
 }
