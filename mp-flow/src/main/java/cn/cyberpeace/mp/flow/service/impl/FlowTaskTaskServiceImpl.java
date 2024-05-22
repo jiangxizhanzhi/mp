@@ -340,12 +340,21 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                 networks.add(network);
             }
             object.put("network_infos", networks);
-            String pcapRsp = HttpUtils.sendPost(hostUrl + "/network/init", object.toJSONString());
-            JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
-            log.info("init network response:{}", jsonObject.toJSONString());
-            if (!ResponseUtils.checkResponse(jsonObject)) {
-                log.error("init network fail!");
-                isSuccess = false;
+            for (int i = 0; i < 10; i++) {
+                try {
+                    String pcapRsp = HttpUtils.sendPost(hostUrl + "/network/init", object.toJSONString());
+                    JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
+                    log.info("init network response:{}", jsonObject.toJSONString());
+                    if (!ResponseUtils.checkResponse(jsonObject)) {
+                        log.error("init network fail!");
+                        isSuccess = false;
+                        Thread.sleep(10);
+                    } else {
+                        break;
+                    }
+                }catch (Exception e){
+                    log.error("init network error at {}", i, e.getMessage());
+                }
             }
         } catch (Exception e) {
             log.error("init network error!", e);
