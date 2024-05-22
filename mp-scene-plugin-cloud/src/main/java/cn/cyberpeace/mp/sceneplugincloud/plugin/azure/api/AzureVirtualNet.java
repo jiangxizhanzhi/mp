@@ -56,14 +56,33 @@ public class AzureVirtualNet {
                         .withAddressSpace(entry.getKey())
                         .withSubnet(IpUtils.extractNetworkPart(entry.getKey()), entry.getKey());
             }
-
         }
+//        创建arkime子网
+        String unused192Cidr = findUnused192Cidr(cidrContainerMap);
+        createdNet
+                .withAddressSpace(unused192Cidr)
+                .defineSubnet("containerSub")
+                .withAddressPrefix(unused192Cidr)
+                .withDelegation("Microsoft.ContainerInstance/containerGroups")
+                .attach();
         Network network = createdNet.create();
 
 
         // azure todo 回写网络id
         net.setResourceId(network.id());
 //        }
+    }
+
+    public static String findUnused192Cidr(ConcurrentHashMap<String, Boolean> cidrContainerMap) {
+        for (int i = 1; i <= 255; i++) {
+            for (int j = 0; j <= 255; j++) {
+                String cidr = "192.168." + i + "." + j + "/24";
+                if (!cidrContainerMap.containsKey(cidr)) {
+                    return cidr;
+                }
+            }
+        }
+        return null; // 如果没有找到符合条件的CIDR
     }
 
     public void delete(CloudPluginSceneElementBO cloudElement) {

@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.flowcollect;
 
-import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.cyberpeace.mp.sceneplugincollection.util.resourcename.ICollectionResourceName;
 import cn.cyberpeace.mp.situationaware.model.NetworkTrafficMirrorRequest;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficGroupService;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficService;
@@ -9,6 +7,7 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
 
 @Data
@@ -47,7 +46,7 @@ public class FlowCollector {
         networkTrafficGroupService.doBindingNetworkTrafficMirror(request);
     }
 
-    public void bindNetworkPorts(String sceneId, String collectorId, List<String> vmInstanceIds, List<String> containerInstanceIds,boolean entity) {
+    public void bindNetworkPorts(String sceneId, String collectorId, List<String> vmInstanceIds, List<String> containerInstanceIds, boolean entity) {
         var request = new NetworkTrafficMirrorRequest();
         request.setArkimeInstanceNames(List.of(collectorId));
         request.setVmInstanceIds(vmInstanceIds);
@@ -79,4 +78,7 @@ public class FlowCollector {
         networkTrafficGroupService.deleteNetworkTrafficMirror(request);
     }
 
+    protected HashMap<String, String> getArkimeEnvironment(String arkimePrefixId) {
+        return networkTrafficGroupService.getArkimeEnvironment(arkimePrefixId);
+    }
 }

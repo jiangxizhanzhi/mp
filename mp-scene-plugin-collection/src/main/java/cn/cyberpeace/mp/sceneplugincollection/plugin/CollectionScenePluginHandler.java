@@ -4,20 +4,17 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.CreateHandler;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.DeleteHandler;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.ElementCreateHandler;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.InitiateHandler;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.PrepareHandler;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.lifecyclehandler.AzureCreateHandle;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.*;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.modelhandler.CollectionScenePluginModelHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhCommon;
 import lombok.Data;
 import org.springframework.stereotype.Component;
-
 
 
 @ClassFieldClasses({
@@ -37,7 +34,7 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
     private InitiateHandler initiateHandler;
     private CreateHandler createHandler;
     private DeleteHandler deleteHandler;
-    private ElementCreateHandler elementCreateHandler ;
+    private ElementCreateHandler elementCreateHandler;
     private PrepareHandler prepareHandler;
 
     @Override
@@ -50,9 +47,16 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
     @Override
     public void initBase() {
         super.initBase();
+        Integer cloudType = getSceneHandler().getScene().getCloudType();
         pluginModelHandler = new CollectionScenePluginModelHandler(this);
         initiateHandler = new InitiateHandler(this);
-        createHandler = new CreateHandler(this);
+
+        if (cloudType == null || cloudType == BaseSceneModel.CloudType.DEFAULT) {
+            createHandler = new CreateHandler(this);
+        } else {
+            createHandler = new AzureCreateHandle(cloudType, this);
+        }
+
         deleteHandler = new DeleteHandler(this);
         prepareHandler = new PrepareHandler(this);
     }

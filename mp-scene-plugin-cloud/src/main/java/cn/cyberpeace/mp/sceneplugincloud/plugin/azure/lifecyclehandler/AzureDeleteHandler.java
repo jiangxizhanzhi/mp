@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.createtasks.LoadCreateTask;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.deletetasks.LoadDeleteTask;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.DeleteHandler;
@@ -86,8 +85,8 @@ public class AzureDeleteHandler extends DeleteHandler {
 //        if (!deleteAuxiliaryNetworkTasks.isEmpty()) {
 //            runSceneProgress(SceneProcess.DELETE_AUXILIARY_NETWORKS, () -> runTasks(deleteAuxiliaryNetworkTasks));
 //        }
-//        删除载荷
 
+//        删除载荷
         List<CloudPluginSceneElementBO> allElements = new ArrayList<>(getPluginHandler().getElementMap().values());
         List<CloudPluginSceneElementBO> filteredLoadElements = filterLoadElements(allElements);
         List<Runnable> deleteLoadTasks = new ArrayList<>();
@@ -102,8 +101,8 @@ public class AzureDeleteHandler extends DeleteHandler {
         }
 
         // 最后删除资源组 TODO 测试载荷暂时去除
-        /*String groupName = getPluginHandler().getSourceSceneId();
-        resourceService.getManager().resourceGroups().deleteByName(groupName);*/
+        String groupName = getPluginHandler().getSourceSceneId();
+        resourceService.getManager().resourceGroups().deleteByName(groupName);
     }
 
     private Runnable formatElementTask(String nodeId, int stepPercentage, EventProcess elementProcess, Runnable action) {
@@ -133,6 +132,7 @@ public class AzureDeleteHandler extends DeleteHandler {
         }
         return filterElements;
     }
+
     private List<CloudPluginSceneElementBO> filterVirtualMachineElements(List<CloudPluginSceneElementBO> allElements) {
         List<CloudPluginSceneElementBO> filterElements = new ArrayList<>();
         for (var c : allElements) {

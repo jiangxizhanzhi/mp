@@ -15,7 +15,9 @@ import com.azure.resourcemanager.containerregistry.models.Registry;
 import com.azure.resourcemanager.containerregistry.models.RegistryCredentials;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AzureContainer {
     private IAzureResourceManager resourceService;
@@ -40,25 +42,34 @@ public class AzureContainer {
         // 调用微软云api 创建虚拟机 回写虚拟机id
         // 虚拟机镜像、名称等信息
 //        容器名中只能包含-字符
-        String containerName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid()).replace("_", "-").toLowerCase();
-        String containerGroupName = cloudElement.getSrcElement().getEid();
+        String containerName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
+        String containerGroupName = cloudElement.getSrcElement().getEid().replace("_", "-").toLowerCase();
 
-//        TODO 注册表信息如何获取 是否只使用一个祖册表 多个注册表是否在同一个资源组 若不在容器镜像参数要包含资源组、注册表名、等信息
+        ContainerGroup container = creatContainer(cloudElement.getImage(), virtualNics, networkId, subnetName, groupName, containerName, containerGroupName, new HashMap());
+
+        cloudElement.setResourceId(container.id());
+    }
+
+    public ContainerGroup creatContainer(String image, List<VirtualNic> virtualNics, String networkId,
+                                         String subnetName, String groupName, String containerName,
+                                         String containerGroupName, Map environment) {
+        //        TODO 注册表信息如何获取 是否只使用一个祖册表 多个注册表是否在同一个资源组 若不在容器镜像参数要包含资源组、注册表名、等信息
         Registry registrytest0407 = azureResourceManager.containerRegistries().getByResourceGroup("container-registry", "registrytest0407");
         RegistryCredentials acrCredentials = registrytest0407.getCredentials();
 //        String imageName = cloudElement.getImage();
 //        String imageName = registrytest0407.loginServerUrl() + "/samples/" + "nginx";
-        String imageName = registrytest0407.loginServerUrl() + "/" + cloudElement.getImage();
+        String imageName = registrytest0407.loginServerUrl() + "/" + image;
+
         ContainerGroup container = azureResourceManager
                 .containerGroups()
-                .define(containerGroupName)
+                .define(containerName)
                 .withRegion(this.region)
                 .withNewResourceGroup(groupName)
                 .withLinux()
 //                .withPublicImageRegistryOnly()
                 .withPrivateImageRegistry(registrytest0407.loginServerUrl(), acrCredentials.username(), acrCredentials.accessKeys().get(AccessKeyType.PRIMARY))
                 .withoutVolume()
-                .defineContainerInstance(containerName)
+                .defineContainerInstance(containerGroupName)
 //                TODO 前端未传先写死
                 .withImage(imageName)
                 .withExternalTcpPort(80)
@@ -66,6 +77,8 @@ public class AzureContainer {
                 .withMemorySizeInGB(0.8)
 //                    上面的简写方法 默认cpu1 memorySize1.5
 //                .withContainerInstance(imageName, 80)
+//                TODO 配置环境后无法设置网络与创建
+//                .withEnvironmentVariables(environment)
                 .attach()
 //                TODO 设置网络
                 .withNewNetworkProfileOnExistingVirtualNetwork(networkId, subnetName)
@@ -73,11 +86,10 @@ public class AzureContainer {
                 .create();
 
         // azure todo  怎么添加网卡呢?
-        for (var virtualNic1 : virtualNics) {
+/*        for (var virtualNic1 : virtualNics) {
             // azure todo  怎么添加网卡呢?
-        }
-
-        cloudElement.setResourceId(container.id());
+        }*/
+        return container;
     }
 
     public void delete(String instanceId) {

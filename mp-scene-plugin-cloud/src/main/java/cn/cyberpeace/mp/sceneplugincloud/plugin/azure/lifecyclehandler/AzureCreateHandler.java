@@ -9,12 +9,12 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.createtas
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
+import cn.cyberpeace.mp.sceneplugincloud.util.ElementNetworkUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 public class AzureCreateHandler extends CreateHandler {
@@ -43,11 +43,11 @@ public class AzureCreateHandler extends CreateHandler {
 
         int stepPercentage = this.getStepPercentage();
         List<CloudPluginSceneElementBO> allElements = new ArrayList<>(getPluginHandler().getElementMap().values());
-
+ /*
         // 再创建终端 终端分虚拟机、容器、和web服务
         List<Runnable> createTerminalTasks = new ArrayList<>();
         // 载荷
-        List<CloudPluginSceneElementBO> filteredLoadElements = this.filterLoadElements(allElements);
+       List<CloudPluginSceneElementBO> filteredLoadElements = this.filterLoadElements(allElements);
         List<Runnable> createLoadTasks = new ArrayList<>();
         for (CloudPluginSceneElementBO element : filteredLoadElements) {
             String nodeId = element.getSrcElement().getId();
@@ -60,8 +60,7 @@ public class AzureCreateHandler extends CreateHandler {
 
         if (!createTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
-        }
-/* TODO 测试载荷暂时去除
+        }*/
 
         // 创建微软云的资源组
         String groupName = getPluginHandler().getSourceSceneId();
@@ -70,34 +69,9 @@ public class AzureCreateHandler extends CreateHandler {
         // 先创建辅助网络
         List<CloudPluginSceneElementBO> filteredAuxiliaryNetworkElements = this.filterAuxiliaryNetworkElements(allElements);
         List<Runnable> createAuxiliaryNetworkTasks = new ArrayList<>();
-        ConcurrentHashMap<String, Boolean> cidrContainerMap = new ConcurrentHashMap<>();
-//        筛选出所有cidr是否连接容器
-        allElements.forEach(cloudElement -> {
-            cloudElement.getDeriveNetworks().forEach(connectedNetworkBO -> {
-                String cidr = connectedNetworkBO.getNetwork().getCidr();
-                AtomicReference<Boolean> isContainer = new AtomicReference<>(false);
-                connectedNetworkBO
-                        .getToPorts()
-                        .stream()
-                        .filter(sceneElementPortBO -> null != sceneElementPortBO)
-                        .map(sceneElementPortBO -> sceneElementPortBO.getElement().getId())
-                        .forEach(id -> {
-                            // 根据id 从allElements取出对应的element
-                            CloudPluginSceneElementBO cloudElement1 = allElements
-                                    .stream()
-                                    .filter(cloudElement2 -> cloudElement2.getSrcElement().getId().equals(id))
-                                    .findFirst()
-                                    .get();
-                            if (null != cloudElement1) {
-                                if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(cloudElement1.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == cloudElement1.getVirtualType()) {
-                                    isContainer.set(true);
-                                }
-                            }
-                        });
-                cidrContainerMap.put(cidr, isContainer.get());
-            });
+        //筛选出所有cidr是否连接容器
+        ConcurrentHashMap<String, Boolean> cidrContainerMap = ElementNetworkUtils.getCidrContainerMap(allElements);
 
-        });
         if (!filteredAuxiliaryNetworkElements.isEmpty()) {
             String nodeIdd = filteredAuxiliaryNetworkElements.get(0).getSrcElement().getId();
             // 封装创建网络的任务
@@ -169,8 +143,9 @@ public class AzureCreateHandler extends CreateHandler {
 
         if (!createTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
-        }*/
+        }
     }
+
 
     private List<CloudPluginSceneElementBO> filterLoadElements(List<CloudPluginSceneElementBO> allElements) {
         List<CloudPluginSceneElementBO> filterElements = new ArrayList<>();
