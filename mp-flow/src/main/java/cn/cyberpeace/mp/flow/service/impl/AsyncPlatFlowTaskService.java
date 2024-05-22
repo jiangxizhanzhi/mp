@@ -675,7 +675,7 @@ public class AsyncPlatFlowTaskService {
                 // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
                 String finalFixedIp = fixedIp;
                 boolean flag = NetworkUtils.probePort(fixedIp, 22, 1000, 1000,
-                        1000 * 60 * 10, null, 0);
+                        1000 * 60 * 2, null, 0);
                 if (flag) {
                     checkStartTrex(finalFixedIp);
                 } else {
