@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.MapUtils;
 import cn.cyberpeace.mp.base.util.define.ListTreeNode;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneAreaNodeConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
@@ -517,7 +518,7 @@ public abstract class BaseSceneHandler<
     /**
      * 保存当前场景外部数据
      */
-    public void saveOut() {
+    public void saveOut(List<TSceneElementBO> insideAreaElements) {
         if (elementMap.isEmpty()) {
             return;
         }
@@ -567,10 +568,16 @@ public abstract class BaseSceneHandler<
         }
 
         // 更新端口连线
+        Set<String> insideNodeEids = new HashSet<>();
+        for (TSceneElementBO insideAreaElement : insideAreaElements) {
+            insideNodeEids.add(insideAreaElement.getEid());
+        }
         List<TSceneElementPortConnectionModel> existsPortConnections = readElementPortConnectionsByNodeEids(outerNodeEids);
         Map<String, TSceneElementPortConnectionModel> existsPortConnectionsMap = new HashMap<>();
         for (TSceneElementPortConnectionModel e : existsPortConnections) {
-            existsPortConnectionsMap.put(elementPortConnectionKey(e), e);
+            if (insideNodeEids.contains(e.getSourceElement()) || insideNodeEids.contains(e.getTargetElement())) {
+                existsPortConnectionsMap.put(elementPortConnectionKey(e), e);
+            }
         }
 
         Map<String, TSceneElementPortConnectionModel> saveingPortConnectionsMap = new HashMap<>();
