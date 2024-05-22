@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
@@ -50,8 +51,10 @@ import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
@@ -319,36 +322,48 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     })
     @GetMapping("get_by_area")
     public ServiceResult<CsceneInstanceBO> getByArea(@RequestParam String id, @RequestParam(required = false,name = "area_id") String areaId) {
+        if (areaId == null) {
+            areaId = StringUtils.EMPTY;
+        }
         String sceneId = this.modelService.get(id).getSource().getObj().getScene();
+        var csceneBO = getByAreaId(sceneId, areaId);
+        return new ServiceResult<>(csceneBO).asResult();
+    }
+
+    private CsceneInstanceBO getByAreaId(String sceneId, String areaId) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, areaId, true, null);
+        SceneDataBO dataBO = sceneHandler.toData();
 
-        var res = sceneHandler.toData();
+        SceneHandler out = new SceneHandler(sceneId, areaId, true, true);
+        out.reloadOut();
+        SceneDataBO extraSceneConfig = out.toDataV2();
 
-        SceneHandler sceneHandler1 = new SceneHandler(sceneId, areaId, true, true);
-        sceneHandler1.reloadOut();
-        var outNodes = sceneHandler1.toDataV2();
+        this.mergeSceneConfig(dataBO, extraSceneConfig);
+        CsceneInstanceBO csceneBO = new CsceneInstanceBO();
+        csceneBO.setScene(dataBO);
+        CsceneDataModifier.correctReturnCsceneData(csceneBO);
+        return csceneBO;
+    }
 
-        if (Objects.nonNull(res) && Objects.nonNull(outNodes)) {
-            if (Objects.nonNull(res.getTopology()) && Objects.nonNull(outNodes.getTopology())) {
-                res.getTopology().getElements().addAll(outNodes.getTopology().getElements());
-                res.getTopology().getAreas().addAll(outNodes.getTopology().getAreas());
+    private void mergeSceneConfig(SceneDataBO originSceneConfig, SceneDataBO extraSceneConfig) {
+        if (Objects.nonNull(originSceneConfig) && Objects.nonNull(extraSceneConfig)) {
+            if (Objects.nonNull(originSceneConfig.getTopology()) && Objects.nonNull(extraSceneConfig.getTopology())) {
+                originSceneConfig.getTopology().getElements().addAll(extraSceneConfig.getTopology().getElements());
+                originSceneConfig.getTopology().getAreas().addAll(extraSceneConfig.getTopology().getAreas());
+                originSceneConfig.getTopology().getConnections().addAll(extraSceneConfig.getTopology().getConnections());
+                originSceneConfig.getTopology().getNodeConnections().addAll(extraSceneConfig.getTopology().getNodeConnections());
             }
-            if (Objects.nonNull(res.getPlugins()) && Objects.nonNull(outNodes.getPlugins())) {
-                outNodes.getPlugins().forEach(((s, scenePluginDataBO) -> {
-                    if (res.getPlugins().containsKey(s)) {
-                        res.getPlugins().get(s).getElements().putAll(scenePluginDataBO.getElements());
-                        res.getPlugins().get(s).getElementPorts().putAll(scenePluginDataBO.getElementPorts());
+            if (Objects.nonNull(originSceneConfig.getPlugins()) && Objects.nonNull(extraSceneConfig.getPlugins())) {
+                extraSceneConfig.getPlugins().forEach(((s, scenePluginDataBO) -> {
+                    if (originSceneConfig.getPlugins().containsKey(s)) {
+                        originSceneConfig.getPlugins().get(s).getElements().putAll(scenePluginDataBO.getElements());
+                        originSceneConfig.getPlugins().get(s).getElementPorts().putAll(scenePluginDataBO.getElementPorts());
                     } else {
-                        res.getPlugins().put(s, scenePluginDataBO);
+                        originSceneConfig.getPlugins().put(s, scenePluginDataBO);
                     }
                 }));
             }
         }
-
-        var csceneInstance = new CsceneInstanceBO();
-        csceneInstance.setScene(res);
-        CsceneDataModifier.correctReturnCsceneData(csceneInstance);
-        return new ServiceResult<>(csceneInstance).asResult();
     }
 
     @AuthTarget(TargetEnum.CSCENE_INSTANCE_GROUP)

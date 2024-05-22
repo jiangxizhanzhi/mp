@@ -613,6 +613,21 @@ public class CsceneDataModifier {
 
     public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO) {
         correctReturnCsceneData(csceneInstanceBO, true);
+
+        Set<String> portIds = new HashSet<>();
+        csceneInstanceBO.getScene().getTopology().getElements().forEach(e -> {
+            if(e.getPorts() != null){
+                e.getPorts().forEach(p -> portIds.add(p.getId()));
+            }
+        });
+        var list = csceneInstanceBO.getScene().getTopology().getConnections();
+        var it = list.iterator();
+        while (it.hasNext()){
+            var d = it.next();
+            if(!portIds.contains(d.getSource()) || !portIds.contains(d.getTarget())){
+                it.remove();
+            }
+        }
     }
 
     public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO, boolean handlerHidden) {
