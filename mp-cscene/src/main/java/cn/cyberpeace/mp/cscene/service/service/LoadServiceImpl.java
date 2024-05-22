@@ -106,8 +106,8 @@ public class LoadServiceImpl {
         }
         List list = new ArrayList();
         Map<String, Object> dataMap = JsonUtils.parseMap(result);
-        if(dataMap != null && dataMap.get("code") != null &&
-                dataMap.get("code").equals("VULN-000000") && dataMap.get("data") != null){
+        if (dataMap != null && dataMap.get("code") != null &&
+                dataMap.get("code").equals("VULN-000000") && dataMap.get("data") != null) {
             list = (List) dataMap.get("data");
         }
         return list;
@@ -125,8 +125,8 @@ public class LoadServiceImpl {
 
         //同步设置
         MpDevopsLoadSource synchronousDataSource = getSynchronousDataSource(new JSONObject());
-        if(synchronousDataSource == null){
-            if(isNeedMessage){
+        if (synchronousDataSource == null) {
+            if (isNeedMessage) {
                 //给所有当前登录的session推送消息
                 WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
                     sendMessage(webSocketServer, session, jsonObject, data, 1, "获取载荷平台ip失败,会话关闭！", false);
@@ -135,10 +135,10 @@ public class LoadServiceImpl {
             return null;
         }
 
-        if(isNeedMessage){
+        if (isNeedMessage) {
             //给所有当前登录的session推送消息
             WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
-                sendMessage(webSocketServer, session, jsonObject, data, 1, "正在连接载荷管理机:"+synchronousDataSource.getIp()+"......成功", true);
+                sendMessage(webSocketServer, session, jsonObject, data, 1, "正在连接载荷管理机:" + synchronousDataSource.getIp() + "......成功", true);
             });
         }
 
@@ -149,7 +149,7 @@ public class LoadServiceImpl {
         List<LinkedHashMap> initialToolList = outLoadService.getToolList(request);
 
         if (initialToolList == null || initialToolList.isEmpty()) {
-            if(isNeedMessage){
+            if (isNeedMessage) {
                 //给所有当前登录的session推送消息
                 WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
                     sendMessage(webSocketServer, session, jsonObject, data, 2, "获取载荷列表失败,会话关闭！", false);
@@ -159,7 +159,7 @@ public class LoadServiceImpl {
         }
 
         //给所有当前登录的session推送消息
-        if(isNeedMessage){
+        if (isNeedMessage) {
             WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
                 sendMessage(webSocketServer, session, jsonObject, data, 2, "正在获取同步载荷......完成！", true);
             });
@@ -169,7 +169,7 @@ public class LoadServiceImpl {
         List<JSONObject> list = new ArrayList<>();
         for (LinkedHashMap tool : initialToolList) {
             if (tool != null) {
-                tool.put("source","1");
+                tool.put("source", "1");
                 list.add(convertToolToJSONObject(tool));
             }
         }
@@ -197,7 +197,7 @@ public class LoadServiceImpl {
         }
         if (deleteData && list != null && !list.isEmpty()) {
             if (!loadMapper.addLoads(list)) {
-                if(isNeedMessage){
+                if (isNeedMessage) {
                     WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
                         sendMessage(webSocketServer, session, jsonObject, data, 3, "载荷数据入库失败,会话关闭！", false);
                     });
@@ -213,13 +213,13 @@ public class LoadServiceImpl {
             throw new RuntimeException(e);
         }
 
-        if(isNeedMessage){
+        if (isNeedMessage) {
             WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
-                data.put("stage3","载荷数据入库成功！");
+                data.put("stage3", "载荷数据入库成功！");
                 sendMessage(webSocketServer, session, jsonObject, data, 3, "载荷数据入库成功！", true);
-                data.put("stage4","共同步"+list.size()+"个载荷");
-                sendMessage(webSocketServer, session, jsonObject, data, 4, "共同步"+list.size()+"个载荷以及更新"+sameLoads.size()+"条载荷", true);
-                data.put("stage5","载荷列表同步成功,会话关闭！");
+                data.put("stage4", "共同步" + list.size() + "个载荷");
+                sendMessage(webSocketServer, session, jsonObject, data, 4, "共同步" + list.size() + "个载荷以及更新" + sameLoads.size() + "条载荷", true);
+                data.put("stage5", "载荷列表同步成功,会话关闭！");
                 sendMessage(webSocketServer, session, jsonObject, data, 5, "载荷列表同步成功,会话关闭！", true);
             });
         }
@@ -239,11 +239,11 @@ public class LoadServiceImpl {
         WebSocketServer webSocketServer = WebSocketServer.sessionPools.get(session);
         //同步设置获取
         MpDevopsLoadSource synchronousDataSource = getSynchronousDataSource(new JSONObject());
-        if(synchronousDataSource == null){
+        if (synchronousDataSource == null) {
             sendMessage(webSocketServer, session, jsonObject, data, 1, "获取载荷平台ip失败,会话关闭！", false);
         }
 
-        sendMessage(webSocketServer, session, jsonObject, data, 1, "正在连接载荷管理机:"+synchronousDataSource.getIp()+"......成功", true);
+        sendMessage(webSocketServer, session, jsonObject, data, 1, "正在连接载荷管理机:" + synchronousDataSource.getIp() + "......成功", true);
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
@@ -260,7 +260,7 @@ public class LoadServiceImpl {
         List<JSONObject> list = new ArrayList<>();
         for (LinkedHashMap tool : toolList) {
             if (tool != null) {
-                tool.put("source","1");
+                tool.put("source", "1");
                 list.add(convertToolToJSONObject(tool));
             }
         }
@@ -286,8 +286,8 @@ public class LoadServiceImpl {
             if (sameLoads != null && sameLoads.size() > 0) {
                 deleteData = loadMapper.batchUpdateData(sameLoads);
             }
-            if (deleteData && list!=null && !list.isEmpty()) {
-                if(!loadMapper.addLoads(list)){
+            if (deleteData && list != null && !list.isEmpty()) {
+                if (!loadMapper.addLoads(list)) {
                     sendMessage(webSocketServer, session, jsonObject, data, 3, "载荷数据入库失败,会话关闭！", false);
                 }
             }
@@ -295,17 +295,17 @@ public class LoadServiceImpl {
             // 记录错误日志、回滚事务等
             throw e; // 或者包装成自定义异常抛出
         }
-        data.put("stage3","载荷数据入库成功！");
+        data.put("stage3", "载荷数据入库成功！");
         sendMessage(webSocketServer, session, jsonObject, data, 3, "载荷数据入库成功！", true);
-        data.put("stage4","共同步"+list.size()+"个载荷");
-        sendMessage(webSocketServer, session, jsonObject, data, 4, "共同步"+list.size()+"个载荷以及更新"+sameLoads.size()+"条载荷", true);
-        data.put("stage5","载荷列表同步成功,会话关闭！");
+        data.put("stage4", "共同步" + list.size() + "个载荷");
+        sendMessage(webSocketServer, session, jsonObject, data, 4, "共同步" + list.size() + "个载荷以及更新" + sameLoads.size() + "条载荷", true);
+        data.put("stage5", "载荷列表同步成功,会话关闭！");
         sendMessage(webSocketServer, session, jsonObject, data, 5, "载荷列表同步成功,会话关闭！", true);
         webSocketServer.onClose(session);
     }
 
     private void sendMessage(WebSocketServer webSocketServer, Session session, Map map, Map data,
-                                  Integer sort, String message, Boolean result){
+                             Integer sort, String message, Boolean result) {
         try {
             data.put("stage" + sort, message);
             map.put("data", data);
@@ -314,7 +314,7 @@ public class LoadServiceImpl {
             // 将JSONObject转换为JSON字符串
             String jsonString = object.toJSONString();
             webSocketServer.sendMessage(session, jsonString);
-            if(!result) {
+            if (!result) {
                 webSocketServer.onClose(session);
             }
         } catch (IOException e) {
@@ -389,9 +389,9 @@ public class LoadServiceImpl {
     public ServiceResult addLoad(JSONObject requestData) {
         if (requestData != null) {
             //来源(1载荷平台 2本地)
-            requestData.put("source","2");
+            requestData.put("source", "2");
             Boolean addLoad = loadMapper.addLoad(requestData);
-            if(!addLoad){
+            if (!addLoad) {
                 return new ServiceResult(null, BaseErrorCode.ERROR, "载荷数据新增失败").asResult();
             }
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
@@ -432,8 +432,8 @@ public class LoadServiceImpl {
 
         //暂用这个
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("pageNum",1);
-        jsonObject.put("pageSize",100);
+        jsonObject.put("pageNum", 1);
+        jsonObject.put("pageSize", 100);
         JSONObject loads = getLoadList(new JSONObject());
         List<MpDevopsLoad> getLoadByPks = (List) loads.get("source");
         return getLoadByPks;
@@ -447,12 +447,12 @@ public class LoadServiceImpl {
         Integer successTimes = 0;
         Integer failTimes = 0;
         Integer noResultForTheTime = 0;
-        for(MpDevopsLoadSceneLog m : list){
-            if(m.getResultStatus() != null && m.getResultStatus().equals("1005010101")){
+        for (MpDevopsLoadSceneLog m : list) {
+            if (m.getResultStatus() != null && m.getResultStatus().equals("1005010101")) {
                 successTimes++;
-            }else if(m.getResultStatus() != null && m.getResultStatus().equals("1005010102")){
+            } else if (m.getResultStatus() != null && m.getResultStatus().equals("1005010102")) {
                 failTimes++;
-            }else if(m.getResultStatus() != null && m.getResultStatus().equals("1005010103")){
+            } else if (m.getResultStatus() != null && m.getResultStatus().equals("1005010103")) {
                 noResultForTheTime++;
             }
         }
@@ -464,7 +464,7 @@ public class LoadServiceImpl {
         //失败次数
         map.put("fail_times", failTimes);
         //已有结果
-        map.put("have_result", successTimes+failTimes);
+        map.put("have_result", successTimes + failTimes);
         //暂无结果
         map.put("no_result_for_the_time", noResultForTheTime);
         for (int i = 0; i < list.size(); i++) {
@@ -543,12 +543,28 @@ public class LoadServiceImpl {
                     Sheet sheet = workbook.getSheetAt(0); // 获取第一个工作表
                     //数据集初始化
                     List<List<Object>> data = new ArrayList<>();
+
+                    //当前行数
+                    int rowTime = 0;
                     for (Row row : sheet) {
-                        List<Object> rowData = new ArrayList<>();
-                        for (Cell cell : row) {
-                            rowData.add(getCellValue(cell));
+                        if(rowTime == 0){
+                            //读取第一行
+                            List<Object> rowData = new ArrayList<>();
+                            //"工具名称", "记录时间", "阶段", "作用类型", "执行类型", "结果类型", "结果状态"
+                            for (Cell cell : row) {
+                                String cellValue = getCellValue(cell).toString();
+                                rowData.add(cellValue);
+                            }
+                            data.add(rowData);
+                        }else{
+                            //读取第一行标题
+                            List<Object> rowData = new ArrayList<>();
+                            for (Cell cell : row) {
+                                rowData.add(getCellValue(cell));
+                            }
+                            data.add(rowData);
                         }
-                        data.add(rowData);
+                        rowTime++;
                     }
                     //打印
                     for (List<Object> row : data) {
@@ -593,7 +609,7 @@ public class LoadServiceImpl {
                                              MpDevopsLoadSceneLog requestData) throws IOException {
         //导出文件xlsx
         try {
-            JSONObject requestDataObject =  JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
+            JSONObject requestDataObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
             List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResultStatistics(requestDataObject);
             Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes("1005");
             Date date = new Date();
@@ -805,7 +821,7 @@ public class LoadServiceImpl {
         return result;
     }
 
-    private Integer addResultLog(JSONObject requestData){
+    private Integer addResultLog(JSONObject requestData) {
         //log表新增初始数据
         requestData.put("resultStatus", "1005010103");
         requestData.put("resultType", "自动上报");
@@ -813,13 +829,13 @@ public class LoadServiceImpl {
         return pk;
     }
 
-    private Boolean updateResultLog(Integer pk,Map<String, Object> startInstance){
+    private Boolean updateResultLog(Integer pk, Map<String, Object> startInstance) {
         Boolean updateResultLog = true;
         if (startInstance == null || startInstance.get("code") == null || !startInstance.get("code").toString().equals("0")) {
             //startInstance方法执行失败
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("resultStatus","1005010102");
-            updateResultLog = loadMapper.updateLoadByPk(pk.toString(),jsonObject);
+            jsonObject.put("resultStatus", "1005010102");
+            updateResultLog = loadMapper.updateLoadByPk(pk.toString(), jsonObject);
         }
         return updateResultLog;
     }
@@ -942,8 +958,8 @@ public class LoadServiceImpl {
         }
         List list = new ArrayList();
         Map<String, Object> dataMap = JsonUtils.parseMap(result);
-        if(dataMap != null && dataMap.get("code") != null &&
-                dataMap.get("code").equals("VULN-000000") && dataMap.get("data") != null){
+        if (dataMap != null && dataMap.get("code") != null &&
+                dataMap.get("code").equals("VULN-000000") && dataMap.get("data") != null) {
             list = (List) dataMap.get("data");
         }
         return list;
@@ -973,10 +989,10 @@ public class LoadServiceImpl {
                     return o2.getValue().compareTo(o1.getValue());
                 }
             });
-           //取前五条
+            //取前五条
             if (list.size() > 5) {
                 list = list.subList(0, 5);
-            }else{
+            } else {
                 list = list.subList(0, list.size());
             }
             //取出list中所有的key
@@ -986,10 +1002,10 @@ public class LoadServiceImpl {
         }
         List<MpDevopsLoad> loadByIds = loadMapper.getLoadByIds(idList);
         LinkedList<JSONObject> returnList = new LinkedList<>();
-        for(MpDevopsLoad load : loadByIds){
+        for (MpDevopsLoad load : loadByIds) {
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("load_name",load.getToolName());
-            jsonObject.put("attack_num",map.get(load.getId()));
+            jsonObject.put("load_name", load.getToolName());
+            jsonObject.put("attack_num", map.get(load.getId()));
             returnList.add(jsonObject);
         }
         return returnList;

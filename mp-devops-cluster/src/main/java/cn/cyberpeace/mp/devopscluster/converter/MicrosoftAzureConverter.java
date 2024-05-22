@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
-import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
-import cn.cyberpeace.mp.auth.service.MicrosoftAzureLoginService;
 import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -27,14 +25,8 @@ import com.azure.containers.containerregistry.ContainerRegistryClient;
 import com.azure.containers.containerregistry.ContainerRegistryClientBuilder;
 import com.azure.containers.containerregistry.ContainerRepository;
 import com.azure.containers.containerregistry.models.ArtifactManifestProperties;
-import com.azure.core.credential.TokenCredential;
-import com.azure.core.http.policy.HttpLogDetailLevel;
 import com.azure.core.http.rest.PagedIterable;
-import com.azure.core.management.AzureEnvironment;
 import com.azure.core.management.Region;
-import com.azure.core.management.profile.AzureProfile;
-import com.azure.identity.ClientSecretCredentialBuilder;
-import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.models.*;
 import lombok.RequiredArgsConstructor;
@@ -54,13 +46,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
     private MicrosoftAzureMapper microsoftAzureMapper;
 
     @Autowired
-    private MicrosoftAzureLoginService microsoftAzureLoginService;
-
-    @Autowired
     private TargetConverter targetConverter;
-
-    @Autowired
-    private TypeConverter typeConverter;
 
     @Autowired
     private DeviceVoConverter deviceVoConverter;
@@ -84,43 +70,49 @@ public class MicrosoftAzureConverter implements BaseConverter {
         return result;
     }
 
-    private JSONObject getReturnData(String cloudServiceType,String tableName,TargerRequestVO request){
+    private JSONObject getReturnData(String cloudServiceType,String tableName,TargerRequestVO request) {
         List<MpSysCodeMenuVO> codes = request.getCodes();
-        List<MpSysCodeMenu> sqls = microsoftAzureMapper.getSqlByCodes(codes);
-        for (int i = 0; i < sqls.size(); i++) {
-            if (sqls.get(i).getSupplement() != null && !sqls.get(i).getSupplement().equals("") && sqls.get(i).getSupplement().contains("**")) {
-                for (int j = 0; j < codes.size(); j++) {
-                    if (codes.get(j).getCode() != null && sqls.get(i).getCode() != null && codes.get(j).getCode().equals(sqls.get(i).getCode())) {
-                        if(codes.get(j).getValue() != null && !codes.get(j).getValue().equals("")){
-                            sqls.get(i).setSupplement("and "+tableName+"."+sqls.get(i).getSupplement().replace("**", codes.get(j).getValue()));
-                        }else{
-                            sqls.get(i).setSupplement("");
+        List<MpSysCodeMenu> sqls = null;
+        if (codes != null && codes.size() > 0) {
+            sqls = microsoftAzureMapper.getSqlByCodes(codes);
+            for (int i = 0; i < sqls.size(); i++) {
+                if (sqls.get(i).getSupplement() != null && !sqls.get(i).getSupplement().equals("") && sqls.get(i).getSupplement().contains("**")) {
+                    for (int j = 0; j < codes.size(); j++) {
+                        if (codes.get(j).getCode() != null && sqls.get(i).getCode() != null && codes.get(j).getCode().equals(sqls.get(i).getCode())) {
+                            if (codes.get(j).getValue() != null && !codes.get(j).getValue().equals("")) {
+                                sqls.get(i).setSupplement("and " + tableName + "." + sqls.get(i).getSupplement().replace("**", codes.get(j).getValue()));
+                            } else {
+                                sqls.get(i).setSupplement("");
+                            }
                         }
                     }
-                }
-            }else if(sqls.get(i).getSupplement() != null && !sqls.get(i).getSupplement().equals("")){
-                if(sqls.get(i).getSupplement().contains(".")){
-                    sqls.get(i).setSupplement("and "+sqls.get(i).getSupplement());
-                }else{
-                    sqls.get(i).setSupplement("and "+tableName+"."+sqls.get(i).getSupplement());
+                } else if (sqls.get(i).getSupplement() != null && !sqls.get(i).getSupplement().equals("")) {
+                    if (sqls.get(i).getSupplement().contains(".")) {
+                        sqls.get(i).setSupplement("and " + sqls.get(i).getSupplement());
+                    } else {
+                        sqls.get(i).setSupplement("and " + tableName + "." + sqls.get(i).getSupplement());
+                    }
                 }
             }
         }
-        List<MpSysCodeMenu> filteredList = sqls.stream()
-                .filter(s -> s.getSupplement() != null && !s.getSupplement().isEmpty())
-                .collect(Collectors.toList());
+        List<MpSysCodeMenu> filteredList = null;
+        if (sqls != null && sqls.size() > 0) {
+            filteredList = sqls.stream()
+                    .filter(s -> s.getSupplement() != null && !s.getSupplement().isEmpty())
+                    .collect(Collectors.toList());
+        }
         Integer offset = 0;
         Integer pageSize = 10;
-        if(request.getPage() != null && request.getPerPage() != null){
+        if (request.getPage() != null && request.getPerPage() != null) {
             offset = (request.getPage() - 1) * request.getPerPage();
             pageSize = request.getPerPage();
         }
         //需要同时修改sql
-        List<DeviceCloudTargetVO> list = microsoftAzureMapper.getCloudTargetListByCodes(Integer.parseInt(cloudServiceType),filteredList,offset,pageSize);
-        Integer totalNum = microsoftAzureMapper.getCloudTargetListByCodesNum(Integer.parseInt(cloudServiceType),filteredList);
+        List<DeviceCloudTargetVO> list = microsoftAzureMapper.getCloudTargetListByCodes(Integer.parseInt(cloudServiceType), filteredList, offset, pageSize);
+        Integer totalNum = microsoftAzureMapper.getCloudTargetListByCodesNum(Integer.parseInt(cloudServiceType), filteredList);
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("data",list);
-        jsonObject.put("total",totalNum);
+        jsonObject.put("data", list);
+        jsonObject.put("total", totalNum);
         return jsonObject;
     }
 
@@ -706,74 +698,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
         }
         return menuDto;
     }
-
-//    /**
-//     * 查询所有信息(带过滤条件)--操作系统、应用系统、网络设备、安全设备内靶标
-//     */
-//    public List getTarget(TargetSceneRequest request) {
-//        BasePageBO<Device> targetSceneConvertModel = allTarget(new ImagePageDTO(request));
-//        List<Device> deviceList = targetSceneConvertModel.getList();
-//        return deviceList;
-//    }
-
-//    /**
-//     * 查询所有靶标数据
-//     * @param dto
-//     * @return
-//     */
-//    public BasePageBO<Device> allTarget(ImagePageDTO dto) {
-//        BasePageBO<DeviceTargetPO> targetPageModel = this.page(dto);
-//
-//        List<DeviceTargetPO> deviceTargetPOS = targetPageModel.getList();
-//        Map<String,DeviceTargetPO> supportExports = new HashMap<>();
-//        deviceTargetPOS.stream().forEach(d -> {
-//            supportExports.put(d.getUuid(), d);
-//        });
-//
-//        List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
-//
-//        BasePageBO<Device> sceneConvertModel = new BasePageBO<>();
-//        sceneConvertModel.setTotal(targetPageModel.getTotal());
-//        if (CollectionUtils.isEmpty(ids)){
-//            sceneConvertModel.setList(Lists.newArrayList());
-//            return sceneConvertModel;
-//        }
-//        CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
-//
-//        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
-//            sceneConvertModel.setList(Lists.newArrayList());
-//            return sceneConvertModel;
-//        }
-//        for (var d : model.getList()) {
-//            if (ImageTypeEnum.CONTAINER.toValue().equals(d.getImageType()) && supportExports.containsKey(d.getUuid())) {
-//                if (d.getExtDocker() != null) {
-//                    d.getExtDocker().setInitSupport(supportExports.get(d.getUuid()).getInitSupport());
-//                }
-//            }
-//        }
-//        POLogoUtils.changeLogoPathToUrl(model.getList());
-//        sceneConvertModel.setList(model.getList());
-//        return sceneConvertModel;
-//    }
-
-//    /**
-//     * 分页查询
-//     * @param dto
-//     * @return
-//     */
-//    public BasePageBO<DeviceTargetPO> page(ImagePageDTO dto) {
-//        Integer total = devopsTargetService.totalCount(dto);
-//        BasePageBO<DeviceTargetPO> targetPageModel = new BasePageBO<>();
-//        targetPageModel.setTotal(total);
-//        if (total == 0){
-//            targetPageModel.setList(Lists.newArrayList());
-//            return targetPageModel;
-//        }
-//        List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
-//        POLogoUtils.changeLogoPathToUrl(deviceTargetPOS);
-//        targetPageModel.setList(deviceTargetPOS);
-//        return targetPageModel;
-//    }
 
     /**
      * 查询常用靶标信息

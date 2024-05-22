@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 靶标管理类
+ * 云靶标管理类
  */
 @Slf4j
 @RestController
@@ -38,7 +38,7 @@ public class CloudDevopsTargetController {
     private LoadServiceImpl LoadService;
 
     /**
-     * 查询所有镜像管理分类
+     * 查询所有镜像管理分类-拓扑编辑器
      */
     @ApiOperation("查询所有镜像管理分类")
     @GetMapping("/imageCategories")
