@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.base.util;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
@@ -120,10 +121,14 @@ public class HttpUtils {
             }
 
             connection.setDoOutput(true);
-            connection.setRequestProperty("Content-Type", "application/json");
+            if (StringUtils.isNotBlank(body)){
+                connection.setRequestProperty("Content-Type", "application/json");
+            }
 
             try (OutputStream os = connection.getOutputStream()) {
-                os.write(body.getBytes());
+                if (StringUtils.isNotBlank(body)){
+                    os.write(body.getBytes());
+                }
                 os.flush();
             }
 
@@ -142,6 +147,7 @@ public class HttpUtils {
             }
         }
     }
+
 
     /**
      * http put请求
