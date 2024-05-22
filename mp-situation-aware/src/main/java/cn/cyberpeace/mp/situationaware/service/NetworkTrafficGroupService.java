@@ -163,7 +163,7 @@ public class NetworkTrafficGroupService {
 
         paramObject.put("interactive", false);
         paramObject.put("run", true);
-        paramObject.put("privileged", true);
+//        paramObject.put("privileged", true);
 
         try {
             log.info("create arkime Image instance param {}",paramObject.toJSONString());
