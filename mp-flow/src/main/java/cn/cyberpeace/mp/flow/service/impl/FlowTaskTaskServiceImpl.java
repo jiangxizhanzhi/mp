@@ -353,6 +353,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                         break;
                     }
                 }catch (Exception e){
+                    e.printStackTrace();
                     log.error("init network error at {}", i, e.getMessage());
                 }
             }
