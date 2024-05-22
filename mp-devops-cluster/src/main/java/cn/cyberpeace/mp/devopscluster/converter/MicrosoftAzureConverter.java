@@ -242,6 +242,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTargetContainer.setLinkId(id);
             deviceCloudTargetContainer.setName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
             deviceCloudTargetContainer.setSourceType(2);
+            deviceCloudTargetContainer.setContainerType("containerInfrastructure");
+            deviceCloudTargetContainer.setSubType("containerRegistry");
             deviceCloudTargetContainer.setUploadTargetName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
             deviceCloudTargetContainer.setOperatingSystem("linux");
             deviceCloudTargetContainer.setOperatingSystemStatus("专业化");

@@ -31,6 +31,14 @@ public class DeviceCloudTargetContainer extends BaseModel {
      */
     private Integer sourceType;
     /**
+     * 容器类型(容器基础结构 容器管理 容器化应用程序)
+     */
+    private String containerType;
+    /**
+     * 子类型(容器实例 容器注册表 Kubernetes服务)
+     */
+    private String subType;
+    /**
      * 用户上传镜像名称
      */
     private String uploadTargetName;
