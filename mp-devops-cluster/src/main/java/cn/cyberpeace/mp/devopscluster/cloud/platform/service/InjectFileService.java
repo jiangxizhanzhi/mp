@@ -34,7 +34,9 @@ public class InjectFileService extends BaseCpService {
      * @param deviceUuid
      */
     public CloudPlatformPageResult<InjectFile> list(String deviceUuid){
-        CloudPlatformItemsPageResult pageResult = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + INJECT_FILE + "?device_uuid=" + deviceUuid, CloudPlatformItemsPageResult.class);
+        CloudPlatformItemsPageResult pageResult = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_URL
+                + BaseCloudPlatformConstant.URL_VERSION + BaseCloudPlatformConstant.CPCLOUD_DEVICE
+                + INJECT_FILE + "?device_uuid=" + deviceUuid, CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<InjectFile> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getData().getItems()),InjectFile.class);
         CloudPlatformPageResult<InjectFile> model = new CloudPlatformPageResult<>();
