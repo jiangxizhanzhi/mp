@@ -192,13 +192,16 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @ApiOperation("根据区域获取指定id场景模板")
     @GetMapping("/get_by_area")
-    public ServiceResult<CsceneBO> getByArea(@RequestParam String id, @RequestParam(required = false,name = "area_id") String areaId) {
+    public ServiceResult<CsceneBO> getByArea(@RequestParam String id, @RequestParam(required = false, name = "area_id") String areaId) {
         if (areaId == null) {
             areaId = StringUtils.EMPTY;
         }
-
         String sceneId = this.modelService.get(id).getSource().getObj().getSceneConfig();
+        var csceneBO = getByAreaId(sceneId, areaId);
+        return new ServiceResult<>(csceneBO).asResult();
+    }
 
+    private CsceneBO getByAreaId(String sceneId, String areaId) {
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, areaId, true, null);
         SceneConfigDataBO dataBO = sceneConfigHandler.toData();
 
@@ -210,7 +213,7 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneBO csceneBO = new CsceneBO();
         csceneBO.setSceneConfig(dataBO);
         CsceneDataModifier.correctReturnCsceneData(csceneBO);
-        return new ServiceResult<>(csceneBO).asResult();
+        return csceneBO;
     }
 
     @ApiOperation("更新区域显示参数")
@@ -635,7 +638,8 @@ public class CsceneController implements BaseModelListControllerBase {
                 CsceneLogUtils.recordSceneConfigLog(result.getData(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());
             }
         }
-        return result;
+        var topo = result.getData().getSceneConfig().getTopology();
+        return this.getByArea(csceneBO.getId(), topo.getAreaId());
     }
 
     @ApiOperation(value = "业务服务端保存（创建/更新）场景模板", notes = "不会校验节点数量,请忽略test_scenes和app_scenes字段")
