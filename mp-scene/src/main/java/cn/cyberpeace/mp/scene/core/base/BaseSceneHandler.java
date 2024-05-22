@@ -518,7 +518,7 @@ public abstract class BaseSceneHandler<
     /**
      * 保存当前场景外部数据
      */
-    public void saveOut(List<TSceneElementBO> insideAreaElements) {
+    public void saveOut(List<TSceneElementBO> insideAreaElements,List<TSceneElementPortBO> insidePorts) {
         if (elementMap.isEmpty()) {
             return;
         }
@@ -568,12 +568,19 @@ public abstract class BaseSceneHandler<
         }
 
         // 更新端口连线
-        Set<String> insideNodeEids = new HashSet<>();
+        Map<String, String> outerNodeId2EidMap = new HashMap<>();
+        for (Map.Entry<String, TSceneElementBO> mapEntry : elementMap.entrySet()) {
+            String key = mapEntry.getKey();
+            TSceneElementBO value = mapEntry.getValue();
+        }
+        existElementMap.forEach((e,v) -> outerNodeId2EidMap.put(e,v.getId()));
+        Map<String, String> insideNodeId2EidMap = new HashMap<>();
         for (TSceneElementBO insideAreaElement : insideAreaElements) {
-            insideNodeEids.add(insideAreaElement.getEid());
+            insideNodeId2EidMap.put(insideAreaElement.getId(), insideAreaElement.getEid());
         }
         List<TSceneElementPortConnectionModel> existsPortConnections = readElementPortConnectionsByNodeEids(outerNodeEids);
         Map<String, TSceneElementPortConnectionModel> existsPortConnectionsMap = new HashMap<>();
+        Set<String> insideNodeEids = new HashSet<>(insideNodeId2EidMap.values());
         for (TSceneElementPortConnectionModel e : existsPortConnections) {
             if (insideNodeEids.contains(e.getSourceElement()) || insideNodeEids.contains(e.getTargetElement())) {
                 existsPortConnectionsMap.put(elementPortConnectionKey(e), e);
@@ -581,10 +588,36 @@ public abstract class BaseSceneHandler<
         }
 
         Map<String, TSceneElementPortConnectionModel> saveingPortConnectionsMap = new HashMap<>();
+        Map<String,String> nodeId2EidMap = new HashMap<>();
+        nodeId2EidMap.putAll(insideNodeId2EidMap);
+        nodeId2EidMap.putAll(outerNodeId2EidMap);
+
+        Map<String,String> portId2EidMap = new HashMap<>();
+        insidePorts.forEach(p -> portId2EidMap.put(p.getId(), p.getEid()));
+        ports.forEach(p -> portId2EidMap.put(p.getPortId(), p.getId()));
+
         for (Map.Entry<String, TSceneElementPortConnectionBO> entry : elementPortConnectionMap.entrySet()) {
             String e = entry.getKey();
             TSceneElementPortConnectionBO v = entry.getValue();
-            saveingPortConnectionsMap.put(e, v.toModel());
+            var model = v.toModel();
+            if (model.getSourceElement() == null) {
+                String sourceNodeId = parseNodeIdFromPort(model.getSourcePortId());
+                model.setSourceElement(nodeId2EidMap.get(sourceNodeId));
+            }
+            if(model.getTargetElement() == null){
+                String targetNodeId = parseNodeIdFromPort(model.getTargetPortId());
+                model.setTargetElement(nodeId2EidMap.get(targetNodeId));
+            }
+            if(model.getSourcePort() == null){
+                model.setSourcePort(portId2EidMap.get(model.getSourcePortId()));
+            }
+            if(model.getTargetPort() == null){
+                model.setTargetPort(portId2EidMap.get(model.getTargetPortId()));
+            }
+            if(model.getScene() == null){
+                model.setScene(sceneId);
+            }
+            saveingPortConnectionsMap.put(e, model);
         }
         saveOutPortConnections(saveingPortConnectionsMap, existsPortConnectionsMap);
     }
@@ -2500,6 +2533,17 @@ public abstract class BaseSceneHandler<
                 .forEach(elementPortConnection -> elementPortConnectionMap.get(elementPortConnectionKey(elementPortConnection))
                         .fromModel(elementPortConnection));
         return diff;
+    }
+
+    private String parseNodeIdFromPort(String input){
+        String regex = "port_(.+)_.+_[0-9]+";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            String extracted = matcher.group(1);
+            return extracted;
+        }
+        return input;
     }
 
     private String parseNodeId(String input){
