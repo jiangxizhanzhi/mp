@@ -428,7 +428,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @ApiImplicitParam(name = "id", value = "场景拓扑id", dataTypeClass = String.class)
     @GetMapping("/tree")
     public ServiceResult<SceneAreaTreeBO> getSceneConfigAreaTree(@RequestParam String id) {
-        if (id == null) {
+        if (StringUtils.isEmpty(id)) {
             return new ServiceResult<>(new SceneAreaTreeBO()).asResult();
         }
         String sceneId = this.modelService.get(id).getSource().getObj().getSceneConfig();
