@@ -485,11 +485,11 @@ public class HttpUtils {
         StringEntity entity = new StringEntity(content, StandardCharsets.UTF_8);
         entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
         httpPost.setEntity(entity);
-
-        HttpResponse resp = client.execute(httpPost);
         // 设置请求和传输超时时间
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
         httpPost.setConfig(requestConfig);
+
+        HttpResponse resp = client.execute(httpPost);
         // 获得返回值
         return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
     }
