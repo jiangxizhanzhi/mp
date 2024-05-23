@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.cscene.bo.CreateTemplateBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneAuthorizeBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.bo.ImportTemplateBO;
@@ -25,6 +26,9 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneSyncRequest;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
+import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
+import cn.cyberpeace.mp.cscene.model.base.BaseCsceneRoleModel;
+import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
@@ -198,7 +202,49 @@ public class CsceneController implements BaseModelListControllerBase {
         }
         String sceneId = this.modelService.get(id).getSource().getObj().getSceneConfig();
         var csceneBO = getByAreaId(sceneId, areaId);
+
+        var roleMapper = BeanCommon.getBean(CsceneRoleMapper.class);
+        var list = roleMapper.list(new HumanCondition().filterEqual(BaseCsceneRoleModel::getCscene, id));
+        if (list != null) {
+            csceneBO.setRoles(convertToRoleBOs(list, CsceneRoleBO.class));
+        } else {
+            csceneBO.setRoles(new ArrayList<>());
+        }
         return new ServiceResult<>(csceneBO).asResult();
+    }
+
+    private List<CsceneRoleBO> convertToRoleBOs(List<CsceneRoleModel> roleObjs, Class<CsceneRoleBO> roleBOClass) {
+        List<CsceneRoleBO> roleBOS = new ArrayList<>();
+        if (roleObjs == null) {
+            return roleBOS;
+        }
+        Map<String, CsceneRoleBO> roleBOMap = new HashMap<>();
+        Map<String, String> roleParentMap = new HashMap<>();
+        for (CsceneRoleModel roleObj : roleObjs) {
+            CsceneRoleBO roleBO = ClassUtils.createInstance(roleBOClass);
+            roleBO.fromModel(roleObj);
+            roleBOMap.put(roleObj.getId(), roleBO);
+            roleParentMap.put(roleObj.getId(), roleObj.getParent());
+            if (StringUtils.isEmpty(roleObj.getParent())) {
+                roleBOS.add(roleBO);
+            }
+        }
+        for (Map.Entry<String, CsceneRoleBO> entry : roleBOMap.entrySet()) {
+            String roleId = entry.getKey();
+            CsceneRoleBO roleBO = entry.getValue();
+            String parentId = roleParentMap.getOrDefault(roleId, null);
+            CsceneRoleBO parentRoleBO = roleBOMap.getOrDefault(parentId, null);
+            if (parentRoleBO == null) {
+                continue;
+            }
+
+            if (parentRoleBO.getChildren() == null) {
+                parentRoleBO.setChildren(new ArrayList<>());
+            }
+            parentRoleBO.getChildren().add(roleBO);
+        }
+
+        return roleBOS;
     }
 
     private CsceneBO getByAreaId(String sceneId, String areaId) {
@@ -584,6 +630,7 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<CsceneBO> syncTemplate(@RequestBody CreateTemplateBO createTemplateBO) {
         var csceneBO = modelService.getById(createTemplateBO.getId(), null, false, null).getSource();
         csceneBO.setName(createTemplateBO.getName());
+        csceneBO.setLogo(createTemplateBO.getLogo());
         csceneBO.getSceneConfig().getTopology().getScene().setName(createTemplateBO.getName());
         csceneBO.getSceneConfig().getTopology().getScene().setDescription(createTemplateBO.getDescription());
         csceneBO.setType(CsceneModel.Type.TEMPLATE);
@@ -641,6 +688,20 @@ public class CsceneController implements BaseModelListControllerBase {
                 CsceneLogUtils.recordSceneConfigLog(result.getData(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());
             }
         }
+
+        CsceneRoleMapper mapper = BeanCommon.getBean(CsceneRoleMapper.class);
+        mapper.filterDelete(new HumanCondition().filterEqual(CsceneRoleModel::getCscene, csceneBO.getId()));
+        if (CollectionUtils.isNotEmpty(csceneBO.getRoles())) {
+            List<CsceneRoleModel> models = new ArrayList<>();
+            csceneBO.getRoles().forEach(r -> {
+                var m = r.toModel();
+                m.setCscene(result.getSource().getId());
+                models.add(m);
+            });
+            mapper.bulkCreate(models);
+        }
+
+
         var topo = result.getData().getSceneConfig().getTopology();
         return this.getByArea(csceneBO.getId(), topo.getAreaId());
     }

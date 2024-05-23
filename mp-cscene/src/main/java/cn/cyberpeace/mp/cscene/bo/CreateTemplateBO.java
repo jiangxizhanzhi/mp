@@ -13,6 +13,9 @@ public class CreateTemplateBO {
     @ApiModelProperty(value = "场景名称")
     private String name;
 
+    @ApiModelProperty(value = "logo")
+    private String logo ;
+
     @ApiModelProperty(value = "场景描述")
     private String description;
 }
