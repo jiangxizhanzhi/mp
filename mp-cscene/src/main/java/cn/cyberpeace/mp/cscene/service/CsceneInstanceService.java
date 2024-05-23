@@ -1319,6 +1319,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
+        if (context != null) {
+            context.loadTransparentContext();
+        }
         return this.sceneService.pause(sceneId, context.toSceneContext());
     }
 
@@ -1326,6 +1329,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        if (context != null) {
+            context.loadTransparentContext();
         }
         return this.sceneService.unpause(sceneId, context.toSceneContext());
     }
@@ -1335,6 +1341,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
+        if (context != null) {
+            context.loadTransparentContext();
+        }
         return this.sceneService.suspend(sceneId, context.toSceneContext());
     }
 
@@ -1342,6 +1351,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        if (context != null) {
+            context.loadTransparentContext();
         }
         return this.sceneService.resume(sceneId, context.toSceneContext());
     }
@@ -1357,6 +1369,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        if (context != null) {
+            context.loadTransparentContext();
         }
         return this.sceneService.startElement(sceneId, nodeId, context.toSceneContext());
     }
@@ -1387,6 +1402,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
+        if (context != null) {
+            context.loadTransparentContext();
+        }
         return this.sceneService.stopElement(sceneId, nodeId, context.toSceneContext());
     }
 
@@ -1395,6 +1413,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
+        if (context != null) {
+            context.loadTransparentContext();
+        }
         return this.sceneService.pauseElement(sceneId, nodeId, context.toSceneContext());
     }
 
@@ -1402,6 +1423,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        if (context != null) {
+            context.loadTransparentContext();
         }
         return this.sceneService.unpauseElement(sceneId, nodeId, context.toSceneContext());
     }
@@ -1422,6 +1446,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
+        if (context != null) {
+            context.loadTransparentContext();
+        }
         return this.sceneService.createElement(sceneId, nodeId, context.toSceneContext());
     }
 
@@ -1429,6 +1456,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        if (context != null) {
+            context.loadTransparentContext();
         }
         return this.sceneService.recreateElement(sceneId, nodeId, image, context.toSceneContext());
     }
@@ -1444,6 +1474,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 .getElements()
                 .get(0)
                 .getId();
+        if (context != null) {
+            context.loadTransparentContext();
+        }
         return this.sceneService.modifyElement(sceneId, nodeId, bo.getUpdate(), context.toSceneContext());
     }
 
@@ -1451,6 +1484,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        if (context != null) {
+            context.loadTransparentContext();
         }
         return this.sceneService.deleteElement(sceneId, nodeId, context.toSceneContext());
     }
@@ -1460,6 +1496,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
+        if (context != null) {
+            context.loadTransparentContext();
+        }
         return this.sceneService.suspendElement(sceneId, nodeId, context.toSceneContext());
     }
 
@@ -1467,6 +1506,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        if (context != null) {
+            context.loadTransparentContext();
         }
         return this.sceneService.resumeElement(sceneId, nodeId, context.toSceneContext());
     }
@@ -1497,6 +1539,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         // 先保存cscene中的关联信息
         String snapshotId = csceneSnapshotService.saveCsceneSnapshot(csceneId, csceneInstanceId, nodeId, snapshotName).getSource();
 
+        if (context != null) {
+            context.loadTransparentContext();
+        }
         // 打快照
         String sceneId = csceneInstance.getScene();
         if (sceneId == null) {

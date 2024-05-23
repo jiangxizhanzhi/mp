@@ -330,13 +330,13 @@ public class SceneService {
         if (originLockInfo == null) {
             // 锁获取成功 没有其他线程执行操作
             ElementTaskPool.getInstance()
-                    .executeTask(() -> {
+                    .executeTask(ThreadUtils.format(() -> {
                         try {
                             sceneHandler.startElement(nodeId);
                         } finally {
                             SceneEventUtils.unLock(id);
                         }
-                    });
+                    }));
             return new ServiceResult<>(true);
         } else if (originLockInfo.getEvent() == SceneElementModel.Event.START) {
             // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
@@ -363,13 +363,13 @@ public class SceneService {
         if (originLockInfo == null) {
             // 锁获取成功 没有其他线程执行操作
             ElementTaskPool.getInstance()
-                    .executeTask(() -> {
+                    .executeTask(ThreadUtils.format(() -> {
                         try {
                             sceneHandler.stopElement(nodeId);
                         } finally {
                             SceneEventUtils.unLock(id);
                         }
-                    });
+                    }));
             return new ServiceResult<>(true);
         } else if (originLockInfo.getEvent() == SceneElementModel.Event.STOP) {
             // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
@@ -389,13 +389,13 @@ public class SceneService {
         if (originLockInfo == null) {
             // 锁获取成功 没有其他线程执行操作
             ElementTaskPool.getInstance()
-                    .executeTask(() -> {
+                    .executeTask(ThreadUtils.format(() -> {
                         try {
                             sceneHandler.pauseElement(nodeId);
                         } finally {
                             SceneEventUtils.unLock(id);
                         }
-                    });
+                    }));
             return new ServiceResult<>(true);
         } else if (originLockInfo.getEvent() == SceneElementModel.Event.PAUSE) {
             // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
@@ -416,13 +416,13 @@ public class SceneService {
         if (originLockInfo == null) {
             // 锁获取成功 没有其他线程执行操作
             ElementTaskPool.getInstance()
-                    .executeTask(() -> {
+                    .executeTask(ThreadUtils.format(() -> {
                         try {
                             sceneHandler.unpauseElement(nodeId);
                         } finally {
                             SceneEventUtils.unLock(id);
                         }
-                    });
+                    }));
             return new ServiceResult<>(true);
         } else if (originLockInfo.getEvent() == SceneElementModel.Event.UNPAUSE) {
             // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
@@ -470,14 +470,14 @@ public class SceneService {
         if (originLockInfo == null) {
             // 锁获取成功 没有其他线程执行操作
             ElementTaskPool.getInstance()
-                    .executeTask(() -> {
+                    .executeTask(ThreadUtils.format(() -> {
                         try {
                             sceneHandler.initiateElement(nodeId);
                             sceneHandler.createElement(nodeId);
                         } finally {
                             SceneEventUtils.unLock(id);
                         }
-                    });
+                    }));
             return new ServiceResult<>(true);
         } else if (originLockInfo.getEvent() == SceneElementModel.Event.CREATE) {
             // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
@@ -498,13 +498,13 @@ public class SceneService {
         if (originLockInfo == null) {
             // 锁获取成功 没有其他线程执行操作
             ElementTaskPool.getInstance()
-                    .executeTask(() -> {
+                    .executeTask(ThreadUtils.format(() -> {
                         try {
                             sceneHandler.recreateElement(nodeId, image);
                         } finally {
                             SceneEventUtils.unLock(id);
                         }
-                    });
+                    }));
             return new ServiceResult<>(true);
         } else if (originLockInfo.getEvent() == SceneElementModel.Event.RECREATE) {
             // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
@@ -525,13 +525,13 @@ public class SceneService {
         if (originLockInfo == null) {
             // 锁获取成功 没有其他线程执行操作
             ElementTaskPool.getInstance()
-                    .executeTask(() -> {
+                    .executeTask(ThreadUtils.format(() -> {
                         try {
                             sceneHandler.deleteElement(nodeId);
                         } finally {
                             SceneEventUtils.unLock(id);
                         }
-                    });
+                    }));
             return new ServiceResult<>(true);
         } else if (originLockInfo.getEvent() == SceneElementModel.Event.DELETE) {
             // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
@@ -572,9 +572,9 @@ public class SceneService {
             }
         }
 
-        ElementTaskPool.getInstance().executeTask(() -> {
+        ElementTaskPool.getInstance().executeTask(ThreadUtils.format(() -> {
             updateHandler.modifyElement(nodeId, originHandler);
-        });
+        }));
         return new ServiceResult<>(true);
     }
 
@@ -588,13 +588,13 @@ public class SceneService {
         if (originLockInfo == null) {
             // 锁获取成功 没有其他线程执行操作
             ElementTaskPool.getInstance()
-                    .executeTask(() -> {
+                    .executeTask(ThreadUtils.format(() -> {
                         try {
                             sceneHandler.suspendElement(nodeId);
                         } finally {
                             SceneEventUtils.unLock(id);
                         }
-                    });
+                    }));
             return new ServiceResult<>(true);
         } else if (originLockInfo.getEvent() == SceneElementModel.Event.SUSPEND) {
             // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
@@ -615,13 +615,13 @@ public class SceneService {
         if (originLockInfo == null) {
             // 锁获取成功 没有其他线程执行操作
             ElementTaskPool.getInstance()
-                    .executeTask(() -> {
+                    .executeTask(ThreadUtils.format(() -> {
                         try {
                             sceneHandler.resumeElement(nodeId);
                         } finally {
                             SceneEventUtils.unLock(id);
                         }
-                    });
+                    }));
             return new ServiceResult<>(true);
         } else if (originLockInfo.getEvent() == SceneElementModel.Event.RESUME) {
             // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
