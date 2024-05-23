@@ -1411,6 +1411,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
+        if (context != null) {
+            context.loadTransparentContext();
+        }
         return this.sceneService.restartElement(sceneId, nodeId, context.toSceneContext());
     }
 
