@@ -1177,7 +1177,7 @@ public class AsyncPlatFlowTaskService {
         serverInfo.setPassword("111111");
         SshUtil.refreshDir(serverInfo, commands, TGN_PATH, "/opt/project_dirs");
 
-        boolean flag = NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
+        boolean flag = NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 2,
                 null, 0);
         if (!flag) {
             log.error("Trex vm start error:{}", fixedIp);
@@ -1287,7 +1287,7 @@ public class AsyncPlatFlowTaskService {
                 JSONObject object = new JSONObject();
                 object.put("fileName",
                         flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getPcapFile().split(BaseConstants.SPOT)[1]);
-                String pcapRsp = HttpUtils.postFile(resourceUrl + "/pcap/import", fileByte, "file", object);
+                String pcapRsp = HttpUtils.postFileV2(resourceUrl + "/pcap/import", fileByte, "file", object);
                 JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
                 log.info("upload pcap file response:{}", jsonObject.toJSONString());
 
@@ -1344,7 +1344,7 @@ public class AsyncPlatFlowTaskService {
                 object.put("fileName", flowName);
 
                 // 先向流量发生平台新增资源文件
-                String scriptRsp = HttpUtils.postFile(resourceUrl + "/scripts", code.getBytes(StandardCharsets.UTF_8), "run_image_script",
+                String scriptRsp = HttpUtils.postFileV2(resourceUrl + "/scripts", code.getBytes(StandardCharsets.UTF_8), "run_image_script",
                         object);
                 JSONObject scriptObj = JSONObject.parseObject(scriptRsp);
                 log.info("add script file response:{}", scriptObj.toJSONString());
