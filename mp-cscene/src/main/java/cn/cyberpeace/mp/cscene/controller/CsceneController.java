@@ -221,7 +221,7 @@ public class CsceneController implements BaseModelListControllerBase {
         Map<String, CsceneRoleBO> roleBOMap = new HashMap<>();
         Map<String, String> roleParentMap = new HashMap<>();
         for (CsceneRoleModel roleObj : roleObjs) {
-            CsceneRoleBO roleBO = ClassUtils.createInstance(roleBOClass);
+            CsceneRoleBO roleBO = new CsceneRoleBO();
             roleBO.fromModel(roleObj);
             roleBOMap.put(roleObj.getId(), roleBO);
             roleParentMap.put(roleObj.getId(), roleObj.getParent());
