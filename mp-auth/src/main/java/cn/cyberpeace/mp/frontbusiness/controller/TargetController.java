@@ -7,8 +7,10 @@ import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.frontbusiness.config.FrontBusinessConfig;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,6 +57,19 @@ public class TargetController {
     @GetMapping("/tree")
     public ServiceResult getTree(@RequestParam(required = false) String targetId, @RequestParam(required = false) Integer type) {
         List<TargetBo> tree = targetService.getTree(targetId, type);
+        if (Boolean.FALSE.equals(BeanCommon.getBean(FrontBusinessConfig.class).getShowAi())) {
+            for (TargetBo bo : tree) {
+                if ("front_all".equals(bo.getId())) {
+                    List<TargetBo> newChild = new ArrayList<>();
+                    for (var c : bo.getChildren()) {
+                        if (!"intelligence-center".equals(c.getId())) {
+                            newChild.add(c);
+                        }
+                    }
+                    bo.setChildren(newChild);
+                }
+            }
+        }
         return ServiceResult.builder().source(tree).build().asResult();
     }
 
@@ -63,6 +79,9 @@ public class TargetController {
     @GetMapping("/current_user/tree")
     public ServiceResult getTree() {
         List<String> menuIdents = userPermissionService.listMenuIdentsByLoginUser();
+        if (Boolean.FALSE.equals(BeanCommon.getBean(FrontBusinessConfig.class).getShowAi())) {
+            menuIdents.remove("intelligence-center");
+        }
         List<TargetBo> result = menuConfigService.getUserTreeMenuBy(UserUtils.getLoginUser().getId(), menuIdents);
         return ServiceResult.builder().source(result).build().asResult();
     }

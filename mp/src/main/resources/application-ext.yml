@@ -56,6 +56,7 @@ mp:
   frontbusiness:
     ext-var:
       url-ac-filter-enabled: ${MP_FRONTBUSINESS_URLACFILTER_ENABLED:true}
+      showai: ${MP_SHOW_AI:true}
   sceneplugincloud:
     ext-var:
       delete-retry-times: ${MP_DELETE_RETRY_TIMES:2}
