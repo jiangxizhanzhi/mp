@@ -101,8 +101,8 @@ public class AzureDeleteHandler extends DeleteHandler {
         }
 
         // 最后删除资源组 TODO 测试载荷暂时去除
-        String groupName = getPluginHandler().getSourceSceneId();
-        resourceService.getManager().resourceGroups().deleteByName(groupName);
+/*        String groupName = getPluginHandler().getSourceSceneId();
+        resourceService.getManager().resourceGroups().deleteByName(groupName);*/
     }
 
     private Runnable formatElementTask(String nodeId, int stepPercentage, EventProcess elementProcess, Runnable action) {

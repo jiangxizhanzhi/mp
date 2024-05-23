@@ -43,7 +43,7 @@ public class AzureCreateHandler extends CreateHandler {
 
         int stepPercentage = this.getStepPercentage();
         List<CloudPluginSceneElementBO> allElements = new ArrayList<>(getPluginHandler().getElementMap().values());
- /*
+
         // 再创建终端 终端分虚拟机、容器、和web服务
         List<Runnable> createTerminalTasks = new ArrayList<>();
         // 载荷
@@ -60,8 +60,8 @@ public class AzureCreateHandler extends CreateHandler {
 
         if (!createTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
-        }*/
-
+        }
+/*
         // 创建微软云的资源组
         String groupName = getPluginHandler().getSourceSceneId();
         new AzureResourceGroup(resourceService).create(groupName);
@@ -143,7 +143,7 @@ public class AzureCreateHandler extends CreateHandler {
 
         if (!createTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
-        }
+        }*/
     }
 
 
