@@ -179,14 +179,9 @@ public class LoadController {
      * */
     @ApiOperation(value = "载荷数据同步设置保存", notes = "")
     @PostMapping("/synchronousDataSource")
-    public ServiceResult synchronousDataSource(@RequestBody(required = false) MpDevopsLoadSource requestData) {
-        JSONObject jsonObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
-        Boolean synchronousDataSource = loadService.synchronousDataSource(jsonObject);
-        if (synchronousDataSource) {
-            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-        } else {
-            return new ServiceResult(null, BaseErrorCode.ERROR, "载荷数据同步设置保存失败").asResult();
-        }
+    public ServiceResult synchronousDataSource(@RequestBody MpDevopsLoadSource requestData) {
+        ServiceResult synchronousDataSource = loadService.synchronousDataSource(requestData);
+        return synchronousDataSource;
     }
 
 //**********************************************************************************************************//

@@ -38,11 +38,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
 
@@ -231,6 +235,7 @@ public class LoadServiceImpl {
         return requestData;
     }
 
+    //给通知给当前会话
     public void synchronousData(Session session) throws IOException {
         //推送的消息返回格式
         Map jsonObject = new LinkedHashMap<>();
@@ -749,37 +754,81 @@ public class LoadServiceImpl {
         return stageBindLoad;
     }
 
+    public static boolean isValidIPPortCombo(String url) {
+        // 初步正则匹配URL结构
+        Pattern pattern = Pattern.compile("^http://(?:[\\w-]+\\.)+[\\w-]+|http://(?:\\[?[\\da-fA-F:\\.]+\\]?|localhost)\\:?\\d+$");
+        Matcher matcher = pattern.matcher(url);
+        if (!matcher.matches()) {
+            return false; // 格式不匹配
+        }
+
+        try {
+            // 分割URL获取IP和端口部分
+            String[] parts = url.split("//")[1].split(":");
+            String ipAddress = parts[0];
+            int port;
+
+            // IPv6地址需要特殊处理
+            if (ipAddress.startsWith("[") && ipAddress.endsWith("]")) {
+                ipAddress = ipAddress.substring(1, ipAddress.length() - 1);
+            }
+
+            // 验证IP地址
+            InetAddress inetAddress = InetAddress.getByName(ipAddress);
+
+            // 验证端口号
+            if (parts.length > 1) {
+                port = Integer.parseInt(parts[1]);
+                if (port < 0 || port > 65535) {
+                    return false; // 端口号不在合法范围内
+                }
+            } else {
+                return false; // 缺少端口号
+            }
+
+            return true; // IP和端口都有效
+        } catch (UnknownHostException | NumberFormatException e) {
+            return false; // IP地址无效或端口号格式错误
+        }
+    }
+
     /*
      * 载荷数据同步
      * */
-    public Boolean synchronousDataSource(JSONObject requestData) {
-        String pk = requestData.get("pk") != null ? requestData.get("pk").toString() : "";
-        String ip = requestData.get("ip") != null ? requestData.get("ip").toString() : "";
-        String synchronizationProtocol = requestData.get("synchronizationProtocol") != null ? requestData.get("synchronizationProtocol").toString() : "";
-        String authenticationType = requestData.get("authenticationType") != null ? requestData.get("authenticationType").toString() : "";
+    public ServiceResult synchronousDataSource(MpDevopsLoadSource requestData) {
+        String pk = requestData.getPk() != null ? requestData.getPk().toString() : "";
+        String ip = requestData.getIp() != null ? requestData.getIp().toString() : "";
+        String synchronizationProtocol = requestData.getSynchronizationProtocol() != null ? requestData.getSynchronizationProtocol() : "";
+        //暂不做校验
+        String authenticationType = requestData.getAuthenticationType() != null ? requestData.getAuthenticationType() : "";
         //认证方式(1:密码认证 2:cookie)
         if (authenticationType.equals("1")) {
-            String userName = requestData.get("userName") != null ? requestData.get("userName").toString() : "";
-            String password = requestData.get("password") != null ? requestData.get("password").toString() : "";
-            if (ip.equals("") || synchronizationProtocol.equals("") || authenticationType.equals("") ||
-                    userName.equals("") || password.equals("")) {
-                return false;
-            }
+            String userName = requestData.getUserName() != null ? requestData.getUserName() : "";
+            String password = requestData.getPassword() != null ? requestData.getPassword() : "";
+            //暂不做校验
         } else if (authenticationType.equals("2")) {
-            String cookie = requestData.get("cookie") != null ? requestData.get("cookie").toString() : "";
-            if (ip.equals("") || synchronizationProtocol.equals("") || authenticationType.equals("") || cookie.equals("")) {
-                return false;
-            }
-        } else {
-            return false;
+            String cookie = requestData.getCookie() != null ? requestData.getCookie() : "";
+            //暂不做校验
         }
+
+        //ip校验
+        boolean validIPPortCombo = isValidIPPortCombo(ip);
+        if(!validIPPortCombo){
+            return new ServiceResult(null, BaseErrorCode.ERROR, "ip格式设置不正确,请传如下格式:http://10.108.1.10:5002").asResult();
+        }
+
         if (pk.equals("")) {
             Boolean addSynchronousDataSource = loadMapper.addSynchronousDataSource(requestData);
-            return addSynchronousDataSource;
+            if (!addSynchronousDataSource){
+                return new ServiceResult(null, BaseErrorCode.ERROR, "载荷数据同步设置保存失败").asResult();
+            }
         } else {
             Boolean synchronousDataSource = loadMapper.synchronousDataSource(requestData);
-            return synchronousDataSource;
+            if (!synchronousDataSource){
+                return new ServiceResult(null, BaseErrorCode.ERROR, "载荷数据同步设置新增失败").asResult();
+            }
         }
+        return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
     /*

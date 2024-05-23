@@ -42,9 +42,9 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
     Boolean stageBindLoad(String addType, String sceneId, String stageId, String taskId, String loadId,
                           String interfaceType, String deployment, String paramList);
 
-    Boolean synchronousDataSource(@Param("param") JSONObject requestData);
+    Boolean synchronousDataSource(@Param("param") MpDevopsLoadSource requestData);
 
-    Boolean addSynchronousDataSource(@Param("param") JSONObject requestData);
+    Boolean addSynchronousDataSource(@Param("param") MpDevopsLoadSource requestData);
 
     MpDevopsLoadSource getSynchronousDataSource();
 
