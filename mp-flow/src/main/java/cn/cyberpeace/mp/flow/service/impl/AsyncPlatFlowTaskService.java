@@ -583,12 +583,10 @@ public class AsyncPlatFlowTaskService {
                 String finalFixedIp = fixedIp;
                 boolean flag = NetworkUtils.probePort(fixedIp, 22, 1000, 1000,
                         1000 * 60 * 10, null, 0);
-                if (flag) {
-                    checkTrexServer(finalFixedIp, networkInfos, flowActuatorModel, externalNetId);
-                } else {
+                if (!flag) {
                     log.error("Trex vm start error:{}", addVmRequest.getName());
                 }
-
+                checkTrexServer(finalFixedIp, networkInfos, flowActuatorModel, externalNetId);
             } else {
                 log.error("add trex vm error");
                 throw new MpRuntimeException(addVmObj.getString(BaseConstants.STR_DETAIL));
