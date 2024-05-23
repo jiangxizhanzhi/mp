@@ -522,6 +522,9 @@ public abstract class BaseSceneHandler<
         if (elementMap.isEmpty()) {
             return;
         }
+        if (areaId == null) {
+            return;
+        }
 
         List<String> outerNodeIds = new ArrayList<>();
         List<TSceneAreaNodeConnectionModel> list = sceneNodeConnectionMapper.list(new HumanCondition().filterEqual(BaseSceneAreaNodeConnectionModel::getScene, sceneId));
