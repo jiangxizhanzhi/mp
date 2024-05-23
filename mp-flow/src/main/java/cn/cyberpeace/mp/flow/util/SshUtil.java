@@ -6,6 +6,7 @@ import com.jcraft.jsch.*;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.util.IOUtils;
 
 import java.io.*;
@@ -88,7 +89,7 @@ public class SshUtil {
             }
         } catch (Exception e) {
             //设置执行失败的响应内容
-            log.error("refresh dir error , serverInfo is {}", JsonCommon.stringify(serverInfo), e);
+            log.error("refresh dir error , serverInfo is {},exception is {}", JsonCommon.stringify(serverInfo), ExceptionUtils.getStackTrace(e));
         } finally {
             close(sftpChannel);
             close(session);
