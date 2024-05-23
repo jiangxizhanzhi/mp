@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.thread.ThreadUtils;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
@@ -440,15 +441,15 @@ public class SceneService {
                 .getName(), SceneElementModel.Event.RESTART);
         SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(id, newEventInfo);
         if (originLockInfo == null) {
+            var restartTask = ThreadUtils.format(() -> {
+                try {
+                    sceneHandler.restartElement(nodeId);
+                } finally {
+                    SceneEventUtils.unLock(id);
+                }
+            });
             // 锁获取成功 没有其他线程执行操作
-            ElementTaskPool.getInstance()
-                    .executeTask(() -> {
-                        try {
-                            sceneHandler.restartElement(nodeId);
-                        } finally {
-                            SceneEventUtils.unLock(id);
-                        }
-                    });
+            ElementTaskPool.getInstance().executeTask(restartTask);
             return new ServiceResult<>(true);
         } else if (originLockInfo.getEvent() == SceneElementModel.Event.RESTART) {
             // 锁获取失败, 其它线程正在执行相同操作 则直接返回成功
