@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant;
 import cn.cyberpeace.mp.scenepluginflow.plugin.common.SceneHandlerUtils;
 import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.DeleteHandler;
+import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.InitiateHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.PrepareHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.modelhandler.FlowScenePluginModelHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
@@ -51,6 +52,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
     private CreateHandler createHandler;
     private DeleteHandler deleteHandler;
     private PrepareHandler prepareHandler ;
+    private InitiateHandler initiateHandler ;
 
     @Resource
     private FlowPostService postService;
@@ -70,6 +72,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         createHandler = new CreateHandler(this);
         deleteHandler = new DeleteHandler(this);
         prepareHandler = new PrepareHandler(this);
+        initiateHandler = new InitiateHandler(this);
     }
 
     @Override
@@ -127,6 +130,10 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
     @Override
     public void prepare(boolean partialStart) {
         prepareHandler.prepare(partialStart);
+    }
+
+    public void initiate() throws Exception {
+        initiateHandler.initiate();
     }
 
     @Override
