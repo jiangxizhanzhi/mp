@@ -60,7 +60,7 @@ public class AzureContainer {
 //        String imageName = registrytest0407.loginServerUrl() + "/samples/" + "nginx";
         String imageName = registrytest0407.loginServerUrl() + "/" + image;
 
-        ContainerGroup container = azureResourceManager
+       /* ContainerGroup container = azureResourceManager
                 .containerGroups()
                 .define(containerName)
                 .withRegion(this.region)
@@ -82,6 +82,30 @@ public class AzureContainer {
                 .attach()
 //                TODO 设置网络
                 .withNewNetworkProfileOnExistingVirtualNetwork(networkId, subnetName)
+                .withRestartPolicy(ContainerGroupRestartPolicy.NEVER)
+                .create();*/
+
+        ContainerGroup.DefinitionStages.WithNextContainerInstance attach = (ContainerGroup.DefinitionStages.WithNextContainerInstance) azureResourceManager
+                .containerGroups()
+                .define(containerName)
+                .withRegion(this.region)
+                .withNewResourceGroup(groupName)
+                .withLinux()
+//                .withPublicImageRegistryOnly()
+                .withPrivateImageRegistry(registrytest0407.loginServerUrl(), acrCredentials.username(), acrCredentials.accessKeys().get(AccessKeyType.PRIMARY))
+                .withoutVolume()
+                .defineContainerInstance(containerGroupName)
+//                TODO 前端未传先写死
+                .withImage(imageName)
+                .withExternalTcpPort(80)
+                .withCpuCoreCount(0.5)
+                .withMemorySizeInGB(0.8)
+//                    上面的简写方法 默认cpu1 memorySize1.5
+//                .withContainerInstance(imageName, 80)
+//                TODO 配置环境后无法设置网络与创建
+                .withEnvironmentVariables(environment)
+                .attach();
+        ContainerGroup container = attach.withNewNetworkProfileOnExistingVirtualNetwork(networkId, subnetName)
                 .withRestartPolicy(ContainerGroupRestartPolicy.NEVER)
                 .create();
 
