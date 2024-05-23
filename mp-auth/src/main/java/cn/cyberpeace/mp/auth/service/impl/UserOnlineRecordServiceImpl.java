@@ -54,7 +54,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
 
     @Override
-    public PageInfo<UserOnlineRecordSummaryDto> recordSummaryPage(UserOnlineRecordSummaryPageRequest req) {
+    public PageInfo<UserOnlineReportDto> recordSummaryPage(UserOnlineRecordSummaryPageRequest req) {
         req.ensure();
         PageHelper.startPage(req.getPage(), req.getPageSize());
         List<UserOnlineRecordSummaryTmpDto> recordSummaryList = getModelMapper().listRecordSummary(req.getUserId(), req.getStartTime(), req.getEndTime());
