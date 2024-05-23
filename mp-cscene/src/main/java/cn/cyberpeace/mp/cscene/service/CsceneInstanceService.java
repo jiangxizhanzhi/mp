@@ -1321,6 +1321,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         if (context != null) {
             context.loadTransparentContext();
+            CsceneContextHolder.setCsceneInstanceId(id);
         }
         return this.sceneService.pause(sceneId, context.toSceneContext());
     }
@@ -1332,6 +1333,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         if (context != null) {
             context.loadTransparentContext();
+            CsceneContextHolder.setCsceneInstanceId(id);
         }
         return this.sceneService.unpause(sceneId, context.toSceneContext());
     }
@@ -1343,6 +1345,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         if (context != null) {
             context.loadTransparentContext();
+            CsceneContextHolder.setCsceneInstanceId(id);
         }
         return this.sceneService.suspend(sceneId, context.toSceneContext());
     }
@@ -1354,6 +1357,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         if (context != null) {
             context.loadTransparentContext();
+            CsceneContextHolder.setCsceneInstanceId(id);
         }
         return this.sceneService.resume(sceneId, context.toSceneContext());
     }
@@ -1372,6 +1376,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         if (context != null) {
             context.loadTransparentContext();
+            CsceneContextHolder.setCsceneInstanceId(id);
         }
         return this.sceneService.startElement(sceneId, nodeId, context.toSceneContext());
     }
@@ -1404,6 +1409,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         if (context != null) {
             context.loadTransparentContext();
+            CsceneContextHolder.setCsceneInstanceId(id);
         }
         return this.sceneService.stopElement(sceneId, nodeId, context.toSceneContext());
     }
@@ -1415,6 +1421,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         if (context != null) {
             context.loadTransparentContext();
+            CsceneContextHolder.setCsceneInstanceId(id);
         }
         return this.sceneService.pauseElement(sceneId, nodeId, context.toSceneContext());
     }
@@ -1426,6 +1433,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         if (context != null) {
             context.loadTransparentContext();
+            CsceneContextHolder.setCsceneInstanceId(id);
         }
         return this.sceneService.unpauseElement(sceneId, nodeId, context.toSceneContext());
     }
@@ -1437,6 +1445,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         if (context != null) {
             context.loadTransparentContext();
+            CsceneContextHolder.setCsceneInstanceId(id);
         }
         return this.sceneService.restartElement(sceneId, nodeId, context.toSceneContext());
     }
@@ -1448,6 +1457,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         if (context != null) {
             context.loadTransparentContext();
+            CsceneContextHolder.setCsceneInstanceId(id);
         }
         return this.sceneService.createElement(sceneId, nodeId, context.toSceneContext());
     }
@@ -1459,6 +1469,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         if (context != null) {
             context.loadTransparentContext();
+            CsceneContextHolder.setCsceneInstanceId(id);
         }
         return this.sceneService.recreateElement(sceneId, nodeId, image, context.toSceneContext());
     }
@@ -1498,6 +1509,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         if (context != null) {
             context.loadTransparentContext();
+            CsceneContextHolder.setCsceneInstanceId(id);
         }
         return this.sceneService.suspendElement(sceneId, nodeId, context.toSceneContext());
     }
@@ -1509,6 +1521,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         if (context != null) {
             context.loadTransparentContext();
+            CsceneContextHolder.setCsceneInstanceId(id);
         }
         return this.sceneService.resumeElement(sceneId, nodeId, context.toSceneContext());
     }
