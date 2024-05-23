@@ -14,9 +14,9 @@ public enum TargetEnum {
     COLLECTION_TEMPLATE(new String[]{"collection-template"}),
     COURSE_FOLDER(new String[]{"course-folder"}),
     COURSES(new String[]{"courses"}),
-    CR_INDIVIDUAL_TRAINING(new String[]{"cr-individual-training"}),
+    CR_INDIVIDUAL_TRAINING(new String[]{"cr-individual-training"}), // 后台单兵训练
     CR_MISSION_ARRANGE_FOLDER(new String[]{"cr-mission-arrange-folder"}),
-    CR_TEAM_TRAINING(new String[]{"cr-team-training"}),
+    CR_TEAM_TRAINING(new String[]{"cr-team-training"}), // 后台团队训练
     CT_AD_LIST(new String[]{"ct-ad-list"}),
     CT_AD_QUESTION_LIST(new String[]{"ct-ad-question-list"}),
     CT_ARENA_LIST(new String[]{"ct-arena-list"}),
@@ -54,11 +54,11 @@ public enum TargetEnum {
     PERSONAL_CENTER(new String[]{"personal-center"}),
     PERSONAL_FOLDER(new String[]{"personal-folder"}),
     RANGE_TEST(new String[]{"range-test"}),
-    RANGE_TEST_SELF(new String[]{"range-test-self"}),
+    RANGE_TEST_SELF(new String[]{"range-test-self"}), //前台靶场测评
     REAL_EQUIPMENT_MANAGEMENT(new String[]{"real-equipment-management"}),
     REAL_MANAGE(new String[]{"real-manage"}),
-    RED_VS_BLUE(new String[]{"red-vs-blue"}),
-    RED_BLUE(new String[]{"red-blue"}),
+    RED_VS_BLUE(new String[]{"red-vs-blue"}), // 前台红蓝对抗
+    RED_BLUE(new String[]{"red-blue"}), // 后台红蓝对抗
     RED_VS_BLUE_WEB_FOLDER(new String[]{"red-vs-blue-web-folder"}),
     RESOURCE_USAGE_MANAGEMENT(new String[]{"resource-usage-management"}),
     SERVICE_MANAGE(new String[]{"service-manage"}),
@@ -100,7 +100,7 @@ public enum TargetEnum {
             GROUP_TRAINING.getTargets()[0], OJ_COURSE.getTargets()[0], OJ_PRACTICE_CAPTURE_FLAG.getTargets()[0], PERSONAL_FOLDER.getTargets()[0], RANGE_TEST.getTargets()[0],
             RED_VS_BLUE_WEB_FOLDER.getTargets()[0], RED_BLUE.getTargets()[0], SINGLE_LIST.getTargets()[0], VULNERABILITY_LIBRARY.getTargets()[0]}),
 
-    CSCENE_MONITOR_GROUP(new String[]{TargetEnum.GROUP_TRAINING.getTargets()[0], TargetEnum.INSTANCE_MONITORING.getTargets()[0], TargetEnum.RANGE_TEST_SELF.getTargets()[0], TargetEnum.RED_VS_BLUE.getTargets()[0], TargetEnum.SINGLE_LIST.getTargets()[0]}),
+    CSCENE_MONITOR_GROUP(new String[]{TargetEnum.DASHBOARD.getTargets()[0], TargetEnum.GROUP_TRAINING.getTargets()[0], TargetEnum.INSTANCE_MONITORING.getTargets()[0], TargetEnum.RANGE_TEST_SELF.getTargets()[0], TargetEnum.RED_VS_BLUE.getTargets()[0], TargetEnum.SINGLE_LIST.getTargets()[0]}),
 
     CSCENE_PROTOCOL_GROUP(new String[]{COURSES.getTargets()[0], CR_INDIVIDUAL_TRAINING.getTargets()[0], CR_TEAM_TRAINING.getTargets()[0],
             CT_CFS_LIST.getTargets()[0], CT_CFS_QUESTION_LIST.getTargets()[0], CT_CONTEST_CFS_LIST.getTargets()[0], CT_CONTEST_OPERATION_LIST.getTargets()[0],

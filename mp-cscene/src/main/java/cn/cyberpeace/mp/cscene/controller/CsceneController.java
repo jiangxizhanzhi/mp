@@ -88,7 +88,7 @@ import java.util.regex.Pattern;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/cscenes")
 @Data
-@AuthTarget({TargetEnum.CT_AD_LIST, TargetEnum.CT_CFS_LIST, TargetEnum.CT_OPERATION_LIST})
+@AuthTarget({TargetEnum.CT_AD_LIST, TargetEnum.CT_CFS_LIST, TargetEnum.CT_OPERATION_LIST, TargetEnum.CR_INDIVIDUAL_TRAINING, TargetEnum.CR_TEAM_TRAINING, TargetEnum.RED_BLUE, TargetEnum.RANGE_TEST_SELF })
 public class CsceneController implements BaseModelListControllerBase {
 
 
