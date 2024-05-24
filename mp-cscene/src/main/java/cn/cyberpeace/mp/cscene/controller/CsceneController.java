@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
+import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -689,21 +690,40 @@ public class CsceneController implements BaseModelListControllerBase {
             }
         }
 
-        CsceneRoleMapper mapper = BeanCommon.getBean(CsceneRoleMapper.class);
-        mapper.filterDelete(new HumanCondition().filterEqual(CsceneRoleModel::getCscene, csceneBO.getId()));
-        if (CollectionUtils.isNotEmpty(csceneBO.getRoles())) {
-            List<CsceneRoleModel> models = new ArrayList<>();
-            csceneBO.getRoles().forEach(r -> {
-                var m = r.toModel();
-                m.setCscene(result.getSource().getId());
-                models.add(m);
-            });
-            mapper.bulkCreate(models);
+        try {
+            CsceneRoleMapper mapper = BeanCommon.getBean(CsceneRoleMapper.class);
+            mapper.filterDelete(new HumanCondition().filterEqual(CsceneRoleModel::getCscene, csceneBO.getId()));
+            if (CollectionUtils.isNotEmpty(csceneBO.getRoles())) {
+                List<CsceneRoleModel> roleObjs = convertToRoleObjs(csceneBO.getRoles(), null);
+                roleObjs.forEach(r -> r.setCscene(csceneBO.getId()));
+                mapper.bulkCreate(roleObjs).getSuccessCount();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
 
         var topo = result.getData().getSceneConfig().getTopology();
         return this.getByArea(csceneBO.getId(), topo.getAreaId());
+    }
+
+    private List<CsceneRoleModel> convertToRoleObjs(List<CsceneRoleBO> roleBOs, String parentId) {
+        List<CsceneRoleModel> roleObjs = new ArrayList<>();
+        if (roleBOs == null) {
+            return roleObjs;
+        }
+
+        for (CsceneRoleBO roleBO : roleBOs) {
+            var roleObj = roleBO.toModel();
+            roleObj.setParent(parentId);
+            roleObj.initDefault(BaseModel::getId);
+            roleObjs.add(roleObj);
+
+            var children = roleBO.getChildren();
+            if (children != null) {
+                roleObjs.addAll(convertToRoleObjs(children, roleObj.getId()));
+            }
+        }
+        return roleObjs;
     }
 
     @ApiOperation(value = "业务服务端保存（创建/更新）场景模板", notes = "不会校验节点数量,请忽略test_scenes和app_scenes字段")
