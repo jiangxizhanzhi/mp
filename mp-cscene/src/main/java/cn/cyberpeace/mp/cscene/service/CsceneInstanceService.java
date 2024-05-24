@@ -14,7 +14,6 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.base.service.result.BaseObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -32,7 +31,10 @@ import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
-import cn.cyberpeace.mp.cscene.model.*;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
+import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.report.bo.CollectedCsceneElementCommonBO;
 import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
@@ -89,8 +91,10 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
+import cn.cyberpeace.mp.sceneplugincollection.model.ElementLogListModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincollection.repository.ElementLogListMapper;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
@@ -98,8 +102,10 @@ import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhProbeDataModel;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import cn.cyberpeace.mp.situationaware.repository.ProbeScriptMapper;
+import cn.cyberpeace.mp.situationaware.repository.WazuhProbeDataMapper;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
@@ -214,7 +220,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Resource
     private AzureVimSizeMapper azureVimSizeMapper;
 
+    @Autowired
+    private ElementLogListMapper elementLogListMapper;
 
+    @Autowired
+    private WazuhProbeDataMapper wazuhProbeDataMapper;
 
     // expires in 10 minutes
     private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -964,8 +974,77 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                         FileEventType.REGISTRY.name());
             }
         }
+        ListObjServiceResult<CollectionHostEventBO> hostEvents = scenePluginCollectionSceneService.listHostEvents(sceneId, queryParams);
+        mergeFileData(hostEvents, queryParams, id);
+        return hostEvents;
+    }
 
-        return scenePluginCollectionSceneService.listHostEvents(sceneId, queryParams);
+    private void mergeFileData(ListObjServiceResult<CollectionHostEventBO> hostEventsBos, HostEventQueryParams queryParams,
+                               String sceneId) {
+
+        if (CollectionUtils.isNotEmpty(queryParams.getNodeIds())) {
+            return;
+        }
+        if (CollectionUtils.isNotEmpty(queryParams.getAppNames())) {
+            return;
+        }
+
+        List<CollectionHostEventBO> bos = hostEventsBos.getSource().getObjs();
+        HumanCondition humanCondition = new HumanCondition().currentLink(ElementLogListModel.class)
+                                                            .filterEqual(ElementLogListModel::getSceneId, sceneId)
+                                                            .filterIn(ElementLogListModel::getCatagory, queryParams.getCatagories().toArray());
+
+        if (StringUtils.isNotEmpty(queryParams.getStartTime())) {
+            humanCondition.filterGreaterThan(ElementLogListModel::getTime, queryParams.getStartTime());
+        }
+        if (StringUtils.isNotEmpty(queryParams.getEndTime())) {
+            humanCondition.filterLessThan(ElementLogListModel::getTime, queryParams.getEndTime());
+        }
+        if (CollectionUtils.isNotEmpty(queryParams.getLevels())) {
+            humanCondition.filterIn(ElementLogListModel::getLevel, queryParams.getLevels().toArray());
+        }
+        if (CollectionUtils.isNotEmpty(queryParams.getKeyword())) {
+            humanCondition.filterContains(ElementLogListModel::getDescription, queryParams.getKeyword().get(0));
+        }
+        var logList = elementLogListMapper.list(humanCondition);
+
+        // 设置total
+        int alreadyHasNum = hostEventsBos.getSource().getTotal();
+        hostEventsBos.getSource().setTotal(alreadyHasNum + logList.size());
+
+        // 当前页元素数量足够
+        int pageSize = queryParams.getPageSize();
+        if (bos.size() == pageSize) {
+            return;
+        }
+
+        // 计算分页起始位置
+        int totalNeedNum = pageSize * queryParams.getPage();
+        int stillNeedNum = totalNeedNum - alreadyHasNum;
+        int startIndex = stillNeedNum <= pageSize ? 0 : stillNeedNum - pageSize;
+        if (startIndex >= logList.size()) {
+            return;
+        }
+        logList = logList.subList(startIndex, Math.min(logList.size(), stillNeedNum));
+
+        for (ElementLogListModel model : logList) {
+            CollectionHostEventBO bo = new CollectionHostEventBO();
+            bo.setNodeName(model.getNodeName());
+            if (Objects.nonNull(model.getLevel())) {
+                bo.setLevel(model.getLevel());
+            } else {
+                bo.setLevel(-1);
+            }
+            bo.setDescription(model.getDescription());
+            bo.setTime(model.getTime());
+            bo.setAppName(model.getAppName());
+            bo.setEventDesc(model.getEventDesc());
+            bo.setLevel(model.getLevel());
+            bos.add(bo);
+            if (bos.size() == queryParams.getPageSize()) {
+                return;
+            }
+        }
     }
 
     /**
@@ -1034,7 +1113,61 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     probeId, queryParams, cloudPluginHandler, type);
         } else {
             // 无探针id，查询所有自定义探针采集数据
-            return getCustomProbeCollectData(sceneInstanceId, sceneId, newNodeIds, pluginHandler, nodeId2ProbeNameMap, queryParams);
+            ListObjServiceResult<CollectionHostEventBO> hostEventsBos = getCustomProbeCollectData(sceneInstanceId, sceneId, newNodeIds, pluginHandler, nodeId2ProbeNameMap, queryParams);
+            mergeCustomProbeCollectData(hostEventsBos, queryParams, sceneInstanceId);
+            return hostEventsBos;
+        }
+    }
+
+
+    private void mergeCustomProbeCollectData(ListObjServiceResult<CollectionHostEventBO> hostEventsBos, HostEventQueryParams queryParams, String sceneId) {
+
+        List<CollectionHostEventBO> bos = hostEventsBos.getSource().getObjs();
+
+        HumanCondition humanCondition = new HumanCondition().currentLink(WazuhProbeDataModel.class)
+                                                            .filterEqual(WazuhProbeDataModel::getSceneId, sceneId);
+
+        if (StringUtils.isNotEmpty(queryParams.getStartTime())) {
+            humanCondition.filterGreaterThan(WazuhProbeDataModel::getTime, queryParams.getStartTime());
+        }
+        if (StringUtils.isNotEmpty(queryParams.getEndTime())) {
+            humanCondition.filterLessThan(WazuhProbeDataModel::getTime, queryParams.getEndTime());
+        }
+        if (CollectionUtils.isNotEmpty(queryParams.getKeyword())) {
+            humanCondition.filterContains(WazuhProbeDataModel::getProbeName, queryParams.getKeyword().get(0));
+        }
+
+        var dataList = wazuhProbeDataMapper.list(humanCondition);
+
+        // 设置total
+        int alreadyHasNum = hostEventsBos.getSource().getTotal();
+        hostEventsBos.getSource().setTotal(alreadyHasNum + dataList.size());
+
+        // 当前页元素数量足够
+        int pageSize = queryParams.getPageSize();
+        if (bos.size() == pageSize) {
+            return;
+        }
+
+        // 计算分页起始位置
+        int totalNeedNum = pageSize * queryParams.getPage();
+        int stillNeedNum = totalNeedNum - alreadyHasNum;
+        int startIndex = stillNeedNum <= pageSize ? 0 : stillNeedNum - pageSize;
+        if (startIndex >= dataList.size()) {
+            return;
+        }
+        dataList = dataList.subList(startIndex, Math.min(dataList.size(), stillNeedNum));
+
+        for (WazuhProbeDataModel model : dataList) {
+            CollectionHostEventBO bo = new CollectionHostEventBO();
+            bo.setNodeName(model.getNodeName());
+            bo.setProbeName(model.getProbeName());
+            bo.setEventDesc(model.getEventDesc());
+            bo.setTime(model.getTime());
+            bos.add(bo);
+            if (bos.size() == queryParams.getPageSize()) {
+                return;
+            }
         }
     }
 

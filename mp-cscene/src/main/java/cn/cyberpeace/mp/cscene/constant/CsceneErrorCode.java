@@ -39,6 +39,7 @@ public enum CsceneErrorCode implements ErrorCode {
     SCENE_INSTANCE_NEED_CLEAR("MP-110292", "scene_instance_need_clear"),
     SCENE_INSTANCE_STILL_NEED_CLEAR("MP-110293", "scene_instance_still_need_clear"),
     PARAMS_FIELD_ERROR("MP-110300", "params_field_error"),
+    EXPORT_ERROR("MP-110301", "export_error"),
     ;
 
     CsceneErrorCode(String code, String message) {

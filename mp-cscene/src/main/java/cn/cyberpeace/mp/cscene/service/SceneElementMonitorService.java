@@ -2,17 +2,17 @@ package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.constant.ExcelHeader;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.base.util.mptool.CollUtil;
-import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
-import cn.cyberpeace.mp.base.util.mptool.NumberUtil;
+import cn.cyberpeace.mp.base.util.mptool.*;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.element.*;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
@@ -28,28 +28,43 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.ImportFileBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
+import cn.cyberpeace.mp.sceneplugincollection.model.ElementFileCountModel;
+import cn.cyberpeace.mp.sceneplugincollection.model.ElementFileListModel;
+import cn.cyberpeace.mp.sceneplugincollection.model.ElementLogListModel;
+import cn.cyberpeace.mp.sceneplugincollection.repository.ElementFileCountMapper;
+import cn.cyberpeace.mp.sceneplugincollection.repository.ElementFileListMapper;
+import cn.cyberpeace.mp.sceneplugincollection.repository.ElementLogListMapper;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SicLaunchConfig;
-import cn.cyberpeace.mp.situationaware.model.FileEventModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
-import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoCountModel;
+import cn.cyberpeace.mp.situationaware.model.*;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
+import cn.cyberpeace.mp.situationaware.repository.WazuhProbeDataMapper;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -96,6 +111,18 @@ public class SceneElementMonitorService {
 
     @Autowired
     private SituationAwareConfig situationAwareConfig;
+
+    @Autowired
+    private ElementFileListMapper elementFileListMapper;
+
+    @Autowired
+    private ElementFileCountMapper elementFileCountMapper;
+
+    @Autowired
+    private ElementLogListMapper elementLogListMapper;
+
+    @Autowired
+    private WazuhProbeDataMapper wazuhProbeDataMapper;
 
     private Integer getWazuhVulnerabilityScanInterval() {
         return CollectionSingleton.collectionAppConfig.getWazuhVulnerabilityScanInterval();
@@ -392,6 +419,7 @@ public class SceneElementMonitorService {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
         var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        List<String> elementIds = pageRequest.getElementIds();
         // 不传节点id默认查询全部节点
         if (pageRequest.getElementIds() == null || pageRequest.getElementIds().isEmpty()) {
             pageRequest.setElementIds(sceneHandler.getElementMap().values().stream().map(e -> e.getId()).collect(Collectors.toList()));
@@ -408,6 +436,7 @@ public class SceneElementMonitorService {
         hostEventQueryParams.setPageSize(pageRequest.getPageSize());
         ListObjServiceResult<CollectionHostEventBO> hostEventsBos = csceneInstanceService.listHostEvents(pageRequest.getSceneId(), hostEventQueryParams);
         mergeModifyData(hostEventsBos, hostEventQueryParams, pageRequest, sceneHandler);
+        mergeFileData(hostEventsBos, hostEventQueryParams, pageRequest, elementIds);
 
         return hostEventsBos;
 
@@ -524,6 +553,75 @@ public class SceneElementMonitorService {
         }
     }
 
+    private void mergeFileData(ListObjServiceResult<CollectionHostEventBO> hostEventsBos,
+                                 HostEventQueryParams hostEventQueryParams, ElementMonitorRequest pageRequest, List<String> elementIds) {
+        if (CollectionUtils.isNotEmpty(elementIds)) {
+            return;
+        }
+        List<CollectionHostEventBO> bos = hostEventsBos.getSource().getObjs();
+        HumanCondition humanCondition = new HumanCondition().currentLink(ElementFileListModel.class)
+                                                            .filterIn(ElementFileListModel::getGroup, hostEventQueryParams.getRuleGroups().toArray())
+                                                            .filterEqual(ElementFileListModel::getSceneId, pageRequest.getSceneId());
+        if (CollectionUtils.isNotEmpty(pageRequest.getLevels())) {
+            humanCondition.filterIn(ElementFileListModel::getLevel, pageRequest.getLevels().toArray());
+        }
+        var fileList = elementFileListMapper.list(humanCondition);
+
+        // 设置total
+        int alreadyHasNum = hostEventsBos.getSource().getTotal();
+        hostEventsBos.getSource().setTotal(alreadyHasNum + fileList.size());
+
+        // 当前页元素数量足够
+        int pageSize = hostEventQueryParams.getPageSize();
+        if (bos.size() == pageSize) {
+            return;
+        }
+
+        // 计算分页起始位置
+        int totalNeedNum = pageSize * hostEventQueryParams.getPage();
+        int stillNeedNum = totalNeedNum - alreadyHasNum;
+        int startIndex = stillNeedNum <= pageSize ? 0 : stillNeedNum - pageSize;
+        if (startIndex >= fileList.size()) {
+            return;
+        }
+        fileList = fileList.subList(startIndex, Math.min(fileList.size(), stillNeedNum));
+
+        for (ElementFileListModel file : fileList) {
+            CollectionHostEventBO bo = new CollectionHostEventBO();
+            bo.setNodeName(file.getNodeName());
+            if (Objects.nonNull(file.getLevel())) {
+                bo.setLevel(file.getLevel());
+            } else {
+                bo.setLevel(-1);
+            }
+            if (StringUtils.isNotEmpty(file.getPath()) && file.getPath().endsWith("---file_not_exists---")) {
+                bo.setPath(StringUtils.replace(file.getPath(), "---file_not_exists---", ""));
+                bo.setDescription("-");
+            } else if (StringUtils.isNotEmpty(file.getPath()) && file.getPath().contains("---file_size---")) {
+                String[] fileSize = file.getPath().split("---file_size---");
+                if (fileSize.length > 0) {
+                    bo.setPath(fileSize[0]);
+                }
+                if (fileSize.length > 1) {
+                    if (NumberUtil.isNumber(fileSize[1])) {
+                        bo.setFileSize(fileSize[1]);
+                    }
+                }
+                bo.setDescription(StringUtils.EMPTY);
+            } else {
+                bo.setPath(file.getPath());
+            }
+            bo.setTime(file.getUpdateTime());
+            bo.setFileSize(file.getFileSize());
+            bo.setMd5Before(file.getMd5Before());
+            bo.setMd5After(file.getMd5After());
+            bos.add(bo);
+            if (bos.size() == hostEventQueryParams.getPageSize()) {
+                return;
+            }
+        }
+    }
+
     /**
      * 按时间分桶查询事件数
      *
@@ -569,7 +667,24 @@ public class SceneElementMonitorService {
         //var infos = processHistogramList(endTime, bucketSize, intervalMinutes, resultMap);
         List<ElementHistogramInfo> finalList = infos.stream().limit(bucketSize).collect(Collectors.toList());
         Collections.reverse(finalList);
+        mergeFileCount(finalList, pageRequest.getSceneId(), ruleGroups);
         return finalList;
+    }
+
+    private List<ElementHistogramInfo> mergeFileCount(List<ElementHistogramInfo> histogramInfos,
+                               String sceneId, List<String> group) {
+        List<String> timeList = histogramInfos.stream().map(ElementHistogramInfo::getTime).collect(Collectors.toList());
+        HumanCondition humanCondition = new HumanCondition().currentLink(ElementFileCountModel.class)
+                                                            .filterEqual(ElementFileCountModel::getSceneId, sceneId)
+                                                            .filterIn(ElementFileCountModel::getTime, timeList.toArray())
+                                                            .filterNotEqual(ElementFileCountModel::getCount, 0)
+                                                            .filterIn(ElementFileCountModel::getGroup, group.toArray());
+        List<ElementFileCountModel> countModels = elementFileCountMapper.list(humanCondition);
+        Map<String, ElementHistogramInfo> histogramInfoMap = histogramInfos.stream().collect(Collectors.toMap(ElementHistogramInfo::getTime, e -> e));
+        for (ElementFileCountModel model : countModels) {
+            histogramInfoMap.get(model.getTime()).setCount(histogramInfoMap.get(model.getTime()).getCount() + model.getCount());
+        }
+        return new ArrayList<>(histogramInfoMap.values());
     }
 
     @Deprecated
@@ -785,6 +900,219 @@ public class SceneElementMonitorService {
             countInfos.add(countInfo);
         });
         return countInfos;
+    }
+
+
+    public void exportData(HttpServletResponse response, String sceneId, String elementId, String type) {
+        ElementMonitorRequest pageRequest = new ElementMonitorRequest();
+        pageRequest.setSceneId(sceneId);
+        pageRequest.setPage(1);
+        pageRequest.setPageSize(1000);
+        if (StringUtils.isNotBlank(elementId)) {
+            pageRequest.setElementIds(Collections.singletonList(elementId));
+        }
+        JSONObject result = new JSONObject();
+
+        //文件变更列表
+        List<ElementFileListModel> fileList = getModifyData(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP, null).asResult()
+                .sourceList().stream()
+                .map(file -> collectionHostEventBO2ElementFileListModel(file, CsceneBizConstant.FILE_MODIFY_GROUP.get(0)))
+                .collect(Collectors.toList());
+        result.put("file_list", JSON.toJSON(fileList));
+
+        //文件变更数据
+        List<ElementFileCountModel> fileCount = listEventHistogram(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP, 15, 15)
+                .stream()
+                .map(count -> elementHistogramInfo2ElementFileCountModel(count, CsceneBizConstant.FILE_MODIFY_GROUP.get(0)))
+                .collect(Collectors.toList());
+        result.put("file_count", JSON.toJSON(fileCount));
+
+        //注册表变更列表
+        List<ElementFileListModel> registryList = getModifyData(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP, null)
+                .sourceList().stream()
+                .map(registry -> collectionHostEventBO2ElementFileListModel(registry, CsceneBizConstant.REGISTRY_MODIFY_GROUP.get(0)))
+                .collect(Collectors.toList());
+        result.put("registry_list", JSON.toJSON(registryList));
+
+        //注册表变更数量
+        List<ElementFileCountModel> registryCount = listEventHistogram(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP, 15, 15)
+                .stream()
+                .map(count -> elementHistogramInfo2ElementFileCountModel(count, CsceneBizConstant.REGISTRY_MODIFY_GROUP.get(0)))
+                .collect(Collectors.toList());
+        result.put("registry_count", JSON.toJSON(registryCount));
+
+        HostEventQueryParams queryParams = getExportDataParams(sceneId, elementId);
+        queryParams.setCatagories(Arrays.asList("020101","020102","020103","020104","020105","020106","020107",
+                "020201","020202","020203","020204","020205","020206","020207","020208","020210",
+                "020301","020302","020303","020304","020305","020313"));
+
+        //日志事件
+        List<ElementLogListModel> logList = csceneInstanceService.listHostEvents(sceneId, queryParams).asResult()
+                .sourceList().stream()
+                .map(this::collectionHostEventBO2ElementLogListModel)
+                .collect(Collectors.toList());
+        result.put("log", JSON.toJSON(logList));
+
+        //自定义采集
+        List<WazuhProbeDataModel> probeList = csceneInstanceService.getProbeCollectionData(null, sceneId, null, queryParams, null)
+                .sourceList().stream()
+                .map(this::collectionHostEventBO2WazuhProbeDataModel)
+                .collect(Collectors.toList());
+        result.put("probe", JSON.toJSON(probeList));
+
+        String fileName = "tmp/data";
+
+        if ("json".equals(type)) {
+            try (FileWriter writer = new FileWriter(fileName + ".json")){
+                writer.write(result.toString());
+            }catch (IOException e) {
+                log.error("export data fail, sceneId = {}, elementId = {}, type = {}",sceneId, elementId, type);
+                throw new MpRuntimeException(CsceneErrorCode.EXPORT_ERROR);
+            }
+            FileUtil.setResponse(new File(fileName + ".json"), true, response);
+        } else if ("yml".equals(type)) {
+            try (FileWriter fileWriter = new FileWriter(fileName + ".yml")) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonNode = objectMapper.readTree(result.toJSONString());
+
+                fileWriter.write(new YAMLMapper().writeValueAsString(jsonNode));
+            }catch (IOException e) {
+                log.error("export data fail, sceneId = {}, elementId = {}, type = {}",sceneId, elementId, type);
+                throw new MpRuntimeException(CsceneErrorCode.EXPORT_ERROR);
+            }
+            FileUtil.setResponse(new File(fileName + ".yml"), true, response);
+        } else if ("xlsx".equals(type)) {
+
+            String filePath = fileName + ".xls";
+            ExcelDataHandler.exportExcel(fileCount, filePath, "文件变更数量",
+                    Arrays.asList("sceneId", "group", "log"), ExcelHeader.FILE_COUNT);
+
+            ExcelDataHandler.exportExcel(fileList, filePath, "文件变更列表",
+                    Arrays.asList("sceneId", "group", "md5Before", "md5After", "log"), ExcelHeader.FILE_LIST);
+
+            ExcelDataHandler.exportExcel(registryCount, filePath, "注册表变更数量",
+                    Arrays.asList("sceneId", "group", "md5Before", "md5After", "log"), ExcelHeader.FILE_COUNT);
+
+            ExcelDataHandler.exportExcel(registryList, filePath, "注册表变更列表",
+                    Arrays.asList("sceneId", "group", "level", "fileSize", "log"), ExcelHeader.REGISTRY_LIST);
+
+            ExcelDataHandler.exportExcel(logList, filePath, "日志事件",
+                    Arrays.asList("sceneId", "catagory", "log"), ExcelHeader.LOG_LIST);
+
+            ExcelDataHandler.exportExcel(probeList, filePath, "自定义采集",
+                    Arrays.asList("sceneId", "log"), ExcelHeader.PROBE_LIST);
+
+            FileUtil.setResponse(new File(fileName + ".xls"), true, response);
+        }
+    }
+
+    private ElementFileListModel collectionHostEventBO2ElementFileListModel(CollectionHostEventBO bo, String group) {
+        ElementFileListModel model = new ElementFileListModel();
+        model.setNodeName(bo.getNodeName());
+        model.setTime(bo.getTime());
+        model.setPath(bo.getPath());
+        model.setEventDesc(bo.getEventDesc());
+        model.setLevel(bo.getLevel());
+        model.setFileSize(bo.getFileSize());
+        model.setGroup(group);
+        model.setMd5Before(bo.getMd5Before());
+        model.setMd5After(bo.getMd5After());
+        return model;
+    }
+
+    private ElementFileCountModel elementHistogramInfo2ElementFileCountModel(ElementHistogramInfo info, String group) {
+        ElementFileCountModel model = new ElementFileCountModel();
+        model.setTime(info.getTime());
+        model.setCount(info.getCount());
+        model.setGroup(group);
+        return model;
+    }
+
+    private ElementLogListModel collectionHostEventBO2ElementLogListModel(CollectionHostEventBO bo) {
+        ElementLogListModel model = new ElementLogListModel();
+        model.setNodeName(bo.getNodeName());
+        model.setTime(bo.getTime());
+        model.setAppName(bo.getAppName());
+        model.setEventDesc(bo.getEventDesc());
+        model.setLevel(bo.getLevel());
+        model.setDescription(bo.getDescription());
+        model.setCatagory(bo.getCatagory());
+        return model;
+    }
+
+    private WazuhProbeDataModel collectionHostEventBO2WazuhProbeDataModel(CollectionHostEventBO bo) {
+        WazuhProbeDataModel model = new WazuhProbeDataModel();
+        model.setProbeName(bo.getProbeName());
+        model.setEventDesc(bo.getEventDesc());
+        model.setTime(bo.getTime());
+        model.setNodeName(bo.getNodeName());
+        return model;
+    }
+
+    private HostEventQueryParams getExportDataParams(String csceneId, String elementId) {
+        var sceneId = csceneInstanceService.getSceneId(csceneId);
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+
+        HostEventQueryParams hostEventQueryParams = new HostEventQueryParams();
+        // 不传节点id默认查询全部节点
+        if (elementId == null) {
+            hostEventQueryParams.setNodeIds(new ArrayList<>(sceneHandler.getElementMap().keySet()));
+        } else {
+            hostEventQueryParams.setNodeIds(Collections.singletonList(elementId));
+        }
+        hostEventQueryParams.setPage(1);
+        hostEventQueryParams.setPageSize(10000);
+        hostEventQueryParams.setPerPage(10000);
+        return hostEventQueryParams;
+    }
+
+    public void importData(ImportFileBO fileBO) {
+        MultipartFile multipartFile = fileBO.getFile();
+        String sceneId = fileBO.getSceneId();
+        String originalFileName = multipartFile.getOriginalFilename();
+        String fileSuffix = originalFileName.substring(originalFileName.lastIndexOf(".") + 1);
+
+        File file = new File("temp", originalFileName);
+        try {
+            multipartFile.transferTo(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if ("json".equals(fileSuffix)) {
+            String content =  FileUtil.getContent(file);
+            JSONObject jsonObject = JSON.parseObject(content);
+
+            String fileCount = jsonObject.getString("file_count");
+            List<ElementFileCountModel> fileCountModels = JSON.parseArray(fileCount, ElementFileCountModel.class);
+            fileCountModels.forEach(count -> count.setSceneId(sceneId));
+            elementFileCountMapper.bulkCreate(fileCountModels);
+
+            String fileList = jsonObject.getString("file_list");
+            List<ElementFileListModel> fileListModels = JSON.parseArray(fileList, ElementFileListModel.class);
+            fileListModels.forEach(list -> list.setSceneId(sceneId));
+            elementFileListMapper.bulkCreate(fileListModels);
+
+            String registryCount = jsonObject.getString("registry_count");
+            List<ElementFileCountModel> registryCountModels = JSON.parseArray(registryCount, ElementFileCountModel.class);
+            registryCountModels.forEach(count -> count.setSceneId(sceneId));
+            elementFileCountMapper.bulkCreate(registryCountModels);
+
+            String registryList = jsonObject.getString("registry_list");
+            List<ElementFileListModel> registryListModels = JSON.parseArray(registryList, ElementFileListModel.class);
+            registryListModels.forEach(list -> list.setSceneId(sceneId));
+            elementFileListMapper.bulkCreate(registryListModels);
+
+            String logList = jsonObject.getString("log");
+            List<ElementLogListModel> logListModels = JSON.parseArray(logList, ElementLogListModel.class);
+            logListModels.forEach(log -> log.setSceneId(sceneId));
+            elementLogListMapper.bulkCreate(logListModels);
+
+            String probeList = jsonObject.getString("probe");
+            List<WazuhProbeDataModel> wazuhProbeDataModels = JSON.parseArray(probeList, WazuhProbeDataModel.class);
+            wazuhProbeDataModels.forEach(dataModel -> dataModel.setSceneId(sceneId));
+            wazuhProbeDataMapper.bulkCreate(wazuhProbeDataModels);
+
+        }
     }
 
     private void processRequest(ElementMonitorRequest pageRequest, SceneHandler sceneHandler) {

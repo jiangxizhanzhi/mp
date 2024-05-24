@@ -6,13 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
-import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
-import cn.cyberpeace.mp.cscene.dto.element.ElementHistogramInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityCountInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityPieChartInfo;
+import cn.cyberpeace.mp.cscene.dto.element.*;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
@@ -20,18 +14,15 @@ import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.ImportFileBO;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Objects;
 
@@ -186,6 +177,24 @@ public class ElementMonitorController {
 
         var result = sceneElementMonitorService.getVulnerabilityInfo(pageRequest);
         return new ListObjServiceResult<>(result).asResult();
+    }
+
+    @ApiOperation("采集数据导出 (Json,Xml,Xlsx)")
+    @GetMapping("/export")
+    public ServiceResult<Boolean> exportFile(HttpServletResponse response,
+                                             @ApiParam(value = "导出格式(json、xml、xlsx)", required = true) String type,
+                                             @ApiParam(value = "场景id", required = true) String sceneId,
+                                             @ApiParam(value = "节点id") String nodeId) {
+        sceneElementMonitorService.exportData(response, sceneId, nodeId, type);
+        return ResultCommon.success(true);
+    }
+
+    @SneakyThrows
+    @ApiOperation("文件导入 (Json,Xml,Xlsx)")
+    @PostMapping("/import")
+    public ServiceResult<Boolean> importFile(ImportFileBO bo){
+        sceneElementMonitorService.importData(bo);
+        return ResultCommon.success(true);
     }
 
 }

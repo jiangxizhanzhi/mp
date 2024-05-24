@@ -1,10 +1,13 @@
 package cn.cyberpeace.mp.base.util.mptool;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
@@ -498,5 +501,82 @@ public class FileUtil {
         return (null != path) && file(path).exists();
     }
 
+    /**
+     * 生成文件响应
+     * @param file 返回的文件
+     * @param delete 是否删除本地文件
+     * @param response 响应
+     */
+    public static void setResponse(File file, Boolean delete, HttpServletResponse response) {
+        // 以流的形式下载文件。
+        InputStream fis = null;
+        OutputStream outputStream = null;
+        try {
+            fis = new FileInputStream(file);
+            byte[] buffer = new byte[fis.available()];
+            fis.read(buffer);
+
+            // 清空response
+            response.reset();
+
+            // 设置返回
+            response.setContentType("application/octet-stream;charset=UTF-8");
+            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(file.getName(),"UTF-8"));
+            outputStream = response.getOutputStream();
+            outputStream.write(buffer);
+            outputStream.flush();
+        } catch (IOException e) {
+            log.error("setResponse error:", e);
+        } finally {
+            try {
+                if (null != fis) {
+                    fis.close();
+                }
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            } catch (IOException e) {
+                log.error("setResponse error:", e);
+            }
+
+            if (delete.equals(Boolean.TRUE) && null != file && file.exists()) {
+                file.delete();
+            }
+        }
+    }
+
+    /**
+     * 读取文件内容
+     * @param file
+     * @return
+     */
+    public static String getContent(File file) {
+        BufferedReader br = null;
+        StringBuilder builder = new StringBuilder();
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "utf-8"));
+
+            String content = "";
+            while ((content = br.readLine()) != null) {
+                builder.append(content + System.lineSeparator());
+            }
+
+            return builder.toString();
+        } catch (Exception e) {
+            // 文件读取失败
+            log.error("file read failed! filePath={} error:", file.getAbsolutePath(), e);
+            throw new MpRuntimeException("file read failed");
+        } finally {
+            try {
+                if (null != br) {
+                    br.close();
+                }
+            } catch (IOException e) {
+                // 不做任何处理
+            } catch (NullPointerException e) {
+                // 对象未创建空指针异常捕获，不做任何处理
+            }
+        }
+    }
 
 }
