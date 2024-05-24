@@ -403,11 +403,11 @@ public class ImagesConverter implements BaseConverter{
         if (StringUtils.isBlank(uuid)) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        String insctanceCreateUser = Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : StringUtils.EMPTY;
-        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser));
+        String instanceCreateUser = Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : StringUtils.EMPTY;
+        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, instanceCreateUser));
         DeviceTargetPO updateTargetModel = new DeviceTargetPO();
         updateTargetModel.setUuid(uuid);
-        updateTargetModel.setInstanceCreateUser(insctanceCreateUser);
+        updateTargetModel.setInstanceCreateUser(instanceCreateUser);
         deviceTargetMapper.updateById(updateTargetModel);
     }
 

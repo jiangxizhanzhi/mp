@@ -446,9 +446,9 @@ public class HttpUtils {
 
     private static String send(HttpRequestBase httpRequest) throws IOException {
         RequestConfig requestConfig = RequestConfig.custom()
-                .setSocketTimeout(DEFAULT_TIME_OUT)
-                .setConnectTimeout(DEFAULT_TIME_OUT)
-                .setConnectionRequestTimeout(DEFAULT_TIME_OUT)
+                .setSocketTimeout(DEFAULT_TIME_OUT * 1000)
+                .setConnectTimeout(DEFAULT_TIME_OUT * 1000)
+                .setConnectionRequestTimeout(DEFAULT_TIME_OUT * 1000)
                 .build();
 
         CloseableHttpClient client = HttpClients.custom()
