@@ -525,6 +525,17 @@ public class LoadServiceImpl {
      * */
     public Boolean updateLoadExecutionOutResult(List<LoadRequest> requestData) {
         Boolean addLoadExecutionOutResult;
+        //校验每条数据中taskId和InstanceId不能为空
+        if (requestData.size() > 0) {
+            for (LoadRequest loadRequest : requestData) {
+                if (loadRequest.getTaskId() == null || loadRequest.getTaskId().equals("")) {
+                    return false;
+                }
+                if (loadRequest.getInstanceId() == null || loadRequest.getInstanceId().equals("")) {
+                    return false;
+                }
+            }
+        }
         if (requestData.size() > 0) {
             addLoadExecutionOutResult = loadMapper.updateLoadExecutionOutResult(requestData);
         } else {

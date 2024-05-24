@@ -101,7 +101,27 @@ public class ExtCloudDocker implements Serializable {
     private String uploadImageName;
 
     /**
+     * 节点pk
+     */
+    private String targetPk;
+
+    /**
+     * 节点id
+     */
+    private String targetId;
+
+    /**
      * 来源(1:云平台,2:用户上传)
      */
     private Integer sourceType;
+
+    /**
+     * 容器类型
+     */
+    private String containerType;
+
+    /**
+     * 子类型
+     */
+    private String subType;
 }

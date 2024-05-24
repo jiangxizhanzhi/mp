@@ -36,6 +36,10 @@ public class DeviceCloudTargetVO extends BaseModel {
      */
     private String calculateType;
     /**
+     * 容器类型
+     */
+    private String containerType;
+    /**
      * 子类型
      */
     private String subType;

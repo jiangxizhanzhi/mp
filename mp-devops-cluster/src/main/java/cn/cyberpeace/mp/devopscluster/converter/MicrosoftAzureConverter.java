@@ -8,6 +8,8 @@ import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.CloudDevice;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtCloudDocker;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtCloudVm;
 import cn.cyberpeace.mp.devopscluster.enums.CommonTargetNameEnum;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetCalculate;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetContainer;
@@ -70,7 +72,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         return result;
     }
 
-    private JSONObject getReturnData(String cloudServiceType,String tableName,TargerRequestVO request) {
+    private JSONObject getReturnData(String cloudServiceType, String tableName, TargerRequestVO request) {
         List<MpSysCodeMenuVO> codes = request.getCodes();
         List<MpSysCodeMenu> sqls = null;
         if (codes != null && codes.size() > 0) {
@@ -143,7 +145,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             default:
         }
         //结果转Device集合
-        List<CloudDevice> convert = convert(vos,total);
+        List<CloudDevice> convert = convert(vos, total);
         JSONObject result = new JSONObject();
         result.put("list", convert);
         result.put("total", total);
@@ -151,12 +153,11 @@ public class MicrosoftAzureConverter implements BaseConverter {
     }
 
     //结果转Device集合
-    private List<CloudDevice> convert(List<DeviceCloudTargetVO> vos,Integer total){
+    private List<CloudDevice> convert(List<DeviceCloudTargetVO> vos, Integer total) {
         List<CloudDevice> deviceList = new ArrayList<>();
         for (int i = 0; i < vos.size(); i++) {
             CloudDevice device = new CloudDevice();
             device.setDeleted(false);
-            device.setTotal(total);
             device.setCloudServiceType(vos.get(i).getCloudServiceType().toString());
             device.setImageType(vos.get(i).getImageType());
             device.setName(vos.get(i).getName());
@@ -167,16 +168,29 @@ public class MicrosoftAzureConverter implements BaseConverter {
             switch (vos.get(i).getCloudServiceType()) {
                 case 1:
                 case 2:
-                    device.getExtCloudVm().setTargetPk(vos.get(i).getPk());
-                    device.getExtCloudVm().setPublisher(vos.get(i).getPublisher());
-                    device.getExtCloudVm().setOffer(vos.get(i).getOffer());
-                    device.getExtCloudVm().setSku(vos.get(i).getSku());
-                    device.getExtCloudVm().setImageOSType(vos.get(i).getOperatingSystem());
-                    device.getExtCloudVm().setSourceType(vos.get(i).getSourceType());
+                    device.setSecondCategory(2);
+                    ExtCloudVm extCloudVm = new ExtCloudVm();
+                    extCloudVm.setCalculateType(vos.get(i).getCalculateType());
+                    extCloudVm.setSubType(vos.get(i).getSubType());
+                    extCloudVm.setTargetPk(vos.get(i).getPk().toString());
+                    extCloudVm.setTargetId(vos.get(i).getId());
+                    extCloudVm.setPublisher(vos.get(i).getPublisher());
+                    extCloudVm.setOffer(vos.get(i).getOffer());
+                    extCloudVm.setSku(vos.get(i).getSku());
+                    extCloudVm.setImageOSType(vos.get(i).getOperatingSystem());
+                    extCloudVm.setSourceType(vos.get(i).getSourceType());
+                    device.setExtCloudVm(extCloudVm);
                     break;
                 case 3:
-                    device.getExtCloudDocker().setSourceType(vos.get(i).getSourceType());
-                    device.getExtCloudDocker().setUploadImageName(vos.get(i).getUploadTargetName());
+                    device.setSecondCategory(3);
+                    ExtCloudDocker extCloudDocker = new ExtCloudDocker();
+                    extCloudDocker.setContainerType(vos.get(i).getContainerType());
+                    extCloudDocker.setSubType(vos.get(i).getSubType());
+                    extCloudDocker.setSourceType(vos.get(i).getSourceType());
+                    extCloudDocker.setTargetPk(vos.get(i).getPk().toString());
+                    extCloudDocker.setTargetId(vos.get(i).getId());
+                    extCloudDocker.setUploadImageName(vos.get(i).getUploadTargetName());
+                    device.setExtCloudDocker(extCloudDocker);
                     break;
                 case 4:
                 case 5:
@@ -356,7 +370,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             for (int i = 0; i < list.size(); i += 1000) {
                 List<DeviceCloudTargetPO> subList = list.subList(i, i + 1000 > list.size() ? list.size() : i + 1000);
                 Boolean insertFlag = microsoftAzureMapper.batchInsertCloudTarget(subList);
-                if(!insertFlag){
+                if (!insertFlag) {
                     batchInsertCloudTarget = false;
                 }
             }
@@ -367,7 +381,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             for (int i = 0; i < calculateList.size(); i += 1000) {
                 List<DeviceCloudTargetCalculate> subList = calculateList.subList(i, i + 1000 > calculateList.size() ? calculateList.size() : i + 1000);
                 Boolean insertFlag = microsoftAzureMapper.batchInsertCloudTargetCalculate(subList);
-                if(!insertFlag){
+                if (!insertFlag) {
                     batchInsertCloudTargetCalculate = false;
                 }
             }
@@ -378,7 +392,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             for (int i = 0; i < containerList.size(); i += 1000) {
                 List<DeviceCloudTargetContainer> subList = containerList.subList(i, i + 1000 > containerList.size() ? containerList.size() : i + 1000);
                 Boolean insertFlag = microsoftAzureMapper.batchInsertCloudTargetContainer(subList);
-                if(!insertFlag){
+                if (!insertFlag) {
                     batchInsertCloudTargetContainer = false;
                 }
             }
@@ -510,47 +524,47 @@ public class MicrosoftAzureConverter implements BaseConverter {
         for (VirtualMachinePublisher publisher : virtualMachinePublishers) {
             //todo 筛选出需要的VM镜像
 //            if (publisher.name() != null && publisher.name().equals("Canonical")) {
-                if (firstTime < 10) {
-                    firstTime++;
-                    System.out.println("PublisherName: " + publisher.name());
-                    // 获取发布者的所有产品(offer)
-                    VirtualMachineOffers offers = publisher.offers();
-                    PagedIterable<VirtualMachineOffer> list = offers.list();
-                    int secondTime = 0;
-                    for (VirtualMachineOffer offer : list) {
-                        if (secondTime < 1) {
-                            secondTime++;
-                            System.out.println("offerName: " + offer.name());
-                            // 获取该产品的所有SKU
-                            VirtualMachineSkus skus = offer.skus();
-                            PagedIterable<VirtualMachineSku> skuList = skus.list();
-                            int thirdTime = 0;
-                            for (VirtualMachineSku sku : skuList) {
-                                if(thirdTime < 1){
-                                    thirdTime++;
-                                    System.out.println("skuName: " + sku.name());
-                                    // 获取每个SKU的所有版本（image versions）
-                                    PagedIterable<VirtualMachineImage> imageList = sku.images().list();
-                                    int time = 0;
-                                    for (VirtualMachineImage image : imageList) {
-                                        if (time < 1) {
-                                            time++;
-                                            OperatingSystemTypes operatingSystemTypes = image.osDiskImage().operatingSystem();
-                                            JSONObject third = new JSONObject();
-                                            third.put("imageName", publisher.name());
-                                            third.put("imageVersion", image.version());
-                                            third.put("PublisherName", publisher.name());
-                                            third.put("offerName", offer.name());
-                                            third.put("skuName", sku.name());
-                                            third.put("operatingSystem", operatingSystemTypes);
-                                            result.add(third);
-                                        }
+            if (firstTime < 10) {
+                firstTime++;
+                System.out.println("PublisherName: " + publisher.name());
+                // 获取发布者的所有产品(offer)
+                VirtualMachineOffers offers = publisher.offers();
+                PagedIterable<VirtualMachineOffer> list = offers.list();
+                int secondTime = 0;
+                for (VirtualMachineOffer offer : list) {
+                    if (secondTime < 1) {
+                        secondTime++;
+                        System.out.println("offerName: " + offer.name());
+                        // 获取该产品的所有SKU
+                        VirtualMachineSkus skus = offer.skus();
+                        PagedIterable<VirtualMachineSku> skuList = skus.list();
+                        int thirdTime = 0;
+                        for (VirtualMachineSku sku : skuList) {
+                            if (thirdTime < 1) {
+                                thirdTime++;
+                                System.out.println("skuName: " + sku.name());
+                                // 获取每个SKU的所有版本（image versions）
+                                PagedIterable<VirtualMachineImage> imageList = sku.images().list();
+                                int time = 0;
+                                for (VirtualMachineImage image : imageList) {
+                                    if (time < 1) {
+                                        time++;
+                                        OperatingSystemTypes operatingSystemTypes = image.osDiskImage().operatingSystem();
+                                        JSONObject third = new JSONObject();
+                                        third.put("imageName", publisher.name());
+                                        third.put("imageVersion", image.version());
+                                        third.put("PublisherName", publisher.name());
+                                        third.put("offerName", offer.name());
+                                        third.put("skuName", sku.name());
+                                        third.put("operatingSystem", operatingSystemTypes);
+                                        result.add(third);
                                     }
                                 }
                             }
                         }
                     }
                 }
+            }
 //            }
         }
         return result;
@@ -591,18 +605,18 @@ public class MicrosoftAzureConverter implements BaseConverter {
     @Transactional
     public Boolean deleteCloudTarget(JSONObject requestData) {
         if (requestData != null && (requestData.get("id") != null && !requestData.get("id").toString().equals("") ||
-                                    requestData.get("ids") != null)) {
+                requestData.get("ids") != null)) {
             String id = "";
-            if(requestData.get("id") != null && !requestData.get("id").toString().equals("")){
+            if (requestData.get("id") != null && !requestData.get("id").toString().equals("")) {
                 id = requestData.get("id").toString();
             }
             List<String> ids = null;
-            if(requestData.get("ids") != null && requestData.get("ids") instanceof List){
+            if (requestData.get("ids") != null && requestData.get("ids") instanceof List) {
                 ids = (List<String>) requestData.get("ids");
             }
-            Integer deleteByPk = microsoftAzureMapper.deleteByIds(id,ids);
-            Integer deleteCalculatesByIds = microsoftAzureMapper.deleteCalculatesByIds(id,ids);
-            Integer deleteContainersByIds = microsoftAzureMapper.deleteContainersByIds(id,ids);
+            Integer deleteByPk = microsoftAzureMapper.deleteByIds(id, ids);
+            Integer deleteCalculatesByIds = microsoftAzureMapper.deleteCalculatesByIds(id, ids);
+            Integer deleteContainersByIds = microsoftAzureMapper.deleteContainersByIds(id, ids);
             if (deleteByPk > 0) {
                 return true;
             }
@@ -614,9 +628,9 @@ public class MicrosoftAzureConverter implements BaseConverter {
     public Boolean updateCloudTarget(JSONObject requestData) {
         if (requestData != null && requestData.get("id") != null && !requestData.get("id").toString().equals("")) {
             Integer id = 0;
-            if(requestData.get("cloudServiceType").toString().equals("2")){
+            if (requestData.get("cloudServiceType").toString().equals("2")) {
                 id = microsoftAzureMapper.updateCloudCalculateTarget(requestData.get("id").toString(), requestData);
-            }else if(requestData.get("cloudServiceType").toString().equals("3")){
+            } else if (requestData.get("cloudServiceType").toString().equals("3")) {
                 id = microsoftAzureMapper.updateCloudContainerTarget(requestData.get("id").toString(), requestData);
             }
             if (id > 0) {
@@ -628,9 +642,9 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
     public DeviceCloudTargetVO getCloudTargetById(JSONObject requestData) {
         DeviceCloudTargetVO data = new DeviceCloudTargetVO();
-        if(requestData.get("cloudServiceType").toString().equals("2")){
+        if (requestData.get("cloudServiceType").toString().equals("2")) {
             data = microsoftAzureMapper.getCloudTargetCalculateById(requestData.get("id").toString());
-        }else if(requestData.get("cloudServiceType").toString().equals("3")){
+        } else if (requestData.get("cloudServiceType").toString().equals("3")) {
             data = microsoftAzureMapper.getCloudTargetContainerById(requestData.get("id").toString());
         }
         return data;
@@ -640,7 +654,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
      * 查询所有镜像管理分类
      */
     public List getImageCategories(String cloudCode) {
-        if(cloudCode == null || cloudCode.equals("")){
+        if (cloudCode == null || cloudCode.equals("")) {
             cloudCode = ParentCodeEnum.PARENT_MIXCLOUD_CATEGORY_TYPE.getCode();
 //        PARENT_MIXCLOUD_CATEGORY_TYPE("1002", "混合云配置项菜单"),
 //        PARENT_PRIVATECLOUD_CATEGORY_TYPE("1003", "私有云配置项菜单"),
@@ -728,20 +742,38 @@ public class MicrosoftAzureConverter implements BaseConverter {
         return deviceVOList;
     }
 
-    public ServiceResult getDetailsByTarget(String id, Integer catagory, String cloudServiceType) {
+    public ServiceResult getDetailsByTarget(String id, String catagory, String cloudServiceType) {
         //1:云靶标 2:载荷 3:边界网络设备
         switch (catagory) {
-            case 1:
+            case "1":
                 JSONObject requestDataCase1 = new JSONObject();
-                requestDataCase1.put("id",id);
-                requestDataCase1.put("cloudServiceType",cloudServiceType);
+                requestDataCase1.put("id", id);
+                requestDataCase1.put("cloudServiceType", cloudServiceType);
                 DeviceCloudTargetVO cloudTargetById = getCloudTargetById(requestDataCase1);
-                if(cloudTargetById!=null){
-                    return new ServiceResult(cloudTargetById, BaseErrorCode.SUCCESS).asResult();
-                }else{
+                if (cloudTargetById == null) {
                     return new ServiceResult(null, BaseErrorCode.DATA_NOT_EXIST, "未找到对应的云靶标").asResult();
                 }
-            case 2:
+//                else{
+//                    return new ServiceResult(cloudTargetById, BaseErrorCode.SUCCESS).asResult();
+//                }
+                //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储 )
+                switch (Integer.parseInt(cloudServiceType)) {
+                    case 1:
+                    case 2:
+                        DeviceCloudTargetCalculate deviceCloudTargetCalculate = new DeviceCloudTargetCalculate();
+                        BeanUtils.copyProperties(cloudTargetById, deviceCloudTargetCalculate);
+                        return new ServiceResult(deviceCloudTargetCalculate, BaseErrorCode.SUCCESS).asResult();
+                    case 3:
+                        DeviceCloudTargetContainer deviceCloudTargetContainer = new DeviceCloudTargetContainer();
+                        BeanUtils.copyProperties(cloudTargetById, deviceCloudTargetContainer);
+                        return new ServiceResult(deviceCloudTargetContainer, BaseErrorCode.SUCCESS).asResult();
+                    case 4:
+                    case 5:
+                    case 6:
+                    case 7:
+                    default:
+                }
+            case "2":
                 JSONObject requestDataCase2 = new JSONObject();
                 requestDataCase2.put("id", id);
                 JSONObject result = loadService.getLoadList(requestDataCase2);
@@ -750,10 +782,10 @@ public class MicrosoftAzureConverter implements BaseConverter {
                     List loopholes = loadService.getBindLoopholes(load.getId());
                     load.setLoopholes(loopholes);
                     return new ServiceResult(load, BaseErrorCode.SUCCESS).asResult();
-                }else{
+                } else {
                     return new ServiceResult(null, BaseErrorCode.DATA_NOT_EXIST, "未找到对应的载荷").asResult();
                 }
-            case 3:
+            case "3":
                 break;
             default:
                 return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID, "catagory参数错误").asResult();

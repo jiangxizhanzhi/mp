@@ -376,6 +376,7 @@
                 </foreach>
             </if>
         </where>
+        order by code
     </select>
 
     <select id="getCloudTargetListByCodes" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO">

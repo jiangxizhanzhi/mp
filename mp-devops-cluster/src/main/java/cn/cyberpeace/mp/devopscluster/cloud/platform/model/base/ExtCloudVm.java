@@ -127,5 +127,20 @@ public class ExtCloudVm implements Serializable {
     /**
      * 对应的云靶标主键
      */
-    private Integer targetPk;
+    private String targetPk;
+
+    /**
+     * 对应的云靶标id
+     */
+    private String targetId;
+
+    /**
+     * 计算类型
+     */
+    private String calculateType;
+
+    /**
+     * 子类型
+     */
+    private String subType;
 }

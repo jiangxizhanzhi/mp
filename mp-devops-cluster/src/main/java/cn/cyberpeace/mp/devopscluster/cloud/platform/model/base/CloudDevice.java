@@ -161,8 +161,7 @@ public class CloudDevice extends BaseCloudPlatformResult {
     /**
      * 虚拟机信息
      */
-    @Builder.Default
-    private ExtCloudVm extCloudVm = new ExtCloudVm();
+    private ExtCloudVm extCloudVm;
 
     /**
      * 镜像信息
@@ -172,8 +171,7 @@ public class CloudDevice extends BaseCloudPlatformResult {
     /**
      * 容器信息
      */
-    @Builder.Default
-    private ExtCloudDocker extCloudDocker = new ExtCloudDocker();
+    private ExtCloudDocker extCloudDocker;
 
     /**
      * 实体USB信息
