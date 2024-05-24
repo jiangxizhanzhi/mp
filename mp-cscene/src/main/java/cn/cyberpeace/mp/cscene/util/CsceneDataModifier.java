@@ -334,10 +334,10 @@ public class CsceneDataModifier {
                 }
                 if (CollectionUtils.isNotEmpty(roles)) {
                     for (CsceneRoleBO r : roles) {
-                        r.setId(null);
+//                        r.setId(null);
                         if (CollectionUtils.isNotEmpty(r.getChildren())) {
                             for (CsceneRoleBO ch : r.getChildren()) {
-                                ch.setId(null);
+//                                ch.setId(null);
                             }
                         }
                     }

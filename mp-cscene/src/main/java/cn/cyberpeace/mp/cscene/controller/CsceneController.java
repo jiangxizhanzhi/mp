@@ -681,6 +681,7 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("scene sync,params is {}", JsonCommon.stringify(csceneBO));
         boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
         correctRequestCsceneParamsForSync(csceneBO);
+        var roles = csceneBO.getRoles();
         ServiceResult<CsceneBO> result = modelService.sync(csceneBO, null, true).asResult();
         if (csceneBO.getType() != null && csceneBO.getType() == CsceneModel.Type.TEMPLATE) {
             if (isUpdate) {
@@ -693,8 +694,8 @@ public class CsceneController implements BaseModelListControllerBase {
         try {
             CsceneRoleMapper mapper = BeanCommon.getBean(CsceneRoleMapper.class);
             mapper.filterDelete(new HumanCondition().filterEqual(CsceneRoleModel::getCscene, csceneBO.getId()));
-            if (CollectionUtils.isNotEmpty(csceneBO.getRoles())) {
-                List<CsceneRoleModel> roleObjs = convertToRoleObjs(csceneBO.getRoles(), null);
+            if (CollectionUtils.isNotEmpty(roles)) {
+                List<CsceneRoleModel> roleObjs = convertToRoleObjs(roles, null);
                 roleObjs.forEach(r -> r.setCscene(csceneBO.getId()));
                 mapper.bulkCreate(roleObjs).getSuccessCount();
             }
