@@ -333,37 +333,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     private CsceneInstanceBO getByAreaId(String sceneId, String areaId) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, areaId, true, null);
         SceneDataBO dataBO = sceneHandler.toData();
-
-        SceneHandler out = new SceneHandler(sceneId, areaId, true, true);
-        out.reloadOut();
-        SceneDataBO extraSceneConfig = out.toDataV2();
-
-        this.mergeSceneConfig(dataBO, extraSceneConfig);
         CsceneInstanceBO csceneBO = new CsceneInstanceBO();
         csceneBO.setScene(dataBO);
         CsceneDataModifier.correctReturnCsceneData(csceneBO);
         return csceneBO;
-    }
-
-    private void mergeSceneConfig(SceneDataBO originSceneConfig, SceneDataBO extraSceneConfig) {
-        if (Objects.nonNull(originSceneConfig) && Objects.nonNull(extraSceneConfig)) {
-            if (Objects.nonNull(originSceneConfig.getTopology()) && Objects.nonNull(extraSceneConfig.getTopology())) {
-                originSceneConfig.getTopology().getElements().addAll(extraSceneConfig.getTopology().getElements());
-                originSceneConfig.getTopology().getAreas().addAll(extraSceneConfig.getTopology().getAreas());
-                originSceneConfig.getTopology().getConnections().addAll(extraSceneConfig.getTopology().getConnections());
-                originSceneConfig.getTopology().getNodeConnections().addAll(extraSceneConfig.getTopology().getNodeConnections());
-            }
-            if (Objects.nonNull(originSceneConfig.getPlugins()) && Objects.nonNull(extraSceneConfig.getPlugins())) {
-                extraSceneConfig.getPlugins().forEach(((s, scenePluginDataBO) -> {
-                    if (originSceneConfig.getPlugins().containsKey(s)) {
-                        originSceneConfig.getPlugins().get(s).getElements().putAll(scenePluginDataBO.getElements());
-                        originSceneConfig.getPlugins().get(s).getElementPorts().putAll(scenePluginDataBO.getElementPorts());
-                    } else {
-                        originSceneConfig.getPlugins().put(s, scenePluginDataBO);
-                    }
-                }));
-            }
-        }
     }
 
     @AuthTarget(TargetEnum.CSCENE_INSTANCE_GROUP)

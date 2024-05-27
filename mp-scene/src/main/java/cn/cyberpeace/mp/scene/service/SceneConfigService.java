@@ -46,10 +46,6 @@ public class SceneConfigService {
                 sceneConfigHandler.getScene().setCreateTime(null);
             }
             sceneConfigHandler.save();
-
-            SceneConfigHandler outerHandler = new SceneConfigHandler(sceneConfigDataBO,true);
-            outerHandler.saveOut(new ArrayList<>(sceneConfigHandler.getElementMap().values()),new ArrayList<>(sceneConfigHandler.getElementPortMap().values()));
-
         } catch (SceneNotExistException e) {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
         }

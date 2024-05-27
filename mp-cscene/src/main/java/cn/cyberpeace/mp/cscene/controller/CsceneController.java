@@ -203,7 +203,6 @@ public class CsceneController implements BaseModelListControllerBase {
         }
         String sceneId = this.modelService.get(id).getSource().getObj().getSceneConfig();
         var csceneBO = getByAreaId(sceneId, areaId);
-
         var roleMapper = BeanCommon.getBean(CsceneRoleMapper.class);
         var list = roleMapper.list(new HumanCondition().filterEqual(BaseCsceneRoleModel::getCscene, id));
         if (list != null) {
@@ -251,12 +250,6 @@ public class CsceneController implements BaseModelListControllerBase {
     private CsceneBO getByAreaId(String sceneId, String areaId) {
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, areaId, true, null);
         SceneConfigDataBO dataBO = sceneConfigHandler.toData();
-
-        SceneConfigHandler out = new SceneConfigHandler(sceneId, areaId, true, true);
-        out.reloadOut();
-        SceneConfigDataBO extraSceneConfig = out.toData();
-
-        this.mergeSceneConfig(dataBO, extraSceneConfig);
         CsceneBO csceneBO = new CsceneBO();
         csceneBO.setSceneConfig(dataBO);
         CsceneDataModifier.correctReturnCsceneData(csceneBO);
