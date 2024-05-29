@@ -23,7 +23,17 @@ public class NetworkInterface {
     private String id;
 
     /**
+     * 访问类型(1:分配公网ip 2:外部网络直接访问 3:私网IP地址)
+     */
+    private Integer accessType;
+
+    /**
      * ip设置
      */
     private String ip;
+
+    /**
+     * 接入协议
+     */
+    private String accessProtocol;
 }

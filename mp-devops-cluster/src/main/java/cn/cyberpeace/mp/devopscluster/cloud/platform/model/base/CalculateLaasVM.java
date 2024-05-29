@@ -15,29 +15,29 @@ import java.util.List;
 @ApiModel("计算-laas-虚拟机信息")
 public class CalculateLaasVM extends DeviceCloudTargetCalculate {
     /**
-     * CPU核数
+     * (包含cpu数量 运存大小 网卡数量等)Standard_B1s，1vcpu，1GiB内存，2网卡
      */
-    private Integer cpu;
+    private String basicType;
 
     /**
-     * 内存大小
+     * os磁盘大小
      */
-    private Integer ram;
+    private String osDisk;
 
     /**
-     * 磁盘大小
+     * 磁盘类型(ssd/hhd)
      */
-    private Integer disk;
+    private String hardDiskType;
 
     /**
-     * 网卡数量
+     * 扩展磁盘
      */
-    private Integer netInterface;
+    private String expansionDisk;
 
     /**
-     * 是否连接外网
+     * 关联漏洞
      */
-    private Boolean isConnectInt;
+    private List loopholes;
 
     /**
      * 网卡设置
@@ -45,22 +45,12 @@ public class CalculateLaasVM extends DeviceCloudTargetCalculate {
     private List<NetworkInterface> networkInterfaces;
 
     /**
-     * 接入协议
-     */
-    private String accessProtocol;
-
-    /**
      * 虚拟机用户账号
      */
     private String userName;
 
     /**
-     * 虚拟机用户账号
+     * 虚拟机用户密码
      */
     private String password;
-
-    /**
-     * 关联漏洞
-     */
-    private List loopholes;
 }

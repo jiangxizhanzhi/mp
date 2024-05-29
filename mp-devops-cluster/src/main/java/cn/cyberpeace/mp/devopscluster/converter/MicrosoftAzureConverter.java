@@ -175,12 +175,12 @@ public class MicrosoftAzureConverter implements BaseConverter {
                     calculateLaasVM.setSku(vos.get(i).getSku());
                     calculateLaasVM.setOperatingSystem(vos.get(i).getOperatingSystem());
                     calculateLaasVM.setSourceType(vos.get(i).getSourceType());
-                    device.setCalleeLaasVM(calculateLaasVM);
+                    device.setCalculateLaasVM(calculateLaasVM);
                     break;
                 case "3":
                     device.setServiceType(vos.get(i).getContainerType());
                     device.setSubType(vos.get(i).getSubType());
-                    DockerInfrastructureContainerRegistries registries =  new DockerInfrastructureContainerRegistries();
+                    DockerInfrastructureContainerRegistries registries = new DockerInfrastructureContainerRegistries();
                     registries.setPk(vos.get(i).getPk());
                     registries.setId(vos.get(i).getId());
                     registries.setContainerType(vos.get(i).getContainerType());
