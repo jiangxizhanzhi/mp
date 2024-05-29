@@ -1554,6 +1554,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
         if (context != null) {
             context.loadTransparentContext();
+            CsceneContextHolder.setCsceneInstanceId(csceneInstanceId);
         }
         // 打快照
         String sceneId = csceneInstance.getScene();
