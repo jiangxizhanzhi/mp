@@ -1,15 +1,21 @@
 package cn.cyberpeace.mp.base.util.mptool;
 
 import cn.cyberpeace.mp.base.constant.ExcelHeader;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.*;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
@@ -17,6 +23,157 @@ import java.util.List;
  */
 @Slf4j
 public class ExcelDataHandler {
+
+
+	private Sheet sheet;
+
+	private Workbook workbook;
+
+	private FileInputStream fileInputStream;
+
+	/**
+	 * 构造参数 初始化excel数据
+	 *
+	 * @param filePath   文件路径
+	 * @param sheetIndex sheet表名
+	 */
+	public ExcelDataHandler(String filePath, int sheetIndex) {
+		try {
+			// 创建文件流
+			fileInputStream = new FileInputStream(filePath);
+
+			workbook = WorkbookFactory.create(fileInputStream);
+
+			// 获取sheet
+			sheet = workbook.getSheetAt(sheetIndex);
+		} catch (Exception e) {
+			log.error(
+					"Construct XSSFSheet object failed! file_path=[{}], sheet_index=[{}], catch error:",
+					filePath, sheetIndex, e);
+			try {
+				fileInputStream.close();
+				workbook.close();
+			} catch (Exception e2) {
+				// 关不掉算了
+				log.error("excel fileInputStream close failed!  catch error:", e2);
+			}
+			throw new MpRuntimeException("file read failed");
+		}
+	}
+
+	/**
+	 * 构造函数，初始化excel数据
+	 *
+	 * @param filePath  excel路径
+	 * @param sheetName sheet表名
+	 */
+	public ExcelDataHandler(String filePath, String sheetName) {
+		try {
+			fileInputStream = new FileInputStream(filePath);
+
+			workbook = WorkbookFactory.create(fileInputStream);
+
+			// 获取sheet
+			sheet = workbook.getSheet(sheetName);
+		} catch (Exception e) {
+			log.error(
+					"Construct XSSFSheet object failed! file_path=[{}], sheet_name=[{}], catch error:",
+					filePath, sheetName, e);
+
+			try {
+				workbook.close();
+				fileInputStream.close();
+			} catch (IOException ioException) {
+				// 关不掉这个没办法了
+			}
+			log.error("excel fileInputStream close failed!  filePath =[{}],sheetName=[{}]",filePath,sheetName);
+			throw new MpRuntimeException("file read failed");
+		}
+	}
+
+	/**
+	 * excel数据读取
+	 *
+	 * @param startRow
+	 * @return
+	 */
+	public List<List<String>> getSheetData(int startRow) {
+		return getSheetData(startRow, 0);
+	}
+
+	/**
+	 * excel文件数据读取
+	 *
+	 * @param startRow 开始行读取 0从第一行开始读取
+	 * @param endRow   结束行 0=不限制结尾 非0则读取startRow-endRow之间的数据
+	 * @return
+	 */
+	public List<List<String>> getSheetData(int startRow, int endRow) {
+
+		int rows = sheet.getPhysicalNumberOfRows();
+		int endIndex = endRow == 0 ? rows : Math.min(rows, endRow);
+
+		if (startRow >= endIndex) {
+			return Lists.newArrayList();
+		}
+
+		// 行数据存储
+		List<List<String>> rowList = Lists.newArrayList();
+		for (int rowIndex = startRow; rowIndex < endIndex; rowIndex++) {
+
+			// 列数据存储
+			List<String> columnList = Lists.newArrayList();
+
+			Row sheetRow = sheet.getRow(rowIndex);
+			if (null == sheetRow) {
+				break;
+			}
+
+			for (int cellIndex = 0; cellIndex < sheetRow.getLastCellNum(); cellIndex++) {
+				String cellData = getExcelDateByIndex(rowIndex, cellIndex);
+				columnList.add(cellData);
+			}
+			rowList.add(columnList);
+		}
+
+		return rowList;
+	}
+	/**
+	 * 根据行和列的索引获取单元格的数据
+	 *
+	 * @param row
+	 * @param column
+	 * @return
+	 */
+	public String getExcelDateByIndex(int row, int column) {
+		Row sheetRow = sheet.getRow(row);
+		Cell cell = sheetRow.getCell(column);
+		if (null == cell) {
+			return "";
+		}
+
+		if (cell.getCellType() == CellType.NUMERIC) {
+			if (DateUtil.isCellDateFormatted(cell)) {
+				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				return simpleDateFormat.format(cell.getDateCellValue());
+			} else {
+				cell.setCellType(CellType.STRING);
+				return cell.getStringCellValue().trim();
+			}
+
+		}
+		return cell.toString().trim();
+	}
+
+	public void closeIO() {
+		try {
+			fileInputStream.close();
+			workbook.close();
+		} catch (IOException e) {
+			// 关不掉没办法
+			log.error("fileInputStream close fail!", e);
+		}
+	}
 
 	/**
 	 * excel 文件导出

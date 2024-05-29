@@ -982,10 +982,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     private void mergeFileData(ListObjServiceResult<CollectionHostEventBO> hostEventsBos, HostEventQueryParams queryParams,
                                String sceneId) {
 
-        if (CollectionUtils.isNotEmpty(queryParams.getNodeIds())) {
-            return;
-        }
-        if (CollectionUtils.isNotEmpty(queryParams.getAppNames())) {
+        if (CollectionUtils.isEmpty(queryParams.getCatagories())) {
             return;
         }
 
@@ -1040,6 +1037,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             bo.setAppName(model.getAppName());
             bo.setEventDesc(model.getEventDesc());
             bo.setLevel(model.getLevel());
+            bo.setCatagory(model.getCatagory());
             bos.add(bo);
             if (bos.size() == queryParams.getPageSize()) {
                 return;

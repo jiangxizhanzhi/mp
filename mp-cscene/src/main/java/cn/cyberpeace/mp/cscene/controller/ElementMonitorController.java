@@ -17,7 +17,6 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.ImportFileBO;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
 import io.swagger.annotations.*;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -189,8 +188,7 @@ public class ElementMonitorController {
         return ResultCommon.success(true);
     }
 
-    @SneakyThrows
-    @ApiOperation("文件导入 (Json,Xml,Xlsx)")
+    @ApiOperation("采集数据导入 (Json,Xml,Xlsx)")
     @PostMapping("/import")
     public ServiceResult<Boolean> importFile(ImportFileBO bo){
         sceneElementMonitorService.importData(bo);
