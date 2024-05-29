@@ -16,6 +16,7 @@ import com.azure.resourcemanager.AzureResourceManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 
 @Component
@@ -81,6 +82,7 @@ public class MixAzureResourceManager implements IAzureResourceManager {
     }
 
     @Override
+    @PostConstruct
     public AzureResourceManager getManager() {
         if (AZURE_RESOURCE_MANAGER == null) {
             synchronized (this) {

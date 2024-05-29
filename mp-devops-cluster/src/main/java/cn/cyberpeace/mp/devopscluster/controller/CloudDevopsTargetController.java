@@ -89,15 +89,15 @@ public class CloudDevopsTargetController {
         return new ServiceResult(returnData, BaseErrorCode.SUCCESS).asResult();
     }
 
-    /*
-     * 查询节点详情
-     * */
-    @ApiOperation(value = "查询节点详情", notes = "")
-    @GetMapping("/getDetailsByTarget")
-    public ServiceResult getDetailsByTarget(@RequestParam(value = "id") String id,
-                                            @RequestParam(value = "catagory") String catagory,
-                                            @RequestParam(value = "cloud_service_type") String cloudServiceType) {
-        return microsoftAzureConverter.getDetailsByTarget(id,catagory,cloudServiceType);
-    }
+//    /*
+//     * 查询节点详情
+//     * */
+//    @ApiOperation(value = "查询节点详情", notes = "")
+//    @GetMapping("/getDetailsByTarget")
+//    public ServiceResult getDetailsByTarget(@RequestParam(value = "id") String id,
+//                                            @RequestParam(value = "catagory") String catagory,
+//                                            @RequestParam(value = "cloud_service_type") String cloudServiceType) {
+//        return microsoftAzureConverter.getDetailsByTarget(id,catagory,cloudServiceType);
+//    }
 
 }

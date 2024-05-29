@@ -1,10 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.po;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
-import cn.cyberpeace.mp.base.model.stereotype.Table;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -30,7 +27,7 @@ public class DeviceCloudTargetVO extends BaseModel {
     /**
      * 云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储 )
      */
-    private Integer cloudServiceType;
+    private String cloudServiceType;
     /**
      * 计算类型
      */

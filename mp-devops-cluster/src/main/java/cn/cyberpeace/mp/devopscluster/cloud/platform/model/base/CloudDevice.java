@@ -2,27 +2,21 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.model.base;
 
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.*;
-
-import java.util.List;
-import java.util.Objects;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 靶标信息
- * @author wanggang
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class CloudDevice extends BaseCloudPlatformResult {
 
     /**
      * ID
      */
     @ApiModelProperty(value = "ID")
-    private Integer id;
+    private String id;
 
     /**
      * uuid
@@ -67,12 +61,6 @@ public class CloudDevice extends BaseCloudPlatformResult {
     private String image;
 
     /**
-     * 云服务类型
-     */
-    @ApiModelProperty(value = "云服务类型")
-    private String cloudServiceType;
-
-    /**
      * 描述
      */
     @ApiModelProperty(value = "描述")
@@ -85,40 +73,28 @@ public class CloudDevice extends BaseCloudPlatformResult {
     private String logo;
 
     /**
-     * 类型
-     */
-    @ApiModelProperty(value = "类型")
-    private String imageType;
-
-    /**
-     *
-     */
-    @ApiModelProperty(value = "靶标分类(TRM:1,TGM:2,CGM:3,其他:0)")
-    private Integer maintype;
-
-    /**
      * 角色
      */
     @ApiModelProperty(value = "角色")
     private Integer role;
 
     /**
-     * 一级分类
+     * 云服务类型
      */
-    @ApiModelProperty(value = "一级分类")
-    private Integer category;
+    @ApiModelProperty(value = "云服务类型")
+    private String cloudServiceType;
 
     /**
-     * 二级分类
+     * 二级类型
      */
-    @ApiModelProperty(value = "二级分类")
-    private Integer secondCategory;
+    @ApiModelProperty(value = "二级类型")
+    private String serviceType;
 
     /**
-     * 三级分类
+     * 三级类型
      */
-    @ApiModelProperty(value = "三级分类")
-    private Integer l3Category;
+    @ApiModelProperty(value = "三级类型")
+    private String subType;
 
     /**
      * 是否导入
@@ -139,46 +115,6 @@ public class CloudDevice extends BaseCloudPlatformResult {
     private Boolean isInit;
 
     /**
-     * 实体信息
-     */
-    private ExtEntity extEntity;
-
-    /**
-     * 交换机
-     */
-    private List<ExtEntityAccess> extEntityAccess;
-
-    /**
-     * 系统信息
-     */
-    private ExtSystemInfo extSystemInfo;
-
-    /**
-     * 网关信息
-     */
-    private ExtGateway extGateway;
-
-    /**
-     * 虚拟机信息
-     */
-    private ExtCloudVm extCloudVm;
-
-    /**
-     * 镜像信息
-     */
-    private ExtImageInfo extImageInfo;
-
-    /**
-     * 容器信息
-     */
-    private ExtCloudDocker extCloudDocker;
-
-    /**
-     * 实体USB信息
-     */
-    private EntityUsb extEntityUsb;
-
-    /**
      * 是否内置镜像
      */
     private Boolean isBuildIn;
@@ -186,19 +122,25 @@ public class CloudDevice extends BaseCloudPlatformResult {
     /**
      * 是否隐藏
      */
-    private Boolean isHide = Boolean.FALSE;
+    private Boolean isHide;
 
     /**
      * 默认可运行的镜像名称
      */
     private String defaultLaunchImageName;
 
-    public Boolean getIsBuildIn() {
-        boolean tmpImport = !Objects.isNull(isImport) && isImport;
-        boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;
-        boolean tmpInit = !Objects.isNull(isInit) && isInit;
-        return tmpImport || tmpInternal || tmpInit;
-    }
-
+    /**
+     * 是否支持导入
+     */
     private Boolean supportExport;
+
+    /**
+     * 容器-基础设施-容器注册表
+     */
+    private DockerInfrastructureContainerRegistries dockerInfrastructureContainerRegistries;
+
+    /**
+     * 计算-laas-虚拟机信息
+     */
+    private CalculateLaasVM calleeLaasVM;
 }
