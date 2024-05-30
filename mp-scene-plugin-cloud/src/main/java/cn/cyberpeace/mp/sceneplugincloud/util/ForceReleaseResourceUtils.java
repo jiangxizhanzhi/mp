@@ -15,6 +15,7 @@ import java.util.List;
  * @Author maojun
  * @Date 2022/7/21
  */
+@Deprecated(since = "ling yun not support")
 public class ForceReleaseResourceUtils {
     public static void forceDeleteVm(List<String> resourceIds) {
         VmParam param = new VmParam();

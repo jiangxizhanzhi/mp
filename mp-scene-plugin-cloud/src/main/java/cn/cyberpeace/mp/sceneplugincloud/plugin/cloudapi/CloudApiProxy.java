@@ -7,11 +7,13 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineDel
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchDeleteData;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * @Description
@@ -61,19 +63,23 @@ public class CloudApiProxy<T> implements MethodInterceptor {
                 if (Boolean.TRUE.equals(config.getEnableForceDelete()) && method.getName().equals("delete")) {
                     if (this.target instanceof VirtualSwitch) {
                         VirtualSwitch vs = (VirtualSwitch) this.target;
-                        result = vs.forceDelete((VirtualSwitchDeleteData) objects[0]);
+                        VirtualSwitchDeleteData virtualSwitchDeleteData = (VirtualSwitchDeleteData) objects[0];
+                        List<String> networkIds = virtualSwitchDeleteData.getIds();
+                        if (CollectionUtils.isNotEmpty(networkIds)) {
+                            networkIds.forEach(vs::deleteById);
+                        }
                         success = true;
                     } else if (this.target instanceof VirtualRouter) {
                         VirtualRouter vr = (VirtualRouter) this.target;
-                        result = vr.forceDelete((VirtualRouterDeleteData) objects[0]);
+                        result = vr.delete((VirtualRouterDeleteData) objects[0]);
                         success = true;
                     } else if (this.target instanceof VirtualMachine) {
                         VirtualMachine vm = (VirtualMachine) this.target;
-                        result = vm.forceDelete((VirtualMachineDeleteData) objects[0]);
+                        result = vm.delete((VirtualMachineDeleteData) objects[0]);
                         success = true;
                     } else if (this.target instanceof Container) {
                         Container container = (Container) this.target;
-                        result = container.forceDelete((ContainerDeleteData) objects[0]);
+                        result = container.delete((ContainerDeleteData) objects[0]);
                         success = true;
                     }
                 }
