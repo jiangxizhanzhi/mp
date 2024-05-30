@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
+import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
@@ -22,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -327,9 +329,23 @@ public class BaseCpService {
      */
     private Map<String, String> wrapperHeaders(Map<String, String> headers) {
         if (MapUtils.isEmpty(headers)) {
-            headers = new HashMap<>();
+            headers = getDefaultHeader();
         }
         headers.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
+        return headers;
+    }
+
+    private Map<String, String> getDefaultHeader() {
+        Map<String, String> headers = new HashMap<>();
+
+        // 国际化header的处理
+        Locale locale = LocaleContextHolder.getLocale();
+        if (locale != null) {
+            headers.put("Accept-Language", locale.getLanguage());
+        }
+        // 调用链id
+        String traceId = SysContextHolder.getCallChainId();
+        headers.put("X-Request-Id", traceId);
         return headers;
     }
 
