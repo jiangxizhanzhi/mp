@@ -25,6 +25,8 @@ import cn.cyberpeace.mp.cscene.response.HypervisorStatistics;
 import cn.cyberpeace.mp.devopscluster.model.common.InstanceOsServiceModel;
 import cn.cyberpeace.mp.devopscluster.model.common.NetworkAgentModel;
 import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.CloudHypervisor;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.HypervisorData;
 import com.alibaba.fastjson.JSONObject;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -74,13 +76,10 @@ public class HypervisorConverter implements BaseConverter {
      * @param ignoreFields 不需要传递给云平台接口的参数,默认过滤page与perPage,此参数已转化成limit与offset这两个参数
      * @return
      */
-    @Cacheable(value = CACHE_VALUE_HYPERVISOR_PAGE)
     public BasePageBO<HypervisorBO> page(BasePageDTO dto, String... ignoreFields) {
-        ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        String getParams = ParamUtils.wrapperGetParamsByObject(dto,ignoreFields);
-        final CloudPlatformPageResult<Hypervisor> model = hypervisorService.page(getParams);
+        var hypervisors = new CloudHypervisor().getCachedHypervisors();
         List<HypervisorBO> list = new ArrayList<>();
-        for (Hypervisor hypervisor : model.getList()) {
+        for (HypervisorData hypervisor : hypervisors) {
             HypervisorBO build = HypervisorBO.builder().name(hypervisor.getHostname())
                     .ip(hypervisor.getHostIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
                     .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
@@ -92,7 +91,7 @@ public class HypervisorConverter implements BaseConverter {
 
         BasePageBO<HypervisorBO> convertModel = new BasePageBO<>();
         convertModel.setList(list);
-        convertModel.setTotal(model.getTotal());
+        convertModel.setTotal(hypervisors.size());
         return convertModel;
     }
 
