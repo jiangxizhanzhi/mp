@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -20,6 +19,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.DeleteTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementLogicalSwitchMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
@@ -32,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -49,6 +50,8 @@ public class DeleteHandler extends HandlerCommon {
 
     private final Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
     private final Set<String> dynamipsIds = new ConcurrentHashSet<>();
+    private final CloudPluginSceneElementLogicalSwitchMapper logicalSwitchMapper = BeanCommon.getBean(CloudPluginSceneElementLogicalSwitchMapper.class);
+
 
     public static class SceneProcess {
         public static final EventProcess DELETE_NPCS = new EventProcess("delete_npcs", "sceneplugincloud.event.delete_npcs");
@@ -57,6 +60,8 @@ public class DeleteHandler extends HandlerCommon {
         public static final EventProcess DELETE_FIREWALLS = new EventProcess("delete_firewalls", "sceneplugincloud.event.delete_firewall");
         public static final EventProcess DELETE_GATEWAYS = new EventProcess("delete_gateways", "sceneplugincloud.event.delete_gateway");
         public static final EventProcess DELETE_AUXILIARY_NETWORKS = new EventProcess("delete_auxiliary_networks", "sceneplugincloud.event.delete_auxiliary_network");
+        public static final EventProcess DELETE_LOGICAL_SWITCHES = new EventProcess("delete_logical_switches", "sceneplugincloud.event.delete_logical_switch");
+
 
     }
 
@@ -262,22 +267,20 @@ public class DeleteHandler extends HandlerCommon {
     }
 
     protected boolean deleteEntityNode(CloudPluginSceneElementBO cloudElement) {
-        closeAccessModes(cloudElement);
 
-        EntityNodeDeleteData deleteData = new EntityNodeDeleteData();
-        List<String> interfaceNames = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
-            List<String> list = new ArrayList<>();
-            for (SceneElementPortBO sceneElementPortBO : cloudElement.getSrcElement().getPorts()) {
-                String name = sceneElementPortBO.getName();
-                list.add(name);
+            for (var port : cloudElement.getSrcElement().getPorts()) {
+                var cloudPort = getPluginHandler().getPort(port.getId());
+                if (StringUtils.isEmpty(cloudPort.getAuxiliaryNetworkId())) {
+                    continue;
+                }
+                var deleteData = new EntityNodeDeleteData();
+                deleteData.setId(cloudPort.getResourceId());
+                deleteData.setNetworkId(cloudPort.getAuxiliaryNetworkId());
+                enClient.delete(deleteData);
             }
-            interfaceNames = list;
         }
-        deleteData.setInterfaces(interfaceNames);
-        ElementExtraCloudInfo extraInfo = collectElementExtraCloudInfo(cloudElement);
-        deleteData.setConnections(extraInfo.getConnectionIds());
-        return enClient.delete(deleteData);
+        return true;
     }
 
     protected void recordNpcNode(CloudPluginSceneElementBO cloudElement) {
@@ -375,6 +378,12 @@ public class DeleteHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.DELETE_TERMINALS, () -> runTasks(deleteTerminalTasks));
         }
 
+
+        deleteLogicSwitchProcess();
+
+
+
+
         // 删除npc节点
         if (network2Info.values().size() > 0) {
             runSceneProgress(SceneProcess.DELETE_NPCS, () -> deleteNpcElements(new ArrayList<>(network2Info.values())));
@@ -440,6 +449,21 @@ public class DeleteHandler extends HandlerCommon {
         }
 
         SceneInstanceLinkCacheUtil.clear(getPluginHandler().getSourceSceneId());
+    }
+
+    protected void deleteLogicSwitchProcess() {
+        List<String> logicalSwitchIds = new CopyOnWriteArrayList<>();
+        var deleteLogicalSwitchTasks = getPluginHandler().getLogicalSwitch().stream()
+                .map(bo -> (Runnable) () -> {
+                    LogicalSwitchDeleteData deleteData = new LogicalSwitchDeleteData();
+                    deleteData.setLogicalSwitchName(bo.getName());
+                    enClient.deleteLogicalSwitch(deleteData);
+                    logicalSwitchIds.add(bo.getId());
+                }).collect(Collectors.toList());
+        if (!deleteLogicalSwitchTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.DELETE_LOGICAL_SWITCHES, () -> runTasks(deleteLogicalSwitchTasks));
+            logicalSwitchMapper.bulkDelete(logicalSwitchIds.toArray(new String[0]));
+        }
     }
 
     private void deleteNpcElements(List<BaseNpcData.NetWorkNpcInfo> list) {

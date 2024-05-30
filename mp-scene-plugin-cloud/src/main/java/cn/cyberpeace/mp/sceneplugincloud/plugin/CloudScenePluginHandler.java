@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -13,18 +15,17 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.*;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementLogicalSwitchModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CoreType;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudScenePluginModelHandler;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementLogicalSwitchMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
@@ -36,6 +37,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Component
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
@@ -44,10 +46,14 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         CloudPluginSceneElementBO, CloudPluginSceneElementPortBO, CloudScenePluginContext> {
 
     private CloudScenePluginModelHandler pluginModelHandler;
+    private CloudPluginSceneElementLogicalSwitchMapper logicalSwitchMapper;
+
 
     private final Map<String, CloudPluginSceneElementBO> gatewayElementMap = new ConcurrentHashMap<>();
     private final Map<String, CloudPluginSceneElementBO> firewallElementMap = new ConcurrentHashMap<>();
     private final Map<String, CloudPluginSceneElementBO> terminalElementMap = new ConcurrentHashMap<>();
+    private final List<CloudPluginSceneElementLogicalSwitchBO> logicalSwitch = new CopyOnWriteArrayList<>();
+
 
     private HandlerUtils handlerUtils;
     private InitiateHandler initiateHandler;
@@ -100,12 +106,16 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         createHandler = new CreateHandler(this);
         deleteHandler = new DeleteHandler(this);
         prepareHandler = new PrepareHandler(this);
+        logicalSwitchMapper = BeanCommon.getBean(CloudPluginSceneElementLogicalSwitchMapper.class);
+
     }
 
     @Override
     public void reload() {
         super.reload();
         loadRelated();
+        logicalSwitch.clear();
+
         // 处理网络
         List<CloudPluginSceneElementNetworkModel> networks = pluginModelHandler.readNetworks();
         Map<String, ConnectedNetworkBO> networkBOMap = new HashMap<>();
@@ -170,6 +180,10 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                 });
             }
         });
+
+        var logicalSwitchModels = logicalSwitchMapper.list(new HumanCondition()
+                .filterEqual(CloudPluginSceneElementLogicalSwitchModel::getScene, getSourceSceneId()));
+        logicalSwitchModels.forEach(model -> logicalSwitch.add(new CloudPluginSceneElementLogicalSwitchBO().fromModel(model)));
     }
 
     @Override

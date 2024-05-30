@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
@@ -16,21 +17,20 @@ import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.util.*;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudElementAccessMode;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.*;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSceneStage;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.ElementAccessModeConstant;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementLogicalSwitchModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementLogicalSwitchMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -69,6 +69,11 @@ public class CreateHandler extends HandlerCommon {
         public static final SceneEventProcess CREATE_GATEWAYS = new SceneEventProcess("create_gateways", "sceneplugincloud.event.create_gateway", "create_gateway", 1);
         public static final SceneEventProcess CREATE_FIREWALLS = new SceneEventProcess("create_firewalls", "sceneplugincloud.event.create_firewall", "create_gateway", 2);
         public static final SceneEventProcess CREATE_TERMINALS = new SceneEventProcess("create_terminals", "sceneplugincloud.event.create_terminal", "create_instance", 1);
+
+        public static final EventProcess CREATE_LOGICAL_SWITCHES = new EventProcess("create_logical_switches", "sceneplugincloud.event.create_logical_switch");
+        public static final EventProcess CREATE_ENTITIES = new EventProcess("bind_physical_port", "sceneplugincloud.event.bind_physical_port");
+
+
         public static final SceneEventProcess CREATE_NPCS = new SceneEventProcess("create_npcs", "sceneplugincloud.event.create_npcs", "create_instance", 1);
         public static final SceneEventProcess CONFIGURE = new SceneEventProcess("configure", "sceneplugincloud.event.configure", "config", 1);
     }
@@ -368,6 +373,7 @@ public class CreateHandler extends HandlerCommon {
         for (ConnectedNetworkBO connectedNetwork : allNetworks) {
             VirtualNic virtualNic = this.genConnectedNetwork(connectedNetwork);
             virtualNic.setFwdnsInterfaceIp(getHandlerUtils().getFwdnsInterfaceIp(cloudElement.getSrcElement().getId(), connectedNetwork.getNetwork().getId()));
+            virtualNic.setSpecial(false);
             virtualNics.add(virtualNic);
         }
         return virtualNics;
@@ -1015,6 +1021,7 @@ public class CreateHandler extends HandlerCommon {
     }
 
     protected void createVirtualMachine(CloudPluginSceneElementBO cloudElement) {
+        // 1. 处理外部虚机
         if (ElementTypeUtils.isExternal(cloudElement)) {
             // 外部虚拟机 需要连接网络
             List<VirtualNic> nics = CollectionUtils.emptyNull(genVirutalNics(cloudElement));
@@ -1038,17 +1045,17 @@ public class CreateHandler extends HandlerCommon {
         }
         SceneElementBO srcElement = cloudElement.getSrcElement();
 
-
-
+        // 2. 准备创建虚机参数
         VirtualMachineCreateData createData = new VirtualMachineCreateData();
         createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
         createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
+        // 待查询出templateId
+
         createData.setTemplateId(cloudElement.getImageUuid());
         createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
         createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
         createData.setDisk(IntUtils.zeroNull(srcElement.getDisk()));
-
-
+        // 2.1 虚机的连接信息
         if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
             List<AccessMode> accessModes = cloudElement.getSrcElement().getPorts().stream().filter(port -> Objects.nonNull(port.getAccessModes()))
                     .flatMap(port -> port.getAccessModes().stream()).collect(Collectors.toList());
@@ -1071,12 +1078,14 @@ public class CreateHandler extends HandlerCommon {
             }
 
         }
+        if (StringUtils.isBlank(createData.getDisplayType())) {
+            createData.setDisplayType(ElementAccessModeConstant.SPICE_AND_VNC);
+        }
 
+        // 3. 虚机的网卡信息，都设置为非special口，设置上ip信息。
+        createData.setNetwork(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
 
         if (createData.getNetwork() != null) {
-            log.info("set switch nic info is {}", JsonCommon.stringify(cloudElement));
-            createData.getNetwork().forEach(c -> c.setSpecial(false));
-
             for (var virtualNic : createData.getNetwork()) {
                 if (HandlerUtils.isExternalNetwork(virtualNic.getNetworkId())) {
                     createData.setMainCloud(true);
@@ -1084,13 +1093,13 @@ public class CreateHandler extends HandlerCommon {
                 }
             }
         }
+
         String systemType = SystemTypeUtils.getStandardSystemType(cloudElement.getSrcElement().getSystemType());
         String osType = SystemTypeCommandUtils.getOsType(systemType);
         createData.setOsType(osType);
-
-
-
-
+        if (StringUtils.isNotEmpty(cloudElement.getHost())) {
+            createData.setRunHost(cloudElement.getHost());
+        }
 
 
         // todo cloud-init不用userdata字段, 用custome_script字段
@@ -1349,8 +1358,43 @@ public class CreateHandler extends HandlerCommon {
         }
         getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_INSTANCE);
 
+        // 批量创建逻辑交换机
+        createLogicSwitchProcess();
+        log.info("end gen part scene connect info");
 
-        getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CONFIG);
+        // 批量创建实体设备
+        createEntityElementProcess();
+    }
+
+    protected void createLogicSwitchProcess() {
+        if (!network2LogicalSwitch.values().isEmpty()) {
+            runSceneProgress(SceneProcess.CREATE_LOGICAL_SWITCHES, () -> createLogicalSwitch(new ArrayList<>(network2LogicalSwitch.values())));
+        }
+    }
+
+    public void createLogicalSwitch(List<LogicalSwitchCreateData> list) {
+        List<CloudPluginSceneElementLogicalSwitchModel> logicalSwitchModels = new ArrayList<>();
+        CloudPluginSceneElementLogicalSwitchMapper logicalSwitchMapper = BeanCommon.getBean(CloudPluginSceneElementLogicalSwitchMapper.class);
+        list.forEach(createData -> {
+            CloudPluginSceneElementLogicalSwitchBO logicalSwitchBO = new CloudPluginSceneElementLogicalSwitchBO();
+            logicalSwitchBO.setScene(getPluginHandler().getSourceSceneId());
+            logicalSwitchBO.setName(createData.getLogicalSwitchName());
+            logicalSwitchBO.setPhysicalPorts(createData.getPhysicalPorts());
+            logicalSwitchBO.setPhysicalSwitchName(createData.getPhysicalSwitchName());
+            logicalSwitchModels.add(logicalSwitchBO.toModel());
+        });
+        logicalSwitchMapper.bulkCreate(logicalSwitchModels);
+        list.forEach(enClient::createLogicalSwitch);
+    }
+
+    protected void createEntityElementProcess() {
+        if (!entityCreateData.isEmpty()) {
+            runSceneProgress(SceneProcess.CREATE_ENTITIES, () -> createEntityElements(new ArrayList<>(entityCreateData)));
+        }
+    }
+
+    public void createEntityElements(List<EntityNodeCreateData> list) {
+        list.forEach(enClient::create);
     }
 
     protected void prepareEventProcess() {

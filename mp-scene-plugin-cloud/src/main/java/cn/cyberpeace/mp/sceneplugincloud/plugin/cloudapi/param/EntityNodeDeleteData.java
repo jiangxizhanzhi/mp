@@ -5,12 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class EntityNodeDeleteData implements CloudHttpData {
-    private List<String> interfaces;
-    private List<String> connections;
+    private String id;
+    private String networkId;
 }
