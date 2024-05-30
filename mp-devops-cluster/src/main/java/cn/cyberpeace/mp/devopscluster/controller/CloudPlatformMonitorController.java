@@ -39,9 +39,9 @@ import cn.cyberpeace.mp.devopscluster.dto.RouterPageDTO;
 import cn.cyberpeace.mp.devopscluster.enums.HypervisorActionEnum;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.common.ServiceStatus;
-import cn.cyberpeace.mp.devopscluster.request.BasePageRequest;
 import cn.cyberpeace.mp.devopscluster.request.CloudPlatformPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.ContainerPageRequest;
+import cn.cyberpeace.mp.devopscluster.request.HypervisorPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.HypervisorRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.ServerRestartRequest;
@@ -221,7 +221,7 @@ public class CloudPlatformMonitorController {
     @AuthTarget({TargetEnum.CLOUD_PLATFORM_MONITORING, TargetEnum.DASHBOARD})
     @ApiOperation("节点管理")
     @GetMapping("/hypervisor/page")
-    public PageResult<HypervisorPageVO> page(BasePageRequest request){
+    public PageResult<HypervisorPageVO> page(HypervisorPageRequest request){
         BasePageBO<HypervisorBO> model = hypervisorConverter.page(new BasePageDTO(request.getLimit(),request.getOffset()));
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
@@ -234,6 +234,10 @@ public class CloudPlatformMonitorController {
                     .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed()).totalInstances(hypervisor.getTotalInstances())
                     .diskUsed(hypervisor.getDiskUsed()).build();
             hypervisorPageRespons.add(build);
+        }
+
+        if (Boolean.TRUE.equals(request.getOnlyHostname())) {
+            return new PageResult<>(hypervisorPageRespons, model.getTotal());
         }
 
         // 获取所有物理主机服务状态
