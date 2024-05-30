@@ -40,12 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static cn.cyberpeace.mp.sceneplugincollection.config.WazuhModifyEventConfig.ProbeType.FILE;
 import static cn.cyberpeace.mp.sceneplugincollection.config.WazuhModifyEventConfig.ProbeType.REGISTRY;
@@ -74,13 +69,16 @@ public class InitiateHandler extends HandlerCommon {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.INITIATE);
     }
 
+    /**
+     * 30s凌云接口流量采集使用的是流量镜像方式
+     */
     public void initiate() {
         prepareEventProcess(SceneModel.Event.INITIATE, SceneProcess.class, ElementProcess.class);
 
         CollectionPluginSceneBO scene = getPluginHandler().getScene();
         // 全局开启流量采集
         if (Boolean.TRUE.equals(CollectionSingleton.collectionAppConfig.getEnableFlowCollect())
-                || Boolean.TRUE.equals(scene.getEnableFlowCollect()) || Boolean.TRUE.equals(scene.getEnableFlowMirror())) {
+                || Boolean.TRUE.equals(scene.getEnableFlowCollect())) {
             CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                     .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             runSceneProgress(SceneProcess.INITIATE_FLOW_COLLECTION, () -> {
@@ -100,7 +98,6 @@ public class InitiateHandler extends HandlerCommon {
                         getPluginHandler().getSceneHandler().addElementPortPlugin(PluginConstant.PLUGIN_KEY, portId, JsonCommon.beanToSnakeMap(collectionPort));
                     }
                     collectionPort.setEnableFlowCollect(scene.getEnableFlowCollect());
-                    collectionPort.setEnableFlowMirror(scene.getEnableFlowMirror());
                 });
             });
         }
@@ -141,6 +138,7 @@ public class InitiateHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.INITIATE_PROBE_ROUTER, () -> {
                 final String externalNetCidr = CloudSingleton.cloudAppConfig.getExternalNetCidr();
                 if (StringUtils.isEmpty(externalNetCidr)) {
+                    log.error("collect network build failed, external network get failed!");
                     return;
                 }
 
@@ -163,6 +161,7 @@ public class InitiateHandler extends HandlerCommon {
                         }
                         String ip = ips.get(0);
                         networkInfo.getExcloudIps().add(ip);
+                        // todo 30s接口没有hostRoutes参数，需要手动下发路由
                         List<HostRoute> hostRoutes = network.getNetwork().getHostRoutes();
                         if (hostRoutes == null) {
                             hostRoutes = new ArrayList<>();

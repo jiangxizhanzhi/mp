@@ -14,6 +14,9 @@ public abstract class BaseCollectionPluginSceneBO<M extends BaseCollectionPlugin
     private Boolean enableFlowCollect;
     @ApiModelProperty(value = "是否开启探针采集")
     private Boolean enableProbeCollect;
+
+
+    @Deprecated(since = "凌云功能和流量采集合并")
     @ApiModelProperty(value = "是否开启流量镜像")
     private Boolean enableFlowMirror;
 }
