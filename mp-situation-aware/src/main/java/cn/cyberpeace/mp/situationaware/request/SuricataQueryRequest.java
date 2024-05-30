@@ -28,6 +28,9 @@ public class SuricataQueryRequest {
     @ApiModelProperty("Att&ck技术")
     private String attck;
 
+    @ApiModelProperty("分类类型")
+    private String classType;
+
     @ApiModelProperty(value = "当前页")
     private Integer page;
 

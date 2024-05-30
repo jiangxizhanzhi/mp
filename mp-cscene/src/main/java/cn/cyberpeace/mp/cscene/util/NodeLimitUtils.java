@@ -2,8 +2,8 @@ package cn.cyberpeace.mp.cscene.util;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
-import cn.cyberpeace.mp.cscene.core.BcSceneInstanceHandler;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -38,7 +38,7 @@ public final class NodeLimitUtils {
      * @param instance
      * @return
      */
-    public static UpdateResult addLimitedNodeCount(BcSceneInstanceHandler instance) {
+    public static UpdateResult addLimitedNodeCount(CsceneInstanceBO instance) {
         int limitedNodeCount = countVirtualElement(instance);
         return addLimitedNodeCount(limitedNodeCount);
     }
@@ -48,7 +48,7 @@ public final class NodeLimitUtils {
      * @param instance
      * @return
      */
-    public static void substractLimitedNodeCount(BcSceneInstanceHandler instance) {
+    public static void substractLimitedNodeCount(CsceneInstanceBO instance) {
         int limitedNodeCount = countVirtualElement(instance);
         substractLimitedNodeCount(limitedNodeCount);
     }
@@ -114,11 +114,11 @@ public final class NodeLimitUtils {
      * @param handler
      * @return
      */
-    private static int countVirtualElement(BcSceneInstanceHandler handler) {
-        if (handler == null || handler.getCscene() == null || handler.getCscene().getScene() == null) {
+    private static int countVirtualElement(CsceneInstanceBO handler) {
+        if (handler == null || handler.getScene() == null) {
             return 0;
         }
-        Map<String, ScenePluginDataBO> plugins = handler.getCscene().getScene().getPlugins();
+        Map<String, ScenePluginDataBO> plugins = handler.getScene().getPlugins();
         if (plugins == null || plugins.get("cpcloud") == null || plugins.get("cpcloud").getElements() == null) {
             return 0;
         }

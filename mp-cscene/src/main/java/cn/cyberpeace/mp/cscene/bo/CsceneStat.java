@@ -25,4 +25,10 @@ public class CsceneStat {
     private Integer testSceneCount;
     @ApiModelProperty(value = "占用节点资源数")
     private Integer resourceOccupiedNums;
+    @ApiModelProperty(value = "总cpu数量,单位个")
+    private Integer totalCpu;
+    @ApiModelProperty(value = "总磁盘大小,单位G")
+    private Integer totalDisk;
+    @ApiModelProperty(value = "总内存大小,单位M")
+    private Integer totalRam;
 }

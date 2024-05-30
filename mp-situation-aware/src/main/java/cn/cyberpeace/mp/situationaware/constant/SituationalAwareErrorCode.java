@@ -46,7 +46,8 @@ public enum SituationalAwareErrorCode implements ErrorCode {
     PROBE_PARAM_DESC_LENGTH_INVALID("MP-110445", "probe_param_desc_length_invalid"),
 
     TEMPLATE_NAME_LENGTH_INVALID("MP-110446", "template_name_length_invalid"),
-    TEMPLATE_DESC_LENGTH_INVALID("MP-110447", "template_desc_length_invalid");
+    TEMPLATE_DESC_LENGTH_INVALID("MP-110447", "template_desc_length_invalid"),
+    SURICATA_FORMAT_ERROR("MP-110448", "suricata_rule_format_error");
 
 
     SituationalAwareErrorCode(String code, String message) {

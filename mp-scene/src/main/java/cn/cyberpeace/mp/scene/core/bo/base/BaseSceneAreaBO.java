@@ -7,6 +7,10 @@ import lombok.Data;
 @Data
 public abstract class BaseSceneAreaBO<M extends BaseSceneAreaModel, T extends BaseSceneAreaBO<M, T>>
         extends BaseSceneNodeBO<M, T> {
-    @ApiModelProperty(value = "展开标记")
+    @Deprecated
     private Boolean open;
+
+    @ApiModelProperty(value = "区域类型")
+    private Integer type;
+
 }

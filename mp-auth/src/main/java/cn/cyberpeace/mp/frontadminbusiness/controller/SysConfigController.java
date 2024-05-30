@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/sys/config")
 @UnlimitPagination("list")
-@AuthTarget(TargetEnum.SYSTEM_CONFIG)
+@AuthTarget(TargetEnum.NO_AUTH)
 public class SysConfigController {
 
     @Autowired

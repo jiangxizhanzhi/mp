@@ -21,7 +21,7 @@ import cn.cyberpeace.mp.devopscluster.model.HypervisorStatisticsCloudPlatformRes
 import cn.cyberpeace.mp.devopscluster.model.HypervisorWeightAndMaxInstanceCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.model.SwitchesCloudPlatform;
 import cn.cyberpeace.mp.devopscluster.model.common.Hypervisor;
-import cn.cyberpeace.mp.devopscluster.model.common.HypervisorStatistics;
+import cn.cyberpeace.mp.cscene.response.HypervisorStatistics;
 import cn.cyberpeace.mp.devopscluster.model.common.InstanceOsServiceModel;
 import cn.cyberpeace.mp.devopscluster.model.common.NetworkAgentModel;
 import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @author wanggang

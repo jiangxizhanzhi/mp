@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.parse.export;
 
 import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
-import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.ExtNodeInfo;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NodeElementParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.StaticRoutesResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeExportResult;
@@ -15,8 +15,14 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.base.util.mptool.ExceptionUtil;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigPieceBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
+import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpParam;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
@@ -27,7 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.Property;
@@ -36,7 +41,7 @@ import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -105,6 +110,9 @@ public class SceneExporter {
         }
         this.createSceneYml(parseResult.getYmlResult(), envPath, "topo2");
 
+        // 生成 topo.json
+        this.createTopoJson(sceneId, sceneNumber, envPath + "/topo.json");
+
         // 下载附件
         this.downloadNodeFile(envPath, resultV1.getFile2Download());
         // 生成server.yml与导出靶标
@@ -117,12 +125,64 @@ public class SceneExporter {
             String k = entry.getKey();
             String v = entry.getValue();
             ExportResult.ConvertInfo convertInfo = new ExportResult.ConvertInfo();
-            convertInfo.setId(v);
+            convertInfo.setId(k);
             convertInfo.setOriginId(k);
             convertInfos.add(convertInfo);
         }
         exportResult.setConvertInfos(convertInfos);
         return exportResult;
+    }
+
+    private void createTopoJson(String sceneId,String sceneNum, String filePath) {
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, null, null);
+        this.removeEid(sceneConfigHandler);
+        SceneConfigDataBO sceneConfigDataBO = sceneConfigHandler.toData();
+        sceneConfigDataBO.getPlugins().remove("cpflow");
+        sceneConfigDataBO.getPlugins().remove("collection");
+        var cloudData = sceneConfigDataBO.getPlugins().get("cpcloud");
+        for (Map<String, Object> cloudElement : cloudData.getElements().values()) {
+            var imageType = cloudElement.get("image_type");
+            if (StringUtils.isEmpty(sceneNum)) {
+                continue;
+            }
+            boolean isContainer = BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(imageType);
+            boolean isVm = BaseCloudPluginSceneElementModel.ImageType.VM.equals(imageType);
+            if (isVm || isContainer) {
+                Object image = cloudElement.get("image");
+                if (image != null) {
+                    cloudElement.put("image", sceneNum + image);
+                }
+            }
+        }
+        String content = JsonCommon.stringify(sceneConfigDataBO);
+        try {
+            this.createFile(content.getBytes("utf8"), filePath);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private SceneConfigHandler removeEid(SceneConfigHandler sceneConfigHandler){
+        sceneConfigHandler.getScene().setEid(null);
+        for (Map.Entry<String, SceneConfigElementBO> entry : sceneConfigHandler.getElementMap().entrySet()) {
+            SceneConfigElementBO value = entry.getValue();
+            value.setEid(null);
+            value.getPorts().forEach(p -> p.setEid(null));
+        }
+        for (Map.Entry<String, SceneConfigAreaBO> entry : sceneConfigHandler.getAreaMap().entrySet()) {
+            SceneConfigAreaBO value = entry.getValue();
+            value.setEid(null);
+        }
+        for (Map.Entry<String, SceneConfigPieceBO> entry : sceneConfigHandler.getPieceMap().entrySet()) {
+            SceneConfigPieceBO value = entry.getValue();
+            value.setEid(null);
+        }
+        for (Map.Entry<String, SceneConfigElementPortConnectionBO> entry : sceneConfigHandler.getElementPortConnectionMap()
+                .entrySet()) {
+            SceneConfigElementPortConnectionBO v = entry.getValue();
+            v.setEid(null);
+        }
+        return sceneConfigHandler;
     }
 
     private void createImageAndServiceYml(String imagePath, String singleImagePath, List<SceneParseResourceCenterV2.Device> devices, String sceneNumber) {

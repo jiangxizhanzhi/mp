@@ -11,19 +11,57 @@ import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
-import cn.cyberpeace.mp.flow.bo.*;
+import cn.cyberpeace.mp.flow.bo.BatchStartTaskBO;
+import cn.cyberpeace.mp.flow.bo.FlowTaskCommonConf;
+import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
+import cn.cyberpeace.mp.flow.bo.FlowTaskFlowConf;
+import cn.cyberpeace.mp.flow.bo.FlowTaskIpv4Conf;
+import cn.cyberpeace.mp.flow.bo.FlowTaskStart;
+import cn.cyberpeace.mp.flow.bo.TaskSipBO;
 import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
-import cn.cyberpeace.mp.flow.enums.*;
-import cn.cyberpeace.mp.flow.model.*;
+import cn.cyberpeace.mp.flow.enums.CustomFlagEnum;
+import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
+import cn.cyberpeace.mp.flow.enums.PortTypeEnum;
+import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
+import cn.cyberpeace.mp.flow.enums.TaskActionEnum;
+import cn.cyberpeace.mp.flow.enums.TaskStatusEnum;
+import cn.cyberpeace.mp.flow.enums.TaskTaskStatusEnum;
+import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
+import cn.cyberpeace.mp.flow.model.FlowInfoModel;
+import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
+import cn.cyberpeace.mp.flow.model.FlowPortModel;
+import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
+import cn.cyberpeace.mp.flow.model.FlowTaskConfModel;
+import cn.cyberpeace.mp.flow.model.FlowTaskModel;
+import cn.cyberpeace.mp.flow.model.FlowTaskPortModel;
+import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowPortMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
-import cn.cyberpeace.mp.flow.request.*;
-import cn.cyberpeace.mp.flow.service.*;
-import cn.cyberpeace.mp.flow.util.*;
+import cn.cyberpeace.mp.flow.request.AddAppTaskRequest;
+import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
+import cn.cyberpeace.mp.flow.request.AddPcapRequest;
+import cn.cyberpeace.mp.flow.request.AddScriptsRequest;
+import cn.cyberpeace.mp.flow.request.AddStandardsTaskRequest;
+import cn.cyberpeace.mp.flow.request.AddVmRequest;
+import cn.cyberpeace.mp.flow.request.BatchStartFlowTaskRequest;
+import cn.cyberpeace.mp.flow.request.BatchStopFlowTaskRequest;
+import cn.cyberpeace.mp.flow.request.StartFlowTaskRequest;
+import cn.cyberpeace.mp.flow.request.StopFlowTaskRequest;
+import cn.cyberpeace.mp.flow.service.FlowPortService;
+import cn.cyberpeace.mp.flow.service.FlowScriptParamService;
+import cn.cyberpeace.mp.flow.service.FlowTaskConfService;
+import cn.cyberpeace.mp.flow.service.FlowTaskPortService;
+import cn.cyberpeace.mp.flow.service.FlowTaskRecordService;
+import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
+import cn.cyberpeace.mp.flow.util.CommonUtil;
+import cn.cyberpeace.mp.flow.util.FlowWebSocketClientUtil;
+import cn.cyberpeace.mp.flow.util.HttpDeleteUtil;
+import cn.cyberpeace.mp.flow.util.ResponseUtils;
+import cn.cyberpeace.mp.flow.util.SshUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -38,7 +76,11 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @Description: 流量任务异步执行服务类
@@ -541,12 +583,10 @@ public class AsyncPlatFlowTaskService {
                 String finalFixedIp = fixedIp;
                 boolean flag = NetworkUtils.probePort(fixedIp, 22, 1000, 1000,
                         1000 * 60 * 10, null, 0);
-                if (flag) {
-                    checkTrexServer(finalFixedIp, networkInfos, flowActuatorModel, externalNetId);
-                } else {
+                if (!flag) {
                     log.error("Trex vm start error:{}", addVmRequest.getName());
                 }
-
+                checkTrexServer(finalFixedIp, networkInfos, flowActuatorModel, externalNetId);
             } else {
                 log.error("add trex vm error");
                 throw new MpRuntimeException(addVmObj.getString(BaseConstants.STR_DETAIL));
@@ -585,6 +625,9 @@ public class AsyncPlatFlowTaskService {
 
         FlowActuatorModel flowActuatorModel = new FlowActuatorModel();
         AddVmRequest addVmRequest = new AddVmRequest();
+        addVmRequest.setCpu(flowConfig.getTrexCpu());
+        addVmRequest.setRam(flowConfig.getTrexRam());
+        addVmRequest.setDisk(flowConfig.getTrexDisk());
         addVmRequest.setName(trexName);
         addVmRequest.setImage(flowConfig.getTrexImage());
         AddVmRequest.Networks networks = new AddVmRequest.Networks();
@@ -630,12 +673,11 @@ public class AsyncPlatFlowTaskService {
                 // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
                 String finalFixedIp = fixedIp;
                 boolean flag = NetworkUtils.probePort(fixedIp, 22, 1000, 1000,
-                        1000 * 60 * 10, null, 0);
-                if (flag) {
-                    checkStartTrex(finalFixedIp);
-                } else {
+                        1000 * 60 * 2, null, 0);
+                if (!flag) {
                     log.error("Trex vm start error:{}", addVmRequest.getName());
                 }
+                checkStartTrex(finalFixedIp);
 
             } else {
                 log.error("add trex vm error");
@@ -1114,13 +1156,12 @@ public class AsyncPlatFlowTaskService {
         serverInfo.setPassword("111111");
         SshUtil.refreshDir(serverInfo, commands, TGN_PATH, "/opt/project_dirs");
 
-        boolean flag = NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
+        boolean flag = NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 2,
                 null, 0);
-        if (flag) {
-            flowPortService.batchCreatePorts(networkInfos, flowActuatorModel, extNetId);
-        } else {
+        if (!flag) {
             log.error("Trex vm start error:{}", fixedIp);
         }
+        flowPortService.batchCreatePorts(networkInfos, flowActuatorModel, extNetId);
     }
 
     /**
@@ -1135,7 +1176,7 @@ public class AsyncPlatFlowTaskService {
         serverInfo.setPassword("111111");
         SshUtil.refreshDir(serverInfo, commands, TGN_PATH, "/opt/project_dirs");
 
-        boolean flag = NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 5,
+        boolean flag = NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 2,
                 null, 0);
         if (!flag) {
             log.error("Trex vm start error:{}", fixedIp);
@@ -1245,7 +1286,7 @@ public class AsyncPlatFlowTaskService {
                 JSONObject object = new JSONObject();
                 object.put("fileName",
                         flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getPcapFile().split(BaseConstants.SPOT)[1]);
-                String pcapRsp = HttpUtils.postFile(resourceUrl + "/pcap/import", fileByte, "file", object);
+                String pcapRsp = HttpUtils.postFileV2(resourceUrl + "/pcap/import", fileByte, "file", object);
                 JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
                 log.info("upload pcap file response:{}", jsonObject.toJSONString());
 
@@ -1302,7 +1343,7 @@ public class AsyncPlatFlowTaskService {
                 object.put("fileName", flowName);
 
                 // 先向流量发生平台新增资源文件
-                String scriptRsp = HttpUtils.postFile(resourceUrl + "/scripts", code.getBytes(StandardCharsets.UTF_8), "run_image_script",
+                String scriptRsp = HttpUtils.postFileV2(resourceUrl + "/scripts", code.getBytes(StandardCharsets.UTF_8), "run_image_script",
                         object);
                 JSONObject scriptObj = JSONObject.parseObject(scriptRsp);
                 log.info("add script file response:{}", scriptObj.toJSONString());

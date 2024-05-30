@@ -100,6 +100,9 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.default.hours-range:24}")
     private Integer hoursRange;
 
+    @Value(("${mp.sceneplugincollection.suricata_rule_dir:}"))
+    private String suricataRuleDir;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 
@@ -111,6 +114,16 @@ public class CollectionAppConfig {
         wazuhAgentInstallerDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR,
                 baseAppConfig.getResourcesDir(), "scene_plugin_collection/wazuh_agent");
         return wazuhAgentInstallerDir;
+    }
+
+    public String getSuricataRuleDir() {
+        if (!StringUtils.isEmpty(this.suricataRuleDir)) {
+            return this.suricataRuleDir;
+        } else {
+            this.suricataRuleDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, baseAppConfig.getResourcesDir(),
+                    "scene_plugin_collection/suricata_rule");
+            return suricataRuleDir;
+        }
     }
 
 

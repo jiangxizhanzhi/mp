@@ -3,6 +3,9 @@ package cn.cyberpeace.mp.scene.core.scene;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
 import cn.cyberpeace.mp.scene.constant.CommonSceneStage;
@@ -11,6 +14,7 @@ import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneAreaNodeConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
@@ -33,18 +37,23 @@ import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementPortBO;
 import cn.cyberpeace.mp.scene.model.SceneAreaModel;
+import cn.cyberpeace.mp.scene.model.SceneAreaNodeConnectionModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPluginModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPortConnectionModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.ScenePieceModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaNodeConnectionModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneAreaMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementPluginMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementPortConnectionMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
+import cn.cyberpeace.mp.scene.repository.SceneNodeConnectionMapper;
 import cn.cyberpeace.mp.scene.repository.ScenePieceMapper;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -78,6 +87,7 @@ public class SceneHandler extends BaseSceneHandler<
         SceneElementModel,
         SceneElementPortModel,
         SceneElementPortConnectionModel,
+        SceneAreaNodeConnectionModel,
         SceneElementPluginModel,
         ScenePieceModel,
         SceneBO,
@@ -85,6 +95,7 @@ public class SceneHandler extends BaseSceneHandler<
         SceneElementPortBO,
         SceneElementBO,
         SceneElementPortConnectionBO,
+        SceneAreaNodeConnectionBO,
         ScenePieceBO,
         SceneTopologyBO,
         SceneDataBO,
@@ -177,6 +188,14 @@ public class SceneHandler extends BaseSceneHandler<
         this.setSceneStageRecorder(new SceneStageRecorder(this.getScene()));
     }
 
+    public SceneHandler(String sceneId, String areaId, boolean isAreaMode, boolean lazyMode) {
+        if (lazyMode) {
+            initLazy(sceneId, areaId, isAreaMode);
+        } else {
+            init(sceneId, areaId, isAreaMode, null);
+        }
+    }
+
     @Override
     protected void initMapper() {
         super.sceneMapper = BeanCommon.getBean(SceneMapper.class);
@@ -186,6 +205,8 @@ public class SceneHandler extends BaseSceneHandler<
         super.sceneElementPortConnectionMapper = BeanCommon.getBean(SceneElementPortConnectionMapper.class);
         super.sceneElementPluginMapper = BeanCommon.getBean(SceneElementPluginMapper.class);
         super.scenePieceMapper = BeanCommon.getBean(ScenePieceMapper.class);
+        super.sceneNodeConnectionMapper = BeanCommon.getBean(SceneNodeConnectionMapper.class);
+
     }
 
     @Override
@@ -206,6 +227,7 @@ public class SceneHandler extends BaseSceneHandler<
         super.sceneElementPluginModelClass = SceneElementPluginModel.class;
         super.scenePieceModelClass = ScenePieceModel.class;
         super.sceneHandlerClass = SceneHandler.class;
+        super.sceneNodeConnectionBOClass = SceneAreaNodeConnectionBO.class;
 
         Field field = ClassUtils.getField(this.getClass(), "scenePluginHandlerInterface", true, false);
         ClassUtils.setFieldValue(field, this, ScenePluginHandler.class);
@@ -948,6 +970,24 @@ public class SceneHandler extends BaseSceneHandler<
         }
     }
 
+    public void snapshotElementV2(String nodeId, String snapshotId, String snapshotName, String description) {
+        SceneElementBO element = getElement(nodeId);
+        try {
+            for (int i = getPlugins().size() - 1; i >= 0; i--) {
+                getPlugins().get(i).snapshotElementV2(nodeId, snapshotId, snapshotName, description);
+            }
+        } catch (Exception e) {
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format(e.getMessage()));
+        }
+        element.setEvent(SceneElementModel.Event.SNAPSHOT);
+        element.setEventStatus(EventStatus.OVER);
+        updateSceneElement(nodeId);
+        asyncAckElementChanged(nodeId, false, false);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            updateSceneElementWithPlugins(nodeId);
+        }
+    }
+
     public void deleteElementSnapshot(String nodeId, String snapshotId) {
         SceneElementBO element = getElement(nodeId);
         prepareElementEvent(element, SceneElementModel.Event.SNAPSHOT);
@@ -988,6 +1028,11 @@ public class SceneHandler extends BaseSceneHandler<
     public SceneDataBO toData() {
         SceneDataBO sceneDataBO = super.toData();
         sceneDataBO.getTopology().getScene().setProgressPercentage(this.calculateProgressPercentage());
+        return sceneDataBO;
+    }
+
+    public SceneDataBO toDataV2() {
+        SceneDataBO sceneDataBO = super.toData();
         return sceneDataBO;
     }
 

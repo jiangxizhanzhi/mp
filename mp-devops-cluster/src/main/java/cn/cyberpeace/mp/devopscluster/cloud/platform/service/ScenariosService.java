@@ -23,7 +23,9 @@ public class ScenariosService extends BaseCpService {
     private static final String DELETE_OR_CREATE_IMAGE_INSTANCE = "/cloud/v1/device/device_instance";
 
     private static final String SCENARIOS = "/scenarios";
-    private static final String SNAPSHOT = "/snapshot";
+    private static final String
+
+            SNAPSHOT = "/snapshot";
 
     public ScenariosService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
@@ -32,7 +34,6 @@ public class ScenariosService extends BaseCpService {
     /**
      * 创建快照
      */
-    @Deprecated
     public BaseCloudPlatformResult  create(ScenariosSnapshot snapshotCreate){
 
         String url = BaseCloudPlatformConstant.CPCLOUD_URL + BaseCloudPlatformConstant.URL_VERSION;

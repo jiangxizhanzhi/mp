@@ -48,11 +48,15 @@ mp:
       enable-command-change: ${MP_ENABLE_COMMAND_CHANGE:false}
       cron-job-expression: ${MP_CRON_JOB_EXPRESSION:0 0/15 * * * ?}
       enable-node-limit-db-check: ${MP_ENABLE_NODE_LIMIT_DB_CHECK:true}
-      cp-ip: ${CP_IP:10.4.1.57}
-      cp-port: ${CP_PORT:9999}
+      default-container-cpu-count: ${MP_DEFAULT_CONTAINER_CPU_COUNT:1}
+      default-container-ram-count: ${MP_DEFAULT_CONTAINER_RAM_COUNT:512}
+      default-container-disk-count: ${MP_DEFAULT_CONTAINER_DISK_COUNT:10}
+      cp-ip: ${CP_IP:10.100.7.1}
+      cp-port: ${CP_PORT:11111}
   frontbusiness:
     ext-var:
       url-ac-filter-enabled: ${MP_FRONTBUSINESS_URLACFILTER_ENABLED:true}
+      showai: ${MP_SHOW_AI:true}
   sceneplugincloud:
     ext-var:
       delete-retry-times: ${MP_DELETE_RETRY_TIMES:2}
@@ -165,6 +169,7 @@ mp:
       scene-process-save-realtime: ${MP_SCENE_PROCESS_SAVE_REALTIME:true}
       element-process-save-realtime: ${MP_ELEMENT_PROCESS_SAVE_REALTIME:true}
       dhcp-control: ${MP_SCENE_DHCP_CONTROL:false}
+      metadata-file-server: ${MP_METADATA_FILE_SERVER:http://169.254.169.254/file}
 
 # for kaptcha
 #kaptcha:

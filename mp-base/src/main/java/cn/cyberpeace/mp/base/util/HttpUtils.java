@@ -2,6 +2,12 @@ package cn.cyberpeace.mp.base.util;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -26,6 +32,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -40,6 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Deprecated
@@ -52,7 +60,7 @@ public class HttpUtils {
     /**
      * 默认超时时间
      */
-    private static final Integer DEFAULT_TIME_OUT = 600;
+    private static final Integer DEFAULT_TIME_OUT = 600 * 1000;
 
     /**
      * 发送一个Post请求
@@ -411,6 +419,56 @@ public class HttpUtils {
         return client.execute(httpGet);
     }
 
+    public static String postFileV2(String url, byte[] fileByte, String fileField, JSONObject jsonObj) {
+        log.info("请求地址================>{}", url);
+        String result = StringUtils.EMPTY;
+        // 向流量发生平台导入pcap包
+        Response response = null;
+        try {
+            OkHttpClient client = new OkHttpClient().newBuilder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(60
+                    , TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS).build();
+            MultipartBody.Builder builder = new MultipartBody.Builder();
+            String fileName = "";
+
+            // 请求参数
+            if (Objects.nonNull(jsonObj)) {
+                log.info("请求参数================>{}", jsonObj.toJSONString());
+                fileName = jsonObj.getString("fileName");
+                for (Object key : jsonObj.keySet()) {
+                    builder.addFormDataPart(key.toString(), jsonObj.getString(key.toString()));
+                }
+            } else {
+                log.info("请求参数================>{}", jsonObj);
+            }
+
+            // 文件对象
+            RequestBody body = builder.setType(MultipartBody.FORM)
+                    .addFormDataPart(fileField, fileName,
+                                     RequestBody.create(MediaType.parse(ContentType.APPLICATION_OCTET_STREAM.getMimeType()),
+                                                        fileByte))
+                    .build();
+
+            Request request = new Request.Builder()
+                    .url(url)
+                    .method("POST", body)
+                    .addHeader("Content-Type", ContentType.MULTIPART_FORM_DATA.getMimeType())
+                    .build();
+            response = client.newCall(request).execute();
+            if (response.isSuccessful()) {
+                result = response.body().string();
+            } else {
+                log.error("post file error:{}", response.message());
+                result = new JSONObject().toJSONString();
+            }
+        } catch (Exception e) {
+            log.error("post file error", e);
+        } finally {
+            IOUtils.closeQuietly(response);
+        }
+
+        return result;
+    }
+
     /**
      * 发送文件
      *
@@ -491,11 +549,11 @@ public class HttpUtils {
         StringEntity entity = new StringEntity(content, StandardCharsets.UTF_8);
         entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
         httpPost.setEntity(entity);
-
-        HttpResponse resp = client.execute(httpPost);
         // 设置请求和传输超时时间
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
         httpPost.setConfig(requestConfig);
+
+        HttpResponse resp = client.execute(httpPost);
         // 获得返回值
         return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
     }

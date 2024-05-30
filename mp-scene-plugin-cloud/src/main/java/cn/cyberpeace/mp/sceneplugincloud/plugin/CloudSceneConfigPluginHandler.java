@@ -143,6 +143,9 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
     public void correctData() {
         getElementMap().forEach((nodeId, element) -> {
             SceneConfigElementBO srcElement = getSrcElement(nodeId);
+            if (srcElement == null) {
+                return;
+            }
             // 纠正 role imageType 对应 type virtualType
             Integer role = element.getRole();
             String imageType = element.getImageType();

@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaNodeConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
@@ -56,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @Description
@@ -304,6 +304,8 @@ public class CsceneDataModifier {
                 List<SceneConfigElementPortConnectionBO> connectionBOS = csceneBO.getSceneConfig().getTopology().getConnections();
                 List<SceneConfigAreaBO> areaBOS = csceneBO.getSceneConfig().getTopology().getAreas();
                 List<SceneConfigPieceBO> pieceBOS = csceneBO.getSceneConfig().getTopology().getPieces();
+                List<SceneConfigAreaNodeConnectionBO> nodeConnectionBOS = csceneBO.getSceneConfig().getTopology()
+                        .getNodeConnections();
                 List<CsceneRoleBO> roles = csceneBO.getRoles();
                 if (CollectionUtils.isNotEmpty(elementBOS)) {
                     for (SceneConfigElementBO bo : elementBOS) {
@@ -332,12 +334,17 @@ public class CsceneDataModifier {
                 }
                 if (CollectionUtils.isNotEmpty(roles)) {
                     for (CsceneRoleBO r : roles) {
-                        r.setId(null);
+//                        r.setId(null);
                         if (CollectionUtils.isNotEmpty(r.getChildren())) {
                             for (CsceneRoleBO ch : r.getChildren()) {
-                                ch.setId(null);
+//                                ch.setId(null);
                             }
                         }
+                    }
+                }
+                if(CollectionUtils.isNotEmpty(nodeConnectionBOS)){
+                    for (SceneConfigAreaNodeConnectionBO n : nodeConnectionBOS) {
+                        n.setEid(null);
                     }
                 }
             }
@@ -573,6 +580,22 @@ public class CsceneDataModifier {
         handlerNodeCommand(csceneBO.getSceneConfig());
         correctVlanId(csceneBO);
         csceneBO.setEnableRecording(getOutputEnableRecording(csceneBO.getSceneConfig()));
+        csceneBO.calHardware();
+        csceneBO.setResourceOccupiedNums(NodeLimitUtils.calLimitedNodesNum(csceneBO));
+        Set<String> portIds = new HashSet<>();
+        csceneBO.getSceneConfig().getTopology().getElements().forEach(e -> {
+            if(e.getPorts() != null){
+                e.getPorts().forEach(p -> portIds.add(p.getId()));
+            }
+        });
+        var list = csceneBO.getSceneConfig().getTopology().getConnections();
+        var it = list.iterator();
+        while (it.hasNext()){
+            var d = it.next();
+            if(!portIds.contains(d.getSource()) || !portIds.contains(d.getTarget())){
+                it.remove();
+            }
+        }
     }
 
     public static void correctVlanId(CsceneBO csceneBO) {
@@ -590,6 +613,21 @@ public class CsceneDataModifier {
 
     public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO) {
         correctReturnCsceneData(csceneInstanceBO, true);
+
+        Set<String> portIds = new HashSet<>();
+        csceneInstanceBO.getScene().getTopology().getElements().forEach(e -> {
+            if(e.getPorts() != null){
+                e.getPorts().forEach(p -> portIds.add(p.getId()));
+            }
+        });
+        var list = csceneInstanceBO.getScene().getTopology().getConnections();
+        var it = list.iterator();
+        while (it.hasNext()){
+            var d = it.next();
+            if(!portIds.contains(d.getSource()) || !portIds.contains(d.getTarget())){
+                it.remove();
+            }
+        }
     }
 
     public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO, boolean handlerHidden) {
@@ -916,6 +954,34 @@ public class CsceneDataModifier {
                             throw new MpRuntimeException(CsceneErrorCode.PARAMS_FIRE_RULES_OUT_OF_LIMIT);
                         }
                     }
+                }
+            }
+        }
+    }
+
+    public static void handlerPortUsable(CsceneBO csceneBO) {
+        if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getTopology() == null) {
+            return;
+        }
+        var topo = csceneBO.getSceneConfig().getTopology();
+        var connections = topo.getConnections();
+        if (CollectionUtils.isEmpty(connections)) {
+            return;
+        }
+        Set<String> usedPortIds = new HashSet<>();
+        connections.forEach(c -> {
+            usedPortIds.add(c.getTarget());
+            usedPortIds.add(c.getSource());
+        });
+        for (SceneConfigElementBO e : topo.getElements()) {
+            if (e.getPorts() == null) {
+                continue;
+            }
+            for (SceneConfigElementPortBO p : e.getPorts()) {
+                if (usedPortIds.contains(p.getId())) {
+                    p.setUsable(false);
+                } else {
+                    p.setUsable(true);
                 }
             }
         }

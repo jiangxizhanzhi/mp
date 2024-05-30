@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.scene.core.plugin.base.BasePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementPortBO;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaNodeConnectionModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortConnectionModel;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -31,8 +32,8 @@ public abstract class BasePluginCommonHandler<
         E extends BasePluginSceneElementBO<?, E, E9>,
         P extends BasePluginSceneElementPortBO<?, P, P9>,
         C,
-        H extends BaseSceneHandler<?, ?, ?, ?, ? extends BaseSceneElementPortConnectionModel, ?, ?,
-                S9, ?, P9, E9, ?, ?, ?, ?, ?,
+        H extends BaseSceneHandler<?, ?, ?, ?, ? extends BaseSceneElementPortConnectionModel,? extends BaseSceneAreaNodeConnectionModel, ?, ?,
+                S9, ?, P9, E9, ?, ?, ?, ?, ?, ?,
                 ?, H>>
         extends BasePluginHandler<S, E, P, C> {
 

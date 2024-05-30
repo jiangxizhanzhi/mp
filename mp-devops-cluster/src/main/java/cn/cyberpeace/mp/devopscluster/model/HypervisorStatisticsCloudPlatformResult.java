@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.model;
 
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
-import cn.cyberpeace.mp.devopscluster.model.common.HypervisorStatistics;
+import cn.cyberpeace.mp.cscene.response.HypervisorStatistics;
 import lombok.*;
 
 @Data

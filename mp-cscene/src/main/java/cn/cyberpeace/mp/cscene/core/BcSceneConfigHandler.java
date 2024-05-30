@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
+import cn.cyberpeace.mp.cscene.util.HardwareLimitUtils;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -144,10 +145,14 @@ public class BcSceneConfigHandler extends BaseCsceneHandler<
         this.checkVlanIds(getCscene());
         BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(csceneInstance, getContext());
         // 节点数量增加失败 说明已到达数量上限
-        NodeLimitUtils.UpdateResult updateResult = NodeLimitUtils.addLimitedNodeCount(instanceHandler);
+        NodeLimitUtils.UpdateResult updateResult = NodeLimitUtils.addLimitedNodeCount(instanceHandler.getCscene());
         if (!updateResult.isSuccess()) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT.format(String.valueOf(updateResult.getLimitNode()),
                     String.valueOf(updateResult.getExistNode()), String.valueOf(updateResult.getCurrentNode())));
+        }
+        HardwareLimitUtils.UpdateResult hardwareResult = HardwareLimitUtils.addHardware(instanceHandler.getCscene());
+        if (!hardwareResult.isSuccess()) {
+            throw new MpRuntimeException(hardwareResult.getMessage());
         }
         instanceHandler.create();
         CsceneInstanceBO result = instanceHandler.toData();
@@ -191,6 +196,7 @@ public class BcSceneConfigHandler extends BaseCsceneHandler<
             reloadCsceneInstances();
         }
         CsceneBO csceneBO = getCscene();
+        csceneBO.calHardware();
         CsceneDataModifier.correctReturnCsceneData(csceneBO);
         return csceneBO;
     }
@@ -301,7 +307,9 @@ public class BcSceneConfigHandler extends BaseCsceneHandler<
 
     @Override
     public void saveScene(CsceneBO csceneBO) {
-        csceneBO.setSceneConfig(sceneConfigService.sync(csceneBO.getSceneConfig(), false, null).getSource());
+        String areaId = csceneBO.getSceneConfig().getTopology().getAreaId();
+        csceneBO.setSceneConfig(sceneConfigService.sync(csceneBO.getSceneConfig(), areaId == null ? false : true, null)
+                                        .getSource());
     }
 
     @Override

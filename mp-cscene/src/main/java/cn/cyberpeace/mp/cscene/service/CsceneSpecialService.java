@@ -18,10 +18,12 @@ import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.CsceneInstanceInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
+import cn.cyberpeace.mp.cscene.model.CsceneElementStat;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountActivitySceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
@@ -32,6 +34,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneSnapshotMapper;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.SceneStatusUtil;
+import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
@@ -70,7 +73,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -105,13 +107,6 @@ public class CsceneSpecialService {
     }
 
     @Data
-    public static class CsceneElementStat {
-        private String csceneId;
-        private Integer elementType;
-        private Integer elementTypeCount;
-    }
-
-    @Data
     public static class CsceneTestInstanceStat {
         private String csceneId;
         private Integer testInstanceCount;
@@ -135,23 +130,12 @@ public class CsceneSpecialService {
 
         Map<String, CsceneStat> statMap = new HashMap<>();
         for (String id : ids) {
-            CsceneStat csceneStat = new CsceneStat(id, 0, 0, 0, 0, 0, 0, 0);
+            CsceneStat csceneStat = new CsceneStat(id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
             statMap.put(id, csceneStat);
         }
 
-        HumanCondition elementStatCondition = new HumanCondition()
-                .link(CsceneModel.class, SceneConfigElementModel.class)
-                .filterLink(CsceneModel.class, CsceneModel::getSceneConfig,
-                        SceneConfigElementModel.class, SceneConfigElementModel::getScene)
-                .currentLink(CsceneModel.class)
-                .filterIn(CsceneModel::getId, ids)
-                .groupBy(CsceneModel::getId)
-                .selectAs(CsceneModel::getId, CsceneElementStat::getCsceneId)
-                .currentLink(SceneConfigElementModel.class)
-                .groupBy(SceneConfigElementModel::getType)
-                .selectAs(SceneConfigElementModel::getType, CsceneElementStat::getElementType)
-                .selectAs(Count.f(SceneConfigElementModel::getType), CsceneElementStat::getElementTypeCount);
-        List<CsceneElementStat> csceneElementStats = csceneMapper.list(elementStatCondition, CsceneElementStat.class);
+        var config = BeanCommon.getBean(CsceneAppConfig.class);
+        List<CsceneElementStat> csceneElementStats  = csceneMapper.statGroupByType(ids, config.getDefaultContainerCpuCount(), config.getDefaultContainerRamCount(), config.getDefaultContainerDiskCount());
         for (CsceneElementStat csceneElementStat : csceneElementStats) {
             CsceneStat stat = statMap.get(csceneElementStat.getCsceneId());
             Integer elementType = csceneElementStat.getElementType();
@@ -166,8 +150,25 @@ public class CsceneSpecialService {
             } else if (elementType.equals(BaseSceneElementModel.Type.NPC)) {
                 stat.setNpcCount(csceneElementStat.getElementTypeCount());
             }
+            if (csceneElementStat.getCpu() != null) {
+                stat.setTotalCpu(stat.getTotalCpu() + csceneElementStat.getCpu());
+            }
+            if (csceneElementStat.getRam() != null) {
+                stat.setTotalRam(stat.getTotalRam() + csceneElementStat.getRam());
+            }
+            if (csceneElementStat.getDisk() != null) {
+                stat.setTotalDisk(stat.getTotalDisk() + csceneElementStat.getDisk());
+            }
         }
 
+        FlowConfig flowConfig = BeanCommon.getBean(FlowConfig.class);
+        List<CsceneElementStat> flowStats = csceneMapper.statGroupByFlow(ids, flowConfig.getTrexCpu(), flowConfig.getTrexRam(), flowConfig.getTrexDisk());
+        for (CsceneElementStat elementStat : flowStats) {
+            CsceneStat stat = statMap.get(elementStat.getCsceneId());
+            stat.setTotalDisk(stat.getTotalDisk() + elementStat.getDisk());
+            stat.setTotalRam(stat.getTotalRam() + elementStat.getRam());
+            stat.setTotalCpu(stat.getTotalCpu() + elementStat.getCpu());
+        }
 
         HumanCondition virtualStatCondition = new HumanCondition()
                 .link(CsceneModel.class, CloudPluginSceneConfigElementModel.class)

@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.HypervisorStatisticsCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.model.HypervisorWeightAndMaxInstanceCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.model.common.Hypervisor;
-import cn.cyberpeace.mp.devopscluster.model.common.HypervisorStatistics;
+import cn.cyberpeace.mp.cscene.response.HypervisorStatistics;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;

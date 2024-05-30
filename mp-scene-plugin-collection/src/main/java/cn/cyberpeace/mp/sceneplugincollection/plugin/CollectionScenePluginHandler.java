@@ -143,6 +143,17 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
     }
 
     @Override
+    public void snapshotElementV2(String nodeId, String snapshotId, String snapshotName, String description) {
+        CollectionPluginSceneElementBO element = getElement(nodeId);
+        if (element == null) {
+            return;
+        }
+        if (Boolean.TRUE.equals(element.getEnableProbeCollect())) {
+            WazuhCommon.uninstallAgent(element.getSrcElement().getEid(), element.getSrcElement().getSystemType());
+        }
+    }
+
+    @Override
     protected void initClass() {
         super.sceneBOClass = CollectionPluginSceneBO.class;
         super.elementBOClass = CollectionPluginSceneElementBO.class;

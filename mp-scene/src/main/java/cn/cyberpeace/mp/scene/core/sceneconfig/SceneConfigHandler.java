@@ -3,7 +3,9 @@ package cn.cyberpeace.mp.scene.core.sceneconfig;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
+import cn.cyberpeace.mp.scene.core.bo.SceneAreaNodeConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaNodeConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
@@ -14,6 +16,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigPieceBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigTopologyBO;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.model.SceneConfigAreaModel;
+import cn.cyberpeace.mp.scene.model.SceneConfigAreaNodeConnectionModel;
 import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
 import cn.cyberpeace.mp.scene.model.SceneConfigElementPluginModel;
 import cn.cyberpeace.mp.scene.model.SceneConfigElementPortConnectionModel;
@@ -26,6 +29,7 @@ import cn.cyberpeace.mp.scene.repository.SceneConfigElementPluginMapper;
 import cn.cyberpeace.mp.scene.repository.SceneConfigElementPortConnectionMapper;
 import cn.cyberpeace.mp.scene.repository.SceneConfigElementPortMapper;
 import cn.cyberpeace.mp.scene.repository.SceneConfigMapper;
+import cn.cyberpeace.mp.scene.repository.SceneConfigNodeConnectionMapper;
 import cn.cyberpeace.mp.scene.repository.SceneConfigPieceMapper;
 
 import java.lang.reflect.Field;
@@ -40,6 +44,7 @@ public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigElementModel,
         SceneConfigElementPortModel,
         SceneConfigElementPortConnectionModel,
+        SceneConfigAreaNodeConnectionModel,
         SceneConfigElementPluginModel,
         SceneConfigPieceModel,
         SceneConfigBO,
@@ -47,6 +52,7 @@ public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigElementPortBO,
         SceneConfigElementBO,
         SceneConfigElementPortConnectionBO,
+        SceneConfigAreaNodeConnectionBO,
         SceneConfigPieceBO,
         SceneConfigTopologyBO,
         SceneConfigDataBO,
@@ -72,6 +78,22 @@ public class SceneConfigHandler extends BaseSceneHandler<
         init(sceneId, areaId, isAreaMode, context);
     }
 
+    public SceneConfigHandler(String sceneId, String areaId, boolean isAreaMode, boolean lazyMode) {
+        if (lazyMode) {
+            initLazy(sceneId, areaId, isAreaMode);
+        } else {
+            init(sceneId, areaId, isAreaMode, null);
+        }
+    }
+
+    public SceneConfigHandler(SceneConfigDataBO sceneConfigDataBO, boolean partMode) {
+        if (partMode) {
+            initPart(sceneConfigDataBO, true);
+        } else {
+            init(sceneConfigDataBO, true, null);
+        }
+    }
+
     @Override
     protected void initMapper() {
         super.sceneMapper = BeanCommon.getBean(SceneConfigMapper.class);
@@ -81,6 +103,7 @@ public class SceneConfigHandler extends BaseSceneHandler<
         super.sceneElementPortConnectionMapper = BeanCommon.getBean(SceneConfigElementPortConnectionMapper.class);
         super.sceneElementPluginMapper = BeanCommon.getBean(SceneConfigElementPluginMapper.class);
         super.scenePieceMapper = BeanCommon.getBean(SceneConfigPieceMapper.class);
+        super.sceneNodeConnectionMapper = BeanCommon.getBean(SceneConfigNodeConnectionMapper.class);
     }
 
     @Override
@@ -101,6 +124,7 @@ public class SceneConfigHandler extends BaseSceneHandler<
         super.sceneElementPluginModelClass = SceneConfigElementPluginModel.class;
         super.scenePieceModelClass = SceneConfigPieceModel.class;
         super.sceneHandlerClass = SceneConfigHandler.class;
+        super.sceneNodeConnectionBOClass = SceneConfigAreaNodeConnectionBO.class;
 
         Field field = ClassUtils.getField(this.getClass(), "scenePluginHandlerInterface", true, false);
         ClassUtils.setFieldValue(field, this, SceneConfigPluginHandler.class);

@@ -1,10 +1,14 @@
 package cn.cyberpeace.mp.cscene.bo;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
+import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -12,6 +16,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @ApiModel(description = "场景模板数据")
 @Data
@@ -42,6 +47,9 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     private Integer resourceOccupiedNums;
     @ApiModelProperty(value = "更新时间")
     private LocalDateTime updateTime;
+    private Integer TotalCpu ;
+    private Integer TotalRam ;
+    private Integer TotalDisk ;
 
     @Override
     public CsceneModel createModel() {
@@ -72,7 +80,34 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
         if (sceneConfig != null) {
             csceneBO.setSceneConfig(sceneConfig.export());
         }
+        csceneBO.calHardware();
         return this;
+    }
+
+    public void calHardware(){
+        int cpu = 0 ,ram = 0 ,disk = 0 ;
+        if(!this.sceneConfig.getPlugins().containsKey("cpcloud")) {
+            return;
+        }
+        Map<String, Map<String, Object>> pluginElements = this.sceneConfig.getPlugins().get("cpcloud").getElements();
+        for (BaseSceneElementBO e : this.sceneConfig.getTopology().getElements()) {
+            var node = pluginElements.get(e.getId());
+            int nodeCpu = e.getCpu() == null ? 0 : e.getCpu();
+            int nodeDisk = e.getDisk() == null ? 0 : e.getDisk();
+            int nodeRam = e.getRam() == null ? 0 : e.getRam();
+            if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(node.get("image_type"))) {
+                CsceneAppConfig config = BeanCommon.getBean(CsceneAppConfig.class);
+                nodeCpu = config.getDefaultContainerCpuCount();
+                nodeRam = config.getDefaultContainerRamCount();
+                disk = config.getDefaultContainerDiskCount();
+            }
+            cpu += nodeCpu;
+            disk += nodeDisk;
+            ram += nodeRam;
+        }
+        this.setTotalCpu(cpu);
+        this.setTotalRam(ram);
+        this.setTotalDisk(disk);
     }
 
     public CsceneInstanceBO exportToCsceneInstance() {
@@ -83,4 +118,5 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
         }
         return csceneInstance;
     }
+
 }

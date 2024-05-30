@@ -1,34 +1,38 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementSnapshotBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.common.PluginSceneEventHandlerCommon;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeviceSnapshotParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeviceSnapshotResultData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotResultData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.SnapshotAddressUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Slf4j
@@ -38,6 +42,8 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
     private HandlerUtils handlerUtils;
 
     private final Remote remote = new Remote();
+    private final VirtualMachine virtualMachine = new VirtualMachine();
+
 
     public HandlerCommon(CloudScenePluginHandler pluginHandler, TaskPool taskPool, int event) {
         super(pluginHandler, taskPool, event);
@@ -236,4 +242,5 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
             }
         }
     }
+
 }

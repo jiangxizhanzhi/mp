@@ -19,6 +19,9 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SuricataData {
 
+    private Integer pk;
+    private String id;
+
     @ApiModelProperty("匹配规则时进行的操作")
     private String action;
 
@@ -62,5 +65,21 @@ public class SuricataData {
      */
     @ApiModelProperty("Att&ck")
     private String attck;
+
+
+    @ApiModelProperty("分类类型")
+    private String classType;
+
+    @ApiModelProperty("出处， reference")
+    private String reference;
+
+    @ApiModelProperty("阈值， threshold")
+    private String threshold;
+
+    @ApiModelProperty("元数据")
+    private String metadata;
+
+    @ApiModelProperty("规则数据类别 0-预置 1-自定义")
+    private Integer ruleGenType;
 
 }

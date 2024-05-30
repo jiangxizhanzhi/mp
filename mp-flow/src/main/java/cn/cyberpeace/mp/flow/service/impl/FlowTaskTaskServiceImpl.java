@@ -296,7 +296,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                 fileByte = FsCommon.downloadRawContent(flowInfoModel.getScriptFile());
                 object.put("fileName", flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getScriptFile().split(BaseConstants.SPOT)[1]);
             }
-            String pcapRsp = HttpUtils.postFile(resourceUrl + "/pcap/upload", fileByte, "file", object);
+            String pcapRsp = HttpUtils.postFileV2(resourceUrl + "/pcap/upload", fileByte, "file", object);
             JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
             log.info("upload pcap file response:{}", jsonObject.toJSONString());
             if (!ResponseUtils.checkResponse(jsonObject)) {
@@ -340,12 +340,22 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                 networks.add(network);
             }
             object.put("network_infos", networks);
-            String pcapRsp = HttpUtils.sendPost(hostUrl + "/network/init", object.toJSONString());
-            JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
-            log.info("init network response:{}", jsonObject.toJSONString());
-            if (!ResponseUtils.checkResponse(jsonObject)) {
-                log.error("init network fail!");
-                isSuccess = false;
+            for (int i = 0; i < 10; i++) {
+                try {
+                    String pcapRsp = HttpUtils.sendPost(hostUrl + "/network/init", object.toJSONString());
+                    JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
+                    log.info("init network response:{}", jsonObject.toJSONString());
+                    if (!ResponseUtils.checkResponse(jsonObject)) {
+                        log.error("init network fail!");
+                        isSuccess = false;
+                        Thread.sleep(10);
+                    } else {
+                        break;
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                    log.error("init network error at {}", i, e.getMessage());
+                }
             }
         } catch (Exception e) {
             log.error("init network error!", e);

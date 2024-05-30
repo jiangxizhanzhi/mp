@@ -92,6 +92,10 @@ management:
 # 中台各模块相关配置
 mp:
   common: #公用配置
+    cp-ip: ${mp.common.ext-var.cp-ip}                # 云平台适配层接口地址
+    cp-port: ${mp.common.ext-var.cp-port}                # 云平台适配层接口地址
+    mp-ip: ${mp.common.ext-var.mp-ip}          # MP中台地址
+    mp-port: ${mp.common.ext-var.mp-port}           # MP中台地址       # MP中台地址
   #    ext-var:
   #      mp-ip: ${MP_API_IP:10.100.1.12}          # MP中台地址
   #      mp-port: ${MP_API_PORT:8001}
@@ -222,6 +226,7 @@ mp:
   # mp-front-business 模块配置
   frontbusiness:
     url-ac-filter-enabled: ${mp.frontbusiness.ext-var.url-ac-filter-enabled}
+    showai: ${mp.frontbusiness.ext-var.showai}
     url-ac-filter-method-match: true
     url-ac-filter-authority-match: true
     url-ac-filter-ignore-if-not-defined: false
@@ -273,6 +278,9 @@ mp:
     enable-command-change: ${mp.cscene.ext-var.enable-command-change}
     cron-job-expression: ${mp.cscene.ext-var.cron-job-expression}
     enable-node-limit-db-check: ${mp.cscene.ext-var.enable-node-limit-db-check}
+    default-container-cpu-count: ${mp.cscene.ext-var.default-container-cpu-count}
+    default-container-ram-count: ${mp.cscene.ext-var.default-container-ram-count}
+    default-container-disk-count: ${mp.cscene.ext-var.default-container-disk-count}
     cp-ip: ${mp.common.ext-var.cp-ip}
     cp-port: ${mp.common.ext-var.cp-port}
   scene:
@@ -284,6 +292,7 @@ mp:
     scene-process-save-realtime: ${mp.scene.ext-var.scene-process-save-realtime}
     element-process-save-realtime: ${mp.scene.ext-var.element-process-save-realtime}
     dhcp-control: ${mp.scene.ext-var.dhcp-control}
+    metadata-file-server: ${mp.scene.ext-var.metadata-file-server}
   aggregation:
     export-image-timeout: ${mp.aggregation.ext-var.export-image-timeout}
 

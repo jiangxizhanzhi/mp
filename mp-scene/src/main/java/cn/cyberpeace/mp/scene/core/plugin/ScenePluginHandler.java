@@ -191,4 +191,7 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
     public void elementSnapshotAction(String nodeId, String snapshotId, String action) {
 
     }
+    public void snapshotElementV2(String nodeId, String snapshotId, String snapshotName, String description) {
+
+    }
 }

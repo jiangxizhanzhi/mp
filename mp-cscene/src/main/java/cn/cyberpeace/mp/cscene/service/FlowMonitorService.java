@@ -42,7 +42,6 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowSimulationParams
 import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
 import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
-import cn.cyberpeace.mp.situationaware.model.FlowClassificationFromJsonModel;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
@@ -58,7 +57,6 @@ import java.net.URL;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -677,9 +675,5 @@ public class FlowMonitorService {
         }
         FlowPcapExportUtil.finalProcess(taskId, url);
         return url;
-    }
-
-    public FlowClassificationFromJsonModel getFlowClassificationFromJsonModel() {
-        return flowAnalysisService.getFlowClassificationInfoFromJson();
     }
 }

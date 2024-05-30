@@ -55,7 +55,7 @@ public class UrlAcInterceptor implements HandlerInterceptor {
             if (urlIsExcludeAuthFlagFromCache(request)) {
                 return true;
             } else {
-                if (validateAuthTargetByHandlerMethod(handler)) {
+                if (validateAuthTargetByHandlerMethod(request, handler)) {
                     return true;
                 } else {
                     setAuthFailedResponse(request, response);
@@ -66,8 +66,11 @@ public class UrlAcInterceptor implements HandlerInterceptor {
         return true;
     }
 
-    private boolean validateAuthTargetByHandlerMethod(Object handler) {
+    private boolean validateAuthTargetByHandlerMethod(HttpServletRequest request, Object handler) {
         if (handler instanceof HandlerMethod) {
+            if (!((HandlerMethod) handler).getBeanType().getPackageName().startsWith("cn.cyberpeace")) {
+                return true;
+            }
             AuthTarget authTargetOnClass = ((HandlerMethod) handler).getBeanType().getAnnotation(AuthTarget.class);
             AuthTarget authTargetOnMethod = ((HandlerMethod) handler).getMethod().getAnnotation(AuthTarget.class);
             Set<String> neededOneOfTheTargets = new HashSet<>();
@@ -81,6 +84,10 @@ public class UrlAcInterceptor implements HandlerInterceptor {
 
 
             if (CollectionUtils.isEmpty(neededOneOfTheTargets)) {
+                String requestUrl = request.getRequestURI();
+                requestUrl = trimLastSlash(requestUrl);
+                log.error("url {} , method {}#{} not config auth info", requestUrl, ((HandlerMethod) handler).getBeanType()
+                        .getName(), ((HandlerMethod) handler).getMethod().getName());
                 throw new MpRuntimeException(AuthErrorCode.INTERFACE_NOT_CONFIG_AUTH_INFO);
                 //包含no_auth, 该接口不需要权限
             } else if (neededOneOfTheTargets.contains(TargetEnum.NO_AUTH.getTargets()[0])){
@@ -89,6 +96,10 @@ public class UrlAcInterceptor implements HandlerInterceptor {
                 Set<String> existTargets = new HashSet<>(userPermissionService.listMenuIdentsByLoginUser());
                 String commonTarget = neededOneOfTheTargets.stream().filter(existTargets::contains)
                         .findAny().orElse("");
+                if (StringUtils.isBlank(commonTarget)) {
+                    log.info("existTargets = {}", existTargets);
+                    log.info("needTargets = {}", neededOneOfTheTargets);
+                }
                 return StringUtils.isNotBlank(commonTarget);
             }
 

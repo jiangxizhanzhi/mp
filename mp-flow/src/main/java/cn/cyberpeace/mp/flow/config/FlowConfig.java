@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.config;
 
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,5 +24,14 @@ public class FlowConfig {
      * 云平台地址
      */
     private String cpUrl;
+
+    @Value("${mp.flow.trex_cpu:4}")
+    private Integer trexCpu;
+
+    @Value("${mp.flow.trex_ram:8194}")
+    private Integer trexRam;
+
+    @Value("${mp.flow.trex_disk:40}")
+    private Integer trexDisk;
 
 }
