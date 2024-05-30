@@ -1660,6 +1660,9 @@ public abstract class BaseSceneHandler<
         if (areaId == null) {
             return sceneNodeConnectionMapper.list(condition);
         }
+        if(layerAreas.isEmpty()){
+            return new ArrayList<>();
+        }
         Set<String> filterAreaIds = new HashSet<>();
         filterAreaIds.add(areaId);
         filterAreaIds.addAll(layerAreas);
@@ -1669,14 +1672,16 @@ public abstract class BaseSceneHandler<
             String sourceNodeId = parseNodeId(c.getSourceNodeId());
             String targetNodeId = parseNodeId(c.getTargetNodeId());
             if (filterAreaIds.contains(sourceNodeId)) {
-                result.add(c);
                 if (sourceNodeId.equals(areaId)) {
                     outerNodeIds.add(targetNodeId);
+                }else{
+                    result.add(c);
                 }
             } else if (filterAreaIds.contains(targetNodeId)) {
-                result.add(c);
                 if (targetNodeId.equals(areaId)) {
                     outerNodeIds.add(sourceNodeId);
+                }else{
+                    result.add(c);
                 }
             }
         }
