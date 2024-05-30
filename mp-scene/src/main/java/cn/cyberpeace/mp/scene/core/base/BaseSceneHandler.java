@@ -1591,13 +1591,13 @@ public abstract class BaseSceneHandler<
         List<String> layerAreas = new ArrayList<>();
         for (var area : existsAreas) {
             if (BaseSceneAreaModel.Type.COMMON == area.getType()) {
-                commonAreas.add(area.getId());
+                commonAreas.add(area.getNodeId());
             } else {
-                layerAreas.add(area.getId());
+                layerAreas.add(area.getNodeId());
             }
         }
         List<TScenePieceModel> existsPieces = readExistsPieces();
-        List<TSceneAreaNodeConnectionModel> existsAreaNodeConnections = readExistsAreaNodeConnections(commonAreas);
+        List<TSceneAreaNodeConnectionModel> existsAreaNodeConnections = readExistsAreaNodeConnections(layerAreas);
         List<TSceneElementModel> existsElements = readExistsElements(commonAreas);
         List<TSceneElementPortModel> existsElementPorts = readExistsElementPorts(existsElements);
         List<TSceneElementPortConnectionModel> existsElementPortConnections = readExistElementPortConnections(existsElementPorts);
