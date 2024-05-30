@@ -972,6 +972,9 @@ public class SceneHandler extends BaseSceneHandler<
 
     public void snapshotElementV2(String nodeId, String snapshotId, String snapshotName, String description) {
         SceneElementBO element = getElement(nodeId);
+        element.setEvent(SceneElementModel.Event.SNAPSHOT);
+        element.setEventStatus(EventStatus.IN_PROGRESS);
+        asyncAckElementChanged(nodeId, false, false);
         try {
             for (int i = getPlugins().size() - 1; i >= 0; i--) {
                 getPlugins().get(i).snapshotElementV2(nodeId, snapshotId, snapshotName, description);
