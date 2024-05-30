@@ -98,9 +98,4 @@ public class MpDevopsLoad extends BaseModel {
      * 漏洞情报
      */
     private List Loopholes;
-
-    /**
-     * 节点分类
-     */
-    private Integer category;
 }

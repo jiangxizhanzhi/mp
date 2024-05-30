@@ -71,4 +71,6 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
     List<MpDevopsLoad> getLoadByIds(@Param("param") List<String> loadIds);
 
     Boolean batchUpdateData(@Param("param") List<JSONObject> sameLoads);
+
+    String getSceneIdByTaskId(String taskId);
 }

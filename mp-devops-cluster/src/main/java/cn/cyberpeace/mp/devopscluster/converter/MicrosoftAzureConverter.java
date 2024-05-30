@@ -158,6 +158,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             device.setId(vos.get(i).getId());
             device.setCloudServiceType(vos.get(i).getCloudServiceType());
             device.setName(vos.get(i).getName());
+            device.setOtherName(vos.get(i).getOtherName());
             device.setLogo(vos.get(i).getLogo());
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储 )
             switch (vos.get(i).getCloudServiceType()) {
@@ -175,6 +176,10 @@ public class MicrosoftAzureConverter implements BaseConverter {
                     calculateLaasVM.setSku(vos.get(i).getSku());
                     calculateLaasVM.setOperatingSystem(vos.get(i).getOperatingSystem());
                     calculateLaasVM.setSourceType(vos.get(i).getSourceType());
+
+                    //todo 待获取属性
+                    calculateLaasVM.setLoopholes(null);
+
                     device.setCalculateLaasVM(calculateLaasVM);
                     break;
                 case "3":
@@ -237,6 +242,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             //主表元素
             DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
             deviceCloudTarget.setName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
+            deviceCloudTarget.setOtherName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
             String id = String.valueOf(UUID.randomUUID());
             deviceCloudTarget.setId(id);
             //镜像类型(container、vm)
@@ -277,6 +283,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             //主表元素
             DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
             deviceCloudTarget.setName(((JSONObject) images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "");
+            deviceCloudTarget.setOtherName(((JSONObject) images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "");
             String id = String.valueOf(UUID.randomUUID());
             deviceCloudTarget.setId(id);
             //镜像类型(container、vm)
@@ -318,6 +325,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             //主表元素
             DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
             deviceCloudTarget.setName(((JSONObject) localImages.get(i)).get("imageName") != null ? ((JSONObject) localImages.get(i)).get("imageName").toString() : "");
+            deviceCloudTarget.setOtherName(((JSONObject) localImages.get(i)).get("imageName") != null ? ((JSONObject) localImages.get(i)).get("imageName").toString() : "");
             String id = String.valueOf(UUID.randomUUID());
             deviceCloudTarget.setId(id);
             //镜像类型(container、vm)
@@ -753,55 +761,4 @@ public class MicrosoftAzureConverter implements BaseConverter {
         }
         return deviceVOList;
     }
-
-//    public ServiceResult getDetailsByTarget(String id, String catagory, String cloudServiceType) {
-//        //1:云靶标 2:载荷 3:边界网络设备
-//        switch (catagory) {
-//            case "1":
-//                JSONObject requestDataCase1 = new JSONObject();
-//                requestDataCase1.put("id", id);
-//                requestDataCase1.put("cloudServiceType", cloudServiceType);
-//                DeviceCloudTargetVO cloudTargetById = getCloudTargetById(requestDataCase1);
-//                if (cloudTargetById == null) {
-//                    return new ServiceResult(null, BaseErrorCode.DATA_NOT_EXIST, "未找到对应的云靶标").asResult();
-//                }
-////                else{
-////                    return new ServiceResult(cloudTargetById, BaseErrorCode.SUCCESS).asResult();
-////                }
-//                //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储 )
-//                switch (Integer.parseInt(cloudServiceType)) {
-//                    case 1:
-//                    case 2:
-//                        DeviceCloudTargetCalculate deviceCloudTargetCalculate = new DeviceCloudTargetCalculate();
-//                        BeanUtils.copyProperties(cloudTargetById, deviceCloudTargetCalculate);
-//                        return new ServiceResult(deviceCloudTargetCalculate, BaseErrorCode.SUCCESS).asResult();
-//                    case 3:
-//                        DeviceCloudTargetContainer deviceCloudTargetContainer = new DeviceCloudTargetContainer();
-//                        BeanUtils.copyProperties(cloudTargetById, deviceCloudTargetContainer);
-//                        return new ServiceResult(deviceCloudTargetContainer, BaseErrorCode.SUCCESS).asResult();
-//                    case 4:
-//                    case 5:
-//                    case 6:
-//                    case 7:
-//                    default:
-//                }
-//            case "2":
-//                JSONObject requestDataCase2 = new JSONObject();
-//                requestDataCase2.put("id", id);
-//                JSONObject result = loadService.getLoadList(requestDataCase2);
-//                if (result != null && result.get("source") != null && ((List) result.get("source")).size() == 1) {
-//                    MpDevopsLoad load = (MpDevopsLoad) ((List) result.get("source")).get(0);
-//                    List loopholes = loadService.getBindLoopholes(load.getId());
-//                    load.setLoopholes(loopholes);
-//                    return new ServiceResult(load, BaseErrorCode.SUCCESS).asResult();
-//                } else {
-//                    return new ServiceResult(null, BaseErrorCode.DATA_NOT_EXIST, "未找到对应的载荷").asResult();
-//                }
-//            case "3":
-//                break;
-//            default:
-//                return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID, "catagory参数错误").asResult();
-//        }
-//        return new ServiceResult(null, BaseErrorCode.SUCCESS).asResult();
-//    }
 }

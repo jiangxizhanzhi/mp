@@ -30,6 +30,10 @@ public class DeviceCloudTargetPO extends BaseModel {
      */
     private String name;
     /**
+     * 别名
+     */
+    private String otherName;
+    /**
      * 镜像类型(container、vm)
      */
     private String imageType;

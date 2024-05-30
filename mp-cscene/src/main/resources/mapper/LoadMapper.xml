@@ -686,4 +686,14 @@
             </if>
         </where>
     </select>
+
+    <select id="getSceneIdByTaskId" resultType="java.lang.String">
+        select
+            scene
+        from
+            mp_sceneplugincloud_scene_element
+        where
+            resource_id = #{taskId}
+        limit 1
+    </select>
 </mapper>

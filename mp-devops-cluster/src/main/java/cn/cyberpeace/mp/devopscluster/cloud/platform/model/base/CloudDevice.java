@@ -55,6 +55,12 @@ public class CloudDevice extends BaseCloudPlatformResult {
     private String name;
 
     /**
+     * 别名
+     */
+    @ApiModelProperty(value = "别名")
+    private String otherName;
+
+    /**
      * 镜像名称（靶标的英文名称）
      */
     @ApiModelProperty(value = "镜像名称（靶标的英文名称）")

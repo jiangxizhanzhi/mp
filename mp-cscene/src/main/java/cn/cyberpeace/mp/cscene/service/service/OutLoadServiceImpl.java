@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.repository.mapper.OutLoadMapper;
+import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -72,25 +73,29 @@ public class OutLoadServiceImpl {
         return dataMap;
     }
 
-    public Boolean updateTaskInfo(JSONObject requestData) {
+    public Boolean updateTaskInfo(OutLoadTaskUpdateRequest requestData) {
         MpDevopsLoadSource synchronousDataSource = loadService.getSynchronousDataSource(new JSONObject());
         String ip = synchronousDataSource.getIp() != null ? synchronousDataSource.getIp() : "http://10.108.1.10:5002";
-        String url = ip + "/stgj/task/modify?id=" + (requestData.get("id") != null ? requestData.get("id").toString() : "") +
-                "&execCommand=" + (requestData.get("execCommand") != null ? requestData.get("execCommand").toString() : "");
+        String url = ip + "/stgj/task/modify";
+        Map<String, Object> formMap = new HashMap();
+        formMap.put("id", requestData.getTaskId() != null ? requestData.getTaskId() : "");
+
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
         headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
 
+        String result = null;
         try {
-            String result = HttpUtils.sendHttpGet(url, headersMap, 2000);
-            Map<String, Object> dataMap = JsonUtils.parseMap(result);
-            if ("0".equals(dataMap.get("code").toString())) {
-                return true;
-            }
+            result = HttpUtils.sendHttpPost(url, formMap, headersMap);
         } catch (IOException e) {
             return null;
         }
-        return false;
+        Map<String, Object> dataMap = JsonUtils.parseMap(result);
+        if(dataMap.get("code")!=null && dataMap.get("code").equals("0")){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     public Boolean deleteTask(JSONObject requestData) {

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.controller.controller;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
 import cn.cyberpeace.mp.cscene.service.service.OutLoadServiceImpl;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
@@ -73,10 +74,10 @@ public class OutLoadController {
      */
     @ApiOperation(value = "修改任务信息", notes = "")
     @PostMapping("/updateTaskInfo")
-    public ServiceResult<Boolean> updateTaskInfo(@RequestBody(required = true) JSONObject requestData) {
+    public ServiceResult<Boolean> updateTaskInfo(@RequestBody(required = true) OutLoadTaskUpdateRequest requestData) {
         Boolean updateTaskInfo = outLoadService.updateTaskInfo(requestData);
         if (updateTaskInfo) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
+            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "修改任务信息成功");
         } else {
             return new ServiceResult<>(null, BaseErrorCode.ERROR, "修改任务信息失败");
         }

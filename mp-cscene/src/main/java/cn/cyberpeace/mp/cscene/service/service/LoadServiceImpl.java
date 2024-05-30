@@ -13,8 +13,10 @@ import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
 import cn.cyberpeace.mp.cscene.model.*;
 import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
+import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
 import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
+import cn.cyberpeace.mp.cscene.websocket.LoadResultWebSocketServer;
 import cn.cyberpeace.mp.cscene.websocket.WebSocketServer;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
@@ -80,10 +82,6 @@ public class LoadServiceImpl {
         requestData.put("pageSize", pageSize);
         requestData.put("offset", (pageNum - 1) * pageSize);
         List<MpDevopsLoad> list = loadMapper.getLoadList(requestData);
-        //list中每个成员的category赋值2
-        list.forEach(item -> {
-            item.setCategory(2);
-        });
         Integer total = loadMapper.getLoadListNum(requestData);
         JSONObject result = new JSONObject();
         result.put("source", list);
@@ -523,25 +521,64 @@ public class LoadServiceImpl {
     /*
      * 批量新增载荷执行结果
      * */
-    public Boolean updateLoadExecutionOutResult(List<LoadRequest> requestData) {
-        Boolean addLoadExecutionOutResult;
+    public ServiceResult updateLoadExecutionOutResult(List<LoadRequest> requestData) {
+        Boolean addLoadExecutionOutResult = true;
+        Boolean checkFlag = true;
         //校验每条数据中taskId和InstanceId不能为空
         if (requestData.size() > 0) {
             for (LoadRequest loadRequest : requestData) {
                 if (loadRequest.getTaskId() == null || loadRequest.getTaskId().equals("")) {
-                    return false;
+                    checkFlag = false;
+                    break;
                 }
                 if (loadRequest.getInstanceId() == null || loadRequest.getInstanceId().equals("")) {
-                    return false;
+                    checkFlag = false;
+                    break;
                 }
             }
         }
+        if(!checkFlag){
+            return new ServiceResult(null, BaseErrorCode.ERROR, "列表数据部分参数缺失").asResult();
+        }
+        //根据taskId获取场景id
+        String sceneId = loadMapper.getSceneIdByTaskId(requestData.get(0).getTaskId());
+        //根据sceneId查找对应ws会话推送消息
+        Session session = LoadResultWebSocketServer.sceneIdAndSession.get(sceneId);
+        LoadResultWebSocketServer loadResultWebSocketServer = LoadResultWebSocketServer.sessionPools.get(session);
+        Map jsonObject = new LinkedHashMap<>();
+        jsonObject.put("code", "MP-acceptLoadResult-by-outService");
+        Map data = new LinkedHashMap<>();
+        Integer sort = 0;
+        String message = requestData.toString();
+        Boolean result = true;
+        sendResultMessage(loadResultWebSocketServer,session,jsonObject,data,sort,message,result);
+
         if (requestData.size() > 0) {
             addLoadExecutionOutResult = loadMapper.updateLoadExecutionOutResult(requestData);
-        } else {
-            return true;
         }
-        return addLoadExecutionOutResult;
+        if(addLoadExecutionOutResult){
+            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+        }else{
+            return new ServiceResult(null, BaseErrorCode.ERROR, "批量新增载荷执行结果失败").asResult();
+        }
+    }
+
+    private void sendResultMessage(LoadResultWebSocketServer webSocketServer, Session session, Map map, Map data,
+                             Integer sort, String message, Boolean result) {
+        try {
+            data.put("stage" + sort, message);
+            map.put("data", data);
+            // 将LinkedHashMap转换为JSONObject
+            JSONObject object = new JSONObject(map);
+            // 将JSONObject转换为JSON字符串
+            String jsonString = object.toJSONString();
+            webSocketServer.sendMessage(session, jsonString);
+            if (!result) {
+                webSocketServer.onClose(session);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /*
@@ -900,50 +937,15 @@ public class LoadServiceImpl {
         return updateResultLog;
     }
 
-    public Boolean updateLoadParam(JSONObject requestData) {
-        String pk = requestData.get("pk") != null ? requestData.get("pk").toString() : "";
-        if (pk.equals("")) {
+    public Boolean updateLoadParam(OutLoadTaskUpdateRequest requestData) {
+        if (requestData.getTaskId() == null || requestData.getTaskId().equals("")) {
             return false;
         }
         //todo 校验参数列表字段值
-        String paramList = requestData.get("paramList") != null ? requestData.get("paramList").toString() : "";
-        Boolean updateBindByPk = loadMapper.updateBindByPk(pk, requestData);
-        //todo 重新加载配置重启载荷服务
-        outLoadService.updateTaskInfo(requestData);
-        outLoadService.stopInstance(requestData);
-        outLoadService.startInstance(requestData);
-//        修改场景节点载荷参数
-        HumanCondition humanCondition = new HumanCondition()
-                .filterEqual(CloudPluginSceneElementModel::getResourceId, requestData.get("task_id"))
-                .filterEqual(CloudPluginSceneElementModel::getLoadResourceInstanceId, requestData.get("load_id"));
-        List<CloudPluginSceneElementModel> list = cloudPluginSceneElementMapper.list(humanCondition);
-        list.forEach(cloudPluginSceneElementModel -> {
-            cloudPluginSceneElementModel.setLoadExecCommand(paramList);
-            cloudPluginSceneElementMapper.update(cloudPluginSceneElementModel);
-//            根据场景找到对应的场景模板再根据scene_element修改场景模板节点
-            HumanCondition selectHumanCondition = new HumanCondition()
-                    .link(CsceneInstanceModel.class)
-                    .link(CsceneModel.class)
-                    .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getCscene,
-                            CsceneModel.class, CsceneModel::getId)
-                    .link(SceneConfigModel.class)
-                    .filterLink(CsceneModel.class, CsceneModel::getSceneConfig,
-                            SceneConfigModel.class, SceneConfigModel::getId)
-                    .link(CloudPluginSceneConfigElementModel.class)
-                    .filterLink(SceneConfigModel.class, SceneConfigModel::getId,
-                            CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
-                    .currentLink(CsceneInstanceModel.class)
-                    .filterEqual(CsceneInstanceModel::getScene, requestData.get("scene_id"))
-                    .currentLink(CloudPluginSceneConfigElementModel.class)
-                    .filterEqual(CloudPluginSceneConfigElementModel::getSceneElement, cloudPluginSceneElementModel.getSceneElement())
-                    .select(new HumanCondition().toDefaultSelectFields(CloudPluginSceneConfigElementModel.class));
-
-            for (CloudPluginSceneConfigElementModel cloudPluginSceneConfigElementModel : cloudPluginSceneConfigElementMapper.list(selectHumanCondition)) {
-                cloudPluginSceneConfigElementModel.setLoadExecCommand(paramList);
-                cloudPluginSceneConfigElementMapper.update(cloudPluginSceneConfigElementModel);
-            }
-        });
-        return updateBindByPk;
+        String taskDescribe = requestData.getTaskDescribe();
+        String execCommand = requestData.getExecCommand();
+        Boolean updateTaskInfo = outLoadService.updateTaskInfo(requestData);
+        return updateTaskInfo;
     }
 
     public List stageBindLoadList(String sceneId) {

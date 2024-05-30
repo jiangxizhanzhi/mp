@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
+import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
 import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import com.alibaba.fastjson.JSONObject;
@@ -343,13 +344,8 @@ public class LoadController {
     @ApiOperation(value = "批量新增载荷执行结果", notes = "")
     @PostMapping("/addLoadExecutionOutResult")
     public ServiceResult addLoadExecutionOutResult(@RequestBody(required = false) List<LoadRequest> requestData) {
-        if (requestData != null) {
-            Boolean updateLoadExecutionOutResult = loadService.updateLoadExecutionOutResult(requestData);
-            if (updateLoadExecutionOutResult) {
-                return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-            }
-        }
-        return new ServiceResult(null, BaseErrorCode.ERROR, "批量新增载荷执行结果失败").asResult();
+        ServiceResult serviceResult = loadService.updateLoadExecutionOutResult(requestData);
+        return serviceResult;
     }
 
     /*
@@ -459,11 +455,11 @@ public class LoadController {
      */
     @ApiOperation(value = "阶段载荷参数设置", notes = "")
     @PutMapping("/updateLoadParam")
-    public ServiceResult updateLoadParam(@RequestBody JSONObject requestData) {
+    public ServiceResult updateLoadParam(@RequestBody OutLoadTaskUpdateRequest requestData) {
         if (requestData != null) {
             Boolean updateLoadParam = loadService.updateLoadParam(requestData);
             if (updateLoadParam) {
-                return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+                return new ServiceResult(null, BaseErrorCode.SUCCESS, "阶段载荷参数设置成功").asResult();
             }
         }
         return new ServiceResult(null, BaseErrorCode.ERROR, "阶段载荷参数设置失败");
