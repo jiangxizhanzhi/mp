@@ -1660,9 +1660,6 @@ public abstract class BaseSceneHandler<
         if (areaId == null) {
             return sceneNodeConnectionMapper.list(condition);
         }
-        if(layerAreas.isEmpty()){
-            return new ArrayList<>();
-        }
         Set<String> filterAreaIds = new HashSet<>();
         filterAreaIds.add(areaId);
         filterAreaIds.addAll(layerAreas);
