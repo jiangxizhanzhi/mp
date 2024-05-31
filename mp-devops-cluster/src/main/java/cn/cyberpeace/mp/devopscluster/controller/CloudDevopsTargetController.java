@@ -3,11 +3,13 @@ package cn.cyberpeace.mp.devopscluster.controller;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.MicrosoftAzureConverter;
 import cn.cyberpeace.mp.devopscluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devopscluster.vo.DeviceVO;
+import cn.cyberpeace.mp.devopscluster.vo.EquipmentRequestVO;
 import cn.cyberpeace.mp.devopscluster.vo.TargerRequestVO;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
@@ -80,12 +82,12 @@ public class CloudDevopsTargetController {
     }
 
     /**
-     * 查询所有靶标信息
+     * 查询边界网络设备
      */
-    @ApiOperation("查询常用靶标信息")
+    @ApiOperation("查询边界网络设备")
     @GetMapping("/getCommonTargets")
-    public ServiceResult getCommonTargets(TargetSceneRequest request) {
-        List<DeviceVO> returnData = microsoftAzureConverter.getCommonTargets(request);
-        return new ServiceResult(returnData, BaseErrorCode.SUCCESS).asResult();
+    public ListObjServiceResult getCommonTargets(EquipmentRequestVO request) {
+        ListObjServiceResult returnResult = microsoftAzureConverter.getCommonTargets(request);
+        return returnResult;
     }
 }

@@ -507,4 +507,18 @@
             </if>
         </where>
     </select>
+
+    <select id="getCommonTargets" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment">
+        select
+            *
+        from
+            mp_devops_boundary_network_equipment
+    </select>
+
+    <select id="getCommonTargetNum" resultType="java.lang.Integer">
+        select
+            count(0)
+        from
+            mp_devops_boundary_network_equipment
+    </select>
 </mapper>

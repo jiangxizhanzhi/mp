@@ -4,7 +4,9 @@ import cn.cyberpeace.mp.base.bo.MpSysCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
+import cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment;
 import cn.cyberpeace.mp.devopscluster.po.*;
+import cn.cyberpeace.mp.devopscluster.vo.EquipmentRequestVO;
 import cn.cyberpeace.mp.devopscluster.vo.MpSysCodeMenuVO;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.annotations.Mapper;
@@ -66,4 +68,9 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
     Boolean batchInsertCloudTargetCalculate(@Param("param") List<DeviceCloudTargetCalculate> calculateList);
 
     Boolean batchInsertCloudTargetContainer(@Param("param") List<DeviceCloudTargetContainer> containerList);
+
+    List<MpDevopsBoundaryNetworkEquipment> getCommonTargets(@Param("param")EquipmentRequestVO request,
+                                                            @Param("offset") Integer offset, @Param("pageSize") Integer pageSize);
+
+    Integer getCommonTargetNum(EquipmentRequestVO request, Integer offset, Integer pageSize);
 }

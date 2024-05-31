@@ -2,6 +2,9 @@ package cn.cyberpeace.mp.devopscluster.converter;
 
 import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.enums.CommonTargetNameEnum;
@@ -9,6 +12,7 @@ import cn.cyberpeace.mp.devopscluster.po.*;
 import cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper;
 import cn.cyberpeace.mp.devopscluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devopscluster.vo.DeviceVO;
+import cn.cyberpeace.mp.devopscluster.vo.EquipmentRequestVO;
 import cn.cyberpeace.mp.devopscluster.vo.MpSysCodeMenuVO;
 import cn.cyberpeace.mp.devopscluster.vo.TargerRequestVO;
 import cn.cyberpeace.mp.devopscluster.vo.convert.DeviceVoConverter;
@@ -809,27 +813,16 @@ public class MicrosoftAzureConverter implements BaseConverter {
     /**
      * 查询常用靶标信息
      */
-    public List<DeviceVO> getCommonTargets(TargetSceneRequest request) {
-        List<Device> deviceList = targetConverter.getCommonTargets("");
-        List<DeviceVO> deviceVOList = deviceVoConverter.sourceToTarget(deviceList);
-
-        Locale locale = LocaleContextHolder.getLocale();
-        if (Objects.equals(locale, Locale.CHINA)) {
-            // 常用靶标名称国际化处理
-            deviceVOList.forEach(device -> {
-                device.setImage(device.getName());
-                device.setName(
-                        Objects.nonNull(CommonTargetNameEnum.map.get(device.getName())) ?
-                                CommonTargetNameEnum.map.get(device.getName()).toValue() : device.getName());
-            });
+    public ListObjServiceResult getCommonTargets(EquipmentRequestVO request) {
+        Integer offset = 0;
+        Integer pageSize = 10;
+        if (request.getPage() != null && request.getPerPage() != null) {
+            offset = (request.getPage() - 1) * request.getPerPage();
+            pageSize = request.getPerPage();
         }
-
-        if (Objects.nonNull(request.getImageType())) {
-            deviceVOList = deviceVOList.stream().filter(v -> v.getImageType().equals(request.getImageType().toValue())).collect(Collectors.toList());
-        }
-        if (Objects.nonNull(request.getRole())) {
-            deviceVOList = deviceVOList.stream().filter(deviceVO -> deviceVO.getRole().equals(request.getRole())).collect(Collectors.toList());
-        }
-        return deviceVOList;
+        //sql同时修改
+        List<MpDevopsBoundaryNetworkEquipment> list = microsoftAzureMapper.getCommonTargets(request,offset,pageSize);
+        Integer num = microsoftAzureMapper.getCommonTargetNum(request,offset,pageSize);
+        return new ListObjServiceResult(list, num).asResult();
     }
 }
