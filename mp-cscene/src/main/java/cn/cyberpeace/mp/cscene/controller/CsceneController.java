@@ -552,6 +552,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @GetMapping(value = "/export_file", params = "id")
     public void exportFile(@RequestParam String id, HttpServletResponse response) {
         var csceneBO = modelService.export(id, null).getSource();
+        csceneBO.setRoles(new ArrayList<>());
         File file;
         var res = csceneBO.getSceneConfig();
         if (Objects.nonNull(res.getTopology()) && Objects.nonNull(res.getTopology().getScene()) &&
