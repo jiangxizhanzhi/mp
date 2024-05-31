@@ -429,6 +429,7 @@
         <if test="cloudServiceType != null and cloudServiceType == 1">
             SELECT
             target.id,
+            target.name,
             target.other_name,
             target.cloud_service_type,
             net.*
@@ -440,6 +441,7 @@
         <if test="cloudServiceType != null and cloudServiceType == 2">
             SELECT
             target.id,
+            target.name,
             target.other_name,
             target.cloud_service_type,
             calculate.*
@@ -451,6 +453,7 @@
         <if test="cloudServiceType != null and cloudServiceType == 3">
             SELECT
             target.id,
+            target.name,
             target.other_name,
             target.cloud_service_type,
             container.*
