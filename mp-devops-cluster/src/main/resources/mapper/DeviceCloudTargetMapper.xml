@@ -468,10 +468,10 @@
                     ${item.supplement}
                 </foreach>
             </if>
-            <if test="offset != null and pageSize != null">
-                limit #{offset}, #{pageSize}
-            </if>
         </where>
+        <if test="offset != null and pageSize != null">
+            limit #{offset}, #{pageSize}
+        </if>
     </select>
 
     <select id="getCloudTargetListByCodesNum" resultType="java.lang.Integer">
@@ -505,7 +505,6 @@
                     ${item.supplement}
                 </foreach>
             </if>
-            and target.cloud_service_type = #{cloudServiceType}
         </where>
     </select>
 </mapper>
