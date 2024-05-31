@@ -468,7 +468,6 @@
                     ${item.supplement}
                 </foreach>
             </if>
-            and target.cloud_service_type = #{cloudServiceType}
             <if test="offset != null and pageSize != null">
                 limit #{offset}, #{pageSize}
             </if>

@@ -73,7 +73,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
                     for (int j = 0; j < codes.size(); j++) {
                         if (codes.get(j).getCode() != null && sqls.get(i).getCode() != null && codes.get(j).getCode().equals(sqls.get(i).getCode())) {
                             if (codes.get(j).getValue() != null && !codes.get(j).getValue().equals("")) {
-                                sqls.get(i).setSupplement("and " + tableName + "." + sqls.get(i).getSupplement().replace("**", codes.get(j).getValue()));
+                                sqls.get(i).setSupplement("and " + sqls.get(i).getSupplement().replace("**", codes.get(j).getValue()));
                             } else {
                                 sqls.get(i).setSupplement("");
                             }
