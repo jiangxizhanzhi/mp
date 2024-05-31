@@ -60,7 +60,7 @@ public class DefaultImgUtil {
         List<LocalFileMappingModel> fileMappingModels = localFileMappingMapper.list(humanCondition);
         if (CollectionUtils.isNotEmpty(fileMappingModels)) {
             for (LocalFileMappingModel localFileMappingModel : fileMappingModels) {
-                rtnMap.put(localFileMappingModel.getGroup() + AuthConstant.ORG_PATH_SEPARATOR + localFileMappingModel.getName(), FsCommon.genHttpUrl(fileMappingModels.get(0).getRemoteFile()));
+                rtnMap.put(localFileMappingModel.getGroup() + AuthConstant.ORG_PATH_SEPARATOR + localFileMappingModel.getName(), FsCommon.genHttpUrl(localFileMappingModel.getRemoteFile()));
             }
         }
         return rtnMap;
