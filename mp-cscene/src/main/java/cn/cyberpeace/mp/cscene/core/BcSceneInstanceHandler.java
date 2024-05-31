@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.cscene.service.CsceneInstanceUserCountService;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -153,7 +154,7 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
         super.csceneRoleBOClass = CsceneInstaneRoleBO.class;
     }
 
-    public void update() {
+    public void update(SceneHandler originSceneHandler) {
         CsceneInstanceBO cscene = getCscene();
         String sceneId = getSceneId();
         if (StringUtils.isEmpty(sceneId)) {
@@ -163,7 +164,7 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
             }
         }
         final String sid = sceneId;
-        cscene.setScene(sceneService.modify(sid, cscene.getScene(), generateSceneContext(), ()->{
+        cscene.setScene(sceneService.modify(sid, cscene.getScene(), generateSceneContext(), originSceneHandler, () -> {
             //W:Refresh scene after running
             SceneInstanceLinkCacheUtil.refresh(sid);
         }).getSource());

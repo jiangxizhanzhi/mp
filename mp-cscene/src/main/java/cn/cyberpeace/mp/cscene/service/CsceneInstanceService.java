@@ -1686,12 +1686,19 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<CsceneInstanceBO> instanceModify(CsceneUpdateBO csceneBO) {
+        BcSceneInstanceHandler originHandler = new BcSceneInstanceHandler(csceneBO.getId(), null);
+
+        // 更新区域
+        SceneHandler sceneHandler = new SceneHandler(csceneBO.getUpdateScene(), null);
+        sceneHandler.save();
+
         CsceneInstanceBO instance = new CsceneInstanceBO();
         instance.setId(csceneBO.getId());
-        instance.setPassThrough(csceneBO.getContext() != null ? csceneBO.getContext().getPassThrough() : new HashMap<>());
-        instance.setScene(csceneBO.getUpdateScene());
+        instance.setPassThrough(csceneBO.getContext() != null ? csceneBO.getContext()
+                .getPassThrough() : new HashMap<>());
+        BcSceneInstanceHandler newData = new BcSceneInstanceHandler(csceneBO.getId(), null);
+        instance.setScene(newData.toData().getScene());
 
-        BcSceneInstanceHandler originHandler = new BcSceneInstanceHandler(csceneBO.getId(), null);
         // 保留隐藏节点和隐藏端口
         SceneDataBO originData = originHandler.toDataWithHidden().getScene();
         Set<String> hiddenElementIds = new HashSet<>();
@@ -1815,7 +1822,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
 
         BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(instance, csceneBO.getContext());
-        instanceHandler.update();
+        instanceHandler.update(originSceneHandler);
         return new ServiceResult<>(instanceHandler.toData());
     }
 
