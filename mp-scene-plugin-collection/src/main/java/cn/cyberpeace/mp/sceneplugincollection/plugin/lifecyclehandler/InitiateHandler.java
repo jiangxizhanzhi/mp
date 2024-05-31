@@ -4,11 +4,13 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
+import cn.cyberpeace.mp.base.util.mptool.Ipv4Util;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
+import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
@@ -47,6 +49,8 @@ import static cn.cyberpeace.mp.sceneplugincollection.config.WazuhModifyEventConf
 
 @Slf4j
 public class InitiateHandler extends HandlerCommon {
+
+    private static final String WINDOWS_ADD_ROUTE_COMMAND_TEMPLATE = "route -p add <destination_network> mask <subnet_mask> <gateway_ip>";
 
     private static WazuhLogProbeLocationConfig locationConfig;
 
@@ -214,12 +218,92 @@ public class InitiateHandler extends HandlerCommon {
                     if (CollectionUtils.isNotEmpty(probeInstallScript)) {
                         initCommands.addAll(probeInstallScript);
                     }
+
+                    //首先添加路由信息，防止缺失路由，导致无法和mp通信
+                    String addCollectRouteCommand = getElementCollectRouteCommand(cloudElement);
+                    initCommands.add(0, addCollectRouteCommand);
+
                     srcElement.setInitCommands(initCommands);
                 });
             });
+
+            // 手动添加路由信息
+
         }
 
     }
+
+    private String getElementCollectRouteCommand(CloudPluginSceneElementBO cloudElement) {
+        String routeCommand = "";
+        List<ConnectedNetworkBO> allConnectNetworks = new ArrayList<>(cloudElement.getDeriveNetworks());
+        allConnectNetworks.addAll(cloudElement.getAccessNetworks());
+
+        String externalCidr = CloudSingleton.cloudAppConfig.getExternalNetCidr();
+        if (CollectionUtils.isNotEmpty(allConnectNetworks)) {
+            for (ConnectedNetworkBO network : allConnectNetworks) {
+                if (CollectionUtils.isNotEmpty(network.getNetwork().getHostRoutes())) {
+                    for (HostRoute hostRoute : network.getNetwork().getHostRoutes()) {
+                        if (externalCidr.equals(hostRoute.getDestination())) {
+                            return addCollectRouteCommandWhenInit(externalCidr, hostRoute.getNexthop(), cloudElement.getSrcElement());
+                        }
+                    }
+                }
+            }
+        }
+
+        log.error("get element collect route failed!!!");
+        return routeCommand;
+    }
+
+
+    /**
+     * 添加采集路由
+     * @return
+     */
+    private String addCollectRouteCommandWhenInit(String externalCidr, String gatewayIp, SceneElementBO srcElement) {
+        String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
+        if (SystemTypeCommandUtils.isLinux(systemType)) {
+            return getLinuxAddRouteCommand(externalCidr, gatewayIp);
+        } else if (SystemTypeCommandUtils.isWindows(systemType)) {
+            return getWindowsAddRouteCommand(externalCidr, gatewayIp);
+        } else {
+            log.error("system type not windows or linux, gen collect route command failed!!!");
+            return "";
+        }
+    }
+
+
+    private String getLinuxAddRouteCommand(String externalCidr, String gatewayIp) {
+        String destinationNetwork = externalCidr.split("/")[0];
+        int maskBit = Integer.parseInt(externalCidr.split("/")[1]);
+        String subnetMask = Ipv4Util.getMaskByMaskBit(maskBit);
+
+
+        String checkExistIpCommand = "if command -v ip > /dev/null;";
+        String addRouteWithIpCommand = String.format(" then ip route add %s via %s;", externalCidr, gatewayIp);
+        String checkExistRouteCommand = "else if command -v route > /dev/null;";
+        String addRouteWithRouteCommand = String.format("then route add -net %s netmask %s gw %s;", destinationNetwork, subnetMask, gatewayIp);
+        String endIfCommand = "fi;";
+
+
+
+        return StringUtils.joinWith("", checkExistIpCommand, addRouteWithIpCommand,
+                checkExistRouteCommand, addRouteWithRouteCommand, endIfCommand, endIfCommand);
+    }
+
+    private String getWindowsAddRouteCommand(String externalCidr, String gatewayIp) {
+        try {
+            String destinationNetwork = externalCidr.split("/")[0];
+            int maskBit = Integer.parseInt(externalCidr.split("/")[1]);
+            String subnetMask = Ipv4Util.getMaskByMaskBit(maskBit);
+            return WINDOWS_ADD_ROUTE_COMMAND_TEMPLATE.replace("<destination_network>", destinationNetwork)
+                    .replace("<subnet_mask>", subnetMask).replace("<gateway_ip>", gatewayIp);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return "";
+        }
+    }
+
 
     /**
      * 获取探针采集参数
