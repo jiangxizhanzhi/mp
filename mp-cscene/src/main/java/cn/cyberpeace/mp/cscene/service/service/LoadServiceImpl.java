@@ -167,37 +167,42 @@ public class LoadServiceImpl {
         }
 
         //准备新增到数据库的载荷列表
-        List<JSONObject> list = new ArrayList<>();
+        List<JSONObject> waitAddList = new ArrayList<>();
         for (LinkedHashMap tool : initialToolList) {
             if (tool != null) {
                 tool.put("source", "1");
-                list.add(convertToolToJSONObject(tool));
+                waitAddList.add(convertToolToJSONObject(tool));
             }
         }
-        List<JSONObject> sameLoads;
 
         //本地的载荷列表数据
         List<MpDevopsLoad> nowLoadList = loadMapper.getLoadList(new JSONObject());
         //收集id相同的数据,id相同的loadId不需要新增,只需要修改
-        sameLoads = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-            for (int j = 0; j < nowLoadList.size(); j++) {
-                if (list.get(i).get("id") != null && nowLoadList.get(j).getId() != null) {
-                    if (list.get(i).get("id").toString().equals(nowLoadList.get(j).getId())) {
-                        sameLoads.add(list.get(i));
-                        //删除相同项
-                        list.remove(list.get(i));
+        List<JSONObject> sameLoads = new ArrayList<>();
+        // 创建一个新集合用于存储需要移除的元素，避免直接在遍历中修改原集合
+        List<JSONObject> toRemove = new ArrayList<>();
+
+        for (JSONObject waitAdd : waitAddList) {
+            if (waitAdd.get("id") != null) {
+                String waitAddId = waitAdd.get("id").toString();
+                for (MpDevopsLoad nowLoad : nowLoadList) {
+                    if (nowLoad.getId() != null && waitAddId.equals(nowLoad.getId())) {
+                        // 找到了匹配项，添加到待移除列表并加入sameLoads
+                        toRemove.add(waitAdd);
+                        sameLoads.add(waitAdd);
+                        break; // 匹配到一个后即可跳出内层循环
                     }
                 }
             }
         }
+        waitAddList.removeAll(toRemove);
         //更新本地数据
         Boolean deleteData = true;
         if (sameLoads != null && sameLoads.size() > 0) {
             deleteData = loadMapper.batchUpdateData(sameLoads);
         }
-        if (deleteData && list != null && !list.isEmpty()) {
-            if (!loadMapper.addLoads(list)) {
+        if (deleteData && waitAddList != null && !waitAddList.isEmpty()) {
+            if (!loadMapper.addLoads(waitAddList)) {
                 if (isNeedMessage) {
                     WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
                         sendMessage(webSocketServer, session, jsonObject, data, 3, "载荷数据入库失败,会话关闭！", false);
@@ -218,8 +223,8 @@ public class LoadServiceImpl {
             WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
                 data.put("stage3", "载荷数据入库成功！");
                 sendMessage(webSocketServer, session, jsonObject, data, 3, "载荷数据入库成功！", true);
-                data.put("stage4", "共同步" + list.size() + "个载荷");
-                sendMessage(webSocketServer, session, jsonObject, data, 4, "共同步" + list.size() + "个载荷以及更新" + sameLoads.size() + "条载荷", true);
+                data.put("stage4", "共同步" + waitAddList.size() + "个载荷");
+                sendMessage(webSocketServer, session, jsonObject, data, 4, "共同步" + waitAddList.size() + "个载荷以及更新" + sameLoads.size() + "条载荷", true);
                 data.put("stage5", "载荷列表同步成功,会话关闭！");
                 sendMessage(webSocketServer, session, jsonObject, data, 5, "载荷列表同步成功,会话关闭！", true);
             });
@@ -228,7 +233,7 @@ public class LoadServiceImpl {
         JSONObject requestData = new JSONObject();
         //同步设置来源
         requestData.put("source", synchronousDataSource);
-        requestData.put("dataNum", sameLoads.size() + list.size());
+        requestData.put("dataNum", sameLoads.size() + waitAddList.size());
         return requestData;
     }
 
@@ -340,8 +345,8 @@ public class LoadServiceImpl {
         }
         return deleteLoadByPk;
     }
-
     /*
+
      * 根据场景id获取绑定的载荷
      * */
     public List<MpDevopsLoad> getLoadBySceneId(String sceneId) {
