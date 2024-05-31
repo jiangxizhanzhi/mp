@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
@@ -132,6 +131,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private String vmType;
     @ApiModelProperty(value = "虚拟机大小")
     private String vmSizeType;
+    @ApiModelProperty(value = "虚拟机系统磁盘类型")//vm_os_disk_type
+    private String vmOsDiskType;
     @ApiModelProperty(value = "发布者信息")
     private String publisher;
     @ApiModelProperty(value = "产品报价")

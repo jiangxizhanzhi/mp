@@ -27,6 +27,7 @@ import cn.cyberpeace.mp.cscene.dto.scene.CsceneLoadDto;
 import cn.cyberpeace.mp.cscene.model.*;
 import cn.cyberpeace.mp.cscene.repository.*;
 import cn.cyberpeace.mp.cscene.service.filed.CsceneModelFields;
+import cn.cyberpeace.mp.cscene.service.param.AzureVmOsDiskQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneSnapshotDeleteTaskPool;
@@ -40,6 +41,7 @@ import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneConfigElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneConfigMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
@@ -109,7 +111,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     @Resource
     private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
     @Resource
-    private AzureVimSizeMapper azureVimSizeMapper;
+    private AzureVmSizeMapper azureVmSizeMapper;
+    @Resource
+    private AzureVmOsDiskMapper azureVmOsDiskMapper;
 
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
@@ -867,7 +871,41 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     public ListObjServiceResult<AzureVmSize> vmSizeList(CsceneInstanceStatQueryParams queryParams) {
         HumanCondition humanCondition = new HumanCondition()
                 .pagination(queryParams.getPage(), queryParams.getPageSize());
-        List<AzureVmSize> list = azureVimSizeMapper.list(humanCondition);
+        List<AzureVmSize> list = azureVmSizeMapper.list(humanCondition);
+        return new ListObjServiceResult<>(new ListObjResult<>(list, list.size()));
+    }
+
+    public ListObjServiceResult<AzureVmOsDisk> vmOsDiskTypeList(CsceneInstanceStatQueryParams queryParams) {
+        HumanCondition humanCondition = new HumanCondition()
+                .pagination(queryParams.getPage(), queryParams.getPageSize());
+        List<AzureVmOsDisk> list = azureVmOsDiskMapper.vmOsDiskTypeList(humanCondition);
+        return new ListObjServiceResult<>(new ListObjResult<>(list, list.size()));
+    }
+
+    public ListObjServiceResult<AzureVmOsDisk> vmOsDiskSizeList(AzureVmOsDiskQueryParams queryParams) {
+        List<AzureVmOsDisk> list = azureVmOsDiskMapper.list(queryParams);
+//        判断系统类型 linux查 30G~2T windows 查127G~2T
+//        过滤出max_size_unit=TB且max_size<=2或max_size_unit=GB且max_size>=30
+        int maxSize = 30;
+        if (BaseSceneElementModel.SystemType.WINDOWS.equals(queryParams.getVmType())) {
+            maxSize = 127;
+        }
+        int finalMaxSize = maxSize;
+        list = list.stream().filter(item -> {
+            if (item.getMaxSizeUnit().equals("TB")) {
+                return Integer.parseInt(item.getMaxSize()) <= 2;
+            } else {
+                return Integer.parseInt(item.getMaxSize()) >= finalMaxSize;
+            }
+        }).collect(Collectors.toList());
+//        建一个AzureVmOsDisk TB且max_size = 30 max_size_unit = GB 放进集合最前面
+        AzureVmOsDisk azureVmOsDisk = new AzureVmOsDisk();
+        azureVmOsDisk.setName("Image default");
+        azureVmOsDisk.setSize("Image default");
+        azureVmOsDisk.setMaxSize(String.valueOf(maxSize));
+        azureVmOsDisk.setMaxSizeUnit("GB");
+        list.add(0, azureVmOsDisk);
+
         return new ListObjServiceResult<>(new ListObjResult<>(list, list.size()));
     }
 }

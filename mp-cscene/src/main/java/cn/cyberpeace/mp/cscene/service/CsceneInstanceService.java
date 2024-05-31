@@ -38,10 +38,7 @@ import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.report.bo.CollectedCsceneElementCommonBO;
 import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
-import cn.cyberpeace.mp.cscene.repository.AzureVimSizeMapper;
-import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
-import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
-import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
+import cn.cyberpeace.mp.cscene.repository.*;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
@@ -62,6 +59,7 @@ import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementSituationProbeModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneConfigElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementSituationProbeMapper;
@@ -109,6 +107,7 @@ import cn.cyberpeace.mp.situationaware.repository.WazuhProbeDataMapper;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import com.azure.resourcemanager.compute.models.ComputeResourceType;
 import com.azure.resourcemanager.compute.models.InstanceViewStatus;
 import com.azure.resourcemanager.compute.models.RunCommandResult;
 import com.google.common.cache.Cache;
@@ -120,6 +119,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -218,7 +218,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Resource
     private SceneElementSituationProbeMapper sceneElementSituationProbeMapper;
     @Resource
-    private AzureVimSizeMapper azureVimSizeMapper;
+    private AzureVmSizeMapper azureVmSizeMapper;
+    @Resource
+    private AzureVmOsDiskMapper azureVmOsDiskMapper;
 
     @Autowired
     private ElementLogListMapper elementLogListMapper;
@@ -988,8 +990,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
         List<CollectionHostEventBO> bos = hostEventsBos.getSource().getObjs();
         HumanCondition humanCondition = new HumanCondition().currentLink(ElementLogListModel.class)
-                                                            .filterEqual(ElementLogListModel::getSceneId, sceneId)
-                                                            .filterIn(ElementLogListModel::getCatagory, queryParams.getCatagories().toArray());
+                .filterEqual(ElementLogListModel::getSceneId, sceneId)
+                .filterIn(ElementLogListModel::getCatagory, queryParams.getCatagories().toArray());
 
         if (StringUtils.isNotEmpty(queryParams.getStartTime())) {
             humanCondition.filterGreaterThan(ElementLogListModel::getTime, queryParams.getStartTime());
@@ -1123,7 +1125,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         List<CollectionHostEventBO> bos = hostEventsBos.getSource().getObjs();
 
         HumanCondition humanCondition = new HumanCondition().currentLink(WazuhProbeDataModel.class)
-                                                            .filterEqual(WazuhProbeDataModel::getSceneId, sceneId);
+                .filterEqual(WazuhProbeDataModel::getSceneId, sceneId);
 
         if (StringUtils.isNotEmpty(queryParams.getStartTime())) {
             humanCondition.filterGreaterThan(WazuhProbeDataModel::getTime, queryParams.getStartTime());
@@ -2108,17 +2110,38 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
 
+    @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Boolean> syncVmSize() throws IOException {
-        AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(1));
-        List<Map<String, String>> dataMaps = azureVirtualMachine.listsAllAvailableResourceSKUsForTheSpecifiedRegion();
+        AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(BaseSceneModel.CloudType.PUBLIC));
+        List<Map<String, String>> dataMaps = azureVirtualMachine.listsAllSkusWithCapabilities(ComputeResourceType.VIRTUALMACHINES);
         if (dataMaps != null && !dataMaps.isEmpty()) {
 //            清空表
-            azureVimSizeMapper.truncate();
+            azureVmSizeMapper.truncate();
             //list按照一千数量间隔批量插入数据
             for (int i = 0; i < dataMaps.size(); i += 1000) {
                 List<Map<String, String>> subList = dataMaps.subList(i, i + 1000 > dataMaps.size() ? dataMaps.size() : i + 1000);
-                Boolean aBoolean = azureVimSizeMapper.batchInsert(subList);
-                if(!aBoolean){
+                Boolean aBoolean = azureVmSizeMapper.batchInsert(subList);
+                if (!aBoolean) {
+                    new MpRuntimeException("批量插入数据失败");
+                }
+            }
+
+        }
+        return new ServiceResult<>(true);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ServiceResult<Boolean> syncVmOsDisk() throws IOException {
+        AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(BaseSceneModel.CloudType.PUBLIC));
+        List<Map<String, String>> dataMaps = azureVirtualMachine.listsAllSkusWithCapabilities(ComputeResourceType.DISKS);
+        if (dataMaps != null && !dataMaps.isEmpty()) {
+//            清空表
+            azureVmOsDiskMapper.truncate();
+            //list按照一千数量间隔批量插入数据
+            for (int i = 0; i < dataMaps.size(); i += 1000) {
+                List<Map<String, String>> subList = dataMaps.subList(i, i + 1000 > dataMaps.size() ? dataMaps.size() : i + 1000);
+                Boolean aBoolean = azureVmOsDiskMapper.batchInsert(subList);
+                if (!aBoolean) {
                     new MpRuntimeException("批量插入数据失败");
                 }
             }

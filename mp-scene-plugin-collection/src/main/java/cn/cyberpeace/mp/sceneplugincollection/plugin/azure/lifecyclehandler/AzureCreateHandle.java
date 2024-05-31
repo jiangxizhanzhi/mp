@@ -87,10 +87,10 @@ public class AzureCreateHandle extends CreateHandler {
         }
         boolean enableCollector = !collectorVmInstanceIds.isEmpty() || !collectorContainerInstanceIds.isEmpty();
         boolean enableMirror = !mirrorVmInstanceIds.isEmpty() || !mirrorContainerInstanceIds.isEmpty();
+        String finalNetWorkId = netWorkId;
         if (enableCollector) {
             var sceneId = getPluginHandler().getSrcScene().getEid();
             // 创建流量采集器
-            String finalNetWorkId = netWorkId;
             runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
 //                var flowCollectorId = getFlowCollector().createCollector();
 //                创建AzureArkime
@@ -114,7 +114,8 @@ public class AzureCreateHandle extends CreateHandler {
         } else if (creatFlowCollector) {
             // 只创建流量采集器
             runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
-                var flowCollectorId = getFlowCollector().createCollector();
+                var flowCollectorId = new AzureFlowCollector(getFlowCollector(), resourceService, getPluginHandler(), finalNetWorkId)
+                        .createCollector();
                 getPluginHandler().getScene().setFlowCollector(flowCollectorId);
             });
         }

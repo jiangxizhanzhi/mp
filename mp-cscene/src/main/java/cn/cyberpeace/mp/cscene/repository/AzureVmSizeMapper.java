@@ -12,7 +12,7 @@ import java.util.Map;
 @Mapper
 @Repository
 @ModelClass(AzureVmSize.class)
-public interface AzureVimSizeMapper extends BaseModelMapper<AzureVmSize> {
+public interface AzureVmSizeMapper extends BaseModelMapper<AzureVmSize> {
 
     Boolean batchInsert(List<Map<String, String>> azureVmSizes);
 

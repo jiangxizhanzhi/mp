@@ -8,8 +8,11 @@ import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.network.models.Network;
+import com.azure.resourcemanager.network.models.NetworkSecurityGroup;
 
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AzureVirtualNet {
@@ -26,7 +29,6 @@ public class AzureVirtualNet {
     }
 
     public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, ConcurrentHashMap<String, Boolean> cidrContainerMap) {
-        String vmType = cloudElement.getVmType();
 //        for (int i = 0; i < cloudElement.getDeriveNetworks().size(); i++) {
         var net = cloudElement.getDeriveNetworks().get(0).getNetwork();
         // azure todo 网络名称用节点 eid+序号
@@ -35,13 +37,21 @@ public class AzureVirtualNet {
         String gateway = net.getGateway();
 //            String cidr = net.getCidr();
         String groupName = pluginHandler.getSourceSceneId();
-        //  azure todo 调用微软云api 创建网络
+        //        nsg设置子网间网络隔离（不包括arkime）
+//            创建nsg
+        NetworkSecurityGroup nsg = azureResourceManager.networkSecurityGroups()
+                .define("nsg")
+                .withRegion(this.region)
+                .withExistingResourceGroup(groupName)
+                .create();
+
+        //  azure 调用微软云api 创建网络
         var createdNet = azureResourceManager.networks()
                 .define(netName)
                 .withRegion(this.region)
                 .withExistingResourceGroup(groupName);
-
-        for (Map.Entry<String, Boolean> entry : cidrContainerMap.entrySet()) {
+        Set<Map.Entry<String, Boolean>> entrySet = cidrContainerMap.entrySet();
+        for (Map.Entry<String, Boolean> entry : entrySet) {
             Boolean value = entry.getValue();
             if (value) {
 //                连接容器的子网需要加子网委托
@@ -50,11 +60,15 @@ public class AzureVirtualNet {
                         .defineSubnet(IpUtils.extractNetworkPart(entry.getKey()))
                         .withAddressPrefix(entry.getKey())
                         .withDelegation("Microsoft.ContainerInstance/containerGroups")
+                        .withExistingNetworkSecurityGroup(nsg)
                         .attach();
             } else {
                 createdNet
                         .withAddressSpace(entry.getKey())
-                        .withSubnet(IpUtils.extractNetworkPart(entry.getKey()), entry.getKey());
+                        .defineSubnet(IpUtils.extractNetworkPart(entry.getKey()))
+                        .withAddressPrefix(entry.getKey())
+                        .withExistingNetworkSecurityGroup(nsg)
+                        .attach();
             }
         }
 //        创建arkime子网
@@ -68,9 +82,43 @@ public class AzureVirtualNet {
         Network network = createdNet.create();
 
 
-        // azure todo 回写网络id
+        // azure 回写网络id
         net.setResourceId(network.id());
-//        }
+
+
+//            子网加入nsg
+
+
+//            创建入站规则
+        NetworkSecurityGroup.Update update = nsg.update();
+        ArrayList<String> cidrs = new ArrayList<>(cidrContainerMap.keySet());
+        for (int i = 0; i < cidrs.size(); i++) {
+            for (int j = i + 1; j < cidrs.size(); j++) {
+//                TODO 入站规则
+                String ipi = IpUtils.extractNetworkPart(cidrs.get(i)).replaceAll("\\.", "");
+                String ipj = IpUtils.extractNetworkPart(cidrs.get(j)).replaceAll("\\.", "");
+                update.defineRule(ipi + "deny" + ipj)
+                        .denyInbound()
+                        .fromAddress(cidrs.get(i))
+//                        .fromPortRanges("*")
+                        .fromAnyPort()
+                        .toAddress(cidrs.get(j))
+                        .toAnyPort()
+                        .withAnyProtocol()
+                        .withPriority(1000 + i * 10 + j)
+                        .attach()
+                        .defineRule(ipj + "deny" + ipi)
+                        .denyInbound()
+                        .fromAddress(cidrs.get(j))
+                        .fromAnyPort()
+                        .toAddress(cidrs.get(i))
+                        .toAnyPort()
+                        .withAnyProtocol()
+                        .withPriority(1000 + j * 10 + i)
+                        .attach();
+            }
+        }
+        update.apply();
     }
 
     public static String findUnused192Cidr(ConcurrentHashMap<String, Boolean> cidrContainerMap) {

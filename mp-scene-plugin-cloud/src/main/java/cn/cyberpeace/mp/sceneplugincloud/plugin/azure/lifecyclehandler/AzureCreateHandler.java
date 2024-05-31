@@ -45,7 +45,7 @@ public class AzureCreateHandler extends CreateHandler {
         List<CloudPluginSceneElementBO> allElements = new ArrayList<>(getPluginHandler().getElementMap().values());
 
         // 再创建终端 终端分虚拟机、容器、和web服务
-        List<Runnable> createTerminalTasks = new ArrayList<>();
+        /*List<Runnable> createTerminalTasks = new ArrayList<>();
         // 载荷
        List<CloudPluginSceneElementBO> filteredLoadElements = this.filterLoadElements(allElements);
         List<Runnable> createLoadTasks = new ArrayList<>();
@@ -60,8 +60,9 @@ public class AzureCreateHandler extends CreateHandler {
 
         if (!createTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
-        }
-/*
+        }*/
+        //  TODO 测试载荷暂时去除
+
         // 创建微软云的资源组
         String groupName = getPluginHandler().getSourceSceneId();
         new AzureResourceGroup(resourceService).create(groupName);
@@ -90,8 +91,8 @@ public class AzureCreateHandler extends CreateHandler {
             filteredAuxiliaryNetworkElements.stream()
                     .flatMap(cloudElement -> cloudElement.getDeriveNetworks().stream())
                     .forEach(cloudElement -> cloudElement.getNetwork().setResourceId(azureNetworkId));
-
         }
+
         // 再创建终端 终端分虚拟机、容器、和web服务
         List<Runnable> createTerminalTasks = new ArrayList<>();
         // 虚拟机
@@ -143,11 +144,12 @@ public class AzureCreateHandler extends CreateHandler {
 
         if (!createTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
-        }*/
+        }
     }
 
 
-    private List<CloudPluginSceneElementBO> filterLoadElements(List<CloudPluginSceneElementBO> allElements) {
+    private List<CloudPluginSceneElementBO> filterLoadElements(List<
+            CloudPluginSceneElementBO> allElements) {
         List<CloudPluginSceneElementBO> filterElements = new ArrayList<>();
         for (var c : allElements) {
             if (BaseCloudPluginSceneElementModel.VirtualType.LOAD == c.getVirtualType()) {

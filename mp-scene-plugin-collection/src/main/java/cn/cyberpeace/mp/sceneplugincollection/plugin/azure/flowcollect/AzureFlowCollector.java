@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureContainer;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.flowcollect.FlowCollector;
-import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.containerinstance.models.ContainerGroup;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,10 +34,9 @@ public class AzureFlowCollector extends FlowCollector {
     }
 
     public String createCollector() {
-        String containerGroupName = indexPrefix + String.valueOf(System.currentTimeMillis());
+        String containerGroupName = "mp-" + String.valueOf(System.currentTimeMillis());
 
 //        创建akime容器
-        AzureResourceManager azureResourceManager = resourceService.getManager();
         String groupName = pluginHandler.getSourceSceneId();
         String imageName = "samples/cyberpeace/arkime";
 
@@ -46,10 +44,10 @@ public class AzureFlowCollector extends FlowCollector {
         //获取环境变量
         HashMap<String, String> environment = super.getArkimeEnvironment(containerGroupName);
 
-
         ContainerGroup container = new AzureContainer(resourceService)
-                .creatContainer(imageName, null, netWorkId, "containerSub", groupName, "arkime", "arkime", environment);
-
+                .creatContainer(imageName, null, netWorkId, "containerSub", groupName,
+                        "arkime", "arkime", environment,
+                        4, 4);
 
         return container.id();
     }

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.cscene.repository.AzureVmOsDiskMapper">
+
+    <insert id="batchInsert">
+        insert into mp_azure_vm_os_disk (
+        id,
+        name,
+        size,
+        max_size_gi_b,
+        max_size,
+        max_size_unit,
+        iops,
+        iops_performance_plus,
+        bandwidth_mbps,
+        bandwidth_mbps_performance_plus,
+        max_burst_iops,
+        max_burst_bandwidth_mbps,
+        max_burst_duration_in_min,
+        create_time,
+        update_time
+        )
+        values
+        <foreach collection="azureVmOsDisks" item="item" separator=",">
+            (
+            REPLACE(UUID(), '-', ''),
+            #{item.name},
+            #{item.size},
+            #{item.MaxSizeGiB},
+            #{item.MaxSize},
+            #{item.MaxSizeUnit},
+            #{item.MaxIOps},
+            #{item.MaxIOpsPerformancePlus},
+            #{item.MaxBandwidthMBps},
+            #{item.MaxBandwidthMBpsPerformancePlus},
+            #{item.MaxBurstIops},
+            #{item.MaxBurstBandwidthMBps},
+            #{item.MaxBurstDurationInMin},
+            now(),
+            now()
+            )
+        </foreach>
+    </insert>
+
+    <delete id="truncate">
+        truncate table mp_azure_vm_os_disk
+    </delete>
+
+    <select id="vmOsDiskTypeList" resultType="cn.cyberpeace.mp.cscene.model.AzureVmOsDisk">
+        SELECT pk,
+               id,
+               name, size, max_size_gi_b, max_size, max_size_unit, iops, iops_performance_plus, bandwidth_mbps, bandwidth_mbps_performance_plus, max_burst_iops, max_burst_bandwidth_mbps, max_burst_duration_in_min
+        FROM (
+            SELECT
+            pk, id, name, size, max_size_gi_b, max_size, max_size_unit, iops, iops_performance_plus, bandwidth_mbps, bandwidth_mbps_performance_plus, max_burst_iops, max_burst_bandwidth_mbps, max_burst_duration_in_min, ROW_NUMBER() OVER (PARTITION BY name ORDER BY CAST (SUBSTRING (size, 2, LENGTH (size) - 1) AS INT) ASC) AS rn
+            FROM
+            mp_azure_vm_os_disk
+            ) AS subquery
+        WHERE
+            rn = 1;
+    </select>
+
+    <select id="list" resultType="cn.cyberpeace.mp.cscene.model.AzureVmOsDisk">
+        SELECT *
+        FROM mp_azure_vm_os_disk
+        <where>
+            <if test="name != null and name != ''">
+                AND name = #{name}
+            </if>
+        </where>
+        ORDER BY CAST(SUBSTRING(size, 2, LENGTH(size) - 1) AS INT)
+    </select>
+</mapper>

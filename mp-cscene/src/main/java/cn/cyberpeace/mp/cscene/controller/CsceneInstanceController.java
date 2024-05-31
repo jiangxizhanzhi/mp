@@ -602,6 +602,12 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return modelService.syncVmSize().asResult();
     }
 
+    @ApiOperation("同步云虚拟机磁盘大小表")
+    @PostMapping("/sync_vm_os_disk")
+    public ServiceResult<Boolean> syncVmOsDisk(@RequestBody(required = false) CsceneInstanceActionRequest request) throws IOException {
+        return modelService.syncVmOsDisk().asResult();
+    }
+
     @ApiOperation("查漏洞列表）")
     @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
     @GetMapping("/vuln_ist")

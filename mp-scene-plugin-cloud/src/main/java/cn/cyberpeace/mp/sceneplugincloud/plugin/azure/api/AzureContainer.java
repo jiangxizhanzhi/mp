@@ -45,45 +45,29 @@ public class AzureContainer {
         String containerName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
         String containerGroupName = cloudElement.getSrcElement().getEid().replace("_", "-").toLowerCase();
 
-        ContainerGroup container = creatContainer(cloudElement.getImage(), virtualNics, networkId, subnetName, groupName, containerName, containerGroupName, new HashMap());
+        var srcElement = cloudElement.getSrcElement();
+
+        double cpu = srcElement.getCpu() == null ? 1 : srcElement.getCpu();
+        double ram = srcElement.getRam() == null ? 1.5 : srcElement.getRam();
+
+        ContainerGroup container = creatContainer(cloudElement.getImage(), virtualNics,
+                networkId, subnetName, groupName,
+                containerName, containerGroupName, new HashMap(),
+                cpu, ram);
 
         cloudElement.setResourceId(container.id());
     }
 
     public ContainerGroup creatContainer(String image, List<VirtualNic> virtualNics, String networkId,
                                          String subnetName, String groupName, String containerName,
-                                         String containerGroupName, Map environment) {
+                                         String containerGroupName, Map environment,
+                                         double cpu, double ram) {
         //        TODO 注册表信息如何获取 是否只使用一个祖册表 多个注册表是否在同一个资源组 若不在容器镜像参数要包含资源组、注册表名、等信息
         Registry registrytest0407 = azureResourceManager.containerRegistries().getByResourceGroup("container-registry", "registrytest0407");
         RegistryCredentials acrCredentials = registrytest0407.getCredentials();
 //        String imageName = cloudElement.getImage();
-//        String imageName = registrytest0407.loginServerUrl() + "/samples/" + "nginx";
+//        String imageName = registrytest0407.loginServerUrl() + "/samples/nginx";
         String imageName = registrytest0407.loginServerUrl() + "/" + image;
-
-       /* ContainerGroup container = azureResourceManager
-                .containerGroups()
-                .define(containerName)
-                .withRegion(this.region)
-                .withNewResourceGroup(groupName)
-                .withLinux()
-//                .withPublicImageRegistryOnly()
-                .withPrivateImageRegistry(registrytest0407.loginServerUrl(), acrCredentials.username(), acrCredentials.accessKeys().get(AccessKeyType.PRIMARY))
-                .withoutVolume()
-                .defineContainerInstance(containerGroupName)
-//                TODO 前端未传先写死
-                .withImage(imageName)
-                .withExternalTcpPort(80)
-                .withCpuCoreCount(0.5)
-                .withMemorySizeInGB(0.8)
-//                    上面的简写方法 默认cpu1 memorySize1.5
-//                .withContainerInstance(imageName, 80)
-//                TODO 配置环境后无法设置网络与创建
-//                .withEnvironmentVariables(environment)
-                .attach()
-//                TODO 设置网络
-                .withNewNetworkProfileOnExistingVirtualNetwork(networkId, subnetName)
-                .withRestartPolicy(ContainerGroupRestartPolicy.NEVER)
-                .create();*/
 
         ContainerGroup.DefinitionStages.WithNextContainerInstance attach = (ContainerGroup.DefinitionStages.WithNextContainerInstance) azureResourceManager
                 .containerGroups()
@@ -91,18 +75,14 @@ public class AzureContainer {
                 .withRegion(this.region)
                 .withNewResourceGroup(groupName)
                 .withLinux()
-//                .withPublicImageRegistryOnly()
                 .withPrivateImageRegistry(registrytest0407.loginServerUrl(), acrCredentials.username(), acrCredentials.accessKeys().get(AccessKeyType.PRIMARY))
                 .withoutVolume()
                 .defineContainerInstance(containerGroupName)
 //                TODO 前端未传先写死
                 .withImage(imageName)
                 .withExternalTcpPort(80)
-                .withCpuCoreCount(0.5)
-                .withMemorySizeInGB(0.8)
-//                    上面的简写方法 默认cpu1 memorySize1.5
-//                .withContainerInstance(imageName, 80)
-//                TODO 配置环境后无法设置网络与创建
+                .withCpuCoreCount(cpu)
+                .withMemorySizeInGB(ram)
                 .withEnvironmentVariables(environment)
                 .attach();
         ContainerGroup container = attach.withNewNetworkProfileOnExistingVirtualNetwork(networkId, subnetName)

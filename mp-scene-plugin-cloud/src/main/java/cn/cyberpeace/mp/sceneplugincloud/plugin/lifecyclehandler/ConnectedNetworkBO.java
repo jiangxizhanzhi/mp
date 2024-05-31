@@ -65,5 +65,17 @@ public class ConnectedNetworkBO {
             this.from = from;
             this.to = to;
         }
+
+        public SceneElementPortBO getFrom() {
+            return from;
+        }
+
+        public SceneElementPortBO getTo() {
+            return to;
+        }
+    }
+
+    public List<ConnectPort> getConnectPorts() {
+        return connectPorts;
     }
 }

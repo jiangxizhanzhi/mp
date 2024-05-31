@@ -11,10 +11,12 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
 import cn.cyberpeace.mp.cscene.dto.scene.CsceneLoadDto;
+import cn.cyberpeace.mp.cscene.model.AzureVmOsDisk;
 import cn.cyberpeace.mp.cscene.model.AzureVmSize;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
+import cn.cyberpeace.mp.cscene.service.param.AzureVmOsDiskQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
@@ -330,10 +332,24 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.addLoad(csceneLoadDto).asResult();
     }
 
-    @ApiOperation("获取分页的聚合数据")
+    @ApiOperation("虚拟机大小列表")
     @GetMapping("/vm_size_list")
     public ListObjServiceResult<AzureVmSize> vmSizeList(CsceneInstanceStatQueryParams queryParams) {
         handleQueryParams("list", queryParams);
         return modelService.vmSizeList(queryParams).asResult();
     }
+
+    @ApiOperation("虚拟机系统磁盘类型列表")
+    @GetMapping("/vm_os_disk_type_list")
+    public ListObjServiceResult<AzureVmOsDisk> vmOsDiskTypeList(CsceneInstanceStatQueryParams queryParams) {
+        handleQueryParams("list", queryParams);
+        return modelService.vmOsDiskTypeList(queryParams).asResult();
+    }
+
+    @ApiOperation("虚拟机系统磁盘大小列表")
+    @GetMapping("/vm_os_disk_size_list")
+    public ListObjServiceResult<AzureVmOsDisk> vmOsDiskSizeList(AzureVmOsDiskQueryParams queryParams) {
+        return modelService.vmOsDiskSizeList(queryParams).asResult();
+    }
+
 }

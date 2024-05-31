@@ -136,12 +136,14 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String vmSizeType;
     @DefaultStr
+    private String vmOsDiskType;
+    @DefaultStr
     private String publisher;
     @DefaultStr
     private String offer;
     @DefaultStr
     private String sku;
-//    漏洞
+    //    漏洞
     @DefaultStr
     private String vulnCode;
 

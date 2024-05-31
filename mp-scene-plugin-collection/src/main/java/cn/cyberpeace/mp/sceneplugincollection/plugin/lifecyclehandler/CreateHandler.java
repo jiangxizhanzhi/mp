@@ -118,7 +118,6 @@ public class CreateHandler extends HandlerCommon {
                 .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         boolean creatFlowCollector = false;
         for (Map.Entry<String, CollectionPluginSceneElementPortBO> entry : getPluginHandler().getElementPortMap().entrySet()) {
-            var portId = entry.getKey();
             var collectionPort = entry.getValue();
             if (Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {
                 creatFlowCollector = true;
