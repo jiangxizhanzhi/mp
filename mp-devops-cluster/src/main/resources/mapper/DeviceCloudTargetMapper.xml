@@ -7,7 +7,6 @@
         id,
         name,
         other_name,
-        image_type,
         cloud_service_type,
         operating_system,
         operating_system_status,
@@ -21,7 +20,6 @@
                 #{item.id},
                 #{item.name},
                 #{item.otherName},
-                #{item.imageType},
                 #{item.cloudServiceType},
                 #{item.operatingSystem},
                 #{item.operatingSystemStatus},
@@ -29,6 +27,37 @@
                 #{item.generation},
                 now(),
                 now()
+            )
+        </foreach>
+    </insert>
+
+    <insert id="batchInsertCloudTargetNet">
+        INSERT INTO mp_devops_cloud_target_net (
+        `link_id`,
+        `net_service_name`,
+        `source_type`,
+        `net_type`,
+        `is_public`,
+        `quick_create_support`,
+        `is_import`,
+        `is_hide`,
+        `create_time`,
+        `update_time`,
+        `logo`
+        ) VALUES
+        <foreach collection="param" item="item" index="index" separator=",">
+            (
+            #{item.linkId},
+            #{item.netServiceName},
+            #{item.sourceType},
+            #{item.netType},
+            #{item.isPublic},
+            #{item.quickCreateSupport},
+            #{item.isImport},
+            #{item.isHide},
+            now(),
+            now(),
+            #{item.logo}
             )
         </foreach>
     </insert>
@@ -216,6 +245,21 @@
         </where>
     </delete>
 
+    <delete id="deleteCloudTargetNet">
+        DELETE
+        FROM
+        mp_devops_cloud_target_net
+        <where>
+            <if test="param != null and param.size != 0">
+                pk in (
+                <foreach collection="param" item="item" index="index" separator=",">
+                    #{item.pk}
+                </foreach>
+                )
+            </if>
+        </where>
+    </delete>
+
     <delete id="deleteCloudTargetCalculate">
         DELETE
         FROM
@@ -382,11 +426,21 @@
     </select>
 
     <select id="getCloudTargetListByCodes" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO">
+        <if test="cloudServiceType != null and cloudServiceType == 1">
+            SELECT
+            target.id,
+            target.other_name,
+            target.cloud_service_type,
+            net.*
+            FROM
+            mp_devops_cloud_target target
+            inner join mp_devops_cloud_target_net net on target.id = net.link_id
+        </if>
+
         <if test="cloudServiceType != null and cloudServiceType == 2">
             SELECT
             target.id,
             target.other_name,
-            target.image_type,
             target.cloud_service_type,
             calculate.*
             FROM
@@ -397,7 +451,7 @@
         <if test="cloudServiceType != null and cloudServiceType == 3">
             SELECT
             target.id,
-            target.image_type,
+            target.other_name,
             target.cloud_service_type,
             container.*
             FROM

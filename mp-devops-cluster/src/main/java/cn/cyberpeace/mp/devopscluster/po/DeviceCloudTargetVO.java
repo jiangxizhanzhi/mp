@@ -25,21 +25,9 @@ public class DeviceCloudTargetVO extends BaseModel {
      */
     private String otherName;
     /**
-     * 镜像类型(container、vm)
-     */
-    private String imageType;
-    /**
      * 云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储 )
      */
     private String cloudServiceType;
-    /**
-     * 计算类型
-     */
-    private String calculateType;
-    /**
-     * 容器类型
-     */
-    private String containerType;
     /**
      * 子类型
      */
@@ -56,6 +44,22 @@ public class DeviceCloudTargetVO extends BaseModel {
      * 源类型(1:云平台 2:用户上传)
      */
     private Integer sourceType;
+
+
+    /**
+     * 网络类型
+     */
+    private String netType;
+    /**
+     * 网络服务名称
+     */
+    private String netServiceName;
+
+
+    /**
+     * 计算类型
+     */
+    private String calculateType;
     /**
      * publisher
      */
@@ -68,10 +72,18 @@ public class DeviceCloudTargetVO extends BaseModel {
      * sku
      */
     private String sku;
+
+
+    /**
+     * 容器类型
+     */
+    private String containerType;
     /**
      * 用户上传镜像名称
      */
     private String uploadTargetName;
+
+
     /**
      * 是否公开，0：私有，1：自定义，2：公开
      */

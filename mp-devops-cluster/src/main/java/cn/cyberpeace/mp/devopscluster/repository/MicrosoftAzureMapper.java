@@ -4,10 +4,7 @@ import cn.cyberpeace.mp.base.bo.MpSysCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
-import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetCalculate;
-import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetContainer;
-import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO;
-import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO;
+import cn.cyberpeace.mp.devopscluster.po.*;
 import cn.cyberpeace.mp.devopscluster.vo.MpSysCodeMenuVO;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.annotations.Mapper;
@@ -56,11 +53,15 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
 
     Boolean deleteCloudTarget(@Param("param") List<DeviceCloudTargetPO> cloudTargetList);
 
+    Boolean deleteCloudTargetNet(@Param("param") List<DeviceCloudTargetNet> allNetList);
+
     Boolean deleteCloudTargetCalculate(@Param("param") List<DeviceCloudTargetCalculate> allCalculateList);
 
     Boolean deleteCloudTargetContainer(@Param("param") List<DeviceCloudTargetContainer> allContainerList);
 
     Boolean batchInsertCloudTarget(@Param("param") List<DeviceCloudTargetPO> list);
+
+    Boolean batchInsertCloudTargetNet(@Param("param") List<DeviceCloudTargetNet> netList);
 
     Boolean batchInsertCloudTargetCalculate(@Param("param") List<DeviceCloudTargetCalculate> calculateList);
 

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.model.base;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetCalculate;
 import io.swagger.annotations.ApiModel;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -18,19 +19,16 @@ public class CalculateLaasVM extends DeviceCloudTargetCalculate {
     /**
      * (包含cpu数量 运存大小 网卡数量等)Standard_B1s，1vcpu，1GiB内存，2网卡
      */
-    @DefaultStr("Standard_B1s")
     private String basicType;
 
     /**
      * os磁盘大小
      */
-    @DefaultStr("30")
     private String osDisk;
 
     /**
      * 磁盘类型(ssd/hhd)
      */
-    @DefaultStr("StandardSSD_LRS")
     private String hardDiskType;
 
     /**
@@ -51,12 +49,19 @@ public class CalculateLaasVM extends DeviceCloudTargetCalculate {
     /**
      * 虚拟机用户账号
      */
-    @DefaultStr("admin123")
     private String userName;
 
     /**
      * 虚拟机用户密码
      */
-    @DefaultStr("NHiOJiZTD4K1")
     private String password;
+
+    // 初始化静态变量
+    {
+        password = "NHiOJiZTD4K1";
+        userName = "admin123";
+        hardDiskType = "StandardSSD_LRS";
+        basicType = "Standard_B1s";
+        osDisk = "30";
+    }
 }
