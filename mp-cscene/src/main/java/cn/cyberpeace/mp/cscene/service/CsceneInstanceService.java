@@ -1689,6 +1689,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         BcSceneInstanceHandler originHandler = new BcSceneInstanceHandler(csceneBO.getId(), null);
 
         // 更新区域
+        csceneBO.getUpdateScene().getTopology().getScene().setEid(originHandler.getSceneId());
         SceneHandler sceneHandler = new SceneHandler(csceneBO.getUpdateScene(), null);
         sceneHandler.save();
 
