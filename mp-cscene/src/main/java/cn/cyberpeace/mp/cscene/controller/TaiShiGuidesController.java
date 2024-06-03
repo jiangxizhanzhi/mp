@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
@@ -37,6 +39,7 @@ public class TaiShiGuidesController {
 
     @ApiOperation(value = "场景态势事件列表")
     @PostMapping("/event_list")
+    @AuthTarget({TargetEnum.NO_AUTH})
     public ListObjServiceResult<TaiShiEventInfo> getAttCkEventList(@RequestBody TaiShiRequest request) {
         log.info("getAttackEventList request = {}", request);
         return taiShiGuidesService.getAttCkEventList(request).asResult();
@@ -44,36 +47,42 @@ public class TaiShiGuidesController {
 
     @ApiOperation(value = "场景态势主机事件列表")
     @GetMapping("/host_event_list")
+    @AuthTarget({TargetEnum.NO_AUTH})
     public ListObjServiceResult<TaiShiEventInfo> getHostEventList(TaiShiHostRequest request) {
         return taiShiGuidesService.getHostEventList(request).asResult();
     }
 
     @ApiOperation(value = "场景态势主机和流量的次数统计")
     @GetMapping("/event_total_count")
+    @AuthTarget({TargetEnum.NO_AUTH})
     public ServiceResult<TaiShiTotalCount> getAttCkEventCount(@Param("sceneId") String sceneId) {
         return taiShiGuidesService.getAttCkEventCount(sceneId).asResult();
     }
 
     @ApiOperation(value = "场景态势主机和流量的次数统计")
     @GetMapping("/event_group_count")
+    @AuthTarget({TargetEnum.GROUP_TRAINING, TargetEnum.RED_VS_BLUE, TargetEnum.RANGE_TEST_SELF})
     public ServiceResult<List<FlowAttackTypeCount>> getAttCkEventGroupCount(@Param("sceneId") String sceneId) {
         return taiShiGuidesService.getAttCkEventGroupCount(sceneId).asResult();
     }
 
     @ApiOperation(value = "场景态势主机和流量事件的次数趋势")
     @GetMapping("/event_trend")
+    @AuthTarget({TargetEnum.NO_AUTH})
     public ServiceResult<List<FlowTrend>> getEventTrend(@Param("sceneId") String sceneId) {
         return taiShiGuidesService.getEventTrend(sceneId).asResult();
     }
 
     @ApiOperation(value = "场景运行过程中态势主机和流量事件的出现时间")
     @RequestMapping("/event_timing")
+    @AuthTarget({TargetEnum.NO_AUTH})
     public ServiceResult<List<FlowTrend>> getEventTiming(@RequestBody TaiShiRequest request) {
         return taiShiGuidesService.getEventTiming(request).asResult();
     }
 
     @ApiOperation(value = "获取流量事件攻击类型分类详情")
     @GetMapping("/flow_classification/all")
+    @AuthTarget({TargetEnum.NO_AUTH})
     public ServiceResult<List<FlowClassificationDto>> listAllFlowClassifications() {
         return new ServiceResult<>(taiShiGuidesService.listAllFlowClassifications()).asResult();
     }
