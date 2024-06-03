@@ -9,9 +9,6 @@ import lombok.Data;
 public class SceneConfigElementBO extends BaseSceneElementBO<SceneConfigElementModel, SceneConfigElementPortBO,
         SceneConfigElementBO> {
 
-    private String controlType;
-    private String defaultCmd;
-
     @Override
     public SceneConfigElementModel createModel() {
         return new SceneConfigElementModel();
