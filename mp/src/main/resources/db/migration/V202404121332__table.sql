@@ -67,3 +67,8 @@ alter table mp_scene_scene_config_element_port add column usable tinyint(1) comm
 alter table `mp_situation_suricatarule` add column class_type_cn varchar(1024) NOT NULL DEFAULT '' COMMENT "流量规则分类类型中文";
 alter table `mp_situation_suricatarule` add column class_type_en varchar(1024) NOT NULL DEFAULT '' COMMENT "流量规则分类类型英文";
 alter table `mp_situation_suricatarule` add column rule_gen_type int(2) NOT NULL DEFAULT 0 COMMENT "规则生成类型0-预定义，用户不能编辑 1-自定义，用户可以编辑";
+
+DROP INDEX IF EXISTS id on 	mp_cscene_cscene_role ;
+DROP INDEX IF EXISTS id on 	mp_cscene_cscene_instance_role ;
+alter table mp_cscene_cscene_role add UNIQUE KEY cscene_id (`cscene`,`id`) ;
+alter table mp_cscene_cscene_instance_role add UNIQUE KEY cscene_id (`cscene`,`id`) ;
