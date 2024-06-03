@@ -1,19 +1,22 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.model.base;
 
-import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetCalculate;
 import io.swagger.annotations.ApiModel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 扩展虚拟机信息
  */
 @Data
+
 @EqualsAndHashCode(callSuper = true)
+@Accessors(chain = true)
 @ApiModel("计算-laas-虚拟机信息")
 public class CalculateLaasVM extends DeviceCloudTargetCalculate {
     /**
@@ -56,12 +59,15 @@ public class CalculateLaasVM extends DeviceCloudTargetCalculate {
      */
     private String password;
 
-    // 初始化静态变量
-    {
-        password = "NHiOJiZTD4K1";
-        userName = "admin123";
-        hardDiskType = "StandardSSD_LRS";
-        basicType = "Standard_B1s";
-        osDisk = "30";
+    //简化实例创建，同时允许链式调用和设置默认值
+    @Builder(toBuilder = true)
+    public CalculateLaasVM() {
+        this.basicType = "Standard_B1s";
+        this.osDisk = "30";
+        this.hardDiskType = "StandardSSD_LRS";
+        this.loopholes = new ArrayList<>();
+        this.networkInterfaces = new ArrayList<>();
+        this.userName = "admin123";
+        this.password = "NHiOJiZTD4K1";
     }
 }
