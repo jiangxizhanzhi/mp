@@ -92,7 +92,7 @@ public enum TargetEnum {
 
     CSCENE_FLOW_TASK_GROUP(new String[]{TargetEnum.GROUP_TRAINING.getTargets()[0], TargetEnum.RANGE_TEST.getTargets()[0], TargetEnum.RED_VS_BLUE_WEB_FOLDER.getTargets()[0]}),
 
-    CSCENE_INSTANCE_GROUP(new String[]{CT_AD_QUESTION_LIST.getTargets()[0], CT_CFS_QUESTION_LIST.getTargets()[0], CT_OPERATION_QUESTION_LIST.getTargets()[0], FLAGS_SOLVE.getTargets()[0], IMAGE_MANAGE.getTargets()[0], INSTANCE_MONITORING.getTargets()[0]}),
+    CSCENE_INSTANCE_GROUP(new String[]{CT_AD_QUESTION_LIST.getTargets()[0], CT_CFS_QUESTION_LIST.getTargets()[0], CT_OPERATION_QUESTION_LIST.getTargets()[0], FLAGS_SOLVE.getTargets()[0], IMAGE_MANAGE.getTargets()[0], INSTANCE_MONITORING.getTargets()[0], RANGE_TEST_SELF.getTargets()[0]}),
 
     CSCENE_INSTANCE_CONNECT_GROUP(new String[]{COURSE_FOLDER.getTargets()[0], COURSES.getTargets()[0], CR_INDIVIDUAL_TRAINING.getTargets()[0],
             CR_TEAM_TRAINING.getTargets()[0], CT_CFS_LIST.getTargets()[0], CT_CFS_QUESTION_LIST.getTargets()[0], CT_CONTEST_CFS_LIST.getTargets()[0],
