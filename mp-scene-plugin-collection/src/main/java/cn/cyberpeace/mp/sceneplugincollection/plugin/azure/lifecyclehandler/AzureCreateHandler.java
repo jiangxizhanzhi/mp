@@ -18,12 +18,12 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class AzureCreateHandle extends CreateHandler {
+public class AzureCreateHandler extends CreateHandler {
     public Integer cloudType;
 
     private IAzureResourceManager resourceService;
 
-    public AzureCreateHandle(int cloudType, CollectionScenePluginHandler pluginHandler) {
+    public AzureCreateHandler(int cloudType, CollectionScenePluginHandler pluginHandler) {
         super(pluginHandler);
         this.cloudType = cloudType;
         this.resourceService = IAzureResourceManager.getInstance(cloudType);
@@ -32,7 +32,6 @@ public class AzureCreateHandle extends CreateHandler {
     public void create() {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
 
-        List<CollectionPluginSceneElementBO> allElements = new ArrayList<>(getPluginHandler().getElementMap().values());
         getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
         // TODO 流量镜像应该是基于网络端口的, 这里是基于节点的
         Set<String> collectorVmInstanceIds = new HashSet<>();

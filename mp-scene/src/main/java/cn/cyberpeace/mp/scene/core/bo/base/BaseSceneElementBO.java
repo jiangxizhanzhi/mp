@@ -45,13 +45,19 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     private String nodeCommand;
     @ApiModelProperty(value = "是否辅助节点")
     private Boolean isAuxiliary;
+    @ApiModelProperty(value = "载荷-控制类型")
+    private String controlType;
+    @ApiModelProperty(value = "载荷-默认命令")
+    private String defaultCmd;
+
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getInitCommands)));
         initCommands = StringUtils.isEmpty(obj.getInitCommands()) ? new ArrayList<>()
-                : JsonCommon.parse(obj.getInitCommands(), new TypeReference<List<String>>(){});
+                : JsonCommon.parse(obj.getInitCommands(), new TypeReference<List<String>>() {
+        });
     }
 
     @Override
