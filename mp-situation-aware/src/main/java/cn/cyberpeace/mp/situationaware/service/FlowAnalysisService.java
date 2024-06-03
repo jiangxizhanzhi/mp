@@ -22,6 +22,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -513,6 +514,13 @@ public class FlowAnalysisService extends AbstractBaseService {
         List<FlowLogBO> flowLogBOList = new ArrayList<>();
         long totalHits = 0;
         try {
+
+            // 先刷新下缓存
+            RefreshRequest refreshRequest = new RefreshRequest();
+            refreshRequest.indices(ArrayUtils.isNotEmpty(request.getIndices()) ? request.getIndices() : this.indices(request.getGroupList(), request.getStartDateTime(), request.getEndDateTime()));
+            refreshRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+            restHighLevelClient.indices().refresh(refreshRequest, RequestOptions.DEFAULT);
+
             SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             SearchHits hits = searchResponse.getHits();
             totalHits = hits.getTotalHits().value;
