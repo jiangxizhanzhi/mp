@@ -147,8 +147,12 @@ public class AzureVirtualMachine {
         String imageName = cloudElement.getImage();
         // azure todo 根据imageName 获取 对应的 image
         KnownLinuxVirtualMachineImage image = KnownLinuxVirtualMachineImage.UBUNTU_SERVER_16_04_LTS;
-        // 获取网卡的信息
 
+        //获取磁盘信息
+        Integer disk = cloudElement.getSrcElement().getDisk();
+        Integer expansionDisk = cloudElement.getSrcElement().getExpansionDisk();
+
+        // 获取网卡的信息
         // 取第一块网卡
         // azure todo 调整 root name
         VirtualNic virtualNic = virtualNics.get(0);
@@ -165,7 +169,8 @@ public class AzureVirtualMachine {
                 .filter(v -> StringUtils.isNotBlank(v.getNetworkId()))
                 .map(v -> v.getNetworkId()).findFirst()
                 .get();
-        VirtualMachine.DefinitionStages.WithCreate creater;
+//        VirtualMachine.DefinitionStages.WithCreate creater;
+        VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged creater = null;
         if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudElement.getVmType())) {
             creater = resourceService.getManager().virtualMachines()
                     .define(vmName)
@@ -178,10 +183,33 @@ public class AzureVirtualMachine {
                     .withLatestWindowsImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
                     .withAdminUsername(StringUtils.isBlank(userNmae) ? "azureuser" : userNmae)
                     .withAdminPassword(StringUtils.isBlank(password) ? "Azure12345678" : password)
-                    .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()))
-                    .withOSDiskStorageAccountType(storageAccountTypes)
-                    .withOSDiskSizeInGB(cloudElement.getSrcElement().getDisk())
+                    .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
+            if(expansionDisk!=null&&expansionDisk>0){
+                creater.withDataDiskDefaultStorageAccountType(storageAccountTypes)
+                        .withNewDataDisk(expansionDisk);
+            }
+            creater.withOSDiskStorageAccountType(storageAccountTypes)
+                    .withOSDiskSizeInGB(disk)
                     .withSize(flavor);
+
+            /*creater = resourceService.getManager().virtualMachines()
+                    .define(vmName)
+                    .withRegion(region)
+                    .withNewResourceGroup(groupName)
+                    .withExistingPrimaryNetwork(azureResourceManager.networks().getById(netId))
+                    .withSubnet(IpUtils.extractNetworkPart(virtualNic.getFixedIp()))
+                    .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp())
+                    .withoutPrimaryPublicIPAddress()
+                    .withLatestWindowsImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
+                    .withAdminUsername(StringUtils.isBlank(userNmae) ? "azureuser" : userNmae)
+                    .withAdminPassword(StringUtils.isBlank(password) ? "Azure12345678" : password)
+                    .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()))
+
+                    .withDataDiskDefaultStorageAccountType(storageAccountTypes)
+                    .withNewDataDisk(expansionDisk)
+                    .withOSDiskStorageAccountType(storageAccountTypes)
+                    .withOSDiskSizeInGB(disk)
+                    .withSize(flavor);*/
 
         } else {
             creater = resourceService.getManager().virtualMachines()
@@ -195,10 +223,32 @@ public class AzureVirtualMachine {
                     .withLatestLinuxImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
                     .withRootUsername(StringUtils.isBlank(userNmae) ? "root1" : userNmae)
                     .withRootPassword(StringUtils.isBlank(password) ? "ycxx123#" : password) // 必须要是6位以上,且有一个特殊字符
-                    .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()))
-                    .withOSDiskStorageAccountType(storageAccountTypes)
-                    .withOSDiskSizeInGB(cloudElement.getSrcElement().getDisk())
+                    .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
+            if(expansionDisk!=null&&expansionDisk>0){
+                creater.withDataDiskDefaultStorageAccountType(storageAccountTypes)
+                        .withNewDataDisk(expansionDisk);
+            }
+            creater.withOSDiskStorageAccountType(storageAccountTypes)
+                    .withOSDiskSizeInGB(disk)
                     .withSize(flavor);
+
+            /*creater = resourceService.getManager().virtualMachines()
+                    .define(vmName)
+                    .withRegion(region)
+                    .withNewResourceGroup(groupName)
+                    .withExistingPrimaryNetwork(azureResourceManager.networks().getById(netId))
+                    .withSubnet(IpUtils.extractNetworkPart(virtualNic.getFixedIp()))
+                    .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp())
+                    .withoutPrimaryPublicIPAddress()
+                    .withLatestLinuxImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
+                    .withRootUsername(StringUtils.isBlank(userNmae) ? "root1" : userNmae)
+                    .withRootPassword(StringUtils.isBlank(password) ? "ycxx123#" : password) // 必须要是6位以上,且有一个特殊字符
+                    .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()))
+                    .withDataDiskDefaultStorageAccountType(storageAccountTypes)
+                    .withNewDataDisk(expansionDisk)
+                    .withOSDiskStorageAccountType(storageAccountTypes)
+                    .withOSDiskSizeInGB(disk)
+                    .withSize(flavor);*/
 
         }
 

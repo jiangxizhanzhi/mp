@@ -49,7 +49,8 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     private String controlType;
     @ApiModelProperty(value = "载荷-默认命令")
     private String defaultCmd;
-
+    @ApiModelProperty(value = "扩展磁盘大小")
+    private Integer expansionDisk;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
