@@ -1,19 +1,25 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
+import cn.cyberpeace.mp.cscene.dto.element.*;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
+import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
+import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
 import cn.cyberpeace.mp.cscene.util.FileUtil;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
@@ -31,6 +38,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Description:
@@ -45,6 +53,9 @@ public class HostStateController {
 
     @Autowired
     private HostStateService hostStateService;
+
+    @Autowired
+    private SceneElementMonitorService sceneElementMonitorService;
 
     /**
      * 默认查询场景所有节点
@@ -148,92 +159,88 @@ public class HostStateController {
 
     @ApiOperation(value = "主机信息json导出")
     @GetMapping("/export/hosts")
-    public void exportHosts(HttpServletResponse response, HostStateTrendRequest hostStateTrendRequest) {
+    public void exportHosts(HttpServletResponse response, HostStateTrendRequest hostStateTrendRequest, TimeListPageInfoQueryParams listPageInfoQueryParams) throws JsonProcessingException {
+        ListObjServiceResult<Netiface> netiface = hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
+        ListObjServiceResult<Port> port = hostStateService.pagePorts(listPageInfoQueryParams).asResult();
+        ListObjServiceResult<Process> process = hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
         List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
+        HostExportState hostExportState = new HostExportState();
+        hostExportState.setHostState(hostStates);
+        hostExportState.setNetiface(netiface);
+        hostExportState.setPorts(port);
+        hostExportState.setProcess(process);
         ObjectMapper objectMapper = new ObjectMapper();
         String fileName = "/cpms/host.json";
+        exportData(response, objectMapper, fileName, objectMapper.writeValueAsString(hostExportState));
+    }
+
+    private void exportData(HttpServletResponse response, ObjectMapper objectMapper, String fileName, String s) {
         File file = new File(fileName);
         if (file.exists()) {
             FileUtil.deleteDir(file);
         }
-        try{
-            String jsonString = objectMapper.writeValueAsString(hostStates);
+        try {
+            String jsonString = s;
             objectMapper.writeValue(file, jsonString);
             response.setContentType("application/octet-stream;charset=UTF-8");
-            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName,"UTF-8").replaceAll("\\+","%20"));
+            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
 
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
         FileUtil.setResponse(file, true, response);
     }
 
 
-    @ApiOperation(value = "主机信息json导出")
+    @ApiOperation(value = "主机采集信息json导出")
     @GetMapping("/export/hosts/acquisition")
-    public void exportHostAcquisition(HttpServletResponse response, HostStateTrendRequest hostStateTrendRequest) {
-        List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
+    public void exportHostAcquisition(HttpServletResponse response, ElementMonitorRequest pageRequest, @RequestParam(required = false) String path,
+                                      @RequestParam(required = false) Integer intervalMinutes,
+                                      @RequestParam(required = false) Integer bucketSize) throws JsonProcessingException {
+        // 网络接口列表
+        ListObjServiceResult<CollectionHostEventBO> modifyFileCount = sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP, path);
+        ListObjResult<CollectionHostEventBO> data = modifyFileCount.getData();
+        List<CollectionHostEventBO> list = data.getList();
+        if (Objects.isNull(intervalMinutes)) {
+            intervalMinutes = 15;
+        }
+        if (Objects.isNull(bucketSize)) {
+            bucketSize = 15;
+        }
+        List<ElementHistogramInfo> modifyFileList = sceneElementMonitorService.listEventHistogram(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP,
+                intervalMinutes, bucketSize);
+        FileExportState fileExportState = new FileExportState();
+        fileExportState.setModifyFileCount(list);
+        fileExportState.setModifyFileList(modifyFileList);
         ObjectMapper objectMapper = new ObjectMapper();
         String fileName = "/cpms/host_acqu.json";
-        File file = new File(fileName);
-        if (file.exists()) {
-            FileUtil.deleteDir(file);
-        }
-        try{
-            String jsonString = objectMapper.writeValueAsString(hostStates);
-            objectMapper.writeValue(file, jsonString);
-            response.setContentType("application/octet-stream;charset=UTF-8");
-            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName,"UTF-8").replaceAll("\\+","%20"));
-
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-        FileUtil.setResponse(file, true, response);
+        exportData(response, objectMapper, fileName, objectMapper.writeValueAsString(fileExportState));
     }
 
 
 
     @ApiOperation(value = "流量采集数据json导出")
     @GetMapping("/export/flow/acquisition")
-    public void exportFlowAcquisition(HttpServletResponse response, HostStateTrendRequest hostStateTrendRequest) {
+    public void exportFlowAcquisition(HttpServletResponse response, HostStateTrendRequest hostStateTrendRequest) throws JsonProcessingException {
         List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
         ObjectMapper objectMapper = new ObjectMapper();
         String fileName = "/cpms/flow.json";
-        File file = new File(fileName);
-        if (file.exists()) {
-            FileUtil.deleteDir(file);
-        }
-        try{
-            String jsonString = objectMapper.writeValueAsString(hostStates);
-            objectMapper.writeValue(file, jsonString);
-            response.setContentType("application/octet-stream;charset=UTF-8");
-            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName,"UTF-8").replaceAll("\\+","%20"));
-
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-        FileUtil.setResponse(file, true, response);
+        exportData(response, objectMapper, fileName, objectMapper.writeValueAsString(hostStates));
     }
 
     @ApiOperation(value = "漏洞数据json导出")
     @GetMapping("/export/vuln")
-    public void exportVulnerabilityInfo(HttpServletResponse response, HostStateTrendRequest hostStateTrendRequest) {
-        List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
+    public void exportVulnerabilityInfo(HttpServletResponse response, ElementMonitorRequest pageRequest) throws JsonProcessingException {
+        List<ElementVulnerabilityCountInfo> vulnerabilityCountInfo = sceneElementMonitorService.getVulnerabilityCountInfo(pageRequest);
+        List<ElementVulnerabilityPieChartInfo> vulnerabilityPieChartInfo = sceneElementMonitorService.getVulnerabilityPieChartInfo(pageRequest);
+        ListObjResult<ElementVulnerabilityInfo> vulnerabilityInfo = sceneElementMonitorService.getVulnerabilityInfo(pageRequest);
+        List<ElementVulnerabilityInfo> list = vulnerabilityInfo.getList();
+        VulnExportState vulnExportState = new VulnExportState();
+        vulnExportState.setList(list);
+        vulnExportState.setVulnerabilityCountInfo(vulnerabilityCountInfo);
+        vulnExportState.setVulnerabilityPieChartInfo(vulnerabilityPieChartInfo);
         ObjectMapper objectMapper = new ObjectMapper();
         String fileName = "/cpms/vlun.json";
-        File file = new File(fileName);
-        if (file.exists()) {
-            FileUtil.deleteDir(file);
-        }
-        try{
-            String jsonString = objectMapper.writeValueAsString(hostStates);
-            objectMapper.writeValue(file, jsonString);
-            response.setContentType("application/octet-stream;charset=UTF-8");
-            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName,"UTF-8").replaceAll("\\+","%20"));
-
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-        FileUtil.setResponse(file, true, response);
+        exportData(response, objectMapper, fileName, objectMapper.writeValueAsString(vulnExportState));
     }
 }
