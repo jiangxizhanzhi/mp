@@ -9,6 +9,8 @@ import cn.cyberpeace.mp.auth.service.RegisterService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.KaptchaUtil;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -50,6 +52,7 @@ public class RegisterController {
     @ApiImplicitParam(name = "req", value = "注册请求体", dataTypeClass = RegisterRequest.class, required = true, dataType = "body")
     @PostMapping
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "注册新用户", target = OpTargetEnums.USER)
+    @AuthTarget(TargetEnum.NO_AUTH)
     public ServiceResult<UserModel> register(@RequestBody @Validated RegisterRequest req) {
         ServiceResult<Object> checkResult = KaptchaUtil.checkKaptcha(req.getVerifyCode());
         if (Boolean.FALSE.equals(checkResult.getSource())) {
