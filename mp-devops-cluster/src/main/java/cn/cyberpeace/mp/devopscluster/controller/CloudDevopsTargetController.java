@@ -3,12 +3,9 @@ package cn.cyberpeace.mp.devopscluster.controller;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.MicrosoftAzureConverter;
-import cn.cyberpeace.mp.devopscluster.request.TargetSceneRequest;
-import cn.cyberpeace.mp.devopscluster.vo.DeviceVO;
 import cn.cyberpeace.mp.devopscluster.vo.EquipmentRequestVO;
 import cn.cyberpeace.mp.devopscluster.vo.TargerRequestVO;
 import com.alibaba.fastjson.JSONObject;
@@ -17,6 +14,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,6 +40,7 @@ public class CloudDevopsTargetController {
      */
     @ApiOperation("查询所有镜像管理分类")
     @GetMapping("/imageCategories")
+    @Cacheable(key = "'getImageCategories' + #code", value = "getImageCategories")
     public ServiceResult imageCategories(@RequestParam(value = "code", defaultValue = "100201") String code) {
         List list = microsoftAzureConverter.getImageCategories(code);
         return new ServiceResult(list, BaseErrorCode.SUCCESS).asResult();
@@ -52,6 +51,7 @@ public class CloudDevopsTargetController {
      */
     @ApiOperation("微软云服务节点列表获取")
     @PostMapping("/getTarget")
+//    @Cacheable(key = "'getTarget' + #request", value = {"getTarget"})
     public ListObjServiceResult getTarget(@RequestBody TargerRequestVO request) {
         JSONObject result = microsoftAzureConverter.getCloudTargetListByCodes(request);
         return new ListObjServiceResult((List) result.get("list"), (int) result.get("total")).asResult();

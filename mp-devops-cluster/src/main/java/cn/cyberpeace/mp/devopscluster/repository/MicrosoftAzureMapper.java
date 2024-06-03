@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devopscluster.repository;
 
-import cn.cyberpeace.mp.base.bo.MpSysCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
@@ -47,19 +46,19 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
     List<MpSysCodeMenu> getSqlByCodes(@Param("param") List<MpSysCodeMenuVO> codes);
 
     List<DeviceCloudTargetVO> getCloudTargetListByCodes(@Param("cloudServiceType") Integer cloudServiceType,
-                                                        @Param("param") List<MpSysCodeMenu> filteredList,
-                                                        @Param("offset") Integer offset, @Param("pageSize") Integer pageSize);
+                                                        @Param("param") List<MpSysCodeMenu> filteredList, @Param("offset") Integer offset,
+                                                        @Param("pageSize") Integer pageSize, @Param("cloudType") String cloudType);
 
-    Integer getCloudTargetListByCodesNum(@Param("cloudServiceType") Integer cloudServiceType,@Param("param") List<MpSysCodeMenu> filteredList);
+    Integer getCloudTargetListByCodesNum(@Param("cloudServiceType") Integer cloudServiceType, @Param("param") List<MpSysCodeMenu> filteredList, @Param("cloudType") String cloudType);
 
 
-    Boolean deleteCloudTarget(@Param("param") List<DeviceCloudTargetPO> cloudTargetList);
+    Boolean deleteCloudTarget(@Param("param") List<DeviceCloudTargetPO> cloudTargetList, @Param("cloudType") String cloudType);
 
-    Boolean deleteCloudTargetNet(@Param("param") List<DeviceCloudTargetNet> allNetList);
+    Boolean deleteCloudTargetNet(@Param("param") List<DeviceCloudTargetNet> allNetList, @Param("cloudType") String cloudType);
 
-    Boolean deleteCloudTargetCalculate(@Param("param") List<DeviceCloudTargetCalculate> allCalculateList);
+    Boolean deleteCloudTargetCalculate(@Param("param") List<DeviceCloudTargetCalculate> allCalculateList, @Param("cloudType") String cloudType);
 
-    Boolean deleteCloudTargetContainer(@Param("param") List<DeviceCloudTargetContainer> allContainerList);
+    Boolean deleteCloudTargetContainer(@Param("param") List<DeviceCloudTargetContainer> allContainerList, @Param("cloudType") String cloudType);
 
     Boolean batchInsertCloudTarget(@Param("param") List<DeviceCloudTargetPO> list);
 
@@ -69,7 +68,7 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
 
     Boolean batchInsertCloudTargetContainer(@Param("param") List<DeviceCloudTargetContainer> containerList);
 
-    List<MpDevopsBoundaryNetworkEquipment> getCommonTargets(@Param("param")EquipmentRequestVO request,
+    List<MpDevopsBoundaryNetworkEquipment> getCommonTargets(@Param("param") EquipmentRequestVO request,
                                                             @Param("offset") Integer offset, @Param("pageSize") Integer pageSize);
 
     Integer getCommonTargetNum(EquipmentRequestVO request, Integer offset, Integer pageSize);

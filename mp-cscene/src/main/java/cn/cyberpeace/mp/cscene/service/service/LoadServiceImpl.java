@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
@@ -36,10 +37,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.websocket.Session;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
@@ -1001,6 +999,30 @@ public class LoadServiceImpl {
             returnList.add(jsonObject);
         }
         return returnList;
+    }
+
+    public ServiceResult loadTransform(MultipartFile file, String transformType, HttpServletResponse response){
+        try {
+            //拿到返回的文件
+
+        }catch (Exception e) {
+            return new ServiceResult(null, BaseErrorCode.ERROR, "未能从载荷平台拿到返回的改造文件").asResult();
+        }
+        Boolean setResponseHeader = this.setResponseHeader(response, file.getOriginalFilename());
+        if (!setResponseHeader) {
+            return new ServiceResult(null, BaseErrorCode.ERROR, "请求头设置失败").asResult();
+        }
+
+        OutputStream os = null;
+        try {
+            os = response.getOutputStream();
+            os.flush();
+            os.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return new ServiceResult(null, BaseErrorCode.SUCCESS).asResult();
     }
 }
 

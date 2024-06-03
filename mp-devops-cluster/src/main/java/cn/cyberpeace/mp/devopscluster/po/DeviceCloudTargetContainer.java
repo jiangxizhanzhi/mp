@@ -27,6 +27,10 @@ public class DeviceCloudTargetContainer extends BaseModel {
      */
     private String name;
     /**
+     * 云类型
+     */
+    private String cloudType;
+    /**
      * 源类型(1:云平台 2:用户上传)
      */
     private Integer sourceType;

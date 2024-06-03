@@ -151,7 +151,7 @@ public class CloudDevice extends BaseCloudPlatformResult {
     private CalculateLaasVM calculateLaasVM;
 
     /**
-     * 计算-laas-虚拟机信息
+     * 网络-网络服务
      */
     private NetService netService;
 }

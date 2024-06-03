@@ -7,6 +7,7 @@
         id,
         name,
         other_name,
+        cloud_type,
         cloud_service_type,
         operating_system,
         operating_system_status,
@@ -20,6 +21,7 @@
                 #{item.id},
                 #{item.name},
                 #{item.otherName},
+                #{item.cloudType},
                 #{item.cloudServiceType},
                 #{item.operatingSystem},
                 #{item.operatingSystemStatus},
@@ -36,6 +38,7 @@
         `link_id`,
         `net_service_name`,
         `source_type`,
+        `cloud_type`,
         `net_type`,
         `is_public`,
         `quick_create_support`,
@@ -50,6 +53,7 @@
             #{item.linkId},
             #{item.netServiceName},
             #{item.sourceType},
+            #{item.cloudType},
             #{item.netType},
             #{item.isPublic},
             #{item.quickCreateSupport},
@@ -67,6 +71,7 @@
         `link_id`,
         `name`,
         `source_type`,
+        `cloud_type`,
         `publisher`,
         `offer`,
         `sku`,
@@ -89,6 +94,7 @@
             #{item.linkId},
             #{item.name},
             #{item.sourceType},
+            #{item.cloudType},
             #{item.publisher},
             #{item.offer},
             #{item.sku},
@@ -114,6 +120,7 @@
         `link_id`,
         `name`,
         `source_type`,
+        `cloud_type`,
         `container_type`,
         `sub_type`,
         `upload_target_name`,
@@ -134,6 +141,7 @@
             #{item.linkId},
             #{item.name},
             #{item.sourceType},
+            #{item.cloudType},
             #{item.containerType},
             #{item.subType},
             #{item.uploadTargetName},
@@ -242,6 +250,9 @@
                 </foreach>
                 )
             </if>
+            <if test="cloudType != null and cloudType != ''">
+                or cloud_type = #{cloudType}
+            </if>
         </where>
     </delete>
 
@@ -256,6 +267,9 @@
                     #{item.pk}
                 </foreach>
                 )
+            </if>
+            <if test="cloudType != null and cloudType != ''">
+                or cloud_type = #{cloudType}
             </if>
         </where>
     </delete>
@@ -272,6 +286,9 @@
                 </foreach>
                 )
             </if>
+            <if test="cloudType != null and cloudType != ''">
+                or cloud_type = #{cloudType}
+            </if>
         </where>
     </delete>
 
@@ -286,6 +303,9 @@
                     #{item.pk}
                 </foreach>
                 )
+            </if>
+            <if test="cloudType != null and cloudType != ''">
+                or cloud_type = #{cloudType}
             </if>
         </where>
     </delete>
@@ -468,6 +488,7 @@
                     ${item.supplement}
                 </foreach>
             </if>
+            and target.cloud_type = #{cloudType}
         </where>
         <if test="offset != null and pageSize != null">
             limit #{offset}, #{pageSize}
@@ -505,6 +526,7 @@
                     ${item.supplement}
                 </foreach>
             </if>
+            and target.cloud_type = #{cloudType}
         </where>
     </select>
 

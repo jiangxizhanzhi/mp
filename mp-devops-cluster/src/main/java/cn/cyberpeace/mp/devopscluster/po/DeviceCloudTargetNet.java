@@ -31,6 +31,10 @@ public class DeviceCloudTargetNet extends BaseModel {
      */
     private Integer sourceType;
     /**
+     * 云类型
+     */
+    private String cloudType;
+    /**
      * 网络服务名称
      */
     private String netServiceName;

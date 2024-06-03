@@ -13,4 +13,6 @@ import lombok.EqualsAndHashCode;
 @ApiModel("网络-网络服务")
 public class NetService extends DeviceCloudTargetNet {
 
+
+
 }

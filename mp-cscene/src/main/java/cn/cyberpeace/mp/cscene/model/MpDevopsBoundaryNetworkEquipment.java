@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.model.stereotype.Table;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * 边界网络设备
@@ -35,6 +34,10 @@ public class MpDevopsBoundaryNetworkEquipment extends BaseModel {
      * 名称
      */
     private String name;
+    /**
+     * 图标
+     */
+    private String logo;
     /**
      * ip连接地址
      */

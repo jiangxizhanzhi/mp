@@ -15,7 +15,6 @@ import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -183,6 +182,17 @@ public class LoadController {
     public ServiceResult synchronousDataSource(@RequestBody MpDevopsLoadSource requestData) {
         ServiceResult synchronousDataSource = loadService.synchronousDataSource(requestData);
         return synchronousDataSource;
+    }
+
+    /*
+     * 载荷改造
+     * */
+    @ApiOperation(value = "载荷改造", notes = "")
+    @PostMapping("/loadTransform")
+    public ServiceResult loadTransform(@RequestParam(value = "file") MultipartFile file, HttpServletRequest request,
+                                       HttpServletResponse response, @RequestParam(value = "transform_type") String transformType) {
+        ServiceResult loadTransform = loadService.loadTransform(file,transformType,response);
+        return loadTransform;
     }
 
 //**********************************************************************************************************//

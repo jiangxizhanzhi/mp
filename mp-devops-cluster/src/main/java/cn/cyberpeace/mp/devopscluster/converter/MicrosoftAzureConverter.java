@@ -4,14 +4,13 @@ import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment;
-import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
-import cn.cyberpeace.mp.devopscluster.enums.CommonTargetNameEnum;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.CalculateLaasVM;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.CloudDevice;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.DockerInfrastructureContainerRegistries;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.NetService;
 import cn.cyberpeace.mp.devopscluster.po.*;
 import cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper;
-import cn.cyberpeace.mp.devopscluster.request.TargetSceneRequest;
-import cn.cyberpeace.mp.devopscluster.vo.DeviceVO;
 import cn.cyberpeace.mp.devopscluster.vo.EquipmentRequestVO;
 import cn.cyberpeace.mp.devopscluster.vo.MpSysCodeMenuVO;
 import cn.cyberpeace.mp.devopscluster.vo.TargerRequestVO;
@@ -29,11 +28,12 @@ import com.azure.resourcemanager.compute.models.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -67,7 +67,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         return result;
     }
 
-    private JSONObject getReturnData(String cloudServiceType, String tableName, TargerRequestVO request) {
+    private JSONObject getReturnData(String cloudServiceType, String tableOtherName, TargerRequestVO request) {
         List<MpSysCodeMenuVO> codes = request.getCodes();
         List<MpSysCodeMenu> sqls = null;
         if (codes != null && codes.size() > 0) {
@@ -87,7 +87,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
                     if (sqls.get(i).getSupplement().contains(".")) {
                         sqls.get(i).setSupplement("and " + sqls.get(i).getSupplement());
                     } else {
-                        sqls.get(i).setSupplement("and " + tableName + "." + sqls.get(i).getSupplement());
+                        sqls.get(i).setSupplement("and " + tableOtherName + "." + sqls.get(i).getSupplement());
                     }
                 }
             }
@@ -105,8 +105,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
             pageSize = request.getPerPage();
         }
         //需要同时修改sql
-        List<DeviceCloudTargetVO> list = microsoftAzureMapper.getCloudTargetListByCodes(Integer.parseInt(cloudServiceType), filteredList, offset, pageSize);
-        Integer totalNum = microsoftAzureMapper.getCloudTargetListByCodesNum(Integer.parseInt(cloudServiceType), filteredList);
+        List<DeviceCloudTargetVO> list = microsoftAzureMapper.getCloudTargetListByCodes(Integer.parseInt(cloudServiceType), filteredList, offset, pageSize, request.getCloudType());
+        Integer totalNum = microsoftAzureMapper.getCloudTargetListByCodesNum(Integer.parseInt(cloudServiceType), filteredList, request.getCloudType());
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("data", list);
         jsonObject.put("total", totalNum);
@@ -260,6 +260,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTarget.setId(id);
             deviceCloudTarget.setName(((JSONObject) getCloudInternetServices.get(i)).get("netServiceName") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("netServiceName").toString() : "");
             deviceCloudTarget.setOtherName(((JSONObject) getCloudInternetServices.get(i)).get("netServiceName") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("netServiceName").toString() : "");
+            deviceCloudTarget.setCloudType(cloudType.toString());
             deviceCloudTarget.setCloudServiceType(1);
             deviceCloudTarget.setOperatingSystemStatus("专业化");
             deviceCloudTarget.setGeneration("第一代");
@@ -271,6 +272,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTargetNet.setLinkId(id);
             deviceCloudTargetNet.setNetServiceName(((JSONObject) getCloudInternetServices.get(i)).get("netServiceName") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("netServiceName").toString() : "");
             deviceCloudTargetNet.setSourceType(1);
+            deviceCloudTargetNet.setCloudType(cloudType.toString());
             deviceCloudTargetNet.setNetType(((JSONObject) getCloudInternetServices.get(i)).get("netType") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("netType").toString() : "");
             deviceCloudTargetNet.setIsPublic(2);
             deviceCloudTargetNet.setQuickCreateSupport(1);
@@ -293,6 +295,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTarget.setOtherName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
             String id = String.valueOf(UUID.randomUUID());
             deviceCloudTarget.setId(id);
+            deviceCloudTarget.setCloudType(cloudType.toString());
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
             deviceCloudTarget.setCloudServiceType(3);
             deviceCloudTarget.setOperatingSystem("linux");
@@ -306,6 +309,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTargetContainer.setLinkId(id);
             deviceCloudTargetContainer.setName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
             deviceCloudTargetContainer.setSourceType(2);
+            deviceCloudTargetContainer.setCloudType(cloudType.toString());
             deviceCloudTargetContainer.setContainerType("containerInfrastructure");
             deviceCloudTargetContainer.setSubType("containerRegistry");
             deviceCloudTargetContainer.setUploadTargetName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
@@ -336,6 +340,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTarget.setId(id);
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
             deviceCloudTarget.setCloudServiceType(2);
+            deviceCloudTarget.setCloudType(cloudType.toString());
             deviceCloudTarget.setOperatingSystem(((JSONObject) images.get(i)).get("operatingSystem") != null ? ((JSONObject) images.get(i)).get("operatingSystem").toString() : "");
             deviceCloudTarget.setOperatingSystemStatus("专业化");
             deviceCloudTarget.setGeneration("第一代");
@@ -347,6 +352,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTargetCalculate.setLinkId(id);
             deviceCloudTargetCalculate.setName(((JSONObject) images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "");
             deviceCloudTargetCalculate.setSourceType(1);
+            deviceCloudTargetCalculate.setCloudType(cloudType.toString());
             deviceCloudTargetCalculate.setPublisher(((JSONObject) images.get(i)).get("PublisherName") != null ? ((JSONObject) images.get(i)).get("PublisherName").toString() : "");
             deviceCloudTargetCalculate.setOffer(((JSONObject) images.get(i)).get("offerName") != null ? ((JSONObject) images.get(i)).get("offerName").toString() : "");
             deviceCloudTargetCalculate.setSku(((JSONObject) images.get(i)).get("skuName") != null ? ((JSONObject) images.get(i)).get("skuName").toString() : "");
@@ -376,6 +382,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTarget.setId(id);
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
             deviceCloudTarget.setCloudServiceType(2);
+            deviceCloudTarget.setCloudType(cloudType.toString());
             deviceCloudTarget.setOperatingSystem(((JSONObject) localImages.get(i)).get("operatingSystem") != null ? ((JSONObject) localImages.get(i)).get("operatingSystem").toString() : "");
             deviceCloudTarget.setOperatingSystemStatus("专业化");
             deviceCloudTarget.setGeneration("第一代");
@@ -388,6 +395,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             deviceCloudTargetCalculate.setLinkId(id);
             deviceCloudTargetCalculate.setName(((JSONObject) localImages.get(i)).get("imageName") != null ? ((JSONObject) localImages.get(i)).get("imageName").toString() : "");
             deviceCloudTargetCalculate.setSourceType(2);
+            deviceCloudTargetCalculate.setCloudType(cloudType.toString());
             deviceCloudTargetCalculate.setPublisher(((JSONObject) localImages.get(i)).get("PublisherName") != null ? ((JSONObject) localImages.get(i)).get("PublisherName").toString() : "");
             deviceCloudTargetCalculate.setOffer(((JSONObject) localImages.get(i)).get("offerName") != null ? ((JSONObject) localImages.get(i)).get("offerName").toString() : "");
             deviceCloudTargetCalculate.setSku(((JSONObject) localImages.get(i)).get("skuName") != null ? ((JSONObject) localImages.get(i)).get("skuName").toString() : "");
@@ -410,10 +418,10 @@ public class MicrosoftAzureConverter implements BaseConverter {
         jsonObject.put("result", result);
         jsonObject.put("data", list);
         jsonObject.put("code", "200");
-        microsoftAzureMapper.deleteCloudTarget(null);
-        microsoftAzureMapper.deleteCloudTargetNet(null);
-        microsoftAzureMapper.deleteCloudTargetCalculate(null);
-        microsoftAzureMapper.deleteCloudTargetContainer(null);
+        microsoftAzureMapper.deleteCloudTarget(null,cloudType.toString());
+        microsoftAzureMapper.deleteCloudTargetNet(null,cloudType.toString());
+        microsoftAzureMapper.deleteCloudTargetCalculate(null,cloudType.toString());
+        microsoftAzureMapper.deleteCloudTargetContainer(null,cloudType.toString());
         //保存同步数据
         Boolean batchInsertCloudTarget = true;
         if (list != null && list.size() > 0) {

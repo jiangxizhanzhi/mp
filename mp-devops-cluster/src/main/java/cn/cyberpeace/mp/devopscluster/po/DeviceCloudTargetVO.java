@@ -21,6 +21,10 @@ public class DeviceCloudTargetVO extends BaseModel {
      */
     private String name;
     /**
+     * 云类型
+     */
+    private String cloudType;
+    /**
      * 别名
      */
     private String otherName;

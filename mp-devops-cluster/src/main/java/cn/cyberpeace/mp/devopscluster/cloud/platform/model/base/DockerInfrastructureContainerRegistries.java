@@ -13,5 +13,9 @@ import lombok.EqualsAndHashCode;
 @ApiModel("容器-基础设施-容器注册表")
 public class DockerInfrastructureContainerRegistries extends DeviceCloudTargetContainer {
 
+    //CPU核数
+    private Integer cpu;
 
+    //内存大小
+    private Integer memory;
 }

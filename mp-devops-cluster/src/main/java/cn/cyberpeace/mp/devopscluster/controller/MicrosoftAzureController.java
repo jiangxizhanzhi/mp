@@ -7,9 +7,11 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.MicrosoftAzureConverter;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO;
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,20 +91,28 @@ public class MicrosoftAzureController {
     }
 
     /**
-     * 云镜像管理同步
+     * 云镜像同步
      */
-    @ApiOperation(value = "云镜像管理同步", notes = "")
+    @ApiOperation(value = "云镜像管理同步", notes = "根据云类型同步云镜像数据，cloud_type默认为1代表公有云")
     @GetMapping("/synchronousCloudData")
-    public ServiceResult synchronousCloudData(@RequestParam(value = "cloud_type", defaultValue = "1") Integer cloudType) throws Exception {
-        if(cloudType != null && !cloudType.equals("")){
-            JSONObject synchronousCloudData = microsoftAzureConverter.synchronousCloudData(cloudType);
-            if (synchronousCloudData.get("code") != null && synchronousCloudData.get("code").equals("200")) {
-                return new ServiceResult(synchronousCloudData).asResult();
-            }else{
-                return new ServiceResult(null, BaseErrorCode.ERROR, synchronousCloudData.get("message") != null
-                        ? synchronousCloudData.get("message").toString() : "同步失败").asResult();
-            }
+//    @CacheEvict(value = "getTarget", beforeInvocation = false)
+    public ServiceResult synchronousCloudData(@ApiParam(value = "云服务提供商类型, 默认为公有云", allowableValues = "1002, 1003, 1004")
+                                          @RequestParam(value = "cloud_type", defaultValue = "1002") Integer cloudType) {
+        if (cloudType == null) {
+            return new ServiceResult(null, BaseErrorCode.ERROR, "云类型参数不能为空").asResult();
         }
-        return new ServiceResult(null, BaseErrorCode.ERROR, "同步失败").asResult();
+        try {
+            JSONObject synchronousCloudData = microsoftAzureConverter.synchronousCloudData(cloudType);
+            if ("200".equals(synchronousCloudData.getString("code"))) {
+                return new ServiceResult(synchronousCloudData).asResult();
+            } else {
+                String errorMessage = synchronousCloudData.containsKey("message")
+                        ? synchronousCloudData.getString("message")
+                        : "同步失败";
+                return new ServiceResult(null, BaseErrorCode.ERROR, errorMessage).asResult();
+            }
+        } catch (JSONException e) {
+            return new ServiceResult(null, BaseErrorCode.ERROR, "数据解析异常").asResult();
+        }
     }
 }
