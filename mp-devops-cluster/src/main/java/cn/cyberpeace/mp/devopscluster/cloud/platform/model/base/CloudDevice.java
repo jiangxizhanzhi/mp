@@ -141,9 +141,9 @@ public class CloudDevice extends BaseCloudPlatformResult {
     private Boolean supportExport;
 
     /**
-     * 容器-基础设施-容器注册表
+     * 网络-网络服务
      */
-    private DockerInfrastructureContainerRegistries dockerInfrastructureContainerRegistries;
+    private NetService netService;
 
     /**
      * 计算-laas-虚拟机信息
@@ -151,7 +151,12 @@ public class CloudDevice extends BaseCloudPlatformResult {
     private CalculateLaasVM calculateLaasVM;
 
     /**
-     * 网络-网络服务
+     * 容器-基础设施-容器注册表
      */
-    private NetService netService;
+    private DockerInfrastructureContainerRegistries dockerInfrastructureContainerRegistries;
+
+    /**
+     * 容器-基础设施-容器实例
+     */
+    private DockerInfrastructureContainerInstances dockerInfrastructureContainerInstances;
 }

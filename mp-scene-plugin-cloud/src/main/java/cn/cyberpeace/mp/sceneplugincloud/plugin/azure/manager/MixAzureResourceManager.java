@@ -94,7 +94,7 @@ public class MixAzureResourceManager implements IAzureResourceManager {
                     AZURE_RESOURCE_MANAGER = AzureResourceManager.configure()
                             .withLogLevel(HttpLogDetailLevel.BASIC)
                             .authenticate(credential, profile)
-                            .withSubscription("c87ba926-f7c2-4d53-8b8e-89245dc92e26");
+                            .withSubscription("c87ba926-f7c2-4d53-8b8e-89245dc92e26");//订阅id
                 }
             }
         }

@@ -177,4 +177,46 @@ public class CloudTargetConverter {
             calculateList.add(deviceCloudTargetCalculate);
         }
     }
+
+    public void cloudContainerInstanceConvert(Integer cloudType, List<DeviceCloudTargetPO> mainTargetList, List<DeviceCloudTargetContainer> containerList, List dockerInstances) {
+        //docker镜像
+        for (int i = 0; i < dockerInstances.size(); i++) {
+            //主表元素
+            DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
+            deviceCloudTarget.setName(((JSONObject) dockerInstances.get(i)).get("containerName") != null ? ((JSONObject) dockerInstances.get(i)).get("containerName").toString() : "");
+            deviceCloudTarget.setOtherName(((JSONObject) dockerInstances.get(i)).get("containerName") != null ? ((JSONObject) dockerInstances.get(i)).get("containerName").toString() : "");
+            String id = String.valueOf(UUID.randomUUID());
+            deviceCloudTarget.setId(id);
+            deviceCloudTarget.setCloudType(cloudType.toString());
+            //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
+            deviceCloudTarget.setCloudServiceType(3);
+            deviceCloudTarget.setOperatingSystem("linux");
+            deviceCloudTarget.setOperatingSystemStatus("专业化");
+            deviceCloudTarget.setGeneration("第一代");
+            deviceCloudTarget.setVersion("0.0.1");
+            mainTargetList.add(deviceCloudTarget);
+
+            //容器副表元素
+            DeviceCloudTargetContainer deviceCloudTargetContainer = new DeviceCloudTargetContainer();
+            deviceCloudTargetContainer.setLinkId(id);
+            deviceCloudTargetContainer.setName(((JSONObject) dockerInstances.get(i)).get("containerName") != null ? ((JSONObject) dockerInstances.get(i)).get("containerName").toString() : "");
+            deviceCloudTargetContainer.setSourceType(2);
+            deviceCloudTargetContainer.setCloudType(cloudType.toString());
+            deviceCloudTargetContainer.setContainerType("containerInfrastructure");
+            deviceCloudTargetContainer.setSubType("containerInstance");
+            deviceCloudTargetContainer.setUploadTargetName(((JSONObject) dockerInstances.get(i)).get("image") != null ? ((JSONObject) dockerInstances.get(i)).get("image").toString() : "");
+            deviceCloudTargetContainer.setOperatingSystem("Linux");
+            deviceCloudTargetContainer.setOperatingSystemStatus("专业化");
+            deviceCloudTargetContainer.setIsPublic(2);
+            deviceCloudTargetContainer.setQuickCreateSupport(1);
+            deviceCloudTargetContainer.setIsImport(0);
+            deviceCloudTargetContainer.setIsHide(0);
+            deviceCloudTargetContainer.setIsPublic(2);
+            deviceCloudTargetContainer.setIsPublic(2);
+            deviceCloudTargetContainer.setLogo("/api/mp/file/710/017/93dde93031be465c3a7bb20381f4cd6e.png");
+            deviceCloudTargetContainer.setGeneration("第一代");
+            deviceCloudTargetContainer.setVersion("0.0.1");
+            containerList.add(deviceCloudTargetContainer);
+        }
+    }
 }

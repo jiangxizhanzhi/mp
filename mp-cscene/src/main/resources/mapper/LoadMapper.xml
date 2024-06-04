@@ -281,9 +281,6 @@
             <if test="param != null and param.resultLog != null and param.resultLog != ''">
                 result_log = #{param.resultLog},
             </if>
-            <if test="param != null and param.createTime != null and param.createTime != ''">
-                create_time = #{param.createTime},
-            </if>
             <if test="param != null and param.creatorId != null and param.creatorId != ''">
                 creator_id = #{param.creatorId},
             </if>
@@ -316,7 +313,7 @@
                 cookie = #{param.cookie},
             </if>
             <if test="param != null and param.createTime != null and param.createTime != ''">
-                create_time = #{param.createTime},
+                create_time = #{param.createTime,jdbcType=TIMESTAMP},
             </if>
             update_time = now()
         </set>
@@ -404,10 +401,10 @@
                     default_cmd = #{item.defaultCmd},
                 </if>
                 <if test="item.createTime != null and item.createTime != ''">
-                    create_time = #{item.createTime},
+                    create_time = #{param.createTime,jdbcType=TIMESTAMP},
                 </if>
                 <if test="item.synchronizationTime != null and item.synchronizationTime != ''">
-                    synchronization_time = #{item.synchronizationTime},
+                    synchronization_time = #{item.synchronizationTime,jdbcType=TIMESTAMP},
                 </if>
                 <if test="item.creatorId != null and item.creatorId != ''">
                     creator_id = #{item.creatorId},

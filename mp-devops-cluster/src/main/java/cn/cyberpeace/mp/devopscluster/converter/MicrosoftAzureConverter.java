@@ -4,10 +4,7 @@ import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.CalculateLaasVM;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.CloudDevice;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.DockerInfrastructureContainerRegistries;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.NetService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.po.*;
 import cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper;
 import cn.cyberpeace.mp.devopscluster.vo.EquipmentRequestVO;
@@ -20,9 +17,14 @@ import com.azure.containers.containerregistry.ContainerRegistryClientBuilder;
 import com.azure.containers.containerregistry.ContainerRepository;
 import com.azure.containers.containerregistry.models.ArtifactManifestProperties;
 import com.azure.core.http.rest.PagedIterable;
+import com.azure.core.management.AzureEnvironment;
 import com.azure.core.management.Region;
+import com.azure.core.management.profile.AzureProfile;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.models.*;
+import com.azure.resourcemanager.containerinstance.ContainerInstanceManager;
+import com.azure.resourcemanager.containerinstance.models.Container;
+import com.azure.resourcemanager.containerinstance.models.ContainerGroup;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -138,7 +141,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             default:
         }
         //结果转Device集合
-        List<CloudDevice> convert = convert(vos, total);
+        List<CloudDevice> convert = convert(vos);
         JSONObject result = new JSONObject();
         result.put("list", convert);
         result.put("total", total);
@@ -146,40 +149,49 @@ public class MicrosoftAzureConverter implements BaseConverter {
     }
 
     //结果转Device集合
-    private List<CloudDevice> convert(List<DeviceCloudTargetVO> vos, Integer total) {
+    private List<CloudDevice> convert(List<DeviceCloudTargetVO> vos) {
         List<CloudDevice> deviceList = new ArrayList<>();
         if(vos != null && vos.size() > 0){
-            for (int i = 0; i < vos.size(); i++) {
+            for(DeviceCloudTargetVO target : vos){
                 CloudDevice device = new CloudDevice();
                 device.setDeleted(false);
-                device.setId(vos.get(i).getId());
-                device.setCloudServiceType(vos.get(i).getCloudServiceType());
-                device.setName(vos.get(i).getName());
-                device.setOtherName(vos.get(i).getOtherName());
-                device.setLogo(vos.get(i).getLogo());
+                device.setId(target.getId());
+                device.setCloudServiceType(target.getCloudServiceType());
+                device.setName(target.getName());
+                device.setOtherName(target.getOtherName());
+                device.setLogo(target.getLogo());
                 //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储 )
-                switch (vos.get(i).getCloudServiceType()) {
+                switch (target.getCloudServiceType()) {
                     case "1":
-                        device.setServiceType(vos.get(i).getNetType());
-                        device.setSubType(vos.get(i).getSubType());
+                        device.setServiceType(target.getNetType());
+                        device.setSubType(target.getSubType());
                         NetService netService = new NetService();
-                        BeanUtils.copyProperties(vos.get(i), netService);
+                        BeanUtils.copyProperties(target, netService);
                         device.setNetService(netService);
                         break;
                     case "2":
-                        device.setServiceType(vos.get(i).getCalculateType());
-                        device.setSubType(vos.get(i).getSubType());
+                        device.setServiceType(target.getCalculateType());
+                        device.setSubType(target.getSubType());
                         CalculateLaasVM calculateLaasVM = new CalculateLaasVM();
-                        BeanUtils.copyProperties(vos.get(i), calculateLaasVM);
+                        BeanUtils.copyProperties(target, calculateLaasVM);
                         device.setCalculateLaasVM(calculateLaasVM);
                         break;
                     case "3":
-                        device.setServiceType(vos.get(i).getContainerType());
-                        device.setSubType(vos.get(i).getSubType());
-                        DockerInfrastructureContainerRegistries registries = new DockerInfrastructureContainerRegistries();
-                        BeanUtils.copyProperties(vos.get(i), registries);
-                        device.setDockerInfrastructureContainerRegistries(registries);
-                        break;
+                        device.setServiceType(target.getContainerType());
+                        device.setSubType(target.getSubType());
+                        if(target.getSubType()!=null && target.getSubType().equals("containerRegistry")){
+                            DockerInfrastructureContainerRegistries registries = new DockerInfrastructureContainerRegistries();
+                            BeanUtils.copyProperties(target, registries);
+                            device.setDockerInfrastructureContainerRegistries(registries);
+                            break;
+                        }else if(target.getSubType()!=null && target.getSubType().equals("containerInstance")){
+                            DockerInfrastructureContainerInstances instance = new DockerInfrastructureContainerInstances();
+                            BeanUtils.copyProperties(target, instance);
+                            device.setDockerInfrastructureContainerInstances(instance);
+                            break;
+                        }else{
+                            break;
+                        }
                     case "4":
                     case "5":
                     case "6":
@@ -197,7 +209,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
      */
     @Transactional
     public JSONObject synchronousCloudData(Integer cloudType) {
-        // 获取资源管理器
+        // 获取该订阅Id的资源管理器
         IAzureResourceManager instance = IAzureResourceManager.getInstance(cloudType);
 
         //目前是根据配置的环境信息去获取微软云资源
@@ -205,22 +217,19 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
         //获取微软云网络服务
         List getCloudInternetServices = getCloudInternetServices(instance);
-        result.put("getCloudInternetServices", getCloudInternetServices);
-        //获取用户 docker镜像
+        result.put("getCloudInternetServiceList", getCloudInternetServices);
+        //获取用户 用户注册表列表
         List dockerImages = getDockerImages(instance);
         result.put("dockerImageList", dockerImages);
-        //获取微软云 docker镜像
-        List cloudDockerImages = getCloudDockerImages(instance);
-        result.put("cloudDockerImageList", cloudDockerImages);
+        //获取用户 容器实例列表
+        List dockerInstances = getDockerInstances(instance);
+        result.put("dockerInstanceList", dockerInstances);
         //获取微软云 虚拟机镜像
         List images = getImages(instance);
-        result.put("imagesList", images);
+        result.put("imageList", images);
         //获取用户 虚拟机镜像
         List localImages = getLocalImages(instance);
-        result.put("localImagesList", localImages);
-        //获取微软云存储服务
-        List microsoftCloudStorageServiceList = getMicrosoftCloudStorageServiceList();
-        result.put("microsoftCloudStorageServiceList", microsoftCloudStorageServiceList);
+        result.put("localImageList", localImages);
 
         //云靶标主数据表
         List<DeviceCloudTargetPO> mainTargetList = new ArrayList<>();
@@ -231,14 +240,13 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
         //容器表数据
         List<DeviceCloudTargetContainer> containerList = new ArrayList<>();
-        cloudTargetConverter.cloudContainerRegistryConvert(cloudType,mainTargetList,containerList,dockerImages);
+        cloudTargetConverter.cloudContainerRegistryConvert(cloudType,mainTargetList,containerList,dockerImages);//容器-容器基础结构-容器注册表
+        cloudTargetConverter.cloudContainerInstanceConvert(cloudType,mainTargetList,containerList,dockerInstances);//容器-容器基础结构-容器实例
 
         //计算表数据
         List<DeviceCloudTargetCalculate> calculateList = new ArrayList<>();
-        //计算-laas-vm(微软云)
-        cloudTargetConverter.cloudCalculateSoftVMConvert(cloudType,mainTargetList,calculateList,images);
-        //计算-laas-vm(用户上传)
-        cloudTargetConverter.cloudCalculateUploadVMConvert(cloudType,mainTargetList,calculateList,localImages);
+        cloudTargetConverter.cloudCalculateSoftVMConvert(cloudType,mainTargetList,calculateList,images);//计算-laas-vm(微软云)
+        cloudTargetConverter.cloudCalculateUploadVMConvert(cloudType,mainTargetList,calculateList,localImages);//计算-laas-vm(用户上传)
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("result", result);
@@ -264,10 +272,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
     private <T> boolean batchInsert(List<T> dataList, Function<List<T>, Boolean> insertFunction, String entityType) {
         if (CollectionUtils.isEmpty(dataList)) {
-//            log.info("{} 数据为空，跳过插入操作", entityType);
             return true;
         }
-
         AtomicInteger counter = new AtomicInteger(0);
         AtomicBoolean allSuccess = new AtomicBoolean(true);
         dataList.stream()
@@ -276,18 +282,14 @@ public class MicrosoftAzureConverter implements BaseConverter {
                     List<T> subList = new ArrayList<>(subGroup);
                     boolean isInserted = insertFunction.apply(subList);
                     if (!isInserted) {
-//                        log.error("{} 批量保存错误，数据批次: {}", entityType, subList);
                         allSuccess.set(false);
-                    } else {
-//                        log.debug("{} 批量保存成功，数据批次: {}", entityType, subList);
                     }
                 });
-
         return allSuccess.get();
     }
 
     /**
-     * 获取存储账号内所有内容
+     * 获取网络服务
      */
     public List getCloudInternetServices(IAzureResourceManager instance) {
         //收集元素
@@ -308,51 +310,12 @@ public class MicrosoftAzureConverter implements BaseConverter {
     }
 
     /**
-     * 获取存储账号内所有内容
-     */
-    public void getBlobContainer() {
-//        /**
-//         * 登录Azure门户
-//         * 导航至你的存储账户
-//         * 左侧导航栏找到并点击“访问密钥”
-//         * 在那里，你会看到两个密钥集，任选其中一个，复制其“连接字符串”
-//         * 构建连接字符串，格式形如 "DefaultEndpointsProtocol=https;AccountName=test0327container1;AccountKey=<account-key>;EndpointSuffix=<endpoint-suffix>"
-//         */
-//        String connectionString = "DefaultEndpointsProtocol=https;AccountName=test0327container1;AccountKey=FrZnVLup7lS/UXdvRiArDZe4V1yD9fnqkPqcHvVJZckIKDqaQWoGtBP46WqsuDemNQFxbEjaE0Yd+AStMsys2A==;EndpointSuffix=core.windows.net";
-//
-//        // 创建BlobServiceClient实例
-//        BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
-//                .connectionString(connectionString)
-//                .buildClient();
-//
-//        List<JSONObject> mainTargetList = new ArrayList<>();
-//        // 遍历所有容器
-//        for (BlobContainerItem containerItem : blobServiceClient.listBlobContainers()) {
-//            BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerItem.getName());
-//            // 列出容器内的所有Blob,默认情况下，listBlobs() 方法可能仅返回一部分结果，因为它支持分页
-//            containerClient.listBlobs().forEach(blobItem -> {
-//                JSONObject jsonObject = new JSONObject();
-//                jsonObject.put("name",blobItem.getName());
-//                jsonObject.put("mateData",blobItem.getMetadata());
-//                jsonObject.put("tags",blobItem.getTags());
-//                jsonObject.put("properties",blobItem.getProperties());
-//                list.add(jsonObject);
-//            });
-//        }
-//
-//        JSONObject jsonObject = new JSONObject();
-//        jsonObject.put("当前存储账户内镜像列表",list);
-//        jsonObject.put("code","200");
-//        jsonObject.put("message","SUCCESS");
-    }
-
-    /**
-     * docker镜像--暂定存放在容器注册表内
+     * docker镜像--存放在容器注册表内
      */
     public List getDockerImages(IAzureResourceManager instance) {
         //收集元素
         List<JSONObject> jsonList = new ArrayList<>();
-        // 获取特定的容器注册表
+        // 获取该订阅下所有资源组中的容器注册表
         instance.getManager().containerRegistries().list().forEach(registry -> {
             if (registry != null) {
                 // 获取并打印容器注册表的endpoint
@@ -398,20 +361,39 @@ public class MicrosoftAzureConverter implements BaseConverter {
     }
 
     /**
-     * 获取微软云 docker镜像
+     * docker镜像--容器实例
      */
-    public List getCloudDockerImages(IAzureResourceManager instance) {
-        //todo 待定
-        String endpoint = "https://registrytest0407.azurecr.io";
-        // 初始化ContainerRegistryClient
-        ContainerRegistryClient containerRegistryClient = new ContainerRegistryClientBuilder()
-                .endpoint(endpoint)
-                .credential(instance.getTokenCredential())
-                .buildClient();
-
+    public List getDockerInstances(IAzureResourceManager instance) {
         //收集元素
         List<JSONObject> jsonList = new ArrayList<>();
 
+        // 初始化容器实例管理器
+        ContainerInstanceManager containerInstanceManager = ContainerInstanceManager
+                .authenticate(instance.getTokenCredential(),new AzureProfile(AzureEnvironment.AZURE));
+
+        // 获取所有容器组列表
+        PagedIterable<ContainerGroup> containerGroups = containerInstanceManager.containerGroups().list();
+
+        // 遍历容器组并打印容器实例信息
+        for (ContainerGroup containerGroup : containerGroups) {
+            System.out.println("Container Group Name: " + containerGroup.name());
+            System.out.println("Region: " + containerGroup.regionName());
+            System.out.println("Status: " + containerGroup.provisioningState());
+
+            // 获取并打印该容器组中的所有容器实例
+            Map<String, Container> containers = containerGroup.containers();
+            for (Map.Entry<String, Container> entry : containers.entrySet()) {
+                Container container = entry.getValue();
+                //运行视图,包含容器的当前状态、重启次数、启动时间和结束时间
+//                ContainerPropertiesInstanceView containerPropertiesInstanceView = container.instanceView();
+                System.out.println("Container Name: " + container.name());
+                System.out.println("Image: " + container.image());
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("containerName", container.name());
+                jsonObject.put("image", container.image());
+                jsonList.add(jsonObject);
+            }
+        }
         return jsonList;
     }
 
@@ -504,14 +486,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
             imageList.add(jsonObject);
         }
         return imageList;
-    }
-
-    /**
-     * 微软云存储服务列表
-     */
-    public List getMicrosoftCloudStorageServiceList() {
-
-        return null;
     }
 
     /**
