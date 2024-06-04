@@ -764,10 +764,15 @@ public class CsceneController implements BaseModelListControllerBase {
     })
     @DeleteMapping
     public ServiceResult<Boolean> delete(@RequestParam(required = false) String id,
+                                         @RequestParam(required = false) String areaId,
                                          @RequestBody(required = false) CsceneActionRequest request) {
         log.info("delete cscene config , cscene id is {}", id);
         request = formatActionRequest(request, id);
-        ServiceResult<Boolean> result = modelService.deleteById(request.getId(), true, false, null).asResult();
+        if (StringUtils.isNotEmpty(areaId)) {
+            request.setAreaId(areaId);
+        }
+        ServiceResult<Boolean> result = modelService.deleteById(request.getId(), request.getAreaId(), true, false, null)
+                .asResult();
         CsceneLogUtils.recordSceneConfigLog(request.getId(), OpTypeEnums.DELETE, CsceneLogUtils.DELETE_SCENE_CONFIG, request.getContext());
         return result;
     }

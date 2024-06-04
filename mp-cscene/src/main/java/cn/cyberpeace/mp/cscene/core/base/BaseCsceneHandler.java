@@ -189,7 +189,7 @@ public abstract class BaseCsceneHandler<
             String originSceneId = originCsceneObj == null ? null : getSceneId(originCsceneObj);
             // 场景id变化了删除原来的
             if (!StringUtils.isEmpty(originSceneId) && !originSceneId.equals(sceneId)) {
-                deleteScene(originSceneId, true);
+                deleteScene(originSceneId, true, null);
             }
         } else {
             UserModel user = UserCommon.getUserWithContext(context);
@@ -352,8 +352,8 @@ public abstract class BaseCsceneHandler<
     /**
      * 删除综合场景业务数据
      */
-    public boolean delete(boolean logic) {
-        deleteScene(cscene, logic);
+    public boolean delete(boolean logic, String areaId) {
+        deleteScene(cscene, logic, areaId);
         if (logic) {
             return csceneMapper.logicDelete(cscene.getId());
         } else {
@@ -387,11 +387,11 @@ public abstract class BaseCsceneHandler<
      * 删除底层场景
      * @param TCsceneBO 综合场景数据
      */
-    public abstract void deleteScene(TCsceneBO TCsceneBO, boolean logic);
+    public abstract void deleteScene(TCsceneBO TCsceneBO, boolean logic, String areaId);
 
     /**
      * 删除底层场景
      * @param sceneId 底层场景id
      */
-    public abstract void deleteScene(String sceneId, boolean logic);
+    public abstract void deleteScene(String sceneId, boolean logic, String areaId);
 }

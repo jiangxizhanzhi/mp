@@ -526,9 +526,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 .put(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY, pluginData);
     }
 
-    public ServiceResult<Boolean> deleteById(String id, boolean logic, boolean withInstance, CsceneContextBO context) {
+    public ServiceResult<Boolean> deleteById(String id, String areaId, boolean logic, boolean withInstance, CsceneContextBO context) {
         BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(id, context);
-        boolean flag = bcSceneConfigHandler.delete(logic, withInstance);
+        boolean flag = bcSceneConfigHandler.delete(logic, withInstance, areaId);
         if (flag) {
             // 尝试该场景模板建立的快照
             CsceneSnapshotDeleteTaskPool.getInstance().executeTask(() -> {
@@ -542,7 +542,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                                                   CsceneContextBO context) {
         int result = 0;
         for (String id : ids) {
-            if (Boolean.TRUE.equals(deleteById(id, logic, withInstance, context).getSource())) {
+            if (Boolean.TRUE.equals(deleteById(id, null, logic, withInstance, context).getSource())) {
                 result += 1;
             }
         }

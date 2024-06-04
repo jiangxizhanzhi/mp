@@ -699,7 +699,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 NodeLimitUtils.substractLimitedNodeCount(instanceHandler.getCscene());
                 HardwareLimitUtils.substractHardware(instanceHandler.getCscene());
                 String sceneId = this.getSceneId(id);
-                boolean flag = instanceHandler.delete(logic);
+                boolean flag = instanceHandler.delete(logic, null);
                 if (sceneId != null) {
                     scenePluginCloudSceneService.deleteSceneRecords(sceneId, logic);
                 }

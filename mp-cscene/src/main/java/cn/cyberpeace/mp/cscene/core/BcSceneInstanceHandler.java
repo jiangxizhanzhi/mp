@@ -120,7 +120,7 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
     }
 
     @Override
-    public void deleteScene(CsceneInstanceBO csceneBO, boolean logic) {
+    public void deleteScene(CsceneInstanceBO csceneBO, boolean logic, String areaId) {
         log.info("=======delete scene getContext(): {}", getContext());
         if (Objects.nonNull(getContext())) {
             csceneInstanceUserCountService.decreaseCount(getContext().getAccessUserId());
@@ -129,12 +129,12 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
         String sceneId = (sceneData == null
                 || sceneData.getTopology() == null
                 || sceneData.getTopology().getScene() == null) ? null : sceneData.getTopology().getScene().getEid();
-        deleteScene(sceneId, logic);
+        deleteScene(sceneId, logic, areaId);
         csceneBO.setScene(null);
     }
 
     @Override
-    public void deleteScene(String sceneId, boolean logic) {
+    public void deleteScene(String sceneId, boolean logic, String areaId) {
         if (sceneId != null) {
             sceneService.delete(sceneId, logic, generateSceneContext());
         }

@@ -8,6 +8,8 @@ import lombok.Data;
 public class CsceneActionRequest {
     @ApiModelProperty(value = "场景模板id")
     private String id;
+    @ApiModelProperty(value = "区域id")
+    private String areaId;
     @ApiModelProperty(value = "场景上下文")
     private CsceneContextBO context;
 }

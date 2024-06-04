@@ -52,11 +52,13 @@ public class SceneConfigService {
         return new ServiceResult<>(sceneConfigHandler.toData());
     }
 
-    public ServiceResult<Boolean> delete(String id, boolean logic, SceneConfigContextBO context) {
+    public ServiceResult<Boolean> delete(String id, String areaId, boolean logic, SceneConfigContextBO context) {
         SceneConfigHandler sceneConfigHandler;
         try {
-            sceneConfigHandler = new SceneConfigHandler(id, null, false, context);
-            if (logic) {
+            sceneConfigHandler = new SceneConfigHandler(id, areaId, areaId != null, context);
+            if (areaId != null) {
+                sceneConfigHandler.delete();
+            } else if (logic) {
                 sceneConfigHandler.logicDelete();
             } else {
                 sceneConfigHandler.delete();
@@ -70,7 +72,7 @@ public class SceneConfigService {
     public ServiceResult<Integer> bulkDelete(String[] ids, boolean logic, SceneConfigContextBO context) {
         int result = 0;
         for (String id: ids) {
-            if (Boolean.TRUE.equals(delete(id, logic, context).getSource())) {
+            if (Boolean.TRUE.equals(delete(id, null, logic, context).getSource())) {
                 result += 1;
             }
         }

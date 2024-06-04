@@ -279,20 +279,20 @@ public class BcSceneConfigHandler extends BaseCsceneHandler<
     }
 
     @Override
-    public boolean delete(boolean logic) {
-        return delete(logic, true);
+    public boolean delete(boolean logic, String areaId) {
+        return delete(logic, true, areaId);
     }
 
-    public boolean delete(boolean logic, boolean withInstance) {
+    public boolean delete(boolean logic, boolean withInstance, String areaId) {
         if (withInstance) {
             reloadCsceneInstances();
             for (CsceneInstanceBO csceneInstance : ListUtils.union(getCscene().getTestScenes(), getCscene().getAppScenes())) {
                 BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(csceneInstance, getContext());
-                instanceHandler.delete(logic);
+                instanceHandler.delete(logic, null);
             }
         }
 
-        return super.delete(logic);
+        return super.delete(logic, areaId);
     }
 
     @Override
@@ -313,19 +313,19 @@ public class BcSceneConfigHandler extends BaseCsceneHandler<
     }
 
     @Override
-    public void deleteScene(CsceneBO csceneBO, boolean logic) {
+    public void deleteScene(CsceneBO csceneBO, boolean logic, String areaId) {
         SceneConfigDataBO sceneData = csceneBO.getSceneConfig();
         String sceneId = (sceneData == null
                 || sceneData.getTopology() == null
                 || sceneData.getTopology().getScene() == null) ? null : sceneData.getTopology().getScene().getEid();
-        deleteScene(sceneId, logic);
+        deleteScene(sceneId, logic, areaId);
         csceneBO.setSceneConfig(null);
     }
 
     @Override
-    public void deleteScene(String sceneId, boolean logic) {
+    public void deleteScene(String sceneId, boolean logic, String areaId) {
         if (sceneId != null) {
-            sceneConfigService.delete(sceneId, logic, null);
+            sceneConfigService.delete(sceneId, areaId, logic, null);
         }
     }
 
