@@ -560,29 +560,38 @@ public class SceneService {
             throw this.createOperateException(originLockInfo);
         }
 
-        newDataBO.getTopology().setScene(originHandler.getScene());
-        SceneHandler updateHandler = new SceneHandler(newDataBO, context);
+        try {
+            newDataBO.getTopology().setScene(originHandler.getScene());
+            SceneHandler updateHandler = new SceneHandler(newDataBO, context);
 
-        SceneElementBO originElement = originHandler.getElement(nodeId);
-        SceneElementBO newElement = updateHandler.getElement(nodeId);
-        newElement.setEid(originElement.getEid());
-        newElement.setEvent(originElement.getEvent());
-        newElement.setEventStatus(originElement.getEventStatus());
-        newElement.setProcess(originElement.getProcess());
-        newElement.setProcessMessage(originElement.getProcessMessage());
-        newElement.setProcessStatus(originElement.getProcessStatus());
-        if (CollectionUtils.isNotEmpty(newElement.getPorts())) {
-            for (SceneElementPortBO newPort : newElement.getPorts()) {
-                SceneElementPortBO originPort = originHandler.getPort(newPort.getId());
-                if (originPort != null) {
-                    newPort.setEid(originPort.getEid());
+            SceneElementBO originElement = originHandler.getElement(nodeId);
+            SceneElementBO newElement = updateHandler.getElement(nodeId);
+            newElement.setEid(originElement.getEid());
+            newElement.setEvent(originElement.getEvent());
+            newElement.setEventStatus(originElement.getEventStatus());
+            newElement.setProcess(originElement.getProcess());
+            newElement.setProcessMessage(originElement.getProcessMessage());
+            newElement.setProcessStatus(originElement.getProcessStatus());
+            if (CollectionUtils.isNotEmpty(newElement.getPorts())) {
+                for (SceneElementPortBO newPort : newElement.getPorts()) {
+                    SceneElementPortBO originPort = originHandler.getPort(newPort.getId());
+                    if (originPort != null) {
+                        newPort.setEid(originPort.getEid());
+                    }
                 }
             }
-        }
 
-        ElementTaskPool.getInstance().executeTask(ThreadUtils.format(() -> {
-            updateHandler.modifyElement(nodeId, originHandler);
-        }));
+            ElementTaskPool.getInstance().executeTask(ThreadUtils.format(() -> {
+                try {
+                    updateHandler.modifyElement(nodeId, originHandler);
+                } finally {
+                    SceneEventUtils.unLock(id);
+                }
+            }));
+        } catch (Exception e) {
+            SceneEventUtils.unLock(id);
+            log.error("failed to modify element  ", e);
+        }
         return new ServiceResult<>(true);
     }
 
