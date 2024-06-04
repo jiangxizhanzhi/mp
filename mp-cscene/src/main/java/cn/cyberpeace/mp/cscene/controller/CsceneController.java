@@ -188,8 +188,10 @@ public class CsceneController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "area_id", value = "区域id", dataTypeClass = String.class)
     })
     @GetMapping(params = "id")
-    public ServiceResult<CsceneBO> get(@RequestParam String id,@RequestParam(value = "area_id",required = false) String areaId) {
-        if (areaId == null) {
+    public ServiceResult<CsceneBO> get(@RequestParam String id, @RequestParam(value = "area_id", required = false) String areaId, @RequestParam(required = false, name = "whole") Boolean whole) {
+        if (Boolean.TRUE.equals(whole)) {
+            areaId = null;
+        } else if (areaId == null) {
             areaId = "";
         }
         return modelService.getById(id, areaId, false, null).asResult();
@@ -204,7 +206,8 @@ public class CsceneController implements BaseModelListControllerBase {
         String sceneId = this.modelService.get(id).getSource().getObj().getSceneConfig();
         var csceneBO = getByAreaId(sceneId, areaId);
         var roleMapper = BeanCommon.getBean(CsceneRoleMapper.class);
-        var list = roleMapper.list(new HumanCondition().filterEqual(BaseCsceneRoleModel::getCscene, id));
+        var list = roleMapper.list(new HumanCondition().filterEqual(BaseCsceneRoleModel::getCscene, id)
+                                           .orderBy(BaseCsceneRoleModel::getPk));
         if (list != null) {
             csceneBO.setRoles(convertToRoleBOs(list, CsceneRoleBO.class));
         } else {
