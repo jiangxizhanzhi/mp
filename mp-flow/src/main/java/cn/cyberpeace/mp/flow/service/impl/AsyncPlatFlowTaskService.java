@@ -502,6 +502,7 @@ public class AsyncPlatFlowTaskService {
      * 新增流量执行器
      * @param uuid
      */
+    @Deprecated(since = "trex启动时并不建立所有的网卡")
     private void addFlowExecutor(String uuid, String trexName, List<FlowNetworkInfo> networkInfos) {
         log.info("addFlowExecutor networkInfos:{}", networkInfos);
         // 获取外部networkId，用于管理端口
@@ -606,6 +607,7 @@ public class AsyncPlatFlowTaskService {
      * @param uuid
      * @param trexName
      */
+    // todo 待和30s接口对接，这个是创建trex接口
     private void startExecutor(String uuid, String trexName) {
         log.info("addFlowExecutor name:{}", trexName);
         // 获取外部networkId，用于管理端口
@@ -697,6 +699,7 @@ public class AsyncPlatFlowTaskService {
      * @param taskId
      * @return
      */
+    // todo 执行单个流量任务
     public ServiceResult<Boolean> startTask(String taskId, String sourceIp) {
         // 任务存在校验
         ObjServiceResult<FlowTaskTaskModel> taskServiceResult = flowTaskTaskService.get(taskId);
@@ -826,6 +829,7 @@ public class AsyncPlatFlowTaskService {
      * @param taskIds
      * @return
      */
+    // todo 批量执行流量任务
     public ServiceResult<Boolean> batchStartTasks(List<String> taskIds, BatchStartTaskBO batchStartTaskBO) {
         Integer runType = null;
         if (Objects.nonNull(batchStartTaskBO)) {

@@ -329,9 +329,10 @@ public class BaseCpService {
      */
     private Map<String, String> wrapperHeaders(Map<String, String> headers) {
         if (MapUtils.isEmpty(headers)) {
-            headers = getDefaultHeader();
+            headers = new HashMap<>();
         }
         headers.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
+        headers.putAll(getDefaultHeader());
         return headers;
     }
 

@@ -204,6 +204,7 @@ public class ImagesConverter implements BaseConverter{
         device.setNetIfCnt(request.getNetIfCnt());
         device.setBrand(request.getBrand());
         device.setInnerApps(request.getInnerApps());
+        device.setAttackMockDeviceFlag(Objects.nonNull(request.getAttackMockDeviceFlag()) ? request.getAttackMockDeviceFlag() : Boolean.FALSE);
         devopsTargetService.insert(Collections.singletonList(device));
     }
 
@@ -494,6 +495,7 @@ public class ImagesConverter implements BaseConverter{
         device.setMaintype(MainTypeEnum.NORMAL.ordinal());
         device.setRootPassword(request.getRootPassword());
         device.setUsername(request.getUsername());
+        device.setAttackMockDeviceFlag(request.getAttackMockDeviceFlag());
         final ExtVm extVm = request.getExtVm();
         if (Objects.nonNull(extVm) && CollectionUtils.isNotEmpty(request.getAccessProtocolList())) {
             extVm.setAccessProtocols(request.getAccessProtocolList());

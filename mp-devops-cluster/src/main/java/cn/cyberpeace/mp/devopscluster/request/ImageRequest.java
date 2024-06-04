@@ -177,5 +177,8 @@ public class ImageRequest extends BaseRequest {
 
     @ApiModelProperty("模型Code")
     private String modelCode;
+
+    @ApiModelProperty("是否是攻防靶标模拟器")
+    private Boolean attackMockDeviceFlag;
 }
 

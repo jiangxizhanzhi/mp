@@ -170,6 +170,8 @@ public class ImagePageDTO extends BasePageDTO{
 
     private Boolean initSupport;
 
+    private Boolean attackMockDeviceFlag;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }
@@ -270,5 +272,6 @@ public class ImagePageDTO extends BasePageDTO{
         this.setPreTypeList(request.getPreTypeList());
         this.setParentSystemType(request.getParentSystemType());
         this.setInitSupport(request.getInitSupport());
+        this.setAttackMockDeviceFlag(request.getAttackMockDeviceFlag());
     }
 }

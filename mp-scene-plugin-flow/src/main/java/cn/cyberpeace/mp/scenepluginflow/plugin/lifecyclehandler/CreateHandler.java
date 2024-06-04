@@ -61,6 +61,8 @@ public class CreateHandler extends HandlerCommon {
                 if (cloudPluginHandler != null) {
                     Set<String> existIp = new HashSet<>();
                     List<ConnectedNetworkBO> networkBOS = new ArrayList<>();
+
+                    // 1. 获取到所有网络
                     for (CloudPluginSceneElementBO cpElement : cloudPluginHandler.getElementMap().values()) {
                         if (CollectionUtils.isNotEmpty(cpElement.getDeriveNetworks())) {
                             networkBOS.addAll(cpElement.getDeriveNetworks());
@@ -71,79 +73,17 @@ public class CreateHandler extends HandlerCommon {
                         if (cloudElement == null || cloudElement.getVirtualType() == null) {
                             return;
                         }
+
+                        // 2. 核心路由器 以及非容器，非虚机无法进行流量发生
                         if ((!cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)
                                 && !cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE))
                             || ElementTypeUtils.isCoreRouter(cloudElement.getImage())) {
                             return;
                         }
-                        if (CollectionUtils.isNotEmpty(element.getSrcElement().getPorts())) {
-                            element.getSrcElement().getPorts().forEach(port -> {
-                                CloudPluginSceneElementNetworkBO network = cloudPluginHandler.getHandlerUtils().getNetworkByPort(port);
-                                String ip = port.getIp();
-
-                                if (StringUtils.isNotEmpty(ip) && !existIp.contains(ip) && network != null) {
-                                    FlowNetworkInfo flowNetworkInfo = new FlowNetworkInfo();
-                                    flowNetworkInfo.setIp(ip);
-                                    flowNetworkInfo.setNetworkId(network.getResourceId());
-                                    flowNetworkInfo.setNodeName("MP_SCENE_" + port.getElement().getEid());
-                                    networkInfos.add(flowNetworkInfo);
-                                    existIp.add(ip);
-                                } else if (StringUtils.isNotEmpty(ip) && !existIp.contains(ip) && network == null) {
-                                    CloudPluginSceneElementNetworkBO net = null;
-                                    for (ConnectedNetworkBO cpNet : networkBOS) {
-                                        List<SceneElementPortBO> list = new ArrayList<>();
-                                        if (CollectionUtils.isNotEmpty(cpNet.getFromPorts())) {
-                                            list.addAll(cpNet.getFromPorts());
-                                        }
-                                        if (CollectionUtils.isNotEmpty(cpNet.getToPorts())) {
-                                            list.addAll(cpNet.getToPorts());
-                                        }
-                                        for (SceneElementPortBO connectPort : list) {
-                                            if (StringUtils.equals(port.getElement().getId(), connectPort.getElement().getId())) {
-                                                net = cpNet.getNetwork();
-                                            }
-                                        }
-                                    }
-
-                                    if (net != null) {
-                                        FlowNetworkInfo flowNetworkInfo = new FlowNetworkInfo();
-                                        flowNetworkInfo.setIp(ip);
-                                        flowNetworkInfo.setNetworkId(net.getResourceId());
-                                        flowNetworkInfo.setNodeName("MP_SCENE_" + port.getElement().getEid());
-                                        networkInfos.add(flowNetworkInfo);
-                                        existIp.add(ip);
-                                    }
-                                } else if (StringUtils.isEmpty(ip) && CollectionUtils.isNotEmpty(networkBOS)) {
-                                    CloudPluginSceneElementNetworkBO net = null;
-                                    for (ConnectedNetworkBO cpNet : networkBOS) {
-                                        List<SceneElementPortBO> list = new ArrayList<>();
-                                        if (CollectionUtils.isNotEmpty(cpNet.getFromPorts())) {
-                                            list.addAll(cpNet.getFromPorts());
-                                        }
-                                        if (CollectionUtils.isNotEmpty(cpNet.getToPorts())) {
-                                            list.addAll(cpNet.getToPorts());
-                                        }
-                                        for (SceneElementPortBO connectPort : list) {
-                                            if (StringUtils.equals(port.getElement().getId(), connectPort.getElement().getId())) {
-                                                net = cpNet.getNetwork();
-                                            }
-                                        }
-                                    }
-
-                                    if (net != null) {
-                                        FlowNetworkInfo flowNetworkInfo = new FlowNetworkInfo();
-                                        flowNetworkInfo.setNetworkId(net.getResourceId());
-                                        flowNetworkInfo.setNodeName("MP_SCENE_" + port.getElement().getEid());
-                                        networkInfos.add(flowNetworkInfo);
-                                        existIp.add(ip);
-                                    }
-                                }
-                            });
-                        }
                     });
                 }
             }
-//            var executorId = getHandlerUtils().createExecutor(getPluginHandler().getSourceSceneId(), networkInfos);
+            // 3. 起trex
             String executorId = getHandlerUtils().startExecutor(getPluginHandler().getSourceSceneId());
             log.info("executorId is:{}", executorId);
             scene.setExecutor(executorId);

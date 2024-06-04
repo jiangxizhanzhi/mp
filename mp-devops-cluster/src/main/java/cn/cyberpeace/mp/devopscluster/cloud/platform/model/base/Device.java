@@ -277,6 +277,9 @@ public class Device extends BaseCloudPlatformResult {
     @ApiModelProperty("模型Code")
     private String modelCode;
 
+    @ApiModelProperty("是否是攻防靶标模拟器")
+    private Boolean attackMockDeviceFlag;
+
     public Boolean getIsBuildIn() {
         boolean tmpImport = !Objects.isNull(isImport) && isImport;
         boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;

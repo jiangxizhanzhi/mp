@@ -165,4 +165,7 @@ public class DeviceTargetPO extends BaseModel {
      */
     @DefaultStr
     private String createUserName;
+
+    @DefaultBool
+    private Boolean attackMockDeviceFlag;
 }
