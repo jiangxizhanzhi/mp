@@ -17,4 +17,7 @@ public class DeviceReferCsceneStat {
     private String createUser;
     @ApiModelProperty(value = "创建用户名")
     private String createUsername;
+
+    private String sceneId;
+    private String elementId;
 }

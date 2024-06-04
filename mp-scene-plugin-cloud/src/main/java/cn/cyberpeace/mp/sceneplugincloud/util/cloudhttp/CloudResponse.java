@@ -1,37 +1,39 @@
 package cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp;
 
-import cn.cyberpeace.mp.base.common.MessageCommon;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class CloudResponse<T> {
-    public static final String SUCCESS_CODE = "CP000000";
-    public static final String SUCCESS_CODE0 = "0";
-    public static final String EXCEPTION_CODE = "CP999999";
+    public static final String SUCCESS_CODE = "0";
+    public static final String EXCEPTION_CODE = "CP-099999";
 
     private T data;
+    private List<T> items;
+    private Integer total;
     private String code;
     private String message;
     private Object detail;
-    private Integer timestamp;
-    private Float timeElapse;
+    private Long timestamp;
     private Boolean success;
+
+
 
     public void setRequestError() {
         setCode(EXCEPTION_CODE);
-        setMessage(MessageCommon.get("sceneplugincloud.http.request_error"));
     }
 
     public void setParseError() {
         setCode(EXCEPTION_CODE);
-        setMessage(MessageCommon.get("sceneplugincloud.http.parse_error"));
     }
 
     public boolean isSuccess() {
-        return SUCCESS_CODE.equals(code) || SUCCESS_CODE0.equals(code) || Boolean.TRUE.equals(success);
+        return StringUtils.isEmpty(code) || SUCCESS_CODE.equals(code);
     }
 }

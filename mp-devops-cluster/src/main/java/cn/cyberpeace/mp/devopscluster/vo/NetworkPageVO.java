@@ -72,11 +72,5 @@ public class NetworkPageVO extends SceneInfoVO {
 
         @ApiModelProperty("网关ip")
         private String gatewayIp;
-
-        @ApiModelProperty("剩余IP数")
-        private Integer freeIps;
-
-        @ApiModelProperty("已使用IP数")
-        private Integer usedIps;
     }
 }

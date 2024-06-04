@@ -55,4 +55,11 @@ public final class BaseCloudPlatformConstant {
      */
     public static final String CODE = "0";
 
+
+
+    public static final String GET_VM_SNAPSHOT_LIST = "/cloud/v1/vm/{vm_id}/snapshot";
+    public static final String GET_CONTAINER_SNAPSHOT_LIST = "/cloud/v1/container/{container_id}/snapshot";
+
+
+
 }

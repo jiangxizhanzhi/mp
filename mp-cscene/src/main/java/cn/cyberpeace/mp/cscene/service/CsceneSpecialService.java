@@ -73,6 +73,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -1237,6 +1238,39 @@ public class CsceneSpecialService {
         CsceneInstanceMapper csceneInstanceMapper = BeanCommon.getBean(CsceneInstanceMapper.class);
         List<CsceneInstanceModel> result = csceneInstanceMapper.list(humanCondition);
         return new ServiceResult<>(result).asResult();
+    }
+
+
+    /**
+     * 获取靶标实例 对应 的场景
+     * @param nodeNames 靶标资源id
+     * @return 获取靶标实例 对应 的场景
+     */
+    public ServiceResult<Map<String, DeviceReferCsceneStat>> statDeviceReferScenes(List<String> nodeNames) {
+        var deviceReferCondition = new HumanCondition()
+                .link(SceneModel.class, SceneElementModel.class)
+                .filterLink(SceneModel.class, SceneModel::getId,
+                        SceneElementModel.class, SceneElementModel::getScene)
+                .currentLink(SceneModel.class)
+                .selectAs(SceneModel::getName, DeviceReferCsceneStat::getName)
+                .selectAs(SceneModel::getId, DeviceReferCsceneStat::getSceneId)
+                .currentLink(SceneElementModel.class)
+                .filterIn(SceneElementModel::getId, nodeNames.toArray())
+                .selectAs(SceneElementModel::getId, DeviceReferCsceneStat::getElementId)
+                .distinct();
+
+        List<DeviceReferCsceneStat> deviceReferCsceneStats = sceneMapper.list(deviceReferCondition, DeviceReferCsceneStat.class);
+
+        var condition = new HumanCondition()
+                .selectAs(SceneModel::getName, DeviceReferCsceneStat::getName)
+                .selectAs(SceneModel::getId, DeviceReferCsceneStat::getSceneId)
+                .selectAs(SceneModel::getId, DeviceReferCsceneStat::getElementId)
+                .filterIn(SceneModel::getId, nodeNames.toArray())
+                .distinct();
+        deviceReferCsceneStats.addAll(sceneMapper.list(condition, DeviceReferCsceneStat.class));
+        var result = deviceReferCsceneStats.stream()
+                .collect(Collectors.toMap(DeviceReferCsceneStat::getElementId, deviceReferCsceneStat -> deviceReferCsceneStat));
+        return new ServiceResult<>(result);
     }
 
 }

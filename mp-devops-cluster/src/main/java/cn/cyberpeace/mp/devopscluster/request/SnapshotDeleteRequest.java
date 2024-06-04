@@ -33,4 +33,13 @@ public class SnapshotDeleteRequest {
     @NotBlank
     private String snapshotName;
 
+    @ApiModelProperty(value = "实例id")
+    private String instanceId;
+
+    @ApiModelProperty(value = "快照id")
+    private String snapshotId;
+
+    @ApiModelProperty(value = "镜像类型")
+    private String imageType;
+
 }

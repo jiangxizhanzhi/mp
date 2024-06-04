@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.devopscluster.model;
 
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.QuickCreateParam;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Snapshot;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.result.Snapshot;
 import lombok.Data;
 
 import java.util.List;

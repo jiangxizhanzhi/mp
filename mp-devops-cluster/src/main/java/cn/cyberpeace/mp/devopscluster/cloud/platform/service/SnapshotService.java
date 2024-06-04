@@ -1,22 +1,27 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.CloudClient;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Snapshot;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ContainerSnapshot;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.result.Snapshot;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.DeviceAndSnapshotCloudPlatformResult;
-import cn.cyberpeace.mp.devopscluster.model.SnapshotCreate;
-import cn.cyberpeace.mp.devopscluster.request.SnapshotDeleteRequest;
+import cn.cyberpeace.mp.devopscluster.request.SnapshotPageRequest;
+import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -27,8 +32,11 @@ import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.util.UriEncoder;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 快照管理
@@ -45,9 +53,13 @@ public class SnapshotService extends BaseCpService {
 
     @Autowired
     private CsceneSpecialService csceneSpecialService;
+    @Resource
+    private SceneElementSnapshotMapper snapshotMapper;
 
     @Resource
     private CsceneSnapshotService csceneSnapshotService;
+    @Resource
+    private CloudClient cloudClient;
 
     public SnapshotService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
@@ -57,6 +69,7 @@ public class SnapshotService extends BaseCpService {
      * 查询列表
      * @param deviceUuid
      */
+    @Deprecated
     public CloudPlatformPageResult<Snapshot> list(String deviceUuid){
         CloudPlatformItemsPageResult pageResult =  super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + SNAPSHOT + "?device_uuid=" + deviceUuid, CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
@@ -72,47 +85,11 @@ public class SnapshotService extends BaseCpService {
      * @param name
      * @return
      */
+    @Deprecated
     public DeviceAndSnapshotCloudPlatformResult deviceAndSnapshotByName(String name) {
         return super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + SNAPSHOT + "/device_snapshots?name=" + UriEncoder.encode(name), DeviceAndSnapshotCloudPlatformResult.class);
     }
 
-    /**
-     * 创建
-     */
-    public Snapshot create(SnapshotCreate snapshotCreate){
-        return super.sendPost(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + SNAPSHOT, JsonUtils.snakeStringify(snapshotCreate), Snapshot.class);
-    }
-
-    /**
-     * 删除
-     */
-    public Boolean delete(List<String> uuids) {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("snapshot_uuids", uuids);
-        BaseCloudPlatformResult model = super.sendDelete(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + SNAPSHOT,JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
-        return model.isSuccess();
-    }
-
-    /**
-     * 删除快照
-     * @param request
-     * @return
-     */
-    public BaseCloudPlatformResult deleteSnapshot(SnapshotDeleteRequest request) {
-        String imageName = request.getDeviceUuid().concat(request.getSnapshotName());
-        this.validSnapshot(imageName);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("device_uuid", request.getDeviceUuid());
-        jsonObject.put("snapshot_uuid", request.getSnapshotUuid());
-        jsonObject.put("snapshot_name", request.getSnapshotName());
-        BaseCloudPlatformResult model = super.sendDelete(BaseCloudPlatformConstant.URL_VERSION + DEVICE_SNAPSHOT, JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
-        if (StringUtils.isNotEmpty(model.getMessage()) && model.getMessage().equals("snapshot not exists")) {
-            csceneSnapshotService.deleteSnapshotRelativeInfoByResource(request.getSnapshotUuid());
-        } else {
-            super.checkResult(model);
-        }
-        return model;
-    }
 
 
     /**
@@ -136,5 +113,54 @@ public class SnapshotService extends BaseCpService {
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_SNAPSHOT_REFERENCED_SCENE_WITH_NAME.format(useStateMap.get(imageName).get(0).getName()));
         }
     }
+
+
+    /**
+     * 根据虚拟机id分页查询虚拟机快照列表
+     * @param request
+     * @return
+     */
+    public ListObjServiceResult<Snapshot> getVmSnapshotById(SnapshotPageRequest request) {
+        var res = cloudClient.listVmSnapshot(request);
+        if (Objects.isNull(res) || CollectionUtils.isEmpty(res.getList())) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
+        var result = res.getList();
+        Map<String, SceneElementSnapshotModel> snapshotId2ModelMap = snapshotMapper.list(new HumanCondition()
+                        .filterIn(SceneElementSnapshotModel::getId, result.stream().map(Snapshot::getId).toArray()))
+                .stream()
+                .collect(Collectors.toMap(BaseModel::getId, sceneElementSnapshotModel -> sceneElementSnapshotModel));
+        result.forEach(snapshot -> {
+            var snapshotModel = snapshotId2ModelMap.get(snapshot.getId());
+            if (Objects.nonNull(snapshotModel)) {
+                snapshot.setName(snapshotModel.getName());
+            } else {
+                snapshot.setName(StringUtils.EMPTY);
+            }
+        });
+        return new ListObjServiceResult<>(new ListObjResult<>(result, res.getTotal()));
+    }
+
+    public ListObjServiceResult<ContainerSnapshot> getContainerSnapshotById(SnapshotPageRequest request) {
+        var res = cloudClient.listContainerSnapshot(request);
+        if (Objects.isNull(res) || CollectionUtils.isEmpty(res.getList())) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
+        var result = res.getList();
+        Map<String, SceneElementSnapshotModel> snapshotId2ModelMap = snapshotMapper.list(new HumanCondition()
+                        .filterIn(SceneElementSnapshotModel::getId, result.stream().map(ContainerSnapshot::getImageId).toArray()))
+                .stream()
+                .collect(Collectors.toMap(BaseModel::getId, sceneElementSnapshotModel -> sceneElementSnapshotModel));
+        result.forEach(snapshot -> {
+            var snapshotModel = snapshotId2ModelMap.get(snapshot.getImageId());
+            if (Objects.nonNull(snapshotModel)) {
+                snapshot.setDescription(snapshotModel.getDescription());
+            } else {
+                snapshot.setDescription(StringUtils.EMPTY);
+            }
+        });
+        return new ListObjServiceResult<>(new ListObjResult<>(result, res.getTotal()));
+    }
+
 
 }

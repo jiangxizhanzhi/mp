@@ -7,9 +7,14 @@ import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.CloudClient;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.params.QuickCreateData;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.params.QuickCreatePageParam;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.result.QuickCreateDevice;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.*;
 import cn.cyberpeace.mp.devopscluster.converter.bo.DeviceAsyncBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
@@ -70,6 +75,8 @@ public class ImagesConverter implements BaseConverter{
     private final TargetConverter targetConverter;
 
     private final SnapshotConverter snapshotConverter;
+    private final CloudClient cloudClient;
+
 
     /**
      * 分页查询镜像列表
@@ -108,6 +115,9 @@ public class ImagesConverter implements BaseConverter{
             return imageConvertPageModel;
         }
         List<Device> deviceList = this.findByIds(ids);
+
+
+
         if (CollectionUtils.isNotEmpty(deviceList)) {
             List<Device> list = new ArrayList<>();
             for (Device device : deviceList) {
@@ -188,6 +198,28 @@ public class ImagesConverter implements BaseConverter{
         return imageConvertPageModel;
     }
 
+
+    private void addSnapshotCountInfo(List<Device> deviceList) {
+        for (Device device : deviceList) {
+            SnapshotPageRequest snapshotPageRequest = new SnapshotPageRequest();
+            if ("vm".equals(device.getImageType())) {
+                String instanceId = device.getExtVm().getInstanceUuid();
+                if (StringUtils.isNotBlank(instanceId)) {
+                    snapshotPageRequest.setInstanceId(instanceId);
+                    Integer snapshotCount = cloudClient.listVmSnapshot(snapshotPageRequest).getTotal();
+                    device.getExtVm().setSnapshotCount(snapshotCount);
+                }
+            } else if ("container".equals(device.getImageType())) {
+                String instanceId = device.getExtDocker().getInstanceUuid();
+                if (StringUtils.isNotBlank(instanceId)) {
+                    snapshotPageRequest.setInstanceId(instanceId);
+                    Integer snapshotCount = cloudClient.listContainerSnapshot(snapshotPageRequest).getTotal();
+                    device.getExtDocker().setSnapshotCount(snapshotCount);
+                }
+            }
+        }
+    }
+
     /**
      * 新增镜像
      * @param request
@@ -256,6 +288,7 @@ public class ImagesConverter implements BaseConverter{
      * @param request
      * @return
      */
+    @Deprecated
     public void build(ImagesBuildRequest request) {
         DeviceQuickCreateCloudPlatformModel model = new DeviceQuickCreateCloudPlatformModel(request.getName(),request.getImageName());
         List<InstallerDTO> installerDTOList = request.getInstallerDTOList();
@@ -275,6 +308,27 @@ public class ImagesConverter implements BaseConverter{
         params.setSettings(v.getDockerInstallerData().getStartUpParameterList());
         params.setFile(v.getDockerInstallerData().getFile());
         return params;
+    }
+
+
+    public ListObjServiceResult<QuickCreateDevice> quickCreateList(QuickCreatePageRequest request) {
+        QuickCreatePageParam param = new QuickCreatePageParam();
+        param.setOffset(request.getPage());
+        param.setLimit(request.getPerPage());
+        param.setName(request.getName());
+        param.setFlavor(request.getFlavor());
+        param.setImageType(request.getImageType());
+        param.setSystemType(request.getSystemType());
+        var result = cloudClient.getQuickCreateDeviceList(param);
+        return new ListObjServiceResult<>(result);
+    }
+
+    public void quickCreate(QuickCreateRequest request) {
+        QuickCreateData data = new QuickCreateData();
+        data.setQuickName(request.getName());
+        data.setDeviceUuid(request.getDeviceUuid());
+        data.setQuickCreateParams(request.getSoftwareIds());
+        cloudClient.quickCreate(data);
     }
 
     /**

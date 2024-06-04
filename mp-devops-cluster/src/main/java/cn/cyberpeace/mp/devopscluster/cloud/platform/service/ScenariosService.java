@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.CloudClient;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.params.DeviceSnapshotMergeCloudPlatform;
@@ -8,8 +9,10 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.params.ScenariosSnapshot;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.*;
 import cn.cyberpeace.mp.devopscluster.model.common.ServiceStatus;
-import com.alibaba.fastjson.JSONObject;
+import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -19,6 +22,15 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class ScenariosService extends BaseCpService {
+
+    @Autowired
+    private CloudClient cloudClient;
+    @Autowired
+    private SceneElementSnapshotMapper snapshotMapper;
+
+
+    private static final String CONTAINER = "container";
+
 
     private static final String DELETE_OR_CREATE_IMAGE_INSTANCE = "/cloud/v1/device/device_instance";
 
@@ -34,21 +46,22 @@ public class ScenariosService extends BaseCpService {
     /**
      * 创建快照
      */
-    public BaseCloudPlatformResult  create(ScenariosSnapshot snapshotCreate){
+    public void create(ScenariosSnapshot snapshotCreate){
 
-        String url = BaseCloudPlatformConstant.CPCLOUD_URL + BaseCloudPlatformConstant.URL_VERSION;
-        if ("vm".equals(snapshotCreate.getImageType())){
-            url = url + "/vm/" + snapshotCreate.getInstanceUuid() + SNAPSHOT;
-        }else if ("container".equals(snapshotCreate.getImageType())){
-            url = url + "/container/" + snapshotCreate.getInstanceUuid() + SNAPSHOT;
+        String snapshotId;
+        if (CONTAINER.equals(snapshotCreate.getImageType())) {
+            snapshotId = cloudClient.containerSnapshot(snapshotCreate.getInstanceUuid(), snapshotCreate.getDescription());
+        } else {
+            var result = cloudClient.vmSnapshot(snapshotCreate.getInstanceUuid(), snapshotCreate.getDescription());
+            snapshotId = result.getId();
         }
 
-        // 新平台只需要快照描述信息
-        JSONObject messageJson = new JSONObject();
-        messageJson.put("description", snapshotCreate.getDescription());
-        BaseCloudPlatformResult result = super.sendPost(url, messageJson.toJSONString(), BaseCloudPlatformResult.class);
-        super.checkResult(result);
-        return result;
+
+        SceneElementSnapshotModel snapshotModel = new SceneElementSnapshotModel();
+        snapshotModel.setId(snapshotId);
+        snapshotModel.setName(snapshotCreate.getDescription());
+        snapshotModel.setDescription(snapshotCreate.getDescription());
+        snapshotMapper.create(snapshotModel);
     }
 
     /**

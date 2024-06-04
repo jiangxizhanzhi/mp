@@ -17,6 +17,11 @@ public class BasePageDTO extends BaseDTO{
      */
     private Integer offset;
 
+    private Integer page;
+
+    private Integer perPage;
+
+
     public BasePageDTO(Integer limit, Integer offset) {
         this.limit = limit;
         this.offset = offset;

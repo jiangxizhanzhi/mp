@@ -6,9 +6,10 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Snapshot;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.CloudClient;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.params.DeviceSnapshotMergeCloudPlatform;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.params.ScenariosSnapshot;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.result.Snapshot;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ScenariosService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.SnapshotService;
@@ -19,24 +20,25 @@ import cn.cyberpeace.mp.devopscluster.converter.model.SnapshotConvertModel;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.DeviceAndSnapshotCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
+import cn.cyberpeace.mp.devopscluster.request.SnapshotActionRequest;
+import cn.cyberpeace.mp.devopscluster.request.SnapshotDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.SnapshotMergeRequest;
 import cn.cyberpeace.mp.devopscluster.request.SnapshotRequest;
+import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class SnapshotConverter {
+
+    private static final String CONTAINER = "container";
+
 
     private final SnapshotService snapshotService;
 
@@ -48,13 +50,18 @@ public class SnapshotConverter {
 
     private final CsceneSpecialService csceneSpecialService;
 
+    private final CloudClient cloudClient;
+
+    private final SceneElementSnapshotMapper snapshotMapper;
+
+
     /**
      * 根据设备UUID查询快照列表
      * @param deviceUuid
      * @return
      */
     public BasePageBO<SnapshotConvertModel> list(String deviceUuid) {
-        CloudPlatformPageResult<Snapshot> model = snapshotService.list(deviceUuid);
+        CloudPlatformPageResult<cn.cyberpeace.mp.devopscluster.cloud.platform.result.Snapshot> model = snapshotService.list(deviceUuid);
         List<SnapshotConvertModel> list = new ArrayList<>();
         for (Snapshot item : model.getList()) {
             SnapshotConvertModel snapshotConvertModel = getSnapshotConvertModel(item);
@@ -124,11 +131,27 @@ public class SnapshotConverter {
         scenariosService.create(snapshotCreate);
     }
 
+
+    /**
+     * 快照操作
+     (path)
+     虚拟机快照操作( preview | commit | undo | rollback )
+     * @param request
+     */
+    public void action(SnapshotActionRequest request) {
+        if (CONTAINER.equals(request.getImageType())) {
+            cloudClient.containerSnapshotAction(request.getInstanceId(), request.getSnapshotId(), request.getAction());
+        } else {
+            cloudClient.vmSnapshotAction(request.getInstanceId(), request.getSnapshotId(), request.getAction());
+        }
+    }
+
     /**
      * 合并快照
      * @param request
      * @return
      */
+    @Deprecated
     public void merge(SnapshotMergeRequest request) {
         validSnapshot(Collections.singletonList(request.getUuid()));
         DeviceSnapshotMergeCloudPlatform mergeCloudPlatform = new DeviceSnapshotMergeCloudPlatform();
@@ -137,6 +160,20 @@ public class SnapshotConverter {
         mergeCloudPlatform.setDeviceUuid(request.getUuid());
         mergeCloudPlatform.setImageType(request.getImageType());
         scenariosService.mergeSnapshot(mergeCloudPlatform);
+    }
+
+    /**
+     * 删除快照
+     * @param request
+     * @return
+     */
+    public void delete(SnapshotDeleteRequest request) {
+        if (CONTAINER.equals(request.getImageType())) {
+            cloudClient.deleteContainerSnapshot(request.getInstanceId(), request.getSnapshotId());
+        } else {
+            cloudClient.deleteVmSnapshot(request.getInstanceId(), request.getSnapshotId());
+        }
+        snapshotMapper.delete(request.getSnapshotId());
     }
 
     /**

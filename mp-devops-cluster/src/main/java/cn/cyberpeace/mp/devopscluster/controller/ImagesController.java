@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
@@ -16,6 +17,8 @@ import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.result.QuickCreateDevice;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.result.Snapshot;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.*;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
@@ -231,9 +234,23 @@ public class ImagesController {
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImagesBuildRequest.class)
     @PostMapping("/build")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "快速构建镜像", target = OpTargetEnums.IMAGE)
+    @Deprecated
     public ServiceResult build(@RequestBody ImagesBuildRequest request){
         imagesConverter.build(request);
         return ResultCommon.success();
+    }
+
+    @ApiOperation("查询快速构建靶标列表")
+    @GetMapping("/quick_create_list")
+    public ListObjServiceResult<QuickCreateDevice> quickCreateList(QuickCreatePageRequest request) {
+        return imagesConverter.quickCreateList(request).asResult();
+    }
+
+    @ApiOperation("提交快速构建")
+    @PostMapping("/quick_create")
+    public ServiceResult<Boolean> quickCreate(@RequestBody QuickCreateRequest request) {
+        imagesConverter.quickCreate(request);
+        return new ServiceResult<>(true).asResult();
     }
 
 
@@ -336,6 +353,7 @@ public class ImagesController {
     @ApiOperation("查询快照历史")
     @ApiImplicitParam(name = "uuid", value = "靶标id", paramType = "path", dataTypeClass = String.class)
     @GetMapping("/{id}/snapshot/list")
+    @Deprecated
     public Result<List<SnapshotConvertModel>> listSnapshot(@PathVariable("id") String uuid){
         BasePageBO<SnapshotConvertModel> convertModel = snapshotConverter.list(uuid);
         List<SnapshotConvertModel> list = convertModel.getList();
@@ -383,6 +401,7 @@ public class ImagesController {
     @ApiOperation("根据镜像名称或快照名称查询镜像名称和快照历史信息")
     @ApiImplicitParam(name = "name", value = "镜像名称", dataTypeClass = String.class)
     @GetMapping("/snapshot/by-name")
+    @Deprecated
     public Result<DeviceAndSnapshotConvertModel> deviceAndSnapshotByName(@RequestParam String name){
         DeviceAndSnapshotConvertModel convertModel = snapshotConverter.deviceAndSnapshotByName(name);
         return new Result(convertModel);
@@ -394,6 +413,7 @@ public class ImagesController {
     @ApiOperation("合并快照历史")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = SnapshotMergeRequest.class)
     @PostMapping("/snapshot/merge")
+    @Deprecated
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "合并快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult mergeSnapshot(@RequestBody SnapshotMergeRequest request){
 //        targetConverter.validTargetCanMerge(Arrays.asList(request.getUuid()));
@@ -415,7 +435,7 @@ public class ImagesController {
     @PostMapping("/snapshot/delete")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult<Boolean> deleteSnapshot(@RequestBody SnapshotDeleteRequest request) {
-        snapshotService.deleteSnapshot(request);
+        snapshotConverter.delete(request);
         return ResultCommon.success(true);
     }
 
@@ -430,6 +450,27 @@ public class ImagesController {
         snapshotConverter.create(request);
         return ResultCommon.success();
     }
+
+    @ApiOperation("快照操作")
+    @PostMapping("/snapshot/action")
+    public ServiceResult<Boolean> snapshotAction(@RequestBody SnapshotActionRequest request) {
+        snapshotConverter.action(request);
+        return new ServiceResult<>(true).asResult();
+    }
+
+    @ApiOperation("根据虚拟机id查询快照列表")
+    @GetMapping("/snapshot/by_vm_id")
+    public ListObjServiceResult<Snapshot> getVmSnapshotById(SnapshotPageRequest request) {
+        return snapshotService.getVmSnapshotById(request).asResult();
+    }
+
+    @ApiOperation("根据容器id查询快照列表")
+    @GetMapping("/snapshot/by_container_id")
+    public ListObjServiceResult<ContainerSnapshot> getContainerSnapshotById(SnapshotPageRequest request) {
+        return snapshotService.getContainerSnapshotById(request).asResult();
+    }
+
+
 
     /**
      * 文件注入

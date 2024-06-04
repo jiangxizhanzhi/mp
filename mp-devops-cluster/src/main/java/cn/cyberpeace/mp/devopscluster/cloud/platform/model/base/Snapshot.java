@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.model.base;
 
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -12,6 +13,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Snapshot extends BaseCloudPlatformResult {
 
+    @ApiModelProperty(value = "快照id")
+    private String id;
+
     /**
      * UUID
      */
@@ -20,6 +24,7 @@ public class Snapshot extends BaseCloudPlatformResult {
     /**
      * 真实快照名称
      */
+    @ApiModelProperty(value = "快照名称")
     private String name;
 
     /**
@@ -35,12 +40,22 @@ public class Snapshot extends BaseCloudPlatformResult {
     /**
      * 描述
      */
+    @ApiModelProperty(value = "快照描述")
     private String description;
 
     /**
      * 创建时间
      */
+    @ApiModelProperty(value = "快照创建时间")
     private String createdAt;
+    @ApiModelProperty(value = "快照状态")
+    private String status;
+    @ApiModelProperty(value = "cpu数量")
+    private Integer cpu;
+    @ApiModelProperty(value = "内存大小")
+    private Integer definedMemory;
+    private Integer ensuredPhysicalMemory;
+    private Boolean memory;
 
     private String imageName;
 
@@ -48,7 +63,7 @@ public class Snapshot extends BaseCloudPlatformResult {
 
     @Setter
     @Getter
-    public static class ExtInfo{
-        private String sceneId ;
+    public static class ExtInfo {
+        private String sceneId;
     }
 }
