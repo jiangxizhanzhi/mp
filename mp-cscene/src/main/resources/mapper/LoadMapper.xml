@@ -655,21 +655,6 @@
         order by create_time desc
     </select>
 
-    <select id="getLoadByPks" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoad">
-        SELECT
-        *
-        FROM
-        mp_devops_load
-        <where>
-            <if test="param != null and param.size != 0">
-                and pk in
-                <foreach collection="param" item="item" separator="," open="(" close=")">
-                    #{item}
-                </foreach>
-            </if>
-        </where>
-    </select>
-
     <select id="getLoadByIds" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoad">
         SELECT
         *

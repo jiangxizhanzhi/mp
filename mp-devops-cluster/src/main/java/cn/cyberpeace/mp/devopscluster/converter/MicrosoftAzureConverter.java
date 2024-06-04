@@ -265,7 +265,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
     private <T> boolean batchInsert(List<T> dataList, Function<List<T>, Boolean> insertFunction, String entityType) {
         if (CollectionUtils.isEmpty(dataList)) {
 //            log.info("{} 数据为空，跳过插入操作", entityType);
-            return true; // 或者根据业务逻辑决定是否认为空列表插入也是成功
+            return true;
         }
 
         AtomicInteger counter = new AtomicInteger(0);

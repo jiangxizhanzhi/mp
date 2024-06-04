@@ -47,6 +47,7 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
 
@@ -349,25 +350,25 @@ public class LoadServiceImpl {
      * */
     public List<MpDevopsLoad> getLoadBySceneId(String sceneId) {
         //节点表
-//        List<CloudPluginSceneElementModel> loadList = csceneInstanceService.listLoads(sceneId);
-//        List<String> loadIds = loadList.stream()
-//                .map(CloudPluginSceneElementModel::getLoadToolId)
-//                .filter(Objects::nonNull)
-//                .distinct()
-//                .collect(Collectors.toList());
-//        List<MpDevopsLoad> getLoadByPks = new ArrayList<>();
-//        if(loadIds!=null && loadIds.size()>0){
-//            getLoadByPks = loadMapper.getLoadByPks(loadIds);
-//        }
-//        return getLoadByPks;
-
-        //暂用这个
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("pageNum", 1);
-        jsonObject.put("pageSize", 100);
-        JSONObject loads = getLoadList(new JSONObject());
-        List<MpDevopsLoad> getLoadByPks = (List) loads.get("source");
+        List<CloudPluginSceneElementModel> loadList = csceneInstanceService.listLoads(sceneId);
+        List<String> loadIds = loadList.stream()
+                .map(CloudPluginSceneElementModel::getLoadToolId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        List<MpDevopsLoad> getLoadByPks = new ArrayList<>();
+        if(loadIds!=null && loadIds.size()>0){
+            getLoadByPks = loadMapper.getLoadByIds(loadIds);
+        }
         return getLoadByPks;
+
+//        //暂用这个
+//        JSONObject jsonObject = new JSONObject();
+//        jsonObject.put("pageNum", 1);
+//        jsonObject.put("pageSize", 100);
+//        JSONObject loads = getLoadList(new JSONObject());
+//        List<MpDevopsLoad> getLoadByPks = (List) loads.get("source");
+//        return getLoadByPks;
     }
 
     /*
@@ -375,33 +376,28 @@ public class LoadServiceImpl {
      * */
     public Map<String, Integer> getLoadExecutionResultStatistics(JSONObject requestData) {
         List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResultStatistics(requestData);
-        Integer successTimes = 0;
-        Integer failTimes = 0;
-        Integer noResultForTheTime = 0;
-        for (MpDevopsLoadSceneLog m : list) {
-            if (m.getResultStatus() != null && m.getResultStatus().equals("1005010101")) {
-                successTimes++;
-            } else if (m.getResultStatus() != null && m.getResultStatus().equals("1005010102")) {
-                failTimes++;
-            } else if (m.getResultStatus() != null && m.getResultStatus().equals("1005010103")) {
-                noResultForTheTime++;
-            }
-        }
-        Map<String, Integer> map = new HashMap();
-        //请求次数
-        map.put("ask_times", list.size());
-        //成功次数
-        map.put("success_times", successTimes);
-        //失败次数
-        map.put("fail_times", failTimes);
-        //已有结果
-        map.put("have_result", successTimes + failTimes);
-        //暂无结果
-        map.put("no_result_for_the_time", noResultForTheTime);
-        for (int i = 0; i < list.size(); i++) {
-            //todo 统计
-        }
-        return map;
+
+        final String SUCCESS_CODE = "10050101";
+        final String FAIL_CODE = "10050102";
+        final String NO_RESULT_CODE = "10050103";
+
+        Map<String, Integer> statusCount = list.stream()
+                .filter(log -> log.getResultStatus() != null)
+                .collect(Collectors.groupingBy(
+                        MpDevopsLoadSceneLog::getResultStatus,
+                        Collectors.collectingAndThen(Collectors.counting(), Long::intValue)));
+
+        Integer successTimes = statusCount.getOrDefault(SUCCESS_CODE, 0);
+        Integer failTimes = statusCount.getOrDefault(FAIL_CODE, 0);
+        Integer noResultForTheTime = statusCount.getOrDefault(NO_RESULT_CODE, 0);
+
+        Map<String, Integer> resultMap = new HashMap<>();
+        resultMap.put("ask_times", list.size());
+        resultMap.put("success_times", successTimes);
+        resultMap.put("fail_times", failTimes);
+        resultMap.put("have_result", successTimes + failTimes);
+        resultMap.put("no_result_for_the_time", noResultForTheTime);
+        return resultMap;
     }
 
     /*
