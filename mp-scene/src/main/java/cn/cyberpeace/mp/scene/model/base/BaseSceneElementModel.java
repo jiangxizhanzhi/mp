@@ -33,7 +33,7 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
     private String controlType;
     @DefaultStr
     private String defaultCmd;
-    @DefaultStr
+    @DefaultInt
     private Integer expansionDisk;
 
     public static class Type {
