@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
-import cn.cyberpeace.mp.cscene.model.MpDevopsLoadStageBind;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.annotations.Mapper;
@@ -55,8 +54,6 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
     List<MpDevopsLoad> getToolListByloadIds(@Param("param") List<String> ids);
 
     Boolean updateBindByPk(String pk, @Param("param") JSONObject requestData);
-
-    List<MpDevopsLoadStageBind> stageBindLoadList(String sceneId);
 
     Boolean deleteLoadBindByPk(String pk);
 

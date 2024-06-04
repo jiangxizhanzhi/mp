@@ -585,18 +585,6 @@
         </where>
     </select>
 
-    <select id="stageBindLoadList" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoadStageBind">
-        SELECT
-        *
-        FROM
-        mp_devops_load_stage_bind
-        <where>
-            <if test="sceneId != null and sceneId != ''">
-                and scene_id = #{sceneId}
-            </if>
-        </where>
-    </select>
-
     <select id="getLoadResultByLoads" resultType="com.alibaba.fastjson.JSONObject">
         SELECT
         log.id as tool_id,

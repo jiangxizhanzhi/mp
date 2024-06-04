@@ -54,6 +54,11 @@ import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
 @Service
 public class LoadServiceImpl {
 
+    final String STATUS_SUCCESS_CODE = "1005010101";
+    final String STATUS_FAIL_CODE = "1005010102";
+    final String LOAD_RESULT_ACTION_CODE = "MP-acceptLoadResult-by-outService";
+    final String SYNCHRONOUS_DATA_ACTION_CODE= "MP-synchronousData-by-outService";
+
     @Autowired
     private LoadMapper loadMapper;
 
@@ -121,7 +126,7 @@ public class LoadServiceImpl {
     public synchronized JSONObject synchronousData(Boolean isNeedMessage) {
         //推送的消息返回格式
         Map jsonObject = new LinkedHashMap<>();
-        jsonObject.put("code", "MP-synchronousData-by-outService");
+        jsonObject.put("code", SYNCHRONOUS_DATA_ACTION_CODE);
         Map data = new LinkedHashMap<>();
 
         //同步设置
@@ -377,9 +382,9 @@ public class LoadServiceImpl {
     public Map<String, Integer> getLoadExecutionResultStatistics(JSONObject requestData) {
         List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResultStatistics(requestData);
 
-        final String SUCCESS_CODE = "10050101";
-        final String FAIL_CODE = "10050102";
-        final String NO_RESULT_CODE = "10050103";
+        final String SUCCESS_CODE = "1005010101";
+        final String FAIL_CODE = "1005010102";
+        final String NO_RESULT_CODE = "1005010103";
 
         Map<String, Integer> statusCount = list.stream()
                 .filter(log -> log.getResultStatus() != null)
@@ -442,49 +447,59 @@ public class LoadServiceImpl {
         return addLoadExecutionResult;
     }
 
+    private boolean validateRequestData(List<LoadRequest> requestData) {
+        for (LoadRequest request : requestData) {
+            if (request.getTaskId() == null || request.getTaskId().isEmpty() || request.getInstanceId() == null || request.getInstanceId().isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String convertStatusToCode(String status) {
+        if ("成功".equals(status)) {
+            return STATUS_SUCCESS_CODE;
+        } else if ("失败".equals(status)) {
+            return STATUS_FAIL_CODE;
+        }
+        return ""; // 或者处理无效状态的逻辑
+    }
+
     /*
      * 批量新增载荷执行结果
      * */
     public ServiceResult updateLoadExecutionOutResult(List<LoadRequest> requestData) {
-        Boolean addLoadExecutionOutResult = true;
-        Boolean checkFlag = true;
-        //校验每条数据中taskId和InstanceId不能为空
-        if (requestData.size() > 0) {
-            for (LoadRequest loadRequest : requestData) {
-                if (loadRequest.getTaskId() == null || loadRequest.getTaskId().equals("")) {
-                    checkFlag = false;
-                    break;
-                }
-                if (loadRequest.getInstanceId() == null || loadRequest.getInstanceId().equals("")) {
-                    checkFlag = false;
-                    break;
-                }
-            }
-        }
-        if(!checkFlag){
+        // 验证参数
+        if (!validateRequestData(requestData)) {
             return new ServiceResult(null, BaseErrorCode.ERROR, "列表数据部分参数缺失").asResult();
         }
+
+        // 状态字符串转状态码
+        requestData.forEach(req -> req.setResultStatus(convertStatusToCode(req.getResultStatus())));
+
         //根据taskId获取场景id
         String sceneId = loadMapper.getSceneIdByTaskId(requestData.get(0).getTaskId());
+
         //根据sceneId查找对应ws会话推送消息
         Session session = LoadResultWebSocketServer.sceneIdAndSession.get(sceneId);
-        LoadResultWebSocketServer loadResultWebSocketServer = LoadResultWebSocketServer.sessionPools.get(session);
-        Map jsonObject = new LinkedHashMap<>();
-        jsonObject.put("code", "MP-acceptLoadResult-by-outService");
-        Map data = new LinkedHashMap<>();
-        Integer sort = 0;
-        String message = requestData.toString();
-        Boolean result = true;
-        sendResultMessage(loadResultWebSocketServer,session,jsonObject,data,sort,message,result);
+        if(session != null){
+            LoadResultWebSocketServer loadResultWebSocketServer = LoadResultWebSocketServer.sessionPools.get(session);
+            if(loadResultWebSocketServer != null){
+                Map jsonObject = new LinkedHashMap<>();
+                jsonObject.put("code", LOAD_RESULT_ACTION_CODE);
+                Map data = new LinkedHashMap<>();
+                Integer sort = 0;
+                String message = requestData.toString();
+                Boolean result = true;
+                sendResultMessage(loadResultWebSocketServer,session,jsonObject,data,sort,message,result);
+            }
+        }
 
-        if (requestData.size() > 0) {
-            addLoadExecutionOutResult = loadMapper.updateLoadExecutionOutResult(requestData);
-        }
-        if(addLoadExecutionOutResult){
-            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-        }else{
-            return new ServiceResult(null, BaseErrorCode.ERROR, "批量新增载荷执行结果失败").asResult();
-        }
+        // 更新数据库
+        Boolean success = requestData.size() > 0 && loadMapper.updateLoadExecutionOutResult(requestData);
+        return success
+                ? new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult()
+                : new ServiceResult(null, BaseErrorCode.ERROR, "批量新增载荷执行结果失败").asResult();
     }
 
     private void sendResultMessage(LoadResultWebSocketServer webSocketServer, Session session, Map map, Map data,
@@ -870,36 +885,6 @@ public class LoadServiceImpl {
         String execCommand = requestData.getExecCommand();
         Boolean updateTaskInfo = outLoadService.updateTaskInfo(requestData);
         return updateTaskInfo;
-    }
-
-    public List stageBindLoadList(String sceneId) {
-        List<MpDevopsLoadStageBind> stageBindLoadList = loadMapper.stageBindLoadList(sceneId);
-        //返回数据
-        List<Map<String, Object>> resultList = new ArrayList<>();
-        //根据stageId分类
-        if (stageBindLoadList != null && stageBindLoadList.size() > 0) {
-            Map<String, List<MpDevopsLoadStageBind>> map = new HashMap<>();
-            for (int i = 0; i < stageBindLoadList.size(); i++) {
-                String stageId = stageBindLoadList.get(i).getStageId();
-                if (map.containsKey(stageId)) {
-                    map.get(stageId).add(stageBindLoadList.get(i));
-                } else {
-                    List<MpDevopsLoadStageBind> list = new ArrayList<>();
-                    list.add(stageBindLoadList.get(i));
-                    map.put(stageId, list);
-                }
-            }
-            //map转换成List<Map>
-            if (map != null && map.size() > 0) {
-                for (Map.Entry<String, List<MpDevopsLoadStageBind>> entry : map.entrySet()) {
-                    Map<String, Object> resultMap = new HashMap<>();
-                    resultMap.put("stageId", entry.getKey());
-                    resultMap.put("data", entry.getValue());
-                    resultList.add(resultMap);
-                }
-            }
-        }
-        return resultList;
     }
 
     public Boolean deleteLoadBind(JSONObject requestData) {

@@ -491,16 +491,6 @@ public class LoadController {
     }
 
     /*
-     * 阶段测试绑定载荷页面
-     * */
-    @ApiOperation(value = "阶段测试绑定载荷页面", notes = "")
-    @GetMapping("/stageBindLoadList")
-    public ServiceResult stageBindLoadList(@RequestParam(value = "sceneId", required = false) String sceneId) {
-        List stageBindLoadList = loadService.stageBindLoadList(sceneId);
-        return new ServiceResult(stageBindLoadList, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-    }
-
-    /*
      * 查询该场景绑定的载荷及记录
      * */
     @ApiOperation(value = "查询该场景绑定的载荷及记录", notes = "")
