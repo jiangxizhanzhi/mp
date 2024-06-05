@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.request.load;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,23 +14,30 @@ import java.util.List;
 @NoArgsConstructor
 public class LoadResultSearchRequest {
 
-    /**
-     * 工具pks
-     */
+    @ApiModelProperty(value = "工具pks")
     private List<String> pks;
 
-    /**
-     * 开始时间
-     */
+    @ApiModelProperty(value = "工具pk")
+    private String pk;
+
+    @ApiModelProperty(value = "开始时间")
     private String beginTime;
 
-    /**
-     * 结束时间
-     */
-    private String finishTime;
+    @ApiModelProperty(value = "结束时间")
+    private String overTime;
 
-    /**
-     * 场景Id
-     */
+    @ApiModelProperty(value = "场景Id")
     private String sceneId;
+
+    @ApiModelProperty(value = "当前页")
+    private Integer page;
+
+    @ApiModelProperty(value = "分页每页条数")
+    private Integer perPage;
+
+    @JsonIgnore
+    private Integer offset;
+
+    @JsonIgnore
+    private Integer pageSize;
 }

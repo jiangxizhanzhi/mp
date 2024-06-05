@@ -24,8 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -154,7 +152,7 @@ public class LoadController {
      * */
     @ApiOperation(value = "载荷数据同步", notes = "")
     @GetMapping("/synchronousData")
-    public ServiceResult synchronousData(@RequestParam(value = "is_need_message",defaultValue = "true") Boolean isNeedMessage) {
+    public ServiceResult synchronousData(@RequestParam(value = "is_need_message", defaultValue = "true") Boolean isNeedMessage) {
         JSONObject synchronousData = loadService.synchronousData(isNeedMessage);
         if (synchronousData != null) {
             return new ServiceResult(synchronousData, BaseErrorCode.SUCCESS, "载荷数据同步成功").asResult();
@@ -192,7 +190,7 @@ public class LoadController {
     @PostMapping("/loadTransform")
     public ServiceResult loadTransform(@RequestParam(value = "file") MultipartFile file, HttpServletRequest request,
                                        HttpServletResponse response, @RequestParam(value = "transform_type") String transformType) {
-        ServiceResult loadTransform = loadService.loadTransform(file,transformType,response);
+        ServiceResult loadTransform = loadService.loadTransform(file, transformType, response);
         return loadTransform;
     }
 
@@ -214,29 +212,11 @@ public class LoadController {
     @ApiOperation(value = "载荷执行结果统计", notes = "")
     @PostMapping("/getLoadExecutionResultStatistics")
     public ServiceResult getLoadExecutionResultStatistics(@RequestBody(required = false) LoadResultSearchRequest requestData) {
-        JSONObject request = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
-        String sceneId = request.get("sceneId") != null && !request.get("sceneId").toString().equals("") ? request.get("sceneId").toString() : "";
-        if (sceneId.equals("")) {
-            return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "scene_id不能为空").asResult();
+        ListObjServiceResult listObjServiceResult = loadService.checkGetResultParam(requestData);
+        if (!listObjServiceResult.isSuccess()) {
+            return listObjServiceResult;
         }
-        //将time转换成LocaldateTime
-        LocalDateTime beginTimeLocalDateTime = null;
-        LocalDateTime finishTimeLocalDateTime = null;
-        if (request.get("beginTime") != null && request.get("finishTime") != null) {
-            try {
-                beginTimeLocalDateTime = LocalDateTime.parse(request.get("beginTime").toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                finishTimeLocalDateTime = LocalDateTime.parse(request.get("finishTime").toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                //比较时间
-                if (beginTimeLocalDateTime.isAfter(finishTimeLocalDateTime)) {
-                    return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "结束时间不能小于开始时间");
-                }
-            } catch (Exception e) {
-                return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "开始时间转换时间类型错误");
-            }
-        }
-        request.put("beginTime", beginTimeLocalDateTime != null ? beginTimeLocalDateTime.toString() : null);
-        request.put("finishTime", finishTimeLocalDateTime != null ? finishTimeLocalDateTime.toString() : null);
-        Map<String, Integer> map = loadService.getLoadExecutionResultStatistics(request);
+        Map<String, Integer> map = loadService.getLoadExecutionResultStatistics(requestData);
         return new ServiceResult(map, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
@@ -246,30 +226,11 @@ public class LoadController {
     @ApiOperation(value = "载荷执行结果", notes = "")
     @PostMapping("/getLoadExecutionResult")
     public ListObjServiceResult getLoadExecutionResult(@RequestBody(required = false) LoadResultSearchRequest requestData) {
-        JSONObject request = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
-        String sceneId = request.get("sceneId") != null && !request.get("sceneId").toString().equals("") ? request.get("sceneId").toString() : "";
-        if (sceneId.equals("")) {
-            return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "scene_id不能为空").asResult();
+        ListObjServiceResult listObjServiceResult = loadService.checkGetResultParam(requestData);
+        if (!listObjServiceResult.isSuccess()) {
+            return listObjServiceResult;
         }
-        //将time转换成LocaldateTime
-        LocalDateTime beginTimeLocalDateTime = null;
-        LocalDateTime finishTimeLocalDateTime = null;
-        if (request.get("beginTime") != null && request.get("finishTime") != null) {
-            try {
-                beginTimeLocalDateTime = LocalDateTime.parse(request.get("beginTime").toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                finishTimeLocalDateTime = LocalDateTime.parse(request.get("finishTime").toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                //比较时间
-                if (beginTimeLocalDateTime.isAfter(finishTimeLocalDateTime)) {
-                    return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "结束时间不能小于开始时间");
-                }
-            } catch (Exception e) {
-                return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "开始时间转换时间类型错误");
-            }
-        }
-        request.put("beginTime", beginTimeLocalDateTime != null ? beginTimeLocalDateTime.toString() : null);
-        request.put("finishTime", finishTimeLocalDateTime != null ? finishTimeLocalDateTime.toString() : null);
-        List<MpDevopsLoadSceneLog> list = loadService.getLoadExecutionResult(request);
-        return new ListObjServiceResult(list, list.size()).asResult();
+        return loadService.getLoadExecutionResult(requestData);
     }
 
     /*
@@ -287,14 +248,12 @@ public class LoadController {
      * */
     @ApiOperation(value = "载荷执行结果详情", notes = "")
     @GetMapping("/getLoadExecutionResultByPk")
-    public ServiceResult getLoadExecutionResultById(@RequestParam(value = "pk") String pk) {
-        JSONObject requestData = new JSONObject();
-        requestData.put("pk", pk);
-        List<MpDevopsLoadSceneLog> list = loadService.getLoadExecutionResult(requestData);
-        if (list != null && list.size() == 1) {
-            return new ServiceResult(list.get(0), BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+    public ServiceResult getLoadExecutionResultByLogPk(@RequestParam(value = "pk") String pk) {
+        MpDevopsLoadSceneLog loadExecutionResult = loadService.getLoadExecutionResultByLogPk(pk);
+        if (loadExecutionResult != null) {
+            return new ServiceResult(loadExecutionResult, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
-            return new ServiceResult(null, BaseErrorCode.ERROR, "查询载荷执行结果详情失败").asResult();
+            return new ServiceResult(null, BaseErrorCode.DATA_NOT_EXIST, "数据不存在").asResult();
         }
     }
 
@@ -304,12 +263,8 @@ public class LoadController {
     @ApiOperation(value = "删除载荷执行结果", notes = "")
     @DeleteMapping("/deleteLoadExecutionResultByPk")
     public ServiceResult deleteLoadExecutionResultByPk(@RequestBody MpDevopsLoadSceneLog request) {
-        Boolean deleteLoadExecutionResultByPk = loadService.deleteLoadExecutionResultByPk(request);
-        if (deleteLoadExecutionResultByPk) {
-            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-        } else {
-            return new ServiceResult(null, BaseErrorCode.ERROR, "删除载荷执行结果失败").asResult();
-        }
+        ServiceResult deleteLoadExecutionResultByPk = loadService.deleteLoadExecutionResultByPk(request);
+        return deleteLoadExecutionResultByPk;
     }
 
     /*
@@ -318,12 +273,8 @@ public class LoadController {
     @ApiOperation(value = "修改载荷执行结果", notes = "")
     @PutMapping("/updateLoadExecutionResultByPk")
     public ServiceResult updateLoadExecutionResultByPk(@RequestBody MpDevopsLoadSceneLog request) {
-        Boolean updateLoadExecutionResultByPk = loadService.updateLoadExecutionResultByPk(request);
-        if (updateLoadExecutionResultByPk) {
-            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-        } else {
-            return new ServiceResult(null, BaseErrorCode.ERROR, "修改载荷执行结果失败").asResult();
-        }
+        ServiceResult updateLoadExecutionResultByPk = loadService.updateLoadExecutionResultByPk(request);
+        return updateLoadExecutionResultByPk;
     }
 
     /*
@@ -379,7 +330,7 @@ public class LoadController {
     @ApiOperation(value = "载荷执行结果导出", notes = "")
     @PostMapping("/exportLoadExecutionResult")
     public ServiceResult exportLoadExecutionResult(HttpServletRequest request, HttpServletResponse response,
-                                                   @RequestBody(required = false) MpDevopsLoadSceneLog requestData) throws IOException {
+                                                   @RequestBody(required = false) LoadResultSearchRequest requestData) throws IOException {
         Boolean exportLoadExecutionResult = loadService.exportLoadExecutionResult(request, response, requestData);
         if (exportLoadExecutionResult) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();

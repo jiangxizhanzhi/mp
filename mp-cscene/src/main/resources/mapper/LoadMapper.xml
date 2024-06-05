@@ -13,8 +13,7 @@
          result_status,
          creator_id,
          create_time)
-        VALUES (
-                #{param.id},
+        VALUES (#{param.id},
                 #{param.sceneId},
                 #{param.stageId},
                 #{param.taskId},
@@ -22,8 +21,7 @@
                 #{param.resultLog},
                 #{param.resultStatus},
                 #{param.creatorId},
-                #{param.createTime}
-               )
+                now())
     </insert>
 
     <insert id="addResult">
@@ -63,7 +61,7 @@
                 <if test="item.resultStatus != null and item.resultStatus != ''">
                     result_status = #{item.resultStatus},
                 </if>
-                    update_time = now()
+                update_time = now()
             </set>
             <where>
                 <if test="item.taskId != null and item.taskId != ''">
@@ -185,26 +183,26 @@
         VALUES
         <foreach item="item" collection="param" separator=",">
             (#{item.id},
-             #{item.toolName},
-             #{item.toolDescription},
-             #{item.toolPlatform},
-             #{item.actionType},
-             #{item.runTable},
-             #{item.controlType},
-             #{item.controlPort},
-             #{item.source},
-             #{item.cover},
-             #{item.coverName},
-             #{item.attachment},
-             #{item.attachmentName},
-             #{item.readMe},
-             #{item.readMeName},
-             #{item.defaultCmd},
-             now(),
-             now(),
-             now(),
-             #{item.creatorId}
-             )
+            #{item.toolName},
+            #{item.toolDescription},
+            #{item.toolPlatform},
+            #{item.actionType},
+            #{item.runTable},
+            #{item.controlType},
+            #{item.controlPort},
+            #{item.source},
+            #{item.cover},
+            #{item.coverName},
+            #{item.attachment},
+            #{item.attachmentName},
+            #{item.readMe},
+            #{item.readMeName},
+            #{item.defaultCmd},
+            now(),
+            now(),
+            now(),
+            #{item.creatorId}
+            )
         </foreach>
     </insert>
 
@@ -281,7 +279,7 @@
             <if test="param != null and param.creatorId != null and param.creatorId != ''">
                 creator_id = #{param.creatorId},
             </if>
-                update_time = now()
+            update_time = now()
         </set>
         WHERE
         pk = #{pk}
@@ -408,7 +406,7 @@
                 </if>
                 update_time = now(),
             </set>
-                where id = #{item.id}
+            where id = #{item.id}
         </foreach>
     </update>
 
@@ -504,6 +502,9 @@
         mp_devops_load mdl
         on log.id = mdl.id
         <where>
+            <if test="param != null and param.pk != null and param.pk != ''">
+                and mdl.pk = #{param.pk}
+            </if>
             <if test="param != null and param.pks != null and param.pks.size != 0">
                 and mdl.pk in
                 <foreach collection="param.pks" item="item" separator="," open="(" close=")">
@@ -513,26 +514,11 @@
             <if test="param != null and param.sceneId != null and param.sceneId != ''">
                 and log.scene_id = #{param.sceneId}
             </if>
-            <if test="param != null and param.toolName != null and param.toolName != ''">
-                and mdl.tool_name like concat('%', #{param.toolName}, '%')
-            </if>
-            <if test="param != null and param.actionType != null and param.actionType != ''">
-                and mdl.action_type = #{param.actionType}
-            </if>
-            <if test="param != null and param.runTable != null and param.runTable != ''">
-                and mdl.run_table = #{param.runTable}
-            </if>
-            <if test="param != null and param.source != null and param.source != ''">
-                and mdl.source = #{param.source}
-            </if>
-            <if test="param != null and param.controlType != null and param.controlType != ''">
-                and mdl.control_type = #{param.controlType}
-            </if>
             <if test="param != null and param.beginTime != null and param.beginTime != ''">
                 and log.create_time &gt;= #{param.beginTime, jdbcType=TIMESTAMP}
             </if>
-            <if test="param != null and param.finishTime != null and param.finishTime != ''">
-                and log.create_time &lt;= #{param.finishTime, jdbcType=TIMESTAMP}
+            <if test="param != null and param.overTime != null and param.overTime != ''">
+                and log.create_time &lt;= #{param.overTime, jdbcType=TIMESTAMP}
             </if>
         </where>
         <if test="param != null and param.offset != null and param.pageSize != null">
@@ -540,14 +526,40 @@
         </if>
     </select>
 
-    <select id="getSynchronousDataSource" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource">
+    <select id="getLoadExecutionResultNum" resultType="java.lang.Integer">
         SELECT
-            *
+        count(0)
         FROM
-            mp_devops_load_source
-        ORDER BY
-            create_time DESC
-            LIMIT 1
+        mp_devops_load_scene_result_log log
+        inner join
+        mp_devops_load mdl
+        on log.id = mdl.id
+        <where>
+            <if test="param != null and param.pk != null and param.pk != ''">
+                and mdl.pk = #{param.pk}
+            </if>
+            <if test="param != null and param.pks != null and param.pks.size != 0">
+                and mdl.pk in
+                <foreach collection="param.pks" item="item" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="param != null and param.sceneId != null and param.sceneId != ''">
+                and log.scene_id = #{param.sceneId}
+            </if>
+            <if test="param != null and param.beginTime != null and param.beginTime != ''">
+                and log.create_time &gt;= #{param.beginTime, jdbcType=TIMESTAMP}
+            </if>
+            <if test="param != null and param.overTime != null and param.overTime != ''">
+                and log.create_time &lt;= #{param.overTime, jdbcType=TIMESTAMP}
+            </if>
+        </where>
+    </select>
+
+    <select id="getSynchronousDataSource" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource">
+        SELECT *
+        FROM mp_devops_load_source
+        ORDER BY create_time DESC LIMIT 1
     </select>
 
     <select id="getToolListByloadIds" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoad">
@@ -639,12 +651,14 @@
     </select>
 
     <select id="getSceneIdByTaskId" resultType="java.lang.String">
-        select
-            scene
-        from
-            mp_sceneplugincloud_scene_element
-        where
-            resource_id = #{taskId}
-        limit 1
+        select scene
+        from mp_sceneplugincloud_scene_element
+        where resource_id = #{taskId} limit 1
+    </select>
+
+    <select id="getLoadExecutionResultByLogPk" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog">
+        SELECT *
+        FROM mp_devops_load_scene_result_log
+        WHERE pk = #{pk}
     </select>
 </mapper>

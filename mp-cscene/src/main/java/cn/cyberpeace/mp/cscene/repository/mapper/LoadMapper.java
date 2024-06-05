@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
+import cn.cyberpeace.mp.cscene.request.load.LoadResultSearchRequest;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -24,7 +25,10 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     Boolean deleteLoadByPk(String pk);
 
-    List<MpDevopsLoadSceneLog> getLoadExecutionResult(@Param("param") JSONObject requestData);
+    // pk和pks为工具的主键
+    List<MpDevopsLoadSceneLog> getLoadExecutionResult(@Param("param") LoadResultSearchRequest requestData);
+
+    Integer getLoadExecutionResultNum(@Param("param") LoadResultSearchRequest requestData);
 
     Boolean deleteLoadExecutionResultByPk(String pk);
 
@@ -68,4 +72,6 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
     Boolean batchUpdateData(@Param("param") List<JSONObject> sameLoads);
 
     String getSceneIdByTaskId(String taskId);
+
+    MpDevopsLoadSceneLog getLoadExecutionResultByLogPk(String pk);
 }

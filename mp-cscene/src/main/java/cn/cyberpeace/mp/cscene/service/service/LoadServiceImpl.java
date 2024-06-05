@@ -1,26 +1,24 @@
 package cn.cyberpeace.mp.cscene.service.service;
 
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
-import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
-import cn.cyberpeace.mp.cscene.model.*;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
+import cn.cyberpeace.mp.cscene.request.load.LoadResultSearchRequest;
 import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
 import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.websocket.LoadResultWebSocketServer;
 import cn.cyberpeace.mp.cscene.websocket.WebSocketServer;
-import cn.cyberpeace.mp.scene.model.SceneConfigModel;
-import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
@@ -37,7 +35,10 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.websocket.Session;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
@@ -57,7 +58,7 @@ public class LoadServiceImpl {
     final String STATUS_SUCCESS_CODE = "1005010101";
     final String STATUS_FAIL_CODE = "1005010102";
     final String LOAD_RESULT_ACTION_CODE = "MP-acceptLoadResult-by-outService";
-    final String SYNCHRONOUS_DATA_ACTION_CODE= "MP-synchronousData-by-outService";
+    final String SYNCHRONOUS_DATA_ACTION_CODE = "MP-synchronousData-by-outService";
 
     @Autowired
     private LoadMapper loadMapper;
@@ -155,7 +156,7 @@ public class LoadServiceImpl {
                 });
             }
             return null;
-        }else{
+        } else {
             if (isNeedMessage) {
                 WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
                     sendMessage(webSocketServer, session, jsonObject, data, 1, "正在连接载荷管理机:" + synchronousDataSource.getIp() + "......成功,正在获取数据", true);
@@ -349,6 +350,7 @@ public class LoadServiceImpl {
         }
         return deleteLoadByPk;
     }
+
     /*
 
      * 根据场景id获取绑定的载荷
@@ -362,7 +364,7 @@ public class LoadServiceImpl {
                 .distinct()
                 .collect(Collectors.toList());
         List<MpDevopsLoad> getLoadByPks = new ArrayList<>();
-        if(loadIds!=null && loadIds.size()>0){
+        if (loadIds != null && loadIds.size() > 0) {
             getLoadByPks = loadMapper.getLoadByIds(loadIds);
         }
         return getLoadByPks;
@@ -379,7 +381,7 @@ public class LoadServiceImpl {
     /*
      * 载荷执行结果统计
      * */
-    public Map<String, Integer> getLoadExecutionResultStatistics(JSONObject requestData) {
+    public Map<String, Integer> getLoadExecutionResultStatistics(LoadResultSearchRequest requestData) {
         List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResult(requestData);
 
         final String SUCCESS_CODE = "1005010101";
@@ -405,38 +407,92 @@ public class LoadServiceImpl {
         return resultMap;
     }
 
+    public ListObjServiceResult checkGetResultParam(LoadResultSearchRequest request) {
+        String sceneId = request.getSceneId() != null && !request.getSceneId().equals("") ? request.getSceneId() : "";
+        if (sceneId.equals("")) {
+            return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "scene_id不能为空").asResult();
+        }
+        //将time转换成LocaldateTime
+        LocalDateTime beginTimeLocalDateTime = null;
+        LocalDateTime finishTimeLocalDateTime = null;
+        if (request.getBeginTime() != null && request.getOverTime() != null) {
+            try {
+                beginTimeLocalDateTime = LocalDateTime.parse(request.getBeginTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                finishTimeLocalDateTime = LocalDateTime.parse(request.getOverTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                //比较时间
+                if (beginTimeLocalDateTime.isAfter(finishTimeLocalDateTime)) {
+                    return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "结束时间不能小于开始时间");
+                }
+            } catch (Exception e) {
+                return new ListObjServiceResult(null, BaseErrorCode.PARAMS_INVALID, "开始时间转换时间类型错误");
+            }
+        }
+        return new ListObjServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS");
+    }
+
     /*
      * 载荷执行结果
      * */
-    public List<MpDevopsLoadSceneLog> getLoadExecutionResult(JSONObject requestData) {
+    public ListObjServiceResult getLoadExecutionResult(LoadResultSearchRequest requestData) {
         List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResult(requestData);
-        return list;
+        Integer offset = 0;
+        Integer pageSize = 10;
+        if (requestData.getPage() != null && requestData.getPerPage() != null) {
+            offset = (requestData.getPage() - 1) * requestData.getPerPage();
+            pageSize = requestData.getPerPage();
+            requestData.setOffset(offset);
+            requestData.setPageSize(pageSize);
+        }
+        //总数量
+        Integer num = loadMapper.getLoadExecutionResultNum(requestData);
+        return new ListObjServiceResult(list, num).asResult();
+    }
+
+    /*
+     * 载荷执行结果
+     * */
+    public List<MpDevopsLoadSceneLog> getLoadExecutionResultList(LoadResultSearchRequest requestData) {
+        return loadMapper.getLoadExecutionResult(requestData);
+    }
+
+    public MpDevopsLoadSceneLog getLoadExecutionResultByLogPk(String pk) {
+        return loadMapper.getLoadExecutionResultByLogPk(pk);
     }
 
     /*
      * 删除载荷执行结果
      * */
-    public Boolean deleteLoadExecutionResultByPk(MpDevopsLoadSceneLog requestData) {
+    public ServiceResult deleteLoadExecutionResultByPk(MpDevopsLoadSceneLog requestData) {
         Boolean deleteLoadExecutionResultByPk;
         if (requestData.getPk() != null && !requestData.getPk().equals("")) {
             deleteLoadExecutionResultByPk = loadMapper.deleteLoadExecutionResultByPk(requestData.getPk().toString());
         } else {
-            return false;
+            return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID, "主键参数为空").asResult();
         }
-        return deleteLoadExecutionResultByPk;
+
+        if (deleteLoadExecutionResultByPk) {
+            return new ServiceResult(null, BaseErrorCode.SUCCESS, "删除成功").asResult();
+        } else {
+            return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID, "删除失败").asResult();
+        }
     }
 
     /*
      * 修改载荷执行结果
      * */
-    public Boolean updateLoadExecutionResultByPk(MpDevopsLoadSceneLog requestData) {
+    public ServiceResult updateLoadExecutionResultByPk(MpDevopsLoadSceneLog requestData) {
         Boolean updateLoadExecutionResultByPk;
         if (requestData.getPk() != null && !requestData.getPk().equals("")) {
             updateLoadExecutionResultByPk = loadMapper.updateLoadExecutionResultByPk(requestData.getPk().toString(), requestData);
         } else {
-            return false;
+            return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID, "主键参数为空").asResult();
         }
-        return updateLoadExecutionResultByPk;
+
+        if (updateLoadExecutionResultByPk) {
+            return new ServiceResult(null, BaseErrorCode.SUCCESS, "修改成功").asResult();
+        } else {
+            return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID, "修改失败").asResult();
+        }
     }
 
     /*
@@ -482,16 +538,16 @@ public class LoadServiceImpl {
 
         //根据sceneId查找对应ws会话推送消息
         Session session = LoadResultWebSocketServer.sceneIdAndSession.get(sceneId);
-        if(session != null){
+        if (session != null) {
             LoadResultWebSocketServer loadResultWebSocketServer = LoadResultWebSocketServer.sessionPools.get(session);
-            if(loadResultWebSocketServer != null){
+            if (loadResultWebSocketServer != null) {
                 Map jsonObject = new LinkedHashMap<>();
                 jsonObject.put("code", LOAD_RESULT_ACTION_CODE);
                 Map data = new LinkedHashMap<>();
                 Integer sort = 0;
                 String message = requestData.toString();
                 Boolean result = true;
-                sendResultMessage(loadResultWebSocketServer,session,jsonObject,data,sort,message,result);
+                sendResultMessage(loadResultWebSocketServer, session, jsonObject, data, sort, message, result);
             }
         }
 
@@ -503,7 +559,7 @@ public class LoadServiceImpl {
     }
 
     private void sendResultMessage(LoadResultWebSocketServer webSocketServer, Session session, Map map, Map data,
-                             Integer sort, String message, Boolean result) {
+                                   Integer sort, String message, Boolean result) {
         try {
             data.put("stage" + sort, message);
             map.put("data", data);
@@ -539,7 +595,7 @@ public class LoadServiceImpl {
                     //当前行数
                     int rowTime = 0;
                     for (Row row : sheet) {
-                        if(rowTime == 0){
+                        if (rowTime == 0) {
                             //读取第一行
                             List<Object> rowData = new ArrayList<>();
                             //"工具名称", "记录时间", "阶段", "作用类型", "执行类型", "结果类型", "结果状态"
@@ -548,7 +604,7 @@ public class LoadServiceImpl {
                                 rowData.add(cellValue);
                             }
                             data.add(rowData);
-                        }else{
+                        } else {
                             //读取第一行标题
                             List<Object> rowData = new ArrayList<>();
                             for (Cell cell : row) {
@@ -598,11 +654,10 @@ public class LoadServiceImpl {
      * 载荷执行结果导出
      * */
     public Boolean exportLoadExecutionResult(HttpServletRequest request, HttpServletResponse response,
-                                             MpDevopsLoadSceneLog requestData) throws IOException {
+                                             LoadResultSearchRequest requestData) throws IOException {
         //导出文件xlsx
         try {
-            JSONObject requestDataObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
-            List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResult(requestDataObject);
+            List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResult(requestData);
             Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes("1005");
             Date date = new Date();
             //格式化当前时间格式
@@ -800,18 +855,18 @@ public class LoadServiceImpl {
 
         //ip校验
         boolean validIPPortCombo = isValidIPPortCombo(ip);
-        if(!validIPPortCombo){
+        if (!validIPPortCombo) {
             return new ServiceResult(null, BaseErrorCode.ERROR, "ip格式设置不正确,请传如下格式:http://10.108.1.10:5002").asResult();
         }
 
         if (pk.equals("")) {
             Boolean addSynchronousDataSource = loadMapper.addSynchronousDataSource(requestData);
-            if (!addSynchronousDataSource){
+            if (!addSynchronousDataSource) {
                 return new ServiceResult(null, BaseErrorCode.ERROR, "载荷数据同步设置保存失败").asResult();
             }
         } else {
             Boolean synchronousDataSource = loadMapper.synchronousDataSource(requestData);
-            if (!synchronousDataSource){
+            if (!synchronousDataSource) {
                 return new ServiceResult(null, BaseErrorCode.ERROR, "载荷数据同步设置新增失败").asResult();
             }
         }
@@ -937,7 +992,9 @@ public class LoadServiceImpl {
     }
 
     public LinkedList<JSONObject> getTop5Loads(String sceneId) {
-        List<MpDevopsLoadSceneLog> loadExecutionResult = getLoadExecutionResult(new JSONObject());
+        LoadResultSearchRequest requestData = new LoadResultSearchRequest();
+        requestData.setSceneId(sceneId);
+        List<MpDevopsLoadSceneLog> loadExecutionResult = getLoadExecutionResultList(requestData);
         //计算id出现次数最多的五条
         Map<String, Integer> map = new HashMap<>();
         if (loadExecutionResult != null && loadExecutionResult.size() > 0) {
@@ -982,11 +1039,11 @@ public class LoadServiceImpl {
         return returnList;
     }
 
-    public ServiceResult loadTransform(MultipartFile file, String transformType, HttpServletResponse response){
+    public ServiceResult loadTransform(MultipartFile file, String transformType, HttpServletResponse response) {
         try {
             //拿到返回的文件
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             return new ServiceResult(null, BaseErrorCode.ERROR, "未能从载荷平台拿到返回的改造文件").asResult();
         }
         Boolean setResponseHeader = this.setResponseHeader(response, file.getOriginalFilename());
