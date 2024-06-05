@@ -32,6 +32,7 @@ import cn.cyberpeace.mp.scene.core.event.base.EventFlag;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.event.base.EventTransition;
+import cn.cyberpeace.mp.scene.core.event.base.ProcessStatus;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
@@ -974,6 +975,8 @@ public class SceneHandler extends BaseSceneHandler<
         SceneElementBO element = getElement(nodeId);
         element.setEvent(SceneElementModel.Event.SNAPSHOT);
         element.setEventStatus(EventStatus.IN_PROGRESS);
+        element.setProcessStatus(ProcessStatus.IN_PROGRESS);
+        updateSceneElement(nodeId);
         asyncAckElementChanged(nodeId, false, false);
         try {
             for (int i = getPlugins().size() - 1; i >= 0; i--) {
@@ -981,13 +984,15 @@ public class SceneHandler extends BaseSceneHandler<
             }
         } catch (Exception e) {
             throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format(e.getMessage()));
-        }
-        element.setEvent(SceneElementModel.Event.SNAPSHOT);
-        element.setEventStatus(EventStatus.OVER);
-        updateSceneElement(nodeId);
-        asyncAckElementChanged(nodeId, false, false);
-        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
-            updateSceneElementWithPlugins(nodeId);
+        } finally {
+            element.setEvent(SceneElementModel.Event.SNAPSHOT);
+            element.setEventStatus(EventStatus.OVER);
+            element.setProcessStatus(ProcessStatus.OVER);
+            updateSceneElement(nodeId);
+            asyncAckElementChanged(nodeId, false, false);
+            if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+                updateSceneElementWithPlugins(nodeId);
+            }
         }
     }
 
