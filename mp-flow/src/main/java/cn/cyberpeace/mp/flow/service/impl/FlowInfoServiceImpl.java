@@ -1514,7 +1514,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * @param flowInfoModel
      * @return
      */
-    private void initPcapProtocols(FlowInfoModel flowInfoModel) {
+    public void initPcapProtocols(FlowInfoModel flowInfoModel) {
         String title = flowInfoModel.getTitle();
         log.info("start init pcap protocols for {}", title);
         List<ProtocolBO> protocolList = new ArrayList<>();

@@ -1,15 +1,21 @@
 package cn.cyberpeace.mp.job.init;
 
-import cn.cyberpeace.mp.job.base.init.MpInitiate;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.model.FlowPcapModel;
+import cn.cyberpeace.mp.flow.model.FlowProtocolModel;
+import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
+import cn.cyberpeace.mp.flow.repository.FlowProtocolMapper;
 import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
 import cn.cyberpeace.mp.flow.service.impl.FlowPcapServiceImpl;
+import cn.cyberpeace.mp.job.base.init.MpInitiate;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -21,16 +27,22 @@ import java.util.Objects;
 @Slf4j
 public class InitFlowFileInitJob {
 
-    @Autowired
+    @Resource
     private FlowInfoServiceImpl flowInfoService;
 
-    @Autowired
+    @Resource
     private FlowPcapServiceImpl flowPcapService;
+
+    @Resource
+    private FlowInfoMapper flowInfoMapper ;
+
+    @Resource
+    private FlowProtocolMapper flowProtocolMapper ;
 
     @MpInitiate(description = "初始化pcap包", id = "flow_file_init")
     public void run() {
-
         try {
+            // 保证初始化的流量包已经正常导入
             FlowInfoModel flowInfoModel = flowInfoService.selectByTitle("wechat_kZQXz70");
             if (Objects.nonNull(flowInfoModel)) {
                 log.info("=========== no need to import flow file ===========");
@@ -40,15 +52,6 @@ public class InitFlowFileInitJob {
                 flowInfoService.batchImportFlowInfo();
                 flowInfoModel = flowInfoService.selectByTitle("wechat_kZQXz70");
             }
-
-//            int pcapCount = flowPcapService.countAll();
-//            if (pcapCount > 135) {
-//                log.info("=========== no need to init pcap analyse ===========");
-//            } else {
-//                // 初始化pcap包解析
-//                TaskCommon.executeTask(() -> flowInfoService.initPcapAnalyse());
-//            }
-
             FlowPcapModel flowPcapModel = flowPcapService.getByFlowId(flowInfoModel.getId());
             if (Objects.nonNull(flowPcapModel) &&
                     !flowInfoModel.getPcapFile().equals(flowPcapModel.getPcapFile())
@@ -57,8 +60,28 @@ public class InitFlowFileInitJob {
             } else {
                 log.info("=========== no need to init pcap analyse ===========");
             }
+
+            // 保证所有的流量包都分析过流量
+            this.checkFlowProtocols();
         } catch (Exception e) {
             log.error("import flow file error，{}", ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+    private void checkFlowProtocols() {
+        List<FlowInfoModel> modelList = flowInfoMapper.list(new HumanCondition().filterGreaterThan(FlowInfoModel::getPk, 0)
+                                                                    .orderBy(FlowInfoModel::getPk).pagination(0, 100));
+        while (CollectionUtils.isNotEmpty(modelList)) {
+            int maxPk = Integer.MAX_VALUE;
+            for (FlowInfoModel flowInfoModel : modelList) {
+                FlowProtocolModel protocol = flowProtocolMapper.first(new HumanCondition().filterEqual(FlowProtocolModel::getFlowId, flowInfoModel.getId()));
+                if (protocol == null) {
+                    flowInfoService.initPcapProtocols(flowInfoModel);
+                }
+                maxPk = flowInfoModel.getPk();
+            }
+            modelList = flowInfoMapper.list(new HumanCondition().filterGreaterThan(FlowInfoModel::getPk, maxPk)
+                                                    .orderBy(FlowInfoModel::getPk).pagination(0, 100));
         }
     }
 }
