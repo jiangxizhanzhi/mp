@@ -76,6 +76,7 @@ public class DevopsTargetService {
         DeviceTargetPO oldDeviceTargetPO = deviceTargetMapper.findByUuid(device.getUuid());
         if (Objects.nonNull(oldDeviceTargetPO)) {
             DeviceTargetPO deviceTargetPO = convertDevice(device);
+            deviceTargetPO.setPlace(device.getPlace());
             deviceTargetPO.setIsPublic(oldDeviceTargetPO.getIsPublic());
             var ret = deviceTargetMapper.update(deviceTargetPO);
             return ret ? 1 : 0;
