@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeExpansionDiskActionRequest;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
@@ -2042,6 +2043,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
      * @param status
      */
     private void save(String id, String nodeId, List<String> scriptContentList, List<ProbeScriptModel> scriptModelList, int status, Boolean isDelete) {
+//        HumanCondition probeHumanCondition1 = new HumanCondition()
+//                .filterIn(SceneElementSituationProbeModel::getProbeId, scriptModelList.)
+//                .filterEqual(SceneElementSituationProbeModel::getScene, id)
+//                .filterEqual(SceneElementSituationProbeModel::getSceneElement, nodeId);
 //        先更新状态为更新
         for (int i = 0; i < scriptModelList.size(); i++) {
             HumanCondition probeHumanCondition = new HumanCondition()
@@ -2100,7 +2105,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
      * @return
      */
     private static RunCommandResult runCommandResult(String id, String nodeId, List<String> scriptContentList) {
-        SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, null, true);
+        String sceneId = instanceHandler.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         Integer cloudType = sceneHandler.getScene().getCloudType();
         CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         CloudPluginSceneElementBO element = cloudPlugin.getElement(nodeId);
@@ -2147,6 +2158,49 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             }
 
         }
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> createElementExpansionDisk(CsceneInstanceNodeExpansionDiskActionRequest request) {
+        //获取场景实例操作对象
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(request.getId(), request.getContext(), true);
+        String sceneId = instanceHandler.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+        Integer cloudType = sceneHandler.getScene().getCloudType();
+        if (cloudType == null || cloudType == 0) {
+            return new ServiceResult<>(false);
+        }
+
+        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        CloudPluginSceneElementBO element = cloudPlugin.getElement(request.getNodeId());
+        AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+        if (null != request.getVmSizeType()) {
+            element.setVmSizeType(request.getVmSizeType());
+        }
+        if (element.getExpansion()) {
+            throw new MpRuntimeException("不允许二次扩容");
+        }
+        element.setVmExpansionDiskType(request.getExpansionDiskType());
+        element.getSrcElement().setExpansionDisk(request.getExpansionDisk());
+
+        SceneTaskPool.getInstance().executeTask(() -> {
+            azureVirtualMachine.expansion(element);
+        });
+
+        element.setExpansion(true);
+        CloudPluginSceneElementModel cloudPluginSceneElementModel = element.toModel();
+
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(CloudPluginSceneElementModel::getScene, sceneHandler.getSceneId())
+                .filterEqual(CloudPluginSceneElementModel::getSceneElement, request.getNodeId());
+        cloudPluginSceneElementMapper.filterUpdate(cloudPluginSceneElementModel, humanCondition);
+        SceneElementModel sceneElementModel = element.getSrcElement().toModel();
+        sceneElementMapper.update(sceneElementModel);
+
+
         return new ServiceResult<>(true);
     }
 }

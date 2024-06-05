@@ -146,6 +146,10 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     //    漏洞
     @DefaultStr
     private String vulnCode;
+    @DefaultStr
+    private String vmExpansionDiskType;
+    @DefaultBool
+    private Boolean expansion;
 
     // 靶标属性
     @DefaultInt

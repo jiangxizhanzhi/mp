@@ -101,8 +101,9 @@ public class AzureCreateHandler extends CreateHandler {
         for (CloudPluginSceneElementBO element : filteredVirtualMachineElements) {
             String nodeId = element.getSrcElement().getId();
             List<VirtualNic> virtualNics = this.genVirutalNics(element);
-//            创建虚拟机不允许扩容
+//            创建虚拟机时不允许扩容
             element.getSrcElement().setExpansionDisk(null);
+            element.setVmExpansionDiskType(null);
             AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics, combineInitCommand(element));
             Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_VIRTUAL_MACHINE, task);
             createVirtualMachineTasks.add(formatTask);

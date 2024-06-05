@@ -63,7 +63,7 @@ public class AzureContainer {
                                          String containerGroupName, Map environment,
                                          double cpu, double ram) {
         //        TODO 注册表信息如何获取 是否只使用一个祖册表 多个注册表是否在同一个资源组 若不在容器镜像参数要包含资源组、注册表名、等信息
-        Registry registrytest0407 = azureResourceManager.containerRegistries().getByResourceGroup("container-registry", "registrytest0407");
+        Registry registrytest0407 = azureResourceManager.containerRegistries().getByResourceGroup("container_registry0530", "registry0530");
         RegistryCredentials acrCredentials = registrytest0407.getCredentials();
 //        String imageName = cloudElement.getImage();
 //        String imageName = registrytest0407.loginServerUrl() + "/samples/nginx";

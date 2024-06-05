@@ -151,6 +151,7 @@ public class AzureVirtualMachine {
         //获取磁盘信息
         Integer disk = cloudElement.getSrcElement().getDisk();
         Integer expansionDisk = cloudElement.getSrcElement().getExpansionDisk();
+        String vmExpansionDiskType = cloudElement.getVmExpansionDiskType();
 
         // 获取网卡的信息
         // 取第一块网卡
@@ -184,32 +185,13 @@ public class AzureVirtualMachine {
                     .withAdminUsername(StringUtils.isBlank(userNmae) ? "azureuser" : userNmae)
                     .withAdminPassword(StringUtils.isBlank(password) ? "Azure12345678" : password)
                     .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
-            if(expansionDisk!=null&&expansionDisk>0){
-                creater.withDataDiskDefaultStorageAccountType(storageAccountTypes)
+            if (expansionDisk != null && expansionDisk > 0) {
+                creater.withDataDiskDefaultStorageAccountType(StorageAccountTypes.fromString(vmExpansionDiskType))
                         .withNewDataDisk(expansionDisk);
             }
             creater.withOSDiskStorageAccountType(storageAccountTypes)
                     .withOSDiskSizeInGB(disk)
                     .withSize(flavor);
-
-            /*creater = resourceService.getManager().virtualMachines()
-                    .define(vmName)
-                    .withRegion(region)
-                    .withNewResourceGroup(groupName)
-                    .withExistingPrimaryNetwork(azureResourceManager.networks().getById(netId))
-                    .withSubnet(IpUtils.extractNetworkPart(virtualNic.getFixedIp()))
-                    .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp())
-                    .withoutPrimaryPublicIPAddress()
-                    .withLatestWindowsImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
-                    .withAdminUsername(StringUtils.isBlank(userNmae) ? "azureuser" : userNmae)
-                    .withAdminPassword(StringUtils.isBlank(password) ? "Azure12345678" : password)
-                    .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()))
-
-                    .withDataDiskDefaultStorageAccountType(storageAccountTypes)
-                    .withNewDataDisk(expansionDisk)
-                    .withOSDiskStorageAccountType(storageAccountTypes)
-                    .withOSDiskSizeInGB(disk)
-                    .withSize(flavor);*/
 
         } else {
             creater = resourceService.getManager().virtualMachines()
@@ -224,31 +206,13 @@ public class AzureVirtualMachine {
                     .withRootUsername(StringUtils.isBlank(userNmae) ? "root1" : userNmae)
                     .withRootPassword(StringUtils.isBlank(password) ? "ycxx123#" : password) // 必须要是6位以上,且有一个特殊字符
                     .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
-            if(expansionDisk!=null&&expansionDisk>0){
-                creater.withDataDiskDefaultStorageAccountType(storageAccountTypes)
+            if (expansionDisk != null && expansionDisk > 0) {
+                creater.withDataDiskDefaultStorageAccountType(StorageAccountTypes.fromString(vmExpansionDiskType))
                         .withNewDataDisk(expansionDisk);
             }
             creater.withOSDiskStorageAccountType(storageAccountTypes)
                     .withOSDiskSizeInGB(disk)
                     .withSize(flavor);
-
-            /*creater = resourceService.getManager().virtualMachines()
-                    .define(vmName)
-                    .withRegion(region)
-                    .withNewResourceGroup(groupName)
-                    .withExistingPrimaryNetwork(azureResourceManager.networks().getById(netId))
-                    .withSubnet(IpUtils.extractNetworkPart(virtualNic.getFixedIp()))
-                    .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp())
-                    .withoutPrimaryPublicIPAddress()
-                    .withLatestLinuxImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
-                    .withRootUsername(StringUtils.isBlank(userNmae) ? "root1" : userNmae)
-                    .withRootPassword(StringUtils.isBlank(password) ? "ycxx123#" : password) // 必须要是6位以上,且有一个特殊字符
-                    .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()))
-                    .withDataDiskDefaultStorageAccountType(storageAccountTypes)
-                    .withNewDataDisk(expansionDisk)
-                    .withOSDiskStorageAccountType(storageAccountTypes)
-                    .withOSDiskSizeInGB(disk)
-                    .withSize(flavor);*/
 
         }
 
@@ -394,5 +358,16 @@ public class AzureVirtualMachine {
     public void stop(String instanceId) {
         VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(instanceId);
         virtualMachine.deallocate();
+    }
+
+    public void expansion(CloudPluginSceneElementBO cloudElement) {
+        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(cloudElement.getResourceId());
+        VirtualMachine.Update update = virtualMachine.update().withSize(cloudElement.getVmSizeType());
+        Integer expansionDisk = cloudElement.getSrcElement().getExpansionDisk();
+        if (expansionDisk != null && expansionDisk > 0 && StringUtils.isNotBlank(cloudElement.getVmExpansionDiskType())) {
+            update.withDataDiskDefaultStorageAccountType(StorageAccountTypes.fromString(cloudElement.getVmExpansionDiskType()))
+                    .withNewDataDisk(expansionDisk);
+        }
+        update.apply();
     }
 }

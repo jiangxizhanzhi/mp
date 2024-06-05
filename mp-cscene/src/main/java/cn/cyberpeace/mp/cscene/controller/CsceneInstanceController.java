@@ -986,4 +986,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         request = formatNodeProbesActionRequest(request, id, nodeId, probeIds);
         return modelService.elementRestartProbes(request.getId(), request.getNodeId(), request.getProbeIds(), request.getContext()).asResult();
     }
+
+    @ApiOperation("扩展节点磁盘")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class),
+    })
+    @PostMapping("/create_element_expansion_disk")
+    public ServiceResult<Boolean> createElementExpansionDisk(@RequestBody(required = true) CsceneInstanceNodeExpansionDiskActionRequest request) {
+        var result = modelService.createElementExpansionDisk(request).asResult();
+        return result;
+    }
 }

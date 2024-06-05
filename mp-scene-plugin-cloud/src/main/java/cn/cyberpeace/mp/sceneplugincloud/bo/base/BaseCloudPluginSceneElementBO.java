@@ -142,6 +142,10 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     //    漏洞
     @ApiModelProperty(value = "漏洞")
     private String vulnCode;
+    @ApiModelProperty(value = "虚拟机扩容磁盘类型")
+    private String vmExpansionDiskType;
+    @ApiModelProperty(value = "是否扩容")
+    private Boolean expansion;
 
     // gns3 属性
     @ApiModelProperty(value = "gns3 platform")
