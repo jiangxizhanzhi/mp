@@ -100,6 +100,14 @@ public class TargetConverter{
                 }
             }
         }
+        List<String> list = deviceTargetPOS.stream().map(DeviceTargetPO::getId).collect(Collectors.toList());
+        List<DeviceTargetPO> devPo = deviceTargetMapper.findByIds(list);
+        Map<String, DeviceTargetPO> map = devPo.stream().collect(Collectors.toMap(DeviceTargetPO::getUuid, dev -> dev));
+        for (Device device : model.getList()) {
+            if (map.containsKey(device.getUuid())) {
+                device.setPlace(map.get(device.getUuid()).getPlace());
+            }
+        }
         POLogoUtils.changeLogoPathToUrl(model.getList());
         sceneConvertModel.setList(model.getList());
         return sceneConvertModel;
