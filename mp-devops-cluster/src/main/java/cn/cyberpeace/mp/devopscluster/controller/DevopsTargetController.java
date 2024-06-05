@@ -227,6 +227,7 @@ public class DevopsTargetController {
             }
             List<Device> secondDeviceList = targetSceneConvertModel.getList();
             deviceList.addAll(secondDeviceList);
+            deviceList.forEach(device -> device.setAttackMockDeviceFlag(request.getAttackMockDeviceFlag()));
         }
         return new Result(new ListResult<>(deviceList));
     }

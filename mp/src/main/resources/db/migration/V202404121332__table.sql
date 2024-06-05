@@ -68,3 +68,8 @@ alter table `mp_situation_suricatarule` add column class_type_cn varchar(1024) N
 alter table `mp_situation_suricatarule` add column class_type_en varchar(1024) NOT NULL DEFAULT '' COMMENT "流量规则分类类型英文";
 alter table `mp_situation_suricatarule` add column rule_gen_type int(2) NOT NULL DEFAULT 0 COMMENT "规则生成类型0-预定义，用户不能编辑 1-自定义，用户可以编辑";
 alter table mp_devops_target add column attack_mock_device_flag int(2) not null default 0 comment '0非攻防模拟器,1攻防模拟器';
+
+
+
+alter table mp_scene_scene_element add attack_mock_device_flag int(2) not null default 0 comment '0非攻防模拟器,1攻防模拟器';
+alter table mp_scene_scene_config_element add attack_mock_device_flag int(2) not null default 0 comment '0非攻防模拟器,1攻防模拟器';
