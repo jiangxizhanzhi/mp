@@ -11,11 +11,14 @@ import cn.cyberpeace.mp.devopscluster.request.SearchSdnSwitchRequest;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 运维管控-系统运维-网络实例管理-交换机
@@ -55,15 +58,34 @@ public class SwitchConverter {
      * @return
      */
     public List<SwitchConvertModel> treeList() {
-        SwitchConvertModel switchConvertModel = new SwitchConvertModel();
-        switchConvertModel.setLabel("test_switch");
-        switchConvertModel.setValue("test_switch");
+        SearchSdnSwitchRequest searchSdnSwitchRequest = new SearchSdnSwitchRequest();
+        searchSdnSwitchRequest.setPerPage(Integer.MAX_VALUE);
+        List<SdnSwitch> switches = switchService.pageSdnSwitch(new SearchSdnSwitchRequest()).getList();
 
-        SwitchConvertModel.Children children = new SwitchConvertModel.Children();
-        children.setLabel("interface_1");
-        children.setValue("interface_2");
-        switchConvertModel.setChildren(Collections.singletonList(children));
-        return Collections.singletonList(switchConvertModel);
+        if (CollectionUtils.isEmpty(switches)) {
+            return Collections.emptyList();
+        } else {
+            return switches.stream().map(sdnSwitch -> {
+                SwitchConvertModel switchConvertModel = new SwitchConvertModel();
+                switchConvertModel.setLabel(sdnSwitch.getName());
+                switchConvertModel.setValue(sdnSwitch.getPhysicalSwitchName());
+
+                List<SwitchConvertModel.Children> children = new ArrayList<>();
+                for (int i = 0; i < sdnSwitch.getPortNum(); i++) {
+                    SwitchConvertModel.Children child = new SwitchConvertModel.Children();
+                    child.setLabel(getFormatSdnSwitchPortName(i+1));
+                    child.setValue(child.getLabel());
+                    children.add(child);
+                }
+
+                switchConvertModel.setChildren(children);
+                return switchConvertModel;
+            }).collect(Collectors.toList());
+        }
+    }
+
+    public String getFormatSdnSwitchPortName(Integer portIndex) {
+        return "opf_g" + String.format("%0" + 6 + "d", portIndex);
     }
 
     /**

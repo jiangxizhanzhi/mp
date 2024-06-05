@@ -11,7 +11,6 @@ import cn.cyberpeace.mp.devopscluster.request.RegisterSdnSwitchCommand;
 import cn.cyberpeace.mp.devopscluster.request.SearchSdnSwitchRequest;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,14 +43,14 @@ public class SdnSwitchController {
         return new ServiceResult<>(switchConverter.pageSdnSwitch(searchSdnSwitchRequest)).asResult();
     }
 
-    @ApiModelProperty("修改物理交换机名称")
+    @ApiOperation("修改物理交换机名称")
     @PostMapping("/modify/{name}")
     public ServiceResult<Boolean> modifySdnSwitch(@PathVariable(name = "name") String name, @Validated @RequestBody ModifySdnSwitchCommand modifySdnSwitchCommand) {
         switchConverter.modifySdnSwitch(modifySdnSwitchCommand, name);
         return new ServiceResult<>(Boolean.TRUE).asResult();
     }
 
-    @ApiModelProperty("删除物理交换机")
+    @ApiOperation("删除物理交换机")
     @PostMapping("/delete/{name}")
     public ServiceResult<Boolean> deleteSdnSwitch(@PathVariable(name = "name") String name) {
         switchConverter.deleteSdnSwitch(name);

@@ -1,11 +1,14 @@
 package cn.cyberpeace.mp.devopscluster.request;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-
+@ApiModel("修改sdn")
+@Data
 public class ModifySdnSwitchCommand {
     @ApiModelProperty("管理ip")
     @NotBlank
