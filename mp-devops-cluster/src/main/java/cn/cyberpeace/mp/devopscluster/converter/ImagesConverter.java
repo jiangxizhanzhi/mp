@@ -115,6 +115,7 @@ public class ImagesConverter implements BaseConverter{
             return imageConvertPageModel;
         }
         List<Device> deviceList = this.findByIds(ids);
+        addSnapshotCountInfo(deviceList);
 
 
 
