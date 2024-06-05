@@ -137,6 +137,7 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneDataModifier.handleAccessModePath(csceneBO);
         CsceneDataModifier.checkCloudElement(csceneBO);
         CsceneDataModifier.handlerPortUsable(csceneBO);
+        CsceneDataModifier.handlerPosition(csceneBO);
     }
 
     private void correctRequestCsceneParamsForAppInstance(CsceneBO csceneBO) {

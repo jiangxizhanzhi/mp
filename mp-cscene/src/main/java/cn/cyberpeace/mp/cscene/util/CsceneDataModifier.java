@@ -987,6 +987,30 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void handlerPosition(CsceneBO csceneBO) {
+        if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getTopology() == null) {
+            return;
+        }
+        var topo = csceneBO.getSceneConfig().getTopology();
+        if (topo.getAreaId() != null) {
+            var elements = topo.getElements();
+            if (elements == null) {
+                return;
+            }
+            String areaId = topo.getAreaId();
+            for (var e : elements) {
+                Map<String, String> outPosition = e.getOuterPosition2();
+                if (outPosition == null) {
+                    outPosition = new HashMap<>();
+                }
+                String pos = e.getPosition2();
+                outPosition.put(areaId, pos);
+                e.setOuterPosition2(outPosition);
+                e.setPosition2(outPosition.getOrDefault(e.getArea(), ""));
+            }
+        }
+    }
+
     public static void checkCloudElement(CsceneBO csceneBO) {
         if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getPlugins() == null || csceneBO.getSceneConfig().getPlugins().get("cpcloud") == null) {
             return;
