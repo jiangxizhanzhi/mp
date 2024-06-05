@@ -1006,7 +1006,12 @@ public class CsceneDataModifier {
                 if (outPosition == null) {
                     outPosition = new HashMap<>();
                 }
-                e.setPosition2(outPosition.getOrDefault(areaId, ""));
+                if (outPosition.containsKey(areaId)) {
+                    e.setPosition2(outPosition.get(areaId));
+                } else {
+                    // 如果未存需要查询的层位置 那么返回节点所在层的位置 否则前端会居中
+                    e.setPosition2(outPosition.getOrDefault(e.getArea(), ""));
+                }
             }
         }
     }
