@@ -137,8 +137,8 @@ public class NetworkTrafficGroupService {
         paramObject.put("name", instanceId);
         //docker镜像名称
         paramObject.put("image", situationAwareConfig.getArkimeImageName());
-        paramObject.put("cpu", 4);
-        paramObject.put("ram", 4096);
+        paramObject.put("cpu", situationAwareConfig.getArkimeCpu());
+        paramObject.put("ram", situationAwareConfig.getArkimeRam());
         paramObject.put("disk", situationAwareConfig.getArkimeDisk());
 
         //设置网络

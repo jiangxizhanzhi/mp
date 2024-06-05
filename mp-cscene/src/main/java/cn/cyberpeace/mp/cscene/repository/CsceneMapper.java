@@ -17,4 +17,6 @@ public interface CsceneMapper extends BaseCsceneMapper<CsceneModel> {
     List<CsceneElementStat> statGroupByType(@Param("ids") String[] sceneIds, @Param("cpu") int cpu, @Param("ram") int ram, @Param("disk") int disk);
 
     List<CsceneElementStat> statGroupByFlow(@Param("ids") String[] sceneIds, @Param("cpu") int cpu, @Param("ram") int ram, @Param("disk") int disk);
+
+    List<CsceneElementStat> statGroupByCollect(@Param("ids") String[] sceneIds, @Param("cpu") int cpu, @Param("ram") int ram, @Param("disk") int disk);
 }

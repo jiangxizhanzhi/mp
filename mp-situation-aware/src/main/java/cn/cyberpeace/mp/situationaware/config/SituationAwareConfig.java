@@ -53,6 +53,8 @@ public class SituationAwareConfig {
     private String arkimeEsPort;
     private String arkimeImageName;
     private Integer arkimeDisk;
+    private Integer arkimeCpu;
+    private Integer arkimeRam;
     private String arkimeUsername;
     private String arkimePassword;
 

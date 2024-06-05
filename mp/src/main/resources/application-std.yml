@@ -161,6 +161,8 @@ mp:
     arkime-es-port: ${mp.situationaware.ext-var.arkime-es-port}
     arkime-image-name: ${mp.situationaware.ext-var.arkime-image-name}
     arkime-disk: ${mp.situationaware.ext-var.arkime-disk}
+    arkime-cpu: ${mp.situationaware.ext-var.arkime-cpu}
+    arkime-ram: ${mp.situationaware.ext-var.arkime-ram}
     arkime-username: api
     arkime-password: api
     #wazuh 开放接口地址用户名密码

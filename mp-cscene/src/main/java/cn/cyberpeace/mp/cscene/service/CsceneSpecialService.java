@@ -52,6 +52,7 @@ import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.IResourceName;
 import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.ResourceParseWrapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.RsourceNameParams;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -98,6 +99,12 @@ public class CsceneSpecialService {
 
     @Autowired
     private UserService userService;
+
+    @Resource
+    private SituationAwareConfig situationAwareConfig ;
+
+    @Resource
+    private FlowConfig flowConfig ;
 
     @Data
     public static class CsceneElementVirtualStat {
@@ -161,9 +168,16 @@ public class CsceneSpecialService {
             }
         }
 
-        FlowConfig flowConfig = BeanCommon.getBean(FlowConfig.class);
         List<CsceneElementStat> flowStats = csceneMapper.statGroupByFlow(ids, flowConfig.getTrexCpu(), flowConfig.getTrexRam(), flowConfig.getTrexDisk());
         for (CsceneElementStat elementStat : flowStats) {
+            CsceneStat stat = statMap.get(elementStat.getCsceneId());
+            stat.setTotalDisk(stat.getTotalDisk() + elementStat.getDisk());
+            stat.setTotalRam(stat.getTotalRam() + elementStat.getRam());
+            stat.setTotalCpu(stat.getTotalCpu() + elementStat.getCpu());
+        }
+
+        List<CsceneElementStat> collectStats = csceneMapper.statGroupByCollect(ids, situationAwareConfig.getArkimeCpu(), situationAwareConfig.getArkimeRam(), situationAwareConfig.getArkimeDisk());
+        for (CsceneElementStat elementStat : collectStats) {
             CsceneStat stat = statMap.get(elementStat.getCsceneId());
             stat.setTotalDisk(stat.getTotalDisk() + elementStat.getDisk());
             stat.setTotalRam(stat.getTotalRam() + elementStat.getRam());
