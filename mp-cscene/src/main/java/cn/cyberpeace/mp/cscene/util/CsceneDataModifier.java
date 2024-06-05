@@ -579,6 +579,7 @@ public class CsceneDataModifier {
         addFilePathPrefix(csceneBO.getSceneConfig());
         handlerNodeCommand(csceneBO.getSceneConfig());
         correctVlanId(csceneBO);
+        handlerReturnPosition(csceneBO.getSceneConfig());
         csceneBO.setEnableRecording(getOutputEnableRecording(csceneBO.getSceneConfig()));
         csceneBO.calHardware();
         csceneBO.setResourceOccupiedNums(NodeLimitUtils.calLimitedNodesNum(csceneBO));
@@ -598,6 +599,8 @@ public class CsceneDataModifier {
         }
     }
 
+
+
     public static void correctVlanId(CsceneBO csceneBO) {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
             Map<String, Map<String, Object>> elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
@@ -613,7 +616,7 @@ public class CsceneDataModifier {
 
     public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO) {
         correctReturnCsceneData(csceneInstanceBO, true);
-
+        handlerReturnPosition(csceneInstanceBO.getScene());
         Set<String> portIds = new HashSet<>();
         csceneInstanceBO.getScene().getTopology().getElements().forEach(e -> {
             if(e.getPorts() != null){
@@ -983,6 +986,27 @@ public class CsceneDataModifier {
                 } else {
                     p.setUsable(true);
                 }
+            }
+        }
+    }
+
+    public static void handlerReturnPosition(BaseSceneDataBO csceneBO) {
+        if (csceneBO == null || csceneBO.getTopology() == null) {
+            return;
+        }
+        var topo = csceneBO.getTopology();
+        if (topo.getAreaId() != null) {
+            List<BaseSceneElementBO> elements = topo.getElements();
+            if (elements == null) {
+                return;
+            }
+            String areaId = topo.getAreaId();
+            for (BaseSceneElementBO e : elements) {
+                Map<String, String> outPosition = e.getOuterPosition2();
+                if (outPosition == null) {
+                    outPosition = new HashMap<>();
+                }
+                e.setPosition2(outPosition.getOrDefault(areaId, ""));
             }
         }
     }
