@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
@@ -20,6 +21,7 @@ import cn.cyberpeace.mp.devopscluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
+import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentRequest;
@@ -136,6 +138,9 @@ public class RealEquipmentConverter implements BaseConverter{
      */
     public RealEquipmentBO findByUuid(String uuid) {
         Device device = deviceService.findByUuid(uuid);
+        DeviceTargetMapper mapper = BeanCommon.getBean(DeviceTargetMapper.class);
+        DeviceTargetPO devPo = mapper.findByUuid(uuid);
+        device.setPlace(devPo.getPlace());
         return convertDevice(device);
     }
 
