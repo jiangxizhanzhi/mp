@@ -9,6 +9,9 @@ public class DatePattern {
      */
     public static final DateTimeFormatter NORM_DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    public static final DateTimeFormatter NORM_WITH_MISE_DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+
+
     /**
      * UTC时间
      */

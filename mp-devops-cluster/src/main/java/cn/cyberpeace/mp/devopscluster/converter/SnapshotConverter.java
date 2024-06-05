@@ -3,10 +3,13 @@ package cn.cyberpeace.mp.devopscluster.converter;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.mptool.DatePattern;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.CloudClient;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ContainerSnapshot;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.params.DeviceSnapshotMergeCloudPlatform;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.params.ScenariosSnapshot;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.result.Snapshot;
@@ -20,10 +23,7 @@ import cn.cyberpeace.mp.devopscluster.converter.model.SnapshotConvertModel;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.DeviceAndSnapshotCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
-import cn.cyberpeace.mp.devopscluster.request.SnapshotActionRequest;
-import cn.cyberpeace.mp.devopscluster.request.SnapshotDeleteRequest;
-import cn.cyberpeace.mp.devopscluster.request.SnapshotMergeRequest;
-import cn.cyberpeace.mp.devopscluster.request.SnapshotRequest;
+import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -31,7 +31,9 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -71,6 +73,45 @@ public class SnapshotConverter {
         convertModel.setList(list);
         convertModel.setSuccess(model.isSuccess());
         return convertModel;
+    }
+
+
+    public List<SnapshotConvertModel> listSnapshot(String deviceUuid) {
+        Device device = deviceService.findByUuid(deviceUuid);
+        SnapshotPageRequest snapshotPageRequest = new SnapshotPageRequest();
+        if ("vm".equals(device.getImageType())) {
+            snapshotPageRequest.setInstanceId(device.getExtVm().getInstanceUuid());
+            List<Snapshot> snapshots = cloudClient.listVmSnapshot(snapshotPageRequest).getList();
+            if (CollectionUtils.isEmpty(snapshots)) {
+                return Collections.emptyList();
+            } else {
+                return snapshots.stream().map(snapshot -> {
+                    SnapshotConvertModel snapshotConvertModel = new SnapshotConvertModel();
+                    snapshotConvertModel.setUuid(snapshot.getId());
+                    snapshotConvertModel.setDescription(snapshot.getDescription());
+                    snapshotConvertModel.setName(snapshot.getDescription());
+                    snapshotConvertModel.setCreatedAt(LocalDateTime.parse(snapshot.getCreatedAt(), DatePattern.NORM_WITH_MISE_DATETIME_FORMAT));
+                    return snapshotConvertModel;
+                }).collect(Collectors.toList());
+            }
+        } else if ("container".equals(device.getImageType())) {
+            snapshotPageRequest.setInstanceId(device.getExtDocker().getInstanceUuid());
+            List<ContainerSnapshot> containerSnapshots = cloudClient.listContainerSnapshot(snapshotPageRequest).getList();
+            if (CollectionUtils.isEmpty(containerSnapshots)) {
+                return Collections.emptyList();
+            } else {
+                return containerSnapshots.stream().map(containerSnapshot -> {
+                    SnapshotConvertModel snapshotConvertModel = new SnapshotConvertModel();
+                    snapshotConvertModel.setUuid(containerSnapshot.getId());
+                    snapshotConvertModel.setDescription(containerSnapshot.getDescription());
+                    snapshotConvertModel.setName(containerSnapshot.getDescription());
+                    snapshotConvertModel.setCreatedAt(LocalDateTime.parse(containerSnapshot.getCreateAt(), DatePattern.NORM_WITH_MISE_DATETIME_FORMAT));
+                    return snapshotConvertModel;
+                }).collect(Collectors.toList());
+            }
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     private static SnapshotConvertModel getSnapshotConvertModel(Snapshot item) {

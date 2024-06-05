@@ -12,7 +12,6 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.common.util.FileClient;
-import cn.cyberpeace.mp.cscene.dto.scene.CsceneInstanceInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
@@ -355,41 +354,7 @@ public class ImagesController {
     @GetMapping("/{id}/snapshot/list")
     @Deprecated
     public Result<List<SnapshotConvertModel>> listSnapshot(@PathVariable("id") String uuid){
-        BasePageBO<SnapshotConvertModel> convertModel = snapshotConverter.list(uuid);
-        List<SnapshotConvertModel> list = convertModel.getList();
-        if (CollectionUtils.isNotEmpty(list)) {
-            List<String> sceneIds = new ArrayList<>();
-            for (SnapshotConvertModel snapshotConvertModel : list) {
-                String sceneId = snapshotConvertModel.getSceneId();
-                if (sceneId != null) {
-                    sceneIds.add(sceneId);
-                }
-            }
-            Map<String, CsceneInstanceInfo> nameMap = csceneSpecialService.getCsceneNameBySceneIds(sceneIds).getSource();
-            List<String> uuids = new ArrayList<>();
-            for (SnapshotConvertModel m : list) {
-                CsceneInstanceInfo sceneInfo = nameMap.get(m.getSceneId());
-                if(StringUtils.isNotEmpty(m.getUuid())){
-                    uuids.add(m.getUuid());
-                }
-                if (sceneInfo != null) {
-                    m.setSceneName(sceneInfo.getName());
-                    m.setSceneId(sceneInfo.getId());
-                    m.setCsceneInstaceId(sceneInfo.getId());
-                    m.setCsceneId(sceneInfo.getCsceneId());
-                } else {
-                    m.setSceneId(null);
-                }
-            }
-            Set<String> deletingSnapshots = csceneSpecialService.getDeletingSnapshots(uuids).getSource();
-            List<SnapshotConvertModel> res = new ArrayList<>();
-            for (SnapshotConvertModel s : list) {
-                if (!deletingSnapshots.contains(s.getUuid())) {
-                    res.add(s);
-                }
-            }
-            return new Result(res);
-        }
+        List<SnapshotConvertModel> list = snapshotConverter.listSnapshot(uuid);
         return new Result(list);
     }
 
