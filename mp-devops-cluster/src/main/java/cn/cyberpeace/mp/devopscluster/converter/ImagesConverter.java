@@ -39,6 +39,7 @@ import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -50,6 +51,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ImagesConverter implements BaseConverter{
 
     private final ImagesService imagesService;
@@ -202,21 +204,26 @@ public class ImagesConverter implements BaseConverter{
 
     private void addSnapshotCountInfo(List<Device> deviceList) {
         for (Device device : deviceList) {
-            SnapshotPageRequest snapshotPageRequest = new SnapshotPageRequest();
-            if ("vm".equals(device.getImageType())) {
-                String instanceId = device.getExtVm().getInstanceUuid();
-                if (StringUtils.isNotBlank(instanceId)) {
-                    snapshotPageRequest.setInstanceId(instanceId);
-                    Integer snapshotCount = cloudClient.listVmSnapshot(snapshotPageRequest).getTotal();
-                    device.getExtVm().setSnapshotCount(snapshotCount);
+            try {
+                SnapshotPageRequest snapshotPageRequest = new SnapshotPageRequest();
+                if ("vm".equals(device.getImageType())) {
+                    String instanceId = device.getExtVm().getInstanceUuid();
+                    if (StringUtils.isNotBlank(instanceId)) {
+                        snapshotPageRequest.setInstanceId(instanceId);
+                        Integer snapshotCount = cloudClient.listVmSnapshot(snapshotPageRequest).getTotal();
+                        device.getExtVm().setSnapshotCount(snapshotCount);
+                    }
+                } else if ("container".equals(device.getImageType())) {
+                    String instanceId = device.getExtDocker().getInstanceUuid();
+                    if (StringUtils.isNotBlank(instanceId)) {
+                        snapshotPageRequest.setInstanceId(instanceId);
+                        Integer snapshotCount = cloudClient.listContainerSnapshot(snapshotPageRequest).getTotal();
+                        device.getExtDocker().setSnapshotCount(snapshotCount);
+                    }
                 }
-            } else if ("container".equals(device.getImageType())) {
-                String instanceId = device.getExtDocker().getInstanceUuid();
-                if (StringUtils.isNotBlank(instanceId)) {
-                    snapshotPageRequest.setInstanceId(instanceId);
-                    Integer snapshotCount = cloudClient.listContainerSnapshot(snapshotPageRequest).getTotal();
-                    device.getExtDocker().setSnapshotCount(snapshotCount);
-                }
+            } catch (Exception e) {
+                //实例在发生删除的时候，instance_id还有,但是请求会失败
+                log.error(e.getMessage(), e);
             }
         }
     }

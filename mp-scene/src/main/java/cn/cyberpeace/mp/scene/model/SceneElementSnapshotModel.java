@@ -12,13 +12,34 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table("mp_scene_scene_element_snapshot")
 public class SceneElementSnapshotModel extends BaseModel {
+    /**
+     * 场景
+     */
+    @DefaultStr
     private String scene;
+    /**
+     * 场景网元
+     */
+    @DefaultStr
     private String sceneElement;
+    /**
+     * 名称
+     */
     @DefaultStr
     private String name;
+    /**
+     * 源名称
+     */
     @DefaultStr
     private String sourceName;
+    /**
+     * 描述
+     */
     @DefaultStr
     private String description;
+    /**
+     * 地址
+     */
+    @DefaultStr
     private String address;
 }
