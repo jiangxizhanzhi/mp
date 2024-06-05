@@ -43,7 +43,7 @@ public class SwitchService extends BaseCpService {
      * @return
      */
     public SwitchesCloudPlatform list() {
-        return super.sendGet(BaseCloudPlatformConstant.CPCLOUD_SWITCH_URL + BaseCloudPlatformConstant.URL_VERSION + "/switchs" , SwitchesCloudPlatform.class);
+        return super.sendGet(BaseCloudPlatformConstant.CPCLOUD_URL + BaseCloudPlatformConstant.URL_VERSION + "/switch/switchs" , SwitchesCloudPlatform.class);
     }
 
     public void delete(String name) {

@@ -44,6 +44,17 @@ mp.situationaware.ext-var.wazuh-es-max-page-size=10000
 mp.situationaware.ext-var.arkime-es-host=10.100.7.1
 mp.situationaware.ext-var.arkime-es-port=9205
 mp.situationaware.ext-var.arkime-disk=50
+mp.situationaware.ext-var.storage-redis-ip=127.0.0.1
+mp.situationaware.ext-var.storage-redis-port=6379
+mp.situationaware.ext-var.storage-redis-password=password
+mp.situationaware.ext-var.storage-kafka-ip=localhost
+mp.situationaware.ext-var.storage-kafka-port=9092
+mp.situationaware.ext-var.storage-kafka-topic=test
+mp.situationaware.ext-var.storage-tidb-ip=127.0.0.1
+mp.situationaware.ext-var.storage-tidb-port=4000
+mp.situationaware.ext-var.storage-tidb-user=root
+mp.situationaware.ext-var.storage-tidb-password=password
+mp.situationaware.ext-var.storage-tidb-name=mp_data
 
 # mp-log 模块
 mp.log.ext-var.es-ip=10.100.7.1

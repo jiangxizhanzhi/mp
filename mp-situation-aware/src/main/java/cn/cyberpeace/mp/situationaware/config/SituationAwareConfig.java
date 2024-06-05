@@ -66,6 +66,21 @@ public class SituationAwareConfig {
     private String wazuhUsername;
     private String wazuhPassword;
     private String wazuhFlowTableUrl;
+
+    /**
+     * 其他存储数据库信息
+     */
+    private String storageRedisIp;
+    private Integer storageRedisPort;
+    private String storageRedisPassword;
+    private String storageKafkaAddress;
+    private String storageKafkaTopic;
+    private String storageTidbIp;
+    private Integer storageTidbPort;
+    private String storageTidbUser;
+    private String storageTidbPassword;
+    private String storageTidbName;
+
     /**
      * wazuh-probe-manager
      */
