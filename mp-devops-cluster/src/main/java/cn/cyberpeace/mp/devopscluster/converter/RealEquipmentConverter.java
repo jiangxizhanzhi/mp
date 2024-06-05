@@ -212,7 +212,7 @@ public class RealEquipmentConverter implements BaseConverter{
         RealEquipmentBO convertModel = RealEquipmentBO.builder().uuid(device.getUuid())
                 .name(device.getName()).role(device.getRole()).logo(DefaultImgUtil.pathToFdfsUrl(device.getLogo()))
                 .mainCategory(device.getCategory()).subCategory(device.getSecondCategory())
-                .description(device.getDescription()).thirdCategory(device.getL3Category()).extEntityAccess(device.getExtEntityAccess()).build();
+                .description(device.getDescription()).thirdCategory(device.getL3Category()).place(device.getPlace()).extEntityAccess(device.getExtEntityAccess()).build();
         convertModel.setSuccess(device.isSuccess());
         convertModel.setMessage(device.getErrorMessage());
         convertModel.setExtEntity(device.getExtEntity());
