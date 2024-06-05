@@ -24,7 +24,7 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     Boolean deleteLoadByPk(String pk);
 
-    List<MpDevopsLoadSceneLog> getLoadExecutionResultStatistics(@Param("param") JSONObject requestData);
+    List<MpDevopsLoadSceneLog> getLoadExecutionResult(@Param("param") JSONObject requestData);
 
     Boolean deleteLoadExecutionResultByPk(String pk);
 

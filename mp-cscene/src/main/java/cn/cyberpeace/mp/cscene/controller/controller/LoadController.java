@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
+import cn.cyberpeace.mp.cscene.request.load.LoadResultSearchRequest;
 import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
 import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
@@ -212,7 +213,7 @@ public class LoadController {
      * */
     @ApiOperation(value = "载荷执行结果统计", notes = "")
     @PostMapping("/getLoadExecutionResultStatistics")
-    public ServiceResult getLoadExecutionResultStatistics(@RequestBody(required = false) MpDevopsLoadSceneLog requestData) {
+    public ServiceResult getLoadExecutionResultStatistics(@RequestBody(required = false) LoadResultSearchRequest requestData) {
         JSONObject request = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
         String sceneId = request.get("sceneId") != null && !request.get("sceneId").toString().equals("") ? request.get("sceneId").toString() : "";
         if (sceneId.equals("")) {
@@ -244,7 +245,7 @@ public class LoadController {
      * */
     @ApiOperation(value = "载荷执行结果", notes = "")
     @PostMapping("/getLoadExecutionResult")
-    public ListObjServiceResult getLoadExecutionResult(@RequestBody(required = false) MpDevopsLoadSceneLog requestData) {
+    public ListObjServiceResult getLoadExecutionResult(@RequestBody(required = false) LoadResultSearchRequest requestData) {
         JSONObject request = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
         String sceneId = request.get("sceneId") != null && !request.get("sceneId").toString().equals("") ? request.get("sceneId").toString() : "";
         if (sceneId.equals("")) {

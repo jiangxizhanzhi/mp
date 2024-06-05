@@ -380,7 +380,7 @@ public class LoadServiceImpl {
      * 载荷执行结果统计
      * */
     public Map<String, Integer> getLoadExecutionResultStatistics(JSONObject requestData) {
-        List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResultStatistics(requestData);
+        List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResult(requestData);
 
         final String SUCCESS_CODE = "1005010101";
         final String FAIL_CODE = "1005010102";
@@ -409,7 +409,7 @@ public class LoadServiceImpl {
      * 载荷执行结果
      * */
     public List<MpDevopsLoadSceneLog> getLoadExecutionResult(JSONObject requestData) {
-        List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResultStatistics(requestData);
+        List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResult(requestData);
         return list;
     }
 
@@ -602,7 +602,7 @@ public class LoadServiceImpl {
         //导出文件xlsx
         try {
             JSONObject requestDataObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
-            List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResultStatistics(requestDataObject);
+            List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResult(requestDataObject);
             Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes("1005");
             Date date = new Date();
             //格式化当前时间格式

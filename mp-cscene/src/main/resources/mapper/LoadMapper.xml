@@ -260,9 +260,6 @@
         UPDATE
         mp_devops_load_scene_result_log
         <set>
-            <if test="param != null and param.id != null and param.id != ''">
-                id = #{param.id},
-            </if>
             <if test="param != null and param.stageId != null and param.stageId != ''">
                 stage_id = #{param.stageId},
             </if>
@@ -492,7 +489,7 @@
         </if>
     </select>
 
-    <select id="getLoadExecutionResultStatistics" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog">
+    <select id="getLoadExecutionResult" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog">
         SELECT
         log.*,
         mdl.tool_name,
@@ -507,26 +504,12 @@
         mp_devops_load mdl
         on log.id = mdl.id
         <where>
-            <if test="param != null and param.pk != null and param.pk != ''">
-                and mdl.pk = #{param.pk}
-            </if>
             <if test="param != null and param.pks != null and param.pks.size != 0">
                 and mdl.pk in
                 <foreach collection="param.pks" item="item" separator="," open="(" close=")">
                     #{item}
                 </foreach>
             </if>
-
-            <if test="param != null and param.id != null and param.id != ''">
-                and log.id = #{param.id}
-            </if>
-            <if test="param != null and param.ids != null and param.ids.size != 0">
-                and log.id in
-                <foreach collection="param.ids" item="item" separator="," open="(" close=")">
-                    #{item}
-                </foreach>
-            </if>
-
             <if test="param != null and param.sceneId != null and param.sceneId != ''">
                 and log.scene_id = #{param.sceneId}
             </if>
@@ -546,10 +529,10 @@
                 and mdl.control_type = #{param.controlType}
             </if>
             <if test="param != null and param.beginTime != null and param.beginTime != ''">
-                and log.create_time &gt;= #{param.beginTime}
+                and log.create_time &gt;= #{param.beginTime, jdbcType=TIMESTAMP}
             </if>
             <if test="param != null and param.finishTime != null and param.finishTime != ''">
-                and log.create_time &lt;= #{param.finishTime}
+                and log.create_time &lt;= #{param.finishTime, jdbcType=TIMESTAMP}
             </if>
         </where>
         <if test="param != null and param.offset != null and param.pageSize != null">
