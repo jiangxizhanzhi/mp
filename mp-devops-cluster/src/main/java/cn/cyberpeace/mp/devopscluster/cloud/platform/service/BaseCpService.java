@@ -155,6 +155,29 @@ public class BaseCpService {
         return result;
     }
 
+    protected String sendPatch(String api, String body) {
+        String url = this.buildUrl(api);
+        String result = "";
+        if (log.isInfoEnabled()) {
+            log.info(POST_LOG_INFO, url, body, result);
+        }
+        try {
+            result = HttpUtils.sendPatch(url, body, wrapperHeaders(new HashMap<>()));
+        } catch (IOException e) {
+            log.error("{} request error:", url, e);
+            throw new MpRuntimeException("devops post request failed");
+        }
+        if (log.isInfoEnabled()) {
+            log.info(POST_LOG_INFO, url, body, result);
+        }
+        return result;
+    }
+
+    protected <T> T sendPatch(String api, String body, TypeReference<T> typeReference) {
+        String result = this.sendPatch(api, body);
+        return JsonUtils.snakeParse(result, typeReference);
+    }
+
     protected <T> T sendPost(String api, String body, TypeReference<T> typeReference) {
         String result = this.sendPost(api, body);
         return JsonUtils.snakeParse(result, typeReference);

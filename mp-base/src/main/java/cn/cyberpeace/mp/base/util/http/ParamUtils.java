@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.base.util.http;
 
+import cn.cyberpeace.mp.base.annotation.ParamName;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import com.google.common.base.Joiner;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 /**
  * @Deprecated 使用`HttpParam`/`SnakeHttpParam`构造请求参数
  */
+@Slf4j
 public class ParamUtils {
 
 
@@ -56,11 +59,23 @@ public class ParamUtils {
         for (Field field : fieldList) {
             field.setAccessible(true);
             String fieldName = field.getName();
+
             Object fieldVal = objWrapper.getPropertyValue(fieldName);
             if (humpToLine) {
                 fieldName = TextUtils.humpToLine(fieldName);
             }
             if (Objects.nonNull(fieldVal)) {
+                try {
+                    ParamName paramName = field.getAnnotation(ParamName.class);
+                    if (Objects.nonNull(paramName)) {
+                        String value = paramName.value();
+                        if (StringUtils.isNotBlank(value)) {
+                            fieldName = value;
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
                 joinerStr.append(Joiner.on("&").join(Joiner.on("=").join(fieldName, fieldVal), ""));
             }
         }

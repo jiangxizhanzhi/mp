@@ -1229,6 +1229,8 @@ public class CreateHandler extends HandlerCommon {
             createData.setPhysicalSwitch(cloudPort.getEntityPhysicalSwitchName());
             createData.setNetworkId(networkId);
             createData.setName(TextUtils.uuid());
+            createData.setMac(port.getMacAddr());
+            createData.setIpAddr(port.getIp());
             if (StringUtils.isNotBlank(cloudPort.getEntityPhysicalSwitchName())) {
                 synchronized (entityCreateData) {
                     entityCreateData.add(createData);

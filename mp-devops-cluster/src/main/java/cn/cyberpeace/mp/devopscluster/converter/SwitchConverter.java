@@ -1,16 +1,19 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.InterfaceDetail;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.SdnSwitch;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Switches;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.SwitchService;
 import cn.cyberpeace.mp.devopscluster.converter.model.SwitchConvertModel;
 import cn.cyberpeace.mp.devopscluster.model.SwitchesCloudPlatform;
+import cn.cyberpeace.mp.devopscluster.request.ModifySdnSwitchCommand;
+import cn.cyberpeace.mp.devopscluster.request.RegisterSdnSwitchCommand;
+import cn.cyberpeace.mp.devopscluster.request.SearchSdnSwitchRequest;
+import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,30 +27,43 @@ public class SwitchConverter {
 
     private final SwitchService switchService;
 
+
+    public SdnSwitch registerSdnSwitch(RegisterSdnSwitchCommand registerSdnSwitchCommand) {
+        return switchService.add(registerSdnSwitchCommand);
+    }
+
+
+
+    public PageInfo<SdnSwitch> pageSdnSwitch(SearchSdnSwitchRequest searchSdnSwitchRequest) {
+        return switchService.pageSdnSwitch(searchSdnSwitchRequest);
+    }
+
+    public void modifySdnSwitch(ModifySdnSwitchCommand modifySdnSwitchCommand, String name) {
+        switchService.modify(modifySdnSwitchCommand, name);
+    }
+
+    public void deleteSdnSwitch(String name) {
+        switchService.delete(name);
+    }
+
+
+
+
+
     /**
      * 树形结构-交换机列表
      * @return
      */
     public List<SwitchConvertModel> treeList() {
-        List<Switches> switchesList = this.list();
-        List<SwitchConvertModel> switchConvertModels = new ArrayList<>();
-        for (Switches switches : switchesList){
-            SwitchConvertModel convertModel = new SwitchConvertModel();
-            convertModel.setLabel(switches.getName());
-            convertModel.setValue(switches.getName());
-            if (CollectionUtils.isNotEmpty(switches.getInterfaceDetails())){
-                List<SwitchConvertModel.Children> childrens = new ArrayList<>();
-                for (InterfaceDetail interfaceDetail : switches.getInterfaceDetails()){
-                    SwitchConvertModel.Children children = new SwitchConvertModel.Children();
-                    children.setLabel(interfaceDetail.getInterfaceName());
-                    children.setValue(interfaceDetail.getInterfaceName());
-                    childrens.add(children);
-                    convertModel.setChildren(childrens);
-                }
-            }
-            switchConvertModels.add(convertModel);
-        }
-        return switchConvertModels;
+        SwitchConvertModel switchConvertModel = new SwitchConvertModel();
+        switchConvertModel.setLabel("test_switch");
+        switchConvertModel.setValue("test_switch");
+
+        SwitchConvertModel.Children children = new SwitchConvertModel.Children();
+        children.setLabel("interface_1");
+        children.setValue("interface_2");
+        switchConvertModel.setChildren(Collections.singletonList(children));
+        return Collections.singletonList(switchConvertModel);
     }
 
     /**

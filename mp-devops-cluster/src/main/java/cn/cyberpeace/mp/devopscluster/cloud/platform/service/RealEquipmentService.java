@@ -45,6 +45,8 @@ public class RealEquipmentService extends BaseCpService {
 
     private static final String ENTITY_USB = "/entity_usbs";
 
+    private static final String ENTITY_ADD_URL = "/cloud/v1/entity/lists";
+
     public RealEquipmentService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }
@@ -71,7 +73,7 @@ public class RealEquipmentService extends BaseCpService {
      * @return
      */
     public Device add(Device device){
-        Device result = super.sendPost(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/lists", JsonUtils.snakeStringify(device),Device.class);
+        Device result = super.sendPost(ENTITY_ADD_URL, JsonUtils.snakeStringify(device),Device.class);
         super.checkResult(result);
         return result;
     }

@@ -336,6 +336,28 @@ public class HttpUtils {
         return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
     }
 
+    public static String sendPatch(String url, String content, Map<String, String> headers) throws IOException {
+        HttpClient client = HttpClientBuilder.create().build();
+        log.info("请求地址================>{}", url);
+        log.info("请求参数================>{}", content);
+        HttpPatch httpPatch = new HttpPatch(url);
+        // 解决中文乱码问题
+        StringEntity entity = new StringEntity(content, StandardCharsets.UTF_8);
+        entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
+        httpPatch.setEntity(entity);
+
+        if (Objects.nonNull(headers) && !headers.isEmpty()) {
+            headers.forEach(httpPatch::addHeader);
+        }
+
+        HttpResponse resp = client.execute(httpPatch);
+        // 设置请求和传输超时时间
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        httpPatch.setConfig(requestConfig);
+        // 获得返回值
+        return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
+    }
+
     /**
      * get请求
      *

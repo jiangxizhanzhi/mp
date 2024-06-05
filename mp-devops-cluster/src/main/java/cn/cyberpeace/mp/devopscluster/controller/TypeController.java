@@ -32,9 +32,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * 类型管理类
@@ -387,8 +387,7 @@ public class TypeController {
     @ApiOperation("查询串口配置")
     @GetMapping("/serial-port-list")
     public Result<List<SerialPortVO>> serialPortList(){
-        List<SerialPortConvertModel> list = serialPortConverter.list();
-        return new Result<>(Lists.newArrayList(new SerialPortVO(CCM_1,CCM_1,list)));
+        return new Result<>(Collections.emptyList());
     }
 
     @AuthTarget(TargetEnum.REAL_MANAGE)
