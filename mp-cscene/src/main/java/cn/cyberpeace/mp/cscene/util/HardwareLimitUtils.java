@@ -4,7 +4,9 @@ import cn.cyberpeace.mp.base.service.code.MessageServiceCode;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,9 +15,9 @@ import java.util.Optional;
 
 @Slf4j
 public class HardwareLimitUtils {
-    private static HardwareCount TOTAL;
+    private static HardwareCount TOTAL = new HardwareCount(64, 1823127060, 128799);
 
-    private static HardwareCount USED;
+    private static HardwareCount USED = new HardwareCount(0, 0, 0);
 
     public static void initTotal(int cpu, int ram, int disk) {
         TOTAL = new HardwareCount();
@@ -133,6 +135,8 @@ public class HardwareLimitUtils {
 
     @Getter
     @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
     private static class HardwareCount {
         private int cpu;
         private int disk;
