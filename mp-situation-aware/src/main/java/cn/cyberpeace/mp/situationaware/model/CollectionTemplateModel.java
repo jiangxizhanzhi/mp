@@ -50,4 +50,8 @@ public class CollectionTemplateModel extends BaseModel implements Serializable {
     @NotBlank(groups = AddGroup.class)
     private Integer osType;
 
+    @ApiModelProperty(value = "系统发行版本")
+    private Integer systemDistributionType;
+
+
 }

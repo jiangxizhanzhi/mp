@@ -62,4 +62,7 @@ public class CollectionTemplateRequest {
     @ApiModelProperty(value = "自定义探针列表")
     private List<ColTempCustomProbeRequest> customProbes;
 
+    @ApiModelProperty(value = "系统发行版本")
+    private Integer systemDistributionType;
+
 }

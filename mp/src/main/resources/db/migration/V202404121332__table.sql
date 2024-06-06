@@ -73,4 +73,5 @@ alter table mp_devops_target add column attack_mock_device_flag int(2) not null 
 
 alter table mp_scene_scene_element add attack_mock_device_flag int(2) not null default 0 comment '0非攻防模拟器,1攻防模拟器';
 alter table mp_scene_scene_config_element add attack_mock_device_flag int(2) not null default 0 comment '0非攻防模拟器,1攻防模拟器';
-alter table mp_situation_probe add system_distribution_type int(11) comment '系统发行版本';
+alter table mp_situation_probe add column system_distribution_type int(11) comment '系统发行版本';
+alter table mp_situation_collection_template add column system_distribution_type int(11) comment '系统发行版本';
