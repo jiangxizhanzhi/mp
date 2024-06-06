@@ -75,6 +75,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private Integer vlanId;
     @DefaultBool
     private Boolean auxiliaryRouterOff;
+    @DefaultStr
+    private String place;
 
     // 虚拟路由属性
     @DefaultStr
