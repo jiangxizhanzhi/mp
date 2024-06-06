@@ -75,4 +75,6 @@ public class ProbeRequest {
     @ApiModelProperty(value = "脚本参数")
     private String parameter;
 
+    @ApiModelProperty(value = "发行版本")
+    private Integer systemDistributionType;
 }

@@ -102,4 +102,8 @@ public class ProbeModel extends BaseModel {
     @ApiModelProperty(value = "(可多选)操作系统类型 0:Windows, 1:Unix, 2:Linux, 3:BSD, 4:Other")
     private String osType;
 
+
+    @ApiModelProperty(value = "系统发行版本")
+    private Integer systemDistributionType;
+
 }
