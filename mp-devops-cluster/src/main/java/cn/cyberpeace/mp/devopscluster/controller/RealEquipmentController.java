@@ -95,15 +95,6 @@ public class RealEquipmentController {
             RealEquipmentPageVO realEquipmentPageVO = getRealEquipmentPageVO(l1AndL2AndL3Type, language, systemArchitecure, accessType, v);
             list.add(realEquipmentPageVO);
         }
-
-        for (RealEquipmentPageVO l : list) {
-            if (l.getExtSystemInfo() != null && "USB".equals(l.getExtSystemInfo().getSystemTypeName())) {
-                l.getExtSystemInfo().setSystemArchitecture(null);
-                l.getExtSystemInfo().setSystemArchitectureName(null);
-                l.getExtSystemInfo().setLanguage(null);
-                l.getExtSystemInfo().setLanguageName(null);
-            }
-        }
         return new PageResult<>(list,model.getTotal());
     }
 

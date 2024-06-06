@@ -74,7 +74,7 @@ public class SwitchConverter {
                 for (int i = 0; i < sdnSwitch.getPortNum(); i++) {
                     SwitchConvertModel.Children child = new SwitchConvertModel.Children();
                     child.setLabel(getFormatSdnSwitchPortName(i+1));
-                    child.setValue(child.getLabel());
+                    child.setValue(String.valueOf(i+1));
                     children.add(child);
                 }
 

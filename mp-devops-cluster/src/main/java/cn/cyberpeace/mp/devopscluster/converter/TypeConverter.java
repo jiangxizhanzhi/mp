@@ -178,7 +178,7 @@ public class TypeConverter {
      */
     public TypeAllConvertModel findSystemArchitecure() {
         // 底层更新了字段名称，中台其他地方还是使用system_architecure字段；
-        return this.findIdStringByType("system_architecture");
+        return this.findIdStringByType("system_architecure");
     }
 
     /**
