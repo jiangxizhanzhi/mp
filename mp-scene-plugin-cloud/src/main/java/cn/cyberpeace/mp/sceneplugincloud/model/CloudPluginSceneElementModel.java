@@ -14,4 +14,6 @@ import lombok.NoArgsConstructor;
 public class CloudPluginSceneElementModel extends BaseCloudPluginSceneElementModel {
     @DefaultStr
     private String fwdnsIps ;
+    @DefaultStr
+    private String place;
 }
