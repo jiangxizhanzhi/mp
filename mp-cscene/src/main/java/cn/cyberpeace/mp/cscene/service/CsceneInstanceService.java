@@ -2176,7 +2176,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
         CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         CloudPluginSceneElementBO element = cloudPlugin.getElement(request.getNodeId());
-        AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
         if (null != request.getVmSizeType()) {
             element.setVmSizeType(request.getVmSizeType());
         }
@@ -2185,22 +2184,24 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         element.setVmExpansionDiskType(request.getExpansionDiskType());
         element.getSrcElement().setExpansionDisk(request.getExpansionDisk());
+        if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(element.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == element.getVirtualType()) {
+            SceneTaskPool.getInstance().executeTask(() -> {
+                AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+                azureVirtualMachine.expansion(element);
+            });
+            element.setExpansion(true);
+            CloudPluginSceneElementModel cloudPluginSceneElementModel = element.toModel();
 
-        SceneTaskPool.getInstance().executeTask(() -> {
-            azureVirtualMachine.expansion(element);
-        });
-
-        element.setExpansion(true);
-        CloudPluginSceneElementModel cloudPluginSceneElementModel = element.toModel();
-
-        HumanCondition humanCondition = new HumanCondition()
-                .filterEqual(CloudPluginSceneElementModel::getScene, sceneHandler.getSceneId())
-                .filterEqual(CloudPluginSceneElementModel::getSceneElement, request.getNodeId());
-        cloudPluginSceneElementMapper.filterUpdate(cloudPluginSceneElementModel, humanCondition);
-        SceneElementModel sceneElementModel = element.getSrcElement().toModel();
-        sceneElementMapper.update(sceneElementModel);
+            HumanCondition humanCondition = new HumanCondition()
+                    .filterEqual(CloudPluginSceneElementModel::getScene, sceneHandler.getSceneId())
+                    .filterEqual(CloudPluginSceneElementModel::getSceneElement, request.getNodeId());
+            cloudPluginSceneElementMapper.filterUpdate(cloudPluginSceneElementModel, humanCondition);
+            SceneElementModel sceneElementModel = element.getSrcElement().toModel();
+            sceneElementMapper.update(sceneElementModel);
 
 
-        return new ServiceResult<>(true);
+            return new ServiceResult<>(true);
+        }
+        return new ServiceResult<>(false);
     }
 }
