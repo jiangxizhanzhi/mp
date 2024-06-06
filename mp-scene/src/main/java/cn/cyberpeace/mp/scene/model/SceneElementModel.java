@@ -24,6 +24,8 @@ public class SceneElementModel extends BaseSceneElementModel implements BaseEven
     private Integer processStatus;
     @DefaultStr
     private String processMessage;
+    @DefaultStr
+    private String place;
 
     @Override
     public String genTarget() {
