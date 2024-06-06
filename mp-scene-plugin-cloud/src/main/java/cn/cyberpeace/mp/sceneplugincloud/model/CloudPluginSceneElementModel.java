@@ -15,4 +15,7 @@ public class CloudPluginSceneElementModel extends BaseCloudPluginSceneElementMod
     @DefaultStr
     private String fwdnsIps ;
 
+    @DefaultStr
+    private String place;
+
 }
