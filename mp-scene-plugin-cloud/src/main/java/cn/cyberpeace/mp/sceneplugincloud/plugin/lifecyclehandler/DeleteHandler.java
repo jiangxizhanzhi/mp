@@ -227,10 +227,6 @@ public class DeleteHandler extends HandlerCommon {
         VirtualMachineDeleteData deleteData = new VirtualMachineDeleteData();
         deleteData.setVms(List.of(resourceId));
         ElementExtraCloudInfo extraInfo = collectElementExtraCloudInfo(cloudElement);
-        deleteData.setQoses(extraInfo.getQosIds());
-        deleteData.setConnections(extraInfo.getConnectionIds());
-        deleteData.setPortMappings(extraInfo.getProxyIds());
-        deleteData.setFloatingIps(extraInfo.getFloatingIpIds());
         return vmClient.delete(deleteData);
     }
 

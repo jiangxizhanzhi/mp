@@ -1073,7 +1073,7 @@ public class CreateHandler extends HandlerCommon {
                 createData.setDisplayType(ElementAccessModeConstant.SPICE_AND_VNC);
             } else if (protocols.contains(CloudElementAccessMode.Protocol.SPICE)) {
                 createData.setDisplayType(ElementAccessModeConstant.SPICE);
-            } else {
+            } else if (protocols.contains(CloudElementAccessMode.Protocol.VNC)){
                 createData.setDisplayType(ElementAccessModeConstant.VNC);
             }
             // 有com接入方式时开启串口接入
@@ -1111,6 +1111,10 @@ public class CreateHandler extends HandlerCommon {
             createData.setCustomScript(TextUtils.emptyNull(combineInitCommand(cloudElement)));
         }
         createData.setNetwork(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
+
+        //临时加参数
+        createData.setExtremeSpeed(true);
+        createData.setMainCloud(false);
 
         VirtualMachineCreateData virtualMachine = vmClient.create(createData);
         cloudElement.setResourceId(virtualMachine.getId());
