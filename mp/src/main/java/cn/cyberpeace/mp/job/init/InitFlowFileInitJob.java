@@ -69,7 +69,9 @@ public class InitFlowFileInitJob {
     }
 
     private void checkFlowProtocols() {
-        List<FlowInfoModel> modelList = flowInfoMapper.list(new HumanCondition().filterGreaterThan(FlowInfoModel::getPk, 0)
+        int preFiles = flowInfoService.countPreFiles();
+        log.info("pre files count {}", preFiles);
+        List<FlowInfoModel> modelList = flowInfoMapper.list(new HumanCondition().filterGreaterThan(FlowInfoModel::getPk, preFiles)
                                                                     .orderBy(FlowInfoModel::getPk).pagination(0, 100));
         while (CollectionUtils.isNotEmpty(modelList)) {
             int maxPk = Integer.MAX_VALUE;

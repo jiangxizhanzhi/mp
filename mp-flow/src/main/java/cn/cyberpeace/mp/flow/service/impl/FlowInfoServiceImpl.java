@@ -1054,6 +1054,21 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         return new ServiceResult<>(true);
     }
 
+    public int countPreFiles() {
+        int count = 0;
+        String path = PRE_PATH + "/pcap";
+        File fileDir = new File(path);
+        if (fileDir.exists() && fileDir.isDirectory()) {
+            count += fileDir.listFiles().length;
+        }
+        path = PRE_PATH + "/scripts";
+        fileDir = new File(path);
+        if (fileDir.exists() && fileDir.isDirectory()) {
+            count += fileDir.listFiles().length;
+        }
+        return count;
+    }
+
     /**
      * 检查力流量脚本参数是否初始化完整，否则进行修正
      */
