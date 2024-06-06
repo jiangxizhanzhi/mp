@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
@@ -17,15 +16,13 @@ import cn.cyberpeace.mp.devopscluster.model.SnmpInterfaceResourceCloudPlatform;
 import cn.cyberpeace.mp.devopscluster.model.common.Hypervisor;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
-import cn.cyberpeace.mp.devopscluster.utils.URLUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -167,21 +164,8 @@ public class RealEquipmentService extends BaseCpService {
      * @return
      */
     public CloudPlatformPageResult<TargetConnection> connection(String deviceUuid){
-        CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/connection?device_uuid=" + deviceUuid,CloudPlatformItemsPageResult.class);
-        super.checkResult(pageResult);
-        List<TargetConnection> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getData().getItems()),TargetConnection.class);
-        DevopsClusterConfig config = BeanCommon.getBean(DevopsClusterConfig.class);
-        if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
-            for (TargetConnection l : list) {
-                if (StringUtils.isEmpty(config.getPublicNetProxyIp())) {
-                    continue;
-                }
-                URL u = URLUtils.url(l.getUrl());
-                l.setUrl(StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp()));
-            }
-        }
         CloudPlatformPageResult<TargetConnection> model = new CloudPlatformPageResult<>();
-        model.setList(list);
+        model.setList(Collections.emptyList());
         return model;
     }
 

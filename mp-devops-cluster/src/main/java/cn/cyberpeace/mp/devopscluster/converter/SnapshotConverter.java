@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.mptool.DatePattern;
@@ -21,7 +22,7 @@ import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.converter.model.DeviceAndSnapshotConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.SnapshotConvertModel;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
-import cn.cyberpeace.mp.devopscluster.model.DeviceAndSnapshotCloudPlatformResult;
+import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
@@ -32,7 +33,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -130,33 +134,24 @@ public class SnapshotConverter {
      * @return
      */
     public DeviceAndSnapshotConvertModel deviceAndSnapshotByName(String name) {
-        DeviceAndSnapshotCloudPlatformResult model = snapshotService.deviceAndSnapshotByName(name);
-        if (Objects.isNull(model)){
-            return null;
+        List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.list(new HumanCondition().select(DeviceTargetPO::getName, DeviceTargetPO::getUuid)
+                .filterEqual(DeviceTargetPO::getName, name));
+        if (CollectionUtils.isEmpty(deviceTargetPOS)) {
+            return new DeviceAndSnapshotConvertModel();
+        } else {
+            DeviceTargetPO deviceTargetPO = deviceTargetPOS.get(0);
+            DeviceAndSnapshotConvertModel deviceAndSnapshotConvertModel = new DeviceAndSnapshotConvertModel();
+            deviceAndSnapshotConvertModel.setDeviceName(deviceTargetPO.getName());
+            deviceAndSnapshotConvertModel.setDeviceUuid(deviceTargetPO.getUuid());
+
+            SnapshotConvertModel snapshotConvertModel = new SnapshotConvertModel();
+            snapshotConvertModel.setDeviceUuid(deviceTargetPO.getUuid());
+            snapshotConvertModel.setUuid(deviceTargetPO.getUuid());
+            snapshotConvertModel.setName(deviceTargetPO.getName());
+            snapshotConvertModel.setUserSnapshotName(deviceTargetPO.getName());
+            deviceAndSnapshotConvertModel.setItems(Collections.singletonList(snapshotConvertModel));
+            return deviceAndSnapshotConvertModel;
         }
-        List<SnapshotConvertModel> resultList = new ArrayList<>();
-        SnapshotConvertModel snapshotConvertModel = new SnapshotConvertModel(model.getDeviceUuid(), model.getImageName(), model.getDeviceName(), model.getDeviceUuid(),
-                "", null);
-        snapshotConvertModel.setQuickCreateParams(model.getQuickCreateParams());
-        DeviceAndSnapshotConvertModel convertModel = new DeviceAndSnapshotConvertModel();
-        convertModel.setDeviceName(model.getDeviceName());
-        convertModel.setDeviceUuid(model.getDeviceUuid());
-        if (CollectionUtils.isEmpty(model.getSnapshots())){
-            resultList.add(snapshotConvertModel);
-            convertModel.setItems(resultList);
-            return convertModel;
-        }
-        List<SnapshotConvertModel> list = new ArrayList<>();
-        for (Snapshot item : model.getSnapshots()) {
-            SnapshotConvertModel snapshotConvertModel1 = new SnapshotConvertModel(item.getUuid(), item.getName(), item.getUserSnapshotName(), item.getDeviceUuid(),
-                    item.getDescription(), Objects.isNull(item.getCreatedAt()) ? null :
-                    TimeUtils.utcStringToLocalDateTime(item.getCreatedAt()));
-            list.add(snapshotConvertModel1);
-        }
-        resultList.addAll(list);
-        resultList.add(0,snapshotConvertModel);
-        convertModel.setItems(resultList);
-        return convertModel;
     }
 
     /**
