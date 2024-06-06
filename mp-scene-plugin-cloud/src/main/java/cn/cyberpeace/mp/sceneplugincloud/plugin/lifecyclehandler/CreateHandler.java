@@ -27,6 +27,8 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementLogicalSwi
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.device.Device;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.device.DeviceClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
@@ -54,6 +56,7 @@ public class CreateHandler extends HandlerCommon {
     private final Npc npcClient = new Npc();
     private final VmRouter vmRouter = new VmRouter();
     private VirtualDynamips vdClient = new VirtualDynamips();
+    private DeviceClient deviceClient = new DeviceClient();
 
     private final Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
 
@@ -1050,8 +1053,9 @@ public class CreateHandler extends HandlerCommon {
         createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
         createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
         // 待查询出templateId
+        Device device = deviceClient.findByUuid(cloudElement.getImageUuid());
 
-        createData.setTemplateId(cloudElement.getImageUuid());
+        createData.setTemplateId(device.getExtVm().getTemplateId());
         createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
         createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
         createData.setDisk(IntUtils.zeroNull(srcElement.getDisk()));

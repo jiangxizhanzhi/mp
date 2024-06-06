@@ -14,6 +14,8 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import static cn.cyberpeace.mp.base.constant.BaseErrorCode.CUSTOM_ERROR;
+
 @Slf4j
 @Data
 public abstract class CloudClient {
@@ -45,6 +47,18 @@ public abstract class CloudClient {
     public <T> CloudResponse<T> cloudGet(String url, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef,
                                          boolean throwException) {
         return checkResponse(httpClient.cloudGet(url, param, valueTypeRef), throwException);
+    }
+
+    public <T> T cloudGetWithoutResponseWrapper(String url, HttpParam param, TypeReference<T> valueTypeRef, boolean throwException) {
+        try {
+            return httpClient.get(url, param, valueTypeRef);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            if (throwException) {
+                throw new MpRuntimeException(CUSTOM_ERROR.format("请求平台接口失败"), e.getMessage());
+            }
+            return null;
+        }
     }
 
     public <T> CloudResponse<T> cloudGet(String url, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef,
