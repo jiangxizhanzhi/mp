@@ -31,6 +31,8 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
     private Boolean isAuxiliary;
     @DefaultStr
     private String physicalLocation;
+    @DefaultStr
+    private String place;
 
     public static class Type {
         public static final int OTHER = 0;
