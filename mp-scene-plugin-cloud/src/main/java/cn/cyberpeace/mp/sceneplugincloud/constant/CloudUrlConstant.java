@@ -102,6 +102,8 @@ public class CloudUrlConstant {
     public static final String NETWORK_DELETE_URL = "/cloud/v1/network/{network_id}";
     public static final String NETWORK_ACL_CREATE_URL = "/cloud/v1/network/{network_id}/acl";
     public static final String NETWORK_ACL_DELETE_URL = "/cloud/v1/network/{network_id}/acl";
+    public static final String NETWORK_GET_URL = "/cloud/v1/networks/%s";
+
 
     /***********************虚机**********************/
     public static final String VIRTUAL_MACHINE_ACCESS_URL = "/cloud/v1/vm/console";
@@ -172,7 +174,6 @@ public class CloudUrlConstant {
 
 
     public static final String NETWORK_QUERY_URL = "/v1/networks";
-    public static final String NETWORK_GET_URL = "/v1/networks/%s";
 
     public static final String CONSOLE_INFO_GET_URL = "/cpcloud/instance_control/v1/console";
 

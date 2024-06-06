@@ -12,42 +12,52 @@ import java.util.List;
 @NoArgsConstructor
 public class NetworkData implements CloudHttpData {
 
+    /***********30**************/
+    private String id;
+    private String networkType;
     private String name;
+    private String description;
+    private String status;
+    private Integer mtu;
+    private String cidr;
+    private String comment;
+    private String createdAt;
+    private Subnet subnet;
+
+    /******************not 30*******************/
+
+
     private Boolean entityNetwork;
     private Boolean configSwitch;
     private Integer segmentationId;
-    private Subnet subnet;
-
-    private String id;
-    private String networkType;
-
-    private String description;
-    private Integer mtu;
     private String portLimit;
     private Boolean portSecurityEnabled;
     private String bridgeName;
     private String hostname;
     private String mechanismDriver;
     private String qosPolicyId;
-    private String status;
     private String project;
     private String updatedAt;
-    private String createdAt;
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Subnet {
-        private Integer ipVersion;
+        /**********30***********/
+
+        private String name;
         private String cidr;
         private String gatewayIp;
+        private List<String> dnsNameservers;
+
+
+
+        /************not 30***********/
+        private Integer ipVersion;
         private Boolean enableDhcp;
         private List<AllocationPool> allocationPools;
-        private List<String> dnsNameservers;
         private List<HostRoute> hostRoutes;
-
         private String id;
-        private String name;
 
         @Data
         @AllArgsConstructor
