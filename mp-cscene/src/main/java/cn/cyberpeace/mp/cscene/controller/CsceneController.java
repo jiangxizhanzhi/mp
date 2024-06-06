@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.mptool.ExceptionUtil;
 import cn.cyberpeace.mp.cscene.bo.CreateTemplateBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneAuthorizeBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
@@ -136,7 +137,6 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneDataModifier.checkFirewallRules(csceneBO);
         CsceneDataModifier.handleAccessModePath(csceneBO);
         CsceneDataModifier.checkCloudElement(csceneBO);
-        CsceneDataModifier.handlerPortUsable(csceneBO);
         CsceneDataModifier.handlerPosition(csceneBO);
     }
 
@@ -698,7 +698,7 @@ public class CsceneController implements BaseModelListControllerBase {
                 mapper.bulkCreate(roleObjs).getSuccessCount();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("failed to save roles , cscene id {} , exception is {}", csceneBO.getId(), ExceptionUtil.stacktraceToString(e));
         }
 
         var topo = result.getData().getSceneConfig().getTopology();
