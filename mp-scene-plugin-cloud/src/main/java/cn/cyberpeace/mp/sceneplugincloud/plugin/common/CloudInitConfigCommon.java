@@ -6,15 +6,9 @@ import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static cn.cyberpeace.mp.scene.util.CommandUtils.WINDOWS_LINE_BREAK;
 
@@ -26,8 +20,6 @@ import static cn.cyberpeace.mp.scene.util.CommandUtils.WINDOWS_LINE_BREAK;
 public class CloudInitConfigCommon {
     public static final String WINDOWS_HOSTS_PATH = "C:\\Windows\\System32\\drivers\\etc\\hosts";
     public static final String LINUX_HOSTS_PATH = "/etc/hosts";
-    private static final String SSH_PWAUTH = "ssh_pwauth: true";
-    private static final String DISABLE_ROOT = "disable_root: 0";
 
     private static final Set<String> CHANGE_USER_PROTOCOL = new HashSet<>();
 
@@ -119,23 +111,7 @@ public class CloudInitConfigCommon {
 
         private List<String> buildForLinux() {
             List<String> list = new ArrayList<>();
-            if (rootPassword != null) {
-                list.addAll(this.getChpasswd(rootPassword));
-            }
-            list.add(SSH_PWAUTH);
-            list.add(DISABLE_ROOT);
-            if (!this.users.isEmpty()) {
-                if (CollectionUtils.isNotEmpty(this.getGroups())) {
-                    list.add("groups: ");
-                    list.addAll(this.getGroups());
-                }
-                if (CollectionUtils.isNotEmpty(this.getUsers())) {
-                    list.add("users: ");
-                    list.addAll(this.getUsers());
-                }
-            }
             if (!this.initCommands.isEmpty()) {
-                list.add("runcmd:");
                 List<String> splitCmds = new ArrayList<>();
                 initCommands.forEach(cmd -> {
                     String[] splitResult = StringUtils.split(cmd, CommandUtils.LINUX_LINE_BREAK);
@@ -145,19 +121,9 @@ public class CloudInitConfigCommon {
                         }
                     }
                 });
-                List<String> formatCommands = new ArrayList<>();
-                for (String s : splitCmds) {
-                    if (StringUtils.isNotEmpty(s)) {
-                        String s1 = "  - " + s;
-                        formatCommands.add(s1);
-                    }
-                }
-                list.addAll(formatCommands);
+                list.addAll(splitCmds);
             }
 
-            if (!this.dnsList.isEmpty()) {
-                list.addAll(this.getDnsList(LINUX_HOSTS_PATH, this.dnsList));
-            }
             return list;
         }
 

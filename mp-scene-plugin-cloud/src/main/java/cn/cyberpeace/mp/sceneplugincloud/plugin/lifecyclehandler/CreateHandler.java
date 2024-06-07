@@ -519,6 +519,7 @@ public class CreateHandler extends HandlerCommon {
     private String combineInitCommand(CloudPluginSceneElementBO cloudElement) {
         SceneElementBO srcElement = cloudElement.getSrcElement();
         List<String> commands = new ArrayList<>();
+
         commands.addAll(behaviorSupportInitCommand(srcElement));
         commands.addAll(getBasDeviceInitCommand(srcElement));
 
@@ -608,7 +609,7 @@ public class CreateHandler extends HandlerCommon {
             if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
                 command = SystemTypeCommandUtils.appendBeforeCommand(command, "rem cmd", standardSystemType);
             } else {
-                command = SystemTypeCommandUtils.appendBeforeCommand(command, "#cloud-config", standardSystemType);
+                command = SystemTypeCommandUtils.appendBeforeCommand(command, "#!/bin/bash", standardSystemType);
             }
         }
 
@@ -634,6 +635,7 @@ public class CreateHandler extends HandlerCommon {
             String standardSystemType = SystemTypeUtils.getStandardSystemType(sceneElementBO.getSystemType());
             if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
                 //todo 待支持windows
+                basDeviceInitCommand.add(String.format("hello test"));
 
 
             } else if (SystemTypeCommandUtils.isLinux(standardSystemType)) {

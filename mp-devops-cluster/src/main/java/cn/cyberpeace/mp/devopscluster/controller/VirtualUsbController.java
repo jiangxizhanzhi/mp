@@ -27,6 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Collections;
+
 /**
  * @Description: 靶标管理-USB仿真
  * @Author: guquan
@@ -52,7 +54,7 @@ public class VirtualUsbController {
     @GetMapping("/page")
     public ListObjServiceResult<VirtualUsbVO> page(VirtualUsbQueryParams queryParams) {
         queryParams.ensure();
-        ListObjServiceResult<VirtualUsbVO> result = usbServicesbService.virtualUsbPage(queryParams);
+        ListObjServiceResult<VirtualUsbVO> result = new ListObjServiceResult<VirtualUsbVO>(Collections.emptyList(), 0).asResult();
         return result;
     }
 

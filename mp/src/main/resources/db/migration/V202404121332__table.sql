@@ -67,15 +67,20 @@ alter table mp_scene_scene_config_element_port add column usable tinyint(1) comm
 alter table `mp_situation_suricatarule` add column class_type_cn varchar(1024) NOT NULL DEFAULT '' COMMENT "流量规则分类类型中文";
 alter table `mp_situation_suricatarule` add column class_type_en varchar(1024) NOT NULL DEFAULT '' COMMENT "流量规则分类类型英文";
 alter table `mp_situation_suricatarule` add column rule_gen_type int(2) NOT NULL DEFAULT 0 COMMENT "规则生成类型0-预定义，用户不能编辑 1-自定义，用户可以编辑";
-alter table mp_devops_target add column attack_mock_device_flag int(2) not null default 0 comment '0非攻防模拟器,1攻防模拟器';
 
-
-
-alter table mp_scene_scene_element add column attack_mock_device_flag int(2) not null default 0 comment '0非攻防模拟器,1攻防模拟器';
-alter table mp_scene_scene_config_element add column attack_mock_device_flag int(2) not null default 0 comment '0非攻防模拟器,1攻防模拟器';
 alter table mp_situation_probe add column system_distribution_type int(11) comment '系统发行版本';
 alter table mp_situation_collection_template add column system_distribution_type int(11) comment '系统发行版本';
 
-alter table mp_devops_target add column behave_support int(2) not null default 0 comment '0不支持,1支持';
-alter table mp_scene_scene_element add column behave_support int(2) not null default 0 comment '0不支持,1支持';
-alter table mp_scene_scene_config_element add column behave_support int(2) not null default 0 comment '0不支持,1支持';
+
+alter table mp_devops_target add column attack_mock_device_flag tinyint(1) not null default 0 comment '0非攻防模拟器,1攻防模拟器';
+alter table mp_scene_scene_element add column attack_mock_device_flag tinyint(1) not null default 0 comment '0非攻防模拟器,1攻防模拟器';
+alter table mp_scene_scene_config_element add column attack_mock_device_flag tinyint(1) not null default 0 comment '0非攻防模拟器,1攻防模拟器';
+alter table mp_devops_target add column behave_support tinyint(1) not null default 0 comment '0不支持,1支持';
+alter table mp_scene_scene_element add column behave_support tinyint(1) not null default 0 comment '0不支持,1支持';
+alter table mp_scene_scene_config_element add column behave_support tinyint(1) not null default 0 comment '0不支持,1支持';
+
+
+
+
+
+
