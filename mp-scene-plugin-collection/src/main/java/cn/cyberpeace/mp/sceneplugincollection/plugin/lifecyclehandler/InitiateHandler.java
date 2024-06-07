@@ -202,6 +202,7 @@ public class InitiateHandler extends HandlerCommon {
                         controlParam = this.getControlConfigParam(collectionElement.getProbes(), srcElement.getEid(),
                                 systemType, this.getLocationMap());
                     }
+                    //生成探测安装脚本
                     var probeInstallScript = getProbeCollector().generateProbeInstallScript(cloudType, systemType,
                             srcElement.getEid(), collectionId, controlParam, isContainer);
                     var initCommands = srcElement.getInitCommands();

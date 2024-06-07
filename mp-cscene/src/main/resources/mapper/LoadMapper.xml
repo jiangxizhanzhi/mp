@@ -116,28 +116,6 @@
                 now())
     </insert>
 
-    <insert id="stageBindLoad">
-        INSERT INTO mp_devops_load_stage_bind
-        (load_id,
-         task_id,
-         add_type,
-         scene_id,
-         stage_id,
-         interface_type,
-         deployment,
-         param_list,
-         create_time)
-        VALUES (#{loadId},
-                #{taskId},
-                #{addType},
-                #{sceneId},
-                #{stageId},
-                #{interfaceType},
-                #{deployment},
-                #{paramList},
-                now())
-    </insert>
-
     <insert id="addSynchronousDataSource">
         INSERT INTO mp_devops_load_source
         (ip,
@@ -316,36 +294,6 @@
         pk = #{param.pk}
     </update>
 
-    <update id="updateBindByPk">
-        UPDATE mp_devops_load_stage_bind
-        <set>
-            <if test="param != null and param.loadId != null and param.loadId != ''">
-                load_id = #{param.loadId},
-            </if>
-            <if test="param != null and param.addType != null and param.addType != ''">
-                add_type = #{param.addType},
-            </if>
-            <if test="param != null and param.sceneId != null and param.sceneId != ''">
-                scene_id = #{param.sceneId},
-            </if>
-            <if test="param != null and param.stageId != null and param.stageId != ''">
-                stage_id = #{param.stageId},
-            </if>
-            <if test="param != null and param.interfaceType != null and param.interfaceType != ''">
-                interface_type = #{param.interfaceType},
-            </if>
-            <if test="param != null and param.deployment != null and param.deployment != ''">
-                deployment = #{param.deployment},
-            </if>
-            <if test="param != null and param.paramList != null and param.paramList != ''">
-                param_list = #{param.paramList},
-            </if>
-            pk = #{pk}
-        </set>
-        WHERE
-        pk = #{pk}
-    </update>
-
     <update id="batchUpdateData">
         <foreach collection="param" item="item" separator=";">
             UPDATE mp_devops_load
@@ -433,12 +381,6 @@
                 </foreach>
             </if>
         </where>
-    </delete>
-
-    <delete id="deleteLoadBindByPk">
-        DELETE
-        FROM mp_devops_load_stage_bind
-        WHERE pk = #{pk}
     </delete>
 
     <select id="getLoadList" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoad">

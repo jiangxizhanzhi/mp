@@ -147,7 +147,7 @@ public class CsceneHandler extends BaseCsceneHandler<
             throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT.format(String.valueOf(updateResult.getLimitNode()),
                     String.valueOf(updateResult.getExistNode()), String.valueOf(updateResult.getCurrentNode())));
         }
-        // 创建实例(对wazul等插件的设置等)
+        // 创建实例(对wazul等服务的设置等)
         instanceHandler.create();
         var result = instanceHandler.toData();
         if (result.getScene() != null && result.getScene().getTopology() != null && result.getScene().getTopology().getScene() != null) {

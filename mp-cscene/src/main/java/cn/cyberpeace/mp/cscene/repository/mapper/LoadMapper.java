@@ -42,9 +42,6 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     Boolean addLoad(@Param("param") JSONObject requestData);
 
-    Boolean stageBindLoad(String addType, String sceneId, String stageId, String taskId, String loadId,
-                          String interfaceType, String deployment, String paramList);
-
     Boolean synchronousDataSource(@Param("param") MpDevopsLoadSource requestData);
 
     Boolean addSynchronousDataSource(@Param("param") MpDevopsLoadSource requestData);
@@ -56,10 +53,6 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
     Boolean deleteData(@Param("param") List<String> ids);
 
     List<MpDevopsLoad> getToolListByloadIds(@Param("param") List<String> ids);
-
-    Boolean updateBindByPk(String pk, @Param("param") JSONObject requestData);
-
-    Boolean deleteLoadBindByPk(String pk);
 
     List<String> getLoadsBySceneId(String sceneId);
 

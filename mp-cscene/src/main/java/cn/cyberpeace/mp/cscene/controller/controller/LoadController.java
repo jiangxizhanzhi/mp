@@ -188,9 +188,8 @@ public class LoadController {
      * */
     @ApiOperation(value = "载荷改造", notes = "")
     @PostMapping("/loadTransform")
-    public ServiceResult loadTransform(@RequestParam(value = "file") MultipartFile file, HttpServletRequest request,
-                                       HttpServletResponse response, @RequestParam(value = "transform_type") String transformType) {
-        ServiceResult loadTransform = loadService.loadTransform(file, transformType, response);
+    public ServiceResult loadTransform(@RequestParam(value = "file") String file, @RequestParam(value = "transform_type") String transformType) {
+        ServiceResult loadTransform = loadService.loadTransform(file, transformType);
         return loadTransform;
     }
 
@@ -316,12 +315,8 @@ public class LoadController {
     @ApiOperation(value = "载荷执行结果导入", notes = "")
     @PostMapping("/importLoadExecutionResult")
     public ServiceResult importLoadExecutionResult(@RequestParam(value = "file") MultipartFile file) throws IOException {
-        Boolean importLoadExecutionResult = loadService.importLoadExecutionResult(file);
-        if (importLoadExecutionResult) {
-            return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-        } else {
-            return new ServiceResult(null, BaseErrorCode.ERROR, "载荷执行结果导入失败").asResult();
-        }
+        ServiceResult importLoadExecutionResult = loadService.importLoadExecutionResult(file);
+        return importLoadExecutionResult;
     }
 
     /*
@@ -336,54 +331,6 @@ public class LoadController {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {
             return new ServiceResult(null, BaseErrorCode.ERROR, "载荷执行结果导出失败").asResult();
-        }
-    }
-
-    /*
-     * 阶段测试绑定载荷工具
-     * */
-    @ApiOperation(value = "阶段测试绑定载荷工具", notes = "")
-    @PostMapping("/stageBindLoad")
-    public ServiceResult stageBindLoad(@RequestBody(required = false) JSONObject requestData) {
-        if (requestData != null && requestData.get("addType") != null && !requestData.get("addType").toString().equals("")) {
-            String addType = requestData.get("addType").toString();
-            if (addType.equals("name") || addType.equals("loopholes") || addType.equals("tactics")) {
-                Boolean stageBindLoad = loadService.stageBindLoad(addType, requestData);
-                if (stageBindLoad) {
-                    return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-                }
-            }
-        }
-        return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID, "参数无效").asResult();
-    }
-
-    /**
-     * 根据靶标漏洞List获取载荷
-     */
-    @ApiOperation(value = "根据靶标漏洞List获取载荷", notes = "")
-    @PostMapping("/getToolByLoopholes")
-    public ServiceResult getToolByLoopholes(@RequestBody JSONObject requestData) {
-        if (requestData != null) {
-            List<MpDevopsLoad> getToolByLoopholes = loadService.getToolByLoopholes(requestData);
-            return new ServiceResult(getToolByLoopholes, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-        } else {
-            return new ServiceResult(null, BaseErrorCode.ERROR, "根据靶标漏洞List获取载荷失败");
-        }
-    }
-
-    /**
-     * 根据关联技战术获取载荷
-     */
-    @ApiOperation(value = "根据关联技战术获取载荷", notes = "")
-    @GetMapping("/getToolBytactics")
-    public ServiceResult getToolBytactics(@RequestParam(value = "tactics", required = false) String tactics) {
-        JSONObject requestData = new JSONObject();
-        requestData.put("tactics", tactics);
-        if (requestData != null) {
-            List<MpDevopsLoad> getToolBytactics = loadService.getToolBytactics(requestData);
-            return new ServiceResult(getToolBytactics, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-        } else {
-            return new ServiceResult(null, BaseErrorCode.ERROR, "根据关联技战术获取载荷失败");
         }
     }
 
@@ -425,21 +372,6 @@ public class LoadController {
             }
         }
         return new ServiceResult(null, BaseErrorCode.ERROR, "阶段载荷参数设置失败");
-    }
-
-    /**
-     * 阶段载荷移除
-     */
-    @ApiOperation(value = "阶段载荷移除", notes = "")
-    @DeleteMapping("/deleteLoad")
-    public ServiceResult deleteLoad(@RequestBody JSONObject requestData) {
-        if (requestData != null) {
-            Boolean deleteLoadBind = loadService.deleteLoadBind(requestData);
-            if (deleteLoadBind) {
-                return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-            }
-        }
-        return new ServiceResult(null, BaseErrorCode.ERROR, "阶段载荷参数移除失败");
     }
 
     /*

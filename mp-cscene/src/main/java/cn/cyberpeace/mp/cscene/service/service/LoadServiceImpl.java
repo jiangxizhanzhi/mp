@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
@@ -579,56 +580,82 @@ public class LoadServiceImpl {
     /*
      * 载荷执行结果导入
      * */
-    public Boolean importLoadExecutionResult(MultipartFile multipartFile) throws IOException {
-        if (multipartFile != null && multipartFile.getName() != null && !multipartFile.getName().equals("")) {
-            if (multipartFile.getOriginalFilename().endsWith("xlsx") || multipartFile.getOriginalFilename().endsWith("xls")) {
-                // 创建临时文件对象（使用UUID作为文件名以避免冲突）
-                File excelFile = File.createTempFile("temp_excel_", ".xlsx");
-                // 将MultipartFile的内容转移到临时文件
-                multipartFile.transferTo(excelFile);
-                try (FileInputStream fis = new FileInputStream(excelFile)) {
-                    Workbook workbook = new XSSFWorkbook(fis);
-                    Sheet sheet = workbook.getSheetAt(0); // 获取第一个工作表
-                    //数据集初始化
-                    List<List<Object>> data = new ArrayList<>();
-
-                    //当前行数
-                    int rowTime = 0;
-                    for (Row row : sheet) {
-                        if (rowTime == 0) {
-                            //读取第一行
-                            List<Object> rowData = new ArrayList<>();
-                            //"工具名称", "记录时间", "阶段", "作用类型", "执行类型", "结果类型", "结果状态"
-                            for (Cell cell : row) {
-                                String cellValue = getCellValue(cell).toString();
-                                rowData.add(cellValue);
-                            }
-                            data.add(rowData);
-                        } else {
-                            //读取第一行标题
-                            List<Object> rowData = new ArrayList<>();
-                            for (Cell cell : row) {
-                                rowData.add(getCellValue(cell));
-                            }
-                            data.add(rowData);
-                        }
-                        rowTime++;
-                    }
-                    //打印
-                    for (List<Object> row : data) {
-                        for (Object cellValue : row) {
-                            System.out.print(cellValue + "\t");
-                        }
-                        System.out.println();
-                    }
-                    workbook.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return true;
-            }
+    public ServiceResult importLoadExecutionResult(MultipartFile multipartFile) throws IOException {
+        if (multipartFile == null || multipartFile.getName() == null || multipartFile.getName().equals("")) {
+            return new ServiceResult(null, BaseErrorCode.ERROR, "文件无名称").asResult();
         }
-        return false;
+        FileInputStream fis = null;
+        if(multipartFile.getOriginalFilename().endsWith("xlsx") || multipartFile.getOriginalFilename().endsWith("xls")){
+            // 创建临时文件对象（使用UUID作为文件名以避免冲突）
+            File excelFile = File.createTempFile("temp_excel_" + TextUtils.uuid(), ".xlsx");
+            // 将MultipartFile的内容转移到临时文件
+            multipartFile.transferTo(excelFile);
+            fis = new FileInputStream(excelFile);
+        }else{
+            return new ServiceResult(null, BaseErrorCode.ERROR, "文件格式错误,请上传xlsx、xls表格文件").asResult();
+        }
+        if (multipartFile.getOriginalFilename().endsWith("xlsx")) {
+            Workbook workbook = new XSSFWorkbook(fis);
+            Sheet sheet = workbook.getSheetAt(0); // 获取第一个工作表
+            //数据集初始化
+            List<List<Object>> data = new ArrayList<>();
+            //当前行数
+            int rowTime = 0;
+            for (Row row : sheet) {
+                if (rowTime == 0) {
+                    //读取第一行
+                    List<Object> rowData = new ArrayList<>();
+                    //"工具名称", "记录时间", "阶段", "作用类型", "执行类型", "结果类型", "结果状态"
+                    for (Cell cell : row) {
+                        String cellValue = Objects.requireNonNull(getCellValue(cell)).toString();
+                        rowData.add(cellValue);
+                    }
+                    data.add(rowData);
+                } else {
+                    //读取第一行标题
+                    List<Object> rowData = new ArrayList<>();
+                    for (Cell cell : row) {
+                        rowData.add(getCellValue(cell));
+                    }
+                    data.add(rowData);
+                }
+                rowTime++;
+            }
+            //打印
+            for (List<Object> row : data) {
+                for (Object cellValue : row) {
+                    System.out.print(cellValue + "\t");
+                }
+                System.out.println();
+            }
+            workbook.close();
+        }else if(multipartFile.getOriginalFilename().endsWith("xls")) {
+            Workbook workbook = new HSSFWorkbook(fis); // 使用HSSFWorkbook处理.xls文件
+            Sheet datatypeSheet = workbook.getSheetAt(0); // 获取第一个工作表
+            Iterator<Row> iterator = datatypeSheet.iterator();
+            //数据集初始化
+            List<List<Object>> data = new ArrayList<>();
+            while (iterator.hasNext()) {
+                Row currentRow = iterator.next();
+                Iterator<Cell> cellIterator = currentRow.iterator();
+                List<String> cellData = new ArrayList();
+                while (cellIterator.hasNext()) {
+                    Cell currentCell = cellIterator.next();
+                    String cellValue = Objects.requireNonNull(getCellValue(currentCell)).toString();
+                    cellData.add(cellValue);
+                }
+                data.add(Collections.singletonList(cellData));
+            }
+            //打印
+            for (List<Object> row : data) {
+                for (Object cellValue : row) {
+                    System.out.print(cellValue + "\t");
+                }
+                System.out.println();
+            }
+            workbook.close();
+        }
+        return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
     private static Object getCellValue(Cell cell) {
@@ -757,43 +784,6 @@ public class LoadServiceImpl {
             }
         }
         return wb;
-    }
-
-    /*
-     * 阶段测试绑定载荷工具
-     * */
-    public Boolean stageBindLoad(String addType, JSONObject requestData) {
-        String sceneId = requestData.get("sceneId") != null ? requestData.get("sceneId").toString() : "";
-        String stageId = requestData.get("stageId") != null ? requestData.get("stageId").toString() : "";
-        //载荷id(可以直接指定,可以根据靶标漏洞关联的载荷id,可以根据关联技战术筛选出的载荷id)
-        String loadId = requestData.get("loadId") != null ? requestData.get("loadId").toString() : "";
-        //界面类型
-        String interfaceType = requestData.get("interfaceType") != null ? requestData.get("interfaceType").toString() : "";
-        //部署类型
-        String deployment = requestData.get("deployment") != null ? requestData.get("deployment").toString() : "";
-        String paramList = requestData.get("paramList") != null ? requestData.get("paramList").toString() : "";
-
-        //根据loadId创建任务
-        JSONObject request = new JSONObject();
-        request.put("taskName", requestData);
-        request.put("taskDescribe", requestData);
-        request.put("toolId", loadId);
-        request.put("execCommand", paramList);
-        Map<String, Object> task = outLoadService.createTask(request);
-        String taskId;
-        if (task != null && task.get("data") != null) {
-            Map<String, Object> data = (Map<String, Object>) task.get("data");
-            if (data != null && data.get("id") != null) {
-                taskId = data.get("id").toString();
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-        //新建绑定关系
-        Boolean stageBindLoad = loadMapper.stageBindLoad(addType, sceneId, stageId, taskId, loadId, interfaceType, deployment, paramList);
-        return stageBindLoad;
     }
 
     public static boolean isValidIPPortCombo(String url) {
@@ -942,17 +932,6 @@ public class LoadServiceImpl {
         return updateTaskInfo;
     }
 
-    public Boolean deleteLoadBind(JSONObject requestData) {
-        String pk = requestData.get("pk") != null ? requestData.get("pk").toString() : "";
-        if (pk.equals("")) {
-            return false;
-        }
-        Boolean deleteLoadByPk = loadMapper.deleteLoadBindByPk(pk);
-        //todo 删除载荷服务,关闭实例
-
-        return deleteLoadByPk;
-    }
-
     public List<JSONObject> getLoadResultBySceneId(String sceneId) {
         List<String> loadIds = loadMapper.getLoadsBySceneId(sceneId);
         List<JSONObject> loadResultBySceneId = null;
@@ -1039,28 +1018,9 @@ public class LoadServiceImpl {
         return returnList;
     }
 
-    public ServiceResult loadTransform(MultipartFile file, String transformType, HttpServletResponse response) {
-        try {
-            //拿到返回的文件
-
-        } catch (Exception e) {
-            return new ServiceResult(null, BaseErrorCode.ERROR, "未能从载荷平台拿到返回的改造文件").asResult();
-        }
-        Boolean setResponseHeader = this.setResponseHeader(response, file.getOriginalFilename());
-        if (!setResponseHeader) {
-            return new ServiceResult(null, BaseErrorCode.ERROR, "请求头设置失败").asResult();
-        }
-
-        OutputStream os = null;
-        try {
-            os = response.getOutputStream();
-            os.flush();
-            os.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return new ServiceResult(null, BaseErrorCode.SUCCESS).asResult();
+    public ServiceResult loadTransform(String file, String transformType) {
+        String newFile = "/api/mp/file/229\\\\882\\\\4fcbb45241f63fb79c3390b24987cc46.zip";
+        return new ServiceResult(newFile, BaseErrorCode.SUCCESS).asResult();
     }
 }
 
