@@ -58,6 +58,7 @@ import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
+import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -205,6 +206,16 @@ public class CsceneFlowService {
             if (CollectionUtils.isEmpty(detail.getFlowInfos())) {
                 continue;
             }
+
+            for (var f : detail.getFlowInfos()) {
+                Flow flow = new Flow();
+                flow.setId(f.getFlowId());
+                var element = flowScenePluginHandler.getElement(detail.getNodeId());
+                if (element.getFlows() == null) {
+                    element.setFlows(new ArrayList<>());
+                }
+                element.getFlows().add(flow);
+            }
             String nodeName = sceneHandler.getElement(detail.getNodeId()).getName();
             String nodeIp = "";
             String networkId = "";
@@ -233,6 +244,7 @@ public class CsceneFlowService {
             addFlowTaskTaskInfo.setNetworkId(networkId);
             addFlowTaskTaskInfoList.add(addFlowTaskTaskInfo);
         }
+        sceneHandler.save();
         //新增流量执行任务
         if (CollectionUtils.isNotEmpty(addFlowTaskTaskInfoList)) {
             flowTaskTaskService.addTask(addFlowTaskTaskInfoList, sceneId, actuatorId, true, flowTaskTaskModelList);
