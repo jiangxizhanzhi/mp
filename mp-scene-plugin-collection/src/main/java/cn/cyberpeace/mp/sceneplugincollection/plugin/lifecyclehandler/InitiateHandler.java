@@ -274,21 +274,18 @@ public class InitiateHandler extends HandlerCommon {
 
 
     private String getLinuxAddRouteCommand(String externalCidr, String gatewayIp) {
-        String destinationNetwork = externalCidr.split("/")[0];
-        int maskBit = Integer.parseInt(externalCidr.split("/")[1]);
-        String subnetMask = Ipv4Util.getMaskByMaskBit(maskBit);
-
-
-        String checkExistIpCommand = "if command -v ip > /dev/null;";
-        String addRouteWithIpCommand = String.format(" then ip route add %s via %s;", externalCidr, gatewayIp);
-        String checkExistRouteCommand = "else if command -v route > /dev/null;";
-        String addRouteWithRouteCommand = String.format("then route add -net %s netmask %s gw %s;", destinationNetwork, subnetMask, gatewayIp);
-        String endIfCommand = "fi;";
+        String addRouteCommand = "if command -v ip > /dev/null; then\n" +
+                String.format("    ip route add %s via %s\n", externalCidr, gatewayIp) +
+                "elif command -v route > /dev/null; then\n" +
+                String.format("    route add -net %s gw %s\n", externalCidr, gatewayIp) +
+                "else\n" +
+                "    echo \"Neither 'ip' nor 'route' command found.\"\n" +
+                "fi\n";
 
 
 
-        return StringUtils.joinWith("", checkExistIpCommand, addRouteWithIpCommand,
-                checkExistRouteCommand, addRouteWithRouteCommand, endIfCommand, endIfCommand);
+
+        return addRouteCommand;
     }
 
     private String getWindowsAddRouteCommand(String externalCidr, String gatewayIp) {

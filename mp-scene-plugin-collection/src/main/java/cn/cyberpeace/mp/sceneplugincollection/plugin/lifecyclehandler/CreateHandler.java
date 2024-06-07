@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
-import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -17,7 +16,6 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
-import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSceneStage;
@@ -74,11 +72,12 @@ public class CreateHandler extends HandlerCommon {
         VirtualRouterCreateData createData = new VirtualRouterCreateData();
         createData.setName(HandlerUtils.genResourceName(sceneId));
         List<VirtualNic> virtualNics = new ArrayList<>();
-        VirtualNic externalVirtualNic = new VirtualNic();
-        externalVirtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
-        externalVirtualNic.setCidr(CloudSingleton.cloudAppConfig.getExternalNetCidr());
-        externalVirtualNic.setFixedIp(IpUtils.newRandomIps(externalVirtualNic.getCidr(), 1, Collections.emptyList(), null, true).get(1));
-        virtualNics.add(externalVirtualNic);
+
+//        VirtualNic externalVirtualNic = new VirtualNic();
+//        externalVirtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
+//        externalVirtualNic.setCidr(CloudSingleton.cloudAppConfig.getExternalNetCidr());
+//        externalVirtualNic.setFixedIp(IpUtils.newRandomIps(externalVirtualNic.getCidr(), 1, Collections.emptyList(), null, true).get(1));
+//        virtualNics.add(externalVirtualNic);
 
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                 .getPluginHandler(PluginConstant.PLUGIN_KEY);
