@@ -10,7 +10,9 @@ import cn.cyberpeace.mp.scene.core.bo.base.BaseScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
+import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
@@ -167,6 +169,8 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
 
     @Override
     public void validate() {
+        Integer cloudType = getSceneHandler().getScene().getCloudType();
+
         for (var srcPort : getSceneHandler().getElementPortMap().values()) {
             // 验证ip是否在cidr内
             var ip = srcPort.getIp();
@@ -190,26 +194,28 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
             }
 
 //            根据微软云创建虚拟机规则验证用户名、密码
-            List<AccessMode> accessModes = srcPort.getAccessModes();
-            if (accessModes.size() > 0) {
-                for (AccessMode accessMode : accessModes) {
-                    if (StringUtils.isNotBlank(accessMode.getUsername())) {
-                        boolean isUsernameAllowed = Arrays.stream(disallowedUsernames)
-                                .noneMatch(accessMode.getUsername()::equalsIgnoreCase);
-                        boolean matches = !validUsernamePattern.matcher(accessMode.getUsername()).matches();
-                        if (!isUsernameAllowed) {
-                            throw new MpRuntimeException(CloudErrorCode.USERNAME_NOT_ALLOWED.format(accessMode.getUsername()));
-                        } else if (!validUsernamePattern.matcher(accessMode.getUsername()).matches()) {
-                            throw new MpRuntimeException(CloudErrorCode.INVALID_USERNAME.format(accessMode.getUsername()));
+            if(cloudType!= BaseSceneModel.CloudType.DEFAULT) {
+                List<AccessMode> accessModes = srcPort.getAccessModes();
+                if (accessModes.size() > 0) {
+                    for (AccessMode accessMode : accessModes) {
+                        if (StringUtils.isNotBlank(accessMode.getUsername())) {
+                            boolean isUsernameAllowed = Arrays.stream(disallowedUsernames)
+                                    .noneMatch(accessMode.getUsername()::equalsIgnoreCase);
+                            boolean matches = !validUsernamePattern.matcher(accessMode.getUsername()).matches();
+                            if (!isUsernameAllowed) {
+                                throw new MpRuntimeException(CloudErrorCode.USERNAME_NOT_ALLOWED.format(accessMode.getUsername()));
+                            } else if (!validUsernamePattern.matcher(accessMode.getUsername()).matches()) {
+                                throw new MpRuntimeException(CloudErrorCode.INVALID_USERNAME.format(accessMode.getUsername()));
+                            }
                         }
-                    }
-                    if (StringUtils.isNotBlank(accessMode.getPassword())) {
-                        boolean isPasswordAllowed = Arrays.stream(disallowedPasswords)
-                                .noneMatch(accessMode.getPassword()::equalsIgnoreCase);
-                        if (!isPasswordAllowed) {
-                            throw new MpRuntimeException(CloudErrorCode.PASSWORD_NOT_ALLOWED.format(accessMode.getPassword()));
-                        } else if (!validPasswordPattern.matcher(accessMode.getPassword()).matches()) {
-                            throw new MpRuntimeException(CloudErrorCode.INVALID_PASSWORD.format(accessMode.getPassword()));
+                        if (StringUtils.isNotBlank(accessMode.getPassword())) {
+                            boolean isPasswordAllowed = Arrays.stream(disallowedPasswords)
+                                    .noneMatch(accessMode.getPassword()::equalsIgnoreCase);
+                            if (!isPasswordAllowed) {
+                                throw new MpRuntimeException(CloudErrorCode.PASSWORD_NOT_ALLOWED.format(accessMode.getPassword()));
+                            } else if (!validPasswordPattern.matcher(accessMode.getPassword()).matches()) {
+                                throw new MpRuntimeException(CloudErrorCode.INVALID_PASSWORD.format(accessMode.getPassword()));
+                            }
                         }
                     }
                 }
