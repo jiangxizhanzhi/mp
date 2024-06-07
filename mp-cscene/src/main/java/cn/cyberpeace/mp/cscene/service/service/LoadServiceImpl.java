@@ -358,25 +358,25 @@ public class LoadServiceImpl {
      * */
     public List<MpDevopsLoad> getLoadBySceneId(String sceneId) {
         //节点表
-//        List<CloudPluginSceneElementModel> loadList = csceneInstanceService.listLoads(sceneId);
-//        List<String> loadIds = loadList.stream()
-//                .map(CloudPluginSceneElementModel::getLoadToolId)
-//                .filter(Objects::nonNull)
-//                .distinct()
-//                .collect(Collectors.toList());
-//        List<MpDevopsLoad> getLoadByPks = new ArrayList<>();
-//        if (loadIds != null && loadIds.size() > 0) {
-//            getLoadByPks = loadMapper.getLoadByIds(loadIds);
-//        }
-//        return getLoadByPks;
-
-        //暂用这个
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("pageNum", 1);
-        jsonObject.put("pageSize", 100);
-        JSONObject loads = getLoadList(new JSONObject());
-        List<MpDevopsLoad> getLoadByPks = (List) loads.get("source");
+        List<CloudPluginSceneElementModel> loadList = csceneInstanceService.listLoads(sceneId);
+        List<String> loadIds = loadList.stream()
+                .map(CloudPluginSceneElementModel::getLoadToolId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        List<MpDevopsLoad> getLoadByPks = new ArrayList<>();
+        if (loadIds != null && loadIds.size() > 0) {
+            getLoadByPks = loadMapper.getLoadByIds(loadIds);
+        }
         return getLoadByPks;
+
+//        //暂用这个
+//        JSONObject jsonObject = new JSONObject();
+//        jsonObject.put("pageNum", 1);
+//        jsonObject.put("pageSize", 100);
+//        JSONObject loads = getLoadList(new JSONObject());
+//        List<MpDevopsLoad> getLoadByPks = (List) loads.get("source");
+//        return getLoadByPks;
     }
 
     /*
