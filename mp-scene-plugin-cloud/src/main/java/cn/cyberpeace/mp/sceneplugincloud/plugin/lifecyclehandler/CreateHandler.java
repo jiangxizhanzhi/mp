@@ -8,6 +8,8 @@ import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
 import cn.cyberpeace.mp.base.util.mptool.FileNameUtil;
+import cn.cyberpeace.mp.common.config.CommonAppConfig;
+import cn.cyberpeace.mp.scene.context.SceneContextHolder;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -517,6 +519,8 @@ public class CreateHandler extends HandlerCommon {
     private String combineInitCommand(CloudPluginSceneElementBO cloudElement) {
         SceneElementBO srcElement = cloudElement.getSrcElement();
         List<String> commands = new ArrayList<>();
+        commands.addAll(behaviorSupportInitCommand(srcElement));
+        commands.addAll(getBasDeviceInitCommand(srcElement));
 
         String standardSystemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
         SceneBO srcScene = getPluginHandler().getSrcScene();
@@ -609,6 +613,40 @@ public class CreateHandler extends HandlerCommon {
         }
 
         return command;
+    }
+
+    private List<String> behaviorSupportInitCommand(SceneElementBO sceneElementBO) {
+        List<String> behaviorInitCommand = new ArrayList<>();
+        // 支持行为
+        if (Boolean.TRUE.equals(sceneElementBO.getBehaveSupport())) {
+            behaviorInitCommand.add(String.format("bash /home/init.sh %s %s %s",
+                    SceneContextHolder.getCsceneInstanceId(), sceneElementBO.getId(), BeanCommon.getBean(CommonAppConfig.class).getMpIp()));
+
+        }
+        return behaviorInitCommand;
+
+    }
+
+    private List<String> getBasDeviceInitCommand(SceneElementBO sceneElementBO) {
+        List<String> basDeviceInitCommand = new ArrayList<>();
+
+        if (Boolean.TRUE.equals(sceneElementBO.getAttackMockDeviceFlag())) {
+            String standardSystemType = SystemTypeUtils.getStandardSystemType(sceneElementBO.getSystemType());
+            if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
+                //todo 待支持windows
+
+
+            } else if (SystemTypeCommandUtils.isLinux(standardSystemType)) {
+                basDeviceInitCommand.add(String.format("sed -i \"/platform_address:/s/server_ip/%s/\" /opt/cpbas/client/application.yml",
+                        BeanCommon.getBean(CommonAppConfig.class).getBasIp()));
+                basDeviceInitCommand.add(String.format("sed -i \"/platform_port:/s/server_port/%s/\" /opt/cpbas/client/application.yml",
+                        BeanCommon.getBean(CommonAppConfig.class).getBasPort()));
+
+            } else {
+                log.error("bas device system not support {}", sceneElementBO);
+            }
+        }
+        return basDeviceInitCommand;
     }
 
     /**

@@ -22,4 +22,10 @@ public class CommonAppConfig {
     @Value("${mp.common.mp-port:8001}")
     private String mpPort;
 
+    @Value("${mp.common.bas-ip:10.100.25.1}")
+    private String basIp;
+
+    @Value("${mp.common.bas-port:9527}")
+    private String basPort;
+
 }
