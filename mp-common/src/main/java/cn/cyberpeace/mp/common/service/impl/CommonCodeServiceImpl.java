@@ -7,10 +7,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -106,6 +104,30 @@ public class CommonCodeServiceImpl {
             }
         }
         return map;
+    }
+
+    public List<MpSysCodeEnum> getNextLevelTreeDatasByCodes(String[] codes) {
+        List<MpSysCodeEnum> nextLevelDatasByCodes = commonCodeMapper.getNextLevelDatasByCodes(codes);
+        List<MpSysCodeEnum> localLevelDatasByCodes = commonCodeMapper.getNextLevelTreeDatasByCodes(codes);
+        Map<String,List<MpSysCodeEnum>> childrenMap = new HashMap<>();
+        //map收集nextLevelDatasByCodes中每个成员中的code和本身
+        for (MpSysCodeEnum mpSysCodeEnum : nextLevelDatasByCodes) {
+            if (mpSysCodeEnum.getParentCode() != null && !mpSysCodeEnum.getParentCode().isEmpty()) {
+                childrenMap.computeIfAbsent(mpSysCodeEnum.getParentCode(), k -> new ArrayList<>()).add(mpSysCodeEnum);
+            }
+        }
+
+        // 填充子节点
+        for (MpSysCodeEnum mpSysCodeEnum : localLevelDatasByCodes) {
+            if (mpSysCodeEnum.getCode() != null && !mpSysCodeEnum.getCode().isEmpty()) {
+                mpSysCodeEnum.setChildren(childrenMap.getOrDefault(mpSysCodeEnum.getCode(), Collections.emptyList()));
+            }
+        }
+
+        // 返回处理后的局部层级数据
+        return localLevelDatasByCodes.stream()
+                .filter(data -> data.getCode() != null && !data.getCode().isEmpty())
+                .collect(Collectors.toList());
     }
 }
 

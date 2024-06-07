@@ -28,6 +28,7 @@ import com.azure.resourcemanager.containerinstance.models.ContainerGroup;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -208,9 +209,24 @@ public class MicrosoftAzureConverter implements BaseConverter {
      * 云镜像管理
      */
     @Transactional
+    @Async
     public JSONObject synchronousCloudData(Integer cloudType) {
         // 获取该订阅Id的资源管理器
         IAzureResourceManager instance = IAzureResourceManager.getInstance(cloudType);
+        String cloudTypeStr;
+        switch (cloudType) {
+            case 1://公有云
+                cloudTypeStr = "1004";
+                break;
+            case 2://私有云
+                cloudTypeStr = "1003";
+                break;
+            case 3://混合云
+                cloudTypeStr = "1002";
+                break;
+            default:
+                cloudTypeStr = "1004";
+        }
 
         //目前是根据配置的环境信息去获取微软云资源
         JSONObject result = new JSONObject();
@@ -236,27 +252,27 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
         //网络表数据
         List<DeviceCloudTargetNet> netList = new ArrayList<>();
-        cloudTargetConverter.cloudNetServiceConvert(cloudType,mainTargetList,netList,getCloudInternetServices);
+        cloudTargetConverter.cloudNetServiceConvert(cloudTypeStr,mainTargetList,netList,getCloudInternetServices);
 
         //容器表数据
         List<DeviceCloudTargetContainer> containerList = new ArrayList<>();
-        cloudTargetConverter.cloudContainerRegistryConvert(cloudType,mainTargetList,containerList,dockerImages);//容器-容器基础结构-容器注册表
-        cloudTargetConverter.cloudContainerInstanceConvert(cloudType,mainTargetList,containerList,dockerInstances);//容器-容器基础结构-容器实例
+        cloudTargetConverter.cloudContainerRegistryConvert(cloudTypeStr,mainTargetList,containerList,dockerImages);//容器-容器基础结构-容器注册表
+        cloudTargetConverter.cloudContainerInstanceConvert(cloudTypeStr,mainTargetList,containerList,dockerInstances);//容器-容器基础结构-容器实例
 
         //计算表数据
         List<DeviceCloudTargetCalculate> calculateList = new ArrayList<>();
-        cloudTargetConverter.cloudCalculateSoftVMConvert(cloudType,mainTargetList,calculateList,images);//计算-laas-vm(微软云)
-        cloudTargetConverter.cloudCalculateUploadVMConvert(cloudType,mainTargetList,calculateList,localImages);//计算-laas-vm(用户上传)
+        cloudTargetConverter.cloudCalculateSoftVMConvert(cloudTypeStr,mainTargetList,calculateList,images);//计算-laas-vm(微软云)
+        cloudTargetConverter.cloudCalculateUploadVMConvert(cloudTypeStr,mainTargetList,calculateList,localImages);//计算-laas-vm(用户上传)
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("result", result);
         jsonObject.put("data", mainTargetList);
         jsonObject.put("code", "200");
 
-        microsoftAzureMapper.deleteCloudTarget(null,cloudType.toString());
-        microsoftAzureMapper.deleteCloudTargetNet(null,cloudType.toString());
-        microsoftAzureMapper.deleteCloudTargetCalculate(null,cloudType.toString());
-        microsoftAzureMapper.deleteCloudTargetContainer(null,cloudType.toString());
+        microsoftAzureMapper.deleteCloudTarget(null,cloudTypeStr);
+        microsoftAzureMapper.deleteCloudTargetNet(null,cloudTypeStr);
+        microsoftAzureMapper.deleteCloudTargetCalculate(null,cloudTypeStr);
+        microsoftAzureMapper.deleteCloudTargetContainer(null,cloudTypeStr);
 
         Boolean batchInsertCloudTarget = batchInsert(mainTargetList, microsoftAzureMapper::batchInsertCloudTarget, "云靶标主数据");
         Boolean batchInsertCloudTargetNet = batchInsert(netList, microsoftAzureMapper::batchInsertCloudTargetNet, "网络表数据");

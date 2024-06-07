@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -93,26 +94,13 @@ public class MicrosoftAzureController {
     /**
      * 云镜像同步
      */
-    @ApiOperation(value = "云镜像管理同步", notes = "根据云类型同步云镜像数据，cloud_type默认为1代表公有云")
+    @ApiOperation(value = "云镜像管理同步", notes = "根据云类型同步云镜像数据,cloud_type默认为1代表公有云")
     @GetMapping("/synchronousCloudData")
 //    @CacheEvict(value = "getTarget", beforeInvocation = false)
-    public ServiceResult synchronousCloudData(@ApiParam(value = "云服务提供商类型, 默认为公有云", allowableValues = "1002, 1003, 1004")
-                                          @RequestParam(value = "cloud_type", defaultValue = "1002") Integer cloudType) {
-        if (cloudType == null) {
-            return new ServiceResult(null, BaseErrorCode.ERROR, "云类型参数不能为空").asResult();
-        }
-        try {
-            JSONObject synchronousCloudData = microsoftAzureConverter.synchronousCloudData(cloudType);
-            if ("200".equals(synchronousCloudData.getString("code"))) {
-                return new ServiceResult(synchronousCloudData).asResult();
-            } else {
-                String errorMessage = synchronousCloudData.containsKey("message")
-                        ? synchronousCloudData.getString("message")
-                        : "同步失败";
-                return new ServiceResult(null, BaseErrorCode.ERROR, errorMessage).asResult();
-            }
-        } catch (JSONException e) {
-            return new ServiceResult(null, BaseErrorCode.ERROR, "数据解析异常").asResult();
-        }
+    public ServiceResult synchronousCloudData() {
+        microsoftAzureConverter.synchronousCloudData(1);
+        microsoftAzureConverter.synchronousCloudData(2);
+        microsoftAzureConverter.synchronousCloudData(3);
+        return new ServiceResult(null, BaseErrorCode.SUCCESS).asResult();
     }
 }

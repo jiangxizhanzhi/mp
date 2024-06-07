@@ -35,7 +35,7 @@ public class CommonCodeController {
     }
 
     /**
-     * 根据code查找下级
+     * 根据codes查找下级
      * @return List<MpSysCodeEnum>
      */
     @ApiOperation("根据codes查找下级")
@@ -45,11 +45,24 @@ public class CommonCodeController {
         return new ServiceResult(getNextLevelDataByCode, BaseErrorCode.SUCCESS).asResult();
     }
 
+//-----------------------------------------------------------------------------------------------------------
+
     /**
-     * 根据code查找下级所有(平级)
+     * 根据codes查找下级树结构数据-用于列表映射
      * @return List<MpSysCodeEnum>
      */
-    @ApiOperation("根据code查找下级所有(平级)")
+    @ApiOperation("根据codes查找下级树结构数据")
+    @GetMapping("/getNextLevelTreeDatasByCodes")
+    public ServiceResult getNextLevelTreeDatasByCodes(@RequestParam(value = "codes") String[] codes) {
+        List<MpSysCodeEnum> getNextLevelDataByCode = commonCodeService.getNextLevelTreeDatasByCodes(codes);
+        return new ServiceResult(getNextLevelDataByCode, BaseErrorCode.SUCCESS).asResult();
+    }
+
+    /**
+     * 根据code查找所有下级数据(平级)
+     * @return List<MpSysCodeEnum>
+     */
+    @ApiOperation("根据code查找所有下级数据(平级)")
     @GetMapping("/getNextAllDataByCode")
     public ServiceResult getNextAllDataByCode(@RequestParam(value = "code") String code) {
         List<MpSysCodeEnum> getNextAllDataByCode = commonCodeService.getNextAllDataByCode(code);

@@ -13,7 +13,7 @@ import java.util.UUID;
 @Service
 public class CloudTargetConverter {
 
-    public void cloudNetServiceConvert(Integer cloudType, List<DeviceCloudTargetPO> list, List<DeviceCloudTargetNet> netList, List getCloudInternetServices) {
+    public void cloudNetServiceConvert(String cloudType, List<DeviceCloudTargetPO> list, List<DeviceCloudTargetNet> netList, List getCloudInternetServices) {
         //网络服务
         for(int i = 0; i < getCloudInternetServices.size(); i++){
             //主表元素
@@ -22,7 +22,7 @@ public class CloudTargetConverter {
             deviceCloudTarget.setId(id);
             deviceCloudTarget.setName(((JSONObject) getCloudInternetServices.get(i)).get("netServiceName") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("netServiceName").toString() : "");
             deviceCloudTarget.setOtherName(((JSONObject) getCloudInternetServices.get(i)).get("netServiceName") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("netServiceName").toString() : "");
-            deviceCloudTarget.setCloudType(cloudType.toString());
+            deviceCloudTarget.setCloudType(cloudType);
             deviceCloudTarget.setCloudServiceType(1);
             deviceCloudTarget.setOperatingSystemStatus("专业化");
             deviceCloudTarget.setGeneration("第一代");
@@ -34,7 +34,7 @@ public class CloudTargetConverter {
             deviceCloudTargetNet.setLinkId(id);
             deviceCloudTargetNet.setNetServiceName(((JSONObject) getCloudInternetServices.get(i)).get("netServiceName") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("netServiceName").toString() : "");
             deviceCloudTargetNet.setSourceType(1);
-            deviceCloudTargetNet.setCloudType(cloudType.toString());
+            deviceCloudTargetNet.setCloudType(cloudType);
             deviceCloudTargetNet.setNetType(((JSONObject) getCloudInternetServices.get(i)).get("netType") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("netType").toString() : "");
             deviceCloudTargetNet.setIsPublic(2);
             deviceCloudTargetNet.setQuickCreateSupport(1);
@@ -47,7 +47,7 @@ public class CloudTargetConverter {
         }
     }
 
-    public void cloudContainerRegistryConvert(Integer cloudType, List<DeviceCloudTargetPO> list, List<DeviceCloudTargetContainer> containerList, List dockerImages) {
+    public void cloudContainerRegistryConvert(String cloudType, List<DeviceCloudTargetPO> list, List<DeviceCloudTargetContainer> containerList, List dockerImages) {
         //docker镜像
         for (int i = 0; i < dockerImages.size(); i++) {
             //主表元素
@@ -56,10 +56,10 @@ public class CloudTargetConverter {
             deviceCloudTarget.setOtherName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
             String id = String.valueOf(UUID.randomUUID());
             deviceCloudTarget.setId(id);
-            deviceCloudTarget.setCloudType(cloudType.toString());
+            deviceCloudTarget.setCloudType(cloudType);
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
             deviceCloudTarget.setCloudServiceType(3);
-            deviceCloudTarget.setOperatingSystem("linux");
+            deviceCloudTarget.setOperatingSystem("Linux");
             deviceCloudTarget.setOperatingSystemStatus("专业化");
             deviceCloudTarget.setGeneration("第一代");
             deviceCloudTarget.setVersion("0.0.1");
@@ -70,7 +70,7 @@ public class CloudTargetConverter {
             deviceCloudTargetContainer.setLinkId(id);
             deviceCloudTargetContainer.setName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
             deviceCloudTargetContainer.setSourceType(2);
-            deviceCloudTargetContainer.setCloudType(cloudType.toString());
+            deviceCloudTargetContainer.setCloudType(cloudType);
             deviceCloudTargetContainer.setContainerType("containerInfrastructure");
             deviceCloudTargetContainer.setSubType("containerRegistry");
             deviceCloudTargetContainer.setUploadTargetName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
@@ -89,7 +89,7 @@ public class CloudTargetConverter {
         }
     }
 
-    public void cloudCalculateSoftVMConvert(Integer cloudType, List<DeviceCloudTargetPO> list, List<DeviceCloudTargetCalculate> calculateList, List images) {
+    public void cloudCalculateSoftVMConvert(String cloudType, List<DeviceCloudTargetPO> list, List<DeviceCloudTargetCalculate> calculateList, List images) {
         //微软云镜像
         for (int i = 0; i < images.size(); i++) {
             //主表元素
@@ -100,7 +100,7 @@ public class CloudTargetConverter {
             deviceCloudTarget.setId(id);
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
             deviceCloudTarget.setCloudServiceType(2);
-            deviceCloudTarget.setCloudType(cloudType.toString());
+            deviceCloudTarget.setCloudType(cloudType);
             deviceCloudTarget.setOperatingSystem(((JSONObject) images.get(i)).get("operatingSystem") != null ? ((JSONObject) images.get(i)).get("operatingSystem").toString() : "");
             deviceCloudTarget.setOperatingSystemStatus("专业化");
             deviceCloudTarget.setGeneration("第一代");
@@ -112,7 +112,7 @@ public class CloudTargetConverter {
             deviceCloudTargetCalculate.setLinkId(id);
             deviceCloudTargetCalculate.setName(((JSONObject) images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "");
             deviceCloudTargetCalculate.setSourceType(1);
-            deviceCloudTargetCalculate.setCloudType(cloudType.toString());
+            deviceCloudTargetCalculate.setCloudType(cloudType);
             deviceCloudTargetCalculate.setPublisher(((JSONObject) images.get(i)).get("PublisherName") != null ? ((JSONObject) images.get(i)).get("PublisherName").toString() : "");
             deviceCloudTargetCalculate.setOffer(((JSONObject) images.get(i)).get("offerName") != null ? ((JSONObject) images.get(i)).get("offerName").toString() : "");
             deviceCloudTargetCalculate.setSku(((JSONObject) images.get(i)).get("skuName") != null ? ((JSONObject) images.get(i)).get("skuName").toString() : "");
@@ -133,7 +133,7 @@ public class CloudTargetConverter {
         }
     }
 
-    public void cloudCalculateUploadVMConvert(Integer cloudType, List<DeviceCloudTargetPO> list, List<DeviceCloudTargetCalculate> calculateList, List localImages) {
+    public void cloudCalculateUploadVMConvert(String cloudType, List<DeviceCloudTargetPO> list, List<DeviceCloudTargetCalculate> calculateList, List localImages) {
         //微软云本地镜像
         for (int i = 0; i < localImages.size(); i++) {
             //主表元素
@@ -144,7 +144,7 @@ public class CloudTargetConverter {
             deviceCloudTarget.setId(id);
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
             deviceCloudTarget.setCloudServiceType(2);
-            deviceCloudTarget.setCloudType(cloudType.toString());
+            deviceCloudTarget.setCloudType(cloudType);
             deviceCloudTarget.setOperatingSystem(((JSONObject) localImages.get(i)).get("operatingSystem") != null ? ((JSONObject) localImages.get(i)).get("operatingSystem").toString() : "");
             deviceCloudTarget.setOperatingSystemStatus("专业化");
             deviceCloudTarget.setGeneration("第一代");
@@ -157,7 +157,7 @@ public class CloudTargetConverter {
             deviceCloudTargetCalculate.setLinkId(id);
             deviceCloudTargetCalculate.setName(((JSONObject) localImages.get(i)).get("imageName") != null ? ((JSONObject) localImages.get(i)).get("imageName").toString() : "");
             deviceCloudTargetCalculate.setSourceType(2);
-            deviceCloudTargetCalculate.setCloudType(cloudType.toString());
+            deviceCloudTargetCalculate.setCloudType(cloudType);
             deviceCloudTargetCalculate.setPublisher(((JSONObject) localImages.get(i)).get("PublisherName") != null ? ((JSONObject) localImages.get(i)).get("PublisherName").toString() : "");
             deviceCloudTargetCalculate.setOffer(((JSONObject) localImages.get(i)).get("offerName") != null ? ((JSONObject) localImages.get(i)).get("offerName").toString() : "");
             deviceCloudTargetCalculate.setSku(((JSONObject) localImages.get(i)).get("skuName") != null ? ((JSONObject) localImages.get(i)).get("skuName").toString() : "");
@@ -178,7 +178,7 @@ public class CloudTargetConverter {
         }
     }
 
-    public void cloudContainerInstanceConvert(Integer cloudType, List<DeviceCloudTargetPO> mainTargetList, List<DeviceCloudTargetContainer> containerList, List dockerInstances) {
+    public void cloudContainerInstanceConvert(String cloudType, List<DeviceCloudTargetPO> mainTargetList, List<DeviceCloudTargetContainer> containerList, List dockerInstances) {
         //docker镜像
         for (int i = 0; i < dockerInstances.size(); i++) {
             //主表元素
@@ -187,10 +187,10 @@ public class CloudTargetConverter {
             deviceCloudTarget.setOtherName(((JSONObject) dockerInstances.get(i)).get("containerName") != null ? ((JSONObject) dockerInstances.get(i)).get("containerName").toString() : "");
             String id = String.valueOf(UUID.randomUUID());
             deviceCloudTarget.setId(id);
-            deviceCloudTarget.setCloudType(cloudType.toString());
+            deviceCloudTarget.setCloudType(cloudType);
             //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
             deviceCloudTarget.setCloudServiceType(3);
-            deviceCloudTarget.setOperatingSystem("linux");
+            deviceCloudTarget.setOperatingSystem("Linux");
             deviceCloudTarget.setOperatingSystemStatus("专业化");
             deviceCloudTarget.setGeneration("第一代");
             deviceCloudTarget.setVersion("0.0.1");
@@ -201,7 +201,7 @@ public class CloudTargetConverter {
             deviceCloudTargetContainer.setLinkId(id);
             deviceCloudTargetContainer.setName(((JSONObject) dockerInstances.get(i)).get("containerName") != null ? ((JSONObject) dockerInstances.get(i)).get("containerName").toString() : "");
             deviceCloudTargetContainer.setSourceType(2);
-            deviceCloudTargetContainer.setCloudType(cloudType.toString());
+            deviceCloudTargetContainer.setCloudType(cloudType);
             deviceCloudTargetContainer.setContainerType("containerInfrastructure");
             deviceCloudTargetContainer.setSubType("containerInstance");
             deviceCloudTargetContainer.setUploadTargetName(((JSONObject) dockerInstances.get(i)).get("image") != null ? ((JSONObject) dockerInstances.get(i)).get("image").toString() : "");
