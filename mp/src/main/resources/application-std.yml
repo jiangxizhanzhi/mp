@@ -279,7 +279,7 @@ mp:
     enable-node-limit-db-check: ${mp.cscene.ext-var.enable-node-limit-db-check}
     cp-ip: ${mp.common.ext-var.cp-ip}
     cp-port: ${mp.common.ext-var.cp-port}
-    flow-minute: ${mp.cscene.ext-var.flow-minute}
+    flow-seconds: ${mp.cscene.ext-var.flow-seconds}
     flow-segment: ${mp.cscene.ext-var.flow-segment}
   scene:
     scene-pool-size: ${mp.scene.ext-var.scene-pool-size}

@@ -473,7 +473,7 @@ public class FlowMonitorService {
         }
 
         if (Objects.isNull(startTime)) {
-            startTime = endTime.minusMinutes(BeanCommon.getBean(CsceneAppConfig.class).getFlowMinute());
+            startTime = endTime.minusSeconds(BeanCommon.getBean(CsceneAppConfig.class).getFlowSeconds());
         }
 
         if (Objects.isNull(segmentCount)) {
