@@ -56,6 +56,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkFlowRateRe
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
@@ -211,6 +212,13 @@ public class CsceneFlowService {
                 Flow flow = new Flow();
                 flow.setId(f.getFlowId());
                 var element = flowScenePluginHandler.getElement(detail.getNodeId());
+                if (element == null) {
+                    element = new FlowPluginSceneElementBO();
+                    element.setFlows(new ArrayList<>());
+                    flowScenePluginHandler.addElement(detail.getNodeId(), element);
+                    flowScenePluginHandler.getSceneHandler()
+                            .addElementPlugin(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY, detail.getNodeId(), JsonCommon.beanToSnakeMap(element));
+                }
                 if (element.getFlows() == null) {
                     element.setFlows(new ArrayList<>());
                 }
@@ -231,10 +239,12 @@ public class CsceneFlowService {
                 }
             }
             if (StringUtils.isEmpty(nodeIp)) {
-                throw new MpRuntimeException(CsceneErrorCode.NODEIP_NOT_EXIST);
+                continue;
+//                throw new MpRuntimeException(CsceneErrorCode.NODEIP_NOT_EXIST);
             }
             if (StringUtils.isEmpty(networkId)) {
-                throw new MpRuntimeException(CsceneErrorCode.NETWORKID_NOT_EXIST);
+                continue;
+//                throw new MpRuntimeException(CsceneErrorCode.NETWORKID_NOT_EXIST);
             }
             AddFlowTaskTaskInfo addFlowTaskTaskInfo = new AddFlowTaskTaskInfo();
             addFlowTaskTaskInfo.setFlowInfos(detail.getFlowInfos());
