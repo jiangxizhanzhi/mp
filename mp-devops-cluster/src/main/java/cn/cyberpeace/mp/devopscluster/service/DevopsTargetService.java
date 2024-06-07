@@ -190,6 +190,7 @@ public class DevopsTargetService {
         deviceTargetPO.setIsHide(Objects.nonNull(device.getIsHide()) ? device.getIsHide() : Boolean.FALSE);
         deviceTargetPO.setIsInit(Objects.nonNull(device.getIsInit()) ? device.getIsInit() : Boolean.FALSE);
         deviceTargetPO.setAttackMockDeviceFlag(Objects.nonNull(device.getAttackMockDeviceFlag()) ? device.getAttackMockDeviceFlag() : Boolean.FALSE);
+        deviceTargetPO.setBehaveSupport(Objects.nonNull(device.getBehaveSupport()) ? device.getBehaveSupport() : Boolean.FALSE);
         if (device.getSupportExport() != null) {
             deviceTargetPO.setSupportExport(device.getSupportExport());
         }

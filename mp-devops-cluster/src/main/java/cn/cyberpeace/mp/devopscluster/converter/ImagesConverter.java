@@ -245,6 +245,7 @@ public class ImagesConverter implements BaseConverter{
         device.setBrand(request.getBrand());
         device.setInnerApps(request.getInnerApps());
         device.setAttackMockDeviceFlag(Objects.nonNull(request.getAttackMockDeviceFlag()) ? request.getAttackMockDeviceFlag() : Boolean.FALSE);
+        device.setBehaveSupport(Objects.nonNull(request.getBehaviorSimulation()) ? request.getBehaviorSimulation() : Boolean.FALSE);
         devopsTargetService.insert(Collections.singletonList(device));
     }
 
@@ -629,6 +630,8 @@ public class ImagesConverter implements BaseConverter{
         imageModel.setExtDocker(device.getExtDocker());
         imageModel.setModelId(device.getModelId());
         imageModel.setModelCode(device.getModelCode());
+        imageModel.setAttackMockDeviceFlag(device.getAttackMockDeviceFlag());
+        imageModel.setBehaveSupport(device.getBehaveSupport());
         return imageModel;
     }
 

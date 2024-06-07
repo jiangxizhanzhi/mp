@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.message.FormatMessage;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.CloudClient;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
@@ -48,6 +49,8 @@ public class WebSocketNoticeController {
 
     private final ImagesConverter imagesConverter;
 
+    private final CloudClient cloudClient;
+
     private final ImagesConnectSocketServer imagesConnectSocketServer;
 
     private final ImagesByUuidSocketServer imagesByUuidSocketServer;
@@ -56,6 +59,7 @@ public class WebSocketNoticeController {
     @ApiImplicitParam(name = "uuid", value = "靶标id", dataTypeClass = String.class)
     @GetMapping("/images/connection")
     public ServiceResult connection(@RequestParam String uuid){
+        log.info("WebSocketNoticeController.connection. uuid:{}", uuid);
         CloudPlatformPageResult<TargetConnection> connection = imagesService.connection(uuid);
         imagesConnectSocketServer.batchSendInfo(JsonUtils.snakeStringify(new FormatMessage<>(connection.getList(), "MP-image-connection")), Arrays.asList(uuid));
         return ResultCommon.success();
@@ -65,6 +69,7 @@ public class WebSocketNoticeController {
     @ApiImplicitParam(name = "uuid", value = "靶标id", dataTypeClass = String.class)
     @GetMapping("/device/get-by-uuid")
     public ServiceResult getByUuid(@RequestParam String uuid){
+        log.info("WebSocketNoticeController.getByUuid. uuid:{}", uuid);
         ImageConvertModel convertModel = imagesConverter.findByUuid(uuid);
         ExtSystemInfo extSystemInfo = convertModel.getExtSystemInfo();
         ExtVm extVm = convertModel.getExtVm();
@@ -82,5 +87,22 @@ public class WebSocketNoticeController {
         imagesByUuidSocketServer.batchSendInfo(JsonUtils.snakeStringify(new FormatMessage<>(pageVO,"MP-device-by-uuid")));
         return ResultCommon.success();
     }
+
+    @ApiOperation("推送快照状态")
+    @GetMapping("/device/snapshot")
+    public ServiceResult<Boolean> pushSnapshot(@RequestParam(name = "vm_id") String vmId) {
+        log.info("WebSocketNoticeController.pushSnapshot. vmId:{}", vmId);
+        imagesByUuidSocketServer.batchSendInfo(JsonUtils.snakeStringify(new FormatMessage<>(vmId, "MP-device-snapshot")));
+        return ResultCommon.success();
+    }
+
+    @ApiOperation("推送指定类型消息")
+    @GetMapping("/device/message")
+    public ServiceResult<Boolean> pushMessage(@RequestParam(name = "vm_id") String vmId, String type) {
+        log.info("WebSocketNoticeController.pushMessage. vmId:{}, type:{}", vmId, type);
+        imagesByUuidSocketServer.batchSendInfo(JsonUtils.snakeStringify(new FormatMessage<>(vmId, type)));
+        return ResultCommon.success();
+    }
+
 
 }

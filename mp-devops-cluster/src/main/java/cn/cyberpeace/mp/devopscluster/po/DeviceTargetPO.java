@@ -168,4 +168,7 @@ public class DeviceTargetPO extends BaseModel {
 
     @DefaultBool
     private Boolean attackMockDeviceFlag;
+
+    @DefaultBool
+    private Boolean behaveSupport;
 }

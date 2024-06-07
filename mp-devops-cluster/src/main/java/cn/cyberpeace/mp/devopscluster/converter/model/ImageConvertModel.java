@@ -157,4 +157,10 @@ public class ImageConvertModel extends BasePageConvertModel{
      */
     private String modelCode;
 
+    @ApiModelProperty("是否是攻防靶标模拟器")
+    private Boolean attackMockDeviceFlag;
+
+    @ApiModelProperty("是否支持行为仿真")
+    private Boolean behaveSupport;
+
 }

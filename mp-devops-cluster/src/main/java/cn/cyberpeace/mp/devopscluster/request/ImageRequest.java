@@ -180,5 +180,8 @@ public class ImageRequest extends BaseRequest {
 
     @ApiModelProperty("是否是攻防靶标模拟器")
     private Boolean attackMockDeviceFlag;
+
+    @ApiModelProperty("行为仿真模拟")
+    private Boolean behaviorSimulation;
 }
 

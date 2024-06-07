@@ -454,7 +454,8 @@
         role, image_type,is_public, quick_create_support,
         create_time, update_time, in_position,use_status,reference_status,parent_system_type,
         system_type,system_architecure, language,image_status,base_image_support,
-        init_support,image_source,is_import,is_hide,is_init,support_export,create_user,create_user_name)
+        init_support,image_source,is_import,is_hide,is_init,support_export,create_user,create_user_name,
+        attack_mock_device_flag, behave_support                             )
         VALUES
         <foreach collection="list" item="item" index="index" separator=",">
             (
@@ -467,7 +468,7 @@
             #{item.referenceStatus},#{item.parentSystemType}, #{item.systemType},
             #{item.systemArchitecure},#{item.language}, #{item.imageStatus},
             #{item.baseImageSupport}, #{item.initSupport}, #{item.imageSource}, #{item.isImport},
-            #{item.isHide},#{item.isInit},#{item.supportExport},#{item.createUser},#{item.createUserName}
+            #{item.isHide},#{item.isInit},#{item.supportExport},#{item.createUser},#{item.createUserName}, #{item.attackMockDeviceFlag}, #{item.behaveSupport}
             )
         </foreach>
     </insert>
