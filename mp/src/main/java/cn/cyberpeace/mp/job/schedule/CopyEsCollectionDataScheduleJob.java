@@ -34,7 +34,6 @@ import java.util.Properties;
 
 @Slf4j
 @Component
-@Service
 public class CopyEsCollectionDataScheduleJob {
 
     @Autowired
