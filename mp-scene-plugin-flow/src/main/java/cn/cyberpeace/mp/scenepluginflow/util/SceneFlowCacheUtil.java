@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.scenepluginflow.util;
 
+import cn.cyberpeace.mp.base.util.mptool.ExceptionUtil;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
@@ -8,6 +10,7 @@ import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -19,6 +22,7 @@ import java.util.concurrent.TimeUnit;
  * @Author maojun
  * @Date 2022/3/1
  */
+@Slf4j
 public class SceneFlowCacheUtil {
     private static LoadingCache<String, SceneHandler> sceneCache = CacheBuilder.newBuilder()
             .maximumSize(300)
@@ -58,6 +62,18 @@ public class SceneFlowCacheUtil {
             return new ArrayList<>();
         }
         return cache.getUnchecked(getKey(sceneId, nodeId));
+    }
+
+    public static void clearCache(String sceneId) {
+        try {
+            sceneCache.refresh(sceneId);
+            var handler = sceneCache.get(sceneId);
+            for (SceneElementBO e : handler.getElementMap().values()) {
+                cache.refresh(getKey(sceneId, e.getId()));
+            }
+        } catch (Exception e) {
+            log.error("failed to refresh cache , sceneId  is {} ,msg is {}", sceneId, ExceptionUtil.stacktraceToString(e));
+        }
     }
 
     public static SceneHandler getSceneHandler(String sceneId) {

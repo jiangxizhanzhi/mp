@@ -56,11 +56,11 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkFlowRateRe
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
+import cn.cyberpeace.mp.scenepluginflow.util.SceneFlowCacheUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.Data;
@@ -75,8 +75,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @Description: 场景流量服务
@@ -255,6 +259,7 @@ public class CsceneFlowService {
             addFlowTaskTaskInfoList.add(addFlowTaskTaskInfo);
         }
         sceneHandler.save();
+        SceneFlowCacheUtil.clearCache(sceneId);
         //新增流量执行任务
         if (CollectionUtils.isNotEmpty(addFlowTaskTaskInfoList)) {
             flowTaskTaskService.addTask(addFlowTaskTaskInfoList, sceneId, actuatorId, true, flowTaskTaskModelList);
