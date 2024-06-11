@@ -41,4 +41,10 @@ public class SceneElementSituationProbeModel extends BaseModel {
             return value;
         }
     }
+
+    public enum ProbeType {
+        UPDATE,
+        ADD,
+        REMOVE;
+    }
 }
