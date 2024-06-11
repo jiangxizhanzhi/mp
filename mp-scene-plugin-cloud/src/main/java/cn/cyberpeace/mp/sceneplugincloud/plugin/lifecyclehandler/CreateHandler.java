@@ -634,9 +634,22 @@ public class CreateHandler extends HandlerCommon {
         if (Boolean.TRUE.equals(sceneElementBO.getAttackMockDeviceFlag())) {
             String standardSystemType = SystemTypeUtils.getStandardSystemType(sceneElementBO.getSystemType());
             if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
-                //todo 待支持windows
-                basDeviceInitCommand.add(String.format("hello test"));
-
+                basDeviceInitCommand.add("@echo off");
+                basDeviceInitCommand.add("setlocal enabledelayedexpansion");
+                basDeviceInitCommand.add("set \"search_ip=server_ip\")");
+                basDeviceInitCommand.add(String.format("set \"replace_ip=%s\"", BeanCommon.getBean(CommonAppConfig.class).getBasIp()));
+                basDeviceInitCommand.add("set \"search_port=server_port\"");
+                basDeviceInitCommand.add(String.format("set \"replace_port=%s\"", BeanCommon.getBean(CommonAppConfig.class).getBasPort()));
+                basDeviceInitCommand.add("set \"input=D:\\config_test.yml\"");
+                basDeviceInitCommand.add("set \"output=D:\\config_test.yml.tmp\"");
+                basDeviceInitCommand.add("(for /f \"tokens=* delims=\" %%i in ('type \"%input%\"') do (");
+                basDeviceInitCommand.add("    set \"line=%%i\"");
+                basDeviceInitCommand.add("    set \"line=!line:%search_ip%=%replace_ip%!\"");
+                basDeviceInitCommand.add("    set \"line=!line:%search_port%=%replace_port%!\"");
+                basDeviceInitCommand.add("    echo(!line!");
+                basDeviceInitCommand.add(")) > \"%output%\"");
+                basDeviceInitCommand.add("move /Y \"%output%\" \"%input%\"");
+                basDeviceInitCommand.add("endlocal");
 
             } else if (SystemTypeCommandUtils.isLinux(standardSystemType)) {
                 basDeviceInitCommand.add(String.format("sed -i \"/platform_address:/s/server_ip/%s/\" /opt/cpbas/client/application.yml",
