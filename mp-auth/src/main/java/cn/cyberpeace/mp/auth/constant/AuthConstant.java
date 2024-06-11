@@ -87,6 +87,11 @@ public class AuthConstant {
      */
     public static final List<String> UPLOAD_AVATAR_MAGIC_HEADER_TYPE = Arrays.asList("png", "jpg");
 
+    /**
+     * 导入网络行为文件后缀类型: side
+     */
+    public static final List<String> BEHAVIOR_FILE_TYPE = Arrays.asList("side");
+
 
     // MQ
     public static final String AUTH_EXCHANGE_NAME = SimpleMessageConfig.GROUP_NAME + ".auth";
