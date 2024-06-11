@@ -1,11 +1,10 @@
 package cn.cyberpeace.mp.scene.model.base;
 
-import java.util.List;
-
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.generator.UuidGenerator;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import lombok.Data;
 
@@ -30,4 +29,11 @@ public class BaseSceneElementPortConnectionModel extends BaseModel {
     private String type;
     @DefaultStr
     private String vertices;
+
+    @DefaultInt
+    private Integer bandwidth;
+    @DefaultInt
+    private Integer delay;
+    @DefaultInt
+    private Integer loss;
 }

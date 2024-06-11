@@ -79,6 +79,15 @@ alter table mp_devops_target add column behave_support tinyint(1) not null defau
 alter table mp_scene_scene_element add column behave_support tinyint(1) not null default 0 comment '0不支持,1支持';
 alter table mp_scene_scene_config_element add column behave_support tinyint(1) not null default 0 comment '0不支持,1支持';
 
+# 连线添加qos配置 带宽，延迟，丢包率
+alter table mp_scene_scene_config_element_port_connection add column bandwidth int(11) not null default 0 comment '带宽';
+alter table mp_scene_scene_config_element_port_connection add column delay int(11) not null default 0 comment '延迟';
+alter table mp_scene_scene_config_element_port_connection add column loss int(11) not null default 0 comment '丢包率';
+
+alter table mp_scene_scene_element_port_connection add column bandwidth int(11) not null default 0 comment '带宽';
+alter table mp_scene_scene_element_port_connection add column delay int(11) not null default 0 comment '延迟';
+alter table mp_scene_scene_element_port_connection add column loss int(11) not null default 0 comment '丢包率';
+
 
 
 
