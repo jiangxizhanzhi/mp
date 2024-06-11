@@ -219,6 +219,29 @@ public class ImagesController {
     @GetMapping("/search/{uuid}")
     public Result<ImagesByIdVO> findByUuid(@PathVariable("uuid") String uuid) {
         ImageConvertModel model = imagesConverter.findByUuid(uuid);
+        ImagesByIdVO imagesByIdVO = getImagesByIdVO(model);
+        return new Result<>(imagesByIdVO);
+    }
+
+    /**
+     * 根据UUID查询
+     */
+    @ApiOperation("根据UUID查询")
+    @ApiImplicitParam(name = "uuid", value = "镜像ID", dataTypeClass = String.class)
+    @PostMapping("/search")
+    public Result<List<ImagesByIdVO>> findByUuids(@RequestBody ImageByUuidsRequest request) {
+        List<ImagesByIdVO> res = new ArrayList<>();
+        List<String> uuids = request.getUuids();
+        for (String uuid : uuids) {
+            ImageConvertModel model = imagesConverter.findByUuid(uuid);
+            ImagesByIdVO imagesByIdVO = getImagesByIdVO(model);
+            res.add(imagesByIdVO);
+        }
+        return new Result<>(res);
+    }
+
+
+    private ImagesByIdVO getImagesByIdVO(ImageConvertModel model) {
         ImagesByIdVO imagesByIdVO = new ImagesByIdVO();
         imagesByIdVO.setUuid(model.getUuid());
         imagesByIdVO.setName(model.getName());
@@ -250,7 +273,7 @@ public class ImagesController {
             imagesByIdVO.setAllowChangeIso(true);
         }
         this.imagesConverter.setImageBusinessProperties(imagesByIdVO, model);
-        return new Result<>(imagesByIdVO);
+        return imagesByIdVO;
     }
 
 
