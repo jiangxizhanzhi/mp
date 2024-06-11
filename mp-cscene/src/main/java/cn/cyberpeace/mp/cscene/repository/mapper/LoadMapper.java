@@ -48,7 +48,7 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     MpDevopsLoadSource getSynchronousDataSource();
 
-    Boolean addLoads(@Param("param") List<JSONObject> list);
+    Boolean addLoads(@Param("param") List<MpDevopsLoadSceneLog> list);
 
     Boolean deleteData(@Param("param") List<String> ids);
 
@@ -62,7 +62,7 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     List<MpDevopsLoad> getLoadByIds(@Param("param") List<String> loadIds);
 
-    Boolean batchUpdateData(@Param("param") List<JSONObject> sameLoads);
+    Boolean batchUpdateData(@Param("param") List<MpDevopsLoadSceneLog> sameLoads);
 
     String getSceneIdByTaskId(String taskId);
 

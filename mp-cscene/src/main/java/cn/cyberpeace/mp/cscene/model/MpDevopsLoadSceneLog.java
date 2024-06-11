@@ -63,4 +63,14 @@ public class MpDevopsLoadSceneLog extends MpDevopsLoad {
      * 结束时间
      */
     private String finishTime;
+
+    /**
+     * 结果类型名称
+     */
+    private String resultTypeName;
+
+    /**
+     * 结果状态名称
+     */
+    private String resultStatusName;
 }

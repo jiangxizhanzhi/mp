@@ -44,13 +44,25 @@ public class MpDevopsLoad extends BaseModel {
      */
     private String actionType;
     /**
+     * 运行类型名称
+     */
+    private String actionTypeName;
+    /**
      * 运行平台
      */
     private String runTable;
     /**
+     * 运行平台名称
+     */
+    private String runTableName;
+    /**
      * 控制类型
      */
     private String controlType;
+    /**
+     * 控制类型名称
+     */
+    private String controlTypeName;
     /**
      * 控制端口
      */

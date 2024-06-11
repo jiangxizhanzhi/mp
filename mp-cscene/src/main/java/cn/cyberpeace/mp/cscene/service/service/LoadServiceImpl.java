@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.service.service;
 
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
+import cn.cyberpeace.mp.base.bo.MpSysCodeEnum;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -8,6 +9,9 @@ import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
+import cn.cyberpeace.mp.common.constant.codeEnum.CommonConvertStatusEnum;
+import cn.cyberpeace.mp.common.constant.codeEnum.CommonFunctionCodeEnum;
+import cn.cyberpeace.mp.common.constant.codeEnum.CommonStatusCodeEnum;
 import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
@@ -20,7 +24,6 @@ import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.websocket.LoadResultWebSocketServer;
 import cn.cyberpeace.mp.cscene.websocket.WebSocketServer;
-import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import com.alibaba.fastjson.JSONObject;
@@ -55,12 +58,6 @@ import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
 
 @Service
 public class LoadServiceImpl {
-
-    final String STATUS_SUCCESS_CODE = "1005010101";
-    final String STATUS_FAIL_CODE = "1005010102";
-    final String LOAD_RESULT_ACTION_CODE = "MP-acceptLoadResult-by-outService";
-    final String SYNCHRONOUS_DATA_ACTION_CODE = "MP-synchronousData-by-outService";
-
     @Autowired
     private LoadMapper loadMapper;
 
@@ -128,7 +125,7 @@ public class LoadServiceImpl {
     public synchronized JSONObject synchronousData(Boolean isNeedMessage) {
         //推送的消息返回格式
         Map jsonObject = new LinkedHashMap<>();
-        jsonObject.put("code", SYNCHRONOUS_DATA_ACTION_CODE);
+        jsonObject.put("code", CommonFunctionCodeEnum.SYNCHRONOUS_DATA_ACTION_CODE.getCode());
         Map data = new LinkedHashMap<>();
 
         //同步设置
@@ -173,7 +170,7 @@ public class LoadServiceImpl {
         }
 
         //准备新增到数据库的载荷列表
-        List<JSONObject> waitAddList = new ArrayList<>();
+        List<MpDevopsLoadSceneLog> waitAddList = new ArrayList<>();
         for (LinkedHashMap tool : initialToolList) {
             if (tool != null) {
                 tool.put("source", "1");
@@ -184,13 +181,13 @@ public class LoadServiceImpl {
         //本地的载荷列表数据
         List<MpDevopsLoad> nowLoadList = loadMapper.getLoadList(new JSONObject());
         //收集id相同的数据,id相同的loadId不需要新增,只需要修改
-        List<JSONObject> sameLoads = new ArrayList<>();
+        List<MpDevopsLoadSceneLog> sameLoads = new ArrayList<>();
         // 创建一个新集合用于存储需要移除的元素，避免直接在遍历中修改原集合
-        List<JSONObject> toRemove = new ArrayList<>();
+        List<MpDevopsLoadSceneLog> toRemove = new ArrayList<>();
 
-        for (JSONObject waitAdd : waitAddList) {
-            if (waitAdd.get("id") != null) {
-                String waitAddId = waitAdd.get("id").toString();
+        for (MpDevopsLoadSceneLog waitAdd : waitAddList) {
+            if (waitAdd.getId() != null) {
+                String waitAddId = waitAdd.getId();
                 for (MpDevopsLoad nowLoad : nowLoadList) {
                     if (nowLoad.getId() != null && waitAddId.equals(nowLoad.getId())) {
                         // 找到了匹配项，添加到待移除列表并加入sameLoads
@@ -203,11 +200,11 @@ public class LoadServiceImpl {
         }
         waitAddList.removeAll(toRemove);
         //更新本地数据
-        Boolean deleteData = true;
+        Boolean batchUpdateData = true;
         if (sameLoads != null && sameLoads.size() > 0) {
-            deleteData = loadMapper.batchUpdateData(sameLoads);
+            batchUpdateData = loadMapper.batchUpdateData(sameLoads);
         }
-        if (deleteData && waitAddList != null && !waitAddList.isEmpty()) {
+        if (batchUpdateData && waitAddList != null && !waitAddList.isEmpty()) {
             if (!loadMapper.addLoads(waitAddList)) {
                 if (isNeedMessage) {
                     WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
@@ -261,36 +258,35 @@ public class LoadServiceImpl {
         }
     }
 
-    private JSONObject convertToolToJSONObject(LinkedHashMap tool) {
-        JSONObject jsonObject = new JSONObject(true);
-
-        jsonObject.put("id", tool.get("id").toString());
-        jsonObject.put("controlPort", tool.get("controlPort"));
-        jsonObject.put("controlType", tool.get("controlType"));
-        jsonObject.put("runTable", tool.get("runTable"));
-        jsonObject.put("actionType", tool.get("actionType"));
-        jsonObject.put("creatorId", tool.get("creatorId"));
-        jsonObject.put("defaultCmd", tool.get("defaultCmd"));
-        jsonObject.put("toolDescription", tool.get("toolDescribe")); //这里的键名与原始数据中的键名不一致
-        jsonObject.put("toolName", tool.get("toolName"));
-        jsonObject.put("source", tool.get("source"));
-        jsonObject.put("toolPlatform", tool.get("toolPlatform"));
-        jsonObject.put("readMe", tool.get("readMe"));
-        jsonObject.put("readMeName", tool.get("readMeName"));
-        jsonObject.put("cover", tool.get("cover"));
-        jsonObject.put("coverName", tool.get("coverName"));
-        jsonObject.put("attachment", tool.get("attachment"));
-        jsonObject.put("attachmentName", tool.get("attachmentName"));
+    private MpDevopsLoadSceneLog convertToolToJSONObject(LinkedHashMap tool) {
+        MpDevopsLoadSceneLog mpDevopsLoadSceneLog = new MpDevopsLoadSceneLog();
+        mpDevopsLoadSceneLog.setId(tool.get("id").toString());
+        mpDevopsLoadSceneLog.setControlPort(tool.get("controlPort").toString());
+        mpDevopsLoadSceneLog.setControlType(tool.get("controlType").toString());
+        mpDevopsLoadSceneLog.setRunTable(tool.get("runTable").toString());
+        mpDevopsLoadSceneLog.setActionType(tool.get("actionType").toString());
+        mpDevopsLoadSceneLog.setCreatorId(tool.get("creatorId").toString());
+        mpDevopsLoadSceneLog.setDefaultCmd(tool.get("defaultCmd").toString());
+        mpDevopsLoadSceneLog.setToolDescription(tool.get("toolDescribe").toString());
+        mpDevopsLoadSceneLog.setToolName(tool.get("toolName").toString());
+        mpDevopsLoadSceneLog.setSource(tool.get("source").toString());
+        mpDevopsLoadSceneLog.setToolPlatform(tool.get("toolPlatform").toString());
+        mpDevopsLoadSceneLog.setReadMe(tool.get("readMe").toString());
+        mpDevopsLoadSceneLog.setReadMeName(tool.get("readMeName").toString());
+        mpDevopsLoadSceneLog.setAttachment(tool.get("attachment").toString());
+        mpDevopsLoadSceneLog.setAttachmentName(tool.get("attachmentName").toString());
+        mpDevopsLoadSceneLog.setCover(tool.get("cover").toString());
+        mpDevopsLoadSceneLog.setCoverName(tool.get("coverName").toString());
 
         Object createTimeObj = tool.get("createTime");
         if (createTimeObj != null) {
             try {
                 LocalDateTime createTime = LocalDateTime.parse(createTimeObj.toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                jsonObject.put("createTime", createTime.toString());
+                mpDevopsLoadSceneLog.setCreateTime(createTime);
             } catch (DateTimeParseException e) {
                 // 记录错误日志，跳过此条数据或使用默认值
                 LocalDateTime createTime = LocalDateTime.now();
-                jsonObject.put("createTime", createTime.toString());
+                mpDevopsLoadSceneLog.setCreateTime(createTime);
             }
         }
 
@@ -298,15 +294,14 @@ public class LoadServiceImpl {
         if (updateTimeObj != null) {
             try {
                 LocalDateTime updateTime = LocalDateTime.parse(updateTimeObj.toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                jsonObject.put("updateTime", updateTime.toString());
+                mpDevopsLoadSceneLog.setUpdateTime(updateTime);
             } catch (DateTimeParseException e) {
                 // 记录错误日志，跳过此条数据或使用默认值
                 LocalDateTime updateTime = LocalDateTime.now();
-                jsonObject.put("updateTime", updateTime.toString());
+                mpDevopsLoadSceneLog.setUpdateTime(updateTime);
             }
         }
-
-        return jsonObject;
+        return mpDevopsLoadSceneLog;
     }
 
     /*
@@ -435,7 +430,6 @@ public class LoadServiceImpl {
      * 载荷执行结果
      * */
     public ListObjServiceResult getLoadExecutionResult(LoadResultSearchRequest requestData) {
-        List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResult(requestData);
         Integer offset = 0;
         Integer pageSize = 10;
         if (requestData.getPage() != null && requestData.getPerPage() != null) {
@@ -444,6 +438,24 @@ public class LoadServiceImpl {
             requestData.setOffset(offset);
             requestData.setPageSize(pageSize);
         }
+        List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResult(requestData);
+
+        String[] codes = {CommonStatusCodeEnum.RESULT_STATUS.getCode(), CommonStatusCodeEnum.ACTION_TYPE.getCode(),
+                CommonStatusCodeEnum.RESULT_TYPE.getCode(), CommonStatusCodeEnum.CONTROL_TYPE.getCode()};
+        List<MpSysCodeEnum> nextLevelDatasByCodes = commonCodeService.getNextLevelDatasByCodes(codes);
+        //将nextLevelDatasByCodes中的code和codeName转换成map
+        Map<String, String> codeMap = nextLevelDatasByCodes.stream()
+                .collect(Collectors.toMap(MpSysCodeEnum::getCode, MpSysCodeEnum::getCodeName));
+        //将list中的resultStatus转换成codeName
+        list = list.stream()
+                .map(log -> {
+                    log.setControlTypeName(log.getControlType() != null ? codeMap.get(log.getControlType()) : log.getControlType());
+                    log.setActionTypeName(log.getActionType() != null ? codeMap.get(log.getActionType()) : log.getActionType());
+                    log.setResultTypeName(log.getResultType() != null ? codeMap.get(log.getResultType()) : log.getResultType());
+                    log.setResultStatusName(log.getResultStatus() != null ? codeMap.get(log.getResultStatus()) : log.getResultStatus());
+                    return log;
+                })
+                .collect(Collectors.toList());
         //总数量
         Integer num = loadMapper.getLoadExecutionResultNum(requestData);
         return new ListObjServiceResult(list, num).asResult();
@@ -515,9 +527,9 @@ public class LoadServiceImpl {
 
     private String convertStatusToCode(String status) {
         if ("成功".equals(status)) {
-            return STATUS_SUCCESS_CODE;
+            return CommonConvertStatusEnum.STATUS_SUCCESS_CODE.getCode();
         } else if ("失败".equals(status)) {
-            return STATUS_FAIL_CODE;
+            return CommonConvertStatusEnum.STATUS_FAIL_CODE.getCode();
         }
         return ""; // 或者处理无效状态的逻辑
     }
@@ -543,7 +555,7 @@ public class LoadServiceImpl {
             LoadResultWebSocketServer loadResultWebSocketServer = LoadResultWebSocketServer.sessionPools.get(session);
             if (loadResultWebSocketServer != null) {
                 Map jsonObject = new LinkedHashMap<>();
-                jsonObject.put("code", LOAD_RESULT_ACTION_CODE);
+                jsonObject.put("code", CommonFunctionCodeEnum.LOAD_RESULT_ACTION_CODE.getCode());
                 Map data = new LinkedHashMap<>();
                 Integer sort = 0;
                 String message = requestData.toString();
@@ -585,13 +597,13 @@ public class LoadServiceImpl {
             return new ServiceResult(null, BaseErrorCode.ERROR, "文件无名称").asResult();
         }
         FileInputStream fis = null;
-        if(multipartFile.getOriginalFilename().endsWith("xlsx") || multipartFile.getOriginalFilename().endsWith("xls")){
+        if (multipartFile.getOriginalFilename().endsWith("xlsx") || multipartFile.getOriginalFilename().endsWith("xls")) {
             // 创建临时文件对象（使用UUID作为文件名以避免冲突）
             File excelFile = File.createTempFile("temp_excel_" + TextUtils.uuid(), ".xlsx");
             // 将MultipartFile的内容转移到临时文件
             multipartFile.transferTo(excelFile);
             fis = new FileInputStream(excelFile);
-        }else{
+        } else {
             return new ServiceResult(null, BaseErrorCode.ERROR, "文件格式错误,请上传xlsx、xls表格文件").asResult();
         }
         if (multipartFile.getOriginalFilename().endsWith("xlsx")) {
@@ -629,7 +641,7 @@ public class LoadServiceImpl {
                 System.out.println();
             }
             workbook.close();
-        }else if(multipartFile.getOriginalFilename().endsWith("xls")) {
+        } else if (multipartFile.getOriginalFilename().endsWith("xls")) {
             Workbook workbook = new HSSFWorkbook(fis); // 使用HSSFWorkbook处理.xls文件
             Sheet datatypeSheet = workbook.getSheetAt(0); // 获取第一个工作表
             Iterator<Row> iterator = datatypeSheet.iterator();
@@ -825,7 +837,7 @@ public class LoadServiceImpl {
     }
 
     /*
-     * 载荷数据同步
+     * 载荷数据同步设置保存
      * */
     public ServiceResult synchronousDataSource(MpDevopsLoadSource requestData) {
         String pk = requestData.getPk() != null ? requestData.getPk().toString() : "";

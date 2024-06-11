@@ -298,7 +298,7 @@
         <foreach collection="param" item="item" separator=";">
             UPDATE mp_devops_load
             <set>
-                <if test="item.loadName != null and item.loadName != ''">
+                <if test="item.toolName != null and item.toolName != ''">
                     tool_name = #{item.toolName},
                 </if>
                 <if test="item.toolDescription != null and item.toolDescription != ''">
@@ -343,16 +343,7 @@
                 <if test="item.defaultCmd != null and item.defaultCmd != ''">
                     default_cmd = #{item.defaultCmd},
                 </if>
-                <if test="item.createTime != null and item.createTime != ''">
-                    create_time = #{param.createTime,jdbcType=TIMESTAMP},
-                </if>
-                <if test="item.synchronizationTime != null and item.synchronizationTime != ''">
-                    synchronization_time = #{item.synchronizationTime,jdbcType=TIMESTAMP},
-                </if>
-                <if test="item.creatorId != null and item.creatorId != ''">
-                    creator_id = #{item.creatorId},
-                </if>
-                update_time = now(),
+                update_time = now()
             </set>
             where id = #{item.id}
         </foreach>
