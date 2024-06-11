@@ -2013,6 +2013,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                             sceneElementSituationProbeModel.setSceneElement(nodeId);
                             sceneElementSituationProbeModel.setProbeId(probe.getId());
                             sceneElementSituationProbeModel.setStatus(SceneElementSituationProbeModel.ProbeStatus.UPDATING.getValue());
+                            sceneElementSituationProbeModel.setDeleted(false);
                             return sceneElementSituationProbeModel;
                         }).collect(Collectors.toList());
 
