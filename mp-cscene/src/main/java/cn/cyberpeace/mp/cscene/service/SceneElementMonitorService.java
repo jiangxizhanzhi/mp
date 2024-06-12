@@ -138,6 +138,8 @@ public class SceneElementMonitorService {
 
     private static final String PROBE = "probe";
 
+    private static final String ALARM = "alarm";
+
 
     private Integer getWazuhVulnerabilityScanInterval() {
         return CollectionSingleton.collectionAppConfig.getWazuhVulnerabilityScanInterval();
@@ -976,6 +978,14 @@ public class SceneElementMonitorService {
                 .collect(Collectors.toList());
         result.put(PROBE, JSON.toJSON(probeList));
 
+        queryParams.setCatagories(Arrays.asList("020301", "020302", "020303", "020304", "020305","020306", "020307", "020308", "020309", "020310", "020311", "020312"));
+        //告警信息
+        List<ElementLogListModel> alarmList =csceneInstanceService.listHostEvents(sceneId, queryParams)
+                                                              .asResult().sourceList().stream()
+                                                              .map(this::collectionHostEventBO2ElementLogListModel)
+                                                              .collect(Collectors.toList());
+        result.put(ALARM, JSON.toJSON(alarmList));
+
         String fileName = "tmp/data";
 
         if ("json".equals(type)) {
@@ -1017,6 +1027,9 @@ public class SceneElementMonitorService {
 
             ExcelDataHandler.exportExcel(probeList, filePath, "自定义采集",
                     Arrays.asList("sceneId", "log"), ExcelHeader.PROBE_LIST);
+
+            ExcelDataHandler.exportExcel(logList, filePath, "告警事件",
+                    Arrays.asList("sceneId", "log"), ExcelHeader.LOG_LIST);
 
             FileUtil.setResponse(new File(fileName + ".xlsx"), true, response);
         }
@@ -1095,8 +1108,9 @@ public class SceneElementMonitorService {
         String sceneId = fileBO.getSceneId();
         String originalFileName = multipartFile.getOriginalFilename();
         String fileSuffix = originalFileName.substring(originalFileName.lastIndexOf(".") + 1);
+        Integer type = fileBO.getType();
 
-        File file = new File("C:\\Users\\liuyu\\Desktop\\测试用文件\\import\\", originalFileName);
+        File file = new File("tmp/", originalFileName);
         try {
             multipartFile.transferTo(file);
         } catch (IOException e) {
@@ -1109,99 +1123,117 @@ public class SceneElementMonitorService {
         List<ElementLogListModel> logListModels = new ArrayList<>();
         List<WazuhProbeDataModel> wazuhProbeDataModels = new ArrayList<>();
         if ("xlsx".equals(fileSuffix)) {
-            ExcelDataHandler excelDataHandler = new ExcelDataHandler(file.getPath(), "文件变更数量");
-            List<List<String>> fileCount = excelDataHandler.getSheetData(1);
-            for (int i = 0; i < fileCount.size(); i++) {
-                List<String> countData = fileCount.get(i);
-                if (0 == Integer.parseInt(countData.get(1))) {
-                    continue;
+            if (0 == type) {
+                ExcelDataHandler excelDataHandler = new ExcelDataHandler(file.getPath(), "文件变更数量");
+                List<List<String>> fileCount = excelDataHandler.getSheetData(1);
+                for (int i = 0; i < fileCount.size(); i++) {
+                    List<String> countData = fileCount.get(i);
+                    if (0 == Integer.parseInt(countData.get(1))) {
+                        continue;
+                    }
+                    ElementFileCountModel countModel = new ElementFileCountModel();
+                    countModel.setSceneId(sceneId);
+                    countModel.setGroup(CsceneBizConstant.FILE_MODIFY_GROUP.get(0));
+                    countModel.setTime(countData.get(0));
+                    countModel.setCount(Integer.parseInt(countData.get(1)));
+                    fileCountModels.add(countModel);
                 }
-                ElementFileCountModel countModel = new ElementFileCountModel();
-                countModel.setSceneId(sceneId);
-                countModel.setGroup(CsceneBizConstant.FILE_MODIFY_GROUP.get(0));
-                countModel.setTime(countData.get(0));
-                countModel.setCount(Integer.parseInt(countData.get(1)));
-                fileCountModels.add(countModel);
-            }
 
-            excelDataHandler = new ExcelDataHandler(file.getPath(), "文件变更列表");
-            List<List<String>> fileList = excelDataHandler.getSheetData(1);
-            for (int i = 0; i < fileList.size(); i++) {
-                List<String> fileData = fileList.get(i);
-                ElementFileListModel fileListModel = new ElementFileListModel();
-                fileListModel.setSceneId(sceneId);
-                fileListModel.setGroup(CsceneBizConstant.FILE_MODIFY_GROUP.get(0));
-                fileListModel.setMd5After("");
-                fileListModel.setMd5Before("");
-                fileListModel.setNodeName(fileData.get(0));
-                fileListModel.setTime(LocalDateTime.parse(fileData.get(1)));
-                fileListModel.setPath(fileData.get(2));
-                fileListModel.setEventDesc(fileData.get(3));
-                fileListModel.setLevel(Integer.parseInt(fileData.get(4)));
-                fileListModel.setFileSize(fileData.get(5));
-                fileListModels.add(fileListModel);
-            }
-
-            excelDataHandler = new ExcelDataHandler(file.getPath(), "注册表变更数量");
-            List<List<String>> registryCount = excelDataHandler.getSheetData(1);
-            for (int i = 0; i < registryCount.size(); i++) {
-                List<String> countData = registryCount.get(i);
-                if (0 == Integer.parseInt(countData.get(1))) {
-                    continue;
+                excelDataHandler = new ExcelDataHandler(file.getPath(), "文件变更列表");
+                List<List<String>> fileList = excelDataHandler.getSheetData(1);
+                for (int i = 0; i < fileList.size(); i++) {
+                    List<String> fileData = fileList.get(i);
+                    ElementFileListModel fileListModel = new ElementFileListModel();
+                    fileListModel.setSceneId(sceneId);
+                    fileListModel.setGroup(CsceneBizConstant.FILE_MODIFY_GROUP.get(0));
+                    fileListModel.setMd5After("");
+                    fileListModel.setMd5Before("");
+                    fileListModel.setNodeName(fileData.get(0));
+                    fileListModel.setTime(LocalDateTime.parse(fileData.get(1)));
+                    fileListModel.setPath(fileData.get(2));
+                    fileListModel.setEventDesc(fileData.get(3));
+                    fileListModel.setLevel(Integer.parseInt(fileData.get(4)));
+                    fileListModel.setFileSize(fileData.get(5));
+                    fileListModels.add(fileListModel);
                 }
-                ElementFileCountModel countModel = new ElementFileCountModel();
-                countModel.setSceneId(sceneId);
-                countModel.setGroup(CsceneBizConstant.REGISTRY_MODIFY_GROUP.get(0));
-                countModel.setTime(countData.get(0));
-                countModel.setCount(Integer.parseInt(countData.get(1)));
-                registryCountModels.add(countModel);
-            }
+            } else if (1 == type) {
+                ExcelDataHandler excelDataHandler = new ExcelDataHandler(file.getPath(), "注册表变更数量");
+                List<List<String>> registryCount = excelDataHandler.getSheetData(1);
+                for (int i = 0; i < registryCount.size(); i++) {
+                    List<String> countData = registryCount.get(i);
+                    if (0 == Integer.parseInt(countData.get(1))) {
+                        continue;
+                    }
+                    ElementFileCountModel countModel = new ElementFileCountModel();
+                    countModel.setSceneId(sceneId);
+                    countModel.setGroup(CsceneBizConstant.REGISTRY_MODIFY_GROUP.get(0));
+                    countModel.setTime(countData.get(0));
+                    countModel.setCount(Integer.parseInt(countData.get(1)));
+                    registryCountModels.add(countModel);
+                }
 
-            excelDataHandler = new ExcelDataHandler(file.getPath(), "注册表变更列表");
-            List<List<String>> registryList = excelDataHandler.getSheetData(1);
-            for (int i = 0; i < registryList.size(); i++) {
-                List<String> registryData = registryList.get(i);
-                ElementFileListModel registryListModel = new ElementFileListModel();
-                registryListModel.setSceneId(sceneId);
-                registryListModel.setGroup(CsceneBizConstant.REGISTRY_MODIFY_GROUP.get(0));
-                registryListModel.setFileSize("");
-                registryListModel.setNodeName(registryData.get(0));
-                registryListModel.setTime(LocalDateTime.parse(registryData.get(1)));
-                registryListModel.setPath(registryData.get(2));
-                registryListModel.setEventDesc(registryData.get(3));
-                registryListModel.setLevel(Integer.parseInt(registryData.get(4)));
-                registryListModel.setMd5Before(registryData.get(5));
-                registryListModel.setMd5After(registryData.get(6));
-                registryListModels.add(registryListModel);
-            }
-
-            excelDataHandler = new ExcelDataHandler(file.getPath(), "日志事件");
-            List<List<String>> logList = excelDataHandler.getSheetData(1);
-            for (int i = 0; i < logList.size(); i++) {
-                List<String> logData = logList.get(i);
-                ElementLogListModel logListModel = new ElementLogListModel();
-                logListModel.setSceneId(sceneId);
-                logListModel.setNodeName(logData.get(0));
-                logListModel.setTime(LocalDateTime.parse(logData.get(1)));
-                logListModel.setAppName(logData.get(2));
-                logListModel.setEventDesc(logData.get(3));
-                logListModel.setLevel(Integer.parseInt(logData.get(4)));
-                logListModel.setDescription(logData.get(5));
-                logListModel.setCatagory(logData.get(6));
-                logListModels.add(logListModel);
-            }
-
-            excelDataHandler = new ExcelDataHandler(file.getPath(), "自定义采集");
-            List<List<String>> probeList = excelDataHandler.getSheetData(1);
-            for (int i = 0; i < probeList.size(); i++) {
-                List<String> probeData = probeList.get(i);
-                WazuhProbeDataModel dataModel = new WazuhProbeDataModel();
-                dataModel.setSceneId(sceneId);
-                dataModel.setNodeName(probeData.get(0));
-                dataModel.setProbeName(probeData.get(1));
-                dataModel.setEventDesc(probeData.get(2));
-                dataModel.setTime(LocalDateTime.parse(probeData.get(3)));
-                wazuhProbeDataModels.add(dataModel);
+                excelDataHandler = new ExcelDataHandler(file.getPath(), "注册表变更列表");
+                List<List<String>> registryList = excelDataHandler.getSheetData(1);
+                for (int i = 0; i < registryList.size(); i++) {
+                    List<String> registryData = registryList.get(i);
+                    ElementFileListModel registryListModel = new ElementFileListModel();
+                    registryListModel.setSceneId(sceneId);
+                    registryListModel.setGroup(CsceneBizConstant.REGISTRY_MODIFY_GROUP.get(0));
+                    registryListModel.setFileSize("");
+                    registryListModel.setNodeName(registryData.get(0));
+                    registryListModel.setTime(LocalDateTime.parse(registryData.get(1)));
+                    registryListModel.setPath(registryData.get(2));
+                    registryListModel.setEventDesc(registryData.get(3));
+                    registryListModel.setLevel(Integer.parseInt(registryData.get(4)));
+                    registryListModel.setMd5Before(registryData.get(5));
+                    registryListModel.setMd5After(registryData.get(6));
+                    registryListModels.add(registryListModel);
+                }
+            } else if (2 == type) {
+                ExcelDataHandler excelDataHandler = new ExcelDataHandler(file.getPath(), "日志事件");
+                List<List<String>> logList = excelDataHandler.getSheetData(1);
+                for (int i = 0; i < logList.size(); i++) {
+                    List<String> logData = logList.get(i);
+                    ElementLogListModel logListModel = new ElementLogListModel();
+                    logListModel.setSceneId(sceneId);
+                    logListModel.setNodeName(logData.get(0));
+                    logListModel.setTime(LocalDateTime.parse(logData.get(1)));
+                    logListModel.setAppName(logData.get(2));
+                    logListModel.setEventDesc(logData.get(3));
+                    logListModel.setLevel(Integer.parseInt(logData.get(4)));
+                    logListModel.setDescription(logData.get(5));
+                    logListModel.setCatagory(logData.get(6));
+                    logListModels.add(logListModel);
+                }
+            } else if (3 == type) {
+                ExcelDataHandler excelDataHandler = new ExcelDataHandler(file.getPath(), "自定义采集");
+                List<List<String>> probeList = excelDataHandler.getSheetData(1);
+                for (int i = 0; i < probeList.size(); i++) {
+                    List<String> probeData = probeList.get(i);
+                    WazuhProbeDataModel dataModel = new WazuhProbeDataModel();
+                    dataModel.setSceneId(sceneId);
+                    dataModel.setNodeName(probeData.get(0));
+                    dataModel.setProbeName(probeData.get(1));
+                    dataModel.setEventDesc(probeData.get(2));
+                    dataModel.setTime(LocalDateTime.parse(probeData.get(3)));
+                    wazuhProbeDataModels.add(dataModel);
+                }
+            } else if (4 == type) {
+                ExcelDataHandler excelDataHandler = new ExcelDataHandler(file.getPath(), "告警事件");
+                List<List<String>> logList = excelDataHandler.getSheetData(1);
+                for (int i = 0; i < logList.size(); i++) {
+                    List<String> logData = logList.get(i);
+                    ElementLogListModel logListModel = new ElementLogListModel();
+                    logListModel.setSceneId(sceneId);
+                    logListModel.setNodeName(logData.get(0));
+                    logListModel.setTime(LocalDateTime.parse(logData.get(1)));
+                    logListModel.setAppName(logData.get(2));
+                    logListModel.setEventDesc(logData.get(3));
+                    logListModel.setLevel(Integer.parseInt(logData.get(4)));
+                    logListModel.setDescription(logData.get(5));
+                    logListModel.setCatagory(logData.get(6));
+                    logListModels.add(logListModel);
+                }
             }
         } else if ("json".equals(fileSuffix) || "xml".equals(fileSuffix)) {
             JSONObject jsonObject = new JSONObject();
@@ -1220,37 +1252,41 @@ public class SceneElementMonitorService {
                     e.printStackTrace();
                 }
             }
-
-            String fileCount = jsonObject.getString(FILE_COUNT);
-            fileCountModels = JSON.parseArray(fileCount, ElementFileCountModel.class)
-                                  .stream()
-                                  .filter(count -> 0 != count.getCount())
-                                  .collect(Collectors.toList());
-            fileCountModels.forEach(count -> count.setSceneId(sceneId));
-
-            String fileList = jsonObject.getString(FILE_LIST);
-            fileListModels = JSON.parseArray(fileList, ElementFileListModel.class);
-            fileListModels.forEach(list -> list.setSceneId(sceneId));
-
-            String registryCount = jsonObject.getString(REGISTRY_COUNT);
-            registryCountModels = JSON.parseArray(registryCount, ElementFileCountModel.class)
+            if (0 == type) {
+                String fileCount = jsonObject.getString(FILE_COUNT);
+                fileCountModels = JSON.parseArray(fileCount, ElementFileCountModel.class)
                                       .stream()
                                       .filter(count -> 0 != count.getCount())
                                       .collect(Collectors.toList());
-            registryCountModels.forEach(count -> count.setSceneId(sceneId));
+                fileCountModels.forEach(count -> count.setSceneId(sceneId));
 
-            String registryList = jsonObject.getString(REGISTRY_LIST);
-            registryListModels = JSON.parseArray(registryList, ElementFileListModel.class);
-            registryListModels.forEach(list -> list.setSceneId(sceneId));
+                String fileList = jsonObject.getString(FILE_LIST);
+                fileListModels = JSON.parseArray(fileList, ElementFileListModel.class);
+                fileListModels.forEach(list -> list.setSceneId(sceneId));
+            } else if (1 == type) {
+                String registryCount = jsonObject.getString(REGISTRY_COUNT);
+                registryCountModels = JSON.parseArray(registryCount, ElementFileCountModel.class)
+                                          .stream()
+                                          .filter(count -> 0 != count.getCount())
+                                          .collect(Collectors.toList());
+                registryCountModels.forEach(count -> count.setSceneId(sceneId));
 
-            String logList = jsonObject.getString(LOG);
-            logListModels = JSON.parseArray(logList, ElementLogListModel.class);
-            logListModels.forEach(log -> log.setSceneId(sceneId));
-
-            String probeList = jsonObject.getString(PROBE);
-            wazuhProbeDataModels = JSON.parseArray(probeList, WazuhProbeDataModel.class);
-            wazuhProbeDataModels.forEach(dataModel -> dataModel.setSceneId(sceneId));
-
+                String registryList = jsonObject.getString(REGISTRY_LIST);
+                registryListModels = JSON.parseArray(registryList, ElementFileListModel.class);
+                registryListModels.forEach(list -> list.setSceneId(sceneId));
+            } else if (2 == type) {
+                String logList = jsonObject.getString(LOG);
+                logListModels = JSON.parseArray(logList, ElementLogListModel.class);
+                logListModels.forEach(log -> log.setSceneId(sceneId));
+            } else if (3 == type) {
+                String probeList = jsonObject.getString(PROBE);
+                wazuhProbeDataModels = JSON.parseArray(probeList, WazuhProbeDataModel.class);
+                wazuhProbeDataModels.forEach(dataModel -> dataModel.setSceneId(sceneId));
+            } else if (4 == type) {
+                String logList = jsonObject.getString(ALARM);
+                logListModels = JSON.parseArray(logList, ElementLogListModel.class);
+                logListModels.forEach(log -> log.setSceneId(sceneId));
+            }
         }
         file.delete();
         elementFileCountMapper.bulkCreate(fileCountModels);

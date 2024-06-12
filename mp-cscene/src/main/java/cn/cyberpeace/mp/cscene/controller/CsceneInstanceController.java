@@ -936,7 +936,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                        @RequestParam(value = "probeIds", required = false) List<String> probeIds,
                                                        @RequestBody(required = false) CsceneInstanceNodeProbesActionRequest request) {
         request = formatNodeProbesActionRequest(request, id, nodeId, probeIds);
-        return modelService.elementInstallProbes(request.getId(), request.getNodeId(), request.getProbeIds(), request.getContext()).asResult();
+        return modelService.elementInstallProbes(request.getId(), request.getNodeId(), request.getProbeList()).asResult();
     }
 
     @ApiOperation("节点探针删除")
@@ -952,7 +952,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                       @RequestParam(value = "probeIds", required = false) List<String> probeIds,
                                                       @RequestBody(required = false) CsceneInstanceNodeProbesActionRequest request) {
         request = formatNodeProbesActionRequest(request, id, nodeId, probeIds);
-        return modelService.elementDeleteProbes(request.getId(), request.getNodeId(), request.getProbeIds(), request.getContext()).asResult();
+        return modelService.elementDeleteProbes(request.getId(), request.getNodeId(), request.getProbeList()).asResult();
     }
 
     @ApiOperation("节点探针卸载")
@@ -968,7 +968,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                          @RequestParam(value = "probeIds", required = false) List<String> probeIds,
                                                          @RequestBody(required = false) CsceneInstanceNodeProbesActionRequest request) {
         request = formatNodeProbesActionRequest(request, id, nodeId, probeIds);
-        return modelService.elementUninstallProbes(request.getId(), request.getNodeId(), request.getProbeIds(), request.getContext()).asResult();
+        return modelService.elementUninstallProbes(request.getId(), request.getNodeId(), request.getProbeList()).asResult();
     }
 
     @ApiOperation("节点探针重启")
@@ -984,7 +984,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                        @RequestParam(value = "probeIds", required = false) List<String> probeIds,
                                                        @RequestBody(required = false) CsceneInstanceNodeProbesActionRequest request) {
         request = formatNodeProbesActionRequest(request, id, nodeId, probeIds);
-        return modelService.elementRestartProbes(request.getId(), request.getNodeId(), request.getProbeIds(), request.getContext()).asResult();
+        return modelService.elementRestartProbes(request.getId(), request.getNodeId(), request.getProbeList()).asResult();
     }
 
     @ApiOperation("扩展节点磁盘")

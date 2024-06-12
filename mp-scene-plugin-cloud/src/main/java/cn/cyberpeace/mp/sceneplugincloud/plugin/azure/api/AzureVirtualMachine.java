@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceMana
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
@@ -289,15 +290,16 @@ public class AzureVirtualMachine {
         }
     }
 
-    public RunCommandResult runCommand(CloudPluginSceneElementBO cloudElement, List<String> scriptContentList) {
+    public RunCommandResult runCommand(CloudPluginSceneElementBO cloudElement, List<ProbeScriptModel> scriptContentList) {
 //        TODO 已创建的虚拟机只能输入命令 不能直接运行脚本 1.所有安装脚本在启动时放入虚拟机（无后新增探针脚本） 2.探针脚本放文件服务 安装时先下载探针脚本后命令启动
         VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(cloudElement.getResourceId());
         String createFileCommand = "echo '你好' > /home/root22/hello22.txt";
 //        linux:RunShellScript windows:RunPowerShellScript
-        RunCommandInput inputCommand = new RunCommandInput()
+        /*RunCommandInput inputCommand = new RunCommandInput()
                 .withCommandId("RunShellScript")
-                .withScript(scriptContentList);
-        return virtualMachine.runCommand(inputCommand);
+                .withScript(scriptContentList);*/
+//        return virtualMachine.runCommand(inputCommand);
+        return null;
     }
 
     public void delete(CloudPluginSceneElementBO cloudElement) {

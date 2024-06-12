@@ -5,9 +5,13 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
+import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
+import cn.cyberpeace.mp.scene.model.SceneElementSituationProbeModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementSituationProbeMapper;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
@@ -36,11 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.sceneplugincollection.config.WazuhModifyEventConfig.ProbeType.FILE;
@@ -55,6 +55,8 @@ public class InitiateHandler extends HandlerCommon {
 
     private static Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> locationMap;
 
+    private SceneElementSituationProbeMapper sceneElementSituationProbeMapper;
+
     public static class SceneProcess {
         public static final SceneEventProcess INITIATE_FLOW_COLLECTION = new SceneEventProcess("initiate_flow_collection", "sceneplugincollection.event.initiate_flow_collection", "init", 1);
         public static final SceneEventProcess INITIATE_PROBE_COLLECTION = new SceneEventProcess("initiate_probe_collection", "sceneplugincollection.event.initiate_probe_collection", "init", 2);
@@ -68,12 +70,15 @@ public class InitiateHandler extends HandlerCommon {
 
     public InitiateHandler(CollectionScenePluginHandler pluginHandler) {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.INITIATE);
+        this.sceneElementSituationProbeMapper = BeanCommon.getBean(SceneElementSituationProbeMapper.class);
     }
 
     public void initiate() {
         prepareEventProcess(SceneModel.Event.INITIATE, SceneProcess.class, ElementProcess.class);
 
         var scene = getPluginHandler().getScene();
+        String eid = scene.getSrcScene().getEid();
+
         //当前云类型
         Integer cloudType = scene.getSrcScene().getCloudType() != null ? scene.getSrcScene().getCloudType() : 1;
         // 全局开启流量采集
@@ -199,8 +204,29 @@ public class InitiateHandler extends HandlerCommon {
                     WazuhControl.ControlConfigParam controlParam = new WazuhControl.ControlConfigParam();
                     String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
                     if (collectionElement.getProbes() != null && !collectionElement.getProbes().isEmpty()) {
-                        controlParam = this.getControlConfigParam(collectionElement.getProbes(), srcElement.getEid(),
+                        List<Probe> probes = collectionElement.getProbes();
+
+                        controlParam = this.getControlConfigParam(probes, srcElement.getEid(),
                                 systemType, this.getLocationMap());
+
+//                        增加节点探针关联表数据
+                        if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
+                            List<SceneElementSituationProbeModel> sceneElementSituationProbeModels =
+                                    probes.stream()
+                                            .map(probe -> {
+                                                SceneElementSituationProbeModel sceneElementSituationProbeModel = new SceneElementSituationProbeModel();
+                                                sceneElementSituationProbeModel.setScene(eid);
+                                                sceneElementSituationProbeModel.setSceneElement(srcElement.getId());
+                                                sceneElementSituationProbeModel.setProbeId(probe.getId());
+                                                sceneElementSituationProbeModel.setStatus(SceneElementSituationProbeModel.ProbeStatus.UPDATING.getValue());
+                                                sceneElementSituationProbeModel.setDeleted(false);
+                                                return sceneElementSituationProbeModel;
+                                            }).collect(Collectors.toList());
+
+                            BaseModelMapper.BulkResult<SceneElementSituationProbeModel> sceneElementSituationProbeModelBulkResult = sceneElementSituationProbeMapper.bulkCreate(sceneElementSituationProbeModels);
+                            System.out.println(sceneElementSituationProbeModelBulkResult.getFail().toString());
+
+                        }
                     }
                     //生成探测安装脚本
                     var probeInstallScript = getProbeCollector().generateProbeInstallScript(cloudType, systemType,
@@ -308,6 +334,7 @@ public class InitiateHandler extends HandlerCommon {
 
     /**
      * 获取变更事件初始数据脚本
+     *
      * @param agentName
      * @param collectPath
      * @param type
