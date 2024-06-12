@@ -986,7 +986,7 @@ public class SceneElementMonitorService {
                                                               .collect(Collectors.toList());
         result.put(ALARM, JSON.toJSON(alarmList));
 
-        String fileName = "tmp/data";
+        String fileName = FileUtil.getTmpDirPath() + File.separator + "data";
 
         if ("json".equals(type)) {
             try (FileWriter writer = new FileWriter(fileName + ".json")){
@@ -1110,7 +1110,7 @@ public class SceneElementMonitorService {
         String fileSuffix = originalFileName.substring(originalFileName.lastIndexOf(".") + 1);
         Integer type = fileBO.getType();
 
-        File file = new File("tmp/", originalFileName);
+        File file = new File(FileUtil.getTmpDirPath() + File.separator, originalFileName);
         try {
             multipartFile.transferTo(file);
         } catch (IOException e) {
