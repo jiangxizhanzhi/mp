@@ -34,7 +34,7 @@ public class AzureFlowCollector extends FlowCollector {
     }
 
     public String createCollector() {
-        String containerGroupName = "mp-" + String.valueOf(System.currentTimeMillis());
+        String containerGroupName = "mp-" + System.currentTimeMillis();
 
 //        创建akime容器
         String groupName = pluginHandler.getSourceSceneId();

@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSceneStage;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
@@ -54,7 +53,6 @@ public class AzureCreateHandler extends CreateHandler {
 
         boolean creatFlowCollector = false;
         for (Map.Entry<String, CollectionPluginSceneElementPortBO> entry : getPluginHandler().getElementPortMap().entrySet()) {
-            var portId = entry.getKey();
             var collectionPort = entry.getValue();
             if (Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {
                 creatFlowCollector = true;
@@ -74,6 +72,7 @@ public class AzureCreateHandler extends CreateHandler {
                 var srcPort = collectionPort.getSrcPort();
                 var srcElement = srcPort.getElement();
                 var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
+//                通过判断ResourceId来确定节点是否启动成功 筛选出来用于绑定流量镜像
                 if (cloudElement != null && cloudElement.getVirtualType() != null
                         && !StringUtils.isEmpty(cloudElement.getResourceId())) {
                     if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
@@ -91,7 +90,6 @@ public class AzureCreateHandler extends CreateHandler {
             var sceneId = getPluginHandler().getSrcScene().getEid();
             // 创建流量采集器
             runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
-//                var flowCollectorId = getFlowCollector().createCollector();
 //                创建AzureArkime
                 var flowCollectorId = new AzureFlowCollector(getFlowCollector(), resourceService, getPluginHandler(), finalNetWorkId)
                         .createCollector();
@@ -100,14 +98,14 @@ public class AzureCreateHandler extends CreateHandler {
 
             var flowCollectorId = getPluginHandler().getScene().getFlowCollector();
             runSceneProgress(SceneProcess.BIND_FLOW_COLLECT_PORTS, () -> {
-                // 绑定网络端口到流量采集器
+                // 绑定网络端口到流量采集器  场景绑定流量镜像
                 getFlowCollector().bindNetworkPorts(sceneId, flowCollectorId, new ArrayList<>(collectorVmInstanceIds),
                         new ArrayList<>(collectorContainerInstanceIds), enableMirror);
             });
         } else if (enableMirror) {
             // 镜像流量
             var sceneId = getPluginHandler().getSrcScene().getEid();
-            // 绑定网络端口到流量采集器
+            // 绑定网络端口到流量采集器  场景绑定流量镜像
             getFlowCollector().bindEntityNetworkPorts(sceneId, new ArrayList<>(mirrorVmInstanceIds),
                     new ArrayList<>(mirrorContainerInstanceIds));
         } else if (creatFlowCollector) {
@@ -118,8 +116,10 @@ public class AzureCreateHandler extends CreateHandler {
                 getPluginHandler().getScene().setFlowCollector(flowCollectorId);
             });
         }
+//        arkime创建绑定流量镜像结束
         getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
 
+//        增加容器节点辅助路由
         // 绑定探针agent到探针采集器
         var probeCollectorId = getPluginHandler().getScene().getProbeCollector();
         if (!StringUtils.isEmpty(probeCollectorId)) {
@@ -171,17 +171,7 @@ public class AzureCreateHandler extends CreateHandler {
             runSceneProgress(SceneProcess.CREATE_PROBE_ROUTER, this::createProbeRouter);
 
             getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_DATA_COLLECT);
-//            var probeCollectionElements = getPluginHandler().getElementMap().values()
-//                    .stream()
-//                    .filter(collectionElement -> !CollectionUtils.isEmpty(collectionElement.getProbes()))
-//                    .collect(Collectors.toList());
-//            var bindProbeCollectAgentTasks = probeCollectionElements.stream()
-//                    .map(collectionElement -> (Runnable)() -> bindProbeCollectAgentProcess(collectionElement,
-//                            probeCollectorId))
-//                    .collect(Collectors.toList());
-//            if (!bindProbeCollectAgentTasks.isEmpty()) {
-//                runSceneProgress(SceneProcess.BIND_PROBE_COLLECT_AGENTS, () -> runTasks(bindProbeCollectAgentTasks));
-//            }
+
         }
     }
 }
