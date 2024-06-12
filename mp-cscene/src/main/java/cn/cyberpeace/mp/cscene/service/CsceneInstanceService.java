@@ -104,7 +104,6 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
-import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhProbeDataModel;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
@@ -116,7 +115,6 @@ import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import com.azure.resourcemanager.compute.models.ComputeResourceType;
-import com.azure.resourcemanager.compute.models.RunCommandResult;
 import com.google.common.cache.Cache;
 import com.google.common.collect.Lists;
 import lombok.Data;
@@ -689,6 +687,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 String sceneId = this.getSceneId(id);
                 var flag = instanceHandler.delete(logic);
                 if (sceneId != null) {
+//                    关闭场景接口中删除节点探针关联表数据
+                    HumanCondition probeListHumanCondition = new HumanCondition()
+                            .filterEqual(SceneElementSituationProbeModel::getScene, sceneId);
+                    sceneElementSituationProbeMapper.filterDelete(probeListHumanCondition);
+
                     scenePluginCloudSceneService.deleteSceneRecords(sceneId, logic);
                     resourceClearHandler.doCallback(id);
                 }

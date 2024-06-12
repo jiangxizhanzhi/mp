@@ -10,7 +10,6 @@ import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementSituationProbeModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementSituationProbeMapper;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
@@ -210,23 +209,21 @@ public class InitiateHandler extends HandlerCommon {
                                 systemType, this.getLocationMap());
 
 //                        增加节点探针关联表数据
-                        if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
-                            List<SceneElementSituationProbeModel> sceneElementSituationProbeModels =
-                                    probes.stream()
-                                            .map(probe -> {
-                                                SceneElementSituationProbeModel sceneElementSituationProbeModel = new SceneElementSituationProbeModel();
-                                                sceneElementSituationProbeModel.setScene(eid);
-                                                sceneElementSituationProbeModel.setSceneElement(srcElement.getId());
-                                                sceneElementSituationProbeModel.setProbeId(probe.getId());
-                                                sceneElementSituationProbeModel.setStatus(SceneElementSituationProbeModel.ProbeStatus.UPDATING.getValue());
-                                                sceneElementSituationProbeModel.setDeleted(false);
-                                                return sceneElementSituationProbeModel;
-                                            }).collect(Collectors.toList());
+                        List<SceneElementSituationProbeModel> sceneElementSituationProbeModels =
+                                probes.stream()
+                                        .map(probe -> {
+                                            SceneElementSituationProbeModel sceneElementSituationProbeModel = new SceneElementSituationProbeModel();
+                                            sceneElementSituationProbeModel.setScene(eid);
+                                            sceneElementSituationProbeModel.setSceneElement(srcElement.getId());
+                                            sceneElementSituationProbeModel.setProbeId(probe.getId());
+                                            sceneElementSituationProbeModel.setStatus(SceneElementSituationProbeModel.ProbeStatus.UPDATING.getValue());
+                                            sceneElementSituationProbeModel.setDeleted(false);
+                                            return sceneElementSituationProbeModel;
+                                        }).collect(Collectors.toList());
 
-                            BaseModelMapper.BulkResult<SceneElementSituationProbeModel> sceneElementSituationProbeModelBulkResult = sceneElementSituationProbeMapper.bulkCreate(sceneElementSituationProbeModels);
-                            System.out.println(sceneElementSituationProbeModelBulkResult.getFail().toString());
+                        BaseModelMapper.BulkResult<SceneElementSituationProbeModel> sceneElementSituationProbeModelBulkResult = sceneElementSituationProbeMapper.bulkCreate(sceneElementSituationProbeModels);
+                        System.out.println(sceneElementSituationProbeModelBulkResult.getFail().toString());
 
-                        }
                     }
                     //生成探测安装脚本
                     var probeInstallScript = getProbeCollector().generateProbeInstallScript(cloudType, systemType,
