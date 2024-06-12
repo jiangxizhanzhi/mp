@@ -287,23 +287,39 @@ public class HttpUtils {
      */
     public static String sendHttpPostWithFile(String url, Map<String, String> headers, List<File> fileList) throws IOException {
         log.info("=======sendHttpPostWithFile url: {}", url);
+        OkHttpClient client = new OkHttpClient().newBuilder().connectTimeout(DEFAULT_TIME_OUT, TimeUnit.MILLISECONDS).readTimeout(DEFAULT_TIME_OUT
+                , TimeUnit.MILLISECONDS).writeTimeout(DEFAULT_TIME_OUT, TimeUnit.MILLISECONDS).build();
 
-        HttpPost httpPost = new HttpPost(url);
-        // header
-        for (Map.Entry<String, String> entry : headers.entrySet()) {
-            httpPost.addHeader(entry.getKey(), entry.getValue());
-        }
-        // body参数
-        var multipartEntityBuilder = MultipartEntityBuilder.create();
+        MultipartBody.Builder multipartBuilder = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM);
+
         for (File file : fileList) {
-            multipartEntityBuilder.addBinaryBody("file", file, ContentType.APPLICATION_OCTET_STREAM, file.getName());
+            multipartBuilder.addFormDataPart("file", file.getName(), RequestBody.create(MediaType.parse("application/octet-stream"), file));
         }
-        var entity = multipartEntityBuilder.build();
-        httpPost.setEntity(entity);
 
-        String result = send(httpPost);
-        log.info("=======sendHttpPostWithFile response: {}", result);
-        return result;
+        RequestBody requestBody = multipartBuilder.build();
+
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(url)
+                .post(requestBody);
+
+        // Set request headers
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            requestBuilder.addHeader(entry.getKey(), entry.getValue());
+        }
+
+        Request request = requestBuilder.build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            String result = response.body().string();
+            log.info("=======sendHttpPostWithFile response: {}", result);
+            return result;
+        } catch (IOException e) {
+            // 打印错误日志
+            log.error("sendHttpPostWithFile error:", e);
+            throw e;
+        }
     }
 
     /**
