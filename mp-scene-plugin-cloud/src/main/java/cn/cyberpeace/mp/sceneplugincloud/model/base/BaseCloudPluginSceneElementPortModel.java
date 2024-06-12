@@ -34,6 +34,8 @@ public class BaseCloudPluginSceneElementPortModel extends BasePluginSceneElement
     // 辅助信息
     @DefaultStr
     private String auxiliaryNetworkId;
+    @DefaultStr
+    private String vnicId;
 
     @DefaultStr
     private String qosId;

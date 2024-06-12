@@ -246,19 +246,13 @@ public class DeleteHandler extends HandlerCommon {
             }
         }
         if (StringUtils.isEmpty(resourceId)) {
-            containerClient.deleteByName(HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid()));
-            return true;
+            log.error("delete container, resource id is null");
+            return false;
         }
 
-        closeAccessModes(cloudElement);
 
         ContainerDeleteData deleteData = new ContainerDeleteData();
         deleteData.setContainers(List.of(resourceId));
-        ElementExtraCloudInfo extraInfo = collectElementExtraCloudInfo(cloudElement);
-        deleteData.setQoses(extraInfo.getQosIds());
-        deleteData.setConnections(extraInfo.getConnectionIds());
-        deleteData.setPortMappings(extraInfo.getProxyIds());
-        deleteData.setFloatingIps(extraInfo.getFloatingIpIds());
         return containerClient.delete(deleteData);
     }
 

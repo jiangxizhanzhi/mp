@@ -2,22 +2,24 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CreateMirrorData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.ArkimeCreateResBo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowMirrorCreateRes;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSceneStage;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRouterPortModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
@@ -32,6 +34,8 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class CreateHandler extends HandlerCommon {
+
+
 
     public static class SceneProcess {
         public static final SceneEventProcess CREATE_FLOW_COLLECTOR = new SceneEventProcess("create_flow_collector", "sceneplugincollection.event.create_flow_collector", "create_flow_collect", 1);
@@ -119,74 +123,34 @@ public class CreateHandler extends HandlerCommon {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
 
         getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
+
         // TODO 流量镜像应该是基于网络端口的, 这里是基于节点的
-        Set<String> collectorVmInstanceIds = new HashSet<>();
-        Set<String> collectorContainerInstanceIds = new HashSet<>();
-        Set<String> mirrorVmInstanceIds = new HashSet<>();
-        Set<String> mirrorContainerInstanceIds = new HashSet<>();
+
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                 .getPluginHandler(PluginConstant.PLUGIN_KEY);
-        boolean creatFlowCollector = false;
-        for (Map.Entry<String, CollectionPluginSceneElementPortBO> entry : getPluginHandler().getElementPortMap().entrySet()) {
-            String portId = entry.getKey();
-            CollectionPluginSceneElementPortBO collectionPort = entry.getValue();
-            if (Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {
-                creatFlowCollector = true;
-                SceneElementPortBO srcPort = collectionPort.getSrcPort();
-                SceneElementBO srcElement = srcPort.getElement();
-                CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(srcElement.getId());
-                if (cloudElement != null && cloudElement.getVirtualType() != null
-                        && !StringUtils.isEmpty(cloudElement.getResourceId())) {
-                    if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
-                        collectorVmInstanceIds.add(cloudElement.getResourceId());
-                    } else if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-                        collectorContainerInstanceIds.add(cloudElement.getResourceId());
-                    }
-                }
-            }
-            if (Boolean.TRUE.equals(collectionPort.getEnableFlowMirror())) {
-                SceneElementPortBO srcPort = collectionPort.getSrcPort();
-                SceneElementBO srcElement = srcPort.getElement();
-                CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(srcElement.getId());
-                if (cloudElement != null && cloudElement.getVirtualType() != null
-                        && !StringUtils.isEmpty(cloudElement.getResourceId())) {
-                    if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
-                        mirrorVmInstanceIds.add(cloudElement.getResourceId());
-                    } else if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-                        mirrorContainerInstanceIds.add(cloudElement.getResourceId());
-                    }
-                }
-            }
-        }
-        boolean enableCollector = !collectorVmInstanceIds.isEmpty() || !collectorContainerInstanceIds.isEmpty();
-        boolean enableMirror = !mirrorVmInstanceIds.isEmpty() || !mirrorContainerInstanceIds.isEmpty();
-        if (enableCollector) {
-            String sceneId = getPluginHandler().getSrcScene().getEid();
-            // 创建流量采集器
-            runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
-                String flowCollectorId = getFlowCollector().createCollector();
-                getPluginHandler().getScene().setFlowCollector(flowCollectorId);
-            });
 
-            String flowCollectorId = getPluginHandler().getScene().getFlowCollector();
-            runSceneProgress(SceneProcess.BIND_FLOW_COLLECT_PORTS, () -> {
-                // 绑定网络端口到流量采集器
-                getFlowCollector().bindNetworkPorts(sceneId, flowCollectorId, new ArrayList<>(collectorVmInstanceIds),
-                        new ArrayList<>(collectorContainerInstanceIds), enableMirror);
-            });
-        } else if (enableMirror) {
-            // 镜像流量
-            String sceneId = getPluginHandler().getSrcScene().getEid();
-            // 绑定网络端口到流量采集器
-            getFlowCollector().bindEntityNetworkPorts(sceneId, new ArrayList<>(mirrorVmInstanceIds),
-                    new ArrayList<>(mirrorContainerInstanceIds));
-        } else if (creatFlowCollector) {
-            // 只创建流量采集器
-            runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
-                String flowCollectorId = getFlowCollector().createCollector();
-                getPluginHandler().getScene().setFlowCollector(flowCollectorId);
-            });
-        }
+        // 1. 统计需要流量镜像的节点
+        List<CreateMirrorData.Param> totalMirrorParams = new ArrayList<>();
+        cloudPluginHandler.getElementMap().keySet().forEach(nodeId -> {
+            List<CreateMirrorData.Param> params = getNodeFlowMirrorParam(nodeId);
+            totalMirrorParams.addAll(params);
+        });
+
+        // 2. 创建arkime 和流量镜像
+        runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
+            ArkimeCreateResBo arkimeCreateResBo = getFlowCollector().createCollector();
+            getPluginHandler().getScene().setFlowCollector(arkimeCreateResBo.getResourceId());
+
+            FlowMirrorCreateRes flowMirrorCreateRes = getFlowCollector().createFlowMirror(arkimeCreateResBo.getIp(),
+                    getPluginHandler().getSceneHandler().getSceneId(), totalMirrorParams);
+
+            getPluginHandler().getScene().setFlowMirrorId(flowMirrorCreateRes.getFlowMirrorId());
+            getPluginHandler().getScene().setOptionKey(Collections.singletonList(flowMirrorCreateRes.getOptionKey()));
+
+        });
+
+
+
         getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
 
         // 绑定探针agent到探针采集器
@@ -258,4 +222,72 @@ public class CreateHandler extends HandlerCommon {
         runElementProgress(collectionElement.getSrcElement().getId(), ElementProcess.BIND_PROBE_COLLECT_AGENT,
                 () -> bindProbeCollectAgent(collectionElement, probeCollectorId));
     }
+
+    public List<CreateMirrorData.Param> getNodeFlowMirrorParam(String nodeId) {
+        CloudScenePluginHandler cloudPlugin = getPluginHandler().getSceneHandler().getPluginHandler(PluginConstant.PLUGIN_KEY);
+
+        var cloudElement = cloudPlugin.getElement(nodeId);
+        if (cloudElement == null) {
+            log.error("flow collect cloudElement is null");
+            return Collections.emptyList();
+        }
+        if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(cloudElement.getImageType())) {
+            return Collections.emptyList();
+        }
+        if (cloudElement.getSrcElement() == null) {
+            log.error("flow collect src element is null");
+            return Collections.emptyList();
+        }
+        if (BaseSceneElementModel.Type.SWITCH == cloudElement.getSrcElement().getType()) {
+            var deriveNetworks = cloudElement.getDeriveNetworks();
+            if (CollectionUtils.isEmpty(deriveNetworks)) {
+                return Collections.emptyList();
+            }
+            Set<String> networkIds = deriveNetworks.stream()
+                    .map(connectedNetworkBO -> connectedNetworkBO.getNetwork().getResourceId())
+                    .filter(StringUtils::isNotEmpty)
+                    .collect(Collectors.toSet());
+            List<CreateMirrorData.Param> params = new ArrayList<>();
+            for (String networkId : networkIds) {
+                CreateMirrorData.Param param = new CreateMirrorData.Param();
+                param.setId(networkId);
+                param.setType(CreateMirrorData.Type.NETWORK);
+                params.add(param);
+            }
+            return params;
+        }
+        if (!BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType())
+                && !BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(cloudElement.getImageType())) {
+            return Collections.emptyList();
+        }
+        return this.genCreateMirrorParam(cloudPlugin, cloudElement);
+    }
+
+
+    private List<CreateMirrorData.Param> genCreateMirrorParam(CloudScenePluginHandler cloudPlugin, CloudPluginSceneElementBO cloudElement) {
+        List<CreateMirrorData.Param> srcParam = new ArrayList<>();
+        var cloudPorts = cloudPlugin.getPorts(cloudElement);
+        if (CollectionUtils.isEmpty(cloudPorts)) {
+            return srcParam;
+        }
+        cloudPorts.forEach(cloudPort -> {
+            if (StringUtils.isEmpty(cloudPort.getVnicId())) {
+                return;
+            }
+            CreateMirrorData.Param param = new CreateMirrorData.Param();
+            param.setId(cloudElement.getResourceId());
+            param.setNicId(cloudPort.getVnicId());
+            if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType())) {
+                param.setType(CreateMirrorData.Type.VM);
+            } else {
+                param.setType(CreateMirrorData.Type.DOCKER);
+            }
+            srcParam.add(param);
+        });
+        return srcParam;
+    }
+
+
+
+
 }

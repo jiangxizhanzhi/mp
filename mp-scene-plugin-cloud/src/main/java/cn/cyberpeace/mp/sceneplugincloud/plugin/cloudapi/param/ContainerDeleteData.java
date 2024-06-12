@@ -12,8 +12,4 @@ import java.util.List;
 @NoArgsConstructor
 public class ContainerDeleteData implements CloudHttpData {
     private List<String> containers;
-    private List<String> connections;
-    private List<String> portMappings;
-    private List<String> qoses;
-    private List<String> floatingIps;
 }

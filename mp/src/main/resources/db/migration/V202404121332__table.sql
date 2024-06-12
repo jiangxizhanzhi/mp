@@ -54,6 +54,18 @@ CREATE TABLE `mp_scene_scene_config_node_connection`
     UNIQUE KEY (`scene`, `source_node_id`, `target_node_id`)
 ) COMMENT ='场景实例节点连线信息表';
 
+CREATE TABLE `mp_sceneplugincollection_scene_option_key`
+(
+    `pk`                 int(11)       NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`                 varchar(64)   NOT NULL COMMENT 'ID',
+    `scene`              varchar(64)   NOT NULL COMMENT '场景实例id',
+    `option_key`         int(11)       NOT NULL COMMENT '流量镜像关联id',
+    `create_time`        datetime(6)   NOT NULL COMMENT '创建时间',
+    `update_time`        datetime(6)   NOT NULL COMMENT '更新时间',
+    PRIMARY KEY (`pk`),
+    UNIQUE KEY (`id`)
+) COMMENT ='场景流量采集流量镜像关联id';
+
 alter table mp_scene_scene_config_area add column type tinyint(2) comment '区域类型 0:普通区域 1:层级区域' default 0 after open;
 alter table mp_scene_scene_area add column type tinyint(2) comment '区域类型 0:普通区域 1:层级区域' default 0 after open;
 alter table mp_scene_scene_element add outer_position2 varchar(255) NOT NULL comment '外部2d坐标';
@@ -87,6 +99,11 @@ alter table mp_scene_scene_config_element_port_connection add column loss int(11
 alter table mp_scene_scene_element_port_connection add column bandwidth int(11) not null default 0 comment '带宽';
 alter table mp_scene_scene_element_port_connection add column delay int(11) not null default 0 comment '延迟';
 alter table mp_scene_scene_element_port_connection add column loss int(11) not null default 0 comment '丢包率';
+
+alter table mp_sceneplugincloud_scene_element_port add column vnic_id varchar(50) not null default '' comment '网卡id';
+alter table mp_sceneplugincloud_scene_config_element_port add column vnic_id varchar(50) not null default '' comment '网卡id';
+
+alter table mp_sceneplugincollection_scene add column flow_mirror_id varchar(50) not null default '' comment '流量镜像id';
 
 
 

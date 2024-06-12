@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
-import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -73,11 +72,6 @@ public class VirtualSwitch extends CloudClient {
 
         CloudResponse<Object> result = cloudPatch(CloudUrlConstant.VIRTUAL_SWITCH_UPDATE_URL.replace("{network_id}", resourceId), updateData, null, new TypeReference<>() {
         }, true);
-    }
-
-    public boolean forceDelete(VirtualSwitchDeleteData deleteData) {
-        ForceReleaseResourceUtils.forceDeleteNetwork(deleteData.getIds());
-        return true;
     }
 
     public PortMappingCreateResult createPortMapping(PortMappingCreateData portMappingCreateData) {

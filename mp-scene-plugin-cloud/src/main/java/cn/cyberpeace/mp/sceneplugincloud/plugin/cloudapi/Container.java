@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
-import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -45,7 +44,7 @@ public class Container extends CloudClient {
     public boolean delete(ContainerDeleteData deleteData) {
         heavyConcurrentWait();
 
-        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.CONTAINER_DELETE_URL, deleteData, null,
+        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.CONTAINER_BATCH_DELETE_URL, deleteData, null,
                 new TypeReference<CloudResponse<Object>>() {
                 }, true);
         return true;
@@ -85,11 +84,7 @@ public class Container extends CloudClient {
         return true;
     }
 
-    public boolean forceDelete(ContainerDeleteData deleteData) {
-        ForceReleaseResourceUtils.forceDeleteContainer(deleteData.getContainers());
-        return true;
-    }
-
+    @Deprecated
     public boolean deleteByName(String resourceName) {
         heavyConcurrentWait();
 

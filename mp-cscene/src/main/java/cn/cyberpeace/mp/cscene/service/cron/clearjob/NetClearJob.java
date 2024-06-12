@@ -2,11 +2,10 @@ package cn.cyberpeace.mp.cscene.service.cron.clearjob;
 
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Network;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkData;
-import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +17,7 @@ import java.util.Map;
  */
 public class NetClearJob extends AbstractClearJob<NetworkData> {
 
+    private VirtualSwitch virtualSwitch = new VirtualSwitch();
     private Network netClient = new Network();
 
     public NetClearJob(SceneElementMapper sceneElementMapper) {
@@ -45,11 +45,12 @@ public class NetClearJob extends AbstractClearJob<NetworkData> {
 
     @Override
     protected void doClear(NetworkData data) {
-        netClient.deleteNetworkById(data.getId());
+        virtualSwitch.deleteById(data.getId());
     }
 
     @Override
     protected void forceClear(NetworkData data) {
-        ForceReleaseResourceUtils.forceDeleteNetwork(Arrays.asList(data.getId()));
+
+        virtualSwitch.deleteById(data.getId());
     }
 }

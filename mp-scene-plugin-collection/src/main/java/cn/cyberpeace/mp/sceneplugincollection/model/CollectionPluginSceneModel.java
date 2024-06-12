@@ -23,4 +23,11 @@ public class CollectionPluginSceneModel extends BaseCollectionPluginSceneModel {
 
     @DefaultStr
     private String flowFile;
+
+    @DefaultStr
+    private String flowMirrorId;
+
+    @DefaultStr
+    private String optionKey;
+
 }

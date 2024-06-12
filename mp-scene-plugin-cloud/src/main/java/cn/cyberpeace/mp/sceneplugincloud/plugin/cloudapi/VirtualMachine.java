@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
-import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -48,11 +47,6 @@ public class VirtualMachine extends CloudClient {
         CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DELETE_URL, deleteData, null,
                 new TypeReference<CloudResponse<Object>>() {
                 }, true);
-        return true;
-    }
-
-    public boolean forceDelete(VirtualMachineDeleteData deleteData) {
-        ForceReleaseResourceUtils.forceDeleteVm(deleteData.getVms());
         return true;
     }
 
@@ -160,6 +154,7 @@ public class VirtualMachine extends CloudClient {
         }
     }
 
+    @Deprecated
     public String resize(String instanceId, String flavorId) {
         VirtualMachineResizeData resizeData = new VirtualMachineResizeData();
         resizeData.setFlavor(flavorId);
@@ -174,6 +169,7 @@ public class VirtualMachine extends CloudClient {
         }
     }
 
+    @Deprecated
     public ConsoleInfoGetResult getConsoleInfo(String instanceId, String hostname) {
         ConsoleInfoGetParam param = new ConsoleInfoGetParam();
         param.setInstanceUuid(instanceId);
@@ -199,6 +195,7 @@ public class VirtualMachine extends CloudClient {
         }
     }
 
+    @Deprecated
     private String instanceResize(VirtualMachineResizeData httpData) {
         try {
             CloudResponse<VirtualMachineInstanceResizeResult> response = cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_RESIZE_URL, httpData, null, new TypeReference<CloudResponse<VirtualMachineInstanceResizeResult>>() {
@@ -224,7 +221,7 @@ public class VirtualMachine extends CloudClient {
     public void deleteInstanceById(String instanceId) {
         heavyConcurrentWait();
 
-        cloudDelete(CloudUrlConstant.DELETE_INSTANCE_URL.replace("{instance_id}", instanceId), null, null, new TypeReference<CloudResponse<Object>>() {
+        cloudDelete(CloudUrlConstant.DELETE_INSTANCE_URL.replace("{vm_id}", instanceId), null, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
     }
 
@@ -263,67 +260,13 @@ public class VirtualMachine extends CloudClient {
         }, true);
     }
 
+    @Deprecated
     public void uploadFile(VirtualMachineUploadFileData data) {
         CloudResponse<Object> response = cloudPost(CloudUrlConstant.SCP_FILE, data, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
     }
 
-    public VirtualMachineExecuteResult execCommand(VirtualMachineExecCommandData data) {
-        VirtualMachineExecuteResult virtualMachineExecuteResult = getHttpClient().post(CloudUrlConstant.SSH_CMD, data, null, VirtualMachineExecuteResult.class);
-        return virtualMachineExecuteResult;
-    }
 
-    public void attachISO(VirtualMachineAttachISOData data) {
-        cloudPost(CloudUrlConstant.ATTACH_ISO, data, null, new TypeReference<CloudResponse<Object>>() {
-        }, true);
-    }
-
-    public void attachVirtualUsbs(AttachVirtualUsbsData data) {
-        cloudPost(CloudUrlConstant.ATTACH_VIRTUAL_USBS, data, null, new TypeReference<CloudResponse<Object>>() {
-        }, true);
-    }
-
-    public void deleteVirtualUsbs(AttachVirtualUsbsData data) {
-        cloudDelete(CloudUrlConstant.DELETE_VIRTUAL_USBS, data, null, new TypeReference<CloudResponse<Object>>() {
-        }, true);
-    }
-
-    /**
-     * 虚拟机挂载实体USB
-     * @param data
-     */
-    public void attachEntityUsbs(AttachEntityUsbsData data) {
-        log.info("VirtualMachine.attachEntityUsbs begin. data:{}", data);
-        //外设挂载失败，不影响场景启动
-        try {
-            CloudResponse<Object> response = cloudPost(CloudUrlConstant.ATTACH_ENTITY_USBS, data, null, new TypeReference<CloudResponse<Object>>() {
-            }, true);
-            log.info("调用云平台挂载实体USB接口, response:{}", response);
-        } catch (Exception e) {
-            log.error("attachEntityUsbs error. e:{}", e);
-        }
-        log.info("VirtualMachine.attachEntityUsbs end.");
-    }
-
-    /**
-     * 虚拟机卸载实体USB
-     * @param data
-     */
-    public void deleteEntityUsbs(AttachEntityUsbsData data) {
-        log.info("VirtualMachine.deleteEntityUsbs begin. data:{}", data);
-        CloudResponse<Object> response = cloudDelete(CloudUrlConstant.DELETE_ENTITY_USBS, data, null, new TypeReference<CloudResponse<Object>>() {
-        }, true);
-        log.info("调用云平台卸载实体USB接口, response:{}", response);
-        log.info("VirtualMachine.deleteEntityUsbs end.");
-    }
-
-    public void execControllerCmd(String cmd) {
-        ExecHostCommandData execHostCommandData = new ExecHostCommandData();
-        execHostCommandData.setCmd(cmd);
-        execHostCommandData.setHostname("controller");
-        cloudPost(CloudUrlConstant.EXEC_HOST_COMMAND, execHostCommandData, null, new TypeReference<CloudResponse<Object>>() {
-        }, true);
-    }
 
     public void snapshotAction(String instanceId, String snapshotId, String action) {
         cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_SNAPSHOT_ACTION_URL.replace(VM_ID, instanceId)
@@ -372,6 +315,72 @@ public class VirtualMachine extends CloudClient {
                 }, true);
         return true;
     }
+
+
+    @Deprecated
+    public VirtualMachineExecuteResult execCommand(VirtualMachineExecCommandData data) {
+        VirtualMachineExecuteResult virtualMachineExecuteResult = getHttpClient().post(CloudUrlConstant.SSH_CMD, data, null, VirtualMachineExecuteResult.class);
+        return virtualMachineExecuteResult;
+    }
+    @Deprecated
+    public void attachISO(VirtualMachineAttachISOData data) {
+        cloudPost(CloudUrlConstant.ATTACH_ISO, data, null, new TypeReference<CloudResponse<Object>>() {
+        }, true);
+    }
+
+    @Deprecated
+    public void attachVirtualUsbs(AttachVirtualUsbsData data) {
+        cloudPost(CloudUrlConstant.ATTACH_VIRTUAL_USBS, data, null, new TypeReference<CloudResponse<Object>>() {
+        }, true);
+    }
+
+    @Deprecated
+    public void deleteVirtualUsbs(AttachVirtualUsbsData data) {
+        cloudDelete(CloudUrlConstant.DELETE_VIRTUAL_USBS, data, null, new TypeReference<CloudResponse<Object>>() {
+        }, true);
+    }
+
+    /**
+     * 虚拟机挂载实体USB
+     * @param data
+     */
+    @Deprecated
+    public void attachEntityUsbs(AttachEntityUsbsData data) {
+        log.info("VirtualMachine.attachEntityUsbs begin. data:{}", data);
+        //外设挂载失败，不影响场景启动
+        try {
+            CloudResponse<Object> response = cloudPost(CloudUrlConstant.ATTACH_ENTITY_USBS, data, null, new TypeReference<CloudResponse<Object>>() {
+            }, true);
+            log.info("调用云平台挂载实体USB接口, response:{}", response);
+        } catch (Exception e) {
+            log.error("attachEntityUsbs error. e:{}", e);
+        }
+        log.info("VirtualMachine.attachEntityUsbs end.");
+    }
+
+    /**
+     * 虚拟机卸载实体USB
+     * @param data
+     */
+    @Deprecated
+    public void deleteEntityUsbs(AttachEntityUsbsData data) {
+        log.info("VirtualMachine.deleteEntityUsbs begin. data:{}", data);
+        CloudResponse<Object> response = cloudDelete(CloudUrlConstant.DELETE_ENTITY_USBS, data, null, new TypeReference<CloudResponse<Object>>() {
+        }, true);
+        log.info("调用云平台卸载实体USB接口, response:{}", response);
+        log.info("VirtualMachine.deleteEntityUsbs end.");
+    }
+
+    @Deprecated
+    public void execControllerCmd(String cmd) {
+        ExecHostCommandData execHostCommandData = new ExecHostCommandData();
+        execHostCommandData.setCmd(cmd);
+        execHostCommandData.setHostname("controller");
+        cloudPost(CloudUrlConstant.EXEC_HOST_COMMAND, execHostCommandData, null, new TypeReference<CloudResponse<Object>>() {
+        }, true);
+    }
+
+
 
 
 }

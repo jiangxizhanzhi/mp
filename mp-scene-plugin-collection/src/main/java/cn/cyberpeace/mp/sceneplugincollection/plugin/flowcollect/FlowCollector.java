@@ -1,81 +1,92 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.flowcollect;
 
-import cn.cyberpeace.mp.situationaware.model.NetworkTrafficMirrorRequest;
-import cn.cyberpeace.mp.situationaware.service.NetworkTrafficGroupService;
-import cn.cyberpeace.mp.situationaware.service.NetworkTrafficService;
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Mirror;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CreateMirrorData;
+import cn.cyberpeace.mp.sceneplugincollection.bo.ArkimeCreateResBo;
+import cn.cyberpeace.mp.sceneplugincollection.bo.DeleteFlowCollectBo;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowMirrorCreateRes;
+import cn.cyberpeace.mp.sceneplugincollection.client.FlowCollectClient;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneOptionKeyModel;
+import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneOptionKeyMapper;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 @Data
 @Component
 public class FlowCollector {
+    private static final FlowCollectClient flowCollectClient = new FlowCollectClient();
+    private static final Random RANDOM = new Random();
 
-
-    private NetworkTrafficGroupService networkTrafficGroupService;
-
-    private NetworkTrafficService networkTrafficService;
-
-    @Autowired
-    public FlowCollector(NetworkTrafficGroupService networkTrafficGroupService,
-                         NetworkTrafficService networkTrafficService) {
-        setNetworkTrafficGroupService(networkTrafficGroupService);
-        setNetworkTrafficService(networkTrafficService);
+    public ArkimeCreateResBo createCollector() {
+        return flowCollectClient.createArkimeInstance();
     }
 
-    public String createCollector() {
-        return networkTrafficGroupService.addArkimeImageInstance(null);
+    public FlowMirrorCreateRes createFlowMirror(String arkimeIp, String sceneId, List<CreateMirrorData.Param> totalMirrorParams) {
+        CreateMirrorData createData = new CreateMirrorData();
+        createData.setSrcParam(totalMirrorParams);
+
+        CreateMirrorData.Param destParam = new CreateMirrorData.Param();
+        destParam.setDesId((arkimeIp));
+        destParam.setType(CreateMirrorData.Type.NETWORK);
+        createData.setDestParam(destParam);
+
+        CollectionPluginSceneOptionKeyMapper optionKeyMapper = BeanCommon.getBean(CollectionPluginSceneOptionKeyMapper.class);
+        List<Integer> excludeOptionKey = optionKeyMapper.list(new HumanCondition())
+                .stream()
+                .map(CollectionPluginSceneOptionKeyModel::getOptionKey)
+                .collect(Collectors.toList());
+        int optionKey = this.randomOptionKey(excludeOptionKey);
+
+        CollectionPluginSceneOptionKeyModel optionKeyModel = new CollectionPluginSceneOptionKeyModel();
+        optionKeyModel.setScene(sceneId);
+        optionKeyModel.setOptionKey(optionKey);
+        optionKeyMapper.create(optionKeyModel);
+
+        createData.setName(TextUtils.uuid().substring(0, 10));
+        createData.setOptionKey(optionKey);
+
+        Mirror mirror = new Mirror();
+        var result = mirror.create(createData);
+
+        return new FlowMirrorCreateRes().setFlowMirrorId(result.getName()).setOptionKey(optionKey);
+
     }
 
-    public void bindEntityNetworkPorts(String sceneId, List<String> vmInstanceIds, List<String> containerInstanceIds) {
-        NetworkTrafficMirrorRequest request = new NetworkTrafficMirrorRequest();
-        request.setVmInstanceIds(vmInstanceIds);
-        request.setContainerInstanceIds(containerInstanceIds);
-        request.setSceneId(sceneId);
-        networkTrafficGroupService.doBindingEntityNetworkTrafficMirror(request);
+    public void deleteCollector(DeleteFlowCollectBo deleteFlowCollectBo) {
+
+        flowCollectClient.delArkimeInstance(deleteFlowCollectBo.getCollectorInstanceId());
+        flowCollectClient.delFlowMirror(deleteFlowCollectBo.getFlowMirrorId());
+
+
+        CollectionPluginSceneOptionKeyMapper optionKeyMapper = BeanCommon.getBean(CollectionPluginSceneOptionKeyMapper.class);
+        List<CollectionPluginSceneOptionKeyModel> optionKeyModels = optionKeyMapper.list(new HumanCondition()
+                .filterEqual(CollectionPluginSceneOptionKeyModel::getScene, deleteFlowCollectBo.getSceneId()));
+        if (CollectionUtils.isEmpty(optionKeyModels)) {
+            return;
+        }
+        optionKeyMapper.bulkDelete(optionKeyModels.stream()
+                .map(CollectionPluginSceneOptionKeyModel::getId)
+                .toArray(String[]::new));
     }
 
-    public void bindNetworkPorts(String sceneId, String collectorId, List<String> vmInstanceIds, List<String> containerInstanceIds) {
-        NetworkTrafficMirrorRequest request = new NetworkTrafficMirrorRequest();
-        request.setArkimeInstanceNames(List.of(collectorId));
-        request.setVmInstanceIds(vmInstanceIds);
-        request.setContainerInstanceIds(containerInstanceIds);
-        request.setSceneId(sceneId);
-        networkTrafficGroupService.doBindingNetworkTrafficMirror(request);
-    }
 
-    public void bindNetworkPorts(String sceneId, String collectorId, List<String> vmInstanceIds, List<String> containerInstanceIds,boolean entity) {
-        NetworkTrafficMirrorRequest request = new NetworkTrafficMirrorRequest();
-        request.setArkimeInstanceNames(List.of(collectorId));
-        request.setVmInstanceIds(vmInstanceIds);
-        request.setContainerInstanceIds(containerInstanceIds);
-        request.setSceneId(sceneId);
-        request.setEntity(entity);
-        networkTrafficGroupService.doBindingNetworkTrafficMirror(request);
-    }
-
-    public void unbindNetworkPorts(String collectorId, List<String> macAddrs) {
-    }
-
-    public void deleteCollector(String collectorId, List<String> vmInstanceIds, List<String> containerInstanceIds) {
-        // 删除实例
-        networkTrafficGroupService.deleteArkimeInstance(collectorId);
-        // 删除镜像
-        NetworkTrafficMirrorRequest request = new NetworkTrafficMirrorRequest();
-        request.setArkimeInstanceNames(List.of(collectorId));
-        request.setVmInstanceIds(vmInstanceIds);
-        request.setContainerInstanceIds(containerInstanceIds);
-        networkTrafficGroupService.deleteNetworkTrafficMirror(request);
-    }
-
-    public void deleteEntityMirror(List<String> vmInstanceIds, List<String> containerInstanceIds) {
-        // 删除镜像
-        NetworkTrafficMirrorRequest request = new NetworkTrafficMirrorRequest();
-        request.setVmInstanceIds(vmInstanceIds);
-        request.setContainerInstanceIds(containerInstanceIds);
-        networkTrafficGroupService.deleteNetworkTrafficMirror(request);
+    private int randomOptionKey(List<Integer> excludeOptionKey) {
+        int optionKey = 1;
+        for (int i = 0; i < 1; i++) {
+            optionKey = RANDOM.nextInt(65535);
+            if (excludeOptionKey.contains(optionKey)) {
+                i--;
+            }
+        }
+        return optionKey;
     }
 
 }

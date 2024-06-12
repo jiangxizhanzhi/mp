@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
-import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -57,11 +56,6 @@ public class VirtualRouter extends CloudClient {
         CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_ROUTER_UNBIND_NETWORK_URL.replace(ROUTER_ID, routerId),
                 data, null, new TypeReference<CloudResponse<Object>>() {
                 }, true);
-        return true;
-    }
-
-    public boolean forceDelete(VirtualRouterDeleteData deleteData) {
-        ForceReleaseResourceUtils.forceDeleteRouter(deleteData.getIds());
         return true;
     }
 

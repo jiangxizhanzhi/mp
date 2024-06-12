@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @Service
 @Slf4j
+@Deprecated
 public class NetworkTrafficGroupService {
 
     @Autowired
@@ -42,7 +43,7 @@ public class NetworkTrafficGroupService {
      */
     private static String indexPrefix = "mp_";
 
-    private static String ARKIMENETWORKNAME = "oj_ext";
+    private static String ARKIMENETWORKNAME = "SN_external";
 
     /**
      * 初始化arkime网络配置
@@ -51,7 +52,7 @@ public class NetworkTrafficGroupService {
     public void initArkimeNetwork() {
         log.info("init arkime network");
         try {
-            String result = HttpUtils.sendGet(situationAwareConfig.getArkimeCpcloudContainerCreateUrl() + "/networks?fetch_all=true");
+            String result = HttpUtils.sendGet(situationAwareConfig.getArkimeCpcloudContainerCreateUrl() + String.format("/networks?name=%s", ARKIMENETWORKNAME));
             log.info("init arkime network result {}", result);
             JSONArray networkList = (JSONArray) JSONPath.eval(JSON.parse(result), "$.data.list");
             for (Object json : networkList) {
@@ -127,11 +128,11 @@ public class NetworkTrafficGroupService {
      *
      * @param instanceId instanceId
      */
-    public void createArkimeImageInstance(String instanceId) {
+    public String createArkimeImageInstance(String instanceId) {
         if (Objects.isNull(SituationalAwareConstant.ArkimeNetworkId)) {
             throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR, "networkId 为空");
         }
-        String url = situationAwareConfig.getArkimeCpcloudContainerCreateUrl() + "/scenarios/container";
+        String url = situationAwareConfig.getArkimeCpcloudContainerCreateUrl() + "/container";
         JSONObject paramObject = new JSONObject();
         //实例名称
         paramObject.put("name", instanceId);
@@ -144,10 +145,13 @@ public class NetworkTrafficGroupService {
         //设置网络
         JSONArray networks = new JSONArray();
         JSONObject arkimeNetwork = new JSONObject();
+
+
+
         arkimeNetwork.put("network_id", SituationalAwareConstant.ArkimeNetworkId);
 
         networks.add(0, arkimeNetwork);
-        paramObject.put("networks", networks);
+        paramObject.put("network", networks);
         //设置环境变量
         JSONObject environment = new JSONObject();
 
@@ -177,26 +181,7 @@ public class NetworkTrafficGroupService {
             log.error("create arkime Image instance error {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR, ExceptionUtils.getStackTrace(e));
         }
-    }
-
-    /**
-     * 场景绑定流量镜像
-     * @param networkTrafficMirrorRequest
-     */
-    public void doBindingEntityNetworkTrafficMirror(NetworkTrafficMirrorRequest networkTrafficMirrorRequest) {
-        String url = situationAwareConfig.getArkimeCpcloudNetworkMirrorUrl() + "/openflow/mirror_entity";
-        JSONObject paramObject = new JSONObject();
-
-        paramObject.put("scene_id", networkTrafficMirrorRequest.getSceneId());
-        paramObject.put("src_vm", networkTrafficMirrorRequest.getVmInstanceIds());
-        paramObject.put("src_container", networkTrafficMirrorRequest.getContainerInstanceIds());
-        try {
-            String res = HttpUtils.sendPost(url, paramObject.toJSONString());
-            log.info("dobind Network traffic mirror message {}", res);
-        } catch (IOException e) {
-            log.error("binding mirror error param:{}, {}", networkTrafficMirrorRequest, ExceptionUtils.getStackTrace(e));
-            throw new MpRuntimeException(SituationalAwareErrorCode.BINDING_MIRROR_ERROR, ExceptionUtils.getStackTrace(e));
-        }
+        return instanceId;
     }
 
     /**
@@ -240,28 +225,6 @@ public class NetworkTrafficGroupService {
         paramObject.put("dst_node", dstNodes);
         try {
             String res  = HttpUtils.sendDelete(url, paramObject.toJSONString());
-            log.info("delete Network traffic mirror message {}", res);
-        } catch (IOException e) {
-            log.error("binding mirror error param:{}, {}", networkTrafficMirrorRequest, ExceptionUtils.getStackTrace(e));
-            throw new MpRuntimeException(SituationalAwareErrorCode.BINDING_MIRROR_ERROR, ExceptionUtils.getStackTrace(e));
-        }
-    }
-
-    /**
-     * 接触场景绑定流量镜像
-     *
-     * @param networkTrafficMirrorRequest
-     */
-    public void deleteEntityNetworkTrafficMirror(NetworkTrafficMirrorRequest networkTrafficMirrorRequest) {
-        String url = situationAwareConfig.getArkimeCpcloudNetworkMirrorUrl() + "/openflow/mirror_entity";
-        JSONObject paramObject = new JSONObject();
-
-        paramObject.put("src_vm", networkTrafficMirrorRequest.getVmInstanceIds());
-        paramObject.put("src_container", networkTrafficMirrorRequest.getContainerInstanceIds());
-        List<String> dstNodes = networkTrafficMirrorRequest.getArkimeInstanceNames();
-        paramObject.put("dst_node", dstNodes);
-        try {
-            String res = HttpUtils.sendDelete(url, paramObject.toJSONString());
             log.info("delete Network traffic mirror message {}", res);
         } catch (IOException e) {
             log.error("binding mirror error param:{}, {}", networkTrafficMirrorRequest, ExceptionUtils.getStackTrace(e));

@@ -38,6 +38,10 @@ public class CloudUrlConstant {
 
 
     /*******************容器接口******************/
+    public static final String GET_ALL_CONTAINER_URL = "/cloud/v1/container";
+
+    public static final String DELETE_CONTAINER_URL = "/cloud/v1/container/{container_id}";
+
 
     /**
      * 容器创建接口，这个是必须的
@@ -46,7 +50,7 @@ public class CloudUrlConstant {
     /**
      * 容器删除接口，这个也是必须的。
      */
-    public static final String CONTAINER_DELETE_URL = "/cloud/v1/scenarios/container";
+    public static final String CONTAINER_BATCH_DELETE_URL = "/cloud/v1/scenarios/container";
 
     /**
      * 获取容器console 连接
@@ -103,9 +107,13 @@ public class CloudUrlConstant {
     public static final String NETWORK_ACL_CREATE_URL = "/cloud/v1/network/{network_id}/acl";
     public static final String NETWORK_ACL_DELETE_URL = "/cloud/v1/network/{network_id}/acl";
     public static final String NETWORK_GET_URL = "/cloud/v1/networks/%s";
+    public static final String NETWORK_QUERY_URL = "/cloud/v1/network";
+
 
 
     /***********************虚机**********************/
+    public static final String DELETE_INSTANCE_URL = "/cloud/v1/vm/{vm_id}";
+
     public static final String VIRTUAL_MACHINE_ACCESS_URL = "/cloud/v1/vm/console";
     public static final String VIRTUAL_MACHINE_CREATE_URL = "/cloud/v1/scenarios/vm";
     public static final String VIRTUAL_MACHINE_DELETE_URL = "/cloud/v1/scenarios/vm";
@@ -173,7 +181,6 @@ public class CloudUrlConstant {
 
 
 
-    public static final String NETWORK_QUERY_URL = "/v1/networks";
 
     public static final String CONSOLE_INFO_GET_URL = "/cpcloud/instance_control/v1/console";
 
@@ -198,9 +205,6 @@ public class CloudUrlConstant {
     public static final String DELETE_NPC_URL = "/cpcloud/npc_node/v1/node";
     public static final String GET_NPC_URL = "/cpcloud/npc_node/v1/node";
 
-    public static final String GET_ALL_CONTAINER_URL = "/v1/containers";
-    public static final String DELETE_CONTAINER_URL = "/v1/containers/{container_id}";
-    public static final String DELETE_INSTANCE_URL = "/v1/instances/{instance_id}";
     public static final String GET_INSTANCE_URL = "/v1/instances/{instance_id}";
     public static final String DELETE_NETWORK_URL = "/v1/networks/{network_id}";
     public static final String GET_ALL_ROUTER_URL = "/v1/routers";

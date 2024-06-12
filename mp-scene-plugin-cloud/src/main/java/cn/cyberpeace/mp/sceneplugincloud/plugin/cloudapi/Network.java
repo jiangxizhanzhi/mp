@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CommonQueryParam;
@@ -44,12 +43,5 @@ public class Network extends CloudClient {
             return result.getData().getList();
         }
         return null;
-    }
-
-    public void deleteNetworkById(String networkId) {
-        heavyConcurrentWait();
-
-        cloudDelete(CloudUrlConstant.DELETE_NETWORK_URL.replace("{network_id}", networkId), null, null, new TypeReference<CloudResponse<Object>>() {
-        }, true);
     }
 }

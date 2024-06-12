@@ -157,8 +157,8 @@ mp:
     monitor-cp-cloud-restart-restrict: ${mp.monitor.ext-var.monitor-cp-cloud-restart-restrict}
     monitor-business-restart-restrict: ${mp.monitor.ext-var.monitor-business-restart-restrict}
     # arkime
-    arkime-cpcloud-container-create-url: http://${mp.common.ext-var.cp-ip}:11111/v1
-    arkime-cpcloud-network-mirror-url: http://${mp.common.ext-var.cp-ip}:11111/cpcloud/sdn_app/v1
+    arkime-cpcloud-container-create-url: http://${mp.common.ext-var.cp-ip}:${mp.common.ext-var.cp-port}/cloud/v1
+    arkime-cpcloud-network-mirror-url: http://${mp.common.ext-var.cp-ip}:${mp.common.ext-var.cp-port}/cpcloud/sdn_app/v1
     arkime-es-host: ${mp.situationaware.ext-var.arkime-es-host}
     arkime-es-port: ${mp.situationaware.ext-var.arkime-es-port}
     arkime-image-name: ${mp.situationaware.ext-var.arkime-image-name}

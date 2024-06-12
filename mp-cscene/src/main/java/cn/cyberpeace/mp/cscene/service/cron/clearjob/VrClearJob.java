@@ -3,10 +3,8 @@ package cn.cyberpeace.mp.cscene.service.cron.clearjob;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterGetData;
-import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +48,6 @@ public class VrClearJob extends AbstractClearJob<VirtualRouterGetData> {
 
     @Override
     protected void forceClear(VirtualRouterGetData data) {
-        ForceReleaseResourceUtils.forceDeleteRouter(Arrays.asList(data.getId()));
+        vrClient.deleteRouterById(data.getId());
     }
 }
