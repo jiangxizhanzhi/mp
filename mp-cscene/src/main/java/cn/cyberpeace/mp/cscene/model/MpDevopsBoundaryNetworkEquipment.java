@@ -50,4 +50,8 @@ public class MpDevopsBoundaryNetworkEquipment extends BaseModel {
      * 创建时间
      */
     private LocalDateTime createTime;
+    /**
+     * 镜像类型
+     */
+    private String imageType;
 }

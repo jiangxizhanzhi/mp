@@ -85,6 +85,10 @@ public class LoadServiceImpl {
         requestData.put("pageSize", pageSize);
         requestData.put("offset", (pageNum - 1) * pageSize);
         List<MpDevopsLoad> list = loadMapper.getLoadList(requestData);
+        //list每个成员的imageType赋值
+        list.forEach(item -> {
+            item.setImageType("load");
+        });
         Integer total = loadMapper.getLoadListNum(requestData);
         JSONObject result = new JSONObject();
         result.put("source", list);

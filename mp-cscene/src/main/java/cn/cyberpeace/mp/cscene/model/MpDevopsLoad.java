@@ -110,4 +110,8 @@ public class MpDevopsLoad extends BaseModel {
      * 漏洞情报
      */
     private List Loopholes;
+    /**
+     * 镜像类型
+     */
+    private String imageType;
 }

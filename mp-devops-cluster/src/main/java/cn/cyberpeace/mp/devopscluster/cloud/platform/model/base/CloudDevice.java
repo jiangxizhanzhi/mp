@@ -141,6 +141,11 @@ public class CloudDevice extends BaseCloudPlatformResult {
     private Boolean supportExport;
 
     /**
+     * 镜像类型
+     */
+    private String imageType;
+
+    /**
      * 网络-网络服务
      */
     private NetService netService;

@@ -173,19 +173,24 @@ public class MicrosoftAzureConverter implements BaseConverter {
                     case "2":
                         device.setServiceType(target.getCalculateType());
                         device.setSubType(target.getSubType());
-                        CalculateLaasVM calculateLaasVM = new CalculateLaasVM();
-                        BeanUtils.copyProperties(target, calculateLaasVM);
-                        device.setCalculateLaasVM(calculateLaasVM);
-                        break;
+                        if(target.getSubType()!=null && target.getSubType().equals("vm")){
+                            device.setImageType("vm");
+                            CalculateLaasVM calculateLaasVM = new CalculateLaasVM();
+                            BeanUtils.copyProperties(target, calculateLaasVM);
+                            device.setCalculateLaasVM(calculateLaasVM);
+                            break;
+                        }
                     case "3":
                         device.setServiceType(target.getContainerType());
                         device.setSubType(target.getSubType());
                         if(target.getSubType()!=null && target.getSubType().equals("containerRegistry")){
+                            device.setImageType("containerRegistry");
                             DockerInfrastructureContainerRegistries registries = new DockerInfrastructureContainerRegistries();
                             BeanUtils.copyProperties(target, registries);
                             device.setDockerInfrastructureContainerRegistries(registries);
                             break;
                         }else if(target.getSubType()!=null && target.getSubType().equals("containerInstance")){
+                            device.setImageType("containerInstance");
                             DockerInfrastructureContainerInstances instance = new DockerInfrastructureContainerInstances();
                             BeanUtils.copyProperties(target, instance);
                             device.setDockerInfrastructureContainerInstances(instance);
@@ -238,8 +243,9 @@ public class MicrosoftAzureConverter implements BaseConverter {
         List dockerImages = getDockerImages(instance);
         result.put("dockerImageList", dockerImages);
         //获取用户 容器实例列表
-        List dockerInstances = getDockerInstances(instance);
-        result.put("dockerInstanceList", dockerInstances);
+        List dockerInstances = null;
+//        List dockerInstances = getDockerInstances(instance);
+//        result.put("dockerInstanceList", dockerInstances);
         //获取微软云 虚拟机镜像
         List images = getImages(instance);
         result.put("imageList", images);
@@ -632,6 +638,9 @@ public class MicrosoftAzureConverter implements BaseConverter {
         }
         //sql同时修改
         List<MpDevopsBoundaryNetworkEquipment> list = microsoftAzureMapper.getCommonTargets(request,offset,pageSize);
+        list.forEach(item -> {
+            item.setImageType("networkEquipment");
+        });
         Integer num = microsoftAzureMapper.getCommonTargetNum(request,offset,pageSize);
         return new ListObjServiceResult(list, num).asResult();
     }
