@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RefreshCachedHypervisorsScheduleJob {
 
-    @MpScheduled(cron = "0 0/10 * * * ?", id = "refresh_cached_hypervisors", description = "刷新缓存的Hypervisors")
+    @MpScheduled(cron = "0 0/2 * * * ?", id = "refresh_cached_hypervisors", description = "刷新缓存的Hypervisors")
     public void action() {
         CloudHypervisor.refreshCachedHypervisors();
     }

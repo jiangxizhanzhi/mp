@@ -20,7 +20,7 @@ public class CloudHypervisor extends CloudClient {
     private static List<HypervisorData> cache;
 
     public static void refreshCachedHypervisors() {
-        cache = new CloudHypervisor().getCachedHypervisors();
+        cache = new CloudHypervisor().getHypervisors();
     }
 
     public List<HypervisorData> getCachedHypervisors() {
