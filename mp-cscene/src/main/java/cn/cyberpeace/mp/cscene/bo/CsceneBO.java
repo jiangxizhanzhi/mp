@@ -99,7 +99,7 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
                 CsceneAppConfig config = BeanCommon.getBean(CsceneAppConfig.class);
                 nodeCpu = config.getDefaultContainerCpuCount();
                 nodeRam = config.getDefaultContainerRamCount();
-                disk = config.getDefaultContainerDiskCount();
+                nodeDisk = config.getDefaultContainerDiskCount();
             }
             cpu += nodeCpu;
             disk += nodeDisk;
