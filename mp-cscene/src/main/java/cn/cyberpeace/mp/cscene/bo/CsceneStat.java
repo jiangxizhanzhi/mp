@@ -21,6 +21,8 @@ public class CsceneStat {
     private Integer switchCount;
     @ApiModelProperty(value = "npc数量")
     private Integer npcCount;
+    @ApiModelProperty(value = "载荷数量")
+    private Integer loadCount;
     @ApiModelProperty(value = "测试场景数量")
     private Integer testSceneCount;
     @ApiModelProperty(value = "占用节点资源数")

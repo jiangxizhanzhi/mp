@@ -236,6 +236,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final int ENTITY_GATEWAY = 50;
         public static final int ENTITY_TERMINAL = 51;
 
+        public static final int LOAD = 60;
+
         private Role() {
         }
     }

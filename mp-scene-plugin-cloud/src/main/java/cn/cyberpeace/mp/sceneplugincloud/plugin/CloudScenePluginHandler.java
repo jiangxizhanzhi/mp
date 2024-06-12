@@ -732,6 +732,8 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
         } else if (role.equals(BaseCloudPluginSceneElementModel.Role.NPC)) {
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.NPC);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.LOAD)) {
+            srcElement.setType(BaseSceneElementModel.Type.LOAD);
         }
     }
 

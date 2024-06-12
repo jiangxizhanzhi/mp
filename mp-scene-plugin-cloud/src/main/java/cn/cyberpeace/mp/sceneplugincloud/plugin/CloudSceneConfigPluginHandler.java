@@ -10,7 +10,6 @@ import cn.cyberpeace.mp.scene.core.bo.base.BaseScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
-import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigBO;
@@ -132,6 +131,8 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
         } else if (role.equals(BaseCloudPluginSceneElementModel.Role.NPC)) {
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.NPC);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.LOAD)) {
+            srcElement.setType(BaseSceneElementModel.Type.LOAD);
         }
     }
 
@@ -194,7 +195,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
             }
 
 //            根据微软云创建虚拟机规则验证用户名、密码
-            if(cloudType!= BaseSceneModel.CloudType.DEFAULT) {
+            if (cloudType != null && cloudType != BaseSceneModel.CloudType.DEFAULT) {
                 List<AccessMode> accessModes = srcPort.getAccessModes();
                 if (accessModes.size() > 0) {
                     for (AccessMode accessMode : accessModes) {

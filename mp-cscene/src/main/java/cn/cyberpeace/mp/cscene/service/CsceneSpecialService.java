@@ -133,7 +133,7 @@ public class CsceneSpecialService {
 
         Map<String, CsceneStat> statMap = new HashMap<>();
         for (String id : ids) {
-            var csceneStat = new CsceneStat(id, 0, 0, 0, 0, 0, 0, 0);
+            var csceneStat = new CsceneStat(id, 0, 0, 0, 0, 0, 0, 0,0);
             statMap.put(id, csceneStat);
         }
 
@@ -163,6 +163,8 @@ public class CsceneSpecialService {
                 stat.setTerminalCount(elementStat.getElementTypeCount());
             } else if (elementType.equals(BaseSceneElementModel.Type.NPC)) {
                 stat.setNpcCount(elementStat.getElementTypeCount());
+            } else if (elementType.equals(BaseSceneElementModel.Type.LOAD)) {
+                stat.setLoadCount(elementStat.getElementTypeCount());
             }
         });
 
