@@ -532,6 +532,7 @@ public class CsceneSpecialService {
                         CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
                 .currentLink(CsceneModel.class)
                 .filterEqual(CsceneModel::getDeleted, false)
+                .filterNotEqual(CsceneModel::getReferenceType, 0)
                 .selectAs(CsceneModel::getName, DeviceReferCsceneStat::getName)
                 .selectAs(CsceneModel::getId, DeviceReferCsceneStat::getCsceneId)
                 .selectAs(CsceneModel::getCreateUser, DeviceReferCsceneStat::getCreateUser)
