@@ -11,7 +11,6 @@ import cn.cyberpeace.mp.base.util.basic.MapUtils;
 import cn.cyberpeace.mp.base.util.define.ListTreeNode;
 import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneAreaNodeConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
@@ -48,10 +47,8 @@ import cn.cyberpeace.mp.scene.repository.base.BaseScenePieceMapper;
 import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -147,7 +144,8 @@ public abstract class BaseSceneHandler<
     protected final Set<String> outerConnectionNodeIds = new CopyOnWriteArraySet<>();
     protected final Map<String, String> nodeIdConnectedNodeIdMap = new ConcurrentHashMap<>();
 
-    private final Set<String> outerNodeIds = new ConcurrentHashSet<>();
+    private final Set<String> existsOuterNodeIds = new ConcurrentHashSet<>();
+    private final Set<String> existsOuterEids = new ConcurrentHashSet<>();
 
     // 辅助变量
     /** 端口所属节点映射 */
@@ -503,116 +501,6 @@ public abstract class BaseSceneHandler<
         this.initClass();
         this.isAreaMode = isAreaMode;
         outerFromData(sceneDataBO);
-    }
-
-    /**
-     * 保存当前场景外部数据
-     */
-    public void saveOut(List<TSceneElementBO> insideAreaElements,List<TSceneElementPortBO> insidePorts) {
-        if (elementMap.isEmpty()) {
-            return;
-        }
-        if (areaId == null) {
-            return;
-        }
-
-        List<String> outerNodeIds = new ArrayList<>();
-        List<TSceneAreaNodeConnectionModel> list = sceneNodeConnectionMapper.list(new HumanCondition().filterEqual(BaseSceneAreaNodeConnectionModel::getScene, sceneId));
-        List<TSceneAreaNodeConnectionModel> outerNodeConnections = new ArrayList<>();
-        for (TSceneAreaNodeConnectionModel l : list) {
-            String targetNodeId = parseNodeId(l.getTargetNodeId());
-            String sourceNodeId = parseNodeId(l.getSourceNodeId());
-            if (areaId.equals(targetNodeId) || areaId.equals(sourceNodeId)) {
-                outerNodeConnections.add(l);
-                if (areaId.equals(targetNodeId)) {
-                    outerNodeIds.add(sourceNodeId);
-                } else {
-                    outerNodeIds.add(targetNodeId);
-                }
-            }
-        }
-
-        // 更新节点
-        Map<String, TSceneElementModel> existElementMap = readElementsByNodeIds(outerNodeIds.toArray(new String[]{})).stream()
-                .collect(Collectors.toMap(BaseSceneElementModel::getNodeId, x -> x));
-        if (existElementMap.isEmpty()) {
-            return;
-        }
-        int updateCount = updateOuterElements(existElementMap);
-        List<String> outerNodeEids = new ArrayList<>();
-        for (TSceneElementModel tSceneElementModel : existElementMap.values()) {
-            outerNodeEids.add(tSceneElementModel.getId());
-        }
-
-        // 更新端口
-        List<String> portIds = new ArrayList<>();
-        var ports = readElementPortsByNodeIds(outerNodeIds.toArray(new String[]{}));
-        List<TSceneElementPortModel> updateModels = new ArrayList<>();
-        for (TSceneElementPortModel p : ports) {
-            TSceneElementPortBO bo = elementPortMap.get(p.getPortId());
-            if (bo != null) {
-                portIds.add(bo.getId());
-                p.setUsable(bo.getUsable());
-                updateModels.add(p);
-            }
-        }
-        if (CollectionUtils.isNotEmpty(updateModels)) {
-            sceneElementPortMapper.bulkUpdate(updateModels);
-        }
-
-        // 更新端口连线
-        Map<String, String> outerNodeId2EidMap = new HashMap<>();
-        for (Map.Entry<String, TSceneElementBO> mapEntry : elementMap.entrySet()) {
-            String key = mapEntry.getKey();
-            TSceneElementBO value = mapEntry.getValue();
-        }
-        existElementMap.forEach((e,v) -> outerNodeId2EidMap.put(e,v.getId()));
-        Map<String, String> insideNodeId2EidMap = new HashMap<>();
-        for (TSceneElementBO insideAreaElement : insideAreaElements) {
-            insideNodeId2EidMap.put(insideAreaElement.getId(), insideAreaElement.getEid());
-        }
-        List<TSceneElementPortConnectionModel> existsPortConnections = readElementPortConnectionsByNodeEids(outerNodeEids);
-        Map<String, TSceneElementPortConnectionModel> existsPortConnectionsMap = new HashMap<>();
-        Set<String> insideNodeEids = new HashSet<>(insideNodeId2EidMap.values());
-        for (TSceneElementPortConnectionModel e : existsPortConnections) {
-            if (insideNodeEids.contains(e.getSourceElement()) || insideNodeEids.contains(e.getTargetElement())) {
-                existsPortConnectionsMap.put(elementPortConnectionKey(e), e);
-            }
-        }
-
-        Map<String, TSceneElementPortConnectionModel> saveingPortConnectionsMap = new HashMap<>();
-        Map<String,String> nodeId2EidMap = new HashMap<>();
-        nodeId2EidMap.putAll(insideNodeId2EidMap);
-        nodeId2EidMap.putAll(outerNodeId2EidMap);
-
-        Map<String,String> portId2EidMap = new HashMap<>();
-        insidePorts.forEach(p -> portId2EidMap.put(p.getId(), p.getEid()));
-        ports.forEach(p -> portId2EidMap.put(p.getPortId(), p.getId()));
-
-        for (Map.Entry<String, TSceneElementPortConnectionBO> entry : elementPortConnectionMap.entrySet()) {
-            String e = entry.getKey();
-            TSceneElementPortConnectionBO v = entry.getValue();
-            var model = v.toModel();
-            if (model.getSourceElement() == null) {
-                String sourceNodeId = parseNodeIdFromPort(model.getSourcePortId());
-                model.setSourceElement(nodeId2EidMap.get(sourceNodeId));
-            }
-            if(model.getTargetElement() == null){
-                String targetNodeId = parseNodeIdFromPort(model.getTargetPortId());
-                model.setTargetElement(nodeId2EidMap.get(targetNodeId));
-            }
-            if(model.getSourcePort() == null){
-                model.setSourcePort(portId2EidMap.get(model.getSourcePortId()));
-            }
-            if(model.getTargetPort() == null){
-                model.setTargetPort(portId2EidMap.get(model.getTargetPortId()));
-            }
-            if(model.getScene() == null){
-                model.setScene(sceneId);
-            }
-            saveingPortConnectionsMap.put(e, model);
-        }
-        saveOutPortConnections(saveingPortConnectionsMap, existsPortConnectionsMap);
     }
 
     /**
@@ -1122,9 +1010,9 @@ public abstract class BaseSceneHandler<
         }
 
         int updateResult = modelMapper.bulkUpdate(diff.getUpdatingTargets()).getSuccessCount();
-        if (updateResult < diff.getUpdatingTargets().size()) {
-            throw new SceneUpdateException("Scene diff update failed");
-        }
+//        if (updateResult < diff.getUpdatingTargets().size()) {
+//            throw new SceneUpdateException("Scene diff update failed");
+//        }
     }
 
     /**
@@ -1157,13 +1045,13 @@ public abstract class BaseSceneHandler<
                     return area;
                 }));
         DiffTargets<TSceneAreaModel> diff = diffTargets(savingAreaMap, existAreaMap);
-        if (isAreaMode) {
+        if (areaId != null) {
             // 删除闭合的子区域
             for (TSceneAreaModel removingArea: diff.getRemovingTargets()) {
-                if (!Boolean.TRUE.equals(removingArea.getOpen())) {
+                if (isLayerArea(removingArea)) {
                     TSceneHandler TSceneHandler = ClassUtils.createInstance(sceneHandlerClass);
                     TSceneHandler.init(sceneId, removingArea.getNodeId(), isAreaMode, context);
-                    TSceneHandler.deleteTopology();
+                    TSceneHandler.deleteTopologyV2();
                 }
             }
         }
@@ -1204,6 +1092,7 @@ public abstract class BaseSceneHandler<
             var v= e.getValue();
             TSceneElementModel element = v.toModel();
             element.setScene(sceneId);
+            element.setUpdateTime(LocalDateTime.now());
             savingElementMap.put(e.getKey(), element);
         }
         DiffTargets<TSceneElementModel> diff = diffTargets(savingElementMap, existElementMap);
@@ -1591,13 +1480,13 @@ public abstract class BaseSceneHandler<
         List<String> layerAreas = new ArrayList<>();
         for (var area : existsAreas) {
             if (BaseSceneAreaModel.Type.COMMON == area.getType()) {
-                commonAreas.add(area.getId());
+                commonAreas.add(area.getNodeId());
             } else {
-                layerAreas.add(area.getId());
+                layerAreas.add(area.getNodeId());
             }
         }
         List<TScenePieceModel> existsPieces = readExistsPieces();
-        List<TSceneAreaNodeConnectionModel> existsAreaNodeConnections = readExistsAreaNodeConnections(commonAreas);
+        List<TSceneAreaNodeConnectionModel> existsAreaNodeConnections = readExistsAreaNodeConnections(layerAreas);
         List<TSceneElementModel> existsElements = readExistsElements(commonAreas);
         List<TSceneElementPortModel> existsElementPorts = readExistsElementPorts(existsElements);
         List<TSceneElementPortConnectionModel> existsElementPortConnections = readExistElementPortConnections(existsElementPorts);
@@ -1669,14 +1558,16 @@ public abstract class BaseSceneHandler<
             String sourceNodeId = parseNodeId(c.getSourceNodeId());
             String targetNodeId = parseNodeId(c.getTargetNodeId());
             if (filterAreaIds.contains(sourceNodeId)) {
-                result.add(c);
                 if (sourceNodeId.equals(areaId)) {
-                    outerNodeIds.add(targetNodeId);
+                    existsOuterNodeIds.add(targetNodeId);
+                }else{
+                    result.add(c);
                 }
             } else if (filterAreaIds.contains(targetNodeId)) {
-                result.add(c);
                 if (targetNodeId.equals(areaId)) {
-                    outerNodeIds.add(sourceNodeId);
+                    existsOuterNodeIds.add(sourceNodeId);
+                }else{
+                    result.add(c);
                 }
             }
         }
@@ -1701,13 +1592,16 @@ public abstract class BaseSceneHandler<
         innerElements = sceneElementMapper.list(innerCondition);
 
         // 和当前层相连的节点
-        if (outerNodeIds.isEmpty()) {
+        if (existsOuterNodeIds.isEmpty()) {
             outerElements = new ArrayList<>();
         } else {
             var outerCondition = new HumanCondition();
             outerCondition.filterEqual(BaseSceneElementModel::getScene, sceneId);
-            outerCondition.filterIn(BaseSceneElementModel::getNodeId, outerNodeIds.toArray(new String[]{}));
+            outerCondition.filterIn(BaseSceneElementModel::getNodeId, existsOuterNodeIds.toArray(new String[]{}));
             outerElements = sceneElementMapper.list(outerCondition);
+            for (var outerElement : outerElements) {
+                existsOuterEids.add(outerElement.getId());
+            }
         }
 
         List<TSceneElementModel> result = new ArrayList<>();
@@ -1911,45 +1805,38 @@ public abstract class BaseSceneHandler<
      * 删除场景数据
      */
     public boolean delete() {
-        deleteTopology();
+        deleteTopologyV2();
 
         // 删除插件数据
         plugins.forEach(plugin -> plugin.deleteScene());
 
-        return sceneMapper.delete(sceneId);
+        if (areaId == null) {
+            return sceneMapper.delete(sceneId);
+        } else {
+            return true;
+        }
     }
 
-    /**
-     * 删除拓扑数据
-     */
-    public void deleteTopology() {
-        List<TSceneAreaModel> areas = readAreas();
-        String[] filterAreaIds = new String[0];
-        if (isAreaMode) {
-            // 递归删除闭合的子区域
-            for (TSceneAreaModel removingArea: areas) {
-                if (!Boolean.TRUE.equals(removingArea.getOpen())) {
-                    TSceneHandler TSceneHandler = ClassUtils.createInstance(sceneHandlerClass);
-                    TSceneHandler.init(sceneId, removingArea.getNodeId(), isAreaMode, context);
-                    TSceneHandler.deleteTopology();
+    public void deleteTopologyV2() {
+        var existModel = readExistsModels();
+        List<TSceneAreaModel> areas = existModel.existsAreas;
+        if (areaId != null) {
+            for (TSceneAreaModel area : areas) {
+                if (isLayerArea(area)) {
+                    TSceneHandler sceneHandler = ClassUtils.createInstance(sceneHandlerClass);
+                    sceneHandler.init(sceneId, area.getNodeId(), true, context);
+                    sceneHandler.deleteTopologyV2();
                 }
             }
-
-            String currentAreaId = areaId == null ? StringUtils.EMPTY : areaId;
-            List<String> list = new ArrayList<>();
-            for (TSceneAreaModel TSceneAreaModel : areas) {
-                if (TSceneAreaModel.getOpen()) {
-                    String nodeId = TSceneAreaModel.getNodeId();
-                    list.add(nodeId);
-                }
-            }
-            filterAreaIds = ArrayUtils.addAll(list.toArray(new String[0]), currentAreaId);
         }
-        List<TScenePieceModel> pieces = readPieces(filterAreaIds);
-        List<TSceneElementModel> elements = readElements(filterAreaIds);
-        List<TSceneElementPortModel> elementPorts = readElementPorts(filterAreaIds);
-        List<TSceneElementPluginModel> elementPlugins = readElementPlugins(filterAreaIds);
-        if (!areas.isEmpty()) {
+        List<TScenePieceModel> pieces = existModel.existsPieces;
+        List<TSceneElementModel> elements = existModel.existsElements;
+        List<TSceneElementPortModel> elementPorts = existModel.existsElementPorts;
+        List<TSceneElementPluginModel> elementPlugins = existModel.existsElementPlugins;
+        List<TSceneElementPortConnectionModel> elementPortConnections = existModel.existsElementPortConnections;
+        List<TSceneAreaNodeConnectionModel> areaNodeConnectionModels = existModel.existsAreaNodeConnections;
+
+        if (CollectionUtils.isNotEmpty(areas)) {
             List<String> list = new ArrayList<>();
             for (TSceneAreaModel TSceneAreaModel : areas) {
                 String id = TSceneAreaModel.getId();
@@ -1957,7 +1844,7 @@ public abstract class BaseSceneHandler<
             }
             sceneAreaMapper.bulkDelete(list.toArray(new String[0]));
         }
-        if (!pieces.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(pieces)) {
             List<String> list = new ArrayList<>();
             for (TScenePieceModel TScenePieceModel : pieces) {
                 String id = TScenePieceModel.getId();
@@ -1965,33 +1852,43 @@ public abstract class BaseSceneHandler<
             }
             scenePieceMapper.bulkDelete(list.toArray(new String[0]));
         }
-        if (!elements.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(elements)) {
             List<String> list = new ArrayList<>();
             for (TSceneElementModel TSceneElementModel : elements) {
                 String id = TSceneElementModel.getId();
-                list.add(id);
+                if (!existsOuterNodeIds.contains(TSceneElementModel.getNodeId())) {
+                    list.add(id);
+                }
             }
-            sceneElementMapper.bulkDelete(list.toArray(new String[0]));
+            if (CollectionUtils.isNotEmpty(list)) {
+                sceneElementMapper.bulkDelete(list.toArray(new String[0]));
+            }
         }
-        if (!elementPorts.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(elementPorts)) {
             List<String> list = new ArrayList<>();
             for (TSceneElementPortModel TSceneElementPortModel : elementPorts) {
-                String id = TSceneElementPortModel.getId();
-                list.add(id);
+                if (!existsOuterEids.contains(TSceneElementPortModel.getSceneElement())) {
+                    String id = TSceneElementPortModel.getId();
+                    list.add(id);
+                }
             }
-            sceneElementPortMapper.bulkDelete(list.toArray(new String[0]));
+            if (CollectionUtils.isNotEmpty(list)) {
+                sceneElementPortMapper.bulkDelete(list.toArray(new String[0]));
+            }
         }
-        if (!elementPlugins.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(elementPlugins)) {
             List<String> list = new ArrayList<>();
             for (TSceneElementPluginModel TSceneElementPluginModel : elementPlugins) {
-                String id = TSceneElementPluginModel.getId();
-                list.add(id);
+                if (!existsOuterEids.contains(TSceneElementPluginModel.getSceneElement())) {
+                    String id = TSceneElementPluginModel.getId();
+                    list.add(id);
+                }
             }
-            sceneElementPluginMapper.bulkDelete(list.toArray(new String[0]));
+            if (CollectionUtils.isNotEmpty(list)) {
+                sceneElementPluginMapper.bulkDelete(list.toArray(new String[0]));
+            }
         }
-
-        List<TSceneElementPortConnectionModel> elementPortConnections = readElementPortConnections(filterAreaIds);
-        if (!elementPortConnections.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(elementPortConnections)) {
             List<String> list = new ArrayList<>();
             for (TSceneElementPortConnectionModel TSceneElementPortConnectionModel : elementPortConnections) {
                 String id = TSceneElementPortConnectionModel.getId();
@@ -1999,7 +1896,14 @@ public abstract class BaseSceneHandler<
             }
             sceneElementPortConnectionMapper.bulkDelete(list.toArray(new String[0]));
         }
-
+        if (CollectionUtils.isNotEmpty(areaNodeConnectionModels)) {
+            List<String> list = new ArrayList<>();
+            for (TSceneAreaNodeConnectionModel TSceneElementPortConnectionModel : areaNodeConnectionModels) {
+                String id = TSceneElementPortConnectionModel.getId();
+                list.add(id);
+            }
+            sceneNodeConnectionMapper.bulkDelete(list.toArray(new String[0]));
+        }
         // 删除插件数据
         plugins.forEach(plugin -> {
             List<String> list = new ArrayList<>();
