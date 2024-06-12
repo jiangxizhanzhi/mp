@@ -7,7 +7,7 @@ plugins {
     id "com.thinkimi.gradle.MybatisGenerator" version "2.3"
 }
 
-ext['tomcat.version'] = '9.0.58'
+ext['tomcat.version'] = '9.0.78'
 ext['logback.version'] = '1.2.10'
 ext['log4j2.version'] = '2.18.0'
 apply from: 'mp/config.gradle'
