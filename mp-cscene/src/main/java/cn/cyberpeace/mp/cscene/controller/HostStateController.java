@@ -170,7 +170,7 @@ public class HostStateController {
         hostExportState.setPorts(port);
         hostExportState.setProcess(process);
         ObjectMapper objectMapper = new ObjectMapper();
-        String fileName = "/cpms/host.json";
+        String fileName = "tmp/host.json";
         exportData(response, objectMapper, fileName, objectMapper.writeValueAsString(hostExportState));
     }
 
@@ -213,7 +213,7 @@ public class HostStateController {
         fileExportState.setModifyFileCount(list);
         fileExportState.setModifyFileList(modifyFileList);
         ObjectMapper objectMapper = new ObjectMapper();
-        String fileName = "/cpms/host_acqu.json";
+        String fileName = "tmp/host_acqu.json";
         exportData(response, objectMapper, fileName, objectMapper.writeValueAsString(fileExportState));
     }
 
@@ -224,7 +224,7 @@ public class HostStateController {
     public void exportFlowAcquisition(HttpServletResponse response, HostStateTrendRequest hostStateTrendRequest) throws JsonProcessingException {
         List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
         ObjectMapper objectMapper = new ObjectMapper();
-        String fileName = "/cpms/flow.json";
+        String fileName = "tmp/flow.json";
         exportData(response, objectMapper, fileName, objectMapper.writeValueAsString(hostStates));
     }
 
@@ -240,7 +240,7 @@ public class HostStateController {
         vulnExportState.setVulnerabilityCountInfo(vulnerabilityCountInfo);
         vulnExportState.setVulnerabilityPieChartInfo(vulnerabilityPieChartInfo);
         ObjectMapper objectMapper = new ObjectMapper();
-        String fileName = "/cpms/vlun.json";
+        String fileName = "tmp/vlun.json";
         exportData(response, objectMapper, fileName, objectMapper.writeValueAsString(vulnExportState));
     }
 }
