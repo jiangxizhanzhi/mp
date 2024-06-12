@@ -222,6 +222,23 @@ public class CloudPlatformMonitorController {
     @ApiOperation("节点管理")
     @GetMapping("/hypervisor/page")
     public PageResult<HypervisorPageVO> page(HypervisorPageRequest request){
+        if (Boolean.TRUE.equals(request.getOnlyHostname())) {
+            BasePageBO<HypervisorBO> model = hypervisorConverter.page(new BasePageDTO(request.getLimit(),request.getOffset()));
+            if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
+                return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
+            }
+            List<HypervisorPageVO> hypervisorPageRespons = new ArrayList<>();
+            for (HypervisorBO hypervisor : model.getList()) {
+                HypervisorPageVO build = HypervisorPageVO.builder().name(hypervisor.getName())
+                        .ip(hypervisor.getIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
+                        .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
+                        .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed()).totalInstances(hypervisor.getTotalInstances())
+                        .diskUsed(hypervisor.getDiskUsed()).build();
+                hypervisorPageRespons.add(build);
+            }
+            return new PageResult<>(hypervisorPageRespons, model.getTotal());
+        }
+
         BasePageBO<HypervisorBO> model = hypervisorConverter.pageUnCache(new BasePageDTO(request.getLimit(),request.getOffset()));
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
@@ -234,10 +251,6 @@ public class CloudPlatformMonitorController {
                     .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed()).totalInstances(hypervisor.getTotalInstances())
                     .diskUsed(hypervisor.getDiskUsed()).build();
             hypervisorPageRespons.add(build);
-        }
-
-        if (Boolean.TRUE.equals(request.getOnlyHostname())) {
-            return new PageResult<>(hypervisorPageRespons, model.getTotal());
         }
 
         // 获取所有物理主机服务状态
