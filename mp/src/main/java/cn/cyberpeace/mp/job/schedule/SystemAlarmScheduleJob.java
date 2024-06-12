@@ -206,7 +206,7 @@ public class SystemAlarmScheduleJob {
 
 
     private List<HostState> listAllCPNodeHostStates() {
-        BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO());
+        BasePageBO<HypervisorBO> modelPage = hypervisorConverter.pageUnCache(new BasePageDTO());
         List<String> hostNames = new ArrayList<>();
         for (HypervisorBO hypervisorBO : modelPage.getList()) {
             String name = hypervisorBO.getName();
