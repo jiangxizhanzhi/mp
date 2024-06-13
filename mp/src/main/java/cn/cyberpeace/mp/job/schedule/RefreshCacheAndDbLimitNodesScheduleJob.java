@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.job.schedule;
 
+import cn.cyberpeace.mp.cscene.service.HardwareLimitRefreshService;
 import cn.cyberpeace.mp.job.base.schedule.MpScheduled;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
+import cn.cyberpeace.mp.job.init.HardwareLimitJob;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,9 @@ public class RefreshCacheAndDbLimitNodesScheduleJob {
     @Resource
     private CsceneService csceneService;
 
+    @Resource
+    private HardwareLimitRefreshService hardwareLimitRefreshService ;
+
     @MpScheduled(cron = "0 0 2 * * ?", description = "内存和数据库中节点数量保持同步", id = "refresh_cache_and_db_limit_nodes")
     public void action() {
         if (!Boolean.TRUE.equals(csceneAppConfig.getEnableSceneCronJob())) {
@@ -34,6 +39,12 @@ public class RefreshCacheAndDbLimitNodesScheduleJob {
             NodeLimitUtils.refreshCount(count);
         } catch (Exception e) {
             log.error("failed to refresh node limit count", e);
+        }
+
+        try {
+            hardwareLimitRefreshService.init();
+        }catch (Exception e){
+            log.error("failed to refresh hardware limit count", e);
         }
     }
 }

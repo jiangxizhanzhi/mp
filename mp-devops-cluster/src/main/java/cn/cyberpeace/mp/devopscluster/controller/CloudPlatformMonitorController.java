@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
+import cn.cyberpeace.mp.cscene.service.HardwareLimitRefreshService;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.cron.clearjob.ClearService;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
@@ -122,6 +123,8 @@ public class CloudPlatformMonitorController {
     private final MonitorScriptControlService monitorScriptControlService;
 
     private final HostStateService hostStateService;
+
+    private final HardwareLimitRefreshService hardwareLimitRefreshService ;
 
     /**
      * 资源统计
@@ -383,7 +386,10 @@ public class CloudPlatformMonitorController {
     @ApiOperation("释放无效资源")
     @GetMapping("/release_resource")
     public ServiceResult<Boolean> releaseResource() {
-        TaskCommon.executeTask(() -> clearService.clearUselessResource());
+        TaskCommon.executeTask(() -> {
+            clearService.clearUselessResource();
+            hardwareLimitRefreshService.init();
+        });
         return new ServiceResult<>(true);
     }
 
