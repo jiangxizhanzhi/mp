@@ -53,8 +53,8 @@ public class WazuhFileModifyDataQueryParamsBuilder implements WazuhDataQueryPara
         // 指定查询哪些文件路径
         if (StringUtils.isNotEmpty(this.filePath)) {
             BoolQueryBuilder filePathQuery = QueryBuilders.boolQuery()
-                    .should(QueryBuilders.matchQuery("data.sic_launch_output.data", QueryParserUtil.escape(this.filePath)))
-                    .should(QueryBuilders.matchQuery("syscheck.path", QueryParserUtil.escape(this.filePath)));
+                    .should(QueryBuilders.wildcardQuery("syscheck.path", "*" + QueryParserUtil.escape(this.filePath) + "*"))
+                    .should(QueryBuilders.wildcardQuery("data.modify_path", "*" + QueryParserUtil.escape(this.filePath) + "*"));
             finalQueryBuilder.must(filePathQuery);
         }
 
