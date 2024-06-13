@@ -184,6 +184,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
                             device.setImageType("vm");
                             CalculateLaasVM calculateLaasVM = new CalculateLaasVM();
                             BeanUtils.copyProperties(target, calculateLaasVM);
+                            calculateLaasVM.setVmType(calculateLaasVM.getOperatingSystem());
                             device.setCalculateLaasVM(calculateLaasVM);
                             break;
                         }
