@@ -137,7 +137,7 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneDataModifier.checkFirewallRules(csceneBO);
         CsceneDataModifier.handleAccessModePath(csceneBO);
         CsceneDataModifier.checkCloudElement(csceneBO);
-        CsceneDataModifier.handlerPosition(csceneBO);
+        CsceneDataModifier.handlerPosition(csceneBO.getSceneConfig());
     }
 
     private void correctRequestCsceneParamsForAppInstance(CsceneBO csceneBO) {

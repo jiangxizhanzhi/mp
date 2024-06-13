@@ -706,6 +706,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<CsceneInstanceBO> instanceModify(@RequestBody(required = true) CsceneUpdateBO request) {
         log.info("modify_instance params,request:{}", JsonCommon.snakeStringify(request));
         CsceneDataModifier.removeFilePathPrefix(request);
+        CsceneDataModifier.handlerPosition(request.getUpdateScene());
         ServiceResult<CsceneInstanceBO> result = modelService.instanceModify(request).asResult();
         return result;
     }

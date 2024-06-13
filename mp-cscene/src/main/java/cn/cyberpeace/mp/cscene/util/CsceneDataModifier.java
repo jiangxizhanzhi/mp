@@ -33,6 +33,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneTopologyBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.EntityUsb;
@@ -1016,18 +1017,18 @@ public class CsceneDataModifier {
         }
     }
 
-    public static void handlerPosition(CsceneBO csceneBO) {
-        if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getTopology() == null) {
+    public static void handlerPosition(BaseSceneDataBO sceneDataBO) {
+        if (sceneDataBO == null || sceneDataBO.getTopology() == null) {
             return;
         }
-        var topo = csceneBO.getSceneConfig().getTopology();
-        if (topo.getAreaId() != null) {
-            var elements = topo.getElements();
+        BaseSceneTopologyBO topologyBO = sceneDataBO.getTopology();
+        if (topologyBO.getAreaId() != null) {
+            List<BaseSceneElementBO> elements = topologyBO.getElements();
             if (elements == null) {
                 return;
             }
-            String areaId = topo.getAreaId();
-            for (var e : elements) {
+            String areaId = topologyBO.getAreaId();
+            for (BaseSceneElementBO e : elements) {
                 Map<String, String> outPosition = e.getOuterPosition2();
                 if (outPosition == null) {
                     outPosition = new HashMap<>();
