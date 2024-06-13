@@ -104,6 +104,10 @@ alter table mp_sceneplugincloud_scene_element_port add column vnic_id varchar(50
 alter table mp_sceneplugincloud_scene_config_element_port add column vnic_id varchar(50) not null default '' comment '网卡id';
 
 alter table mp_sceneplugincollection_scene add column flow_mirror_id varchar(50) not null default '' comment '流量镜像id';
+alter table mp_sceneplugincollection_scene add column option_key text not null default '' comment '流量镜像标识';
+
+
+delete from mp_common_option where type = 'runtime_log_type' and code = 'CP';
 
 
 

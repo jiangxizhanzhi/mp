@@ -3,9 +3,10 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Firewall;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
 
 /**
  * 运维管控-系统运维-防火墙
@@ -25,7 +26,7 @@ public class FirewallService extends BaseCpService {
      * @return
      */
     public CloudPlatformPageResult<Firewall> page(String getParams) {
-        return super.page(BaseCloudPlatformConstant.URL_VERSION + "/firewalls" + getParams, Firewall.class);
+        return new CloudPlatformPageResult<>(Collections.emptyList());
     }
 
 

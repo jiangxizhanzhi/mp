@@ -12,6 +12,8 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+
 /**
  * 运维管控-系统运维-网络实例管理-网络
  * @author wanggang
@@ -62,7 +64,7 @@ public class NetworkService extends BaseCpService {
      */
     @Deprecated
     public CloudPlatformPageResult<ElasticIpModel> pageElasticIp(String getParams){
-        return super.page(BaseCloudPlatformConstant.URL_VERSION + NETWORKS + "/floatingips" + getParams, ElasticIpModel.class);
+        return new CloudPlatformPageResult<>(Collections.emptyList());
     }
 
     /**

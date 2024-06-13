@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
-import cn.cyberpeace.mp.base.util.json.JsonUtils;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.OpenFlow;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.params.OpenFlowPageParams;
@@ -12,10 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
-
-import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant.CPCLOUD_OPENFLOW;
-import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
 
 /**
  * @Description: 流表监控service
@@ -37,7 +35,8 @@ public class OpenFlowService extends BaseCpService {
      * @return
      */
     public CloudPlatformPageResult<OpenFlow> page(OpenFlowPageParams request) {
-        CloudPlatformResult<List<OpenFlow>> pageResult = super.sendPost(CPCLOUD_OPENFLOW + URL_VERSION + "/openflow/action", JsonUtils.snakeStringify(request), CloudPlatformResult.class);
+        CloudPlatformResult<List<OpenFlow>> pageResult = new CloudPlatformResult<>(Collections.emptyList());
+        pageResult.setCode(BaseCloudPlatformConstant.CODE);
         super.checkResult(pageResult);
         List<OpenFlow> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getData()),OpenFlow.class);
         CloudPlatformPageResult<OpenFlow> model = new CloudPlatformPageResult();
