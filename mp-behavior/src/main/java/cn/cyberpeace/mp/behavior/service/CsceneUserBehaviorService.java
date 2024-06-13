@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.behavior.service;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
+import cn.cyberpeace.mp.base.util.mptool.ZipUtil;
 import cn.cyberpeace.mp.behavior.bo.UserBehaviorConfigBo;
 import cn.cyberpeace.mp.behavior.model.CsceneNetworkBehaviorModel;
 import cn.cyberpeace.mp.behavior.model.CsceneUserBehaviorModel;
@@ -13,14 +15,26 @@ import cn.cyberpeace.mp.behavior.req.ElementBehaviorReq;
 import cn.cyberpeace.mp.behavior.res.CsceneNetworkBehaviorRes;
 import cn.cyberpeace.mp.behavior.res.CsceneNodeBehaviorRes;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -81,8 +95,7 @@ public class CsceneUserBehaviorService {
 	public List<CsceneNodeBehaviorRes> get(String nodeId) {
 		HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneUserBehaviorModel::getNodeId, nodeId);
 		List<CsceneUserBehaviorModel> userModelList = csceneUserBehaviorMapper.list(humanCondition);
-		List<CsceneNetworkBehaviorModel> networkModelList = csceneNetworkBehaviorService.get(nodeId);
-		Map<String, CsceneNetworkBehaviorModel> networkModelMap = networkModelList.stream().collect(Collectors.toMap(CsceneNetworkBehaviorModel::getId, m -> m));
+		Map<String, CsceneNetworkBehaviorModel> networkModelMap = csceneNetworkBehaviorService.getMapByNodeId(nodeId);
 		List<CsceneNodeBehaviorRes> nodeBehaviorResList = new ArrayList<>();
 		for (CsceneUserBehaviorModel userModel : userModelList) {
 			CsceneNodeBehaviorRes nodeBehaviorRes = new CsceneNodeBehaviorRes();
@@ -104,9 +117,88 @@ public class CsceneUserBehaviorService {
 		return nodeBehaviorResList;
 	}
 
+	public void getElementResource(HttpServletResponse response, String nodeId, String sceneId) {
+		HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneUserBehaviorModel::getNodeId, nodeId);
+		List<CsceneUserBehaviorModel> userModels = csceneUserBehaviorMapper.list(humanCondition);
+		Map<String, CsceneNetworkBehaviorModel> networkModelMap = csceneNetworkBehaviorService.getMapByNodeId(nodeId);
+		String originalPath = FileUtil.getTmpDirPath() + File.separator + sceneId + "_" + nodeId;
+		Map<Integer, String> typeMap = Arrays.stream(UserBehaviorModel.UserType.values())
+											 .collect(Collectors.toMap(UserBehaviorModel.UserType::getCode, type -> type.getDesc().substring(0, 2)));
+		int userModelNumber = 1;
+		for (CsceneUserBehaviorModel userModel : userModels) {
+			String folderPath = originalPath + File.separator + "用户模型" + userModelNumber++;
+			//config.json内容
+			JSONObject config = new JSONObject();
+			config.put("scene_id", sceneId);
+			config.put("node_id", nodeId);
+			config.put("user_model_name", userModel.getName());
+			config.put("user_model_id", userModel.getId());
+			config.put("start_time", userModel.getStartTime());
+			config.put("end_time", userModel.getEndTime());
+			config.put("type", typeMap.get(userModel.getType()));
+			List<String> networkNameList = new ArrayList<>();
+			List<String> networkIds = JSON.parseArray(userModel.getNetworkIds(), String.class);
+			for (int i = 0 ; i < networkIds.size() ; i++){
+				//网络行为文件导出部分
+				String networkId = networkIds.get(i);
+				CsceneNetworkBehaviorModel networkModel = networkModelMap.get(networkId);
+				String fileName = folderPath + File.separator + (i+1) + ".side";
+				File file = new File(folderPath);
+				if (!file.exists()) {
+					file.mkdirs();
+				}
+				String fileString = getRemoteFileContent(networkModel.getFileUrl());
+				JSONObject content = JSONObject.parseObject(fileString);
+				//替换side文件中的url、urls
+				content.put("url", networkModel.getUrl());
+				List<String> urls = Arrays.asList(networkModel.getUrl());
+				content.put("urls", urls);
+				try (FileWriter writer = new FileWriter(fileName)){
+					writer.write(content.toString());
+				}catch (IOException e) {
+					log.error("export file fail, networkBehaviorId = {}, e = {}", networkId, e);
+					throw new MpRuntimeException("导出文件失败");
+				}
+				networkNameList.add((i+1) + ".side");
+			}
+			config.put("actions", networkNameList);
+			try (FileWriter writer = new FileWriter(folderPath + File.separator + "config.json")){
+				writer.write(config.toString());
+			}catch (IOException e) {
+				log.error("export file fail, userBehaviorId = {}, e = {}", userModel.getUserBehaviorId(), e);
+				throw new MpRuntimeException("导出文件失败");
+			}
+		}
+		String resultPath = ZipUtil.toZip(originalPath);
+		FileUtil.setResponse(new File(resultPath), true, response);
+		FileUtil.del(originalPath);
+	}
+
 	private void deleteByNodeId(String nodeId) {
 		HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneUserBehaviorModel::getNodeId, nodeId);
 		csceneUserBehaviorMapper.filterDelete(humanCondition);
+	}
+
+	private String getRemoteFileContent(String fileUrl) {
+		HttpClient httpClient = HttpClientBuilder.create().build();
+		HttpGet request = new HttpGet(fileUrl);
+		try {
+			// 发送请求并获取响应
+			HttpResponse response = httpClient.execute(request);
+			// 检查响应的状态码
+			if (response.getStatusLine().getStatusCode() == 200) {
+				// 获取响应实体
+				HttpEntity entity = response.getEntity();
+				// 将响应实体转换为字符串
+				return EntityUtils.toString(entity, "UTF-8");
+			} else {
+				log.error("get file content fail, file_url = {}", fileUrl);
+				throw new MpRuntimeException("读取文件内容错误");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }

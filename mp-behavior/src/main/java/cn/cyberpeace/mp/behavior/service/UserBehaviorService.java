@@ -73,7 +73,7 @@ public class UserBehaviorService {
 	}
 
 	public List<CodeNameRes> getUserType() {
-		return Arrays.stream(UserBehaviorModel.userType.values())
+		return Arrays.stream(UserBehaviorModel.UserType.values())
 			  .map(userType -> new CodeNameRes(userType.getCode(), userType.getDesc()))
 			  .collect(Collectors.toList());
 	}

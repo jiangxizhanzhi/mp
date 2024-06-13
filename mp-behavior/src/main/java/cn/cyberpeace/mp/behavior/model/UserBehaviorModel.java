@@ -32,10 +32,10 @@ public class UserBehaviorModel extends BaseModel {
 	@ApiModelProperty("结束时间")
 	private LocalDateTime endTime;
 
-	public enum userType {
+	public enum UserType {
 
-		ORDER(0, "order"),
-		RANDOM(1, "random");
+		ORDER(0, "顺序播放"),
+		RANDOM(1, "随机播放");
 
 		@Getter
 		private Integer code;
@@ -43,7 +43,7 @@ public class UserBehaviorModel extends BaseModel {
 		@Getter
 		private String desc;
 
-		userType(Integer code, String desc) {
+		UserType(Integer code, String desc) {
 			this.code = code;
 			this.desc = desc;
 		}

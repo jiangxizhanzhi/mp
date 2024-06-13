@@ -3,8 +3,10 @@ package cn.cyberpeace.mp.base.util.mptool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
@@ -496,6 +498,45 @@ public class FileUtil {
      */
     public static boolean exist(String path) {
         return (null != path) && file(path).exists();
+    }
+
+
+    public static void setResponse(File file, Boolean delete, HttpServletResponse response) {
+        // 以流的形式下载文件。
+        InputStream fis = null;
+        OutputStream outputStream = null;
+        try {
+            fis = new FileInputStream(file);
+            byte[] buffer = new byte[fis.available()];
+            fis.read(buffer);
+
+            // 清空response
+            response.reset();
+
+            // 设置返回
+            response.setContentType("application/octet-stream;charset=UTF-8");
+            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(file.getName(),"UTF-8").replaceAll("\\+","%20"));
+            outputStream = response.getOutputStream();
+            outputStream.write(buffer);
+            outputStream.flush();
+        } catch (IOException e) {
+            log.error("setResponse error:", e);
+        } finally {
+            try {
+                if (null != fis) {
+                    fis.close();
+                }
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            } catch (IOException e) {
+                log.error("setResponse error:", e);
+            }
+
+            if (delete.equals(Boolean.TRUE) && null != file && file.exists()) {
+                file.delete();
+            }
+        }
     }
 
 

@@ -63,8 +63,8 @@ public class CsceneNetworkBehaviorService {
 		csceneNetworkBehaviorMapper.filterDelete(humanCondition);
 	}
 
-	public List<CsceneNetworkBehaviorModel> get(String nodeId) {
+	public Map<String, CsceneNetworkBehaviorModel> getMapByNodeId(String nodeId) {
 		HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneNetworkBehaviorModel::getNodeId, nodeId);
-		return csceneNetworkBehaviorMapper.list(humanCondition);
+		return csceneNetworkBehaviorMapper.list(humanCondition).stream().collect(Collectors.toMap(CsceneNetworkBehaviorModel::getId, m -> m));
 	}
 }

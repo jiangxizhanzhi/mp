@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @Api(tags = "场景行为管理")
@@ -35,5 +36,14 @@ public class SceneBehaviorController {
 	@ApiOperation("查看节点关联的行为")
 	public ServiceResult<List<CsceneNodeBehaviorRes>> getBehavior(@ApiParam(name = "node_id", value = "节点id", required = true) @RequestParam(name = "node_id") String nodeId) {
 		return ResultCommon.success(csceneUserBehaviorService.get(nodeId));
+	}
+
+	@GetMapping("/element/resource")
+	@ApiOperation("获取节点的行为资源包")
+	public ServiceResult<Boolean> getResource(HttpServletResponse response,
+											  @ApiParam(name = "node_id", value = "节点id", required = true) @RequestParam(name = "node_id") String nodeId,
+											  @ApiParam(name = "scene_id", value = "场景id", required = true) @RequestParam(name = "scene_id") String sceneId) {
+		csceneUserBehaviorService.getElementResource(response, nodeId, sceneId);
+		return ResultCommon.success(true);
 	}
 }
