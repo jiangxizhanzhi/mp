@@ -93,7 +93,8 @@ public class VmConverter implements BaseConverter{
         List<InstanceBO> list = model.getList().stream().map(instanceModel ->
                 InstanceBO.builder().name(instanceModel.getName()).node(instanceModel.getHost())
                         .runningTime(instanceModel.getRunningTime())
-                        .addressList(instanceModel.getAddresses().stream().map(InstanceModel.Address::getIp)
+                        .addressList(Optional.ofNullable(instanceModel.getAddresses()).orElse(Collections.emptyList())
+                                .stream().map(InstanceModel.Address::getIp)
                                 .collect(Collectors.toList()))
                         .status(instanceModel.getStatus()).createTime(instanceModel.getCreatedAt()).build()
         ).collect(Collectors.toList());

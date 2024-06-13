@@ -1,14 +1,10 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformResult;
-import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
-import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
-import cn.cyberpeace.mp.devopscluster.model.HypervisorStatisticsCloudPlatformResult;
-import cn.cyberpeace.mp.devopscluster.model.HypervisorWeightAndMaxInstanceCloudPlatformResult;
-import cn.cyberpeace.mp.devopscluster.model.common.Hypervisor;
-import cn.cyberpeace.mp.cscene.response.HypervisorStatistics;
+import cn.cyberpeace.mp.cscene.response.HostStatisticsResponse;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
-import com.alibaba.fastjson.JSONObject;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
+import cn.cyberpeace.mp.devopscluster.model.HypervisorWeightAndMaxInstanceCloudPlatformResult;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -20,34 +16,26 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class HypervisorService extends BaseCpService {
 
+    private static final String HOSTS_MONITOR_LIST = "/cloud/v1/monitor/hosts";
+
     public static final String HYPERVISORS = "/hypervisors";
 
     public HypervisorService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }
 
-    /**
-     * 资源统计
-     * @return
-     */
-    public HypervisorStatisticsCloudPlatformResult statistics(){
-        CloudPlatformResult result = super.sendGet(BaseCloudPlatformConstant.URL_VERSION + HYPERVISORS + "/statistics", CloudPlatformResult.class);
-        super.checkResult(result);
-        HypervisorStatistics data = JSONObject.parseObject(JSONObject.toJSONString(result.getData()), HypervisorStatistics.class);
-        HypervisorStatisticsCloudPlatformResult model = new HypervisorStatisticsCloudPlatformResult();
-        model.setHypervisorStatistics(data);
-        model.setCode(result.getCode());
-        return model;
-    }
 
+
+    public HostStatisticsResponse page(String getParams) {
+        return super.sendGet(HOSTS_MONITOR_LIST + getParams, new TypeReference<HostStatisticsResponse>() {
+        });
+    }
     /**
      * 分页查询节点管理信息
      * @param getParams
      * @return
      */
-    public CloudPlatformPageResult<Hypervisor> page(String getParams){
-        return super.page(BaseCloudPlatformConstant.URL_VERSION + HYPERVISORS + getParams, Hypervisor.class);
-    }
+
 
     /**
      * 获取虚拟机数量限制

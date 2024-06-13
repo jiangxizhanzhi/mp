@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 弹性IP管理类
@@ -31,6 +30,7 @@ import java.util.stream.Collectors;
 @Api(tags = "网络实例管理-弹性IP")
 @RequiredArgsConstructor
 @AuthTarget(TargetEnum.NETWORK_MANAGEMENT)
+@Deprecated
 public class ElasticIpController {
 
     private final ElasticIpConverter elasticIpConverter;

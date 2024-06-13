@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
+import cn.cyberpeace.mp.cscene.response.HostStatisticsResponse;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Switches;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.HypervisorService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.NetworkService;
@@ -17,11 +18,8 @@ import cn.cyberpeace.mp.devopscluster.dto.BasePageDTO;
 import cn.cyberpeace.mp.devopscluster.dto.HypervisorActionDTO;
 import cn.cyberpeace.mp.devopscluster.dto.HypervisorWeightAndMaxInstanceDTO;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
-import cn.cyberpeace.mp.devopscluster.model.HypervisorStatisticsCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.model.HypervisorWeightAndMaxInstanceCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.model.SwitchesCloudPlatform;
-import cn.cyberpeace.mp.devopscluster.model.common.Hypervisor;
-import cn.cyberpeace.mp.cscene.response.HypervisorStatistics;
 import cn.cyberpeace.mp.devopscluster.model.common.InstanceOsServiceModel;
 import cn.cyberpeace.mp.devopscluster.model.common.NetworkAgentModel;
 import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
@@ -61,11 +59,17 @@ public class HypervisorConverter implements BaseConverter {
      * @return
      */
     public HypervisorStatisticsConvertModel statistics() {
-        HypervisorStatisticsCloudPlatformResult statistics = hypervisorService.statistics();
-        HypervisorStatistics hypervisorStatistics = statistics.getHypervisorStatistics();
-        return new HypervisorStatisticsConvertModel(hypervisorStatistics.getVcpus(),hypervisorStatistics.getMemoryMb()
-                ,hypervisorStatistics.getLocalGb(),hypervisorStatistics.getVcpusUsed(),hypervisorStatistics.getMemoryMbUsed()
-                ,hypervisorStatistics.getLocalGbUsed(),hypervisorStatistics.getFreeRamMb(),hypervisorStatistics.getFreeDiskGb());
+        HostStatisticsResponse statistics = hypervisorService.page("");
+        HostStatisticsResponse.HostCount hypervisorStatistics = statistics.getCount();
+        return new HypervisorStatisticsConvertModel()
+                .setCpus(hypervisorStatistics.getCpuResidueAbs() + hypervisorStatistics.getCpuUsedAbs())
+                .setCpusUsed(hypervisorStatistics.getCpuUsedAbs().longValue())
+                .setMemoryMb((long) (hypervisorStatistics.getMemoryResidueAbs() + hypervisorStatistics.getMemoryUsedAbs()))
+                .setMemoryMbUsed(hypervisorStatistics.getMemoryUsedAbs().longValue())
+                .setFreeRamMb(hypervisorStatistics.getMemoryResidueAbs().longValue())
+                .setFreeDiskGb(hypervisorStatistics.getLocalDiskResidueAbs().longValue())
+                .setLocalGb((long) (hypervisorStatistics.getLocalDiskResidueAbs() + hypervisorStatistics.getLocalDiskUsedAbs()))
+                .setLocalGbUsed(hypervisorStatistics.getLocalDiskResidueAbs().longValue());
     }
 
     /**
@@ -78,15 +82,21 @@ public class HypervisorConverter implements BaseConverter {
     public BasePageBO<HypervisorBO> page(BasePageDTO dto, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(dto,ignoreFields);
-        final CloudPlatformPageResult<Hypervisor> model = hypervisorService.page(getParams);
+        HostStatisticsResponse model = hypervisorService.page(getParams);
         List<HypervisorBO> list = new ArrayList<>();
-        for (Hypervisor hypervisor : model.getList()) {
-            HypervisorBO build = HypervisorBO.builder().name(hypervisor.getHostname())
-                    .ip(hypervisor.getHostIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
-                    .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
-                    .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed()).totalInstances(hypervisor.getRunningVms())
+        for (HostStatisticsResponse.HostData hypervisor : model.getData()) {
+            HypervisorBO build = HypervisorBO.builder()
+                    .name(hypervisor.getHostname())
+                    .status(hypervisor.getStatus())
+                    .state(hypervisor.getStatus())
+                    .cpu(hypervisor.getCpu().getTotal())
+                    .ram((long) hypervisor.getMemory().getTotal())
+                    .disk((long) hypervisor.getDisk().getTotal())
+                    .cpuUsed(hypervisor.getCpu().getUsed())
+                    .ramUsed((long) hypervisor.getMemory().getUsed())
+                    .totalInstances(hypervisor.getVmCount())
                     .serviceStatus(false)
-                    .diskUsed(hypervisor.getDiskUsed()).build();
+                    .diskUsed((long) hypervisor.getDisk().getUsed()).build();
             list.add(build);
         }
 

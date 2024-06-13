@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.devopscluster.converter;
 
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -18,7 +17,6 @@ import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
-import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
@@ -66,9 +64,10 @@ public class RealEquipmentConverter implements BaseConverter{
      * @return
      */
     public Integer getTotalRealEquipment(RealEquipmentPageRequest request) {
-        String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
-        CloudPlatformPageResult<Device> page = realEquipmentService.page(getParams);
-        return page.getTotal();
+        ImagePageDTO dto = new ImagePageDTO().setSearchType(2).setInPosition(request.getInPosition())
+                .setName(request.getName()).setUseStatus(request.getUseStatus())
+                .setMainCategory(request.getCategory()).setThirdCategory(request.getThirdCategory());
+        return devopsTargetService.totalCount(dto);
     }
 
     /**

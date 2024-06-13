@@ -1,12 +1,13 @@
 package cn.cyberpeace.mp.cscene.response;
 
+import cn.cyberpeace.mp.base.model.BaseModel;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
 
-public class HostStatisticsResponse {
+public class HostStatisticsResponse extends BaseModel {
 
     private List<HostData> data;
     private Integer total;
@@ -26,8 +27,8 @@ public class HostStatisticsResponse {
         private ResourceUseInfo cpu;
         private ResourceUseInfo memory;
         private ResourceUseInfo disk;
-        private Integer vmCount;
-        private Integer container_count;
+        private int vmCount;
+        private int containerCount;
 
     }
 
@@ -50,9 +51,9 @@ public class HostStatisticsResponse {
 
     @Data
     public static class ResourceUseInfo {
-        private Integer total;
-        private Integer used;
-        private Double percent;
+        private int total;
+        private int used;
+        private double percent;
     }
 
 

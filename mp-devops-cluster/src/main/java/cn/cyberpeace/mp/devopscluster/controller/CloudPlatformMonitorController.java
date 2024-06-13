@@ -19,11 +19,8 @@ import cn.cyberpeace.mp.devopscluster.converter.bo.VirtualRealSwitchBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.converter.model.HypervisorServiceStateConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.HypervisorStatisticsConvertModel;
-import cn.cyberpeace.mp.devopscluster.converter.model.HypervisorWeightAndMaxInstanceConvertModel;
 import cn.cyberpeace.mp.devopscluster.dto.*;
 import cn.cyberpeace.mp.devopscluster.enums.HypervisorActionEnum;
-import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
-import cn.cyberpeace.mp.devopscluster.model.common.ServiceStatus;
 import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.devopscluster.service.MonitorScriptControlService;
 import cn.cyberpeace.mp.devopscluster.service.ServiceMonitorService;
@@ -34,7 +31,6 @@ import cn.cyberpeace.mp.devopscluster.vo.VirtualRealSwitchStatusVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
@@ -53,7 +49,6 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -142,15 +137,13 @@ public class CloudPlatformMonitorController {
         //NPC个数
         HypervisorStatisticsVO finalResponse4 = response;
         CompletableFuture totalNpcsCf = CompletableFuture.runAsync(() -> {
-            Integer totalNpcs = npcConverter.getTotalNpcs(new BasePageDTO());
-            finalResponse4.setTotalNpc(totalNpcs);
+            finalResponse4.setTotalNpc(0);
         });
 
         // 防火墙个数
         HypervisorStatisticsVO finalResponse5 = response;
         CompletableFuture totalFirewallsCf = CompletableFuture.runAsync(() -> {
-            Integer totalFirewalls = firewallConverter.getTotalFirewall(new BasePageDTO());
-            finalResponse5.setTotalFireWall(totalFirewalls);
+            finalResponse5.setTotalFireWall(0);
         });
 
         // 交换机个数 -> 替换为网络个数
@@ -163,9 +156,8 @@ public class CloudPlatformMonitorController {
         // dynamips个数
         HypervisorStatisticsVO finalResponse7 = response;
         CompletableFuture totalDynamipsCf = CompletableFuture.runAsync(() -> {
-            int totalDynamips = 0;
 
-            finalResponse7.setTotalDynamips(totalDynamips);
+            finalResponse7.setTotalDynamips(0);
         });
 
         CompletableFuture allCf = CompletableFuture.allOf(totalInstanceCf, totalContainersCf, totalRealEquipmentsCf,
@@ -203,37 +195,25 @@ public class CloudPlatformMonitorController {
                     .ip(hypervisor.getIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
                     .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
                     .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed()).totalInstances(hypervisor.getTotalInstances())
-                    .diskUsed(hypervisor.getDiskUsed()).build();
+                    .diskUsed(hypervisor.getDiskUsed())
+                    .status(hypervisor.getStatus())
+                    .serviceStatus(true)
+                    .build();
             hypervisorPageRespons.add(build);
         }
 
         // 获取所有物理主机服务状态
-        CloudPlatformPageResult<ServiceStatus> serviceStatusModel = imagesConverter.listServiceStatus();
 
         for (HypervisorPageVO hypervisorPageRespon : hypervisorPageRespons) {
             String name = hypervisorPageRespon.getName();
-            Optional<ServiceStatus> serviceStatus =
-                    Optional.empty();
-            for (ServiceStatus statusModel : serviceStatusModel.getList()) {
-                if (name.equals(statusModel.getHost())) {
-                    serviceStatus = Optional.of(statusModel);
-                    break;
-                }
-            }
-            // 设置物理主机服务状态
-            hypervisorPageRespon.setServiceStatus(serviceStatus.isPresent() && serviceStatus.get().isStatus());
 
-            HypervisorWeightAndMaxInstanceConvertModel weightAndMaxInstances = hypervisorConverter.getWeightAndMaxInstances(new HypervisorWeightAndMaxInstanceDTO(name));
+            // 设置物理主机服务状态
+
             Integer totalContainers = containerConverter.getTotalContainers(new ContainerPageDTO(name));
             hypervisorPageRespon.setTotalContainers(totalContainers);
-            if (Objects.nonNull(weightAndMaxInstances)) {
-                hypervisorPageRespon.setWeight(weightAndMaxInstances.getWeight());
-                hypervisorPageRespon.setMaxInstances(weightAndMaxInstances.getMaxInstances());
-            }
         }
 
         // 获取 dynamips 数量
-        VirtualDynamips virtualDynamips = new VirtualDynamips();
         for (HypervisorPageVO v : hypervisorPageRespons) {
             v.setTotalDynamips(0);
         }

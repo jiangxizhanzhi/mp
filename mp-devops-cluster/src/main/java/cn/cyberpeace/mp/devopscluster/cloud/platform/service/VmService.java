@@ -19,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class VmService extends BaseCpService {
 
     private static final String VM_ACTION_URL = "/cloud/v1/vm/{vm_id}/{action}";
+    private static final String VM_LIST = "/cloud/v1/vm";
 
 
     private static final String INSTANCES = "/instances";
@@ -34,7 +35,7 @@ public class VmService extends BaseCpService {
      */
     @Deprecated
     public CloudPlatformPageResult<InstanceModel> page(String getParams){
-        return super.page(BaseCloudPlatformConstant.URL_VERSION + INSTANCES + getParams, InstanceModel.class);
+        return super.page(VM_LIST + getParams, InstanceModel.class);
     }
 
     /**
