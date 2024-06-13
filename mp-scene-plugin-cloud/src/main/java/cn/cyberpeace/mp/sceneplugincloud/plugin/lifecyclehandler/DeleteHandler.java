@@ -301,35 +301,10 @@ public class DeleteHandler extends HandlerCommon {
         super(pluginHandler, DeleteTaskPool.getInstance(), SceneModel.Event.DELETE);
     }
 
-    protected void syncFlowPortInfo() {
-        log.info("DeleteHandler.syncFlowPortInfo.");
-        //通知云平台需要统计环境总速率的端口
-        if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate())) {
-            List<String> portIds = new ArrayList<>();
-            Map<String, CloudPluginSceneElementPortBO> portMap = getPluginHandler().getElementPortMap();
-            portMap.forEach((key, value) -> {
-                if (StringUtils.isNotEmpty(value.getResourceId())) {
-                    portIds.add(value.getResourceId());
-                }
-            });
-            vpClient.syncFlowPortInfo(portIds, "delete");
-        }
-    }
+
 
     public void delete() {
         prepareEventProcess();
-        //通知云平台需要统计环境总速率的端口
-        syncFlowPortInfo();
-//        if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate())) {
-//            List<String> portIds = new ArrayList<>();
-//            Map<String, CloudPluginSceneElementPortBO> portMap = getPluginHandler().getElementPortMap();
-//            portMap.forEach((key, value) -> {
-//                if (StringUtils.isNotEmpty(value.getResourceId())) {
-//                    portIds.add(value.getResourceId());
-//                }
-//            });
-//            vpClient.syncFlowPortInfo(portIds, "delete");
-//        }
         // 优先删除实体设备
         List<CloudPluginSceneElementBO> entities = new ArrayList<>();
         getPluginHandler().getElementMap().values().forEach(e -> {

@@ -332,7 +332,6 @@ public class ModifyHandler extends HandlerCommon {
             this.deletedNodeIds = deletedNodeIds;
         }
 
-        @Override
         protected void syncFlowPortInfo() {
             log.info("ModifyDeleteHandler.syncFlowPortInfo.");
         }

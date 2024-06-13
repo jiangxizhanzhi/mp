@@ -13,9 +13,7 @@ import cn.cyberpeace.mp.devopscluster.enums.AlarmStatusEnum;
 import cn.cyberpeace.mp.devopscluster.enums.AlarmTypeEnum;
 import cn.cyberpeace.mp.devopscluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devopscluster.enums.MonitorStateEnum;
-import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.SystemAlarmModel;
-import cn.cyberpeace.mp.devopscluster.model.common.ServiceStatus;
 import cn.cyberpeace.mp.devopscluster.repository.SystemAlarmMapper;
 import cn.cyberpeace.mp.devopscluster.request.BizServicePageRequest;
 import cn.cyberpeace.mp.devopscluster.request.CloudPlatformPageRequest;
@@ -34,7 +32,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @Description: 服务监控服务类
@@ -173,18 +170,11 @@ public class ServiceMonitorService {
         BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO());
         if (CollectionUtils.isNotEmpty(modelPage.getList())) {
             // 获取所有物理主机服务状态
-            CloudPlatformPageResult<ServiceStatus> serviceStatusModel = imagesConverter.listServiceStatus();
             for (HypervisorBO hypervisorBO : modelPage.getList()) {// 忽略DOWN状态的节点查询
                 if (Objects.equals(CloudPlatformEnum.UP.getState(), hypervisorBO.getState())) {
                     hostNameList.add(hypervisorBO.getName());
                 }
-                if (CollectionUtils.isNotEmpty(serviceStatusModel.getList())) {
-                    for (ServiceStatus serviceModel : serviceStatusModel.getList()) {
-                        if (hypervisorBO.getName().equals(serviceModel.getHost())) {
-                            hypervisorBO.setServiceStatus(serviceModel.isStatus());
-                        }
-                    }
-                }
+                hypervisorBO.setServiceStatus(true);
             }
 
             int totalCount = modelPage.getTotal();

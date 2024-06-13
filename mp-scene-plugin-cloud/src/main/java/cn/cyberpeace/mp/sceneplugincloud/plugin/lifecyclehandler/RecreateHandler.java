@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -16,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -95,18 +93,6 @@ public class RecreateHandler extends HandlerCommon {
                 log.warn("Element({}) {} has no virtual type", cloudElement.getSrcElement().getEid(),
                         cloudElement.getSrcElement().getId());
                 return;
-            }
-            //通知云平台需要统计环境总速率的端口
-            if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate())) {
-                List<String> portIds = new ArrayList<>();
-                if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
-                    for (SceneElementPortBO p : cloudElement.getSrcElement().getPorts()) {
-                        if (StringUtils.isNotEmpty(getPluginHandler().getPort(p.getId()).getResourceId())) {
-                            portIds.add(getPluginHandler().getPort(p.getId()).getResourceId());
-                        }
-                    }
-                }
-                super.vpClient.syncFlowPortInfo(portIds, "delete");
             }
 
             if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
@@ -218,19 +204,6 @@ public class RecreateHandler extends HandlerCommon {
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_ENTITY_NODE,
                         () -> createEntityNode(cloudElement));
-            }
-
-            //通知云平台需要统计环境总速率的端口
-            if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate())) {
-                List<String> portIds = new ArrayList<>();
-                if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
-                    for (SceneElementPortBO p : cloudElement.getSrcElement().getPorts()) {
-                        if (StringUtils.isNotEmpty(getPluginHandler().getPort(p.getId()).getResourceId())) {
-                            portIds.add(getPluginHandler().getPort(p.getId()).getResourceId());
-                        };
-                    }
-                }
-                super.vpClient.syncFlowPortInfo(portIds, "add");
             }
         }
     }

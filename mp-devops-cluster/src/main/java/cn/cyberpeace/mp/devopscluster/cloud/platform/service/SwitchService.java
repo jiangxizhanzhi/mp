@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.SdnSwitch;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.CloudDeleteResponse;
@@ -17,6 +16,8 @@ import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.Collections;
 
 import static cn.cyberpeace.mp.base.constant.BaseErrorCode.CUSTOM_ERROR;
 
@@ -43,7 +44,7 @@ public class SwitchService extends BaseCpService {
      * @return
      */
     public SwitchesCloudPlatform list() {
-        return super.sendGet(BaseCloudPlatformConstant.CPCLOUD_URL + BaseCloudPlatformConstant.URL_VERSION + "/switch/switchs" , SwitchesCloudPlatform.class);
+        return new SwitchesCloudPlatform(Collections.emptyList());
     }
 
     public void delete(String name) {

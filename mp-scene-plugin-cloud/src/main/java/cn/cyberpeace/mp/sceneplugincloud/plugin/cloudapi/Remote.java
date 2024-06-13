@@ -263,55 +263,6 @@ public class Remote extends CloudClient {
         getHttpClient().put(CloudUrlConstant.UPDATE_RECORD_CLEAN_CONFIG, data, null, Object.class);
     }
 
-    public void createFlavor() {
-
-    }
-
-    /**
-     * 通知云平台需要统计流量的端口
-     * @param portIds
-     * @return
-     */
-    public boolean addFlowPorts(List<String> portIds) {
-        log.info("Remote.addFlowPorts begin. portIds:{}", portIds);
-        boolean result = true;
-        NetworkFlowRateData networkFlowRateData = new NetworkFlowRateData();
-        networkFlowRateData.setPorts(portIds);
-        log.info("Call cpclould begin. posturl:{}, params:{}", CloudUrlConstant.NETWORK_FLOW_RATE, networkFlowRateData);
-        CloudResponse<Object> response = cloudPost(CloudUrlConstant.NETWORK_FLOW_RATE, networkFlowRateData, null, new TypeReference<CloudResponse<Object>>() {}, true);
-        log.info("Call cpclould end. posturl:{}, response:{}", CloudUrlConstant.NETWORK_FLOW_RATE, response);
-        if (response != null && Boolean.TRUE.equals(response.getSuccess())) {
-            result = true;
-        } else {
-            log.error("failed to addFlowPorts");
-            result = false;
-        }
-        log.info("Remote.addFlowPorts end. result:{}", result);
-        return result;
-    }
-
-    /**
-     * 通知云平台需要取消统计流量的端口
-     * @param portIds
-     * @return
-     */
-    public boolean deleteFlowPorts(List<String> portIds) {
-        log.info("Remote.deleteFlowPorts begin. portIds:{}", portIds);
-        boolean result = true;
-        NetworkFlowRateData networkFlowRateData = new NetworkFlowRateData();
-        networkFlowRateData.setPorts(portIds);
-        log.info("Call cpclould begin. deleteurl:{}, params:{}", CloudUrlConstant.NETWORK_FLOW_RATE, networkFlowRateData);
-        CloudResponse<Object> response = cloudDelete(CloudUrlConstant.NETWORK_FLOW_RATE, networkFlowRateData, null, new TypeReference<CloudResponse<Object>>() {}, true);
-        log.info("Call cpclould end. deleteurl:{}, response:{}", CloudUrlConstant.NETWORK_FLOW_RATE, response);
-        if (response != null && Boolean.TRUE.equals(response.getSuccess())) {
-            result = true;
-        } else {
-            log.error("failed to deleteFlowPorts");
-            result = false;
-        }
-        log.info("Remote.deleteFlowPorts end. result:{}", result);
-        return result;
-    }
 
     /**
      * 查询环境总速率
