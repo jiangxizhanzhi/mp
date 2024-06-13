@@ -46,7 +46,6 @@
             <if test="param.version != null and param.version != ''">
                 version = #{param.version},
             </if>
-            create_time = now()
         WHERE
             pk = #{pk}
 

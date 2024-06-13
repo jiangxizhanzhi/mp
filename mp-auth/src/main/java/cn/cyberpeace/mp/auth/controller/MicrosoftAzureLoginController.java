@@ -46,17 +46,6 @@ public class MicrosoftAzureLoginController {
         return new ServiceResult<>(localAzurer).asResult();
     }
 
-    @ApiOperation(value = "增加微软云用户", notes = "")
-    @PostMapping("/addAzurer")
-    public ServiceResult<MicrosoftAzureUserModel> addAzurer(@RequestBody MicrosoftAzureUserModel requestData) {
-        Boolean addAzurer = microsoftAzureLoginService.addAzurer(requestData);
-        if(addAzurer){
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS,"新增成功");
-        }else{
-            return new ServiceResult<>(null, BaseErrorCode.ERROR,"新增失败");
-        }
-    }
-
     @ApiOperation(value = "删除微软云用户", notes = "")
     @DeleteMapping("/deleteAzurer")
     public ServiceResult<MicrosoftAzureUserModel> deleteAzurer(@RequestBody MicrosoftAzureUserModel requestData) {
@@ -72,12 +61,8 @@ public class MicrosoftAzureLoginController {
 
     @ApiOperation(value = "修改账号信息", notes = "")
     @PutMapping("/updateLocalAzurer")
-    public ServiceResult<MicrosoftAzureUserModel> updateLocalAzurer(@RequestBody MicrosoftAzureUserModel requestData) {
-        Boolean updateLocalAzurer = microsoftAzureLoginService.updateLocalAzurer(requestData);
-        if(updateLocalAzurer){
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS,"修改账号信息成功");
-        }else{
-            return new ServiceResult<>(null, BaseErrorCode.ERROR,"修改账号信息失败");
-        }
+    public ServiceResult updateLocalAzurer(@RequestBody MicrosoftAzureUserModel requestData) {
+        ServiceResult updateLocalAzurer = microsoftAzureLoginService.updateLocalAzurer(requestData);
+        return updateLocalAzurer;
     }
 }

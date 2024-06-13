@@ -3,12 +3,13 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
 import cn.cyberpeace.mp.auth.repository.MicrosoftAzureLoginMapper;
 import cn.cyberpeace.mp.auth.service.MicrosoftAzureLoginService;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -37,19 +38,6 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
     }
 
     @Override
-    @Transactional
-    public Boolean addAzurer(MicrosoftAzureUserModel requestData) {
-        if(requestData != null){
-            Boolean addAzurer = microsoftAzureLoginMapper.addAzurer(requestData);
-            if(addAzurer){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    @Transactional
     public Boolean deleteAzurer(String pk) {
         if(pk == null || pk.equals("")){
             return false;
@@ -59,13 +47,22 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
     }
 
     @Override
-    @Transactional
-    public Boolean updateLocalAzurer(MicrosoftAzureUserModel requestData) {
+    public ServiceResult updateLocalAzurer(MicrosoftAzureUserModel requestData) {
         if(requestData == null || requestData.getPk() == null || requestData.getPk().equals("")){
-            return false;
+            Boolean addAzurer = microsoftAzureLoginMapper.addAzurer(requestData);
+            if(addAzurer){
+                return new ServiceResult<>(null, BaseErrorCode.SUCCESS,"新增账号信息成功");
+            }else{
+                return new ServiceResult<>(null, BaseErrorCode.ERROR,"新增账号信息失败");
+            }
+        }else{
+            Boolean updateLocalAzurer = microsoftAzureLoginMapper.updateLocalAzurer(requestData.getPk().toString(),requestData);
+            if(updateLocalAzurer){
+                return new ServiceResult<>(null, BaseErrorCode.SUCCESS,"修改账号信息成功");
+            }else{
+                return new ServiceResult<>(null, BaseErrorCode.ERROR,"修改账号信息失败");
+            }
         }
-        Boolean updateLocalAzurer = microsoftAzureLoginMapper.updateLocalAzurer(requestData.getPk().toString(),requestData);
-        return updateLocalAzurer;
     }
 
 }

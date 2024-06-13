@@ -22,7 +22,7 @@ public class CalculateLaasVM extends DeviceCloudTargetCalculate {
     /**
      * (包含cpu数量 运存大小 网卡数量等)Standard_B1s，1vcpu，1GiB内存，2网卡
      */
-    private String basicType;
+    private String vmSizeType;
 
     /**
      * os磁盘大小
@@ -32,7 +32,7 @@ public class CalculateLaasVM extends DeviceCloudTargetCalculate {
     /**
      * 磁盘类型(ssd/hhd)
      */
-    private String hardDiskType;
+    private String vmOsDiskType;
 
     /**
      * 扩展磁盘
@@ -59,12 +59,17 @@ public class CalculateLaasVM extends DeviceCloudTargetCalculate {
      */
     private String password;
 
+    /**
+     * 虚拟机类型
+     */
+    private String vmType;
+
     //简化实例创建，同时允许链式调用和设置默认值
     @Builder(toBuilder = true)
     public CalculateLaasVM() {
-        this.basicType = "Standard_B1s";
+        this.vmSizeType = "Standard_B1s";
         this.osDisk = "30";
-        this.hardDiskType = "StandardSSD_LRS";
+        this.vmOsDiskType = "StandardSSD_LRS";
         this.loopholes = new ArrayList<>();
         this.networkInterfaces = new ArrayList<>();
         this.userName = "admin123";
