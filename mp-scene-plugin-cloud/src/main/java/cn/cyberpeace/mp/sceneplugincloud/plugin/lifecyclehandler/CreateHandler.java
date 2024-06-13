@@ -640,12 +640,18 @@ public class CreateHandler extends HandlerCommon {
                 basDeviceInitCommand.add(String.format("set \"replace_ip=%s\"", BeanCommon.getBean(CommonAppConfig.class).getBasIp()));
                 basDeviceInitCommand.add("set \"search_port=server_port\"");
                 basDeviceInitCommand.add(String.format("set \"replace_port=%s\"", BeanCommon.getBean(CommonAppConfig.class).getBasPort()));
+
+                basDeviceInitCommand.add("set \"search_template_id=mp_scene_template_id\"");
+                basDeviceInitCommand.add(String.format("set \"replace_template_id=%s\"", SceneContextHolder.getCsceneInstanceId()));
                 basDeviceInitCommand.add("set \"input=D:\\config_test.yml\"");
+
                 basDeviceInitCommand.add("set \"output=D:\\config_test.yml.tmp\"");
                 basDeviceInitCommand.add("(for /f \"tokens=* delims=\" %%i in ('type \"%input%\"') do (");
                 basDeviceInitCommand.add("    set \"line=%%i\"");
                 basDeviceInitCommand.add("    set \"line=!line:%search_ip%=%replace_ip%!\"");
                 basDeviceInitCommand.add("    set \"line=!line:%search_port%=%replace_port%!\"");
+                basDeviceInitCommand.add("    set \"line=!line:%search_template_id%=%replace_template_id%!\"");
+
                 basDeviceInitCommand.add("    echo(!line!");
                 basDeviceInitCommand.add(")) > \"%output%\"");
                 basDeviceInitCommand.add("move /Y \"%output%\" \"%input%\"");
@@ -656,6 +662,8 @@ public class CreateHandler extends HandlerCommon {
                         BeanCommon.getBean(CommonAppConfig.class).getBasIp()));
                 basDeviceInitCommand.add(String.format("sed -i \"/platform_port:/s/server_port/%s/\" /opt/cpbas/client/application.yml",
                         BeanCommon.getBean(CommonAppConfig.class).getBasPort()));
+                basDeviceInitCommand.add(String.format("sed -i \"/template_id:/s/mp_scene_template_id/%s/\" /opt/cpbas/client/application.yml",
+                        SceneContextHolder.getCsceneInstanceId()));
 
             } else {
                 log.error("bas device system not support {}", sceneElementBO);
