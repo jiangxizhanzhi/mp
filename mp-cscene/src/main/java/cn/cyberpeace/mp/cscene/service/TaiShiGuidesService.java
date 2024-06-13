@@ -676,13 +676,17 @@ public class TaiShiGuidesService {
         return taiShi;
     }
 
-    private TaiShiEventInfo getEventInfoFrom(FlowEventData eventData, Map<String, SceneElementBO> ip2ElementMap) {
+    private TaiShiEventInfo getEventInfoFrom(FlowEventData eventData, Map<String, SceneElementBO> mac2ElementMap) {
         TaiShiEventInfo taiShi = new TaiShiEventInfo();
         taiShi.setActionType("attack");
         taiShi.setTriggerType("flow");
         taiShi.setTime(TimeUtils.timestampToLocalDateTime(Long.parseLong(eventData.getTimestamp())));
         if (eventData.getSource() != null) {
-            SceneElementBO element = this.getElementBy(eventData.getSource().getIp(), ip2ElementMap);
+            String mac = StringUtils.EMPTY;
+            if (CollectionUtils.isNotEmpty(eventData.getSource().getMac())) {
+                mac = eventData.getSource().getMac().get(0);
+            }
+            SceneElementBO element = this.getElementBy(mac, mac2ElementMap);
             if (element != null) {
                 taiShi.setSourceNodeId(element.getId());
                 taiShi.setSourceNodeIp(eventData.getSource().getIp());
@@ -691,7 +695,11 @@ public class TaiShiGuidesService {
             }
         }
         if (eventData.getDestination() != null) {
-            SceneElementBO element = this.getElementBy(eventData.getDestination().getIp(), ip2ElementMap);
+            String mac = StringUtils.EMPTY;
+            if (CollectionUtils.isNotEmpty(eventData.getSource().getMac())) {
+                mac = eventData.getSource().getMac().get(0);
+            }
+            SceneElementBO element = this.getElementBy(mac, mac2ElementMap);
             if (element != null) {
                 taiShi.setTargetNodeId(element.getId());
                 taiShi.setTargetNodeIp(eventData.getDestination().getIp());
