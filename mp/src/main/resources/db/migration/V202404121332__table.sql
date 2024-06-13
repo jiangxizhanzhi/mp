@@ -108,6 +108,7 @@ alter table mp_sceneplugincollection_scene add column option_key text not null d
 
 
 delete from mp_common_option where type = 'runtime_log_type' and code = 'CP';
+update mp_sys_config set `value` = '专用防御效能评估环境' where `key_name` = 'system_name';
 
 
 

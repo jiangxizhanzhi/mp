@@ -138,15 +138,19 @@ public class CreateHandler extends HandlerCommon {
 
         // 2. 创建arkime 和流量镜像
         runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
-            ArkimeCreateResBo arkimeCreateResBo = getFlowCollector().createCollector();
-            getPluginHandler().getScene().setFlowCollector(arkimeCreateResBo.getResourceId());
+            try {
+                ArkimeCreateResBo arkimeCreateResBo = getFlowCollector().createCollector();
+                getPluginHandler().getScene().setFlowCollector(arkimeCreateResBo.getResourceId());
 
-            FlowMirrorCreateRes flowMirrorCreateRes = getFlowCollector().createFlowMirror(arkimeCreateResBo.getIp(),
-                    getPluginHandler().getSceneHandler().getSceneId(), totalMirrorParams);
+                FlowMirrorCreateRes flowMirrorCreateRes = getFlowCollector().createFlowMirror(arkimeCreateResBo.getIp(),
+                        getPluginHandler().getSceneHandler().getSceneId(), totalMirrorParams);
 
-            getPluginHandler().getScene().setFlowMirrorId(flowMirrorCreateRes.getFlowMirrorId());
-            getPluginHandler().getScene().setOptionKey(Collections.singletonList(flowMirrorCreateRes.getOptionKey()));
-
+                getPluginHandler().getScene().setFlowMirrorId(flowMirrorCreateRes.getFlowMirrorId());
+                getPluginHandler().getScene().setOptionKey(Collections.singletonList(flowMirrorCreateRes.getOptionKey()));
+            } catch (Exception e) {
+                log.error("创建arkime流量采集器失败");
+                log.error(e.getMessage(), e);
+            }
         });
 
 

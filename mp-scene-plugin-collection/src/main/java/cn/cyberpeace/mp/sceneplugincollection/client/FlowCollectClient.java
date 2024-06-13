@@ -12,7 +12,6 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.ArkimeCreateResBo;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
-import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import com.google.common.collect.Lists;
 import lombok.Data;
@@ -40,8 +39,8 @@ public class FlowCollectClient {
         //arkime在es上创建索引的开头唯一标识
         String arkimePrefixId = indexPrefix + String.valueOf(System.currentTimeMillis());
         log.info("index prefix generated {}", arkimePrefixId);
-        if (Objects.isNull(SituationalAwareConstant.ArkimeNetworkId)) {
-            throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR, "networkId 为空");
+        if (Objects.isNull(CloudSingleton.cloudAppConfig.getExternalNetId())) {
+            throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR, "arkime 连接的外部网络networkId 为空");
         }
         SituationAwareConfig situationAwareConfig = BeanCommon.getBean(SituationAwareConfig.class);
         String fixedIp = IpUtils.newRandomIps(CloudSingleton.cloudAppConfig.getExternalNetCidr(), 1, Collections.emptyList(), Collections.emptyList(), false).get(0);
