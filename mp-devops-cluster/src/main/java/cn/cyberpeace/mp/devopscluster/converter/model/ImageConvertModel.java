@@ -163,4 +163,9 @@ public class ImageConvertModel extends BasePageConvertModel{
     @ApiModelProperty("是否支持行为仿真")
     private Boolean behaveSupport;
 
+    /**
+     * 攻防模拟器类型 0-攻击 1-防守
+     */
+    private Integer attackMockDeviceType;
+
 }

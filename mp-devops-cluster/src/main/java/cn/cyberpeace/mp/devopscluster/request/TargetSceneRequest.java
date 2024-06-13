@@ -141,4 +141,7 @@ public class TargetSceneRequest extends BasePageRequest implements Serializable 
     @ApiModelProperty(value = "true:过滤攻防模拟器")
     private Boolean attackMockDeviceFlag = false;
 
+    @ApiModelProperty(value = "攻防模拟器类型 0-攻击 1-防守")
+    private Integer attackMockDeviceType;
+
 }

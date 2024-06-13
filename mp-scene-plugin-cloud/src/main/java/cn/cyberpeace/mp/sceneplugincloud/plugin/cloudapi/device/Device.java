@@ -266,6 +266,9 @@ public class Device {
     @ApiModelProperty("是否是攻防靶标模拟器")
     private Boolean attackMockDeviceFlag;
 
+    @ApiModelProperty("攻防模拟器类型 0-攻击 1-防守")
+    private Integer attackMockDeviceType;
+
     public Boolean getIsBuildIn() {
         boolean tmpImport = !Objects.isNull(isImport) && isImport;
         boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;

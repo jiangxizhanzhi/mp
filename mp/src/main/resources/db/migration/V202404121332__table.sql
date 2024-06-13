@@ -87,6 +87,12 @@ alter table mp_situation_collection_template add column system_distribution_type
 alter table mp_devops_target add column attack_mock_device_flag tinyint(1) not null default 0 comment '0非攻防模拟器,1攻防模拟器';
 alter table mp_scene_scene_element add column attack_mock_device_flag tinyint(1) not null default 0 comment '0非攻防模拟器,1攻防模拟器';
 alter table mp_scene_scene_config_element add column attack_mock_device_flag tinyint(1) not null default 0 comment '0非攻防模拟器,1攻防模拟器';
+
+alter table mp_devops_target add column attack_mock_device_type int(2) not null default 0 comment '攻防模拟器类型 0-攻击 1-防守';
+alter table mp_scene_scene_element add column attack_mock_device_type int(2) not null default 0 comment '攻防模拟器类型 0-攻击 1-防守';
+alter table mp_scene_scene_config_element add column attack_mock_device_type int(2) not null default 0 comment '攻防模拟器类型 0-攻击 1-防守';
+
+
 alter table mp_devops_target add column behave_support tinyint(1) not null default 0 comment '0不支持,1支持';
 alter table mp_scene_scene_element add column behave_support tinyint(1) not null default 0 comment '0不支持,1支持';
 alter table mp_scene_scene_config_element add column behave_support tinyint(1) not null default 0 comment '0不支持,1支持';

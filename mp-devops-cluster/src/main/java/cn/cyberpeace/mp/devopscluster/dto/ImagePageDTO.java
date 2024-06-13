@@ -174,6 +174,8 @@ public class ImagePageDTO extends BasePageDTO{
 
     private Boolean attackMockDeviceFlag;
 
+    private Integer attackMockDeviceType;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }

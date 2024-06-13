@@ -3,18 +3,12 @@ package cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
 import cn.cyberpeace.mp.flow.bo.FlowTaskAttackConf;
-import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
-import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
-import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
-import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import cn.cyberpeace.mp.scenepluginflow.constant.FlowSceneStage;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
@@ -24,9 +18,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 public class CreateHandler extends HandlerCommon {
@@ -53,36 +45,7 @@ public class CreateHandler extends HandlerCommon {
         // 创建 trex 虚拟机
         runSceneProgress(SceneProcess.CREATE_EXECUTOR, () -> {
             FlowPluginSceneBO scene = getPluginHandler().getScene();
-            List<FlowNetworkInfo> networkInfos = new ArrayList<>();
-            ArrayList<FlowPluginSceneElementBO> flowElements = new ArrayList<>(getPluginHandler().getElementMap().values());
-            log.info("flowElements is:{}", flowElements);
-            if (CollectionUtils.isNotEmpty(flowElements)) {
-                CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler().getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-                if (cloudPluginHandler != null) {
-                    Set<String> existIp = new HashSet<>();
-                    List<ConnectedNetworkBO> networkBOS = new ArrayList<>();
 
-                    // 1. 获取到所有网络
-                    for (CloudPluginSceneElementBO cpElement : cloudPluginHandler.getElementMap().values()) {
-                        if (CollectionUtils.isNotEmpty(cpElement.getDeriveNetworks())) {
-                            networkBOS.addAll(cpElement.getDeriveNetworks());
-                        }
-                    }
-                    flowElements.forEach(element -> {
-                        CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(element.getSrcElement().getId());
-                        if (cloudElement == null || cloudElement.getVirtualType() == null) {
-                            return;
-                        }
-
-                        // 2. 核心路由器 以及非容器，非虚机无法进行流量发生
-                        if ((!cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)
-                                && !cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE))
-                            || ElementTypeUtils.isCoreRouter(cloudElement.getImage())) {
-                            return;
-                        }
-                    });
-                }
-            }
             // 3. 起trex
             String executorId = getHandlerUtils().startExecutor(getPluginHandler().getSourceSceneId());
             log.info("executorId is:{}", executorId);

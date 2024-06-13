@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
 import cn.cyberpeace.mp.flow.bo.BatchStartTaskBO;
 import cn.cyberpeace.mp.flow.bo.TaskSipBO;
-import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
@@ -26,11 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 @Data
@@ -138,11 +133,6 @@ public class SceneHandlerUtils {
         this.pluginHandler = pluginHandler;
         flowExecutor = BeanCommon.getBean(FlowExecutor.class);
         flowTaskTaskService = BeanCommon.getBean(FlowTaskTaskService.class);
-    }
-
-    public String createExecutor(String sceneEid, List<FlowNetworkInfo> networkInfos) {
-        String name = BeanCommon.getBean(IFlowResourceName.class).generate(sceneEid, null);
-        return flowExecutor.createExecutor(name, networkInfos);
     }
 
     public String startExecutor(String sceneEid) {

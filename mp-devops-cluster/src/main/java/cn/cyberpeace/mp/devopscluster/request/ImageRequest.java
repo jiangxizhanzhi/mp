@@ -181,6 +181,9 @@ public class ImageRequest extends BaseRequest {
     @ApiModelProperty("是否是攻防靶标模拟器")
     private Boolean attackMockDeviceFlag;
 
+    @ApiModelProperty("攻防模拟器类型, 0-攻击类型 1-防守类型")
+    private Integer attackMockDeviceType;
+
     @ApiModelProperty("行为仿真模拟")
     private Boolean behaviorSimulation;
 }

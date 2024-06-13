@@ -33,6 +33,8 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
     private Boolean attackMockDeviceFlag;
     @DefaultBool
     private Boolean behaveSupport;
+    @DefaultInt
+    private Integer attackMockDeviceType;
 
     public static class Type {
         public static final int OTHER = 0;

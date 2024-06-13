@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 靶标
@@ -99,7 +100,9 @@ public class TargetConverter{
             sceneConvertModel.setList(Lists.newArrayList());
             return sceneConvertModel;
         }
+        Map<String, Integer> deviceIdToAttackMockTypeMap = deviceTargetPOS.stream().collect(Collectors.toMap(DeviceTargetPO::getId, DeviceTargetPO::getAttackMockDeviceType, (a, b) -> a));
         for (Device d : deviceList) {
+            d.setAttackMockDeviceType(deviceIdToAttackMockTypeMap.get(String.valueOf(d.getId())));
             if (ImageTypeEnum.CONTAINER.toValue().equals(d.getImageType()) && supportExports.containsKey(d.getUuid())) {
                 if (d.getExtDocker() != null) {
                     d.getExtDocker().setInitSupport(supportExports.get(d.getUuid()).getInitSupport());

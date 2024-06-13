@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.scene.core.bo.base;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
@@ -45,10 +44,12 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     private String nodeCommand;
     @ApiModelProperty(value = "是否辅助节点")
     private Boolean isAuxiliary;
-    @DefaultBool
+    @ApiModelProperty(value = "是否是攻防模拟器")
     private Boolean attackMockDeviceFlag;
-    @DefaultBool
+    @ApiModelProperty(value = "是否支持行为")
     private Boolean behaveSupport;
+    @ApiModelProperty(value = "攻防模拟器类型 0-攻击 1-防守")
+    private Integer attackMockDeviceType;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
