@@ -221,8 +221,7 @@ public class InitiateHandler extends HandlerCommon {
                                             return sceneElementSituationProbeModel;
                                         }).collect(Collectors.toList());
 
-                        BaseModelMapper.BulkResult<SceneElementSituationProbeModel> sceneElementSituationProbeModelBulkResult = sceneElementSituationProbeMapper.bulkCreate(sceneElementSituationProbeModels);
-                        System.out.println(sceneElementSituationProbeModelBulkResult.getFail().toString());
+                        sceneElementSituationProbeMapper.bulkCreate(sceneElementSituationProbeModels);
 
                     }
                     //生成探测安装脚本
