@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowPcapFileInfo;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowProtocolsInfo;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
 import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
@@ -34,6 +35,7 @@ import cn.cyberpeace.mp.cscene.service.FlowAttackTypeConvert;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
+import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneConfigAssetBO;
@@ -62,7 +64,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -76,6 +77,8 @@ import java.util.stream.Collectors;
 @AuthTarget(TargetEnum.CSCENE_MONITOR_GROUP)
 public class FlowMonitorController {
 
+    private static final String STR_PROTOCOLS = "[\"arp\", \"dns\",\"snmp\", \"ftp\", \"ftp-data\", \"http\", \"icmp\", \"ikev2\", \"ip\", \"ipv6\", \"krb5\", \"nfs\", \"ntp\", \"pkthdr\", \"pop3\", \"sftp\", \"smb\", \"smtp\", \"ssh\", \"syn\", \"tcp\", \"tcp-pkt\", \"tcp-stream\", \"tcpmux\", \"telnet\", \"tls\", \"udp\"]";
+
     @Autowired
     private FlowMonitorService flowMonitorService;
 
@@ -84,6 +87,9 @@ public class FlowMonitorController {
 
     @Autowired
     private FlowClassificationsService flowClassificationsService;
+
+    @Autowired
+    private SysConfigService sysConfigService ;
 
     @ApiOperation(value = "模拟流量")
     @GetMapping("/simulation")
@@ -315,6 +321,32 @@ public class FlowMonitorController {
         FlowAttackConfigInfo info = new FlowAttackConfigInfo();
         info.setTypes(list);
         return new ServiceResult<>(info).asResult();
+    }
+
+    @AuthTarget(TargetEnum.NO_AUTH)
+    @ApiOperation(value = "查询流量攻击协议列表")
+    @GetMapping("/flow_protocols")
+    public ServiceResult<FlowProtocolsInfo> getFlowProtocolsInfo() {
+        String strProtocols = STR_PROTOCOLS;
+        var model = sysConfigService.getByKeyName("cscene_flow_allprotocols");
+        if (model != null) {
+            strProtocols = model.getValue();
+        }
+        var protocols = JsonCommon.parseList(strProtocols, String.class);
+        List<FlowProtocolsInfo.FlowProtocol> list = new ArrayList<>();
+        FlowProtocolsInfo.FlowProtocol v = new FlowProtocolsInfo.FlowProtocol();
+        v.setValue(null);
+        v.setLabel(MessageCommon.get("cscene.flow.allprotocols"));
+        list.add(v);
+        for (var p : protocols) {
+            v = new FlowProtocolsInfo.FlowProtocol();
+            v.setLabel(p);
+            v.setValue(p);
+            list.add(v);
+        }
+        FlowProtocolsInfo flowProtocolsInfo = new FlowProtocolsInfo();
+        flowProtocolsInfo.setFlowOptions(list);
+        return new ServiceResult<>(flowProtocolsInfo).asResult();
     }
 
     private static FlowAttackConfigInfo.FlowAttackType getFlowAttackType(FlowClassificationModel r) {
