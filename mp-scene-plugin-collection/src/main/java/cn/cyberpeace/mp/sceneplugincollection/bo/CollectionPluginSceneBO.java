@@ -8,7 +8,10 @@ import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneModel;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -37,15 +40,24 @@ public class CollectionPluginSceneBO extends BaseCollectionPluginSceneBO<Collect
 
     public void fromModel(CollectionPluginSceneModel obj, String... ignoreFields) {
         BeanUtils.copyPropertiesIgnoreNull(obj, this, ignoreFields);
-        this.setOptionKey(JsonCommon.parse(obj.getOptionKey(), new TypeReference<List<Integer>>() {
-        }));
+        if (StringUtils.isNoneBlank(obj.getOptionKey())) {
+            this.setOptionKey(JsonCommon.parse(obj.getOptionKey(), new TypeReference<List<Integer>>() {
+            }));
+        } else {
+            this.setOptionKey(Collections.emptyList());
+        }
+
     }
 
     @Override
     public CollectionPluginSceneModel toModel(String... ignoreFields) {
         CollectionPluginSceneModel obj = createModel();
         BeanUtils.copyPropertiesIgnoreNull(this, obj, ignoreFields);
-        obj.setOptionKey(JsonCommon.snakeStringify(this.getOptionKey()));
+        if (CollectionUtils.isEmpty(this.getOptionKey())) {
+            obj.setOptionKey("");
+        } else {
+            obj.setOptionKey(JsonCommon.snakeStringify(this.getOptionKey()));
+        }
         return obj;
     }
 }
