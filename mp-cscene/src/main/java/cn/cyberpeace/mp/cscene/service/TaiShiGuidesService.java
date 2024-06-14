@@ -696,8 +696,8 @@ public class TaiShiGuidesService {
         }
         if (eventData.getDestination() != null) {
             String mac = StringUtils.EMPTY;
-            if (CollectionUtils.isNotEmpty(eventData.getSource().getMac())) {
-                mac = eventData.getSource().getMac().get(0);
+            if (CollectionUtils.isNotEmpty(eventData.getDestination().getMac())) {
+                mac = eventData.getDestination().getMac().get(0);
             }
             SceneElementBO element = this.getElementBy(mac, mac2ElementMap);
             if (element != null) {
