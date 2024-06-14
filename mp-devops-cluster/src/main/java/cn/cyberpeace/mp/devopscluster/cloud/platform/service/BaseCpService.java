@@ -117,7 +117,7 @@ public class BaseCpService {
             result = HttpUtils.sendHttpPost(url, body, wrapperHeaders(new HashMap<>()));
         } catch (IOException e) {
             log.error("{} request error:", url, e);
-            throw new MpRuntimeException("devops post request failed");
+            throw new MpRuntimeException(DevopsClusterErrorCode.CLOUD_ERROR.format(e.getMessage()));
         }
         if (log.isInfoEnabled()) {
             log.info(POST_LOG_INFO, url, body, result);
