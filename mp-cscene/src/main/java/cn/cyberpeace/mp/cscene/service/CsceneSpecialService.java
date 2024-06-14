@@ -12,22 +12,13 @@ import cn.cyberpeace.mp.base.repository.condition.aggregation.Sum;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountActivitySceneBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
-import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneStat;
-import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
-import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.CsceneInstanceInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
-import cn.cyberpeace.mp.cscene.model.CsceneElementStat;
-import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountActivitySceneModel;
-import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
-import cn.cyberpeace.mp.cscene.model.CsceneModel;
-import cn.cyberpeace.mp.cscene.model.CsceneSnapshotModel;
+import cn.cyberpeace.mp.cscene.model.*;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneSnapshotMapper;
@@ -64,15 +55,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 @Slf4j
@@ -471,6 +454,9 @@ public class CsceneSpecialService {
                             CsceneInstanceStat::getDynamipsCount);
             List<CsceneInstanceStat> dataInfos = csceneInstanceMapper.list(humanCondition2, CsceneInstanceStat.class);
             if (CollectionUtils.isNotEmpty(dataInfos)) {
+
+                List<String> flowStats = csceneInstanceMapper.statGroupByFlow(sceneIds);
+                List<String> collectStats = csceneInstanceMapper.statGroupByCollect(sceneIds);
                 Map<String, CsceneInstanceStat> infos = new HashMap<>();
                 for (CsceneInstanceStat dataInfo : dataInfos) {
                     infos.put(dataInfo.getId(), dataInfo);
@@ -478,18 +464,32 @@ public class CsceneSpecialService {
                 for (CsceneInstanceStat d : data) {
                     CsceneInstanceStat info = infos.get(d.getId());
                     if (info != null) {
-                        d.setCpu(info.getCpu());
-                        d.setRam(info.getRam());
-                        d.setDisk(info.getDisk());
+                        int cpu = info.getCpu();
+                        int ram = info.getRam();
+                        int disk = info.getDisk();
                         d.setVmCount(info.getVmCount());
                         d.setContainerCount(info.getContainerCount());
                         d.setEntityCount(info.getEntityCount());
                         d.setDynamipsCount(info.getDynamipsCount());
                         if (info.getContainerCount() != null) {
-                            d.setCpu(d.getCpu() + info.getContainerCount());
-                            d.setRam(d.getRam() + info.getContainerCount() * 512);
-                            d.setDisk(d.getDisk() + info.getContainerCount() * 10);
+                            cpu += info.getContainerCount();
+                            ram += info.getContainerCount() * 512;
+                            disk += info.getContainerCount() * 10;
                         }
+                        // 加上流量和采集的资源占用
+                        if (flowStats.contains(d.getId())) {
+                            cpu += flowConfig.getTrexCpu();
+                            ram += flowConfig.getTrexRam();
+                            disk += flowConfig.getTrexDisk();
+                        }
+                        if (collectStats.contains(d.getId())) {
+                            cpu += situationAwareConfig.getArkimeCpu();
+                            ram += situationAwareConfig.getArkimeRam();
+                            disk += situationAwareConfig.getArkimeDisk();
+                        }
+                        d.setCpu(cpu);
+                        d.setRam(ram);
+                        d.setDisk(disk);
                     } else {
                         d.setCpu(0);
                         d.setRam(0);

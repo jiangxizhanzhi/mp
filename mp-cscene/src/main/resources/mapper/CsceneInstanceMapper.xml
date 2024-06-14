@@ -95,5 +95,26 @@
             #{item}
         </foreach>
     </select>
+    <select id="statGroupByFlow" resultType="java.lang.String">
+        select a.id
+        from mp_cscene_cscene_instance a,
+        mp_scenepluginflow_scene b
+        where a.scene = b.scene
+        and a.id in
+        <foreach collection="ids" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+    <select id="statGroupByCollect" resultType="java.lang.String">
+        select a.id
+        from mp_cscene_cscene_instance a,
+        mp_sceneplugincollection_scene b
+        where a.scene = b.scene
+        and b.enable_flow_collect = true
+        and a.id in
+        <foreach collection="ids" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
 
 </mapper>
