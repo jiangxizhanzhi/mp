@@ -26,10 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -100,7 +97,9 @@ public class TargetConverter{
             sceneConvertModel.setList(Lists.newArrayList());
             return sceneConvertModel;
         }
-        Map<String, Integer> deviceIdToAttackMockTypeMap = deviceTargetPOS.stream().collect(Collectors.toMap(DeviceTargetPO::getId, DeviceTargetPO::getAttackMockDeviceType, (a, b) -> a));
+        Map<String, Integer> deviceIdToAttackMockTypeMap = deviceTargetPOS.stream()
+                .filter(deviceTargetPO -> Objects.nonNull(deviceTargetPO.getAttackMockDeviceType()))
+                .collect(Collectors.toMap(DeviceTargetPO::getId, DeviceTargetPO::getAttackMockDeviceType, (a, b) -> a));
         for (Device d : deviceList) {
             d.setAttackMockDeviceType(deviceIdToAttackMockTypeMap.get(String.valueOf(d.getId())));
             if (ImageTypeEnum.CONTAINER.toValue().equals(d.getImageType()) && supportExports.containsKey(d.getUuid())) {

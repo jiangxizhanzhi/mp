@@ -114,7 +114,7 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
      * @param addFlowTaskTaskInfos
      * @param sceneId
      */
-    // todo待和30s接口对接，这个是流量发生trex新增流量任务接口
+    // todo 待和30s接口对接，这个是流量发生trex新增流量任务接口
     @Transactional
     public void addTask(List<AddFlowTaskTaskInfo> addFlowTaskTaskInfos, String sceneId, String actuatorId, boolean isAsync, List<FlowTaskTaskModel> flowTaskTaskModels) {
         log.info("FlowTaskTaskServiceImpl.addTask begin. addFlowTaskTaskInfos:{}, sceneId:{}", addFlowTaskTaskInfos, sceneId);
@@ -136,14 +136,16 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
                     if (flowActuatorModel != null && StringUtils.isNotEmpty(flowActuatorModel.getInstanceId())) {
                         JSONObject addPortReq = new JSONObject();
                         addPortReq.put("network_id", detail.getNetworkId());
+                        addPortReq.put("name", String.format("interface_%s", detail.getNetworkId()));
+                        addPortReq.put("hw_vif_model", "virtio");
                         try {
-                            String addTrexClientPortRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/instances/" +
-                                    flowActuatorModel.getInstanceId() + "/interfaces", addPortReq.toJSONString());
+                            String addTrexClientPortRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/cloud/v1/vm/" +
+                                    flowActuatorModel.getInstanceId() + "/network", addPortReq.toJSONString());
                             JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
                             log.info("add client port response:{}", addTrexClientObj.toJSONString());
                             if (BaseConstants.SUCCESS_ZERO.equals(addTrexClientObj.getString(BaseConstants.STR_CODE))) {
                                 JSONObject clientDataObj = addTrexClientObj.getJSONObject(BaseConstants.STR_DATA);
-                                macAddress = clientDataObj.getString("mac_address");
+                                macAddress = clientDataObj.getString("mac");
                                 flowTaskPortModel.setMac(macAddress);
                                 flowTaskPortModel.setActuatorId(actuatorId);
                                 flowTaskPortModel.setNetworkId(detail.getNetworkId());

@@ -22,6 +22,9 @@ spring:
     hikari:
       maximum-pool-size: ${spring.datasource.ext-var.maximum-pool-size}
       minimum-idle: ${spring.datasource.ext-var.minimum-idle}
+      idleTimeout: 30000  # 空闲连接的超时时间（毫秒）
+      connectionTimeout: 10000  # 连接超时时间（毫秒）
+      leakDetectionThreshold: 5000  # 连接泄漏检测阈值（毫秒）
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
   flyway:

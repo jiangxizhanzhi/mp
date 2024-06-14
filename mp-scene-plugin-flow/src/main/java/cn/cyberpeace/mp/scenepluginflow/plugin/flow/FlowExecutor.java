@@ -14,7 +14,6 @@ import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskPortModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.response.FlowRecordsResponse;
-import cn.cyberpeace.mp.flow.service.FlowActuatorService;
 import cn.cyberpeace.mp.flow.service.FlowTaskPortService;
 import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
 import cn.cyberpeace.mp.flow.service.impl.AsyncPlatFlowTaskService;
@@ -28,7 +27,6 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCre
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.res.ExternalNetworkInfoRes;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,16 +35,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Data
 @Component
 @Slf4j
 public class FlowExecutor {
     private static FlowTaskModel DEFAULT_INSTANCE;
 
+    @Autowired
     private AsyncPlatFlowTaskService flowService1;
 
-    private FlowActuatorService flowService2;
-
+    @Autowired
     private FlowTaskServiceImpl flowService3;
 
     @Autowired
@@ -57,20 +54,8 @@ public class FlowExecutor {
     @Autowired
     private FlowTaskPortService flowTaskPortService;
 
-    private static final Network networkClient = new Network();
-    private static final VirtualMachine vmClient = new VirtualMachine();
-    private static final Template templateClient = new Template();
     private static final String TREX_DEVICE_NAME = "tgnTrex";
     private static final String TGN_PATH = "/root/.mp/resources/flows/traffic_generators.zip";
-
-
-    @Autowired
-    public FlowExecutor(AsyncPlatFlowTaskService flowService1, FlowActuatorService flowService2,
-                        FlowTaskServiceImpl flowService3) {
-        setFlowService1(flowService1);
-        setFlowService2(flowService2);
-        setFlowService3(flowService3);
-    }
 
     public String createExecutor(String name, List<FlowNetworkInfo> networkInfos) {
         return flowService1.addExecutorSync(name, networkInfos);
@@ -83,6 +68,11 @@ public class FlowExecutor {
     }
 
     private void startExecutor(String uuid, String trexName) {
+        Network networkClient = new Network();
+        VirtualMachine vmClient = new VirtualMachine();
+        Template templateClient = new Template();
+
+
         log.info("addFlowExecutor name:{}", trexName);
         // 获取外部networkId，用于管理端口
         ExternalNetworkInfoRes externalNetworkInfoRes = networkClient.getExternalNetworkInfo();
@@ -161,6 +151,7 @@ public class FlowExecutor {
     }
 
     public void deleteExecutor(String executorId) {
+        VirtualMachine vmClient = new VirtualMachine();
         FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(executorId);
         String trexInstanceId = flowActuatorModel.getInstanceId();
         vmClient.deleteInstanceById(trexInstanceId);
