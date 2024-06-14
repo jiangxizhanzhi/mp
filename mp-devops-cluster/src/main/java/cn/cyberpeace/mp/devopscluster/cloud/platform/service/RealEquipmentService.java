@@ -44,6 +44,8 @@ public class RealEquipmentService extends BaseCpService {
 
     private static final String ENTITY_ADD_URL = "/cloud/v1/entity/lists";
 
+    private static final String SWITCH_CONNECT_ENTITY_DETAIL = "/cloud/v1/switch/switch_map";
+
     public RealEquipmentService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }
@@ -134,7 +136,7 @@ public class RealEquipmentService extends BaseCpService {
      * @return
      */
     public CloudPlatformPageResult<RealEquipmentByParams> findBySwitchName(String switchName){
-        CloudPlatformItemsPageResult pageResult =  super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/switch_map?switch_name=" + switchName,CloudPlatformItemsPageResult.class);
+        CloudPlatformItemsPageResult pageResult =  super.sendGet(SWITCH_CONNECT_ENTITY_DETAIL+"?switch_name=" + switchName,CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<RealEquipmentByParams> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getData().getItems()),RealEquipmentByParams.class);
         POLogoUtils.changeLogoPathToUrl(list);

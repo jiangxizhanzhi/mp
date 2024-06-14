@@ -643,9 +643,9 @@ public class CreateHandler extends HandlerCommon {
 
                 basDeviceInitCommand.add("set \"search_template_id=mp_scene_template_id\"");
                 basDeviceInitCommand.add(String.format("set \"replace_template_id=%s\"", SceneContextHolder.getCsceneInstanceId()));
-                basDeviceInitCommand.add("set \"input=D:\\config_test.yml\"");
+                basDeviceInitCommand.add("set \"input=C:\\cpbas\\client\\application.yml\"");
 
-                basDeviceInitCommand.add("set \"output=D:\\config_test.yml.tmp\"");
+                basDeviceInitCommand.add("set \"output=C:\\cpbas\\client\\application.yml.tmp\"");
                 basDeviceInitCommand.add("(for /f \"tokens=* delims=\" %%i in ('type \"%input%\"') do (");
                 basDeviceInitCommand.add("    set \"line=%%i\"");
                 basDeviceInitCommand.add("    set \"line=!line:%search_ip%=%replace_ip%!\"");

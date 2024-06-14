@@ -17,8 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Collections;
-
 import static cn.cyberpeace.mp.base.constant.BaseErrorCode.CUSTOM_ERROR;
 
 /**
@@ -35,6 +33,8 @@ public class SwitchService extends BaseCpService {
 
     public static final String DELETE_PHYSIC_SWITCH = "/cloud/v1/physical/physical_switch/{name}";
 
+    public static final String LIST_PHYSIC_SWITCH_DETAIL = "/cloud/v1/switch/switchs";
+
     public SwitchService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }
@@ -44,7 +44,7 @@ public class SwitchService extends BaseCpService {
      * @return
      */
     public SwitchesCloudPlatform list() {
-        return new SwitchesCloudPlatform(Collections.emptyList());
+        return super.sendGet(LIST_PHYSIC_SWITCH_DETAIL , SwitchesCloudPlatform.class);
     }
 
     public void delete(String name) {
