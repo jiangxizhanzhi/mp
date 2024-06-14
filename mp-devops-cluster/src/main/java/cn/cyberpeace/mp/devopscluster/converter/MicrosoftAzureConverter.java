@@ -566,7 +566,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         } else if (requestData.get("cloudServiceType").toString().equals("3")) {
             data = microsoftAzureMapper.getCloudTargetContainerById(requestData.get("id").toString());
         }else if (requestData.get("cloudServiceType").toString().equals("1")) {
-            data = microsoftAzureMapper.getCloudTargetContainerById(requestData.get("id").toString());
+            data = microsoftAzureMapper.getCloudTargetNetById(requestData.get("id").toString());
         }
         return data;
     }

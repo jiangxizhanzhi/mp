@@ -186,14 +186,14 @@
 
     <update id="updateCloudNetTarget">
         UPDATE
-        mp_devops_cloud_target_net
+            mp_devops_cloud_target_net
         SET
         <if test="param != null and param.logo != null">
             logo = #{param.logo},
         </if>
-        update_time = now()
+            update_time = now()
         WHERE
-        link_id = #{id}
+            link_id = #{id}
     </update>
 
     <delete id="deleteByIds">
