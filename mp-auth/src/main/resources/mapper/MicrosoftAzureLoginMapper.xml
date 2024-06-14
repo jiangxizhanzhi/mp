@@ -6,6 +6,7 @@
         INSERT INTO mp_auth_cloud_user
         (
             cloud_type,
+            connect_ip,
             azure_tenant_id,
             azure_subscription_id,
             azure_client_id,
@@ -17,6 +18,7 @@
         VALUES
         (
             #{param.cloudType},
+            #{param.connectIp},
             #{param.azureTenantId},
             #{param.azureSubscriptionId},
             #{param.azureClientId},
@@ -30,7 +32,7 @@
     <update id="updateLocalAzurer">
         UPDATE
             mp_auth_cloud_user
-        SET
+        <set>
             <if test="param.azureTenantId != null and param.azureTenantId != ''">
                 azure_tenant_id = #{param.azureTenantId},
             </if>
@@ -43,9 +45,13 @@
             <if test="param.azureClientSecret != null and param.azureClientSecret != ''">
                 azure_client_secret = #{param.azureClientSecret},
             </if>
+            <if test="param.connectIp != null and param.connectIp != ''">
+                connect_ip = #{param.connectIp},
+            </if>
             <if test="param.version != null and param.version != ''">
                 version = #{param.version},
             </if>
+        </set>
         WHERE
             pk = #{pk}
 
