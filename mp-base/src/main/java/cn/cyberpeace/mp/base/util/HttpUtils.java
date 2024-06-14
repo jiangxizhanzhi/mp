@@ -136,6 +136,19 @@ public class HttpUtils {
                 os.flush();
             }
 
+            int responseCode = connection.getResponseCode();
+            if (responseCode == 500) {
+                // 读取响应体中的错误信息
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+                String inputLine;
+                StringBuilder response = new StringBuilder();
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+                return response.toString();
+            }
+
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
                 StringBuilder response = new StringBuilder();
                 String line;
