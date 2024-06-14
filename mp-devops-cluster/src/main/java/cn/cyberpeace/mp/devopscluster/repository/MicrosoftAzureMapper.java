@@ -37,9 +37,13 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
 
     Integer updateCloudContainerTarget(@Param("id") String id, @Param("param") JSONObject requestData);
 
+    Integer updateCloudNetTarget(@Param("id") String id, @Param("param") JSONObject requestData);
+
     DeviceCloudTargetVO getCloudTargetCalculateById(@Param("id") String id);
 
     DeviceCloudTargetVO getCloudTargetContainerById(@Param("id") String id);
+
+    DeviceCloudTargetVO getCloudTargetNetById(@Param("id") String id);
 
     LinkedList<MpSysCodeMenu> getAlldata(String code);
 

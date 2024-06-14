@@ -13,7 +13,7 @@ public class DeviceCloudTargetVO extends BaseModel {
      */
     private Integer pk;
     /**
-     * 服务ID
+     * ID
      */
     private String id;
     /**

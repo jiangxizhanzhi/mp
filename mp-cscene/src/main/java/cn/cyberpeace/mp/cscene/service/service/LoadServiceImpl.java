@@ -443,7 +443,6 @@ public class LoadServiceImpl {
             requestData.setPageSize(pageSize);
         }
         List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResult(requestData);
-
         String[] codes = {CommonStatusCodeEnum.RESULT_STATUS.getCode(), CommonStatusCodeEnum.ACTION_TYPE.getCode(),
                 CommonStatusCodeEnum.RESULT_TYPE.getCode(), CommonStatusCodeEnum.CONTROL_TYPE.getCode()};
         List<MpSysCodeEnum> nextLevelDatasByCodes = commonCodeService.getNextLevelDatasByCodes(codes);

@@ -534,8 +534,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 ids = (List<String>) requestData.get("ids");
             }
             Integer deleteByPk = microsoftAzureMapper.deleteByIds(id, ids);
-            Integer deleteCalculatesByIds = microsoftAzureMapper.deleteCalculatesByIds(id, ids);
-            Integer deleteContainersByIds = microsoftAzureMapper.deleteContainersByIds(id, ids);
             if (deleteByPk > 0) {
                 return true;
             }
@@ -551,6 +549,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 id = microsoftAzureMapper.updateCloudCalculateTarget(requestData.get("id").toString(), requestData);
             } else if (requestData.get("cloudServiceType").toString().equals("3")) {
                 id = microsoftAzureMapper.updateCloudContainerTarget(requestData.get("id").toString(), requestData);
+            } else if (requestData.get("cloudServiceType").toString().equals("1")) {
+                id = microsoftAzureMapper.updateCloudNetTarget(requestData.get("id").toString(), requestData);
             }
             if (id > 0) {
                 return true;
@@ -564,6 +564,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
         if (requestData.get("cloudServiceType").toString().equals("2")) {
             data = microsoftAzureMapper.getCloudTargetCalculateById(requestData.get("id").toString());
         } else if (requestData.get("cloudServiceType").toString().equals("3")) {
+            data = microsoftAzureMapper.getCloudTargetContainerById(requestData.get("id").toString());
+        }else if (requestData.get("cloudServiceType").toString().equals("1")) {
             data = microsoftAzureMapper.getCloudTargetContainerById(requestData.get("id").toString());
         }
         return data;
