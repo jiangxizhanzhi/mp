@@ -145,15 +145,25 @@ public class CloudPlatformMonitorController {
         //虚拟机个数
         HypervisorStatisticsVO finalResponse = response;
         CompletableFuture totalInstanceCf = CompletableFuture.runAsync(() -> {
-            Integer totalInstances = vmConverter.getTotalInstances(new InstancePageDTO());
-            finalResponse.setTotalInstances(totalInstances);
+            try {
+                Integer totalInstances = vmConverter.getTotalInstances(new InstancePageDTO());
+                finalResponse.setTotalInstances(totalInstances);
+            } catch (Exception e) {
+                log.error("failed to get vm instances", e);
+                finalResponse.setTotalInstances(0);
+            }
         });
 
         //容器个数
         HypervisorStatisticsVO finalResponse1 = response;
         CompletableFuture totalContainersCf = CompletableFuture.runAsync(() -> {
-            Integer totalContainers =  containerConverter.getTotalContainers(new ContainerPageDTO());
-            finalResponse1.setTotalContainers(totalContainers);
+            try {
+                Integer totalContainers = containerConverter.getTotalContainers(new ContainerPageDTO());
+                finalResponse1.setTotalContainers(totalContainers);
+            } catch (Exception e) {
+                log.error("failed to get container instances", e);
+                finalResponse1.setTotalContainers(0);
+            }
         });
 
         //实装设备个数
@@ -162,56 +172,92 @@ public class CloudPlatformMonitorController {
 
         HypervisorStatisticsVO finalResponse2 = response;
         CompletableFuture totalRealEquipmentsCf = CompletableFuture.runAsync(() -> {
-            Integer totalRealEquipments = realEquipmentConverter.getTotalRealEquipment(realEquipmentPageRequest);
-            finalResponse2.setTotalRealEquipments(totalRealEquipments);
+            try {
+                Integer totalRealEquipments = realEquipmentConverter.getTotalRealEquipment(realEquipmentPageRequest);
+                finalResponse2.setTotalRealEquipments(totalRealEquipments);
+            }catch (Exception e){
+                log.error("failed to get RealEquipments instances", e);
+                finalResponse2.setTotalRealEquipments(0);
+            }
         });
 
         //路由个数
         HypervisorStatisticsVO finalResponse3 = response;
         CompletableFuture totalRoutersCf = CompletableFuture.runAsync(() -> {
-            Integer totalRouters = routerConverter.getTotalRouters(new RouterPageDTO());
-            finalResponse3.setTotalRouters(totalRouters);
+            try {
+                Integer totalRouters = routerConverter.getTotalRouters(new RouterPageDTO());
+                finalResponse3.setTotalRouters(totalRouters);
+            }catch (Exception e){
+                log.error("failed to get totalRouters instances", e);
+                finalResponse3.setTotalRouters(0);
+            }
         });
 
         //NPC个数
         HypervisorStatisticsVO finalResponse4 = response;
         CompletableFuture totalNpcsCf = CompletableFuture.runAsync(() -> {
-            Integer totalNpcs = npcConverter.getTotalNpcs(new BasePageDTO());
-            finalResponse4.setTotalNpc(totalNpcs);
+            try {
+                Integer totalNpcs = npcConverter.getTotalNpcs(new BasePageDTO());
+                finalResponse4.setTotalNpc(totalNpcs);
+            }catch (Exception e){
+                log.error("failed to get totalNpcs instances", e);
+                finalResponse4.setTotalNpc(0);
+            }
         });
 
         // 防火墙个数
         HypervisorStatisticsVO finalResponse5 = response;
         CompletableFuture totalFirewallsCf = CompletableFuture.runAsync(() -> {
-            Integer totalFirewalls = firewallConverter.getTotalFirewall(new BasePageDTO());
-            finalResponse5.setTotalFireWall(totalFirewalls);
+            try {
+                Integer totalFirewalls = firewallConverter.getTotalFirewall(new BasePageDTO());
+                finalResponse5.setTotalFireWall(totalFirewalls);
+            }catch (Exception e){
+                log.error("failed to get totalFirewalls instances", e);
+                finalResponse5.setTotalFireWall(0);
+            }
         });
 
         // 交换机个数 -> 替换为网络个数
         HypervisorStatisticsVO finalResponse6 = response;
         CompletableFuture totalNetworksCf = CompletableFuture.runAsync(() -> {
-            Integer totalNetworks = networkConverter.getTotalNetwork(new NetworkPageDTO());
-            finalResponse6.setTotalSwitch(totalNetworks);
+            try {
+                Integer totalNetworks = networkConverter.getTotalNetwork(new NetworkPageDTO());
+                finalResponse6.setTotalSwitch(totalNetworks);
+            }catch (Exception e){
+                log.error("failed to get totalFirewalls instances", e);
+                finalResponse6.setTotalSwitch(0);
+            }
         });
 
         // dynamips个数
         HypervisorStatisticsVO finalResponse7 = response;
         CompletableFuture totalDynamipsCf = CompletableFuture.runAsync(() -> {
-            VirtualDynamipsStatisticsResult result = new VirtualDynamips().statistics();
-            int totalDynamips = 0;
-            for (Integer v : result.getStatics().values()) {
-                totalDynamips += v;
+            try {
+
+                VirtualDynamipsStatisticsResult result = new VirtualDynamips().statistics();
+                int totalDynamips = 0;
+                for (Integer v : result.getStatics().values()) {
+                    totalDynamips += v;
+                }
+                finalResponse7.setTotalDynamips(totalDynamips);
+            }catch (Exception e){
+                log.error("failed to get TotalDynamips instances", e);
+                finalResponse7.setTotalDynamips(0);
             }
-            finalResponse7.setTotalDynamips(totalDynamips);
         });
 
         HypervisorStatisticsVO finalResponse8 = response;
         CompletableFuture hypervisorStatisticsCf = CompletableFuture.runAsync(() -> {
-            HypervisorStatisticsConvertModel hypervisorStatistics = hypervisorConverter.statistics();
-            if(hypervisorStatistics != null){
-                finalResponse8.build(hypervisorStatistics.getCpus(), hypervisorStatistics.getMemoryMb()
-                        ,hypervisorStatistics.getLocalGb(),hypervisorStatistics.getCpusUsed(),hypervisorStatistics.getMemoryMbUsed()
-                        ,hypervisorStatistics.getLocalGbUsed(),hypervisorStatistics.getFreeRamMb(),hypervisorStatistics.getFreeDiskGb());
+            try {
+                HypervisorStatisticsConvertModel hypervisorStatistics = hypervisorConverter.statistics();
+                if(hypervisorStatistics != null){
+                    finalResponse8.build(hypervisorStatistics.getCpus(), hypervisorStatistics.getMemoryMb()
+                            ,hypervisorStatistics.getLocalGb(),hypervisorStatistics.getCpusUsed(),hypervisorStatistics.getMemoryMbUsed()
+                            ,hypervisorStatistics.getLocalGbUsed(),hypervisorStatistics.getFreeRamMb(),hypervisorStatistics.getFreeDiskGb());
+                }
+            }catch (Exception e){
+                log.error("failed to get TotalDynamips instances", e);
+                finalResponse8.build(0, 0L, 0L, 0L, 0L, 0L, 0L, 0L);
             }
         });
 
