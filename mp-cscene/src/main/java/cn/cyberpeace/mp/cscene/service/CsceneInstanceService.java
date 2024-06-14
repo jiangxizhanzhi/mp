@@ -2077,21 +2077,35 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(true);
     }
 
+    /**
+     * 节点扩容
+     *
+     * @param request
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Boolean> createElementExpansionDisk(CsceneInstanceNodeExpansionDiskActionRequest request) {
         //获取场景实例操作对象
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(request.getId(), request.getContext(), true);
         String sceneId = instanceHandler.getSceneId();
+
+
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         Integer cloudType = sceneHandler.getScene().getCloudType();
-        if (cloudType == null || cloudType == 0) {
+        if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
             return new ServiceResult<>(false);
         }
 
         CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         CloudPluginSceneElementBO element = cloudPlugin.getElement(request.getNodeId());
+        String imageType = element.getImageType();
+        if (!BaseCloudPluginSceneElementModel.ImageType.VM.equals(imageType)) {
+            throw new MpRuntimeException("非虚拟机节点，不支持扩容");
+        }
+
         if (null != request.getVmSizeType()) {
             element.setVmSizeType(request.getVmSizeType());
         }

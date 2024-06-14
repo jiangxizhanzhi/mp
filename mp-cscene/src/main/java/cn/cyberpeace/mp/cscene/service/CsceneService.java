@@ -868,11 +868,21 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return new ServiceResult<>(true);
     }
 
-    public ListObjServiceResult<AzureVmSize> vmSizeList(CsceneInstanceStatQueryParams queryParams) {
+    public ListObjServiceResult<Map> vmSizeList(CsceneInstanceStatQueryParams queryParams) {
         HumanCondition humanCondition = new HumanCondition()
                 .pagination(queryParams.getPage(), queryParams.getPageSize());
         List<AzureVmSize> list = azureVmSizeMapper.list(humanCondition);
-        return new ListObjServiceResult<>(new ListObjResult<>(list, list.size()));
+        List<Map> data = list.stream()
+                .map(vs -> {
+                    // 使用StringBuilder代替字符串连接以提高性能
+                    StringBuilder sb = new StringBuilder(vs.getName());
+                    sb.append("、").append(vs.getVcpu()).append("vcpu、").append(vs.getRam()).append("GIB内存、").append(vs.getMaxNics()).append("网卡");
+                    HashMap<String, String> map = new HashMap<>();
+                    map.put(vs.getName(), sb.toString());
+                    return map;
+                })
+                .collect(Collectors.toList());
+        return new ListObjServiceResult<>(new ListObjResult<>(data, data.size()));
     }
 
     public ListObjServiceResult<AzureVmOsDisk> vmOsDiskTypeList(CsceneInstanceStatQueryParams queryParams) {

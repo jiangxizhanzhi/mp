@@ -12,7 +12,6 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
 import cn.cyberpeace.mp.cscene.dto.scene.CsceneLoadDto;
 import cn.cyberpeace.mp.cscene.model.AzureVmOsDisk;
-import cn.cyberpeace.mp.cscene.model.AzureVmSize;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -334,7 +333,7 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @ApiOperation("虚拟机大小列表")
     @GetMapping("/vm_size_list")
-    public ListObjServiceResult<AzureVmSize> vmSizeList(CsceneInstanceStatQueryParams queryParams) {
+    public ListObjServiceResult<Map> vmSizeList(CsceneInstanceStatQueryParams queryParams) {
         handleQueryParams("list", queryParams);
         return modelService.vmSizeList(queryParams).asResult();
     }

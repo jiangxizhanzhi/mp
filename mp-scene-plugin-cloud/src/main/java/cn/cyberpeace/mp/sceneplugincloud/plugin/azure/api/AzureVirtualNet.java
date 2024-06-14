@@ -60,6 +60,7 @@ public class AzureVirtualNet {
                         .defineSubnet(IpUtils.extractNetworkPart(entry.getKey()))
                         .withAddressPrefix(entry.getKey())
                         .withDelegation("Microsoft.ContainerInstance/containerGroups")
+//                          子网加入nsg
                         .withExistingNetworkSecurityGroup(nsg)
                         .attach();
             } else {
@@ -84,10 +85,6 @@ public class AzureVirtualNet {
 
         // azure 回写网络id
         net.setResourceId(network.id());
-
-
-//            子网加入nsg
-
 
 //            创建入站规则
         NetworkSecurityGroup.Update update = nsg.update();
