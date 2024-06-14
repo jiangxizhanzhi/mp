@@ -107,7 +107,11 @@ public class CloudUrlConstant {
     public static final String NETWORK_ACL_CREATE_URL = "/cloud/v1/network/{network_id}/acl";
     public static final String NETWORK_ACL_DELETE_URL = "/cloud/v1/network/{network_id}/acl";
     public static final String NETWORK_GET_URL = "/cloud/v1/networks/%s";
+    public static final String GET_EXTERNAL_NETWORK = "/cloud/v1/scenarios/virtual_internet";
     public static final String NETWORK_QUERY_URL = "/cloud/v1/network";
+
+    /******************模板*****************/
+    public static final String GET_TEMPLATE_ID_BY_DEVICE_NAME = "/cloud/v1/device/template_by_device?name=%s";
 
 
 

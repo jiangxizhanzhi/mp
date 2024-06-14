@@ -706,16 +706,6 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         return result;
     }
 
-    /**
-     * 更新流量任务
-     * @param flowTaskModel
-     * @return
-     */
-    @Deprecated
-    public int updateFlowTaskDetail(FlowTaskModel flowTaskModel) {
-        return getModelMapper().updateTaskInfo(flowTaskModel);
-    }
-
 
     /**
      * 批量新增流量任务
