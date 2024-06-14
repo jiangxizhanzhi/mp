@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
@@ -24,6 +25,8 @@ import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
+import cn.cyberpeace.mp.scene.repository.SceneConfigAreaMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
@@ -68,8 +71,12 @@ public class ResourceCenterService {
     @Resource
     private TargetConverter targetConverter;
 
+    @Resource
+    private SceneConfigAreaMapper sceneConfigAreaMapper ;
+
     public ServiceResult<CsceneBO> importByConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
-        String jsonFilePath = ymlFilePath + "/topo.json";
+        // 后续改名成 topo.json
+        String jsonFilePath = ymlFilePath + "/topo_not_support.json";
         File file = new File(jsonFilePath);
         if (file.exists()) {
             return this.importByJsonConfig(ymlFilePath, imageFilePath, imageFilePathList, sceneFilePath);
@@ -211,6 +218,15 @@ public class ResourceCenterService {
             log.error(detail);
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST, detail);
         }
+
+        // 有层节点不支持导出
+        var condition = new HumanCondition().filterEqual(BaseSceneAreaModel::getScene, cscene.getSource().getObj()
+                .getSceneConfig()).filterEqual(BaseSceneAreaModel::getType, BaseSceneAreaModel.Type.LAYER);
+        var list = sceneConfigAreaMapper.list(condition);
+        if (CollectionUtils.isNotEmpty(list)) {
+            throw new MpRuntimeException(CsceneErrorCode.UN_SUPPORT_AREA);
+        }
+
         String logo = cscene.getSource().getObj().getLogo();
         //存在logo图片则导出
         if (StringUtils.isNotEmpty(logo)) {
@@ -224,6 +240,8 @@ public class ResourceCenterService {
                 throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
             }
         }
+
+
 
         ExportResult result = new SceneExporter().export(cscene.getSource().getObj().getSceneConfig(), envPath, imagePath, singleImagePath, sceneNumber, disableImageExport);
         return new ServiceResult<>(result);
