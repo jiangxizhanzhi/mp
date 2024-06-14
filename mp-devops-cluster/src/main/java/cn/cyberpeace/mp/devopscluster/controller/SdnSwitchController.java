@@ -51,7 +51,7 @@ public class SdnSwitchController {
     }
 
     @ApiOperation("删除物理交换机")
-    @PostMapping("/delete/{name}")
+    @DeleteMapping("/delete/{name}")
     public ServiceResult<Boolean> deleteSdnSwitch(@PathVariable(name = "name") String name) {
         switchConverter.deleteSdnSwitch(name);
         return new ServiceResult<>(Boolean.TRUE).asResult();
