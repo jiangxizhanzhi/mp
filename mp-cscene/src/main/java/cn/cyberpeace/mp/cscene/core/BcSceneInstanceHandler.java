@@ -13,7 +13,9 @@ import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceUserCountService;
+import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
+import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
@@ -167,6 +169,12 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
         cscene.setScene(sceneService.modify(sid, cscene.getScene(), generateSceneContext(), originSceneHandler, () -> {
             //W:Refresh scene after running
             SceneInstanceLinkCacheUtil.refresh(sid);
+            try {
+                int count = BeanCommon.getBean(CsceneService.class).getActiveVirtualDeviceCount();
+                NodeLimitUtils.refreshCount(count);
+            } catch (Exception e) {
+                log.error("failed to refresh node limit count", e);
+            }
         }).getSource());
 
         CsceneInstanceModel csceneObj = cscene.toModel();
