@@ -7,15 +7,13 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.MicrosoftAzureConverter;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO;
-import com.alibaba.fastjson.JSONException;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -101,6 +99,15 @@ public class MicrosoftAzureController {
         microsoftAzureConverter.synchronousCloudData(1);
         microsoftAzureConverter.synchronousCloudData(2);
         microsoftAzureConverter.synchronousCloudData(3);
+        return new ServiceResult(null, BaseErrorCode.SUCCESS).asResult();
+    }
+
+    @ApiOperation(value = "同步后初始化用户")
+    @GetMapping("/initCloudUser")
+    public ServiceResult initCloudUser(@RequestParam(value = "cloud_types") int[] cloudTypes) {
+        for (int cloudType : cloudTypes) {
+            IAzureResourceManager.getInstance(cloudType).init();
+        }
         return new ServiceResult(null, BaseErrorCode.SUCCESS).asResult();
     }
 }

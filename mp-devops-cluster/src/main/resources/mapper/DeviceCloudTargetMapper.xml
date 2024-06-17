@@ -160,40 +160,24 @@
         </foreach>
     </insert>
 
-    <update id="updateCloudCalculateTarget">
+    <update id="updateCloudTarget">
         UPDATE
-            mp_devops_cloud_target_calculate
-        SET
-            <if test="param != null and param.logo != null">
-                logo = #{param.logo},
-            </if>
-                update_time = now()
-        WHERE
-            link_id = #{id}
-    </update>
-
-    <update id="updateCloudContainerTarget">
-        UPDATE
-            mp_devops_cloud_target_container
-        SET
-        <if test="param != null and param.logo != null">
-            logo = #{param.logo},
-        </if>
-            update_time = now()
-        WHERE
-            link_id = #{id}
-    </update>
-
-    <update id="updateCloudNetTarget">
-        UPDATE
+        <if test="cloudServiceType != null and cloudServiceType == 1">
             mp_devops_cloud_target_net
+        </if>
+        <if test="cloudServiceType != null and cloudServiceType == 2">
+            mp_devops_cloud_target_calculate
+        </if>
+        <if test="cloudServiceType != null and cloudServiceType == 3">
+            mp_devops_cloud_target_docker
+        </if>
         SET
         <if test="param != null and param.logo != null">
             logo = #{param.logo},
         </if>
-            update_time = now()
+        update_time = now()
         WHERE
-            link_id = #{id}
+        link_id = #{id}
     </update>
 
     <delete id="deleteByIds">
@@ -360,70 +344,70 @@
 
     <select id="getCloudTargetCalculateById" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO">
         SELECT
-            `link_id` as id,
-            `name`,
-            `source_type`,
-            `publisher`,
-            `offer`,
-            `sku`,
-            `operating_system`,
-            `operating_system_status`,
-            `is_public`,
-            `quick_create_support`,
-            `is_import`,
-            `is_hide`,
-            `create_time`,
-            `update_time`,
-            `logo`,
-            `version`,
-            `generation`
+            t.id,
+            t.name,
+            tc.source_type,
+            tc.publisher,
+            tc.offer,
+            tc.sku,
+            tc.operating_system,
+            tc.operating_system_status,
+            tc.is_public,
+            tc.quick_create_support,
+            tc.is_import,
+            tc.is_hide,
+            tc.create_time,
+            tc.update_time,
+            tc.logo,
+            tc.version,
+            tc.generation
         FROM
-            mp_devops_cloud_target_calculate
+            mp_devops_cloud_target t inner join mp_devops_cloud_target_calculate tc on t.id = tc.link_id
         WHERE
-            link_id = #{id}
+            t.id = #{id}
     </select>
 
     <select id="getCloudTargetContainerById" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO">
         SELECT
-            `link_id` as id,
-            `name`,
-            `source_type`,
-            `upload_target_name`,
-            `operating_system`,
-            `operating_system_status`,
-            `is_public`,
-            `quick_create_support`,
-            `is_import`,
-            `is_hide`,
-            `create_time`,
-            `update_time`,
-            `logo`,
-            `version`,
-            `generation`
+            t.id,
+            t.name,
+            tc.source_type,
+            tc.upload_target_name,
+            tc.operating_system,
+            tc.operating_system_status,
+            tc.is_public,
+            tc.quick_create_support,
+            tc.is_import,
+            tc.is_hide,
+            tc.create_time,
+            tc.update_time,
+            tc.logo,
+            tc.version,
+            tc.generation
         FROM
-            mp_devops_cloud_target_container
+            mp_devops_cloud_target t inner join mp_devops_cloud_target_container tc on t.id = tc.link_id
         WHERE
-            link_id = #{id}
+            t.id = #{id}
     </select>
 
     <select id="getCloudTargetNetById" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO">
         SELECT
-            `link_id` as id,
-            `net_service_name`,
-            `source_type`,
-            `cloud_type`,
-            `net_type`,
-            `is_public`,
-            `quick_create_support`,
-            `is_import`,
-            `is_hide`,
-            `create_time`,
-            `update_time`,
-            `logo`
+            t.id,
+            t.name,
+            tn.source_type,
+            tn.cloud_type,
+            tn.net_type,
+            tn.is_public,
+            tn.quick_create_support,
+            tn.is_import,
+            tn.is_hide,
+            tn.create_time,
+            tn.update_time,
+            tn.logo
         FROM
-            mp_devops_cloud_target_net
+            mp_devops_cloud_target t inner join mp_devops_cloud_target_net tn on t.id = tn.link_id
         WHERE
-            link_id = #{id}
+            t.id = #{id}
     </select>
 
     <select id="getAlldata" resultType="cn.cyberpeace.mp.base.bo.MpSysCodeMenu">

@@ -14,6 +14,8 @@ public interface IAzureResourceManager {
 
     MicrosoftAzureUserModel getUser();
 
+    void init();
+
     Region getRegin();
 
     public static IAzureResourceManager getInstance(int type) {
