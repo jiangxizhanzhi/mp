@@ -43,6 +43,10 @@ public class NetworkBehaviorService {
 		networkBehaviorMapper.bulkDelete(ids.toArray(new String[0]));
 	}
 
+	public NetworkBehaviorModel get(String id) {
+		return networkBehaviorMapper.get(id);
+	}
+
 	public ListObjServiceResult<NetworkBehaviorModel> page(NetworkPageReq pageReq) {
 		pageReq.ensure();
 		HumanCondition humanCondition = new HumanCondition()

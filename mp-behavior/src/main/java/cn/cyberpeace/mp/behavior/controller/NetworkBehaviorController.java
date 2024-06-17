@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.common.util.FileClient;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -53,6 +54,13 @@ public class NetworkBehaviorController {
 	public ServiceResult<Boolean> deleteBehavior(@RequestBody DeleteReq deleteReq) {
 		networkBehaviorService.delete(deleteReq.getIds());
 		return ResultCommon.success(true);
+	}
+
+	@GetMapping("/")
+	@ApiOperation("获取网络行为详情")
+	public ServiceResult<NetworkBehaviorModel> getBehavior(@ApiParam(name = "id", value = "网络行为id", required = true)
+															   @RequestParam("id") String id) {
+		return ResultCommon.success(networkBehaviorService.get(id));
 	}
 
 	@GetMapping("/page")
