@@ -54,7 +54,6 @@ public class FlowExecutor {
     @Autowired
     private FlowTaskPortService flowTaskPortService;
 
-    private static final String TREX_DEVICE_NAME = "tgnTrex";
     private static final String TGN_PATH = "/root/.mp/resources/flows/traffic_generators.zip";
 
     public String createExecutor(String name, List<FlowNetworkInfo> networkInfos) {
@@ -76,7 +75,8 @@ public class FlowExecutor {
         log.info("addFlowExecutor name:{}", trexName);
         // 获取外部networkId，用于管理端口
         ExternalNetworkInfoRes externalNetworkInfoRes = networkClient.getExternalNetworkInfo();
-        String trexTemplateId = templateClient.getTemplateIdByDeviceName(TREX_DEVICE_NAME);
+        String trexImageName = BeanCommon.getBean(FlowConfig.class).getTrexImage();
+        String trexTemplateId = templateClient.getTemplateIdByDeviceName(trexImageName);
         FlowConfig flowConfig = BeanCommon.getBean(FlowConfig.class);
 
 

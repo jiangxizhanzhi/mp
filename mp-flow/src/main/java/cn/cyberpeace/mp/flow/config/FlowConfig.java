@@ -18,6 +18,7 @@ public class FlowConfig {
     /**
      * trex镜像名称
      */
+    @Value("${mp.flow.trex-image:tgn-trex}")
     private String trexImage;
 
     /**

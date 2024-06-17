@@ -31,7 +31,6 @@ public class FlowCollectClient {
     private static final Container containerClient = new Container();
     private static final Mirror mirrorClient = new Mirror();
     private static String indexPrefix = "mp_";
-    private static final String ARKIME_IMAGE_NAME = "mp_arkime:v2";
 
 
 
