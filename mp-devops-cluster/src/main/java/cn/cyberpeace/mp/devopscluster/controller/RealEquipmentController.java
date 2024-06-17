@@ -233,12 +233,14 @@ public class RealEquipmentController {
             }
             extEntityAccess = list;
         }
-
+        DeviceTargetPO targetPO = realEquipmentService.getTargetBo(id);
         RealEquipmentByIdVO response = RealEquipmentByIdVO.builder().uuid(realEquipmentBO.getUuid())
                 .name(realEquipmentBO.getName()).logo(realEquipmentBO.getLogo()).role(realEquipmentBO.getRole())
                 .mainCategory(realEquipmentBO.getMainCategory()).subCategory(realEquipmentBO.getSubCategory()).thirdCategory(realEquipmentBO.getThirdCategory())
                 .systemInfo(realEquipmentBO.getExtSystemInfo()).extEntity(realEquipmentBO.getExtEntity())
-                .description(realEquipmentBO.getDescription()).extEntityAccess(extEntityAccess).extEntityUsb(realEquipmentBO.getExtEntityUsb()).build();
+                .description(realEquipmentBO.getDescription()).extEntityAccess(extEntityAccess).extEntityUsb(realEquipmentBO.getExtEntityUsb())
+                .openSyslog(targetPO.getOpenSyslog()).openKafka(targetPO.getOpenKafka()).openRestapi(targetPO.getOpenRestapi())
+                .openSoap(targetPO.getOpenSoap()).openSnmp(targetPO.getOpenSnmp()).build();
         return new Result(response);
     }
 
