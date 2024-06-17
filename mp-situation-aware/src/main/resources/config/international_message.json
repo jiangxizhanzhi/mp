@@ -2084,6 +2084,11 @@
     "zh_name": "自定义采集",
     "en_name": "custom collection"
   },
+  {
+    "key": "collection.type.04",
+    "zh_name": "通用协议采集",
+    "en_name": "common protocol acquisition"
+  },
 
   {
     "key": "cloudmusic",

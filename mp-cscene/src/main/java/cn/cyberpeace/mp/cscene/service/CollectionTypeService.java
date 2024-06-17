@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -50,6 +49,7 @@ public class CollectionTypeService {
         types.add(sourceLogFile("01", CollectionType.TYPE_LOG_FILE));
         types.add(logEvent("02", CollectionType.TYPE_LOG_EVENT));
         types.add(customCollect("03", CollectionType.TYPE_CUSTOM_COLLECT));
+        types.add(commonProtocolAcquisition("04", CollectionType.TYPE_COMMON_COLLECT));
 
         for (CollectionType type : types) {
             processCollectionType(type);
@@ -173,6 +173,14 @@ public class CollectionTypeService {
         CollectionType customCollect = CollectionType.builder().name("自定义采集").code(code).type(type).build();
 
         return customCollect;
+    }
+
+    /**
+     * 通用协议采集
+     */
+    private CollectionType commonProtocolAcquisition(String code, Integer type) {
+        CollectionType commonCollect = CollectionType.builder().name("通用协议采集").code(code).type(type).build();
+        return commonCollect;
     }
 
 

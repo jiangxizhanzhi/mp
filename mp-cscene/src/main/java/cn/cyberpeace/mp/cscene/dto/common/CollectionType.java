@@ -26,6 +26,7 @@ public class CollectionType {
     public static final Integer TYPE_LOG_FILE = 2;
     public static final Integer TYPE_LOG_EVENT = 3;
     public static final Integer TYPE_CUSTOM_COLLECT = 4;
+    public static final Integer TYPE_COMMON_COLLECT = 5;
 
     @ApiModelProperty(value = "名称")
     private String name;
@@ -33,7 +34,7 @@ public class CollectionType {
     @ApiModelProperty(value = "编码")
     private String code;
 
-    @ApiModelProperty(value = "-1:父级类别 0:文件变更 1:注册表变更 2:原始日志 3:日志事件 4:自定义采集")
+    @ApiModelProperty(value = "-1:父级类别 0:文件变更 1:注册表变更 2:原始日志 3:日志事件 4:自定义采集 5:通用协议采集")
     private Integer type;
 
     @ApiModelProperty(value = "描述")
