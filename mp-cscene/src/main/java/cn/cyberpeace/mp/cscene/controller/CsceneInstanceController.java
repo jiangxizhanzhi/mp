@@ -1000,7 +1000,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation(value = "查询通用协议采集")
     public ServiceResult<List<CommonCollectRes>> getCommonCollect(
             @ApiParam(name = "scene_id", value = "场景id", required = true) @RequestParam("scene_id") String sceneId,
-            @ApiParam(name = "node_id", value = "节点id", required = true) @RequestParam("node_id") String nodeId,
+            @ApiParam(name = "node_id", value = "节点id") @RequestParam(value = "node_id", required = false) String nodeId,
             @ApiParam(name = "agreement", value = "协议") @RequestParam(value = "agreement", required = false) String agreement
             ) {
         return new ServiceResult<>(commonCollectService.getCollect(sceneId, nodeId, agreement)).asResult();
