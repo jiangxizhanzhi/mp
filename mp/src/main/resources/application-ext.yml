@@ -141,8 +141,8 @@ mp:
       enable-command-change: ${MP_ENABLE_COMMAND_CHANGE:false}
       cron-job-expression: ${MP_CRON_JOB_EXPRESSION:0 0/15 * * * ?}
       enable-node-limit-db-check: ${MP_ENABLE_NODE_LIMIT_DB_CHECK:true}
-      flow-seconds: ${MP_FLOW_SECONDS:1}
-      flow-segment: ${MP_FLOW_SEGMENT:12}
+      flow-seconds: ${MP_FLOW_SECONDS:40}
+      flow-segment: ${MP_FLOW_SEGMENT:8}
   aggregation:
     ext-var:
       export-image-timeout: ${MP_EXPORT_IMAGE_TIMEOUT:1200000}
