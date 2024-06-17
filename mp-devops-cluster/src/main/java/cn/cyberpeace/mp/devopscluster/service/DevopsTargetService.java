@@ -191,6 +191,11 @@ public class DevopsTargetService {
         deviceTargetPO.setIsInit(Objects.nonNull(device.getIsInit()) ? device.getIsInit() : Boolean.FALSE);
         deviceTargetPO.setAttackMockDeviceFlag(Objects.nonNull(device.getAttackMockDeviceFlag()) ? device.getAttackMockDeviceFlag() : Boolean.FALSE);
         deviceTargetPO.setBehaveSupport(Objects.nonNull(device.getBehaveSupport()) ? device.getBehaveSupport() : Boolean.FALSE);
+        deviceTargetPO.setOpenSyslog(Objects.nonNull(device.getOpenSyslog()) ? device.getOpenSyslog() : Boolean.FALSE);
+        deviceTargetPO.setOpenKafka(Objects.nonNull(device.getOpenKafka()) ? device.getOpenKafka() : Boolean.FALSE);
+        deviceTargetPO.setOpenRestapi(Objects.nonNull(device.getOpenRestapi()) ? device.getOpenRestapi() : Boolean.FALSE);
+        deviceTargetPO.setOpenSoap(Objects.nonNull(device.getOpenSoap()) ? device.getOpenSoap() : Boolean.FALSE);
+        deviceTargetPO.setOpenSnmp(Objects.nonNull(device.getOpenSnmp()) ? device.getOpenSnmp() : Boolean.FALSE);
         if (device.getSupportExport() != null) {
             deviceTargetPO.setSupportExport(device.getSupportExport());
         }

@@ -226,6 +226,11 @@ public class RealEquipmentConverter implements BaseConverter{
         if (Objects.nonNull(extEntity)){
             convertModel.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
         }
+        convertModel.setOpenSyslog(device.getOpenSyslog());
+        convertModel.setOpenKafka(device.getOpenKafka());
+        convertModel.setOpenRestapi(device.getOpenRestapi());
+        convertModel.setOpenSoap(device.getOpenSoap());
+        convertModel.setOpenSnmp(device.getOpenSnmp());
         return convertModel;
     }
 
@@ -247,6 +252,11 @@ public class RealEquipmentConverter implements BaseConverter{
         device.setExtEntity(request.getExtEntity());
         device.setExtSystemInfo(request.getSystemInfo());
         device.setExtEntityUsb(request.getExtEntityUsb());
+        device.setOpenSyslog(request.getOpenSyslog());
+        device.setOpenKafka(request.getOpenKafka());
+        device.setOpenRestapi(request.getOpenRestapi());
+        device.setOpenSoap(request.getOpenSoap());
+        device.setOpenSnmp(request.getOpenSnmp());
         return device;
     }
 

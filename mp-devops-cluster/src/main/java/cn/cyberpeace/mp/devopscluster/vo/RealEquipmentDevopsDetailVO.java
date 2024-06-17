@@ -93,4 +93,19 @@ public class RealEquipmentDevopsDetailVO extends BaseVO {
      */
     @ApiModelProperty("登录链接信息")
     private List<TargetConnection> connections;
+
+    @ApiModelProperty("是否开启syslog采集")
+    private Boolean openSyslog;
+
+    @ApiModelProperty("是否开启kafka采集")
+    private Boolean openKafka;
+
+    @ApiModelProperty("是否开启restapi采集")
+    private Boolean openRestapi;
+
+    @ApiModelProperty("是否开启webservice(soap)采集")
+    private Boolean openSoap;
+
+    @ApiModelProperty("是否开启snmp采集,0不开启,1开启")
+    private Boolean openSnmp;
 }

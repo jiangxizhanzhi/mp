@@ -283,6 +283,21 @@ public class Device extends BaseCloudPlatformResult {
     @ApiModelProperty("攻防模拟器类型 0-攻击 1-防守")
     private Integer attackMockDeviceType;
 
+    @ApiModelProperty("是否开启syslog采集")
+    private Boolean openSyslog;
+
+    @ApiModelProperty("是否开启kafka采集")
+    private Boolean openKafka;
+
+    @ApiModelProperty("是否开启restapi采集")
+    private Boolean openRestapi;
+
+    @ApiModelProperty("是否开启webservice(soap)采集")
+    private Boolean openSoap;
+
+    @ApiModelProperty("是否开启snmp采集,0不开启,1开启")
+    private Boolean openSnmp;
+
     public Boolean getIsBuildIn() {
         boolean tmpImport = !Objects.isNull(isImport) && isImport;
         boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;

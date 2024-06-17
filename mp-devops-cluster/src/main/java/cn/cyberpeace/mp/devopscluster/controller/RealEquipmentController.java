@@ -25,11 +25,15 @@ import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.model.*;
 import cn.cyberpeace.mp.devopscluster.model.common.Hypervisor;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
+import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentNetworkCardPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentRequest;
-import cn.cyberpeace.mp.devopscluster.vo.*;
+import cn.cyberpeace.mp.devopscluster.vo.RealEquipmentByIdVO;
+import cn.cyberpeace.mp.devopscluster.vo.RealEquipmentDevopsDetailVO;
+import cn.cyberpeace.mp.devopscluster.vo.RealEquipmentNetworkCardPageVO;
+import cn.cyberpeace.mp.devopscluster.vo.RealEquipmentPageVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
@@ -300,9 +304,12 @@ public class RealEquipmentController {
         if (Objects.isNull(realEquipmentBO)){
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
+        DeviceTargetPO targetPO = realEquipmentService.getTargetBo(id);
         RealEquipmentDevopsDetailVO response = RealEquipmentDevopsDetailVO.builder()
                 .name(realEquipmentBO.getName()).logo(realEquipmentBO.getLogo())
-                .extSystemInfo(realEquipmentBO.getExtSystemInfo()).extEntity(realEquipmentBO.getExtEntity()).extEntityUsb(realEquipmentBO.getExtEntityUsb()).build();
+                .extSystemInfo(realEquipmentBO.getExtSystemInfo()).extEntity(realEquipmentBO.getExtEntity()).extEntityUsb(realEquipmentBO.getExtEntityUsb())
+                .openSyslog(targetPO.getOpenSyslog()).openKafka(targetPO.getOpenKafka()).openRestapi(targetPO.getOpenRestapi())
+                .openSoap(targetPO.getOpenSoap()).openSnmp(targetPO.getOpenSnmp()).build();
         if (CollectionUtils.isNotEmpty(realEquipmentBO.getExtEntityAccess())) {
             List<String> list = new ArrayList<>();
             for (ExtEntityAccess extEntityAccess : realEquipmentBO.getExtEntityAccess()) {

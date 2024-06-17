@@ -174,4 +174,19 @@ public class DeviceTargetPO extends BaseModel {
 
     @DefaultBool
     private Boolean behaveSupport;
+
+    @DefaultBool
+    private Boolean openSyslog;
+
+    @DefaultBool
+    private Boolean openKafka;
+
+    @DefaultBool
+    private Boolean openRestapi;
+
+    @DefaultBool
+    private Boolean openSoap;
+
+    @DefaultBool
+    private Boolean openSnmp;
 }

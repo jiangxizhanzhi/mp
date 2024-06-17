@@ -135,4 +135,29 @@ public class RealEquipmentBO extends BasePageConvertModel {
      * 实体USB信息
      */
     private EntityUsb extEntityUsb;
+
+    /**
+     * 是否开启syslog采集
+     */
+    private Boolean openSyslog;
+
+    /**
+     * 是否开启kafka采集
+     */
+    private Boolean openKafka;
+
+    /**
+     * 是否开启restapi采集
+     */
+    private Boolean openRestapi;
+
+    /**
+     * 是否开启webservice(soap)采集
+     */
+    private Boolean openSoap;
+
+    /**
+     * 是否开启snmp采集
+     */
+    private Boolean openSnmp;
 }

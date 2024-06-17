@@ -112,6 +112,11 @@ alter table mp_sceneplugincloud_scene_config_element_port add column vnic_id var
 alter table mp_sceneplugincollection_scene add column flow_mirror_id varchar(50) not null default '' comment '流量镜像id';
 alter table mp_sceneplugincollection_scene add column option_key text not null default '' comment '流量镜像标识';
 
+alter table mp_devops_target add column open_syslog tinyint(1) not null default 0 comment '是否开启syslog采集,0不开启,1开启';
+alter table mp_devops_target add column open_kafka tinyint(1) not null default 0 comment '是否开启kafka采集,0不开启,1开启';
+alter table mp_devops_target add column open_restapi tinyint(1) not null default 0 comment '是否开启restapi采集,0不开启,1开启';
+alter table mp_devops_target add column open_soap tinyint(1) not null default 0 comment '是否开启webservice(soap)采集,0不开启,1开启';
+alter table mp_devops_target add column open_snmp tinyint(1) not null default 0 comment '是否开启snmp采集,0不开启,1开启';
 
 delete from mp_common_option where type = 'runtime_log_type' and code = 'CP';
 update mp_sys_config set `value` = '专用防御效能评估环境' where `key_name` = 'system_name';

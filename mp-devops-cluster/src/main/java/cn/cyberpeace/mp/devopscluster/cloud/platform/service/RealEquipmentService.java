@@ -15,10 +15,13 @@ import cn.cyberpeace.mp.devopscluster.model.SnmpCloudPlatform;
 import cn.cyberpeace.mp.devopscluster.model.SnmpInterfaceResourceCloudPlatform;
 import cn.cyberpeace.mp.devopscluster.model.common.Hypervisor;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
+import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
+import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -45,6 +48,9 @@ public class RealEquipmentService extends BaseCpService {
     private static final String ENTITY_ADD_URL = "/cloud/v1/entity/lists";
 
     private static final String SWITCH_CONNECT_ENTITY_DETAIL = "/cloud/v1/switch/switch_map";
+
+    @Autowired
+    private DeviceTargetMapper deviceTargetMapper;
 
     public RealEquipmentService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
@@ -74,6 +80,10 @@ public class RealEquipmentService extends BaseCpService {
     public Device add(Device device){
         Device result = super.sendPost(ENTITY_ADD_URL, JsonUtils.snakeStringify(device),Device.class);
         super.checkResult(result);
+        result.setOpenSyslog(device.getOpenSyslog());
+        result.setOpenKafka(device.getOpenKafka());
+        result.setOpenRestapi(device.getOpenRestapi());
+        result.setOpenSoap(device.getOpenSoap());
         return result;
     }
 
@@ -208,5 +218,9 @@ public class RealEquipmentService extends BaseCpService {
         }
         log.debug("RealEquipmentService.physicalUsbListByHost end.");
         return new ListObjServiceResult(new ListObjResult<>(responseList, count)).asResult();
+    }
+
+    public DeviceTargetPO getTargetBo(String id) {
+        return deviceTargetMapper.findByUuid(id);
     }
 }
