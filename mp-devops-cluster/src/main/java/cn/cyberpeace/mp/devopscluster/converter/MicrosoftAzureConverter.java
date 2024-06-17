@@ -254,10 +254,10 @@ public class MicrosoftAzureConverter implements BaseConverter {
         List dockerInstances = null;
 //        List dockerInstances = getDockerInstances(instance);
 //        result.put("dockerInstanceList", dockerInstances);
-        //获取微软云 虚拟机镜像
+        //获取微软云市场 虚拟机镜像
         List images = getImages(instance);
         result.put("imageList", images);
-        //获取用户 虚拟机镜像
+        //获取用户上传 虚拟机镜像
         List localImages = getLocalImages(instance);
         result.put("localImageList", localImages);
 
@@ -448,41 +448,43 @@ public class MicrosoftAzureConverter implements BaseConverter {
         int firstTime = 0;
         for (VirtualMachinePublisher publisher : virtualMachinePublishers) {
             //todo 筛选出需要的VM镜像
-//            if (publisher.name() != null && publisher.name().equals("Canonical")) {
-            if (firstTime < 10) {
-                firstTime++;
-                System.out.println("PublisherName: " + publisher.name());
-                // 获取发布者的所有产品(offer)
-                VirtualMachineOffers offers = publisher.offers();
-                PagedIterable<VirtualMachineOffer> list = offers.list();
-                int secondTime = 0;
-                for (VirtualMachineOffer offer : list) {
-                    if (secondTime < 1) {
-                        secondTime++;
-                        System.out.println("offerName: " + offer.name());
-                        // 获取该产品的所有SKU
-                        VirtualMachineSkus skus = offer.skus();
-                        PagedIterable<VirtualMachineSku> skuList = skus.list();
-                        int thirdTime = 0;
-                        for (VirtualMachineSku sku : skuList) {
-                            if (thirdTime < 1) {
-                                thirdTime++;
-                                System.out.println("skuName: " + sku.name());
-                                // 获取每个SKU的所有版本（image versions）
-                                PagedIterable<VirtualMachineImage> imageList = sku.images().list();
-                                int time = 0;
-                                for (VirtualMachineImage image : imageList) {
-                                    if (time < 1) {
-                                        time++;
-                                        OperatingSystemTypes operatingSystemTypes = image.osDiskImage().operatingSystem();
-                                        JSONObject third = new JSONObject();
-                                        third.put("imageName", publisher.name());
-                                        third.put("imageVersion", image.version());
-                                        third.put("PublisherName", publisher.name());
-                                        third.put("offerName", offer.name());
-                                        third.put("skuName", sku.name());
-                                        third.put("operatingSystem", operatingSystemTypes);
-                                        result.add(third);
+            if (publisher.name() != null && (publisher.name().contains("linux") || publisher.name().contains("ubuntu")
+                    || publisher.name().contains("centos") || publisher.name().contains("windows"))) {
+                if (firstTime < 100) {
+                    firstTime++;
+                    System.out.println("PublisherName: " + publisher.name());
+                    // 获取发布者的所有产品(offer)
+                    VirtualMachineOffers offers = publisher.offers();
+                    PagedIterable<VirtualMachineOffer> list = offers.list();
+                    int secondTime = 0;
+                    for (VirtualMachineOffer offer : list) {
+                        if (secondTime < 1) {
+                            secondTime++;
+                            System.out.println("offerName: " + offer.name());
+                            // 获取该产品的所有SKU
+                            VirtualMachineSkus skus = offer.skus();
+                            PagedIterable<VirtualMachineSku> skuList = skus.list();
+                            int thirdTime = 0;
+                            for (VirtualMachineSku sku : skuList) {
+                                if (thirdTime < 1) {
+                                    thirdTime++;
+                                    System.out.println("skuName: " + sku.name());
+                                    // 获取每个SKU的所有版本（image versions）
+                                    PagedIterable<VirtualMachineImage> imageList = sku.images().list();
+                                    int time = 0;
+                                    for (VirtualMachineImage image : imageList) {
+                                        if (time < 1) {
+                                            time++;
+                                            OperatingSystemTypes operatingSystemTypes = image.osDiskImage().operatingSystem();
+                                            JSONObject third = new JSONObject();
+                                            third.put("imageName", publisher.name());
+                                            third.put("imageVersion", image.version());
+                                            third.put("PublisherName", publisher.name());
+                                            third.put("offerName", offer.name());
+                                            third.put("skuName", sku.name());
+                                            third.put("operatingSystem", operatingSystemTypes);
+                                            result.add(third);
+                                        }
                                     }
                                 }
                             }
@@ -490,7 +492,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
                     }
                 }
             }
-//            }
         }
         return result;
     }
@@ -544,17 +545,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
     @Transactional
     public Boolean updateCloudTarget(JSONObject requestData) {
         if (requestData != null && requestData.get("id") != null && !requestData.get("id").toString().equals("")) {
-            Integer id = 0;
-            if (requestData.get("cloudServiceType").toString().equals("2")) {
-                id = microsoftAzureMapper.updateCloudCalculateTarget(requestData.get("id").toString(), requestData);
-            } else if (requestData.get("cloudServiceType").toString().equals("3")) {
-                id = microsoftAzureMapper.updateCloudContainerTarget(requestData.get("id").toString(), requestData);
-            } else if (requestData.get("cloudServiceType").toString().equals("1")) {
-                id = microsoftAzureMapper.updateCloudNetTarget(requestData.get("id").toString(), requestData);
-            }
-            if (id > 0) {
-                return true;
-            }
+            Boolean updateCloudTarget = microsoftAzureMapper.updateCloudTarget(requestData.get("id").toString(), requestData.getInteger("cloudServiceType"), requestData);
+            return updateCloudTarget;
         }
         return false;
     }
