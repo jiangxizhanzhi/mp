@@ -1,0 +1,5 @@
+dependencies {
+    implementation project(':mp-base')
+    implementation project(':mp-scene')
+    implementation project(':mp-scene-plugin-cloud')
+}

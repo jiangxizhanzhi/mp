@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P extends BaseSceneElementPortBO<?, P, T>,
@@ -50,6 +51,8 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     private Boolean behaveSupport;
     @ApiModelProperty(value = "攻防模拟器类型 0-攻击 1-防守")
     private Integer attackMockDeviceType;
+    @ApiModelProperty(value = "节点的配置命令")
+    private ConfigCommand configCommand;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
@@ -57,6 +60,9 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
                 BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getInitCommands)));
         initCommands = StringUtils.isEmpty(obj.getInitCommands()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getInitCommands(), new TypeReference<List<String>>(){});
+        this.configCommand = StringUtils.isEmpty(obj.getConfigCommand()) ? new ConfigCommand()
+                : JsonCommon.parse(obj.getConfigCommand(), new TypeReference<ConfigCommand>() {
+        });
     }
 
     @Override
@@ -65,6 +71,9 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
                 BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getInitCommands)));
         if (initCommands != null) {
             obj.setInitCommands(JsonCommon.stringify(initCommands));
+        }
+        if (Objects.nonNull(this.configCommand)) {
+            obj.setConfigCommand(JsonCommon.stringify(this.configCommand));
         }
         return obj;
     }
@@ -102,5 +111,30 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
         }
 
         return pObj;
+    }
+
+    @Data
+    public static class ConfigCommand {
+        private String protocol;
+        private String ip;
+        private String port;
+        private String username;
+        private String password;
+        private String community;
+        private List<Command> commands;
+
+    }
+
+    @Data
+    public static class Command {
+        private String commandTag;
+        private String command;
+        private List<Param> params;
+    }
+
+    @Data
+    public static class Param {
+        private String key;
+        private String value;
     }
 }

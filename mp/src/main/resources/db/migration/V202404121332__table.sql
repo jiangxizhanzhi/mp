@@ -121,6 +121,8 @@ alter table mp_devops_target add column open_snmp tinyint(1) not null default 0 
 delete from mp_common_option where type = 'runtime_log_type' and code = 'CP';
 update mp_sys_config set `value` = '专用防御效能评估环境' where `key_name` = 'system_name';
 
+alter table mp_scene_scene_element add column config_command text not null default '' comment '配置命令';
+alter table mp_scene_scene_config_element add column config_command text not null default '' comment '配置命令';
 
 
 
