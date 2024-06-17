@@ -108,7 +108,7 @@ public class Device extends BaseCloudPlatformResult {
     private String logo;
 
     /**
-     * 类型
+     * 类型 vm-虚拟机  container-容器
      */
     @ApiModelProperty(value = "类型")
     private String imageType;

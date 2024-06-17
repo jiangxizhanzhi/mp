@@ -114,7 +114,9 @@ public class HttpUtils {
      * @throws IOException
      */
     public static String sendHttpPost(String url, String body, Map<String, String> headers) throws IOException {
-        log.info("=======sendHttpPost url: {}", url);
+        log.info("=======sendHttpPost url: {},  body: {}", url, body);
+        long startTime = System.currentTimeMillis();
+
         HttpURLConnection connection = null;
         try {
             URL urlObj = new URL(url);
@@ -146,7 +148,13 @@ public class HttpUtils {
                 while ((line = reader.readLine()) != null) {
                     response.append(line);
                 }
-                log.info("=======sendHttpPost response: {}", response);
+                long callTime = System.currentTimeMillis() - startTime;
+                if (log.isDebugEnabled()) {
+                    log.debug("=======sendHttpPost callTime [{}] response: {}", callTime, response);
+                }
+                if (log.isInfoEnabled()) {
+                    log.info("=======sendHttpPost callTime [{}] response success", callTime);
+                }
                 return response.toString();
             }
         } finally {

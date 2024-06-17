@@ -166,12 +166,21 @@ public class DeviceTargetPO extends BaseModel {
     @DefaultStr
     private String createUserName;
 
+    /**
+     * 攻防模拟器， 0-非， 1-是
+     */
     @DefaultBool
     private Boolean attackMockDeviceFlag;
 
+    /**
+     *  攻防模拟器类型 0-攻击 1-防守
+     */
     @DefaultInt
     private Integer attackMockDeviceType;
 
+    /**
+     * 是否支持行为 0-不支持， 1-支持
+     */
     @DefaultBool
     private Boolean behaveSupport;
 

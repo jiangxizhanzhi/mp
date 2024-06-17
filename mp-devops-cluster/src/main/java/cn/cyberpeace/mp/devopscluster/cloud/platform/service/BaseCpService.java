@@ -113,19 +113,12 @@ public class BaseCpService {
      */
     protected <T extends BaseModel> T sendPost(String api, String body, Class<T> valueType) {
         String url = this.buildUrl(api);
-        ;
         String result = "";
-        if (log.isInfoEnabled()) {
-            log.info(POST_LOG_INFO, url, body, result);
-        }
         try {
             result = HttpUtils.sendHttpPost(url, body, wrapperHeaders(new HashMap<>()));
         } catch (IOException e) {
             log.error("{} request error:", url, e);
             throw new MpRuntimeException("devops post request failed");
-        }
-        if (log.isInfoEnabled()) {
-            log.info(POST_LOG_INFO, url, body, result);
         }
         return this.buildSnakeObject(result, valueType);
     }
@@ -140,17 +133,11 @@ public class BaseCpService {
     protected String sendPost(String api, String body) {
         String url = this.buildUrl(api);
         String result = "";
-        if (log.isInfoEnabled()) {
-            log.info(POST_LOG_INFO, url, body, result);
-        }
         try {
             result = HttpUtils.sendHttpPost(url, body, wrapperHeaders(new HashMap<>()));
         } catch (IOException e) {
             log.error("{} request error:", url, e);
             throw new MpRuntimeException("devops post request failed");
-        }
-        if (log.isInfoEnabled()) {
-            log.info(POST_LOG_INFO, url, body, result);
         }
         return result;
     }

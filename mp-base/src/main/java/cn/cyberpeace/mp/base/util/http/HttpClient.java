@@ -144,6 +144,7 @@ public class HttpClient {
         HttpResult result = new HttpResult();
         result.setRequest(request);
         HttpResponse response;
+        long startTime = System.currentTimeMillis();
         if (logRequest) {
             log.info("Http {} - url: {}, header: {}, body: {}", request.getMethod(), request.getURI(),
                     request.getAllHeaders(), data == null ? StringUtils.EMPTY : data.toContent());
@@ -174,6 +175,8 @@ public class HttpClient {
                 result.setException(e);
             }
         }
+        long callTime = System.currentTimeMillis() - startTime;
+        log.info("=======Http callTime [{}] result success", callTime);
 
         return result;
     }
