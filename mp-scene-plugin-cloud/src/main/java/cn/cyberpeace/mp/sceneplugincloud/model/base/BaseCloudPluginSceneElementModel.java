@@ -173,6 +173,14 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String host;
 
+    //云场景-前端用
+    @DefaultStr
+    private String serviceType;
+    @DefaultStr
+    private String subType;
+    @DefaultStr
+    private String cloudServiceType;
+
 
     public static class VirtualType {
         public static final int VIRTUAL_SWITCH = 1;
