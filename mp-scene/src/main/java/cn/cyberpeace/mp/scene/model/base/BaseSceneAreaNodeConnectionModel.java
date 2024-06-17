@@ -56,7 +56,4 @@ public class BaseSceneAreaNodeConnectionModel extends BaseModel {
     @DefaultStr
     private String vertices;
 
-
-    @DefaultStr
-    private String info;
 }
