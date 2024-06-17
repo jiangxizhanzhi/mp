@@ -13,15 +13,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
-import cn.cyberpeace.mp.cscene.bo.CsceneBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
-import cn.cyberpeace.mp.cscene.bo.CsceneUpdateBO;
-import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
-import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
-import cn.cyberpeace.mp.cscene.bo.SceneAreaTreeBO;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -30,6 +22,8 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.cscene.response.CommonCollectRes;
+import cn.cyberpeace.mp.cscene.service.CsceneCommonCollectService;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -40,10 +34,8 @@ import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
-import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
@@ -58,10 +50,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataCountParams;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -73,12 +62,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Api(value = "场景实例", tags = "CSCENE-场景实例")
 @Slf4j
@@ -96,6 +80,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
+
+    @Autowired
+    private CsceneCommonCollectService commonCollectService;
 
     private CsceneInstanceActionRequest formatActionRequest(CsceneInstanceActionRequest request, String paramId) {
         if (request == null) {
@@ -1001,5 +988,21 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation(value = "查询靶场监控的场景实例类型")
     public ServiceResult<List<OptionBO>> getSceneType() {
         return optionService.getIntOptions(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_TYPE);
+    }
+
+    @GetMapping("/agreement")
+    @ApiOperation(value = "查询协议列表")
+    public ServiceResult<List<String>> getAgreementList() {
+        return new ServiceResult<>(Arrays.asList("syslog", "kafka", "restapi", "webservice")).asResult();
+    }
+
+    @GetMapping("/common_collect")
+    @ApiOperation(value = "查询通用协议采集")
+    public ServiceResult<List<CommonCollectRes>> getCommonCollect(
+            @ApiParam(name = "scene_id", value = "场景id", required = true) @RequestParam("scene_id") String sceneId,
+            @ApiParam(name = "node_id", value = "节点id", required = true) @RequestParam("node_id") String nodeId,
+            @ApiParam(name = "agreement", value = "协议") @RequestParam(value = "agreement", required = false) String agreement
+            ) {
+        return new ServiceResult<>(commonCollectService.getCollect(sceneId, nodeId, agreement)).asResult();
     }
 }

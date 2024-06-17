@@ -56,3 +56,18 @@ CREATE TABLE `mp_cscene_user_behavior` (
                                            `update_time` datetime NOT NULL COMMENT '更新时间',
                                            PRIMARY KEY (`pk`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='场景用户行为表';
+
+
+CREATE TABLE `mp_cscene_common_collect` (
+                                            `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+                                            `id` varchar(64) NOT NULL COMMENT 'ID',
+                                            `cscene_id` varchar(64) NOT NULL COMMENT '场景id',
+                                            `node_id` varchar(64) NOT NULL COMMENT '节点id',
+                                            `host_name` varchar(255) NOT NULL COMMENT '节点名称',
+                                            `agreement` varchar(255) NOT NULL COMMENT '协议',
+                                            `time` datetime NOT NULL COMMENT '采集时间',
+                                            `detail` text DEFAULT NULL COMMENT '详情',
+                                            `create_time` datetime NOT NULL COMMENT '创建时间',
+                                            `update_time` datetime NOT NULL COMMENT '更新时间',
+                                            PRIMARY KEY (`pk`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='通用协议采集数据表';
