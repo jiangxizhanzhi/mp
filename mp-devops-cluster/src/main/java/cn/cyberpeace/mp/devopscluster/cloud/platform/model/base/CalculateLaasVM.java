@@ -64,6 +64,11 @@ public class CalculateLaasVM extends DeviceCloudTargetCalculate {
      */
     private String vmType;
 
+    /**
+     * 是否支持初始化
+     */
+    private Boolean initSupport;
+
     //简化实例创建，同时允许链式调用和设置默认值
     @Builder(toBuilder = true)
     public CalculateLaasVM() {
@@ -74,5 +79,6 @@ public class CalculateLaasVM extends DeviceCloudTargetCalculate {
         this.networkInterfaces = new ArrayList<>();
         this.userName = "admin123";
         this.password = "NHiOJiZTD4K1";
+        this.initSupport = true;
     }
 }

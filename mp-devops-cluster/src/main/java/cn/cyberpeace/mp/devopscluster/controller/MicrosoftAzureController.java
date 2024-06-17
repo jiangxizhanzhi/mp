@@ -96,6 +96,7 @@ public class MicrosoftAzureController {
     @GetMapping("/synchronousCloudData")
 //    @CacheEvict(value = "getTarget", beforeInvocation = false)
     public ServiceResult synchronousCloudData() {
+        //1: 微软公有云 2:微软私有云 3:微软混合云
         microsoftAzureConverter.synchronousCloudData(1);
         microsoftAzureConverter.synchronousCloudData(2);
         microsoftAzureConverter.synchronousCloudData(3);
