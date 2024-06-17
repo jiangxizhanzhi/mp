@@ -247,6 +247,14 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "宿主机名称")
     private String host;
 
+    //云场景-前端用
+    @ApiModelProperty(value = "二级类型-云场景")
+    private String serviceType;
+    @ApiModelProperty(value = "三级类型-云场景")
+    private String subType;
+    @ApiModelProperty(value = "云服务类型-云场景")
+    private String cloudServiceType;
+
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         //忽略直接赋值处理的字段，需要定制处理
