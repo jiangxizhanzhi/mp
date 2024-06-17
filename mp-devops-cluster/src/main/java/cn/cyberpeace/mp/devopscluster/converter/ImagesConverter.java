@@ -29,6 +29,7 @@ import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.enums.UploadTypeEnum;
 import cn.cyberpeace.mp.devopscluster.model.*;
 import cn.cyberpeace.mp.devopscluster.model.common.ServiceStatus;
+import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetAuthPO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
@@ -36,7 +37,10 @@ import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudElementAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetConnectionUrlParam;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -78,6 +82,38 @@ public class ImagesConverter implements BaseConverter{
 
     private final SnapshotConverter snapshotConverter;
     private final CloudClient cloudClient;
+
+
+
+    public List<TargetConnection> getConnections(String deviceUuid) {
+        Remote remoteClient = new Remote();
+        Device device = deviceService.findByUuid(deviceUuid);
+        String imageType = device.getImageType();
+        String vmId;
+        if (ImageTypeEnum.CONTAINER.toValue().equals(imageType)) {
+            vmId = device.getExtDocker().getInstanceUuid();
+            GetConnectionUrlParam getConnectionUrlParam = new GetConnectionUrlParam();
+            getConnectionUrlParam.setVmId(vmId);
+            getConnectionUrlParam.setConsoleType(CloudElementAccessMode.Protocol.CONSOLE);
+            String url = remoteClient.getContainerConnectionUrl(getConnectionUrlParam)
+                    .getData();
+            return Collections.singletonList(new TargetConnection()
+                    .setUrl(url).setProtocol(CloudElementAccessMode.Protocol.CONSOLE));
+
+        } else if (ImageTypeEnum.VM.toValue().equals(imageType)) {
+            vmId = device.getExtVm().getInstanceUuid();
+            GetConnectionUrlParam getConnectionUrlParam = new GetConnectionUrlParam();
+            getConnectionUrlParam.setVmId(vmId);
+            getConnectionUrlParam.setConsoleType(CloudElementAccessMode.Protocol.NO_VNC);
+            String url = remoteClient.getNoVncConnectionUrl(getConnectionUrlParam).getData();
+
+            return Collections.singletonList(new TargetConnection()
+                    .setUrl(url).setProtocol(CloudElementAccessMode.Protocol.VNC));
+        } else {
+            return Collections.emptyList();
+        }
+
+    }
 
 
     /**

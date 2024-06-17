@@ -525,8 +525,8 @@ public class ImagesController {
     @ApiImplicitParam(name = "uuid", value = "设备ID", dataTypeClass = String.class)
     @GetMapping("/connection")
     public Result<List<TargetConnection>> connection(@RequestParam String uuid){
-        CloudPlatformPageResult<TargetConnection> connection = imagesService.connection(uuid);
-        return new Result<>(connection.getList());
+        List<TargetConnection> connection = imagesConverter.getConnections(uuid);
+        return new Result<>(connection);
     }
 
     @ApiOperation("同步镜像数据")

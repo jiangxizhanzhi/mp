@@ -52,4 +52,6 @@ public class ContainerService extends BaseCpService {
         BaseCloudPlatformResult result = super.sendPost(url, "", BaseCloudPlatformResult.class);
         super.checkResult(result);
     }
+
+
 }

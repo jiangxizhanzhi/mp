@@ -156,6 +156,8 @@ public class ImagesService extends BaseCpService {
      * @return
      */
     public CloudPlatformPageResult<TargetConnection> connection(String deviceUuid) {
+
+
         CloudPlatformItemsPageResult pageResult = super.sendGet(DEVICE_CONNECT +
                 "?device_uuid=" + deviceUuid + "&user_id=" + (Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : ""), CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);

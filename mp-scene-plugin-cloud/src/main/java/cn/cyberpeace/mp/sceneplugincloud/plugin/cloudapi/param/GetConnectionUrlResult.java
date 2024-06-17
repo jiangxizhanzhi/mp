@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param;
 
-import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
+import cn.cyberpeace.mp.base.model.BaseModel;
 import lombok.Data;
 
 @Data
-public class GetConnectionUrlResult implements CloudHttpData {
+public class GetConnectionUrlResult extends BaseModel {
     private String data;
 }

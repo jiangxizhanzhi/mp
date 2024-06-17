@@ -1252,7 +1252,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
     }
 
-    public ServiceResult<String> getConnectionUrl(String sceneId, String nodeId, String protocol, HttpServletResponse response) {
+    public ServiceResult<String> getConnectionUrl(String csceneId, String nodeId, String protocol, HttpServletResponse response) {
+        String sceneId = getSceneId(csceneId);
         var sceneHandler = new SceneHandler(sceneId, null, null);
         CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         var cloudElement = cloudPlugin.getElement(nodeId);

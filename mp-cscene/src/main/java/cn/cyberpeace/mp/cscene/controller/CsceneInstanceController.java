@@ -491,9 +491,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("场景实例获取节点接入链接(vm-no_vnc container-console)")
     @GetMapping("/get_connection_url")
-    public ServiceResult<String> getConnectionUrl(@RequestParam String sceneId, @RequestParam String nodeId,
+    public ServiceResult<String> getConnectionUrl(@RequestParam String csceneId, @RequestParam String nodeId,
                                                   @RequestParam String protocol, HttpServletResponse response) {
-        return modelService.getConnectionUrl(sceneId, nodeId, protocol, response).asResult();
+        return modelService.getConnectionUrl(csceneId, nodeId, protocol, response).asResult();
     }
 
     @AuthTarget(TargetEnum.CSCENE_INSTANCE_CONNECT_GROUP)
