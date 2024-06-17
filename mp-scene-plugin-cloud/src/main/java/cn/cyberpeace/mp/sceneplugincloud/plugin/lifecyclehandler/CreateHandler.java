@@ -21,10 +21,7 @@ import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.util.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.*;
-import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSceneStage;
-import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
-import cn.cyberpeace.mp.sceneplugincloud.constant.ElementAccessModeConstant;
-import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
+import cn.cyberpeace.mp.sceneplugincloud.constant.*;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementLogicalSwitchModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -36,6 +33,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementLogicalSwitchMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -73,6 +71,7 @@ public class CreateHandler extends HandlerCommon {
 
     public static class SceneProcess {
         public static final SceneEventProcess CREATE_AUXILIARY_NETWORKS = new SceneEventProcess("create_auxiliary_networks", "sceneplugincloud.event.create_auxiliary_network", "create_network", 1);
+        public static final SceneEventProcess CREATE_NODE_TO_EXTERNAL_ROUTER = new SceneEventProcess("create_node_to_external_router", "sceneplugincloud.event.create_node_to_external_router", "create_network", 1);
         public static final SceneEventProcess CREATE_GATEWAYS = new SceneEventProcess("create_gateways", "sceneplugincloud.event.create_gateway", "create_gateway", 1);
         public static final SceneEventProcess CREATE_FIREWALLS = new SceneEventProcess("create_firewalls", "sceneplugincloud.event.create_firewall", "create_gateway", 2);
         public static final SceneEventProcess CREATE_TERMINALS = new SceneEventProcess("create_terminals", "sceneplugincloud.event.create_terminal", "create_instance", 1);
@@ -1416,11 +1415,14 @@ public class CreateHandler extends HandlerCommon {
         if (!createAuxiliaryNetworkTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> {
                 runTasks(createAuxiliaryNetworkTasks);
-                getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_NETWORK);
             });
-        } else {
-            getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_NETWORK);
         }
+
+        runSceneProgress(SceneProcess.CREATE_NODE_TO_EXTERNAL_ROUTER, this::createNodeToExternalRouter);
+
+        getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_NETWORK);
+
+
 
 
         // 再创建网关 和 防火墙
@@ -1489,6 +1491,66 @@ public class CreateHandler extends HandlerCommon {
 
         // 批量创建实体设备
         createEntityElementProcess();
+    }
+
+    protected void createNodeToExternalRouter() {
+        String sceneId = getPluginHandler().getSrcScene().getEid();
+        VirtualRouter vrClient = new VirtualRouter();
+        // 创建辅助路由
+        VirtualRouterCreateData createData = new VirtualRouterCreateData();
+        createData.setName(HandlerUtils.genResourceName(sceneId));
+        List<VirtualNic> virtualNics = new ArrayList<>();
+        //路由需要接外部网络，以及路由上面配置NAT，30s暂时不支持
+
+//        VirtualNic externalVirtualNic = new VirtualNic();
+//        externalVirtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
+//        externalVirtualNic.setCidr(CloudSingleton.cloudAppConfig.getExternalNetCidr());
+//        externalVirtualNic.setFixedIp(IpUtils.newRandomIps(externalVirtualNic.getCidr(), 1, Collections.emptyList(), null, true).get(1));
+//        virtualNics.add(externalVirtualNic);
+
+        CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
+                .getPluginHandler(PluginConstant.PLUGIN_KEY);
+        cloudPluginHandler.getElementMap().values().forEach(elementBO -> {
+            List<ConnectedNetworkBO> deriveNetworks = elementBO.getDeriveNetworks();
+            if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(deriveNetworks)) {
+                deriveNetworks.forEach(deriveNet -> {
+                    String networkId = deriveNet.getNetwork().getResourceId();
+                    String networkCidr = deriveNet.getNetwork().getCidr();
+                    VirtualNic virtualNic = new VirtualNic();
+                    virtualNic.setNetworkId(networkId);
+                    String ip = "";
+                    if (StringUtils.isNotBlank(networkCidr)) {
+                        String preAllocateIp = getPluginHandler().getSceneHandler().getNetworkCidrToCollectRouterPortIp().get(networkCidr);
+                        if (StringUtils.isNotBlank(preAllocateIp)) {
+                            ip = preAllocateIp;
+                        }
+                    }
+                    if (StringUtils.isBlank(ip)) {
+                        List<String> ips = IpUtils.newRandomIps(deriveNet.getNetwork().getCidr(), 1, new ArrayList<>(deriveNet.getNetwork().getExcloudIps()), deriveNet.getNetwork().getAllocationPools(), Boolean.TRUE.equals(deriveNet.getNetwork().getDhcp()));
+                        if (org.apache.commons.collections4.CollectionUtils.isEmpty(ips)) {
+                            log.info("ip pool is empty when initate collection,node {}", elementBO.getSrcElement().getName());
+                            return;
+                        }
+                        ip = ips.get(0);
+                    }
+
+                    virtualNic.setFixedIp(ip);
+                    virtualNic.setCidr(networkCidr);
+                    virtualNics.add(virtualNic);
+
+                });
+
+            }
+        });
+        createData.setNetworks(virtualNics.stream().map(virtualNic -> {
+            VirtualRouterNic virtualRouterNic = new VirtualRouterNic();
+            virtualRouterNic.setId(virtualNic.getNetworkId());
+            virtualRouterNic.setFixedIp(virtualNic.getFixedIp());
+            virtualRouterNic.setCidr(virtualNic.getCidr());
+            return virtualRouterNic;
+        }).collect(Collectors.toList()));
+        VirtualRouterCreateData virtualRouter = vrClient.create(createData);
+        getPluginHandler().getSceneHandler().setProbeRouter(virtualRouter.getId());
     }
 
     protected void createLogicSwitchProcess() {

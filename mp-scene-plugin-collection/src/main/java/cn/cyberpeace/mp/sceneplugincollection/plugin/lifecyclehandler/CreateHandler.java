@@ -11,11 +11,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CreateMirrorData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.ArkimeCreateResBo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
@@ -23,7 +19,6 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.FlowMirrorCreateRes;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSceneStage;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRouterPortModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -41,6 +36,7 @@ public class CreateHandler extends HandlerCommon {
         public static final SceneEventProcess CREATE_FLOW_COLLECTOR = new SceneEventProcess("create_flow_collector", "sceneplugincollection.event.create_flow_collector", "create_flow_collect", 1);
         public static final SceneEventProcess BIND_FLOW_COLLECT_PORTS = new SceneEventProcess("bind_flow_collect_ports", "sceneplugincollection.event.bind_flow_collect_ports", "create_flow_collect", 2);
         public static final SceneEventProcess CREATE_PROBE_ROUTER = new SceneEventProcess("create_probe_router", "sceneplugincollection.event.create_probe_router", "create_data_collect", 1);
+
     }
 
     public static class ElementProcess {
@@ -67,33 +63,19 @@ public class CreateHandler extends HandlerCommon {
         getProbeCollector().bindAgent(probeCollectorId, cloudResourceId);
     }
 
-    protected void createProbeRouter() {
+    protected void updateProbeRouterPort() {
         String sceneId = getPluginHandler().getSrcScene().getEid();
         List<CollectionPluginSceneProbeRouterPortModel> routerPorts = getSceneProbeRouterPortMapper().list(
                 new HumanCondition().filterEqual(CollectionPluginSceneProbeRouterPortModel::getScene, sceneId));
-        VirtualRouter vrClient = new VirtualRouter();
-        // 创建辅助路由
-        VirtualRouterCreateData createData = new VirtualRouterCreateData();
-        createData.setName(HandlerUtils.genResourceName(sceneId));
-        List<VirtualNic> virtualNics = new ArrayList<>();
-
-//        VirtualNic externalVirtualNic = new VirtualNic();
-//        externalVirtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
-//        externalVirtualNic.setCidr(CloudSingleton.cloudAppConfig.getExternalNetCidr());
-//        externalVirtualNic.setFixedIp(IpUtils.newRandomIps(externalVirtualNic.getCidr(), 1, Collections.emptyList(), null, true).get(1));
-//        virtualNics.add(externalVirtualNic);
-
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                 .getPluginHandler(PluginConstant.PLUGIN_KEY);
         routerPorts.forEach(routerPort -> {
             CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(routerPort.getSceneElement());
             String networkId = null;
-            String networkCidr = null;
             if (CollectionUtils.isNotEmpty(cloudElement.getDeriveNetworks())) {
                 for (ConnectedNetworkBO deriveNet : cloudElement.getDeriveNetworks()) {
                     if (deriveNet.getNetwork().getExcloudIps().contains(routerPort.getIp())) {
                         networkId = deriveNet.getNetwork().getResourceId();
-                        networkCidr = deriveNet.getNetwork().getCidr();
                     }
                 }
             }
@@ -101,22 +83,9 @@ public class CreateHandler extends HandlerCommon {
                 return;
             }
             routerPort.setNetworkId(networkId);
-            VirtualNic virtualNic = new VirtualNic();
-            virtualNic.setNetworkId(networkId);
-            virtualNic.setFixedIp(routerPort.getIp());
-            virtualNic.setCidr(networkCidr);
-            virtualNics.add(virtualNic);
         });
         getSceneProbeRouterPortMapper().bulkUpdate(routerPorts);
-        createData.setNetworks(virtualNics.stream().map(virtualNic -> {
-            VirtualRouterNic virtualRouterNic = new VirtualRouterNic();
-            virtualRouterNic.setId(virtualNic.getNetworkId());
-            virtualRouterNic.setFixedIp(virtualNic.getFixedIp());
-            virtualRouterNic.setCidr(virtualNic.getCidr());
-            return virtualRouterNic;
-        }).collect(Collectors.toList()));
-        VirtualRouterCreateData virtualRouter = vrClient.create(createData);
-        getPluginHandler().getScene().setProbeRouter(virtualRouter.getId());
+        getPluginHandler().getScene().setProbeRouter(getPluginHandler().getSceneHandler().getProbeRouter());
     }
 
     public void create() {
@@ -205,20 +174,13 @@ public class CreateHandler extends HandlerCommon {
 
             getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CollectionSceneStage.CREATE_DATA_COLLECT);
 
-            runSceneProgress(SceneProcess.CREATE_PROBE_ROUTER, this::createProbeRouter);
+            runSceneProgress(SceneProcess.CREATE_PROBE_ROUTER, this::updateProbeRouterPort);
 
             getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_DATA_COLLECT);
-//            var probeCollectionElements = getPluginHandler().getElementMap().values()
-//                    .stream()
-//                    .filter(collectionElement -> !CollectionUtils.isEmpty(collectionElement.getProbes()))
-//                    .collect(Collectors.toList());
-//            var bindProbeCollectAgentTasks = probeCollectionElements.stream()
-//                    .map(collectionElement -> (Runnable)() -> bindProbeCollectAgentProcess(collectionElement,
-//                            probeCollectorId))
-//                    .collect(Collectors.toList());
-//            if (!bindProbeCollectAgentTasks.isEmpty()) {
-//                runSceneProgress(SceneProcess.BIND_PROBE_COLLECT_AGENTS, () -> runTasks(bindProbeCollectAgentTasks));
-//            }
+
+
+
+
         }
     }
 

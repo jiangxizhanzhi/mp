@@ -175,6 +175,7 @@ public class InitiateHandler extends HandlerCommon {
                         hostRoute.setNexthop(ip);
                         hostRoutes.add(hostRoute);
                         network.getNetwork().setHostRoutes(hostRoutes);
+                        getPluginHandler().getSceneHandler().getNetworkCidrToCollectRouterPortIp().put(networkInfo.getCidr(), ip);
 
                         CollectionPluginSceneProbeRouterPortModel routerPort = new CollectionPluginSceneProbeRouterPortModel();
                         routerPort.setScene(getPluginHandler().getSrcScene().getEid());
