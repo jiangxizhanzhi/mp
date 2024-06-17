@@ -1,9 +1,18 @@
 package cn.cyberpeace.mp.scene.core.bo.base;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaNodeConnectionModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortConnectionModel;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,6 +51,12 @@ public abstract class BaseSceneAreaNodeConnectionBO<M extends BaseSceneAreaNodeC
     @ApiModelProperty(value = "显示参数")
     private String displayContext;
 
+    @ApiModelProperty(value = "连线类型")
+    private String type;
+
+    @ApiModelProperty(value = "路径点")
+    private List<Map<String, Object>> vertices;
+
     /**
      * 从模型加载
      *
@@ -51,10 +66,13 @@ public abstract class BaseSceneAreaNodeConnectionBO<M extends BaseSceneAreaNodeC
      */
     @Override
     public void fromModel(M obj, String... ignoreFields) {
-        super.fromModel(obj, ignoreFields);
+        super.fromModel(obj, ArrayUtils.addAll(ignoreFields, BeanUtils.getBeanGetterFieldName(BaseSceneElementPortConnectionModel::getVertices)));
         setId(obj.getConnectionId());
         setSource(obj.getSourceNodeId());
         setTarget(obj.getTargetNodeId());
+        vertices = StringUtils.isEmpty(obj.getVertices()) ? new ArrayList<>()
+                : JsonCommon.parse(obj.getVertices(), new TypeReference<List<Map<String,Object>>>() {
+        });
     }
 
     /**
@@ -69,6 +87,7 @@ public abstract class BaseSceneAreaNodeConnectionBO<M extends BaseSceneAreaNodeC
         obj.setConnectionId(id);
         obj.setSourceNodeId(source);
         obj.setTargetNodeId(target);
+        obj.setVertices(JsonCommon.stringify(vertices == null ? new ArrayList<>() : vertices));
         return obj;
     }
 

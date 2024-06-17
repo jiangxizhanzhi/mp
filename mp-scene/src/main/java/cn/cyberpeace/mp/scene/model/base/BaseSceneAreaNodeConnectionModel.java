@@ -43,4 +43,20 @@ public class BaseSceneAreaNodeConnectionModel extends BaseModel {
      */
     @DefaultStr
     private String displayContext;
+
+    /**
+     * 线条类型
+     */
+    @DefaultStr
+    private String type;
+
+    /**
+     * 路径点
+     */
+    @DefaultStr
+    private String vertices;
+
+
+    @DefaultStr
+    private String info;
 }

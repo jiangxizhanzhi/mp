@@ -32,6 +32,8 @@ public abstract class BaseSceneElementPortConnectionBO<M extends BaseSceneElemen
     private String type;
     @ApiModelProperty(value = "路径点")
     private List<Map<String, Object>> vertices;
+    @ApiModelProperty(value = "连线其他信息,可自由存储")
+    private String info;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
