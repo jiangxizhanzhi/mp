@@ -12,7 +12,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P extends BaseSceneElementPortBO<?, P, T>,
@@ -50,13 +52,18 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     private Boolean behaveSupport;
     @ApiModelProperty(value = "攻防模拟器类型 0-攻击 1-防守")
     private Integer attackMockDeviceType;
+    @ApiModelProperty(value = "配置命令")
+    private Map<String, Object> configCommand;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
-                BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getInitCommands)));
+                BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getInitCommands),
+                BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getConfigCommand)));
         initCommands = StringUtils.isEmpty(obj.getInitCommands()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getInitCommands(), new TypeReference<List<String>>(){});
+        configCommand = StringUtils.isEmpty(obj.getConfigCommand()) ? new HashMap<>()
+                : JsonCommon.parse(obj.getConfigCommand(), new TypeReference<Map<String,Object>>(){});
     }
 
     @Override
@@ -65,6 +72,9 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
                 BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getInitCommands)));
         if (initCommands != null) {
             obj.setInitCommands(JsonCommon.stringify(initCommands));
+        }
+        if(configCommand != null){
+            obj.setConfigCommand(JsonCommon.stringify(configCommand));
         }
         return obj;
     }
