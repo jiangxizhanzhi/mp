@@ -20,7 +20,6 @@ public class SceneNodeNumInitJob {
 
     @MpInitiate(id = "scene_node_num_init_job", description = "初始化刷新内存里的节点数量统计")
     public void execute() {
-        int count = csceneService.getActiveVirtualDeviceCount();
-        NodeLimitUtils.refreshCount(count);
+        NodeLimitUtils.getAndRefreshCount();
     }
 }

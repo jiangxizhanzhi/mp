@@ -35,8 +35,7 @@ public class RefreshCacheAndDbLimitNodesScheduleJob {
             return;
         }
         try {
-            int count = csceneService.getActiveVirtualDeviceCount();
-            NodeLimitUtils.refreshCount(count);
+            NodeLimitUtils.getAndRefreshCount();
         } catch (Exception e) {
             log.error("failed to refresh node limit count", e);
         }

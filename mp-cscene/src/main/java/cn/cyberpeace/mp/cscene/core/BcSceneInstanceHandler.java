@@ -170,8 +170,7 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
             //W:Refresh scene after running
             SceneInstanceLinkCacheUtil.refresh(sid);
             try {
-                int count = BeanCommon.getBean(CsceneService.class).getActiveVirtualDeviceCount();
-                NodeLimitUtils.refreshCount(count);
+                NodeLimitUtils.getAndRefreshCount();
             } catch (Exception e) {
                 log.error("failed to refresh node limit count", e);
             }

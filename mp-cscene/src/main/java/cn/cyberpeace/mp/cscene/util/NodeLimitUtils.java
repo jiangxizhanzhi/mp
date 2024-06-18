@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
+import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -63,6 +64,11 @@ public final class NodeLimitUtils {
             csceneAppConfig = BeanCommon.getBean(CsceneAppConfig.class);
         }
         return updateElementCount(count);
+    }
+
+    public synchronized static void getAndRefreshCount() {
+        int countTmp = BeanCommon.getBean(CsceneService.class).getActiveVirtualDeviceCount();
+        NodeLimitUtils.refreshCount(countTmp);
     }
 
     public synchronized static void refreshCount(int count) {

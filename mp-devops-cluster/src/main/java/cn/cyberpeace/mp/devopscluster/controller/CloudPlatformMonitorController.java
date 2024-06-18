@@ -437,8 +437,7 @@ public class CloudPlatformMonitorController {
     @GetMapping("/release_resource")
     public ServiceResult<Boolean> releaseResource() {
         try {
-            int count = csceneService.getActiveVirtualDeviceCount();
-            NodeLimitUtils.refreshCount(count);
+            NodeLimitUtils.getAndRefreshCount();
         } catch (Exception e) {
             log.error("failed to refresh node limit count", e);
         }

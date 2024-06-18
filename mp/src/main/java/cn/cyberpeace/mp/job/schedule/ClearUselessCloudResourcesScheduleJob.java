@@ -41,12 +41,6 @@ public class ClearUselessCloudResourcesScheduleJob {
         // 清理未正常释放的资源
         clearService.clearUselessResource();
 
-        try {
-            int count = csceneService.getActiveVirtualDeviceCount();
-            NodeLimitUtils.refreshCount(count);
-        } catch (Exception e) {
-            log.error("failed to refresh node limit count", e);
-        }
 
         try {
             hardwareLimitRefreshService.init();
