@@ -1036,7 +1036,10 @@ public class LoadServiceImpl {
                 .filter(Objects::nonNull)
                 .distinct()
                 .collect(Collectors.toList());
-        List<MpDevopsLoadSceneLog> getLoadResultByPks = loadMapper.getLoadResultByLoadIds(loadIds);
+        List<MpDevopsLoadSceneLog> getLoadResultByPks = new ArrayList<>();
+        if (loadIds != null && loadIds.size() > 0) {
+            getLoadResultByPks = loadMapper.getLoadResultByLoadIds(loadIds);
+        }
         if (getLoadResultByPks != null && getLoadResultByPks.size() > 0) {
             String[] codes = {CommonStatusCodeEnum.RESULT_STATUS.getCode(), CommonStatusCodeEnum.ACTION_TYPE.getCode(),
                     CommonStatusCodeEnum.RESULT_TYPE.getCode(), CommonStatusCodeEnum.CONTROL_TYPE.getCode()};
