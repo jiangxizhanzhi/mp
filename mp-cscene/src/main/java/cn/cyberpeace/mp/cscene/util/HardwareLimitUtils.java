@@ -1,100 +1,100 @@
 package cn.cyberpeace.mp.cscene.util;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.code.MessageServiceCode;
+import cn.cyberpeace.mp.base.util.http.HttpParam;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 @Slf4j
 public class HardwareLimitUtils {
-    private static HardwareCount TOTAL;
 
-    private static HardwareCount USED;
-
-    public static void initTotal(int cpu, int ram, int disk) {
-        TOTAL = new HardwareCount();
-        TOTAL.setCpu(cpu);
-        TOTAL.setRam(ram);
-        TOTAL.setDisk(disk);
-    }
-
-    public static void initUsed(int cpu, int ram, int disk) {
-        USED = new HardwareCount();
-        USED.setCpu(cpu);
-        USED.setRam(ram);
-        USED.setDisk(disk);
-    }
-
-    public static UpdateResult addHardware(CsceneInstanceBO instance) {
+    public static void check(CsceneInstanceBO instance) {
         HardwareCount count = getHardwareCount(instance.getScene().getTopology().getElements());
-        return updateHardware(count);
+        int ram = count.getRam();
+        int disk = count.getDisk();
+
+        PageParam param = new PageParam(1, 100);
+        CloudResponse<HypervisorResponse> response = new Remote().cloudGet(CloudUrlConstant.HYPERVISORS_STATISTICS, param, new TypeReference<CloudResponse<HypervisorResponse>>() {
+        }, true);
+        List<HypervisorBO> statistics = response.getData().getList();
+        int totalRam = 0, totalDisk = 0;
+        int usedRam = 0, usedDisk = 0;
+        int freeRam = 0, freeDisk = 0;
+
+        for (var stat : statistics) {
+            totalRam += stat.getRam();
+            totalDisk += stat.getDisk();
+
+            usedDisk += stat.getDiskUsed();
+            usedRam += stat.getRamUsed();
+        }
+
+        freeRam = totalRam - usedRam;
+        freeDisk = totalDisk - usedDisk;
+
+        // cpu可以超分 暂时不校验
+        if (ram > freeRam) {
+            throw new MpRuntimeException(CsceneErrorCode.RAM_LIMIT.format(String.valueOf(totalRam), String.valueOf(usedRam), String.valueOf(ram)));
+        }
+        if (disk > freeDisk) {
+            throw new MpRuntimeException(CsceneErrorCode.DISK_LIMIT.format(String.valueOf(totalDisk), String.valueOf(usedDisk), String.valueOf(disk)));
+        }
     }
 
-    public static UpdateResult substractHardware(CsceneInstanceBO instance) {
-        HardwareCount count = getHardwareCount(instance.getScene().getTopology().getElements());
-        count.setDisk(-1 * Math.abs(count.getDisk()));
-        count.setCpu(-1 * Math.abs(count.getCpu()));
-        count.setRam(-1 * Math.abs(count.getRam()));
-        return updateHardware(count);
+    @Getter
+    @Setter
+    private static class HypervisorResponse {
+        private List<HypervisorBO> list;
+
+        private Integer total;
     }
 
-    private static synchronized UpdateResult updateHardware(HardwareCount count) {
-        UpdateResult successResult = new UpdateResult();
-        successResult.setSuccess(true);
-        if (count.getCpu() == 0 && count.getDisk() == 0 && count.getRam() == 0) {
-            return successResult;
-        }
-        if (USED.getCpu() + count.getCpu() > TOTAL.getCpu()) {
-            UpdateResult result = new UpdateResult();
-            result.setSuccess(false);
-            result.setLimitNode(TOTAL.getCpu());
-            result.setCurrentNode(count.getCpu());
-            result.setExistNode(USED.getCpu());
-            result.setErrorCode(CsceneErrorCode.CPU_LIMIT);
-            return result;
-        }
+    @Getter
+    @Setter
+    private static class PageParam implements HttpParam {
+        private Integer limit;
 
-        if (USED.getRam() + count.getRam() > TOTAL.getRam()) {
-            UpdateResult result = new UpdateResult();
-            result.setSuccess(false);
-            result.setLimitNode(TOTAL.getRam());
-            result.setCurrentNode(count.getRam());
-            result.setExistNode(USED.getRam());
-            result.setErrorCode(CsceneErrorCode.RAM_LIMIT);
-            return result;
-        }
+        private Integer offset;
 
-        if (USED.getDisk() + count.getDisk() > TOTAL.getDisk()) {
-            UpdateResult result = new UpdateResult();
-            result.setSuccess(false);
-            result.setLimitNode(TOTAL.getDisk());
-            result.setCurrentNode(count.getDisk());
-            result.setExistNode(USED.getDisk());
-            result.setErrorCode(CsceneErrorCode.DISK_LIMIT);
-            return result;
+        public PageParam(Integer offset, Integer limit) {
+            this.limit = limit;
+            this.offset = offset;
         }
+    }
 
-        USED.setCpu(USED.getCpu() + count.getCpu());
-        USED.setRam(USED.getRam() + count.getRam());
-        USED.setDisk(USED.getDisk() + count.getDisk());
-        if (USED.getCpu() < 0) {
-            USED.setCpu(0);
-        }
-        if (USED.getRam() < 0) {
-            USED.setRam(0);
-        }
-        if (USED.getDisk() < 0) {
-            USED.setDisk(0);
-        }
-        UpdateResult result = new UpdateResult();
-        result.setSuccess(true);
-        return result;
+
+    @Getter
+    @Setter
+    private static class HypervisorBO {
+        private String name;
+        private String ip;
+        private Integer cpu;
+        private Long ram;
+        private Long disk;
+        private Integer cpuUsed;
+        private Long ramUsed;
+        private Long diskUsed;
+        private BigDecimal cpuPercent;
+        private BigDecimal ramPercent;
+        private BigDecimal diskPercent;
+        private Integer totalInstances;
+        private Integer totalContainers;
+        private Integer weight;
+        private Integer maxInstances;
+        private boolean serviceStatus;
     }
 
     private static HardwareCount getHardwareCount(List<SceneElementBO> elements) {

@@ -11,7 +11,6 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
-import cn.cyberpeace.mp.cscene.service.HardwareLimitRefreshService;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.cron.clearjob.ClearService;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
@@ -125,8 +124,6 @@ public class CloudPlatformMonitorController {
     private final MonitorScriptControlService monitorScriptControlService;
 
     private final HostStateService hostStateService;
-
-    private final HardwareLimitRefreshService hardwareLimitRefreshService ;
 
     private final CsceneService csceneService;
 
@@ -443,7 +440,6 @@ public class CloudPlatformMonitorController {
         }
         TaskCommon.executeTask(() -> {
             clearService.clearUselessResource();
-            hardwareLimitRefreshService.init();
         });
         return new ServiceResult<>(true);
     }

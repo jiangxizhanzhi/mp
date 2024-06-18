@@ -150,10 +150,7 @@ public class BcSceneConfigHandler extends BaseCsceneHandler<
             throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT.format(String.valueOf(updateResult.getLimitNode()),
                     String.valueOf(updateResult.getExistNode()), String.valueOf(updateResult.getCurrentNode())));
         }
-        HardwareLimitUtils.UpdateResult hardwareResult = HardwareLimitUtils.addHardware(instanceHandler.getCscene());
-        if (!hardwareResult.isSuccess()) {
-            throw new MpRuntimeException(hardwareResult.getMessage());
-        }
+        HardwareLimitUtils.check(instanceHandler.getCscene());
         instanceHandler.create();
         CsceneInstanceBO result = instanceHandler.toData();
         if (result.getScene() != null && result.getScene().getTopology() != null && result.getScene().getTopology().getScene() != null) {
