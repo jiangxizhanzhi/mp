@@ -338,6 +338,12 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.vmSizeList(queryParams).asResult();
     }
 
+    @ApiOperation("根据名字查网卡数")
+    @GetMapping("/find_nic_by_name")
+    public ServiceResult<String> findNicByName(AzureVmOsDiskQueryParams queryParams) {
+        return modelService.findNicByName(queryParams).asResult();
+    }
+
     @ApiOperation("虚拟机系统磁盘类型列表")
     @GetMapping("/vm_os_disk_type_list")
     public ListObjServiceResult<AzureVmOsDisk> vmOsDiskTypeList(CsceneInstanceStatQueryParams queryParams) {

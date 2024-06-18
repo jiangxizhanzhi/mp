@@ -169,7 +169,7 @@ public class AzureCreateHandler extends CreateHandler {
 
                 getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CollectionSceneStage.CREATE_DATA_COLLECT);
 
-                runSceneProgress(SceneProcess.CREATE_PROBE_ROUTER, this::createProbeRouter);
+                // runSceneProgress(SceneProcess.CREATE_PROBE_ROUTER, this::createProbeRouter);
 
                 getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_DATA_COLLECT);
 

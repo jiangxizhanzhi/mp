@@ -43,7 +43,7 @@ public class SceneAppConfig {
     private String metadataFileServer;
 
     //公有云
-    @Value("${mp.scene.metadata_public_file_server:http://169.254.169.254/file}")
+    @Value("${mp.scene.metadata_public_file_server:http://20.205.18.81/api/mp/file}")
     private String metadataPublicFileServer;
 
     //私有云
@@ -80,6 +80,28 @@ public class SceneAppConfig {
         windowsHelpInstallerDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, baseAppConfig.getResourcesDir(),
                 "scene/windows_installer");
         return windowsHelpInstallerDir;
+    }
+
+    public String getMetadataFileServer(Integer cloudType) {
+        String metadataFileServer;
+        switch (cloudType) {
+            case 0:
+                metadataFileServer = this.metadataFileServer;
+                break;
+            case 1:
+                metadataFileServer = this.metadataPublicFileServer;
+                break;
+            case 2:
+                metadataFileServer = this.metadataPrivateFileServer;
+                break;
+            case 3:
+                metadataFileServer = this.metadataMixedFileServer;
+                break;
+            default:
+                metadataFileServer = this.metadataFileServer;
+                break;
+        }
+        return metadataFileServer;
     }
 
 }

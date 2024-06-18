@@ -121,11 +121,12 @@ public class WazuhControl {
         }
     }
 
-    public static String genControlConfigCommand(String osType, ControlConfigParam controlConfigParam) {
-        return genControlConfigCommand(osType, controlConfigParam, false);
+    public static String genControlConfigCommand(Integer cloudType, String osType, ControlConfigParam controlConfigParam) {
+        return genControlConfigCommand(cloudType, osType, controlConfigParam, false);
     }
 
-    public static String genControlConfigCommand(String osType, ControlConfigParam controlConfigParam, boolean restart) {
+
+    public static String genControlConfigCommand(Integer cloudType, String osType, ControlConfigParam controlConfigParam, boolean restart) {
         String controlScriptPath;
         if (WazuhLauncher.OS_TYPE_WINDOWS.equals(osType)) {
             controlScriptPath = WINDOWS_CONTROL_SCRIPT_PATH;
@@ -165,7 +166,7 @@ public class WazuhControl {
         // 把参数上传到文件服务器
         String scriptParamsStr = TextUtils.encodeBase64(JsonCommon.stringify(scriptParams));
         String result = FsCommon.uploadContent(scriptParamsStr);
-        result = SceneSingleton.sceneAppConfig.getMetadataFileServer() + "/" + result;
+        result = SceneSingleton.sceneAppConfig.getMetadataFileServer(cloudType) + "/" + result;
         if (restart) {
             return String.format("%s \"%s\" -r", controlScriptPath, result);
         } else {
@@ -228,7 +229,7 @@ public class WazuhControl {
         private WazuhLauncher.WazuhLauncherBuilder wazuhLauncherBuilder;
         private String godfsServer;
 
-        private WazuhControlBuilder () {
+        private WazuhControlBuilder() {
             wazuhLauncherBuilder = WazuhLauncher.builder();
         }
 
@@ -285,7 +286,7 @@ public class WazuhControl {
         var runCommandItem = new WazuhLauncher.RunCommandItem();
         runCommandItem.setAgentName(agentName);
         runCommandItem.setOsType(osType);
-        runCommandItem.setCommand(genControlConfigCommand(osType, controlConfigParam, true));
+        runCommandItem.setCommand(genControlConfigCommand(0, osType, controlConfigParam, true));
         wazuhLauncher.runCommand(List.of(runCommandItem));
     }
 
@@ -317,7 +318,8 @@ public class WazuhControl {
         try {
             configData = JsonCommon.snakeParse(
                     TextUtils.decompress(TextUtils.rawDecodeBase64(((String) rawOutput).trim())),
-                    new TypeReference<QueryConfigData>(){});
+                    new TypeReference<QueryConfigData>() {
+                    });
         } catch (Exception e) {
             log.error("Query agent({}) osType({}) config parse raw output({}) error: {}", agentName, osType, rawOutput,
                     e);
@@ -356,7 +358,8 @@ public class WazuhControl {
 
         try {
             result = JsonCommon.snakeParse(TextUtils.decompress(TextUtils.rawDecodeBase64(((String) rawOutput).trim())),
-                    new TypeReference<List<QueryLogCollectFileData>>() {});
+                    new TypeReference<List<QueryLogCollectFileData>>() {
+                    });
         } catch (Exception e) {
             log.error("Query agent({}) osType({}) log collect files parse raw output({}) error: {}", agentName, osType,
                     rawOutput, e);
@@ -402,7 +405,8 @@ public class WazuhControl {
         Map<String, ControlFileResult> result = null;
         try {
             result = JsonCommon.snakeParse(TextUtils.decompress(TextUtils.rawDecodeBase64(((String) rawOutput).trim())),
-                    new TypeReference<Map<String, ControlFileResult>>() {});
+                    new TypeReference<Map<String, ControlFileResult>>() {
+                    });
         } catch (Exception e) {
             log.error("Control agent({}) osType({}) file parse raw output({}) error: {}", agentName, osType, rawOutput,
                     e);

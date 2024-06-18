@@ -19,16 +19,16 @@ public class ProbeCollector {
     private String getWazuhHost(Integer cloudType, String collectorId) {
         String wazuhHost = "";
         switch (cloudType) {
-            case 1:
+            case 0:
                 wazuhHost = CollectionSingleton.collectionAppConfig.getWazuhServerHost();
                 break;
-            case 2:
+            case 1:
                 wazuhHost = CollectionSingleton.collectionAppConfig.getWazuhPublicServerHost();
                 break;
-            case 3:
+            case 2:
                 wazuhHost = CollectionSingleton.collectionAppConfig.getWazuhPrivateServerHost();
                 break;
-            case 4:
+            case 3:
                 wazuhHost = CollectionSingleton.collectionAppConfig.getWazuhMixedServerHost();
                 break;
             default:

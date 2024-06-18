@@ -26,7 +26,7 @@ public class WazuhCommon {
 
     private static WazuhProbeConfig wazuhProbeConfig;
 
-    private static Integer getWazuhRemotePort(Integer cloudType){
+    private static Integer getWazuhRemotePort(Integer cloudType) {
         Integer wazuhRemoteHost = 0;
         switch (cloudType) {
             case 1:
@@ -48,7 +48,7 @@ public class WazuhCommon {
         return wazuhRemoteHost;
     }
 
-    private static Integer getWazuhAuthPort(Integer cloudType){
+    private static Integer getWazuhAuthPort(Integer cloudType) {
         Integer wazuhAuthPort = 0;
         switch (cloudType) {
             case 1:
@@ -70,27 +70,6 @@ public class WazuhCommon {
         return wazuhAuthPort;
     }
 
-    private static String getMetadataFileServer(Integer cloudType){
-        String metadataFileServer;
-        switch (cloudType) {
-            case 1:
-                metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
-                break;
-            case 2:
-                metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataPublicFileServer();
-                break;
-            case 3:
-                metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataPrivateFileServer();
-                break;
-            case 4:
-                metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataMixedFileServer();
-                break;
-            default:
-                metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
-                break;
-        }
-        return metadataFileServer;
-    }
 
     public static final String WAZUH_AGENT_GROUP = "wazuh_agent_installer";
 
@@ -126,7 +105,8 @@ public class WazuhCommon {
         return agentLinuxLocalFilepath;
     }
 
-    private WazuhCommon() {}
+    private WazuhCommon() {
+    }
 
     public static List<String> generateWazuhAgentInstallScript(Integer cloudType, String systemType, String agentName, String wazuhHost,
                                                                WazuhControl.ControlConfigParam controlParam, boolean isContainer) {
@@ -139,13 +119,13 @@ public class WazuhCommon {
                 LocalFileMappingModel::getRemoteFile));
 
         String osType = SystemTypeCommandUtils.getOsType(systemType);
-        String metadataFileServer = getMetadataFileServer(cloudType);
+        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer(cloudType);
         List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>(controlParam.getProbeParams());
         List<WazuhControl.ControlProbeParam> defaultProbeParams;
         defaultProbeParams = getDefaultProbeParams(nameFileMap, metadataFileServer, agentName, wazuhProbeConfig);
         controlProbeParams.addAll(defaultProbeParams);
         controlParam.setProbeParams(controlProbeParams);
-        String probeCommand = WazuhControl.genControlConfigCommand(osType, controlParam);
+        String probeCommand = WazuhControl.genControlConfigCommand(cloudType, osType, controlParam);
 
         String windowsInstallDir = SceneSingleton.sceneAppConfig.getWindowsInstallerDir();
         String linuxInstallDir = SceneSingleton.sceneAppConfig.getLinuxInstallerDir();
@@ -212,9 +192,16 @@ public class WazuhCommon {
                 String downloadPath = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, linuxInstallDir,
                         LINUX_DOWNLOAD_AGENT_FILE);
                 // 下载按需安装脚本并执行
+//                if (cloudType == null || cloudType == BaseSceneModel.CloudType.DEFAULT) {
                 addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
                         String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, downloadPath, downloadUrl),
                         String.format("sh %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
+                /*}else {
+                    addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
+                            String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, downloadPath, downloadUrl),
+                            String.format("sudo sh %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
+                }*/
+
                 // 给下载安装包的脚本添加参数`
                 String filePathParam = String.format("filepath=%s/%s", linuxInstallDir,
                         WAZUH_AGENT_LINUX_FILE_NAME);

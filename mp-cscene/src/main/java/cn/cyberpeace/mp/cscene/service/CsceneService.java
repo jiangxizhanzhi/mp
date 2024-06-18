@@ -913,9 +913,19 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         azureVmOsDisk.setName("Image default");
         azureVmOsDisk.setSize("Image default");
         azureVmOsDisk.setMaxSize(String.valueOf(maxSize));
+        azureVmOsDisk.setMaxSizeGiB(String.valueOf(maxSize));
         azureVmOsDisk.setMaxSizeUnit("GB");
         list.add(0, azureVmOsDisk);
 
         return new ListObjServiceResult<>(new ListObjResult<>(list, list.size()));
+    }
+
+    public ServiceResult<String> findNicByName(AzureVmOsDiskQueryParams queryParams) {
+        HumanCondition humanCondition = new HumanCondition()
+                .select(AzureVmSize::getMaxNics)
+                .filterEqual(AzureVmSize::getName, queryParams.getName());
+        List<AzureVmSize> list = azureVmSizeMapper.list(humanCondition);
+
+        return new ServiceResult<>(list.size() > 0 ? list.get(0).getMaxNics().toString() : null);
     }
 }

@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.BoolUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
+import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -34,6 +35,8 @@ import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.TopoReformUtils;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -520,6 +523,8 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     @Override
     public void completionTopo(Set<String> existingIpSet) {
         TopoReformUtils topoReformUtils = new TopoReformUtils(this);
+        Map<String, SceneAreaBO> areaMap = getSceneHandler().getAreaMap();
+
         // 如果节点没有连线的 把交换机补充上
         for (CloudPluginSceneElementBO element : getElementMap().values()) {
             List<SceneElementPortBO> notIpPortsByNotConnectedPorts = getNotIpPortsByNotConnectedPorts(element.getSrcElement().getId(), existingIpSet);
@@ -530,19 +535,23 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                 if (!element.getDeriveNetworks().isEmpty()) {
 //                    List<SceneElementPortBO> ports = element.getSrcElement().getPorts();
                     TopoReformUtils.ElementWrapper nodeWrapper = topoReformUtils.addAuxiliarySwitchNode();
-                    nodeWrapper.getSceneElement().setIsAuxiliary(false);
+                    SceneElementBO sceneElement = nodeWrapper.getSceneElement();
+                    sceneElement.setIsAuxiliary(false);
                     TopoReformUtils.PortWrapper port1Wrapper = topoReformUtils.addAuxiliaryPort(element);
                     TopoReformUtils.PortWrapper port2Wrapper = topoReformUtils.addAuxiliaryPort(nodeWrapper.getPluginElement());
                     port1Wrapper.getScenePort().setIsAuxiliary(false);
                     port2Wrapper.getScenePort().setIsAuxiliary(false);
                     topoReformUtils.addConnect(port1Wrapper.getScenePort(), port2Wrapper.getScenePort());
+
+                    updatePosition2(element.getSrcElement(), sceneElement);
                 }
 //                n个未连线ip节点需要n交换机
             } else if (CollectionUtils.isNotEmpty(notIpPortsByNotConnectedPorts)) {
                 notIpPortsByNotConnectedPorts.forEach(p -> {
                     //                    加交换机节点
                     TopoReformUtils.ElementWrapper nodeWrapper = topoReformUtils.addAuxiliarySwitchNode();
-                    nodeWrapper.getSceneElement().setIsAuxiliary(false);
+                    SceneElementBO sceneElement = nodeWrapper.getSceneElement();
+                    sceneElement.setIsAuxiliary(false);
                     //                    加交换机端口 不创建element端口
                     TopoReformUtils.PortWrapper port2Wrapper = topoReformUtils.addAuxiliaryPort(nodeWrapper.getPluginElement());
                     //                    连线
@@ -561,9 +570,33 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                         stringObjectMap.put("cidr", cidr);
                         this.getSceneHandler().getScenePluginData().get(PluginConstant.PLUGIN_KEY).setElements(elements);
                     }
+
+                    updatePosition2(p.getElement(), sceneElement);
                 });
             }
         }
+    }
+
+    private static void updatePosition2(SceneElementBO element, SceneElementBO sceneElement) {
+        //                    增加交换机位置
+//                        1.获取节点位置信息
+        String position2 = element.getPosition2();
+        String area = element.getArea();
+        if (StringUtils.isNotEmpty(position2)) {
+            Origin origin = JsonCommon.parse(position2, Origin.class);
+//                        2.保存网络节点位置
+            origin.setY(origin.getY() + 20);
+            String sceneElementPosition2 = JsonCommon.stringify(origin);
+            sceneElement.setPosition2(sceneElementPosition2);
+            sceneElement.setArea(area);
+        }
+    }
+
+    @Getter
+    @Setter
+    protected static class Origin {
+        private double x;
+        private double y;
     }
 
     /**

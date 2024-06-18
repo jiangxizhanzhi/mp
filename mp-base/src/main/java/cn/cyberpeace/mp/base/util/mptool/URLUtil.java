@@ -33,7 +33,7 @@ public class URLUtil {
      * reserved = gen-delims / sub-delims<br>
      * see：<a href="https://www.ietf.org/rfc/rfc3986.html#section-2.2">https://www.ietf.org/rfc/rfc3986.html#section-2.2</a>
      */
-    public static final String RESERVED = GEN_DELIMS +SUB_DELIMS;
+    public static final String RESERVED = GEN_DELIMS + SUB_DELIMS;
     /**
      * unreserved  = ALPHA / DIGIT / "-" / "." / "_" / "~"<br>
      * see: <a href="https://www.ietf.org/rfc/rfc3986.html#section-2.3">https://www.ietf.org/rfc/rfc3986.html#section-2.3</a>
@@ -47,19 +47,19 @@ public class URLUtil {
     /**
      * query = pchar / "/" / "?"
      */
-    public static final String QUERY = PCHAR +"/?";
+    public static final String QUERY = PCHAR + "/?";
 
     /**
      * query中的value<br>
      * value不能包含"{@code &}"，可以包含 "="
      */
-    public static final String QUERY_PARAM_VALUE = QUERY.replace("&","");
+    public static final String QUERY_PARAM_VALUE = QUERY.replace("&", "");
 
     /**
      * query中的key<br>
      * key不能包含"{@code &}" 和 "="
      */
-    public static final String QUERY_PARAM_NAME = QUERY.replace("=","");
+    public static final String QUERY_PARAM_NAME = QUERY.replace("=", "");
 
 
     public static final BitSet QUERY_PARAM_VALUE_SET = buildBitSet(QUERY_PARAM_VALUE);
@@ -101,7 +101,7 @@ public class URLUtil {
         return StringUtils.newStringUsAscii(URLCodec.encodeUrl(QUERY_PARAM_VALUE_SET, value.getBytes(charset)));
     }
 
-    private static  String toStr(Object value) {
+    private static String toStr(Object value) {
         if (value == null) {
             return "";
         }
@@ -119,7 +119,7 @@ public class URLUtil {
         if (value.getClass().isArray()) {
             int size = Array.getLength(value);
             Object[] objects = new Object[size];
-            for(int i=0;i<size;i++){
+            for (int i = 0; i < size; i++) {
                 objects[i] = Array.get(value, i);
             }
             List<String> values = Arrays.stream(objects).map(URLUtil::toStr).collect(Collectors.toList());
@@ -165,6 +165,20 @@ public class URLUtil {
     public static String getPath(String urlString) {
         try {
             return toURI(urlString, false).getPath();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 获得host部分
+     * Params:
+     * uriStr – URI路径
+     */
+    public static String getHost(String urlString) {
+        try {
+            return toURI(urlString, false).getHost();
         } catch (Exception e) {
             log.error(e.getMessage());
             return null;
@@ -230,20 +244,21 @@ public class URLUtil {
         return sb;
     }
 
-    private static BitSet buildBitSet(String value){
+    private static BitSet buildBitSet(String value) {
         BitSet set = new BitSet(value.length());
-        for(int i=0;i<value.length();i++){
+        for (int i = 0; i < value.length(); i++) {
             set.set(value.charAt(i));
         }
         return set;
     }
 
     public static void main(String[] args) {
-        Map<String,Object> params=new HashMap<>();
-        params.put("name",12345);
-        String[] ports = new String[]{"0acade7c-9c4b-4ad6-96e4-aa587494d67f","1e12906c-8393-42cb-9776-1f800b3231a4","db460449-085f-4620-8e28-a5bbdf4b703b"};
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", 12345);
+        String[] ports = new String[]{"0acade7c-9c4b-4ad6-96e4-aa587494d67f", "1e12906c-8393-42cb-9776-1f800b3231a4", "db460449-085f-4620-8e28-a5bbdf4b703b"};
 //        List<String> portList = Arrays.asList(ports);
         params.put("ports", ports);
-        System.out.println(URLUtil.buildQuery(params, StandardCharsets.UTF_8));;
+        System.out.println(URLUtil.buildQuery(params, StandardCharsets.UTF_8));
+        ;
     }
 }

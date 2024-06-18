@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.base.util.mptool.FileNameUtil;
+import cn.cyberpeace.mp.base.util.mptool.URLUtil;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -577,10 +578,12 @@ public class CreateHandler extends HandlerCommon {
                         standardSystemType));
             });
         }
-
+        Integer cloudType = srcScene.getCloudType();
+        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer(cloudType);
+        String host = URLUtil.getHost(metadataFileServer);
         boolean isWindows = SystemTypeCommandUtils.isWindows(standardSystemType);
         if (!isWindows && cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
-            commands.add("echo \"169.254.169.254     res.cr.com\" >>/etc/hosts");
+            commands.add(String.format("echo \"%s     res.cr.com\" >>/etc/hosts", host));
         }
 
         // TODO: 应用安装
