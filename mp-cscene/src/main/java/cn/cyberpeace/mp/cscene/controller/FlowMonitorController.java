@@ -77,7 +77,7 @@ import java.util.Optional;
 @AuthTarget(TargetEnum.CSCENE_MONITOR_GROUP)
 public class FlowMonitorController {
 
-    private static final String STR_PROTOCOLS = "[\"arp\", \"dns\",\"snmp\", \"ftp\", \"ftp-data\", \"http\", \"icmp\", \"ikev2\", \"ip\", \"ipv6\", \"krb5\", \"nfs\", \"ntp\", \"pkthdr\", \"pop3\", \"sftp\", \"smb\", \"smtp\", \"ssh\", \"syn\", \"tcp\", \"tcp-pkt\", \"tcp-stream\", \"tcpmux\", \"telnet\", \"tls\", \"udp\"]";
+    private static final String STR_PROTOCOLS = "[\"arp\", \"dns\", \"ftp\", \"ftp-data\", \"http\", \"icmp\", \"ikev2\", \"ip\", \"ipv6\", \"krb5\", \"ldap\", \"nfs\", \"ntp\", \"pkthdr\", \"pop3\", \"rdp\", \"rmi\", \"sftp\", \"smb\", \"smtp\", \"snmp\", \"ssh\", \"syn\", \"tcp\", \"tcp-pkt\", \"tcp-stream\", \"tcpmux\", \"telnet\", \"tls\", \"udp\" , \"dhcpv6\"]";
 
     @Autowired
     private FlowMonitorService flowMonitorService;
