@@ -6,9 +6,6 @@ apply from: 'config.gradle'
 
 dependencies {
     implementation project(':mp-base')
-    implementation 'redis.clients:jedis:3.7.0'
-    implementation 'org.apache.kafka:kafka-clients:3.4.0'
-    implementation 'mysql:mysql-connector-java:8.0.29'
     gradle.ext.appmodules.each {
         implementation project(":${it}")
     }
