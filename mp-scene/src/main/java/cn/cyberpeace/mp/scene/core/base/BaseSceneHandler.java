@@ -1641,8 +1641,10 @@ public abstract class BaseSceneHandler<
         for (TSceneElementPortModel e : existsPorts) {
             portIds.add(e.getPortId());
         }
-        condition.filterIn(BaseSceneElementPortConnectionModel::getSourcePortId, portIds.toArray(new String[]{}));
-        condition.filterIn(BaseSceneElementPortConnectionModel::getTargetPortId, portIds.toArray(new String[]{}));
+        condition.filterOrStart()
+                .orIn(BaseSceneElementPortConnectionModel::getSourcePortId, portIds.toArray(new String[]{}))
+                .orIn(BaseSceneElementPortConnectionModel::getTargetPortId, portIds.toArray(new String[]{}))
+                .filterOrEnd();
         return sceneElementPortConnectionMapper.list(condition);
     }
 
