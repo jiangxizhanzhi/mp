@@ -45,6 +45,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -124,9 +125,16 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (CollectionUtils.isEmpty(sceneIds)) {
             return 0;
         }
+        SceneElementMapper sceneElementMapper = BeanCommon.getBean(SceneElementMapper.class);
+        var elements = sceneElementMapper.list(new HumanCondition().filterIn(BaseSceneElementModel::getScene, sceneIds.toArray(new String[]{})));
+        if (CollectionUtils.isEmpty(elements)) {
+            return 0;
+        }
+        List<String> nodeIds = new ArrayList<>();
+        elements.forEach(e -> nodeIds.add(e.getNodeId()));
         String groupFieldName = BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getVirtualType);
         Map<Object, Long> elementCountMap = scenePluginCloudSceneService
-                .groupCountElement(sceneIds, null, List.of(groupFieldName))
+                .groupCountElement(sceneIds, nodeIds, List.of(groupFieldName))
                 .getSource().get(groupFieldName);
         long activeVirtualDeviceCount = elementCountMap.getOrDefault(
                 BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, 0L) +
