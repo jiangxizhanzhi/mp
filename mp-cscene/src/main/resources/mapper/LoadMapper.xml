@@ -599,11 +599,11 @@
     <select id="getLoadResultByLoadIds" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog">
         SELECT
         log.*,
-        load.tool_name,
+        l.tool_name,
         DATE_FORMAT(log.create_time, '%Y-%m-%d %H:%i:%S') AS create_time
         FROM
         mp_devops_load_scene_result_log log
-        inner join mp_devops_load load on log.id = load.id
+        inner join mp_devops_load l on log.id = l.id
         <where>
             <if test="param != null and param.size != 0">
                 and log.id in

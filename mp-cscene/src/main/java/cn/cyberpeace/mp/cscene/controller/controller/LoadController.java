@@ -388,7 +388,7 @@ public class LoadController {
      * 查询该节点id的载荷执行结果
      * */
     @ApiOperation(value = "查询该节点id的载荷执行结果", notes = "")
-    @GetMapping("/getLoadResultByNodeId")
+    @GetMapping("/getLoadResultByNodeIds")
     public ServiceResult getLoadResultByNodeIds(@RequestParam(value = "node_ids") String[] nodeIds) {
         List<MpDevopsLoadSceneLog> log = loadService.getLoadResultByNodeIds(nodeIds);
         return new ServiceResult(log, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
