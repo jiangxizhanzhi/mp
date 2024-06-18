@@ -1036,9 +1036,24 @@ public class LoadServiceImpl {
                 .filter(Objects::nonNull)
                 .distinct()
                 .collect(Collectors.toList());
-        List<MpDevopsLoadSceneLog> getLoadResultByPks = new ArrayList<>();
-        if (loadIds != null && loadIds.size() > 0) {
-            getLoadResultByPks = loadMapper.getLoadResultByLoadIds(loadIds);
+        List<MpDevopsLoadSceneLog> getLoadResultByPks = loadMapper.getLoadResultByLoadIds(loadIds);
+        if (getLoadResultByPks != null && getLoadResultByPks.size() > 0) {
+            String[] codes = {CommonStatusCodeEnum.RESULT_STATUS.getCode(), CommonStatusCodeEnum.ACTION_TYPE.getCode(),
+                    CommonStatusCodeEnum.RESULT_TYPE.getCode(), CommonStatusCodeEnum.CONTROL_TYPE.getCode()};
+            List<MpSysCodeEnum> nextLevelDatasByCodes = commonCodeService.getNextLevelDatasByCodes(codes);
+            //将nextLevelDatasByCodes中的code和codeName转换成map
+            Map<String, String> codeMap = nextLevelDatasByCodes.stream()
+                    .collect(Collectors.toMap(MpSysCodeEnum::getCode, MpSysCodeEnum::getCodeName));
+            //将list中的resultStatus转换成codeName
+            getLoadResultByPks = getLoadResultByPks.stream()
+                    .map(log -> {
+                        log.setControlTypeName(log.getControlType() != null ? codeMap.get(log.getControlType()) : log.getControlType());
+                        log.setActionTypeName(log.getActionType() != null ? codeMap.get(log.getActionType()) : log.getActionType());
+                        log.setResultTypeName(log.getResultType() != null ? codeMap.get(log.getResultType()) : log.getResultType());
+                        log.setResultStatusName(log.getResultStatus() != null ? codeMap.get(log.getResultStatus()) : log.getResultStatus());
+                        return log;
+                    })
+                    .collect(Collectors.toList());
         }
         return getLoadResultByPks;
     }
