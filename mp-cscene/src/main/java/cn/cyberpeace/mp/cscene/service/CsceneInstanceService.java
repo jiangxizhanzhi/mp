@@ -874,6 +874,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return list;
     }
 
+    public List<CloudPluginSceneElementModel> getLoadResultByNodeIds(String[] nodeIds) {
+        HumanCondition humanCondition = new HumanCondition()
+                .filterIn(CloudPluginSceneElementModel::getSceneElement, nodeIds);
+        List<CloudPluginSceneElementModel> list = cloudPluginSceneElementMapper.list(humanCondition);
+        return list;
+    }
+
     public ListObjServiceResult<CollectionHostStateBO> listHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams) {
         queryParams.setNodeIds(null);
         return scenePluginCollectionSceneService.listHostStatesByAgentNames(agentNames, queryParams);

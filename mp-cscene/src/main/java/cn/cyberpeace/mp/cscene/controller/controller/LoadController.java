@@ -379,8 +379,18 @@ public class LoadController {
      * */
     @ApiOperation(value = "查询该场景绑定的载荷及记录", notes = "")
     @GetMapping("/getLoadResultBySceneId")
-    public ServiceResult getLoadResultBySceneId(@RequestParam(value = "sceneId") String sceneId) {
+    public ServiceResult getLoadResultBySceneId(@RequestParam(value = "scene_id") String sceneId) {
         List<JSONObject> getLoadResultBySceneId = loadService.getLoadResultBySceneId(sceneId);
         return new ServiceResult(getLoadResultBySceneId, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+    }
+
+    /*
+     * 查询该节点id的载荷执行结果
+     * */
+    @ApiOperation(value = "查询该节点id的载荷执行结果", notes = "")
+    @GetMapping("/getLoadResultByNodeId")
+    public ServiceResult getLoadResultByNodeIds(@RequestParam(value = "node_ids") String[] nodeIds) {
+        List<MpDevopsLoadSceneLog> log = loadService.getLoadResultByNodeIds(nodeIds);
+        return new ServiceResult(log, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 }

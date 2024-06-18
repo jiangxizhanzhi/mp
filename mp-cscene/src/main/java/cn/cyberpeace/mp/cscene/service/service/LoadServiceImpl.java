@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.websocket.LoadResultWebSocketServer;
 import cn.cyberpeace.mp.cscene.websocket.WebSocketServer;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import com.alibaba.fastjson.JSONObject;
@@ -925,17 +926,6 @@ public class LoadServiceImpl {
         return pk;
     }
 
-    private Boolean updateResultLog(Integer pk, Map<String, Object> startInstance) {
-        Boolean updateResultLog = true;
-        if (startInstance == null || startInstance.get("code") == null || !startInstance.get("code").toString().equals("0")) {
-            //startInstance方法执行失败
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("resultStatus", "1005010102");
-            updateResultLog = loadMapper.updateLoadByPk(pk.toString(), jsonObject);
-        }
-        return updateResultLog;
-    }
-
     public Boolean updateLoadParam(OutLoadTaskUpdateRequest requestData) {
         if (requestData.getTaskId() == null || requestData.getTaskId().equals("")) {
             return false;
@@ -1036,6 +1026,21 @@ public class LoadServiceImpl {
     public ServiceResult loadTransform(String file, String transformType) {
         String newFile = "/api/mp/file/229\\\\882\\\\4fcbb45241f63fb79c3390b24987cc46.zip";
         return new ServiceResult(newFile, BaseErrorCode.SUCCESS).asResult();
+    }
+
+    public List<MpDevopsLoadSceneLog> getLoadResultByNodeIds(String[] nodeIds) {
+        //节点表
+        List<CloudPluginSceneElementModel> loadList = csceneInstanceService.getLoadResultByNodeIds(nodeIds);
+        List<String> loadIds = loadList.stream()
+                .map(CloudPluginSceneElementModel::getLoadToolId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        List<MpDevopsLoadSceneLog> getLoadResultByPks = new ArrayList<>();
+        if (loadIds != null && loadIds.size() > 0) {
+            getLoadResultByPks = loadMapper.getLoadResultByLoadIds(loadIds);
+        }
+        return getLoadResultByPks;
     }
 }
 

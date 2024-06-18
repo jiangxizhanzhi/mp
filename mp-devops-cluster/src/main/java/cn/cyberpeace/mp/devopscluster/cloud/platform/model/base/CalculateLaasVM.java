@@ -27,7 +27,7 @@ public class CalculateLaasVM extends DeviceCloudTargetCalculate {
     /**
      * os磁盘大小
      */
-    private String osDisk;
+    private String disk;
 
     /**
      * 磁盘类型(ssd/hhd)
@@ -73,7 +73,7 @@ public class CalculateLaasVM extends DeviceCloudTargetCalculate {
     @Builder(toBuilder = true)
     public CalculateLaasVM() {
         this.vmSizeType = "Standard_B1s";
-        this.osDisk = "30";
+        this.disk = "30";
         this.vmOsDiskType = "StandardSSD_LRS";
         this.loopholes = new ArrayList<>();
         this.networkInterfaces = new ArrayList<>();
