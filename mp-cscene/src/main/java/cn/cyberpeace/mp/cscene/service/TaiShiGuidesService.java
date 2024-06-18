@@ -296,6 +296,7 @@ public class TaiShiGuidesService {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             total = (int) response.getHits().getTotalHits().value;
             Map<String, SceneElementBO> mac2Elements = sceneHandler.getAllMac2ElementMapForScene();
+            Map<String, SceneElementBO> ip2Elements = sceneHandler.getAllIp2ElementMapForScene();
             Map<String, SceneElementBO> eid2Elements = sceneHandler.getAllEid2ElementMap();
             for (SearchHit hit : response.getHits().getHits()) {
                 if (hit.getSourceAsMap().containsKey("agent")) {
@@ -305,7 +306,7 @@ public class TaiShiGuidesService {
                 } else {
                     FlowEventData eventData = JsonCommon.mapToBean(hit.getSourceAsMap(), FlowEventData.class);
                     eventData.setTimestamp(hit.getSourceAsMap().get("@timestamp").toString());
-                    TaiShiEventInfo taishi = this.getEventInfoFrom(eventData, mac2Elements);
+                    TaiShiEventInfo taishi = this.getEventInfoFrom(eventData, mac2Elements, ip2Elements);
                     result.add(taishi);
                 }
             }
@@ -676,15 +677,17 @@ public class TaiShiGuidesService {
         return taiShi;
     }
 
-    private TaiShiEventInfo getEventInfoFrom(FlowEventData eventData, Map<String, SceneElementBO> mac2ElementMap) {
+    private TaiShiEventInfo getEventInfoFrom(FlowEventData eventData, Map<String, SceneElementBO> mac2ElementMap, Map<String, SceneElementBO> ip2Elements) {
         TaiShiEventInfo taiShi = new TaiShiEventInfo();
         taiShi.setActionType("attack");
         taiShi.setTriggerType("flow");
         taiShi.setTime(TimeUtils.timestampToLocalDateTime(Long.parseLong(eventData.getTimestamp())));
         if (eventData.getSource() != null) {
             String mac = StringUtils.EMPTY;
+            String ip = StringUtils.EMPTY;
             if (CollectionUtils.isNotEmpty(eventData.getSource().getMac())) {
                 mac = eventData.getSource().getMac().get(0);
+                ip = eventData.getSource().getIp();
             }
             SceneElementBO element = this.getElementBy(mac, mac2ElementMap);
             if (element != null) {
@@ -692,12 +695,22 @@ public class TaiShiGuidesService {
                 taiShi.setSourceNodeIp(eventData.getSource().getIp());
                 taiShi.setSourceNodeName(element.getName());
                 taiShi.setSourceNodePort(eventData.getSource().getPort());
+            }else {
+                element = this.getElementBy(ip, ip2Elements);
+                if (element != null) {
+                    taiShi.setSourceNodeId(element.getId());
+                    taiShi.setSourceNodeIp(eventData.getSource().getIp());
+                    taiShi.setSourceNodeName(element.getName());
+                    taiShi.setSourceNodePort(eventData.getSource().getPort());
+                }
             }
         }
         if (eventData.getDestination() != null) {
             String mac = StringUtils.EMPTY;
+            String ip = StringUtils.EMPTY;
             if (CollectionUtils.isNotEmpty(eventData.getDestination().getMac())) {
                 mac = eventData.getDestination().getMac().get(0);
+                ip = eventData.getDestination().getIp();
             }
             SceneElementBO element = this.getElementBy(mac, mac2ElementMap);
             if (element != null) {
@@ -705,6 +718,14 @@ public class TaiShiGuidesService {
                 taiShi.setTargetNodeIp(eventData.getDestination().getIp());
                 taiShi.setTargetNodeName(element.getName());
                 taiShi.setTargetNodePort(eventData.getDestination().getPort());
+            } else {
+                element = this.getElementBy(ip, ip2Elements);
+                if (element != null) {
+                    taiShi.setTargetNodeId(element.getId());
+                    taiShi.setTargetNodeIp(eventData.getDestination().getIp());
+                    taiShi.setTargetNodeName(element.getName());
+                    taiShi.setTargetNodePort(eventData.getDestination().getPort());
+                }
             }
         }
         taiShi.setAttCks(this.getAttCksByFlowAttackTypes(eventData.getSuricata().getCategory()));
