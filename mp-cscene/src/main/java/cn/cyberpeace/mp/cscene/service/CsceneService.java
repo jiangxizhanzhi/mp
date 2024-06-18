@@ -44,9 +44,17 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.scene.model.SceneConfigAreaModel;
+import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneAreaMapper;
+import cn.cyberpeace.mp.scene.repository.SceneConfigAreaMapper;
+import cn.cyberpeace.mp.scene.repository.SceneConfigElementMapper;
+import cn.cyberpeace.mp.scene.repository.SceneConfigNodeConnectionMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.scene.repository.SceneNodeConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
@@ -75,6 +83,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -778,5 +788,62 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             ids = list;
         }
         return ids;
+    }
+
+    public boolean checkDeleteNodeConnection(String areaConnectionEid) {
+        SceneConfigNodeConnectionMapper sceneNodeConnectionMapper = BeanCommon.getBean(SceneConfigNodeConnectionMapper.class);
+        SceneConfigElementMapper sceneConfigElementMapper = BeanCommon.getBean(SceneConfigElementMapper.class);
+        SceneConfigAreaMapper sceneConfigAreaMapper = BeanCommon.getBean(SceneConfigAreaMapper.class);
+
+        var conn = sceneNodeConnectionMapper.get(areaConnectionEid);
+        if (conn == null) {
+            return true;
+        }
+        String scene = conn.getScene();
+        List<String> nodeIds = Arrays.asList(parseNodeId(conn.getSourceNodeId()), parseNodeId(conn.getTargetNodeId()));
+
+        var elementCondition = new HumanCondition()
+                .filterEqual(BaseSceneElementModel::getScene, scene)
+                .filterIn(BaseSceneElementModel::getNodeId, nodeIds.toArray(new String[]{}));
+        SceneConfigElementModel elementModel = sceneConfigElementMapper.first(elementCondition);
+        if (elementModel == null) {
+            return true;
+        }
+        var areaCondition = new HumanCondition()
+                .filterEqual(BaseSceneAreaModel::getScene, scene)
+                .filterIn(BaseSceneAreaModel::getNodeId, nodeIds.toArray(new String[]{}));
+        SceneConfigAreaModel areaModel = sceneConfigAreaMapper.first(areaCondition);
+        if (areaModel == null) {
+            return true;
+        }
+
+        // 和层内节点相连 则不允许删除
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(scene, areaModel.getNodeId(), null);
+        var connectedElements = sceneConfigHandler.getElementConnectedElements(elementModel.getNodeId());
+        if (CollectionUtils.isNotEmpty(connectedElements)) {
+            return false;
+        }
+
+        // 和层内区域相连 则不允许删除
+        var areaNodeConnections = new ArrayList<>(sceneConfigHandler.getAreaNodeConnectionMap().values());
+        for (var areaNodeConnection : areaNodeConnections) {
+            String source = areaNodeConnection.getSourceNodeId();
+            String target = areaNodeConnection.getTargetNodeId();
+            if (StringUtils.equals(source, elementModel.getNodeId()) || StringUtils.equals(target, elementModel.getNodeId())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String parseNodeId(String input){
+        String regex = "port_(.+)_layer_[0-9]+";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            String extracted = matcher.group(1);
+            return extracted;
+        }
+        return input;
     }
 }

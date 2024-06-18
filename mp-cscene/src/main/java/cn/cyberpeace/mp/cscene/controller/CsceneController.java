@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneStat;
+import cn.cyberpeace.mp.cscene.bo.DeleteCheckResultBO;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.bo.ImportTemplateBO;
 import cn.cyberpeace.mp.cscene.bo.SceneAreaTreeBO;
@@ -215,6 +216,17 @@ public class CsceneController implements BaseModelListControllerBase {
             csceneBO.setRoles(new ArrayList<>());
         }
         return new ServiceResult<>(csceneBO).asResult();
+    }
+
+    @ApiOperation("是否可删除连线等的校验")
+    @GetMapping("/delete_check")
+    public ServiceResult<DeleteCheckResultBO> deleteCheck( @RequestParam String areaConnectionEid) {
+        // 是否可删除节点和区域的连线连线
+        if (StringUtils.isEmpty(areaConnectionEid)) {
+            return new ServiceResult<>(new DeleteCheckResultBO(true)).asResult();
+        }
+        boolean result = getModelService().checkDeleteNodeConnection(areaConnectionEid);
+        return new ServiceResult<>(new DeleteCheckResultBO(result)).asResult();
     }
 
     private List<CsceneRoleBO> convertToRoleBOs(List<CsceneRoleModel> roleObjs, Class<CsceneRoleBO> roleBOClass) {
