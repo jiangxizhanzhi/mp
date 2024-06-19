@@ -14,7 +14,6 @@ import java.util.List;
  * 扩展虚拟机信息
  */
 @Data
-
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
 @ApiModel("计算-laas-虚拟机信息")
@@ -80,5 +79,9 @@ public class CalculateLaasVM extends DeviceCloudTargetCalculate {
         this.userName = "admin123";
         this.password = "NHiOJiZTD4K1";
         this.initSupport = true;
+        List<NetworkInterface> init = new ArrayList<>();
+        NetworkInterface initNet = new NetworkInterface();
+        init.add(initNet);
+        this.networkInterfaces = init;
     }
 }
