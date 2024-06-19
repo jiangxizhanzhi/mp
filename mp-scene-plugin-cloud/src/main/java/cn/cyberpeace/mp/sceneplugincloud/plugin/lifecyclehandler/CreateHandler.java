@@ -1422,8 +1422,12 @@ public class CreateHandler extends HandlerCommon {
 
         getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_NETWORK);
 
-
-
+        // todo 先等30秒用于人手动添加采集路由的外网地址
+        try {
+            Thread.sleep(30000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
         // 再创建网关 和 防火墙
         getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_GATEWAY);
@@ -1550,6 +1554,7 @@ public class CreateHandler extends HandlerCommon {
             return virtualRouterNic;
         }).collect(Collectors.toList()));
         VirtualRouterCreateData virtualRouter = vrClient.create(createData);
+        log.info("collected router {}", virtualRouter.getId());
         getPluginHandler().getSceneHandler().setProbeRouter(virtualRouter.getId());
     }
 
