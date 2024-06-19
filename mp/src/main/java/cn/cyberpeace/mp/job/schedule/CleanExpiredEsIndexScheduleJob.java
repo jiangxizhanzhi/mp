@@ -95,7 +95,7 @@ public class CleanExpiredEsIndexScheduleJob {
             GetIndexResponse result = restHighLevelClient.indices().get(getIndexRequest, RequestOptions.DEFAULT);
             String[] indexs = result.getIndices();
             if (indexs != null) {
-                String nDaysAgoStr = TimeUtils.localDateTimeToString(nDaysAgo, DateTimeFormatter.ofPattern("yyyyMMdd"));
+                String nDaysAgoStr = TimeUtils.localDateTimeToString(nDaysAgo, DateTimeFormatter.ofPattern("yyMMdd"));
                 int nDaysAgoYYYYMMDD = Integer.valueOf(nDaysAgoStr);
                 for (String index : indexs) {
                     String dayStr = StringUtils.replace(index, sessionPrefix, "");
