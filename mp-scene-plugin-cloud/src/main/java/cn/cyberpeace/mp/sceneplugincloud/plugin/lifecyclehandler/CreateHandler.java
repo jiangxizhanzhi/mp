@@ -1047,6 +1047,10 @@ public class CreateHandler extends HandlerCommon {
             createData.setHost(cloudElement.getEntityUsbs().get(0).getHost());
         }
         if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
+            String userDataTxt = TextUtils.emptyNull(combineInitCommand(cloudElement));
+            System.out.println("combineInitCommand---------------------------------------------------------");
+            System.out.println(userDataTxt);
+            System.out.println("combineInitCommand---------------------------------------------------------");
             createData.setUserData(TextUtils.emptyNull(combineInitCommand(cloudElement)));
         }
         createData.setNetworks(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));

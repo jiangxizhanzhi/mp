@@ -1,21 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.azure.lifecyclehandler;
 
-import cn.cyberpeace.mp.scene.model.SceneModel;
-import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
-import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSceneStage;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.flowcollect.AzureFlowCollector;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.CreateHandler;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class AzureCreateHandler extends CreateHandler {
     public Integer cloudType;
@@ -30,7 +17,8 @@ public class AzureCreateHandler extends CreateHandler {
 
     public void create() {
         try {
-            prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
+//            TODO arkime暂停开发
+            /*prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
 
             getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
             // TODO 流量镜像应该是基于网络端口的, 这里是基于节点的
@@ -173,7 +161,7 @@ public class AzureCreateHandler extends CreateHandler {
 
                 getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_DATA_COLLECT);
 
-            }
+            }*/
         } catch (Exception e) {
 //            云场景启动失败立即删除云资源
             String groupName = getPluginHandler().getSourceSceneId();

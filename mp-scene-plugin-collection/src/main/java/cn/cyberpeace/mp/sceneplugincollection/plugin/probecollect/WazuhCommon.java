@@ -192,15 +192,17 @@ public class WazuhCommon {
                 String downloadPath = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, linuxInstallDir,
                         LINUX_DOWNLOAD_AGENT_FILE);
                 // 下载按需安装脚本并执行
-//                if (cloudType == null || cloudType == BaseSceneModel.CloudType.DEFAULT) {
+                /*if (cloudType == null || cloudType == BaseSceneModel.CloudType.DEFAULT) {
                 addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
                         String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, downloadPath, downloadUrl),
                         String.format("sh %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
-                /*}else {
+                }else {*/
                     addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
                             String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, downloadPath, downloadUrl),
-                            String.format("sudo sh %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
-                }*/
+                            String.format("sh %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
+//                    TODO apt-get install unzip 改为不同的类型不同安装命令
+                    addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK, "apt-get install unzip", addCommand);
+//                }
 
                 // 给下载安装包的脚本添加参数`
                 String filePathParam = String.format("filepath=%s/%s", linuxInstallDir,
