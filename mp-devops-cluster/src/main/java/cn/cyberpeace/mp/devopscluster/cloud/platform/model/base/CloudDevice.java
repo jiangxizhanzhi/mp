@@ -1,9 +1,15 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.model.base;
 
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
+import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 靶标信息
@@ -16,7 +22,7 @@ public class CloudDevice extends BaseCloudPlatformResult {
      * ID
      */
     @ApiModelProperty(value = "ID")
-    private String id;
+    private Integer id;
 
     /**
      * uuid
@@ -55,12 +61,6 @@ public class CloudDevice extends BaseCloudPlatformResult {
     private String name;
 
     /**
-     * 别名
-     */
-    @ApiModelProperty(value = "别名")
-    private String otherName;
-
-    /**
      * 镜像名称（靶标的英文名称）
      */
     @ApiModelProperty(value = "镜像名称（靶标的英文名称）")
@@ -79,28 +79,40 @@ public class CloudDevice extends BaseCloudPlatformResult {
     private String logo;
 
     /**
+     * 类型
+     */
+    @ApiModelProperty(value = "类型")
+    private String imageType;
+
+    /**
+     *
+     */
+    @ApiModelProperty(value = "靶标分类(TRM:1,TGM:2,CGM:3,其他:0)")
+    private Integer maintype;
+
+    /**
      * 角色
      */
     @ApiModelProperty(value = "角色")
     private Integer role;
 
     /**
-     * 云服务类型
+     * 一级分类
      */
-    @ApiModelProperty(value = "云服务类型")
-    private String cloudServiceType;
+    @ApiModelProperty(value = "一级分类")
+    private Integer category;
 
     /**
-     * 二级类型
+     * 二级分类
      */
-    @ApiModelProperty(value = "二级类型")
-    private String serviceType;
+    @ApiModelProperty(value = "二级分类")
+    private Integer secondCategory;
 
     /**
-     * 三级类型
+     * 三级分类
      */
-    @ApiModelProperty(value = "三级类型")
-    private String subType;
+    @ApiModelProperty(value = "三级分类")
+    private Integer l3Category;
 
     /**
      * 是否导入
@@ -121,6 +133,50 @@ public class CloudDevice extends BaseCloudPlatformResult {
     private Boolean isInit;
 
     /**
+     * 实体信息
+     */
+    private ExtEntity extEntity;
+
+    /**
+     * 交换机
+     */
+    private List<ExtEntityAccess> extEntityAccess;
+
+    /**
+     * 系统信息
+     */
+    private ExtSystemInfo extSystemInfo;
+
+    /**
+     * 网关信息
+     */
+    private ExtGateway extGateway;
+
+    /**
+     * 虚拟机信息
+     */
+    private ExtVm extVm;
+
+    /**
+     * 镜像信息
+     */
+    private ExtImageInfo extImageInfo;
+
+    /**
+     * 云镜像信息
+     */
+    private DeviceCloudTargetVO deviceCloudTarget;
+
+    private ExtDocker extDocker;
+
+    private ExtNet extNet;
+
+    /**
+     * 实体USB信息
+     */
+    private EntityUsb extEntityUsb;
+
+    /**
      * 是否内置镜像
      */
     private Boolean isBuildIn;
@@ -128,7 +184,7 @@ public class CloudDevice extends BaseCloudPlatformResult {
     /**
      * 是否隐藏
      */
-    private Boolean isHide;
+    private Boolean isHide = Boolean.FALSE;
 
     /**
      * 默认可运行的镜像名称
@@ -136,32 +192,35 @@ public class CloudDevice extends BaseCloudPlatformResult {
     private String defaultLaunchImageName;
 
     /**
-     * 是否支持导入
+     * 云服务类型
      */
+    @ApiModelProperty(value = "云服务类型")
+    private String cloudServiceType;
+
+    /**
+     * 二级类型
+     */
+    @ApiModelProperty(value = "二级类型")
+    private String serviceType;
+
+    /**
+     * 三级类型
+     */
+    @ApiModelProperty(value = "三级类型")
+    private String subType;
+
+    public Boolean getIsBuildIn() {
+        boolean tmpImport = !Objects.isNull(isImport) && isImport;
+        boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;
+        boolean tmpInit = !Objects.isNull(isInit) && isInit;
+        return tmpImport || tmpInternal || tmpInit;
+    }
+
     private Boolean supportExport;
 
-    /**
-     * 镜像类型
-     */
-    private String imageType;
+    //简化实例创建，同时允许链式调用和设置默认值
+    @Builder(toBuilder = true)
+    public CloudDevice() {
 
-    /**
-     * 网络-网络服务
-     */
-    private NetService netService;
-
-    /**
-     * 计算-laas-虚拟机信息
-     */
-    private CalculateLaasVM calculateLaasVM;
-
-    /**
-     * 容器-基础设施-容器注册表
-     */
-    private DockerInfrastructureContainerRegistries dockerInfrastructureContainerRegistries;
-
-    /**
-     * 容器-基础设施-容器实例
-     */
-    private DockerInfrastructureContainerInstances dockerInfrastructureContainerInstances;
+    }
 }

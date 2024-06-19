@@ -84,4 +84,5 @@ public class CalculateLaasVM extends DeviceCloudTargetCalculate {
         init.add(initNet);
         this.networkInterfaces = init;
     }
+
 }

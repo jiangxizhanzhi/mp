@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Snapshot;
 import cn.cyberpeace.mp.devopscluster.po.*;
 import cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper;
 import cn.cyberpeace.mp.devopscluster.vo.EquipmentRequestVO;
@@ -156,11 +157,19 @@ public class MicrosoftAzureConverter implements BaseConverter {
             for(DeviceCloudTargetVO target : vos){
                 CloudDevice device = new CloudDevice();
                 device.setDeleted(false);
-                device.setId(target.getId());
-                device.setCloudServiceType(target.getCloudServiceType());
-                device.setName(target.getName());
-                device.setOtherName(target.getOtherName());
+                device.setSuccess(false);
+                device.setUuid(target.getId());
                 device.setLogo(target.getLogo());
+                device.setIsImport(false);
+                device.setIsInternal(false);
+                device.setIsInit(false);
+                device.setIsBuildIn(false);
+                device.setIsHide(false);
+
+                device.setName(target.getName());
+                device.setDefaultLaunchImageName(target.getName());
+                device.setCreatedAt(String.valueOf(target.getCreateTime()));
+                device.setCloudServiceType(target.getCloudServiceType());
                 //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储 )
                 switch (target.getCloudServiceType()) {
                     case "1":
@@ -173,35 +182,22 @@ public class MicrosoftAzureConverter implements BaseConverter {
                         }else if(target.getNetType()!=null && target.getNetType().equals("WAF")){
                             device.setImageType("WAF");
                         }
-                        NetService netService = new NetService();
-                        BeanUtils.copyProperties(target, netService);
-                        device.setNetService(netService);
+                        ExtNet extNet = new ExtNet();
+//                        BeanUtils.copyProperties(target, extNet);
+                        device.setExtNet(extNet);
                         break;
                     case "2":
                         device.setServiceType(target.getCalculateType());
                         device.setSubType(target.getSubType());
                         if(target.getSubType()!=null && target.getSubType().equals("vm")){
-                            device.setImageType("vm");
-                            CalculateLaasVM calculateLaasVM = new CalculateLaasVM();
-                            BeanUtils.copyProperties(target, calculateLaasVM);
-                            calculateLaasVM.setVmType(calculateLaasVM.getOperatingSystem());
-                            device.setCalculateLaasVM(calculateLaasVM);
+                            convertExtVm(device,target);
                             break;
                         }
                     case "3":
                         device.setServiceType(target.getContainerType());
                         device.setSubType(target.getSubType());
                         if(target.getSubType()!=null && target.getSubType().equals("containerRegistry")){
-                            device.setImageType("containerRegistry");
-                            DockerInfrastructureContainerRegistries registries = new DockerInfrastructureContainerRegistries();
-                            BeanUtils.copyProperties(target, registries);
-                            device.setDockerInfrastructureContainerRegistries(registries);
-                            break;
-                        }else if(target.getSubType()!=null && target.getSubType().equals("containerInstance")){
-                            device.setImageType("containerInstance");
-                            DockerInfrastructureContainerInstances instance = new DockerInfrastructureContainerInstances();
-                            BeanUtils.copyProperties(target, instance);
-                            device.setDockerInfrastructureContainerInstances(instance);
+                            convertExtDocker(device,target);
                             break;
                         }else{
                             break;
@@ -216,6 +212,91 @@ public class MicrosoftAzureConverter implements BaseConverter {
             }
         }
         return deviceList;
+    }
+
+    public void convertExtVm(CloudDevice device,DeviceCloudTargetVO target){
+        /**
+         * ext_vm
+         */
+        device.setImageType("vm");
+        ExtVm extVm = new ExtVm();
+        extVm.setFlavor("2c-8g-512g");
+        extVm.setCpu(2);
+        extVm.setRam(8);
+        extVm.setDisk(512);
+        extVm.setInitSupport(true);
+        extVm.setQuickCreateSupport(false);
+        //访问协议
+        List<AccessProtocol> accessProtocols = new ArrayList<>();
+        extVm.setAccessProtocols(accessProtocols);
+        extVm.setExtInfo(null);
+        extVm.setInstanceExist(false);
+        //快照计数
+        extVm.setSnapshotCount(0);
+        extVm.setInstanceState(0);
+        extVm.setIsoAttach(false);
+        device.setExtVm(extVm);
+
+        /**
+         * ext_system_info
+         */
+        ExtSystemInfo extSystemInfo = new ExtSystemInfo();
+        extSystemInfo.setLanguage("cn");
+        extSystemInfo.setSystemArchitecture("64");
+        device.setExtSystemInfo(extSystemInfo);
+
+        /**
+         * ext_image_info
+         */
+        ExtImageInfo extImageInfo = new ExtImageInfo();
+        device.setExtImageInfo(extImageInfo);
+
+        /**
+         * device_cloud_target
+         */
+        device.setDeviceCloudTarget(target);
+    }
+
+    public void convertExtDocker(CloudDevice device,DeviceCloudTargetVO target){
+        /**
+         * ext_docker
+         */
+        device.setImageType("containerRegistry");
+        ExtDocker extDocker = new ExtDocker();
+        extDocker.setFlavor("");
+        extDocker.setCpu(0);
+        extDocker.setRam(0);
+        extDocker.setDisk(0);
+        extDocker.setInstanceState(0);
+        extDocker.setInitSupport(true);
+        extDocker.setQuickCreateSupport(true);
+        extDocker.setSnapshotCount(0);
+        extDocker.setExtInfo(new Snapshot.ExtInfo());
+        List<AccessProtocol> accessProtocols = new ArrayList<>();
+        AccessProtocol accessProtocol = new AccessProtocol();
+        accessProtocol.setProtocol("console");
+        accessProtocols.add(accessProtocol);
+        extDocker.setAccessProtocols(accessProtocols);
+        device.setExtDocker(extDocker);
+
+        /**
+         * ext_system_info
+         */
+        ExtSystemInfo extSystemInfo = new ExtSystemInfo();
+        extSystemInfo.setLanguage("en");
+        extSystemInfo.setSystemArchitecture("64");
+        device.setExtSystemInfo(extSystemInfo);
+
+        /**
+         * ext_image_info
+         */
+        ExtImageInfo extImageInfo = new ExtImageInfo();
+        device.setExtImageInfo(extImageInfo);
+
+        /**
+         * device_cloud_target
+         */
+        device.setDeviceCloudTarget(target);
     }
 
     /**
