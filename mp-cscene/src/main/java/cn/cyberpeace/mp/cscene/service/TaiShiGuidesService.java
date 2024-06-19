@@ -673,6 +673,15 @@ public class TaiShiGuidesService {
             taiShi.setTargetNodeName(element.getName());
             taiShi.setTargetNodeIp(eventData.getAgent().getIp());
             taiShi.setTargetNodeId(element.getId());
+            if (StringUtils.isEmpty(taiShi.getTargetNodeIp())) {
+                if (CollectionUtils.isNotEmpty(element.getPorts())) {
+                    for (var p : element.getPorts()) {
+                        if (StringUtils.isNotEmpty(p.getIp())) {
+                            taiShi.setTargetNodeIp(p.getIp());
+                        }
+                    }
+                }
+            }
         }
         return taiShi;
     }
