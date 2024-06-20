@@ -1215,6 +1215,7 @@ public class CreateHandler extends HandlerCommon {
                 if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(cloudElement.getImageType())) {
                     CloudAccessMode cloudAccessMode = new CloudAccessMode();
                     cloudAccessMode.setAccessIp(ip);
+                    cloudAccessMode.setAvailable(true);
                     cloudAccessMode.setConnectionUrl(remoteClient.getContainerConnectionUrl(new GetConnectionUrlParam()
                             .setConsoleType(CloudElementAccessMode.Protocol.CONSOLE)
                             .setVmId(cloudElement.getResourceId())).getData());
@@ -1226,7 +1227,7 @@ public class CreateHandler extends HandlerCommon {
                     spiceAccessMode.setConnectionUrl("");
                     spiceAccessMode.setProtocol(CloudElementAccessMode.Protocol.SPICE);
                     cloudAccessModes.add(spiceAccessMode);
-
+                    spiceAccessMode.setAvailable(true);
 
                     CloudAccessMode vncAccessMode = new CloudAccessMode();
                     vncAccessMode.setAccessIp(ip);
@@ -1234,6 +1235,7 @@ public class CreateHandler extends HandlerCommon {
                             .setConsoleType(CloudElementAccessMode.Protocol.NO_VNC)
                             .setVmId(cloudElement.getResourceId())).getData());
                     vncAccessMode.setProtocol(CloudElementAccessMode.Protocol.VNC);
+                    vncAccessMode.setAvailable(true);
                     cloudAccessModes.add(vncAccessMode);
                 }
                 cloudPort.setAccessModes(cloudAccessModes);
