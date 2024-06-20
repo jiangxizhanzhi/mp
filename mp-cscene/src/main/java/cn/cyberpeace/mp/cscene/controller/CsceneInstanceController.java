@@ -513,6 +513,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                         if (StringUtils.equals(a.getId(), accessModeId)) {
                             NodeConnectionBO nodeConnectionBO = new NodeConnectionBO();
                             nodeConnectionBO.setConnectionUrl(a.getConnectionUrl());
+                            nodeConnectionBO.setNodeName(element.getName());
+                            nodeConnectionBO.setNodeId(nodeId);
+                            nodeConnectionBO.setProtocol(a.getProtocol());
                             return new ServiceResult<>(nodeConnectionBO).asResult();
                         }
                     }
