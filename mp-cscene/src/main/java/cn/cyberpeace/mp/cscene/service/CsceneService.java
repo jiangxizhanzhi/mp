@@ -511,6 +511,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     @Transactional
     public ServiceResult<CsceneBO> syncForImport(CsceneBO csceneBO, CsceneContextBO context) {
+        if (csceneBO.getReferenceType() == null) {
+            csceneBO.setReferenceType(1);
+        }
         this.addCollectionPlugin(csceneBO);
         BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(csceneBO, context);
         bcSceneConfigHandler.save();
