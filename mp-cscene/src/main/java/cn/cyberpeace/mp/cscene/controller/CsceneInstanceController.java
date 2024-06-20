@@ -498,9 +498,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                                @RequestParam(required = false) String nodeId,
                                                                @RequestParam(required = false) String accessModeId,
                                                                @RequestBody(required = false) CsceneInstanceNodeAccessModeActionRequest request) {
-//        request = formatNodeAccessModeActionRequest(request, id, nodeId, accessModeId);
-//        return modelService.getRemoteConnection(request.getId(), request.getNodeId(), request.getAccessModeId(),
-//                request.getContext()).asResult();
+        request = formatNodeAccessModeActionRequest(request, id, nodeId, accessModeId);
+        id = request.getId();
+        nodeId = request.getNodeId();
+        accessModeId = request.getAccessModeId();
         String sceneId = getModelService().getSceneId(id);
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
