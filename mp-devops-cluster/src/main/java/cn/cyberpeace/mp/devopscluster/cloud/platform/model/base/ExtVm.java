@@ -86,8 +86,11 @@ public class ExtVm implements Serializable {
     private String isoTmpdirUuid;
 
     @ApiModelProperty("大小")
-    private String vmSize;
+    private String vmSizeType;
 
     @ApiModelProperty("os磁盘")
     private String vmOsDiskType;
+
+    @ApiModelProperty("漏洞信息")
+    private String loopholeInfo;
 }

@@ -22,7 +22,7 @@ public class CloudTargetConverter {
         extVm.setCpu(1);
         extVm.setRam(1);
         extVm.setDisk(30);
-        extVm.setVmSize("Standard_B1s");
+        extVm.setVmSizeType("Standard_B1s");
         extVm.setVmOsDiskType("StandardSSD_LRS");
         extVm.setInitSupport(true);
         extVm.setQuickCreateSupport(false);
