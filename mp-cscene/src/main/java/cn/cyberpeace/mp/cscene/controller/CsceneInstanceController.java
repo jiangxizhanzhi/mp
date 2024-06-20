@@ -39,6 +39,8 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventTypeBO;
@@ -496,9 +498,28 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                                @RequestParam(required = false) String nodeId,
                                                                @RequestParam(required = false) String accessModeId,
                                                                @RequestBody(required = false) CsceneInstanceNodeAccessModeActionRequest request) {
-        request = formatNodeAccessModeActionRequest(request, id, nodeId, accessModeId);
-        return modelService.getRemoteConnection(request.getId(), request.getNodeId(), request.getAccessModeId(),
-                request.getContext()).asResult();
+//        request = formatNodeAccessModeActionRequest(request, id, nodeId, accessModeId);
+//        return modelService.getRemoteConnection(request.getId(), request.getNodeId(), request.getAccessModeId(),
+//                request.getContext()).asResult();
+        String sceneId = getModelService().getSceneId(id);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
+        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        var element = pluginHandler.getElement(nodeId).getSrcElement();
+        if (element != null && CollectionUtils.isNotEmpty(element.getPorts())) {
+            for (var p : element.getPorts()) {
+                var pluginPort = pluginHandler.getPort(p.getId());
+                if (pluginPort != null && CollectionUtils.isNotEmpty(pluginPort.getAccessModes())) {
+                    for (var a : pluginPort.getAccessModes()) {
+                        if (StringUtils.equals(a.getId(), accessModeId)) {
+                            NodeConnectionBO nodeConnectionBO = new NodeConnectionBO();
+                            nodeConnectionBO.setConnectionUrl(a.getConnectionUrl());
+                            return new ServiceResult<>(nodeConnectionBO).asResult();
+                        }
+                    }
+                }
+            }
+        }
+        return new ServiceResult<>(new NodeConnectionBO()).asResult();
     }
 
     @ApiOperation("获取容器console连接,仅支持非neutron网络的容器")
