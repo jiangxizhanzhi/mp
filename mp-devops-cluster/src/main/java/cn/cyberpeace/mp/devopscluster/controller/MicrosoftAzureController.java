@@ -98,8 +98,8 @@ public class MicrosoftAzureController {
     public ServiceResult synchronousCloudData() {
         //1: 微软公有云 2:微软私有云 3:微软混合云
         microsoftAzureConverter.synchronousCloudData(1);
-        microsoftAzureConverter.synchronousCloudData(2);
-        microsoftAzureConverter.synchronousCloudData(3);
+//        microsoftAzureConverter.synchronousCloudData(2);
+//        microsoftAzureConverter.synchronousCloudData(3);
         return new ServiceResult(null, BaseErrorCode.SUCCESS).asResult();
     }
 

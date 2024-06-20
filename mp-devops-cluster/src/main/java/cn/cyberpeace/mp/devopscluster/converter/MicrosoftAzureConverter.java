@@ -4,8 +4,8 @@ import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Snapshot;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.CloudDevice;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtNet;
 import cn.cyberpeace.mp.devopscluster.po.*;
 import cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper;
 import cn.cyberpeace.mp.devopscluster.vo.EquipmentRequestVO;
@@ -153,8 +153,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
     //结果转Device集合
     private List<CloudDevice> convert(List<DeviceCloudTargetVO> vos) {
         List<CloudDevice> deviceList = new ArrayList<>();
-        if(vos != null && vos.size() > 0){
-            for(DeviceCloudTargetVO target : vos){
+        if (vos != null && vos.size() > 0) {
+            for (DeviceCloudTargetVO target : vos) {
                 CloudDevice device = new CloudDevice();
                 device.setDeleted(false);
                 device.setSuccess(false);
@@ -175,11 +175,11 @@ public class MicrosoftAzureConverter implements BaseConverter {
                     case "1":
                         device.setServiceType(target.getNetType());
                         device.setSubType(target.getSubType());
-                        if(target.getNetType()!=null && target.getNetType().equals("VNet")){
+                        if (target.getNetType() != null && target.getNetType().equals("VNet")) {
                             device.setImageType("VNet");
-                        }else if(target.getNetType()!=null && target.getNetType().equals("fireWall")){
+                        } else if (target.getNetType() != null && target.getNetType().equals("fireWall")) {
                             device.setImageType("fireWall");
-                        }else if(target.getNetType()!=null && target.getNetType().equals("WAF")){
+                        } else if (target.getNetType() != null && target.getNetType().equals("WAF")) {
                             device.setImageType("WAF");
                         }
                         ExtNet extNet = new ExtNet();
@@ -189,17 +189,17 @@ public class MicrosoftAzureConverter implements BaseConverter {
                     case "2":
                         device.setServiceType(target.getCalculateType());
                         device.setSubType(target.getSubType());
-                        if(target.getSubType()!=null && target.getSubType().equals("vm")){
-                            convertExtVm(device,target);
+                        if (target.getSubType() != null && target.getSubType().equals("vm")) {
+                            cloudTargetConverter.convertExtVm(device, target);
                             break;
                         }
                     case "3":
                         device.setServiceType(target.getContainerType());
                         device.setSubType(target.getSubType());
-                        if(target.getSubType()!=null && target.getSubType().equals("containerRegistry")){
-                            convertExtDocker(device,target);
+                        if (target.getSubType() != null && target.getSubType().equals("containerRegistry")) {
+                            cloudTargetConverter.convertExtDocker(device, target);
                             break;
-                        }else{
+                        } else {
                             break;
                         }
                     case "4":
@@ -214,90 +214,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
         return deviceList;
     }
 
-    public void convertExtVm(CloudDevice device,DeviceCloudTargetVO target){
-        /**
-         * ext_vm
-         */
-        device.setImageType("vm");
-        ExtVm extVm = new ExtVm();
-        extVm.setFlavor("2c-8g-512g");
-        extVm.setCpu(2);
-        extVm.setRam(8);
-        extVm.setDisk(512);
-        extVm.setInitSupport(true);
-        extVm.setQuickCreateSupport(false);
-        //访问协议
-        List<AccessProtocol> accessProtocols = new ArrayList<>();
-        extVm.setAccessProtocols(accessProtocols);
-        extVm.setExtInfo(null);
-        extVm.setInstanceExist(false);
-        //快照计数
-        extVm.setSnapshotCount(0);
-        extVm.setInstanceState(0);
-        extVm.setIsoAttach(false);
-        device.setExtVm(extVm);
-
-        /**
-         * ext_system_info
-         */
-        ExtSystemInfo extSystemInfo = new ExtSystemInfo();
-        extSystemInfo.setLanguage("cn");
-        extSystemInfo.setSystemArchitecture("64");
-        device.setExtSystemInfo(extSystemInfo);
-
-        /**
-         * ext_image_info
-         */
-        ExtImageInfo extImageInfo = new ExtImageInfo();
-        device.setExtImageInfo(extImageInfo);
-
-        /**
-         * device_cloud_target
-         */
-        device.setDeviceCloudTarget(target);
-    }
-
-    public void convertExtDocker(CloudDevice device,DeviceCloudTargetVO target){
-        /**
-         * ext_docker
-         */
-        device.setImageType("containerRegistry");
-        ExtDocker extDocker = new ExtDocker();
-        extDocker.setFlavor("");
-        extDocker.setCpu(0);
-        extDocker.setRam(0);
-        extDocker.setDisk(0);
-        extDocker.setInstanceState(0);
-        extDocker.setInitSupport(true);
-        extDocker.setQuickCreateSupport(true);
-        extDocker.setSnapshotCount(0);
-        extDocker.setExtInfo(new Snapshot.ExtInfo());
-        List<AccessProtocol> accessProtocols = new ArrayList<>();
-        AccessProtocol accessProtocol = new AccessProtocol();
-        accessProtocol.setProtocol("console");
-        accessProtocols.add(accessProtocol);
-        extDocker.setAccessProtocols(accessProtocols);
-        device.setExtDocker(extDocker);
-
-        /**
-         * ext_system_info
-         */
-        ExtSystemInfo extSystemInfo = new ExtSystemInfo();
-        extSystemInfo.setLanguage("en");
-        extSystemInfo.setSystemArchitecture("64");
-        device.setExtSystemInfo(extSystemInfo);
-
-        /**
-         * ext_image_info
-         */
-        ExtImageInfo extImageInfo = new ExtImageInfo();
-        device.setExtImageInfo(extImageInfo);
-
-        /**
-         * device_cloud_target
-         */
-        device.setDeviceCloudTarget(target);
-    }
 
     /**
      * 云镜像管理
@@ -347,27 +263,27 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
         //网络表数据
         List<DeviceCloudTargetNet> netList = new ArrayList<>();
-        cloudTargetConverter.cloudNetServiceConvert(cloudTypeStr,mainTargetList,netList,getCloudInternetServices);
+        cloudTargetConverter.cloudNetServiceConvert(cloudTypeStr, mainTargetList, netList, getCloudInternetServices);
 
         //容器表数据
         List<DeviceCloudTargetContainer> containerList = new ArrayList<>();
-        cloudTargetConverter.cloudContainerRegistryConvert(cloudTypeStr,mainTargetList,containerList,dockerImages);//容器-容器基础结构-容器注册表
-        cloudTargetConverter.cloudContainerInstanceConvert(cloudTypeStr,mainTargetList,containerList,dockerInstances);//容器-容器基础结构-容器实例
+        cloudTargetConverter.cloudContainerRegistryConvert(cloudTypeStr, mainTargetList, containerList, dockerImages);//容器-容器基础结构-容器注册表
+        cloudTargetConverter.cloudContainerInstanceConvert(cloudTypeStr, mainTargetList, containerList, dockerInstances);//容器-容器基础结构-容器实例
 
         //计算表数据
         List<DeviceCloudTargetCalculate> calculateList = new ArrayList<>();
-        cloudTargetConverter.cloudCalculateSoftVMConvert(cloudTypeStr,mainTargetList,calculateList,images);//计算-laas-vm(微软云)
-        cloudTargetConverter.cloudCalculateUploadVMConvert(cloudTypeStr,mainTargetList,calculateList,localImages);//计算-laas-vm(用户上传)
+        cloudTargetConverter.cloudCalculateSoftVMConvert(cloudTypeStr, mainTargetList, calculateList, images);//计算-laas-vm(微软云)
+        cloudTargetConverter.cloudCalculateUploadVMConvert(cloudTypeStr, mainTargetList, calculateList, localImages);//计算-laas-vm(用户上传)
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("result", result);
         jsonObject.put("data", mainTargetList);
         jsonObject.put("code", "200");
 
-        microsoftAzureMapper.deleteCloudTarget(null,cloudTypeStr);
-        microsoftAzureMapper.deleteCloudTargetNet(null,cloudTypeStr);
-        microsoftAzureMapper.deleteCloudTargetCalculate(null,cloudTypeStr);
-        microsoftAzureMapper.deleteCloudTargetContainer(null,cloudTypeStr);
+        microsoftAzureMapper.deleteCloudTarget(null, cloudTypeStr);
+        microsoftAzureMapper.deleteCloudTargetNet(null, cloudTypeStr);
+        microsoftAzureMapper.deleteCloudTargetCalculate(null, cloudTypeStr);
+        microsoftAzureMapper.deleteCloudTargetContainer(null, cloudTypeStr);
 
         Boolean batchInsertCloudTarget = batchInsert(mainTargetList, microsoftAzureMapper::batchInsertCloudTarget, "云靶标主数据");
         Boolean batchInsertCloudTargetNet = batchInsert(netList, microsoftAzureMapper::batchInsertCloudTargetNet, "网络表数据");
@@ -406,16 +322,16 @@ public class MicrosoftAzureConverter implements BaseConverter {
         //收集元素
         List<JSONObject> jsonList = new ArrayList<>();
         JSONObject VNet = new JSONObject();
-        VNet.put("netServiceName","VNet");
-        VNet.put("netType","VNet");
+        VNet.put("netServiceName", "VNet");
+        VNet.put("netType", "VNet");
         jsonList.add(VNet);
         JSONObject fireWall = new JSONObject();
-        fireWall.put("netServiceName","fireWall");
-        fireWall.put("netType","fireWall");
+        fireWall.put("netServiceName", "fireWall");
+        fireWall.put("netType", "fireWall");
         jsonList.add(fireWall);
         JSONObject WAF = new JSONObject();
-        WAF.put("netServiceName","WAF");
-        WAF.put("netType","WAF");
+        WAF.put("netServiceName", "WAF");
+        WAF.put("netType", "WAF");
         jsonList.add(WAF);
         return jsonList;
     }
@@ -480,7 +396,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
         // 初始化容器实例管理器
         ContainerInstanceManager containerInstanceManager = ContainerInstanceManager
-                .authenticate(instance.getTokenCredential(),new AzureProfile(AzureEnvironment.AZURE));
+                .authenticate(instance.getTokenCredential(), new AzureProfile(AzureEnvironment.AZURE));
 
         // 获取所有容器组列表
         PagedIterable<ContainerGroup> containerGroups = containerInstanceManager.containerGroups().list();
@@ -516,64 +432,73 @@ public class MicrosoftAzureConverter implements BaseConverter {
         // 指定要查询的区域
         Region region = Region.ASIA_EAST; // 替换为您的实际区域
         List<JSONObject> result = new ArrayList<>();
-//        //只分地区的所有镜像
-//        PagedIterable<VirtualMachineImage> virtualMachineImages = azureResourceManager.virtualMachineImages().listByRegion(region);
-//        for(VirtualMachineImage virtualMachineImage : virtualMachineImages){
-//            String publisherName = virtualMachineImage.publisherName();
-//            String offerName = virtualMachineImage.offer();
-//            String skuName = virtualMachineImage.sku();
-//        }
-
-        // 获取所有虚拟机发布者
-        PagedIterable<VirtualMachinePublisher> virtualMachinePublishers = azureResourceManager.virtualMachineImages().publishers().listByRegion(region);
-        int firstTime = 0;
-        for (VirtualMachinePublisher publisher : virtualMachinePublishers) {
-            //todo 筛选出需要的VM镜像
-            if (publisher.name() != null && (publisher.name().contains("linux") || publisher.name().contains("ubuntu")
-                    || publisher.name().contains("centos") || publisher.name().contains("windows"))) {
-                if (firstTime < 100) {
-                    firstTime++;
-                    System.out.println("PublisherName: " + publisher.name());
-                    // 获取发布者的所有产品(offer)
-                    VirtualMachineOffers offers = publisher.offers();
-                    PagedIterable<VirtualMachineOffer> list = offers.list();
-                    int secondTime = 0;
-                    for (VirtualMachineOffer offer : list) {
-                        if (secondTime < 1) {
-                            secondTime++;
-                            System.out.println("offerName: " + offer.name());
-                            // 获取该产品的所有SKU
-                            VirtualMachineSkus skus = offer.skus();
-                            PagedIterable<VirtualMachineSku> skuList = skus.list();
-                            int thirdTime = 0;
-                            for (VirtualMachineSku sku : skuList) {
-                                if (thirdTime < 1) {
-                                    thirdTime++;
-                                    System.out.println("skuName: " + sku.name());
-                                    // 获取每个SKU的所有版本（image versions）
-                                    PagedIterable<VirtualMachineImage> imageList = sku.images().list();
-                                    int time = 0;
-                                    for (VirtualMachineImage image : imageList) {
-                                        if (time < 1) {
-                                            time++;
-                                            OperatingSystemTypes operatingSystemTypes = image.osDiskImage().operatingSystem();
-                                            JSONObject third = new JSONObject();
-                                            third.put("imageName", publisher.name());
-                                            third.put("imageVersion", image.version());
-                                            third.put("PublisherName", publisher.name());
-                                            third.put("offerName", offer.name());
-                                            third.put("skuName", sku.name());
-                                            third.put("operatingSystem", operatingSystemTypes);
-                                            result.add(third);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        //只分地区的所有镜像
+        PagedIterable<VirtualMachineImage> virtualMachineImages = azureResourceManager.virtualMachineImages().listByRegion(region);
+        for(VirtualMachineImage image : virtualMachineImages){
+            String publisherName = image.publisherName();
+            String offerName = image.offer();
+            String skuName = image.sku();
+            OperatingSystemTypes operatingSystemTypes = image.osDiskImage().operatingSystem();
+            JSONObject third = new JSONObject();
+            third.put("imageName", offerName);
+            third.put("imageVersion", image.version());
+            third.put("PublisherName", publisherName);
+            third.put("offerName", offerName);
+            third.put("skuName", skuName);
+            third.put("operatingSystem", operatingSystemTypes);
+            result.add(third);
         }
+
+//        // 获取所有虚拟机发布者
+//        PagedIterable<VirtualMachinePublisher> virtualMachinePublishers = azureResourceManager.virtualMachineImages().publishers().listByRegion(region);
+//        int firstTime = 0;
+//        for (VirtualMachinePublisher publisher : virtualMachinePublishers) {
+//            //todo 筛选出需要的VM镜像
+////            if (publisher.name() != null && (publisher.name().contains("linux") || publisher.name().contains("ubuntu")
+////                    || publisher.name().contains("centos") || publisher.name().contains("windows"))) {
+//                if (firstTime < 1000) {
+//                    firstTime++;
+//                    System.out.println("PublisherName: " + publisher.name());
+//                    // 获取发布者的所有产品(offer)
+//                    VirtualMachineOffers offers = publisher.offers();
+//                    PagedIterable<VirtualMachineOffer> list = offers.list();
+//                    int secondTime = 0;
+//                    for (VirtualMachineOffer offer : list) {
+//                        if (secondTime < 1) {
+//                            secondTime++;
+//                            System.out.println("offerName: " + offer.name());
+//                            // 获取该产品的所有SKU
+//                            VirtualMachineSkus skus = offer.skus();
+//                            PagedIterable<VirtualMachineSku> skuList = skus.list();
+//                            int thirdTime = 0;
+//                            for (VirtualMachineSku sku : skuList) {
+//                                if (thirdTime < 1) {
+//                                    thirdTime++;
+//                                    System.out.println("skuName: " + sku.name());
+//                                    // 获取每个SKU的所有版本（image versions）
+//                                    PagedIterable<VirtualMachineImage> imageList = sku.images().list();
+//                                    int time = 0;
+//                                    for (VirtualMachineImage image : imageList) {
+//                                        if (time < 1) {
+//                                            time++;
+//                                            OperatingSystemTypes operatingSystemTypes = image.osDiskImage().operatingSystem();
+//                                            JSONObject third = new JSONObject();
+//                                            third.put("imageName", offer.name());
+//                                            third.put("imageVersion", image.version());
+//                                            third.put("PublisherName", publisher.name());
+//                                            third.put("offerName", offer.name());
+//                                            third.put("skuName", sku.name());
+//                                            third.put("operatingSystem", operatingSystemTypes);
+//                                            result.add(third);
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+////            }
+//        }
         return result;
     }
 
@@ -587,13 +512,13 @@ public class MicrosoftAzureConverter implements BaseConverter {
         PagedIterable<VirtualMachineCustomImage> list = virtualMachineCustomImages.list();
 
         List<JSONObject> imageList = new ArrayList<>();
-        // 打印我上传的映像列表
+        // 打印上传的映像列表
         for (VirtualMachineCustomImage image : list) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("imageName", image.name());
             jsonObject.put("operatingSystem", image.osDiskImage().osType());
             jsonObject.put("imageVersion", "0.0.1");
-            System.out.println("imageName: " + image.name());
+            System.out.println("uploadImageName: " + image.name());
             System.out.println("-------------");
             imageList.add(jsonObject);
         }
@@ -638,7 +563,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             data = microsoftAzureMapper.getCloudTargetCalculateById(requestData.get("id").toString());
         } else if (requestData.get("cloudServiceType").toString().equals("3")) {
             data = microsoftAzureMapper.getCloudTargetContainerById(requestData.get("id").toString());
-        }else if (requestData.get("cloudServiceType").toString().equals("1")) {
+        } else if (requestData.get("cloudServiceType").toString().equals("1")) {
             data = microsoftAzureMapper.getCloudTargetNetById(requestData.get("id").toString());
         }
         return data;
@@ -720,11 +645,11 @@ public class MicrosoftAzureConverter implements BaseConverter {
             pageSize = request.getPerPage();
         }
         //sql同时修改
-        List<MpDevopsBoundaryNetworkEquipment> list = microsoftAzureMapper.getCommonTargets(request,offset,pageSize);
+        List<MpDevopsBoundaryNetworkEquipment> list = microsoftAzureMapper.getCommonTargets(request, offset, pageSize);
         list.forEach(item -> {
             item.setImageType("networkEquipment");
         });
-        Integer num = microsoftAzureMapper.getCommonTargetNum(request,offset,pageSize);
+        Integer num = microsoftAzureMapper.getCommonTargetNum(request, offset, pageSize);
         return new ListObjServiceResult(list, num).asResult();
     }
 }

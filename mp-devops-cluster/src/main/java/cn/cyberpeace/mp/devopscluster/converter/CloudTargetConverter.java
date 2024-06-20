@@ -1,22 +1,109 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
-import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetCalculate;
-import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetContainer;
-import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetNet;
-import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devopscluster.po.*;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 public class CloudTargetConverter {
 
+    public void convertExtVm(CloudDevice device, DeviceCloudTargetVO target) {
+        /**
+         * ext_vm
+         */
+        device.setImageType("laasVm");
+        ExtVm extVm = new ExtVm();
+        extVm.setFlavor("1c-1g-30g-2i");
+        extVm.setCpu(1);
+        extVm.setRam(1);
+        extVm.setDisk(30);
+        extVm.setVmSize("Standard_B1s");
+        extVm.setVmOsDiskType("StandardSSD_LRS");
+        extVm.setInitSupport(true);
+        extVm.setQuickCreateSupport(false);
+        //访问协议
+        List<AccessProtocol> accessProtocols = new ArrayList<>();
+        extVm.setAccessProtocols(accessProtocols);
+        extVm.setExtInfo(null);
+        extVm.setInstanceExist(false);
+        //快照计数
+        extVm.setSnapshotCount(0);
+        extVm.setInstanceState(0);
+        extVm.setIsoAttach(false);
+        device.setExtVm(extVm);
+
+        /**
+         * ext_system_info
+         */
+        ExtSystemInfo extSystemInfo = new ExtSystemInfo();
+        extSystemInfo.setLanguage("cn");
+        extSystemInfo.setSystemArchitecture("64");
+        device.setExtSystemInfo(extSystemInfo);
+
+        /**
+         * ext_image_info
+         */
+        ExtImageInfo extImageInfo = new ExtImageInfo();
+        device.setExtImageInfo(extImageInfo);
+
+        /**
+         * device_cloud_target
+         */
+        device.setDeviceCloudTarget(target);
+    }
+
+    public void convertExtDocker(CloudDevice device, DeviceCloudTargetVO target) {
+        /**
+         * ext_docker
+         */
+        device.setImageType("containerRegistry");
+        ExtDocker extDocker = new ExtDocker();
+        extDocker.setFlavor("");
+        extDocker.setCpu(0);
+        extDocker.setRam(0);
+        extDocker.setDisk(0);
+        extDocker.setInstanceState(0);
+        extDocker.setInitSupport(true);
+        extDocker.setQuickCreateSupport(true);
+        extDocker.setSnapshotCount(0);
+        extDocker.setExtInfo(new Snapshot.ExtInfo());
+        List<AccessProtocol> accessProtocols = new ArrayList<>();
+        AccessProtocol accessProtocol = new AccessProtocol();
+        accessProtocol.setProtocol("console");
+        accessProtocols.add(accessProtocol);
+        extDocker.setAccessProtocols(accessProtocols);
+        device.setExtDocker(extDocker);
+
+        /**
+         * ext_system_info
+         */
+        ExtSystemInfo extSystemInfo = new ExtSystemInfo();
+        extSystemInfo.setLanguage("en");
+        extSystemInfo.setSystemArchitecture("64");
+        device.setExtSystemInfo(extSystemInfo);
+
+        /**
+         * ext_image_info
+         */
+        ExtImageInfo extImageInfo = new ExtImageInfo();
+        device.setExtImageInfo(extImageInfo);
+
+        /**
+         * device_cloud_target
+         */
+        device.setDeviceCloudTarget(target);
+    }
+
+
     public void cloudNetServiceConvert(String cloudType, List<DeviceCloudTargetPO> list, List<DeviceCloudTargetNet> netList, List getCloudInternetServices) {
-        if(getCloudInternetServices!=null && getCloudInternetServices.size() > 0){
+        if (getCloudInternetServices != null && getCloudInternetServices.size() > 0) {
             //网络服务
-            for(int i = 0; i < getCloudInternetServices.size(); i++){
+            for (int i = 0; i < getCloudInternetServices.size(); i++) {
                 //主表元素
                 DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
                 String id = String.valueOf(UUID.randomUUID());
@@ -50,7 +137,7 @@ public class CloudTargetConverter {
     }
 
     public void cloudContainerRegistryConvert(String cloudType, List<DeviceCloudTargetPO> list, List<DeviceCloudTargetContainer> containerList, List dockerImages) {
-        if (dockerImages != null && dockerImages.size() > 0){
+        if (dockerImages != null && dockerImages.size() > 0) {
             //docker镜像
             for (int i = 0; i < dockerImages.size(); i++) {
                 //主表元素
@@ -94,7 +181,7 @@ public class CloudTargetConverter {
     }
 
     public void cloudCalculateSoftVMConvert(String cloudType, List<DeviceCloudTargetPO> list, List<DeviceCloudTargetCalculate> calculateList, List images) {
-        if(images != null && images.size() > 0){
+        if (images != null && images.size() > 0) {
             //微软云镜像
             for (int i = 0; i < images.size(); i++) {
                 //主表元素
@@ -140,7 +227,7 @@ public class CloudTargetConverter {
     }
 
     public void cloudCalculateUploadVMConvert(String cloudType, List<DeviceCloudTargetPO> list, List<DeviceCloudTargetCalculate> calculateList, List localImages) {
-        if(localImages != null && localImages.size() > 0){
+        if (localImages != null && localImages.size() > 0) {
             //微软云本地镜像
             for (int i = 0; i < localImages.size(); i++) {
                 //主表元素
@@ -187,7 +274,7 @@ public class CloudTargetConverter {
     }
 
     public void cloudContainerInstanceConvert(String cloudType, List<DeviceCloudTargetPO> mainTargetList, List<DeviceCloudTargetContainer> containerList, List dockerInstances) {
-        if(dockerInstances != null && dockerInstances.size() > 0){
+        if (dockerInstances != null && dockerInstances.size() > 0) {
             //docker镜像
             for (int i = 0; i < dockerInstances.size(); i++) {
                 //主表元素
