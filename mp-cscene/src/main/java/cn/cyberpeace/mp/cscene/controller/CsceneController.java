@@ -304,6 +304,7 @@ public class CsceneController implements BaseModelListControllerBase {
         this.removeId(templateSceneConfig);
         this.updateOldId(templateSceneConfig);
         this.modifyAreaId(templateSceneConfig, request.getAreaId());
+        CsceneDataModifier.handlerPosition(originSceneConfig);
         this.mergeSceneConfig(originSceneConfig, templateSceneConfig);
         sceneConfigService.sync(originSceneConfig, false, null);
         var res = sceneConfigService.get(id, true, request.getAreaId(), null).getSource();
