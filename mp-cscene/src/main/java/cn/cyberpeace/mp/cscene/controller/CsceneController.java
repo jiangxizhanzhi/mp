@@ -304,8 +304,8 @@ public class CsceneController implements BaseModelListControllerBase {
         this.removeId(templateSceneConfig);
         this.updateOldId(templateSceneConfig);
         this.modifyAreaId(templateSceneConfig, request.getAreaId());
-        CsceneDataModifier.handlerPosition(originSceneConfig);
         this.mergeSceneConfig(originSceneConfig, templateSceneConfig);
+        CsceneDataModifier.handlerPosition(originSceneConfig);
         sceneConfigService.sync(originSceneConfig, false, null);
         var res = sceneConfigService.get(id, true, request.getAreaId(), null).getSource();
         var csceneBO = new CsceneBO();
@@ -672,6 +672,7 @@ public class CsceneController implements BaseModelListControllerBase {
             this.updateOldId(templateSceneConfig);
             this.modifyAreaId(templateSceneConfig, importTemplateBO.getAreaId());
             this.mergeSceneConfig(originSceneConfig, templateSceneConfig);
+            CsceneDataModifier.handlerPosition(originSceneConfig);
             sceneConfigService.sync(originSceneConfig, false, null);
             var res = sceneConfigService.get(id, true, importTemplateBO.getAreaId(), null).getSource();
 
