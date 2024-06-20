@@ -40,6 +40,7 @@ import cn.cyberpeace.mp.cscene.service.filed.CsceneModelFields;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneSnapshotDeleteTaskPool;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
@@ -819,9 +820,23 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
         // 和层内节点相连 则不允许删除
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(scene, areaModel.getNodeId(), null);
+        var commonAreas = new HashSet<>();
+        for (SceneConfigAreaBO a : sceneConfigHandler.getAreaMap().values()) {
+            if (a.getType() == BaseSceneAreaModel.Type.COMMON) {
+                commonAreas.add(a.getId());
+            }
+        }
         var connectedElements = sceneConfigHandler.getElementConnectedElements(elementModel.getNodeId());
         if (CollectionUtils.isNotEmpty(connectedElements)) {
-            return false;
+            for (var connectedElement : connectedElements) {
+                if (StringUtils.equals(connectedElement.getArea(), areaModel.getNodeId())) {
+                    // 和层内节点相连
+                    return false;
+                } else if (commonAreas.contains(connectedElement.getArea())) {
+                    // 和层内部区域中的节点相连
+                    return false;
+                }
+            }
         }
 
         // 和层内区域相连 则不允许删除
