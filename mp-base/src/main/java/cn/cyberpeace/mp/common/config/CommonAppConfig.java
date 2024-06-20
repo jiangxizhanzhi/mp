@@ -25,7 +25,7 @@ public class CommonAppConfig {
     @Value("${mp.common.bas-ip:10.100.25.1}")
     private String basIp;
 
-    @Value("${mp.common.bas-port:9527}")
+    @Value("${mp.common.bas-port:9876}")
     private String basPort;
 
 }
