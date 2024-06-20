@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceUserCountService;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
+import cn.cyberpeace.mp.scene.context.SceneContextHolder;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.service.SceneService;
@@ -95,6 +96,7 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
         CsceneInstanceBO cscene = getCscene();
         // 先保存设置id
         save();
+        SceneContextHolder.setCsceneInstanceId(cscene.getId());
         SceneDataBO result = sceneService.create(cscene.getScene(), generateSceneContext(), Boolean.TRUE.equals(getCscene().getSupportPartialStart())).getSource();
         cscene.setScene(result);
 
