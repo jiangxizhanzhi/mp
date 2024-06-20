@@ -252,7 +252,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
 //        List dockerInstances = getDockerInstances(instance);
 //        result.put("dockerInstanceList", dockerInstances);
         //获取微软云市场 虚拟机镜像
-        List images = getImages(instance);
+        List images = null;
+        images = getImages(instance);
         result.put("imageList", images);
         //获取用户上传 虚拟机镜像
         List localImages = getLocalImages(instance);
@@ -464,7 +465,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             //todo 筛选出需要的VM镜像
 //            if (publisher.name() != null && (publisher.name().contains("linux") || publisher.name().contains("ubuntu")
 //                    || publisher.name().contains("centos") || publisher.name().contains("windows"))) {
-                if (firstTime < 500) {
+                if (firstTime < 100) {
                     firstTime++;
                     System.out.println("PublisherName: " + publisher.name());
                     // 获取发布者的所有产品(offer)
@@ -524,6 +525,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         for (VirtualMachineCustomImage image : list) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("imageName", image.name());
+            jsonObject.put("uploadImageId", image.id());
             jsonObject.put("operatingSystem", image.osDiskImage().osType());
             jsonObject.put("imageVersion", "0.0.1");
             System.out.println("uploadImageName: " + image.name());

@@ -65,6 +65,10 @@ public class DeviceCloudTargetVO extends BaseModel {
      */
     private String calculateType;
     /**
+     * 用户上传镜像id
+     */
+    private String uploadImageId;
+    /**
      * publisher
      */
     private String publisher;

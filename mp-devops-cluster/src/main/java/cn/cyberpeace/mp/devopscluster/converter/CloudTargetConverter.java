@@ -251,6 +251,7 @@ public class CloudTargetConverter {
                 deviceCloudTargetCalculate.setLinkId(id);
                 deviceCloudTargetCalculate.setName(((JSONObject) localImages.get(i)).get("imageName") != null ? ((JSONObject) localImages.get(i)).get("imageName").toString() : "");
                 deviceCloudTargetCalculate.setSourceType(2);
+                deviceCloudTargetCalculate.setUploadImageId(((JSONObject) localImages.get(i)).get("uploadImageId") != null ? ((JSONObject) localImages.get(i)).get("uploadImageId").toString() : "");
                 deviceCloudTargetCalculate.setCloudType(cloudType);
                 deviceCloudTargetCalculate.setPublisher(((JSONObject) localImages.get(i)).get("PublisherName") != null ? ((JSONObject) localImages.get(i)).get("PublisherName").toString() : "");
                 deviceCloudTargetCalculate.setOffer(((JSONObject) localImages.get(i)).get("offerName") != null ? ((JSONObject) localImages.get(i)).get("offerName").toString() : "");

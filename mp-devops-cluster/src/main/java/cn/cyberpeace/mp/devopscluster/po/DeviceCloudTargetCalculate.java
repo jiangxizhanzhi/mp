@@ -35,6 +35,10 @@ public class DeviceCloudTargetCalculate extends BaseModel {
      */
     private Integer sourceType;
     /**
+     * 用户上传镜像id
+     */
+    private String uploadImageId;
+    /**
      * publisher
      */
     private String publisher;
