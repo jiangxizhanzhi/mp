@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.behavior.constant.ControllerConstant;
 import cn.cyberpeace.mp.behavior.model.UserBehaviorModel;
+import cn.cyberpeace.mp.behavior.repository.UserBehaviorMapper;
 import cn.cyberpeace.mp.behavior.req.AddUserBehaviorReq;
 import cn.cyberpeace.mp.behavior.req.DeleteReq;
 import cn.cyberpeace.mp.behavior.req.UpdateUserBehaviorReq;
@@ -29,6 +30,9 @@ public class UserBehaviorController {
 
 	@Autowired
 	private UserBehaviorService userBehaviorService;
+
+	@Autowired
+	private UserBehaviorMapper userBehaviorMapper;
 
 	@PostMapping("/")
 	@ApiOperation("新增用户行为")
@@ -60,6 +64,12 @@ public class UserBehaviorController {
 	@ApiOperation("查看用户行为访问配置")
 	public ServiceResult<List<CodeNameRes>> getUserType() {
 		return ResultCommon.success(userBehaviorService.getUserType());
+	}
+
+	@GetMapping("/")
+	@ApiOperation("查询用户行为详情")
+	public ServiceResult<UserBehaviorModel> behaviorDetail(@RequestParam String id) {
+		return ResultCommon.success(userBehaviorMapper.get(id));
 	}
 
 }
