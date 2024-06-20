@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.behavior.constant.ControllerConstant;
+import cn.cyberpeace.mp.behavior.model.UserBehaviorDetailModel;
 import cn.cyberpeace.mp.behavior.model.UserBehaviorModel;
 import cn.cyberpeace.mp.behavior.repository.UserBehaviorMapper;
 import cn.cyberpeace.mp.behavior.req.AddUserBehaviorReq;
@@ -12,13 +13,16 @@ import cn.cyberpeace.mp.behavior.req.DeleteReq;
 import cn.cyberpeace.mp.behavior.req.UpdateUserBehaviorReq;
 import cn.cyberpeace.mp.behavior.res.CodeNameRes;
 import cn.cyberpeace.mp.behavior.service.UserBehaviorService;
+import com.alibaba.fastjson.JSONArray;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -68,8 +72,13 @@ public class UserBehaviorController {
 
 	@GetMapping("/")
 	@ApiOperation("查询用户行为详情")
-	public ServiceResult<UserBehaviorModel> behaviorDetail(@RequestParam String id) {
-		return ResultCommon.success(userBehaviorMapper.get(id));
+	public ServiceResult<UserBehaviorDetailModel> behaviorDetail(@RequestParam String id) {
+		UserBehaviorModel userBehaviorModel = userBehaviorMapper.get(id);
+		String networkIds = userBehaviorModel.getNetworkIds();
+		UserBehaviorDetailModel userBehaviorDetailModel = new UserBehaviorDetailModel();
+		BeanUtils.copyProperties(userBehaviorModel, userBehaviorDetailModel);
+		userBehaviorDetailModel.setNetworkIdsList(JSONArray.parseArray(networkIds));
+		return ResultCommon.success(userBehaviorDetailModel);
 	}
 
 }
