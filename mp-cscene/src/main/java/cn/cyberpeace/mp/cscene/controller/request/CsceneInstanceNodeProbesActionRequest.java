@@ -8,8 +8,6 @@ import java.util.List;
 
 @Data
 public class CsceneInstanceNodeProbesActionRequest extends CsceneInstanceNodeActionRequest {
-    @ApiModelProperty(value = "探针ids")
-    private List<String> probeIds;
 
     @ApiModelProperty(value = "探针集合")
     private List<Probe> probeList;

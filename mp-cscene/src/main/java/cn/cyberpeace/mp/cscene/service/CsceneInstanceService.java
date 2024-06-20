@@ -49,6 +49,7 @@ import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
+import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -68,6 +69,7 @@ import cn.cyberpeace.mp.scene.repository.SceneElementSituationProbeMapper;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
+import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
@@ -96,6 +98,7 @@ import cn.cyberpeace.mp.sceneplugincollection.model.ElementLogListModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.ConvertScriptParams;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.PublicWazuhControlCommon;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
 import cn.cyberpeace.mp.sceneplugincollection.repository.ElementLogListMapper;
@@ -2216,6 +2219,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         String agentName = srcElement.getEid();
         String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
 
+
+        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer(sceneHandler.getScene().getCloudType());
+
         var controlConfigParam = new WazuhControl.ControlConfigParam();
         controlConfigParam.setProbeParams(new ArrayList<>());
         ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName);
@@ -2223,12 +2229,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         // 删除操作
         if (SceneElementSituationProbeModel.ProbeType.REMOVE == probeType || SceneElementSituationProbeModel.ProbeType.UPDATE == probeType) {
             var removeParams = convertScript.convertParams().get(0);
+//            convertScript.convertParams()内拼接url错误 重新拼接
+            removeParams.setScriptUrl(StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, probe.getScriptUrl().replaceFirst("^/api/mp/file/", "")));
             removeParams.setAction(WazuhControl.CONTROL_ACTION_REMOVE);
             controlConfigParam.getProbeParams().add(removeParams);
         }
         // 新增操作
         if (SceneElementSituationProbeModel.ProbeType.ADD == probeType || SceneElementSituationProbeModel.ProbeType.UPDATE == probeType) {
             var addParams = convertScript.convertParams().get(0);
+            addParams.setScriptUrl(StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, probe.getScriptUrl().replaceFirst("^/api/mp/file/", "")));
             String groupId = TextUtils.uuid();
             addParams.setGroup(groupId);
             addParams.setAction(WazuhControl.CONTROL_ACTION_ADD);
@@ -2236,6 +2245,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
 
         var osType = SystemTypeCommandUtils.getOsType(systemType);
-        WazuhControlCommon.wazuhControl.controlConfigOld(agentName, osType, controlConfigParam);
+
+        switch (sceneHandler.getScene().getCloudType()) {
+            case 0:
+                WazuhControlCommon.wazuhControl.controlConfigOld(agentName, osType, controlConfigParam);
+                break;
+            case 1:
+                PublicWazuhControlCommon.wazuhControl.controlConfigOld(agentName, osType, controlConfigParam);
+                break;
+        }
+
+
     }
 }

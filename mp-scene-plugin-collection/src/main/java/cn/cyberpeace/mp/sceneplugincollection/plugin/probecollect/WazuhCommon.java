@@ -7,6 +7,8 @@ import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
@@ -192,17 +194,20 @@ public class WazuhCommon {
                 String downloadPath = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, linuxInstallDir,
                         LINUX_DOWNLOAD_AGENT_FILE);
                 // 下载按需安装脚本并执行
-                /*if (cloudType == null || cloudType == BaseSceneModel.CloudType.DEFAULT) {
                 addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
                         String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, downloadPath, downloadUrl),
                         String.format("sh %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
-                }else {*/
-                    addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
-                            String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, downloadPath, downloadUrl),
-                            String.format("sh %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
-//                    TODO apt-get install unzip 改为不同的类型不同安装命令
-                    addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK, "apt-get install unzip", addCommand);
-//                }
+//                 增加安装依赖   TODO Azure VM 如何知晓系统类型？
+                if (BaseSceneModel.CloudType.DEFAULT == cloudType) {
+                    if (BaseSceneElementModel.SystemType.CENTOS.equals(systemType)) {
+                        addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK, "yum install unzip", addCommand);
+                    } else if (BaseSceneElementModel.SystemType.UBUNTU.equals(systemType)
+                            || BaseSceneElementModel.SystemType.KALI.equals(systemType)) {
+                        addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK, "apt-get install unzip", addCommand);
+                    } else {
+                        addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK, "apt-get install unzip", addCommand);
+                    }
+                }
 
                 // 给下载安装包的脚本添加参数`
                 String filePathParam = String.format("filepath=%s/%s", linuxInstallDir,
