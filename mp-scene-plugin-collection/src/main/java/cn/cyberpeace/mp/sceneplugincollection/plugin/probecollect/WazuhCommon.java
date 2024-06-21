@@ -198,7 +198,7 @@ public class WazuhCommon {
                         String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, downloadPath, downloadUrl),
                         String.format("sh %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
 //                 增加安装依赖   TODO Azure VM 如何知晓系统类型？
-                if (BaseSceneModel.CloudType.DEFAULT == cloudType) {
+                if (BaseSceneModel.CloudType.DEFAULT != cloudType) {
                     if (BaseSceneElementModel.SystemType.CENTOS.equals(systemType)) {
                         addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK, "yum install unzip", addCommand);
                     } else if (BaseSceneElementModel.SystemType.UBUNTU.equals(systemType)
