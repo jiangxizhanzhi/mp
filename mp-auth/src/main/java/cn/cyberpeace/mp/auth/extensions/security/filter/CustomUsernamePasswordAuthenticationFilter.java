@@ -106,9 +106,6 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
             if (StringUtils.isBlank(decryptedPwd)) {
                 result = ServiceResult.builder().serviceCode(AuthErrorCode.PASSWORD_EMPTY).build().asResult();
             }
-            if (StringUtils.isBlank(macAddr)) {
-                result = ServiceResult.builder().serviceCode(AuthErrorCode.MAC_ADDR_EMPTY).build().asResult();
-            }
         }
 
         String originPwd = "";
@@ -123,13 +120,17 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
         if (Objects.isNull(result)) {
             var user = BeanCommon.getBean(UserService.class).getByIdent(username);
             if (user != null && !StringUtils.equals(user.getMacAddr(), "nocheck")) {
-                Set<String> macs = new HashSet<>();
-                var macStr = StringUtils.split(user.getMacAddr() == null ? "" : user.getMacAddr(), ",");
-                for (var m : macStr) {
-                    macs.add(m);
-                }
-                if (!macs.contains(macAddr)) {
+                if (StringUtils.isBlank(macAddr)) {
                     result = ServiceResult.builder().serviceCode(AuthErrorCode.MAC_ADDR_EMPTY).build().asResult();
+                } else {
+                    Set<String> macs = new HashSet<>();
+                    var macStr = StringUtils.split(user.getMacAddr() == null ? "" : user.getMacAddr(), ",");
+                    for (var m : macStr) {
+                        macs.add(m);
+                    }
+                    if (!macs.contains(macAddr)) {
+                        result = ServiceResult.builder().serviceCode(AuthErrorCode.MAC_ADDR_EMPTY).build().asResult();
+                    }
                 }
             }
         }
