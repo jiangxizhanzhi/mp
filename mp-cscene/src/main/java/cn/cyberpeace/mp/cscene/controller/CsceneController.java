@@ -662,7 +662,7 @@ public class CsceneController implements BaseModelListControllerBase {
         try {
             inputStream = importTemplateBO.getFile().getInputStream();
             var bytes = inputStream.readAllBytes();
-            CsceneBO csceneBO = JsonCommon.parse(new String(bytes, StandardCharsets.UTF_8), CsceneBO.class);
+            CsceneBO csceneBO = JsonCommon.snakeParse(new String(bytes, StandardCharsets.UTF_8), CsceneBO.class);
 
             String id = this.modelService.get(importTemplateBO.getId()).getSource().getObj().getSceneConfig();
             SceneConfigService sceneConfigService = BeanCommon.getBean(SceneConfigService.class);
