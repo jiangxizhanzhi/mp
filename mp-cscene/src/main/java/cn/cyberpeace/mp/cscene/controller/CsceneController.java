@@ -690,6 +690,13 @@ public class CsceneController implements BaseModelListControllerBase {
             var originSceneConfig = sceneConfigService.get(id, false, null, null).getSource();
             var templateSceneConfig = csceneBO.getSceneConfig();
 
+            int currentNum = originSceneConfig.getTopology().getElements().size();
+            int templateNum = templateSceneConfig.getTopology().getElements().size();
+            int limit = BeanCommon.getBean(CsceneAppConfig.class).getSceneEditNodeLimit();
+            if (currentNum + templateNum > limit) {
+                throw new MpRuntimeException(CsceneErrorCode.SCENE_EDIT_LIMIT.format(String.valueOf(limit), String.valueOf(currentNum), String.valueOf(templateNum)));
+            }
+
             this.removeId(templateSceneConfig);
             this.updateOldId(templateSceneConfig);
             this.modifyAreaId(templateSceneConfig, importTemplateBO.getAreaId());
