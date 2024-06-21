@@ -63,9 +63,9 @@ public class CloudTargetConverter {
         //云靶标只能拿到linux和windows两类
         String operatingSystem = target.getOperatingSystem();
         if (operatingSystem!= null && "Linux".equals(operatingSystem)) {
-            extSystemInfo.setSystemType(1);
+            extSystemInfo.setSystemType(306);
         } else if (operatingSystem!= null && "Windows".equals(operatingSystem)) {
-            extSystemInfo.setSystemType(2);
+            extSystemInfo.setSystemType(106);
         }
         device.setExtImageInfo(extImageInfo);
 
@@ -106,9 +106,9 @@ public class CloudTargetConverter {
         //云靶标只能拿到linux和windows两类
         String operatingSystem = target.getOperatingSystem();
         if (operatingSystem!= null && "Linux".equals(operatingSystem)) {
-            extSystemInfo.setSystemType(1);
+            extSystemInfo.setSystemType(306);
         } else if (operatingSystem!= null && "Windows".equals(operatingSystem)) {
-            extSystemInfo.setSystemType(2);
+            extSystemInfo.setSystemType(106);
         }
         extSystemInfo.setSystemArchitecture("64");
         device.setExtSystemInfo(extSystemInfo);
