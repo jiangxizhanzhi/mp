@@ -936,7 +936,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 roleIds.addAll(Arrays.asList(user.getRoles().split(",")));
             }
         }
-        List<RoleModel> allRoles = roleService.listByIds(roleIds);
+        List<RoleModel> allRoles = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(roleIds)) {
+            allRoles = roleService.listByIds(roleIds);
+        }
         Map<String, RoleModel> roleMap = new HashMap<>();
         for (RoleModel role : allRoles) {
             if (roleMap.put(role.getId(), role) != null) {
@@ -977,7 +980,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 List<RoleModel> userRoleModels = new ArrayList<>();
                 for (String userRoleId : userRoleIds) {
                     RoleModel roleModel = roleMap.get(userRoleId);
-                    userRoleModels.add(roleModel);
+                    if (roleModel != null) {
+                        userRoleModels.add(roleModel);
+                    }
                 }
                 userBo.setRoles(userRoleModels);
 
