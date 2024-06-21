@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -22,7 +23,9 @@ import cn.cyberpeace.mp.cscene.bo.DeleteCheckResultBO;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.bo.ImportTemplateBO;
 import cn.cyberpeace.mp.cscene.bo.SceneAreaTreeBO;
+import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.controller.request.AreaUpdateRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
@@ -266,6 +269,10 @@ public class CsceneController implements BaseModelListControllerBase {
     private CsceneBO getByAreaId(String sceneId, String areaId) {
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, areaId, true, null);
         SceneConfigDataBO dataBO = sceneConfigHandler.toData();
+        if (areaId != null) {
+            int num = this.modelService.getOutAreaElementNum(sceneId, areaId, dataBO);
+            dataBO.getTopology().setOutAreaElementNum(num);
+        }
         CsceneBO csceneBO = new CsceneBO();
         csceneBO.setSceneConfig(dataBO);
         CsceneDataModifier.correctReturnCsceneData(csceneBO);
@@ -301,6 +308,14 @@ public class CsceneController implements BaseModelListControllerBase {
 
         var originSceneConfig = sceneConfigService.get(id, false, null, null).getSource();
         var templateSceneConfig = sceneConfigService.get(templateId, false, null, null).getSource();
+
+        int currentNum = originSceneConfig.getTopology().getElements().size();
+        int templateNum = templateSceneConfig.getTopology().getElements().size();
+        int limit = BeanCommon.getBean(CsceneAppConfig.class).getSceneEditNodeLimit();
+        if (currentNum + templateNum > limit) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_EDIT_LIMIT.format(String.valueOf(limit), String.valueOf(currentNum), String.valueOf(templateNum)));
+        }
+
         this.removeId(templateSceneConfig);
         this.updateOldId(templateSceneConfig);
         this.modifyAreaId(templateSceneConfig, request.getAreaId());
@@ -311,6 +326,7 @@ public class CsceneController implements BaseModelListControllerBase {
         var res = sceneConfigService.get(id, true, request.getAreaId(), null).getSource();
         var csceneBO = new CsceneBO();
         csceneBO.setSceneConfig(res);
+        res.getTopology().setOutAreaElementNum(this.modelService.getOutAreaElementNum(id, request.getAreaId(), res));
         CsceneDataModifier.correctReturnCsceneData(csceneBO);
         return new ServiceResult<>(csceneBO).asResult();
     }
@@ -677,7 +693,8 @@ public class CsceneController implements BaseModelListControllerBase {
             this.mergeSceneConfig(originSceneConfig, templateSceneConfig);
             sceneConfigService.sync(originSceneConfig, false, null);
             var res = sceneConfigService.get(id, true, importTemplateBO.getAreaId(), null).getSource();
-
+            res.getTopology()
+                    .setOutAreaElementNum(this.modelService.getOutAreaElementNum(id, importTemplateBO.getAreaId(), res));
             var resultBO = new CsceneBO();
             resultBO.setSceneConfig(res);
             CsceneDataModifier.correctReturnCsceneData(resultBO);

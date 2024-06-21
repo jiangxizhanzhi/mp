@@ -38,6 +38,8 @@ public abstract class BaseSceneTopologyBO<
     private S scene;
     @ApiModelProperty(value = "当前区域id")
     private String areaId;
+    @ApiModelProperty(value = "区域外节点数量")
+    private Integer outAreaElementNum;
     @ApiModelProperty(value = "区域数据")
     @Valid
     private List<A> areas;
