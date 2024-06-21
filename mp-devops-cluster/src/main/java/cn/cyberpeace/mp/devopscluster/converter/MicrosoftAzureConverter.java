@@ -176,6 +176,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
                         device.setServiceType(target.getNetType());
                         device.setSubType(target.getSubType());
                         if (target.getNetType() != null && target.getNetType().equals("VNet")) {
+                            device.setRole(21);
                             device.setImageType("VNet");
                         } else if (target.getNetType() != null && target.getNetType().equals("fireWall")) {
                             device.setImageType("fireWall");

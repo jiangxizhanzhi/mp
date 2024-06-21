@@ -17,6 +17,7 @@ public class CloudTargetConverter {
          * ext_vm
          */
         device.setImageType("laasVm");
+        device.setRole(4);
         ExtVm extVm = new ExtVm();
         extVm.setFlavor("1c-1g-30g-2i");
         extVm.setCpu(1);
@@ -72,6 +73,7 @@ public class CloudTargetConverter {
          * ext_docker
          */
         device.setImageType("containerRegistry");
+        device.setRole(4);
         ExtDocker extDocker = new ExtDocker();
         extDocker.setFlavor("");
         extDocker.setCpu(0);
@@ -94,6 +96,13 @@ public class CloudTargetConverter {
          */
         ExtSystemInfo extSystemInfo = new ExtSystemInfo();
         extSystemInfo.setLanguage("en");
+        //云靶标只能拿到linux和windows两类
+        String operatingSystem = target.getOperatingSystem();
+        if ("Linux".equals(operatingSystem)) {
+            extSystemInfo.setSystemType(1);
+        } else if ("Windows".equals(operatingSystem)) {
+            extSystemInfo.setSystemType(2);
+        }
         extSystemInfo.setSystemArchitecture("64");
         device.setExtSystemInfo(extSystemInfo);
 

@@ -114,4 +114,8 @@ public class MpDevopsLoad extends BaseModel {
      * 镜像类型
      */
     private String imageType;
+    /**
+     * role
+     */
+    private Integer role;
 }

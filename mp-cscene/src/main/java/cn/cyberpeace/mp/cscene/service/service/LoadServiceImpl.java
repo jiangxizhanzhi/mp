@@ -89,6 +89,7 @@ public class LoadServiceImpl {
         //list每个成员的imageType赋值
         list.forEach(item -> {
             item.setImageType("load");
+            item.setRole(60);
         });
         Integer total = loadMapper.getLoadListNum(requestData);
         JSONObject result = new JSONObject();
