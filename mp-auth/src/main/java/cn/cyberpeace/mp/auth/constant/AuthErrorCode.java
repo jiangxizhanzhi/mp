@@ -65,6 +65,8 @@ public enum AuthErrorCode implements ErrorCode {
     TOKEN_EMPTY_ERROR("MP-110048", "token_empty_error"),
     USERNAME_EMPTY("MP-110049", "username_empty"),
     PASSWORD_EMPTY("MP-110050", "password_empty"),
+    MAC_ADDR_EMPTY("MP-110052", "mac_addr_empty"),
+    MAC_ADDR_ERROR("MP-110053", "mac_addr_error"),
     PASSWORD_DECODE_ERROR("MP-110051", "password_decode_error"),
 
 

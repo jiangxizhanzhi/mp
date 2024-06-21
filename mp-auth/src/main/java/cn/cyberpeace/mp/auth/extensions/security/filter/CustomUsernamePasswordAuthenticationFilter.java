@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.extensions.security.filter;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.KaptchaUtil;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
@@ -25,8 +26,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @Description:
@@ -83,6 +86,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
     private UsernamePasswordAuthenticationToken processAuthRequest(Map<String, String> loginData, HttpServletRequest request, HttpServletResponse response) throws IOException {
         String username = loginData.getOrDefault(getUsernameParameter(), StringUtils.EMPTY);
         String decryptedPwd = loginData.getOrDefault(getPasswordParameter(), StringUtils.EMPTY);
+        String macAddr = loginData.getOrDefault("mac_addr", StringUtils.EMPTY);
 
         if (StringUtils.isNotBlank(username)) {
             request.setAttribute(AuthConstant.REQUEST_PARAMETER_USERNAME, username);
@@ -102,6 +106,9 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
             if (StringUtils.isBlank(decryptedPwd)) {
                 result = ServiceResult.builder().serviceCode(AuthErrorCode.PASSWORD_EMPTY).build().asResult();
             }
+            if (StringUtils.isBlank(macAddr)) {
+                result = ServiceResult.builder().serviceCode(AuthErrorCode.MAC_ADDR_EMPTY).build().asResult();
+            }
         }
 
         String originPwd = "";
@@ -110,6 +117,20 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
                 originPwd = PasswordUtils.desDecrypt(decryptedPwd);
             } catch (Exception e) {
                 result = ServiceResult.builder().serviceCode(AuthErrorCode.PASSWORD_DECODE_ERROR).build().asResult();
+            }
+        }
+
+        if (Objects.isNull(result)) {
+            var user = BeanCommon.getBean(UserService.class).getByIdent(username);
+            if (user != null) {
+                Set<String> macs = new HashSet<>();
+                var macStr = StringUtils.split(user.getMacAddr() == null ? "" : user.getMacAddr(), ",");
+                for (var m : macStr) {
+                    macs.add(m);
+                }
+                if (!macs.contains(macAddr)) {
+                    result = ServiceResult.builder().serviceCode(AuthErrorCode.MAC_ADDR_EMPTY).build().asResult();
+                }
             }
         }
 

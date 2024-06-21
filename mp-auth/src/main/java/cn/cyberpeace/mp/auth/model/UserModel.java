@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -133,6 +134,10 @@ public class UserModel extends BaseModel implements Serializable {
     @ApiModelProperty(value = "最后登录时间")
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime lastLogin;
+
+    @ApiModelProperty(value = "绑定的mac地址")
+    @DefaultStr
+    private String macAddr;
 
     @Builder
     public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin) {
