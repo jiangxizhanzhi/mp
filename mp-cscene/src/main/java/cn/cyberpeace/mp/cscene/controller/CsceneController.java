@@ -199,7 +199,12 @@ public class CsceneController implements BaseModelListControllerBase {
         } else if (areaId == null) {
             areaId = "";
         }
-        return modelService.getById(id, areaId, false, null).asResult();
+        var result = modelService.getById(id, areaId, false, null);
+        var dataBO = result.getSource().getSceneConfig();
+        String sceneId = dataBO.getTopology().getScene().getEid();
+        result.getSource().getSceneConfig().getTopology()
+                .setOutAreaElementNum(this.modelService.getOutAreaElementNum(sceneId, areaId, dataBO));
+        return result.asResult();
     }
 
     @ApiOperation("根据区域获取指定id场景模板")
