@@ -10,7 +10,6 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceMana
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
-import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
@@ -171,21 +170,33 @@ public class AzureVirtualMachine {
                 .filter(v -> StringUtils.isNotBlank(v.getNetworkId()))
                 .map(v -> v.getNetworkId()).findFirst()
                 .get();
-//        VirtualMachine.DefinitionStages.WithCreate creater;
+
         VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged creater = null;
+
         if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudElement.getVmType())) {
-            creater = resourceService.getManager().virtualMachines()
+            VirtualMachine.DefinitionStages.WithProximityPlacementGroup withProximityPlacementGroup = resourceService.getManager().virtualMachines()
                     .define(vmName)
                     .withRegion(region)
                     .withNewResourceGroup(groupName)
                     .withExistingPrimaryNetwork(azureResourceManager.networks().getById(netId))
                     .withSubnet(IpUtils.extractNetworkPart(virtualNic.getFixedIp()))
                     .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp())
-                    .withoutPrimaryPublicIPAddress()
-                    .withLatestWindowsImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
-                    .withAdminUsername(StringUtils.isBlank(userNmae) ? "azureuser" : userNmae)
-                    .withAdminPassword(StringUtils.isBlank(password) ? "Azure12345678" : password)
-                    .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
+                    .withoutPrimaryPublicIPAddress();
+
+//            源类型(1:云平台 2:用户上传)
+            if (2 == cloudElement.getSourceType()) {
+                creater = withProximityPlacementGroup.withGeneralizedWindowsCustomImage(cloudElement.getUploadImageId())
+                        .withAdminUsername(StringUtils.isBlank(userNmae) ? "azureuser" : userNmae)
+                        .withAdminPassword(StringUtils.isBlank(password) ? "Azure12345678" : password)
+                        .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
+
+            } else {
+                creater = withProximityPlacementGroup.withLatestWindowsImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
+                        .withAdminUsername(StringUtils.isBlank(userNmae) ? "azureuser" : userNmae)
+                        .withAdminPassword(StringUtils.isBlank(password) ? "Azure12345678" : password)
+                        .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
+            }
+//            扩展磁盘 此处用于重建vm
             if (expansionDisk != null && expansionDisk > 0) {
                 creater.withDataDiskDefaultStorageAccountType(StorageAccountTypes.fromString(vmExpansionDiskType))
                         .withNewDataDisk(expansionDisk);
@@ -195,18 +206,29 @@ public class AzureVirtualMachine {
                     .withSize(flavor);
 
         } else {
-            creater = resourceService.getManager().virtualMachines()
+            VirtualMachine.DefinitionStages.WithProximityPlacementGroup withProximityPlacementGroup = resourceService.getManager().virtualMachines()
                     .define(vmName)
                     .withRegion(region)
                     .withNewResourceGroup(groupName)
                     .withExistingPrimaryNetwork(azureResourceManager.networks().getById(netId))
                     .withSubnet(IpUtils.extractNetworkPart(virtualNic.getFixedIp()))
                     .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp())
-                    .withoutPrimaryPublicIPAddress()
-                    .withLatestLinuxImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
-                    .withRootUsername(StringUtils.isBlank(userNmae) ? "root1" : userNmae)
-                    .withRootPassword(StringUtils.isBlank(password) ? "ycxx123#" : password) // 必须要是6位以上,且有一个特殊字符
-                    .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
+                    .withoutPrimaryPublicIPAddress();
+            //            源类型(1:云平台 2:用户上传)
+            if (2 == cloudElement.getSourceType()) {
+                creater = withProximityPlacementGroup
+                        .withGeneralizedLinuxCustomImage(cloudElement.getUploadImageId())
+                        .withRootUsername(StringUtils.isBlank(userNmae) ? "root1" : userNmae)
+                        .withRootPassword(StringUtils.isBlank(password) ? "ycxx123#" : password) // 必须要是6位以上,且有一个特殊字符
+                        .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
+            } else {
+                creater = withProximityPlacementGroup
+                        .withLatestLinuxImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
+                        .withRootUsername(StringUtils.isBlank(userNmae) ? "root1" : userNmae)
+                        .withRootPassword(StringUtils.isBlank(password) ? "ycxx123#" : password) // 必须要是6位以上,且有一个特殊字符
+                        .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
+            }
+//            扩展磁盘 此处用于重建vm
             if (expansionDisk != null && expansionDisk > 0) {
                 creater.withDataDiskDefaultStorageAccountType(StorageAccountTypes.fromString(vmExpansionDiskType))
                         .withNewDataDisk(expansionDisk);
@@ -233,7 +255,7 @@ public class AzureVirtualMachine {
             creater.withExistingSecondaryNetworkInterface(ni);
         }
 
-        // azure todo 创建虚拟机 回写数据
+        // azure 创建虚拟机 回写数据
         VirtualMachine vm = creater.create();
         cloudElement.setResourceId(vm.id());
 
@@ -288,18 +310,6 @@ public class AzureVirtualMachine {
                     .withPriority(3100 + i * 200)
                     .attach();
         }
-    }
-
-    public RunCommandResult runCommand(CloudPluginSceneElementBO cloudElement, List<ProbeScriptModel> scriptContentList) {
-//        TODO 已创建的虚拟机只能输入命令 不能直接运行脚本 1.所有安装脚本在启动时放入虚拟机（无后新增探针脚本） 2.探针脚本放文件服务 安装时先下载探针脚本后命令启动
-        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(cloudElement.getResourceId());
-        String createFileCommand = "echo '你好' > /home/root22/hello22.txt";
-//        linux:RunShellScript windows:RunPowerShellScript
-        /*RunCommandInput inputCommand = new RunCommandInput()
-                .withCommandId("RunShellScript")
-                .withScript(scriptContentList);*/
-//        return virtualMachine.runCommand(inputCommand);
-        return null;
     }
 
     public void delete(CloudPluginSceneElementBO cloudElement) {

@@ -143,6 +143,10 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String offer;
     @DefaultStr
     private String sku;
+    @DefaultInt
+    private Integer sourceType;
+    @DefaultStr
+    private String uploadImageId;
     //    漏洞
     @DefaultStr
     private String vulnCode;

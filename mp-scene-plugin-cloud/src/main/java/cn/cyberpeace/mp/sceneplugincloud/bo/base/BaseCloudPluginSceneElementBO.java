@@ -139,6 +139,11 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private String offer;
     @ApiModelProperty(value = "产品SKU（Stock Keeping Unit）编码")
     private String sku;
+    @ApiModelProperty(value = "源类型(1:云平台 2:用户上传)")
+    private Integer sourceType;
+    @ApiModelProperty(value = "用户上传映像id")
+    private String uploadImageId;
+
     //    漏洞
     @ApiModelProperty(value = "漏洞")
     private String vulnCode;

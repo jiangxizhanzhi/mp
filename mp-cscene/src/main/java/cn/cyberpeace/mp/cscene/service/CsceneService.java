@@ -869,8 +869,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     public ListObjServiceResult<Map> vmSizeList(CsceneInstanceStatQueryParams queryParams) {
-        HumanCondition humanCondition = new HumanCondition()
-                .pagination(queryParams.getPage(), queryParams.getPageSize());
+        HumanCondition humanCondition = new HumanCondition();
         List<AzureVmSize> list = azureVmSizeMapper.list(humanCondition);
         List<Map> data = list.stream()
                 .map(vs -> {
