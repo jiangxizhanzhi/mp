@@ -621,7 +621,7 @@ public class CreateHandler extends HandlerCommon {
         List<String> behaviorInitCommand = new ArrayList<>();
         // 支持行为
         if (Boolean.TRUE.equals(sceneElementBO.getBehaveSupport())) {
-            behaviorInitCommand.add(String.format("bash /home/init.sh %s %s %s",
+            behaviorInitCommand.add(String.format("python C:\\init.py %s %s %s",
                     SceneContextHolder.getCsceneInstanceId(), sceneElementBO.getId(), BeanCommon.getBean(CommonAppConfig.class).getMpIp()));
 
         }
