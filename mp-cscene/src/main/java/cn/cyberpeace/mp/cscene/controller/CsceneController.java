@@ -587,7 +587,7 @@ public class CsceneController implements BaseModelListControllerBase {
                 String filename = file.getName();
                 file.createNewFile();
                 FileWriter fileWriter = new FileWriter(file);
-                fileWriter.write(JsonCommon.stringify(csceneBO));
+                fileWriter.write(JsonCommon.snakeStringify(csceneBO));
                 fileWriter.close();
 
                 FileInputStream fileInputStream = new FileInputStream(file);
