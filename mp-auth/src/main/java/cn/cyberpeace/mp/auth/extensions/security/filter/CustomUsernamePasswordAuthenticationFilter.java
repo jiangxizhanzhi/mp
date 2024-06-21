@@ -122,7 +122,7 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
 
         if (Objects.isNull(result)) {
             var user = BeanCommon.getBean(UserService.class).getByIdent(username);
-            if (user != null) {
+            if (user != null && !StringUtils.equals(user.getMacAddr(), "nocheck")) {
                 Set<String> macs = new HashSet<>();
                 var macStr = StringUtils.split(user.getMacAddr() == null ? "" : user.getMacAddr(), ",");
                 for (var m : macStr) {
