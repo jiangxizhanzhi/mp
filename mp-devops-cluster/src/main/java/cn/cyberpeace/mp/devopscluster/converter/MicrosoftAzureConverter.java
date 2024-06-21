@@ -214,12 +214,18 @@ public class MicrosoftAzureConverter implements BaseConverter {
         return deviceList;
     }
 
+    @Async
+    public void executeSequentially(){
+        //1: 微软公有云 2:微软私有云 3:微软混合云
+        JSONObject publicTargetResult = synchronousCloudData(1);
+        JSONObject privateTargetResult = synchronousCloudData(2);
+        JSONObject mixTargetResult = synchronousCloudData(3);
+    }
 
     /**
      * 云镜像管理
      */
     @Transactional
-    @Async
     public JSONObject synchronousCloudData(Integer cloudType) {
         // 获取该订阅Id的资源管理器
         IAzureResourceManager instance = IAzureResourceManager.getInstance(cloudType);
@@ -433,7 +439,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         // 指定要查询的区域
         Region region = Region.ASIA_EAST; // 替换为您的实际区域
         //只分地区的所有镜像
-        PagedIterable<VirtualMachineImage> virtualMachineImages = azureResourceManager.virtualMachineImages().listByRegion(region);
+//        PagedIterable<VirtualMachineImage> virtualMachineImages = azureResourceManager.virtualMachineImages().listByRegion(region);
 
         List<JSONObject> result = new ArrayList<>();
 //        try {
@@ -504,6 +510,14 @@ public class MicrosoftAzureConverter implements BaseConverter {
                                 }
                             }
                         }
+                    }
+                }
+                // 每循环一百次暂停30秒
+                if (firstTime % 100 == 0) {
+                    try {
+                        Thread.sleep(30000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
 //            }

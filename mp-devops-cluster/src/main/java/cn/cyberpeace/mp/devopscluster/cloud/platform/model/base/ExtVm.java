@@ -93,4 +93,16 @@ public class ExtVm implements Serializable {
 
     @ApiModelProperty("漏洞信息")
     private String loopholeInfo;
+
+    /**
+     * 云场景节点公共用户名
+     */
+    @ApiModelProperty("用户名")
+    private String username;
+
+    /**
+     * 云场景节点公共密码
+     */
+    @ApiModelProperty("密码")
+    private String password;
 }

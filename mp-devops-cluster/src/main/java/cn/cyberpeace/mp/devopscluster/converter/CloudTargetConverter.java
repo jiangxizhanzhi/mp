@@ -26,8 +26,18 @@ public class CloudTargetConverter {
         extVm.setVmOsDiskType("StandardSSD_LRS");
         extVm.setInitSupport(true);
         extVm.setQuickCreateSupport(false);
+        extVm.setUsername("admin123");
+        extVm.setPassword("NHiOJiZTD4K1");
+
         //访问协议
         List<AccessProtocol> accessProtocols = new ArrayList<>();
+        AccessProtocol accessProtocol = new AccessProtocol();
+        accessProtocol.setHostname("");
+        //1:分配公网ip 2:外部网络直接访问 3:私网ip地址
+        accessProtocol.setAccessType("3");
+        accessProtocol.setProtocol("SSH");
+
+        accessProtocols.add(accessProtocol);
         extVm.setAccessProtocols(accessProtocols);
         extVm.setExtInfo(null);
         extVm.setInstanceExist(false);
