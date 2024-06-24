@@ -79,7 +79,7 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.enable_flow_collect:false}")
     private Boolean enableFlowCollect;
 
-    @Value("${mp.sceneplugincollection.enable_probe_collect:true}")
+    @Value("${mp.sceneplugincollection.enable_probe_collect:false}")
     private Boolean enableProbeCollect;
 
     @Value("${mp.sceneplugincollection.collect_interval:180s}")
