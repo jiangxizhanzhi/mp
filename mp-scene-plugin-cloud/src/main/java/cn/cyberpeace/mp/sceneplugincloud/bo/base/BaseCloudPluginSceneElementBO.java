@@ -143,10 +143,14 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private Integer sourceType;
     @ApiModelProperty(value = "用户上传映像id")
     private String uploadImageId;
+    @ApiModelProperty(value = "用户名")
+    private String username;
+    @ApiModelProperty(value = "密码")
+    private String password;
 
     //    漏洞
     @ApiModelProperty(value = "漏洞")
-    private String vulnCode;
+    private String loopholeInfo;
     @ApiModelProperty(value = "虚拟机扩容磁盘类型")
     private String vmExpansionDiskType;
     @ApiModelProperty(value = "是否扩容")

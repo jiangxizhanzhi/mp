@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 
@@ -143,9 +144,9 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         }
 
         if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.SIMPLE)) {
-        } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.VM)) {
+        } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.VM) || imageType.equals(BaseCloudPluginSceneElementModel.ImageType.LAAS_VM)) {
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE);
-        } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.CONTAINER)) {
+        } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.CONTAINER) || imageType.equals(BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY)) {
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER);
         } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.ENTITY)) {
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
@@ -172,6 +173,31 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
     public void validate() {
         Integer cloudType = getSceneHandler().getScene().getCloudType();
 
+        //            根据微软云创建虚拟机规则验证用户名、密码
+        if (cloudType != null && cloudType != BaseSceneModel.CloudType.DEFAULT) {
+            getElementMap().forEach((nodeId, element) -> {
+                if (StringUtils.isNotBlank(element.getUsername())) {
+                    boolean isUsernameAllowed = Arrays.stream(disallowedUsernames)
+                            .noneMatch(element.getUsername()::equalsIgnoreCase);
+                    boolean matches = !validUsernamePattern.matcher(element.getUsername()).matches();
+                    if (!isUsernameAllowed) {
+                        throw new MpRuntimeException(CloudErrorCode.USERNAME_NOT_ALLOWED.format(element.getUsername()));
+                    } else if (!validUsernamePattern.matcher(element.getUsername()).matches()) {
+                        throw new MpRuntimeException(CloudErrorCode.INVALID_USERNAME.format(element.getUsername()));
+                    }
+                }
+                if (StringUtils.isNotBlank(element.getPassword())) {
+                    boolean isPasswordAllowed = Arrays.stream(disallowedPasswords)
+                            .noneMatch(element.getPassword()::equalsIgnoreCase);
+                    if (!isPasswordAllowed) {
+                        throw new MpRuntimeException(CloudErrorCode.PASSWORD_NOT_ALLOWED.format(element.getPassword()));
+                    } else if (!validPasswordPattern.matcher(element.getPassword()).matches()) {
+                        throw new MpRuntimeException(CloudErrorCode.INVALID_PASSWORD.format(element.getPassword()));
+                    }
+                }
+            });
+        }
+
         for (var srcPort : getSceneHandler().getElementPortMap().values()) {
             // 验证ip是否在cidr内
             var ip = srcPort.getIp();
@@ -190,34 +216,6 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                         throw new MpRuntimeException(CloudErrorCode.INVALID_IP_ON_CIDR.format(ip, cidr));
                     } else if (!StringUtils.isEmpty(cidr) && Arrays.asList(IpUtils.getSpecificIPsFromCIDR(cidr)).contains(ip)) {
                         throw new MpRuntimeException(CloudErrorCode.IP_CONFLICT_WITH_RESERVED_IP.format(ip));
-                    }
-                }
-            }
-
-//            根据微软云创建虚拟机规则验证用户名、密码
-            if (cloudType != null && cloudType != BaseSceneModel.CloudType.DEFAULT) {
-                List<AccessMode> accessModes = srcPort.getAccessModes();
-                if (accessModes.size() > 0) {
-                    for (AccessMode accessMode : accessModes) {
-                        if (StringUtils.isNotBlank(accessMode.getUsername())) {
-                            boolean isUsernameAllowed = Arrays.stream(disallowedUsernames)
-                                    .noneMatch(accessMode.getUsername()::equalsIgnoreCase);
-                            boolean matches = !validUsernamePattern.matcher(accessMode.getUsername()).matches();
-                            if (!isUsernameAllowed) {
-                                throw new MpRuntimeException(CloudErrorCode.USERNAME_NOT_ALLOWED.format(accessMode.getUsername()));
-                            } else if (!validUsernamePattern.matcher(accessMode.getUsername()).matches()) {
-                                throw new MpRuntimeException(CloudErrorCode.INVALID_USERNAME.format(accessMode.getUsername()));
-                            }
-                        }
-                        if (StringUtils.isNotBlank(accessMode.getPassword())) {
-                            boolean isPasswordAllowed = Arrays.stream(disallowedPasswords)
-                                    .noneMatch(accessMode.getPassword()::equalsIgnoreCase);
-                            if (!isPasswordAllowed) {
-                                throw new MpRuntimeException(CloudErrorCode.PASSWORD_NOT_ALLOWED.format(accessMode.getPassword()));
-                            } else if (!validPasswordPattern.matcher(accessMode.getPassword()).matches()) {
-                                throw new MpRuntimeException(CloudErrorCode.INVALID_PASSWORD.format(accessMode.getPassword()));
-                            }
-                        }
                     }
                 }
             }

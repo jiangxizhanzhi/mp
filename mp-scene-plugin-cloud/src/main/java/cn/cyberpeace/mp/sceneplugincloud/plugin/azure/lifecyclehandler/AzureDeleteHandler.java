@@ -156,7 +156,7 @@ public class AzureDeleteHandler extends DeleteHandler {
     private List<CloudPluginSceneElementBO> filterWebAppElements(List<CloudPluginSceneElementBO> allElements) {
         List<CloudPluginSceneElementBO> filterElements = new ArrayList<>();
         for (var c : allElements) {
-            if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(c.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.WEBAPP == c.getVirtualType()) {
+            if (BaseCloudPluginSceneElementModel.ImageType.VNET.equals(c.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.WEBAPP == c.getVirtualType()) {
                 filterElements.add(c);
             }
         }

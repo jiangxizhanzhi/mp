@@ -1991,8 +1991,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 .filterEqual(CloudPluginSceneElementModel::getScene, id);
         List<CloudPluginSceneElementModel> list = cloudPluginSceneElementMapper.list(humanCondition);
         List<String> vulnList = list.stream()
-                .filter(e -> Objects.nonNull(e.getVulnCode()))
-                .flatMap(e -> Arrays.stream(e.getVulnCode().split(";")))
+                .filter(e -> Objects.nonNull(e.getLoopholeInfo()))
+                .flatMap(e -> Arrays.stream(e.getLoopholeInfo().split(";")))
                 .distinct()
                 .filter(e -> !e.isEmpty())
                 .collect(Collectors.toList());

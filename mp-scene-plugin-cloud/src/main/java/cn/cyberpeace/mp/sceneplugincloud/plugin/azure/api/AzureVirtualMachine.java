@@ -158,14 +158,7 @@ public class AzureVirtualMachine {
         // azure todo 调整 root name
         VirtualNic virtualNic = virtualNics.get(0);
 //        设置登录信息
-        String userNmae = null;
-        String password = null;
-        for (VirtualNic.AccessMode accessMode : virtualNic.getAccessModes()) {
-            if (StringUtils.isNotBlank(accessMode.getUsername()) && StringUtils.isNotBlank(accessMode.getPassword())) {
-                userNmae = accessMode.getUsername();
-                password = accessMode.getPassword();
-            }
-        }
+
         String netId = virtualNics.stream()
                 .filter(v -> StringUtils.isNotBlank(v.getNetworkId()))
                 .map(v -> v.getNetworkId()).findFirst()
@@ -186,14 +179,14 @@ public class AzureVirtualMachine {
 //            源类型(1:云平台 2:用户上传)
             if (2 == cloudElement.getSourceType()) {
                 creater = withProximityPlacementGroup.withGeneralizedWindowsCustomImage(cloudElement.getUploadImageId())
-                        .withAdminUsername(StringUtils.isBlank(userNmae) ? "azureuser" : userNmae)
-                        .withAdminPassword(StringUtils.isBlank(password) ? "Azure12345678" : password)
+                        .withAdminUsername(cloudElement.getUsername())
+                        .withAdminPassword(cloudElement.getPassword())
                         .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
 
             } else {
                 creater = withProximityPlacementGroup.withLatestWindowsImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
-                        .withAdminUsername(StringUtils.isBlank(userNmae) ? "azureuser" : userNmae)
-                        .withAdminPassword(StringUtils.isBlank(password) ? "Azure12345678" : password)
+                        .withAdminUsername(cloudElement.getUsername())
+                        .withAdminPassword(cloudElement.getPassword())
                         .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
             }
 //            扩展磁盘 此处用于重建vm
@@ -218,14 +211,14 @@ public class AzureVirtualMachine {
             if (2 == cloudElement.getSourceType()) {
                 creater = withProximityPlacementGroup
                         .withGeneralizedLinuxCustomImage(cloudElement.getUploadImageId())
-                        .withRootUsername(StringUtils.isBlank(userNmae) ? "root1" : userNmae)
-                        .withRootPassword(StringUtils.isBlank(password) ? "ycxx123#" : password) // 必须要是6位以上,且有一个特殊字符
+                        .withRootUsername(cloudElement.getUsername())
+                        .withRootPassword(cloudElement.getPassword()) // 必须要是6位以上,且有一个特殊字符
                         .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
             } else {
                 creater = withProximityPlacementGroup
                         .withLatestLinuxImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
-                        .withRootUsername(StringUtils.isBlank(userNmae) ? "root1" : userNmae)
-                        .withRootPassword(StringUtils.isBlank(password) ? "ycxx123#" : password) // 必须要是6位以上,且有一个特殊字符
+                        .withRootUsername(cloudElement.getUsername())
+                        .withRootPassword(cloudElement.getPassword()) // 必须要是6位以上,且有一个特殊字符
                         .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
             }
 //            扩展磁盘 此处用于重建vm

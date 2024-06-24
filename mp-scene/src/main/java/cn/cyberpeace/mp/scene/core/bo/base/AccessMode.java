@@ -53,6 +53,13 @@ public class AccessMode {
     @ApiModelProperty(value = "是否是管理接入")
     private Boolean manageMode;
 
+    @ApiModelProperty(value = "IP")
+    private String hostname;
+
+    @ApiModelProperty(value = "访问类型")
+    private String accessType;
+
+
     public static class Protocol {
         public static final String PING = "ping";
         public static final String CONSOLE = "console";

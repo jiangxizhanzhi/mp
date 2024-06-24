@@ -147,9 +147,13 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private Integer sourceType;
     @DefaultStr
     private String uploadImageId;
+    @DefaultStr
+    private String username;
+    @DefaultStr
+    private String password;
     //    漏洞
     @DefaultStr
-    private String vulnCode;
+    private String loopholeInfo;
     @DefaultStr
     private String vmExpansionDiskType;
     @DefaultBool
@@ -261,6 +265,9 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final String ENTITY = "entity";
         public static final String DYNAMIPS = "dynamips";
         public static final String LOAD = "load";
+        public static final String VNET = "VNet";
+        public static final String LAAS_VM = "laasVm";
+        public static final String CONTAINER_REGISTRY = "containerRegistry";
 
         private ImageType() {
         }
