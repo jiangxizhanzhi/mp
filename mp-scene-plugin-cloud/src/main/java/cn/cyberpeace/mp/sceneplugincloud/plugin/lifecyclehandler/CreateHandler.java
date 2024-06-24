@@ -1250,9 +1250,12 @@ public class CreateHandler extends HandlerCommon {
 
         SceneElementBO srcElement = cloudElement.getSrcElement();
         ContainerCreateData createData = new ContainerCreateData();
-        createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
+//        createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
         createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
-        createData.setImage(cloudElement.getImageUuid());
+        var device = new DeviceClient().findByUuid(cloudElement.getImageUuid());
+        String image = device.getExtImageInfo().getBaseImageName();
+        String version = device.getExtImageInfo().getVersion();
+        createData.setImage(image + ":" + version);
 
         if (srcElement.getCpu() != null && srcElement.getCpu() > 0) {
             createData.setCpu(srcElement.getCpu());
@@ -1270,7 +1273,7 @@ public class CreateHandler extends HandlerCommon {
         // 容器参数
         if (cloudElement.getDockerParams() != null) {
             DockerParams dockerParams = cloudElement.getDockerParams();
-            createData.setEnvironment(dockerParams.getEnvironment());
+//            createData.setEnvironment(dockerParams.getEnvironment());
             createData.setInteractive(dockerParams.getInteractive());
             createData.setPrivilege(dockerParams.getPrivileged());
             createData.setRun(dockerParams.getRun());
@@ -1428,11 +1431,11 @@ public class CreateHandler extends HandlerCommon {
         getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_NETWORK);
 
         // todo 先等30秒用于人手动添加采集路由的外网地址
-        try {
-            Thread.sleep(30000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            Thread.sleep(30000);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
 
         // 再创建网关 和 防火墙
         getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_GATEWAY);
