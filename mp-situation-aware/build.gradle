@@ -3,6 +3,7 @@ dependencies {
     implementation project(':mp-common')
     implementation project(':mp-auth')
     implementation project(':mp-log')
+    implementation project(path: ':mp-scene')
 }
 
 apply plugin: "com.thinkimi.gradle.MybatisGenerator"

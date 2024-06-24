@@ -889,9 +889,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return scenePluginCollectionSceneService.listHostStatesByAgentNames(agentNames, queryParams);
     }
 
-    public Map<String, List<CollectionHostStateBO>> mapHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams) {
+    public Map<String, List<CollectionHostStateBO>> mapHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams, Integer cloudType) {
         queryParams.setNodeIds(null);
-        return scenePluginCollectionSceneService.mapHostStatesByAgentNames(agentNames, queryParams);
+        return scenePluginCollectionSceneService.mapHostStatesByAgentNames(agentNames, queryParams, cloudType);
     }
 
     public ServiceResult<Map<String, Integer>> queryCollectionDataCount(QueryCollectionDataCountParams params) {

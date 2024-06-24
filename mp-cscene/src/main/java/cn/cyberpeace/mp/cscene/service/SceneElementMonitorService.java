@@ -211,8 +211,10 @@ public class SceneElementMonitorService {
         if (CollectionUtil.isEmpty(agentNames)) {
             return null;
         }
+        var sceneInstanceId = csceneCommonService.translateSceneId(baseRequest.getSceneId());
+        SceneHandler sceneHandler = new SceneHandler(sceneInstanceId, null, null);
         String agentName = agentNames.get(0);
-        List<OS> osList = sysCollectorService.getOS(agentName);
+        List<OS> osList = sysCollectorService.getOS(agentName, sceneHandler.getScene().getCloudType());
         if (CollectionUtil.isEmpty(osList)) {
             return null;
         }
@@ -377,11 +379,12 @@ public class SceneElementMonitorService {
     }
 
     /**
-     *   获取的主机信息，cpu,memory,disk直接使用靶标配置的值，从es中获取不一定都采得到/准确
-     * @author
-     * @date 17:09 2023/10/17
+     * 获取的主机信息，cpu,memory,disk直接使用靶标配置的值，从es中获取不一定都采得到/准确
+     *
      * @param elementMonitorBasicInfo
      * @param sceneElementBO
+     * @author
+     * @date 17:09 2023/10/17
      **/
     private void formatHostStateBySceneElementBo(ElementMonitorBasicInfo elementMonitorBasicInfo, SceneElementBO sceneElementBO) {
         if (Objects.isNull(elementMonitorBasicInfo.getHostState())) {
@@ -407,10 +410,11 @@ public class SceneElementMonitorService {
             elementMonitorBasicInfo.getHostState().setDiskSpace(sceneElementBO.getDisk().longValue());
         }
     }
+
     public void cpSceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, CloudPluginSceneElementBO cpSceneElementBO) {
         // 镜像名称
         String imageName = null;
-        if(StringUtils.contains(cpSceneElementBO.getImage(), cpSceneElementBO.getImageUuid())) {
+        if (StringUtils.contains(cpSceneElementBO.getImage(), cpSceneElementBO.getImageUuid())) {
             imageName = cpSceneElementBO.getImage().replaceFirst(cpSceneElementBO.getImageUuid(), "");
         } else {
             imageName = cpSceneElementBO.getImage();
@@ -571,14 +575,14 @@ public class SceneElementMonitorService {
     }
 
     private void mergeFileData(ListObjServiceResult<CollectionHostEventBO> hostEventsBos,
-                                 HostEventQueryParams hostEventQueryParams, ElementMonitorRequest pageRequest, List<String> elementIds) {
+                               HostEventQueryParams hostEventQueryParams, ElementMonitorRequest pageRequest, List<String> elementIds) {
         if (CollectionUtils.isNotEmpty(elementIds)) {
             return;
         }
         List<CollectionHostEventBO> bos = hostEventsBos.getSource().getObjs();
         HumanCondition humanCondition = new HumanCondition().currentLink(ElementFileListModel.class)
-                                                            .filterIn(ElementFileListModel::getGroup, hostEventQueryParams.getRuleGroups().toArray())
-                                                            .filterEqual(ElementFileListModel::getSceneId, pageRequest.getSceneId());
+                .filterIn(ElementFileListModel::getGroup, hostEventQueryParams.getRuleGroups().toArray())
+                .filterEqual(ElementFileListModel::getSceneId, pageRequest.getSceneId());
         if (CollectionUtils.isNotEmpty(pageRequest.getLevels())) {
             humanCondition.filterIn(ElementFileListModel::getLevel, pageRequest.getLevels().toArray());
         }
@@ -690,13 +694,13 @@ public class SceneElementMonitorService {
     }
 
     private List<ElementHistogramInfo> mergeFileCount(List<ElementHistogramInfo> histogramInfos,
-                               String sceneId, List<String> group) {
+                                                      String sceneId, List<String> group) {
         List<String> timeList = histogramInfos.stream().map(ElementHistogramInfo::getTime).collect(Collectors.toList());
         HumanCondition humanCondition = new HumanCondition().currentLink(ElementFileCountModel.class)
-                                                            .filterEqual(ElementFileCountModel::getSceneId, sceneId)
-                                                            .filterIn(ElementFileCountModel::getTime, timeList.toArray())
-                                                            .filterNotEqual(ElementFileCountModel::getCount, 0)
-                                                            .filterIn(ElementFileCountModel::getGroup, group.toArray());
+                .filterEqual(ElementFileCountModel::getSceneId, sceneId)
+                .filterIn(ElementFileCountModel::getTime, timeList.toArray())
+                .filterNotEqual(ElementFileCountModel::getCount, 0)
+                .filterIn(ElementFileCountModel::getGroup, group.toArray());
         List<ElementFileCountModel> countModels = elementFileCountMapper.list(humanCondition);
         Map<String, ElementHistogramInfo> histogramInfoMap = histogramInfos.stream().collect(Collectors.toMap(ElementHistogramInfo::getTime, e -> e));
         for (ElementFileCountModel model : countModels) {
@@ -960,9 +964,9 @@ public class SceneElementMonitorService {
         result.put(REGISTRY_COUNT, JSON.toJSON(registryCount));
 
         HostEventQueryParams queryParams = getExportDataParams(sceneId, elementId);
-        queryParams.setCatagories(Arrays.asList("020101","020102","020103","020104","020105","020106","020107",
-                "020201","020202","020203","020204","020205","020206","020207","020208","020210",
-                "020301","020302","020303","020304","020305","020313"));
+        queryParams.setCatagories(Arrays.asList("020101", "020102", "020103", "020104", "020105", "020106", "020107",
+                "020201", "020202", "020203", "020204", "020205", "020206", "020207", "020208", "020210",
+                "020301", "020302", "020303", "020304", "020305", "020313"));
 
         //日志事件
         List<ElementLogListModel> logList = csceneInstanceService.listHostEvents(sceneId, queryParams)
@@ -978,21 +982,21 @@ public class SceneElementMonitorService {
                 .collect(Collectors.toList());
         result.put(PROBE, JSON.toJSON(probeList));
 
-        queryParams.setCatagories(Arrays.asList("020301", "020302", "020303", "020304", "020305","020306", "020307", "020308", "020309", "020310", "020311", "020312"));
+        queryParams.setCatagories(Arrays.asList("020301", "020302", "020303", "020304", "020305", "020306", "020307", "020308", "020309", "020310", "020311", "020312"));
         //告警信息
-        List<ElementLogListModel> alarmList =csceneInstanceService.listHostEvents(sceneId, queryParams)
-                                                              .asResult().sourceList().stream()
-                                                              .map(this::collectionHostEventBO2ElementLogListModel)
-                                                              .collect(Collectors.toList());
+        List<ElementLogListModel> alarmList = csceneInstanceService.listHostEvents(sceneId, queryParams)
+                .asResult().sourceList().stream()
+                .map(this::collectionHostEventBO2ElementLogListModel)
+                .collect(Collectors.toList());
         result.put(ALARM, JSON.toJSON(alarmList));
 
         String fileName = FileUtil.getTmpDirPath() + File.separator + "data";
 
         if ("json".equals(type)) {
-            try (FileWriter writer = new FileWriter(fileName + ".json")){
+            try (FileWriter writer = new FileWriter(fileName + ".json")) {
                 writer.write(result.toString());
-            }catch (IOException e) {
-                log.error("export data fail, sceneId = {}, elementId = {}, type = {}",sceneId, elementId, type);
+            } catch (IOException e) {
+                log.error("export data fail, sceneId = {}, elementId = {}, type = {}", sceneId, elementId, type);
                 throw new MpRuntimeException(CsceneErrorCode.EXPORT_ERROR);
             }
             FileUtil.setResponse(new File(fileName + ".json"), true, response);
@@ -1002,8 +1006,8 @@ public class SceneElementMonitorService {
                 JsonNode jsonNode = objectMapper.readTree(result.toJSONString());
 
                 fileWriter.write(new XmlMapper().writeValueAsString(jsonNode));
-            }catch (IOException e) {
-                log.error("export data fail, sceneId = {}, elementId = {}, type = {}",sceneId, elementId, type);
+            } catch (IOException e) {
+                log.error("export data fail, sceneId = {}, elementId = {}, type = {}", sceneId, elementId, type);
                 throw new MpRuntimeException(CsceneErrorCode.EXPORT_ERROR);
             }
             FileUtil.setResponse(new File(fileName + ".xml"), true, response);
@@ -1238,7 +1242,7 @@ public class SceneElementMonitorService {
         } else if ("json".equals(fileSuffix) || "xml".equals(fileSuffix)) {
             JSONObject jsonObject = new JSONObject();
             if ("json".equals(fileSuffix)) {
-                String content =  FileUtil.getContent(file);
+                String content = FileUtil.getContent(file);
                 jsonObject = JSON.parseObject(content);
             } else {
                 ObjectMapper objectMapper = new ObjectMapper(new XmlFactory());
@@ -1255,9 +1259,9 @@ public class SceneElementMonitorService {
             if (0 == type) {
                 String fileCount = jsonObject.getString(FILE_COUNT);
                 fileCountModels = JSON.parseArray(fileCount, ElementFileCountModel.class)
-                                      .stream()
-                                      .filter(count -> 0 != count.getCount())
-                                      .collect(Collectors.toList());
+                        .stream()
+                        .filter(count -> 0 != count.getCount())
+                        .collect(Collectors.toList());
                 fileCountModels.forEach(count -> count.setSceneId(sceneId));
 
                 String fileList = jsonObject.getString(FILE_LIST);
@@ -1266,9 +1270,9 @@ public class SceneElementMonitorService {
             } else if (1 == type) {
                 String registryCount = jsonObject.getString(REGISTRY_COUNT);
                 registryCountModels = JSON.parseArray(registryCount, ElementFileCountModel.class)
-                                          .stream()
-                                          .filter(count -> 0 != count.getCount())
-                                          .collect(Collectors.toList());
+                        .stream()
+                        .filter(count -> 0 != count.getCount())
+                        .collect(Collectors.toList());
                 registryCountModels.forEach(count -> count.setSceneId(sceneId));
 
                 String registryList = jsonObject.getString(REGISTRY_LIST);

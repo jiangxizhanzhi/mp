@@ -327,7 +327,7 @@ public class ScenePluginCollectionSceneService {
         request.setStartTime(Optional.ofNullable(queryParams.getStartTime()).orElse(sceneHandler.getScene().getCreateTime()));
         // 结束时间,默认为当前时间
         request.setEndTime(Optional.ofNullable(queryParams.getEndTime()).orElse(LocalDateTime.now()));
-        return doQueryHostStateEventsWithTimeRange(sceneId, agentName2Element, request);
+        return doQueryHostStateEventsWithTimeRange(sceneId, agentName2Element, request, sceneHandler.getScene().getCloudType());
     }
 
 
@@ -345,10 +345,10 @@ public class ScenePluginCollectionSceneService {
         request.setStartTime(Optional.ofNullable(queryParams.getStartTime()).orElse(LocalDateTime.now().minusHours(24)));
         // 结束时间,默认为当前时间
         request.setEndTime(Optional.ofNullable(queryParams.getEndTime()).orElse(LocalDateTime.now()));
-        return doQueryHostStateEventsWithTimeRange(null, null, request);
+        return doQueryHostStateEventsWithTimeRange(null, null, request,null);
     }
 
-    public Map<String, List<CollectionHostStateBO>> mapHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams) {
+    public Map<String, List<CollectionHostStateBO>> mapHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams, Integer cloudType) {
         // 没有探针
         if (CollectionUtil.isEmpty(agentNames)) {
             return Collections.emptyMap();
@@ -361,12 +361,12 @@ public class ScenePluginCollectionSceneService {
         request.setStartTime(Optional.ofNullable(queryParams.getStartTime()).orElse(LocalDateTime.now().minusHours(24)));
         // 结束时间,默认为当前时间
         request.setEndTime(Optional.ofNullable(queryParams.getEndTime()).orElse(LocalDateTime.now()));
-        return doMapHostStateEventsWithTimeRange(null, null, request, queryParams.getPageSize());
+        return doMapHostStateEventsWithTimeRange(null, null, request, queryParams.getPageSize(), cloudType);
     }
 
-    private ListObjServiceResult<CollectionHostStateBO> doQueryHostStateEventsWithTimeRange(String sceneId, Map<String, SceneElementBO> agentName2Element, WazuhMonitorEventsRequest request) {
+    private ListObjServiceResult<CollectionHostStateBO> doQueryHostStateEventsWithTimeRange(String sceneId, Map<String, SceneElementBO> agentName2Element, WazuhMonitorEventsRequest request, Integer cloudType) {
         // 执行查询
-        List<WazuhHostStateModel> result = dataCollectionService.queryHostStateEventsWithTimeRange(request);
+        List<WazuhHostStateModel> result = dataCollectionService.queryHostStateEventsWithTimeRange(request,cloudType);
         List<CollectionHostStateBO> hostStates = result.stream().map(srcHostState -> {
             return hostStateModel2BO(sceneId, agentName2Element, srcHostState);
         }).collect(Collectors.toList());
@@ -374,9 +374,10 @@ public class ScenePluginCollectionSceneService {
     }
 
 
-    private Map<String, List<CollectionHostStateBO>> doMapHostStateEventsWithTimeRange(String sceneId, Map<String, SceneElementBO> agentName2Element, WazuhMonitorEventsRequest request, int topSize) {
+    private Map<String, List<CollectionHostStateBO>> doMapHostStateEventsWithTimeRange(
+            String sceneId, Map<String, SceneElementBO> agentName2Element, WazuhMonitorEventsRequest request, int topSize, Integer cloudType) {
         // 执行查询
-        Map<String, List<WazuhHostStateModel>> map = dataCollectionService.mapHostStatesByAgentNamesWithTimeRange(request, topSize);
+        Map<String, List<WazuhHostStateModel>> map = dataCollectionService.mapHostStatesByAgentNamesWithTimeRange(request, topSize, cloudType);
         Map<String, List<CollectionHostStateBO>> convertedMap = new HashMap<>();
         map.forEach((agentName, result) -> {
             List<CollectionHostStateBO> hostStates = result.stream().map(srcHostState -> {
@@ -1412,7 +1413,7 @@ public class ScenePluginCollectionSceneService {
         }
         List<Process> processes = new ArrayList<>();
         Integer total = 0;
-        for (int i = 0; i < listPageInfoQueryParams.getNodeIds().size() ; i++) {
+        for (int i = 0; i < listPageInfoQueryParams.getNodeIds().size(); i++) {
             WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
             String elementName = batchSceneHandler.getNodeId2NodenameMap().get(listPageInfoQueryParams.getNodeIds().get(i));
             wazuhRequest.setAgentNames(Lists.newArrayList(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(i))));

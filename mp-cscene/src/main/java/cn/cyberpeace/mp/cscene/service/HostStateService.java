@@ -54,14 +54,7 @@ import org.springframework.util.unit.DataSize;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -144,7 +137,7 @@ public class HostStateService {
         request.setEndTime(endTime);
 
         // 执行查询
-        List<WazuhHostStateModel> result = dataCollectionService.queryHostStateEventsWithTimeRange(request);
+        List<WazuhHostStateModel> result = dataCollectionService.queryHostStateEventsWithTimeRange(request, null);
         List<CollectionHostStateBO> hostStateBOs = result.stream().map(srcHostState -> {
             CollectionHostStateBO hostStateBO = new CollectionHostStateBO();
             hostStateBO.setCpuCount(srcHostState.getCpuCount());
@@ -332,7 +325,7 @@ public class HostStateService {
         HostStateQueryParams queryParams = new HostStateQueryParams();
         queryParams.setPage(request.getPage());
         queryParams.setPageSize(request.getPageSize());
-        Map<String, List<CollectionHostStateBO>> map = csceneInstanceService.mapHostStatesByAgentNames(request.getAgentNames(), queryParams);
+        Map<String, List<CollectionHostStateBO>> map = csceneInstanceService.mapHostStatesByAgentNames(request.getAgentNames(), queryParams, request.getCloudType());
         Map<String, List<HostState>> convertedMap = new HashMap<>();
         map.forEach((k, v) -> {
             List<HostState> hostStates = collectionHostStateBOs2HostStates(v);
@@ -550,7 +543,7 @@ public class HostStateService {
         }
     }
 
-    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> getSceneAttCkTypeCountTrend(BaseSceneElementRequest request,LocalDateTime startTime,LocalDateTime endTime) {
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> getSceneAttCkTypeCountTrend(BaseSceneElementRequest request, LocalDateTime startTime, LocalDateTime endTime) {
         List<IntervalSizeBO<LocalDateTime, Long>> result = new ArrayList<>();
         var sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
         if (CollectionUtils.isEmpty(sceneIds)) {

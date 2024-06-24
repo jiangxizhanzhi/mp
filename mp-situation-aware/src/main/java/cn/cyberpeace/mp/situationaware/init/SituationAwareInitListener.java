@@ -34,13 +34,18 @@ public class SituationAwareInitListener implements ApplicationListener<Applicati
 
         //定时更新token初始化
         SituationalAwareConstant.wazuhToken = CacheBuilder.newBuilder()
-                .maximumSize(1)
+                .maximumSize(2)
                 .expireAfterWrite(14, TimeUnit.MINUTES)
                 .build(new CacheLoader<>() {
                     @Override
                     public String load(String key) {
-                        String token = securityService.authenticate();
-                        return token;
+                        if ("publicWazuhToken".equals(key)) {
+                            String token = securityService.publicAuthenticate();
+                            return token;
+                        } else {
+                            String token = securityService.authenticate();
+                            return token;
+                        }
                     }
                 });
 

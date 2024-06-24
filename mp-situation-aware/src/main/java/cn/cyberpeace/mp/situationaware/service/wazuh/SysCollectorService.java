@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.situationaware.service.wazuh;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.WazuhAgentPortsModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhAgentProcessModel;
@@ -11,6 +12,7 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseResponse;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.*;
+import cn.cyberpeace.mp.situationaware.utils.PublicWazuhHttpsUtils;
 import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
 import com.alibaba.fastjson.*;
 import com.google.common.collect.Lists;
@@ -50,7 +52,7 @@ public class SysCollectorService extends RequestProcessor {
      * @return 端口号
      */
     public ListObjServiceResult<Port> pagePorts(CollectorBaseRequest collectorBaseRequest) {
-        String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName());
+        String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName(), null);
         if (StringUtils.isBlank(agentId)) {
             log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
             return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), 0));
@@ -77,7 +79,7 @@ public class SysCollectorService extends RequestProcessor {
      * @return 进程集合
      */
     public ListObjServiceResult<Process> pageProcesses(CollectorBaseRequest collectorBaseRequest) {
-        String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName());
+        String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName(), null);
         if (StringUtils.isBlank(agentId)) {
             log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
             return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), 0));
@@ -105,7 +107,7 @@ public class SysCollectorService extends RequestProcessor {
      * @return 进程集合
      */
     public ListObjServiceResult<Netiface> pageNetifaces(CollectorBaseRequest collectorBaseRequest) {
-        String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName());
+        String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName(), null);
         if (StringUtils.isBlank(agentId)) {
             log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
             return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), 0));
@@ -176,7 +178,7 @@ public class SysCollectorService extends RequestProcessor {
      */
     public List<Hardware> getHardware(String agentName) {
 
-        String agentId = agentService.getSingleAgentId(agentName);
+        String agentId = agentService.getSingleAgentId(agentName, null);
         if (StringUtils.isBlank(agentId)) {
             log.error("agentId is null, agentName:{}", agentName);
             return null;
@@ -193,22 +195,25 @@ public class SysCollectorService extends RequestProcessor {
     }
 
 
-
     /**
      * @param
      * @return
      */
-    public List<OS> getOS(String agentName) {
+    public List<OS> getOS(String agentName, Integer cloudType) {
 
-        String agentId = agentService.getSingleAgentId(agentName);
+        String agentId = agentService.getSingleAgentId(agentName, cloudType);
         if (StringUtils.isBlank(agentId)) {
             log.error("agentId is null, agentName:{}", agentName);
             return null;
         }
-
-        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + "/syscollector/" + agentId + "/os";
-
-        String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
+        String res = "";
+        if (null != cloudType && BaseSceneModel.CloudType.PUBLIC == cloudType) {
+            String requestUrl = situationAwareConfig.getPublicWazuhBaseUrl() + "/syscollector/" + agentId + "/os";
+            res = PublicWazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
+        } else {
+            String requestUrl = situationAwareConfig.getWazuhBaseUrl() + "/syscollector/" + agentId + "/os";
+            res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
+        }
         BaseResponse<OS> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
         log.info("{}", result);

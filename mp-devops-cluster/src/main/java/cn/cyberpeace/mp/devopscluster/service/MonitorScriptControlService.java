@@ -30,15 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -214,7 +206,7 @@ public class MonitorScriptControlService {
                 AgentRequest agentRequest = new AgentRequest();
                 agentRequest.setName(hostName);
                 agentRequest.setStatus("active");
-                List<Agent> agents = agentService.listAgents(agentRequest);
+                List<Agent> agents = agentService.listAgents(agentRequest, null);
                 if (!CollectionUtils.isEmpty(agents)) {
                     sendScriptInstallCmd(hostName, nameFileMap);
                     addOrUpdateNodeConfigByHostName(hostName, nameFileMap);

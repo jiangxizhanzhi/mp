@@ -43,15 +43,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -324,6 +316,8 @@ public class SceneMonitorService {
                 AgentNameBasedRequest agentNameBasedRequest = new AgentNameBasedRequest();
                 agentNameBasedRequest.setAgentNames(agentNames);
                 agentNameBasedRequest.setPageSize(1);
+                agentNameBasedRequest.setCloudType(sceneHandler.getScene().getCloudType());
+
 
                 Map<String, List<HostState>> map = hostStateService.mapHostStatesByAgentName(agentNameBasedRequest);
                 basicInfos.forEach(basicInfo -> {
@@ -480,6 +474,7 @@ public class SceneMonitorService {
 
     /**
      * 列出场景所有录屏的用户
+     *
      * @param request
      * @return
      */
@@ -536,6 +531,7 @@ public class SceneMonitorService {
 
     /**
      * 是否是需要的节点
+     *
      * @param virtualType
      * @return
      */

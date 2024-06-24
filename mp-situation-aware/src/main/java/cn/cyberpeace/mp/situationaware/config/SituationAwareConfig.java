@@ -23,6 +23,13 @@ public class SituationAwareConfig {
      */
     private Integer wazuhEsMaxPageSize;
 
+    private String publicWazuhEsNodes;
+    private Integer publicWazuhEsMaxPageSize;
+    private String privateWazuhEsNodes;
+    private Integer privateWazuhEsMaxPageSize;
+    private String mixWazuhEsNodes;
+    private Integer mixWazuhEsMaxPageSize;
+
     /**
      * MP新中台ES地址
      */
@@ -67,6 +74,12 @@ public class SituationAwareConfig {
     private String wazuhPassword;
     private String wazuhFlowTableUrl;
     /**
+     * public-wazuh
+     */
+    private String publicWazuhBaseUrl;
+    private String publicWazuhUsername;
+    private String publicWazuhPassword;
+    /**
      * wazuh-probe-manager
      */
     private String probeMgrUrl;
@@ -75,6 +88,7 @@ public class SituationAwareConfig {
     private String probeMgrTaskEnable;
 
     public static DateTimeFormatter esDateTimeFormatter = null;
+
     @PostConstruct
     public void init() {
         esDateTimeFormatter = DateTimeFormatter.ofPattern(esDatePattern);

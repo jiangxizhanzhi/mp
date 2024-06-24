@@ -7,33 +7,17 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.cyberpeace.mp.situationaware.constant.SicLaunchConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.enums.LaunchStatusEnum;
-import cn.cyberpeace.mp.situationaware.model.DataCollectionEventModel;
-import cn.cyberpeace.mp.situationaware.model.FileEventModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhEnvVarEventModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
-import cn.cyberpeace.mp.situationaware.model.WazuhFileRoot;
-import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
-import cn.cyberpeace.mp.situationaware.model.WazuhMonitorRoot;
-import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhProbeCommonModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhSystemUserModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoCountModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoModel;
+import cn.cyberpeace.mp.situationaware.model.*;
 import cn.cyberpeace.mp.situationaware.model.enums.DataCollectionType;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
-import cn.cyberpeace.mp.situationaware.model.sic.BaseChangeCountOutput;
-import cn.cyberpeace.mp.situationaware.model.sic.BaseInput;
-import cn.cyberpeace.mp.situationaware.model.sic.BaseRawOutput;
-import cn.cyberpeace.mp.situationaware.model.sic.HostStateOutput;
-import cn.cyberpeace.mp.situationaware.model.sic.Launch;
+import cn.cyberpeace.mp.situationaware.model.sic.*;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -68,11 +52,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.BucketOrder;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
-import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
-import org.elasticsearch.search.aggregations.bucket.histogram.LongBounds;
-import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
+import org.elasticsearch.search.aggregations.bucket.histogram.*;
 import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.nested.ParsedNested;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
@@ -100,19 +80,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -125,6 +93,16 @@ public class DataCollectionService extends CollectionBaseService {
 
     @Resource(name = "wazuhRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
+
+    @Resource(name = "publicWazuhRestHighLevelClient")
+    private RestHighLevelClient publicWazuhRestHighLevelClient;
+
+    @Resource(name = "privateWazuhRestHighLevelClient")
+    private RestHighLevelClient privateWazuhRestHighLevelClient;
+
+    @Resource(name = "mixWazuhRestHighLevelClient")
+    private RestHighLevelClient mixWazuhRestHighLevelClient;
+
 
     @Autowired
     private WazuhRepository wazuhRepository;
@@ -617,11 +595,11 @@ public class DataCollectionService extends CollectionBaseService {
      * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
      */
     @Cacheable(value = CACHE_KEY_HOST_STATE)
-    public List<WazuhHostStateModel> queryHostStateEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
+    public List<WazuhHostStateModel> queryHostStateEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, Integer cloudType) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
         }
-        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_HOST_STATE);
+        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_HOST_STATE, cloudType);
         List<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
                 .getHits()).map(hit ->
                 JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>>() {
@@ -649,14 +627,14 @@ public class DataCollectionService extends CollectionBaseService {
      * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
      */
     @Cacheable(value = CACHE_KEY_MAP_HOST_STATE)
-    public Map<String, List<WazuhHostStateModel>> mapHostStatesByAgentNamesWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, int topSize) {
+    public Map<String, List<WazuhHostStateModel>> mapHostStatesByAgentNamesWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, int topSize, Integer cloudType) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyMap();
         }
 
         String aggName = "aggs_group_by_agent_name";
         String subAggName = "top_docs";
-        SearchResponse response = aggsSICLaunchEventsByAgentNameWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_HOST_STATE, topSize, aggName, subAggName);
+        SearchResponse response = aggsSICLaunchEventsByAgentNameWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_HOST_STATE, topSize, aggName, subAggName, cloudType);
         Map<String, List<WazuhHostStateModel>> map = new HashMap<>();
         if (Objects.nonNull(response.getAggregations())) {
 
@@ -703,7 +681,7 @@ public class DataCollectionService extends CollectionBaseService {
         }
         // 只取一条数据，做假分页处理
         wazuhMonitorEventsRequest.setPageSize(1);
-        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_NET_CONNS);
+        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_NET_CONNS, null);
         JSONObject jsonObject = processBaseChangeOutput(response);
         if (Objects.isNull(jsonObject)) {
             return Collections.emptyList();
@@ -743,7 +721,7 @@ public class DataCollectionService extends CollectionBaseService {
         }
         // 只取一条数据，做假分页处理
         wazuhMonitorEventsRequest.setPageSize(1);
-        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_PROCESSES);
+        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_PROCESSES, null);
         JSONObject jsonObject = processBaseChangeOutput(response);
         if (Objects.isNull(jsonObject)) {
             return Collections.emptyList();
@@ -786,7 +764,7 @@ public class DataCollectionService extends CollectionBaseService {
         }
         // 只取一条数据，做假分页处理
         wazuhMonitorEventsRequest.setPageSize(1);
-        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS);
+        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS, null);
         JSONObject jsonObject = processBaseChangeOutput(response);
         if (Objects.isNull(jsonObject)) {
             return Collections.emptyList();
@@ -876,7 +854,7 @@ public class DataCollectionService extends CollectionBaseService {
      * @param launchId
      * @return
      */
-    public SearchResponse querySICLaunchEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, String launchId) {
+    public SearchResponse querySICLaunchEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, String launchId, Integer cloudType) {
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhMonitorEventsRequest.getStartTime(), wazuhMonitorEventsRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
@@ -899,7 +877,11 @@ public class DataCollectionService extends CollectionBaseService {
                     (wazuhMonitorEventsRequest.getPageNum() - 1) * wazuhMonitorEventsRequest.getPageSize() : 0);
             sourceBuilder.size(wazuhMonitorEventsRequest.getPageSize());
         } else {
-            sourceBuilder.size(situationAwareConfig.getWazuhEsMaxPageSize());
+            if (null != cloudType && BaseSceneModel.CloudType.PUBLIC == cloudType) {
+                sourceBuilder.size(situationAwareConfig.getPublicWazuhEsMaxPageSize());
+            } else {
+                sourceBuilder.size(situationAwareConfig.getWazuhEsMaxPageSize());
+            }
         }
         // 监控数据每个agent一条，所以这里分页大小设为agent数量的2倍
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
@@ -908,8 +890,7 @@ public class DataCollectionService extends CollectionBaseService {
         log.info("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
 
         try {
-            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            return response;
+            return getSearchResponse(cloudType, searchRequest);
         } catch (IOException e) {
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
@@ -924,7 +905,7 @@ public class DataCollectionService extends CollectionBaseService {
      * @return
      */
     public SearchResponse aggsSICLaunchEventsByAgentNameWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, String launchId, int topSize,
-                                                                      String aggName, String subAggName) {
+                                                                      String aggName, String subAggName, Integer cloudType) {
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhMonitorEventsRequest.getStartTime(), wazuhMonitorEventsRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
@@ -958,10 +939,35 @@ public class DataCollectionService extends CollectionBaseService {
         log.info("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
 
         try {
-            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            return response;
+            return getSearchResponse(cloudType, searchRequest);
         } catch (IOException e) {
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+    /**
+     * 增加cloudType参数从不同云服务获取数据
+     *
+     * @param cloudType
+     * @param searchRequest
+     * @return
+     * @throws IOException
+     */
+    private SearchResponse getSearchResponse(Integer cloudType, SearchRequest searchRequest) throws IOException {
+        if (null != cloudType && BaseSceneModel.CloudType.PUBLIC == cloudType) {
+            SearchResponse response = publicWazuhRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            return response;
+        }
+        if (null != cloudType && BaseSceneModel.CloudType.PRIVATE == cloudType) {
+            SearchResponse response = privateWazuhRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            return response;
+        }
+        if (null != cloudType && BaseSceneModel.CloudType.MIX == cloudType) {
+            SearchResponse response = mixWazuhRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            return response;
+        } else {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            return response;
         }
     }
 

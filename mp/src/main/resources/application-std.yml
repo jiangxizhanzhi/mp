@@ -164,6 +164,10 @@ mp:
     wazuh-username: ${mp.situationaware.ext-var.wazuh-username}
     wazuh-password: ${mp.situationaware.ext-var.wazuh-password}
     wazuh-flow-table-url: http://${mp.common.ext-var.cp-ip}:9999/knapsack/probe/v1
+    #wazuh 开放接口地址用户名密码
+    public-wazuh-base-url: http://${mp.situationaware.ext-var.public-wazuh-ip}:${mp.situationaware.ext-var.public-wazuh-port}
+    public-wazuh-username: ${mp.situationaware.ext-var.public-wazuh-username}
+    public-wazuh-password: ${mp.situationaware.ext-var.public-wazuh-password}
     # wazuh-probe-manager
     probe-mgr-url: http://${mp.situationaware.ext-var.wazuh-ip}:${mp.situationaware.ext-var.wazuh-port}
     probe-mgr-agent-script-linux-path: ${mp.situationaware.ext-var.linux-path}
@@ -172,6 +176,15 @@ mp:
     # wazuh es节点地址
     wazuh-es-nodes: ${mp.situationaware.ext-var.wazuh-es-ip}:${mp.situationaware.ext-var.wazuh-es-port}
     wazuh-es-max-page-size: ${mp.situationaware.ext-var.wazuh-es-max-page-size}
+    # 公有云 wazuh es节点地址
+    public-wazuh-es-nodes: ${mp.situationaware.ext-var.public-wazuh-es-ip}:${mp.situationaware.ext-var.public-wazuh-es-port}
+    public-wazuh-es-max-page-size: ${mp.situationaware.ext-var.public-wazuh-es-max-page-size}
+    # 私有云 wazuh es节点地址
+    private-wazuh-es-nodes: ${mp.situationaware.ext-var.private-wazuh-es-ip}:${mp.situationaware.ext-var.private-wazuh-es-port}
+    private-wazuh-es-max-page-size: ${mp.situationaware.ext-var.private-wazuh-es-max-page-size}
+    # 混合云 wazuh es节点地址
+    mix-wazuh-es-nodes: ${mp.situationaware.ext-var.mix-wazuh-es-ip}:${mp.situationaware.ext-var.mix-wazuh-es-port}
+    mix-wazuh-es-max-page-size: ${mp.situationaware.ext-var.mix-wazuh-es-max-page-size}
     # arkime es 地址
     arkime-es-nodes: ${mp.situationaware.ext-var.arkime-es-host}:${mp.situationaware.ext-var.arkime-es-port}
     # es 日期格式
@@ -179,11 +192,11 @@ mp:
   # mp-log 模块
   log:
     ext-var:
-      #      es-ip: ${LOG_ES_IP:10.100.7.1}
-      #      es-port: ${LOG_ES_PORT:9205}
-      #      es-max-page-size: ${ES_MAX_PAGESIZE:10000}
-      #      log-db: ${MP_DEVOPS_LOG_DB:sql} #日志存储数据库可以配置：es、sql
-      #      dynamic-level-keeping: ${DYNAMIC_LEVEL_KEEPING:true} #动态日志级别保持
+    #      es-ip: ${LOG_ES_IP:10.100.7.1}
+    #      es-port: ${LOG_ES_PORT:9205}
+    #      es-max-page-size: ${ES_MAX_PAGESIZE:10000}
+    #      log-db: ${MP_DEVOPS_LOG_DB:sql} #日志存储数据库可以配置：es、sql
+    #      dynamic-level-keeping: ${DYNAMIC_LEVEL_KEEPING:true} #动态日志级别保持
     exclude-urls: ${DEVOPS_LOG_EXCLUDE_URLS:/login}
     exclude-methods: ${DEVOPS_LOG_EXCLUDE_METHODS:OPTIONS}
     es-nodes: ${mp.log.ext-var.es-ip}:${mp.log.ext-var.es-port}

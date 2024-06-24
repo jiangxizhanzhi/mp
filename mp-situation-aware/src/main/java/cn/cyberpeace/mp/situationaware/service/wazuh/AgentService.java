@@ -1,12 +1,14 @@
 package cn.cyberpeace.mp.situationaware.service.wazuh;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseResponse;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.AgentRequest;
+import cn.cyberpeace.mp.situationaware.utils.PublicWazuhHttpsUtils;
 import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -44,14 +46,25 @@ public class AgentService extends RequestProcessor {
      * @return
      */
     @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_AGENTS)
-    public PageInfo<Agent> pageAgents(AgentRequest agentRequest) {
+    public PageInfo<Agent> pageAgents(AgentRequest agentRequest, Integer cloudType) {
         agentRequest.ensure();
         var requestUri = "/agents";
-        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + requestUri;
+        String requestUrl = null;
+        if (null != cloudType && BaseSceneModel.CloudType.PUBLIC == cloudType) {
+            requestUrl = situationAwareConfig.getPublicWazuhBaseUrl() + requestUri;
+        } else {
+            requestUrl = situationAwareConfig.getWazuhBaseUrl() + requestUri;
+        }
         List<NameValuePair> params = processRequestParams(agentRequest);
         log.info("requestUrl:{}", requestUrl);
-        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
-        BaseResponse<Agent> result = JSONObject.parseObject(res, new TypeReference<BaseResponse<Agent>>() {});
+        String res = "";
+        if (null != cloudType && BaseSceneModel.CloudType.PUBLIC == cloudType) {
+            res = PublicWazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
+        } else {
+            res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
+        }
+        BaseResponse<Agent> result = JSONObject.parseObject(res, new TypeReference<BaseResponse<Agent>>() {
+        });
         log.info("{}", result);
         List<Agent> agents = result.getData().getAffectedItems();
 
@@ -61,8 +74,8 @@ public class AgentService extends RequestProcessor {
         return pageInfo;
     }
 
-    public List<Agent> listAgents(AgentRequest agentRequest) {
-        PageInfo<Agent> agentPageInfo = pageAgents(agentRequest);
+    public List<Agent> listAgents(AgentRequest agentRequest, Integer cloudType) {
+        PageInfo<Agent> agentPageInfo = pageAgents(agentRequest, cloudType);
         return agentPageInfo.getList();
     }
 
@@ -78,7 +91,7 @@ public class AgentService extends RequestProcessor {
         if (CollectionUtils.isNotEmpty(agentNames)) {
             agentRequest.setName(agentNames.stream().collect(Collectors.joining(",")));
         }
-        List<Agent> agents = listAgents(agentRequest);
+        List<Agent> agents = listAgents(agentRequest, null);
 
         if (CollectionUtils.isEmpty(agents)) {
             return null;
@@ -95,11 +108,11 @@ public class AgentService extends RequestProcessor {
      * @param agentName
      * @return
      */
-    public String getSingleAgentId(String agentName) {
+    public String getSingleAgentId(String agentName, Integer cloudType) {
         if (StringUtils.isNotBlank(agentName)) {
             AgentRequest agentRequest = new AgentRequest();
             agentRequest.setName(agentName);
-            List<Agent> agents = listAgents(agentRequest);
+            List<Agent> agents = listAgents(agentRequest, cloudType);
 
             if (CollectionUtils.isEmpty(agents)) {
                 return null;

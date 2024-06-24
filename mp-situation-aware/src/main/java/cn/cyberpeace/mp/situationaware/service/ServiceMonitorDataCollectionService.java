@@ -27,9 +27,9 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
     private DataCollectionService dataCollectionService;
 
 
-
     /**
      * 查询平台服务状态列表
+     *
      * @param hostnames
      * @return
      */
@@ -37,7 +37,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
         List<String> launchIds = ServerMonitorConfig.cpCloudSrvMonitors.stream().map(ServerMonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
         List<ServiceMonitorDto> dtos = new ArrayList<>();
         for (String hostname : hostnames) {
-            var result = doQueryServiceMonitorDto(hostname, launchIds) ;
+            var result = doQueryServiceMonitorDto(hostname, launchIds);
             dtos.addAll(result);
         }
         return dtos;
@@ -46,6 +46,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
 
     /**
      * 查询业务服务状态列表
+     *
      * @param hostnames
      * @return
      */
@@ -60,6 +61,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
 
     /**
      * 查询服务监控
+     *
      * @param
      * @return
      */
@@ -72,7 +74,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
         for (String launchId : launchIds) {
             wazuhMonitorEventsRequest.setPageSize(1);
             wazuhMonitorEventsRequest.setStartTime(LocalDateTime.now().minusMinutes(10));
-            SearchResponse response = dataCollectionService.querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, launchId);
+            SearchResponse response = dataCollectionService.querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, launchId, null);
             JSONObject jsonObject = dataCollectionService.processBaseRawOutput(response);
             if (Objects.isNull(jsonObject)) {
                 continue;
@@ -93,7 +95,6 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
         }
         return dtos;
     }
-
 
 
     private List<ServiceMonitorDto> jsonObj2ServiceMonitorDtos(JSONObject jsonObject, String launchId) {

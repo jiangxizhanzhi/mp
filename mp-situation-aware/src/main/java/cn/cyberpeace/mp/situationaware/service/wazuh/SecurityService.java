@@ -32,5 +32,17 @@ public class SecurityService {
         return WazuhHttpsUtils.sendGetWithAuth(requestUrl, situationAwareConfig.getWazuhUsername(), situationAwareConfig.getWazuhPassword());
     }
 
+    /**
+     * 查询wazuhToken防止token失效
+     *
+     * @return
+     * @throws IOException
+     */
+    public String publicAuthenticate() {
+        log.info("retrieve public wazuh token...");
+        var requestUrl = situationAwareConfig.getPublicWazuhBaseUrl() + "/security/user/authenticate?raw=true";
+        return WazuhHttpsUtils.sendGetWithAuth(requestUrl, situationAwareConfig.getPublicWazuhUsername(), situationAwareConfig.getPublicWazuhPassword());
+    }
+
 
 }

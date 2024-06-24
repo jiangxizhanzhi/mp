@@ -17,17 +17,33 @@ public class SituationAwareEsConfig {
     @Autowired
     private SituationAwareConfig situationAwareConfig;
 
-    @Bean(name="wazuhRestHighLevelClient")
+    @Bean(name = "wazuhRestHighLevelClient")
     public RestHighLevelClient wazuhRestHighLevelClient() {
         return new RestHighLevelClient(RestClient.builder(this.createWazuHttpHost()));
     }
 
-    @Bean(name="datasandtableRestHighLevelClient")
+    @Bean(name = "publicWazuhRestHighLevelClient")
+    public RestHighLevelClient publicWazuhRestHighLevelClient() {
+        return new RestHighLevelClient(RestClient.builder(this.createPublicWazuHttpHost()));
+    }
+
+    @Bean(name = "privateWazuhRestHighLevelClient")
+    public RestHighLevelClient privateWazuhRestHighLevelClient() {
+        return new RestHighLevelClient(RestClient.builder(this.createPrivateWazuHttpHost()));
+    }
+
+    @Bean(name = "mixWazuhRestHighLevelClient")
+    public RestHighLevelClient mixWazuhRestHighLevelClient() {
+        return new RestHighLevelClient(RestClient.builder(this.createMixWazuHttpHost()));
+    }
+
+    @Bean(name = "datasandtableRestHighLevelClient")
     public RestHighLevelClient datasandtableRestHighLevelClient() {
         return new RestHighLevelClient(RestClient.builder(this.createArkimeHttpHost()));
     }
 
-    /**cn.cyberpeace.mp.situationaware
+    /**
+     * cn.cyberpeace.mp.situationaware
      * 创建 HttpHost 对象
      *
      * @return 返回 HttpHost 对象数组
@@ -47,7 +63,53 @@ public class SituationAwareEsConfig {
         return httpHosts;
     }
 
-    /**cn.cyberpeace.mp.situationaware
+    private HttpHost[] createPublicWazuHttpHost() {
+        String wazuhEsNodes = situationAwareConfig.getPublicWazuhEsNodes();
+        Asserts.check(!ObjectUtils.isEmpty(wazuhEsNodes), "ElasticSearch cluster ip address cannot empty");
+        String[] ipArray = wazuhEsNodes.split(",");
+        var httpHosts = new HttpHost[ipArray.length];
+        for (int i = 0, len = ipArray.length; i < len; i++) {
+            var ipAddress = ipArray[i];
+            String[] values = ipAddress.split(":");
+            String ip = values[0];
+            var port = Integer.parseInt(values[1]);
+            httpHosts[i] = new HttpHost(ip, port, "http");
+        }
+        return httpHosts;
+    }
+
+    private HttpHost[] createPrivateWazuHttpHost() {
+        String wazuhEsNodes = situationAwareConfig.getPrivateWazuhEsNodes();
+        Asserts.check(!ObjectUtils.isEmpty(wazuhEsNodes), "ElasticSearch cluster ip address cannot empty");
+        String[] ipArray = wazuhEsNodes.split(",");
+        var httpHosts = new HttpHost[ipArray.length];
+        for (int i = 0, len = ipArray.length; i < len; i++) {
+            var ipAddress = ipArray[i];
+            String[] values = ipAddress.split(":");
+            String ip = values[0];
+            var port = Integer.parseInt(values[1]);
+            httpHosts[i] = new HttpHost(ip, port, "http");
+        }
+        return httpHosts;
+    }
+
+    private HttpHost[] createMixWazuHttpHost() {
+        String wazuhEsNodes = situationAwareConfig.getMixWazuhEsNodes();
+        Asserts.check(!ObjectUtils.isEmpty(wazuhEsNodes), "ElasticSearch cluster ip address cannot empty");
+        String[] ipArray = wazuhEsNodes.split(",");
+        var httpHosts = new HttpHost[ipArray.length];
+        for (int i = 0, len = ipArray.length; i < len; i++) {
+            var ipAddress = ipArray[i];
+            String[] values = ipAddress.split(":");
+            String ip = values[0];
+            var port = Integer.parseInt(values[1]);
+            httpHosts[i] = new HttpHost(ip, port, "http");
+        }
+        return httpHosts;
+    }
+
+    /**
+     * cn.cyberpeace.mp.situationaware
      * 创建 HttpHost 对象
      *
      * @return 返回 HttpHost 对象数组

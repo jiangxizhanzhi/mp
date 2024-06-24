@@ -27,4 +27,7 @@ public class AgentNameBasedRequest extends PageRequest {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;
 
+    @ApiModelProperty(value = "云类型")
+    private Integer cloudType;
+
 }
