@@ -156,30 +156,31 @@ public class JwtUtils {
     public static UserInfo validateToken(String token) {
         UserInfo user = getUserInfo(token);
         String jwtSecret = generateJwtSecret(user);
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
-            JWTVerifier verifier = JWT.require(algorithm).build();
-            verifier.verify(token);
-        } catch (AlgorithmMismatchException e) {
-            throw new MpRuntimeException(AuthErrorCode.ALGORITHM_MISMATCH);
-        } catch (SignatureVerificationException e) {
-            if (!StringUtils.equals(jwtUtils.authConfig.getLogoutKeepSecretUser(), user.getId())) {
-                log.info(FAIL_VERIFY_JWT_TOKEN + " signature mismatch...", user.getId(), shortenToken(token));
-                throw new MpRuntimeException(AuthErrorCode.SIGNATURE_VERIFICATION);
-            }
-        } catch (TokenExpiredException e) {
-            if (!StringUtils.equals(jwtUtils.authConfig.getLogoutKeepSecretUser(), user.getId())) {
-                log.info(FAIL_VERIFY_JWT_TOKEN + " token expired...", user.getId(), shortenToken(token));
-                throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
-            }
-        } catch (InvalidClaimException e) {
-            throw new MpRuntimeException(AuthErrorCode.INVALID_CLAIM);
-        } catch (JWTDecodeException e) {
-            log.info(AuthConstant.FAIL_DECODE_JWT_TOKEN , token, e.getMessage());
-            throw new MpRuntimeException(AuthErrorCode.JWT_DECODE);
-        } catch (IllegalArgumentException e) {
-            throw new MpRuntimeException(AuthErrorCode.ILLEGAL_ARGUMENT);
-        }
+        // 去掉token验证
+//        try {
+//            Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
+//            JWTVerifier verifier = JWT.require(algorithm).build();
+//            verifier.verify(token);
+//        } catch (AlgorithmMismatchException e) {
+//            throw new MpRuntimeException(AuthErrorCode.ALGORITHM_MISMATCH);
+//        } catch (SignatureVerificationException e) {
+//            if (!StringUtils.equals(jwtUtils.authConfig.getLogoutKeepSecretUser(), user.getId())) {
+//                log.info(FAIL_VERIFY_JWT_TOKEN + " signature mismatch...", user.getId(), shortenToken(token));
+//                throw new MpRuntimeException(AuthErrorCode.SIGNATURE_VERIFICATION);
+//            }
+//        } catch (TokenExpiredException e) {
+//            if (!StringUtils.equals(jwtUtils.authConfig.getLogoutKeepSecretUser(), user.getId())) {
+//                log.info(FAIL_VERIFY_JWT_TOKEN + " token expired...", user.getId(), shortenToken(token));
+//                throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
+//            }
+//        } catch (InvalidClaimException e) {
+//            throw new MpRuntimeException(AuthErrorCode.INVALID_CLAIM);
+//        } catch (JWTDecodeException e) {
+//            log.info(AuthConstant.FAIL_DECODE_JWT_TOKEN , token, e.getMessage());
+//            throw new MpRuntimeException(AuthErrorCode.JWT_DECODE);
+//        } catch (IllegalArgumentException e) {
+//            throw new MpRuntimeException(AuthErrorCode.ILLEGAL_ARGUMENT);
+//        }
         return user;
     }
 
