@@ -272,7 +272,7 @@ public class ServiceMonitorService {
     }
 
 
-    private List<String> getActiveHostNameList(String hostName) {
+    public List<String> getActiveHostNameList(String hostName) {
         List<String> hostNameList = new ArrayList<>();
 
         BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO());

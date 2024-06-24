@@ -198,9 +198,6 @@ public class MonitorScriptControlService {
             log.info("newAddedNodes:{}", newAddedNodes);
             toInstallList.addAll(newAddedNodes);
 
-            List<String> tryInstallAgain = this.getTryInstallAgainNodes(configedNodeList, new HashSet<>(toInstallList));
-            toInstallList.addAll(tryInstallAgain);
-
             // 上次脚本安装失败，或者配置有变更的节点
             for (String nodeName : hostNameList) {
                 for (CpNodeMonitorScriptConfigModel configedNodeModel : configedNodeList) {
