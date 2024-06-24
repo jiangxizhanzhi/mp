@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntity;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.RealEquipmentService;
 import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
@@ -24,6 +25,8 @@ import cn.cyberpeace.mp.devopscluster.request.RealEquipmentRequest;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -191,13 +194,20 @@ public class RealEquipmentConverter implements BaseConverter{
      */
     @Transactional
     public BaseCloudPlatformResult delete(RealEquipmentDeleteRequest request) {
+
+        // 删除云平台数据
         targetConverter.validTargetCanDelete(request.getUuids());
-        BaseCloudPlatformResult result = deviceService.deleteByIds(request.getUuids());
-        if (result.isSuccess()) {
-            ImageDeleteDTO dto = new ImageDeleteDTO();
-            dto.setIds(request.getUuids());
-            devopsTargetService.delete(dto);
-            devopsTargetAuthService.deleteByTargets(request.getUuids());
+        CloudPlatformResult result = deviceService.deleteByIds(request.getUuids());
+
+        // 删除云平台数据成功后删除本地数据
+        if (null != result.getData()) {
+            JSONObject jsonObject = JSONObject.parseObject(JSONArray.toJSONString(result.getData()));
+            if ("true".equals(jsonObject.getString("success"))) {
+                ImageDeleteDTO dto = new ImageDeleteDTO();
+                dto.setIds(request.getUuids());
+                devopsTargetService.delete(dto);
+                devopsTargetAuthService.deleteByTargets(request.getUuids());
+            }
         }
         return result;
     }

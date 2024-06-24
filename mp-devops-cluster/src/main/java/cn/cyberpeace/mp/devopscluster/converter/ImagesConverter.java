@@ -11,7 +11,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.CloudClient;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.params.QuickCreateData;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.params.QuickCreatePageParam;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.result.QuickCreateDevice;
@@ -41,6 +41,8 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudElementAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetConnectionUrlParam;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +58,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ImagesConverter implements BaseConverter{
+public class ImagesConverter implements BaseConverter {
 
     private final ImagesService imagesService;
 
@@ -82,8 +84,6 @@ public class ImagesConverter implements BaseConverter{
 
     private final SnapshotConverter snapshotConverter;
     private final CloudClient cloudClient;
-
-
 
     public List<TargetConnection> getConnections(String deviceUuid) {
         Remote remoteClient = new Remote();
@@ -115,9 +115,9 @@ public class ImagesConverter implements BaseConverter{
 
     }
 
-
     /**
      * 分页查询镜像列表
+     *
      * @param dto
      * @return
      */
@@ -126,18 +126,18 @@ public class ImagesConverter implements BaseConverter{
 
         BasePageBO<ImageConvertModel> imageConvertPageModel = new BasePageBO<>();
         imageConvertPageModel.setTotal(total);
-        if (total == 0){
+        if (total == 0) {
             imageConvertPageModel.setList(Lists.newArrayList());
             return imageConvertPageModel;
         }
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
-        Map<String,DeviceTargetPO> supportExports = new HashMap<>();
+        Map<String, DeviceTargetPO> supportExports = new HashMap<>();
         for (DeviceTargetPO d1 : deviceTargetPOS) {
             supportExports.put(d1.getUuid(), d1);
         }
         Map<String, Integer> orderMap = new HashMap<String, Integer>();
         if (CollectionUtils.isNotEmpty(deviceTargetPOS)) {
-            for (int i=0; i<deviceTargetPOS.size(); i++) {
+            for (int i = 0; i < deviceTargetPOS.size(); i++) {
                 orderMap.put(deviceTargetPOS.get(i).getUuid(), i);
             }
         }
@@ -148,14 +148,12 @@ public class ImagesConverter implements BaseConverter{
             Integer parseInt = Integer.parseInt(id);
             ids.add(parseInt);
         }
-        if (CollectionUtils.isEmpty(ids)){
+        if (CollectionUtils.isEmpty(ids)) {
             imageConvertPageModel.setList(Lists.newArrayList());
             return imageConvertPageModel;
         }
         List<Device> deviceList = this.findByIds(ids);
         addSnapshotCountInfo(deviceList);
-
-
 
         if (CollectionUtils.isNotEmpty(deviceList)) {
             List<Device> list = new ArrayList<>();
@@ -173,7 +171,7 @@ public class ImagesConverter implements BaseConverter{
         }
         POLogoUtils.changeLogoPathToUrl(deviceList);
 
-        if (CollectionUtils.isEmpty(deviceList)){
+        if (CollectionUtils.isEmpty(deviceList)) {
             imageConvertPageModel.setList(Lists.newArrayList());
             return imageConvertPageModel;
         }
@@ -237,7 +235,6 @@ public class ImagesConverter implements BaseConverter{
         return imageConvertPageModel;
     }
 
-
     private void addSnapshotCountInfo(List<Device> deviceList) {
         for (Device device : deviceList) {
             try {
@@ -266,6 +263,7 @@ public class ImagesConverter implements BaseConverter{
 
     /**
      * 新增镜像
+     *
      * @param request
      * @return
      */
@@ -287,6 +285,7 @@ public class ImagesConverter implements BaseConverter{
 
     /**
      * 根据ID查询镜像信息
+     *
      * @param id
      * @return
      */
@@ -297,6 +296,7 @@ public class ImagesConverter implements BaseConverter{
 
     /**
      * 根据UUID集合查询镜像数据
+     *
      * @param uuids
      * @return
      */
@@ -319,23 +319,25 @@ public class ImagesConverter implements BaseConverter{
 
     /**
      * 更新镜像数据
+     *
      * @param request
      * @return
      */
     @Transactional
     public void update(ImageRequest request) {
-        Device device = imagesService.update(request.getUuid(),convertRequest(request));
+        Device device = imagesService.update(request.getUuid(), convertRequest(request));
         devopsTargetService.updateById(device);
     }
 
     /**
      * 快速构建镜像
+     *
      * @param request
      * @return
      */
     @Deprecated
     public void build(ImagesBuildRequest request) {
-        DeviceQuickCreateCloudPlatformModel model = new DeviceQuickCreateCloudPlatformModel(request.getName(),request.getImageName());
+        DeviceQuickCreateCloudPlatformModel model = new DeviceQuickCreateCloudPlatformModel(request.getName(), request.getImageName());
         List<InstallerDTO> installerDTOList = request.getInstallerDTOList();
         List<QuickCreateParam> quickCreateParams = new ArrayList<>();
         for (InstallerDTO v : installerDTOList) {
@@ -354,7 +356,6 @@ public class ImagesConverter implements BaseConverter{
         params.setFile(v.getDockerInstallerData().getFile());
         return params;
     }
-
 
     public ListObjServiceResult<QuickCreateDevice> quickCreateList(QuickCreatePageRequest request) {
         QuickCreatePageParam param = new QuickCreatePageParam();
@@ -378,25 +379,36 @@ public class ImagesConverter implements BaseConverter{
 
     /**
      * 删除镜像数据
+     *
      * @param request
      * @return
      */
     @Transactional
     public void delete(ImagesDeleteRequest request) {
+        if (CollectionUtils.isEmpty(request.getImageIds())) {
+            return;
+        }
+
+        // 删除云平台数据
         targetConverter.validTargetCanDelete(request.getImageIds());
         snapshotConverter.validSnapshot(request.getImageIds());
-        BaseCloudPlatformResult result = deviceService.deleteByIds(request.getImageIds());
+        CloudPlatformResult result = deviceService.deleteByIds(request.getImageIds());
 
-        if (CollectionUtils.isNotEmpty(request.getImageIds()) && result.isSuccess()){
-            ImageDeleteDTO dto = new ImageDeleteDTO();
-            dto.setIds(request.getImageIds());
-            deviceTargetMapper.delete(dto);
-            devopsTargetAuthService.deleteByTargets(request.getImageIds());
+        // 删除云平台数据成功后删除本地数据
+        if (null != result.getData()) {
+            JSONObject jsonObject = JSONObject.parseObject(JSONArray.toJSONString(result.getData()));
+            if ("true".equals(jsonObject.getString("success"))) {
+                ImageDeleteDTO dto = new ImageDeleteDTO();
+                dto.setIds(request.getImageIds());
+                deviceTargetMapper.delete(dto);
+                devopsTargetAuthService.deleteByTargets(request.getImageIds());
+            }
         }
     }
 
     /**
      * 授权镜像信息
+     *
      * @param request
      */
     @Transactional(rollbackFor = Exception.class)
@@ -415,13 +427,13 @@ public class ImagesConverter implements BaseConverter{
         }
         //再新增权限数据
         List<String> userIds = request.getUserIds();
-        if (PublicEnum.PRIVATE == isAllPublic){
+        if (PublicEnum.PRIVATE == isAllPublic) {
             UserModel user = UserUtils.getLoginUser();
             if (Objects.nonNull(user)) {
                 userIds.add(user.getId());
             }
         }
-        if (PublicEnum.ALL_PUBLIC != isAllPublic && CollectionUtils.isNotEmpty(userIds)){
+        if (PublicEnum.ALL_PUBLIC != isAllPublic && CollectionUtils.isNotEmpty(userIds)) {
             for (String imageId : imageIds) {
                 List<DeviceTargetAuthPO> authModelList = new ArrayList<>();
                 for (String userId : userIds) {
@@ -443,12 +455,13 @@ public class ImagesConverter implements BaseConverter{
 
     /**
      * 根据镜像ID查询用户列表
+     *
      * @param uuid
      * @return
      */
-    public List<UserBo> findUsersByUuid(String uuid){
+    public List<UserBo> findUsersByUuid(String uuid) {
         List<DeviceTargetAuthPO> deviceTargetAuthPOS = devopsTargetAuthService.findByTarget(uuid);
-        if (CollectionUtils.isEmpty(deviceTargetAuthPOS)){
+        if (CollectionUtils.isEmpty(deviceTargetAuthPOS)) {
             return Lists.newArrayList();
         }
         List<String> userIds = new ArrayList<>();
@@ -465,17 +478,17 @@ public class ImagesConverter implements BaseConverter{
 
     /**
      * 重启镜像机器
+     *
      * @param request
      * @return
      */
     public void reboot(ImagesRebootInstanceRequest request) {
-        if (StringUtils.isBlank(request.getInstanceId()) || StringUtils.isBlank(request.getImageType())){
+        if (StringUtils.isBlank(request.getInstanceId()) || StringUtils.isBlank(request.getImageType())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        if(ImageTypeEnum.VM.toValue().equals(request.getImageType())) {
+        if (ImageTypeEnum.VM.toValue().equals(request.getImageType())) {
             vmService.action("reboot", request.getInstanceId());
-        }
-        else if(ImageTypeEnum.CONTAINER.toValue().equals(request.getImageType())) {
+        } else if (ImageTypeEnum.CONTAINER.toValue().equals(request.getImageType())) {
             ContainerActionCloudPlatformModel model = new ContainerActionCloudPlatformModel();
             model.setAction("reboot");
             model.setWaitForStatus(Boolean.TRUE);
@@ -487,16 +500,18 @@ public class ImagesConverter implements BaseConverter{
 
     /**
      * 导出镜像信息
+     *
      * @param uuid
      * @param imageName
      * @return
      */
     public String export(String uuid, String imageName) {
-        return imagesService.export(uuid,imageName);
+        return imagesService.export(uuid, imageName);
     }
 
     /**
      * 创建镜像机器
+     *
      * @param uuid
      */
     public void create(String uuid) {
@@ -513,6 +528,7 @@ public class ImagesConverter implements BaseConverter{
 
     /**
      * 删除镜像机器
+     *
      * @param request
      */
     public void delete(ImagesDeleteInstanceRequest request) {
@@ -528,25 +544,27 @@ public class ImagesConverter implements BaseConverter{
 
     /**
      * 根据ID集合（非UUID）查询靶标数据
+     *
      * @param ids
      */
-    public List<Device> findByIds(List<Integer> ids){
+    public List<Device> findByIds(List<Integer> ids) {
         return deviceService.findByIds(ids);
     }
 
     /**
      * 同步镜像数据
+     *
      * @param request
      * @return
      */
     @Transactional
-    public Integer async(ImageAsyncRequest request){
+    public Integer async(ImageAsyncRequest request) {
         List<Integer> requestIds = request.getIds();
         Boolean isHide = request.getIsHide();
         DeviceAsyncBO bo = targetConverter.getAsyncDeviceIds(requestIds);
         List<Integer> notExistedList = bo.getNotExistedList();
         List<Integer> existedList = bo.getExistedList();
-        if (CollectionUtils.isEmpty(notExistedList) && CollectionUtils.isEmpty(existedList)){
+        if (CollectionUtils.isEmpty(notExistedList) && CollectionUtils.isEmpty(existedList)) {
             return requestIds.size();
         }
         Integer result = NumberUtils.INTEGER_ZERO;
@@ -559,32 +577,32 @@ public class ImagesConverter implements BaseConverter{
                 result += devopsTargetService.insert(deviceList);
             }
         }
-        if (CollectionUtils.isNotEmpty(existedList)){
+        if (CollectionUtils.isNotEmpty(existedList)) {
             List<Device> deviceList = deviceService.findByIds(existedList);
             if (CollectionUtils.isNotEmpty(deviceList)) {
                 for (Device device : deviceList) {
                     devopsTargetService.updateById(device);
                 }
-                result+= existedList.size();
+                result += existedList.size();
             }
         }
         return result;
     }
 
-
     /**
      * 转换ImageRequest
+     *
      * @param request
      * @return
      */
-    protected Device convertRequest(ImageRequest request){
+    protected Device convertRequest(ImageRequest request) {
         Device device = new Device();
         device.setName(request.getName());
         device.setDeviceVersion(request.getDeviceVersion());
         device.setParentName(request.getParentName());
         device.setDescription(request.getDescription());
         device.setLogo(DefaultImgUtil.fdfsUrlToPath(request.getLogo()));
-        Integer role  = request.getRole();
+        Integer role = request.getRole();
         device.setRole(role);
         device.setRoleId(request.getRoleId());
         device.setCategory(request.getCategory());
@@ -602,7 +620,7 @@ public class ImagesConverter implements BaseConverter{
         device.setExtSystemInfo(request.getExtSystemInfo());
         ExtImageInfo extImageInfo = request.getExtImageInfo();
         if (Objects.nonNull(extImageInfo) && StringUtils.isNotBlank(extImageInfo.getUploadType())
-                && extImageInfo.getUploadType().equals(UploadTypeEnum.FTP.getDesc())){
+                && extImageInfo.getUploadType().equals(UploadTypeEnum.FTP.getDesc())) {
             extImageInfo.setUserFilename(extImageInfo.getFtpFilename());
             extImageInfo.setFilename(extImageInfo.getFtpFilename());
         } else {
@@ -615,11 +633,11 @@ public class ImagesConverter implements BaseConverter{
         device.setExtGateway(request.getExtGateway());
         ExtDocker extDocker = request.getExtDocker();
         if (request.getImageType().equals("container") && Objects.nonNull(extDocker)
-                && CollectionUtils.isNotEmpty(request.getAccessProtocolList())){
+                && CollectionUtils.isNotEmpty(request.getAccessProtocolList())) {
             extDocker.setAccessProtocols(request.getAccessProtocolList());
         }
 
-        if (CollectionUtils.isEmpty(request.getAccessProtocolList())){
+        if (CollectionUtils.isEmpty(request.getAccessProtocolList())) {
             if (Objects.nonNull(extVm)) {
                 extVm.setAccessProtocols(Lists.newArrayList());
             }
@@ -629,7 +647,7 @@ public class ImagesConverter implements BaseConverter{
         }
         device.setExtVm(extVm);
         device.setExtDocker(extDocker);
-        device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE );
+        device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
         device.setModelId(request.getModelId());
         device.setModelCode(request.getModelCode());
         return device;
@@ -637,10 +655,11 @@ public class ImagesConverter implements BaseConverter{
 
     /**
      * 转换Device
+     *
      * @param device
      * @return
      */
-    protected ImageConvertModel wrapperImageConvertModel(Device device){
+    protected ImageConvertModel wrapperImageConvertModel(Device device) {
         ImageConvertModel imageModel = new ImageConvertModel();
         imageModel.setUuid(device.getUuid());
         imageModel.setName(device.getName());
@@ -657,7 +676,7 @@ public class ImagesConverter implements BaseConverter{
         imageModel.setExtSystemInfo(device.getExtSystemInfo());
         ExtImageInfo extImageInfo = device.getExtImageInfo();
         if (Objects.nonNull(extImageInfo) && StringUtils.isNotBlank(extImageInfo.getUploadType())
-                && extImageInfo.getUploadType().equals(UploadTypeEnum.FTP.getDesc())){
+                && extImageInfo.getUploadType().equals(UploadTypeEnum.FTP.getDesc())) {
             extImageInfo.setFtpFilename(extImageInfo.getUserFilename());
         }
         imageModel.setExtImageInfo(extImageInfo);
@@ -673,6 +692,7 @@ public class ImagesConverter implements BaseConverter{
 
     /**
      * 获取物理主机服务状态列表
+     *
      * @return
      */
     public CloudPlatformPageResult<ServiceStatus> listServiceStatus() {

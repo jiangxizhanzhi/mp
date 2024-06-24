@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -99,10 +100,10 @@ public class DeviceService extends BaseCpService {
      * 批量删除
      * @param uuids
      */
-    public BaseCloudPlatformResult deleteByIds(List<String> uuids) {
+    public CloudPlatformResult deleteByIds(List<String> uuids) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("uuids", uuids);
-        BaseCloudPlatformResult result = super.sendDelete(DELETE_DEVICES_BY_UUIDS, JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
+        CloudPlatformResult result = super.sendDelete(DELETE_DEVICES_BY_UUIDS, JSONObject.toJSONString(jsonObject), CloudPlatformResult.class);
         super.checkResult(result);
         return result;
     }
