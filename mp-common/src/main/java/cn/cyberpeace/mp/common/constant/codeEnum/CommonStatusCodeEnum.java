@@ -11,8 +11,9 @@ public enum CommonStatusCodeEnum {
 
     //载荷
     ACTION_TYPE("10050201", "作用类型"),
-    RUN_TABLE("10050202", "运行类型"),
+    RUN_TABLE("10050202", "运行平台"),
     CONTROL_TYPE("10050203", "控制类型");
+
 
 
     private String code;

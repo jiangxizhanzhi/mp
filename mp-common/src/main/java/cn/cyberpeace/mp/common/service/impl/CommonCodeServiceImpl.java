@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.common.repository.CommonCodeMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -90,17 +91,34 @@ public class CommonCodeServiceImpl {
         return menuDto;
     }
 
+    /**
+     * 根据codes查找下级
+     */
     public List<MpSysCodeEnum> getNextLevelDatasByCodes(String[] codes) {
         return commonCodeMapper.getNextLevelDatasByCodes(codes);
     }
 
+    @Cacheable(key = "'nextLevelDatasByCodes' + #codes", value = "nextLevelDatasByCodes")
+    public Map<String,String> convertNextLevelDatasByCodes(String[] codes) {
+        List<MpSysCodeEnum> nextLevelDatasByCodes = getNextLevelDatasByCodes(codes);
+        //将nextLevelDatasByCodes中的code和codeName转换成map
+        Map<String, String> codeMap = nextLevelDatasByCodes.stream()
+                .collect(Collectors.toMap(MpSysCodeEnum::getCode, MpSysCodeEnum::getCodeName));
+        return codeMap;
+    }
+
+
+
+    @Cacheable(key = "'getNextLevelMapsByCodes' + #code", value = "getNextLevelMapsByCodes")
     public Map<String,String> getNextLevelMapsByCodes(String code) {
         Map<String,String> map = new HashMap<>();
         List<MpSysCodeEnum> nextLevelDatasByCodes = commonCodeMapper.getNextAllDataByCode(code);
-        //map收集nextLevelDatasByCodes中每个成员中的code和codeName
-        for (MpSysCodeEnum mpSysCodeEnum : nextLevelDatasByCodes) {
-            if(mpSysCodeEnum.getCode()!=null && !mpSysCodeEnum.getCode().equals("")){
-                map.put(mpSysCodeEnum.getCode(),mpSysCodeEnum.getCodeName());
+        if(nextLevelDatasByCodes != null && nextLevelDatasByCodes.size() > 0){
+            //map收集nextLevelDatasByCodes中每个成员中的code和codeName
+            for (MpSysCodeEnum mpSysCodeEnum : nextLevelDatasByCodes) {
+                if(mpSysCodeEnum.getCode()!=null && !mpSysCodeEnum.getCode().equals("")){
+                    map.put(mpSysCodeEnum.getCode(),mpSysCodeEnum.getCodeName());
+                }
             }
         }
         return map;

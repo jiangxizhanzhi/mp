@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.cscene.service.service;
 
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
-import cn.cyberpeace.mp.base.bo.MpSysCodeEnum;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -86,10 +85,15 @@ public class LoadServiceImpl {
         requestData.put("pageSize", pageSize);
         requestData.put("offset", (pageNum - 1) * pageSize);
         List<MpDevopsLoad> list = loadMapper.getLoadList(requestData);
+
+        Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes("1005");
         //list每个成员的imageType赋值
         list.forEach(item -> {
             item.setImageType("load");
             item.setRole(60);
+            item.setRunTableName(nextLevelMapsByCodes.get(item.getRunTable()));
+            item.setActionTypeName(nextLevelMapsByCodes.get(item.getActionType()));
+            item.setControlTypeName(nextLevelMapsByCodes.get(item.getControlType()));
         });
         Integer total = loadMapper.getLoadListNum(requestData);
         JSONObject result = new JSONObject();
@@ -447,10 +451,7 @@ public class LoadServiceImpl {
         List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResult(requestData);
         String[] codes = {CommonStatusCodeEnum.RESULT_STATUS.getCode(), CommonStatusCodeEnum.ACTION_TYPE.getCode(),
                 CommonStatusCodeEnum.RESULT_TYPE.getCode(), CommonStatusCodeEnum.CONTROL_TYPE.getCode()};
-        List<MpSysCodeEnum> nextLevelDatasByCodes = commonCodeService.getNextLevelDatasByCodes(codes);
-        //将nextLevelDatasByCodes中的code和codeName转换成map
-        Map<String, String> codeMap = nextLevelDatasByCodes.stream()
-                .collect(Collectors.toMap(MpSysCodeEnum::getCode, MpSysCodeEnum::getCodeName));
+        Map<String, String> codeMap = commonCodeService.convertNextLevelDatasByCodes(codes);
         //将list中的resultStatus转换成codeName
         list = list.stream()
                 .map(log -> {
@@ -1044,10 +1045,7 @@ public class LoadServiceImpl {
         if (getLoadResultByPks != null && getLoadResultByPks.size() > 0) {
             String[] codes = {CommonStatusCodeEnum.RESULT_STATUS.getCode(), CommonStatusCodeEnum.ACTION_TYPE.getCode(),
                     CommonStatusCodeEnum.RESULT_TYPE.getCode(), CommonStatusCodeEnum.CONTROL_TYPE.getCode()};
-            List<MpSysCodeEnum> nextLevelDatasByCodes = commonCodeService.getNextLevelDatasByCodes(codes);
-            //将nextLevelDatasByCodes中的code和codeName转换成map
-            Map<String, String> codeMap = nextLevelDatasByCodes.stream()
-                    .collect(Collectors.toMap(MpSysCodeEnum::getCode, MpSysCodeEnum::getCodeName));
+            Map<String, String> codeMap = commonCodeService.convertNextLevelDatasByCodes(codes);
             //将list中的resultStatus转换成codeName
             getLoadResultByPks = getLoadResultByPks.stream()
                     .map(log -> {
