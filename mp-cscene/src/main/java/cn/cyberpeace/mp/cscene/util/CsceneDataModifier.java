@@ -1203,7 +1203,6 @@ public class CsceneDataModifier {
                     csceneBO.getReferenceType() != BaseCsceneModel.ReferenceType.READ_VS_BLUE) {
                 if (csceneBO.getSceneConfig().getPlugins() != null) {
                     csceneBO.getSceneConfig().getPlugins().remove("cpflow");
-                    csceneBO.getSceneConfig().getPlugins().remove("cpcollection");
                 }
             }
         }

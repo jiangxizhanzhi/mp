@@ -36,6 +36,8 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.ConvertRegistryParams;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.ConvertScriptParams;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
+import cn.cyberpeace.mp.sceneplugincollection.util.CollectionCommonConfigUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -124,8 +126,12 @@ public class InitiateHandler extends HandlerCommon {
                     if (collectionElement == null) {
                         collectionElement = new CollectionPluginSceneElementBO();
                         getPluginHandler().addElement(nodeId, collectionElement);
+                        collectionElement.setEnableProbeCollect(true);
+                        String defaultBizProbesContent = CollectionCommonConfigUtil.getConfigString(CollectionCommonConfigUtil.DEFAULT_BIZ_PROBES);
+                        List<Probe> defaultBizProbes = JsonCommon.snakeParse(defaultBizProbesContent, new TypeReference<List<Probe>>() {
+                        });
+                        collectionElement.setProbes(defaultBizProbes);
                     }
-                    collectionElement.setEnableProbeCollect(true);
                 });
             });
         }

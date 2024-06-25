@@ -8,6 +8,7 @@
     "name": "硬件信息",
     "os_type": "0,1,2,3",
     "output_format": "none",
+    "exec_type": 0,
     "type": 0,
     "open": true
   },
@@ -21,6 +22,7 @@
     "os_type": "0,1,2,3",
     "output_format": "none",
     "type": 0,
+    "exec_type": 0,
     "open": true
   },
   {
@@ -30,6 +32,7 @@
     "disabled": false,
     "interval": 180,
     "name": "网络接口信息",
+    "exec_type": 0,
     "os_type": "0,1,2,3",
     "output_format": "none",
     "type": 0,
@@ -42,6 +45,7 @@
     "disabled": false,
     "interval": 180,
     "name": "端口信息",
+    "exec_type": 0,
     "os_type": "0,1,2,3",
     "output_format": "none",
     "type": 0,
@@ -54,6 +58,7 @@
     "disabled": false,
     "interval": 180,
     "name": "进程信息",
+    "exec_type": 0,
     "os_type": "0,1,2,3",
     "output_format": "none",
     "type": 0,
@@ -66,6 +71,7 @@
     "disabled": false,
     "interval": 180,
     "name": "文件变更事件",
+    "exec_type": 2,
     "os_type": "0,1,2,3",
     "output_format": "none",
     "type": 1,
@@ -81,6 +87,7 @@
     "disabled": false,
     "interval": 180,
     "name": "注册表变更事件",
+    "exec_type": 3,
     "os_type": "0,1,2,3",
     "output_format": "none",
     "type": 1,
@@ -92,6 +99,7 @@
   {
     "common": true,
     "desc": "日志文件",
+    "exec_type": 1,
     "id": "011",
     "disabled": false,
     "interval": 180,
@@ -107,6 +115,7 @@
   {
     "common": true,
     "desc": "安全软件",
+    "exec_type": 1,
     "id": "010",
     "disabled": false,
     "interval": 180,
@@ -119,6 +128,7 @@
   {
     "common": true,
     "desc": "操作系统",
+    "exec_type": 1,
     "id": "008",
     "disabled": false,
     "interval": 180,
@@ -131,6 +141,7 @@
   {
     "common": true,
     "desc": "应用系统日志",
+    "exec_type": 1,
     "id": "009",
     "disabled": false,
     "interval": 180,
