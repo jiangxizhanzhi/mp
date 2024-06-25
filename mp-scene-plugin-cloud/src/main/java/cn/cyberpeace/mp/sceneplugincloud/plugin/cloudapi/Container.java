@@ -15,6 +15,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -119,11 +120,18 @@ public class Container extends CloudClient {
         return true;
     }
 
+    private ContainerExecuteData getContainerExecuteDataByCommand(String command) {
+        log.info("getContainerExecuteDataByCommand split command is [{}]", command);
+        String[] s = command.split(" ");
+        List<String> strings = Arrays.asList(s);
+        String cmd = strings.remove(0);
+
+        return new ContainerExecuteData(cmd, strings);
+    }
+
     public ContainerExecuteResult executeCommand(String containerId, String command) {
-        ContainerExecuteData data = new ContainerExecuteData();
-        data.setCommand(String.format("sh -c '%s'", command));
-        data.setInteractive(false);
-        data.setRun(true);
+        final ContainerExecuteData data = getContainerExecuteDataByCommand(command);
+
         String requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
         CloudResponse<ContainerExecuteResult> result = new CloudResponse<ContainerExecuteResult>();
         try {
@@ -137,10 +145,8 @@ public class Container extends CloudClient {
     }
 
     public ContainerExecuteResult executeCommand(String containerId, String command, Runnable action, Integer retryTimes) {
-        ContainerExecuteData data = new ContainerExecuteData();
-        data.setCommand(String.format("sh -c '%s'", command));
-        data.setInteractive(false);
-        data.setRun(true);
+        final ContainerExecuteData data = getContainerExecuteDataByCommand(command);
+
         String requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
         CloudResponse<ContainerExecuteResult> result = new CloudResponse<ContainerExecuteResult>();
         int times = retryTimes != null ? retryTimes : 1;
@@ -167,11 +173,7 @@ public class Container extends CloudClient {
     }
 
     public ContainerExecuteResult executeCommand(String containerId, String command,String user) {
-        ContainerExecuteData data = new ContainerExecuteData();
-        data.setCommand(String.format("sh -c '%s'", command));
-        data.setInteractive(false);
-        data.setRun(true);
-        data.setUser(user);
+        final ContainerExecuteData data = getContainerExecuteDataByCommand(command);
         String requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
         CloudResponse<ContainerExecuteResult> result = new CloudResponse<ContainerExecuteResult>();
         try {
