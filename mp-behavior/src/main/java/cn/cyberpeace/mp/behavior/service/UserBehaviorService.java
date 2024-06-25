@@ -6,11 +6,14 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.behavior.model.NetworkBehaviorModel;
 import cn.cyberpeace.mp.behavior.model.UserBehaviorModel;
+import cn.cyberpeace.mp.behavior.repository.NetworkBehaviorMapper;
 import cn.cyberpeace.mp.behavior.repository.UserBehaviorMapper;
 import cn.cyberpeace.mp.behavior.req.AddUserBehaviorReq;
 import cn.cyberpeace.mp.behavior.req.UpdateUserBehaviorReq;
 import cn.cyberpeace.mp.behavior.res.CodeNameRes;
+import cn.cyberpeace.mp.behavior.res.UserBehaviorDetail;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -28,6 +31,9 @@ public class UserBehaviorService {
 
 	@Autowired
 	private UserBehaviorMapper userBehaviorMapper;
+
+	@Autowired
+	private NetworkBehaviorMapper networkBehaviorMapper;
 
 	public String add(AddUserBehaviorReq addReq) {
 		UserBehaviorModel model = new UserBehaviorModel();
@@ -76,5 +82,22 @@ public class UserBehaviorService {
 		return Arrays.stream(UserBehaviorModel.UserType.values())
 			  .map(userType -> new CodeNameRes(userType.getCode(), userType.getDesc()))
 			  .collect(Collectors.toList());
+	}
+
+	/**
+	 * 获取用户行为详情
+	 * @param id
+	 * @return
+	 */
+	public UserBehaviorDetail getDetail(String id) {
+		UserBehaviorModel userBehaviorModel = userBehaviorMapper.get(id);
+		String networkIds = userBehaviorModel.getNetworkIds();
+		List<String> networkIdList = JSON.parseArray(networkIds, String.class);
+		HumanCondition humanCondition = new HumanCondition().filterIn(NetworkBehaviorModel::getId, networkIdList.toArray(new String[0]));
+		List<NetworkBehaviorModel> networkBehaviorModelList = networkBehaviorMapper.list(humanCondition);
+		UserBehaviorDetail detail = new UserBehaviorDetail();
+		BeanUtils.copyProperties(userBehaviorModel, detail);
+		detail.setNetworkBehaviorModelList(networkBehaviorModelList);
+		return detail;
 	}
 }
