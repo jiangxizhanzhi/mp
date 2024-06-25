@@ -66,6 +66,7 @@ public class CloudTargetConverter {
         extVm.setQuickCreateSupport(false);
         extVm.setUsername("admin123");
         extVm.setPassword("NHiOJiZTD4K1");
+        extVm.setVmType(target.getOperatingSystem());
 
         //访问协议
         List<AccessProtocol> accessProtocols = new ArrayList<>();

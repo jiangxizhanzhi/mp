@@ -105,4 +105,9 @@ public class ExtVm implements Serializable {
      */
     @ApiModelProperty("密码")
     private String password;
+
+    /**
+     * 操作系统
+     */
+    private String vmType;
 }
