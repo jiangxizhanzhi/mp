@@ -32,17 +32,22 @@ public class SecurityService {
         return WazuhHttpsUtils.sendGetWithAuth(requestUrl, situationAwareConfig.getWazuhUsername(), situationAwareConfig.getWazuhPassword());
     }
 
-    /**
-     * 查询wazuhToken防止token失效
-     *
-     * @return
-     * @throws IOException
-     */
     public String publicAuthenticate() {
         log.info("retrieve public wazuh token...");
         var requestUrl = situationAwareConfig.getPublicWazuhBaseUrl() + "/security/user/authenticate?raw=true";
         return WazuhHttpsUtils.sendGetWithAuth(requestUrl, situationAwareConfig.getPublicWazuhUsername(), situationAwareConfig.getPublicWazuhPassword());
     }
 
+    public String privateAuthenticate() {
+        log.info("retrieve private wazuh token...");
+        var requestUrl = situationAwareConfig.getPrivateWazuhBaseUrl() + "/security/user/authenticate?raw=true";
+        return WazuhHttpsUtils.sendGetWithAuth(requestUrl, situationAwareConfig.getPrivateWazuhUsername(), situationAwareConfig.getPrivateWazuhPassword());
+    }
+
+    public String mixAuthenticate() {
+        log.info("retrieve mix wazuh token...");
+        var requestUrl = situationAwareConfig.getMixWazuhBaseUrl() + "/security/user/authenticate?raw=true";
+        return WazuhHttpsUtils.sendGetWithAuth(requestUrl, situationAwareConfig.getPrivateWazuhUsername(), situationAwareConfig.getPrivateWazuhPassword());
+    }
 
 }

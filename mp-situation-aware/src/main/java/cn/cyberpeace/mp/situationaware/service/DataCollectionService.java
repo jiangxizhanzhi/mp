@@ -715,13 +715,13 @@ public class DataCollectionService extends CollectionBaseService {
      * @return
      */
     @Cacheable(value = CACHE_KEY_PROCESS)
-    public List<WazuhProcessModel> queryProcessesWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
+    public List<WazuhProcessModel> queryProcessesWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, Integer cloudType) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
         }
         // 只取一条数据，做假分页处理
         wazuhMonitorEventsRequest.setPageSize(1);
-        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_PROCESSES, null);
+        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_PROCESSES, cloudType);
         JSONObject jsonObject = processBaseChangeOutput(response);
         if (Objects.isNull(jsonObject)) {
             return Collections.emptyList();
@@ -879,6 +879,10 @@ public class DataCollectionService extends CollectionBaseService {
         } else {
             if (null != cloudType && BaseSceneModel.CloudType.PUBLIC == cloudType) {
                 sourceBuilder.size(situationAwareConfig.getPublicWazuhEsMaxPageSize());
+            } else if (null != cloudType && BaseSceneModel.CloudType.PRIVATE == cloudType) {
+                sourceBuilder.size(situationAwareConfig.getPrivateWazuhEsMaxPageSize());
+            } else if (null != cloudType && BaseSceneModel.CloudType.MIX == cloudType) {
+                sourceBuilder.size(situationAwareConfig.getMixWazuhEsMaxPageSize());
             } else {
                 sourceBuilder.size(situationAwareConfig.getWazuhEsMaxPageSize());
             }
@@ -1381,7 +1385,7 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
 
-    public Map<String, Long> aggsDateHistogram(WazuhEventRequest wazuhEventRequest, String interval, String minBounds, String maxBounds) {
+    public Map<String, Long> aggsDateHistogram(WazuhEventRequest wazuhEventRequest, String interval, String minBounds, String maxBounds, Integer cloudType) {
         String aggregationName = "aggs_date_histogram";
         Map<String, Long> resultMap = new LinkedHashMap<>();
 
@@ -1413,7 +1417,7 @@ public class DataCollectionService extends CollectionBaseService {
         log.info("elasticsearch aggs request query... index:{}, JSON query:\n{}", indexArray, searchRequest.source().toString());
 
         try {
-            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            SearchResponse response = getSearchResponse(cloudType, searchRequest);
 
             if (Objects.nonNull(response.getAggregations())) {
                 Histogram histogram = response.getAggregations().get(aggregationName);

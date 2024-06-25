@@ -278,8 +278,11 @@ public class AzureVirtualMachine {
                             .create();
                     NetworkSecurityGroup.Update nsgUpdate = nsg.update();
                     for (int i = 0; i < accessModes.size(); i++) {
+
                         AccessMode accessMode = accessModes.get(i);
-                        addInRule(accessMode.getProtocol(), nsgUpdate, i);
+                        String protocol = accessMode.getProtocol();
+                        if (null == protocol) continue;
+                        addInRule(accessMode.getProtocol().toLowerCase(), nsgUpdate, i);
                     }
                     nsgUpdate.apply();
                     networkInterface.update().withExistingNetworkSecurityGroup(nsg).apply();

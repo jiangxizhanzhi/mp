@@ -345,7 +345,7 @@ public class ScenePluginCollectionSceneService {
         request.setStartTime(Optional.ofNullable(queryParams.getStartTime()).orElse(LocalDateTime.now().minusHours(24)));
         // 结束时间,默认为当前时间
         request.setEndTime(Optional.ofNullable(queryParams.getEndTime()).orElse(LocalDateTime.now()));
-        return doQueryHostStateEventsWithTimeRange(null, null, request,null);
+        return doQueryHostStateEventsWithTimeRange(null, null, request, null);
     }
 
     public Map<String, List<CollectionHostStateBO>> mapHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams, Integer cloudType) {
@@ -366,7 +366,7 @@ public class ScenePluginCollectionSceneService {
 
     private ListObjServiceResult<CollectionHostStateBO> doQueryHostStateEventsWithTimeRange(String sceneId, Map<String, SceneElementBO> agentName2Element, WazuhMonitorEventsRequest request, Integer cloudType) {
         // 执行查询
-        List<WazuhHostStateModel> result = dataCollectionService.queryHostStateEventsWithTimeRange(request,cloudType);
+        List<WazuhHostStateModel> result = dataCollectionService.queryHostStateEventsWithTimeRange(request, cloudType);
         List<CollectionHostStateBO> hostStates = result.stream().map(srcHostState -> {
             return hostStateModel2BO(sceneId, agentName2Element, srcHostState);
         }).collect(Collectors.toList());
@@ -1382,7 +1382,7 @@ public class ScenePluginCollectionSceneService {
         collectorBaseRequest.setPage(1);
         collectorBaseRequest.setPageSize(10);
         collectorBaseRequest.setPerPage(10);
-        return sysCollectorService.pagePorts(collectorBaseRequest).getSource().getObjs();
+        return sysCollectorService.pagePorts(collectorBaseRequest, null).getSource().getObjs();
     }
 
     public ListObjServiceResult<Port> listPagePorts(ListPageInfoQueryParams listPageInfoQueryParams) {
@@ -1397,7 +1397,8 @@ public class ScenePluginCollectionSceneService {
         if (Objects.isNull(collectorBaseRequest.getAgentName())) {
             return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
         }
-        return sysCollectorService.pagePorts(collectorBaseRequest);
+        SceneHandler sceneHandler = new SceneHandler(listPageInfoQueryParams.getSceneIds().get(0), null, false, null);
+        return sysCollectorService.pagePorts(collectorBaseRequest, sceneHandler.getScene().getCloudType());
     }
 
     public ListObjServiceResult<Process> listPageProcess(TimeListPageInfoQueryParams listPageInfoQueryParams) {
@@ -1438,7 +1439,8 @@ public class ScenePluginCollectionSceneService {
                 return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
             }
 
-            List<WazuhProcessModel> totalList = dataCollectionService.queryProcessesWithTimeRange(wazuhRequest);
+            SceneHandler sceneHandler = new SceneHandler(listPageInfoQueryParams.getSceneIds().get(0), null, false, null);
+            List<WazuhProcessModel> totalList = dataCollectionService.queryProcessesWithTimeRange(wazuhRequest, sceneHandler.getScene().getCloudType());
             total += totalList.size();
 
             int skip = (page - 1) * pageSize;
@@ -1497,7 +1499,7 @@ public class ScenePluginCollectionSceneService {
         if (Objects.isNull(collectorBaseRequest.getAgentName())) {
             return new ArrayList<>();
         }
-        return sysCollectorService.pageNetifaces(collectorBaseRequest).getSource().getObjs();
+        return sysCollectorService.pageNetifaces(collectorBaseRequest, null).getSource().getObjs();
     }
 
 
@@ -1515,7 +1517,9 @@ public class ScenePluginCollectionSceneService {
         }
         //pageInfo = sysCollectorService.pageNetifaces(collectorBaseRequest);
         //return new ListObjServiceResult<>(new ListObjResult<>(pageInfo.getList(), (int) pageInfo.getTotal()).asResult()).asResult();
-        return sysCollectorService.pageNetifaces(collectorBaseRequest);
+        SceneHandler sceneHandler = new SceneHandler(listPageInfoQueryParams.getSceneIds().get(0), null, false, null);
+
+        return sysCollectorService.pageNetifaces(collectorBaseRequest, sceneHandler.getScene().getCloudType());
     }
 
 

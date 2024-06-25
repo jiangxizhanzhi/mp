@@ -80,6 +80,18 @@ public class SituationAwareConfig {
     private String publicWazuhUsername;
     private String publicWazuhPassword;
     /**
+     * private-wazuh
+     */
+    private String privateWazuhBaseUrl;
+    private String privateWazuhUsername;
+    private String privateWazuhPassword;
+    /**
+     * mix-wazuh
+     */
+    private String mixWazuhBaseUrl;
+    private String mixWazuhUsername;
+    private String mixWazuhPassword;
+    /**
      * wazuh-probe-manager
      */
     private String probeMgrUrl;

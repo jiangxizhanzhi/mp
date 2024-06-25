@@ -151,6 +151,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String username;
     @DefaultStr
     private String password;
+    @DefaultStr
+    private String defaultLaunchImageName;
     //    漏洞
     @DefaultStr
     private String loopholeInfo;

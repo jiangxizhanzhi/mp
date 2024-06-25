@@ -147,6 +147,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private String username;
     @ApiModelProperty(value = "密码")
     private String password;
+    @ApiModelProperty(value = "默认启动镜像名称")
+    private String defaultLaunchImageName;
 
     //    漏洞
     @ApiModelProperty(value = "漏洞")

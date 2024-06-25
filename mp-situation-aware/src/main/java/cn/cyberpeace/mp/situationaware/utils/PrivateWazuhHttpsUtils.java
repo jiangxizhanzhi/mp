@@ -1,0 +1,114 @@
+package cn.cyberpeace.mp.situationaware.utils;
+
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
+import com.google.common.util.concurrent.UncheckedExecutionException;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.http.HttpHeaders;
+import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.util.EntityUtils;
+
+import java.io.IOException;
+import java.util.List;
+
+@Slf4j
+public class PrivateWazuhHttpsUtils {
+    private static CloseableHttpClient createIgnoreSSLHttpClient() {
+        try {
+            var sslContext = new SSLContextBuilder().loadTrustMaterial(null, (TrustStrategy) (chain, authType) -> true).build();
+            var sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
+            return HttpClients.custom().setSSLSocketFactory(sslConnectionSocketFactory).build();
+        } catch (Exception e) {
+            log.error("{}", ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException("createIgnoreSSLHttpClient error");
+        }
+    }
+
+    /**
+     * get请求
+     *
+     * @param url
+     * @return
+     * @throws IOException
+     */
+    public static String sendGetWithAuthToken(String url, List<NameValuePair> params) {
+        CloseableHttpResponse response = null;
+        CloseableHttpClient httpClient = null;
+        try {
+            httpClient = createIgnoreSSLHttpClient();
+
+            URIBuilder uriBuilder = new URIBuilder(url);
+            uriBuilder.setParameters(params);
+            HttpGet httpGet = new HttpGet(uriBuilder.build());
+
+            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + SituationalAwareConstant.wazuhToken.get("privateWazuhToken"));
+            response = httpClient.execute(httpGet);
+            StatusLine sl = response.getStatusLine();
+            if (sl.getStatusCode() == 401) {
+                SituationalAwareConstant.wazuhToken.invalidate("privateWazuhToken");
+                httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + SituationalAwareConstant.wazuhToken.get("privateWazuhToken"));
+                response = httpClient.execute(httpGet);
+            }
+
+            StatusLine sl2 = response.getStatusLine();
+            if (sl2.getStatusCode() != 200) {
+                log.error("get private wazuh token error!:{}", EntityUtils.toString(response.getEntity(), "UTF-8"));
+                throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
+            }
+
+            return EntityUtils.toString(response.getEntity(), "UTF-8");
+        } catch (UncheckedExecutionException | IOException | MpRuntimeException e) {
+            log.error("connected exception: ", e);
+            throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
+        } catch (Exception e) {
+            log.error("wazuh api error: ", e);
+            throw new MpRuntimeException("wazuh api query error!");
+        }
+    }
+
+    private static String sendGetWithAuthToken(String url) {
+        CloseableHttpResponse response = null;
+        CloseableHttpClient httpClient = null;
+        try {
+            httpClient = createIgnoreSSLHttpClient();
+
+            HttpGet httpGet = new HttpGet(url);
+            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + SituationalAwareConstant.wazuhToken.get("privateWazuhToken"));
+            response = httpClient.execute(httpGet);
+            StatusLine sl = response.getStatusLine();
+            if (sl.getStatusCode() == 401) {
+                SituationalAwareConstant.wazuhToken.invalidate("privateWazuhToken");
+                httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + SituationalAwareConstant.wazuhToken.get("privateWazuhToken"));
+                response = httpClient.execute(httpGet);
+            }
+
+            StatusLine sl2 = response.getStatusLine();
+            if (sl2.getStatusCode() != 200) {
+                log.error("get private wazuh token error!:{}", EntityUtils.toString(response.getEntity(), "UTF-8"));
+                throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
+            }
+
+            return EntityUtils.toString(response.getEntity(), "UTF-8");
+        } catch (UncheckedExecutionException | IOException | MpRuntimeException e) {
+            log.error("connected exception: ", e);
+            throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
+        } catch (Exception e) {
+//            processException(e);
+            log.error("wazuh api error: ", e);
+            throw new MpRuntimeException("wazuh api query error!");
+        }
+    }
+
+}

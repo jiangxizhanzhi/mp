@@ -1,15 +1,13 @@
 package cn.cyberpeace.mp.situationaware.service.wazuh;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseResponse;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.AgentRequest;
-import cn.cyberpeace.mp.situationaware.utils.PublicWazuhHttpsUtils;
-import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
+import cn.cyberpeace.mp.situationaware.utils.CloudAwareWazuhHttpClient;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.github.pagehelper.PageInfo;
@@ -49,20 +47,10 @@ public class AgentService extends RequestProcessor {
     public PageInfo<Agent> pageAgents(AgentRequest agentRequest, Integer cloudType) {
         agentRequest.ensure();
         var requestUri = "/agents";
-        String requestUrl = null;
-        if (null != cloudType && BaseSceneModel.CloudType.PUBLIC == cloudType) {
-            requestUrl = situationAwareConfig.getPublicWazuhBaseUrl() + requestUri;
-        } else {
-            requestUrl = situationAwareConfig.getWazuhBaseUrl() + requestUri;
-        }
+        String requestUrl = CloudAwareWazuhHttpClient.getRequestUrl(situationAwareConfig, cloudType, requestUri);
         List<NameValuePair> params = processRequestParams(agentRequest);
         log.info("requestUrl:{}", requestUrl);
-        String res = "";
-        if (null != cloudType && BaseSceneModel.CloudType.PUBLIC == cloudType) {
-            res = PublicWazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
-        } else {
-            res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
-        }
+        String res = CloudAwareWazuhHttpClient.getRes(cloudType, requestUrl, params);
         BaseResponse<Agent> result = JSONObject.parseObject(res, new TypeReference<BaseResponse<Agent>>() {
         });
         log.info("{}", result);

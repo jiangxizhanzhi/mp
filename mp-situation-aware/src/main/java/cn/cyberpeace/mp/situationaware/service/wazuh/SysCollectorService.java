@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseResponse;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.*;
+import cn.cyberpeace.mp.situationaware.utils.CloudAwareWazuhHttpClient;
 import cn.cyberpeace.mp.situationaware.utils.PublicWazuhHttpsUtils;
 import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
 import com.alibaba.fastjson.*;
@@ -51,19 +52,18 @@ public class SysCollectorService extends RequestProcessor {
      *
      * @return 端口号
      */
-    public ListObjServiceResult<Port> pagePorts(CollectorBaseRequest collectorBaseRequest) {
-        String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName(), null);
+    public ListObjServiceResult<Port> pagePorts(CollectorBaseRequest collectorBaseRequest, Integer cloudType) {
+        String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName(), cloudType);
         if (StringUtils.isBlank(agentId)) {
             log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
             return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), 0));
         }
         var uri = "/syscollector/" + agentId + "/ports";
-        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;
-
+        String requestUrl = CloudAwareWazuhHttpClient.getRequestUrl(situationAwareConfig, cloudType, uri);
         List<NameValuePair> params = processRequestParams(collectorBaseRequest);
 
         log.info("requestUrl:{}", requestUrl);
-        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
+        String res = CloudAwareWazuhHttpClient.getRes(cloudType, requestUrl, params);
         BaseResponse<Port> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
         List<Port> ports = result.getData().getAffectedItems();
@@ -106,19 +106,19 @@ public class SysCollectorService extends RequestProcessor {
      *
      * @return 进程集合
      */
-    public ListObjServiceResult<Netiface> pageNetifaces(CollectorBaseRequest collectorBaseRequest) {
-        String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName(), null);
+    public ListObjServiceResult<Netiface> pageNetifaces(CollectorBaseRequest collectorBaseRequest, Integer cloudType) {
+        String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName(), cloudType);
         if (StringUtils.isBlank(agentId)) {
             log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
             return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), 0));
         }
         var uri = "/syscollector/" + agentId + "/netiface";
-        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + uri;
+        String requestUrl = CloudAwareWazuhHttpClient.getRequestUrl(situationAwareConfig, cloudType, uri);
 
         List<NameValuePair> params = processRequestParams(collectorBaseRequest);
 
         log.info("requestUrl:{}", requestUrl);
-        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
+        String res = CloudAwareWazuhHttpClient.getRes(cloudType, requestUrl, params);
         BaseResponse<Netiface> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
         log.info("{}", result);

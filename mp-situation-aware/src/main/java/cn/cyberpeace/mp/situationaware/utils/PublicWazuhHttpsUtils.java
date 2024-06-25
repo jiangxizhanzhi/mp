@@ -7,11 +7,8 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
@@ -24,8 +21,6 @@ import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.List;
 
 @Slf4j
@@ -62,7 +57,7 @@ public class PublicWazuhHttpsUtils {
             response = httpClient.execute(httpGet);
             StatusLine sl = response.getStatusLine();
             if (sl.getStatusCode() == 401) {
-                SituationalAwareConstant.wazuhToken.invalidate("wazuhToken");
+                SituationalAwareConstant.wazuhToken.invalidate("publicWazuhToken");
                 httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + SituationalAwareConstant.wazuhToken.get("publicWazuhToken"));
                 response = httpClient.execute(httpGet);
             }
@@ -114,45 +109,6 @@ public class PublicWazuhHttpsUtils {
             log.error("wazuh api error: ", e);
             throw new MpRuntimeException("wazuh api query error!");
         }
-    }
-
-    /**
-     * get请求
-     *
-     * @param url
-     * @return
-     * @throws IOException
-     */
-    public static String sendGetWithAuth(String url, String userName, String password) {
-        CloseableHttpResponse response = null;
-        CloseableHttpClient httpClient = null;
-        try {
-            var pass = userName + ":" + password;
-            String encoding = Base64.getEncoder().encodeToString(pass.getBytes(StandardCharsets.UTF_8));
-            httpClient = createIgnoreSSLHttpClient();
-
-            HttpGet httpGet = new HttpGet(url);
-            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
-            response = httpClient.execute(httpGet);
-            return EntityUtils.toString(response.getEntity(), "UTF-8");
-        } catch (UncheckedExecutionException | IOException e) {
-            log.error("connected exception: ", e);
-            throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
-        } catch (Exception e) {
-//            processException(e);
-            log.error("wazuh api error: ", e);
-            throw new MpRuntimeException("wazuh api query error!");
-        }
-    }
-
-    private static String doGetRequest(String url, HttpClient client) throws IOException {
-        HttpGet httpget = new HttpGet(url);
-        HttpResponse resp = client.execute(httpget);
-        // 设置请求和传输超时时间
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
-        httpget.setConfig(requestConfig);
-        // 获得返回值
-        return EntityUtils.toString(resp.getEntity(), "UTF-8");
     }
 
 }
