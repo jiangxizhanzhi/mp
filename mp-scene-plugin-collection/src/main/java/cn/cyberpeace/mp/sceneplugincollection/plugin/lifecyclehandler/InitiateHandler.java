@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
-import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementSituationProbeModel;
@@ -225,7 +224,7 @@ public class InitiateHandler extends HandlerCommon {
 
                     }
                     //生成探测安装脚本
-                    var probeInstallScript = getProbeCollector().generateProbeInstallScript(cloudType, systemType,
+                    var probeInstallScript = getProbeCollector().generateProbeInstallScript(cloudElement, cloudType, systemType,
                             srcElement.getEid(), collectionId, controlParam, isContainer);
                     var initCommands = srcElement.getInitCommands();
                     if (initCommands == null) {

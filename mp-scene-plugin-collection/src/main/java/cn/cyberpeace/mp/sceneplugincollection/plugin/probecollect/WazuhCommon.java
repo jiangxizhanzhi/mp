@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
 import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
@@ -110,7 +111,7 @@ public class WazuhCommon {
     private WazuhCommon() {
     }
 
-    public static List<String> generateWazuhAgentInstallScript(Integer cloudType, String systemType, String agentName, String wazuhHost,
+    public static List<String> generateWazuhAgentInstallScript(CloudPluginSceneElementBO cloudElement, Integer cloudType, String systemType, String agentName, String wazuhHost,
                                                                WazuhControl.ControlConfigParam controlParam, boolean isContainer) {
         if (wazuhProbeConfig == null) {
             wazuhProbeConfig = BeanCommon.getBean(WazuhProbeConfig.class);
@@ -197,12 +198,13 @@ public class WazuhCommon {
                 addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
                         String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, downloadPath, downloadUrl),
                         String.format("sh %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
-//                 增加安装依赖   TODO Azure VM 如何知晓系统类型？
+//                 增加安装依赖 无法确定系统类型
                 if (BaseSceneModel.CloudType.DEFAULT != cloudType) {
-                    if (BaseSceneElementModel.SystemType.CENTOS.equals(systemType)) {
+                    String systemInfo = cloudElement.getPublisher() + cloudElement.getOffer() + cloudElement.getSku() + cloudElement.getDefaultLaunchImageName();
+                    if (BaseSceneElementModel.SystemType.CENTOS.equals(systemInfo.toLowerCase())) {
                         addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK, "yum install unzip", addCommand);
                     } else if (BaseSceneElementModel.SystemType.UBUNTU.equals(systemType)
-                            || BaseSceneElementModel.SystemType.KALI.equals(systemType)) {
+                            || BaseSceneElementModel.SystemType.KALI.equals(systemInfo.toLowerCase())) {
                         addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK, "apt-get install unzip", addCommand);
                     } else {
                         addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK, "apt-get install unzip", addCommand);
