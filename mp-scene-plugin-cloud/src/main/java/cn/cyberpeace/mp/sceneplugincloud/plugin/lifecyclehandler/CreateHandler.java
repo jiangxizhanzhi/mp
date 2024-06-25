@@ -1567,7 +1567,8 @@ public class CreateHandler extends HandlerCommon {
 //        VirtualNic externalVirtualNic = new VirtualNic();
 //        externalVirtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
 //        externalVirtualNic.setCidr(CloudSingleton.cloudAppConfig.getExternalNetCidr());
-//        externalVirtualNic.setFixedIp(IpUtils.newRandomIps(externalVirtualNic.getCidr(), 1, Collections.emptyList(), null, true).get(1));
+        // cloud-manger 并没有使用该ip
+//        externalVirtualNic.setFixedIp(IpUtils.newRandomIps(externalVirtualNic.getCidr(), 1, Collections.emptyList(), null, true).get(0));
 //        virtualNics.add(externalVirtualNic);
 
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
