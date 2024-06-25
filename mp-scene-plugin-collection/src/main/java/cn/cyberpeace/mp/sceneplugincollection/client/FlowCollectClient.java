@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Mirror;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerGetData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.ArkimeCreateResBo;
@@ -81,8 +82,14 @@ public class FlowCollectClient {
     }
 
     public void delArkimeInstance(String instanceId) {
+        final Container container = new Container();
+        final ContainerGetData containerGetData = container.getContainerByName(instanceId);
+        if (containerGetData == null) {
+            log.error("delArkimeInstance find no containerId by containName {}", instanceId);
+            throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_DELETE_ERROR, "通过arkime名称未找到容器id");
+        }
         ContainerDeleteData containerDeleteData = new ContainerDeleteData();
-        containerDeleteData.setContainers(Lists.newArrayList(instanceId));
+        containerDeleteData.setContainers(Lists.newArrayList(containerGetData.getId()));
         containerClient.delete(containerDeleteData);
     }
 
