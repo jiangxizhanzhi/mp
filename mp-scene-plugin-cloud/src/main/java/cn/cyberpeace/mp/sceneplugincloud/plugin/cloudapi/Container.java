@@ -111,7 +111,7 @@ public class Container extends CloudClient {
     public boolean copyFile(String containerId, String filepath, String dstPath) {
         ContainerArchiveData data = new ContainerArchiveData();
         data.setFile(new File(filepath));
-        data.setDstPath(dstPath);
+        data.setPath(dstPath);
         String requestUrl = String.format(CloudUrlConstant.CONTAINER_COPY_FILE_URL, containerId);
         CloudResponse<Object> result = cloudPost(requestUrl, data, null,
                 new TypeReference<CloudResponse<Object>>() {

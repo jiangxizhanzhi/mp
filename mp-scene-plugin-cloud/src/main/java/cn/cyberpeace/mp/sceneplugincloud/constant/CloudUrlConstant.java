@@ -27,7 +27,7 @@ public class CloudUrlConstant {
      *
      * 1. 会影响到容器解压安装wazuh
      */
-    public static final String CONTAINER_COPY_FILE_URL = "/v1/containers/%s/archive";
+    public static final String CONTAINER_COPY_FILE_URL = "/v1/containers/%s/copy_to_container";
 
     /**
      * 容器获取接入url接口，

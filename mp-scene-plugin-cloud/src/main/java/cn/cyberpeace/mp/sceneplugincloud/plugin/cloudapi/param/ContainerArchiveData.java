@@ -12,7 +12,7 @@ import java.io.File;
 @NoArgsConstructor
 public class ContainerArchiveData implements CloudHttpData {
 
-    private String dstPath;
+    private String path;
 
     private File file;
 
