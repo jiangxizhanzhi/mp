@@ -93,6 +93,8 @@ public interface FlowTaskTaskService extends BaseModelService<FlowTaskTaskModel,
      */
     List<FlowTaskTaskModel> listBySceneId(String sceneId);
 
+    List<FlowTaskTaskModel> listByActuatorIds(List<String> sceneId);
+
     /**
      * 条件查询任务
      * @param request

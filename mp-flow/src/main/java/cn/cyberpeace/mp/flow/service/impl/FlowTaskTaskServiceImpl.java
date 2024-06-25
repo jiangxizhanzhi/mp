@@ -418,6 +418,16 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
     }
 
     @Override
+    public List<FlowTaskTaskModel> listByActuatorIds(List<String> sceneId) {
+        HumanCondition condition = new HumanCondition();
+        if (CollectionUtils.isNotEmpty(sceneId)){
+            condition.filterIn(FlowTaskTaskModel::getActuatorId, sceneId.toArray());
+            condition.distinct();
+        }
+        return getModelMapper().list(condition);
+    }
+
+    @Override
     public List<FlowTaskTaskModel> listByCondition(FlowTaskPageQueryParams request) {
         HumanCondition condition = new HumanCondition();
         condition.filterEqual(FlowTaskTaskModel::getSceneId, request.getSceneId());

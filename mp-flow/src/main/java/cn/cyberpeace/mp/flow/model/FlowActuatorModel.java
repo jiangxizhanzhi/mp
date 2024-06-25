@@ -49,4 +49,9 @@ public class FlowActuatorModel extends BaseModel {
     @DefaultStr
     private String instanceId;
 
+    /**
+     * 运行状态：0 初始化， 1 运行中， 2 停止中， 3 已停止， 4 未启动过
+     */
+    @ApiModelProperty(value = "流量运行状态：0 初始化， 1 运行中， 2 停止中， 3 已停止， 4 未启动过")
+    private Integer status;
 }

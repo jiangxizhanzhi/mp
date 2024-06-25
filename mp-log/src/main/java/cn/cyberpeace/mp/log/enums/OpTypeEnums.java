@@ -35,6 +35,8 @@ public enum OpTypeEnums {
     PAUSE("pause"),
     // 启动
     START("start"),
+    // 重启
+    REBOOT("reboot"),
     // 恢复
     RECOVER("recover"),
     //导出
