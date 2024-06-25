@@ -17,4 +17,20 @@ import java.util.List;
 @ApiModel("网络-网络服务")
 public class ExtNet extends DeviceCloudTargetNet {
 
+    /**
+     * 接入方式
+     */
+    @ApiModelProperty("接入方式")
+    private List<AccessProtocol> accessProtocols;
+
+    /**
+     * IPv4地址
+     */
+    private String ipv4Address;
+
+    /**
+     * IPv4地址池
+     */
+    private String ipv4AddressPool;
+
 }

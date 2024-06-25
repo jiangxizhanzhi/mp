@@ -12,6 +12,43 @@ import java.util.UUID;
 @Service
 public class CloudTargetConverter {
 
+    public void convertExtNet(CloudDevice device, DeviceCloudTargetVO target) {
+        /**
+         * ext_net
+         */
+        device.setRole(21);
+        device.setImageType("VNet");
+        ExtNet extNet = new ExtNet();
+        extNet.setIpv4Address(null);
+        extNet.setIpv4AddressPool(null);
+        device.setExtNet(extNet);
+
+        //访问协议
+        List<AccessProtocol> accessProtocols = new ArrayList<>();
+        AccessProtocol accessProtocol = new AccessProtocol();
+        accessProtocols.add(accessProtocol);
+        extNet.setAccessProtocols(accessProtocols);
+
+        /**
+         * ext_system_info
+         */
+        ExtSystemInfo extSystemInfo = new ExtSystemInfo();
+        extSystemInfo.setLanguage("cn");
+        extSystemInfo.setSystemArchitecture("64");
+        device.setExtSystemInfo(extSystemInfo);
+
+        /**
+         * ext_image_info
+         */
+        ExtImageInfo extImageInfo = new ExtImageInfo();
+        device.setExtImageInfo(extImageInfo);
+
+        /**
+         * device_cloud_target
+         */
+        device.setDeviceCloudTarget(target);
+    }
+
     public void convertExtVm(CloudDevice device, DeviceCloudTargetVO target) {
         /**
          * ext_vm
@@ -37,9 +74,9 @@ public class CloudTargetConverter {
         //1:分配公网ip 2:外部网络直接访问 3:私网ip地址
         accessProtocol.setAccessType("3");
         accessProtocol.setProtocol("SSH");
-
         accessProtocols.add(accessProtocol);
         extVm.setAccessProtocols(accessProtocols);
+
         extVm.setExtInfo(null);
         extVm.setInstanceExist(false);
         //快照计数
@@ -91,11 +128,17 @@ public class CloudTargetConverter {
         extDocker.setQuickCreateSupport(true);
         extDocker.setSnapshotCount(0);
         extDocker.setExtInfo(new Snapshot.ExtInfo());
+
+        //访问协议
         List<AccessProtocol> accessProtocols = new ArrayList<>();
         AccessProtocol accessProtocol = new AccessProtocol();
-        accessProtocol.setProtocol("console");
+        //1:分配公网ip 2:外部网络直接访问 3:私网ip地址
+        accessProtocol.setAccessType("1");
+        accessProtocol.setHostname("");
+        accessProtocol.setProtocol("SSH");
         accessProtocols.add(accessProtocol);
         extDocker.setAccessProtocols(accessProtocols);
+
         device.setExtDocker(extDocker);
 
         /**

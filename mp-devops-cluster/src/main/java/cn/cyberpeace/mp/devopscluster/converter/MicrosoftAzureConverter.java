@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -69,48 +70,66 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
     private JSONObject getReturnData(String cloudServiceType, String tableOtherName, TargerRequestVO request) {
         List<MpSysCodeMenuVO> codes = request.getCodes();
-        List<MpSysCodeMenu> sqls = null;
-        if (codes != null && codes.size() > 0) {
+        List<MpSysCodeMenu> sqls = new ArrayList<>();
+
+        // 获取SQL的拼接条件
+        if (codes != null && !codes.isEmpty()) {
             sqls = microsoftAzureMapper.getSqlByCodes(codes);
-            for (int i = 0; i < sqls.size(); i++) {
-                if (sqls.get(i).getSupplement() != null && !sqls.get(i).getSupplement().equals("") && sqls.get(i).getSupplement().contains("**")) {
-                    for (int j = 0; j < codes.size(); j++) {
-                        if (codes.get(j).getCode() != null && sqls.get(i).getCode() != null && codes.get(j).getCode().equals(sqls.get(i).getCode())) {
-                            if (codes.get(j).getValue() != null && !codes.get(j).getValue().equals("")) {
-                                sqls.get(i).setSupplement("and " + sqls.get(i).getSupplement().replace("**", codes.get(j).getValue()));
-                            } else {
-                                sqls.get(i).setSupplement("");
-                            }
-                        }
-                    }
-                } else if (sqls.get(i).getSupplement() != null && !sqls.get(i).getSupplement().equals("")) {
-                    if (sqls.get(i).getSupplement().contains(".")) {
-                        sqls.get(i).setSupplement("and " + sqls.get(i).getSupplement());
-                    } else {
-                        sqls.get(i).setSupplement("and " + tableOtherName + "." + sqls.get(i).getSupplement());
-                    }
-                }
-            }
+            processSqls(sqls, codes, tableOtherName);
+        } else {
+            //防止未传条件
+            MpSysCodeMenu code = new MpSysCodeMenu();
+            code.setSupplement("and " + tableOtherName + ".pk = ''");
+            sqls.add(code);
         }
-        List<MpSysCodeMenu> filteredList = null;
-        if (sqls != null && sqls.size() > 0) {
-            filteredList = sqls.stream()
-                    .filter(s -> s.getSupplement() != null && !s.getSupplement().isEmpty())
-                    .collect(Collectors.toList());
-        }
-        Integer offset = 0;
-        Integer pageSize = 10;
-        if (request.getPage() != null && request.getPerPage() != null) {
-            offset = (request.getPage() - 1) * request.getPerPage();
-            pageSize = request.getPerPage();
-        }
-        //需要同时修改sql
-        List<DeviceCloudTargetVO> list = microsoftAzureMapper.getCloudTargetListByCodes(Integer.parseInt(cloudServiceType), filteredList, offset, pageSize, request.getCloudType());
-        Integer totalNum = microsoftAzureMapper.getCloudTargetListByCodesNum(Integer.parseInt(cloudServiceType), filteredList, request.getCloudType());
+
+        // 过滤出非空的Supplement字段
+        List<MpSysCodeMenu> filteredList = (sqls != null) ?
+                sqls.stream()
+                        .filter(s -> s.getSupplement() != null && !s.getSupplement().isEmpty())
+                        .collect(Collectors.toList()) :
+                Collections.emptyList();
+
+        // 分页信息
+        int offset = (request.getPage() != null && request.getPerPage() != null) ? (request.getPage() - 1) * request.getPerPage() : 0;
+        int pageSize = (request.getPerPage() != null) ? request.getPerPage() : 10;
+
+        // 获取数据和总数
+        List<DeviceCloudTargetVO> list = microsoftAzureMapper.getCloudTargetListByCodes(
+                Integer.parseInt(cloudServiceType), filteredList, offset, pageSize, request.getCloudType()
+        );
+        Integer totalNum = microsoftAzureMapper.getCloudTargetListByCodesNum(
+                Integer.parseInt(cloudServiceType), filteredList, request.getCloudType()
+        );
+
+        // 构建返回的JSON对象
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("data", list);
         jsonObject.put("total", totalNum);
         return jsonObject;
+    }
+
+    private void processSqls(List<MpSysCodeMenu> sqls, List<MpSysCodeMenuVO> codes, String tableOtherName) {
+        for (MpSysCodeMenu sql : sqls) {
+            String supplement = sql.getSupplement();
+            if (supplement != null && !supplement.isEmpty()) {
+                if (supplement.contains("**")) {
+                    for (MpSysCodeMenuVO code : codes) {
+                        if (code.getCode() != null && sql.getCode() != null && code.getCode().equals(sql.getCode())) {
+                            if (code.getValue() != null && !code.getValue().isEmpty()) {
+                                sql.setSupplement("and " + supplement.replace("**", code.getValue()));
+                            } else {
+                                sql.setSupplement("");
+                            }
+                        }
+                    }
+                } else if (supplement.contains(".")) {
+                    sql.setSupplement("and " + supplement);
+                } else {
+                    sql.setSupplement("and " + tableOtherName + "." + supplement);
+                }
+            }
+        }
     }
 
     public JSONObject getCloudTargetListByCodes(TargerRequestVO request) {
@@ -176,33 +195,31 @@ public class MicrosoftAzureConverter implements BaseConverter {
                         device.setServiceType(target.getNetType());
                         device.setSubType(target.getSubType());
                         if (target.getNetType() != null && target.getNetType().equals("VNet")) {
-                            device.setRole(21);
-                            device.setImageType("VNet");
+                            cloudTargetConverter.convertExtNet(device, target);
                         } else if (target.getNetType() != null && target.getNetType().equals("fireWall")) {
                             device.setImageType("fireWall");
                         } else if (target.getNetType() != null && target.getNetType().equals("WAF")) {
                             device.setImageType("WAF");
                         }
-                        ExtNet extNet = new ExtNet();
-//                        BeanUtils.copyProperties(target, extNet);
-                        device.setExtNet(extNet);
                         break;
                     case "2":
                         device.setServiceType(target.getCalculateType());
                         device.setSubType(target.getSubType());
                         if (target.getSubType() != null && target.getSubType().equals("vm")) {
                             cloudTargetConverter.convertExtVm(device, target);
-                            break;
+                        } else {
+
                         }
+                        break;
                     case "3":
                         device.setServiceType(target.getContainerType());
                         device.setSubType(target.getSubType());
                         if (target.getSubType() != null && target.getSubType().equals("containerRegistry")) {
                             cloudTargetConverter.convertExtDocker(device, target);
-                            break;
                         } else {
-                            break;
+
                         }
+                        break;
                     case "4":
                     case "5":
                     case "6":
