@@ -86,7 +86,7 @@ public class LoadServiceImpl {
         requestData.put("offset", (pageNum - 1) * pageSize);
         List<MpDevopsLoad> list = loadMapper.getLoadList(requestData);
 
-        Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes("1005");
+        Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes(CommonStatusCodeEnum.CODE.getCode());
         //list每个成员的imageType赋值
         list.forEach(item -> {
             item.setImageType("load");
@@ -703,7 +703,7 @@ public class LoadServiceImpl {
         //导出文件xlsx
         try {
             List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResult(requestData);
-            Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes("1005");
+            Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes(CommonStatusCodeEnum.CODE.getCode());
             Date date = new Date();
             //格式化当前时间格式
             SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss");

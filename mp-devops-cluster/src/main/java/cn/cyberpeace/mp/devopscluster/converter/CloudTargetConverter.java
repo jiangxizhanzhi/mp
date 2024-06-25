@@ -119,10 +119,9 @@ public class CloudTargetConverter {
         device.setImageType("containerRegistry");
         device.setRole(4);
         ExtDocker extDocker = new ExtDocker();
-        extDocker.setFlavor("");
-        extDocker.setCpu(0);
-        extDocker.setRam(0);
-        extDocker.setDisk(0);
+        extDocker.setFlavor("1 vcpu，1 GiB 内存");
+        extDocker.setCpu(1);
+        extDocker.setRam(1);
         extDocker.setInstanceState(0);
         extDocker.setInitSupport(true);
         extDocker.setQuickCreateSupport(true);

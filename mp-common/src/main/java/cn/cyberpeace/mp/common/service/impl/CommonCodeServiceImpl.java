@@ -101,9 +101,12 @@ public class CommonCodeServiceImpl {
     @Cacheable(key = "'nextLevelDatasByCodes' + #codes", value = "nextLevelDatasByCodes")
     public Map<String,String> convertNextLevelDatasByCodes(String[] codes) {
         List<MpSysCodeEnum> nextLevelDatasByCodes = getNextLevelDatasByCodes(codes);
-        //将nextLevelDatasByCodes中的code和codeName转换成map
-        Map<String, String> codeMap = nextLevelDatasByCodes.stream()
-                .collect(Collectors.toMap(MpSysCodeEnum::getCode, MpSysCodeEnum::getCodeName));
+        Map<String, String> codeMap = new HashMap<>();
+        if(nextLevelDatasByCodes != null && nextLevelDatasByCodes.size() > 0){
+            //将nextLevelDatasByCodes中的code和codeName转换成map
+            codeMap = nextLevelDatasByCodes.stream()
+                    .collect(Collectors.toMap(MpSysCodeEnum::getCode, MpSysCodeEnum::getCodeName));
+        }
         return codeMap;
     }
 
