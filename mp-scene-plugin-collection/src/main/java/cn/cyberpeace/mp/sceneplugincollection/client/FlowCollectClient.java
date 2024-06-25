@@ -17,8 +17,10 @@ import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -64,8 +66,11 @@ public class FlowCollectClient {
         env.put("ES_HOST", situationAwareConfig.getArkimeEsHost());
         env.put("ES_PORT", situationAwareConfig.getArkimeEsPort());
         env.put("ES_PREFIX", arkimePrefixId);
-
-
+        List<String> envs = new ArrayList<>();
+        for (var e : env.entrySet()) {
+            envs.add(e.getKey() + "=" + e.getValue());
+        }
+        arkimeCreateData.setEnvs(envs);
 
         ContainerCreateData createData = containerClient.create(arkimeCreateData);
         ArkimeCreateResBo arkimeCreateResBo = new ArkimeCreateResBo();

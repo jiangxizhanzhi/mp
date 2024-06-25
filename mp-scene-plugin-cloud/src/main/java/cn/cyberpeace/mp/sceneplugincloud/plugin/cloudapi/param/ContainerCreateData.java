@@ -35,4 +35,5 @@ public class ContainerCreateData implements CloudHttpData {
     private String hostname;
 
     private String id;
+    private List<String> envs;
 }
