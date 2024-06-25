@@ -233,7 +233,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
     }
 
     @Async
-    public void executeSequentially(){
+    public void executeSequentially() {
         //1: 微软公有云 2:微软私有云 3:微软混合云
         JSONObject publicTargetResult = synchronousCloudData(1);
         JSONObject privateTargetResult = synchronousCloudData(2);
@@ -484,61 +484,56 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
 //        // 获取所有虚拟机发布者
         PagedIterable<VirtualMachinePublisher> virtualMachinePublishers = azureResourceManager.virtualMachineImages().publishers().listByRegion(region);
-        int firstTime = 0;
         for (VirtualMachinePublisher publisher : virtualMachinePublishers) {
             //todo 筛选出需要的VM镜像
-//            if (publisher.name() != null && (publisher.name().contains("linux") || publisher.name().contains("ubuntu")
-//                    || publisher.name().contains("centos") || publisher.name().contains("windows"))) {
-                if (firstTime < 100) {
-                    firstTime++;
-                    System.out.println("PublisherName: " + publisher.name());
-                    // 获取发布者的所有产品(offer)
-                    VirtualMachineOffers offers = publisher.offers();
-                    PagedIterable<VirtualMachineOffer> list = offers.list();
-                    int secondTime = 0;
-                    for (VirtualMachineOffer offer : list) {
-                        if (secondTime < 1) {
-                            secondTime++;
-                            System.out.println("offerName: " + offer.name());
-                            // 获取该产品的所有SKU
-                            VirtualMachineSkus skus = offer.skus();
-                            PagedIterable<VirtualMachineSku> skuList = skus.list();
-                            int thirdTime = 0;
-                            for (VirtualMachineSku sku : skuList) {
-                                if (thirdTime < 1) {
-                                    thirdTime++;
-                                    System.out.println("skuName: " + sku.name());
-                                    // 获取每个SKU的所有版本（image versions）
-                                    PagedIterable<VirtualMachineImage> imageList = sku.images().list();
-                                    int time = 0;
-                                    for (VirtualMachineImage image : imageList) {
-                                        if (time < 1) {
-                                            time++;
-                                            OperatingSystemTypes operatingSystemTypes = image.osDiskImage().operatingSystem();
-                                            JSONObject third = new JSONObject();
-                                            third.put("imageName", offer.name());
-                                            third.put("imageVersion", image.version());
-                                            third.put("PublisherName", publisher.name());
-                                            third.put("offerName", offer.name());
-                                            third.put("skuName", sku.name());
-                                            third.put("operatingSystem", operatingSystemTypes);
-                                            result.add(third);
-                                        }
-                                    }
+            System.out.println("PublisherName: " + publisher.name());
+            if (publisher.name() != null && (publisher.name().contains("Canonical") || publisher.name().contains("canonical")
+                    || publisher.name().contains("centos") || publisher.name().contains("windows"))) {
+                // 获取发布者的所有产品(offer)
+                VirtualMachineOffers offers = publisher.offers();
+                PagedIterable<VirtualMachineOffer> list = offers.list();
+                for (VirtualMachineOffer offer : list) {
+                    System.out.println("offerName: " + offer.name());
+                    // 获取该产品的所有SKU
+                    VirtualMachineSkus skus = offer.skus();
+                    PagedIterable<VirtualMachineSku> skuList = skus.list();
+                    for (VirtualMachineSku sku : skuList) {
+                        System.out.println("skuName: " + sku.name());
+
+                        JSONObject third = new JSONObject();
+                        third.put("imageName", offer.name());
+                        third.put("PublisherName", publisher.name());
+                        third.put("offerName", offer.name());
+                        third.put("skuName", sku.name());
+                        result.add(third);
+                        // 获取每个SKU的所有版本（image versions）
+                        PagedIterable<VirtualMachineImage> imageList = sku.images().list();
+                        int time = 0;
+                        for (VirtualMachineImage image : imageList) {
+                            if (time < 1) {
+                                time++;
+
+                                //休眠0.5秒
+                                try {
+                                    Thread.sleep(500);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
                                 }
+
+                                result.remove(third);
+                                JSONObject forth = new JSONObject();
+                                forth.put("imageName", offer.name());
+                                forth.put("imageVersion", image.version());
+                                forth.put("PublisherName", publisher.name());
+                                forth.put("offerName", offer.name());
+                                forth.put("skuName", sku.name());
+                                forth.put("operatingSystem", image.osDiskImage().operatingSystem());
+                                result.add(forth);
                             }
                         }
                     }
                 }
-                // 每循环一百次暂停30秒
-                if (firstTime % 100 == 0) {
-                    try {
-                        Thread.sleep(30000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-//            }
+            }
         }
         return result;
     }
