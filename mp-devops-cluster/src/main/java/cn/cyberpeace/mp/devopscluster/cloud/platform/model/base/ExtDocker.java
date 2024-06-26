@@ -74,5 +74,5 @@ public class ExtDocker implements Serializable {
     private Boolean isPublicIp;
 
     @ApiModelProperty("公网ip")
-    private String isPublicIpAddress;
+    private String publicIpAddress;
 }
