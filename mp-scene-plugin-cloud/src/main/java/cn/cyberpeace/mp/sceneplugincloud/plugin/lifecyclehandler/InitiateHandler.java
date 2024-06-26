@@ -338,6 +338,7 @@ public class InitiateHandler extends HandlerCommon {
 
             CloudPluginSceneElementNetworkBO network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
             network.setExternal(true);
+            network.setCidr(CloudSingleton.cloudAppConfig.getExternalNetCidr());
             network.setResourceId(CloudSingleton.cloudAppConfig.getExternalNetId());
             ConnectedNetworkBO connectNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
             List<SceneElementPortBO> ports = Optional
@@ -964,9 +965,10 @@ public class InitiateHandler extends HandlerCommon {
             initiateVirtualToPort(cloudElement);
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
             // 二层网络节点的网络、而且非外部网络需要初始化对端端口
-            if (cloudElement.getRole() != null && cloudElement.getRole() != BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK) {
-                initiateVirtualToPort(cloudElement);
-            }
+//            if (cloudElement.getRole() != null && cloudElement.getRole() != BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK) {
+//                initiateVirtualToPort(cloudElement);
+//            }
+            initiateVirtualToPort(cloudElement);
         }
     }
 
