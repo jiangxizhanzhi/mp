@@ -72,6 +72,7 @@ public class FlowCollectClient {
             envs.add(e.getKey() + "=" + e.getValue());
         }
         arkimeCreateData.setEnvs(envs);
+        arkimeCreateData.setPrivilege(true);
 
         ContainerCreateData createData = containerClient.create(arkimeCreateData);
         ArkimeCreateResBo arkimeCreateResBo = new ArkimeCreateResBo();
