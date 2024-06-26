@@ -413,7 +413,7 @@ public class DeleteHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.DELETE_AUXILIARY_NETWORKS, () -> runTasks(deleteAuxiliaryNetworkTasks));
         }
 
-        SceneInstanceLinkCacheUtil.clear(getPluginHandler().getSourceSceneId());
+//        SceneInstanceLinkCacheUtil.clear(getPluginHandler().getSourceSceneId());
     }
 
     protected void deleteLogicSwitchProcess() {

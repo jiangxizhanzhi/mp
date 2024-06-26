@@ -85,7 +85,6 @@ public class CreateHandler extends HandlerCommon {
             routerPort.setNetworkId(networkId);
         });
         getSceneProbeRouterPortMapper().bulkUpdate(routerPorts);
-        getPluginHandler().getScene().setProbeRouter(getPluginHandler().getSceneHandler().getProbeRouter());
     }
 
     public void create() {
@@ -182,6 +181,7 @@ public class CreateHandler extends HandlerCommon {
 
 
         }
+        getPluginHandler().getScene().setProbeRouter(getPluginHandler().getSceneHandler().getProbeRouter());
     }
 
     public void bindProbeCollectAgentProcess(CollectionPluginSceneElementBO collectionElement, String probeCollectorId) {
