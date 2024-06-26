@@ -279,6 +279,7 @@ mp:
     dhcp-ip-allocate: ${mp.sceneplugincloud.ext-var.dhcp-ip-allocate}
     external_net_id: ${mp.sceneplugincloud.ext-var.external_net_id}
     external_net_cidr: ${mp.sceneplugincloud.ext-var.external_net_cidr}
+    external_net_pool: ${mp.sceneplugincloud.ext-var.external_net_pool}
 
   sceneplugincollection:
     wazuh-server-host: ${mp.situationaware.ext-var.wazuh-ip}

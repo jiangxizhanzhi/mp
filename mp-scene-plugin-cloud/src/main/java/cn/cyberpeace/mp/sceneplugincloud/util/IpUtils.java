@@ -2,9 +2,11 @@ package cn.cyberpeace.mp.sceneplugincloud.util;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.RandomUtils;
+import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.base.util.mptool.Ipv4Util;
 import cn.cyberpeace.mp.base.util.mptool.StrUtil;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -48,6 +50,13 @@ public class IpUtils {
      */
     public static List<String> newRandomIps(String cidr, int count, List<String> excludeIps,
                                             List<AllocationPool> allocationPools, boolean abandonDhcp) {
+        if(cidr.equals(CloudSingleton.cloudAppConfig.getExternalNetCidr())){
+            // 现场很容易冲突
+            final List<AllocationPool> externalNetPool = CloudSingleton.cloudAppConfig.getExternalNetPool();
+            if (!CollectionUtil.isEmpty(externalNetPool)){
+                allocationPools = externalNetPool;
+            }
+        }
         List<String> ips = new ArrayList<>();
         String beginIp = null;
         String lastIp = null;

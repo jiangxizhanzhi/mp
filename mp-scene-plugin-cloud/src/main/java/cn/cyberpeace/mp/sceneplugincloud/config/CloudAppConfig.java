@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.config;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Network;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualInternet;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkData;
@@ -116,6 +117,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.external_net_cidr:}")
     private String externalNetCidr;
 
+    @Value("${mp.sceneplugincloud.external_net_pool:}")
+    private String externalNetPool;
+
     @Value("${mp.sceneplugincloud.mgmt_name:mgmt}")
     private String mgmtName;
 
@@ -189,6 +193,20 @@ public class CloudAppConfig {
 
     public void init() {
         this.getCidrPool();
+    }
+
+    public List<AllocationPool> getExternalNetPool() {
+        final ArrayList<AllocationPool> allocationPools = new ArrayList<>();
+        if (!StringUtils.isEmpty(externalNetPool)) {
+            log.info("externalNetPool select first from pool is {}", externalNetPool);
+            final String[] ipPools = externalNetPool.split(",");
+            for(String ipPool: ipPools ){
+                final String[] ips = ipPool.split("-");
+                final AllocationPool allocationPool = new AllocationPool(ips[0], ips[1]);
+                allocationPools.add(allocationPool);
+            }
+        }
+        return allocationPools;
     }
 
     public List<String> getCidrPool() {
