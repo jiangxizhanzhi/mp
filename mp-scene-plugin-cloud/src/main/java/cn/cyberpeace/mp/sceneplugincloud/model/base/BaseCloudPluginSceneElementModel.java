@@ -160,6 +160,10 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String vmExpansionDiskType;
     @DefaultBool
     private Boolean expansion;
+    @DefaultBool
+    private Boolean isPublicIp;
+    @DefaultStr
+    private String publicIpAddress;
 
     // 靶标属性
     @DefaultInt

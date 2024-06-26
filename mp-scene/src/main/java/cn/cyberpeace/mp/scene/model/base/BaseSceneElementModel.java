@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.scene.model.base;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
@@ -39,7 +38,7 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
     @DefaultStr
     private String actionType;
     @DefaultStr
-    private String actionTypeNAME;
+    private String actionTypeName;
     @DefaultStr
     private String runTable;
     @DefaultStr
@@ -56,7 +55,8 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
         public static final int NPC = 7;
         public static final int LOAD = 60;
 
-        private Type() {}
+        private Type() {
+        }
     }
 
     public static class SystemType {
@@ -81,7 +81,8 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
         public static final String WINDOWS = "windows";
         public static final String LINUX = "linux";
 
-        private SystemType() {}
+        private SystemType() {
+        }
     }
 
     public static class SystemArchitecture {
@@ -89,7 +90,8 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
         public static final String BIT_32 = "32";
         public static final String BIT_64 = "64";
 
-        private SystemArchitecture() {}
+        private SystemArchitecture() {
+        }
     }
 
     public static class SystemLanguage {
@@ -104,6 +106,7 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
         public static final String VI = "vi";
         public static final String AR = "ar";
 
-        private SystemLanguage() {}
+        private SystemLanguage() {
+        }
     }
 }

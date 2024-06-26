@@ -54,7 +54,7 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     @ApiModelProperty(value = "载荷-运行类型CODE")
     private String actionType;
     @ApiModelProperty(value = "载荷-运行类型NAME")
-    private String actionTypeNAME;
+    private String actionTypeName;
     @ApiModelProperty(value = "载荷-运行类型CODE")
     private String runTable;
     @ApiModelProperty(value = "载荷-运行类型NAME")

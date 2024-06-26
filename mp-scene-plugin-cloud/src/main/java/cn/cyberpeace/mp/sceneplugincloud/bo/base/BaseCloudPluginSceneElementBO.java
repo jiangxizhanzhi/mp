@@ -149,6 +149,10 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private String password;
     @ApiModelProperty(value = "默认启动镜像名称")
     private String defaultLaunchImageName;
+    @ApiModelProperty(value = "公共ip标记 0否 1是")
+    private Boolean isPublicIp;
+    @ApiModelProperty(value = "公共ip")
+    private String publicIpAddress;
 
     //    漏洞
     @ApiModelProperty(value = "漏洞")

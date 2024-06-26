@@ -15,10 +15,7 @@ import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.fluent.models.ResourceSkuInner;
 import com.azure.resourcemanager.compute.models.*;
-import com.azure.resourcemanager.network.models.Network;
-import com.azure.resourcemanager.network.models.NetworkInterface;
-import com.azure.resourcemanager.network.models.NetworkSecurityGroup;
-import com.azure.resourcemanager.network.models.SecurityRuleProtocol;
+import com.azure.resourcemanager.network.models.*;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileWriter;
@@ -138,120 +135,10 @@ public class AzureVirtualMachine {
     public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData) {
         String groupName = pluginHandler.getSourceSceneId();
 
-        // azure todo 调用微软云api 查询或者创建一个 flavor
-        VirtualMachineSizeTypes flavor = StringUtils.isNotBlank(cloudElement.getVmSizeType()) ? VirtualMachineSizeTypes.fromString(cloudElement.getVmSizeType()) : VirtualMachineSizeTypes.STANDARD_B1S;
-        StorageAccountTypes storageAccountTypes = StringUtils.isNotBlank(cloudElement.getVmOsDiskType()) ? StorageAccountTypes.fromString(cloudElement.getVmOsDiskType()) : StorageAccountTypes.STANDARD_SSD_LRS;
         // 调用微软云api 创建虚拟机 回写虚拟机id
-        // 虚拟机镜像、名称等信息
-        String vmName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
-        String imageName = cloudElement.getImage();
-        // azure todo 根据imageName 获取 对应的 image
-        KnownLinuxVirtualMachineImage image = KnownLinuxVirtualMachineImage.UBUNTU_SERVER_16_04_LTS;
-
-        //获取磁盘信息
-        Integer disk = cloudElement.getSrcElement().getDisk();
-        Integer expansionDisk = cloudElement.getSrcElement().getExpansionDisk();
-        String vmExpansionDiskType = cloudElement.getVmExpansionDiskType();
-
-        // 获取网卡的信息
-        // 取第一块网卡
-        // azure todo 调整 root name
-        VirtualNic virtualNic = virtualNics.get(0);
-//        设置登录信息
-
-        String netId = virtualNics.stream()
-                .filter(v -> StringUtils.isNotBlank(v.getNetworkId()))
-                .map(v -> v.getNetworkId()).findFirst()
-                .get();
-
-        VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged creater = null;
-
-        if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudElement.getVmType())) {
-            VirtualMachine.DefinitionStages.WithProximityPlacementGroup withProximityPlacementGroup = resourceService.getManager().virtualMachines()
-                    .define(vmName)
-                    .withRegion(region)
-                    .withNewResourceGroup(groupName)
-                    .withExistingPrimaryNetwork(azureResourceManager.networks().getById(netId))
-                    .withSubnet(IpUtils.extractNetworkPart(virtualNic.getFixedIp()))
-                    .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp())
-                    .withoutPrimaryPublicIPAddress();
-
-//            源类型(1:云平台 2:用户上传)
-            if (2 == cloudElement.getSourceType()) {
-                creater = withProximityPlacementGroup.withGeneralizedWindowsCustomImage(cloudElement.getUploadImageId())
-                        .withAdminUsername(cloudElement.getUsername())
-                        .withAdminPassword(cloudElement.getPassword())
-                        .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
-
-            } else {
-                creater = withProximityPlacementGroup.withLatestWindowsImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
-                        .withAdminUsername(cloudElement.getUsername())
-                        .withAdminPassword(cloudElement.getPassword())
-                        .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
-            }
-//            扩展磁盘 此处用于重建vm
-            if (expansionDisk != null && expansionDisk > 0) {
-                creater.withDataDiskDefaultStorageAccountType(StorageAccountTypes.fromString(vmExpansionDiskType))
-                        .withNewDataDisk(expansionDisk);
-            }
-            creater.withOSDiskStorageAccountType(storageAccountTypes)
-                    .withOSDiskSizeInGB(disk)
-                    .withSize(flavor);
-
-        } else {
-            VirtualMachine.DefinitionStages.WithProximityPlacementGroup withProximityPlacementGroup = resourceService.getManager().virtualMachines()
-                    .define(vmName)
-                    .withRegion(region)
-                    .withNewResourceGroup(groupName)
-                    .withExistingPrimaryNetwork(azureResourceManager.networks().getById(netId))
-                    .withSubnet(IpUtils.extractNetworkPart(virtualNic.getFixedIp()))
-                    .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp())
-                    .withoutPrimaryPublicIPAddress();
-            //            源类型(1:云平台 2:用户上传)
-            if (2 == cloudElement.getSourceType()) {
-                creater = withProximityPlacementGroup
-                        .withGeneralizedLinuxCustomImage(cloudElement.getUploadImageId())
-                        .withRootUsername(cloudElement.getUsername())
-                        .withRootPassword(cloudElement.getPassword()) // 必须要是6位以上,且有一个特殊字符
-                        .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
-            } else {
-                creater = withProximityPlacementGroup
-                        .withLatestLinuxImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
-                        .withRootUsername(cloudElement.getUsername())
-                        .withRootPassword(cloudElement.getPassword()) // 必须要是6位以上,且有一个特殊字符
-                        .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
-            }
-//            扩展磁盘 此处用于重建vm
-            if (expansionDisk != null && expansionDisk > 0) {
-                creater.withDataDiskDefaultStorageAccountType(StorageAccountTypes.fromString(vmExpansionDiskType))
-                        .withNewDataDisk(expansionDisk);
-            }
-            creater.withOSDiskStorageAccountType(storageAccountTypes)
-                    .withOSDiskSizeInGB(disk)
-                    .withSize(flavor);
-
-        }
-
-
-        // 加其他网卡
-        for (int i = 1; i < virtualNics.size(); i++) {
-            VirtualNic nic = virtualNics.get(i);
-            Network azureNetwork = azureResourceManager.networks().getById(netId);
-            NetworkInterface ni = azureResourceManager.networkInterfaces()
-                    .define("nic" + nic.getFixedIp())
-                    .withRegion(region)
-                    .withNewResourceGroup(groupName)
-                    .withExistingPrimaryNetwork(azureNetwork)
-                    .withSubnet(IpUtils.extractNetworkPart(nic.getFixedIp()))
-                    .withPrimaryPrivateIPAddressStatic(nic.getFixedIp())
-                    .create();
-            creater.withExistingSecondaryNetworkInterface(ni);
-        }
-
-        // azure 创建虚拟机 回写数据
-        VirtualMachine vm = creater.create();
+        VirtualMachine vm = createVirtualMachine(cloudElement, virtualNics, userData, groupName);
         cloudElement.setResourceId(vm.id());
-
+        cloudElement.setPublicIpAddress(vm.getPrimaryPublicIPAddress().ipAddress());
 
 //        创建网络安全组
 //        绑定网络接口
@@ -378,4 +265,347 @@ public class AzureVirtualMachine {
         }
         update.apply();
     }
+
+    private VirtualMachine createVirtualMachine1(CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData, String groupName) {
+        // 虚拟机镜像、名称等信息
+        String vmName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
+
+        String netId = virtualNics.stream()
+                .filter(v -> StringUtils.isNotBlank(v.getNetworkId()))
+                .map(v -> v.getNetworkId()).findFirst()
+                .get();
+
+        // 获取网卡的信息
+        // 取第一块网卡
+        VirtualNic virtualNic = virtualNics.get(0);
+
+        //获取磁盘信息
+        Integer disk = cloudElement.getSrcElement().getDisk();
+        Integer expansionDisk = cloudElement.getSrcElement().getExpansionDisk();
+        String vmExpansionDiskType = cloudElement.getVmExpansionDiskType();
+
+        // azure todo 调用微软云api 查询或者创建一个 flavor
+        VirtualMachineSizeTypes flavor = StringUtils.isNotBlank(cloudElement.getVmSizeType()) ? VirtualMachineSizeTypes.fromString(cloudElement.getVmSizeType()) : VirtualMachineSizeTypes.STANDARD_B1S;
+        StorageAccountTypes storageAccountTypes = StringUtils.isNotBlank(cloudElement.getVmOsDiskType()) ? StorageAccountTypes.fromString(cloudElement.getVmOsDiskType()) : StorageAccountTypes.STANDARD_SSD_LRS;
+
+        VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged creater = null;
+
+        if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudElement.getVmType())) {
+            VirtualMachine.DefinitionStages.WithProximityPlacementGroup withProximityPlacementGroup;
+            VirtualMachine.DefinitionStages.WithPublicIPAddress withPublicIPAddress = resourceService.getManager().virtualMachines()
+                    .define(vmName)
+                    .withRegion(region)
+                    .withNewResourceGroup(groupName)
+                    .withExistingPrimaryNetwork(azureResourceManager.networks().getById(netId))
+                    .withSubnet(IpUtils.extractNetworkPart(virtualNic.getFixedIp()))
+                    .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp());
+            if (cloudElement.getIsPublicIp()) {
+                PublicIpAddress publicIpAddress = azureResourceManager.publicIpAddresses().define("PublicIP" + vmName)
+                        .withRegion(region)
+                        .withExistingResourceGroup(groupName)
+                        .withDynamicIP()
+                        .create();
+                withProximityPlacementGroup = withPublicIPAddress.withExistingPrimaryPublicIPAddress(publicIpAddress);
+            } else {
+                withProximityPlacementGroup = withPublicIPAddress.withoutPrimaryPublicIPAddress();
+            }
+
+//            源类型(1:云平台 2:用户上传)
+            if (2 == cloudElement.getSourceType()) {
+                creater = withProximityPlacementGroup.withGeneralizedWindowsCustomImage(cloudElement.getUploadImageId())
+                        .withAdminUsername(cloudElement.getUsername())
+                        .withAdminPassword(cloudElement.getPassword())
+                        .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
+
+            } else {
+                creater = withProximityPlacementGroup.withLatestWindowsImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
+                        .withAdminUsername(cloudElement.getUsername())
+                        .withAdminPassword(cloudElement.getPassword())
+                        .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
+            }
+//            扩展磁盘 此处用于重建vm
+            if (expansionDisk != null && expansionDisk > 0) {
+                creater.withDataDiskDefaultStorageAccountType(StorageAccountTypes.fromString(vmExpansionDiskType))
+                        .withNewDataDisk(expansionDisk);
+            }
+            creater.withOSDiskStorageAccountType(storageAccountTypes)
+                    .withOSDiskSizeInGB(disk)
+                    .withSize(flavor);
+
+        } else {
+//            LINUX
+            VirtualMachine.DefinitionStages.WithProximityPlacementGroup withProximityPlacementGroup;
+            VirtualMachine.DefinitionStages.WithPublicIPAddress withPublicIPAddress = resourceService.getManager().virtualMachines()
+                    .define(vmName)
+                    .withRegion(region)
+                    .withNewResourceGroup(groupName)
+                    .withExistingPrimaryNetwork(azureResourceManager.networks().getById(netId))
+                    .withSubnet(IpUtils.extractNetworkPart(virtualNic.getFixedIp()))
+                    .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp());
+            if (cloudElement.getIsPublicIp()) {
+                PublicIpAddress publicIpAddress = azureResourceManager.publicIpAddresses().define("PublicIP" + vmName)
+                        .withRegion(region)
+                        .withExistingResourceGroup(groupName)
+                        .withDynamicIP()
+                        .create();
+                withProximityPlacementGroup = withPublicIPAddress.withExistingPrimaryPublicIPAddress(publicIpAddress);
+            } else {
+                withProximityPlacementGroup = withPublicIPAddress.withoutPrimaryPublicIPAddress();
+            }
+
+            //            源类型(1:云平台 2:用户上传)
+            if (2 == cloudElement.getSourceType()) {
+                creater = withProximityPlacementGroup
+                        .withGeneralizedLinuxCustomImage(cloudElement.getUploadImageId())
+                        .withRootUsername(cloudElement.getUsername())
+                        .withRootPassword(cloudElement.getPassword()) // 必须要是6位以上,且有一个特殊字符
+                        .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
+            } else {
+                creater = withProximityPlacementGroup
+                        .withLatestLinuxImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
+                        .withRootUsername(cloudElement.getUsername())
+                        .withRootPassword(cloudElement.getPassword()) // 必须要是6位以上,且有一个特殊字符
+                        .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
+            }
+//            扩展磁盘 此处用于重建vm
+            if (expansionDisk != null && expansionDisk > 0) {
+                creater.withDataDiskDefaultStorageAccountType(StorageAccountTypes.fromString(vmExpansionDiskType))
+                        .withNewDataDisk(expansionDisk);
+            }
+            creater.withOSDiskStorageAccountType(storageAccountTypes)
+                    .withOSDiskSizeInGB(disk)
+                    .withSize(flavor);
+
+        }
+
+
+        // 加其他网卡
+        for (int i = 1; i < virtualNics.size(); i++) {
+            VirtualNic nic = virtualNics.get(i);
+            Network azureNetwork = azureResourceManager.networks().getById(netId);
+            NetworkInterface ni = azureResourceManager.networkInterfaces()
+                    .define("nic" + nic.getFixedIp())
+                    .withRegion(region)
+                    .withNewResourceGroup(groupName)
+                    .withExistingPrimaryNetwork(azureNetwork)
+                    .withSubnet(IpUtils.extractNetworkPart(nic.getFixedIp()))
+                    .withPrimaryPrivateIPAddressStatic(nic.getFixedIp())
+                    .create();
+            creater.withExistingSecondaryNetworkInterface(ni);
+        }
+
+        // azure 创建虚拟机 回写数据
+        VirtualMachine vm = creater.create();
+        return vm;
+    }
+
+    /**
+     * 创建虚拟机的方法
+     *
+     * @param cloudElement 云插件场景元素
+     * @param virtualNics  虚拟网卡列表
+     * @param userData     用户数据
+     * @param groupName    资源组名称
+     * @return 创建的虚拟机对象
+     */
+    private VirtualMachine createVirtualMachine(CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData, String groupName) {
+        // 生成虚拟机名称
+        String vmName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
+
+        // 获取网络ID
+        String netId = virtualNics.stream()
+                .filter(v -> StringUtils.isNotBlank(v.getNetworkId()))
+                .map(VirtualNic::getNetworkId)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Network ID is required"));
+
+        // 获取第一块网卡
+        VirtualNic virtualNic = virtualNics.get(0);
+
+        // 获取磁盘信息
+        Integer disk = cloudElement.getSrcElement().getDisk();
+        Integer expansionDisk = cloudElement.getSrcElement().getExpansionDisk();
+        String vmExpansionDiskType = cloudElement.getVmExpansionDiskType();
+
+        // 定义虚拟机大小和存储账户类型
+        VirtualMachineSizeTypes flavor = StringUtils.isNotBlank(cloudElement.getVmSizeType()) ? VirtualMachineSizeTypes.fromString(cloudElement.getVmSizeType()) : VirtualMachineSizeTypes.STANDARD_B1S;
+        StorageAccountTypes storageAccountTypes = StringUtils.isNotBlank(cloudElement.getVmOsDiskType()) ? StorageAccountTypes.fromString(cloudElement.getVmOsDiskType()) : StorageAccountTypes.STANDARD_SSD_LRS;
+
+        VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged creator;
+
+        if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudElement.getVmType())) {
+            creator = createWindowsVM(cloudElement, userData, groupName, azureResourceManager, region, vmName, netId, virtualNic, disk, expansionDisk, vmExpansionDiskType, storageAccountTypes, flavor);
+        } else {
+            creator = createLinuxVM(cloudElement, userData, groupName, azureResourceManager, region, vmName, netId, virtualNic, disk, expansionDisk, vmExpansionDiskType, storageAccountTypes, flavor);
+        }
+
+        // 添加其他网卡
+        for (int i = 1; i < virtualNics.size(); i++) {
+            VirtualNic nic = virtualNics.get(i);
+            NetworkInterface ni = createNetworkInterface(azureResourceManager, region, groupName, nic, netId);
+            creator.withExistingSecondaryNetworkInterface(ni);
+        }
+
+        // 创建虚拟机
+        return creator.create();
+    }
+
+    /**
+     * 创建Windows虚拟机
+     *
+     * @param cloudElement         云插件场景元素
+     * @param userData             用户数据
+     * @param groupName            资源组名称
+     * @param azureResourceManager Azure资源管理器
+     * @param region               地区
+     * @param vmName               虚拟机名称
+     * @param netId                网络ID
+     * @param virtualNic           虚拟网卡
+     * @param disk                 磁盘大小
+     * @param expansionDisk        扩展磁盘大小
+     * @param vmExpansionDiskType  扩展磁盘类型
+     * @param storageAccountTypes  存储账户类型
+     * @param flavor               虚拟机规格
+     * @return 虚拟机定义阶段对象
+     */
+    private VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged createWindowsVM(
+            CloudPluginSceneElementBO cloudElement, String userData, String groupName, AzureResourceManager azureResourceManager,
+            Region region, String vmName, String netId, VirtualNic virtualNic, Integer disk, Integer expansionDisk, String vmExpansionDiskType,
+            StorageAccountTypes storageAccountTypes, VirtualMachineSizeTypes flavor) {
+        VirtualMachine.DefinitionStages.WithProximityPlacementGroup withProximityPlacementGroup = azureResourceManager.virtualMachines()
+                .define(vmName)
+                .withRegion(region)
+                .withNewResourceGroup(groupName)
+                .withExistingPrimaryNetwork(azureResourceManager.networks().getById(netId))
+                .withSubnet(IpUtils.extractNetworkPart(virtualNic.getFixedIp()))
+                .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp())
+                .withoutPrimaryPublicIPAddress();
+
+        VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged creator;
+
+        if (cloudElement.getSourceType() == 2) {
+            creator = withProximityPlacementGroup
+                    .withGeneralizedWindowsCustomImage(cloudElement.getUploadImageId())
+                    .withAdminUsername(cloudElement.getUsername())
+                    .withAdminPassword(cloudElement.getPassword())
+                    .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
+        } else {
+            creator = withProximityPlacementGroup
+                    .withLatestWindowsImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
+                    .withAdminUsername(cloudElement.getUsername())
+                    .withAdminPassword(cloudElement.getPassword())
+                    .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
+        }
+
+        configureDisks(creator, expansionDisk, vmExpansionDiskType, storageAccountTypes, flavor, disk);
+
+        return creator;
+    }
+
+    /**
+     * 创建Linux虚拟机
+     *
+     * @param cloudElement         云插件场景元素
+     * @param userData             用户数据
+     * @param groupName            资源组名称
+     * @param azureResourceManager Azure资源管理器
+     * @param region               地区
+     * @param vmName               虚拟机名称
+     * @param netId                网络ID
+     * @param virtualNic           虚拟网卡
+     * @param disk                 磁盘大小
+     * @param expansionDisk        扩展磁盘大小
+     * @param vmExpansionDiskType  扩展磁盘类型
+     * @param storageAccountTypes  存储账户类型
+     * @param flavor               虚拟机规格
+     * @return 虚拟机定义阶段对象
+     */
+    private VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged createLinuxVM(
+            CloudPluginSceneElementBO cloudElement, String userData, String groupName, AzureResourceManager azureResourceManager,
+            Region region, String vmName, String netId, VirtualNic virtualNic, Integer disk, Integer expansionDisk, String vmExpansionDiskType,
+            StorageAccountTypes storageAccountTypes, VirtualMachineSizeTypes flavor) {
+        VirtualMachine.DefinitionStages.WithProximityPlacementGroup withProximityPlacementGroup;
+        VirtualMachine.DefinitionStages.WithPublicIPAddress withPublicIPAddress = azureResourceManager.virtualMachines()
+                .define(vmName)
+                .withRegion(region)
+                .withNewResourceGroup(groupName)
+                .withExistingPrimaryNetwork(azureResourceManager.networks().getById(netId))
+                .withSubnet(IpUtils.extractNetworkPart(virtualNic.getFixedIp()))
+                .withPrimaryPrivateIPAddressStatic(virtualNic.getFixedIp());
+
+        if (cloudElement.getIsPublicIp()) {
+            PublicIpAddress publicIpAddress = azureResourceManager.publicIpAddresses().define("PublicIP" + vmName)
+                    .withRegion(region)
+                    .withExistingResourceGroup(groupName)
+                    .withDynamicIP()
+                    .create();
+            withProximityPlacementGroup = withPublicIPAddress.withExistingPrimaryPublicIPAddress(publicIpAddress);
+        } else {
+            withProximityPlacementGroup = withPublicIPAddress.withoutPrimaryPublicIPAddress();
+        }
+
+        VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged creator;
+
+        if (cloudElement.getSourceType() == 2) {
+            creator = withProximityPlacementGroup
+                    .withGeneralizedLinuxCustomImage(cloudElement.getUploadImageId())
+                    .withRootUsername(cloudElement.getUsername())
+                    .withRootPassword(cloudElement.getPassword())
+                    .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
+        } else {
+            creator = withProximityPlacementGroup
+                    .withLatestLinuxImage(cloudElement.getPublisher(), cloudElement.getOffer(), cloudElement.getSku())
+                    .withRootUsername(cloudElement.getUsername())
+                    .withRootPassword(cloudElement.getPassword())
+                    .withCustomData(Base64.getEncoder().encodeToString(userData.getBytes()));
+        }
+
+        configureDisks(creator, expansionDisk, vmExpansionDiskType, storageAccountTypes, flavor, disk);
+
+        return creator;
+    }
+
+    /**
+     * 配置磁盘
+     *
+     * @param creator             虚拟机定义阶段对象
+     * @param expansionDisk       扩展磁盘大小
+     * @param vmExpansionDiskType 扩展磁盘类型
+     * @param storageAccountTypes 存储账户类型
+     * @param flavor              虚拟机规格
+     * @param disk                系统磁盘大小
+     */
+    private void configureDisks(VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged creator, Integer expansionDisk, String vmExpansionDiskType, StorageAccountTypes storageAccountTypes, VirtualMachineSizeTypes flavor, Integer disk) {
+        if (expansionDisk != null && expansionDisk > 0) {
+            creator.withDataDiskDefaultStorageAccountType(StorageAccountTypes.fromString(vmExpansionDiskType))
+                    .withNewDataDisk(expansionDisk);
+        }
+        creator.withOSDiskStorageAccountType(storageAccountTypes)
+                .withOSDiskSizeInGB(disk)
+                .withSize(flavor);
+    }
+
+    /**
+     * 创建网络接口
+     *
+     * @param azureResourceManager Azure资源管理器
+     * @param region               地区
+     * @param groupName            资源组名称
+     * @param nic                  虚拟网卡
+     * @param netId                网络ID
+     * @return 创建的网络接口对象
+     */
+    private NetworkInterface createNetworkInterface(AzureResourceManager azureResourceManager, Region region, String groupName, VirtualNic nic, String netId) {
+        Network azureNetwork = azureResourceManager.networks().getById(netId);
+        return azureResourceManager.networkInterfaces()
+                .define("nic" + nic.getFixedIp())
+                .withRegion(region)
+                .withNewResourceGroup(groupName)
+                .withExistingPrimaryNetwork(azureNetwork)
+                .withSubnet(IpUtils.extractNetworkPart(nic.getFixedIp()))
+                .withPrimaryPrivateIPAddressStatic(nic.getFixedIp())
+                .create();
+    }
+
 }
+
