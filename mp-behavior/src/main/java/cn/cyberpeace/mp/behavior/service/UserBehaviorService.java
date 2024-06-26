@@ -98,6 +98,7 @@ public class UserBehaviorService {
 		UserBehaviorDetail detail = new UserBehaviorDetail();
 		BeanUtils.copyProperties(userBehaviorModel, detail);
 		detail.setNetworkBehaviorModelList(networkBehaviorModelList);
+		detail.setNetworkBehaviorIdList(networkBehaviorModelList.stream().map(NetworkBehaviorModel::getId).collect(Collectors.toList()));
 		return detail;
 	}
 }

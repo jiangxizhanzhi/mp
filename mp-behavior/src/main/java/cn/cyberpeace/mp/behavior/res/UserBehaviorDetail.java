@@ -12,4 +12,7 @@ public class UserBehaviorDetail extends UserBehaviorModel {
 
 	@ApiModelProperty("关联的网络行为列表")
 	private List<NetworkBehaviorModel> networkBehaviorModelList;
+
+	@ApiModelProperty("关联的网络行为id列表")
+	private List<String> networkBehaviorIdList;
 }
