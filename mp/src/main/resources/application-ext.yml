@@ -117,17 +117,17 @@ mp:
       wazuh-es-ip: ${WAZUH_ES_IP:10.100.7.1}
       wazuh-es-port: ${WAZUH_ES_PORT:9205}
       wazuh-es-max-page-size: ${ES_MAX_PAGESIZE:10000}
-      public-wazuh-ip: ${PUBLIC_WAZUH_IP:10.100.7.1}
+      public-wazuh-ip: ${PUBLIC_WAZUH_IP:10.108.1.10}
       public-wazuh-port: ${PUBLIC_WAZUH_PORT:15500}
       public-wazuh-username: ${PUBLIC_WAZUH_USERNAME:wazuh}
       public-wazuh-password: ${PUBLIC_WAZUH_PASSWORD:Abcd123#}
-      public-wazuh-es-ip: ${PUBLIC_WAZUH_ES_IP:10.100.7.1}
+      public-wazuh-es-ip: ${PUBLIC_WAZUH_ES_IP:10.108.1.10}
       public-wazuh-es-port: ${PUBLIC_WAZUH_ES_PORT:9205}
       public-wazuh-es-max-page-size: ${PUBLIC_ES_MAX_PAGESIZE:10000}
-      private-wazuh-es-ip: ${PRIVATE_WAZUH_ES_IP:10.100.7.1}
+      private-wazuh-es-ip: ${PRIVATE_WAZUH_ES_IP:10.108.1.10}
       private-wazuh-es-port: ${PRIVATE_WAZUH_ES_PORT:9205}
       private-wazuh-es-max-page-size: ${PRIVATE_ES_MAX_PAGESIZE:10000}
-      mix-wazuh-es-ip: ${MIX_WAZUH_ES_IP:10.100.7.1}
+      mix-wazuh-es-ip: ${MIX_WAZUH_ES_IP:10.108.1.10}
       mix-wazuh-es-port: ${MIX_WAZUH_ES_PORT:9205}
       mix-wazuh-es-max-page-size: ${MIX_ES_MAX_PAGESIZE:10000}
       arkime-es-host: ${ARKIME_ES_IP:10.100.7.1}

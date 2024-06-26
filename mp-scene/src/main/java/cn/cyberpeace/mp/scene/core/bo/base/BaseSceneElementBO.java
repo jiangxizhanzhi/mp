@@ -45,10 +45,20 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     private String nodeCommand;
     @ApiModelProperty(value = "是否辅助节点")
     private Boolean isAuxiliary;
-    @ApiModelProperty(value = "载荷-控制类型")
+    @ApiModelProperty(value = "载荷-控制类型CODE")
     private String controlType;
     @ApiModelProperty(value = "载荷-默认命令")
     private String defaultCmd;
+    @ApiModelProperty(value = "载荷-控制类型NAME")
+    private String controlTypeName;
+    @ApiModelProperty(value = "载荷-运行类型CODE")
+    private String actionType;
+    @ApiModelProperty(value = "载荷-运行类型NAME")
+    private String actionTypeNAME;
+    @ApiModelProperty(value = "载荷-运行类型CODE")
+    private String runTable;
+    @ApiModelProperty(value = "载荷-运行类型NAME")
+    private String runTableName;
     @ApiModelProperty(value = "扩展磁盘大小")
     private Integer expansionDisk;
 
