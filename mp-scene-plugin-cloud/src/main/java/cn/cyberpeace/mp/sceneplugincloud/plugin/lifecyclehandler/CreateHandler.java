@@ -1275,7 +1275,7 @@ public class CreateHandler extends HandlerCommon {
             DockerParams dockerParams = cloudElement.getDockerParams();
 //            createData.setEnvironment(dockerParams.getEnvironment());
             createData.setInteractive(dockerParams.getInteractive());
-            createData.setPrivilege(dockerParams.getPrivileged());
+            createData.setPrivileged(dockerParams.getPrivileged());
             createData.setRun(dockerParams.getRun());
         }
 
