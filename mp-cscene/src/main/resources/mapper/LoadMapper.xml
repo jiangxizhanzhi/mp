@@ -613,4 +613,9 @@
             </if>
         </where>
     </select>
+
+    <select id="getLoadBySceneId" resultType="java.lang.String">
+        select load_tool_id from mp_sceneplugincloud_scene_config_element where scene = #{sceneId} and image_type = 'load'
+        select scene from mp_cscene_cscene_instance where id = #{sceneId}
+    </select>
 </mapper>

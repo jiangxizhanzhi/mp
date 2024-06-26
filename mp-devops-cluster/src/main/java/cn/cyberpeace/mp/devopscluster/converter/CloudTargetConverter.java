@@ -50,6 +50,7 @@ public class CloudTargetConverter {
     }
 
     public void convertExtVm(CloudDevice device, DeviceCloudTargetVO target) {
+        String operatingSystem = target.getOperatingSystem();
         /**
          * ext_vm
          */
@@ -78,7 +79,13 @@ public class CloudTargetConverter {
         AccessProtocol accessProtocol = new AccessProtocol();
         //ip地址
         accessProtocol.setHostname("");
-        accessProtocol.setProtocol("SSH");
+        if (operatingSystem!= null && "Linux".equals(operatingSystem)) {
+            accessProtocol.setProtocol("SSH");
+        } else if (operatingSystem!= null && "Windows".equals(operatingSystem)) {
+            accessProtocol.setProtocol("RDP");
+        } else {
+            accessProtocol.setProtocol("SSH");
+        }
         accessProtocols.add(accessProtocol);
         extVm.setAccessProtocols(accessProtocols);
         extVm.setIsPublicIp(false);
@@ -99,7 +106,6 @@ public class CloudTargetConverter {
          */
         ExtImageInfo extImageInfo = new ExtImageInfo();
         //云靶标只能拿到linux和windows两类
-        String operatingSystem = target.getOperatingSystem();
         if (operatingSystem!= null && "Linux".equals(operatingSystem)) {
             extSystemInfo.setSystemType(306);
         } else if (operatingSystem!= null && "Windows".equals(operatingSystem)) {
