@@ -964,6 +964,7 @@ public class InitiateHandler extends HandlerCommon {
             // 实体节点的网络需要初始化对端端口
             initiateVirtualToPort(cloudElement);
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
+            // 30s底层不能自动分ip，所以这里特殊处理，外部网络连接的端口也由中台分一个ip，否则接口报错
             // 二层网络节点的网络、而且非外部网络需要初始化对端端口
 //            if (cloudElement.getRole() != null && cloudElement.getRole() != BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK) {
 //                initiateVirtualToPort(cloudElement);
