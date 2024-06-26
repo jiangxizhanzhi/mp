@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -110,6 +111,15 @@ public class Container extends CloudClient {
     }
 
     public boolean copyFile(String containerId, String filepath, String dstPath) {
+
+        // 只能上传已存在的文件夹中，若是文件夹不存在需要调用命令创建文件夹
+        ContainerMkdirData dataMkdir = new ContainerMkdirData();
+        dataMkdir.setCmd("mkdir");
+        dataMkdir.setArgs(Arrays.asList("-p", dstPath));
+        String mkdirUrl = String.format(CloudUrlConstant.CONTAINER_COMMAND_URL, containerId);
+        cloudPost(mkdirUrl, dataMkdir, null, new TypeReference<CloudResponse<Object>>() {}, true);
+
+        // 上传文件
         ContainerArchiveData data = new ContainerArchiveData();
         data.setFile(new File(filepath));
         data.setPath(dstPath);
