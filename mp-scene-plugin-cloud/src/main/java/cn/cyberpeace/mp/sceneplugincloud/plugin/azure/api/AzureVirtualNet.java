@@ -1,10 +1,12 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api;
 
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.NetworkSecurityGroupUtils;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.network.models.Network;
@@ -115,7 +117,15 @@ public class AzureVirtualNet {
                         .attach();
             }
         }
+
+//        放开ssh rdp hhtp https 在创建虚拟机时的第二个网络安全组内做限制
+        NetworkSecurityGroupUtils.addInRule(AccessMode.Protocol.SSH, update, 1000);
+        NetworkSecurityGroupUtils.addInRule(AccessMode.Protocol.HTTP, update, 1100);
+        NetworkSecurityGroupUtils.addInRule(AccessMode.Protocol.HTTPS, update, 1200);
+        NetworkSecurityGroupUtils.addInRule(AccessMode.Protocol.RDP, update, 1300);
+
         update.apply();
+
     }
 
     public static String findUnused192Cidr(ConcurrentHashMap<String, Boolean> cidrContainerMap) {

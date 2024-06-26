@@ -870,6 +870,17 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public List<CloudPluginSceneElementModel> listLoads(String id) {
+
+//        2.根据sceneId查询场景
+//            plugins.topology
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
+//            plugins.cpcloud
+        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+//        3.获取节点内工具idList
+        Map<String, CloudPluginSceneElementBO> elementMap = pluginHandler.getElementMap();
+        List<String> loadToolIdList = elementMap.values().stream().map(element -> element.getLoadToolId()).collect(Collectors.toList());
+
+
         HumanCondition humanCondition = new HumanCondition()
                 .filterEqual(CloudPluginSceneElementModel::getScene, id)
                 .filterEqual(CloudPluginSceneElementModel::getVirtualType, BaseCloudPluginSceneElementModel.VirtualType.LOAD);
