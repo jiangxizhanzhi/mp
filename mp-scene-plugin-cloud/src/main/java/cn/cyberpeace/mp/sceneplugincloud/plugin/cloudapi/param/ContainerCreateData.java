@@ -26,7 +26,7 @@ public class ContainerCreateData implements CloudHttpData {
     private Boolean interactive;
     private Boolean tty;
     private Boolean run;
-    private Boolean privilege;
+    private Boolean privileged;
     private Boolean keepNicsSequence;
     private String command;
     private String postCommand;
