@@ -841,6 +841,9 @@ public class FlowInfoService {
             sourceBuilder.aggregation(aggBuilder);
         }
 
+        queryBuilder.mustNot(QueryBuilders.termsQuery("source.ip", "172.19.254.10"));
+        queryBuilder.mustNot(QueryBuilders.termsQuery("destination.ip", "172.19.254.10"));
+
         searchRequest.source(sourceBuilder.query(queryBuilder));
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
@@ -858,6 +861,9 @@ public class FlowInfoService {
     private SearchResponse esListQuery(BoolQueryBuilder queryBuilder, Integer pageNum, Integer pageSize) {
         String[] indexArray = getFlowIndex();
         var searchRequest = new SearchRequest(indexArray);
+
+        queryBuilder.mustNot(QueryBuilders.termsQuery("source.ip", "172.19.254.10"));
+        queryBuilder.mustNot(QueryBuilders.termsQuery("destination.ip", "172.19.254.10"));
 
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         if (pageNum != null) {
