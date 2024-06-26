@@ -432,7 +432,7 @@ public class CsceneController implements BaseModelListControllerBase {
                 String newAreaId = idMap.get(oldAreaId);
                 e.setId(newNodeId);
                 e.setArea(newAreaId);
-                if (!e.getOuterPosition2().isEmpty()) {
+                if (e.getOuterPosition2() != null && !e.getOuterPosition2().isEmpty()) {
                     Map<String, String> newOuterPosition2 = new HashMap<>();
                     for (Map.Entry<String, String> entry : e.getOuterPosition2().entrySet()) {
                         String area = entry.getKey();
