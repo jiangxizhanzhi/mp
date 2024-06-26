@@ -35,11 +35,13 @@ public class HardwareLimitUtils {
         int freeRam = 0, freeDisk = 0;
 
         for (var stat : statistics) {
-            totalRam += stat.getRam();
-            totalDisk += stat.getDisk();
+            if ("up".equals(stat.getState()) && "enabled".equals(stat.getStatus())) {
+                totalRam += stat.getRam();
+                totalDisk += stat.getDisk();
 
-            usedDisk += stat.getDiskUsed();
-            usedRam += stat.getRamUsed();
+                usedDisk += stat.getDiskUsed();
+                usedRam += stat.getRamUsed();
+            }
         }
 
         freeRam = totalRam - usedRam;
@@ -95,6 +97,8 @@ public class HardwareLimitUtils {
         private Integer weight;
         private Integer maxInstances;
         private boolean serviceStatus;
+        private String state;
+        private String status;
     }
 
     private static HardwareCount getHardwareCount(List<SceneElementBO> elements) {
