@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.CloudDevice;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtNet;
 import cn.cyberpeace.mp.devopscluster.po.*;
 import cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper;
 import cn.cyberpeace.mp.devopscluster.vo.EquipmentRequestVO;
@@ -189,7 +188,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 device.setDefaultLaunchImageName(target.getName());
                 device.setCreatedAt(String.valueOf(target.getCreateTime()));
                 device.setCloudServiceType(target.getCloudServiceType());
-                //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储 )
+                //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储)
                 switch (target.getCloudServiceType()) {
                     case "1":
                         device.setServiceType(target.getNetType());
@@ -488,7 +487,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             //todo 筛选出需要的VM镜像
             System.out.println("PublisherName: " + publisher.name());
             if (publisher.name() != null && (publisher.name().contains("Canonical") || publisher.name().contains("canonical")
-                    || publisher.name().contains("centos") || publisher.name().contains("windows"))) {
+                    || publisher.name().contains("RedHat") || publisher.name().contains("Microsoft"))) {
                 // 获取发布者的所有产品(offer)
                 VirtualMachineOffers offers = publisher.offers();
                 PagedIterable<VirtualMachineOffer> list = offers.list();
@@ -499,13 +498,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
                     PagedIterable<VirtualMachineSku> skuList = skus.list();
                     for (VirtualMachineSku sku : skuList) {
                         System.out.println("skuName: " + sku.name());
-
-                        JSONObject third = new JSONObject();
-                        third.put("imageName", offer.name());
-                        third.put("PublisherName", publisher.name());
-                        third.put("offerName", offer.name());
-                        third.put("skuName", sku.name());
-                        result.add(third);
                         // 获取每个SKU的所有版本（image versions）
                         PagedIterable<VirtualMachineImage> imageList = sku.images().list();
                         int time = 0;
@@ -513,14 +505,13 @@ public class MicrosoftAzureConverter implements BaseConverter {
                             if (time < 1) {
                                 time++;
 
-                                //休眠0.5秒
+                                //休眠0.5秒,请求速度过快会导致请求微软云的连接中断
                                 try {
                                     Thread.sleep(500);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
 
-                                result.remove(third);
                                 JSONObject forth = new JSONObject();
                                 forth.put("imageName", offer.name());
                                 forth.put("imageVersion", image.version());

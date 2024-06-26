@@ -67,23 +67,23 @@ public class CloudTargetConverter {
         extVm.setUsername("admin123");
         extVm.setPassword("NHiOJiZTD4K1");
         extVm.setVmType(target.getOperatingSystem());
+        extVm.setExtInfo(null);
+        extVm.setInstanceExist(false);
+        extVm.setSnapshotCount(0);//快照计数
+        extVm.setInstanceState(0);
+        extVm.setIsoAttach(false);
 
         //访问协议
         List<AccessProtocol> accessProtocols = new ArrayList<>();
         AccessProtocol accessProtocol = new AccessProtocol();
+        //ip地址
         accessProtocol.setHostname("");
-        //1:分配公网ip 2:外部网络直接访问 3:私网ip地址
-        accessProtocol.setAccessType("3");
         accessProtocol.setProtocol("SSH");
         accessProtocols.add(accessProtocol);
         extVm.setAccessProtocols(accessProtocols);
+        extVm.setIsPublicIp(false);
+        extVm.setIsPublicIpAddress("");
 
-        extVm.setExtInfo(null);
-        extVm.setInstanceExist(false);
-        //快照计数
-        extVm.setSnapshotCount(0);
-        extVm.setInstanceState(0);
-        extVm.setIsoAttach(false);
         device.setExtVm(extVm);
 
         /**
@@ -128,12 +128,12 @@ public class CloudTargetConverter {
         extDocker.setQuickCreateSupport(true);
         extDocker.setSnapshotCount(0);
         extDocker.setExtInfo(new Snapshot.ExtInfo());
+        extDocker.setIsPublicIp(false);
+        extDocker.setIsPublicIpAddress("");
 
         //访问协议
         List<AccessProtocol> accessProtocols = new ArrayList<>();
         AccessProtocol accessProtocol = new AccessProtocol();
-        //1:分配公网ip 2:外部网络直接访问 3:私网ip地址
-        accessProtocol.setAccessType("1");
         accessProtocol.setHostname("");
         accessProtocol.setProtocol("SSH");
         accessProtocols.add(accessProtocol);

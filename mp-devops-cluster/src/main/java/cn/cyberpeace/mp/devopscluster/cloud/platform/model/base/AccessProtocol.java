@@ -2,12 +2,10 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.model.base;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 /**
  * 访问协议
@@ -74,7 +72,4 @@ public class AccessProtocol implements Serializable {
 
     @ApiModelProperty("是否管理接入")
     private Boolean manageMode;
-
-    @ApiModelProperty("访问类型")
-    private String accessType;
 }

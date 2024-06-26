@@ -22,38 +22,21 @@ public class ExtVm implements Serializable {
     @ApiModelProperty("flavor信息")
     private String flavor;
 
-    /**
-     * 支持初始化
-     */
     @ApiModelProperty("支持初始化")
     private Boolean initSupport;
 
-    /**
-     * 支持快速创建
-     */
     @ApiModelProperty("支持快速创建")
     private Boolean quickCreateSupport;
 
-    /**
-     * 接入方式
-     */
     @ApiModelProperty("接入方式")
     private List<AccessProtocol> accessProtocols;
 
-    /**
-     * 快速构建
-     */
+    @ApiModelProperty("快速构建")
     private List<QuickCreateParam> quickCreateParams;
 
-    /**
-     * 额外信息
-     */
     @ApiModelProperty("扩展信息")
     private Object extInfo;
 
-    /**
-     * 实例是否存在
-     */
     @ApiModelProperty("实例是否存在")
     private Boolean instanceExist;
 
@@ -80,8 +63,10 @@ public class ExtVm implements Serializable {
 
     @ApiModelProperty("是否挂载ISO文件")
     private Boolean isoAttach;
+
     @ApiModelProperty("ISO文件名称")
     private String isoAttachFilename;
+
     @ApiModelProperty("ISO临时文件地址")
     private String isoTmpdirUuid;
 
@@ -94,20 +79,18 @@ public class ExtVm implements Serializable {
     @ApiModelProperty("漏洞信息")
     private String loopholeInfo;
 
-    /**
-     * 云场景节点公共用户名
-     */
-    @ApiModelProperty("用户名")
+    @ApiModelProperty("云场景节点公共用户名")
     private String username;
 
-    /**
-     * 云场景节点公共密码
-     */
-    @ApiModelProperty("密码")
+    @ApiModelProperty("云场景节点公共密码")
     private String password;
 
-    /**
-     * 操作系统
-     */
+    @ApiModelProperty("操作系统")
     private String vmType;
+
+    @ApiModelProperty("是否分配公网ip")
+    private Boolean isPublicIp;
+
+    @ApiModelProperty("公网ip")
+    private String isPublicIpAddress;
 }
