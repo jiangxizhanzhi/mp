@@ -195,6 +195,7 @@ public class FsCommon {
     }
 
     public static byte[] downloadRawContent(String fileKey) {
+        fileKey = StringUtils.replaceOnce(fileKey, "/api/mp/file/", "");
         byte[] byteContent;
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             download(fileKey, os);
