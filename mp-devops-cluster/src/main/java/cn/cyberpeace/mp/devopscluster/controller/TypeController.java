@@ -60,11 +60,12 @@ public class TypeController {
 
     /**
      * 查询所有分类
+     *
      * @return
      */
     @ApiOperation("查询所有靶标分类")
     @GetMapping("/target-categories")
-    public Result<TypeAllVO> targetCategories(){
+    public Result<TypeAllVO> targetCategories() {
         TypeAllConvertModel roles = typeConverter.findRoles();
         TypeAllConvertModel entityRoles = typeConverter.findEntityRoles();
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
@@ -74,7 +75,7 @@ public class TypeController {
         TypeAllConvertModel imageType = typeConverter.findImageType();
         TypeAllVO allResponse = new TypeAllVO();
         List<SerialPortConvertModel> serialPortConvertModels = serialPortConverter.list();
-        allResponse.setSerialPortRespons(Lists.newArrayList(new SerialPortVO(CCM_1,CCM_1,serialPortConvertModels)));
+        allResponse.setSerialPortRespons(Lists.newArrayList(new SerialPortVO(CCM_1, CCM_1, serialPortConvertModels)));
         allResponse.setSwitchConvertModels(switchConverter.treeList());
         allResponse.setAccessProtocolsPorts(typeService.findAccessProtocolsPort().getList());
         allResponse.setSnmpVersions(Objects.nonNull(snmpVersion) ? snmpVersion.getIdStringModelList() : null);
@@ -98,8 +99,8 @@ public class TypeController {
     @ApiOperation("查询所有镜像管理分类")
     @ApiImplicitParam(name = "isAll", value = "是否全部", dataTypeClass = Boolean.class)
     @GetMapping("/image-mg-categories")
-    public Result<TypeAllVO> imageCategories(Boolean isAll){
-        if (Objects.isNull(isAll)){
+    public Result<TypeAllVO> imageCategories(Boolean isAll) {
+        if (Objects.isNull(isAll)) {
             isAll = Boolean.FALSE;
         }
         TypeAllConvertModel roles = typeConverter.findRoles(isAll);
@@ -129,33 +130,117 @@ public class TypeController {
     }
 
     /**
+     * 查询所有分类（实装）
+     */
+    @AuthTarget(TargetEnum.REAL_MANAGE)
+    @ApiOperation("查询所有分类")
+    @ApiImplicitParam(name = "justFirst", value = "获取第一层", dataTypeClass = Boolean.class)
+    @GetMapping("/real-equipment-categories")
+    public Result<TypeAllVO> realEquipmentCategories(@RequestParam Boolean justFirst) {
+        TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
+        if (Objects.isNull(l1AndL2AndL3Type)) {
+            return new Result<>();
+        }
+
+        // 根据产品规划，需要对获取的分类名称进行修改增删
+        // 修改为：服务器（原操作系统）/网络设备/防御资源（原安全设备）/攻击资源/硬件外设
+        List<TypeConvertModel> newFirst = new ArrayList<>();
+        List<TypeConvertModel> newSecond = new ArrayList<>();
+        List<TypeConvertModel> newThird = new ArrayList<>();
+        List<Integer> l1Ids = new ArrayList<>();
+        List<Integer> l2Ids = new ArrayList<>();
+
+        // 修改一级分类
+        for (TypeConvertModel typeConvertModel : l1AndL2AndL3Type.getFirstTypeList()) {
+            if ("操作系统".equals(typeConvertModel.getName())) {
+                l1Ids.add(typeConvertModel.getId());
+                typeConvertModel.setName("服务器");
+                newFirst.add(typeConvertModel);
+            } else if ("网络设备".equals(typeConvertModel.getName())) {
+                l1Ids.add(typeConvertModel.getId());
+                newFirst.add(typeConvertModel);
+            } else if ("安全防护设备".equals(typeConvertModel.getName())) {
+                l1Ids.add(typeConvertModel.getId());
+                typeConvertModel.setName("防御资源");
+                newFirst.add(typeConvertModel);
+            }
+        }
+        // 添加新的两个一级分类
+        List<Integer> newTypeIds = getNewTypeId(l1Ids, 2);
+        TypeConvertModel typeConvertModel1 = new TypeConvertModel();
+        typeConvertModel1.setId(newTypeIds.get(0));
+        typeConvertModel1.setName("攻击资源");
+        TypeConvertModel typeConvertModel2 = new TypeConvertModel();
+        typeConvertModel2.setId(newTypeIds.get(1));
+        typeConvertModel2.setName("硬件外设");
+        newFirst.add(typeConvertModel1);
+        newFirst.add(typeConvertModel2);
+
+        // 若只获取一级分类信息，则直接返回
+        if (null != justFirst && !justFirst){
+            // 修改二级分类
+            for (TypeConvertModel typeConvertModel : l1AndL2AndL3Type.getSecondTypeList()) {
+                if (l1Ids.contains(typeConvertModel.getL1ParentId())) {
+                    newSecond.add(typeConvertModel);
+                    l2Ids.add(typeConvertModel.getId());
+                }
+            }
+
+            // 修改三级分类
+            for (TypeConvertModel typeConvertModel : l1AndL2AndL3Type.getThirdTypeList()) {
+                if (l2Ids.contains(typeConvertModel.getL1ParentId())) {
+                    newThird.add(typeConvertModel);
+                }
+            }
+        }
+
+        // 拼装返回对象
+        return new Result<>(new TypeAllVO(newFirst, newSecond, newThird));
+    }
+
+    private List<Integer> getNewTypeId(List<Integer> l1Ids, int count) {
+        List<Integer> result = new ArrayList<>();
+        for (int i = 1; i <= l1Ids.size() + count; i++) {
+            if (!l1Ids.contains(i)) {
+                result.add(i);
+                if (result.size() == count) {
+                    return result;
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
      * 查询所有分类
+     *
      * @return
      */
     @AuthTarget(TargetEnum.REAL_MANAGE)
     @ApiOperation("查询所有分类")
     @GetMapping("/categories")
-    public Result<TypeAllVO> list(){
+    public Result<TypeAllVO> list() {
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
-        if (Objects.isNull(l1AndL2AndL3Type)){
+        if (Objects.isNull(l1AndL2AndL3Type)) {
             return new Result<>();
         }
         TypeAllVO response = new TypeAllVO(l1AndL2AndL3Type.getFirstTypeList(),
-                l1AndL2AndL3Type.getSecondTypeList(),l1AndL2AndL3Type.getThirdTypeList());
+                l1AndL2AndL3Type.getSecondTypeList(), l1AndL2AndL3Type.getThirdTypeList());
         return new Result<>(response);
     }
 
     /**
      * 查询所有分类
+     *
      * @return
      */
     @AuthTarget(TargetEnum.DEVOPS_CATEGORY_GROUP)
     @ApiOperation("查询所有二级分类")
     @ApiImplicitParam(name = "firstTypeId", value = "一级分类id", dataTypeClass = Integer.class)
     @GetMapping("/l2-categories")
-    public Result<TypeL2AllVO> l2List(@RequestParam(value = "firstTypeId", required = false) Integer firstTypeId){
+    public Result<TypeL2AllVO> l2List(@RequestParam(value = "firstTypeId", required = false) Integer firstTypeId) {
         ListResult<TargetType> l1AndL2AndL3Type = typeConverter.findL1AndL2Type();
-        if (Objects.isNull(l1AndL2AndL3Type)){
+        if (Objects.isNull(l1AndL2AndL3Type)) {
             return new Result<>();
         }
         if (Objects.nonNull(firstTypeId)) {
@@ -172,16 +257,16 @@ public class TypeController {
         return new Result<>(new TypeL2AllVO(l1AndL2AndL3Type.getList()));
     }
 
-
     /**
      * 查询所有角色
+     *
      * @return
      */
     @ApiOperation("查询所有角色")
     @GetMapping("/roles")
-    public Result<TypeAllVO>  roles(){
+    public Result<TypeAllVO> roles() {
         TypeAllConvertModel model = typeConverter.findRoles();
-        if (Objects.isNull(model)){
+        if (Objects.isNull(model)) {
             return new Result<>();
         }
         TypeAllVO response = new TypeAllVO();
@@ -191,13 +276,14 @@ public class TypeController {
 
     /**
      * 查询所有部署类型
+     *
      * @return
      */
     @ApiOperation("查询所有部署类型")
     @GetMapping("/deploy_type")
-    public Result<TypeAllVO>  deployType(){
+    public Result<TypeAllVO> deployType() {
         TypeAllConvertModel model = typeConverter.findDeployType();
-        if (Objects.isNull(model)){
+        if (Objects.isNull(model)) {
             return new Result<>();
         }
         TypeAllVO response = new TypeAllVO();
@@ -207,13 +293,14 @@ public class TypeController {
 
     /**
      * 查询所有虚拟类型
+     *
      * @return
      */
     @ApiOperation("查询所有虚拟类型")
     @GetMapping("/image-types")
-    public Result<TypeAllVO> imageType(){
+    public Result<TypeAllVO> imageType() {
         TypeAllConvertModel model = typeConverter.findImageType();
-        if (Objects.isNull(model)){
+        if (Objects.isNull(model)) {
             return new Result<>();
         }
         TypeAllVO response = new TypeAllVO();
@@ -223,13 +310,14 @@ public class TypeController {
 
     /**
      * 查询所有语言
+     *
      * @return
      */
     @ApiOperation("查询所有语言")
     @GetMapping("/language")
-    public Result<TypeAllVO> language(){
+    public Result<TypeAllVO> language() {
         TypeAllConvertModel model = typeConverter.findLanguage();
-        if (Objects.isNull(model)){
+        if (Objects.isNull(model)) {
             return new Result<>();
         }
         TypeAllVO response = new TypeAllVO();
@@ -239,13 +327,14 @@ public class TypeController {
 
     /**
      * 查询所有系统架构
+     *
      * @return
      */
     @ApiOperation("查询所有系统架构")
     @GetMapping("/system-architecure")
-    public Result<TypeAllVO> systemArchitecure(){
+    public Result<TypeAllVO> systemArchitecure() {
         TypeAllConvertModel model = typeConverter.findSystemArchitecure();
-        if (Objects.isNull(model)){
+        if (Objects.isNull(model)) {
             return new Result<>();
         }
         TypeAllVO response = new TypeAllVO();
@@ -255,13 +344,14 @@ public class TypeController {
 
     /**
      * 查询支持的磁盘格式
+     *
      * @return
      */
     @ApiOperation("查询支持的磁盘格式")
     @GetMapping("/disk-format")
-    public Result<TypeAllVO> diskFormat(){
+    public Result<TypeAllVO> diskFormat() {
         TypeAllConvertModel model = typeConverter.findDiskFormat();
-        if (Objects.isNull(model)){
+        if (Objects.isNull(model)) {
             return new Result<>();
         }
         TypeAllVO response = new TypeAllVO();
@@ -271,13 +361,14 @@ public class TypeController {
 
     /**
      * 查询所有访问类型
+     *
      * @return
      */
     @ApiOperation("查询所有访问类型")
     @GetMapping("/access-type")
-    public Result<TypeAllVO> accessType(){
+    public Result<TypeAllVO> accessType() {
         TypeAllConvertModel model = typeConverter.findAccessType();
-        if (Objects.isNull(model)){
+        if (Objects.isNull(model)) {
             return new Result<>();
         }
         TypeAllVO response = new TypeAllVO();
@@ -287,18 +378,19 @@ public class TypeController {
 
     /**
      * 查询所有服务分类
+     *
      * @return
      */
     @AuthTarget(TargetEnum.SERVICE_MANAGE)
     @ApiOperation("查询所有服务管理分类")
     @GetMapping("/service-mg-categories")
-    public Result<TypeAllVO> serviceMgCategories(){
+    public Result<TypeAllVO> serviceMgCategories() {
         TypeAllConvertModel serviceCategories = typeConverter.findServiceCategories();
         TypeAllConvertModel deployType = typeConverter.findDeployType();
         TypeAllConvertModel installerPlatforms = typeConverter.findInstallerPlatforms();
 
         TypeAllVO response = new TypeAllVO();
-        response.setDeployType(Objects.nonNull(deployType) ?  deployType.getIdIntegerModelList() : null);
+        response.setDeployType(Objects.nonNull(deployType) ? deployType.getIdIntegerModelList() : null);
         response.setServiceCategories(Objects.nonNull(serviceCategories) ?
                 serviceCategories.getIdStringModelList() : null);
         response.setInstallerPlatforms(Objects.nonNull(installerPlatforms) ? installerPlatforms.getIdStringModelList() : null);
@@ -307,11 +399,12 @@ public class TypeController {
 
     /**
      * 查询所有实装管理分类
+     *
      * @return
      */
     @ApiOperation("查询所有实装管理分类")
     @GetMapping("/entity-mg-categories")
-    public Result<TypeAllVO> entityMgCategories(){
+    public Result<TypeAllVO> entityMgCategories() {
         TypeAllConvertModel entityRoles = typeConverter.findEntityRoles();
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
         TypeAllConvertModel language = typeConverter.findLanguage();
@@ -319,7 +412,7 @@ public class TypeController {
         TypeAllConvertModel snmpVersion = typeConverter.findSnmpVersion();
         TypeAllVO allResponse = new TypeAllVO();
         List<SerialPortConvertModel> serialPortConvertModels = serialPortConverter.list();
-        allResponse.setSerialPortRespons(Lists.newArrayList(new SerialPortVO(CCM_1,CCM_1,serialPortConvertModels)));
+        allResponse.setSerialPortRespons(Lists.newArrayList(new SerialPortVO(CCM_1, CCM_1, serialPortConvertModels)));
         allResponse.setSwitchConvertModels(switchConverter.treeList());
         allResponse.setAccessProtocolsPorts(typeService.findAccessProtocolsPort().getList());
         allResponse.setSnmpVersions(Objects.nonNull(snmpVersion) ? snmpVersion.getIdStringModelList() : null);
@@ -335,14 +428,15 @@ public class TypeController {
 
     /**
      * 查询所有服务分类
+     *
      * @return
      */
     @AuthTarget(TargetEnum.IMAGE_MANAGE)
     @ApiOperation("查询所有服务分类")
     @GetMapping("/service-categories")
-    public Result<TypeAllVO> serviceCategories(){
+    public Result<TypeAllVO> serviceCategories() {
         TypeAllConvertModel model = typeConverter.findServiceCategories();
-        if (Objects.isNull(model)){
+        if (Objects.isNull(model)) {
             return new Result<>();
         }
         TypeAllVO response = new TypeAllVO();
@@ -352,13 +446,14 @@ public class TypeController {
 
     /**
      * 查询所有服务管理-启动参数类型
+     *
      * @return
      */
     @ApiOperation("查询启动参数类型")
     @GetMapping("/service-start-type")
-    public Result<TypeAllVO> serviceStartType(){
+    public Result<TypeAllVO> serviceStartType() {
         TypeAllConvertModel model = typeConverter.findServiceStartType();
-        if (Objects.isNull(model)){
+        if (Objects.isNull(model)) {
             return new Result<>();
         }
         TypeAllVO response = new TypeAllVO();
@@ -368,13 +463,14 @@ public class TypeController {
 
     /**
      * 查询所有平台
+     *
      * @return
      */
     @ApiOperation("查询所有平台数据")
     @GetMapping("/installer-platforms")
-    public Result<TypeAllVO> installerPlatforms(){
+    public Result<TypeAllVO> installerPlatforms() {
         TypeAllConvertModel model = typeConverter.findInstallerPlatforms();
-        if (Objects.isNull(model)){
+        if (Objects.isNull(model)) {
             return new Result<>();
         }
         TypeAllVO response = new TypeAllVO();
@@ -386,21 +482,21 @@ public class TypeController {
     @AuthTarget({TargetEnum.REAL_EQUIPMENT_MANAGEMENT, TargetEnum.REAL_MANAGE})
     @ApiOperation("查询串口配置")
     @GetMapping("/serial-port-list")
-    public Result<List<SerialPortVO>> serialPortList(){
+    public Result<List<SerialPortVO>> serialPortList() {
         return new Result<>(Collections.emptyList());
     }
 
     @AuthTarget(TargetEnum.REAL_MANAGE)
     @ApiOperation("查询交换机部分信息数据")
     @GetMapping("/switch-tree-list")
-    public Result<List<SwitchConvertModel>> treeList(){
+    public Result<List<SwitchConvertModel>> treeList() {
         return new Result<>(switchConverter.treeList());
     }
 
     @AuthTarget(TargetEnum.REAL_EQUIPMENT_MANAGEMENT)
     @ApiOperation("查询交换机所有信息")
     @GetMapping("/switch-list")
-    public Result<List<Switches>> switchList(){
+    public Result<List<Switches>> switchList() {
         return new Result<>(switchConverter.list());
     }
 }
