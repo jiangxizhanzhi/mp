@@ -88,7 +88,7 @@ public class CloudTargetConverter {
         }
         accessProtocols.add(accessProtocol);
         extVm.setAccessProtocols(accessProtocols);
-        extVm.setIsPublicIp(false);
+        extVm.setIsPublicIp(true);
         extVm.setPublicIpAddress("");
 
         device.setExtVm(extVm);
@@ -134,7 +134,7 @@ public class CloudTargetConverter {
         extDocker.setQuickCreateSupport(true);
         extDocker.setSnapshotCount(0);
         extDocker.setExtInfo(new Snapshot.ExtInfo());
-        extDocker.setIsPublicIp(false);
+        extDocker.setIsPublicIp(true);
         extDocker.setPublicIpAddress("");
 
         //访问协议
