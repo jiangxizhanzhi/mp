@@ -291,6 +291,17 @@ public class SceneHandler extends BaseSceneHandler<
                     var portId = sceneElementPort.getId();
                     var pluginPort = plugin.getPort(portId);
                     if (pluginPort != null) {
+                        pluginPort.getSrcPort().getAccessModes().forEach(accessMode -> {
+                            accessMode.setAvailable(true);
+                            accessMode.setUsername("admin123");
+                            accessMode.setPassword("NHiOJiZTD4K1");
+                            accessMode.setPort(22);
+                            accessMode.setProtocol("ssh");
+                            accessMode.setAccessIp("20.2.10.118");
+                            accessMode.setProxy(true);
+                            accessMode.setAccessPort(22);
+                            accessMode.setProxyId("1");
+                    });
                         pluginPorts.put(portId, pluginPort);
                     }
                 });
