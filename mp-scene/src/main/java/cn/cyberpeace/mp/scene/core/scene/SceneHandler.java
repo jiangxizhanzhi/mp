@@ -44,6 +44,8 @@ import cn.cyberpeace.mp.scene.repository.SceneElementPortConnectionMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.scene.repository.ScenePieceMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -304,8 +306,14 @@ public class SceneHandler extends BaseSceneHandler<
                             accessMode.setProxy(true);
                             accessMode.setAccessPort(22);
                             accessMode.setProxyId("1");
-                            Map<String, Object> map = JsonCommon.beanToMap(pluginPort);
-                            map.put("accessModes", accessModes);
+                            // 创建一个ObjectMapper实例
+                            ObjectMapper mapper = new ObjectMapper();
+
+                            // 设置属性命名策略为下划线风格
+                            mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+                            // 将对象转换为Map，同时将属性名转为下划线形式
+                            Map<String, Object> map = mapper.convertValue(pluginPorts, Map.class);
+                            map.put("access_modes", accessModes);
                             pluginPorts.put(portId, map);
                         });
                     }
