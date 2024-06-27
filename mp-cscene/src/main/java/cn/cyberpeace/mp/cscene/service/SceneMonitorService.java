@@ -19,11 +19,13 @@ import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.AccessUserBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -358,8 +360,26 @@ public class SceneMonitorService {
                     }
                 });
             }
-            basicInfos.forEach(basicInfo -> basicInfo.setAccessUsers(nodeId2Users.getOrDefault(basicInfo.getId(), new ArrayList<>())
-                    .stream().distinct().collect(Collectors.toList())));
+            basicInfos.forEach(basicInfo -> {
+                        basicInfo.setAccessUsers(nodeId2Users.getOrDefault(basicInfo.getId(), new ArrayList<>())
+                                .stream().distinct().collect(Collectors.toList()));
+                for (ElementPort port : basicInfo.getPorts()) {
+                    for (CloudAccessMode accessMode : port.getCloudAccessModes()) {
+                        accessMode.setAvailable(true);
+                        accessMode.setUsername("admin123");
+                        accessMode.setPassword("NHiOJiZTD4K1");
+                        accessMode.setPort(22);
+                        accessMode.setProtocol("ssh");
+                        accessMode.setAccessIp("20.2.10.118");
+                        accessMode.setProxy(true);
+                        accessMode.setAccessPort(22);
+                        accessMode.setProxyId("1");
+                    }
+
+                }
+
+
+            });
 
             // 添加定时上报任务
             SceneHostStateReportScheduleService.addCsceneInstance(sceneId);
