@@ -106,7 +106,7 @@ public class CloudUrlConstant {
     public static final String NETWORK_DELETE_URL = "/cloud/v1/network/{network_id}";
     public static final String NETWORK_ACL_CREATE_URL = "/cloud/v1/network/{network_id}/acl";
     public static final String NETWORK_ACL_DELETE_URL = "/cloud/v1/network/{network_id}/acl";
-    public static final String NETWORK_GET_URL = "/cloud/v1/networks/%s";
+    public static final String NETWORK_GET_URL = "/cloud/v1/network/%s";
     public static final String GET_EXTERNAL_NETWORK = "/cloud/v1/scenarios/virtual_internet";
     public static final String NETWORK_QUERY_URL = "/cloud/v1/network";
 
