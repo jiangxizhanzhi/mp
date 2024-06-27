@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneOptionK
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneOptionKeyMapper;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -63,7 +64,9 @@ public class FlowCollector {
     public void deleteCollector(DeleteFlowCollectBo deleteFlowCollectBo) {
 
         flowCollectClient.delArkimeInstance(deleteFlowCollectBo.getCollectorInstanceId());
-        flowCollectClient.delFlowMirror(deleteFlowCollectBo.getFlowMirrorId());
+        if (StringUtils.isNotEmpty(deleteFlowCollectBo.getFlowMirrorId())) {
+            flowCollectClient.delFlowMirror(deleteFlowCollectBo.getFlowMirrorId());
+        }
 
 
         CollectionPluginSceneOptionKeyMapper optionKeyMapper = BeanCommon.getBean(CollectionPluginSceneOptionKeyMapper.class);
