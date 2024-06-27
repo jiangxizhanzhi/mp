@@ -497,7 +497,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<NodeConnectionBO> getRemoteConnection(@RequestParam(required = false) String id,
                                                                @RequestParam(required = false) String nodeId,
                                                                @RequestParam(required = false) String accessModeId,
-                                                               @RequestBody(required = false) CsceneInstanceNodeAccessModeActionRequest request) {
+                                                               @RequestBody(required = false) CsceneInstanceNodeAccessModeActionRequest request,
+                                                               HttpServletResponse response) {
         request = formatNodeAccessModeActionRequest(request, id, nodeId, accessModeId);
         id = request.getId();
         nodeId = request.getNodeId();
@@ -517,6 +518,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                             nodeConnectionBO.setNodeName(element.getName());
                             nodeConnectionBO.setNodeId(nodeId);
                             nodeConnectionBO.setProtocol(a.getProtocol());
+                            String url = modelService.getConnectionUrl(id, nodeId, a.getProtocol(), response)
+                                    .getSource();
+                            nodeConnectionBO.setConnectionUrl(url);
                             return new ServiceResult<>(nodeConnectionBO).asResult();
                         }
                     }
