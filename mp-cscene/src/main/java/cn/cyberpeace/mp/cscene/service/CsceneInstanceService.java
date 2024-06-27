@@ -1637,6 +1637,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         SceneLinkStatusInfo sceneLinkStatusInfo = new SceneLinkStatusInfo();
         sceneLinkStatusInfo.setNodeLinkStatusList(result);
         sceneLinkStatusInfo.setCsceneId(csceneId);
+        sceneLinkStatusInfo.getNodeLinkStatusList().stream().forEach(nodeLinkStatusBO -> {
+            nodeLinkStatusBO.setStatus(1);
+        });
         return new ServiceResult<>(sceneLinkStatusInfo);
     }
 
