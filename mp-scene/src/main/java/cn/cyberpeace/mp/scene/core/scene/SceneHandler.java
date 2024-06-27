@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.ScenePieceBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
 import cn.cyberpeace.mp.scene.core.event.SceneEventHandler;
@@ -28,6 +29,7 @@ import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.event.base.EventTransition;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
+import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementPortBO;
 import cn.cyberpeace.mp.scene.model.SceneAreaModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementPluginModel;
@@ -291,7 +293,8 @@ public class SceneHandler extends BaseSceneHandler<
                     var portId = sceneElementPort.getId();
                     var pluginPort = plugin.getPort(portId);
                     if (pluginPort != null) {
-                        pluginPort.getSrcPort().getAccessModes().forEach(accessMode -> {
+                        List<AccessMode> accessModes = pluginPort.getSrcPort().getAccessModes();
+                        accessModes.forEach(accessMode -> {
                             accessMode.setAvailable(true);
                             accessMode.setUsername("admin123");
                             accessMode.setPassword("NHiOJiZTD4K1");
@@ -301,8 +304,10 @@ public class SceneHandler extends BaseSceneHandler<
                             accessMode.setProxy(true);
                             accessMode.setAccessPort(22);
                             accessMode.setProxyId("1");
-                    });
-                        pluginPorts.put(portId, pluginPort);
+                            Map<String, Object> map = JsonCommon.beanToMap(pluginPort);
+                            map.put("accessModes", accessModes);
+                            pluginPorts.put(portId, map);
+                        });
                     }
                 });
                 portPluginData.put(plugin.getKey(), pluginPorts);
@@ -324,6 +329,7 @@ public class SceneHandler extends BaseSceneHandler<
             return;
         }
         var collectedSceneElement = getCollectedSceneElementBO(nodeId);
+
         reporters.forEach(reporter -> reportTaskPool.executeTask(() -> reporter.reportElement(collectedSceneElement)));
     }
 
