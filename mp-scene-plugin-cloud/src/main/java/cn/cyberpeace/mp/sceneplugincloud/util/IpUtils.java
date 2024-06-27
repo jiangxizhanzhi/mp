@@ -478,8 +478,10 @@ public class IpUtils {
      * @return 地址池与cidr交集大小
      */
     private static int getAvailableAllocationPoolIpSize(List<AllocationPool> allocationPools, long begin, long last) {
+        log.info("getAvailableAllocationPoolIpSize, allocationPools is [{}], begin is [{}], last is [{}]", allocationPools, begin, last);
         int allocationPoolIpSize = getAllocationPoolIpSize(allocationPools);
         List<AllocationPool> newAllocationPools = getAvailableAllocationPool(allocationPools, begin, last);
+        log.info("getAvailableAllocationPoolIpSize, newAllocationPools is [{}]", newAllocationPools);
         newAllocationPools.sort(Comparator.comparing(allocationPool -> Ipv4Util.ipv4ToLong(allocationPool.getEnd())));
         if (Ipv4Util.ipv4ToLong(newAllocationPools.get(newAllocationPools.size() - 1).getEnd()) > last) {
             int endSize = (int) (Ipv4Util.ipv4ToLong(newAllocationPools.get(newAllocationPools.size() - 1).getEnd()) - last);
