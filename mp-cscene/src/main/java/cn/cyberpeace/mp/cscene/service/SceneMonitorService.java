@@ -364,7 +364,8 @@ public class SceneMonitorService {
                         basicInfo.setAccessUsers(nodeId2Users.getOrDefault(basicInfo.getId(), new ArrayList<>())
                                 .stream().distinct().collect(Collectors.toList()));
                 for (ElementPort port : basicInfo.getPorts()) {
-                    for (CloudAccessMode accessMode : port.getCloudAccessModes()) {
+                    for (AccessMode accessMode : port.getAccessModes()) {
+
                         accessMode.setAvailable(true);
                         accessMode.setUsername("admin123");
                         accessMode.setPassword("NHiOJiZTD4K1");

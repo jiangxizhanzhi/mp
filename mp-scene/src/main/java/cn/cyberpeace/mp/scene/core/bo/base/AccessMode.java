@@ -59,6 +59,14 @@ public class AccessMode {
     @ApiModelProperty(value = "访问类型")
     private String accessType;
 
+    @ApiModelProperty(value = "接入ip")
+    private String accessIp;
+    @ApiModelProperty(value = "接入端口")
+    private Integer accessPort;
+    @ApiModelProperty(value = "是否连通")
+    private Boolean available;
+    @ApiModelProperty(value = "代理id")
+    private String proxyId;
 
     public static class Protocol {
         public static final String PING = "ping";
