@@ -207,19 +207,19 @@ public class TypeController {
                 }
             }
             // 添加新的两个三级分类
-            TypeConvertModel typeConvertModel111 = new TypeConvertModel();
-            TypeConvertModel typeConvertModel222 = new TypeConvertModel();
-            typeConvertModel111.setName(typeConvertModel11.getName());
-            typeConvertModel111.setL1ParentId(typeConvertModel1.getId());
-            typeConvertModel111.setL2ParentId(typeConvertModel11.getId());
-            typeConvertModel222.setName(typeConvertModel22.getName());
-            typeConvertModel222.setL1ParentId(typeConvertModel2.getId());
-            typeConvertModel222.setL2ParentId(typeConvertModel22.getId());
-            List<Integer> newTypeIdsFor3 = getNewTypeId(l3Ids, 2);
-            typeConvertModel111.setId(newTypeIdsFor3.get(0));
-            typeConvertModel222.setId(newTypeIdsFor3.get(1));
-            newThird.add(typeConvertModel111);
-            newThird.add(typeConvertModel222);
+            //TypeConvertModel typeConvertModel111 = new TypeConvertModel();
+            //TypeConvertModel typeConvertModel222 = new TypeConvertModel();
+            //typeConvertModel111.setName(typeConvertModel11.getName());
+            //typeConvertModel111.setL1ParentId(typeConvertModel1.getId());
+            //typeConvertModel111.setL2ParentId(typeConvertModel11.getId());
+            //typeConvertModel222.setName(typeConvertModel22.getName());
+            //typeConvertModel222.setL1ParentId(typeConvertModel2.getId());
+            //typeConvertModel222.setL2ParentId(typeConvertModel22.getId());
+            //List<Integer> newTypeIdsFor3 = getNewTypeId(l3Ids, 2);
+            //typeConvertModel111.setId(newTypeIdsFor3.get(0));
+            //typeConvertModel222.setId(newTypeIdsFor3.get(1));
+            //newThird.add(typeConvertModel111);
+            //newThird.add(typeConvertModel222);
         }
 
         // 拼装返回对象
