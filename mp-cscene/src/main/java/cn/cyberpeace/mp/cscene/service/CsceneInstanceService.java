@@ -1337,7 +1337,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<NodeConnectionBO> getRemoteConnection(String id, String nodeId, String accessModeId, CsceneContextBO context) {
-        try {
+        /*try {
             CsceneContextHolder.setCsceneInstanceId(id);
             CsceneContextHolder.setCallAction(CsceneCallAction.NODE_ACCESS_USER);
             if (context == null || StringUtils.isEmpty(context.getAccessUserId())) {
@@ -1362,7 +1362,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             return result;
         } finally {
             CsceneContextHolder.resetContext();
-        }
+        }*/
+
+        var nodeConnection1 = new NodeConnectionBO();
+        nodeConnection1.setConnectionUrl("http://10.108.1.10:9200/guacamole/#/client/MTE3AGMAbXlzcWw=");
+        nodeConnection1.setConnectionId("1");
+        return new ServiceResult<>(nodeConnection1);
     }
 
     public ServiceResult<NodeConnectionBO> getRemoteTtyConnection(String id, String nodeId) {
