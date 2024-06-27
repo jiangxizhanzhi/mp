@@ -30,11 +30,6 @@ public class CloudUrlConstant {
     public static final String CONTAINER_COPY_FILE_URL = "/cloud/v1/container/%s/copy_to_container";
 
     /**
-     * 容器执行命令url
-     */
-    public static final String CONTAINER_COMMAND_URL = "/cloud/v1/container/%s/exec";
-
-    /**
      * 容器获取接入url接口，
      */
     public static final String CONTAINER_GET_URL = "/cloud/v1/scenarios/container/%s";

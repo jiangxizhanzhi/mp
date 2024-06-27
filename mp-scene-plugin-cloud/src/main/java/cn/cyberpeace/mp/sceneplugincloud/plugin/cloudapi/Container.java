@@ -16,6 +16,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -116,7 +117,7 @@ public class Container extends CloudClient {
         ContainerMkdirData dataMkdir = new ContainerMkdirData();
         dataMkdir.setCmd("mkdir");
         dataMkdir.setArgs(Arrays.asList("-p", dstPath));
-        String mkdirUrl = String.format(CloudUrlConstant.CONTAINER_COMMAND_URL, containerId);
+        String mkdirUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
         cloudPost(mkdirUrl, dataMkdir, null, new TypeReference<CloudResponse<Object>>() {}, true);
 
         // 上传文件
@@ -133,13 +134,13 @@ public class Container extends CloudClient {
     private ContainerExecuteData getContainerExecuteDataByCommand(String command) {
         log.info("getContainerExecuteDataByCommand split command is [{}]", command);
         String[] s = command.split(" ");
-        List<String> strings = Arrays.asList(s);
+        List<String> strings = new ArrayList<>(List.of(s));
         String cmd = strings.remove(0);
-
         return new ContainerExecuteData(cmd, strings);
     }
 
     public ContainerExecuteResult executeCommand(String containerId, String command) {
+        log.info("executeCommand split containerId is [{}], command is [{}]", containerId, command);
         final ContainerExecuteData data = getContainerExecuteDataByCommand(command);
 
         String requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);

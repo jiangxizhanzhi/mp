@@ -15,9 +15,4 @@ public class ContainerMkdirData implements CloudHttpData {
 
     private String cmd;
     private List<String> args;
-
-    @Override
-    public boolean multipart() {
-        return true;
-    }
 }
