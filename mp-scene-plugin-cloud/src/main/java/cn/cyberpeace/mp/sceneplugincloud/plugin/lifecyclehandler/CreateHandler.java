@@ -1555,14 +1555,6 @@ public class CreateHandler extends HandlerCommon {
         VirtualRouterCreateData createData = new VirtualRouterCreateData();
         createData.setName(HandlerUtils.genResourceName(sceneId));
         List<VirtualNic> virtualNics = new ArrayList<>();
-        //路由需要接外部网络，以及路由上面配置NAT，30s暂时不支持
-
-        VirtualNic externalVirtualNic = new VirtualNic();
-        externalVirtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
-        externalVirtualNic.setCidr(CloudSingleton.cloudAppConfig.getExternalNetCidr());
-        // cloud-manger 并没有使用该ip
-        externalVirtualNic.setFixedIp(IpUtils.newRandomIps(externalVirtualNic.getCidr(), 1, Collections.emptyList(), null, true).get(0));
-        virtualNics.add(externalVirtualNic);
 
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                 .getPluginHandler(PluginConstant.PLUGIN_KEY);
@@ -1605,6 +1597,24 @@ public class CreateHandler extends HandlerCommon {
             virtualRouterNic.setCidr(virtualNic.getCidr());
             return virtualRouterNic;
         }).collect(Collectors.toList()));
+
+        boolean externalNetExists = false;
+        for (var n : virtualNics) {
+            if (StringUtils.equals(CloudSingleton.cloudAppConfig.getExternalNetId(), n.getNetworkId())) {
+                externalNetExists = true;
+            }
+        }
+        if (!externalNetExists) {
+            //路由需要接外部网络，以及路由上面配置NAT，30s暂时不支持
+            VirtualNic externalVirtualNic = new VirtualNic();
+            externalVirtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
+            externalVirtualNic.setCidr(CloudSingleton.cloudAppConfig.getExternalNetCidr());
+            // cloud-manger 并没有使用该ip
+            externalVirtualNic.setFixedIp(IpUtils.newRandomIps(externalVirtualNic.getCidr(), 1, Collections.emptyList(), null, true)
+                                                  .get(0));
+            virtualNics.add(externalVirtualNic);
+        }
+
         VirtualRouterCreateData virtualRouter = vrClient.create(createData);
         log.info("collected router {}", virtualRouter.getId());
         getPluginHandler().getSceneHandler().setProbeRouter(virtualRouter.getId());
