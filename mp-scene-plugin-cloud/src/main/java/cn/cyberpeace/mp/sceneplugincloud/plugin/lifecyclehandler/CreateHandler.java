@@ -1480,13 +1480,6 @@ public class CreateHandler extends HandlerCommon {
 
         getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_NETWORK);
 
-        // todo 先等30秒用于人手动添加采集路由的外网地址
-//        try {
-//            Thread.sleep(30000);
-//        } catch (InterruptedException e) {
-//            throw new RuntimeException(e);
-//        }
-
         // 再创建网关 和 防火墙
         getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_GATEWAY);
 
@@ -1564,12 +1557,12 @@ public class CreateHandler extends HandlerCommon {
         List<VirtualNic> virtualNics = new ArrayList<>();
         //路由需要接外部网络，以及路由上面配置NAT，30s暂时不支持
 
-//        VirtualNic externalVirtualNic = new VirtualNic();
-//        externalVirtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
-//        externalVirtualNic.setCidr(CloudSingleton.cloudAppConfig.getExternalNetCidr());
+        VirtualNic externalVirtualNic = new VirtualNic();
+        externalVirtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
+        externalVirtualNic.setCidr(CloudSingleton.cloudAppConfig.getExternalNetCidr());
         // cloud-manger 并没有使用该ip
-//        externalVirtualNic.setFixedIp(IpUtils.newRandomIps(externalVirtualNic.getCidr(), 1, Collections.emptyList(), null, true).get(0));
-//        virtualNics.add(externalVirtualNic);
+        externalVirtualNic.setFixedIp(IpUtils.newRandomIps(externalVirtualNic.getCidr(), 1, Collections.emptyList(), null, true).get(0));
+        virtualNics.add(externalVirtualNic);
 
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                 .getPluginHandler(PluginConstant.PLUGIN_KEY);
