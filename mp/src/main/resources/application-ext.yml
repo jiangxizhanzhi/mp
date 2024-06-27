@@ -85,7 +85,7 @@ mp:
       dhcp-ip-allocate: ${MP_DHCP_IP_ALLOCATE:true}
       external_net_id: ${MP_EXTERNAL_NET_ID:fc6213d4-1966-4d01-9cf3-a3a29e786a8f}
       external_net_cidr: ${MP_EXTERNAL_NET_CIDR:10.4.1.0/24}
-      external_net_pool: ${MP_EXTERNAL_NET_POOL:10.4.1.0.150-10.4.1.0.180,10.4.1.0.181-10.4.1.0.230} # 外部网络ip地址地址池
+      external_net_pool: ${MP_EXTERNAL_NET_POOL:10.4.1.150-10.4.1.180,10.4.1.181-10.4.1.230} # 外部网络ip地址地址池
   monitor:
     ext-var:
       monitor-cp-cloud-interval: ${MP_MONITOR_CP_SRV_INTERVAL:}
