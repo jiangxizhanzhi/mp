@@ -87,11 +87,11 @@ public class FlowCollectClient {
         final ContainerGetData containerGetData = container.getContainerByName(instanceId);
         if (containerGetData == null) {
             log.error("delArkimeInstance find no containerId by containName {}", instanceId);
-            throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_DELETE_ERROR, "通过arkime名称未找到容器id");
+        } else {
+            ContainerDeleteData containerDeleteData = new ContainerDeleteData();
+            containerDeleteData.setContainers(Lists.newArrayList(containerGetData.getId()));
+            containerClient.delete(containerDeleteData);
         }
-        ContainerDeleteData containerDeleteData = new ContainerDeleteData();
-        containerDeleteData.setContainers(Lists.newArrayList(containerGetData.getId()));
-        containerClient.delete(containerDeleteData);
     }
 
     public void delFlowMirror(String flowMirrorId) {
