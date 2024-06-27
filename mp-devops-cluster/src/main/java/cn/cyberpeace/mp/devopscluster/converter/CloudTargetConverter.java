@@ -81,10 +81,13 @@ public class CloudTargetConverter {
         accessProtocol.setHostname("");
         if (operatingSystem!= null && "Linux".equals(operatingSystem)) {
             accessProtocol.setProtocol("SSH");
+            extVm.setProtocols("SSH");
         } else if (operatingSystem!= null && "Windows".equals(operatingSystem)) {
             accessProtocol.setProtocol("RDP");
+            extVm.setProtocols("RDP");
         } else {
             accessProtocol.setProtocol("SSH");
+            extVm.setProtocols("SSH");
         }
         accessProtocols.add(accessProtocol);
         extVm.setAccessProtocols(accessProtocols);
@@ -136,6 +139,7 @@ public class CloudTargetConverter {
         extDocker.setExtInfo(new Snapshot.ExtInfo());
         extDocker.setIsPublicIp(true);
         extDocker.setPublicIpAddress("");
+        extDocker.setProtocols("SSH");
 
         //访问协议
         List<AccessProtocol> accessProtocols = new ArrayList<>();

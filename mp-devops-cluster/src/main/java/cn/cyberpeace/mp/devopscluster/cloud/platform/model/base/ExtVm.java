@@ -93,4 +93,7 @@ public class ExtVm implements Serializable {
 
     @ApiModelProperty("公网ip")
     private String publicIpAddress;
+
+    @ApiModelProperty("接入协议")
+    private String protocols;
 }
