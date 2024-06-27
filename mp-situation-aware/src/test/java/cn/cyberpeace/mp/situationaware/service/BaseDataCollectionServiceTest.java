@@ -117,7 +117,7 @@ public class BaseDataCollectionServiceTest {
         wazuhEventRequest.setAgentNames(Lists.newArrayList("ubuntu1", "windows_agent1"));
         wazuhEventRequest.setStartTime(LocalDateTime.now().minusDays(1));
         wazuhEventRequest.setEndTime(LocalDateTime.now());
-        List<WazuhHostStateModel> wazuhHostStateModelList = dataCollectionService.queryHostStateEventsWithTimeRange(wazuhEventRequest);
+        List<WazuhHostStateModel> wazuhHostStateModelList = dataCollectionService.queryHostStateEventsWithTimeRange(wazuhEventRequest,null);
         System.out.println(wazuhHostStateModelList);
     }
 

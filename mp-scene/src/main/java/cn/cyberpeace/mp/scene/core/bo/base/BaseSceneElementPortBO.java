@@ -48,6 +48,8 @@ public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel
     private Integer order;
     @ApiModelProperty(value = "是否辅助端口")
     private Boolean isAuxiliary;
+    @ApiModelProperty(value = "接入协议")
+    private String protocols;
 
     @JsonIgnore
     private E element;

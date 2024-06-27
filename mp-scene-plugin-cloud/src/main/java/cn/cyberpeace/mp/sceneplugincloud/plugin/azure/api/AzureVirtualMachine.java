@@ -26,6 +26,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class AzureVirtualMachine {
@@ -127,6 +128,12 @@ public class AzureVirtualMachine {
                             capabilityMap.put("MaxSizeUnit", "TB");
                         }
                     }
+//                    管理网络占用网卡数 网卡数-1
+                    Pattern pattern = Pattern.compile("-?\\d+");
+                    if (null != capabilityMap.get("MaxNetworkInterfaces") && pattern.matcher(capabilityMap.get("MaxNetworkInterfaces")).matches()) {
+                        capabilityMap.put("MaxNetworkInterfaces", String.valueOf(Integer.parseInt(capabilityMap.get("MaxNetworkInterfaces")) - 1));
+                    }
+
 
                     dataMaps.add(capabilityMap);
                 }

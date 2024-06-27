@@ -445,6 +445,26 @@ public abstract class BaseSceneHandler<
             }
             elementPorts.forEach(elementPort -> {
                 elementPort.setElement(element);
+//                  组装asseccModels
+        /*        Integer cloudType = getScene().getCloudType();
+                if (cloudType != null && cloudType != BaseSceneModel.CloudType.DEFAULT) {
+
+                    String protocols = elementPort.getProtocols();
+                    ArrayList<AccessMode> accessModes = new ArrayList<>();
+                    if (protocols != null) {
+                        for (String protocol : protocols.split(";")) {
+                            AccessMode accessMode = new AccessMode();
+//                            accessMode.setUsername(element.getUsername());
+//                            accessMode.setPassword(element.getPassword());
+                            accessMode.setPort(AccessMode.Protocol.DEFAULT_PORT_MAP.get(protocol));
+                            accessMode.setPrivateKeyEnable(false);
+                            accessMode.setProtocol(protocol);
+                            accessMode.setProxy(true);
+                            accessModes.add(accessMode);
+                        }
+                        elementPort.setAccessModes(accessModes);
+                    }
+                }*/
                 elementPortMap.put(elementPort.getId(), elementPort);
                 portIdElementMap.put(elementPort.getId(), element);
             });

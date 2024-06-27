@@ -73,6 +73,7 @@ import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
@@ -677,6 +678,22 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (recorder != null) {
             recorder.refreshSceneBO(scene);
         }
+        data.getScene().getPlugins().get("cpcloud").getElementPorts().forEach((nodeId, element) -> {
+            CloudAccessMode accessMode = new CloudAccessMode();
+            accessMode.setAvailable(true);
+            accessMode.setUsername("admin123");
+            accessMode.setPassword("NHiOJiZTD4K1");
+            accessMode.setPort(22);
+            accessMode.setProtocol("ssh");
+            accessMode.setAccessIp("20.2.10.118");
+            accessMode.setProxy(true);
+            accessMode.setAccessPort(22);
+            accessMode.setProxyId("1");
+            ArrayList<CloudAccessMode> cloudAccessModes = new ArrayList<>();
+            cloudAccessModes.add(accessMode);
+            element.put("access_modes", cloudAccessModes);
+        });
+
         return new ServiceResult<>(data);
     }
 
