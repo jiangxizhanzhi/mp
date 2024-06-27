@@ -594,11 +594,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             log.error("user id:{} not existed!", userId);
         }
 
+        
         // 禁用之后立即使登录的token失效
         UserModel updateUser = new UserModel();
         updateUser.setId(userId);
         updateUser.initDefault("tokenSecret");
         this.update(updateUser);
+
 
         userCacheService.evictAllUserCache();
         return false;
