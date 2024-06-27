@@ -114,6 +114,7 @@ public class FlowExecutor {
         flowActuatorModel.setInstanceId(trex.getId());
         flowActuatorModel.setIp(ip);
         flowActuatorModel.setNetworkId(externalNetworkInfoRes.getId());
+        flowActuatorModel.setStatus(0);
         flowActuatorMapper.create(flowActuatorModel);
 
         // 添加流量任务网口信息
@@ -153,8 +154,10 @@ public class FlowExecutor {
     public void deleteExecutor(String executorId) {
         VirtualMachine vmClient = new VirtualMachine();
         FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(executorId);
-        String trexInstanceId = flowActuatorModel.getInstanceId();
-        vmClient.deleteInstanceById(trexInstanceId);
+        if (flowActuatorModel != null) {
+            String trexInstanceId = flowActuatorModel.getInstanceId();
+            vmClient.deleteInstanceById(trexInstanceId);
+        }
     }
 
 
