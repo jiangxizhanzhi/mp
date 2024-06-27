@@ -558,6 +558,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             UserModel userModel = userOptional.get();
             if (Objects.equals(userModel.getIsEnabled(), UserModel.Status.ENABLED)) {
                 UserModel updateUser = UserModel.builder().id(userId).isEnabled(UserModel.Status.DISABLED).build();
+                // 禁用之后立即使登录的token失效
+                updateUser.initDefault("tokenSecret");
                 return getModelMapper().update(updateUser);
             }
             log.error("user id:{} has an incorrect status! [Is Not Enabled!]", userId);
