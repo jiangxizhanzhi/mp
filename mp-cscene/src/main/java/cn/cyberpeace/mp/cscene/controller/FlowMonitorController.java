@@ -317,66 +317,62 @@ public class FlowMonitorController {
     @GetMapping("/assets_statistics")
     public ServiceResult<List<AssetsStatisticsResponse>> getAssetsStatistics(AssetsStatisticsRequest request) {
         log.info("assets_statistics params: {}", JsonCommon.stringify(request));
-        try {
-            // 转换场景id
-            List<String> sceneIds = csceneCommonService.translateSceneIds(request.getSceneIds());
-            if (CollectionUtils.isEmpty(sceneIds)) {
-                log.error("translateSceneIds is null");
-                throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
-            }
-            List<SceneAssetsBO> sceneAssetsList = scenePluginCollectionSceneService.listSceneAssets(sceneIds).getSource();
-
-            List<AssetsStatisticsResponse> responseList = new ArrayList<>();
-            // 统计资产数量
-            sceneIds.forEach(id -> {
-                SceneAssetsBO sceneAssetsBO = sceneAssetsList.stream().filter(list -> id.equals(list.getSceneId())).findFirst().get();
-                List<CategoryGroupBO> categoryGroups = sceneAssetsBO.getCategoryGroups();
-                // 操作系统
-                List<CategoryGroupBO> osList = categoryGroups.stream().filter(group -> group.getCategory() == 1).collect(Collectors.toList());
-                // 应用系统
-                List<CategoryGroupBO> asList = categoryGroups.stream().filter(group -> group.getCategory() == 2).collect(Collectors.toList());
-                // 网络设备
-                List<CategoryGroupBO> networkList = categoryGroups.stream().filter(group -> group.getCategory() == 3).collect(Collectors.toList());
-                // 安全设备
-                List<CategoryGroupBO> ssList = categoryGroups.stream().filter(group -> group.getCategory() == 4).collect(Collectors.toList());
-//            虚拟机、容器分类1 边界设备分类3
-                SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
-                CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-                // 虚拟机
-                List<SceneElementBO> vmList = categoryGroups.stream()
-                        .filter(group -> group.getCategory() == 1)
-                        .flatMap(group -> group.getElements().stream())
-                        .filter(element -> BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudPlugin.getElement(element.getId()).getImageType()))
-                        .collect(Collectors.toList());
-                // 容器
-                List<SceneElementBO> containerList = categoryGroups.stream()
-                        .filter(group -> group.getCategory() == 1)
-                        .flatMap(group -> group.getElements().stream())
-                        .filter(element -> BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(cloudPlugin.getElement(element.getId()).getImageType()))
-                        .collect(Collectors.toList());
-                AssetsStatisticsResponse response =
-                        AssetsStatisticsResponse.builder().sceneId(id)
-                                .assetsTotal(sceneAssetsBO.getNodeCount())
-                                .ipTotal(sceneAssetsBO.getIpCount())
-                                .operationSystemCount(CollectionUtils.isNotEmpty(osList) ? osList.get(0).getElements().size() : 0)
-                                .applicationSystemCount(CollectionUtils.isNotEmpty(asList) ? asList.get(0).getElements().size() : 0)
-                                .networkCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0)
-                                .safetySystemCount(CollectionUtils.isNotEmpty(ssList) ? ssList.get(0).getElements().size() : 0)
-                                .vmCount(CollectionUtils.isNotEmpty(vmList) ? vmList.size() : 0)
-                                .containerCount(CollectionUtils.isNotEmpty(containerList) ? containerList.size() : 0)
-//                            TODO 目前没有做Azure web
-                                .webCount(0)
-//                            暂定 可能不准确
-                                .peripheryCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0)
-                                .build();
-                responseList.add(response);
-            });
-
-            return ResultCommon.success(responseList);
-        }catch (Exception e){
-            log.error(e.getMessage());
-            return ResultCommon.success();
+        // 转换场景id
+        List<String> sceneIds = csceneCommonService.translateSceneIds(request.getSceneIds());
+        if (CollectionUtils.isEmpty(sceneIds)) {
+            log.error("translateSceneIds is null");
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
+        List<SceneAssetsBO> sceneAssetsList = scenePluginCollectionSceneService.listSceneAssets(sceneIds).getSource();
+
+        List<AssetsStatisticsResponse> responseList = new ArrayList<>();
+        // 统计资产数量
+        sceneIds.forEach(id -> {
+            SceneAssetsBO sceneAssetsBO = sceneAssetsList.stream().filter(list -> id.equals(list.getSceneId())).findFirst().get();
+            List<CategoryGroupBO> categoryGroups = sceneAssetsBO.getCategoryGroups();
+            // 操作系统
+            List<CategoryGroupBO> osList = categoryGroups.stream().filter(group -> group.getCategory() == 1).collect(Collectors.toList());
+            // 应用系统
+            List<CategoryGroupBO> asList = categoryGroups.stream().filter(group -> group.getCategory() == 2).collect(Collectors.toList());
+            // 网络设备
+            List<CategoryGroupBO> networkList = categoryGroups.stream().filter(group -> group.getCategory() == 3).collect(Collectors.toList());
+            // 安全设备
+            List<CategoryGroupBO> ssList = categoryGroups.stream().filter(group -> group.getCategory() == 4).collect(Collectors.toList());
+//            虚拟机、容器分类1 边界设备分类3
+            SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
+            CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+            // 虚拟机
+            List<SceneElementBO> vmList = categoryGroups.stream()
+                    .filter(group -> group.getCategory() == 1)
+                    .flatMap(group -> group.getElements().stream())
+                    .filter(element -> BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudPlugin.getElement(element.getId()).getImageType()))
+                    .collect(Collectors.toList());
+            // 容器
+            List<SceneElementBO> containerList = categoryGroups.stream()
+                    .filter(group -> group.getCategory() == 1)
+                    .flatMap(group -> group.getElements().stream())
+                    .filter(element -> BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(cloudPlugin.getElement(element.getId()).getImageType()))
+                    .collect(Collectors.toList());
+            AssetsStatisticsResponse response =
+                    AssetsStatisticsResponse.builder().sceneId(id)
+                            .assetsTotal(sceneAssetsBO.getNodeCount())
+                            .ipTotal(sceneAssetsBO.getIpCount())
+                            .operationSystemCount(CollectionUtils.isNotEmpty(osList) ? osList.get(0).getElements().size() : 0)
+                            .applicationSystemCount(CollectionUtils.isNotEmpty(asList) ? asList.get(0).getElements().size() : 0)
+                            .networkCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0)
+                            .safetySystemCount(CollectionUtils.isNotEmpty(ssList) ? ssList.get(0).getElements().size() : 0)
+                            .vmCount(CollectionUtils.isNotEmpty(vmList) ? vmList.size() : 0)
+                            .containerCount(CollectionUtils.isNotEmpty(containerList) ? containerList.size() : 0)
+//                            TODO 目前没有做Azure web
+                            .webCount(0)
+//                            暂定 可能不准确
+                            .peripheryCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0)
+                            .build();
+            responseList.add(response);
+        });
+
+        return ResultCommon.success(responseList);
+
     }
 
     @ApiOperation(value = "场景模板资产统计", notes = "场景模板资产统计")
