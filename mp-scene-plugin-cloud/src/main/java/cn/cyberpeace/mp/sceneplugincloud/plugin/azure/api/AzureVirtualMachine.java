@@ -149,7 +149,9 @@ public class AzureVirtualMachine {
         // 调用微软云api 创建虚拟机 回写虚拟机id
         VirtualMachine vm = createVirtualMachine(cloudElement, virtualNics, userData, groupName);
         cloudElement.setResourceId(vm.id());
-        cloudElement.setPublicIpAddress(vm.getPrimaryPublicIPAddress().ipAddress());
+        if(cloudElement.getIsPublicIp()){
+            cloudElement.setPublicIpAddress(vm.getPrimaryPublicIPAddress().ipAddress());
+        }
 
 //        创建网络安全组
 //        绑定网络接口
