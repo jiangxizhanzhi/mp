@@ -408,7 +408,7 @@ public class CsceneController implements BaseModelListControllerBase {
                 String newAreaId = idMap.get(oldAreaId);
                 e.setId(newNodeId);
                 e.setArea(newAreaId);
-                if (!e.getOuterPosition2().isEmpty()) {
+                if (e.getOuterPosition2() != null && !e.getOuterPosition2().isEmpty()) {
                     Map<String, String> newOuterPosition2 = new HashMap<>();
                     for (Map.Entry<String, String> entry : e.getOuterPosition2().entrySet()) {
                         String area = entry.getKey();
@@ -583,7 +583,7 @@ public class CsceneController implements BaseModelListControllerBase {
                 String filename = file.getName();
                 file.createNewFile();
                 FileWriter fileWriter = new FileWriter(file);
-                fileWriter.write(JsonCommon.stringify(csceneBO));
+                fileWriter.write(JsonCommon.snakeStringify(csceneBO));
                 fileWriter.close();
 
                 FileInputStream fileInputStream = new FileInputStream(file);
@@ -658,7 +658,7 @@ public class CsceneController implements BaseModelListControllerBase {
         try {
             inputStream = importTemplateBO.getFile().getInputStream();
             var bytes = inputStream.readAllBytes();
-            CsceneBO csceneBO = JsonCommon.parse(new String(bytes, StandardCharsets.UTF_8), CsceneBO.class);
+            CsceneBO csceneBO = JsonCommon.snakeParse(new String(bytes, StandardCharsets.UTF_8), CsceneBO.class);
 
             String id = this.modelService.get(importTemplateBO.getId()).getSource().getObj().getSceneConfig();
             SceneConfigService sceneConfigService = BeanCommon.getBean(SceneConfigService.class);
@@ -668,10 +668,13 @@ public class CsceneController implements BaseModelListControllerBase {
             this.removeId(templateSceneConfig);
             this.updateOldId(templateSceneConfig);
             this.modifyAreaId(templateSceneConfig, importTemplateBO.getAreaId());
+            templateSceneConfig.getTopology().setAreaId(importTemplateBO.getAreaId());
+            CsceneDataModifier.handlerPosition(templateSceneConfig);
             this.mergeSceneConfig(originSceneConfig, templateSceneConfig);
             sceneConfigService.sync(originSceneConfig, false, null);
             var res = sceneConfigService.get(id, true, importTemplateBO.getAreaId(), null).getSource();
-
+            res.getTopology()
+                    .setOutAreaElementNum(this.modelService.getOutAreaElementNum(id, importTemplateBO.getAreaId(), res));
             var resultBO = new CsceneBO();
             resultBO.setSceneConfig(res);
             CsceneDataModifier.correctReturnCsceneData(resultBO);
