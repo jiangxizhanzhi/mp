@@ -6,11 +6,13 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.mptool.ExceptionUtil;
 import cn.cyberpeace.mp.cscene.bo.CreateTemplateBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneAuthorizeBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
@@ -20,7 +22,9 @@ import cn.cyberpeace.mp.cscene.bo.CsceneStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.bo.ImportTemplateBO;
 import cn.cyberpeace.mp.cscene.bo.SceneAreaTreeBO;
+import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.controller.request.AreaUpdateRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
@@ -136,7 +140,7 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneDataModifier.checkFirewallRules(csceneBO);
         CsceneDataModifier.handleAccessModePath(csceneBO);
         CsceneDataModifier.checkCloudElement(csceneBO);
-        CsceneDataModifier.handlerPortUsable(csceneBO);
+        CsceneDataModifier.handlerPosition(csceneBO.getSceneConfig());
     }
 
     private void correctRequestCsceneParamsForAppInstance(CsceneBO csceneBO) {
@@ -285,14 +289,25 @@ public class CsceneController implements BaseModelListControllerBase {
 
         var originSceneConfig = sceneConfigService.get(id, false, null, null).getSource();
         var templateSceneConfig = sceneConfigService.get(templateId, false, null, null).getSource();
+
+        int currentNum = originSceneConfig.getTopology().getElements().size();
+        int templateNum = templateSceneConfig.getTopology().getElements().size();
+        int limit = BeanCommon.getBean(CsceneAppConfig.class).getSceneEditNodeLimit();
+        if (currentNum + templateNum > limit) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_EDIT_LIMIT.format(String.valueOf(limit), String.valueOf(currentNum), String.valueOf(templateNum)));
+        }
+
         this.removeId(templateSceneConfig);
         this.updateOldId(templateSceneConfig);
         this.modifyAreaId(templateSceneConfig, request.getAreaId());
+        templateSceneConfig.getTopology().setAreaId(request.getAreaId());
+        CsceneDataModifier.handlerPosition(templateSceneConfig);
         this.mergeSceneConfig(originSceneConfig, templateSceneConfig);
         sceneConfigService.sync(originSceneConfig, false, null);
         var res = sceneConfigService.get(id, true, request.getAreaId(), null).getSource();
         var csceneBO = new CsceneBO();
         csceneBO.setSceneConfig(res);
+        res.getTopology().setOutAreaElementNum(this.modelService.getOutAreaElementNum(id, request.getAreaId(), res));
         CsceneDataModifier.correctReturnCsceneData(csceneBO);
         return new ServiceResult<>(csceneBO).asResult();
     }
@@ -693,7 +708,7 @@ public class CsceneController implements BaseModelListControllerBase {
                 mapper.bulkCreate(roleObjs).getSuccessCount();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("failed to save roles , cscene id {} , exception is {}", csceneBO.getId(), ExceptionUtil.stacktraceToString(e));
         }
 
         var topo = result.getData().getSceneConfig().getTopology();

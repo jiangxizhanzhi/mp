@@ -45,6 +45,9 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneConfigElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -770,5 +773,22 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             ids = list;
         }
         return ids;
+    }
+
+    public int getOutAreaElementNum(String sceneId, String areaId, SceneConfigDataBO dataBO) {
+        List<String> excludeAreaIds = new ArrayList<>();
+        excludeAreaIds.add(areaId);
+        if (CollectionUtils.isNotEmpty(dataBO.getTopology().getAreas())) {
+            for (var a : dataBO.getTopology().getAreas()) {
+                if (a.getType() == BaseSceneAreaModel.Type.COMMON) {
+                    excludeAreaIds.add(a.getId());
+                }
+            }
+        }
+        var condition = new HumanCondition().filterEqual(BaseSceneElementModel::getScene, sceneId)
+                .filterNotIn(BaseSceneElementModel::getArea, excludeAreaIds.toArray(new String[]{}));
+        SceneConfigElementMapper sceneConfigElementMapper = BeanCommon.getBean(SceneConfigElementMapper.class);
+        int num = sceneConfigElementMapper.total(condition);
+        return num;
     }
 }

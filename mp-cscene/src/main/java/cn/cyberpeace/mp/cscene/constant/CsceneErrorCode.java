@@ -42,6 +42,7 @@ public enum CsceneErrorCode implements ErrorCode {
     CPU_LIMIT("MP-110301", "cpu_limit"),
     RAM_LIMIT("MP-110302", "ram_limit"),
     DISK_LIMIT("MP-110303", "disk_limit"),
+    SCENE_EDIT_LIMIT("MP-110305", "scene_edit_limit"),
     ;
 
     CsceneErrorCode(String code, String message) {
