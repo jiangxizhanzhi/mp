@@ -961,12 +961,10 @@ public class DataCollectionService extends CollectionBaseService {
         if (null != cloudType && BaseSceneModel.CloudType.PUBLIC == cloudType) {
             SearchResponse response = publicWazuhRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             return response;
-        }
-        if (null != cloudType && BaseSceneModel.CloudType.PRIVATE == cloudType) {
+        } else if (null != cloudType && BaseSceneModel.CloudType.PRIVATE == cloudType) {
             SearchResponse response = privateWazuhRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             return response;
-        }
-        if (null != cloudType && BaseSceneModel.CloudType.MIX == cloudType) {
+        } else if (null != cloudType && BaseSceneModel.CloudType.MIX == cloudType) {
             SearchResponse response = mixWazuhRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             return response;
         } else {
