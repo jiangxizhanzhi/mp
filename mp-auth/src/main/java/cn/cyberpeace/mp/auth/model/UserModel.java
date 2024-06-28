@@ -139,6 +139,11 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultStr
     private String macAddr;
 
+    @ApiModelProperty(value = "vlan id")
+    @DefaultStr
+    private Integer vlanId;
+
+
     @Builder
     public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin) {
         super(id, createTime, updateTime);

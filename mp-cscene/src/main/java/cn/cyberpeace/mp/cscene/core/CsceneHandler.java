@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.core;
 
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
@@ -15,6 +16,7 @@ import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
+import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
@@ -139,6 +141,23 @@ public class CsceneHandler extends BaseCsceneHandler<
             // 非测试模式,核心路由器需要加上console登录协议
             CsceneDataModifier.supplyProtocolForCoreRouter(csceneInstance, AccessMode.Protocol.CONSOLE);
         }
+        Integer vlanId = UserUtils.getLoginUser().getVlanId();
+        if (csceneInstance.getReferenceType() == BaseCsceneModel.ReferenceType.PRACTICE) {
+            // 实操题 给网络加入vlanId
+            var elements = csceneInstance.getScene().getPlugins().get("cpcloud").getElements();
+            for (Map<String, Object> e : elements.values()) {
+                e.put("vlan_id", vlanId);
+                e.put("vlan", true);
+            }
+        }
+
+        var runInstance = csceneInstanceMapper.first(new HumanCondition().filterEqual(BaseCsceneModel::getDeleted, false)
+                                                             .filterEqual(BaseCsceneModel::getCreateUser, UserUtils.getLoginUser()
+                                                                     .getId()));
+        if (runInstance != null) {
+            throw new MpRuntimeException(CsceneErrorCode.USER_CSCENE_INSTANCE_LIMIT);
+        }
+
         this.checkVlanIds(getCscene());
         var instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
         // 节点数量增加失败 说明已到达数量上限

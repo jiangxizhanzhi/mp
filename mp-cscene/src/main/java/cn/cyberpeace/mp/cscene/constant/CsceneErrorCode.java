@@ -38,7 +38,8 @@ public enum CsceneErrorCode implements ErrorCode {
     SCENE_INSTANCE_IS_CLEARING("MP-110291", "scene_instance_is_clearing"),
     SCENE_INSTANCE_NEED_CLEAR("MP-110292", "scene_instance_need_clear"),
     SCENE_INSTANCE_STILL_NEED_CLEAR("MP-110293", "scene_instance_still_need_clear"),
-    PARAMS_FIELD_ERROR("MP-110300", "params_field_error");
+    PARAMS_FIELD_ERROR("MP-110300", "params_field_error"),
+    USER_CSCENE_INSTANCE_LIMIT("MP-110301", "user_cscene_instance_limit");
 
     CsceneErrorCode(String code, String message) {
         setCode(code, "cscene.error_code." + message);
