@@ -3,10 +3,15 @@ package cn.cyberpeace.mp.sceneplugincloud.service.common;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ComInfoGetResult;
@@ -75,6 +80,9 @@ public class CloudSceneConnectionCommon {
                     sceneId, sceneElementId, sceneElementPortId, cloudAccessMode.getProtocol());
             return null;
         }
+
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+        Integer cloudType = sceneHandler.getScene().getCloudType();
 
         var isConsole = cloudAccessMode.getProtocol().equals(AccessMode.Protocol.CONSOLE);
         var isCom = cloudAccessMode.getProtocol().equals(AccessMode.Protocol.COM);
@@ -186,6 +194,7 @@ public class CloudSceneConnectionCommon {
             } else {
                 protocol = sceneConnection.getProtocol();
             }
+
             connectionParams.setProtocol(protocol);
             // windows系统的rdp连接,需要禁用字形缓存
             if (AccessMode.Protocol.RDP.equals(protocol) && SystemTypeCommandUtils.isWindows(SystemTypeUtils.getStandardSystemType(param.getSystemType()))) {
@@ -201,7 +210,14 @@ public class CloudSceneConnectionCommon {
                 connectionParams.setUsername(sceneConnection.getUsername());
                 connectionParams.setPassword(sceneConnection.getPassword());
             }
-            connectionParams.setHostname(sceneConnection.getAccessIp());
+
+            if (BaseSceneModel.CloudType.DEFAULT != cloudType) {
+                CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+                CloudPluginSceneElementBO element = pluginHandler.getElement(sceneElementId);
+                connectionParams.setHostname(element.getMgmtIp());
+            } else {
+                connectionParams.setHostname(sceneConnection.getAccessIp());
+            }
             guacamoleCreateConnectionData.setConnectionParams(connectionParams);
             var result = remoteClient.createConnection(guacamoleCreateConnectionData);
             if (result == null || StringUtils.isEmpty(result.getConnectionId())) {

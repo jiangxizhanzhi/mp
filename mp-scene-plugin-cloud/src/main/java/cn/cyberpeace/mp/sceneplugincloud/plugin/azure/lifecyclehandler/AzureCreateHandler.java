@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -315,13 +316,14 @@ public class AzureCreateHandler extends CreateHandler {
                     for (int j = 0; j < protoclos.length; j++) {
                         CloudAccessMode cloudAccessMode = new CloudAccessMode();
 //                        TODO 管理网络ip port
-                        cloudAccessMode.setAccessIp("199.6.6.6");
+                        cloudAccessMode.setAccessIp(virtualNic.getFixedIp());
                         cloudAccessMode.setProtocol(protoclos[j]);
                         cloudAccessMode.setAccessPort(AccessMode.Protocol.DEFAULT_PORT_MAP.get(protoclos[j].toLowerCase()));
                         cloudAccessMode.setUsername(cloudElement.getUsername());
                         cloudAccessMode.setPassword(cloudElement.getPassword());
                         cloudAccessMode.setAvailable(true);
                         cloudAccessMode.setProxy(true);
+                        cloudAccessMode.setId(TextUtils.uuid());
 
                         if (StringUtils.isEmpty(cloudAccessMode.getAccessIp()) && cloudPort.getSrcPort() != null) {
                             cloudAccessMode.setAccessIp(cloudPort.getSrcPort().getIp());
