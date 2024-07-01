@@ -133,6 +133,9 @@ public class MicrosoftAzureConverter implements BaseConverter {
         List<DeviceCloudTargetVO> vos = null;
         //分页时计算总数
         Integer total = 0;
+        if(request.getCloudServiceType() == null || request.getCloudServiceType().isEmpty()){
+            return new ArrayList<>();
+        }
         switch (request.getCloudServiceType()) {
             case "1":
                 JSONObject net = getReturnData(request.getCloudServiceType(), "net", request);
