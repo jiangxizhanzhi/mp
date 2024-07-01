@@ -133,9 +133,9 @@ public class CloudTargetConverter {
         device.setImageType("containerRegistry");
         device.setRole(4);
         ExtDocker extDocker = new ExtDocker();
-        extDocker.setFlavor("1vcpu/1GiB内存");
+        extDocker.setFlavor("1vcpu/1.5GiB内存");
         extDocker.setCpu(1);
-        extDocker.setRam(1);
+        extDocker.setRam(1.5);
         extDocker.setInstanceState(0);
         extDocker.setInitSupport(true);
         extDocker.setQuickCreateSupport(true);
@@ -144,6 +144,7 @@ public class CloudTargetConverter {
         extDocker.setIsPublicIp(true);
         extDocker.setPublicIpAddress("");
         extDocker.setProtocols("SSH");
+        extDocker.setVmType(target.getOperatingSystem());
 
         //访问协议
         List<AccessProtocol> accessProtocols = new ArrayList<>();

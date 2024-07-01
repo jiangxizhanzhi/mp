@@ -24,7 +24,7 @@ public class ExtDocker implements Serializable {
     private Integer cpu;
 
     @ApiModelProperty("内存大小")
-    private Integer ram;
+    private Double ram;
 
     @ApiModelProperty("磁盘大小")
     private Integer disk;
@@ -78,4 +78,7 @@ public class ExtDocker implements Serializable {
 
     @ApiModelProperty("接入协议")
     private String protocols;
+
+    @ApiModelProperty("操作系统")
+    private String vmType;
 }
