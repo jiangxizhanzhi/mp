@@ -23,7 +23,8 @@ public interface BaseModelGetController<M extends BaseModel, S extends BaseModel
 
     /**
      * 通用单条数据id查询
-     * @param id 数据id
+     *
+     * @param id     数据id
      * @param fields 返回数据字段
      * @return 单条数据结果
      */
@@ -39,7 +40,8 @@ public interface BaseModelGetController<M extends BaseModel, S extends BaseModel
 
     /**
      * 通用单条数据id查询
-     * @param id 数据id
+     *
+     * @param id     数据id
      * @param fields 返回数据字段
      * @return 单条数据结果
      */

@@ -49,6 +49,12 @@ public class ActivMenuController {
     @Autowired
     private MenuSetService menuSetService;
 
+    /**
+     * 更新菜单列表
+     *
+     * @param file
+     * @return 统一服务返回结果
+     */
     @PostMapping("/menu/reimport")
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "更新菜单列表", target = OpTargetEnums.MENU)
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
@@ -57,6 +63,12 @@ public class ActivMenuController {
         return ResultCommon.success();
     }
 
+    /**
+     * 根据激活配置查询所有菜单
+     *
+     * @param actives
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "根据激活配置查询所有菜单")
     @GetMapping("/menu/tree")
     public ServiceResult getTree(@RequestParam(required = false) List<String> actives) {
@@ -71,6 +83,12 @@ public class ActivMenuController {
         return new ServiceResult(tree).asResult();
     }
 
+    /**
+     * 刷新默认菜单模板
+     *
+     * @param template
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "刷新默认菜单模板")
     @PostMapping("/menu/reset_default_menu_template")
     public ServiceResult refreshDefaultMenuTemplate(@RequestBody MenuSetService.MenuTemplate template) {
@@ -78,6 +96,12 @@ public class ActivMenuController {
         return new ServiceResult(result).asResult();
     }
 
+    /**
+     * 新增一套模板
+     *
+     * @param template
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "新增一套模板,可以同时关联到某个角色")
     @PostMapping("/menu/add_template")
     public ServiceResult addMenuTemplate(@RequestBody MenuSetService.MenuTemplate template) {
@@ -91,6 +115,12 @@ public class ActivMenuController {
         return new ServiceResult(result).asResult();
     }
 
+    /**
+     * 导入并覆盖默认菜单模板
+     *
+     * @param file
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "导入并覆盖默认菜单模板")
     @PostMapping("/menu/import_template")
     public ServiceResult importMenuTemplate(MultipartFile file) {
@@ -98,6 +128,12 @@ public class ActivMenuController {
         return new ServiceResult(result).asResult();
     }
 
+    /**
+     * 修改角色和模板的关联关系
+     *
+     * @param roleTemplate
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "修改角色和模板的关联关系")
     @PostMapping("/menu/update_role_template")
     public ServiceResult updateRoleMenuTemplate(@RequestBody MenuSetService.RoleTemplate roleTemplate) {

@@ -69,6 +69,9 @@ public class InstallerController {
 
     /**
      * 分页查询
+     *
+     * @param request
+     * @return
      */
     @ApiOperation("分页查询")
     @GetMapping("/page")
@@ -89,6 +92,12 @@ public class InstallerController {
         return new PageResult<>(list,model.getTotal());
     }
 
+    /**
+     * 根据ID查询
+     *
+     * @param id
+     * @return
+     */
     @ApiOperation("根据ID查询")
     @GetMapping("/{id}")
     public Result<InstallerByIdVO> getById(@PathVariable String id){
@@ -110,6 +119,9 @@ public class InstallerController {
 
     /**
      * 新增
+     *
+     * @param request
+     * @return 统一服务返回结果
      */
     @ApiOperation("新增")
     @ApiImplicitParam(name = "request", value = "新增数据请求体", dataTypeClass = InstallerRequest.class)
@@ -122,6 +134,10 @@ public class InstallerController {
 
     /**
      * 更新
+     *
+     * @param request
+     * @param uuid
+     * @return 统一服务返回结果
      */
     @ApiOperation("更新")
     @ApiImplicitParams({
@@ -142,6 +158,9 @@ public class InstallerController {
 
     /**
      * 删除
+     *
+     * @param request
+     * @return 统一服务返回结果
      */
     @ApiOperation("删除")
     @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = InstallerDeleteRequest.class)

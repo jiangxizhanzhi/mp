@@ -37,6 +37,12 @@ public class UserPermissionController {
     private UserPermissionService userPermissionService;
 
 
+    /**
+     * 根据userId查询所有权限
+     *
+     * @param userId
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "[用户权限管理] 根据userId查询所有权限", notes = "")
     @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/byuser")
@@ -46,6 +52,12 @@ public class UserPermissionController {
     }
 
 
+    /**
+     * 根据userId查询所有权限
+     *
+     * @param userId
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "[用户权限管理] 根据userId查询所有权限", notes = "")
     @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/tree/byuser")
@@ -55,7 +67,12 @@ public class UserPermissionController {
     }
 
 
-
+    /**
+     * 根据userId查询所有菜单权限
+     *
+     * @param userId
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "根据userId查询所有菜单权限（对象集合）", notes = "")
     @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/menus/byuser")
@@ -65,6 +82,11 @@ public class UserPermissionController {
     }
 
 
+    /**
+     * 查询当前登录用户所有菜单权限
+     *
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "查询当前登录用户所有菜单权限（对象集合）", notes = "")
     @GetMapping("/menus/byloginuser")
     public ServiceResult getMenuTargetsByLoginUser() {
@@ -73,6 +95,11 @@ public class UserPermissionController {
     }
 
 
+    /**
+     * 查询当前登录用户所有菜单权限
+     *
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "查询当前登录用户所有菜单权限（编码集合）", notes = "")
     @GetMapping("/menuidents/byloginuser")
     public ServiceResult listMenuIdentsByLoginUser() {
@@ -81,6 +108,12 @@ public class UserPermissionController {
     }
 
 
+    /**
+     * 绑定请求
+     *
+     * @param userTargetsReq
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "绑定用户-资源关系，注意，该操作会清除用户原来绑定的权限。如果targetIds为空，表示删除用户所有角色！", notes = "")
     @ApiImplicitParam(name="userTargetsReq", value="绑定请求", dataTypeClass = BindUserTargetsRequest.class)
     @PostMapping("/bind")

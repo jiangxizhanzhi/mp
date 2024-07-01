@@ -45,6 +45,7 @@ public class FirewallController {
 
     /**
      * 分页查询
+     *
      * @param request
      * @return
      */
@@ -92,6 +93,7 @@ public class FirewallController {
 
     /**
      * 转换BO to VO
+     *
      * @param model
      * @return
      */
@@ -106,6 +108,10 @@ public class FirewallController {
         return list;
     }
 
+    /**
+     * @param firewall
+     * @return 网络分页返回信息
+     */
     private static FirewallPageVO getFirewallPageVO(Firewall firewall) {
         if (StringUtils.isNotBlank(firewall.getName()) && firewall.getName().startsWith("MP_SCENE_")) {
             return new FirewallPageVO(firewall.getName(),

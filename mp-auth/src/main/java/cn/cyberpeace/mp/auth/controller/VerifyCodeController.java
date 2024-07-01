@@ -36,6 +36,12 @@ public class VerifyCodeController {
     @Resource
     private Producer kaptchaProducer;
 
+    /**
+     * 获取验证码接口
+     *
+     * @param request
+     * @param response
+     */
     @ApiOperation(value = "获取验证码接口", notes = "")
     @GetMapping("")
     public void generateVerifyCode(HttpServletRequest request, HttpServletResponse response) throws IOException {

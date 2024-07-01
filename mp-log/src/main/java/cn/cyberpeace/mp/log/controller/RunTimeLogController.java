@@ -52,12 +52,25 @@ public class RunTimeLogController {
     @javax.annotation.Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
+    /**
+     * queryLogs
+     *
+     * @param basePageRequest
+     * @return
+     */
     @GetMapping("/logs")
     @ApiOperation(value = "分页查询运行时日志", notes = "")
     public ListObjServiceResult<RunTimeLogDTO> queryLogs(BasePageRequest basePageRequest) {
         return new ListObjServiceResult(runTimeLogService.page(basePageRequest)).asResult();
     }
 
+    /**
+     * downloadLogFiles
+     *
+     * @param response
+     * @param request
+     * @return
+     */
     @GetMapping("/download")
     @ApiOperation(value = "日志下载", notes = "")
     public ResponseEntity<Resource> downloadLogFiles(HttpServletResponse response,
@@ -81,6 +94,11 @@ public class RunTimeLogController {
     }
 
 
+    /**
+     * getTypes
+     *
+     * @return
+     */
     @GetMapping("/types")
     @ApiOperation(value = "查询运行日志类型")
     public ServiceResult<List<OptionBO>> getTypes() {

@@ -41,6 +41,14 @@ public class NetWorkTrafficController {
     @Autowired
     private NetworkTrafficService netWorkTrafficService;
 
+    /**
+     * downloadPcapFile
+     *
+     * @param httpServletResponse
+     * @param sessionId
+     * @param groupId
+     * @return
+     */
     @GetMapping("/pcap/{groupId}/{sessionId}")
     @ApiImplicitParam(name = "groupId", value = "分组ID", dataType = "path", dataTypeClass = String.class)
     @ApiOperation(value = "流量下载", notes = "")
@@ -90,6 +98,12 @@ public class NetWorkTrafficController {
         return new ListObjServiceResult<>(netWorkTrafficService.querySessionWithPage(sessionRequest));
     }
 
+    /**
+     * querySessionSpiView
+     *
+     * @param spiViewRequest
+     * @return
+     */
     @PostMapping("spiview")
     @ApiOperation("SPI视图")
     @ApiImplicitParam(name = "spiViewRequest", value = "查询请求", dataType = "body", dataTypeClass = SPIViewRequest.class)

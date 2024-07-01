@@ -17,6 +17,13 @@ public interface BaseModelGetBOController<T extends ModelBO<M, T>, M extends Bas
 
     S getModelService();
 
+    /**
+     * 获取指定id数据
+     *
+     * @param id
+     * @param fields
+     * @return
+     */
     @ApiOperation("获取指定id数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", paramType = "path", value = "数据id", dataTypeClass = String.class),
@@ -27,6 +34,13 @@ public interface BaseModelGetBOController<T extends ModelBO<M, T>, M extends Bas
         return getModelService().<T>getBO(id, ControllerCommon.convertValidFields(fields), ControllerCommon.getModelBOClass(getClass())).asResult();
     }
 
+    /**
+     * 获取指定id数据
+     *
+     * @param id
+     * @param fields
+     * @return
+     */
     @ApiOperation("获取指定id数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class),

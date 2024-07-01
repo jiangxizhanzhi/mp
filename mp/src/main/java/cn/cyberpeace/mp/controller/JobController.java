@@ -20,6 +20,11 @@ public class JobController {
     private CopyEsCollectionDataScheduleJob copyEsCollectionDataScheduleJob;
 
 
+    /**
+     * es数据存储定时任务
+     *
+     * @return
+     */
     @ApiOperation(value = "es数据存储定时任务", notes = "启动")
     @GetMapping("/copyEsCollectionDataJob")
     public String copyEsCollectionData() {

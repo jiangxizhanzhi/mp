@@ -48,6 +48,13 @@ public class TargetController {
     @Autowired
     private UserPermissionService userPermissionService;
 
+    /**
+     * 查询权限树
+     *
+     * @param targetId
+     * @param type
+     * @return 统一服务返回结果
+     */
     @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "查询权限树", notes = "")
     @ApiImplicitParams({
@@ -74,6 +81,11 @@ public class TargetController {
     }
 
 
+    /**
+     * 查询当前用户菜单
+     *
+     * @return 统一服务返回结果
+     */
     @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation(value = "查询当前用户菜单")
     @GetMapping("/current_user/tree")

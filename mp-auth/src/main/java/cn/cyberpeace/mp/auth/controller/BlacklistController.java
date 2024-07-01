@@ -31,6 +31,12 @@ public class BlacklistController {
     @Resource
     private BlacklistModel blacklistModel;
 
+    /**
+     * 更新访问黑名单开关
+     *
+     * @param flag
+     * @return
+     */
     @ApiOperation("更新访问黑名单开关")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "flag", value = "启用开关", dataTypeClass = Boolean.class),
@@ -43,6 +49,11 @@ public class BlacklistController {
         return new ObjServiceResult<>(true).asResult();
     }
 
+    /**
+     * 查看访问黑名单开关
+     *
+     * @return
+     */
     @ApiOperation("查看访问黑名单开关")
     @GetMapping("/enabled")
     public ObjServiceResult<Boolean> getBlacklistFlag() {

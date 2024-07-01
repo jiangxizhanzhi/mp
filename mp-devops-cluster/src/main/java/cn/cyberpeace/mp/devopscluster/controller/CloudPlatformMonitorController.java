@@ -93,6 +93,7 @@ public class CloudPlatformMonitorController {
 
     /**
      * 资源统计
+     *
      * @return
      */
     @ApiOperation("资源统计")
@@ -179,6 +180,8 @@ public class CloudPlatformMonitorController {
 
     /**
      * 节点管理
+     *
+     * @param request
      * @return
      */
     @AuthTarget({TargetEnum.CLOUD_PLATFORM_MONITORING, TargetEnum.DASHBOARD})
@@ -222,6 +225,7 @@ public class CloudPlatformMonitorController {
 
     /**
      * 节点管理-关机/重启
+     *
      * @param request
      * @return
      */
@@ -240,6 +244,7 @@ public class CloudPlatformMonitorController {
 
     /**
      * 服务状态监控
+     *
      * @return
      */
     @ApiOperation("服务状态监控")
@@ -256,6 +261,7 @@ public class CloudPlatformMonitorController {
 
     /**
      * 虚实结合交换机状态
+     *
      * @return
      */
     @ApiOperation("虚实结合交换机状态")
@@ -276,6 +282,7 @@ public class CloudPlatformMonitorController {
 
     /**
      * 释放无效资源
+     *
      * @return
      */
     @ApiOperation("释放无效资源")
@@ -287,6 +294,8 @@ public class CloudPlatformMonitorController {
 
     /**
      * 云平台服务状态监控
+     *
+     * @param request
      * @return
      */
     @ApiOperation("云平台服务状态监控")
@@ -298,6 +307,7 @@ public class CloudPlatformMonitorController {
 
     /**
      * 服务重启
+     *
      * @param serverRestartRequest
      * @return
      */
@@ -311,6 +321,7 @@ public class CloudPlatformMonitorController {
 
     /**
      * 设备运行监控
+     *
      * @param request
      * @return
      */
@@ -382,6 +393,10 @@ public class CloudPlatformMonitorController {
         return ResultCommon.success(hypervisorPageVOList);
     }
 
+    /**
+     * @param number
+     * @return
+     */
     private BigDecimal formatNumber(double number) {
         return BigDecimal.valueOf(number).setScale(2, RoundingMode.HALF_DOWN);
     }

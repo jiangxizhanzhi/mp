@@ -36,6 +36,12 @@ public class DataCollectionController {
     @Autowired
     private DataCollectionService dataCollectionService;
 
+    /**
+     * queryFileEvents
+     *
+     * @param wazuhEventRequest
+     * @return
+     */
     @PostMapping("/file_events")
     @ApiOperation(value = "查询文件注册表变更信息", notes = "")
     @ApiImplicitParam(name = "wazuhEventRequest", value = "查询请求体", dataTypeClass = WazuhEventRequest.class)
@@ -50,6 +56,12 @@ public class DataCollectionController {
         return new ListObjServiceResult<>(dataCollectionService.queryFileEvents(wazuhEventRequest)).asResult();
     }
 
+    /**
+     * queryMonitorEvents
+     *
+     * @param wazuhMonitorEventsRequest
+     * @return
+     */
     @PostMapping("/monitor_events")
     @ApiOperation(value = "查询场景系统指标信息", notes = "")
     @ApiImplicitParam(name = "wazuhMonitorEventsRequest", value = "查询请求体", dataTypeClass = WazuhMonitorEventsRequest.class)
@@ -60,6 +72,11 @@ public class DataCollectionController {
         return new ListObjServiceResult<>(dataCollectionService.queryMonitorEvents(wazuhMonitorEventsRequest)).asResult();
     }
 
+    /**
+     * queryAllAgentMacAddr
+     *
+     * @return
+     */
     @PostMapping("/monitor_agent_mac")
     @ApiOperation(value = "查询场景agent和mac信息", notes = "")
     public ServiceResult<MultiValueMap<String, String>> queryAllAgentMacAddr() {

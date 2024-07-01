@@ -27,6 +27,11 @@ public class CommonConfigController {
     @Resource
     private CloudCommonConfigService cloudCommonConfigService;
 
+    /**
+     * 查询靶标对应的探针系统分类
+     *
+     * @return
+     */
     @ApiOperation("查询靶标对应的探针系统分类")
     @GetMapping("/system_type_to_agent_support")
     public ServiceResult<Map<String, Object>> getSystemTypeToAgentSupport() {

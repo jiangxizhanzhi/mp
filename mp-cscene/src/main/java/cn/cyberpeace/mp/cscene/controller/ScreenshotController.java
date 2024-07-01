@@ -47,6 +47,12 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
         setModelService(screenshotService);
     }
 
+    /**
+     * list
+     *
+     * @param queryParams
+     * @return
+     */
     @AuthTarget({TargetEnum.RESOURCE_USAGE_MANAGEMENT})
     @ApiOperation("截屏列表")
     @Override
@@ -54,6 +60,12 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
         return super.list(queryParams);
     }
 
+    /**
+     * screenshotUpload
+     *
+     * @param request
+     * @return
+     */
     @AuthTarget({TargetEnum.COURSES, TargetEnum.OJ_ALL_COURSE})
     @ApiOperation("截屏文件上传")
     @PostMapping("/upload")
@@ -77,6 +89,11 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
         FileClient.downloadFile(filePath, response);
     }
 
+    /**
+     * queryUsedSpace
+     *
+     * @return
+     */
     @AuthTarget(TargetEnum.RESOURCE_USAGE_MANAGEMENT)
     @ApiOperation("查询已用空间")
     @GetMapping("/used_space")
@@ -84,6 +101,12 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
         return getModelService().queryUsedSpace();
     }
 
+    /**
+     * timeDelete
+     *
+     * @param request
+     * @return
+     */
     @AuthTarget(TargetEnum.RESOURCE_USAGE_MANAGEMENT)
     @ApiOperation("按时间删除截屏文件")
     @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = ScreenshotDeleteRequest.class)
@@ -92,6 +115,12 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
         return getModelService().timeDelete(request);
     }
 
+    /**
+     * batchDelete
+     *
+     * @param request
+     * @return
+     */
     @AuthTarget(TargetEnum.RESOURCE_USAGE_MANAGEMENT)
     @ApiOperation("批量删除截屏文件")
     @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = ScreenshotBatchDeleteRequest.class)

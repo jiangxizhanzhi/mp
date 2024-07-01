@@ -24,6 +24,12 @@ public class EventTrackingController {
     @Autowired
     private EventTrackingService eventTrackingService;
 
+    /**
+     * 埋点记录
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("埋点记录")
     @PostMapping("/record")
     public ServiceResult<Boolean> page(@RequestBody EventTrackRequest request) {

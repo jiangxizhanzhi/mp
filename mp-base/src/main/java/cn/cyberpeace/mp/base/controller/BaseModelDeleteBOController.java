@@ -19,6 +19,12 @@ public interface BaseModelDeleteBOController<T extends ModelBO<M, T>, M extends 
 
     S getModelService();
 
+    /**
+     * 删除指定id数据
+     *
+     * @param id
+     * @return
+     */
     @ApiOperation("删除指定id数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", paramType = "path", value = "数据id", dataTypeClass = String.class),
@@ -28,6 +34,12 @@ public interface BaseModelDeleteBOController<T extends ModelBO<M, T>, M extends 
         return getModelService().<T>deleteBO(id, ControllerCommon.getModelBOClass(getClass())).asResult();
     }
 
+    /**
+     * 删除指定id数据
+     *
+     * @param id
+     * @return
+     */
     @ApiOperation("删除指定id数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class),
@@ -37,7 +49,12 @@ public interface BaseModelDeleteBOController<T extends ModelBO<M, T>, M extends 
         return getModelService().<T>deleteBO(id, ControllerCommon.getModelBOClass(getClass())).asResult();
     }
 
-//    @DeleteMapping
+    /**
+     * deleteByData
+     *
+     * @param deleteData
+     * @return
+     *///    @DeleteMapping
     default ServiceResult<Boolean> deleteByData(@RequestBody BaseDeleteData deleteData) {
         return getModelService().<T>deleteBO(deleteData.getId(), ControllerCommon.getModelBOClass(getClass())).asResult();
     }

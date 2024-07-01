@@ -38,6 +38,12 @@ public class CollectionTemplateController {
     private CollectionTemplateService templateService;
 
 
+    /**
+     * page
+     *
+     * @param pageQueryRequest
+     * @return
+     */
     @AuthTarget({TargetEnum.SITUATION_AWARE_GROUP, TargetEnum.COLLECTION_TEMPLATE, TargetEnum.CUSTOM_PROBE, TargetEnum.UNIVERSAL_PROBE})
     @GetMapping("/page")
     @ApiOperation(value = "分页查询采集模板，不含自定义探针如脚本，参数等）")
@@ -47,6 +53,12 @@ public class CollectionTemplateController {
     }
 
 
+    /**
+     * getById
+     *
+     * @param id
+     * @return
+     */
     @AuthTarget({TargetEnum.SITUATION_AWARE_GROUP, TargetEnum.COLLECTION_TEMPLATE, TargetEnum.CUSTOM_PROBE, TargetEnum.UNIVERSAL_PROBE})
     @GetMapping
     @ApiOperation(value = "查询采集模板，包含自定义探针参数，不含自定义探针脚本")
@@ -60,6 +72,13 @@ public class CollectionTemplateController {
     }
 
 
+    /**
+     * getProbeDetailsById
+     *
+     * @param templateId
+     * @param probeId
+     * @return
+     */
     @GetMapping("/probe_details")
     @ApiOperation(value = "查询采集模板中的某个探针详细信息，包括脚本内容")
     @ApiImplicitParams({
@@ -72,7 +91,9 @@ public class CollectionTemplateController {
     }
 
     /**
+     * listCustomProbesForTemplate
      *
+     * @param templateId
      * @param category
      * @param name
      * @return
@@ -109,6 +130,7 @@ public class CollectionTemplateController {
     /**
      * 修改采集模板
      *
+     * @param updateRequest
      * @return ServiceResult<Void>
      */
     @AuthTarget({TargetEnum.SITUATION_AWARE_GROUP, TargetEnum.COLLECTION_TEMPLATE, TargetEnum.CUSTOM_PROBE, TargetEnum.UNIVERSAL_PROBE})
@@ -121,6 +143,12 @@ public class CollectionTemplateController {
     }
 
 
+    /**
+     * deleteByIds
+     *
+     * @param ids
+     * @return 统一服务返回结果
+     */
     @AuthTarget({TargetEnum.SITUATION_AWARE_GROUP, TargetEnum.COLLECTION_TEMPLATE, TargetEnum.CUSTOM_PROBE, TargetEnum.UNIVERSAL_PROBE})
     @DeleteMapping()
     @ApiOperation(value = "删除采集模板")

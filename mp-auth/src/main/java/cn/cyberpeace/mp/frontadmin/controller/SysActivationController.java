@@ -42,6 +42,12 @@ public class SysActivationController {
     private SysActivationService activationService;
 
 
+    /**
+     * 激活
+     *
+     * @param activationRequest
+     * @return 统一服务返回结果
+     */
     @ApiOperation("激活")
     @ApiImplicitParam(name = "activationRequest", value = "激活请求体", dataTypeClass = ActivationRequest.class)
     @PostMapping
@@ -50,6 +56,12 @@ public class SysActivationController {
         return ResultCommon.success();
     }
 
+    /**
+     * 延期激活
+     *
+     * @param activationRequest
+     * @return
+     */
     @ApiOperation("延期激活")
     @ApiImplicitParam(name = "activationRequest", value = "延期激活请求体", dataTypeClass = ActivationRequest.class)
     @PostMapping("/delay")
@@ -58,6 +70,11 @@ public class SysActivationController {
         return ResultCommon.success(true);
     }
 
+    /**
+     * 查询激活选项内容
+     *
+     * @return
+     */
     @ApiOperation("查询激活选项内容")
     @GetMapping("/status")
     public ServiceResult<ActivationResponse> status() {
@@ -69,6 +86,11 @@ public class SysActivationController {
         return ResultCommon.success(content);
     }
 
+    /**
+     * 查询模块激活信息
+     *
+     * @return
+     */
     @ApiOperation("查询模块激活信息，包括竞赛模块，实训模块，靶场模块")
     @GetMapping("/module_infos")
     public ServiceResult<List<ModuleInfoResponse>> moduleInfos() {
@@ -77,6 +99,11 @@ public class SysActivationController {
     }
 
 
+    /**
+     * 查询激活状态
+     *
+     * @return
+     */
     @ApiOperation("查询激活状态")
     @GetMapping("/license_status")
     public ServiceResult<ActivationStatus> licenseStatus() {
@@ -87,6 +114,12 @@ public class SysActivationController {
     }
 
 
+    /**
+     * 查询激活配置项
+     *
+     * @param key
+     * @return
+     */
     @ApiOperation("查询激活配置项")
     @ApiImplicitParam(name = "key", value = "配置名称", dataTypeClass = String.class)
     @GetMapping("/config_value")
@@ -97,6 +130,11 @@ public class SysActivationController {
     }
 
 
+    /**
+     * 查询机器序列号
+     *
+     * @return 统一服务返回结果
+     */
     @ApiOperation("查询机器序列号")
     @GetMapping("/machinecode")
     public ServiceResult getMachineCode() {
@@ -105,6 +143,11 @@ public class SysActivationController {
     }
 
 
+    /**
+     * 重置菜单可见性
+     *
+     * @return 统一服务返回结果
+     */
     @ApiOperation("重置菜单可见性")
     @GetMapping("/reset_menu_visibility")
     public ServiceResult resetMenuVisibility() {
@@ -113,6 +156,9 @@ public class SysActivationController {
     }
 
 
+    /**
+     * @return
+     */
     private ActivationResponse getActivationResponse() {
         ActivationResponse content = activationService.status();
         if (Objects.isNull(content)) {

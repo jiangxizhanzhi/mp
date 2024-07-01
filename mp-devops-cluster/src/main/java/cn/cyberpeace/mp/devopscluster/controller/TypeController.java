@@ -93,6 +93,8 @@ public class TypeController {
 
     /**
      * 查询所有分类
+     *
+     * @param isAll
      * @return
      */
     @AuthTarget(TargetEnum.DEVOPS_CATEGORY_GROUP)
@@ -131,6 +133,9 @@ public class TypeController {
 
     /**
      * 查询所有分类（实装）
+     *
+     * @param justFirst
+     * @return
      */
     @AuthTarget(TargetEnum.REAL_MANAGE)
     @ApiOperation("查询所有分类")
@@ -226,6 +231,11 @@ public class TypeController {
         return new Result<>(new TypeAllVO(newFirst, newSecond, newThird));
     }
 
+    /**
+     * @param l1Ids
+     * @param count
+     * @return
+     */
     private List<Integer> getNewTypeId(List<Integer> l1Ids, int count) {
         List<Integer> result = new ArrayList<>();
         for (int i = 1; i <= l1Ids.size() + count; i++) {
@@ -260,6 +270,7 @@ public class TypeController {
     /**
      * 查询所有分类
      *
+     * @param firstTypeId
      * @return
      */
     @AuthTarget(TargetEnum.DEVOPS_CATEGORY_GROUP)
@@ -507,6 +518,11 @@ public class TypeController {
 
     }
 
+    /**
+     * 查询串口配置
+     *
+     * @return
+     */
     @AuthTarget({TargetEnum.REAL_EQUIPMENT_MANAGEMENT, TargetEnum.REAL_MANAGE})
     @ApiOperation("查询串口配置")
     @GetMapping("/serial-port-list")
@@ -514,6 +530,11 @@ public class TypeController {
         return new Result<>(Collections.emptyList());
     }
 
+    /**
+     * 查询交换机部分信息数据
+     *
+     * @return
+     */
     @AuthTarget(TargetEnum.REAL_MANAGE)
     @ApiOperation("查询交换机部分信息数据")
     @GetMapping("/switch-tree-list")
@@ -521,6 +542,11 @@ public class TypeController {
         return new Result<>(switchConverter.treeList());
     }
 
+    /**
+     * 查询交换机所有信息
+     *
+     * @return
+     */
     @AuthTarget(TargetEnum.REAL_EQUIPMENT_MANAGEMENT)
     @ApiOperation("查询交换机所有信息")
     @GetMapping("/switch-list")

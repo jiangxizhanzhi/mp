@@ -30,6 +30,12 @@ public class SdnSwitchController {
     private SwitchConverter switchConverter;
 
 
+    /**
+     * 注册新的sdn交换机
+     *
+     * @param registerSdnSwitchCommand
+     * @return
+     */
     @ApiOperation("注册新的sdn交换机")
     @PostMapping("/add")
     public ServiceResult<Boolean> addSdnSwitch(@RequestBody RegisterSdnSwitchCommand registerSdnSwitchCommand) {
@@ -37,12 +43,25 @@ public class SdnSwitchController {
         return new ServiceResult<>(Boolean.TRUE).asResult();
     }
 
+    /**
+     * 分页查询sdn交换机
+     *
+     * @param searchSdnSwitchRequest
+     * @return
+     */
     @ApiOperation("分页查询sdn交换机")
     @GetMapping("/page")
     public ServiceResult<PageInfo<SdnSwitch>> pageSdnSwitch(SearchSdnSwitchRequest searchSdnSwitchRequest) {
         return new ServiceResult<>(switchConverter.pageSdnSwitch(searchSdnSwitchRequest)).asResult();
     }
 
+    /**
+     * 修改物理交换机名称
+     *
+     * @param name
+     * @param modifySdnSwitchCommand
+     * @return
+     */
     @ApiOperation("修改物理交换机名称")
     @PostMapping("/modify/{name}")
     public ServiceResult<Boolean> modifySdnSwitch(@PathVariable(name = "name") String name, @Validated @RequestBody ModifySdnSwitchCommand modifySdnSwitchCommand) {
@@ -50,6 +69,12 @@ public class SdnSwitchController {
         return new ServiceResult<>(Boolean.TRUE).asResult();
     }
 
+    /**
+     * 删除物理交换机
+     *
+     * @param name
+     * @return
+     */
     @ApiOperation("删除物理交换机")
     @DeleteMapping("/delete/{name}")
     public ServiceResult<Boolean> deleteSdnSwitch(@PathVariable(name = "name") String name) {

@@ -21,6 +21,7 @@ public interface BaseRemoteFileDeleteController<S extends BaseRemoteFileService>
 
     /**
      * 通用删除文件接口
+     *
      * @param id 文件id
      * @return 是否删除成功
      */
@@ -35,6 +36,7 @@ public interface BaseRemoteFileDeleteController<S extends BaseRemoteFileService>
 
     /**
      * 通用删除
+     *
      * @param deleteData 删除数据
      * @return 是否删除成功
      */

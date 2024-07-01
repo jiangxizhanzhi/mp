@@ -22,12 +22,24 @@ import org.springframework.web.bind.annotation.RestController;
 @AuthTarget(TargetEnum.NO_AUTH)
 public class ScenePluginFlowController {
 
+    /**
+     * loadSceneConfig
+     *
+     * @param data
+     * @return
+     */
     @ApiOperation("场景模板流量插件数据，非API")
     @GetMapping("/scene_config")
     public String loadSceneConfig(@RequestBody FlowPluginSceneConfigDataBO data) {
         return null;
     }
 
+    /**
+     * loadScene
+     *
+     * @param data
+     * @return
+     */
     @ApiOperation("场景流量插件数据，非API")
     @GetMapping("/scene")
     public String loadScene(@RequestBody FlowPluginSceneDataBO data) {

@@ -21,12 +21,26 @@ public interface BaseRemoteFileUploadController<S extends BaseRemoteFileService>
 
     S getRemoteFileService();
 
+    /**
+     * toFileUploadResponse
+     *
+     * @param id
+     * @param responseClazz
+     * @return
+     */
     static <T extends FileUploadResponse> T toFileUploadResponse(String id, Class<T> responseClazz) {
         T response = ClassUtils.createInstance(responseClazz);
         response.setId(id);
         return response;
     }
 
+    /**
+     * toFileUploadResponseResult
+     *
+     * @param uploadResult
+     * @param responseClazz
+     * @return
+     */
     static <T extends FileUploadResponse> ServiceResult<T> toFileUploadResponseResult(
             ServiceResult<String> uploadResult, Class<T> responseClazz) {
         if (!uploadResult.judgeSuccess()) {
@@ -39,6 +53,8 @@ public interface BaseRemoteFileUploadController<S extends BaseRemoteFileService>
 
     /**
      * 通用上传接口
+     *
+     * @param file
      * @return 文件id
      */
     @ApiOperation("上传文件")

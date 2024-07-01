@@ -57,6 +57,11 @@ public class DashboardController {
         this.dashboardService = dashboardService;
     }
 
+    /**
+     * 用户日活统计
+     *
+     * @return
+     */
     @ApiOperation("用户日活统计")
     @GetMapping("/daily_user_activity")
     public ServiceResult<DailyUserActivityResponse> getDailyUserActivity() {
@@ -64,6 +69,11 @@ public class DashboardController {
         return ResultCommon.success(response);
     }
 
+    /**
+     * 资源统计
+     *
+     * @return
+     */
     @ApiOperation("资源统计")
     @GetMapping("/resource_statistics")
     public ServiceResult<ResourceStatisticsResponse> getResourceStatistics() {
@@ -73,6 +83,7 @@ public class DashboardController {
 
     /**
      * (mock接口,不要使用)
+     *
      * @return
      */
     @Deprecated
@@ -83,6 +94,11 @@ public class DashboardController {
         return ResultCommon.success(response);
     }
 
+    /**
+     * 查询活动场景数
+     *
+     * @return
+     */
     @ApiOperation("查询活动场景数")
     @GetMapping("/user_summary")
     public ServiceResult<UserSummarySceneResponse> userSummary() {
@@ -90,6 +106,12 @@ public class DashboardController {
         return ResultCommon.success(response);
     }
 
+    /**
+     * 用户在线记录
+     *
+     * @param pageRequest
+     * @return
+     */
     @ApiOperation(value = "用户在线记录", notes = "")
     @GetMapping("/user_online_record")
     public ListObjServiceResult<UserOnlineReportMonitorBo> getUserOnlineMonitorRecords(UserOnlineRecordSummaryPageRequest pageRequest) {
@@ -98,6 +120,12 @@ public class DashboardController {
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
+    /**
+     * 用户监控会话
+     *
+     * @param userId
+     * @return
+     */
     @ApiOperation(value = "用户监控会话", notes = "")
     @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/user_node_session")
@@ -105,6 +133,11 @@ public class DashboardController {
         return dashboardService.getUserNodeSessions(userId);
     }
 
+    /**
+     * 用户资源
+     *
+     * @return
+     */
     @AuthTarget(TargetEnum.PERSONAL_FOLDER)
     @ApiOperation(value = "用户资源")
     @GetMapping("/user_resource")

@@ -45,6 +45,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
 
     /**
      * 新增流量任务
+     *
      * @param request
      * @return
      */
@@ -64,6 +65,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
 
     /**
      * 删除流量任务
+     *
      * @param id
      * @return
      */
@@ -80,6 +82,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
 
     /**
      * 流量任务列表查询
+     *
      * @param request
      * @return
      */
@@ -96,6 +99,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
 
     /**
      * 条件查询任务id集合
+     *
      * @param request
      * @return
      */
@@ -109,6 +113,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
 
     /**
      * 编辑流量任务配置
+     *
      * @param request
      * @return
      */
@@ -124,6 +129,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
 
     /**
      * 流量任务配置查询
+     *
      * @param taskId
      * @return
      */
@@ -140,6 +146,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
 
     /**
      * 流量仿真概况
+     *
      * @param id
      * @return
      */
@@ -156,6 +163,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
 
     /**
      * 流量仿真统计
+     *
      * @param id
      * @return
      */
@@ -172,6 +180,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
 
     /**
      * 流量仿真所有统计（包括概况、统计、环境总速率、top5）
+     *
      * @param id
      * @return
      */
@@ -188,6 +197,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
 
     /**
      * TOP5实时速率
+     *
      * @param id
      * @return
      */
@@ -204,6 +214,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
 
     /**
      * TOP5流量协议
+     *
      * @param id
      * @return
      */
@@ -220,6 +231,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
 
     /**
      * 流量任务启动
+     *
      * @param taskId
      * @return
      */
@@ -236,6 +248,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
 
     /**
      * 流量任务批量启动
+     *
      * @param request
      * @return
      */
@@ -251,6 +264,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
 
     /**
      * 流量任务停止
+     *
      * @param taskId
      * @return
      */
@@ -267,6 +281,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
 
     /**
      * 流量任务批量停止
+     *
      * @param request
      * @return
      */
@@ -282,6 +297,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
 
     /**
      * 目标设备下拉选项
+     *
      * @param id
      * @return
      */
@@ -298,6 +314,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
 
     /**
      * 环境总速率
+     *
      * @param id
      * @return
      */

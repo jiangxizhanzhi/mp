@@ -27,6 +27,12 @@ public class DecoderController {
     @Autowired
     private DecoderService decoderService;
 
+    /**
+     * pageDecoders
+     *
+     * @param pageRequest
+     * @return
+     */
     @ApiOperation(value = "分页查询解析器信息", notes = "")
     @GetMapping
     public ListObjServiceResult<Decoder> pageDecoders(BasePageRequest pageRequest) {

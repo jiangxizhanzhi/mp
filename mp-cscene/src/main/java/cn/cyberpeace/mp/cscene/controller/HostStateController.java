@@ -70,6 +70,7 @@ public class HostStateController {
 
     /**
      * 集群状态趋势
+     *
      * @param hostStateTrendRequest
      * @return
      */
@@ -100,8 +101,9 @@ public class HostStateController {
 
 
     /**
-     * 查询节点当前状态信息
+     * getElementHostState
      *
+     * @param pageRequest
      * @return
      */
     @ApiOperation(value = "节点主机状态")
@@ -114,8 +116,9 @@ public class HostStateController {
     }
 
     /**
-     * 查询节点当前状态信息
+     * getHostStateByAgentName
      *
+     * @param request
      * @return
      */
     @ApiOperation(value = "节点主机状态")
@@ -127,18 +130,36 @@ public class HostStateController {
         return ResultCommon.success(hostStates);
     }
 
+    /**
+     * pagePorts
+     *
+     * @param listPageInfoQueryParams
+     * @return
+     */
     @ApiOperation(value = "节点端口信息")
     @GetMapping("/element_port")
     public ListObjServiceResult<Port> pagePorts(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
     }
 
+    /**
+     * pageProcesses
+     *
+     * @param listPageInfoQueryParams
+     * @return
+     */
     @ApiOperation(value = "节点进程信息")
     @GetMapping("/element_process")
     public ListObjServiceResult<Process> pageProcesses(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
     }
 
+    /**
+     * pageNetifaces
+     *
+     * @param listPageInfoQueryParams
+     * @return
+     */
     @ApiOperation(value = "节点网卡信息")
     @GetMapping("/element_netifaces")
     public ListObjServiceResult<Netiface> pageNetifaces(TimeListPageInfoQueryParams listPageInfoQueryParams) {

@@ -61,6 +61,11 @@ public class SysConfigController {
     private SysConfigCheckService checkService;
 
 
+    /**
+     * 查询所有系统设置
+     *
+     * @return
+     */
     @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation(value = "查询所有系统设置", notes = "")
     @GetMapping("/all")
@@ -74,6 +79,11 @@ public class SysConfigController {
         return ResultCommon.success(result);
     }
 
+    /**
+     * 查询常用系统设置
+     *
+     * @return
+     */
     @ApiOperation(value = "查询常用系统设置", notes = "")
     @GetMapping("/common")
     public ServiceResult<List<SysConfigBO>> listCommon() {
@@ -88,6 +98,11 @@ public class SysConfigController {
         return ResultCommon.success(result);
     }
 
+    /**
+     * 查询系统名称
+     *
+     * @return
+     */
     @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation(value = "查询系统名称", notes = "")
     @GetMapping("/public")
@@ -100,6 +115,12 @@ public class SysConfigController {
         return ResultCommon.success(configs);
     }
 
+    /**
+     * 根据keyname更新单条sysconfig
+     *
+     * @param updateConfig
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "根据keyname更新单条sysconfig", notes = "")
     @ApiImplicitParam(name = "updateConfig", value = "更新请求体", dataTypeClass = SysConfigModel.class)
     @PostMapping("/update/bykeyname")
@@ -118,6 +139,12 @@ public class SysConfigController {
         }
     }
 
+    /**
+     * 根据keyname批量更新sysconfig
+     *
+     * @param configs
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "根据keyname批量更新sysconfig", notes = "")
     @ApiImplicitParam(name = "configs", value = "配置列表", dataTypeClass = List.class)
     @PostMapping("/updateall")

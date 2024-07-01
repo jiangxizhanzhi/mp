@@ -43,6 +43,12 @@ public class UserRoleController {
     @Autowired
     private UserRoleService userRoleService;
 
+    /**
+     * 分页查询
+     *
+     * @param pageRequest
+     * @return
+     */
     @ApiOperation(value = "[用户角色管理] 分页查询 根据userId查询用户所有角色", notes = "")
     @GetMapping("/roles/page/byuser")
     public ListObjServiceResult<RoleModel> getRolesByUser(UserRolePageRequest pageRequest) {
@@ -50,6 +56,12 @@ public class UserRoleController {
         return result;
     }
 
+    /**
+     * 分页查询
+     *
+     * @param pageRequest
+     * @return
+     */
     @ApiOperation(value = "[用户角色管理] 分页查询 根据roleId查询角色绑定的所有用户", notes = "")
     @AuthTarget(TargetEnum.USER_MANAGE)
     @GetMapping("/users/page/byrole")
@@ -58,6 +70,11 @@ public class UserRoleController {
         return result;
     }
 
+    /**
+     * 查询所有角色以及绑定的用户数量
+     *
+     * @return
+     */
     @ApiOperation(value = "[用户角色管理] 查询所有角色以及绑定的用户数量", notes = "")
     @AuthTarget(TargetEnum.DASHBOARD)
     @GetMapping("/statistics")
@@ -67,6 +84,12 @@ public class UserRoleController {
     }
 
 
+    /**
+     * 绑定请求
+     *
+     * @param userRolesReq
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "[用户角色管理] 绑定用户-角色关系(单个用户 -> 多个角色)，注意，该操作会删除原有用户的所有角色。 如果roleIds为空，表示删除用户所有角色！", notes = "")
     @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiImplicitParam(name="userRolesReq", value="绑定请求", dataTypeClass = UserRolesRequest.class)
@@ -83,6 +106,12 @@ public class UserRoleController {
     }
 
 
+    /**
+     * 角色关系
+     *
+     * @param roleUsersReq
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "[用户角色管理] 绑定用户-角色关系(单个角色 -> 多个用户)", notes = "")
     @ApiImplicitParam(name="roleUsersReq", value="绑定请求", dataTypeClass = RoleUsersRequest.class)
     @PostMapping("/bind/roleUsers")
@@ -98,6 +127,12 @@ public class UserRoleController {
     }
 
 
+    /**
+     * 角色关系
+     *
+     * @param roleUsersReq
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "[用户角色管理] 删除用户-角色关系(通过 role_id 和 user_ids组合)", notes = "")
     @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiImplicitParam(name="roleUsersReq", value="删除请求", dataTypeClass = RoleUsersRequest.class)

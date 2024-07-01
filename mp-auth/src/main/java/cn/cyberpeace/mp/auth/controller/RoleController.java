@@ -57,6 +57,12 @@ public class RoleController {
     private OperateRolePermissionService opRolePermService;
 
 
+    /**
+     * 删除指定id角色
+     *
+     * @param id
+     * @return
+     */
     @ApiOperation("删除指定id角色")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="id",dataTypeClass = String.class),
@@ -71,6 +77,7 @@ public class RoleController {
 
     /**
      * 批量删除
+     *
      * @param ids 数据id集
      * @return 成功数量
      */
@@ -83,6 +90,12 @@ public class RoleController {
         return roleService.bulkDelete(ids).asResult();
     }
 
+    /**
+     * 查询指定id角色
+     *
+     * @param id
+     * @return
+     */
     @AuthTarget(TargetEnum.USER_MANAGE)
     @GetMapping("/{id}")
     @ApiOperation(value = "查询指定id角色，附带权限集合", notes = "")
@@ -92,6 +105,12 @@ public class RoleController {
         return ResultUtils.obj2ObjServiceResult(roleBo);
     }
 
+    /**
+     * 获取指定id角色
+     *
+     * @param id
+     * @return
+     */
     @ApiOperation("获取指定id角色")
     @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiImplicitParams({
@@ -102,6 +121,12 @@ public class RoleController {
         return roleService.get(id).asResult();
     }
 
+    /**
+     * 创建角色
+     *
+     * @param createRequest
+     * @return
+     */
     @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "创建角色，同时完成角色-权限绑定关系", notes = "")
     @ApiImplicitParam(name = "createRequest", value = "请求", dataTypeClass = RoleRequest.class)
@@ -113,6 +138,12 @@ public class RoleController {
         return ResultCommon.success(roleModel);
     }
 
+    /**
+     * 更新角色
+     *
+     * @param modifyRequest
+     * @return
+     */
     @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "更新角色，同时完成角色-权限绑定关系", notes = "")
     @ApiImplicitParam(name = "modifyRequest", value = "修改请求", dataTypeClass = RoleRequest.class)
@@ -124,6 +155,12 @@ public class RoleController {
         return ResultCommon.success(roleModel);
     }
 
+    /**
+     * 查询所有角色
+     *
+     * @param rolePageRequest
+     * @return
+     */
     @AuthTarget({TargetEnum.USER_MANAGE, TargetEnum.SYSTEM_NOTICE_FOLDER})
     @ApiOperation(value = "查询所有角色，不分页，仅查询角色信息", notes = "")
     @GetMapping("/all")

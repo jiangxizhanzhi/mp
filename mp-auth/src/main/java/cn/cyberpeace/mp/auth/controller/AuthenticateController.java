@@ -41,6 +41,12 @@ public class AuthenticateController {
     @Autowired
     private UserService userService;
 
+    /**
+     * 检查是否是有效token
+     *
+     * @param token
+     * @return
+     */
     @ApiOperation(value = "检查是否是有效token", notes = "")
     @ApiImplicitParam(name = "token", value = "token", dataTypeClass = String.class)
     @GetMapping
@@ -51,6 +57,10 @@ public class AuthenticateController {
         return ResultCommon.success(userBo);
     }
 
+    /**
+     * @param token
+     * @return
+     */
     private JwtUtils.UserInfo verifyToken(String token) {
         JwtUtils.UserInfo user = null;
         if (StringUtils.isNotBlank(token)) {

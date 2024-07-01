@@ -53,6 +53,12 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    /**
+     * 删除指定id用户
+     *
+     * @param id
+     * @return
+     */
     @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation("删除指定id用户")
     @ApiImplicitParams({
@@ -67,6 +73,7 @@ public class UserController {
 
     /**
      * 批量删除
+     *
      * @param ids 数据id集
      * @return 成功数量
      */
@@ -81,6 +88,13 @@ public class UserController {
     }
 
 
+    /**
+     * 查询指定id用户
+     *
+     * @param id
+     * @param fields
+     * @return
+     */
     @ApiOperation(value = "查询指定id用户(附带组织、角色信息)", notes = "")
     @AuthTarget(TargetEnum.USER_MANAGE)
 
@@ -95,6 +109,12 @@ public class UserController {
     }
 
 
+    /**
+     * 查询指定id用户
+     *
+     * @param id
+     * @return
+     */
     @ApiOperation(value = "查询指定id用户(返回有限数据，无登录用户权限拦截)", notes = "")
     @AuthTarget(TargetEnum.NO_AUTH)
     @ApiImplicitParams({
@@ -112,6 +132,12 @@ public class UserController {
         return new ObjServiceResult(null).asResult();
     }
 
+    /**
+     * 查询指定ids用户列表
+     *
+     * @param ids
+     * @return
+     */
     @ApiOperation(value = "查询指定ids用户列表(返回有限数据，无登录用户权限拦截)", notes = "")
     @AuthTarget(TargetEnum.NO_AUTH)
     @ApiImplicitParams({
@@ -132,6 +158,11 @@ public class UserController {
     }
 
 
+    /**
+     * 查询当前登录用户信息
+     *
+     * @return
+     */
     @ApiOperation(value = "查询当前登录用户信息(附带组织，角色信息)", notes = "")
     @AuthTarget(TargetEnum.NO_AUTH)
     @GetMapping("/current")
@@ -141,6 +172,12 @@ public class UserController {
     }
 
 
+    /**
+     * 新增用户
+     *
+     * @param createRequest
+     * @return
+     */
     @ApiOperation(value = "新增用户(同时完成组织，角色绑定关系)", notes = "")
     @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiImplicitParam(name = "createRequest", value = "请求", dataTypeClass = UserRequest.class)
@@ -153,6 +190,12 @@ public class UserController {
         return ResultCommon.success(userModel);
     }
 
+    /**
+     * 修改用户
+     *
+     * @param modifyRequest
+     * @return
+     */
     @ApiOperation(value = "修改用户(同时完成组织，角色绑定关系)", notes = "")
     @AuthTarget({TargetEnum.OJ_COURSE, TargetEnum.PERSONAL_CENTER, TargetEnum.PERSONAL_FOLDER, TargetEnum.USER_MANAGE})
     @ApiImplicitParam(name = "modifyRequest", value = "修改请求", dataTypeClass = UserRequest.class)

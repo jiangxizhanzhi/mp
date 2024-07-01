@@ -42,6 +42,7 @@ public class EventMonitorController {
 
     /**
      * 查询事件总数
+     *
      * @param baseRequest
      * @return
      */
@@ -56,6 +57,7 @@ public class EventMonitorController {
     /**
      * 采集事件统计，查询各个节点事件的占比情况
      * 默认排序为前5个节点
+     *
      * @param eventPercentRequest
      * @return
      */
@@ -93,7 +95,7 @@ public class EventMonitorController {
     /**
      * 采集事件趋势图
      *
-     * @param
+     * @param eventTrendRequest
      * @return
      */
     @ApiOperation(value = "采集事件趋势图")

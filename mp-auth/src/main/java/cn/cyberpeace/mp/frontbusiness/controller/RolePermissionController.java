@@ -36,6 +36,12 @@ public class RolePermissionController {
     @Autowired
     private RolePermissionModelService rolePermissionModelService;
 
+    /**
+     * 角色ID
+     *
+     * @param roleId
+     * @return
+     */
     @ApiOperation(value = "[角色权限管理] 查询角色权限", notes = "")
     @ApiImplicitParam(name="roleId", value="角色ID", dataTypeClass = String.class)
     @GetMapping("/byrole")
@@ -45,6 +51,12 @@ public class RolePermissionController {
         return ResultCommon.success(targets);
     }
 
+    /**
+     * 角色权限绑定请求
+     *
+     * @param bindRoleTargetsReq
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "[角色权限管理] 绑定角色-权限关系，注意，如果targetIds为空，表示删除角色所有权限！", notes = "")
     @ApiImplicitParam(name = "bindRoleTargetsReq", value = "角色权限绑定请求", dataTypeClass = BindRoleTargetsRequest.class)
     @PostMapping("/bind")

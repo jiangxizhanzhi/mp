@@ -79,6 +79,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     /**
      * 删除流量信息
+     *
      * @param id
      * @return
      */
@@ -92,6 +93,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     /**
      * 批量删除流量信息
+     *
      * @param ids
      * @return
      */
@@ -107,6 +109,11 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return flowServiceImpl.batchDeleteFlowInfo(ids);
     }
 
+    /**
+     * flowCategories
+     *
+     * @return
+     */
     @GetMapping("/categories")
     @ApiOperation(value = "查询流量分类")
     public ServiceResult<List<OptionBO>> flowCategories() {
@@ -115,6 +122,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     /**
      * 分页查询流量信息
+     *
      * @param queryParams
      * @return
      */
@@ -133,6 +141,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     /**
      * 背景流量详情
+     *
      * @param id
      * @return
      */
@@ -146,6 +155,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     /**
      * 新增背景流量
+     *
      * @param addRequest
      * @return
      */
@@ -159,6 +169,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     /**
      * 更新背景流量
+     *
      * @param modifyRequest
      * @return
      */
@@ -172,6 +183,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     /**
      * 攻击流量详情
+     *
      * @param id
      * @return
      */
@@ -185,6 +197,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     /**
      * 新增攻击流量
+     *
      * @param addRequest
      * @return
      */
@@ -198,6 +211,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     /**
      * 更新攻击流量
+     *
      * @param modifyRequest
      * @return
      */
@@ -211,6 +225,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     /**
      * 根据集合id批量查询
+     *
      * @param request
      * @return
      */
@@ -223,6 +238,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     /**
      * 流量信息导入
+     *
      * @param request
      * @return
      */
@@ -236,6 +252,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     /**
      * 名称存在校验
+     *
      * @param request
      * @return
      */
@@ -246,6 +263,12 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return flowServiceImpl.checkNamesExist(request);
     }
 
+    /**
+     * flowAnalyse
+     *
+     * @param file
+     * @return
+     */
     @ApiOperation(value = "流量包解析", notes = "获取流量包包含的协议集合")
     @PostMapping("/analyse")
     public ServiceResult<PcapAnalyseResponse> flowAnalyse(MultipartFile file) {
@@ -277,6 +300,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     /**
      * 分页查询流量分类列表
+     *
      * @param queryParams
      * @return
      */
@@ -305,6 +329,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     /**
      * 新增流量分类
+     *
      * @param optionModelBO
      * @return
      */
@@ -324,6 +349,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     /**
      * 编辑流量分类
+     *
      * @param optionModelBO
      * @return
      */
@@ -340,6 +366,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     /**
      * 删除流量分类
+     *
      * @param request
      * @return
      */
@@ -364,6 +391,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     /**
      * 流量分类详情
+     *
      * @param id
      * @return
      */

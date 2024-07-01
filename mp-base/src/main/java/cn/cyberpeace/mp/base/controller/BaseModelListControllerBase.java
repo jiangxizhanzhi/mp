@@ -14,6 +14,7 @@ public interface BaseModelListControllerBase {
 
     /**
      * 判断查询方法是否不限制分页大小
+     *
      * @param listFuncName 查询方法名称
      * @return boolean
      */
@@ -28,8 +29,9 @@ public interface BaseModelListControllerBase {
 
     /**
      * 处理有效的查询参数
+     *
      * @param listFuncName 查询方法名称
-     * @param queryParams 查询参数
+     * @param queryParams  查询参数
      */
     default void handleQueryParams(String listFuncName, QueryParams queryParams) {
         ControllerCommon.convertValidQueryParams(queryParams, isUnlimitPagination(listFuncName));

@@ -35,12 +35,24 @@ public class UserBehaviorController {
 	@Autowired
 	private UserBehaviorMapper userBehaviorMapper;
 
+	/**
+	 * 新增用户行为
+	 *
+	 * @param addReq
+	 * @return
+	 */
 	@PostMapping("/")
 	@ApiOperation("新增用户行为")
 	public ServiceResult<String> addBehavior(@RequestBody @Validated AddUserBehaviorReq addReq) {
 		return ResultCommon.success(userBehaviorService.add(addReq));
 	}
 
+	/**
+	 * 修改用户行为
+	 *
+	 * @param updateReq
+	 * @return
+	 */
 	@PatchMapping("/")
 	@ApiOperation("修改用户行为")
 	public ServiceResult<Boolean> updateBehavior(@RequestBody @Validated UpdateUserBehaviorReq updateReq) {
@@ -48,6 +60,12 @@ public class UserBehaviorController {
 		return ResultCommon.success(true);
 	}
 
+	/**
+	 * 删除用户行为
+	 *
+	 * @param deleteReq
+	 * @return
+	 */
 	@DeleteMapping("/")
 	@ApiOperation("删除用户行为")
 	public ServiceResult<Boolean> deleteBehavior(@RequestBody DeleteReq deleteReq) {
@@ -55,18 +73,35 @@ public class UserBehaviorController {
 		return ResultCommon.success(true);
 	}
 
+	/**
+	 * 分页查询用户行为
+	 *
+	 * @param pageReq
+	 * @return
+	 */
 	@GetMapping("/page")
 	@ApiOperation("分页查询用户行为")
 	public ListObjServiceResult<UserBehaviorModel> pageBehavior(PageRequest pageReq) {
 		return userBehaviorService.page(pageReq).asResult();
 	}
 
+	/**
+	 * 查看用户行为访问配置
+	 *
+	 * @return
+	 */
 	@GetMapping("/type")
 	@ApiOperation("查看用户行为访问配置")
 	public ServiceResult<List<CodeNameRes>> getUserType() {
 		return ResultCommon.success(userBehaviorService.getUserType());
 	}
 
+	/**
+	 * 查询用户行为详情
+	 *
+	 * @param id
+	 * @return
+	 */
 	@GetMapping("/")
 	@ApiOperation("查询用户行为详情")
 	public ServiceResult<UserBehaviorDetail> behaviorDetail(@RequestParam String id) {

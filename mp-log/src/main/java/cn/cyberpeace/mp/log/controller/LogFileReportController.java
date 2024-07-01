@@ -27,6 +27,12 @@ public class LogFileReportController {
 
     private final LogReportService logReportService;
 
+    /**
+     * report
+     *
+     * @param request
+     * @return
+     */
     @PostMapping
     @ApiOperation(value = "上报日志", notes = "")
     @ApiImplicitParam(name = "request", value = "日志上报请求", dataTypeClass = LogReportRequest.class)

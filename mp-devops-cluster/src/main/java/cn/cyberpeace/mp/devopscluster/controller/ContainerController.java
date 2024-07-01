@@ -54,6 +54,7 @@ public class ContainerController {
 
     /**
      * 重启
+     *
      * @param request
      * @return
      */
@@ -69,6 +70,7 @@ public class ContainerController {
 
     /**
      * 暂停
+     *
      * @param request
      * @return
      */
@@ -84,6 +86,7 @@ public class ContainerController {
 
     /**
      * 恢复
+     *
      * @param request
      * @return
      */
@@ -99,6 +102,7 @@ public class ContainerController {
 
     /**
      * 开启
+     *
      * @param request
      * @return
      */
@@ -114,6 +118,7 @@ public class ContainerController {
 
     /**
      * 关闭
+     *
      * @param request
      * @return
      */
@@ -129,6 +134,7 @@ public class ContainerController {
 
     /**
      * 分页查询容器列表
+     *
      * @param request
      * @return
      */
@@ -143,6 +149,7 @@ public class ContainerController {
 
     /**
      * 转换BO to VO
+     *
      * @param model
      * @return
      */
@@ -183,6 +190,12 @@ public class ContainerController {
         return list;
     }
 
+    /**
+     * @param source
+     * @param tmpUserBoList
+     * @param containerModel
+     * @return 容器分页返回信息
+     */
     private static ContainerPageVO getContainerPageVO(Map<String, CsceneNodeInfoBO> source, List<UserBo> tmpUserBoList, ContainerBO containerModel) {
         CsceneNodeInfoBO csceneNodeInfoBO = new CsceneNodeInfoBO();
         if (Objects.nonNull(source.get(containerModel.getName()))) {

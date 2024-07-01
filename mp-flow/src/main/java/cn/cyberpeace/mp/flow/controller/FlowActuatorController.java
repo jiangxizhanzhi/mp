@@ -41,7 +41,10 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
     private FlowActuatorService flowActuatorService;
 
     /**
-     * 模糊搜索场景名称
+     * listSceneByFuzzy
+     *
+     * @param request
+     * @return
      */
     @AuthTarget({TargetEnum.STATIC_TRAFFIC_LIST, TargetEnum.FLOW_GROUP})
     @ApiOperation("模糊搜索场景信息")
@@ -56,7 +59,10 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
     }
 
     /**
-     * 分页查询流量发生器信息
+     * page
+     *
+     * @param queryParams
+     * @return
      */
     @AuthTarget({TargetEnum.STATIC_TRAFFIC_LIST, TargetEnum.FLOW_GROUP})
     @ApiOperation("分页查询流量信息")
@@ -69,9 +75,10 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
     }
 
     /**
-     * 启动
+     * batchStart
      *
      * @param request 流量发生器id列表
+     * @return 统一服务返回结果
      */
     @AuthTarget({TargetEnum.DYNAMIC_TRAFFIC_LIST, TargetEnum.STATIC_TRAFFIC_LIST})
     @ApiOperation("启动流量发生器")
@@ -88,9 +95,10 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
     }
 
     /**
-     * 暂停
+     * batchPause
      *
      * @param request 流量发生器id列表
+     * @return 统一服务返回结果
      */
     @AuthTarget({TargetEnum.DYNAMIC_TRAFFIC_LIST, TargetEnum.STATIC_TRAFFIC_LIST})
     @ApiOperation("暂停流量发生器")
@@ -107,9 +115,10 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
     }
 
     /**
-     * 重启
+     * batchReboot
      *
      * @param request 流量发生器id列表
+     * @return 统一服务返回结果
      */
     @AuthTarget({TargetEnum.DYNAMIC_TRAFFIC_LIST, TargetEnum.STATIC_TRAFFIC_LIST})
     @ApiOperation("重启流量发生器")

@@ -56,6 +56,7 @@ public class VmController {
 
     /**
      * 重启
+     *
      * @param request
      * @return
      */
@@ -71,6 +72,7 @@ public class VmController {
 
     /**
      * 暂停
+     *
      * @param request
      * @return
      */
@@ -86,6 +88,7 @@ public class VmController {
 
     /**
      * 恢复
+     *
      * @param request
      * @return
      */
@@ -101,6 +104,7 @@ public class VmController {
 
     /**
      * 开启
+     *
      * @param request
      * @return
      */
@@ -116,6 +120,7 @@ public class VmController {
 
     /**
      * 关闭
+     *
      * @param request
      * @return
      */
@@ -131,6 +136,7 @@ public class VmController {
 
     /**
      * 分页查询虚拟机信息
+     *
      * @param request
      * @return
      */
@@ -144,6 +150,7 @@ public class VmController {
 
     /**
      * 转换BO to VO
+     *
      * @param model
      * @return
      */
@@ -208,6 +215,13 @@ public class VmController {
         return list;
     }
 
+    /**
+     * @param source
+     * @param tmpUserBoList
+     * @param uuid2User
+     * @param instanceModel
+     * @return 虚拟机分页返回信息
+     */
     private static InstancePageVO getInstancePageVO(Map<String, CsceneNodeInfoBO> source, List<UserBo> tmpUserBoList, Map<String, String> uuid2User, InstanceBO instanceModel) {
         CsceneNodeInfoBO csceneNodeInfoBO = new CsceneNodeInfoBO();
         if (Objects.nonNull(source.get(instanceModel.getName()))) {

@@ -35,6 +35,12 @@ public class OrgController {
     @Autowired
     private OrgService orgService;
 
+    /**
+     * 根据parent组织获取下级组织
+     *
+     * @param parentId
+     * @return 统一服务返回结果
+     */
     @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "根据parent组织获取下级组织", notes = "")
     @ApiImplicitParam(name = "parentId", value = "上级组织ID", dataTypeClass = String.class)
@@ -44,6 +50,12 @@ public class OrgController {
         return ServiceResult.builder().source(orgs).build().asResult();
     }
 
+    /**
+     * 根据组织路径查询
+     *
+     * @param path
+     * @return
+     */
     @ApiOperation(value = "根据组织路径查询", notes = "")
     @ApiImplicitParam(name = "path", value = "组织路径", dataTypeClass = String.class)
     @GetMapping("/bypath")
@@ -53,6 +65,12 @@ public class OrgController {
         return ResultCommon.success(orgBO);
     }
 
+    /**
+     * 查询组织
+     *
+     * @param orgId
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "查询组织（树形结构，orgId为空就是查所有组织树形结构）", notes = "")
     @ApiImplicitParam(name = "orgId", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/tree")

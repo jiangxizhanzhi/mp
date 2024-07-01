@@ -27,6 +27,12 @@ public class RuleController {
     @Autowired
     private RuleService ruleService;
 
+    /**
+     * pageRules
+     *
+     * @param pageRequest
+     * @return
+     */
     @ApiOperation(value = "分页查询规则信息", notes = "")
     @GetMapping
     public ListObjServiceResult<Rule> pageRules(BasePageRequest pageRequest) {

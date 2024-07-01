@@ -35,6 +35,12 @@ public class CollectionTypeController {
     @Autowired
     private CollectionTypeService collectionTypeService;
 
+    /**
+     * 查询采集类型
+     *
+     * @param baseRequest
+     * @return
+     */
     @GetMapping("/list")
     @ApiOperation(value = "查询采集类型")
     public ServiceResult<List<CollectionType>> typesTree(BaseSceneElementRequest baseRequest) {
@@ -44,8 +50,12 @@ public class CollectionTypeController {
     }
 
 
-
-
+    /**
+     * 查询节点应用列表
+     *
+     * @param appRequest
+     * @return
+     */
     @GetMapping("/apps")
     @ApiOperation(value = "查询节点应用列表")
     public ServiceResult<List<CollectionApp>> getApps(CollectionAppRequest appRequest) {

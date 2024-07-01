@@ -22,6 +22,7 @@ public interface BaseModelBulkUpdateController<M extends BaseModel, S extends Ba
 
     /**
      * 通用批量更新
+     *
      * @param objs 更新对象集，需要更新的字段必须一致
      * @return 成功数量
      */

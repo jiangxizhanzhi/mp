@@ -36,12 +36,24 @@ public class NetworkBehaviorController {
 	@Autowired
 	private NetworkBehaviorService networkBehaviorService;
 
+	/**
+	 * 新增网络行为
+	 *
+	 * @param addNetworkBehaviorReq
+	 * @return
+	 */
 	@PostMapping("/")
 	@ApiOperation("新增网络行为")
 	public ServiceResult<String> addBehavior(@RequestBody @Validated AddNetworkBehaviorReq addNetworkBehaviorReq) {
 		return ResultCommon.success(networkBehaviorService.add(addNetworkBehaviorReq));
 	}
 
+	/**
+	 * 修改网络行为
+	 *
+	 * @param updateNetworkBehaviorReq
+	 * @return
+	 */
 	@PatchMapping("/")
 	@ApiOperation("修改网络行为")
 	public ServiceResult<Boolean> updateBehavior(@RequestBody @Validated UpdateNetworkBehaviorReq updateNetworkBehaviorReq) {
@@ -49,6 +61,12 @@ public class NetworkBehaviorController {
 		return ResultCommon.success(true);
 	}
 
+	/**
+	 * 删除网络行为
+	 *
+	 * @param deleteReq
+	 * @return
+	 */
 	@DeleteMapping("/")
 	@ApiOperation("删除网络行为")
 	public ServiceResult<Boolean> deleteBehavior(@RequestBody DeleteReq deleteReq) {
@@ -56,6 +74,12 @@ public class NetworkBehaviorController {
 		return ResultCommon.success(true);
 	}
 
+	/**
+	 * 获取网络行为详情
+	 *
+	 * @param id
+	 * @return
+	 */
 	@GetMapping("/")
 	@ApiOperation("获取网络行为详情")
 	public ServiceResult<NetworkBehaviorModel> getBehavior(@ApiParam(name = "id", value = "网络行为id", required = true)
@@ -63,18 +87,35 @@ public class NetworkBehaviorController {
 		return ResultCommon.success(networkBehaviorService.get(id));
 	}
 
+	/**
+	 * 分页查询网络行为
+	 *
+	 * @param pageReq
+	 * @return
+	 */
 	@GetMapping("/page")
 	@ApiOperation("分页查询网络行为")
 	public ListObjServiceResult<NetworkBehaviorModel> pageBehavior(NetworkPageReq pageReq) {
 		return networkBehaviorService.page(pageReq).asResult();
 	}
 
+	/**
+	 * 查询行为类型
+	 *
+	 * @return
+	 */
 	@GetMapping("/type")
 	@ApiOperation("查询行为类型")
 	public ServiceResult<List<CodeNameRes>> getBehaviorType() {
 		return ResultCommon.success(networkBehaviorService.getBehaviorType());
 	}
 
+	/**
+	 * 导入文件
+	 *
+	 * @param file
+	 * @return
+	 */
 	@PostMapping("/upload")
 	@ApiOperation("导入文件")
 	@ResponseBody

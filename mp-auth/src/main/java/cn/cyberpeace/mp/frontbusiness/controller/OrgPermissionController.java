@@ -36,6 +36,12 @@ public class OrgPermissionController {
     private OrgPermissionService orgPermissionService;
 
 
+    /**
+     * 绑定组织权限请求体
+     *
+     * @param bindOrgTargetsReq
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "[组织权限管理] 绑定组织-权限关系(注意，该操作会清除原来绑定的所有权限， 如果targetIds为空，表示删除组织所有权限！)", notes = "")
     @ApiImplicitParam(name = "bindOrgTargetsReq", value = "绑定组织权限请求体", dataTypeClass = BindOrgTargetsRequest.class)
     @PostMapping("/bind")
@@ -51,6 +57,12 @@ public class OrgPermissionController {
     }
 
 
+    /**
+     * 组织ID
+     *
+     * @param orgId
+     * @return
+     */
     @ApiOperation(value = "[组织权限管理] 查询组织所有权限")
     @ApiImplicitParam(name = "orgId", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/byorg")
@@ -60,6 +72,12 @@ public class OrgPermissionController {
     }
 
 
+    /**
+     * 组织ID
+     *
+     * @param orgId
+     * @return
+     */
     @ApiOperation(value = "[组织权限管理] 查询组织所有权限（继承上级组织权限）")
     @ApiImplicitParam(name = "orgId", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/byorg/includeparent")

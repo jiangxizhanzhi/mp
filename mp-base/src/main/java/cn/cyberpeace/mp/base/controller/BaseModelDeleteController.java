@@ -24,6 +24,7 @@ public interface BaseModelDeleteController<M extends BaseModel, S extends BaseMo
 
     /**
      * 通用删除
+     *
      * @param id 数据id
      * @return 是否删除成功
      */
@@ -38,6 +39,7 @@ public interface BaseModelDeleteController<M extends BaseModel, S extends BaseMo
 
     /**
      * 通用删除
+     *
      * @param id 数据id
      * @return 是否删除成功
      */
@@ -52,6 +54,7 @@ public interface BaseModelDeleteController<M extends BaseModel, S extends BaseMo
 
     /**
      * 通用删除
+     *
      * @param deleteData 删除数据
      * @return 是否删除成功
      */

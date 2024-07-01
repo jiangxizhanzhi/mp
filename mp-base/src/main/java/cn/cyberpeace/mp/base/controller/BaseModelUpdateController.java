@@ -24,8 +24,9 @@ public interface BaseModelUpdateController<M extends BaseModel, S extends BaseMo
 
     /**
      * 通用更新
-     * @param id 数据id
-     * @param obj 数据对象
+     *
+     * @param id     数据id
+     * @param obj    数据对象
      * @param fields 返回数据字段，只涉及更新字段
      * @return 单条数据结果
      */
@@ -43,7 +44,8 @@ public interface BaseModelUpdateController<M extends BaseModel, S extends BaseMo
 
     /**
      * 通用更新, 兼容
-     * @param obj 数据对象
+     *
+     * @param obj    数据对象
      * @param fields 返回数据字段，只涉及更新字段
      * @return 单条数据结果
      */
@@ -59,8 +61,9 @@ public interface BaseModelUpdateController<M extends BaseModel, S extends BaseMo
 
     /**
      * 通用更新, 兼容
-     * @param id 数据id
-     * @param obj 数据对象
+     *
+     * @param id     数据id
+     * @param obj    数据对象
      * @param fields 返回数据字段，只涉及更新字段
      * @return 单条数据结果
      */

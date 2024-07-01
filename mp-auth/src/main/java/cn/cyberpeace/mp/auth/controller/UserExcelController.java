@@ -74,6 +74,12 @@ public class UserExcelController {
     private TenantUserService tenantUserService;
 
 
+    /**
+     * 导出用户数据excel
+     *
+     * @param response
+     * @param exportRequest
+     */
     @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "导出用户数据excel", notes = "")
     @ApiImplicitParam(name = "exportRequest", value = "导出请求", dataTypeClass = UserExportRequest.class)
@@ -110,6 +116,12 @@ public class UserExcelController {
     }
 
 
+    /**
+     * 通过excel导入用户数据
+     *
+     * @param file
+     * @return 统一服务返回结果
+     */
     @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "通过excel导入用户数据", notes = "")
     @ApiImplicitParam(name="file", value="文件", dataTypeClass = MultipartFile.class)
@@ -130,6 +142,9 @@ public class UserExcelController {
     }
 
 
+    /**
+     * 下载用户导入excel模板
+     */
     @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation(value = "下载用户导入excel模板", notes = "")
     @GetMapping("/excel/template")

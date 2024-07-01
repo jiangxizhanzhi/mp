@@ -55,6 +55,12 @@ public class WebSocketNoticeController {
 
     private final ImagesByUuidSocketServer imagesByUuidSocketServer;
 
+    /**
+     * 根据镜像UUID获取登录链接信息
+     *
+     * @param uuid
+     * @return 统一服务返回结果
+     */
     @ApiOperation("根据镜像UUID获取登录链接信息")
     @ApiImplicitParam(name = "uuid", value = "靶标id", dataTypeClass = String.class)
     @GetMapping("/images/connection")
@@ -65,6 +71,12 @@ public class WebSocketNoticeController {
         return ResultCommon.success();
     }
 
+    /**
+     * 根据镜像UUID获取靶标信息
+     *
+     * @param uuid
+     * @return 统一服务返回结果
+     */
     @ApiOperation("根据镜像UUID获取靶标信息")
     @ApiImplicitParam(name = "uuid", value = "靶标id", dataTypeClass = String.class)
     @GetMapping("/device/get-by-uuid")
@@ -88,6 +100,12 @@ public class WebSocketNoticeController {
         return ResultCommon.success();
     }
 
+    /**
+     * 推送快照状态
+     *
+     * @param vmId
+     * @return
+     */
     @ApiOperation("推送快照状态")
     @GetMapping("/device/snapshot")
     public ServiceResult<Boolean> pushSnapshot(@RequestParam(name = "vm_id") String vmId) {
@@ -96,6 +114,13 @@ public class WebSocketNoticeController {
         return ResultCommon.success();
     }
 
+    /**
+     * 推送指定类型消息
+     *
+     * @param vmId
+     * @param type
+     * @return
+     */
     @ApiOperation("推送指定类型消息")
     @GetMapping("/device/message")
     public ServiceResult<Boolean> pushMessage(@RequestParam(name = "vm_id") String vmId, String type) {

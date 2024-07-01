@@ -57,6 +57,12 @@ public class SysNoticeController {
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
+    /**
+     * 查询单个公告
+     *
+     * @param id
+     * @return
+     */
     @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation("查询单个公告")
     @ApiImplicitParam(name = "id", value = "公告ID", dataTypeClass = String.class)
@@ -73,6 +79,12 @@ public class SysNoticeController {
     }
 
 
+    /**
+     * 阅读公告
+     *
+     * @param id
+     * @return 统一服务返回结果
+     */
     @ApiOperation("阅读公告")
     @AuthTarget(TargetEnum.NO_AUTH)
     @ApiImplicitParam(name = "id", value = "公告ID", dataTypeClass = String.class)
@@ -82,6 +94,13 @@ public class SysNoticeController {
         return ResultCommon.success();
     }
 
+    /**
+     * 置顶公告
+     *
+     * @param id
+     * @param type
+     * @return 统一服务返回结果
+     */
     @ApiOperation("置顶公告")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "公告ID", dataTypeClass = String.class),
@@ -94,6 +113,12 @@ public class SysNoticeController {
     }
 
 
+    /**
+     * 停止推送公告消息
+     *
+     * @param ids
+     * @return 统一服务返回结果
+     */
     @ApiOperation("停止推送公告消息")
     @AuthTarget({TargetEnum.FRONT_ALL, TargetEnum.SYSTEM_NOTICE_FOLDER})
     @ApiImplicitParam(name = "ids", value = "公告ID列表", dataTypeClass = String.class)
@@ -104,6 +129,11 @@ public class SysNoticeController {
     }
 
 
+    /**
+     * 查询未读公告数量
+     *
+     * @return
+     */
     @ApiOperation("查询未读公告数量")
     @AuthTarget({TargetEnum.FRONT_ALL, TargetEnum.SYSTEM_NOTICE_FOLDER})
     @GetMapping("/unread_count")
@@ -112,6 +142,12 @@ public class SysNoticeController {
         return ResultCommon.success(unreadCnt);
     }
 
+    /**
+     * 查询所有公告(分页)
+     *
+     * @param pageRequest
+     * @return
+     */
     @ApiOperation("查询所有公告(分页)")
     @GetMapping("/page")
     @AuthTarget(TargetEnum.NO_AUTH)
@@ -121,6 +157,12 @@ public class SysNoticeController {
     }
 
 
+    /**
+     * 查询当前用户有权看到的公告
+     *
+     * @param pageRequest
+     * @return
+     */
     @ApiOperation("查询当前用户有权看到的公告(分页)")
     @AuthTarget({TargetEnum.NO_AUTH, TargetEnum.SYSTEM_NOTICE_FOLDER})
     @GetMapping("/currentuser/page")
@@ -130,6 +172,12 @@ public class SysNoticeController {
     }
 
 
+    /**
+     * 新增公告
+     *
+     * @param noticeReq
+     * @return
+     */
     @ApiOperation("新增公告")
     @ApiImplicitParam(name = "noticeReq", value = "新增公告请求", dataTypeClass = SysNoticeRequest.class)
     @PostMapping
@@ -140,6 +188,13 @@ public class SysNoticeController {
         return ResultCommon.success(noticeModel);
     }
 
+    /**
+     * 更新公告
+     *
+     * @param id
+     * @param noticeReq
+     * @return 统一服务返回结果
+     */
     @ApiOperation("更新公告")
     @ApiImplicitParam(name = "noticeReq", value = "更新公告请求", dataTypeClass = SysNoticeRequest.class)
     @PatchMapping("/{id}")
@@ -152,6 +207,12 @@ public class SysNoticeController {
     }
 
 
+    /**
+     * 批量删除公告
+     *
+     * @param ids
+     * @return
+     */
     @ApiOperation("批量删除公告")
     @ApiImplicitParam(name = "ids", value = "公告ID列表", dataTypeClass = String[].class)
     @DeleteMapping
@@ -162,6 +223,12 @@ public class SysNoticeController {
         return ResultCommon.success(result.getSource());
     }
 
+    /**
+     * 删除指定id公告
+     *
+     * @param id
+     * @return
+     */
     @ApiOperation("删除指定id公告")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", paramType = "path", value = "数据id", dataTypeClass = String.class),
@@ -175,6 +242,11 @@ public class SysNoticeController {
         return ResultCommon.success(result.getSource());
     }
 
+    /**
+     * 查询系统公告类型
+     *
+     * @return
+     */
     @ApiOperation(value = "查询系统公告类型")
     @GetMapping("/types")
     @AuthTarget(TargetEnum.NO_AUTH)
@@ -182,6 +254,12 @@ public class SysNoticeController {
         return optionService.getIntOptions(FrontAdminConstant.MP_COMMON_OPTION_TYPE_FRONT_ADMIN_NOTICE_TYPE);
     }
 
+    /**
+     * 延期提醒
+     *
+     * @param delayNoticeRequest
+     * @return
+     */
     @ApiOperation("延期提醒")
     @PostMapping("/delay_notice")
     @AuthTarget(TargetEnum.NO_AUTH)

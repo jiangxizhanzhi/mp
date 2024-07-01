@@ -89,6 +89,12 @@ public class ElementMonitorController {
     }
 
 
+    /**
+     * getOS
+     *
+     * @param baseRequest
+     * @return
+     */
     @ApiOperation(value = "节点操作系统信息")
     @GetMapping("/os")
     public ServiceResult<OS> getOS(BaseSceneElementRequest baseRequest) {
@@ -97,6 +103,12 @@ public class ElementMonitorController {
     }
 
 
+    /**
+     * pageConnectionStates
+     *
+     * @param pageRequest
+     * @return
+     */
     @ApiOperation(value = "查询节点网络连接状态")
     @GetMapping("/connection_state")
     public ListObjServiceResult<ConnectionState> pageConnectionStates(BaseSceneElementPageRequest pageRequest) {
@@ -105,6 +117,13 @@ public class ElementMonitorController {
         return sceneElementMonitorService.pageNetworkConnections(pageRequest);
     }
 
+    /**
+     * fileModify
+     *
+     * @param pageRequest
+     * @param path
+     * @return
+     */
     @ApiOperation(value = "查询节点文件变更事件")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "path", value = "文件路径 模糊查询", dataTypeClass = String.class)
@@ -131,6 +150,14 @@ public class ElementMonitorController {
         return result.asResult();
     }
 
+    /**
+     * fileModifyHistogram
+     *
+     * @param intervalMinutes
+     * @param bucketSize
+     * @param pageRequest
+     * @return
+     */
     @ApiOperation(value = "节点文件变更事件柱状图")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "intervalMinutes", value = "时间间隔,单位分钟,默认15", dataTypeClass = Integer.class),
@@ -161,6 +188,13 @@ public class ElementMonitorController {
         return new ServiceResult<>(result).asResult();
     }
 
+    /**
+     * registryModify
+     *
+     * @param pageRequest
+     * @param path
+     * @return
+     */
     @ApiOperation(value = "查询节点注册表变更事件")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "path", value = "注册表路径 模糊查询", dataTypeClass = String.class)
@@ -187,6 +221,14 @@ public class ElementMonitorController {
         return result.asResult();
     }
 
+    /**
+     * registryModifyHistogram
+     *
+     * @param intervalMinutes
+     * @param bucketSize
+     * @param pageRequest
+     * @return
+     */
     @ApiOperation(value = "节点注册表变更事件柱状图")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "intervalMinutes", value = "时间间隔,单位分钟,默认15", dataTypeClass = Integer.class),
@@ -217,6 +259,12 @@ public class ElementMonitorController {
         return new ServiceResult<>(result).asResult();
     }
 
+    /**
+     * getServiceVulnerability
+     *
+     * @param pageRequest
+     * @return
+     */
     @ApiOperation(value = "查询节点服务漏洞Top10")
     @GetMapping("/get_service_vulnerability")
     public ListObjServiceResult<ElementVulnerabilityCountInfo> getServiceVulnerability(ElementMonitorRequest pageRequest) {
@@ -226,6 +274,12 @@ public class ElementMonitorController {
         return new ListObjServiceResult<>(new ListObjResult<>(result, result.size())).asResult();
     }
 
+    /**
+     * getVulnerabilityPieChart
+     *
+     * @param pageRequest
+     * @return
+     */
     @ApiOperation(value = "查询节点服务漏洞饼状图")
     @GetMapping("/get_vulnerability_pie_chart")
     public ListObjServiceResult<ElementVulnerabilityPieChartInfo> getVulnerabilityPieChart(ElementMonitorRequest pageRequest) {
@@ -235,6 +289,12 @@ public class ElementMonitorController {
         return new ListObjServiceResult<>(new ListObjResult<>(result, result.size())).asResult();
     }
 
+    /**
+     * getVulnerabilityList
+     *
+     * @param pageRequest
+     * @return
+     */
     @ApiOperation(value = "查询节点服务漏洞列表")
     @GetMapping("/get_vulnerability_list")
     public ListObjServiceResult<ElementVulnerabilityInfo> getVulnerabilityList(ElementMonitorRequest pageRequest) {

@@ -26,6 +26,10 @@ public interface BaseRemoteFileDownloadController<S extends BaseRemoteFileServic
 
     /**
      * 通用下载接口
+     *
+     * @param id
+     * @param filename
+     * @param response
      */
     @ApiOperation("下载文件")
     @ApiImplicitParams({

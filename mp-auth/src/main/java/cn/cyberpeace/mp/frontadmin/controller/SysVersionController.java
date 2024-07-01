@@ -30,6 +30,11 @@ public class SysVersionController {
     @Autowired
     private SysModelVersionService sysModelVersionService;
 
+    /**
+     * 查询系统版本号
+     *
+     * @return
+     */
     @ApiOperation(value = "查询系统版本号", notes = "")
     @GetMapping("/list")
     public ServiceResult<SysVersionResponse> listSysVersion() {

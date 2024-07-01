@@ -32,12 +32,25 @@ public class LogDynamicSettingController {
     @Autowired
     private ILogSettingService logSettingService;
 
+    /**
+     * setLogLevel
+     *
+     * @param logName
+     * @param logLevel
+     * @return
+     */
     @GetMapping("/logLevel/{logName}/{logLevel}")
     @ApiOperation(value = "设置日志级别")
     public ServiceResult<LogLevelResponse> setLogLevel(@PathVariable("logName") String logName, @PathVariable("logLevel") String logLevel) {
         return logSettingService.setLogLevel(logName, logLevel);
     }
 
+    /**
+     * setBatchLogLevel
+     *
+     * @param logLevelBatch
+     * @return
+     */
     @PostMapping("/logLevel/batch")
     @ApiOperation(value = "批量设置日志级别")
     public ServiceResult<List<LogLevelResponse>> setBatchLogLevel(@RequestBody LogLevelBatchRequest logLevelBatch) {
@@ -45,6 +58,11 @@ public class LogDynamicSettingController {
         return logSettingService.setBatchLogLevel(logLevelBatch.getLogLevelList());
     }
 
+    /**
+     * resetDefaultLogLevel
+     *
+     * @return
+     */
     @GetMapping("/logLevel/reset")
     @ApiOperation(value = "重置日志级别")
     public ServiceResult<List<LogLevelResponse>> resetDefaultLogLevel() {
@@ -54,6 +72,7 @@ public class LogDynamicSettingController {
     /**
      * 获取日志级别列表
      *
+     * @param logName
      * @return 日志级别信息
      */
     @GetMapping("/logLevel/{logName}")

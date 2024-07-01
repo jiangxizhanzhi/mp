@@ -24,6 +24,11 @@ public class ConfigController {
     @Resource
     private CloudAppConfig config;
 
+    /**
+     * 查询单ip配置
+     *
+     * @return
+     */
     @ApiOperation("查询单ip配置")
     @GetMapping(value = "/single_ip")
     public ServiceResult<SingleIpResponse> getSingIpConfig() {

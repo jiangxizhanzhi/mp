@@ -80,6 +80,9 @@ public class RealEquipmentController {
 
     /**
      * 分页查询
+     *
+     * @param request
+     * @return
      */
     @AuthTarget({TargetEnum.DEVOPS_EQUIPMENT_PAGE_GROUP, REAL_EQUIPMENT_MANAGEMENT, REAL_MANAGE})
     @ApiOperation("分页查询")
@@ -102,6 +105,14 @@ public class RealEquipmentController {
         return new PageResult<>(list,model.getTotal());
     }
 
+    /**
+     * @param l1AndL2AndL3Type
+     * @param language
+     * @param systemArchitecure
+     * @param accessType
+     * @param v
+     * @return
+     */
     private RealEquipmentPageVO getRealEquipmentPageVO(TypeAllConvertModel l1AndL2AndL3Type, TypeAllConvertModel language, TypeAllConvertModel systemArchitecure, TypeAllConvertModel accessType, RealEquipmentBO v) {
         ExtEntity extEntity = v.getExtEntity();
         CloudPlatformPageResult<TargetConnection> connection = realEquipmentService.connection(v.getUuid());
@@ -220,6 +231,12 @@ public class RealEquipmentController {
         return response;
     }
 
+    /**
+     * 根据ID查询
+     *
+     * @param id
+     * @return
+     */
     @ApiOperation("根据ID查询")
     @GetMapping("/{id}")
     public Result<RealEquipmentByIdVO> findByUuid(@PathVariable String id){
@@ -244,6 +261,10 @@ public class RealEquipmentController {
         return new Result(response);
     }
 
+    /**
+     * @param v
+     * @return 扩展实体访问信息
+     */
     private static ExtEntityAccess getExtEntityAccess(ExtEntityAccess v) {
         List<AccessProtocol> accessProtocols = v.getAccessProtocols();
         if (CollectionUtils.isNotEmpty(accessProtocols)) {
@@ -261,7 +282,9 @@ public class RealEquipmentController {
 
     /**
      * 新增
-     * TODO erzhu
+     *
+     * @param request
+     * @return 统一服务返回结果
      */
     @ApiOperation("新增")
     @ApiImplicitParam(name = "request", value = "新增实装设备请求体", dataTypeClass = RealEquipmentRequest.class)
@@ -274,6 +297,9 @@ public class RealEquipmentController {
 
     /**
      * 更新
+     *
+     * @param request
+     * @return 统一服务返回结果
      */
     @ApiOperation("更新")
     @ApiImplicitParam(name = "request", value = "更新数据请求体", dataTypeClass = RealEquipmentRequest.class)
@@ -289,6 +315,9 @@ public class RealEquipmentController {
 
     /**
      * 删除
+     *
+     * @param request
+     * @return
      */
     @ApiOperation("删除")
     @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = RealEquipmentDeleteRequest.class)
@@ -299,6 +328,12 @@ public class RealEquipmentController {
         return new Result<>(result.isSuccess());
     }
 
+    /**
+     * 查询详情
+     *
+     * @param id
+     * @return
+     */
     @ApiOperation("查询详情")
     @ApiImplicitParam(name = "uuid", value = "请求参数", dataTypeClass = String.class)
     @GetMapping("/get-devops-details")
@@ -419,6 +454,12 @@ public class RealEquipmentController {
     }
 
 
+    /**
+     * 接口资源
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("接口资源")
     @GetMapping("/network-card")
     public PageResult<RealEquipmentNetworkCardPageVO> pageNetworkCard(RealEquipmentNetworkCardPageRequest request){
@@ -468,6 +509,12 @@ public class RealEquipmentController {
         return new PageResult<>(list,model.getResult().size());
     }
 
+    /**
+     * 根据设备ID获取登录链接信息
+     *
+     * @param uuid
+     * @return
+     */
     @ApiOperation("根据设备ID获取登录链接信息")
     @ApiImplicitParam(name = "uuid", value = "设备id", dataTypeClass = String.class)
     @GetMapping("/connection")
@@ -479,6 +526,12 @@ public class RealEquipmentController {
         return new Result<>(connection.getList());
     }
 
+    /**
+     * 根据交换机名称查询实体装备
+     *
+     * @param switchName
+     * @return
+     */
     @ApiOperation("根据交换机名称查询实体装备")
     @ApiImplicitParam(name = "switchName", value = "交换机名称", dataTypeClass = String.class)
     @GetMapping("/by-switch-name")
@@ -490,6 +543,12 @@ public class RealEquipmentController {
         return new Result<>(bySwitchName.getList());
     }
 
+    /**
+     * 根据串口名称查询实体装备
+     *
+     * @param serialPort
+     * @return
+     */
     @ApiOperation("根据串口名称查询实体装备")
     @ApiImplicitParam(name = "serialPort", value = "端口名称", dataTypeClass = String.class)
     @GetMapping("/by-serial-port")
@@ -501,12 +560,22 @@ public class RealEquipmentController {
         return new Result<>(bySerialPort.getList());
     }
 
+    /**
+     * 查询实装设备的在位状态
+     *
+     * @return
+     */
     @GetMapping("/position")
     @ApiOperation(value = "查询实装设备的在位状态")
     public ServiceResult<List<OptionBO>> getPositionStatus() {
         return optionService.getIntOptions(DevopsClusterConstant.MP_COMMON_OPTION_TYPE_DEVOPS_CLUSTER_POSITION);
     }
 
+    /**
+     * 实装设备的使用状态
+     *
+     * @return
+     */
     @GetMapping("/use")
     @ApiOperation(value = "实装设备的使用状态")
     public ServiceResult<List<OptionBO>> getUseStatus() {
@@ -515,6 +584,7 @@ public class RealEquipmentController {
 
     /**
      * 获取服务器列表
+     *
      * @return
      */
     @ApiOperation("获取服务器列表")
@@ -525,6 +595,8 @@ public class RealEquipmentController {
 
     /**
      * 根据hostName查询usb列表
+     *
+     * @param hostName
      * @return
      */
     @ApiOperation("根据hostName查询usb列表")

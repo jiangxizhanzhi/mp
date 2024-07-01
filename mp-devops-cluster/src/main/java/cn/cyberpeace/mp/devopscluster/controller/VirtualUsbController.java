@@ -46,6 +46,7 @@ public class VirtualUsbController {
 
     /**
      * 分页查询虚拟USB信息
+     *
      * @param queryParams
      * @return
      */
@@ -60,6 +61,7 @@ public class VirtualUsbController {
 
     /**
      * 根据UUID查询虚拟USB信息
+     *
      * @param uuid
      * @return
      */
@@ -73,6 +75,7 @@ public class VirtualUsbController {
 
     /**
      * 新增虚拟USB
+     *
      * @param virtualUsbVO
      * @return
      */
@@ -86,6 +89,7 @@ public class VirtualUsbController {
 
     /**
      * 编辑虚拟USB
+     *
      * @param virtualUsbVO
      * @return
      */
@@ -99,6 +103,7 @@ public class VirtualUsbController {
 
     /**
      * 删除虚拟USB
+     *
      * @param request
      * @return
      */
@@ -113,6 +118,7 @@ public class VirtualUsbController {
 
     /**
      * 根据UUID查询虚拟USB文件列表
+     *
      * @param uuid
      * @return
      */
@@ -126,6 +132,7 @@ public class VirtualUsbController {
 
     /**
      * 上传文件到虚拟USB
+     *
      * @param file
      * @param uuid
      * @return
@@ -141,6 +148,7 @@ public class VirtualUsbController {
 
     /**
      * 虚拟USB删除文件
+     *
      * @param uuid
      * @param fileName
      * @return
@@ -159,6 +167,7 @@ public class VirtualUsbController {
 
     /**
      * 虚拟USB格式化
+     *
      * @param uuid
      * @return
      */
@@ -173,6 +182,7 @@ public class VirtualUsbController {
 
     /**
      * 虚拟USB下载文件
+     *
      * @param uuid
      * @param fileName
      * @return

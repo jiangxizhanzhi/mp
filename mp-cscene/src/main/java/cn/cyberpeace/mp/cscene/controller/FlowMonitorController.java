@@ -85,6 +85,12 @@ public class FlowMonitorController {
     @Autowired
     private FlowClassificationsService flowClassificationsService;
 
+    /**
+     * simulation
+     *
+     * @param request
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "模拟流量")
     @GetMapping("/simulation")
     public ServiceResult simulation(FlowSceneSimulationRequest request) {
@@ -100,6 +106,7 @@ public class FlowMonitorController {
      * 默认查询场景所有节点
      * 忽略elementIds的值
      *
+     * @param flowTrendRequest
      * @return
      */
     @ApiOperation(value = "场景流量趋势图")
@@ -117,6 +124,12 @@ public class FlowMonitorController {
         }
     }
 
+    /**
+     * getSceneRealTimeAttack
+     *
+     * @param flowTrendRequest
+     * @return
+     */
     @ApiOperation(value = "场景实时攻击")
     @GetMapping("/scene_real_time_attack")
     public ServiceResult<Long> getSceneRealTimeAttack(FlowTrendRequest flowTrendRequest) {
@@ -147,6 +160,7 @@ public class FlowMonitorController {
      * 默认查询场景所有节点
      * 忽略elementIds的值
      *
+     * @param request
      * @return
      */
     @ApiOperation(value = "场景受攻击端口")
@@ -161,6 +175,7 @@ public class FlowMonitorController {
      * 默认查询场景所有节点
      * 忽略elementIds的值
      *
+     * @param request
      * @return
      */
     @ApiOperation(value = "场景主机状态")
@@ -173,8 +188,9 @@ public class FlowMonitorController {
 
 
     /**
-     * elementIds若为多值，则只取第一个值
+     * getElementFlowTrend
      *
+     * @param flowTrendRequest
      * @return
      */
     @ApiOperation(value = "节点流量趋势图")
@@ -186,6 +202,12 @@ public class FlowMonitorController {
     }
 
 
+    /**
+     * getFlowRiskCount
+     *
+     * @param baseRequest
+     * @return
+     */
     @ApiOperation(value = "流量风险各级别统计")
     @GetMapping("/risk_count")
     public ServiceResult<FlowRiskCount> getFlowRiskCount(BaseSceneElementRequest baseRequest) {
@@ -195,6 +217,12 @@ public class FlowMonitorController {
         return ResultCommon.success(riskCount);
     }
 
+    /**
+     * getAttackTypeCount
+     *
+     * @param baseRequest
+     * @return
+     */
     @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation(value = "攻击流量各类别统计")
     @GetMapping("/attack_type_count")
@@ -227,6 +255,12 @@ public class FlowMonitorController {
         return ResultCommon.success(attackTypeCounts);
     }
 
+    /**
+     * getAttackTypeCountGroup
+     *
+     * @param baseRequest
+     * @return
+     */
     @ApiOperation(value = "攻击流量各类别统计(归14大类)")
     @GetMapping("/attack_type_count_group")
     public ServiceResult<List<FlowAttackTypeCount>> getAttackTypeCountGroup(AttackTypeTopRequest baseRequest) {
@@ -279,6 +313,12 @@ public class FlowMonitorController {
         return ResultCommon.success(resultCounts);
     }
 
+    /**
+     * getAttackTimes
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation(value = "攻击次数各按ip统计", notes = "单个ip发起攻击或受到攻击的次数")
     @GetMapping("/attack_ip_count")
     public ServiceResult<List<FlowAttackTime>> getAttackTimes(AttackCountRequest request) {
@@ -287,6 +327,12 @@ public class FlowMonitorController {
         return ResultCommon.success(attackTypeCounts);
     }
 
+    /**
+     * getAttackRatioCount
+     *
+     * @param baseRequest
+     * @return
+     */
     @ApiOperation(value = "攻击占比统计")
     @GetMapping("/attack_ratio_count")
     public ServiceResult<TotalFlowAttackRatio> getAttackRatioCount(AttackCountRequest baseRequest) {
@@ -295,6 +341,12 @@ public class FlowMonitorController {
         return ResultCommon.success(attackTypeCounts);
     }
 
+    /**
+     * getFlowAnalysisSummary
+     *
+     * @param timeRangeRequest
+     * @return
+     */
     @ApiOperation(value = "场景监控-流量分析: 统计场景流量，攻击流量，网络连接，带宽占用，攻击事件")
     @GetMapping("/summary")
     public ServiceResult<FlowAnalysisSummary> getFlowAnalysisSummary(BaseTimeRangeRequest timeRangeRequest) {
@@ -303,6 +355,11 @@ public class FlowMonitorController {
         return ResultCommon.success(summary);
     }
 
+    /**
+     * getFlowAttackType
+     *
+     * @return
+     */
     @ApiOperation(value = "查询流量攻击类型列表")
     @GetMapping("/attack_types")
     public ServiceResult<FlowAttackConfigInfo> getFlowAttackType() {
@@ -317,6 +374,12 @@ public class FlowMonitorController {
         return new ServiceResult<>(info).asResult();
     }
 
+    /**
+     * getFlowAttackType
+     *
+     * @param r
+     * @return
+     */
     private static FlowAttackConfigInfo.FlowAttackType getFlowAttackType(FlowClassificationModel r) {
         FlowAttackConfigInfo.FlowAttackType type = new FlowAttackConfigInfo.FlowAttackType();
         type.setValue(r.getCategoryEn());
@@ -325,6 +388,13 @@ public class FlowMonitorController {
         return type;
     }
 
+    /**
+     * pageFlow
+     *
+     * @param id
+     * @param queryParams
+     * @return
+     */
     @ApiOperation(value = "流量分页接口")
     @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),})
     @GetMapping("/page")
@@ -336,6 +406,12 @@ public class FlowMonitorController {
     }
 
 
+    /**
+     * getAssetsStatistics
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation(value = "资产统计", notes = "资产统计")
     @GetMapping("/assets_statistics")
     public ServiceResult<List<AssetsStatisticsResponse>> getAssetsStatistics(AssetsStatisticsRequest request) {
@@ -395,6 +471,12 @@ public class FlowMonitorController {
         return ResultCommon.success(responseList);
     }
 
+    /**
+     * getSceneConfigAssetsStatistics
+     *
+     * @param id
+     * @return
+     */
     @ApiOperation(value = "场景模板资产统计", notes = "场景模板资产统计")
     @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class)
     @GetMapping("/scene_config/assets_statistics")
@@ -443,6 +525,12 @@ public class FlowMonitorController {
         return ResultCommon.success(responseList);
     }
 
+    /**
+     * export
+     *
+     * @param id
+     * @return
+     */
     @ApiOperation(value = "导出全部流量文件")
     @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),})
     @GetMapping("/export")
@@ -462,6 +550,12 @@ public class FlowMonitorController {
     }
 
 
+    /**
+     * process
+     *
+     * @param id
+     * @return
+     */
     @ApiOperation(value = "流量导出进度")
     @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "任务id", dataTypeClass = String.class),})
     @GetMapping("/export/process")

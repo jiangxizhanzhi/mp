@@ -37,6 +37,11 @@ public class RestCpcloudAllIpsController {
     @Resource
     private CloudAppConfig config;
 
+    /**
+     * 删除所有运行中的场景和靶标示例
+     *
+     * @return
+     */
     @ApiOperation("删除所有运行中的场景和靶标示例")
     @DeleteMapping("/clear_all")
     public ServiceResult<Boolean> clearAll() {
@@ -44,6 +49,12 @@ public class RestCpcloudAllIpsController {
         return new ServiceResult<>(true).asResult();
     }
 
+    /**
+     * 重新设置环境所有Ip
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("重新设置环境所有Ip")
     @PostMapping("/reset_all_ip")
     public ServiceResult<Boolean> resetAllIp(@RequestBody ResetCplcoudAllIpsData request) {
@@ -54,6 +65,11 @@ public class RestCpcloudAllIpsController {
         return modelService.resetAllIps(request);
     }
 
+    /**
+     * 获得原始的所有Ip
+     *
+     * @return
+     */
     @ApiOperation("获得原始的所有Ip")
     @GetMapping("/get_origin_ip")
     public ServiceResult<OriginIpsResult> gerOriginIp() {

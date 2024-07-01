@@ -44,18 +44,36 @@ public class CsceneReporterController {
         private String data;
     }
 
+    /**
+     * reportScene
+     *
+     * @param data
+     * @return
+     */
     @ApiOperation("场景上报数据说明，非API")
     @GetMapping("/report_scene")
     public String reportScene(@RequestBody SceneFormatMessage data) {
         return null;
     }
 
+    /**
+     * reportSceneElement
+     *
+     * @param data
+     * @return
+     */
     @ApiOperation("场景网元上报数据说明，非API")
     @GetMapping("/report_scene_element")
     public String reportSceneElement(@RequestBody SceneElementFormatMessage data) {
         return null;
     }
 
+    /**
+     * reportDeleteCsceneInstance
+     *
+     * @param data
+     * @return
+     */
     @ApiOperation("删除场景实例上报数据说明，非API")
     @GetMapping("/report_delete_cscene_instance")
     public String reportDeleteCsceneInstance(@RequestBody DeleteCsceneInstanceFormatMessage data) {

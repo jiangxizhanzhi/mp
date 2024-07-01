@@ -22,6 +22,7 @@ public interface BaseModelBulkCreateController<M extends BaseModel, S extends Ba
 
     /**
      * 通用批量创建
+     *
      * @param objs 创建对象集
      * @return 成功数量
      */

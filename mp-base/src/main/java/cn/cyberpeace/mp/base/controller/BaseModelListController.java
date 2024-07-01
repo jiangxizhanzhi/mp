@@ -20,6 +20,7 @@ public interface BaseModelListController<M extends BaseModel, Q extends QueryPar
 
     /**
      * 通用查询方法
+     *
      * @param queryParams 查询参数
      * @return 列表查询结果
      */

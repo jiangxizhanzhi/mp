@@ -48,6 +48,8 @@ public class CsceneFileController {
     private ProtocolCollectionService protocolCollectionService;
 
     /**
+     * attachmentUpload
+     *
      * @param file
      * @return
      * @throws IOException
@@ -64,6 +66,8 @@ public class CsceneFileController {
     }
 
     /**
+     * 脚本文件
+     *
      * @param file
      * @return
      * @throws IOException
@@ -80,6 +84,8 @@ public class CsceneFileController {
     }
 
     /**
+     * 上传场景中的图标
+     *
      * @param file
      * @return
      * @throws IOException
@@ -96,6 +102,8 @@ public class CsceneFileController {
     }
 
     /**
+     * 上传节点秘钥
+     *
      * @param file
      * @return
      * @throws IOException
@@ -112,6 +120,8 @@ public class CsceneFileController {
     }
 
     /**
+     * 上传场景模板截图
+     *
      * @param file
      * @return
      * @throws IOException
@@ -128,6 +138,12 @@ public class CsceneFileController {
     }
 
 
+    /**
+     * sceneMibFileUpload
+     *
+     * @param file
+     * @return
+     */
     @ApiOperation("上传mib文件")
     @ApiImplicitParam(name = "file", value = "mib文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/mib_import")

@@ -23,6 +23,11 @@ public class NetworkTrafficGroupController {
     @Autowired
     private NetworkTrafficGroupService networkTrafficGroupService;
 
+    /**
+     * initArkimeNetwork
+     *
+     * @return 统一服务返回结果
+     */
     @GetMapping("/init-ark-network")
     @ApiOperation(value = "初始化流量网络", notes = "")
     public ServiceResult initArkimeNetwork() {
@@ -30,6 +35,12 @@ public class NetworkTrafficGroupController {
 
     }
 
+    /**
+     * deleteModelById
+     *
+     * @param groupId
+     * @return 统一服务返回结果
+     */
     @DeleteMapping("/{groupId}")
     @ApiOperation(value = "根据groupId删除分组信息", notes = "")
     @ApiImplicitParam(name = "groupId", value = "场景分组id", dataTypeClass = String.class)
@@ -38,6 +49,12 @@ public class NetworkTrafficGroupController {
     }
 
 
+    /**
+     * addGroup
+     *
+     * @param groupRequest
+     * @return 统一服务返回结果
+     */
     @PostMapping
     @ApiOperation(value = "新增分组信息", notes = "")
     @ApiImplicitParam(name = "groupRequest", value = "新增请求体", dataType = "body", dataTypeClass = GroupRequest.class)

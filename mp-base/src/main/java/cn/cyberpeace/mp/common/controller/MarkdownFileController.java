@@ -31,6 +31,11 @@ public class MarkdownFileController {
 
     private MarkdownFileService markdownFileService;
 
+    /**
+     * MarkdownFileController
+     *
+     * @param markdownFileService
+     */
     @Autowired
     public MarkdownFileController(MarkdownFileService markdownFileService) {
         setMarkdownFileService(markdownFileService);
@@ -38,6 +43,8 @@ public class MarkdownFileController {
 
     /**
      * markdown上传图片
+     *
+     * @param file
      * @return 文件id
      */
     @ApiOperation("上传图片")
@@ -52,6 +59,8 @@ public class MarkdownFileController {
 
     /**
      * markdown上传文件
+     *
+     * @param file
      * @return 文件id
      */
     @ApiOperation("上传文件")

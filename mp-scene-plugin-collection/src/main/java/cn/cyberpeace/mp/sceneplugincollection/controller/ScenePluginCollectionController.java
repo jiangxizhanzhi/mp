@@ -20,18 +20,35 @@ import org.springframework.web.bind.annotation.*;
 @AuthTarget(TargetEnum.NO_AUTH)
 public class ScenePluginCollectionController {
 
+    /**
+     * loadSceneConfig
+     *
+     * @param data
+     * @return
+     */
     @ApiOperation("场景模板采集插件数据，非API")
     @GetMapping("/scene_config")
     public String loadSceneConfig(@RequestBody CollectionPluginSceneConfigDataBO data) {
         return null;
     }
 
+    /**
+     * loadScene
+     *
+     * @param data
+     * @return
+     */
     @ApiOperation("场景采集插件数据，非API")
     @GetMapping("/scene")
     public String loadScene(@RequestBody CollectionPluginSceneDataBO data) {
         return null;
     }
 
+    /**
+     * wazuhRunCommandResultCall
+     *
+     * @param alertData
+     */
     @ApiOperation("wazuh执行agent命令结果回调")
     @PostMapping("/wazuh_run_command_result")
     public void wazuhRunCommandResultCall(@RequestBody WazuhLauncher.LaunchAlert alertData) {

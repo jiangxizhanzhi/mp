@@ -42,6 +42,9 @@ public class FlowAnalysisController {
 
     private final FlowAnalysisService flowAnalysisService;
 
+    /**
+     * initClassification
+     */
     @ApiOperation("初始化攻击分类")
     @GetMapping("/init-classification")
     public void initClassification() throws IOException {
@@ -49,12 +52,23 @@ public class FlowAnalysisController {
         flowAnalysisService.initClassification();
     }
 
+    /**
+     * addSimulation
+     *
+     * @param request
+     */
     @ApiOperation("新增模拟流量")
     @GetMapping("/add-simulation")
     public void addSimulation(FlowSimulationRequest request) throws IOException {
         flowAnalysisService.addSimulationFlow(request);
     }
 
+    /**
+     * flowLog
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation(value = "流量日志")
     @GetMapping("/log")
     @Deprecated
@@ -75,6 +89,12 @@ public class FlowAnalysisController {
         return new ServiceResult(flowLogVOList).asResult();
     }
 
+    /**
+     * topByAggregationTypeEnum
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation(value = "根据聚合类型聚合不同的TOP N数据")
     @GetMapping("/top-By-aggregation-type")
     @Deprecated
@@ -93,6 +113,12 @@ public class FlowAnalysisController {
         return new ServiceResult(voList).asResult();
     }
 
+    /**
+     * sumNetworkBytesByDateHistogramTimestamp
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation(value = "统计时间窗口里的流量大小",hidden = true)
     @GetMapping("/sum-network-bytes")
     @Deprecated

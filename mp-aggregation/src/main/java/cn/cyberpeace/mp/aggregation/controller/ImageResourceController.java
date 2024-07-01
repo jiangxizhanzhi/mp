@@ -32,6 +32,12 @@ public class ImageResourceController {
     @Resource
     private ImageResourceService imageResourceService;
 
+    /**
+     * 镜像导出
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("镜像导出")
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = ImageExportRequest.class)
     @PostMapping("/export_image")

@@ -26,9 +26,45 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 
 /**
- * @Description
- * @Author maojun
- * @Date 2021/10/11
+ * 文件名：Example.java
+ * <p>
+ * <p>
+ * <p>
+ * 版本信息：v1.0
+ * <p>
+ * <p>
+ * <p>
+ * 日期：2023-04-01
+ * <p>
+ * <p>
+ * <p>
+ * 描述：
+ * <p>
+ * <p>
+ * <p>
+ * 这是一个示例Java文件，展示了开头注释的标准格式。
+ * <p>
+ * <p>
+ * <p>
+ * <p>
+ * <p>
+ * <p>
+ * 版权信息：
+ * <p>
+ * <p>
+ * <p>
+ * © 2023 你的名字或公司
+ * <p>
+ * <p>
+ * <p>
+ * <p>
+ * <p>
+ * <p>
+ * 修改历史：
+ * <p>
+ * <p>
+ * <p>
+ * 2023-04-01 初始版本
  */
 @Api(value = "场景导入相关接口", tags = "场景导入相关接口")
 @Slf4j
@@ -40,6 +76,12 @@ public class SceneImportController {
     @Resource
     private ResourceCenterService resourceCenterService;
 
+    /**
+     * 场景导入
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("场景导入")
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = SceneImportRequest.class)
     @PostMapping("/import_resource_center")
@@ -54,6 +96,12 @@ public class SceneImportController {
         return ResultCommon.success(serviceResult.getSource().getId());
     }
 
+    /**
+     * 场景导入
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("场景导出")
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = SceneExportRequest.class)
     @PostMapping("/export_scene")
@@ -73,6 +121,12 @@ public class SceneImportController {
         }
     }
 
+    /**
+     * 挂载
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("挂载")
     @PostMapping("/mount")
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = MoundRequest.class)
@@ -83,6 +137,12 @@ public class SceneImportController {
         return this.resourceCenterService.mount(request.getHost(), request.getPath()).asResult();
     }
 
+    /**
+     * 取消挂载
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("取消挂载")
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = MoundRequest.class)
     @PostMapping("/umount")

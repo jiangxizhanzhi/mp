@@ -18,6 +18,14 @@ public interface BaseModelUpdateBOController<T extends ModelBO<M, T>, M extends 
 
     S getModelService();
 
+    /**
+     * 更新指定id数据
+     *
+     * @param id
+     * @param bo
+     * @param fields
+     * @return
+     */
     @ApiOperation("更新指定id数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", paramType = "path", value = "数据id", dataTypeClass=String.class),
@@ -30,6 +38,13 @@ public interface BaseModelUpdateBOController<T extends ModelBO<M, T>, M extends 
         return getModelService().<T>updateBO(bo, ControllerCommon.convertValidFields(fields), ControllerCommon.getModelBOClass(getClass())).asResult();
     }
 
+    /**
+     * 更新数据
+     *
+     * @param bo
+     * @param fields
+     * @return
+     */
     @ApiOperation("更新数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "fields", value = "需要返回的字段", dataTypeClass = String[].class),
@@ -40,6 +55,14 @@ public interface BaseModelUpdateBOController<T extends ModelBO<M, T>, M extends 
         return getModelService().<T>updateBO(bo, ControllerCommon.convertValidFields(fields), ControllerCommon.getModelBOClass(getClass())).asResult();
     }
 
+    /**
+     * 更新指定id数据
+     *
+     * @param id
+     * @param bo
+     * @param fields
+     * @return
+     */
     @ApiOperation("更新指定id数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class),

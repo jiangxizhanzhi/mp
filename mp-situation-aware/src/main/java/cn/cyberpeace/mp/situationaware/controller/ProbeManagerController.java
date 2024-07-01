@@ -60,18 +60,34 @@ public class ProbeManagerController {
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
+    /**
+     * probeTypes
+     *
+     * @return
+     */
     @GetMapping("/types")
     @ApiOperation(value = "分页查询探针类型")
     public ServiceResult<List<OptionBO>> probeTypes() {
         return optionService.getIntOptions(SituationalAwareConstant.MP_COMMON_OPTION_TYPE_SITUATION_PROBE_TYPE);
     }
 
+    /**
+     * osTypes
+     *
+     * @return
+     */
     @GetMapping("/os-types")
     @ApiOperation(value = "查询操作系统类型")
     public ServiceResult<List<OptionBO>> osTypes() {
         return optionService.getIntOptions(SituationalAwareConstant.MP_COMMON_OPTION_TYPE_SITUATION_OS_TYPE);
     }
 
+    /**
+     * page
+     *
+     * @param pageQueryRequest
+     * @return
+     */
     @AuthTarget(TargetEnum.SITUATION_AWARE_GROUP)
     @GetMapping("/page")
     @ApiOperation(value = "分页查询探针，不含探针脚本内容")
@@ -81,6 +97,12 @@ public class ProbeManagerController {
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
+    /**
+     * pageAbilities
+     *
+     * @param pageQueryRequest
+     * @return
+     */
     @GetMapping("/abilities/page")
     @ApiOperation(value = "分页查询探针能力")
     public ListObjServiceResult<ProbeAbilityDto> pageAbilities(ProbePageQueryRequest pageQueryRequest) {
@@ -89,6 +111,12 @@ public class ProbeManagerController {
     }
 
 
+    /**
+     * getById
+     *
+     * @param id
+     * @return
+     */
     @GetMapping
     @ApiOperation(value = "根据id查询单个探针详情，包含探针脚本内容")
     @ApiImplicitParam(name = "id", value = "探针ID", dataTypeClass = String.class)
@@ -100,6 +128,12 @@ public class ProbeManagerController {
         return ResultCommon.success();
     }
 
+    /**
+     * getByIds
+     *
+     * @param ids
+     * @return
+     */
     @GetMapping("/batch")
     @ApiOperation(value = "根据id数组批量查询探针详情，包含探针脚本内容")
     @ApiImplicitParam(name = "ids", value = "探针ID集合", dataTypeClass = String[].class)
@@ -131,6 +165,12 @@ public class ProbeManagerController {
     }
 
 
+    /**
+     * modifyProbe
+     *
+     * @param probeRequest
+     * @return 统一服务返回结果
+     */
     @PatchMapping
     @ApiOperation(value = "修改自定义探针")
     @OperateLog(module = OpModuleEnums.PROBE, type = OpTypeEnums.UPDATE, title = "修改探针", target = OpTargetEnums.PROBE)
@@ -166,6 +206,12 @@ public class ProbeManagerController {
     }
 
 
+    /**
+     * deleteByIds
+     *
+     * @param ids
+     * @return 统一服务返回结果
+     */
     @DeleteMapping()
     @ApiOperation(value = "删除探针")
     @ApiImplicitParam(name = "ids", value = "探针ID集合", dataTypeClass = String[].class)
@@ -176,6 +222,12 @@ public class ProbeManagerController {
         return ResultCommon.success(cnt);
     }
 
+    /**
+     * upload
+     *
+     * @param file
+     * @return
+     */
     @ApiOperation(value = "导入脚本文件，返回脚本内容", notes = "")
     @ApiImplicitParam(name = "file", value = "脚本文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/script/import")

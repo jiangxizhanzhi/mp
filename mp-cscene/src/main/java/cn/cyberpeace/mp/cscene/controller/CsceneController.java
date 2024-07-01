@@ -103,6 +103,13 @@ public class CsceneController implements BaseModelListControllerBase {
 
     private BaseAppConfig baseAppConfig;
 
+    /**
+     * formatActionRequest
+     *
+     * @param request
+     * @param paramId
+     * @return
+     */
     private CsceneActionRequest formatActionRequest(CsceneActionRequest request, String paramId) {
         if (request == null) {
             request = new CsceneActionRequest();
@@ -113,6 +120,13 @@ public class CsceneController implements BaseModelListControllerBase {
         return request;
     }
 
+    /**
+     * formatCreateInstanceRequest
+     *
+     * @param request
+     * @param paramId
+     * @return
+     */
     private CsceneCreateInstanceRequest formatCreateInstanceRequest(CsceneCreateInstanceRequest request, String paramId) {
         if (request == null) {
             request = new CsceneCreateInstanceRequest();
@@ -121,6 +135,11 @@ public class CsceneController implements BaseModelListControllerBase {
         return request;
     }
 
+    /**
+     * correctRequestCsceneParamsForSync
+     *
+     * @param csceneBO
+     */
     private void correctRequestCsceneParamsForSync(CsceneBO csceneBO) {
         if (csceneBO == null) {
             return;
@@ -143,6 +162,11 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneDataModifier.handlerPosition(csceneBO.getSceneConfig());
     }
 
+    /**
+     * correctRequestCsceneParamsForAppInstance
+     *
+     * @param csceneBO
+     */
     private void correctRequestCsceneParamsForAppInstance(CsceneBO csceneBO) {
         if (csceneBO == null) {
             return;
@@ -153,6 +177,13 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneDataModifier.removeUnUsePlugin(csceneBO);
     }
 
+    /**
+     * CsceneController
+     *
+     * @param csceneService
+     * @param csceneSpecialService
+     * @param baseAppConfig
+     */
     @Autowired
     public CsceneController(CsceneService csceneService, CsceneSpecialService csceneSpecialService, BaseAppConfig baseAppConfig) {
         setModelService(csceneService);
@@ -160,6 +191,12 @@ public class CsceneController implements BaseModelListControllerBase {
         this.baseAppConfig = baseAppConfig;
     }
 
+    /**
+     * 授权场景模板
+     *
+     * @param request
+     * @return
+     */
     @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation("授权场景模板")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneAuthorizeRequest.class)
@@ -168,6 +205,12 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.csceneAuthorize(request.getTargetIds(), request.getCsceneIds(), request.getAuthType()).asResult();
     }
 
+    /**
+     * 获取指定场景模板授权信息
+     *
+     * @param id
+     * @return
+     */
     @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation("获取指定场景模板授权信息")
     @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class)
@@ -176,6 +219,12 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.getCsceneAuthorizeInfo(id).asResult();
     }
 
+    /**
+     * list
+     *
+     * @param queryParams
+     * @return
+     */
     @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
     @GetMapping
     public ListObjServiceResult<CsceneBO> list(CsceneQueryParams queryParams) {
@@ -185,6 +234,13 @@ public class CsceneController implements BaseModelListControllerBase {
         return result;
     }
 
+    /**
+     * 获取指定id场景模板
+     *
+     * @param id
+     * @param areaId
+     * @return
+     */
     @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
     @ApiOperation("获取指定id场景模板")
     @ApiImplicitParams({
@@ -199,6 +255,13 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.getById(id, areaId, false, null).asResult();
     }
 
+    /**
+     * 根据区域获取指定id场景模板
+     *
+     * @param id
+     * @param areaId
+     * @return
+     */
     @ApiOperation("根据区域获取指定id场景模板")
     @GetMapping("/get_by_area")
     public ServiceResult<CsceneBO> getByArea(@RequestParam String id, @RequestParam(required = false, name = "area_id") String areaId) {
@@ -217,6 +280,13 @@ public class CsceneController implements BaseModelListControllerBase {
         return new ServiceResult<>(csceneBO).asResult();
     }
 
+    /**
+     * convertToRoleBOs
+     *
+     * @param roleObjs
+     * @param roleBOClass
+     * @return
+     */
     private List<CsceneRoleBO> convertToRoleBOs(List<CsceneRoleModel> roleObjs, Class<CsceneRoleBO> roleBOClass) {
         List<CsceneRoleBO> roleBOS = new ArrayList<>();
         if (roleObjs == null) {
@@ -251,6 +321,13 @@ public class CsceneController implements BaseModelListControllerBase {
         return roleBOS;
     }
 
+    /**
+     * getByAreaId
+     *
+     * @param sceneId
+     * @param areaId
+     * @return
+     */
     private CsceneBO getByAreaId(String sceneId, String areaId) {
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, areaId, true, null);
         SceneConfigDataBO dataBO = sceneConfigHandler.toData();
@@ -260,6 +337,12 @@ public class CsceneController implements BaseModelListControllerBase {
         return csceneBO;
     }
 
+    /**
+     * 更新区域显示参数
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("更新区域显示参数")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = AreaUpdateRequest.class)
     @PostMapping("/update_area")
@@ -279,6 +362,12 @@ public class CsceneController implements BaseModelListControllerBase {
         return new ServiceResult<>(sceneConfigAreaMapper.update(sceneConfigAreaModel)).asResult();
     }
 
+    /**
+     * 更新场景拓扑
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("更新场景拓扑(模板拖拽)")
     @PostMapping("/sync_with_template")
     public ServiceResult<CsceneBO> syncWithTemplate(@RequestBody CsceneSyncRequest request) {
@@ -312,6 +401,12 @@ public class CsceneController implements BaseModelListControllerBase {
         return new ServiceResult<>(csceneBO).asResult();
     }
 
+    /**
+     * modifyAreaId
+     *
+     * @param sceneConfigDataBO
+     * @param areaId
+     */
     private void modifyAreaId(SceneConfigDataBO sceneConfigDataBO, String areaId) {
         if (Objects.nonNull(sceneConfigDataBO) && Objects.nonNull(sceneConfigDataBO.getTopology())) {
             for (SceneConfigAreaBO sceneConfigAreaBO : sceneConfigDataBO.getTopology().getAreas()) {
@@ -328,6 +423,11 @@ public class CsceneController implements BaseModelListControllerBase {
         }
     }
 
+    /**
+     * removeId
+     *
+     * @param sceneConfigDataBO
+     */
     private void removeId(SceneConfigDataBO sceneConfigDataBO) {
         if (Objects.isNull(sceneConfigDataBO)) {
             return;
@@ -362,6 +462,11 @@ public class CsceneController implements BaseModelListControllerBase {
         }
     }
 
+    /**
+     * updateOldId
+     *
+     * @param sceneConfigDataBO
+     */
     private void updateOldId(SceneConfigDataBO sceneConfigDataBO) {
         if (Objects.isNull(sceneConfigDataBO)) {
             return;
@@ -479,6 +584,12 @@ public class CsceneController implements BaseModelListControllerBase {
         }
     }
 
+    /**
+     * 查询场景拓扑区域树形结构
+     *
+     * @param id
+     * @return
+     */
     @ApiOperation("查询场景拓扑区域树形结构")
     @ApiImplicitParam(name = "id", value = "场景拓扑id", dataTypeClass = String.class)
     @GetMapping("/tree")
@@ -522,6 +633,13 @@ public class CsceneController implements BaseModelListControllerBase {
         return new ServiceResult<>(sceneAreaTree).asResult();
     }
 
+    /**
+     * getTreeArea
+     *
+     * @param sceneConfigAreaBO
+     * @param parentId2Children
+     * @return
+     */
     private SceneAreaTreeBO.Area getTreeArea(SceneConfigAreaBO sceneConfigAreaBO, Map<String, List<SceneConfigAreaBO>> parentId2Children) {
         SceneAreaTreeBO.Area area = new SceneAreaTreeBO.Area();
         area.setId(sceneConfigAreaBO.getId());
@@ -532,6 +650,13 @@ public class CsceneController implements BaseModelListControllerBase {
         return area;
     }
 
+    /**
+     * processChildren
+     *
+     * @param parentId
+     * @param area
+     * @param parentId2Children
+     */
     private void processChildren(String parentId, SceneAreaTreeBO.Area area, Map<String, List<SceneConfigAreaBO>> parentId2Children) {
         if (CollectionUtils.isNotEmpty(parentId2Children.get(parentId))) {
             parentId2Children.get(parentId).forEach(sceneConfigAreaBO -> {
@@ -551,6 +676,12 @@ public class CsceneController implements BaseModelListControllerBase {
         }
     }
 
+    /**
+     * 导出指定id场景模板
+     *
+     * @param id
+     * @return
+     */
     @ApiOperation("导出指定id场景模板")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
@@ -560,6 +691,12 @@ public class CsceneController implements BaseModelListControllerBase {
         return modelService.export(id, null).asResult();
     }
 
+    /**
+     * 导出指定id场景模板
+     *
+     * @param id
+     * @param response
+     */
     @ApiOperation("导出指定id场景模板（分层）")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
@@ -613,6 +750,12 @@ public class CsceneController implements BaseModelListControllerBase {
         }
     }
 
+    /**
+     * 保存
+     *
+     * @param csceneBO
+     * @return
+     */
     @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
     @ApiOperation(value = "保存（创建/更新）场景", notes = "请忽略test_scenes和app_scenes字段")
     @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
@@ -632,6 +775,12 @@ public class CsceneController implements BaseModelListControllerBase {
         return result;
     }
 
+    /**
+     * 创建场景模板
+     *
+     * @param createTemplateBO
+     * @return
+     */
     @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
     @ApiOperation(value = "创建场景模板")
     @ApiImplicitParam(name = "createTemplateBO", value = "请求体", dataTypeClass = CreateTemplateBO.class)
@@ -650,6 +799,12 @@ public class CsceneController implements BaseModelListControllerBase {
         return new ServiceResult<>(csceneBO).asResult();
     }
 
+    /**
+     * 导入场景模板
+     *
+     * @param importTemplateBO
+     * @return
+     */
     @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
     @ApiOperation(value = "导入场景模板")
     @PostMapping("/import_template")
@@ -684,6 +839,12 @@ public class CsceneController implements BaseModelListControllerBase {
         }
     }
 
+    /**
+     * syncWithOutCheck
+     *
+     * @param csceneBO
+     * @return
+     */
     @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
     @ApiOperation(value = "syncWithOutCheck 保存（创建/更新）场景模板", notes = "请忽略test_scenes和app_scenes字段")
     @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
@@ -718,6 +879,13 @@ public class CsceneController implements BaseModelListControllerBase {
         return this.getByArea(csceneBO.getId(), topo.getAreaId());
     }
 
+    /**
+     * convertToRoleObjs
+     *
+     * @param roleBOs
+     * @param parentId
+     * @return
+     */
     private List<CsceneRoleModel> convertToRoleObjs(List<CsceneRoleBO> roleBOs, String parentId) {
         List<CsceneRoleModel> roleObjs = new ArrayList<>();
         if (roleBOs == null) {
@@ -738,6 +906,12 @@ public class CsceneController implements BaseModelListControllerBase {
         return roleObjs;
     }
 
+    /**
+     * serverApiSync
+     *
+     * @param csceneBO
+     * @return
+     */
     @ApiOperation(value = "业务服务端保存（创建/更新）场景模板", notes = "不会校验节点数量,请忽略test_scenes和app_scenes字段")
     @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
     @PostMapping("/server_api/sync")
@@ -756,6 +930,13 @@ public class CsceneController implements BaseModelListControllerBase {
         return result;
     }
 
+    /**
+     * clone
+     *
+     * @param id
+     * @param request
+     * @return
+     */
     @ApiOperation("克隆指定id场景模板")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
@@ -770,6 +951,13 @@ public class CsceneController implements BaseModelListControllerBase {
         return result;
     }
 
+    /**
+     * delete
+     *
+     * @param id
+     * @param request
+     * @return
+     */
     @AuthTarget(TargetEnum.CSCENE_TARGET_GROUP)
     @ApiOperation("删除场景模板")
     @ApiImplicitParams({
@@ -786,6 +974,12 @@ public class CsceneController implements BaseModelListControllerBase {
         return result;
     }
 
+    /**
+     * bulkDelete
+     *
+     * @param ids
+     * @return
+     */
     @ApiOperation("批量删除场景模板")
     @ApiImplicitParam(name = "ids", value = "删除数据请求体", dataTypeClass = String[].class)
     @DeleteMapping("/bulk_delete")
@@ -796,6 +990,13 @@ public class CsceneController implements BaseModelListControllerBase {
         return result;
     }
 
+    /**
+     * createTestInstance
+     *
+     * @param id
+     * @param request
+     * @return
+     */
     @ApiOperation("创建场景模板测试实例")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
@@ -812,6 +1013,13 @@ public class CsceneController implements BaseModelListControllerBase {
         return result;
     }
 
+    /**
+     * createAppInstance
+     *
+     * @param id
+     * @param request
+     * @return
+     */
     @ApiOperation("创建场景模板应用实例")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
@@ -828,6 +1036,12 @@ public class CsceneController implements BaseModelListControllerBase {
         return result;
     }
 
+    /**
+     * statCscenes
+     *
+     * @param ids
+     * @return
+     */
     @ApiOperation("获取场景模板统计数据")
     @ApiImplicitParam(name = "ids", value = "请求参数", dataTypeClass = String[].class)
     @GetMapping("/stat")
@@ -835,6 +1049,12 @@ public class CsceneController implements BaseModelListControllerBase {
         return csceneSpecialService.statCscenes(ids).asResult();
     }
 
+    /**
+     * statDeviceReferCscenes
+     *
+     * @param images
+     * @return
+     */
     @ApiOperation("统计靶标对应引用该靶标的场景模板")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "images", value = "靶标名称", dataTypeClass = String[].class, allowMultiple = true),
@@ -845,6 +1065,12 @@ public class CsceneController implements BaseModelListControllerBase {
         return csceneSpecialService.statDeviceReferCscenes(images).asResult();
     }
 
+    /**
+     * mergeSceneConfig
+     *
+     * @param originSceneConfig
+     * @param extraSceneConfig
+     */
     private void mergeSceneConfig(SceneConfigDataBO originSceneConfig, SceneConfigDataBO extraSceneConfig) {
         if (Objects.nonNull(originSceneConfig) && Objects.nonNull(extraSceneConfig)) {
             if (Objects.nonNull(originSceneConfig.getTopology()) && Objects.nonNull(extraSceneConfig.getTopology())) {
@@ -866,6 +1092,12 @@ public class CsceneController implements BaseModelListControllerBase {
         }
     }
 
+    /**
+     * parseNodeId
+     *
+     * @param input
+     * @return
+     */
     private String parseNodeId(String input){
         String regex = "port_(.+)_layer_[0-9]+";
         Pattern pattern = Pattern.compile(regex);

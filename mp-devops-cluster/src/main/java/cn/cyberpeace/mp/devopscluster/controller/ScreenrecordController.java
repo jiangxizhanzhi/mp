@@ -48,6 +48,12 @@ public class ScreenrecordController {
 
     private final CsceneInstanceMapper csceneInstanceMapper;
 
+    /**
+     * 分页查询录屏文件
+     *
+     * @param queryParams
+     * @return
+     */
     @AuthTarget({TargetEnum.GROUP_TRAINING, TargetEnum.RANGE_TEST_SELF, TargetEnum.RED_VS_BLUE, TargetEnum.RESOURCE_USAGE_MANAGEMENT})
     @ApiOperation("分页查询录屏文件")
     @GetMapping("/page")
@@ -60,6 +66,12 @@ public class ScreenrecordController {
         return screenrecordService.pageScreenrecord(queryParams, sceneId);
     }
 
+    /**
+     * 按时间删除录屏文件
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("按时间删除录屏文件")
     @ApiImplicitParam(name = "request", value = "删除请求体", dataTypeClass = ScreenrecordDeleteRequest.class)
     @DeleteMapping("/time_delete")
@@ -67,6 +79,12 @@ public class ScreenrecordController {
         return screenrecordService.removeRecordfile(request);
     }
 
+    /**
+     * 批量删除录屏文件
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("批量删除录屏文件")
     @ApiImplicitParam(name = "request", value = "删除请求体", dataTypeClass = ScreenrecordBatchDeleteRequest.class)
     @DeleteMapping("/batch_delete")
@@ -74,18 +92,34 @@ public class ScreenrecordController {
         return screenrecordService.batchDeleteScreenRecord(request);
     }
 
+    /**
+     * 查询已用空间
+     *
+     * @return
+     */
     @ApiOperation("查询已用空间")
     @GetMapping("/used_space")
     public ServiceResult<ScreenRecordUsedSpaceVO> queryUsedSpace() {
         return screenrecordService.queryUsedSpace();
     }
 
+    /**
+     * 查询资源用量情况
+     *
+     * @return
+     */
     @ApiOperation("查询资源用量情况")
     @GetMapping("/space_statics")
     public ServiceResult<SpaceStaticsVO> querySpaceStatics() {
         return screenrecordService.querySpaceStatics();
     }
 
+    /**
+     * 获取截屏文件URL
+     *
+     * @param fileName
+     * @return
+     */
     @ApiOperation("获取截屏文件URL")
     @ApiImplicitParam(name = "fileName", value = "文件名", dataTypeClass = String.class)
     @GetMapping("/download")
@@ -93,12 +127,23 @@ public class ScreenrecordController {
         return screenrecordService.getScreenRecordUrl(fileName);
     }
 
+    /**
+     * 查询录屏空间上限配置
+     *
+     * @return
+     */
     @ApiOperation("查询录屏空间上限配置")
     @GetMapping("/get_restore_limit_config")
     public ServiceResult<ScreenRecordRestoreConfigVO> getRestoreLimitConfig() {
         return screenrecordService.getRestoreLimitConfig().asResult();
     }
 
+    /**
+     * 更新录屏空间上限配置
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("更新录屏空间上限配置")
     @PostMapping("/update_restore_limit_config")
     public ServiceResult<ScreenRecordRestoreConfigVO> updateRestoreLimitConfig(@RequestBody ScreenrecordConfigRequest request) {

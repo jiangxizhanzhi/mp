@@ -40,6 +40,12 @@ public class FlowScriptDemoController extends BaseModelController<FlowScriptDemo
     @Autowired
     private FlowScriptDemoServiceImpl flowScriptDemoService;
 
+    /**
+     * listFlowScriptDemos
+     *
+     * @param type
+     * @return
+     */
     @ApiOperation("查询脚本模板信息")
     @ApiImplicitParam(name = "type", value = "类型", dataTypeClass = Integer.class)
     @GetMapping("/list")

@@ -62,7 +62,8 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
     private FlowCollectionServiceImpl flowCollectionService;
 
     /**
-     * 分页查询流量集合信息
+     * pageFlowCollection
+     *
      * @param queryParams
      * @return
      */
@@ -89,6 +90,12 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
         return new ListObjServiceResult<>(new ListObjResult<>(responseList, listResult.getSource().getTotal())).asResult();
     }
 
+    /**
+     * get
+     *
+     * @param id
+     * @return
+     */
     @ApiOperation("查询指定id数据")
     @ApiImplicitParam(name = "id", value = "集合ID", dataTypeClass = String.class)
     @GetMapping("/bulk")
@@ -108,6 +115,12 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
         return ResultCommon.success(response);
     }
 
+    /**
+     * add
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("新增流量集合信息")
     @ApiImplicitParam(name = "request", value = "新增集合请求", dataTypeClass = AddFlowCollectionRequest.class)
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增流量集合", target = OpTargetEnums.FLOW_COLLECTION)
@@ -116,6 +129,12 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
         return flowCollectionService.addCollection(request);
     }
 
+    /**
+     * update
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("更新流量集合信息")
     @ApiImplicitParam(name = "request", value = "更新集合请求", dataTypeClass = ModifyCollectionRequest.class)
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "更新流量集合", target = OpTargetEnums.FLOW_COLLECTION)
@@ -124,6 +143,12 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
         return flowCollectionService.updateCollection(request);
     }
 
+    /**
+     * getByCollectionId
+     *
+     * @param queryParams
+     * @return
+     */
     @ApiOperation("根据集合id查询流量信息")
     @GetMapping("/detail/page")
     public ListObjServiceResult<FlowInfoModel> getByCollectionId(FlowCollectionRelQueryParams queryParams) {
@@ -139,6 +164,12 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
         return flowCollectionService.getByCollectionId(queryParams);
     }
 
+    /**
+     * addCollectionRel
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("新增集合关联信息")
     @ApiImplicitParam(name = "request", value = "新增关联信息请求", dataTypeClass = AddFlowCollectionRelRequest.class)
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增流量管理", target = OpTargetEnums.FLOW_COLLECTION)
@@ -147,6 +178,12 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
         return flowCollectionService.addCollectionRel(request);
     }
 
+    /**
+     * delCollectionRel
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("删除集合关联信息")
     @ApiImplicitParam(name = "request", value = "删除请求体", dataTypeClass = DelFlowCollectionRelRequest.class)
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.UPDATE, title = "更新流量管理", target = OpTargetEnums.FLOW_COLLECTION)

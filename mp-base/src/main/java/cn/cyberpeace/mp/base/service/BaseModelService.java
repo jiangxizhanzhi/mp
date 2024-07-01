@@ -43,6 +43,10 @@ public interface BaseModelService<M extends BaseModel, Q> {
         return new ServiceResult<>();
     }
 
+    /**
+     * @param objs
+     * @return
+     */
     default ServiceResult<Integer> bulkUpdate(List<M> objs) {
         return new ServiceResult<>();
     }

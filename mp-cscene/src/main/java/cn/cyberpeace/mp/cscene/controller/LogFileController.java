@@ -104,8 +104,9 @@ public class LogFileController {
 
 
     /**
-     * elementIds不能为空，如果为多个值，默认只取第一个
+     * getDownloadUrl
      *
+     * @param request
      * @return
      */
     @AuthTarget({TargetEnum.RANGE_TEST_SELF, TargetEnum.RED_VS_BLUE_WEB_FOLDER})

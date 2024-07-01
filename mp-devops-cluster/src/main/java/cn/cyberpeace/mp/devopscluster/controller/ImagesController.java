@@ -117,6 +117,9 @@ public class ImagesController {
 
     /**
      * 分页查询
+     *
+     * @param request
+     * @return
      */
     @AuthTarget(TargetEnum.DEVOPS_IMAGE_GROUP)
     @ApiOperation("分页查询")
@@ -130,6 +133,9 @@ public class ImagesController {
 
     /**
      * 新增
+     *
+     * @param request
+     * @return 统一服务返回结果
      */
     @ApiOperation("新增")
     @ApiImplicitParam(name = "request", value = "查询信息请求体", dataTypeClass = ImageRequest.class)
@@ -144,6 +150,9 @@ public class ImagesController {
 
     /**
      * 更新
+     *
+     * @param request
+     * @return 统一服务返回结果
      */
     @ApiOperation("更新")
     @ApiImplicitParam(name = "request", value = "更新信息请求体", dataTypeClass = ImageRequest.class)
@@ -161,6 +170,9 @@ public class ImagesController {
 
     /**
      * 根据UUID查询
+     *
+     * @param uuid
+     * @return
      */
     @ApiOperation("根据UUID查询")
     @ApiImplicitParam(name = "uuid", value = "镜像ID", dataTypeClass = String.class)
@@ -205,6 +217,9 @@ public class ImagesController {
 
     /**
      * 根据UUID集合查询
+     *
+     * @param request
+     * @return
      */
     @ApiOperation("根据UUID集合查询")
     @ApiImplicitParam(name = "request", value = "查询信息请求体", dataTypeClass = ImageByUuidsRequest.class)
@@ -219,6 +234,10 @@ public class ImagesController {
         return  new Result<>(responseList);
     }
 
+    /**
+     * @param model
+     * @return 根据ID查询返回信息
+     */
     private static ImagesByUuidsVO getImagesByUuidsVO(ImageTargetConvertModel model) {
         ImagesByUuidsVO response = new ImagesByUuidsVO();
         response.setName(model.getName());
@@ -228,6 +247,9 @@ public class ImagesController {
 
     /**
      * 构建
+     *
+     * @param request
+     * @return 统一服务返回结果
      */
     @ApiOperation("快速构建")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImagesBuildRequest.class)
@@ -239,12 +261,24 @@ public class ImagesController {
         return ResultCommon.success();
     }
 
+    /**
+     * 查询快速构建靶标列表
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("查询快速构建靶标列表")
     @GetMapping("/quick_create_list")
     public ListObjServiceResult<QuickCreateDevice> quickCreateList(QuickCreatePageRequest request) {
         return imagesConverter.quickCreateList(request).asResult();
     }
 
+    /**
+     * 提交快速构建
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("提交快速构建")
     @PostMapping("/quick_create")
     public ServiceResult<Boolean> quickCreate(@RequestBody QuickCreateRequest request) {
@@ -255,6 +289,9 @@ public class ImagesController {
 
     /**
      * 删除镜像
+     *
+     * @param request
+     * @return 统一服务返回结果
      */
     @ApiOperation("删除")
     @ApiImplicitParam(name = "request", value = "删除信息请求体", dataTypeClass = ImagesDeleteRequest.class)
@@ -267,6 +304,9 @@ public class ImagesController {
 
     /**
      * 授权
+     *
+     * @param request
+     * @return 统一服务返回结果
      */
     @ApiOperation("授权/批量授权")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImagesAuthRequest.class)
@@ -279,6 +319,9 @@ public class ImagesController {
 
     /**
      * 授权
+     *
+     * @param uuid
+     * @return
      */
     @ApiOperation("根据uuid查询授权用户信息")
     @ApiImplicitParam(name = "uuid", value = "请求参数", dataTypeClass = String.class)
@@ -290,6 +333,10 @@ public class ImagesController {
 
     /**
      * 导出
+     *
+     * @param uuid
+     * @param imageName
+     * @return
      */
     @ApiOperation("导出")
     @ApiImplicitParams({
@@ -312,6 +359,9 @@ public class ImagesController {
 
     /**
      * 创建虚拟机/容器
+     *
+     * @param uuid
+     * @return 统一服务返回结果
      */
     @ApiOperation("编辑镜像")
     @PostMapping("/{id}/create")
@@ -323,6 +373,9 @@ public class ImagesController {
 
     /**
      * 删除虚拟机/容器
+     *
+     * @param request
+     * @return 统一服务返回结果
      */
     @ApiOperation("释放镜像机器")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImagesDeleteInstanceRequest.class)
@@ -335,6 +388,9 @@ public class ImagesController {
 
     /**
      * 重启镜像机器
+     *
+     * @param request
+     * @return 统一服务返回结果
      */
     @ApiOperation("重启镜像机器")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImagesRebootInstanceRequest.class)
@@ -347,6 +403,9 @@ public class ImagesController {
 
     /**
      * 查询快照历史
+     *
+     * @param uuid
+     * @return
      */
     @AuthTarget(TargetEnum.DEVOPS_SNAPSHOT_GROUP)
     @ApiOperation("查询快照历史")
@@ -361,6 +420,9 @@ public class ImagesController {
 
     /**
      * 查询快照历史
+     *
+     * @param name
+     * @return
      */
     @AuthTarget(TargetEnum.DEVOPS_SNAPSHOT_GROUP)
     @ApiOperation("根据镜像名称或快照名称查询镜像名称和快照历史信息")
@@ -374,6 +436,9 @@ public class ImagesController {
 
     /**
      * 合并快照历史
+     *
+     * @param request
+     * @return 统一服务返回结果
      */
     @ApiOperation("合并快照历史")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = SnapshotMergeRequest.class)
@@ -394,6 +459,9 @@ public class ImagesController {
 
     /**
      * 删除快照
+     *
+     * @param request
+     * @return
      */
     @ApiOperation("删除快照")
     @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = SnapshotDeleteRequest.class)
@@ -406,6 +474,9 @@ public class ImagesController {
 
     /**
      * 创建快照
+     *
+     * @param request
+     * @return 统一服务返回结果
      */
     @ApiOperation("创建快照")
     @ApiImplicitParam(name = "request", value = "创建数据请求体", dataTypeClass = SnapshotRequest.class)
@@ -416,6 +487,12 @@ public class ImagesController {
         return ResultCommon.success();
     }
 
+    /**
+     * 快照操作
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("快照操作")
     @PostMapping("/snapshot/action")
     public ServiceResult<Boolean> snapshotAction(@RequestBody SnapshotActionRequest request) {
@@ -423,12 +500,24 @@ public class ImagesController {
         return new ServiceResult<>(true).asResult();
     }
 
+    /**
+     * 根据虚拟机id查询快照列表
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("根据虚拟机id查询快照列表")
     @GetMapping("/snapshot/by_vm_id")
     public ListObjServiceResult<Snapshot> getVmSnapshotById(SnapshotPageRequest request) {
         return snapshotService.getVmSnapshotById(request).asResult();
     }
 
+    /**
+     * 根据容器id查询快照列表
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("根据容器id查询快照列表")
     @GetMapping("/snapshot/by_container_id")
     public ListObjServiceResult<ContainerSnapshot> getContainerSnapshotById(SnapshotPageRequest request) {
@@ -436,9 +525,11 @@ public class ImagesController {
     }
 
 
-
     /**
      * 文件注入
+     *
+     * @param request
+     * @return 统一服务返回结果
      */
     @ApiOperation("文件注入")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImageInjectFileRequest.class)
@@ -452,6 +543,9 @@ public class ImagesController {
 
     /**
      * 查看文件注入列表
+     *
+     * @param request
+     * @return
      */
     @ApiOperation("查看文件注入列表")
     @GetMapping("/inject-file")
@@ -462,6 +556,9 @@ public class ImagesController {
 
     /**
      * 删除文件注入
+     *
+     * @param request
+     * @return 统一服务返回结果
      */
     @ApiOperation("删除文件注入")
     @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = ImageInjectFileDeleteRequest.class)
@@ -475,6 +572,8 @@ public class ImagesController {
 
     /**
      * 分页查询
+     *
+     * @return
      */
     @ApiOperation("查询flavor")
     @GetMapping("/page-flavor")
@@ -505,6 +604,12 @@ public class ImagesController {
         return new Result<>(flavorList);
     }
 
+    /**
+     * 查询dynamips 相关的信息
+     *
+     * @param platform
+     * @return
+     */
     @AuthTarget(TargetEnum.DEVOPS_DYNAMIPS_TARGET_GROUP)
     @ApiOperation("查询dynamips 相关的信息")
     @GetMapping("/dynamic_image_info")
@@ -513,6 +618,11 @@ public class ImagesController {
         return new Result<>(info);
     }
 
+    /**
+     * 查询dynamips flavor 相关的信息
+     *
+     * @return
+     */
     @AuthTarget(TargetEnum.DEVOPS_DYNAMIPS_TARGET_GROUP)
     @ApiOperation("查询dynamips flavor 相关的信息")
     @GetMapping("/dynamic_type_info")
@@ -521,6 +631,12 @@ public class ImagesController {
         return new Result<>(info);
     }
 
+    /**
+     * 根据设备ID获取登录链接信息
+     *
+     * @param uuid
+     * @return
+     */
     @ApiOperation("根据设备ID获取登录链接信息")
     @ApiImplicitParam(name = "uuid", value = "设备ID", dataTypeClass = String.class)
     @GetMapping("/connection")
@@ -529,6 +645,12 @@ public class ImagesController {
         return new Result<>(connection);
     }
 
+    /**
+     * 同步镜像数据
+     *
+     * @param request
+     * @return 统一服务返回结果
+     */
     @ApiOperation("同步镜像数据")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = ImageAsyncRequest.class)
     @PostMapping("/async")
@@ -599,6 +721,13 @@ public class ImagesController {
         return injectFileUploadService.upload();
     }
 
+    /**
+     * 上传iso文件
+     *
+     * @param file
+     * @param tmpdirUuid
+     * @return
+     */
     @ApiOperation("上传iso文件")
     @PostMapping(value = "/file/upload/iso")
     public ServiceResult<ISOUploadVO> uploadISOFile(MultipartFile file, String tmpdirUuid) {
@@ -609,6 +738,12 @@ public class ImagesController {
         return isoUploadService.upload();
     }
 
+    /**
+     * 下载iso文件
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("下载iso文件")
     @GetMapping(value = "/file/download/iso")
     public ServiceResult<String> downloadISOFile(ISOFileRequest request) {
@@ -616,6 +751,12 @@ public class ImagesController {
         return new ServiceResult<>(result.getNginxFileUrl()).asResult();
     }
 
+    /**
+     * 删除iso文件
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("删除iso文件")
     @DeleteMapping(value = "/file/delete/iso")
     public ServiceResult<Boolean> deleteISOFile(@RequestBody ISOFileRequest request) {
@@ -626,6 +767,7 @@ public class ImagesController {
 
     /**
      * 验证请求参数
+     *
      * @param request
      */
     private void validImageRequest(ImageRequest request){
@@ -639,6 +781,7 @@ public class ImagesController {
 
     /**
      * 转换BO to VO
+     *
      * @param model
      * @return
      */
@@ -651,6 +794,10 @@ public class ImagesController {
         return list;
     }
 
+    /**
+     * @param v
+     * @return 镜像分页返回信息
+     */
     private ImagesPageVO getImagesPageVO(ImageConvertModel v) {
         ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
         ExtVm extVm = v.getExtVm();
@@ -713,6 +860,9 @@ public class ImagesController {
         return vo;
     }
 
+    /**
+     * @param isoTmpdirUuid
+     */
     private void checkISOReference(String isoTmpdirUuid) {
         List<String> result = csceneSpecialService.statISOReferCscenes(isoTmpdirUuid).getSource();
         if (CollectionUtils.isNotEmpty(result)) {

@@ -15,6 +15,12 @@ public interface BaseModelListBOController<T extends ModelBO<M, T>, M extends Ba
 
     S getModelService();
 
+    /**
+     * 获取分页数据
+     *
+     * @param queryParams
+     * @return
+     */
     @ApiOperation("获取分页数据")
     @GetMapping
     default ListObjServiceResult<T> list(Q queryParams) {

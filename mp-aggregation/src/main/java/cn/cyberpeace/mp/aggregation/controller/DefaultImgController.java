@@ -97,6 +97,11 @@ public class DefaultImgController {
         return ResultCommon.success(rtnList);
     }
 
+    /**
+     * 获取系统图片
+     *
+     * @return
+     */
     @ApiOperation("获取系统图片")
     @GetMapping("/get-sys-logo-img")
     public ServiceResult<Map<String, String>> getSysLogoImg(){

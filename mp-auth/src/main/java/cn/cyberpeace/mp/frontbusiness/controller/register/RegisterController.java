@@ -46,6 +46,12 @@ public class RegisterController {
     @Autowired
     private RegisterService registerService;
 
+    /**
+     * 注册用户
+     *
+     * @param req
+     * @return
+     */
     @ApiOperation(value = "注册用户", notes = "")
     @ApiImplicitParam(name = "req", value = "注册请求体", dataTypeClass = RegisterRequest.class, required = true, dataType = "body")
     @PostMapping

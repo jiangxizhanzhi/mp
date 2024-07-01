@@ -17,6 +17,13 @@ public interface BaseModelCreateBOController<T extends ModelBO<M, T>, M extends 
 
     S getModelService();
 
+    /**
+     * 创建数据
+     *
+     * @param bo
+     * @param fields
+     * @return
+     */
     @ApiOperation("创建数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "fields", value = "需要返回的字段", dataTypeClass=String[].class),

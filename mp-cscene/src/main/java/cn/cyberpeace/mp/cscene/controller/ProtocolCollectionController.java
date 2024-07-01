@@ -41,6 +41,12 @@ public class ProtocolCollectionController {
 //    }
 
 
+    /**
+     * queryMibNodeInfo
+     *
+     * @param queryRequest
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "mib节点信息查询")
     @GetMapping("/mib_nodeinfo")
     public ServiceResult queryMibNodeInfo(@Validated MibInfoQueryRequest queryRequest) {

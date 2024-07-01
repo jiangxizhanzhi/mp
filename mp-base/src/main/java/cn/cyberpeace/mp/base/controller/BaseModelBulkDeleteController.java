@@ -21,6 +21,7 @@ public interface BaseModelBulkDeleteController<M extends BaseModel, S extends Ba
 
     /**
      * 通用批量删除
+     *
      * @param ids 数据id集
      * @return 成功数量
      */
@@ -33,6 +34,7 @@ public interface BaseModelBulkDeleteController<M extends BaseModel, S extends Ba
 
     /**
      * 通用删除
+     *
      * @param deleteData 删除数据
      * @return 成功数量
      */

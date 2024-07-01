@@ -17,6 +17,12 @@ public interface BaseModelBulkUpdateBOController<T extends ModelBO<M, T>, M exte
 
     S getModelService();
 
+    /**
+     * 批量更新数据
+     *
+     * @param bos
+     * @return
+     */
     @ApiOperation("批量更新数据")
     @ApiImplicitParam(name = "bos", value = "更新数据请求体", dataTypeClass = List.class)
     @PatchMapping("/bulk_update")

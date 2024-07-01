@@ -46,6 +46,13 @@ public class OperateLogController {
         this.operateLogService = operateLogService;
     }
 
+    /**
+     * add
+     *
+     * @param request
+     * @param httpServletRequest
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "新增操作日志")
     @ApiImplicitParam(name = "request", value = "操作日志请求", dataTypeClass = OperationLogRequest.class)
     @PostMapping("/add")
@@ -56,6 +63,12 @@ public class OperateLogController {
     }
 
 
+    /**
+     * page
+     *
+     * @param request
+     * @return
+     */
     @AuthTarget({TargetEnum.AUDIT_LOG, TargetEnum.DASHBOARD, TargetEnum.USER_MANAGE})
     @ApiOperation(value = "查询操作日志")
     @GetMapping("/page")
@@ -64,6 +77,11 @@ public class OperateLogController {
         return operateLogService.search(request);
     }
 
+    /**
+     * getModules
+     *
+     * @return
+     */
     @AuthTarget(TargetEnum.AUDIT_LOG)
     @GetMapping("/modules")
     @ApiOperation(value = "查询审计日志操作模块")
@@ -71,6 +89,11 @@ public class OperateLogController {
         return optionService.getIntOptions(LogConstant.MP_COMMON_OPTION_TYPE_LOG_OP_MODULE);
     }
 
+    /**
+     * getTypes
+     *
+     * @return
+     */
     @AuthTarget(TargetEnum.AUDIT_LOG)
     @GetMapping("/types")
     @ApiOperation(value = "查询审计日志操作类型")

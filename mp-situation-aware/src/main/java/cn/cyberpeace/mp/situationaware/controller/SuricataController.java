@@ -39,6 +39,12 @@ public class SuricataController {
     private SuricataService suricataService;
 
 
+    /**
+     * importSuricataRules
+     *
+     * @param file
+     * @return 统一服务返回结果
+     */
     @PostMapping("/rule/reimport")
     @PreAuthorize("hasAnyAuthority('ROLE_" + SuricataConstant.ROLE_ADMIN + "')")
     public ServiceResult importSuricataRules(MultipartFile file) {
@@ -46,30 +52,58 @@ public class SuricataController {
     }
 
 
+    /**
+     * querySuricataRulesPage
+     *
+     * @param suricataQueryRequest
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "分页查询流量分析规则")
     @GetMapping("/rule/page")
     public ServiceResult querySuricataRulesPage(SuricataQueryRequest suricataQueryRequest){
         return suricataService.queryPage(suricataQueryRequest);
     }
 
+    /**
+     * querySuricataRulesAllProtocols
+     *
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "查询流量分析规则所有协议")
     @GetMapping("/rule/protocols")
     public ServiceResult querySuricataRulesAllProtocols(){
         return suricataService.queryAllProtocols();
     }
 
+    /**
+     * listAllClassTypes
+     *
+     * @return
+     */
     @ApiOperation(value = "查询流量分析规则所有的分类类别")
     @GetMapping("/rule/classtype")
     public ServiceResult<List<String>> listAllClassTypes() {
         return new ServiceResult<>(suricataService.queryAllClassType()).asResult();
     }
 
+    /**
+     * analyseSuricataRule
+     *
+     * @param suricataRuleRequest
+     * @return
+     */
     @ApiOperation(value = "解析用户输入的规则")
     @PostMapping("/rule/analyse")
     public ServiceResult<SuricataData> analyseSuricataRule(@RequestBody SuricataRuleRequest suricataRuleRequest) {
         return new ServiceResult<>(suricataService.analyseRule(suricataRuleRequest.getMetadata())).asResult();
     }
 
+    /**
+     * saveSuricataRule
+     *
+     * @param suricataRuleRequest
+     * @return
+     */
     @ApiOperation(value = "保存用户编辑的规则")
     @PostMapping("/rule/save")
     public ServiceResult<Boolean> saveSuricataRule(@RequestBody SuricataRuleRequest suricataRuleRequest) {
@@ -77,6 +111,11 @@ public class SuricataController {
         return new ServiceResult<>(Boolean.TRUE).asResult();
     }
 
+    /**
+     * getSuricataRuleFilePath
+     *
+     * @return
+     */
     @ApiOperation(value = "获取流量规则文件存储路径")
     @GetMapping("/rule/file_path")
     @AuthTarget(TargetEnum.NO_AUTH)

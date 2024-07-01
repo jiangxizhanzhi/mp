@@ -57,6 +57,12 @@ public class UserController {
     @Autowired
     private UserHeartbeatService heartbeatService;
 
+    /**
+     * 修改密码
+     *
+     * @param resetPwdRequest
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "修改密码", notes = "")
     @ApiImplicitParam(name="resetPwdRequest", value="修改请求", dataTypeClass = ResetPwdRequest.class)
     @PostMapping("/resetpwd")
@@ -68,6 +74,12 @@ public class UserController {
         return ResultCommon.success();
     }
 
+    /**
+     * 修改自己的密码
+     *
+     * @param req
+     * @return 统一服务返回结果
+     */
     @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation(value = "修改自己的密码", notes = "")
     @ApiImplicitParam(name="req", value="修改请求", dataTypeClass = ResetSelfPwdRequest.class)
@@ -81,6 +93,12 @@ public class UserController {
     }
 
 
+    /**
+     * 禁用用户
+     *
+     * @param userIds
+     * @return
+     */
     @ApiOperation(value = "禁用用户", notes = "")
     @ApiImplicitParam(name = "userIds", value = "id列表", dataTypeClass = List.class)
     @PostMapping("/disable")
@@ -95,6 +113,12 @@ public class UserController {
     }
 
 
+    /**
+     * 启用用户
+     *
+     * @param userIds
+     * @return
+     */
     @ApiOperation(value = "启用用户", notes = "")
     @ApiImplicitParam(name = "userIds", value = "id列表", dataTypeClass = List.class, paramType = "body", required = true)
     @PostMapping("/enable")
@@ -108,6 +132,12 @@ public class UserController {
         return ResultCommon.success(errMsg);
     }
 
+    /**
+     * 审核用户
+     *
+     * @param userIds
+     * @return
+     */
     @ApiOperation(value = "审核用户", notes = "")
     @ApiImplicitParam(name = "userIds", value = "id列表", dataTypeClass = List.class, paramType = "query")
     @PostMapping("/approve")
@@ -122,6 +152,11 @@ public class UserController {
     }
 
 
+    /**
+     * 统计在线用户信息
+     *
+     * @return 统一服务返回结果
+     */
     @AuthTarget(TargetEnum.NO_AUTH)
     @ApiOperation(value = "用户心跳-统计在线用户信息", notes = "")
     @PostMapping("/heartbeat")
@@ -130,6 +165,12 @@ public class UserController {
         return ResultCommon.success();
     }
 
+    /**
+     * 用户在线报告
+     *
+     * @param pageRequest
+     * @return 统一服务返回结果
+     */
     @AuthTarget(TargetEnum.DASHBOARD)
     @ApiOperation(value = "用户在线报告", notes = "")
     @GetMapping("/olreport")
@@ -139,6 +180,11 @@ public class UserController {
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
+    /**
+     * 在线用户数量
+     *
+     * @return
+     */
     @AuthTarget(TargetEnum.DASHBOARD)
     @ApiOperation(value = "在线用户数量", notes = "")
     @GetMapping("/olUserCnt")

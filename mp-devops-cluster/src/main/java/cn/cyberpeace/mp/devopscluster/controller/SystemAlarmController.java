@@ -66,6 +66,7 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
 
     /**
      * 分页查询告警信息
+     *
      * @param queryParams
      * @return
      */
@@ -92,6 +93,7 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
 
     /**
      * 替换服务名称
+     *
      * @param systemAlarmModels
      */
     private void changeServiceName(List<SystemAlarmModel> systemAlarmModels) {
@@ -107,6 +109,8 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
 
     /**
      * 系统告警统计信息
+     *
+     * @param days
      * @return
      */
     @ApiOperation("系统告警统计信息")
@@ -135,6 +139,8 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
 
     /**
      * 系统告警统计信息
+     *
+     * @param trendRequest
      * @return
      */
     @ApiOperation("系统告警趋势")
@@ -147,6 +153,8 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
 
     /**
      * 系统告警分布
+     *
+     * @param request
      * @return
      */
     @ApiOperation("系统告警分布")

@@ -33,6 +33,12 @@ public class AvatarController {
     @Autowired
     private AvatarService avatarService;
 
+    /**
+     * 上传用户头像
+     *
+     * @param file
+     * @return
+     */
     @ApiOperation(value = "上传用户头像(返回url)", notes = "")
     @ApiImplicitParam(name = "file", value = "图片文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/upload")

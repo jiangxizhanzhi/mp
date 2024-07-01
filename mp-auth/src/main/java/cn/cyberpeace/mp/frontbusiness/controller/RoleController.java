@@ -33,6 +33,13 @@ public class RoleController {
     @Autowired
     private RoleService roleService;
 
+    /**
+     * 查询指定id角色
+     *
+     * @param id
+     * @param fields
+     * @return
+     */
     @ApiOperation("查询指定id角色（附带权限、用户数）")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
@@ -45,6 +52,12 @@ public class RoleController {
         return ResultUtils.obj2ObjServiceResult(rolePermBo);
     }
 
+    /**
+     * 分页查询角色列表
+     *
+     * @param pageRequest
+     * @return 统一服务返回结果
+     */
     @ApiOperation(value = "分页查询角色列表（附加权限信息，绑定的用户信息）", notes = "")
     @GetMapping("/page")
     public ServiceResult getRolesWithUserCnt(RolePageRequest pageRequest) {

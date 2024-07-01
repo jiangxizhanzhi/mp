@@ -45,6 +45,12 @@ public class SceneMonitorController {
     @Autowired
     private SceneMonitorService sceneMonitorService;
 
+    /**
+     * getSceneMonitorInfo
+     *
+     * @param sceneId
+     * @return
+     */
     @ApiOperation(value = "查询场景监控信息")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "sceneId", value = "场景ID", dataTypeClass = String.class),
@@ -56,6 +62,14 @@ public class SceneMonitorController {
     }
 
 
+    /**
+     * getSceneAllElements
+     *
+     * @param sceneId
+     * @param realTimeHostState
+     * @param request
+     * @return
+     */
     @ApiOperation(value = "查询场景所有节点列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "sceneId", value = "场景ID", dataTypeClass = String.class),
@@ -86,6 +100,14 @@ public class SceneMonitorController {
         return ResultCommon.success(result);
     }
 
+    /**
+     * getSceneElements
+     *
+     * @param sceneId
+     * @param supportProbe
+     * @param supportFlow
+     * @return
+     */
     @ApiOperation(value = "按需查询场景节点列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "sceneId", value = "场景ID", dataTypeClass = String.class),
@@ -101,6 +123,13 @@ public class SceneMonitorController {
         return ResultCommon.success(basicInfoList);
     }
 
+    /**
+     * getSceneAllElements
+     *
+     * @param id
+     * @param request
+     * @return
+     */
     @ApiOperation(value = "查询场景模板所有节点列表")
     @ApiImplicitParam(name = "id", value = "场景模板ID", dataTypeClass = String.class)
     @GetMapping("/config/all_elements/{id}")
@@ -110,6 +139,12 @@ public class SceneMonitorController {
     }
 
 
+    /**
+     * listIps
+     *
+     * @param baseRequest
+     * @return
+     */
     @ApiOperation(value = "查询场景所有IP列表")
     @GetMapping("/ips")
     public ServiceResult<List<String>> listIps(BaseSceneElementRequest baseRequest) {
@@ -117,6 +152,12 @@ public class SceneMonitorController {
         return ResultCommon.success(ips);
     }
 
+    /**
+     * listRecordingUsers
+     *
+     * @param baseRequest
+     * @return
+     */
     @ApiOperation(value = "查询场景所有录屏用户列表")
     @GetMapping("/recording/users")
     public ServiceResult<List<UserModel>> listRecordingUsers(BaseSceneElementRequest baseRequest) {
@@ -124,6 +165,13 @@ public class SceneMonitorController {
         return ResultCommon.success(users);
     }
 
+    /**
+     * topByHoststates
+     *
+     * @param sceneId
+     * @param topCount
+     * @return
+     */
     @ApiOperation(value = "查询场景top5节点状态")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "sceneId", value = "场景ID", dataTypeClass = String.class),

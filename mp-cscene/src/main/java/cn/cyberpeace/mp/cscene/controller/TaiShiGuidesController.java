@@ -35,6 +35,12 @@ public class TaiShiGuidesController {
     @Resource
     private TaiShiGuidesService taiShiGuidesService;
 
+    /**
+     * getAttCkEventList
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation(value = "场景态势事件列表")
     @PostMapping("/event_list")
     public ListObjServiceResult<TaiShiEventInfo> getAttCkEventList(@RequestBody TaiShiRequest request) {
@@ -42,36 +48,71 @@ public class TaiShiGuidesController {
         return taiShiGuidesService.getAttCkEventList(request).asResult();
     }
 
+    /**
+     * getHostEventList
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation(value = "场景态势主机事件列表")
     @GetMapping("/host_event_list")
     public ListObjServiceResult<TaiShiEventInfo> getHostEventList(TaiShiHostRequest request) {
         return taiShiGuidesService.getHostEventList(request).asResult();
     }
 
+    /**
+     * getAttCkEventCount
+     *
+     * @param sceneId
+     * @return
+     */
     @ApiOperation(value = "场景态势主机和流量的次数统计")
     @GetMapping("/event_total_count")
     public ServiceResult<TaiShiTotalCount> getAttCkEventCount(@Param("sceneId") String sceneId) {
         return taiShiGuidesService.getAttCkEventCount(sceneId).asResult();
     }
 
+    /**
+     * getAttCkEventGroupCount
+     *
+     * @param sceneId
+     * @return
+     */
     @ApiOperation(value = "场景态势主机和流量的次数统计")
     @GetMapping("/event_group_count")
     public ServiceResult<List<FlowAttackTypeCount>> getAttCkEventGroupCount(@Param("sceneId") String sceneId) {
         return taiShiGuidesService.getAttCkEventGroupCount(sceneId).asResult();
     }
 
+    /**
+     * getEventTrend
+     *
+     * @param sceneId
+     * @return
+     */
     @ApiOperation(value = "场景态势主机和流量事件的次数趋势")
     @GetMapping("/event_trend")
     public ServiceResult<List<FlowTrend>> getEventTrend(@Param("sceneId") String sceneId) {
         return taiShiGuidesService.getEventTrend(sceneId).asResult();
     }
 
+    /**
+     * getEventTiming
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation(value = "场景运行过程中态势主机和流量事件的出现时间")
     @RequestMapping("/event_timing")
     public ServiceResult<List<FlowTrend>> getEventTiming(@RequestBody TaiShiRequest request) {
         return taiShiGuidesService.getEventTiming(request).asResult();
     }
 
+    /**
+     * listAllFlowClassifications
+     *
+     * @return
+     */
     @ApiOperation(value = "获取流量事件攻击类型分类详情")
     @GetMapping("/flow_classification/all")
     public ServiceResult<List<FlowClassificationDto>> listAllFlowClassifications() {

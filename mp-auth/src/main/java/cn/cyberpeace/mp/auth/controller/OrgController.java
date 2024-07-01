@@ -37,6 +37,12 @@ public class OrgController {
     @Autowired
     private OrgService orgService;
 
+    /**
+     * 查询指定id组织
+     *
+     * @param id
+     * @return
+     */
     @ApiOperation(value = "查询指定id组织(restful形式)", notes = "")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
@@ -49,6 +55,12 @@ public class OrgController {
         return new ObjServiceResult<>(new ObjResult<>(orgService.orgModel2OrgBO(orgModel), null)).asResult();
     }
 
+    /**
+     * 查询指定id组织
+     *
+     * @param id
+     * @return
+     */
     @ApiOperation(value = "查询指定id组织", notes = "")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
@@ -61,6 +73,13 @@ public class OrgController {
         return new ObjServiceResult<>(new ObjResult<>(orgService.orgModel2OrgBO(orgModel), null)).asResult();
     }
 
+    /**
+     * 新增组织
+     *
+     * @param obj
+     * @param fields
+     * @return
+     */
     @ApiOperation("新增组织")
     @ApiImplicitParams({
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
@@ -74,6 +93,14 @@ public class OrgController {
         return result;
     }
 
+    /**
+     * 更新指定id组织
+     *
+     * @param id
+     * @param obj
+     * @param fields
+     * @return
+     */
     @ApiOperation("更新指定id组织")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
@@ -89,6 +116,12 @@ public class OrgController {
         return orgService.update(obj, fields);
     }
 
+    /**
+     * 删除指定id组织
+     *
+     * @param id
+     * @return
+     */
     @ApiOperation("删除指定id组织")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),

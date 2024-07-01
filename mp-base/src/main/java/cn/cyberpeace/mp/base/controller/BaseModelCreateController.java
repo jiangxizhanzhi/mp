@@ -23,7 +23,8 @@ public interface BaseModelCreateController<M extends BaseModel, S extends BaseMo
 
     /**
      * 通用创建
-     * @param obj 数据对象
+     *
+     * @param obj    数据对象
      * @param fields 返回数据字段
      * @return 单条数据结果
      */

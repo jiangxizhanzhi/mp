@@ -76,6 +76,7 @@ public class DevopsTargetController {
 
     /**
      * 查询FTP信息
+     *
      * @return
      */
     @ApiOperation("查询FTP信息")
@@ -93,6 +94,7 @@ public class DevopsTargetController {
 
     /**
      * 查询所有靶标信息
+     *
      * @param request
      * @return
      */
@@ -171,6 +173,7 @@ public class DevopsTargetController {
 
     /**
      * 查询所有靶标信息
+     *
      * @param request
      * @return
      */
@@ -235,6 +238,7 @@ public class DevopsTargetController {
 
     /**
      * 查询所有靶标信息
+     *
      * @param request
      * @return
      */
@@ -316,6 +320,10 @@ public class DevopsTargetController {
         return new Result(new ListResult<>(targetScenes));
     }
 
+    /**
+     * @param v
+     * @return
+     */
     private static DeviceTargetVO getDeviceTargetVO(DeviceTargetPO v) {
         DeviceTargetVO vo = new DeviceTargetVO();
         vo.setUuid(v.getUuid());
@@ -329,6 +337,12 @@ public class DevopsTargetController {
         return vo;
     }
 
+    /**
+     * 根据UUID查询靶标信息
+     *
+     * @param uuid
+     * @return
+     */
     @ApiOperation("根据UUID查询靶标信息")
     @ApiImplicitParam(name = "uuid", value = "靶标id", dataTypeClass = String.class)
     @GetMapping("/get-by-uuid")
@@ -338,6 +352,12 @@ public class DevopsTargetController {
         return new Result<>(deviceVO);
     }
 
+    /**
+     * 分页查询靶标信息
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("分页查询靶标信息")
     @GetMapping("/page")
     public PageResult<DeviceVO> page(TargetSceneRequest request){
@@ -352,6 +372,12 @@ public class DevopsTargetController {
         return new PageResult<>(deviceVOList,targetSceneConvertModel.getTotal());
     }
 
+    /**
+     * 查询常用靶标信息
+     *
+     * @param request
+     * @return
+     */
     @AuthTarget(TargetEnum.DEVOPS_TARGET_GROUP)
     @ApiOperation("查询常用靶标信息")
     @GetMapping("/common-targets")
@@ -391,6 +417,12 @@ public class DevopsTargetController {
         return new Result(new ListResult(deviceVOList));
     }
 
+    /**
+     * 批量同步靶标数据
+     *
+     * @param request
+     * @return 统一服务返回结果
+     */
     @ApiOperation("批量同步靶标数据")
     @GetMapping("/multi-async")
     public ServiceResult multiAsync(TargetMultiAsyncRequest request){
@@ -404,6 +436,12 @@ public class DevopsTargetController {
         return serviceResult.asResult();
     }
 
+    /**
+     * 注册MP地址
+     *
+     * @param url
+     * @return 统一服务返回结果
+     */
     @ApiOperation("注册MP地址")
     @ApiImplicitParam(name = "url", value = "地址", dataTypeClass = String.class)
     @GetMapping("/register")
@@ -412,6 +450,12 @@ public class DevopsTargetController {
         return ResultCommon.success();
     }
 
+    /**
+     * 上传靶标图标
+     *
+     * @param file
+     * @return
+     */
     @ApiOperation("上传靶标图标")
     @PostMapping("/upload/icon")
     @ApiImplicitParam(name = "file", value = "文件", dataTypeClass = MultipartFile.class)
@@ -421,6 +465,12 @@ public class DevopsTargetController {
     }
 
 
+    /**
+     * 校验靶标是否存在
+     *
+     * @param request
+     * @return
+     */
     @ApiOperation("校验靶标是否存在")
     @PostMapping("/check")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = TargetSceneRequest.class)

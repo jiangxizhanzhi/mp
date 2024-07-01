@@ -16,6 +16,12 @@ public interface BaseModelBulkDeleteBOController<T extends ModelBO<M, T>, M exte
 
     S getModelService();
 
+    /**
+     * 批量删除数据
+     *
+     * @param deleteData
+     * @return
+     */
     @ApiOperation("批量删除数据")
     @ApiImplicitParam(name = "deleteData", value = "删除数据请求体", dataTypeClass = BaseBulkDeleteData.class)
     @DeleteMapping("/bulk_delete")

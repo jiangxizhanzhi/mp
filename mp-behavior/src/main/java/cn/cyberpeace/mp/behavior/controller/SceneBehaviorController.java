@@ -26,18 +26,38 @@ public class SceneBehaviorController {
 	@Autowired
 	private CsceneUserBehaviorService csceneUserBehaviorService;
 
+	/**
+	 * 保存节点关联的行为
+	 *
+	 * @param addReq
+	 * @return
+	 */
 	@PostMapping("/element")
 	@ApiOperation("保存节点关联的行为")
 	public ServiceResult<Boolean> addBehavior(@RequestBody @Validated ElementBehaviorReq addReq) {
 		return ResultCommon.success(csceneUserBehaviorService.add(addReq));
 	}
 
+	/**
+	 * 查看节点关联的行为
+	 *
+	 * @param nodeId
+	 * @return
+	 */
 	@GetMapping("/element")
 	@ApiOperation("查看节点关联的行为")
 	public ServiceResult<List<CsceneNodeBehaviorRes>> getBehavior(@ApiParam(name = "node_id", value = "节点id", required = true) @RequestParam(name = "node_id") String nodeId) {
 		return ResultCommon.success(csceneUserBehaviorService.get(nodeId));
 	}
 
+	/**
+	 * 获取节点的行为资源包
+	 *
+	 * @param response
+	 * @param nodeId
+	 * @param sceneId
+	 * @return
+	 */
 	@GetMapping("/element/resource")
 	@ApiOperation("获取节点的行为资源包")
 	public ServiceResult<Boolean> getResource(HttpServletResponse response,

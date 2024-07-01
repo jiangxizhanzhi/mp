@@ -35,11 +35,22 @@ public class TargetSceneReferController {
 
     private CsceneSpecialService csceneSpecialService;
 
+    /**
+     * @param csceneSpecialService
+     */
     @Autowired
     public TargetSceneReferController(CsceneSpecialService csceneSpecialService) {
         this.csceneSpecialService = csceneSpecialService;
     }
 
+    /**
+     * 分页查询
+     *
+     * @param name
+     * @param perPage
+     * @param page
+     * @return
+     */
     @AuthTarget(TargetEnum.REAL_EQUIPMENT_MANAGEMENT)
     @ApiOperation("分页查询")
     @ApiImplicitParams({
