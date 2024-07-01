@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.converter.SupportExportConvert;
+import cn.cyberpeace.mp.devopscluster.converter.bo.SceneRealEquipmentBo;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
@@ -151,6 +152,20 @@ public class DevopsTargetService {
     @Transactional
     public int deleteAllTarget() {
         return deviceTargetMapper.deleteAllTarget();
+    }
+
+    /**
+     * 获取所有的实体靶标id
+     */
+    public List<String> getAllRealEquipmentId() {
+        return deviceTargetMapper.selectAllRealEquipmentId();
+    }
+
+    /**
+     * 根据id获取信息
+     */
+    public SceneRealEquipmentBo getBoById(String id) {
+        return deviceTargetMapper.selectBoById(id);
     }
 
     /**

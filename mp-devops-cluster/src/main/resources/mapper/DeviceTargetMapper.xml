@@ -510,4 +510,16 @@
             sum(case when t.image_type = 'entity' and t.main_category = 4 then 1 else 0 end ) as '4'
         from mp_devops_target t where t.is_hide = 0
     </select>
+
+    <select id="selectAllRealEquipmentId" resultType="java.lang.String">
+        select id from mp_devops_target
+        where image_type = 'entity'
+    </select>
+
+    <select id="selectBoById" resultType="cn.cyberpeace.mp.devopscluster.converter.bo.SceneRealEquipmentBo">
+        select scene scene_id, name, element.scene_element node_id from mp_devops_target target
+        left join mp_sceneplugincloud_scene_element element on target.uuid = element.image_uuid
+        where target.id = #{id}
+        limit 1
+    </select>
 </mapper>

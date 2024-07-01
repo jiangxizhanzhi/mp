@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopscluster.repository;
 
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
+import cn.cyberpeace.mp.devopscluster.converter.bo.SceneRealEquipmentBo;
 import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
@@ -108,4 +109,14 @@ public interface DeviceTargetMapper extends BaseModelMapper<DeviceTargetPO> {
      * @return
      */
     Integer deleteAllTarget();
+
+    /**
+     * 查询所有实体设备id
+     */
+    List<String> selectAllRealEquipmentId();
+
+    /**
+     * 根据id获取信息
+     */
+    SceneRealEquipmentBo selectBoById(@Param("id") String id);
 }

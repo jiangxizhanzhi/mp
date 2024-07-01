@@ -4,15 +4,19 @@ import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.model.CsceneCommonCollectModel;
+import cn.cyberpeace.mp.cscene.repository.CsceneCommonCollectMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntity;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntityAccess;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.RealEquipmentService;
 import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devopscluster.converter.bo.RealEquipmentBO;
+import cn.cyberpeace.mp.devopscluster.converter.bo.SceneRealEquipmentBo;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
@@ -32,11 +36,15 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 /**
  * 实装管理
@@ -60,6 +68,9 @@ public class RealEquipmentConverter implements BaseConverter{
     private final TargetConverter targetConverter;
 
     private final CsceneSpecialService csceneSpecialService;
+
+    @Autowired
+    private CsceneCommonCollectMapper csceneCommonCollectMapper;
 
     /**
      * 获取实装总数
@@ -212,6 +223,46 @@ public class RealEquipmentConverter implements BaseConverter{
         return result;
     }
 
+    public void report(String ip, String content, String agreement) {
+        if (StringUtils.isEmpty(ip)) {
+            throw new MpRuntimeException("ip为空");
+        }
+        CsceneCommonCollectModel model = new CsceneCommonCollectModel();
+        model.setAgreement(agreement);
+        model.setDetail(content);
+        SceneRealEquipmentBo realEquipmentBo = getRealEquipmentId(ip);
+        model.setCsceneId(realEquipmentBo.getSceneId());
+        model.setHostName(realEquipmentBo.getName());
+        model.setNodeId(realEquipmentBo.getNodeId());
+        model.setTime(LocalDateTime.now());
+        csceneCommonCollectMapper.create(model);
+    }
+
+    public void report(HttpServletRequest request, String content) {
+        String ip = getClientIp(request);
+        report(ip, content, "restapi");
+    }
+
+    public String getClientIp(HttpServletRequest request) {
+        String ipAddress = request.getHeader("X-FORWARDED-FOR");
+        if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getHeader("Proxy-Client-IP");
+        }
+        if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getHeader("HTTP_CLIENT_IP");
+        }
+        if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getHeader("HTTP_X_FORWARDED_FOR");
+        }
+        if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getRemoteAddr();
+        }
+        return ipAddress;
+    }
+
     /**
      * 转换Device对象
      * @param device
@@ -313,5 +364,27 @@ public class RealEquipmentConverter implements BaseConverter{
                 }
             }
         }
+    }
+
+
+    /**
+     * 根据ip获取场景中的实装设备信息
+     * @param ip
+     * @return
+     */
+    private SceneRealEquipmentBo getRealEquipmentId(String ip) {
+        List<String> ids = devopsTargetService.getAllRealEquipmentId();
+        List<Device> deviceList = deviceService.findByIds(ids.stream().map(Integer::parseInt).collect(Collectors.toList()));
+        for (Device device : deviceList) {
+            List<ExtEntityAccess> accesses = device.getExtEntityAccess();
+            if (CollectionUtils.isNotEmpty(accesses)) {
+                for (ExtEntityAccess extEntityAccess : accesses) {
+                    if (ip.equals(extEntityAccess.getIp())) {
+                        return devopsTargetService.getBoById(Integer.toString(device.getId()));
+                    }
+                }
+            }
+        }
+        throw new MpRuntimeException("找不到对应的实体设备");
     }
 }
