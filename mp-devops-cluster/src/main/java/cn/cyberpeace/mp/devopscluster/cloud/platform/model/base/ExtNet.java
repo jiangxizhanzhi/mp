@@ -31,6 +31,6 @@ public class ExtNet extends DeviceCloudTargetNet {
     /**
      * IPv4地址池
      */
-    private String ipv4AddressPool;
+    private Integer ipv4AddressPool;
 
 }

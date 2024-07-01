@@ -52,9 +52,9 @@ public class CloudDevopsTargetController {
     @ApiOperation("微软云服务节点列表获取")
     @PostMapping("/getTarget")
 //    @Cacheable(key = "'getTarget' + #request", value = {"getTarget"})
-    public ListObjServiceResult getTarget(@RequestBody TargerRequestVO request) {
-        JSONObject result = microsoftAzureConverter.getCloudTargetListByCodes(request);
-        return new ListObjServiceResult((List) result.get("list"), (int) result.get("total")).asResult();
+    public ServiceResult getTarget(@RequestBody TargerRequestVO request) {
+        List<JSONObject> result = microsoftAzureConverter.getCloudTargetListByCodes(request);
+        return new ServiceResult(result).asResult();
     }
 
     /**

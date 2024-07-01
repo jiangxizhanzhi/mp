@@ -72,4 +72,7 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
                                                             @Param("offset") Integer offset, @Param("pageSize") Integer pageSize);
 
     Integer getCommonTargetNum(EquipmentRequestVO request, Integer offset, Integer pageSize);
+
+
+    List<JSONObject> getSubTypeName();
 }

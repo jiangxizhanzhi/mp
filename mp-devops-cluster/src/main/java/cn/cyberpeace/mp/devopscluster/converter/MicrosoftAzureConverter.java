@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
 import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
+import cn.cyberpeace.mp.base.bo.MpSysCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment;
@@ -33,10 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -91,7 +89,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
         // 分页信息
         int offset = (request.getPage() != null && request.getPerPage() != null) ? (request.getPage() - 1) * request.getPerPage() : 0;
-        int pageSize = (request.getPerPage() != null) ? request.getPerPage() : 10;
+        int pageSize = (request.getPerPage() != null) ? request.getPerPage() : 100000;
 
         // 获取数据和总数
         List<DeviceCloudTargetVO> list = microsoftAzureMapper.getCloudTargetListByCodes(
@@ -131,8 +129,9 @@ public class MicrosoftAzureConverter implements BaseConverter {
         }
     }
 
-    public JSONObject getCloudTargetListByCodes(TargerRequestVO request) {
+    public List<JSONObject> getCloudTargetListByCodes(TargerRequestVO request) {
         List<DeviceCloudTargetVO> vos = null;
+        //分页时计算总数
         Integer total = 0;
         switch (request.getCloudServiceType()) {
             case "1":
@@ -162,10 +161,41 @@ public class MicrosoftAzureConverter implements BaseConverter {
         }
         //结果转Device集合
         List<CloudDevice> convert = convert(vos);
-        JSONObject result = new JSONObject();
-        result.put("list", convert);
-        result.put("total", total);
-        return result;
+
+        //根据convert中subType分类收集成returnDate,list在收集returnDate
+        List<JSONObject> list = new ArrayList<>();
+        JSONObject returnDate = new JSONObject();
+        returnDate.put("sub_type",null);
+        returnDate.put("data",new ArrayList<CloudDevice>());
+
+        // 使用 Map 分组
+        Map<String, List<CloudDevice>> groupedDevices = new HashMap<>();
+        for (CloudDevice cloudDevice : convert) {
+            String subType = cloudDevice.getSubType();
+            if (subType != null) {
+                groupedDevices.computeIfAbsent(subType, k -> new ArrayList<>()).add(cloudDevice);
+            }
+        }
+
+        //查询subType对应名称
+        List<JSONObject> nameList = microsoftAzureMapper.getSubTypeName();
+        Map<String,String> map = new HashMap<>();
+        if(nameList != null && nameList.size() > 0){
+            //将nameList中的codeName和codeOtherName转换成map
+            for (JSONObject jsonObject : nameList) {
+                map.put(jsonObject.getString("code_other_name"),jsonObject.getString("code_name"));
+            }
+        }
+
+        // 将分组结果放入返回的 JSON 对象和 List
+        for (Map.Entry<String, List<CloudDevice>> entry : groupedDevices.entrySet()) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("subType", entry.getKey());
+            jsonObject.put("subTypeName", map.get(entry.getKey()) != null ? map.get(entry.getKey()) : entry.getKey());
+            jsonObject.put("data", entry.getValue());
+            list.add(jsonObject);
+        }
+        return list;
     }
 
     //结果转Device集合
@@ -207,7 +237,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
                         if (target.getSubType() != null && target.getSubType().equals("vm")) {
                             cloudTargetConverter.convertExtVm(device, target);
                         } else {
-
                         }
                         break;
                     case "3":
@@ -216,7 +245,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
                         if (target.getSubType() != null && target.getSubType().equals("containerRegistry")) {
                             cloudTargetConverter.convertExtDocker(device, target);
                         } else {
-
                         }
                         break;
                     case "4":
@@ -264,23 +292,23 @@ public class MicrosoftAzureConverter implements BaseConverter {
         //目前是根据配置的环境信息去获取微软云资源
         JSONObject result = new JSONObject();
 
-        //获取微软云网络服务
+        //获取微软云市场 网络服务(网络-网络服务)
         List getCloudInternetServices = getCloudInternetServices(instance);
         result.put("getCloudInternetServiceList", getCloudInternetServices);
-        //获取用户 用户注册表列表
+        //获取用户上传 容器注册表(容器-容器基础结构-容器注册表)
         List dockerImages = getDockerImages(instance);
         result.put("dockerImageList", dockerImages);
-        //获取用户 容器实例列表
+        //获取用户上传 虚拟机镜像(计算-lass-映像)
+        List localImages = getLocalImages(instance);
+        result.put("localImageList", localImages);
+        //获取 容器实例列表(容器-容器基础结构-容器实例)
         List dockerInstances = null;
 //        List dockerInstances = getDockerInstances(instance);
 //        result.put("dockerInstanceList", dockerInstances);
-        //获取微软云市场 虚拟机镜像
+        //获取微软云市场 虚拟机镜像(计算-lass-映像)
         List images = null;
         images = getImages(instance);
         result.put("imageList", images);
-        //获取用户上传 虚拟机镜像
-        List localImages = getLocalImages(instance);
-        result.put("localImageList", localImages);
 
         //云靶标主数据表
         List<DeviceCloudTargetPO> mainTargetList = new ArrayList<>();
@@ -346,16 +374,19 @@ public class MicrosoftAzureConverter implements BaseConverter {
         //收集元素
         List<JSONObject> jsonList = new ArrayList<>();
         JSONObject VNet = new JSONObject();
-        VNet.put("netServiceName", "VNet");
-        VNet.put("netType", "VNet");
+        VNet.put("name", "VNet");
+        VNet.put("netType", "basicNetwork");
+        VNet.put("subType", "VNet");
         jsonList.add(VNet);
         JSONObject fireWall = new JSONObject();
-        fireWall.put("netServiceName", "fireWall");
-        fireWall.put("netType", "fireWall");
+        fireWall.put("name", "fireWall");
+        fireWall.put("netType", "networkSecurity");
+        fireWall.put("subType", "fireWall");
         jsonList.add(fireWall);
         JSONObject WAF = new JSONObject();
-        WAF.put("netServiceName", "WAF");
-        WAF.put("netType", "WAF");
+        WAF.put("name", "WAF");
+        WAF.put("netType", "networkSecurity");
+        WAF.put("subType", "WAF");
         jsonList.add(WAF);
         return jsonList;
     }
@@ -486,24 +517,30 @@ public class MicrosoftAzureConverter implements BaseConverter {
         for (VirtualMachinePublisher publisher : virtualMachinePublishers) {
             //todo 筛选出需要的VM镜像
             System.out.println("PublisherName: " + publisher.name());
-            if (publisher.name() != null && (publisher.name().contains("Canonical") || publisher.name().contains("canonical")
-                    || publisher.name().contains("RedHat") || publisher.name().contains("Microsoft"))) {
+            if (publisher.name() != null && (publisher.name().contains("Canonical") || publisher.name().contains("canonical"))) {
                 // 获取发布者的所有产品(offer)
                 VirtualMachineOffers offers = publisher.offers();
                 PagedIterable<VirtualMachineOffer> list = offers.list();
+                int firstTime = 0;
                 for (VirtualMachineOffer offer : list) {
-                    System.out.println("offerName: " + offer.name());
-                    // 获取该产品的所有SKU
-                    VirtualMachineSkus skus = offer.skus();
-                    PagedIterable<VirtualMachineSku> skuList = skus.list();
-                    for (VirtualMachineSku sku : skuList) {
-                        System.out.println("skuName: " + sku.name());
-                        // 获取每个SKU的所有版本（image versions）
-                        PagedIterable<VirtualMachineImage> imageList = sku.images().list();
-                        int time = 0;
-                        for (VirtualMachineImage image : imageList) {
-                            if (time < 1) {
-                                time++;
+//                    if (firstTime < 10) {
+//                        firstTime++;
+
+                        //休眠0.5秒,请求速度过快会导致请求微软云的连接中断
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        System.out.println("offerName: " + offer.name());
+                        // 获取该产品的所有SKU
+                        VirtualMachineSkus skus = offer.skus();
+                        PagedIterable<VirtualMachineSku> skuList = skus.list();
+                        int secondTime = 0;
+                        for (VirtualMachineSku sku : skuList) {
+//                            if (secondTime < 10) {
+//                                secondTime++;
 
                                 //休眠0.5秒,请求速度过快会导致请求微软云的连接中断
                                 try {
@@ -512,17 +549,34 @@ public class MicrosoftAzureConverter implements BaseConverter {
                                     e.printStackTrace();
                                 }
 
-                                JSONObject forth = new JSONObject();
-                                forth.put("imageName", offer.name());
-                                forth.put("imageVersion", image.version());
-                                forth.put("PublisherName", publisher.name());
-                                forth.put("offerName", offer.name());
-                                forth.put("skuName", sku.name());
-                                forth.put("operatingSystem", image.osDiskImage().operatingSystem());
-                                result.add(forth);
-                            }
+                                System.out.println("skuName: " + sku.name());
+                                // 获取每个SKU的所有版本（image versions）
+                                PagedIterable<VirtualMachineImage> imageList = sku.images().list();
+                                int thirdTime = 0;
+                                for (VirtualMachineImage image : imageList) {
+                                    if (thirdTime < 1) {
+                                        thirdTime++;
+
+                                        //休眠0.5秒,请求速度过快会导致请求微软云的连接中断
+                                        try {
+                                            Thread.sleep(500);
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+
+                                        JSONObject forth = new JSONObject();
+                                        forth.put("imageName", offer.name());
+                                        forth.put("imageVersion", image.version());
+                                        forth.put("PublisherName", publisher.name());
+                                        forth.put("offerName", offer.name());
+                                        forth.put("skuName", sku.name());
+                                        forth.put("operatingSystem", image.osDiskImage().operatingSystem());
+                                        result.add(forth);
+                                    }
+                                }
+//                            }
                         }
-                    }
+//                    }
                 }
             }
         }

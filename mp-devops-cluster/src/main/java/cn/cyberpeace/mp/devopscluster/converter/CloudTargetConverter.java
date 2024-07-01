@@ -26,6 +26,10 @@ public class CloudTargetConverter {
         //访问协议
         List<AccessProtocol> accessProtocols = new ArrayList<>();
         AccessProtocol accessProtocol = new AccessProtocol();
+        accessProtocol.setProtocol("SSH");
+        accessProtocol.setUsername("admin123");
+        accessProtocol.setPassword("NHiOJiZTD4K1");
+        accessProtocol.setPort(22);
         accessProtocols.add(accessProtocol);
         extNet.setAccessProtocols(accessProtocols);
 
@@ -187,8 +191,8 @@ public class CloudTargetConverter {
                 DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
                 String id = String.valueOf(UUID.randomUUID());
                 deviceCloudTarget.setId(id);
-                deviceCloudTarget.setName(((JSONObject) getCloudInternetServices.get(i)).get("netServiceName") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("netServiceName").toString() : "");
-                deviceCloudTarget.setOtherName(((JSONObject) getCloudInternetServices.get(i)).get("netServiceName") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("netServiceName").toString() : "");
+                deviceCloudTarget.setName(((JSONObject) getCloudInternetServices.get(i)).get("name") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("name").toString() : "");
+                deviceCloudTarget.setOtherName(((JSONObject) getCloudInternetServices.get(i)).get("name") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("name").toString() : "");
                 deviceCloudTarget.setCloudType(cloudType);
                 deviceCloudTarget.setCloudServiceType(1);
                 deviceCloudTarget.setOperatingSystemStatus("专业化");
@@ -199,10 +203,11 @@ public class CloudTargetConverter {
                 //网络副表元素
                 DeviceCloudTargetNet deviceCloudTargetNet = new DeviceCloudTargetNet();
                 deviceCloudTargetNet.setLinkId(id);
-                deviceCloudTargetNet.setNetServiceName(((JSONObject) getCloudInternetServices.get(i)).get("netServiceName") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("netServiceName").toString() : "");
+                deviceCloudTargetNet.setName(((JSONObject) getCloudInternetServices.get(i)).get("name") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("name").toString() : "");
                 deviceCloudTargetNet.setSourceType(1);
                 deviceCloudTargetNet.setCloudType(cloudType);
                 deviceCloudTargetNet.setNetType(((JSONObject) getCloudInternetServices.get(i)).get("netType") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("netType").toString() : "");
+                deviceCloudTargetNet.setSubType(((JSONObject) getCloudInternetServices.get(i)).get("subType") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("subType").toString() : "");
                 deviceCloudTargetNet.setIsPublic(2);
                 deviceCloudTargetNet.setQuickCreateSupport(1);
                 deviceCloudTargetNet.setIsImport(0);
