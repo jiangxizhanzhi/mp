@@ -657,10 +657,16 @@ public class ImagesController {
     public ServiceResult async(@RequestBody ImageAsyncRequest request){
         List<Integer> requestIds = request.getIds();
         if (CollectionUtils.isEmpty(requestIds)){
-           throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+            log.error("requestIds is empty");
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         Integer result = imagesConverter.async(request);
-        return result > 0 ? ResultCommon.success() : ResultCommon.fail("");
+        if (result > 0){
+            return ResultCommon.success();
+        }else  {
+            log.error("result is 0, nothings to do");
+            return ResultCommon.fail("result is 0, nothings to do");
+        }
     }
 
     /**
