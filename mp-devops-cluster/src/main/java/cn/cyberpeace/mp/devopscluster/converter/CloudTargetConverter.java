@@ -61,7 +61,7 @@ public class CloudTargetConverter {
         device.setImageType("laasVm");
         device.setRole(4);
         ExtVm extVm = new ExtVm();
-        extVm.setFlavor("1CPU/1g内存/30g磁盘/2网卡");
+        extVm.setFlavor("1CPU/1G内存/30G磁盘/2网卡");
         extVm.setCpu(1);
         extVm.setRam(1);
         extVm.setDisk(30);
@@ -133,7 +133,7 @@ public class CloudTargetConverter {
         device.setImageType("containerRegistry");
         device.setRole(4);
         ExtDocker extDocker = new ExtDocker();
-        extDocker.setFlavor("1 vcpu，1 GiB 内存");
+        extDocker.setFlavor("1vcpu/1GiB内存");
         extDocker.setCpu(1);
         extDocker.setRam(1);
         extDocker.setInstanceState(0);
