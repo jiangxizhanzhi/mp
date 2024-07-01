@@ -1590,13 +1590,6 @@ public class CreateHandler extends HandlerCommon {
 
             }
         });
-        createData.setNetworks(virtualNics.stream().map(virtualNic -> {
-            VirtualRouterNic virtualRouterNic = new VirtualRouterNic();
-            virtualRouterNic.setId(virtualNic.getNetworkId());
-            virtualRouterNic.setFixedIp(virtualNic.getFixedIp());
-            virtualRouterNic.setCidr(virtualNic.getCidr());
-            return virtualRouterNic;
-        }).collect(Collectors.toList()));
 
         boolean externalNetExists = false;
         for (var n : virtualNics) {
@@ -1614,6 +1607,14 @@ public class CreateHandler extends HandlerCommon {
                                                   .get(0));
             virtualNics.add(externalVirtualNic);
         }
+
+        createData.setNetworks(virtualNics.stream().map(virtualNic -> {
+            VirtualRouterNic virtualRouterNic = new VirtualRouterNic();
+            virtualRouterNic.setId(virtualNic.getNetworkId());
+            virtualRouterNic.setFixedIp(virtualNic.getFixedIp());
+            virtualRouterNic.setCidr(virtualNic.getCidr());
+            return virtualRouterNic;
+        }).collect(Collectors.toList()));
 
         VirtualRouterCreateData virtualRouter = vrClient.create(createData);
         log.info("collected router {}", virtualRouter.getId());
