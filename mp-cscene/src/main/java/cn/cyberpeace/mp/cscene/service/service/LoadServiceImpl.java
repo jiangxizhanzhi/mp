@@ -1014,13 +1014,15 @@ public class LoadServiceImpl {
                 idList.add(list.get(i).getKey());
             }
         }
-        List<MpDevopsLoad> loadByIds = loadMapper.getLoadByIds(idList);
         LinkedList<JSONObject> returnList = new LinkedList<>();
-        for (MpDevopsLoad load : loadByIds) {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("load_name", load.getToolName());
-            jsonObject.put("attack_num", map.get(load.getId()));
-            returnList.add(jsonObject);
+        if(idList != null && idList.size() > 0){
+            List<MpDevopsLoad> loadByIds = loadMapper.getLoadByIds(idList);
+            for (MpDevopsLoad load : loadByIds) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("load_name", load.getToolName());
+                jsonObject.put("attack_num", map.get(load.getId()));
+                returnList.add(jsonObject);
+            }
         }
         return returnList;
     }

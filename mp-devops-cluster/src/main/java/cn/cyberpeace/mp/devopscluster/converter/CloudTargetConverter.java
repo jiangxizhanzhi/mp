@@ -26,6 +26,10 @@ public class CloudTargetConverter {
         //访问协议
         List<AccessProtocol> accessProtocols = new ArrayList<>();
         AccessProtocol accessProtocol = new AccessProtocol();
+        accessProtocol.setProtocol("SSH");
+        accessProtocol.setUsername("admin123");
+        accessProtocol.setPassword("NHiOJiZTD4K1");
+        accessProtocol.setPort(22);
         accessProtocols.add(accessProtocol);
         extNet.setAccessProtocols(accessProtocols);
 
@@ -57,7 +61,7 @@ public class CloudTargetConverter {
         device.setImageType("laasVm");
         device.setRole(4);
         ExtVm extVm = new ExtVm();
-        extVm.setFlavor("1c-1g-30g-2i");
+        extVm.setFlavor("1CPU/1G内存/30G磁盘/2网卡");
         extVm.setCpu(1);
         extVm.setRam(1);
         extVm.setDisk(30);
@@ -129,9 +133,9 @@ public class CloudTargetConverter {
         device.setImageType("containerRegistry");
         device.setRole(4);
         ExtDocker extDocker = new ExtDocker();
-        extDocker.setFlavor("1 vcpu，1 GiB 内存");
+        extDocker.setFlavor("1vcpu/1.5GiB内存");
         extDocker.setCpu(1);
-        extDocker.setRam(1);
+        extDocker.setRam(1.5);
         extDocker.setInstanceState(0);
         extDocker.setInitSupport(true);
         extDocker.setQuickCreateSupport(true);
@@ -140,6 +144,7 @@ public class CloudTargetConverter {
         extDocker.setIsPublicIp(true);
         extDocker.setPublicIpAddress("");
         extDocker.setProtocols("SSH");
+        extDocker.setVmType(target.getOperatingSystem());
 
         //访问协议
         List<AccessProtocol> accessProtocols = new ArrayList<>();
@@ -187,8 +192,8 @@ public class CloudTargetConverter {
                 DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
                 String id = String.valueOf(UUID.randomUUID());
                 deviceCloudTarget.setId(id);
-                deviceCloudTarget.setName(((JSONObject) getCloudInternetServices.get(i)).get("netServiceName") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("netServiceName").toString() : "");
-                deviceCloudTarget.setOtherName(((JSONObject) getCloudInternetServices.get(i)).get("netServiceName") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("netServiceName").toString() : "");
+                deviceCloudTarget.setName(((JSONObject) getCloudInternetServices.get(i)).get("name") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("name").toString() : "");
+                deviceCloudTarget.setOtherName(((JSONObject) getCloudInternetServices.get(i)).get("name") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("name").toString() : "");
                 deviceCloudTarget.setCloudType(cloudType);
                 deviceCloudTarget.setCloudServiceType(1);
                 deviceCloudTarget.setOperatingSystemStatus("专业化");
@@ -199,10 +204,11 @@ public class CloudTargetConverter {
                 //网络副表元素
                 DeviceCloudTargetNet deviceCloudTargetNet = new DeviceCloudTargetNet();
                 deviceCloudTargetNet.setLinkId(id);
-                deviceCloudTargetNet.setNetServiceName(((JSONObject) getCloudInternetServices.get(i)).get("netServiceName") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("netServiceName").toString() : "");
+                deviceCloudTargetNet.setName(((JSONObject) getCloudInternetServices.get(i)).get("name") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("name").toString() : "");
                 deviceCloudTargetNet.setSourceType(1);
                 deviceCloudTargetNet.setCloudType(cloudType);
                 deviceCloudTargetNet.setNetType(((JSONObject) getCloudInternetServices.get(i)).get("netType") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("netType").toString() : "");
+                deviceCloudTargetNet.setSubType(((JSONObject) getCloudInternetServices.get(i)).get("subType") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("subType").toString() : "");
                 deviceCloudTargetNet.setIsPublic(2);
                 deviceCloudTargetNet.setQuickCreateSupport(1);
                 deviceCloudTargetNet.setIsImport(0);

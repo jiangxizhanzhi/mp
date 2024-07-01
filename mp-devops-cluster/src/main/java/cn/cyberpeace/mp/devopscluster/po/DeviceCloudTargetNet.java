@@ -23,7 +23,7 @@ public class DeviceCloudTargetNet extends BaseModel {
      */
     private String linkId;
     /**
-     * 服务名称
+     * 网络服务名称
      */
     private String name;
     /**
@@ -35,13 +35,13 @@ public class DeviceCloudTargetNet extends BaseModel {
      */
     private String cloudType;
     /**
-     * 网络服务名称
-     */
-    private String netServiceName;
-    /**
      * 网络类型
      */
     private String netType;
+    /**
+     * 子类型
+     */
+    private String subType;
     /**
      * 是否公开，0：私有，1：自定义，2：公开
      */

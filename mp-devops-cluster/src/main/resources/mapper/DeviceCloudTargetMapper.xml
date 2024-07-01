@@ -35,26 +35,28 @@
 
     <insert id="batchInsertCloudTargetNet">
         INSERT INTO mp_devops_cloud_target_net (
-        `link_id`,
-        `net_service_name`,
-        `source_type`,
-        `cloud_type`,
-        `net_type`,
-        `is_public`,
-        `quick_create_support`,
-        `is_import`,
-        `is_hide`,
-        `create_time`,
-        `update_time`,
-        `logo`
+        link_id,
+        name,
+        source_type,
+        cloud_type,
+        net_type,
+        sub_type,
+        is_public,
+        quick_create_support,
+        is_import,
+        is_hide,
+        create_time,
+        update_time,
+        logo
         ) VALUES
         <foreach collection="param" item="item" index="index" separator=",">
             (
             #{item.linkId},
-            #{item.netServiceName},
+            #{item.name},
             #{item.sourceType},
             #{item.cloudType},
             #{item.netType},
+            #{item.subType},
             #{item.isPublic},
             #{item.quickCreateSupport},
             #{item.isImport},
@@ -560,5 +562,16 @@
             count(0)
         from
             mp_devops_boundary_network_equipment
+    </select>
+
+    <select id="getSubTypeName" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT DISTINCT
+            code_name,
+            code_other_name
+        FROM
+            mp_sys_code_menu
+        WHERE
+            code_name IS NOT NULL
+          AND code_other_name IS NOT NULL
     </select>
 </mapper>
