@@ -140,7 +140,7 @@ public class UserModel extends BaseModel implements Serializable {
     private String macAddr;
 
     @ApiModelProperty(value = "vlan id")
-    @DefaultStr
+    @DefaultInt
     private Integer vlanId;
 
     @ApiModelProperty(value = "用户绑定的cidr")
