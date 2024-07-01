@@ -18,6 +18,7 @@ public interface ScreenshotService extends BaseModelService<ScreenshotModel, Scr
 
     /**
      * 上传截屏文件
+     *
      * @param request
      * @return
      */
@@ -25,12 +26,14 @@ public interface ScreenshotService extends BaseModelService<ScreenshotModel, Scr
 
     /**
      * 查询已用空间
+     *
      * @return
      */
     ServiceResult<ScreenshotUsedSpaceResponse> queryUsedSpace();
 
     /**
      * 按时间删除截屏文件
+     *
      * @param request
      * @return
      */
@@ -38,6 +41,7 @@ public interface ScreenshotService extends BaseModelService<ScreenshotModel, Scr
 
     /**
      * 批量删除
+     *
      * @param request
      * @return
      */

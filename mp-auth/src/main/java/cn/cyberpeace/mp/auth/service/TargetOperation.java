@@ -9,5 +9,11 @@ import cn.cyberpeace.mp.auth.bo.target.TargetBo;
  */
 public interface TargetOperation<T> {
 
+    /**
+     * doExecute
+     *
+     * @param targetBo
+     * @return
+     */
     T doExecute(TargetBo targetBo);
 }

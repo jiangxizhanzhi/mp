@@ -15,18 +15,21 @@ public interface FlowPcapService extends BaseModelService<FlowPcapModel, QueryPa
 
     /**
      * 统计流量包总数
+     *
      * @return
      */
     int countAll();
 
     /**
      * 删除所有数据
+     *
      * @return
      */
     int deleteAll();
 
     /**
      * 根据flowId查询
+     *
      * @param flowId
      * @return
      */
@@ -34,6 +37,7 @@ public interface FlowPcapService extends BaseModelService<FlowPcapModel, QueryPa
 
     /**
      * 查询所有流量包
+     *
      * @return
      */
     List<FlowPcapModel> listAll();

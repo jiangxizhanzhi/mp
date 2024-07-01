@@ -41,6 +41,12 @@ public class CollectionTypeService {
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
 
+    /**
+     * typeTrees
+     *
+     * @param baseRequest
+     * @return
+     */
     public List<CollectionType> typeTrees(BaseSceneElementRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
 
@@ -57,6 +63,12 @@ public class CollectionTypeService {
         return types;
     }
 
+    /**
+     * getAppNames
+     *
+     * @param appRequest
+     * @return
+     */
     public List<CollectionApp> getAppNames(CollectionAppRequest appRequest) {
         log.info("baseRequest:{}", appRequest);
         BaseRequestUtil.checkBaseRequestWithSceneId(appRequest);
@@ -129,6 +141,12 @@ public class CollectionTypeService {
         return apps;
     }
 
+    /**
+     * getCollectionApp
+     *
+     * @param r
+     * @return
+     */
     private CollectionApp getCollectionApp(String r) {
         ServiceResult<String> appNameResult = scenePluginCollectionSceneService.ruleFile2AppName(r);
         String appName = appNameResult.getSource();
@@ -142,6 +160,9 @@ public class CollectionTypeService {
 
     /**
      * 变更事件
+     *
+     * @param code
+     * @param type
      * @return
      */
     private CollectionType changeEvent(String code, Integer type) {
@@ -157,6 +178,9 @@ public class CollectionTypeService {
 
     /**
      * 原始日志
+     *
+     * @param code
+     * @param type
      * @return
      */
     private CollectionType sourceLogFile(String code, Integer type) {
@@ -167,6 +191,9 @@ public class CollectionTypeService {
 
     /**
      * 自定义采集
+     *
+     * @param code
+     * @param type
      * @return
      */
     private CollectionType customCollect(String code, Integer type) {
@@ -177,6 +204,10 @@ public class CollectionTypeService {
 
     /**
      * 通用协议采集
+     *
+     * @param code
+     * @param type
+     * @return
      */
     private CollectionType commonProtocolAcquisition(String code, Integer type) {
         CollectionType commonCollect = CollectionType.builder().name("通用协议采集").code(code).type(type).build();
@@ -186,6 +217,9 @@ public class CollectionTypeService {
 
     /**
      * 日志事件 02*
+     *
+     * @param code
+     * @param type
      * @return
      */
     private CollectionType logEvent(String code, Integer type) {
@@ -199,6 +233,9 @@ public class CollectionTypeService {
 
     /**
      * 日志事件/操作系统日志
+     *
+     * @param code
+     * @param type
      * @return
      */
     private CollectionType logEventOSType(String code, Integer type) {
@@ -221,6 +258,7 @@ public class CollectionTypeService {
 
     /**
      * 日志事件/应用系统日志
+     *
      * @param code
      * @param type
      * @return
@@ -251,6 +289,10 @@ public class CollectionTypeService {
 
     /**
      * 日志事件/安全系统日志
+     *
+     * @param code
+     * @param type
+     * @return
      */
     private CollectionType logEventSecuritySystem(String code, Integer type) {
         CollectionType secSysType = CollectionType.builder().name("安全系统日志").code(code).type(-1).build();
@@ -276,6 +318,11 @@ public class CollectionTypeService {
         return secSysType;
     }
 
+    /**
+     * processCollectionType
+     *
+     * @param type
+     */
     private void processCollectionType(CollectionType type) {
         // 国际化处理
         String key = String.format(SituationBase18nCode.COLLECTION_TYPE_PARENT_I18N_CODE_PREFIX, type.getCode());
@@ -284,6 +331,11 @@ public class CollectionTypeService {
         processCollectionTypeChildren(type);
     }
 
+    /**
+     * processCollectionTypeChildren
+     *
+     * @param type
+     */
     private void processCollectionTypeChildren(CollectionType type) {
         if (CollectionUtils.isEmpty(type.getChildren())) {
             return;

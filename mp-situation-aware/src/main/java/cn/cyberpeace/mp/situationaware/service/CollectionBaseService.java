@@ -17,7 +17,8 @@ import java.util.stream.Collectors;
 public class CollectionBaseService {
 
     /**
-     * 剔除null
+     * agentNamesExcludeNullValue
+     *
      * @param agentNames
      * @return
      */
@@ -31,6 +32,12 @@ public class CollectionBaseService {
         return nullExcludedAgentNames;
     }
 
+    /**
+     * isAgentNamesEmpty
+     *
+     * @param agentNames
+     * @return boolean
+     */
     public boolean isAgentNamesEmpty(List<String> agentNames) {
         List processedAgentNames = agentNamesExcludeNullValue(agentNames);
         boolean isEmpty = CollectionUtils.isEmpty(processedAgentNames);

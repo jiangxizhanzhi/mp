@@ -18,6 +18,7 @@ public interface FlowTaskRecordService extends BaseModelService<FlowTaskRecordMo
 
     /**
      * 根据taskId查询流量任务记录
+     *
      * @param taskId
      * @return
      */
@@ -25,12 +26,14 @@ public interface FlowTaskRecordService extends BaseModelService<FlowTaskRecordMo
 
     /**
      * 根据taskId删除
+     *
      * @param taskId
      */
     void deleteByTaskId(String taskId);
 
     /**
      * 批量统计每一个流量任务的实时速率
+     *
      * @param taskIds
      * @param conditions
      * @return
@@ -39,6 +42,7 @@ public interface FlowTaskRecordService extends BaseModelService<FlowTaskRecordMo
 
     /**
      * 仿真概况
+     *
      * @param sceneId
      * @return
      */
@@ -46,6 +50,7 @@ public interface FlowTaskRecordService extends BaseModelService<FlowTaskRecordMo
 
     /**
      * 根据节点统计实时速率
+     *
      * @param sceneId
      * @return
      */
@@ -53,6 +58,7 @@ public interface FlowTaskRecordService extends BaseModelService<FlowTaskRecordMo
 
     /**
      * 仿真统计
+     *
      * @param sceneId
      * @return
      */
@@ -60,12 +66,14 @@ public interface FlowTaskRecordService extends BaseModelService<FlowTaskRecordMo
 
     /**
      * 同步执行记录
+     *
      * @param jsonMessage
      */
     void syncRecord(JSONObject jsonMessage);
 
     /**
      * 批量更新任务状态
+     *
      * @param status
      * @param taskIds
      */

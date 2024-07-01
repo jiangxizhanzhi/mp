@@ -44,6 +44,15 @@ public class SceneService {
     @Resource
     private SceneConfigService sceneConfigService;
 
+    /**
+     * get
+     *
+     * @param id
+     * @param isAreaMode
+     * @param areaId
+     * @param context
+     * @return
+     */
     public ServiceResult<SceneDataBO> get(String id, boolean isAreaMode, String areaId, SceneContextBO context) {
         SceneHandler sceneHandler;
         try {
@@ -54,6 +63,14 @@ public class SceneService {
         return new ServiceResult<>(sceneHandler.toData());
     }
 
+    /**
+     * create
+     *
+     * @param sceneDataBO
+     * @param context
+     * @param partialStart
+     * @return
+     */
     public ServiceResult<SceneDataBO> create(SceneDataBO sceneDataBO, SceneContextBO context, boolean partialStart) {
         SceneHandler sceneHandler;
         try {
@@ -89,6 +106,13 @@ public class SceneService {
         return new ServiceResult<>(sceneHandler.toData());
     }
 
+    /**
+     * createFromSceneConfig
+     *
+     * @param sceneConfigDataBO
+     * @param context
+     * @return
+     */
     public ServiceResult<SceneDataBO> createFromSceneConfig(SceneConfigDataBO sceneConfigDataBO,
                                                             SceneContextBO context) {
         return create(sceneConfigDataBO.exportToScene(), context, false);
@@ -105,6 +129,14 @@ public class SceneService {
         return createFromSceneConfig(sceneConfigDataBO, context);
     }
 
+    /**
+     * delete
+     *
+     * @param id
+     * @param logic
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> delete(String id, boolean logic, SceneContextBO context) {
         SceneHandler sceneHandler;
         try {
@@ -126,6 +158,14 @@ public class SceneService {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * bulkDelete
+     *
+     * @param ids
+     * @param logic
+     * @param context
+     * @return
+     */
     public ServiceResult<Integer> bulkDelete(String[] ids, boolean logic, SceneContextBO context) {
         int result = 0;
         for (String id : ids) {
@@ -142,6 +182,15 @@ public class SceneService {
         }
     }
 
+    /**
+     * modify
+     *
+     * @param sceneId
+     * @param updatedSceneData
+     * @param context
+     * @param runner
+     * @return
+     */
     public ServiceResult<SceneDataBO> modify(String sceneId, SceneDataBO updatedSceneData, SceneContextBO context, Runnable runner) {
         SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(sceneId, null, null, SceneModel.Event.MODIFY);
         SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(sceneId, newEventInfo);
@@ -213,6 +262,13 @@ public class SceneService {
         return new ServiceResult<>(updatedSceneHandler.toData());
     }
 
+    /**
+     * pause
+     *
+     * @param id
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> pause(String id, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -238,6 +294,13 @@ public class SceneService {
         }
     }
 
+    /**
+     * unpause
+     *
+     * @param id
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> unpause(String id, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -263,6 +326,13 @@ public class SceneService {
         }
     }
 
+    /**
+     * suspend
+     *
+     * @param id
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> suspend(String id, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -288,6 +358,13 @@ public class SceneService {
         }
     }
 
+    /**
+     * resume
+     *
+     * @param id
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> resume(String id, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -315,6 +392,7 @@ public class SceneService {
 
     /**
      * @description: 启动节点
+     *
      * @param id
      * @param nodeId
      * @param context
@@ -349,6 +427,7 @@ public class SceneService {
 
     /**
      * @description: 关闭节点
+     *
      * @param id
      * @param nodeId
      * @param context
@@ -380,6 +459,14 @@ public class SceneService {
         }
     }
 
+    /**
+     * pauseElement
+     *
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> pauseElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -406,6 +493,14 @@ public class SceneService {
         }
     }
 
+    /**
+     * unpauseElement
+     *
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> unpauseElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -433,6 +528,14 @@ public class SceneService {
         }
     }
 
+    /**
+     * restartElement
+     *
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> restartElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -460,6 +563,14 @@ public class SceneService {
         }
     }
 
+    /**
+     * createElement
+     *
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> createElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -488,6 +599,15 @@ public class SceneService {
         }
     }
 
+    /**
+     * recreateElement
+     *
+     * @param id
+     * @param nodeId
+     * @param image
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> recreateElement(String id, String nodeId,String image, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -515,6 +635,14 @@ public class SceneService {
         }
     }
 
+    /**
+     * deleteElement
+     *
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> deleteElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -542,6 +670,15 @@ public class SceneService {
         }
     }
 
+    /**
+     * modifyElement
+     *
+     * @param id
+     * @param nodeId
+     * @param newDataBO
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> modifyElement(String id, String nodeId, SceneDataBO newDataBO, SceneContextBO context) {
         SceneHandler originHandler = new SceneHandler(id, null, false, context);
 
@@ -578,6 +715,14 @@ public class SceneService {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * suspendElement
+     *
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> suspendElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -605,6 +750,14 @@ public class SceneService {
         }
     }
 
+    /**
+     * resumeElement
+     *
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> resumeElement(String id, String nodeId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -632,6 +785,17 @@ public class SceneService {
         }
     }
 
+    /**
+     * snapshotElementSync
+     *
+     * @param id
+     * @param nodeId
+     * @param snapshotId
+     * @param snapshotName
+     * @param description
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> snapshotElementSync(String id, String nodeId, String snapshotId, String snapshotName, String description, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -652,6 +816,17 @@ public class SceneService {
         }
     }
 
+    /**
+     * snapshotElementSyncV2
+     *
+     * @param id
+     * @param nodeId
+     * @param snapshotId
+     * @param snapshotName
+     * @param description
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> snapshotElementSyncV2(String id, String nodeId, String snapshotId, String snapshotName, String description, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -676,6 +851,15 @@ public class SceneService {
         }
     }
 
+    /**
+     * deleteElementSnapshot
+     *
+     * @param id
+     * @param nodeId
+     * @param snapshotId
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> deleteElementSnapshot(String id, String nodeId, String snapshotId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -683,6 +867,16 @@ public class SceneService {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * elementSnapshotAction
+     *
+     * @param id
+     * @param nodeId
+     * @param snapshotId
+     * @param action
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> elementSnapshotAction(String id, String nodeId, String snapshotId, String action, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -690,6 +884,15 @@ public class SceneService {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * createSceneEventInfo
+     *
+     * @param id
+     * @param nodeId
+     * @param nodeName
+     * @param event
+     * @return
+     */
     private SceneEventUtils.SceneEventInfo createSceneEventInfo(String id, String nodeId, String nodeName, int event) {
         SceneEventUtils.SceneEventInfo eventInfo = new SceneEventUtils.SceneEventInfo();
         String action = MessageCommon.get(SceneEventHandler.EVENT_NAME_MAP.get(event));
@@ -701,6 +904,12 @@ public class SceneService {
         return eventInfo;
     }
 
+    /**
+     * createOperateException
+     *
+     * @param originLockInfo
+     * @return 监控运行时异常
+     */
     private MpRuntimeException createOperateException(SceneEventUtils.SceneEventInfo originLockInfo) {
         if (originLockInfo.getNodeId() == null) {
             return new MpRuntimeException(SceneErrorCode.SCENE_EVENT_OPERATE_CONFLICT.format(originLockInfo.getEventName()));

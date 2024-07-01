@@ -15,6 +15,7 @@ public interface FlowTaskConfService extends BaseModelService<FlowTaskConfModel,
 
     /**
      * 根据taskId查询配置信息
+     *
      * @param taskId
      * @return
      */
@@ -22,6 +23,7 @@ public interface FlowTaskConfService extends BaseModelService<FlowTaskConfModel,
 
     /**
      * 根据taskId集合查询
+     *
      * @param taskIds
      * @return
      */

@@ -13,18 +13,24 @@ public interface MpOperateLogService {
 
     /**
      * 站点类型
+     *
      * @return
      */
     SiteTypeEnums siteType();
 
     /**
      * 创建日志
+     *
      * @param operationLogModel
+     * @return
      */
     IndexResponse create(OperationLogModel operationLogModel);
 
     /**
      * 查询日志
+     *
+     * @param request
+     * @return
      */
     SearchResponse search(OperationLogPageRequest request);
 

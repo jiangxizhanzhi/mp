@@ -65,6 +65,12 @@ public class DefaultImgService {
         return list;
     }
 
+    /**
+     * getDefaultImgFilePath
+     *
+     * @param relativePath
+     * @return
+     */
     public String getDefaultImgFilePath(String relativePath) {
         String startWithFile = "file:";
         String pathName = AggregationSingleton.aggregationConfig.getStaticLocation();

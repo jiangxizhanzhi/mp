@@ -14,7 +14,8 @@ import java.util.List;
 public interface ILogSettingService {
 
     /**
-     * @description setLogLevel 
+     * @description setLogLevel
+     *
      * @param logName 日志模块名
      * @param logLevel 日志级别
      * @return cn.cyberpeace.mp.base.service.result.ServiceResult<cn.cyberpeace.mp.log.response.LogLevelResponse>
@@ -25,6 +26,7 @@ public interface ILogSettingService {
 
     /**
      * @description setBatchLogLevel
+     *
      * @param logLevelRequestList 批量日志级别
      * @return cn.cyberpeace.mp.base.service.result.ServiceResult<java.util.List<cn.cyberpeace.mp.log.response.LogLevelResponse>>
      * @author wangssh
@@ -34,7 +36,8 @@ public interface ILogSettingService {
 
 
     /**
-     * @description resetDefualLogLevel 
+     * @description resetDefualLogLevel
+     *
      * @return cn.cyberpeace.mp.base.service.result.ServiceResult<java.util.List<cn.cyberpeace.mp.log.response.LogLevelResponse>>
      * @author wangssh
      * @date 2023/5/31
@@ -43,6 +46,7 @@ public interface ILogSettingService {
 
     /**
      * @description getLogLevel
+     *
      * @param logName 日志模块名
      * @return cn.cyberpeace.mp.base.service.result.ServiceResult<java.util.List<cn.cyberpeace.mp.log.response.LogLevelResponse>>
      * @author wangssh
@@ -52,6 +56,7 @@ public interface ILogSettingService {
 
     /**
      * @description loadDynamicLogLevel
+     *
      * @return void
      * @author wangssh
      * @date 2023/6/1

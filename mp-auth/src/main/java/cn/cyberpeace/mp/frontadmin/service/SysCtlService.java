@@ -28,6 +28,11 @@ public class SysCtlService {
         return isSystemTimestampRollback;
     }
 
+    /**
+     * getUnusedActivCtlModel
+     *
+     * @return
+     */
     public SysActivCtlModel getUnusedActivCtlModel() {
         SysActivCtlModel sysActivCtlModel = sysActivCtlService.selectUnused();
         return sysActivCtlModel;
@@ -35,6 +40,7 @@ public class SysCtlService {
 
     /**
      * generate a default with current timestamp as system_ts and activ_ts;
+     *
      * @return
      */
     synchronized public SysActivCtlModel generateOrGetUnusedActivCtlModel() {
@@ -65,6 +71,7 @@ public class SysCtlService {
 
     /**
      * generate a default with current timestamp as system_ts and activ_ts;
+     *
      * @return
      */
     public SysActivCtlModel getValidCtlModel() {

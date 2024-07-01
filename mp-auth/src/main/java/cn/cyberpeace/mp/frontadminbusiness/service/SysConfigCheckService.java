@@ -21,6 +21,11 @@ import java.util.Objects;
 @Service
 public class SysConfigCheckService {
 
+    /**
+     * updateCheck
+     *
+     * @param sysConfigs
+     */
     public void updateCheck(List<SysConfigModel> sysConfigs) {
         if (CollectionUtils.isEmpty(sysConfigs)) {
             throw new MpRuntimeException(AdminErrorCode.PARAMS_ERROR);

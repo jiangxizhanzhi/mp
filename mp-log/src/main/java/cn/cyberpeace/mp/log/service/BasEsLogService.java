@@ -25,6 +25,7 @@ public abstract class BasEsLogService {
 
     /**
      * 创建索引并新增数据
+     *
      * @param indexRequest
      * @return
      */
@@ -42,6 +43,7 @@ public abstract class BasEsLogService {
 
     /**
      * 查询
+     *
      * @param searchRequest
      * @return
      */
@@ -53,6 +55,11 @@ public abstract class BasEsLogService {
         }
     }
 
+    /**
+     * getRestHighLevelClient
+     *
+     * @return
+     */
     protected RestHighLevelClient getRestHighLevelClient() {
         return restHighLevelClient;
     }

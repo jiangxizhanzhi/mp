@@ -45,6 +45,13 @@ public class CsceneLogService {
     @Resource
     private FlowInfoService flowInfoService;
 
+    /**
+     * getLogDetail
+     *
+     * @param csceneId
+     * @param config
+     * @return
+     */
     public LogDetail getLogDetail(String csceneId, boolean config) {
         List<String> target = this.getTarget(csceneId, config);
         LogContent logContent = new LogContent();
@@ -53,6 +60,13 @@ public class CsceneLogService {
         return new LogDetail(StringUtils.join(target, ","), content);
     }
 
+    /**
+     * getLogDetail
+     *
+     * @param csceneIds
+     * @param config
+     * @return
+     */
     public LogDetail getLogDetail(List<String> csceneIds, boolean config) {
         LogContent logContent = new LogContent();
         logContent.setIds(csceneIds);
@@ -64,6 +78,13 @@ public class CsceneLogService {
         }
     }
 
+    /**
+     * getLogDetail
+     *
+     * @param csceneId
+     * @param nodeId
+     * @return
+     */
     public LogDetail getLogDetail(String csceneId, String nodeId) {
         List<String> target = this.getTarget(csceneId, nodeId);
         LogContent logContent = new LogContent();
@@ -73,6 +94,14 @@ public class CsceneLogService {
         return new LogDetail(StringUtils.join(target, ","), content);
     }
 
+    /**
+     * getLogDetail
+     *
+     * @param csceneId
+     * @param nodeId
+     * @param flowId
+     * @return
+     */
     public LogDetail getLogDetail(String csceneId, String nodeId, String flowId) {
         List<String> target = this.getTarget(csceneId, nodeId, flowId);
         LogContent logContent = new LogContent();
@@ -85,6 +114,13 @@ public class CsceneLogService {
         return new LogDetail(StringUtils.join(target, ","), content);
     }
 
+    /**
+     * getTarget
+     *
+     * @param csceneId
+     * @param config
+     * @return
+     */
     private List<String> getTarget(String csceneId, boolean config) {
         if (config) {
             CsceneModel model = csceneMapper.get(csceneId);
@@ -101,6 +137,13 @@ public class CsceneLogService {
         }
     }
 
+    /**
+     * getTarget
+     *
+     * @param csceneId
+     * @param nodeId
+     * @return
+     */
     private List<String> getTarget(String csceneId, String nodeId) {
         CsceneInstanceModel cscene = csceneInstanceMapper.get(csceneId);
         if (cscene == null) {
@@ -117,6 +160,14 @@ public class CsceneLogService {
         }
     }
 
+    /**
+     * getTarget
+     *
+     * @param csceneId
+     * @param nodeId
+     * @param flowId
+     * @return
+     */
     private List<String> getTarget(String csceneId, String nodeId, String flowId) {
         List<String> targets = getTarget(csceneId, nodeId);
         if (StringUtils.isEmpty(flowId)) {

@@ -12,6 +12,13 @@ import java.io.InputStream;
 @Service
 public class MarkdownFileService extends BaseRemoteFileServiceImpl {
 
+    /**
+     * validateUploadImageInput
+     *
+     * @param is
+     * @param fileSuffix
+     * @return
+     */
     public ServiceResult<Boolean> validateUploadImageInput(InputStream is, String fileSuffix) {
         // MD上传图片支持类型校验
         if (!SuffixCheckUtil.checkBySuffix(fileSuffix, FileSuffixConstant.MD_UPLOAD_IMAGE_LIST)) {
@@ -20,6 +27,13 @@ public class MarkdownFileService extends BaseRemoteFileServiceImpl {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * validateUploadFileInput
+     *
+     * @param is
+     * @param fileSuffix
+     * @return
+     */
     public ServiceResult<Boolean> validateUploadFileInput(InputStream is, String fileSuffix) {
         // MD上传文件支持类型校验
         if (!SuffixCheckUtil.checkBySuffix(fileSuffix, FileSuffixConstant.MD_UPLOAD_FILE_LIST)) {
@@ -28,6 +42,13 @@ public class MarkdownFileService extends BaseRemoteFileServiceImpl {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * uploadImage
+     *
+     * @param is
+     * @param fileSuffix
+     * @return
+     */
     public ServiceResult<String> uploadImage(InputStream is, String fileSuffix) {
         ServiceResult<Boolean> validateResult = validateUploadImageInput(is, fileSuffix);
         if (!Boolean.TRUE.equals(validateResult.getSource())) {
@@ -37,6 +58,13 @@ public class MarkdownFileService extends BaseRemoteFileServiceImpl {
         return upload(is, fileSuffix);
     }
 
+    /**
+     * uploadFile
+     *
+     * @param is
+     * @param fileSuffix
+     * @return
+     */
     public ServiceResult<String> uploadFile(InputStream is, String fileSuffix) {
         ServiceResult<Boolean> validateResult = validateUploadFileInput(is, fileSuffix);
         if (!Boolean.TRUE.equals(validateResult.getSource())) {

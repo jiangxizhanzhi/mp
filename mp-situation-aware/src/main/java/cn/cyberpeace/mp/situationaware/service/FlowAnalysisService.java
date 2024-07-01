@@ -92,6 +92,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     /**
      * 初始化攻击方式
+     *
      * @return
      * @throws IOException
      */
@@ -106,6 +107,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     /**
      * 模拟生成流量
+     *
      * @return
      * @throws IOException
      */
@@ -198,6 +200,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     /**
      * 统计时间窗口里的流量大小
+     *
      * @param request
      *        属性secondsInterval不可为空且必须大于0;
      *        属性groupList不可为空;
@@ -255,6 +258,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     /**
      * 统计时间窗口里的攻击次数
+     *
      * @param request
      *        属性secondsInterval不可为空且必须大于0;
      *        属性groupList不可为空;
@@ -311,6 +315,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     /**
      * 统计受攻击端口-攻击次数&流量大小(端口映射协议)
+     *
      * @param request
      * @return
      */
@@ -329,6 +334,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     /**
      * 统计受攻击端口-攻击次数&流量大小
+     *
      * @param request
      *        属性secondsInterval不可为空且必须大于0;
      *        属性groupList不可为空;
@@ -386,6 +392,7 @@ public class FlowAnalysisService extends AbstractBaseService {
     }
 
     /**
+     * groupByDestinationIpAndSeverity
      *
      * @param request
      * @return
@@ -443,6 +450,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     /**
      * 攻击日志
+     *
      * @param request
      * @return
      */
@@ -489,6 +497,12 @@ public class FlowAnalysisService extends AbstractBaseService {
     }
 
 
+    /**
+     * flowLogWithTotal
+     *
+     * @param request
+     * @return
+     */
     public ListObjResult<FlowLogBO> flowLogWithTotal(FlowAnalysisRequest request){
 
         BoolQueryBuilder boolQueryBuilder = this.buildBoolQueryBuilder(request);
@@ -534,6 +548,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     /**
      * 流量日志，国际化处理
+     *
      * @param request
      * @return
      */
@@ -561,6 +576,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     /**
      * 根据聚合类型聚合不同的TOP N数据，目标支持攻击分类、源IP、目标IP、攻击严重性,默认TOP 10
+     *
      * @param request
      * @return
      */
@@ -580,6 +596,7 @@ public class FlowAnalysisService extends AbstractBaseService {
     }
 
     /**
+     * queryTopByAggregationTypeEnum
      *
      * @param request
      * @return
@@ -642,9 +659,9 @@ public class FlowAnalysisService extends AbstractBaseService {
     }
 
 
-
     /**
      * 计算流量大小
+     *
      * @param request
      * @return
      */
@@ -683,6 +700,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     /**
      * 统计总数
+     *
      * @param request
      * @return
      */
@@ -708,6 +726,7 @@ public class FlowAnalysisService extends AbstractBaseService {
     /**
      * 查询一个战队的数据聚合
      *
+     * @param request
      * @return
      */
     public TeamAttackBO queryOneTeamAttackSumList(FlowAnalysisRequest request) {
@@ -754,6 +773,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     /**
      * 删除对应场景流量数据
+     *
      * @param groupList
      * @return
      */
@@ -781,7 +801,10 @@ public class FlowAnalysisService extends AbstractBaseService {
     }
 
     /**
-     * 攻击手法-攻击次数百分比
+     * 攻击次数百分比
+     *
+     * @param attackResultVOS
+     * @return
      */
     private List<AttackWayAggregationBO> buildTeamAttackWayPercent(List<AttackWayAggregationBO> attackResultVOS) {
         long sum = 0L;
@@ -825,7 +848,9 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     /**
      * 构建SearchRequest对象
+     *
      * @param request
+     * @param searchSourceBuilder
      * @return
      */
     protected SearchRequest buildSearchRequest(FlowAnalysisRequest request,SearchSourceBuilder searchSourceBuilder){
@@ -839,6 +864,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     /**
      * 构建BoolQueryBuilder对象
+     *
      * @param request
      * @return
      */
@@ -943,6 +969,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     /**
      * 国际化攻击手法
+     *
      * @param aggregationBOS
      */
     protected void globalizedWithAttackWay(List<AttackWayAggregationBO> aggregationBOS){
@@ -958,6 +985,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     /**
      * 国际化攻击手法
+     *
      * @param attackWay
      * @param allCategoryDicMap
      * @return
@@ -977,6 +1005,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     /**
      * 获取所有索引,支持模糊匹配索引
+     *
      * @return
      */
     public String[] getAllIndices(String... indices){
@@ -991,6 +1020,11 @@ public class FlowAnalysisService extends AbstractBaseService {
         return getIndexResponse.getIndices();
     }
 
+    /**
+     * clearUselessArkimeESIndex
+     *
+     * @param prefix
+     */
     public void clearUselessArkimeESIndex(String prefix) {
         try {
             GetIndexRequest request = new GetIndexRequest(prefix + "*");

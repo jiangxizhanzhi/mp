@@ -34,13 +34,20 @@ public class FlowClassificationsService {
 
     private static final Long TIME_OUT = 2 * 60 * 60 * 1000L;
 
+    /**
+     * init
+     */
     @PostConstruct
     public void init() {
         lfuCache = CacheBuilder.newBuilder().maximumSize(100).build();
     }
 
 
-
+    /**
+     * FlowClassificationsService
+     *
+     * @param flowClassificationsMapper
+     */
     @Autowired
     public FlowClassificationsService(FlowClassificationsMapper flowClassificationsMapper) {
         this.flowClassificationsMapper = flowClassificationsMapper;
@@ -48,6 +55,7 @@ public class FlowClassificationsService {
 
     /**
      * 查询所有攻击类型
+     *
      * @return
      */
     public List<FlowClassificationModel> findAll(){
@@ -63,6 +71,7 @@ public class FlowClassificationsService {
 
     /**
      * 查询所有攻击类型
+     *
      * @return
      */
     public Map<String,FlowClassificationModel> findAllCategoryDicMap(){
@@ -81,6 +90,7 @@ public class FlowClassificationsService {
 
     /**
      * 删除所有
+     *
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
@@ -90,6 +100,7 @@ public class FlowClassificationsService {
 
     /**
      * 批量保存
+     *
      * @param classificationBO
      * @return
      */

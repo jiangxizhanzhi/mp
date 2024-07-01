@@ -57,6 +57,11 @@ public class RestCpcloudAllIpsService {
 
     private ReentrantLock lock = new ReentrantLock();
 
+    /**
+     * clearAll
+     *
+     * @return
+     */
     public ServiceResult<Boolean> clearAll() {
         if (!lock.tryLock()) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_INSTANCE_IS_CLEARING);
@@ -106,6 +111,12 @@ public class RestCpcloudAllIpsService {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * resetAllIps
+     *
+     * @param request
+     * @return
+     */
     public ServiceResult<Boolean> resetAllIps(ResetCplcoudAllIpsData request) {
         if (checkHasClear()) {
             //调云平台接口
@@ -124,6 +135,11 @@ public class RestCpcloudAllIpsService {
         return new ServiceResult<>(false).asResult();
     }
 
+    /**
+     * getOriginIps
+     *
+     * @return
+     */
     public OriginIpsResult getOriginIps() {
         //调云平台接口
         OriginIpsResult response = scenePluginCloudSceneService.getCpcloudOriginIps();
@@ -131,6 +147,11 @@ public class RestCpcloudAllIpsService {
         return response;
     }
 
+    /**
+     * checkHasClear
+     *
+     * @return
+     */
     private Boolean checkHasClear() {
         if (lock.isLocked()) {
             // 正在清除，提示一下
@@ -143,11 +164,21 @@ public class RestCpcloudAllIpsService {
         return true;
     }
 
+    /**
+     * getAllSceneInstances
+     *
+     * @return
+     */
     private List<CsceneInstanceModel> getAllSceneInstances() {
         List<CsceneInstanceModel> csceneInstanceModels = csceneInstanceMapper.list(new HumanCondition().filterEqual(CsceneInstanceModel::getDeleted, 0));
         return csceneInstanceModels;
     }
 
+    /**
+     * getAllInstances
+     *
+     * @return
+     */
     private List<DeviceTargetPO> getAllInstances() {
         ImagePageDTO dto = new ImagePageDTO();
         dto.setVmStarted(true);
@@ -155,6 +186,13 @@ public class RestCpcloudAllIpsService {
         return allInstances;
     }
 
+    /**
+     * convertMessages
+     *
+     * @param message
+     * @param resetCplcoudAllIpsData
+     * @return
+     */
     private String convertMessages(String message, ResetCplcoudAllIpsData resetCplcoudAllIpsData) {
         if (message != null) {
             message = message.replaceAll("\\{office_ip}",resetCplcoudAllIpsData.getOffice().getIp());

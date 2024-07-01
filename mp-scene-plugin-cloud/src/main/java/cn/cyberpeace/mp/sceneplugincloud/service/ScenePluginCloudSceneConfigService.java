@@ -38,6 +38,13 @@ public class ScenePluginCloudSceneConfigService {
 
     private CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper;
 
+    /**
+     * ScenePluginCloudSceneConfigService
+     *
+     * @param cloudSceneConfigStatCommon
+     * @param cloudPluginSceneConfigMapper
+     * @param cloudPluginSceneConfigElementMapper
+     */
     @Autowired
     public ScenePluginCloudSceneConfigService(CloudSceneConfigStatCommon cloudSceneConfigStatCommon, CloudPluginSceneConfigMapper cloudPluginSceneConfigMapper,
                                               CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper) {
@@ -48,6 +55,7 @@ public class ScenePluginCloudSceneConfigService {
 
     /**
      * 查询网元指定字段的聚合统计数量
+     *
      * @param sceneIds 场景id列表，不传默认为全部
      * @param nodeIds 节点id列表，不传默认为全部
      * @param fieldNames 聚合统计字段  有效字段 COUNT_ELEMENT_FIELDS
@@ -73,6 +81,13 @@ public class ScenePluginCloudSceneConfigService {
         return new ServiceResult<>(result);
     }
 
+    /**
+     * updateEnableRecording
+     *
+     * @param sceneId
+     * @param newValue
+     * @return
+     */
     public ServiceResult<Boolean> updateEnableRecording(String sceneId, boolean newValue) {
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, null, false, null);
         CloudSceneConfigPluginHandler cloudSceneConfigPluginHandler = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
@@ -88,6 +103,14 @@ public class ScenePluginCloudSceneConfigService {
         return new ServiceResult<>(result > 0);
     }
 
+    /**
+     * updateElementImage
+     *
+     * @param sceneId
+     * @param nodeId
+     * @param image
+     * @return
+     */
     public ServiceResult<Boolean> updateElementImage(String sceneId, String nodeId, String image) {
         if (StringUtils.isEmpty(sceneId) || StringUtils.isEmpty(nodeId) || StringUtils.isEmpty(image)) {
             return new ServiceResult<>(false);

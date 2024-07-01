@@ -76,6 +76,7 @@ public class LogFileService {
     /**
      * 分页查询日志文件列表
      * （假分页）
+     *
      * @param pageRequest
      * @return
      */
@@ -138,6 +139,12 @@ public class LogFileService {
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
+    /**
+     * loadLogFile
+     *
+     * @param csceneId
+     * @return
+     */
     public Map<String, List<LogFileVO>> loadLogFile(String csceneId) {
         CsceneInstanceModel cscene = csceneInstanceMapper.get(csceneId);
         if(cscene == null){
@@ -197,6 +204,14 @@ public class LogFileService {
     }
 
 
+    /**
+     * queryLogCollectFiles
+     *
+     * @param agentName
+     * @param elementId
+     * @param systemType
+     * @return
+     */
     private List<LogFileVO> queryLogCollectFiles(String agentName, String elementId, String systemType) {
         log.debug("queryLogFile start! thread:{}, agentName:{}, elementId:{}, systemType:{}", Thread.currentThread().getName(), agentName, elementId, systemType);
         String osType = getOsType(systemType);
@@ -214,6 +229,8 @@ public class LogFileService {
 
     /**
      * 根据systemType查询节点osType
+     *
+     * @param systemType
      * @return
      */
     private String getOsType(String systemType) {
@@ -231,6 +248,8 @@ public class LogFileService {
     /**
      * 触发自定义探针脚本，执行上传指定日志文件到文件服务器
      * 并生成下载url返回
+     *
+     * @param request
      * @return
      */
     public List<LogFileDownloadUrlDto> getDownloadUrls(LogFileDownloadUrlRequest request) {
@@ -277,6 +296,12 @@ public class LogFileService {
         return dtos;
     }
 
+    /**
+     * getControlFileParam
+     *
+     * @param path
+     * @return
+     */
     private static WazuhControl.ControlFileParam getControlFileParam(String path) {
         WazuhControl.ControlFileParam uploadParam = new WazuhControl.ControlFileParam();
         uploadParam.configUploadParam(path, CollectionSingleton.collectionAppConfig.getWazuhGodfsServer() + "/godfs/upload");
@@ -286,6 +311,7 @@ public class LogFileService {
 
     /**
      * 转换WazuhControl.QueryLogCollectFileData到LogFileDto
+     *
      * @param logFiles
      * @param elementId
      * @param agentName
@@ -315,6 +341,15 @@ public class LogFileService {
         return logFileVOS;
     }
 
+    /**
+     * getLogFileVO
+     *
+     * @param elementId
+     * @param agentName
+     * @param osType
+     * @param f
+     * @return
+     */
     private LogFileVO getLogFileVO(String elementId, String agentName, String osType, WazuhControl.QueryLogCollectRelatedFileInfo f) {
         LogFileVO dto =
                 LogFileVO.builder()
@@ -332,6 +367,12 @@ public class LogFileService {
     }
 
 
+    /**
+     * parseDateTime
+     *
+     * @param datetime
+     * @return
+     */
     private LocalDateTime parseDateTime(String datetime) {
         String date1 = StringUtils.substringBeforeLast(datetime, ".");
         date1 = date1.concat("Z");

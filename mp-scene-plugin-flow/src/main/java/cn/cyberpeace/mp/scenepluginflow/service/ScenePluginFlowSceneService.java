@@ -32,6 +32,16 @@ public class ScenePluginFlowSceneService {
     @Resource
     private FlowExecutor flowExecutor;
 
+    /**
+     * startFlow
+     *
+     * @param sceneId
+     * @param nodeId
+     * @param flowId
+     * @param sourceIp
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> startFlow(String sceneId, String nodeId, String flowId, String sourceIp, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, context);
         CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
@@ -43,6 +53,15 @@ public class ScenePluginFlowSceneService {
         return new ServiceResult<>(result);
     }
 
+    /**
+     * stopFlow
+     *
+     * @param sceneId
+     * @param nodeId
+     * @param flowId
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> stopFlow(String sceneId, String nodeId, String flowId, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, context);
         FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
@@ -50,6 +69,16 @@ public class ScenePluginFlowSceneService {
         return new ServiceResult<>(result);
     }
 
+    /**
+     * updateFlowParams
+     *
+     * @param sceneId
+     * @param nodeId
+     * @param flowId
+     * @param sourceIp
+     * @param context
+     * @return
+     */
     @Transactional
     public ServiceResult<Boolean> updateFlowParams(String sceneId, String nodeId, String flowId, String sourceIp, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, context);
@@ -64,6 +93,16 @@ public class ScenePluginFlowSceneService {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * startFlows
+     *
+     * @param sceneId
+     * @param nodeId
+     * @param flowIdWithSourceIps
+     * @param context
+     * @param runType
+     * @return
+     */
     public ServiceResult<Boolean> startFlows(String sceneId, String nodeId, List<FlowIdWithSourceIp> flowIdWithSourceIps,
                                              SceneContextBO context, int runType) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, context);
@@ -81,6 +120,15 @@ public class ScenePluginFlowSceneService {
         return new ServiceResult<>(result);
     }
 
+    /**
+     * stopFlows
+     *
+     * @param sceneId
+     * @param nodeId
+     * @param flowIds
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> stopFlows(String sceneId, String nodeId, List<String> flowIds, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, context);
         FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
@@ -91,6 +139,16 @@ public class ScenePluginFlowSceneService {
         return new ServiceResult<>(result);
     }
 
+    /**
+     * queryFlowRecords
+     *
+     * @param sceneId
+     * @param nodeId
+     * @param flowId
+     * @param context
+     * @param isBatch
+     * @return
+     */
     public ServiceResult<SceneFlowRecordsResponse> queryFlowRecords(String sceneId, String nodeId, String flowId,
                                                                     SceneContextBO context, Boolean isBatch) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, context);

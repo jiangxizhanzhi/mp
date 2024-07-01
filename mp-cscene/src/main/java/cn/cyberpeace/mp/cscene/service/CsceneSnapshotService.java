@@ -58,6 +58,15 @@ public class CsceneSnapshotService {
 
     private SceneElementMapper sceneElementMapper;
 
+    /**
+     * CsceneSnapshotService
+     *
+     * @param csceneSnapshotMapper
+     * @param sceneSnapshotService
+     * @param csceneSpecialService
+     * @param csceneInstanceMapper
+     * @param sceneElementMapper
+     */
     @Autowired
     public CsceneSnapshotService(CsceneSnapshotMapper csceneSnapshotMapper, SceneSnapshotService sceneSnapshotService,
                                  CsceneSpecialService csceneSpecialService, CsceneInstanceMapper csceneInstanceMapper,
@@ -69,6 +78,15 @@ public class CsceneSnapshotService {
         this.sceneElementMapper = sceneElementMapper;
     }
 
+    /**
+     * checkSnapshotName
+     *
+     * @param csceneId
+     * @param csceneInstanceId
+     * @param nodeId
+     * @param name
+     * @return
+     */
     public ServiceResult<Boolean> checkSnapshotName(String csceneId, String csceneInstanceId, String nodeId, String name) {
         CsceneSnapshotModel sameNameModel = csceneSnapshotMapper.first(new HumanCondition()
                 .filterEqual(CsceneSnapshotModel::getCsceneId, csceneId)
@@ -83,6 +101,15 @@ public class CsceneSnapshotService {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * saveCsceneSnapshot
+     *
+     * @param csceneId
+     * @param csceneInstanceId
+     * @param nodeId
+     * @param name
+     * @return
+     */
     public ServiceResult<String> saveCsceneSnapshot(String csceneId, String csceneInstanceId, String nodeId, String name) {
         CsceneSnapshotModel model = new CsceneSnapshotModel();
         model.setCsceneId(csceneId);
@@ -94,6 +121,14 @@ public class CsceneSnapshotService {
         return new ServiceResult<>(model.getSnapshotId());
     }
 
+    /**
+     * updateCsceneSnapshotRelativeInfo
+     *
+     * @param snapshotId
+     * @param snapshotResourceId
+     * @param sourceName
+     * @return
+     */
     public ServiceResult<Boolean> updateCsceneSnapshotRelativeInfo(String snapshotId, String snapshotResourceId, String sourceName) {
         CsceneSnapshotModel snapshotModel = new CsceneSnapshotModel();
         snapshotModel.setSnapshotResourceId(snapshotResourceId);
@@ -102,6 +137,12 @@ public class CsceneSnapshotService {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * getCsceneSnapshotId
+     *
+     * @param snapshotId
+     * @return
+     */
     public ServiceResult<CsceneSnapshotModel> getCsceneSnapshotId(String snapshotId) {
         CsceneSnapshotModel result = csceneSnapshotMapper.first(
                 new HumanCondition()
@@ -111,6 +152,14 @@ public class CsceneSnapshotService {
         return new ServiceResult<>(result);
     }
 
+    /**
+     * getCsceneSnapshot
+     *
+     * @param csceneId
+     * @param nodeId
+     * @param snapshotResourceId
+     * @return
+     */
     public ServiceResult<CsceneSnapshotModel> getCsceneSnapshot(String csceneId, String nodeId, String snapshotResourceId) {
         CsceneSnapshotModel result = csceneSnapshotMapper.first(new HumanCondition()
                 .filterEqual(CsceneSnapshotModel::getCsceneId, csceneId)
@@ -121,6 +170,12 @@ public class CsceneSnapshotService {
         return new ServiceResult<>(result);
     }
 
+    /**
+     * getCsceneSnapshot
+     *
+     * @param csceneId
+     * @return
+     */
     public ServiceResult<List<CsceneSnapshotModel>> getCsceneSnapshot(String csceneId) {
         List<CsceneSnapshotModel> result = csceneSnapshotMapper.list(new HumanCondition()
                 .filterEqual(CsceneSnapshotModel::getCsceneId, csceneId)
@@ -129,6 +184,14 @@ public class CsceneSnapshotService {
         return new ServiceResult<>(result);
     }
 
+    /**
+     * logicDeleteCsceneSnapshot
+     *
+     * @param csceneId
+     * @param nodeId
+     * @param snapshotResourceId
+     * @return
+     */
     public ServiceResult<Boolean> logicDeleteCsceneSnapshot(String csceneId, String nodeId, String snapshotResourceId) {
         CsceneSnapshotModel model = new CsceneSnapshotModel();
         model.setDeleted(true);
@@ -140,6 +203,14 @@ public class CsceneSnapshotService {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * deleteCsceneSnapshotRelativeInfo
+     *
+     * @param csceneId
+     * @param nodeId
+     * @param snapshotResourceId
+     * @return
+     */
     @Transactional
     public ServiceResult<Boolean> deleteCsceneSnapshotRelativeInfo(String csceneId, String nodeId, String snapshotResourceId) {
         CsceneSnapshotModel csceneSnapshot = csceneSnapshotMapper.first(new HumanCondition().filterEqual(CsceneSnapshotModel::getCsceneId, csceneId)
@@ -152,6 +223,12 @@ public class CsceneSnapshotService {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * deleteSnapshotRelativeInfoByResource
+     *
+     * @param snapshotResourceId
+     * @return
+     */
     @Transactional
     public ServiceResult<Boolean> deleteSnapshotRelativeInfoByResource(String snapshotResourceId) {
         CsceneSnapshotModel csceneSnapshot = csceneSnapshotMapper.first(new HumanCondition()
@@ -163,6 +240,11 @@ public class CsceneSnapshotService {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * correctSnapshotRelativeInfo
+     *
+     * @return
+     */
     public ServiceResult<Boolean> correctSnapshotRelativeInfo() {
         // 异常数据: cscene_snapshot 存在, 无resourceId
         List<CsceneSnapshotModel> noResourceIds = csceneSnapshotMapper.list(new HumanCondition()
@@ -207,6 +289,12 @@ public class CsceneSnapshotService {
     }
 
 
+    /**
+     * correctCsceneSnapshotResourceId
+     *
+     * @param csceneSnapshot
+     * @return boolean
+     */
     private boolean correctCsceneSnapshotResourceId(CsceneSnapshotModel csceneSnapshot) {
         SceneElementSnapshotModel result = sceneSnapshotService.getElementSnapshot(csceneSnapshot.getSnapshotId()).getSource();
         if (result != null) {
@@ -257,6 +345,11 @@ public class CsceneSnapshotService {
         return false;
     }
 
+    /**
+     * deleteSceneSnapshots
+     *
+     * @param csceneId
+     */
     public void deleteSceneSnapshots(String csceneId) {
         List<CsceneSnapshotModel> csceneSnapshots = this.getCsceneSnapshot(csceneId).getSource();
         if (CollectionUtils.isEmpty(csceneSnapshots)) {
@@ -310,6 +403,14 @@ public class CsceneSnapshotService {
         }
     }
 
+    /**
+     * deleteOneSnapshot
+     *
+     * @param csceneId
+     * @param snapshot
+     * @param correctMode
+     * @return boolean
+     */
     private boolean deleteOneSnapshot(String csceneId, SceneElementSnapshotModel snapshot, boolean correctMode) {
         String image = SnapshotAddressUtils.parseAddress(snapshot.getAddress()).getImageName();
         Map<String, List<DeviceReferCsceneStat>> configUsed = csceneSpecialService.statDeviceReferCscenes(new String[]{image}).getSource();
@@ -378,6 +479,14 @@ public class CsceneSnapshotService {
         }
     }
 
+    /**
+     * getReferCsceneNames
+     *
+     * @param usingList
+     * @param getName
+     * @param nameSize
+     * @return
+     */
     private <T> List<String> getReferCsceneNames(List<T> usingList, Function<T, String> getName, int nameSize) {
         if (CollectionUtils.isEmpty(usingList)) {
             return null;
@@ -391,6 +500,12 @@ public class CsceneSnapshotService {
         return new ArrayList<>(names);
     }
 
+    /**
+     * getSceneInfo
+     *
+     * @param csceneInstanceId
+     * @return
+     */
     private SceneInfo getSceneInfo(String csceneInstanceId) {
         HumanCondition condition = new HumanCondition().link(CsceneInstanceModel.class, CsceneModel.class)
                 .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getCscene, CsceneModel.class, CsceneModel::getId)

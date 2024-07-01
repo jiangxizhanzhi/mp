@@ -51,6 +51,13 @@ public class ImageResourceService {
     private static final String PNG = "logo.png";
     private static final String JPG = "logo.jpg";
 
+    /**
+     * exportImageByUuid
+     *
+     * @param uuid
+     * @param imagePath
+     * @return
+     */
     public Boolean exportImageByUuid(String uuid, String imagePath) {
         if (StringUtils.isNotEmpty(uuid)) {
             DeviceTargetPO imageInfo = deviceTargetMapper.findByUuid(uuid);
@@ -67,6 +74,14 @@ public class ImageResourceService {
         }
     }
 
+    /**
+     * exportImage
+     *
+     * @param imageName
+     * @param logoPath
+     * @param imagePath
+     * @param deviceAccessModes
+     */
     public void exportImage(String imageName, String logoPath, String imagePath, List<AccessMode> deviceAccessModes) {
 
         File file = new File(imagePath);
@@ -83,6 +98,13 @@ public class ImageResourceService {
         createServiceYml(imageName, imagePath, image, deviceAccessModes);
     }
 
+    /**
+     * exportImage
+     *
+     * @param imageName
+     * @param imagePath
+     * @return
+     */
     private Image exportImage(String imageName, String imagePath) {
         ExportImageParams params = new ExportImageParams();
         params.setImageName(imageName);
@@ -96,6 +118,13 @@ public class ImageResourceService {
         return JsonCommon.mapToBean(imageMap, Image.class);
     }
 
+    /**
+     * exportLogo
+     *
+     * @param logoPath
+     * @param imagePath
+     * @return
+     */
     private String exportLogo(String logoPath, String imagePath) {
         if (FsCommon.isFileServerOuterUrl(logoPath)) {
             String logoUrl = FsCommon.getFileKey(logoPath);
@@ -142,6 +171,14 @@ public class ImageResourceService {
         }
     }
 
+    /**
+     * createServiceYml
+     *
+     * @param imageName
+     * @param imagePath
+     * @param image
+     * @param deviceAccessModes
+     */
     private void createServiceYml(String imageName, String imagePath, Image image, List<AccessMode> deviceAccessModes) {
         if (CollectionUtils.isNotEmpty(deviceAccessModes)) {
             List<AccessModeParseResult> normal = new ArrayList<>();
@@ -196,6 +233,13 @@ public class ImageResourceService {
             FIELD_ORDER.put("shape", 4);
         }
 
+        /**
+         * representJavaBean
+         *
+         * @param properties
+         * @param javaBean
+         * @return
+         */
         @Override
         protected MappingNode representJavaBean(Set<Property> properties, Object javaBean) {
             Set<Property> filterProperties = new TreeSet<>();
@@ -277,6 +321,12 @@ public class ImageResourceService {
         private List<AccessModeParseResult> 管理接入;
     }
 
+    /**
+     * isPng
+     *
+     * @param content
+     * @return boolean
+     */
     private boolean isPng(byte[] content) {
         if (content == null || content.length < 8) {
             return false;
@@ -290,6 +340,12 @@ public class ImageResourceService {
         return true;
     }
 
+    /**
+     * createFile
+     *
+     * @param content
+     * @param filePath
+     */
     private void createFile(byte[] content, String filePath) {
         try {
             FileUtils.writeByteArrayToFile(new File(filePath), content);
@@ -299,6 +355,12 @@ public class ImageResourceService {
         }
     }
 
+    /**
+     * createFile
+     *
+     * @param content
+     * @param filePath
+     */
     private void createFile(String content, String filePath) {
         try {
             FileUtils.write(new File(filePath), content, "utf8");

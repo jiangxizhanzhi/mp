@@ -27,6 +27,7 @@ public class OperatePermissionService {
     /**
      * 登录用户是否是普通管理员
      * client认证的用户都有管理员权限
+     *
      * @return
      */
     public boolean isLoginUserAdmin() {
@@ -50,6 +51,7 @@ public class OperatePermissionService {
     /**
      * 登录用户是否是超级用户
      * client认证的用户都有超级用户权限
+     *
      * @return
      */
     public boolean isLoginUserSuperUser() {
@@ -75,6 +77,7 @@ public class OperatePermissionService {
      * 超级用户不受限制
      * 管理员可以查询管理员和普通用户，但是不能修改
      * 普通用户可以查普通用户
+     *
      * @param targetRoleIds
      */
     public void checkByTargetRoleIdsForSearching(List<String> targetRoleIds) {
@@ -107,6 +110,7 @@ public class OperatePermissionService {
      * 超级用户不受限制
      * 管理员可以修改普通用户，不能修改管理员
      * 普通用户无修改权限
+     *
      * @param targetRoleIds
      */
     public void checkByTargetRoleIds(List<String> targetRoleIds) {
@@ -150,6 +154,7 @@ public class OperatePermissionService {
 
     /**
      * 判断角色id集合中有无管理员
+     *
      * @param roleIds
      * @return
      */

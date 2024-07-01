@@ -14,6 +14,7 @@ public interface LogReportService {
 
     /**
      * 上报日志
+     *
      * @param logReportTypeEnum
      * @param list
      * @return
@@ -22,6 +23,8 @@ public interface LogReportService {
 
     /**
      * 查询全部日志上报数据
+     *
+     * @param type
      * @return
      */
     List<LogReportDTO> list(String type);

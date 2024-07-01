@@ -70,6 +70,17 @@ public class DashboardService {
     @Autowired
     private UserOnlineRecordService userOnlineRecordService;
 
+    /**
+     * DashboardService
+     *
+     * @param deviceService
+     * @param csceneInstanceService
+     * @param csceneSpecialService
+     * @param csceneInstanceMapper
+     * @param cloudPluginSceneElementMapper
+     * @param scenePluginCloudSceneService
+     * @param devopsTargetService
+     */
     @Autowired
     public DashboardService(DeviceService deviceService,
                             CsceneInstanceService csceneInstanceService,
@@ -89,6 +100,8 @@ public class DashboardService {
 
     /**
      * 最近一周用户活动轨迹
+     *
+     * @return
      */
     public DailyUserActivityResponse dailyUserActivity() {
 
@@ -130,6 +143,7 @@ public class DashboardService {
 
     /**
      * 仪表盘-资源统计
+     *
      * @return
      */
     public ResourceStatisticsResponse resourceStatistics() {
@@ -152,6 +166,7 @@ public class DashboardService {
 
     /**
      * 统计活动场景总数和场景占比
+     *
      * @return
      */
     public UserSummarySceneResponse countActivityScene() {
@@ -180,6 +195,11 @@ public class DashboardService {
         return response;
     }
 
+    /**
+     * countUserResourceResponse
+     *
+     * @return
+     */
     public UserResourceResponse countUserResourceResponse() {
         UserResourceResponse userResource = UserResourceResponse
                 .builder()
@@ -224,6 +244,11 @@ public class DashboardService {
         return userResource;
     }
 
+    /**
+     * groupCountResourceByRole
+     *
+     * @return
+     */
     public ServiceResult<SceneBusinessSummary> groupCountResourceByRole() {
         HumanCondition condition = new HumanCondition()
                 .filterEqual(CsceneInstanceModel::getDeleted, false);
@@ -258,6 +283,9 @@ public class DashboardService {
 
     /**
      * 整合在线报告和节点监控
+     *
+     * @param pageRequest
+     * @return
      */
     public PageInfo<UserOnlineReportMonitorBo> getUserOnlineMonitorRecords(UserOnlineRecordSummaryPageRequest pageRequest) {
         PageInfo<UserOnlineReportBo> pageInfo = userOnlineRecordService.recordSummaryPage(pageRequest);
@@ -308,6 +336,7 @@ public class DashboardService {
 
     /**
      * 查询用户会话
+     *
      * @param userId
      * @return
      */
@@ -316,6 +345,14 @@ public class DashboardService {
         return serviceResult.asResult();
     }
 
+    /**
+     * countByVirtualTypeAndRole
+     *
+     * @param sceneIds
+     * @param virtualTypes
+     * @param roles
+     * @return int
+     */
     private int countByVirtualTypeAndRole(List<String> sceneIds, List<Integer> virtualTypes, List<Integer> roles) {
         HumanCondition condition = new HumanCondition()
                 .filterIn(CloudPluginSceneElementModel::getScene, sceneIds.toArray())
@@ -325,6 +362,13 @@ public class DashboardService {
         return cloudElements.size();
     }
 
+    /**
+     * groupSummary
+     *
+     * @param roleType
+     * @param result
+     * @return int
+     */
     private int groupSummary(List<Integer> roleType, Map<Object, Long> result) {
         int sum = 0;
         for (Integer role : roleType) {

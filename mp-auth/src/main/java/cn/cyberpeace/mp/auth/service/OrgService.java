@@ -16,19 +16,59 @@ import java.util.List;
  */
 public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
 
+    /**
+     * getOrgBO
+     *
+     * @param id
+     * @return
+     */
     OrgBO getOrgBO(String id);
 
+    /**
+     * getOrgModel
+     *
+     * @param id
+     * @return
+     */
     OrgModel getOrgModel(String id);
 
+    /**
+     * listParents
+     *
+     * @return
+     */
     List<OrgBO> listParents();
 
+    /**
+     * listByParent
+     *
+     * @param parentId
+     * @return
+     */
     List<OrgBO> listByParent(String parentId);
 
+    /**
+     * listAll
+     *
+     * @param tenantId
+     * @return
+     */
     List<OrgBO> listAll(String tenantId);
 
+    /**
+     * getTree
+     *
+     * @param orgId
+     * @return
+     */
     List<OrgDto> getTree(String orgId);
 
-    // 列出组织的层级关系
+    /**
+     * 列出组织的层级关系
+     *
+     * @param orgId
+     * @return
+     */
     OrgDto getHierarchicalOrgsByOrgId(String orgId);
 
     // 根据路径查出组织

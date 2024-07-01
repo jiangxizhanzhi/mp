@@ -18,12 +18,19 @@ import java.util.List;
  */
 public interface UserOnlineRecordService extends BaseModelService<UserOnlineRecordModel, QueryParams> {
 
+    /**
+     * recordSummaryPage
+     *
+     * @param req
+     * @return
+     */
     PageInfo<UserOnlineReportBo> recordSummaryPage(UserOnlineRecordSummaryPageRequest req);
 
     /**
      * 判断在线的依据：
      * end_time > (now() - 5m) && status = 0
      *
+     * @param userIds
      * @return
      */
     List<UserOnlineRecordModel> listCurrentOnlined(List<String> userIds);
@@ -65,6 +72,11 @@ public interface UserOnlineRecordService extends BaseModelService<UserOnlineReco
      */
     Integer getOnlinedUserCntByPeriod(LocalDateTime startTime, LocalDateTime endTime);
 
+    /**
+     * onlineUserCnt
+     *
+     * @return
+     */
     UserOnlineCntBo onlineUserCnt();
 
 }

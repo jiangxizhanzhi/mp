@@ -23,10 +23,24 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class FlowTaskPostService implements FlowPostService {
+    /**
+     * getSceneHandler
+     *
+     * @param sceneId
+     * @return 场景实例的处理
+     */
     private SceneHandler getSceneHandler(String sceneId) {
         return SceneFlowCacheUtil.getSceneHandler(sceneId);
     }
 
+    /**
+     * getFlow
+     *
+     * @param sceneId
+     * @param nodeId
+     * @param flowId
+     * @return
+     */
     private Flow getFlow(String sceneId, String nodeId, String flowId){
         List<Flow> flows = SceneFlowCacheUtil.get(sceneId, nodeId);
         Optional<Flow> flow = flows.stream().filter(f -> Objects.equals(f.getId(), flowId)).findFirst();
@@ -35,6 +49,7 @@ public class FlowTaskPostService implements FlowPostService {
 
     /**
      * 单个任务执行异常时的回调处理
+     *
      * @param sceneId   场景
      * @param nodeId 节点
      * @param flowId 流量
@@ -48,6 +63,7 @@ public class FlowTaskPostService implements FlowPostService {
 
     /**
      * 流量任务出错时，节点级别的后处理
+     *
      * @param sceneId   场景
      * @param nodeId 节点
      * @param response 执行信息
@@ -68,6 +84,7 @@ public class FlowTaskPostService implements FlowPostService {
 
     /**
      * 单个任务执行时的回调处理
+     *
      * @param sceneId   场景
      * @param nodeId 节点
      * @param flowId 流量
@@ -78,12 +95,23 @@ public class FlowTaskPostService implements FlowPostService {
         onStopTaskNode(sceneId, nodeId);
     }
 
+    /**
+     * successOffFLow
+     *
+     * @param flow
+     */
     private void successOffFLow(Flow flow) {
         log.info("flow success off,flowId is {},taskId is {}", flow.getId(), flow.getTaskId());
         flow.setStatus(Flow.Status.OFF);
         flow.setStatusText(null);
     }
 
+    /**
+     * errorFLow
+     *
+     * @param flow
+     * @param error
+     */
     private void errorFLow(Flow flow, String error) {
         log.info("flow error,flowId is {},taskId is {},error is {}", flow.getId(), flow.getTaskId(), error);
         flow.setStatus(Flow.Status.ERROR);
@@ -93,6 +121,7 @@ public class FlowTaskPostService implements FlowPostService {
     // FlowScenePluginHandler.java:232
     /**
      * 单个节点上流量任务停止时的后处理操作
+     *
      * @param sceneId
      * @param nodeId
      */

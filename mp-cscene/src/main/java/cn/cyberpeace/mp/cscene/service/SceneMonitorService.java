@@ -98,6 +98,7 @@ public class SceneMonitorService {
     /**
      * CsceneInstanceBO转为SceneMonitorInfo
      *
+     * @param sceneId
      * @return
      */
     public SceneMonitorInfo getSceneMonitorInfo(String sceneId) {
@@ -192,6 +193,14 @@ public class SceneMonitorService {
         return sceneMonitorInfo;
     }
 
+    /**
+     * getSceneElements
+     *
+     * @param sceneId
+     * @param supportProbe
+     * @param supportFlow
+     * @return
+     */
     public List<ElementMonitorBasicInfo> getSceneElements(String sceneId, Boolean supportProbe, Boolean supportFlow) {
         ServiceResult<CsceneInstanceBO> result = csceneInstanceService.getById(sceneId, null);
         CsceneInstanceBO csceneInstanceBO = result.getSource();
@@ -223,6 +232,12 @@ public class SceneMonitorService {
         return basicInfos;
     }
 
+    /**
+     * extracted1
+     *
+     * @param element
+     * @return boolean
+     */
     private static boolean extracted1(ElementMonitorBasicInfo element) {
         boolean isVm = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE;
         boolean isContainer = element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER;
@@ -231,6 +246,12 @@ public class SceneMonitorService {
         return isVm || isContainer || isEntity || isDynamips;
     }
 
+    /**
+     * extracted
+     *
+     * @param element
+     * @return boolean
+     */
     private static boolean extracted(ElementMonitorBasicInfo element) {
         if (element.getVirtualType() == null) {
             return false;
@@ -250,6 +271,8 @@ public class SceneMonitorService {
      * 查询场景中所有的节点列表
      *
      * @param sceneId
+     * @param fetchRealTimeHostState
+     * @param request
      * @return
      */
     public List<ElementMonitorBasicInfo> getAllSceneElements(String sceneId, Boolean fetchRealTimeHostState, SceneAllElementsQueryRequest request) {
@@ -447,6 +470,13 @@ public class SceneMonitorService {
         return basicInfos;
     }
 
+    /**
+     * getRealTimeHostState
+     *
+     * @param basicInfo
+     * @param hostStates
+     * @return
+     */
     private HostState getRealTimeHostState(ElementMonitorBasicInfo basicInfo, List<HostState> hostStates) {
         HostState oldHostState = basicInfo.getHostState();
         HostState realTimeHostState = hostStates.get(0);
@@ -458,6 +488,13 @@ public class SceneMonitorService {
         return realTimeHostState;
     }
 
+    /**
+     * getAllSceneConfigElements
+     *
+     * @param id
+     * @param request
+     * @return
+     */
     public List<ElementMonitorBasicInfo> getAllSceneConfigElements(String id, SceneAllElementsQueryRequest request) {
         String sceneConfigId = csceneCommonService.translateSceneConfigId(id);
         if (sceneConfigId == null) {
@@ -529,6 +566,16 @@ public class SceneMonitorService {
         return result;
     }
 
+    /**
+     * processElementBasicInfo
+     *
+     * @param csceneInstanceBO
+     * @param sceneId
+     * @param nodeId
+     * @param fetchRealTimeHostState
+     * @param isAll
+     * @return
+     */
     private ElementMonitorBasicInfo processElementBasicInfo(CsceneInstanceBO csceneInstanceBO, String sceneId, String nodeId,
                                                             boolean fetchRealTimeHostState, boolean isAll) {
         ElementMonitorBasicInfo basicInfo = new ElementMonitorBasicInfo();
@@ -560,6 +607,7 @@ public class SceneMonitorService {
 
     /**
      * 列出场景所有录屏的用户
+     *
      * @param request
      * @return
      */
@@ -580,6 +628,10 @@ public class SceneMonitorService {
 
     /**
      * 查看top N的节点状态
+     *
+     * @param sceneId
+     * @param topCount
+     * @return
      */
     public Map<String, List<ElementMonitorBasicInfo>> topAggrByHoststates(String sceneId, Integer topCount) {
         if (Objects.isNull(topCount)) {
@@ -650,6 +702,7 @@ public class SceneMonitorService {
 
     /**
      * 是否是需要的节点
+     *
      * @param virtualType
      * @return
      */

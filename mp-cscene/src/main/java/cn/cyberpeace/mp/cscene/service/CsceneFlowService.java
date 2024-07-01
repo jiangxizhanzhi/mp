@@ -169,6 +169,13 @@ public class CsceneFlowService {
         log.debug("CsceneFlowService.addTask end.");
     }
 
+    /**
+     * asyncAddTask
+     *
+     * @param sceneId
+     * @param addFlowTaskTaskDetails
+     * @param flowTaskTaskModelList
+     */
     public void asyncAddTask(String sceneId, List<AddFlowTaskTaskDetail> addFlowTaskTaskDetails, List<FlowTaskTaskModel> flowTaskTaskModelList) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         FlowScenePluginHandler flowScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant.PLUGIN_KEY);
@@ -591,6 +598,7 @@ public class CsceneFlowService {
     /**
      * 根据场景id查询环境总速率
      *
+     * @param id
      * @return
      */
     public List<FlowStatisticsDetail> totalRate(String id) {
@@ -669,6 +677,13 @@ public class CsceneFlowService {
     }
 
 
+    /**
+     * getUsableIp
+     *
+     * @param networkId
+     * @param sceneHandler
+     * @return
+     */
     private String getUsableIp(String networkId, SceneHandler sceneHandler) {
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         ArrayList<CloudPluginSceneElementBO> elements = new ArrayList<>(pluginHandler.getElementMap().values());

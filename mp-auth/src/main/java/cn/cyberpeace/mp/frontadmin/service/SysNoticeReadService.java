@@ -11,9 +11,28 @@ import cn.cyberpeace.mp.frontadmin.model.SysNoticeReadModel;
  */
 public interface SysNoticeReadService extends BaseModelService<SysNoticeReadModel, QueryParams> {
 
+    /**
+     * selectByUserIdAndNoticeId
+     *
+     * @param user
+     * @param noticeId
+     * @return
+     */
     SysNoticeReadModel selectByUserIdAndNoticeId(String user, String noticeId);
 
+    /**
+     * increaseReadCount
+     *
+     * @param id
+     * @return int
+     */
     int increaseReadCount(String id);
 
+    /**
+     * countIsReadedOrIsUnPush
+     *
+     * @param user
+     * @return int
+     */
     int countIsReadedOrIsUnPush(String user);
 }

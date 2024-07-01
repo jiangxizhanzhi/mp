@@ -55,6 +55,12 @@ public class CsceneUserBehaviorService {
 	@Autowired
 	private CsceneNetworkBehaviorService csceneNetworkBehaviorService;
 
+	/**
+	 * add
+	 *
+	 * @param elementBehaviorReq
+	 * @return
+	 */
 	public Boolean add(ElementBehaviorReq elementBehaviorReq) {
 		String nodeId = elementBehaviorReq.getNodeId();
 		List<String> userBehaviorIds = elementBehaviorReq.getUserBos().stream()
@@ -92,6 +98,12 @@ public class CsceneUserBehaviorService {
 		return true;
 	}
 
+	/**
+	 * get
+	 *
+	 * @param nodeId
+	 * @return
+	 */
 	public List<CsceneNodeBehaviorRes> get(String nodeId) {
 		HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneUserBehaviorModel::getNodeId, nodeId);
 		List<CsceneUserBehaviorModel> userModelList = csceneUserBehaviorMapper.list(humanCondition);
@@ -117,6 +129,13 @@ public class CsceneUserBehaviorService {
 		return nodeBehaviorResList;
 	}
 
+	/**
+	 * getElementResource
+	 *
+	 * @param response
+	 * @param nodeId
+	 * @param sceneId
+	 */
 	public void getElementResource(HttpServletResponse response, String nodeId, String sceneId) {
 		HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneUserBehaviorModel::getNodeId, nodeId);
 		List<CsceneUserBehaviorModel> userModels = csceneUserBehaviorMapper.list(humanCondition);
@@ -174,11 +193,22 @@ public class CsceneUserBehaviorService {
 		FileUtil.del(originalPath);
 	}
 
+	/**
+	 * deleteByNodeId
+	 *
+	 * @param nodeId
+	 */
 	private void deleteByNodeId(String nodeId) {
 		HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneUserBehaviorModel::getNodeId, nodeId);
 		csceneUserBehaviorMapper.filterDelete(humanCondition);
 	}
 
+	/**
+	 * getRemoteFileContent
+	 *
+	 * @param fileUrl
+	 * @return
+	 */
 	private String getRemoteFileContent(String fileUrl) {
 		HttpClient httpClient = HttpClientBuilder.create().build();
 		HttpGet request = new HttpGet(fileUrl);

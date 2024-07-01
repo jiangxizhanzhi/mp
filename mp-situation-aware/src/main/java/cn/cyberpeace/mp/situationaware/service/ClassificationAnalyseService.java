@@ -24,6 +24,11 @@ public class ClassificationAnalyseService {
     private static final String CLASSIFICATION_FILE_NAME = "suricata/classification.json";
 
 
+    /**
+     * getFlowClassificationInfoFromJson
+     *
+     * @return
+     */
     @Cacheable(value = "#root.targetClass.simpleName + '.' + #root.methodName")
     public FlowClassificationFromJsonModel getFlowClassificationInfoFromJson() {
         try {
@@ -36,6 +41,11 @@ public class ClassificationAnalyseService {
         }
     }
 
+    /**
+     * getFlowEventEnToCnMap
+     *
+     * @return
+     */
     @Cacheable(value = "#root.targetClass.simpleName + '.' + #root.methodName")
     public Map<String, String> getFlowEventEnToCnMap() {
         FlowClassificationFromJsonModel flowClassificationFromJsonModel = getFlowClassificationInfoFromJson();

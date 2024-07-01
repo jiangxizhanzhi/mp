@@ -14,9 +14,27 @@ import java.util.List;
  */
 public interface SysNoticeRoleService extends BaseModelService<SysNoticeRoleModel, QueryParams> {
 
+    /**
+     * listByNoticeIds
+     *
+     * @param noticeIds
+     * @return
+     */
     List<RoleModel> listByNoticeIds(List<String> noticeIds);
 
+    /**
+     * deleteByNoticeIds
+     *
+     * @param noticeIds
+     * @return int
+     */
     int deleteByNoticeIds(List<String> noticeIds);
 
+    /**
+     * deleteByRole
+     *
+     * @param roleId
+     * @return int
+     */
     int deleteByRole(String roleId);
 }

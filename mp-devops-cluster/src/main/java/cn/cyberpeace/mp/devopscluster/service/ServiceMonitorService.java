@@ -57,6 +57,7 @@ public class ServiceMonitorService {
 
     /**
      * 分页查询业务服务监控数据
+     *
      * @param request
      * @return
      */
@@ -86,6 +87,7 @@ public class ServiceMonitorService {
 
     /**
      * 分页查询云平台服务监控数据
+     *
      * @param request
      * @return
      */
@@ -115,6 +117,7 @@ public class ServiceMonitorService {
 
     /**
      * 替换服务名称
+     *
      * @param serviceMonitorDtos
      */
     private void changeServiceName(List<ServiceMonitorDto> serviceMonitorDtos) {
@@ -127,6 +130,7 @@ public class ServiceMonitorService {
 
     /**
      * 系统告警
+     *
      * @return
      */
     public SystemAlarmVO getSystemAlarm() {
@@ -233,6 +237,7 @@ public class ServiceMonitorService {
 
     /**
      * 如果在重启有效期内，状态为不正常的状态的，统一替换为重启状态
+     *
      * @param serviceMonitorDtos
      */
     private void processRestartingStatus(List<ServiceMonitorDto> serviceMonitorDtos) {
@@ -262,6 +267,12 @@ public class ServiceMonitorService {
     }
 
 
+    /**
+     * getActiveHostNameList
+     *
+     * @param hostName
+     * @return
+     */
     private List<String> getActiveHostNameList(String hostName) {
         List<String> hostNameList = new ArrayList<>();
 
@@ -292,6 +303,7 @@ public class ServiceMonitorService {
     /**
      * 判断是否禁用重启按钮，该方法需要在processRestartingStatus()方法之后调用
      * 如果某个服务在限制列表中，且状态为RUNNING或者RESTARTING，则禁止重启，既disableRestart=true
+     *
      * @param serviceMonitorDtos
      * @param monitorProbes
      */
@@ -320,6 +332,12 @@ public class ServiceMonitorService {
         }
     }
 
+    /**
+     * sortMonitorDtos
+     *
+     * @param serviceMonitorDtos
+     * @param sort
+     */
     private void sortMonitorDtos(List<ServiceMonitorDto> serviceMonitorDtos, String sort) {
         if (StringUtils.isBlank(sort)) {
             normalSort(serviceMonitorDtos);
@@ -330,6 +348,7 @@ public class ServiceMonitorService {
 
     /**
      * 普通排序
+     *
      * @param serviceMonitorDtos
      */
     private void normalSort(List<ServiceMonitorDto> serviceMonitorDtos) {
@@ -368,6 +387,12 @@ public class ServiceMonitorService {
     }
 
 
+    /**
+     * customSort
+     *
+     * @param serviceMonitorDtos
+     * @param sort
+     */
     private void customSort(List<ServiceMonitorDto> serviceMonitorDtos, String sort) {
         if (StringUtils.isBlank(sort)) {
             return;
@@ -441,6 +466,13 @@ public class ServiceMonitorService {
     }
 
 
+    /**
+     * isReversed
+     *
+     * @param sortStr
+     * @param sortField
+     * @return boolean
+     */
     private boolean isReversed(String sortStr, String sortField) {
         String symbol = StringUtils.substringBefore(sortStr, sortField);
         return !Objects.equals("-", symbol);

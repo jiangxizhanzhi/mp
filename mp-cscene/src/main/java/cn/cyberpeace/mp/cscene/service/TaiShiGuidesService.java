@@ -90,6 +90,11 @@ public class TaiShiGuidesService {
     @Autowired
     private ClassificationAnalyseService classificationAnalyseService;
 
+    /**
+     * listAllFlowClassifications
+     *
+     * @return
+     */
     public List<FlowClassificationDto> listAllFlowClassifications() {
         FlowClassificationFromJsonModel flowClassificationFromJsonModel = classificationAnalyseService.getFlowClassificationInfoFromJson();
         List<FlowClassificationDto> flowClassificationDtoList = FlowClassificationDto.getDtoListFromModel(flowClassificationFromJsonModel);
@@ -102,6 +107,12 @@ public class TaiShiGuidesService {
         return attackTypeNotEmptyDtoList;
     }
 
+    /**
+     * getAttCkEventList
+     *
+     * @param request
+     * @return
+     */
     public ListObjServiceResult<TaiShiEventInfo> getAttCkEventList(TaiShiRequest request) {
         List<String> sceneIds = new ArrayList<>();
         if (StringUtils.isNotEmpty(request.getSceneId()) && request.getSceneId().contains(",")) {
@@ -181,6 +192,12 @@ public class TaiShiGuidesService {
         return getResult(request.getPage(), request.getPageSize(), sceneHandler, indexes, mergeQuery);
     }
 
+    /**
+     * getHostEventList
+     *
+     * @param request
+     * @return
+     */
     public ListObjServiceResult<TaiShiEventInfo> getHostEventList(TaiShiHostRequest request) {
         List<String> sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
         if (CollectionUtils.isEmpty(sceneIds)) {
@@ -205,6 +222,14 @@ public class TaiShiGuidesService {
         return getResult(request.getPage(), request.getPageSize(), sceneHandler, indexes, mergeQuery);
     }
 
+    /**
+     * getResultHistogram
+     *
+     * @param sceneHandler
+     * @param indexes
+     * @param mergeQuery
+     * @return
+     */
     private ServiceResult<List<FlowTrend>> getResultHistogram(BatchSceneHandler sceneHandler, Set<String> indexes, BoolQueryBuilder mergeQuery) {
         long interval = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(sceneHandler.getEarliestStartTime(), sceneHandler.getLatestSceneRunningTime(), 50);
         SearchSourceBuilder searchBuilder = new SearchSourceBuilder();
@@ -235,6 +260,13 @@ public class TaiShiGuidesService {
         }
     }
 
+    /**
+     * getFlowTrend
+     *
+     * @param bucket
+     * @param bucket1
+     * @return
+     */
     private static FlowTrend getFlowTrend(String bucket, Aggregations bucket1) {
         FlowTrend bo = new FlowTrend();
         LocalDateTime time = TimeUtils.stringToLocalDateTime(bucket, TimeUtils.tzMillsDateTimeFormatter).atZone(ZoneOffset.UTC).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime();
@@ -245,6 +277,13 @@ public class TaiShiGuidesService {
         return bo;
     }
 
+    /**
+     * getResultHistogram
+     *
+     * @param indexes
+     * @param mergeQuery
+     * @return
+     */
     private ServiceResult<List<FlowTrend>> getResultHistogram(Set<String> indexes, BoolQueryBuilder mergeQuery) {
         SearchSourceBuilder searchBuilder = new SearchSourceBuilder();
         searchBuilder.query(mergeQuery);
@@ -275,6 +314,16 @@ public class TaiShiGuidesService {
         }
     }
 
+    /**
+     * getResult
+     *
+     * @param page
+     * @param pageSize
+     * @param sceneHandler
+     * @param indexes
+     * @param mergeQuery
+     * @return
+     */
     private ListObjServiceResult<TaiShiEventInfo> getResult(int page, int pageSize, BatchSceneHandler sceneHandler, Set<String> indexes, BoolQueryBuilder mergeQuery) {
         SearchSourceBuilder searchBuilder = new SearchSourceBuilder();
         searchBuilder.query(mergeQuery);
@@ -315,6 +364,13 @@ public class TaiShiGuidesService {
         return new ListObjServiceResult<>(new ListObjResult<>(result, total));
     }
 
+    /**
+     * getHostEsEventRequestParsedResult
+     *
+     * @param sceneHandler
+     * @param request
+     * @return
+     */
     private EsEventRequestParsedResult getHostEsEventRequestParsedResult(BatchSceneHandler sceneHandler, TaiShiRequest.EventRequest request) {
         LocalDateTime start = request.getStartTime() == null ? sceneHandler.getEarliestStartTime() : request.getStartTime();
         LocalDateTime end = request.getEndTime() == null ? sceneHandler.getLatestSceneRunningTime() : request.getEndTime();
@@ -353,6 +409,14 @@ public class TaiShiGuidesService {
         return result;
     }
 
+    /**
+     * getFlowEsEventRequestParsedResult
+     *
+     * @param sceneId
+     * @param sceneHandler
+     * @param request
+     * @return
+     */
     private EsEventRequestParsedResult getFlowEsEventRequestParsedResult(String sceneId, BatchSceneHandler sceneHandler, TaiShiRequest.EventRequest request) {
         if (request != null && CollectionUtils.isNotEmpty(request.getEventName())) {
             return null;
@@ -400,6 +464,12 @@ public class TaiShiGuidesService {
         return result;
     }
 
+    /**
+     * getEventTiming
+     *
+     * @param request
+     * @return
+     */
     public ServiceResult<List<FlowTrend>> getEventTiming(TaiShiRequest request) {
         List<String> sceneIds = new ArrayList<>();
         if (StringUtils.isNotEmpty(request.getSceneId()) && request.getSceneId().contains(",")) {
@@ -478,6 +548,12 @@ public class TaiShiGuidesService {
         return getResultHistogram(sceneHandler, indexes, mergeQuery);
     }
 
+    /**
+     * getEventTrend
+     *
+     * @param sceneId
+     * @return
+     */
     public ServiceResult<List<FlowTrend>> getEventTrend(String sceneId) {
         List<String> sceneIdList = csceneCommonService.translateSceneIds(Arrays.asList(sceneId));
         BatchSceneHandler sceneHandler = new BatchSceneHandler(sceneIdList, new ArrayList<>());
@@ -540,6 +616,15 @@ public class TaiShiGuidesService {
         return new ServiceResult<>(trends);
     }
 
+    /**
+     * getFlowEventTrend
+     *
+     * @param sceneIds
+     * @param startTime
+     * @param endTime
+     * @param segmentCount
+     * @return
+     */
     private List<FlowTrend> getFlowEventTrend(String[] sceneIds, LocalDateTime startTime, LocalDateTime endTime, int segmentCount) {
         FlowTrendRequest request = new FlowTrendRequest();
         request.setSegmentCount(segmentCount);
@@ -551,6 +636,15 @@ public class TaiShiGuidesService {
         return flows;
     }
 
+    /**
+     * getHostEventTrend
+     *
+     * @param sceneId
+     * @param startTime
+     * @param endTime
+     * @param segmentCount
+     * @return
+     */
     private List<FlowTrend> getHostEventTrend(String sceneId, LocalDateTime startTime, LocalDateTime endTime, int segmentCount) {
         Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
         List<LocalDateTime> timeList = SegmentCount2IntervalSecondsUtil.generateTimeList(startTime, endTime, intervalSeconds);
@@ -583,6 +677,12 @@ public class TaiShiGuidesService {
         return hostTrends;
     }
 
+    /**
+     * getAttCkEventCount
+     *
+     * @param sceneId
+     * @return
+     */
     public ServiceResult<TaiShiTotalCount> getAttCkEventCount(String sceneId) {
         TaiShiTotalCount taiShiTotalCount = new TaiShiTotalCount();
         taiShiTotalCount.setFlow(this.flowTotalCount(sceneId));
@@ -590,6 +690,12 @@ public class TaiShiGuidesService {
         return new ServiceResult<>(taiShiTotalCount);
     }
 
+    /**
+     * getAttCkEventGroupCount
+     *
+     * @param sceneId
+     * @return
+     */
     public ServiceResult<List<FlowAttackTypeCount>> getAttCkEventGroupCount(String sceneId) {
         Map<String, FlowAttackTypeCount> result = new HashMap<>();
 
@@ -635,12 +741,24 @@ public class TaiShiGuidesService {
         return new ServiceResult<>(sortedResult);
     }
 
+    /**
+     * hostTotalCount
+     *
+     * @param sceneId
+     * @return long
+     */
     private long hostTotalCount(String sceneId) {
         BaseSceneElementRequest request = new BaseSceneElementRequest();
         request.setSceneId(sceneId);
         return hostStateService.getSceneAttCkTypeCountInfo(request).getSource().getTotalTimes();
     }
 
+    /**
+     * flowTotalCount
+     *
+     * @param sceneId
+     * @return long
+     */
     private long flowTotalCount(String sceneId) {
         AttackTypeTopRequest request = new AttackTypeTopRequest();
         request.setSceneId(sceneId);
@@ -654,6 +772,13 @@ public class TaiShiGuidesService {
         return total;
     }
 
+    /**
+     * getEventInfoFrom
+     *
+     * @param eventData
+     * @param eid2Elements
+     * @return
+     */
     private TaiShiEventInfo getEventInfoFrom(WazuhEventData eventData, Map<String, SceneElementBO> eid2Elements) {
         TaiShiEventInfo taiShi = new TaiShiEventInfo();
         taiShi.setActionType("attack");
@@ -676,6 +801,13 @@ public class TaiShiGuidesService {
         return taiShi;
     }
 
+    /**
+     * getEventInfoFrom
+     *
+     * @param eventData
+     * @param ip2ElementMap
+     * @return
+     */
     private TaiShiEventInfo getEventInfoFrom(FlowEventData eventData, Map<String, SceneElementBO> ip2ElementMap) {
         TaiShiEventInfo taiShi = new TaiShiEventInfo();
         taiShi.setActionType("attack");
@@ -704,6 +836,13 @@ public class TaiShiGuidesService {
         return taiShi;
     }
 
+    /**
+     * getElementBy
+     *
+     * @param ip
+     * @param ip2ElementMap
+     * @return
+     */
     private SceneElementBO getElementBy(String ip, Map<String, SceneElementBO> ip2ElementMap) {
         if (StringUtils.isBlank(ip)) {
             return null;
@@ -711,6 +850,12 @@ public class TaiShiGuidesService {
         return ip2ElementMap.get(ip);
     }
 
+    /**
+     * getAttCkTypeNames
+     *
+     * @param attCks
+     * @return
+     */
     private List<String> getAttCkTypeNames(List<String> attCks) {
         if (CollectionUtils.isEmpty(attCks)) {
             return new ArrayList<>();
@@ -723,11 +868,23 @@ public class TaiShiGuidesService {
         return list;
     }
 
+    /**
+     * getAttCkTypeName
+     *
+     * @param attCk
+     * @return
+     */
     private String getAttCkTypeName(String attCk) {
         String key = attCk.replaceAll(" ", "_");
         return MessageCommon.get("cscene.attck." + key.toLowerCase());
     }
 
+    /**
+     * getAttCksByFlowAttackTypes
+     *
+     * @param flowAttackTypes
+     * @return
+     */
     public List<String> getAttCksByFlowAttackTypes(List<String> flowAttackTypes) {
         List<String> result = new ArrayList<>();
         for (String a : flowAttackTypes) {
@@ -739,10 +896,23 @@ public class TaiShiGuidesService {
         return result;
     }
 
+    /**
+     * getAttCkByFlowAttackType
+     *
+     * @param flowAttackType
+     * @return
+     */
     private String getAttCkByFlowAttackType(String flowAttackType) {
         return FlowAttackTypeConvert.attackType2AttCks.get(flowAttackType);
     }
 
+    /**
+     * getIpsByNodeIds
+     *
+     * @param sceneHandler
+     * @param nodeIds
+     * @return
+     */
     private List<String> getIpsByNodeIds(BatchSceneHandler sceneHandler, List<String> nodeIds) {
         if (CollectionUtils.isEmpty(nodeIds)) {
             return new ArrayList<>(sceneHandler.getAllIps());
@@ -762,6 +932,13 @@ public class TaiShiGuidesService {
         }
     }
 
+    /**
+     * getEidsByNodeIds
+     *
+     * @param sceneHandler
+     * @param nodeIds
+     * @return
+     */
     private List<String> getEidsByNodeIds(BatchSceneHandler sceneHandler, List<String> nodeIds) {
         List<String> targetNodeEids = new ArrayList<>();
         // 探针数据 只有目标节点 没有源节点
@@ -780,6 +957,13 @@ public class TaiShiGuidesService {
         return targetNodeEids;
     }
 
+    /**
+     * getClosest
+     *
+     * @param time
+     * @param flowTrendMap
+     * @return
+     */
     private FlowTrend getClosest(LocalDateTime time, Map<LocalDateTime, FlowTrend> flowTrendMap) {
         LocalDateTime closestTime = null;
         long durationSeconds = Long.MAX_VALUE;

@@ -32,6 +32,13 @@ public class TargetAggregationService {
 
     private DeviceTargetMapper deviceTargetMapper;
 
+    /**
+     * TargetAggregationService
+     *
+     * @param csceneSpecialService
+     * @param targetConverter
+     * @param deviceTargetMapper
+     */
     @Autowired
     public TargetAggregationService(CsceneSpecialService csceneSpecialService, TargetConverter targetConverter,
                                     DeviceTargetMapper deviceTargetMapper) {

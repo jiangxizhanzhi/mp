@@ -20,6 +20,15 @@ public class CscenePluginDataRecordService {
     @Resource
     private CollectionPluginSceneDataMapper collectionPluginSceneDataMapper;
 
+    /**
+     * getData
+     *
+     * @param params
+     * @param type
+     * @param startTime
+     * @param endTime
+     * @return
+     */
     public List<CollectionPluginSceneDataModel> getData(TimeListPageInfoQueryParams params, int type,
                                                         LocalDateTime startTime, LocalDateTime endTime) {
         String sceneId = params.getSceneIds().get(0);

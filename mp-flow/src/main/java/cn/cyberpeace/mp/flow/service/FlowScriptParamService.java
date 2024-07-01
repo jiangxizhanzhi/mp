@@ -16,6 +16,7 @@ public interface FlowScriptParamService extends BaseModelService<FlowScriptParam
 
     /**
      * 根据流量id查询
+     *
      * @param flowId
      * @return
      */
@@ -23,6 +24,7 @@ public interface FlowScriptParamService extends BaseModelService<FlowScriptParam
 
     /**
      * 批量查询流量参数信息
+     *
      * @param flowIds
      * @return
      */
@@ -30,6 +32,7 @@ public interface FlowScriptParamService extends BaseModelService<FlowScriptParam
 
     /**
      * 根据流量id删除
+     *
      * @param flowId
      * @return
      */
@@ -37,6 +40,7 @@ public interface FlowScriptParamService extends BaseModelService<FlowScriptParam
 
     /**
      * 根据流量id批量删除
+     *
      * @param flowIds
      * @return
      */

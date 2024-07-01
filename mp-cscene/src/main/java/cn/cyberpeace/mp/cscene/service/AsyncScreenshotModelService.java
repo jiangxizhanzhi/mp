@@ -20,6 +20,7 @@ public class AsyncScreenshotModelService {
 
     /**
      * 轮询删除截屏文件
+     *
      * @param screenshotModels
      */
     @Async

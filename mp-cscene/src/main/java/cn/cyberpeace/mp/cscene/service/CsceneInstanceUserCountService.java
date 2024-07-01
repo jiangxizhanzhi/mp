@@ -13,18 +13,21 @@ public interface CsceneInstanceUserCountService extends BaseModelService<CsceneI
 
     /**
      * 增加用户启动场景数
+     *
      * @param userId
      */
     void increaseCount(String userId);
 
     /**
      * 减少用户启动场景数
+     *
      * @param userId
      */
     void decreaseCount(String userId);
 
     /**
      * 统计用户数据
+     *
      * @param userId
      * @return
      */

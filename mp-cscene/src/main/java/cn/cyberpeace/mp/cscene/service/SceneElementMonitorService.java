@@ -120,6 +120,11 @@ public class SceneElementMonitorService {
     @Autowired
     private SituationAwareConfig situationAwareConfig;
 
+    /**
+     * getWazuhVulnerabilityScanInterval
+     *
+     * @return
+     */
     private Integer getWazuhVulnerabilityScanInterval() {
         return CollectionSingleton.collectionAppConfig.getWazuhVulnerabilityScanInterval();
     }
@@ -127,6 +132,8 @@ public class SceneElementMonitorService {
     /**
      * CsceneInstanceBO转为ElementMonitorInfo
      *
+     * @param baseRequest
+     * @param fetchRealTimeHostState
      * @return
      */
     public ElementMonitorBasicInfo getElementMonitorInfo(BaseSceneElementRequest baseRequest, boolean fetchRealTimeHostState) {
@@ -151,6 +158,12 @@ public class SceneElementMonitorService {
     }
 
 
+    /**
+     * pageNetworkConnections
+     *
+     * @param pageRequest
+     * @return
+     */
     public ListObjServiceResult<ConnectionState> pageNetworkConnections(BaseSceneElementPageRequest pageRequest) {
         pageRequest.ensure();
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(pageRequest);
@@ -205,12 +218,24 @@ public class SceneElementMonitorService {
     }
 
 
+    /**
+     * sumEnvVarChangedCount
+     *
+     * @param baseRequest
+     * @return int
+     */
     public int sumEnvVarChangedCount(BaseSceneElementRequest baseRequest) {
         ListPageInfoQueryParams listPageInfoQueryParams = buildListPageInfoQueryParams(baseRequest);
         int sum = scenePluginCollectionSceneService.sumEnvVarChangedCount(listPageInfoQueryParams).getSource();
         return sum;
     }
 
+    /**
+     * sumProcessesChangedCount
+     *
+     * @param baseRequest
+     * @return int
+     */
     public int sumProcessesChangedCount(BaseSceneElementRequest baseRequest) {
         ListPageInfoQueryParams listPageInfoQueryParams = buildListPageInfoQueryParams(baseRequest);
         int sum = scenePluginCollectionSceneService.sumProcessesChangedCount(listPageInfoQueryParams).getSource();
@@ -218,6 +243,12 @@ public class SceneElementMonitorService {
     }
 
 
+    /**
+     * sumSysUserChangedCount
+     *
+     * @param baseRequest
+     * @return int
+     */
     public int sumSysUserChangedCount(BaseSceneElementRequest baseRequest) {
         ListPageInfoQueryParams listPageInfoQueryParams = buildListPageInfoQueryParams(baseRequest);
         int sum = scenePluginCollectionSceneService.sumSysUserChangedCount(listPageInfoQueryParams).getSource();
@@ -239,6 +270,14 @@ public class SceneElementMonitorService {
     }
 
 
+    /**
+     * processTopologyElement
+     *
+     * @param basicInfo
+     * @param csceneInstanceBO
+     * @param elementId
+     * @param fetchRealTimeHostState
+     */
     public void processTopologyElement(ElementMonitorBasicInfo basicInfo, CsceneInstanceBO csceneInstanceBO, String elementId, boolean fetchRealTimeHostState) {
         if (Objects.isNull(csceneInstanceBO)
                 || Objects.isNull(csceneInstanceBO.getScene())
@@ -262,6 +301,13 @@ public class SceneElementMonitorService {
         }
     }
 
+    /**
+     * processPluginElement
+     *
+     * @param basicInfo
+     * @param csceneInstanceBO
+     * @param elementId
+     */
     public void processPluginElement(ElementMonitorBasicInfo basicInfo, CsceneInstanceBO csceneInstanceBO, String elementId) {
         if (Objects.isNull(csceneInstanceBO)
                 || Objects.isNull(csceneInstanceBO.getScene())
@@ -288,6 +334,14 @@ public class SceneElementMonitorService {
     }
 
 
+    /**
+     * sceneElementBO2ElementMonitorBasicInfo
+     *
+     * @param basicInfo
+     * @param sceneElementBO
+     * @param csceneInstanceBO
+     * @param fetchRealTimeHostState
+     */
     public void sceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, SceneElementBO sceneElementBO, CsceneInstanceBO csceneInstanceBO, boolean fetchRealTimeHostState) {
         log.info("fetchHostState:{}", fetchRealTimeHostState);
         // 获取hostState比较耗时，这里加个开关
@@ -371,6 +425,12 @@ public class SceneElementMonitorService {
         formatHostStateBySceneElementBo(basicInfo, sceneElementBO);
     }
 
+    /**
+     * getElementPort
+     *
+     * @param p
+     * @return
+     */
     private static ElementPort getElementPort(SceneElementPortBO p) {
         ElementPort port = new ElementPort();
         port.setIp(p.getIp());
@@ -382,6 +442,7 @@ public class SceneElementMonitorService {
 
     /**
      *   获取的主机信息，cpu,memory,disk直接使用靶标配置的值，从es中获取不一定都采得到/准确
+     *
      * @author
      * @date 17:09 2023/10/17
      * @param elementMonitorBasicInfo
@@ -412,6 +473,13 @@ public class SceneElementMonitorService {
             elementMonitorBasicInfo.getHostState().setDiskSpace(sceneElementBO.getDisk().longValue());
         }
     }
+
+    /**
+     * cpSceneElementBO2ElementMonitorBasicInfo
+     *
+     * @param basicInfo
+     * @param cpSceneElementBO
+     */
     public void cpSceneElementBO2ElementMonitorBasicInfo(ElementMonitorBasicInfo basicInfo, CloudPluginSceneElementBO cpSceneElementBO) {
         // 镜像名称
         String imageName = null;
@@ -436,6 +504,14 @@ public class SceneElementMonitorService {
         basicInfo.setCategory(cpSceneElementBO.getCategory());
     }
 
+    /**
+     * getModifyData
+     *
+     * @param pageRequest
+     * @param ruleGroups
+     * @param path
+     * @return
+     */
     @Deprecated
     public ListObjServiceResult<CollectionHostEventBO> getModifyData(ElementMonitorRequest pageRequest, List<String> ruleGroups,
                                                                      String path) {
@@ -581,6 +657,14 @@ public class SceneElementMonitorService {
         }
     }
 
+    /**
+     * getModifyHistogram
+     *
+     * @param pageRequest
+     * @param ruleGroups
+     * @param segmentCount
+     * @return
+     */
     @Deprecated
     public List<ElementHistogramInfo> getModifyHistogram(ElementMonitorRequest pageRequest, List<String> ruleGroups, Integer segmentCount) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
@@ -626,6 +710,12 @@ public class SceneElementMonitorService {
         return histogramInfos;
     }
 
+    /**
+     * getVulnerabilityInfo
+     *
+     * @param pageRequest
+     * @return
+     */
     public ListObjResult<ElementVulnerabilityInfo> getVulnerabilityInfo(ElementMonitorRequest pageRequest) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
         if (CollUtil.isEmpty(pageRequest.getElementIds())) {
@@ -678,6 +768,12 @@ public class SceneElementMonitorService {
         return new ListObjResult<>(vulnerabilityInfos, result.getTotal());
     }
 
+    /**
+     * processTimeRangeForVulnerabilityInfo
+     *
+     * @param pageRequest
+     * @param agentNames
+     */
     private void processTimeRangeForVulnerabilityInfo(ElementMonitorRequest pageRequest, List<String> agentNames) {
         LocalDateTime startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
         LocalDateTime endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
@@ -705,6 +801,12 @@ public class SceneElementMonitorService {
         }
     }
 
+    /**
+     * getVulnerabilityPieChartInfo
+     *
+     * @param pageRequest
+     * @return
+     */
     public List<ElementVulnerabilityPieChartInfo> getVulnerabilityPieChartInfo(ElementMonitorRequest pageRequest) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
         if (CollUtil.isEmpty(pageRequest.getElementIds())) {
@@ -769,6 +871,12 @@ public class SceneElementMonitorService {
         return pieChartInfos;
     }
 
+    /**
+     * getVulnerabilityCountInfo
+     *
+     * @param pageRequest
+     * @return
+     */
     public List<ElementVulnerabilityCountInfo> getVulnerabilityCountInfo(ElementMonitorRequest pageRequest) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
         if (CollUtil.isEmpty(pageRequest.getElementIds())) {
@@ -805,6 +913,12 @@ public class SceneElementMonitorService {
         return countInfos;
     }
 
+    /**
+     * processRequest
+     *
+     * @param pageRequest
+     * @param sceneHandler
+     */
     private void processRequest(ElementMonitorRequest pageRequest, SceneHandler sceneHandler) {
         if (StringUtils.isEmpty(pageRequest.getStartTime())) {
             pageRequest.setStartTime(TimeUtils.localDateTimeToString(sceneHandler.getScene().getCreateTime()));
@@ -814,6 +928,13 @@ public class SceneElementMonitorService {
         }
     }
 
+    /**
+     * processVulnerabilityRequest
+     *
+     * @param pageRequest
+     * @param sceneModel
+     * @param isRunning
+     */
     private void processVulnerabilityRequest(ElementMonitorRequest pageRequest, SceneModel sceneModel, boolean isRunning) {
         LocalDateTime endTime;
         if (isRunning) {
@@ -835,6 +956,13 @@ public class SceneElementMonitorService {
         }
     }
 
+    /**
+     * getAgentNames
+     *
+     * @param pageRequest
+     * @param sceneHandler
+     * @return
+     */
     private List<String> getAgentNames(ElementMonitorRequest pageRequest, SceneHandler sceneHandler) {
         List<String> agentNames;
         List<String> list = new ArrayList<>();
@@ -848,6 +976,12 @@ public class SceneElementMonitorService {
         return agentNames;
     }
 
+    /**
+     * convertWazuhNetConn2ConnState
+     *
+     * @param model
+     * @return
+     */
     private ConnectionState convertWazuhNetConn2ConnState(WazuhNetworkConnectionModel model) {
         ConnectionState connectionState = new ConnectionState();
         connectionState.setState(model.getStatus());
@@ -952,6 +1086,12 @@ public class SceneElementMonitorService {
         }
     }
 
+    /**
+     * buildListPageInfoQueryParams
+     *
+     * @param baseRequest
+     * @return
+     */
     private ListPageInfoQueryParams buildListPageInfoQueryParams(BaseSceneElementRequest baseRequest) {
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
         ListPageInfoQueryParams listPageInfoQueryParams = new ListPageInfoQueryParams();
@@ -961,6 +1101,12 @@ public class SceneElementMonitorService {
     }
 
 
+    /**
+     * convertDate
+     *
+     * @param date
+     * @return
+     */
     private LocalDate convertDate(String date) {
         try {
             return TimeUtils.stringToLocalDate(date);
@@ -978,6 +1124,15 @@ public class SceneElementMonitorService {
         return null;
     }
 
+    /**
+     * processHistogramList
+     *
+     * @param endTime
+     * @param bucketSize
+     * @param invervalMinutes
+     * @param resultMap
+     * @return
+     */
     private List<ElementHistogramInfo> processHistogramList(LocalDateTime endTime, int bucketSize, int invervalMinutes, Map<String, Long> resultMap) {
         List<ElementHistogramInfo> infos = new ArrayList<>();
         LocalDateTime calculatedTime = LocalDateTime.of(endTime.toLocalDate(), LocalTime.of(endTime.getHour(), endTime.getMinute() / invervalMinutes * invervalMinutes));
@@ -1004,6 +1159,12 @@ public class SceneElementMonitorService {
     }
 
 
+    /**
+     * buildWazuhRequest
+     *
+     * @param pageRequest
+     * @return
+     */
     private WazuhEventRequest buildWazuhRequest(ElementMonitorRequest pageRequest) {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         LocalDateTime startTime = null;

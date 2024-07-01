@@ -16,8 +16,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public interface UserHeartbeatService extends BaseModelService<UserHeartbeatModel, QueryParams> {
 
+    /**
+     * heartbeat
+     */
     void heartbeat();
 
+    /**
+     * getHeartbeatMap
+     *
+     * @return
+     */
     ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> getHeartbeatMap();
 
 }

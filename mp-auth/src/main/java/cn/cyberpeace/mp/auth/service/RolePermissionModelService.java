@@ -15,14 +15,46 @@ import java.util.List;
  */
 public interface RolePermissionModelService extends BaseModelService<RolePermissionModel, QueryParams> {
 
+    /**
+     * listTargetsByRoleIds
+     *
+     * @param roleIds
+     * @return
+     */
     List<TargetModel> listTargetsByRoleIds(List<String> roleIds);
 
+    /**
+     * listTargetRoleDtosByRoleIds
+     *
+     * @param roleIds
+     * @return
+     */
     List<TargetRoleBo> listTargetRoleDtosByRoleIds(List<String> roleIds);
 
+    /**
+     * bindRoleTargets
+     *
+     * @param roleId
+     * @param targetIds
+     * @param cleanOldTargets
+     * @return boolean
+     */
     boolean bindRoleTargets(String roleId, List<String> targetIds, boolean cleanOldTargets);
 
+    /**
+     * deleteByRoleId
+     *
+     * @param roleId
+     * @return boolean
+     */
     boolean deleteByRoleId(String roleId);
 
+    /**
+     * deleteByTargetId
+     *
+     * @param targetId
+     * @return boolean
+     */
     boolean deleteByTargetId(String targetId);
 
 }

@@ -35,6 +35,12 @@ public class UserBehaviorService {
 	@Autowired
 	private NetworkBehaviorMapper networkBehaviorMapper;
 
+	/**
+	 * add
+	 *
+	 * @param addReq
+	 * @return
+	 */
 	public String add(AddUserBehaviorReq addReq) {
 		UserBehaviorModel model = new UserBehaviorModel();
 		BeanUtils.copyProperties(addReq, model);
@@ -45,6 +51,11 @@ public class UserBehaviorService {
 		return model.getId();
 	}
 
+	/**
+	 * update
+	 *
+	 * @param updateReq
+	 */
 	public void update(UpdateUserBehaviorReq updateReq) {
 		UserBehaviorModel model = new UserBehaviorModel();
 		BeanUtils.copyProperties(updateReq, model);
@@ -60,10 +71,21 @@ public class UserBehaviorService {
 		userBehaviorMapper.update(model);
 	}
 
+	/**
+	 * delete
+	 *
+	 * @param ids
+	 */
 	public void delete(List<String> ids) {
 		userBehaviorMapper.bulkDelete(ids.toArray(new String[0]));
 	}
 
+	/**
+	 * page
+	 *
+	 * @param pageReq
+	 * @return
+	 */
 	public ListObjServiceResult<UserBehaviorModel> page(PageRequest pageReq) {
 		pageReq.ensure();
 		HumanCondition humanCondition = new HumanCondition()
@@ -78,6 +100,11 @@ public class UserBehaviorService {
 		return new ListObjServiceResult(new ListObjResult(modelList, total).asResult());
 	}
 
+	/**
+	 * getUserType
+	 *
+	 * @return
+	 */
 	public List<CodeNameRes> getUserType() {
 		return Arrays.stream(UserBehaviorModel.UserType.values())
 			  .map(userType -> new CodeNameRes(userType.getCode(), userType.getDesc()))
@@ -86,6 +113,7 @@ public class UserBehaviorService {
 
 	/**
 	 * 获取用户行为详情
+	 *
 	 * @param id
 	 * @return
 	 */

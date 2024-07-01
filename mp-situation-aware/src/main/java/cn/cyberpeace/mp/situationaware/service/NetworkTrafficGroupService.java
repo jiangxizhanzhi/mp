@@ -115,6 +115,7 @@ public class NetworkTrafficGroupService {
      * 新增arkime 镜像
      *
      * @param groupModel
+     * @return
      */
     public String addArkimeImageInstance(GroupModel groupModel) {
         String arkimePrefixId = indexPrefix + String.valueOf(System.currentTimeMillis());
@@ -127,6 +128,7 @@ public class NetworkTrafficGroupService {
      * 新增arkime 实例
      *
      * @param instanceId instanceId
+     * @return
      */
     public String createArkimeImageInstance(String instanceId) {
         if (Objects.isNull(SituationalAwareConstant.ArkimeNetworkId)) {
@@ -186,6 +188,7 @@ public class NetworkTrafficGroupService {
 
     /**
      * 场景绑定流量镜像
+     *
      * @param networkTrafficMirrorRequest
      */
     public void doBindingNetworkTrafficMirror(NetworkTrafficMirrorRequest networkTrafficMirrorRequest) {
@@ -210,6 +213,7 @@ public class NetworkTrafficGroupService {
 
     /**
      * 接触场景绑定流量镜像
+     *
      * @param networkTrafficMirrorRequest
      */
     public void deleteNetworkTrafficMirror(NetworkTrafficMirrorRequest networkTrafficMirrorRequest) {

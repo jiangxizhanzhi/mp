@@ -35,6 +35,7 @@ public class ProbeAbilityService {
     /**
      * 探针能力分页查询
      *
+     * @param pageRequest
      * @return
      */
     public PageInfo<ProbeAbilityDto> page(ProbePageQueryRequest pageRequest) {
@@ -61,6 +62,11 @@ public class ProbeAbilityService {
         return pageInfo;
     }
 
+    /**
+     * processInternationalMessage
+     *
+     * @param dto
+     */
     private void processInternationalMessage(ProbeAbilityDto dto) {
         String probeName = MessageCommonUtil.convertMessage(SituationBase18nCode.SITUATION_AWARE_I18N_NAME_PREFIX + dto.getProbeId());
         String name = MessageCommonUtil.convertMessage(SituationBase18nCode.SITUATION_AWARE_I18N_PROBE_ABILITY_NAME_PREFIX + dto.getId());
@@ -70,6 +76,11 @@ public class ProbeAbilityService {
         dto.setDescription(description);
     }
 
+    /**
+     * processAbilityEngine
+     *
+     * @param dto
+     */
     private void processAbilityEngine(ProbeAbilityDto dto) {
         String msg;
         if (Objects.equals(dto.getEngine(), "Y")) {
@@ -80,6 +91,11 @@ public class ProbeAbilityService {
         dto.setEngine(msg);
     }
 
+    /**
+     * processProbeDtoOsTypes
+     *
+     * @param dto
+     */
     private void processProbeDtoOsTypes(ProbeAbilityDto dto) {
         if (StringUtils.isNotBlank(dto.getOsType())) {
             List<Integer> osTypes = new ArrayList<>();

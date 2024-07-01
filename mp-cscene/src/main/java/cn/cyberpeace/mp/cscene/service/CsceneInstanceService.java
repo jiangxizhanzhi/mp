@@ -203,6 +203,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     private static final String ALL = "all";
 
+    /**
+     * readCsceneInstanceRoles
+     *
+     * @param csceneInstanceIds
+     * @return
+     */
     private List<CsceneInstanceRoleModel> readCsceneInstanceRoles(String[] csceneInstanceIds) {
         if (csceneInstanceIds == null || csceneInstanceIds.length == 0) {
             return new ArrayList<>();
@@ -211,6 +217,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 .filterIn(CsceneInstanceRoleModel::getCscene, csceneInstanceIds));
     }
 
+    /**
+     * getSceneId
+     *
+     * @param csceneId
+     * @return
+     */
     public String getSceneId(String csceneId) {
         ObjResult<CsceneInstanceModel> csceneInstanceResult = get(csceneId).getSource();
         if (csceneInstanceResult == null) {
@@ -221,6 +233,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return sceneId;
     }
 
+    /**
+     * getSceneConfigId
+     *
+     * @param csceneId
+     * @return
+     */
     public String getSceneConfigId(String csceneId) {
         ObjResult<CsceneInstanceModel> csceneInstanceResult = get(csceneId).getSource();
         if (csceneInstanceResult == null) {
@@ -232,6 +250,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return cscene.getObj().getSceneConfig();
     }
 
+    /**
+     * getCsceneInstanceObjs
+     *
+     * @param csceneIds
+     * @return
+     */
     private List<CsceneInstanceModel> getCsceneInstanceObjs(List<String> csceneIds) {
         if (csceneIds.isEmpty()) {
             return new ArrayList<>();
@@ -245,6 +269,21 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return csceneInstancesResult.getObjs();
     }
 
+    /**
+     * getProbeCollectData
+     *
+     * @param sceneInstanceId
+     * @param sceneId
+     * @param requestId
+     * @param nodeIds
+     * @param sceneHandler
+     * @param nodeId2ProbeNameMap
+     * @param probeId
+     * @param queryParams
+     * @param cloudPluginHandler
+     * @param type
+     * @return
+     */
     private ListObjServiceResult<CollectionHostEventBO> getProbeCollectData(String sceneInstanceId, String sceneId, String requestId,
                                                                             List<String> nodeIds, SceneHandler sceneHandler,
                                                                             Map<String, Map<String, String>> nodeId2ProbeNameMap,
@@ -524,6 +563,17 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
     }
 
+    /**
+     * getCustomProbeCollectData
+     *
+     * @param sceneInstanceId
+     * @param sceneId
+     * @param nodeIds
+     * @param pluginHandler
+     * @param nodeId2ProbeNameMap
+     * @param queryParams
+     * @return
+     */
     private ListObjServiceResult<CollectionHostEventBO> getCustomProbeCollectData(String sceneInstanceId, String sceneId,
                                                                                   List<String> nodeIds, CollectionScenePluginHandler pluginHandler,
                                                                                   Map<String, Map<String, String>> nodeId2ProbeNameMap,
@@ -598,6 +648,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ListObjServiceResult<>(new ListObjResult<>(result, total));
     }
 
+    /**
+     * CsceneInstanceService
+     *
+     * @param modelMapper
+     * @param csceneInstanceRoleMapper
+     * @param cloudPluginSceneConnectionMapper
+     */
     @Autowired
     public CsceneInstanceService(CsceneInstanceMapper modelMapper, CsceneInstanceRoleMapper csceneInstanceRoleMapper,
                                  CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper) {
@@ -606,6 +663,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         setCloudPluginSceneConnectionMapper(cloudPluginSceneConnectionMapper);
     }
 
+    /**
+     * listCsceneInstanceBO
+     *
+     * @param queryParams
+     * @param context
+     * @return
+     */
     public ListObjServiceResult<CsceneInstanceBO> listCsceneInstanceBO(QueryParams queryParams,
                                                                        CsceneContextBO context) {
         ListObjServiceResult<CsceneInstanceModel> listResult = super.list(queryParams);
@@ -636,6 +700,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 listResult.getSource().getFields()));
     }
 
+    /**
+     * getById
+     *
+     * @param id
+     * @param context
+     * @return
+     */
     public ServiceResult<CsceneInstanceBO> getById(String id, CsceneContextBO context) {
         BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(id, null, context);
         CsceneInstanceBO data = instanceHandler.toData();
@@ -647,6 +718,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(data);
     }
 
+    /**
+     * getById
+     *
+     * @param id
+     * @param areaId
+     * @param context
+     * @return
+     */
     public ServiceResult<CsceneInstanceBO> getById(String id, String areaId, CsceneContextBO context) {
         BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(id,areaId, context);
         CsceneInstanceBO data = instanceHandler.toData();
@@ -658,6 +737,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(data);
     }
 
+    /**
+     * deleteById
+     *
+     * @param id
+     * @param logic
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> deleteById(String id, boolean logic, CsceneContextBO context) {
         if (ReentrantLockUtils.tryLock(id)) {
             try {
@@ -685,6 +772,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(true);
     }
 
+    /**
+     * bulkDeleteByIds
+     *
+     * @param ids
+     * @param logic
+     * @param context
+     * @return
+     */
     public ServiceResult<Integer> bulkDeleteByIds(String[] ids, boolean logic, CsceneContextBO context) {
         int result = 0;
         Map<String, Object> originPassThrough = SysContextHolder.getPassThroughMap();
@@ -703,6 +798,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
     }
 
+    /**
+     * clearById
+     *
+     * @param id
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> clearById(String id, CsceneContextBO context) {
         List<CsceneInstanceModel> csceneInstanceObjs = new ArrayList<>();
         for (CsceneInstanceModel csceneInstanceModel : getCsceneInstanceObjs(List.of(id))) {
@@ -716,6 +818,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return deleteById(csceneInstanceObjs.get(0).getId(), false, context);
     }
 
+    /**
+     * bulkClearByIds
+     *
+     * @param ids
+     * @param context
+     * @return
+     */
     public ServiceResult<Integer> bulkClearByIds(String[] ids, CsceneContextBO context) {
         List<CsceneInstanceModel> csceneInstanceObjs = new ArrayList<>();
         for (CsceneInstanceModel csceneInstanceModel : getCsceneInstanceObjs(Arrays.asList(ids))) {
@@ -731,6 +840,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return bulkDeleteByIds(list.toArray(new String[0]), false, context);
     }
 
+    /**
+     * getNodeSessions
+     *
+     * @param ids
+     * @param nodeIds
+     * @param userIds
+     * @param type
+     * @return
+     */
     public ServiceResult<List<UserNodeSessionInfo>> getNodeSessions(List<String> ids, List<String> nodeIds, List<String> userIds, String type) {
         if (type == null) {
             type = MONITOR;
@@ -800,6 +918,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(result);
     }
 
+    /**
+     * listRecordings
+     *
+     * @param ids
+     * @param nodeIds
+     * @param userIds
+     * @param queryParams
+     * @return
+     */
     public ListObjServiceResult<NodeRecordingBO> listRecordings(List<String> ids, List<String> nodeIds, List<String> userIds,
                                                                 RecordingQueryParams queryParams) {
         List<CsceneInstanceModel> csceneInstances = getCsceneInstanceObjs(ids);
@@ -830,6 +957,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return nodeRecordingResult;
     }
 
+    /**
+     * listFlows
+     *
+     * @param id
+     * @param queryParams
+     * @return
+     */
     public ListObjServiceResult<CsceneCollectionFlowBO> listFlows(String id, FlowQueryParams queryParams) {
         String[] csceneIds = StringUtils.split(id, ",");
         Map<String, String> sceneId2CsceneId = new HashMap<>();
@@ -853,6 +987,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ListObjServiceResult<>(new ListObjResult<>(result, serviceResult.getSource().getTotal()));
     }
 
+    /**
+     * getCsceneCollectionFlowBO
+     *
+     * @param sceneId2CsceneId
+     * @param bo
+     * @return
+     */
     private static CsceneCollectionFlowBO getCsceneCollectionFlowBO(Map<String, String> sceneId2CsceneId, CollectionFlowBO bo) {
         CsceneCollectionFlowBO csceneCollectionFlowBO = new CsceneCollectionFlowBO();
         BeanUtils.copyProperties(bo, csceneCollectionFlowBO);
@@ -862,6 +1003,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return csceneCollectionFlowBO;
     }
 
+    /**
+     * listHostStates
+     *
+     * @param id
+     * @param queryParams
+     * @return
+     */
     public ListObjServiceResult<CollectionHostStateBO> listHostStates(String id, HostStateQueryParams queryParams) {
         String sceneId = getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
@@ -871,16 +1019,36 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return scenePluginCollectionSceneService.listHostStates(sceneId, queryParams);
     }
 
+    /**
+     * listHostStatesByAgentNames
+     *
+     * @param agentNames
+     * @param queryParams
+     * @return
+     */
     public ListObjServiceResult<CollectionHostStateBO> listHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams) {
         queryParams.setNodeIds(null);
         return scenePluginCollectionSceneService.listHostStatesByAgentNames(agentNames, queryParams);
     }
 
+    /**
+     * mapHostStatesByAgentNames
+     *
+     * @param agentNames
+     * @param queryParams
+     * @return
+     */
     public Map<String, List<CollectionHostStateBO>> mapHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams) {
         queryParams.setNodeIds(null);
         return scenePluginCollectionSceneService.mapHostStatesByAgentNames(agentNames, queryParams);
     }
 
+    /**
+     * queryCollectionDataCount
+     *
+     * @param params
+     * @return
+     */
     public ServiceResult<Map<String, Integer>> queryCollectionDataCount(QueryCollectionDataCountParams params) {
         Map<String, Integer> count = new ConcurrentHashMap<>();
         List<Runnable> tasks = new ArrayList<>();
@@ -994,7 +1162,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     /**
      * 滚动分页列表
      *
+     * @param id
      * @param scrollId
+     * @param queryParams
      * @return
      */
     public ListObjServiceResult<CollectionHostEventBO> scrollHostEvents(String id, String scrollId, HostEventQueryParams queryParams) {
@@ -1008,6 +1178,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return scenePluginCollectionSceneService.scrollHostEvents(sceneId, scrollId, queryParams);
     }
 
+    /**
+     * getProbeCollectionData
+     *
+     * @param requestId
+     * @param sceneInstanceId
+     * @param probeId
+     * @param queryParams
+     * @param type
+     * @return
+     */
     public ListObjServiceResult<CollectionHostEventBO> getProbeCollectionData(String requestId, String sceneInstanceId,
                                                                               String probeId, HostEventQueryParams queryParams,
                                                                               String type) {
@@ -1066,6 +1246,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
     }
 
+    /**
+     * startFlow
+     *
+     * @param id
+     * @param toNodeId
+     * @param flowId
+     * @param sourceIp
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> startFlow(String id, String toNodeId, String flowId, String sourceIp, CsceneContextBO context) {
         CsceneContextHolder.setCallAction(CsceneCallAction.NODE_START_FLOW);
         CsceneContextHolder.setCsceneInstanceId(id);
@@ -1082,6 +1272,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 context == null ? null : context.toSceneContext());
     }
 
+    /**
+     * stopFlow
+     *
+     * @param id
+     * @param toNodeId
+     * @param flowId
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> stopFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
         CsceneContextHolder.setCallAction(CsceneCallAction.NODE_STOP_FLOW);
         CsceneContextHolder.setCsceneInstanceId(id);
@@ -1098,6 +1297,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 context == null ? null : context.toSceneContext());
     }
 
+    /**
+     * updateFlowParams
+     *
+     * @param id
+     * @param nodeId
+     * @param flowId
+     * @param sourceIp
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> updateFlowParams(String id, String nodeId, String flowId, String sourceIp, CsceneContextBO context) {
         CsceneContextHolder.setCsceneInstanceId(id);
         if (context != null) {
@@ -1111,6 +1320,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return scenePluginFlowSceneService.updateFlowParams(sceneId, nodeId, flowId, sourceIp, context == null ? null : context.toSceneContext());
     }
 
+    /**
+     * startFlows
+     *
+     * @param id
+     * @param toNodeId
+     * @param flowIdWithSourceIps
+     * @param context
+     * @param runType
+     * @return
+     */
     public ServiceResult<Boolean> startFlows(String id, String toNodeId, List<FlowIdWithSourceIp> flowIdWithSourceIps,
                                              CsceneContextBO context, int runType) {
         CsceneContextHolder.setCallAction(CsceneCallAction.NODE_START_FLOW);
@@ -1128,6 +1347,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 context == null ? null : context.toSceneContext(), runType);
     }
 
+    /**
+     * stopFlows
+     *
+     * @param id
+     * @param toNodeId
+     * @param flowIdWithSourceIps
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> stopFlows(String id, String toNodeId, List<FlowIdWithSourceIp> flowIdWithSourceIps,
                                             CsceneContextBO context) {
         CsceneContextHolder.setCallAction(CsceneCallAction.NODE_STOP_FLOW);
@@ -1149,6 +1377,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return scenePluginFlowSceneService.stopFlows(sceneId, toNodeId, flowIds, context == null ? null : context.toSceneContext());
     }
 
+    /**
+     * queryFlowRecords
+     *
+     * @param id
+     * @param nodeId
+     * @param flowId
+     * @param context
+     * @param isBatch
+     * @return
+     */
     public ServiceResult<SceneFlowRecordsResponse> queryFlowRecords(String id, String nodeId, String flowId,
                                                                     CsceneContextBO context, Boolean isBatch) {
         CsceneContextHolder.setCsceneInstanceId(id);
@@ -1163,6 +1401,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 context == null ? null : context.toSceneContext(), isBatch);
     }
 
+    /**
+     * startProbe
+     *
+     * @param id
+     * @param toNodeId
+     * @param probeId
+     * @param context
+     * @return
+     */
     public ServiceResult<Probe> startProbe(String id, String toNodeId, String probeId, CsceneContextBO context) {
         CsceneContextHolder.setCallAction(CsceneCallAction.NODE_START_PROBE);
         CsceneContextHolder.setCsceneInstanceId(id);
@@ -1173,6 +1420,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(null);
     }
 
+    /**
+     * stopProbe
+     *
+     * @param id
+     * @param toNodeId
+     * @param probeId
+     * @param context
+     * @return
+     */
     public ServiceResult<Probe> stopProbe(String id, String toNodeId, String probeId, CsceneContextBO context) {
         CsceneContextHolder.setCallAction(CsceneCallAction.NODE_STOP_PROBE);
         CsceneContextHolder.setCsceneInstanceId(id);
@@ -1183,6 +1439,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(null);
     }
 
+    /**
+     * getProtocolByAccessModeId
+     *
+     * @param accessModeId
+     * @param sceneHandler
+     * @param targetNodeId
+     * @return
+     */
     private String getProtocolByAccessModeId(String accessModeId, SceneHandler sceneHandler, String targetNodeId) {
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         CloudPluginSceneBO cloudScene = pluginHandler.getScene();
@@ -1223,6 +1487,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return null;
     }
 
+    /**
+     * getRemoteConnection
+     *
+     * @param id
+     * @param nodeId
+     * @param accessModeId
+     * @param context
+     * @return
+     */
     public ServiceResult<NodeConnectionBO> getRemoteConnection(String id, String nodeId, String accessModeId, CsceneContextBO context) {
         try {
             CsceneContextHolder.setCsceneInstanceId(id);
@@ -1252,6 +1525,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
     }
 
+    /**
+     * getConnectionUrl
+     *
+     * @param csceneId
+     * @param nodeId
+     * @param protocol
+     * @param response
+     * @return
+     */
     public ServiceResult<String> getConnectionUrl(String csceneId, String nodeId, String protocol, HttpServletResponse response) {
         String sceneId = getSceneId(csceneId);
         var sceneHandler = new SceneHandler(sceneId, null, null);
@@ -1263,6 +1545,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(CloudSceneConnectionCommon.getConnectionUrl(param, response).getData());
     }
 
+    /**
+     * getRemoteTtyConnection
+     *
+     * @param id
+     * @param nodeId
+     * @return
+     */
     public ServiceResult<NodeConnectionBO> getRemoteTtyConnection(String id, String nodeId) {
         String sceneId = getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
@@ -1273,6 +1562,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(result);
     }
 
+    /**
+     * enableRecording
+     *
+     * @param id
+     * @param nodeId
+     * @param connectionId
+     * @param context
+     * @return
+     */
     public ServiceResult<NodeConnectionBO> enableRecording(String id, String nodeId, String connectionId, CsceneContextBO context) {
         CsceneContextHolder.setCsceneInstanceId(id);
         if (context == null || StringUtils.isEmpty(context.getAccessUserId())) {
@@ -1288,6 +1586,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return scenePluginCloudSceneService.enableRemoteRecording(sceneId, nodeId, context.getAccessUserId(), connectionId, cloudScenePluginContext);
     }
 
+    /**
+     * disableRecording
+     *
+     * @param id
+     * @param nodeId
+     * @param connectionId
+     * @param context
+     * @return
+     */
     public ServiceResult<NodeConnectionBO> disableRecording(String id, String nodeId, String connectionId, CsceneContextBO context) {
         try {
             CsceneContextHolder.setCsceneInstanceId(id);
@@ -1333,6 +1640,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return list;
     }
 
+    /**
+     * pause
+     *
+     * @param id
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> pause(String id, CsceneContextBO context) {
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
@@ -1345,6 +1659,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return this.sceneService.pause(sceneId, context.toSceneContext());
     }
 
+    /**
+     * unpause
+     *
+     * @param id
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> unpause(String id, CsceneContextBO context) {
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
@@ -1357,6 +1678,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return this.sceneService.unpause(sceneId, context.toSceneContext());
     }
 
+    /**
+     * suspend
+     *
+     * @param id
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> suspend(String id, CsceneContextBO context) {
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
@@ -1369,6 +1697,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return this.sceneService.suspend(sceneId, context.toSceneContext());
     }
 
+    /**
+     * resume
+     *
+     * @param id
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> resume(String id, CsceneContextBO context) {
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
@@ -1382,6 +1717,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     /**
+     * startElement
+     *
      * @param id
      * @param nodeId
      * @param context
@@ -1401,6 +1738,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     /**
+     * unSupportedOperation
+     *
      * @param csceneId 场景id
      * @param nodeId   节点id
      * @description: 如果是gns3靶标，禁止开机/重启/关机/重建
@@ -1415,6 +1754,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     /**
+     * stopElement
+     *
      * @param id
      * @param nodeId
      * @param context
@@ -1433,6 +1774,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return this.sceneService.stopElement(sceneId, nodeId, context.toSceneContext());
     }
 
+    /**
+     * pauseElement
+     *
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> pauseElement(String id, String nodeId, CsceneContextBO context) {
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
@@ -1445,6 +1794,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return this.sceneService.pauseElement(sceneId, nodeId, context.toSceneContext());
     }
 
+    /**
+     * unpauseElement
+     *
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> unpauseElement(String id, String nodeId, CsceneContextBO context) {
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
@@ -1457,6 +1814,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return this.sceneService.unpauseElement(sceneId, nodeId, context.toSceneContext());
     }
 
+    /**
+     * restartElement
+     *
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> restartElement(String id, String nodeId, CsceneContextBO context) {
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
@@ -1469,6 +1834,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return this.sceneService.restartElement(sceneId, nodeId, context.toSceneContext());
     }
 
+    /**
+     * createElement
+     *
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> createElement(String id, String nodeId, CsceneContextBO context) {
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
@@ -1481,6 +1854,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return this.sceneService.createElement(sceneId, nodeId, context.toSceneContext());
     }
 
+    /**
+     * recreateElement
+     *
+     * @param id
+     * @param nodeId
+     * @param image
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> recreateElement(String id, String nodeId, String image, CsceneContextBO context) {
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
@@ -1493,6 +1875,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return this.sceneService.recreateElement(sceneId, nodeId, image, context.toSceneContext());
     }
 
+    /**
+     * modifyElement
+     *
+     * @param bo
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> modifyElement(ElementModifyBO bo, CsceneContextBO context) {
         String sceneId = this.getSceneId(bo.getId());
         if (sceneId == null) {
@@ -1510,6 +1899,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return this.sceneService.modifyElement(sceneId, nodeId, bo.getUpdate(), context.toSceneContext());
     }
 
+    /**
+     * deleteElement
+     *
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> deleteElement(String id, String nodeId, CsceneContextBO context) {
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
@@ -1521,6 +1918,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return this.sceneService.deleteElement(sceneId, nodeId, context.toSceneContext());
     }
 
+    /**
+     * suspendElement
+     *
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> suspendElement(String id, String nodeId, CsceneContextBO context) {
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
@@ -1533,6 +1938,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return this.sceneService.suspendElement(sceneId, nodeId, context.toSceneContext());
     }
 
+    /**
+     * resumeElement
+     *
+     * @param id
+     * @param nodeId
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> resumeElement(String id, String nodeId, CsceneContextBO context) {
         String sceneId = this.getSceneId(id);
         if (sceneId == null) {
@@ -1545,6 +1958,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return this.sceneService.resumeElement(sceneId, nodeId, context.toSceneContext());
     }
 
+    /**
+     * snapshotElement
+     *
+     * @param id
+     * @param nodeId
+     * @param snapshotName
+     * @param description
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> snapshotElement(String id, String nodeId, String snapshotName, String description, CsceneContextBO context) {
         // 校验快照名长度、是否重复等
         if (StringUtils.isEmpty(snapshotName)) {
@@ -1601,6 +2024,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(true);
     }
 
+    /**
+     * execElement
+     *
+     * @param id
+     * @param nodeId
+     * @param command
+     * @param user
+     * @param context
+     * @return
+     */
     public ServiceResult<ElementCommandExecResult> execElement(String id, String nodeId, String command,
                                                                String user, CsceneContextBO context) {
         String sceneId = getSceneId(id);
@@ -1611,18 +2044,46 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(result);
     }
 
+    /**
+     * uploadElementFile
+     *
+     * @param id
+     * @param nodeId
+     * @param filePath
+     * @param filename
+     * @param destPath
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> uploadElementFile(String id, String nodeId, String filePath, String filename, String destPath, CsceneContextBO context) {
         String sceneId = getSceneId(id);
         scenePluginCloudSceneService.uploadElementFile(sceneId, nodeId, filePath, filename, destPath);
         return new ServiceResult<>(true);
     }
 
+    /**
+     * uploadElementFile
+     *
+     * @param id
+     * @param nodeId
+     * @param inputStream
+     * @param filename
+     * @param destPath
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> uploadElementFile(String id, String nodeId, InputStream inputStream, String filename, String destPath, CsceneContextBO context) {
         String sceneId = getSceneId(id);
         scenePluginCloudSceneService.uploadElementFile(sceneId, nodeId, inputStream, filename, destPath);
         return new ServiceResult<>(true);
     }
 
+    /**
+     * linkStatus
+     *
+     * @param csceneId
+     * @return
+     */
     public ServiceResult<SceneLinkStatusInfo> linkStatus(String csceneId) {
         String sceneId = getSceneId(csceneId);
         List<NodeLinkStatusBO> result = scenePluginCloudSceneService.linkStatus(sceneId).getSource();
@@ -1632,6 +2093,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(sceneLinkStatusInfo);
     }
 
+    /**
+     * deleteElementSnapshot
+     *
+     * @param csceneId
+     * @param nodeId
+     * @param snapshotId
+     * @return
+     */
     public ServiceResult<Boolean> deleteElementSnapshot(String csceneId, String nodeId, String snapshotId) {
         // 校验场景是否存在、快照是否在当前场景模板下
         ObjResult<CsceneInstanceModel> queryInstance = this.get(csceneId).getSource();
@@ -1675,6 +2144,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(result);
     }
 
+    /**
+     * elementSnapshotAction
+     *
+     * @param id
+     * @param nodeId
+     * @param snapshotId
+     * @param action
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> elementSnapshotAction(String id, String nodeId, String snapshotId, String action, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
@@ -1682,6 +2161,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(true);
     }
 
+    /**
+     * getReferCsceneNames
+     *
+     * @param usingList
+     * @param getName
+     * @param nameSize
+     * @return
+     */
     private <T> List<String> getReferCsceneNames(List<T> usingList, Function<T, String> getName, int nameSize) {
         if (CollectionUtils.isEmpty(usingList)) {
             return null;
@@ -1695,6 +2182,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ArrayList<>(names);
     }
 
+    /**
+     * getSceneInfo
+     *
+     * @param csceneInstanceId
+     * @return
+     */
     private SceneInfo getSceneInfo(String csceneInstanceId) {
         HumanCondition condition = new HumanCondition().link(CsceneInstanceModel.class, CsceneModel.class)
                 .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getCscene, CsceneModel.class, CsceneModel::getId)
@@ -1711,6 +2204,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
     }
 
+    /**
+     * instanceModify
+     *
+     * @param csceneBO
+     * @return
+     */
     public ServiceResult<CsceneInstanceBO> instanceModify(CsceneUpdateBO csceneBO) {
         CsceneInstanceBO instance = new CsceneInstanceBO();
         instance.setId(csceneBO.getId());
@@ -1845,6 +2344,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(instanceHandler.toData());
     }
 
+    /**
+     * mergeInstance
+     *
+     * @param instanceId
+     * @param newData
+     * @param originData
+     * @return
+     */
     private CsceneInstanceBO mergeInstance(String instanceId, CsceneInstanceBO newData, CsceneInstanceBO originData) {
         CsceneInstanceBO instance = new CsceneInstanceBO();
         instance.setId(instanceId);
@@ -1880,6 +2387,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return instance;
     }
 
+    /**
+     * mergeElements
+     *
+     * @param newElements
+     * @param originElements
+     * @param updateElementIds
+     * @return
+     */
     private List<SceneElementBO> mergeElements(List<SceneElementBO> newElements, List<SceneElementBO> originElements, List<String> updateElementIds) {
         Map<String, SceneElementBO> originElementsMap = new HashMap<>();
         Map<String, SceneElementBO> newElementsMap = new HashMap<>();
@@ -1932,6 +2447,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return result;
     }
 
+    /**
+     * mergePorts
+     *
+     * @param newPorts
+     * @param originPorts
+     * @return
+     */
     private List<SceneElementPortBO> mergePorts(List<SceneElementPortBO> newPorts, List<SceneElementPortBO> originPorts) {
         Set<String> originPortIds = new HashSet<>();
         for (SceneElementPortBO originPort : originPorts) {
@@ -1956,6 +2478,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return result;
     }
 
+    /**
+     * mergePluginDatas
+     *
+     * @param newData
+     * @param originData
+     * @param updateElementIds
+     * @return
+     */
     private ScenePluginDataBO mergePluginDatas(ScenePluginDataBO newData, ScenePluginDataBO originData, List<String> updateElementIds) {
         ScenePluginDataBO scenePluginDataBO = new ScenePluginDataBO();
         scenePluginDataBO.setScene(originData.getScene());
@@ -1964,6 +2494,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return scenePluginDataBO;
     }
 
+    /**
+     * mergeMap
+     *
+     * @param newData
+     * @param originData
+     * @param updateElementIds
+     * @return
+     */
     private Map<String, Map<String, Object>> mergeMap(Map<String, Map<String, Object>> newData, Map<String, Map<String, Object>> originData, List<String> updateElementIds) {
         Set<String> originElementIds = new HashSet<>(originData.keySet());
         Set<String> newElementIds = newData.keySet();
@@ -1988,6 +2526,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return result;
     }
 
+    /**
+     * reportElementAccessUser
+     *
+     * @param sceneId
+     * @param nodeId
+     */
     public void reportElementAccessUser(String sceneId, String nodeId) {
         List<CloudPluginSceneConnectionModel> connections = cloudPluginSceneConnectionMapper.list(new HumanCondition()
                 .select(CloudPluginSceneConnectionModel::getAccessUser)
@@ -2027,6 +2571,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportElementCommon(csceneElementCommon));
     }
 
+    /**
+     * listCsceneInstanceNodes
+     *
+     * @param sceneId
+     * @param nodeIds
+     * @param selectFields
+     * @return
+     */
     public List<SceneElementModel> listCsceneInstanceNodes(String sceneId, String[] nodeIds, SerializableFunction<SceneElementModel>... selectFields) {
         HumanCondition humanCondition = new HumanCondition().filterEqual(SceneElementModel::getScene, sceneId);
         if (Objects.nonNull(nodeIds) && nodeIds.length > 0) {

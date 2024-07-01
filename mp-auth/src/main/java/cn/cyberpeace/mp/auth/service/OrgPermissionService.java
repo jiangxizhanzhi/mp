@@ -15,14 +15,46 @@ import java.util.Set;
  */
 public interface OrgPermissionService extends BaseModelService<OrgPermissionModel, QueryParams> {
 
+    /**
+     * listTargetsByOrgId
+     *
+     * @param orgId
+     * @return
+     */
     Set<TargetModel> listTargetsByOrgId(String orgId);
 
+    /**
+     * listTargetsByOrgIdIncludeAllParentsOrg
+     *
+     * @param orgId
+     * @return
+     */
     Set<TargetModel> listTargetsByOrgIdIncludeAllParentsOrg(String orgId);
 
+    /**
+     * bindOrgTargets
+     *
+     * @param orgId
+     * @param targetIds
+     * @param cleanOldTargets
+     * @return boolean
+     */
     boolean bindOrgTargets(String orgId, List<String> targetIds, boolean cleanOldTargets);
 
+    /**
+     * deleteByOrgId
+     *
+     * @param orgId
+     * @return boolean
+     */
     boolean deleteByOrgId(String orgId);
 
+    /**
+     * deleteByTargetId
+     *
+     * @param targetId
+     * @return boolean
+     */
     boolean deleteByTargetId(String targetId);
 
 

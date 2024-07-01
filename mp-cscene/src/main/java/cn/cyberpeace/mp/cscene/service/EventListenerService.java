@@ -23,6 +23,11 @@ public class EventListenerService {
     @Autowired
     private ScenePluginCloudSceneService pluginCloudSceneService;
 
+    /**
+     * onMyEventPublished
+     *
+     * @param configUpdateEvent
+     */
     @EventListener
     public void onMyEventPublished(SysConfigUpdateEvent configUpdateEvent) {
         Map<String, String> configMap = (Map<String, String>) configUpdateEvent.getSource();
@@ -33,6 +38,11 @@ public class EventListenerService {
         }
     }
 
+    /**
+     * onMyEventPublished
+     *
+     * @param userLogoutEvent
+     */
     @EventListener
     public void onMyEventPublished(UserLogoutEvent userLogoutEvent) {
         Map<String, Object> userInfo = (Map<String, Object>) userLogoutEvent.getSource();

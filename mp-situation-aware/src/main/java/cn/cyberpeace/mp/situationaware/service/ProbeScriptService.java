@@ -28,6 +28,12 @@ public class ProbeScriptService {
     private ProbeScriptMapper probeScriptMapper;
 
 
+    /**
+     * getScriptChecksumByProbeId
+     *
+     * @param probeId
+     * @return
+     */
     public String getScriptChecksumByProbeId(String probeId) {
         return probeScriptMapper.getChecksumByProbeId(probeId);
     }
@@ -38,7 +44,9 @@ public class ProbeScriptService {
 
     /**
      * 将脚本内容上传FDFS，返回上传文件url
+     *
      * @param scriptContent
+     * @param scriptType
      * @return
      */
     public String uploadScriptContentToFDFS(String scriptContent, Integer scriptType) {
@@ -69,6 +77,8 @@ public class ProbeScriptService {
 
     /**
      * 导入脚本文件，返回脚本内容
+     *
+     * @param scriptFile
      * @return 脚本内容
      */
     public String readScriptFileContent(MultipartFile scriptFile) {

@@ -10,6 +10,11 @@ import cn.cyberpeace.mp.auth.model.UserModel;
  */
 public interface UserCheckService {
 
+    /**
+     * check
+     *
+     * @param userModel
+     */
     void check(UserModel userModel);
 
 }

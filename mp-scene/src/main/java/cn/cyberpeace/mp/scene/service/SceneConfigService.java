@@ -25,6 +25,15 @@ public class SceneConfigService {
     @Resource
     private SceneElementSnapshotMapper snapshotMapper ;
 
+    /**
+     * get
+     *
+     * @param id
+     * @param isAreaMode
+     * @param areaId
+     * @param context
+     * @return
+     */
     public ServiceResult<SceneConfigDataBO> get(String id, boolean isAreaMode, String areaId,
                                                 SceneConfigContextBO context) {
         SceneConfigHandler sceneConfigHandler;
@@ -36,6 +45,14 @@ public class SceneConfigService {
         return new ServiceResult<>(sceneConfigHandler.toData());
     }
 
+    /**
+     * sync
+     *
+     * @param sceneConfigDataBO
+     * @param isAreaMode
+     * @param context
+     * @return
+     */
     public ServiceResult<SceneConfigDataBO> sync(SceneConfigDataBO sceneConfigDataBO, boolean isAreaMode,
                                                  SceneConfigContextBO context) {
         SceneConfigHandler sceneConfigHandler;
@@ -52,6 +69,14 @@ public class SceneConfigService {
         return new ServiceResult<>(sceneConfigHandler.toData());
     }
 
+    /**
+     * delete
+     *
+     * @param id
+     * @param logic
+     * @param context
+     * @return
+     */
     public ServiceResult<Boolean> delete(String id, boolean logic, SceneConfigContextBO context) {
         SceneConfigHandler sceneConfigHandler;
         try {
@@ -67,6 +92,14 @@ public class SceneConfigService {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * bulkDelete
+     *
+     * @param ids
+     * @param logic
+     * @param context
+     * @return
+     */
     public ServiceResult<Integer> bulkDelete(String[] ids, boolean logic, SceneConfigContextBO context) {
         int result = 0;
         for (String id: ids) {

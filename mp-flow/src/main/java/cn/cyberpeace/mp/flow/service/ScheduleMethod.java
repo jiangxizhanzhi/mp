@@ -9,6 +9,11 @@ import cn.cyberpeace.mp.flow.model.base.FlowBaseModel;
  */
 public interface ScheduleMethod {
 
+    /**
+     * execute
+     *
+     * @param obj
+     */
     void execute(FlowBaseModel obj);
 
 }

@@ -120,6 +120,12 @@ public class MenuSetService {
         return visibleMenuIds;
     }
 
+    /**
+     * getSystemTreeMenusBy
+     *
+     * @param visibleMenuIds
+     * @return
+     */
     public List<TargetBo> getSystemTreeMenusBy(Set<String> visibleMenuIds) {
         List<MenuTemplateModel> userMenus = listAll(AuthConstant.DEFAULT_TENANT, 1, "1");
         List<MenuTemplateModel> userVisibleMenus = new ArrayList<>();
@@ -133,6 +139,12 @@ public class MenuSetService {
         return tree;
     }
 
+    /**
+     * getCurrentUserTreeMenusBy
+     *
+     * @param visibleMenuIds
+     * @return
+     */
     public List<TargetBo> getCurrentUserTreeMenusBy(Set<String> visibleMenuIds) {
         UserModel user = UserUtils.getLoginUser();
         List<MenuTemplateModel> userMenus = this.getUserAllMenus(user.getId());
@@ -147,6 +159,12 @@ public class MenuSetService {
         return tree;
     }
 
+    /**
+     * importDefaultTemplate
+     *
+     * @param file
+     * @return
+     */
     public MenuTemplate importDefaultTemplate(MultipartFile file) {
         String content = readJsonStrFromMultipartFile(file);
         MenuTemplate menuTemplate = JsonCommon.snakeParse(content, new TypeReference<MenuTemplate>() {
@@ -154,15 +172,35 @@ public class MenuSetService {
         return this.refreshTemplate(menuTemplate.getMenuTree(), "1");
     }
 
+    /**
+     * addTemplate
+     *
+     * @param inputTreeTargets
+     * @return
+     */
     public MenuTemplate addTemplate(List<TargetBo> inputTreeTargets) {
         return save2Template(inputTreeTargets, TextUtils.uuid());
     }
 
+    /**
+     * refreshTemplate
+     *
+     * @param inputTreeTargets
+     * @param templateId
+     * @return
+     */
     public MenuTemplate refreshTemplate(List<TargetBo> inputTreeTargets, String templateId) {
         menuTemplateMapper.filterDelete(new HumanCondition().filterEqual(MenuTemplateModel::getTemplateId, templateId));
         return save2Template(inputTreeTargets, templateId);
     }
 
+    /**
+     * save2Template
+     *
+     * @param inputTreeTargets
+     * @param templateId
+     * @return
+     */
     private MenuTemplate save2Template(List<TargetBo> inputTreeTargets, String templateId) {
         List<TargetBo> listTargets = new ArrayList<>();
         List<TargetBo> queue = new LinkedList<>();
@@ -193,6 +231,13 @@ public class MenuSetService {
         return menuTemplate;
     }
 
+    /**
+     * getMenuTemplateModel
+     *
+     * @param menuTemplate
+     * @param t
+     * @return 这个target以后就当做menu
+     */
     private static MenuTemplateModel getMenuTemplateModel(MenuTemplate menuTemplate, TargetBo t) {
         MenuTemplateModel model = new MenuTemplateModel();
         model.setTemplateId(menuTemplate.templateId);
@@ -208,6 +253,12 @@ public class MenuSetService {
         return model;
     }
 
+    /**
+     * updateRoleMenuTemplate
+     *
+     * @param roleId
+     * @param templateId
+     */
     public void updateRoleMenuTemplate(String roleId, String templateId) {
         MenuTemplateRoleModel existModel = menuTemplateRoleMapper.first(new HumanCondition().filterEqual(MenuTemplateRoleModel::getRoleId, roleId));
         if (existModel != null) {
@@ -223,6 +274,12 @@ public class MenuSetService {
         }
     }
 
+    /**
+     * getUserAllMenus
+     *
+     * @param userId
+     * @return
+     */
     private List<MenuTemplateModel> getUserAllMenus(String userId) {
         List<UserRoleModel> roles = userRoleMapper.list(new HumanCondition().filterEqual(UserRoleModel::getUser, userId).orderBy(UserRoleModel::getPk));
         List<MenuTemplateModel> targets = null;
@@ -239,6 +296,14 @@ public class MenuSetService {
         return targets;
     }
 
+    /**
+     * listAll
+     *
+     * @param tenant
+     * @param type
+     * @param templateId
+     * @return
+     */
     private List<MenuTemplateModel> listAll(String tenant, Integer type, String templateId) {
         HumanCondition humanCondition = new HumanCondition();
         if (Objects.nonNull(type)) {
@@ -253,6 +318,12 @@ public class MenuSetService {
         return targets;
     }
 
+    /**
+     * toTree
+     *
+     * @param targets
+     * @return
+     */
     private List<TargetBo> toTree(List<MenuTemplateModel> targets) {
         ParamCheck.notEmpty(targets, AuthBasei18nCode.TARGET_LIST);
         Map<String, List<TargetModel>> map = new HashMap<>();
@@ -296,7 +367,11 @@ public class MenuSetService {
         return parentTargets;
     }
 
-    // 权限树排序
+    /**
+     * 权限树排序
+     *
+     * @param targets
+     */
     private void sortTree(List<TargetBo> targets) {
         for (TargetBo t : targets) {
             if (CollectionUtils.isNotEmpty(t.getChildren())) {
@@ -327,6 +402,12 @@ public class MenuSetService {
         private String templateId;
     }
 
+    /**
+     * getPositiveKeys
+     *
+     * @param activationResponse
+     * @return
+     */
     private List<String> getPositiveKeys(ActivationResponse activationResponse) {
         List<ActivationItem> items = activationResponse.getItems();
         List<String> positiveKeys = new ArrayList<>();
@@ -341,6 +422,13 @@ public class MenuSetService {
         return positiveKeys;
     }
 
+    /**
+     * checkEditionMatch
+     *
+     * @param mi
+     * @param edition
+     * @return boolean
+     */
     private boolean checkEditionMatch(MenuExtraInfoModel mi, String edition) {
         boolean editionMatch = false;
         if (StringUtils.isNotEmpty(mi.getEditions())) {
@@ -350,6 +438,13 @@ public class MenuSetService {
         return editionMatch;
     }
 
+    /**
+     * checkItemMatch
+     *
+     * @param mi
+     * @param positiveKeys
+     * @return boolean
+     */
     private boolean checkItemMatch(MenuExtraInfoModel mi, List<String> positiveKeys) {
         boolean itemMatch = false;
         if (StringUtils.isNotEmpty(mi.getActivKeys())) {
@@ -376,6 +471,12 @@ public class MenuSetService {
         return itemMatch;
     }
 
+    /**
+     * readJsonStrFromMultipartFile
+     *
+     * @param file
+     * @return
+     */
     private String readJsonStrFromMultipartFile(MultipartFile file) {
         String jsonStr = "";
         try (Reader reader = new InputStreamReader(file.getInputStream(), "utf-8")) {

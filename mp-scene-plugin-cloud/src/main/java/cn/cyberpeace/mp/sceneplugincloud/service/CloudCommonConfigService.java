@@ -31,6 +31,11 @@ public class CloudCommonConfigService {
 
     private final static Map<String, String> CONFIG_MAP = new HashMap<>();
 
+    /**
+     * getSystemTypeToAgentSupport
+     *
+     * @return
+     */
     public ServiceResult<Map<String, Object>> getSystemTypeToAgentSupport() {
         this.init();
         String result = CONFIG_MAP.get(SYSTEM_TYPE_TO_AGENT_SUPPORT);
@@ -41,6 +46,11 @@ public class CloudCommonConfigService {
         return new ServiceResult<>(new HashMap<>());
     }
 
+    /**
+     * getCloudMessageConvert
+     *
+     * @return
+     */
     public ServiceResult<String> getCloudMessageConvert() {
         this.init();
         if (CONFIG_MAP.containsKey(CLOUD_MESSAGE_CONVERT)) {
@@ -49,6 +59,9 @@ public class CloudCommonConfigService {
         return new ServiceResult<>(StringUtils.EMPTY);
     }
 
+    /**
+     * init
+     */
     private synchronized void init() {
         if (LOADED) {
             return;

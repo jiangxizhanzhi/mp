@@ -17,18 +17,21 @@ public interface LogFileService extends Ordered {
 
     /**
      * 日志上报类型
+     *
      * @return
      */
     String logReportType();
 
     /**
      * 列表
+     *
      * @return
      */
     List<LogReportDTO> list(String type);
 
     /**
      * 下载
+     *
      * @param downloadDTO
      * @return
      */

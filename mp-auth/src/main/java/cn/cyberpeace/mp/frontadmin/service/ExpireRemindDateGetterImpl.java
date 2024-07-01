@@ -15,6 +15,11 @@ public class ExpireRemindDateGetterImpl implements ExpireRemindDateGetter {
     @Resource
     private SysActivationService activationService;
 
+    /**
+     * get
+     *
+     * @return
+     */
     @Override
     public LocalDateTime get() {
         ActivationResponse content = activationService.status();

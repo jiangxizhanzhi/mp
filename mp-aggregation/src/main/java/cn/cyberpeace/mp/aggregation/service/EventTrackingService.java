@@ -11,6 +11,11 @@ public class EventTrackingService {
     @Autowired
     private EventTrackingRecordMapper recordMapper;
 
+    /**
+     * save
+     *
+     * @param request
+     */
     public void save(EventTrackRequest request) {
         EventTrackingRecord record = new EventTrackingRecord();
         record.setAction(request.getAction());

@@ -28,6 +28,13 @@ public class CsceneNetworkBehaviorService {
 	@Autowired
 	private NetworkBehaviorMapper networkBehaviorMapper;
 
+	/**
+	 * add
+	 *
+	 * @param configBos
+	 * @param nodeId
+	 * @return
+	 */
 	public List<String> add(List<NetworkBehaviorConfigBo> configBos, String nodeId) {
 		List<String> ids = configBos.stream().map(NetworkBehaviorConfigBo::getNetworkBehaviorId).collect(Collectors.toList());
 
@@ -58,11 +65,22 @@ public class CsceneNetworkBehaviorService {
 		return csceneNetworkBehaviorIds;
 	}
 
+	/**
+	 * deleteByNodeId
+	 *
+	 * @param nodeId
+	 */
 	public void deleteByNodeId(String nodeId) {
 		HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneNetworkBehaviorModel::getNodeId, nodeId);
 		csceneNetworkBehaviorMapper.filterDelete(humanCondition);
 	}
 
+	/**
+	 * getMapByNodeId
+	 *
+	 * @param nodeId
+	 * @return
+	 */
 	public Map<String, CsceneNetworkBehaviorModel> getMapByNodeId(String nodeId) {
 		HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneNetworkBehaviorModel::getNodeId, nodeId);
 		return csceneNetworkBehaviorMapper.list(humanCondition).stream().collect(Collectors.toMap(CsceneNetworkBehaviorModel::getId, m -> m));

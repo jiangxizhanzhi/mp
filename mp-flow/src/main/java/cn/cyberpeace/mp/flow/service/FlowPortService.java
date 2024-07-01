@@ -10,6 +10,13 @@ import java.util.List;
 
 public interface FlowPortService extends BaseModelService<FlowPortModel, QueryParams>  {
 
+    /**
+     * batchCreatePorts
+     *
+     * @param networkInfos
+     * @param flowActuatorModel
+     * @param externalNetId
+     */
     void batchCreatePorts(List<FlowNetworkInfo> networkInfos, FlowActuatorModel flowActuatorModel, String externalNetId);
 
 }

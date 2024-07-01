@@ -43,6 +43,7 @@ public class DevopsTargetService {
 
     /**
      * 分页
+     *
      * @param dto
      * @return
      */
@@ -54,6 +55,7 @@ public class DevopsTargetService {
 
     /**
      * 统计总数
+     *
      * @param dto
      * @return
      */
@@ -63,6 +65,7 @@ public class DevopsTargetService {
 
     /**
      * 更新
+     *
      * @param device
      * @return
      */
@@ -79,6 +82,7 @@ public class DevopsTargetService {
 
     /**
      * 新增
+     *
      * @param deviceList
      * @return
      */
@@ -103,6 +107,11 @@ public class DevopsTargetService {
         return deviceTargetMapper.batchInsert(deviceTargetPOS);
     }
 
+    /**
+     * updateInPosition
+     *
+     * @param deviceList
+     */
     public void updateInPosition(List<Device> deviceList) {
         if (deviceList == null) {
             return;
@@ -123,6 +132,7 @@ public class DevopsTargetService {
 
     /**
      * 靶标类型统计
+     *
      * @return
      */
     public Map<String, Object> countTarget() {
@@ -131,6 +141,7 @@ public class DevopsTargetService {
 
     /**
      * 虚拟靶标统计
+     *
      * @return
      */
     public Map<String, Object> countVmTarget() {
@@ -139,6 +150,7 @@ public class DevopsTargetService {
 
     /**
      * 实体靶标统计
+     *
      * @return
      */
     public Map<String, Object> countEntityTarget() {
@@ -147,6 +159,7 @@ public class DevopsTargetService {
 
     /**
      * 删除所有靶标数据
+     *
      * @return
      */
     @Transactional
@@ -170,6 +183,7 @@ public class DevopsTargetService {
 
     /**
      * 删除指定靶标
+     *
      * @param dto
      * @return
      */
@@ -178,6 +192,12 @@ public class DevopsTargetService {
         return deviceTargetMapper.delete(dto);
     }
 
+    /**
+     * convertToTargetModel
+     *
+     * @param device
+     * @return
+     */
     protected DeviceTargetPO convertToTargetModel(Device device) {
         DeviceTargetPO deviceTargetPO = convertDevice(device);
         deviceTargetPO.setIsPublic(PublicEnum.ALL_PUBLIC);
@@ -188,6 +208,7 @@ public class DevopsTargetService {
 
     /**
      * 转换Device
+     *
      * @param device
      * @return
      */
@@ -259,6 +280,12 @@ public class DevopsTargetService {
         return deviceTargetPO;
     }
 
+    /**
+     * getSupportExport
+     *
+     * @param device
+     * @return
+     */
     private Boolean getSupportExport(Device device) {
         // 内置靶标不可导出
         if (Boolean.TRUE.equals(device.getIsImport() || Boolean.TRUE.equals(device.getIsInit()) || Boolean.TRUE.equals(device.getIsInternal()))) {

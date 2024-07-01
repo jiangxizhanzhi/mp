@@ -63,6 +63,7 @@ public class SuricataService {
     
     /**
      * @description: 处理规则文件
+     *
      * @param file
      * @return boolean
      */
@@ -81,6 +82,12 @@ public class SuricataService {
         return importData(convertRuleList);
     }
 
+    /**
+     * analyseRule
+     *
+     * @param metadata
+     * @return
+     */
     public SuricataData analyseRule(String metadata) {
         try {
             SuricataRuleModel suricataRuleModel = SuricataRuleModel.parseRuleStringToModel(metadata, classificationAnalyseService);
@@ -90,6 +97,12 @@ public class SuricataService {
             throw new MpRuntimeException(SituationalAwareErrorCode.SURICATA_FORMAT_ERROR);
         }
     }
+
+    /**
+     * saveRule
+     *
+     * @param suricataRuleRequest
+     */
     public void saveRule(SuricataRuleRequest suricataRuleRequest) {
         try {
             SuricataRuleModel suricataRuleModel = SuricataRuleModel.parseRuleStringToModel(suricataRuleRequest.getMetadata(), classificationAnalyseService);
@@ -112,6 +125,12 @@ public class SuricataService {
         }
     }
 
+    /**
+     * importData
+     *
+     * @param convertRuleList
+     * @return boolean
+     */
     @Transactional(rollbackFor = Exception.class)
     public boolean importData(List<SuricataRuleModel> convertRuleList){
         int num = suricataRuleMapper.filterDelete(new HumanCondition()
@@ -131,6 +150,11 @@ public class SuricataService {
         return bulkResult.getSuccessCount() > 0;
     }
 
+    /**
+     * convertAllRuleDataToRuleFile
+     *
+     * @param filePath
+     */
     public void convertAllRuleDataToRuleFile(String filePath) {
         try {
             Path targetPath = Path.of(filePath);
@@ -143,12 +167,19 @@ public class SuricataService {
     }
 
 
-
+    /**
+     * scanRuleDataByPkAndInitClassType
+     */
     @Transactional(rollbackFor = Exception.class)
     public void scanRuleDataByPkAndInitClassType() {
         scanRuleDataByPkAndDoSomething(this::updateSuricataRuleClassTypeWhenEmpty);
     }
 
+    /**
+     * updateSuricataRuleClassTypeWhenEmpty
+     *
+     * @param suricataRuleModelList
+     */
     private void updateSuricataRuleClassTypeWhenEmpty(List<SuricataRuleModel> suricataRuleModelList) {
         List<SuricataRuleModel> emptyClassTypeRules = suricataRuleModelList.stream()
                 .filter(ruleModel -> StringUtils.isEmpty(ruleModel.getClassTypeCn()) || StringUtils.isEmpty(ruleModel.getClassTypeEn()))
@@ -166,6 +197,11 @@ public class SuricataService {
     }
 
 
+    /**
+     * scanRuleDataByPkAndWriteRuleDataToFile
+     *
+     * @param ruleDataPath
+     */
     private void scanRuleDataByPkAndWriteRuleDataToFile(Path ruleDataPath) {
         scanRuleDataByPkAndDoSomething((ruleModelList) -> {
             try {
@@ -177,6 +213,11 @@ public class SuricataService {
         });
     }
 
+    /**
+     * scanRuleDataByPkAndDoSomething
+     *
+     * @param consumer
+     */
     private void scanRuleDataByPkAndDoSomething(Consumer<List<SuricataRuleModel>> consumer) {
         int initPk = 0;
         do {
@@ -198,6 +239,12 @@ public class SuricataService {
         } while (true);
     }
 
+    /**
+     * convertRuleDataToLines
+     *
+     * @param suricataRuleModelList
+     * @return
+     */
     private List<String> convertRuleDataToLines(List<SuricataRuleModel> suricataRuleModelList) {
         if (CollectionUtils.isEmpty(suricataRuleModelList)) {
             return Collections.emptyList();
@@ -224,6 +271,7 @@ public class SuricataService {
 
     /**
      * @description: 解析规则数据为规则数据对象
+     *
      * @param ruleStrList
      * @return List<SuricataData>
      */
@@ -245,6 +293,7 @@ public class SuricataService {
 
     /**
      * @description: 从上传文件中获取所有规则
+     *
      * @param file
      * @return List<String>
      */
@@ -274,6 +323,7 @@ public class SuricataService {
 
     /**
      * @description: 分页查询流量规则信息
+     *
      * @param suricataQueryRequest
      * @return ServiceResult<List<SuricataData>>
      */
@@ -317,6 +367,12 @@ public class SuricataService {
     }
 
 
+    /**
+     * convertModelToData
+     *
+     * @param rule
+     * @return
+     */
     public static SuricataData convertModelToData(SuricataRuleModel rule) {
         SuricataData build = SuricataData.builder().action(rule.getAction()).protocol(rule.getProtocol()).source(rule.getSource())
                 .sourcePorts(rule.getSourcePorts()).direction(rule.getDirection()).destination(rule.getDestination())
@@ -339,6 +395,7 @@ public class SuricataService {
 
     /**
      * @description: 查询规则所有的协议类型
+     *
      * @return ServiceResult<List<String>>
      */
     public ServiceResult<List<String>> queryAllProtocols() {
@@ -357,6 +414,11 @@ public class SuricataService {
         return new ServiceResult<>(result).asResult();
     }
 
+    /**
+     * queryAllClassType
+     *
+     * @return
+     */
     public List<String> queryAllClassType() {
         if (LocaleUtil.chineseLocalFlag()) {
             return new ArrayList<>(classificationAnalyseService.getFlowEventEnToCnMap().values());

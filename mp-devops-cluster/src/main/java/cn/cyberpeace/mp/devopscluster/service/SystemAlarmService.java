@@ -22,18 +22,32 @@ public interface SystemAlarmService extends BaseModelService<SystemAlarmModel, Q
 
     /**
      * 处理系统告警
+     *
      * @param systemAlarmModels
      */
     void processSystemAlarm(List<SystemAlarmModel> systemAlarmModels);
 
     /**
      * 当天告警数量统计
+     *
      * @return
      */
     List<AlarmCountVO> todayAlarmCount();
 
+    /**
+     * listSystemAlarm
+     *
+     * @param queryParams
+     * @return
+     */
     ListObjServiceResult<SystemAlarmModel> listSystemAlarm(AlarmQueryParams queryParams);
 
+    /**
+     * getSystemAlarmDistribution
+     *
+     * @param request
+     * @return
+     */
     ServiceResult<AlarmDistributionVo> getSystemAlarmDistribution(AlarmDistributionRequest request);
 
 }

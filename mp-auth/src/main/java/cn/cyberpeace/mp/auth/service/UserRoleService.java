@@ -18,31 +18,93 @@ import java.util.List;
  */
 public interface UserRoleService extends BaseModelService<UserRoleModel, QueryParams> {
 
+    /**
+     * listByUserId
+     *
+     * @param userId
+     * @return
+     */
     List<RoleModel> listByUserId(String userId);
 
+    /**
+     * listByUserIds
+     *
+     * @param userIds
+     * @return
+     */
     List<RoleModel> listByUserIds(List<String> userIds);
 
+    /**
+     * listUsersByRoleIdNoRestrict
+     *
+     * @param roleId
+     * @return
+     */
     List<UserModel> listUsersByRoleIdNoRestrict(String roleId);
 
+    /**
+     * pageByUserId
+     *
+     * @param pageRequest
+     * @return
+     */
     ListObjServiceResult pageByUserId(UserRolePageRequest pageRequest);
 
+    /**
+     * pageByRoleId
+     *
+     * @param pageRequest
+     * @return
+     */
     ListObjServiceResult pageByRoleId(UserRolePageRequest pageRequest);
 
-    // 绑定一个用户，多个角色 会清除用户原来绑定的角色
+    /**
+     * 绑定一个用户，多个角色 会清除用户原来绑定的角色
+     *
+     * @param userId
+     * @param roleIds
+     * @param cleanOldRoles
+     * @return boolean
+     */
     boolean bindUserRoles(String userId, List<String> roleIds, boolean cleanOldRoles);
 
-    // 绑定一个角色，多个用户
+    /**
+     * 绑定一个角色，多个用户
+     *
+     * @param roleId
+     * @param userIds
+     * @return boolean
+     */
     boolean bindRoleUsers(String roleId, List<String> userIds);
 
-    // 解绑一个角色，多个用户
+    /**
+     * 解绑一个角色，多个用户
+     *
+     * @param roleId
+     * @param userIds
+     * @return boolean
+     */
     boolean deleteByRoleIdAndUserIds(String roleId, List<String> userIds);
 
+    /**
+     * deleteByUserId
+     *
+     * @param userId
+     * @return boolean
+     */
     boolean deleteByUserId(String userId);
 
+    /**
+     * deleteByRoleId
+     *
+     * @param roleId
+     * @return boolean
+     */
     boolean deleteByRoleId(String roleId);
 
     /**
      * 统计每个角色的用户数量
+     *
      * @return
      */
     List<UserRoleStatisticBo> getUserRoleStatistics();

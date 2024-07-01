@@ -33,6 +33,11 @@ public class OperateUserPermissionService extends OperatePermissionService {
     private UserRoleService userRoleService;
 
 
+    /**
+     * getExcludeRoleIdsByLoginUserForSearchingUsers
+     *
+     * @return
+     */
     public List<String> getExcludeRoleIdsByLoginUserForSearchingUsers() {
 
         List<String> result = new ArrayList<>();
@@ -54,6 +59,11 @@ public class OperateUserPermissionService extends OperatePermissionService {
         return result;
     }
 
+    /**
+     * getExcludeUserIdsByLoginUserForSearchingUsers
+     *
+     * @return
+     */
     public List<String> getExcludeUserIdsByLoginUserForSearchingUsers() {
 
         boolean isSupserUser = isLoginUserSuperUser();
@@ -68,6 +78,7 @@ public class OperateUserPermissionService extends OperatePermissionService {
 
     /**
      * targetUserId是否是登录用户自身
+     *
      * @param targetUserIds
      * @return
      */
@@ -85,6 +96,7 @@ public class OperateUserPermissionService extends OperatePermissionService {
     /**
      * 根据操作用户id集合进行权限校验
      * 如：批量删除用户，批量更新用户等
+     *
      * @param targetUserIds
      */
     public void checkByTargetUserIdsForSearching(List<String> targetUserIds) {
@@ -128,6 +140,7 @@ public class OperateUserPermissionService extends OperatePermissionService {
     /**
      * 根据操作用户id集合进行权限校验
      * 如：批量删除用户，批量更新用户等
+     *
      * @param targetUserIds
      */
     public void checkByTargetUserIds(List<String> targetUserIds) {
@@ -163,6 +176,7 @@ public class OperateUserPermissionService extends OperatePermissionService {
     /**
      * 根据操作对象的所有角色名称检查权限
      * 如：excel批量导入
+     *
      * @param targetRoleNames
      */
     public void checkByTargetRoleNames(List<String> targetRoleNames) {

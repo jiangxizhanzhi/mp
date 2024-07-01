@@ -21,6 +21,7 @@ public class DevopsTargetAuthService {
 
     /**
      * 分组查询镜像授权用户数
+     *
      * @param ids
      * @return
      */
@@ -30,6 +31,7 @@ public class DevopsTargetAuthService {
 
     /**
      * 根据镜像ID查询用户信息
+     *
      * @param target
      * @return
      */
@@ -39,6 +41,7 @@ public class DevopsTargetAuthService {
 
     /**
      * 根据镜像ID集合批量删除数据
+     *
      * @param ids
      * @return
      */
@@ -49,6 +52,7 @@ public class DevopsTargetAuthService {
 
     /**
      * 批量创建
+     *
      * @param authModelList
      * @return
      */

@@ -15,9 +15,26 @@ import javax.servlet.http.HttpServletRequest;
  */
 public interface OperateLogService {
 
+    /**
+     * create
+     *
+     * @param request
+     */
     void create(OperationLogRequest request);
 
+    /**
+     * create
+     *
+     * @param operateLog
+     * @param request
+     */
     void create(OperateLog operateLog, HttpServletRequest request);
 
+    /**
+     * search
+     *
+     * @param request
+     * @return
+     */
     ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request);
 }

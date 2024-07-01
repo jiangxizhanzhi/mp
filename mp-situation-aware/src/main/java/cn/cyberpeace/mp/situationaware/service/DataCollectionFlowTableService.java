@@ -27,7 +27,8 @@ public class DataCollectionFlowTableService{
 
 
     /**
-     * 批量创建流表
+     * createDataCollectionFlow
+     *
      * @param agentInstanceIds agentInstanceIds
      */
     public void createDataCollectionFlow(List<String> agentInstanceIds) {
@@ -47,6 +48,7 @@ public class DataCollectionFlowTableService{
 
     /**
      * 根据agentInstanceId删除流表
+     *
      * @param agentInstanceIds agentInstanceIds
      */
     public void deleteDataCollectionFlow(List<String> agentInstanceIds) {

@@ -18,24 +18,35 @@ public interface AlarmStatisticsService extends BaseModelService<AlarmStatistics
 
     /**
      * 查询今天告警统计信息
+     *
      * @return
      */
     List<AlarmStatisticsModel> todayAlarmStatistics();
 
     /**
      * 服务告警趋势
+     *
+     * @param days
      * @return
      */
     List<AlarmStatisticsVO> serviceAlarmStatistics(int days);
 
     /**
      * 设备告警趋势
+     *
+     * @param days
      * @return
      */
     List<AlarmStatisticsVO> serverAlarmStatistics(int days);
 
     /**
      * 告警趋势
+     *
+     * @param types
+     * @param unit
+     * @param count
+     * @param startTime
+     * @param endTime
      * @return
      */
     List<AlarmStatisticsTrendVO> alarmTrend(Integer[] types, String unit, Integer count, LocalDateTime startTime, LocalDateTime endTime);

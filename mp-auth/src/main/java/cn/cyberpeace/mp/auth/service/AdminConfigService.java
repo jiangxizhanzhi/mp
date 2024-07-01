@@ -26,6 +26,7 @@ public class AdminConfigService {
 
     /**
      * 允许用户公开注册
+     *
      * @return
      */
     public boolean isPublicRegisterAvailable() {
@@ -40,6 +41,7 @@ public class AdminConfigService {
 
     /**
      * 是否新注册用户需要审核
+     *
      * @return
      */
     public boolean isNewUserNeedAudit() {
@@ -54,6 +56,7 @@ public class AdminConfigService {
 
     /**
      * 查询注册用户默认角色ID
+     *
      * @return
      */
     public String getRegisterDefaultRoleId() {

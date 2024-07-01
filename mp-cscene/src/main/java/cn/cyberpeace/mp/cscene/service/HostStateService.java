@@ -104,6 +104,15 @@ public class HostStateService {
     private CscenePluginDataRecordService dataRecordService;
 
 
+    /**
+     * getHostStatesFromWazuh
+     *
+     * @param sceneId
+     * @param agentName
+     * @param startTime
+     * @param endTime
+     * @return
+     */
     public List<HostState> getHostStatesFromWazuh(String sceneId, String agentName, LocalDateTime startTime, LocalDateTime endTime) {
         List<CollectionHostStateBO> hostStateBOS = foo(agentName, startTime, endTime);
 
@@ -116,6 +125,13 @@ public class HostStateService {
         return hostStates;
     }
 
+    /**
+     * getHostState
+     *
+     * @param sceneId
+     * @param hostStateBO
+     * @return
+     */
     private static HostState getHostState(String sceneId, CollectionHostStateBO hostStateBO) {
         HostState hs = new HostState();
         hs.setAgentName(hostStateBO.getAgentName());
@@ -136,6 +152,14 @@ public class HostStateService {
     }
 
 
+    /**
+     * foo
+     *
+     * @param agentName
+     * @param startTime
+     * @param endTime
+     * @return
+     */
     private List<CollectionHostStateBO> foo(String agentName, LocalDateTime startTime, LocalDateTime endTime) {
         // 构建查询参数
         WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
@@ -159,6 +183,12 @@ public class HostStateService {
         return hostStateBOs;
     }
 
+    /**
+     * getCollectionHostStateBO
+     *
+     * @param srcHostState
+     * @return
+     */
     private CollectionHostStateBO getCollectionHostStateBO(WazuhHostStateModel srcHostState) {
         CollectionHostStateBO hostStateBO = new CollectionHostStateBO();
         hostStateBO.setCpuCount(srcHostState.getCpuCount());
@@ -236,6 +266,16 @@ public class HostStateService {
         return processHostStateTrendByAgentNames(agentNames, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
     }
 
+    /**
+     * processHostStateTrend
+     *
+     * @param sceneIds
+     * @param elementIds
+     * @param startTime
+     * @param endTime
+     * @param segmentCount
+     * @return
+     */
     private List<HostState> processHostStateTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount) {
         // 默认值
         LocalDateTime sceneStartTime = null;
@@ -275,6 +315,15 @@ public class HostStateService {
         return listHostStates(timeList, cpuResult, memResult, diskResult);
     }
 
+    /**
+     * processHostStateTrendByAgentNames
+     *
+     * @param agentNames
+     * @param startTime
+     * @param endTime
+     * @param segmentCount
+     * @return
+     */
     private List<HostState> processHostStateTrendByAgentNames(List<String> agentNames, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount) {
         // 默认值
         if (Objects.isNull(endTime)) {
@@ -304,6 +353,7 @@ public class HostStateService {
     /**
      * 查询单个节点机器当前状态
      *
+     * @param pageRequest
      * @return
      */
     // todo 老方法，待优化
@@ -324,6 +374,12 @@ public class HostStateService {
         return collectionHostStateBOs2HostStates(hostStateBOS);
     }
 
+    /**
+     * listHostStatesByAgentName
+     *
+     * @param request
+     * @return
+     */
     public List<HostState> listHostStatesByAgentName(AgentNameBasedRequest request) {
         request.ensure();
         if (CollectionUtil.isEmpty(request.getAgentNames())) {
@@ -340,6 +396,12 @@ public class HostStateService {
         return collectionHostStateBOs2HostStates(hostStateBOS);
     }
 
+    /**
+     * mapHostStatesByAgentName
+     *
+     * @param request
+     * @return
+     */
     public Map<String, List<HostState>> mapHostStatesByAgentName(AgentNameBasedRequest request) {
         request.ensure();
         if (CollectionUtil.isEmpty(request.getAgentNames())) {
@@ -361,6 +423,12 @@ public class HostStateService {
     }
 
 
+    /**
+     * collectionHostStateBOs2HostStates
+     *
+     * @param hostStateBOS
+     * @return
+     */
     private List<HostState> collectionHostStateBOs2HostStates(List<CollectionHostStateBO> hostStateBOS) {
         List<HostState> hostStates = new ArrayList<>();
         for (CollectionHostStateBO hostStateBO : hostStateBOS) {
@@ -371,6 +439,12 @@ public class HostStateService {
         return hostStates;
     }
 
+    /**
+     * getHostState
+     *
+     * @param hostStateBO
+     * @return
+     */
     private static HostState getHostState(CollectionHostStateBO hostStateBO) {
         HostState hs = new HostState();
         hs.setAgentName(hostStateBO.getAgentName());
@@ -403,6 +477,15 @@ public class HostStateService {
     }
 
 
+    /**
+     * listHostStates
+     *
+     * @param timeList
+     * @param cpuResult
+     * @param memResult
+     * @param diskResult
+     * @return
+     */
     private List<HostState> listHostStates(List<LocalDateTime> timeList, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult) {
         List<IntervalSizeBO<LocalDateTime, Double>> intervalCpuPercentBOs = cpuResult.getSource();
         List<IntervalSizeBO<LocalDateTime, Double>> intervalMemPercentBOs = memResult.getSource();
@@ -456,6 +539,12 @@ public class HostStateService {
         return hostStates;
     }
 
+    /**
+     * pagePorts
+     *
+     * @param listPageInfoQueryParams
+     * @return
+     */
     public ListObjServiceResult<Port> pagePorts(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         listPageInfoQueryParams.ensure();
         checkListPageParams(listPageInfoQueryParams);
@@ -493,6 +582,12 @@ public class HostStateService {
         }
     }
 
+    /**
+     * pageProcesses
+     *
+     * @param listPageInfoQueryParams
+     * @return
+     */
     public ListObjServiceResult<Process> pageProcesses(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         listPageInfoQueryParams.ensure();
         checkListPageParams(listPageInfoQueryParams);
@@ -522,6 +617,12 @@ public class HostStateService {
     }
 
 
+    /**
+     * pageSystemUserEvents
+     *
+     * @param listPageInfoQueryParams
+     * @return
+     */
     public ListObjServiceResult<SystemUser> pageSystemUserEvents(ListPageInfoQueryParams listPageInfoQueryParams) {
         listPageInfoQueryParams.ensure();
         checkListPageParams(listPageInfoQueryParams);
@@ -580,6 +681,14 @@ public class HostStateService {
         }
     }
 
+    /**
+     * getSceneAttCkTypeCountTrend
+     *
+     * @param request
+     * @param startTime
+     * @param endTime
+     * @return
+     */
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> getSceneAttCkTypeCountTrend(BaseSceneElementRequest request,LocalDateTime startTime,LocalDateTime endTime) {
         List<IntervalSizeBO<LocalDateTime, Long>> result = new ArrayList<>();
         List<String> sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
@@ -599,6 +708,12 @@ public class HostStateService {
         return new ServiceResult<>(result);
     }
 
+    /**
+     * getSceneAttCkTypeCountInfo
+     *
+     * @param request
+     * @return
+     */
     public ServiceResult<SceneAttCkTypeCountInfo> getSceneAttCkTypeCountInfo(BaseSceneElementRequest request) {
         List<String> sceneIds = csceneCommonService.translateSceneIds(Arrays.asList(request.getSceneId()));
         if (CollectionUtils.isEmpty(sceneIds)) {
@@ -621,6 +736,11 @@ public class HostStateService {
         return new ServiceResult<>(attCkTypeCountInfo);
     }
 
+    /**
+     * checkListPageParams
+     *
+     * @param params
+     */
     private void checkListPageParams(ListPageInfoQueryParams params) {
         List<String> sceneIds = params.getSceneIds();
         if (CollectionUtil.isEmpty(sceneIds)) {
@@ -633,6 +753,11 @@ public class HostStateService {
         }
     }
 
+    /**
+     * getAgentNames
+     *
+     * @return
+     */
     private List<String> getAgentNames() {
         String url = "http://" + csceneAppConfig.getCpIp() + ":" + csceneAppConfig.getCpPort() + "/v1/hypervisors";
 //        String result = HttpRequest.get(url).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();

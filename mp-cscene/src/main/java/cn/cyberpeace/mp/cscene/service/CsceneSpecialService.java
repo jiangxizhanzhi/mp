@@ -121,6 +121,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计场景模板中各类型节点数量，测试场景数量
+     *
      * @param ids 场景模板id列表
      * @return 统计结果
      */
@@ -216,6 +217,7 @@ public class CsceneSpecialService {
 
     /**
      * 场景实例数据
+     *
      * @param queryParams 查询参数
      * @return 统计结果
      */
@@ -495,6 +497,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计靶标名称 对应 引用了靶标的场景模板
+     *
      * @param imageNames 靶标名称
      * @return 靶标名称 对应 引用了靶标的场景模板
      */
@@ -502,10 +505,23 @@ public class CsceneSpecialService {
         return statDeviceReferCscenesByImageNameAndUuid(imageNames, null);
     }
 
+    /**
+     * statDeviceReferCscenesByImageUuid
+     *
+     * @param imageUuids
+     * @return
+     */
     public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenesByImageUuid(String[] imageUuids) {
         return statDeviceReferCscenesByImageNameAndUuid(null, imageUuids);
     }
 
+    /**
+     * statDeviceReferCscenesByImageNameAndUuid
+     *
+     * @param imageNames
+     * @param imageUuids
+     * @return
+     */
     private ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenesByImageNameAndUuid(String[] imageNames, String[] imageUuids) {
         if ((Objects.isNull(imageNames) || imageNames.length == 0) && (Objects.isNull(imageUuids) || imageUuids.length == 0)) {
             throw new MpRuntimeException("statDeviceReferCscenesByImageNameAndUuid params are all null");
@@ -558,6 +574,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计靶标快照 对应 引用了靶标的场景模板
+     *
      * @param snapUuids 靶标名称
      * @return 靶标名称 对应 引用了靶标的场景模板
      */
@@ -735,6 +752,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计iso文件 对应 引用了iso文件的场景模板
+     *
      * @param isoTmpdirUuid iso文件地址uuid
      * @return iso文件uuid 对应 引用了iso文件的场景模板
      */
@@ -768,6 +786,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计靶标名称 对应 引用了靶标的场景实例
+     *
      * @param imageNames 靶标名称
      * @return 靶标名称 对应 引用了靶标的场景实例
      */
@@ -776,10 +795,23 @@ public class CsceneSpecialService {
         return statDeviceReferCsceneInstancesByImageNameOrUuid(imageNames, null);
     }
 
+    /**
+     * statDeviceReferCsceneInstanceByImageUuid
+     *
+     * @param imageUuids
+     * @return
+     */
     public ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> statDeviceReferCsceneInstanceByImageUuid(String[] imageUuids) {
         return statDeviceReferCsceneInstancesByImageNameOrUuid(null, imageUuids);
     }
 
+    /**
+     * statDeviceReferCsceneInstancesByImageNameOrUuid
+     *
+     * @param imageNames
+     * @param imageUuids
+     * @return
+     */
     private ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> statDeviceReferCsceneInstancesByImageNameOrUuid(
             String[] imageNames, String[] imageUuids) {
         if ((Objects.isNull(imageNames) || imageNames.length == 0) && (Objects.isNull(imageUuids) || imageUuids.length == 0)) {
@@ -842,6 +874,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计靶标快照 对应 引用了靶标的场景实例
+     *
      * @param snapUuids 靶标名称
      * @return 靶标名称 对应 引用了靶标的场景实例
      */
@@ -888,6 +921,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计活动场景总数和场景总数
+     *
      * @return
      */
     public CsceneInstanceCountActivitySceneBO countActivityScene() {
@@ -895,12 +929,18 @@ public class CsceneSpecialService {
         return CsceneInstanceCountActivitySceneBO.builder().activitySceneTotal(model.getActivitySceneTotal()).total(model.getTotal()).build();
     }
 
+    /**
+     * countSceneConfig
+     *
+     * @return int
+     */
     public int countSceneConfig() {
         return csceneMapper.total(new HumanCondition().filterEqual(CsceneModel::getDeleted, false));
     }
 
     /**
      * 统计一段时间区间内活跃过的场景数(活跃数 = 区间内启动过的(不管有没有关闭) + 之前启动的而且未关闭的)
+     *
      * @param startTime
      * @param endTime
      * @return
@@ -910,6 +950,12 @@ public class CsceneSpecialService {
         return Optional.ofNullable(cnt).orElse(0);
     }
 
+    /**
+     * loadEvent
+     *
+     * @param instanceStat
+     * @param csceneId
+     */
     public void loadEvent(DeviceReferCsceneInstanceStat instanceStat, String csceneId) {
         CsceneInstanceModel latestCsceneInstance = csceneInstanceMapper.first(new HumanCondition()
                 .filterEqual(CsceneInstanceModel::getCscene, csceneId)
@@ -929,6 +975,7 @@ public class CsceneSpecialService {
 
     /**
      * 根据场景模板查询启动的实例数量
+     *
      * @param csceneIds
      * @param includeFailedScene 是否包括启动失败的场景
      * @param includeDeleteScene 是否包括已删除的场景
@@ -968,6 +1015,7 @@ public class CsceneSpecialService {
 
     /**
      * 根据场景模板查询启动的实例数量
+     *
      * @param csceneId
      * @param includeFailedScene 是否包括启动失败的场景
      * @param includeDeleteScene 是否包括已删除的场景
@@ -980,6 +1028,7 @@ public class CsceneSpecialService {
 
     /**
      * 获取实例运行的状态信息
+     *
      * @param csceneId
      * @return
      */
@@ -995,6 +1044,7 @@ public class CsceneSpecialService {
 
     /**
      * 根据资源名称反查节点和场景信息
+     *
      * @param resourceNames
      * @return
      */
@@ -1024,6 +1074,13 @@ public class CsceneSpecialService {
         return new ServiceResult<>(result);
     }
 
+    /**
+     * parseNameInfos
+     *
+     * @param resourceNames
+     * @param nodeEid2Name
+     * @param sceneId2Name
+     */
     private void parseNameInfos(List<String> resourceNames, Map<String, List<String>> nodeEid2Name, Map<String, List<String>> sceneId2Name) {
         Map<String, IResourceName> resourceNameUtilMap = BeanCommon.getBeanType(IResourceName.class);
         if (resourceNameUtilMap == null || resourceNameUtilMap.isEmpty()) {
@@ -1051,6 +1108,12 @@ public class CsceneSpecialService {
         }
     }
 
+    /**
+     * getSceneInfoBySceneEids
+     *
+     * @param sceneId2Name
+     * @return
+     */
     private List<CsceneNodeInfoBO> getSceneInfoBySceneEids(Map<String, List<String>> sceneId2Name) {
         if (sceneId2Name == null || sceneId2Name.isEmpty()) {
             return new ArrayList<>();
@@ -1071,6 +1134,12 @@ public class CsceneSpecialService {
         return this.assembleInfos(result, sceneId2Name, CsceneNodeInfoBO::getInternalSceneEid);
     }
 
+    /**
+     * getSceneInfoByElementEids
+     *
+     * @param nodeEid2Name
+     * @return
+     */
     private List<CsceneNodeInfoBO> getSceneInfoByElementEids(Map<String, List<String>> nodeEid2Name) {
         if (nodeEid2Name == null || nodeEid2Name.isEmpty()) {
             return new ArrayList<>();
@@ -1098,6 +1167,14 @@ public class CsceneSpecialService {
         return this.assembleInfos(elementInfos, nodeEid2Name, CsceneNodeInfoBO::getInternalNodeEid);
     }
 
+    /**
+     * assembleInfos
+     *
+     * @param infoBOS
+     * @param nameMap
+     * @param getFlag
+     * @return
+     */
     private List<CsceneNodeInfoBO> assembleInfos(List<CsceneNodeInfoBO> infoBOS, Map<String, List<String>> nameMap, Function<CsceneNodeInfoBO, String> getFlag) {
         List<CsceneNodeInfoBO> result = new ArrayList<>();
         ArrayList<Object> sceneIds = new ArrayList<>();
@@ -1138,6 +1215,12 @@ public class CsceneSpecialService {
         return result;
     }
 
+    /**
+     * getCsceneNameBySceneIds
+     *
+     * @param sceneIds
+     * @return
+     */
     public ServiceResult<Map<String, CsceneInstanceInfo>> getCsceneNameBySceneIds(List<String> sceneIds) {
         if (CollectionUtils.isEmpty(sceneIds)) {
             return new ServiceResult<>(new HashMap<>());
@@ -1155,6 +1238,12 @@ public class CsceneSpecialService {
         return new ServiceResult<>(result);
     }
 
+    /**
+     * getDeletingSnapshots
+     *
+     * @param snapshotResourceIds
+     * @return
+     */
     public ServiceResult<Set<String>> getDeletingSnapshots(List<String> snapshotResourceIds) {
         if (CollectionUtils.isEmpty(snapshotResourceIds)) {
             return new ServiceResult<>(new HashSet<>());
@@ -1176,10 +1265,24 @@ public class CsceneSpecialService {
         }
     }
 
+    /**
+     * countUserConnections
+     *
+     * @param users
+     * @return
+     */
     public ServiceResult<List<UserConnectionNumBO>> countUserConnections(List<String> users) {
         return cloudSceneService.countUserConnections(users);
     }
 
+    /**
+     * getUserNodeSessions
+     *
+     * @param user
+     * @param monitor
+     * @param assistance
+     * @return
+     */
     public ServiceResult<List<NodeSessionBO>> getUserNodeSessions(String user, boolean monitor, boolean assistance) {
         List<NodeSessionBO> list = cloudSceneService.getUserNodeSessions(user, monitor, assistance).getSource();
         if (CollectionUtils.isEmpty(list)) {
@@ -1225,6 +1328,12 @@ public class CsceneSpecialService {
         return new ServiceResult<>(list);
     }
 
+    /**
+     * getInstanceUseVlanId
+     *
+     * @param vlanId
+     * @return
+     */
     public ServiceResult<List<CsceneInstanceModel>> getInstanceUseVlanId(Integer vlanId) {
         HumanCondition humanCondition = new HumanCondition();
         humanCondition.link(CsceneInstanceModel.class, CloudPluginSceneElementModel.class)
@@ -1243,6 +1352,7 @@ public class CsceneSpecialService {
 
     /**
      * 获取靶标实例 对应 的场景
+     *
      * @param nodeNames 靶标资源id
      * @return 获取靶标实例 对应 的场景
      */

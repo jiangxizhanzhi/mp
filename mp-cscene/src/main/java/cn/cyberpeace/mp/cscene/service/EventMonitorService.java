@@ -59,6 +59,7 @@ public class EventMonitorService {
 
     /**
      * 统计一段时间内的事件总数
+     *
      * @param request
      * @return
      */
@@ -78,6 +79,7 @@ public class EventMonitorService {
 
     /**
      * 按照事件占比，对场景所有节点进行排序，top5
+     *
      * @param
      * @return
      */
@@ -173,6 +175,7 @@ public class EventMonitorService {
 
     /**
      * 根据事件类型，统计百分比
+     *
      * @param request
      * @return
      */
@@ -247,8 +250,16 @@ public class EventMonitorService {
     }
 
 
-
-
+    /**
+     * processEventTrend
+     *
+     * @param sceneIds
+     * @param elementIds
+     * @param startTime
+     * @param endTime
+     * @param segmentCount
+     * @return
+     */
     private List<EventTimeCount> processEventTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount) {
         // 默认值
         if (Objects.isNull(segmentCount)) {
@@ -285,6 +296,8 @@ public class EventMonitorService {
 
     /**
      * 查询各个节点进程变化数量
+     *
+     * @param agentNames
      * @return
      */
     private Map<String, Long> aggProcessCount(List<String> agentNames) {
@@ -306,6 +319,7 @@ public class EventMonitorService {
     /**
      * 查询各个节点端口变化总数
      *  网络连接的变动数量和端口的变动数量实际上是一样的，所以底层都是用的
+     *
      *  dataCollectionService.sumNetConnsChangedCountByTimeRange()
      * @return
      */
@@ -328,6 +342,7 @@ public class EventMonitorService {
     /**
      * 查询各个节点网络连接变化总数
      * 网络连接的变动数量和端口的变动数量实际上是一样的，所以底层都是用的
+     *
      * dataCollectionService.sumNetConnsChangedCountByTimeRange()
      * @param agentNames
      * @return
@@ -350,6 +365,7 @@ public class EventMonitorService {
 
     /**
      * 各个节点系统用户变化数量
+     *
      * @param agentNames
      * @return
      */
@@ -367,6 +383,12 @@ public class EventMonitorService {
         return map;
     }
 
+    /**
+     * buildWazuhMonitorEventsRequest
+     *
+     * @param agentName
+     * @return
+     */
     private WazuhMonitorEventsRequest buildWazuhMonitorEventsRequest(String agentName) {
         WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
         wazuhRequest.setAgentNames(CollectionUtil.toList(agentName));
@@ -381,6 +403,7 @@ public class EventMonitorService {
 
     /**
      * 计算百分比
+     *
      * @param value
      * @param sum
      * @return

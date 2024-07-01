@@ -11,7 +11,20 @@ import java.util.List;
 
 public interface EsCollectionDataStorageService extends BaseModelService<EsCollectionDataStorageModel, QueryParams>  {
 
+    /**
+     * getByDateAndChannel
+     *
+     * @param date
+     * @param channel
+     * @return
+     */
     EsCollectionDataStorageModel getByDateAndChannel(String date, String channel);
 
+    /**
+     * listByDate
+     *
+     * @param date
+     * @return
+     */
     List<EsCollectionDataStorageModel> listByDate(String date);
 }

@@ -18,6 +18,14 @@ public class CsceneCommonCollectService {
 	@Autowired
 	private CsceneCommonCollectMapper collectMapper;
 
+	/**
+	 * getCollect
+	 *
+	 * @param csceneId
+	 * @param nodeId
+	 * @param agreement
+	 * @return
+	 */
 	public List<CommonCollectRes> getCollect(String csceneId, String nodeId, String agreement) {
 		HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneCommonCollectModel::getCsceneId, csceneId);
 		if (StringUtils.isNotEmpty(nodeId)) {

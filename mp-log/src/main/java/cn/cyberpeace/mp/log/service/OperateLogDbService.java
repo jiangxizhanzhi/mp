@@ -15,9 +15,29 @@ import java.util.Locale;
  * @Date 2022/10/12
  */
 public interface OperateLogDbService {
+    /**
+     * create
+     *
+     * @param request
+     * @param locale
+     */
     void create(OperationLogRequest request, Locale locale);
 
+    /**
+     * create
+     *
+     * @param operateLog
+     * @param request
+     * @param locale
+     */
     void create(OperateLog operateLog, HttpServletRequest request, Locale locale);
 
+    /**
+     * search
+     *
+     * @param request
+     * @param locale
+     * @return
+     */
     ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request, Locale locale);
 }

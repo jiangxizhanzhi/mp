@@ -14,6 +14,7 @@ public interface ISystemStatusInfo {
 
     /**
      * 获取线程池信息
+     *
      * @description: 获取线程池信息
      * @return: 信息状态信息列表
      * @date: 2023/6/29

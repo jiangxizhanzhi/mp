@@ -48,6 +48,12 @@ public class CsceneCommonService {
     @Autowired
     private CsceneSpecialService csceneSpecialService;
 
+    /**
+     * translateSceneIds
+     *
+     * @param sceneIds
+     * @return
+     */
     @Cacheable(value = "translate_sceneids")
     public List<String> translateSceneIds(List<String> sceneIds) {
         List<String> translatedScendIds = new ArrayList<>();
@@ -59,12 +65,24 @@ public class CsceneCommonService {
     }
 
 
+    /**
+     * translateSceneId
+     *
+     * @param sceneId
+     * @return
+     */
     @Cacheable(value = "translate_sceneid")
     public String translateSceneId(String sceneId) {
         String translatedSceneId = csceneInstanceService.getSceneId(sceneId);
         return translatedSceneId;
     }
 
+    /**
+     * translateSceneConfigId
+     *
+     * @param csceneId
+     * @return
+     */
     @Cacheable(value = "translate_scene_config_id")
     public String translateSceneConfigId(String csceneId) {
         ObjResult<CsceneModel> csceneResult = csceneService.get(csceneId).getSource();
@@ -112,6 +130,12 @@ public class CsceneCommonService {
         return agentNames;
     }
 
+    /**
+     * getSceneCreateTime
+     *
+     * @param sceneId
+     * @return
+     */
     @Cacheable(value = "query_scene_create_time")
     public LocalDateTime getSceneCreateTime(String sceneId) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
@@ -156,6 +180,7 @@ public class CsceneCommonService {
     /**
      * 查询场景是否是开启状态
      *
+     * @param csceneId
      * @return
      */
     @Cacheable(value = "is_cscene_running")

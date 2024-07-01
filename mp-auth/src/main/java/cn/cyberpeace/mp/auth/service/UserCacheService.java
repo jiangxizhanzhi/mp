@@ -44,6 +44,9 @@ public class UserCacheService {
     @Resource(name = AuthCacheConfig.CACHE_MANAGER_LONG)
     private CacheManager cacheManagerLong;
 
+    /**
+     * evictAllUserCache
+     */
     public void evictAllUserCache() {
         log.debug("evict user releated cache...");
         for (String cacheValue : USER_CACHE_VALUES) {
@@ -51,6 +54,9 @@ public class UserCacheService {
         }
     }
 
+    /**
+     * evictAllTargetsCache
+     */
     public void evictAllTargetsCache() {
         log.debug("evict targets releated cache...");
         for (String cacheValue : TARGET_CACHE_VALUES) {
@@ -58,6 +64,11 @@ public class UserCacheService {
         }
     }
 
+    /**
+     * clean
+     *
+     * @param cacheValue
+     */
     private void clean(String cacheValue) {
         Cache cacheNormal = cacheManagerNormal.getCache(cacheValue);
         Cache cacheMedium = cacheManagerMedium.getCache(cacheValue);

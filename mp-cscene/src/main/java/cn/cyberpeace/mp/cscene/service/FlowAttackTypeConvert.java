@@ -91,14 +91,32 @@ public class FlowAttackTypeConvert {
         }
     }
 
+    /**
+     * getAttCk
+     *
+     * @param attackType
+     * @return
+     */
     public static String getAttCk(String attackType) {
         return attackType2AttCks.getOrDefault(attackType, attackType);
     }
 
+    /**
+     * getAttackTypes
+     *
+     * @param attCk
+     * @return
+     */
     public static List<String> getAttackTypes(String attCk) {
         return attCk2AttackTypes.getOrDefault(attCk.toLowerCase(), Arrays.asList(attCk));
     }
 
+    /**
+     * getFormatType
+     *
+     * @param type
+     * @return
+     */
     public static String getFormatType(String type) {
         return formatTypes.getOrDefault(type.toLowerCase(), type);
     }

@@ -25,19 +25,59 @@ public interface UserPermissionService extends BaseModelService<UserPermissionMo
      */
     List<TargetModel> listTargetsByUserId(String userId);
 
+    /**
+     * listMenusByUserId
+     *
+     * @param userId
+     * @return
+     */
     List<TargetModel> listMenusByUserId(String userId);
 
+    /**
+     * getTreeByUserId
+     *
+     * @param userId
+     * @return
+     */
     List<TargetBo> getTreeByUserId(String userId);
 
+    /**
+     * bindUserTargets
+     *
+     * @param userId
+     * @param targetIds
+     * @param cleanOldTargets
+     * @return boolean
+     */
     boolean bindUserTargets(String userId, List<String> targetIds, boolean cleanOldTargets);
 
-    // 返回菜单对象集合
+    /**
+     * listMenusByLoginUser
+     *
+     * @return
+     */// 返回菜单对象集合
     List<TargetModel> listMenusByLoginUser();
 
-    // 返回菜单对象编码集合
+    /**
+     * listMenuIdentsByLoginUser
+     *
+     * @return
+     */// 返回菜单对象编码集合
     List<String> listMenuIdentsByLoginUser();
 
+    /**
+     * deleteByUserId
+     *
+     * @param userId
+     * @return boolean
+     */
     boolean deleteByUserId(String userId);
 
+    /**
+     * deleteByTargetId
+     *
+     * @param targetId
+     * @return boolean
+     */
     boolean deleteByTargetId(String targetId);
 }

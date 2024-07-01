@@ -43,6 +43,13 @@ public class MenuConfigService {
     @Resource
     private MenuTemplateRoleMapper menuTemplateRoleMapper;
 
+    /**
+     * getUserTreeMenuBy
+     *
+     * @param userId
+     * @param authorityMenuIds
+     * @return
+     */
     public List<TargetBo> getUserTreeMenuBy(String userId, List<String> authorityMenuIds) {
         String userMenuTemplateId = "1";
         List<UserRoleModel> roles = userRoleMapper.list(new HumanCondition().filterEqual(UserRoleModel::getUser, userId).orderBy(UserRoleModel::getPk));
@@ -91,6 +98,14 @@ public class MenuConfigService {
         return tree;
     }
 
+    /**
+     * listAll
+     *
+     * @param tenant
+     * @param type
+     * @param templateId
+     * @return
+     */
     public List<MenuTemplateModel> listAll(String tenant, Integer type, String templateId) {
         HumanCondition humanCondition = new HumanCondition();
         if (Objects.nonNull(type)) {
@@ -105,6 +120,11 @@ public class MenuConfigService {
         return targets;
     }
 
+    /**
+     * getTree
+     *
+     * @return
+     */
     public List<TargetBo> getTree() {
         UserModel user = UserUtils.getLoginUser();
         List<UserRoleModel> roles = userRoleMapper.list(new HumanCondition().filterEqual(UserRoleModel::getUser, user.getId()).orderBy(UserRoleModel::getPk));
@@ -124,6 +144,12 @@ public class MenuConfigService {
         return tree;
     }
 
+    /**
+     * toTree
+     *
+     * @param targets
+     * @return
+     */
     private List<TargetBo> toTree(List<MenuTemplateModel> targets) {
         ParamCheck.notEmpty(targets, AuthBasei18nCode.TARGET_LIST);
         Map<String, TargetBo> mapTmp = new HashMap<>();
@@ -170,6 +196,11 @@ public class MenuConfigService {
         return parentTargets;
     }
 
+    /**
+     * sortTree
+     *
+     * @param targets
+     */
     private void sortTree(List<TargetBo> targets) {
         for (TargetBo t : targets) {
             if (CollectionUtils.isNotEmpty(t.getChildren())) {

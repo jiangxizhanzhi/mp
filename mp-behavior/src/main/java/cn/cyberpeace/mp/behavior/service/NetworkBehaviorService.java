@@ -26,6 +26,12 @@ public class NetworkBehaviorService {
 	@Autowired
 	private NetworkBehaviorMapper networkBehaviorMapper;
 
+	/**
+	 * add
+	 *
+	 * @param addReq
+	 * @return
+	 */
 	public String add(AddNetworkBehaviorReq addReq) {
 		NetworkBehaviorModel model = new NetworkBehaviorModel();
 		BeanUtils.copyProperties(addReq, model);
@@ -33,20 +39,42 @@ public class NetworkBehaviorService {
 		return model.getId();
 	}
 
+	/**
+	 * update
+	 *
+	 * @param updateReq
+	 */
 	public void update(UpdateNetworkBehaviorReq updateReq) {
 		NetworkBehaviorModel model = new NetworkBehaviorModel();
 		BeanUtils.copyProperties(updateReq, model);
 		networkBehaviorMapper.update(model);
 	}
 
+	/**
+	 * delete
+	 *
+	 * @param ids
+	 */
 	public void delete(List<String> ids) {
 		networkBehaviorMapper.bulkDelete(ids.toArray(new String[0]));
 	}
 
+	/**
+	 * get
+	 *
+	 * @param id
+	 * @return
+	 */
 	public NetworkBehaviorModel get(String id) {
 		return networkBehaviorMapper.get(id);
 	}
 
+	/**
+	 * page
+	 *
+	 * @param pageReq
+	 * @return
+	 */
 	public ListObjServiceResult<NetworkBehaviorModel> page(NetworkPageReq pageReq) {
 		pageReq.ensure();
 		HumanCondition humanCondition = new HumanCondition()
@@ -64,6 +92,11 @@ public class NetworkBehaviorService {
 		return new ListObjServiceResult(new ListObjResult(modelList, total).asResult());
 	}
 
+	/**
+	 * getBehaviorType
+	 *
+	 * @return
+	 */
 	public List<CodeNameRes> getBehaviorType() {
 		return Arrays.stream(NetworkBehaviorModel.BehaviorEnum.values())
 					 .map(behaviorEnum -> new CodeNameRes(behaviorEnum.getCode(), behaviorEnum.getDesc()))

@@ -181,6 +181,12 @@ public class FlowMonitorService {
         return list;
     }
 
+    /**
+     * getFlowGroupPortWithProtocolVO
+     *
+     * @param v
+     * @return 端口维度
+     */
     private static FlowGroupPortWithProtocolVO getFlowGroupPortWithProtocolVO(FlowGroupPortWithProtocolBO v) {
         FlowGroupPortWithProtocolVO vo = new FlowGroupPortWithProtocolVO();
         vo.setProtocol(v.getProtocol());
@@ -313,6 +319,12 @@ public class FlowMonitorService {
     }
 
 
+    /**
+     * getFlowRiskCount
+     *
+     * @param baseRequest
+     * @return
+     */
     public FlowRiskCount getFlowRiskCount(BaseSceneElementRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
 
@@ -342,6 +354,12 @@ public class FlowMonitorService {
         return riskCount;
     }
 
+    /**
+     * getAttackTypeCount
+     *
+     * @param baseRequest
+     * @return
+     */
     public List<FlowAttackTypeCount> getAttackTypeCount(AttackTypeTopRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
 
@@ -370,6 +388,12 @@ public class FlowMonitorService {
         return result;
     }
 
+    /**
+     * getAttackTimeCountNoName
+     *
+     * @param baseRequest
+     * @return
+     */
     public List<FlowAttackTime> getAttackTimeCountNoName(AttackCountRequest baseRequest) {
         log.info("baseRequest:{}", JsonCommon.stringify(baseRequest));
         BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
@@ -393,6 +417,12 @@ public class FlowMonitorService {
         return result;
     }
 
+    /**
+     * getAttackIpCount
+     *
+     * @param baseRequest
+     * @return
+     */
     public List<FlowAttackTime> getAttackIpCount(AttackCountRequest baseRequest) {
         log.info("baseRequest:{}", JsonCommon.stringify(baseRequest));
         BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
@@ -421,6 +451,12 @@ public class FlowMonitorService {
         return list;
     }
 
+    /**
+     * getAttackRatioCount
+     *
+     * @param baseRequest
+     * @return
+     */
     public TotalFlowAttackRatio getAttackRatioCount(AttackCountRequest baseRequest) {
         log.info("getAttackRatioCount baseRequest:{}", JsonCommon.stringify(baseRequest));
         BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
@@ -493,6 +529,18 @@ public class FlowMonitorService {
     }
 
 
+    /**
+     * processFlowTrend
+     *
+     * @param sceneIds
+     * @param elementIds
+     * @param startTime
+     * @param endTime
+     * @param segmentCount
+     * @param sourceIps
+     * @param type
+     * @return
+     */
     private List<FlowTrend> processFlowTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount, List<String> sourceIps, Integer type) {
         // 默认值
         if (Objects.isNull(endTime)) {
@@ -549,7 +597,10 @@ public class FlowMonitorService {
     }
 
     /**
+     * getFlowAnalysisSummary
+     *
      * @param timeRangeRequest
+     * @return
      */
     public FlowAnalysisSummary getFlowAnalysisSummary(BaseTimeRangeRequest timeRangeRequest) {
         LocalDateTime now = LocalDateTime.now();
@@ -638,6 +689,13 @@ public class FlowMonitorService {
     }
 
 
+    /**
+     * getClosest
+     *
+     * @param time
+     * @param flowTrendMap
+     * @return
+     */
     private FlowTrend getClosest(LocalDateTime time, Map<LocalDateTime, FlowTrend> flowTrendMap) {
         LocalDateTime closestTime = null;
         long durationSeconds = Long.MAX_VALUE;
@@ -655,6 +713,9 @@ public class FlowMonitorService {
     /**
      * 导出全部流量文件
      *
+     * @param taskId
+     * @param csceneId
+     * @return
      */
     public String export(String taskId, String csceneId) {
         // csceneId -> sceneId

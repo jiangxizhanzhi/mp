@@ -57,25 +57,49 @@ public class MonitorScriptControlService {
             .build();
 
 
+    /**
+     * init
+     *
+     * @param mappings
+     */
     public void init(List<LocalFileMappingModel> mappings) {
         serviceMonitorScriptInit(mappings);
     }
 
-    // 定时调度，查询脚本是否安装成功
+    /**
+     * 定时调度，查询脚本是否安装成功
+     */
     public void schedule() {
 
     }
 
+    /**
+     * listAll
+     *
+     * @return
+     */
     public List<CpNodeMonitorScriptConfigModel> listAll() {
         return monitorScriptConfigMapper.listAll();
     }
 
 
+    /**
+     * getByAgentName
+     *
+     * @param agentName
+     * @return
+     */
     public CpNodeMonitorScriptConfigModel getByAgentName(String agentName) {
         return monitorScriptConfigMapper.getByAgentName(agentName);
     }
 
 
+    /**
+     * restart
+     *
+     * @param hostname
+     * @param serviceList
+     */
     public void restart(String hostname, List<String> serviceList) {
         // 如果某个服务的状态还在重启中，则忽略该服务的重启
         Cache<String, ServiceRestartStatusDto> timedCache = getStatusCache();
@@ -125,6 +149,11 @@ public class MonitorScriptControlService {
     }
 
 
+    /**
+     * statusManually
+     *
+     * @param hostname
+     */
     public void statusManually(String hostname) {
         List<ServerMonitorConfig.MonitorProbe> allSrvMonitors = new ArrayList<>();
         List<ServerMonitorConfig.MonitorProbe> cpSrvs = ServerMonitorConfig.cpCloudSrvMonitors;
@@ -157,6 +186,11 @@ public class MonitorScriptControlService {
     }
 
 
+    /**
+     * serviceMonitorScriptInit
+     *
+     * @param mappings
+     */
     private void serviceMonitorScriptInit(List<LocalFileMappingModel> mappings) {
         BasePageBO<HypervisorBO> hypervisorBOBasePageBO = hypervisorConverter.page(new BasePageDTO());
         List<HypervisorBO> hypervisorBOs = hypervisorBOBasePageBO.getList();
@@ -239,6 +273,13 @@ public class MonitorScriptControlService {
 
     }
 
+    /**
+     * getTryInstallAgainNodes
+     *
+     * @param configedNodeList
+     * @param toInstallListMap
+     * @return
+     */
     private List<String> getTryInstallAgainNodes(List<CpNodeMonitorScriptConfigModel> configedNodeList, Set<String> toInstallListMap) {
         // 15分钟内的可能是装失败的 尝试再次重装
         List<String> tryInstallAgainNodes = new ArrayList<>();
@@ -257,6 +298,12 @@ public class MonitorScriptControlService {
         return result;
     }
 
+    /**
+     * sendScriptInstallCmd
+     *
+     * @param hostname
+     * @param nameFileMap
+     */
     private void sendScriptInstallCmd(String hostname, Map<String, String> nameFileMap) {
         WazuhControl.ControlConfigParam configParam = new WazuhControl.ControlConfigParam();
 
@@ -278,6 +325,13 @@ public class MonitorScriptControlService {
     }
 
 
+    /**
+     * generateControlProbeParam
+     *
+     * @param monitorProbe
+     * @param nameFileMap
+     * @return
+     */
     private WazuhControl.ControlProbeParam generateControlProbeParam(ServerMonitorConfig.MonitorProbe monitorProbe, Map<String, String> nameFileMap) {
 
         WazuhControl.ControlProbeParam probeParam = new WazuhControl.ControlProbeParam();
@@ -296,6 +350,12 @@ public class MonitorScriptControlService {
         return probeParam;
     }
 
+    /**
+     * addOrUpdateNodeConfigByHostName
+     *
+     * @param hostName
+     * @param nameFileMap
+     */
     private void addOrUpdateNodeConfigByHostName(String hostName, Map<String, String> nameFileMap) {
         List<CpNodeMonitorScriptConfigModel.ParamConfig> paramConfigs = getConfigFromYaml(nameFileMap);
         String configStr = JsonCommon.stringify(paramConfigs);
@@ -323,6 +383,11 @@ public class MonitorScriptControlService {
     }
 
 
+    /**
+     * getStatusCache
+     *
+     * @return
+     */
     public Cache<String, ServiceRestartStatusDto> getStatusCache() {
         return SRV_STATUS_CACHE;
     }
@@ -353,6 +418,12 @@ public class MonitorScriptControlService {
         return !configsFromYaml.equals(configsFromDB);
     }
 
+    /**
+     * getConfigFromYaml
+     *
+     * @param nameFileMap
+     * @return
+     */
     private List<CpNodeMonitorScriptConfigModel.ParamConfig> getConfigFromYaml(Map<String, String> nameFileMap) {
         List<ServerMonitorConfig.MonitorProbe> allSrvs = new ArrayList<>();
         allSrvs.addAll(ServerMonitorConfig.cpCloudSrvMonitors);

@@ -20,6 +20,12 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class AvatarService {
 
+    /**
+     * upload
+     *
+     * @param file
+     * @return
+     */
     public FileResponseData upload(MultipartFile file) {
         // 校验文件
         FileCheckRequest fileCheckRequest = new FileCheckRequest();

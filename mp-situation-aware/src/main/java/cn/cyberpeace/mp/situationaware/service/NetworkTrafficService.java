@@ -121,6 +121,7 @@ public class NetworkTrafficService extends AbstractBaseService{
 
     /**
      * 支持分页查询
+     *
      * @param sessionRequest sessionRequest
      * @return ListObjResult<SessionResult>
      */
@@ -200,10 +201,12 @@ public class NetworkTrafficService extends AbstractBaseService{
     }
 
 
-
-
     /**
      * 根据分组id下载流量包
+     *
+     * @param groupId
+     * @param sessionId
+     * @return
      */
     public HttpResponse queryPcapFileByGroupId(String groupId, String sessionId) {
         HttpResponse httpResponse = null;
@@ -229,6 +232,7 @@ public class NetworkTrafficService extends AbstractBaseService{
 
     /**
      * 查询spiView数据
+     *
      * @param spiViewRequest spiViewRequest
      * @return String
      */
@@ -262,6 +266,7 @@ public class NetworkTrafficService extends AbstractBaseService{
 
     /**
      * 构造动态条件查询
+     *
      * @param sessionRequest sessionRequest
      * @param boolQueryBuilder boolQueryBuilder
      */

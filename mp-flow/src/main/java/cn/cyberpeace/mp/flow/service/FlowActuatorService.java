@@ -13,6 +13,11 @@ import java.util.List;
 public interface FlowActuatorService extends BaseModelService<FlowActuatorModel, FlowActuatorQueryParams> {
 
 
+    /**
+     * delExecutor
+     *
+     * @param actuatorId
+     */
     void delExecutor(String actuatorId);
 
     /**

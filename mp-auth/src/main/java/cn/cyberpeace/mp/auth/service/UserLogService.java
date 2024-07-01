@@ -24,6 +24,12 @@ public class UserLogService {
     @Autowired
     private OperateLogController operateLogController;
 
+    /**
+     * listOpLog
+     *
+     * @param request
+     * @return
+     */
     public List<OperationLogPageResponse> listOpLog(OperationLogPageRequest request) {
         ListObjServiceResult<OperationLogPageResponse> response = operateLogController.page(request);
         if (Objects.nonNull(response.getData().getList())) {

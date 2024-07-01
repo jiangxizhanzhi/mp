@@ -180,6 +180,13 @@ public class ScenePluginCollectionSceneService {
     private CollectionPluginSceneMapper collectionPluginSceneMapper;
 
 
+    /**
+     * listFlows
+     *
+     * @param sceneIds
+     * @param queryParams
+     * @return
+     */
     public ListObjServiceResult<CollectionFlowBO> listFlows(List<String> sceneIds, FlowQueryParams queryParams) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, queryParams.getNodeIds());
         if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
@@ -332,6 +339,13 @@ public class ScenePluginCollectionSceneService {
         return new ListObjServiceResult<>(new ListObjResult<>(list, flowLogBOSResult.getTotal()));
     }
 
+    /**
+     * globalizedWithAttackWay
+     *
+     * @param attackWay
+     * @param allCategoryDicMap
+     * @return
+     */
     private String globalizedWithAttackWay(String attackWay, Map<String, FlowClassificationModel> allCategoryDicMap) {
         if (MapUtils.isEmpty(allCategoryDicMap)) {
             return attackWay;
@@ -345,6 +359,13 @@ public class ScenePluginCollectionSceneService {
         return globalized;
     }
 
+    /**
+     * globalizedWithAttCkWay
+     *
+     * @param attackWay
+     * @param allCategoryDicMap
+     * @return
+     */
     private String globalizedWithAttCkWay(String attackWay, Map<String, FlowClassificationModel> allCategoryDicMap) {
         if (MapUtils.isEmpty(allCategoryDicMap)) {
             return attackWay;
@@ -358,6 +379,13 @@ public class ScenePluginCollectionSceneService {
         return globalized;
     }
 
+    /**
+     * listHostStates
+     *
+     * @param sceneId
+     * @param queryParams
+     * @return
+     */
     public ListObjServiceResult<CollectionHostStateBO> listHostStates(String sceneId, HostStateQueryParams queryParams) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         // 没有采集插件
@@ -396,6 +424,13 @@ public class ScenePluginCollectionSceneService {
     }
 
 
+    /**
+     * listHostStatesByAgentNames
+     *
+     * @param agentNames
+     * @param queryParams
+     * @return
+     */
     public ListObjServiceResult<CollectionHostStateBO> listHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams) {
         // 没有探针
         if (CollectionUtil.isEmpty(agentNames)) {
@@ -413,6 +448,13 @@ public class ScenePluginCollectionSceneService {
         return doQueryHostStateEventsWithTimeRange(null, null, request);
     }
 
+    /**
+     * mapHostStatesByAgentNames
+     *
+     * @param agentNames
+     * @param queryParams
+     * @return
+     */
     public Map<String, List<CollectionHostStateBO>> mapHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams) {
         // 没有探针
         if (CollectionUtil.isEmpty(agentNames)) {
@@ -429,6 +471,14 @@ public class ScenePluginCollectionSceneService {
         return doMapHostStateEventsWithTimeRange(null, null, request, queryParams.getPageSize());
     }
 
+    /**
+     * doQueryHostStateEventsWithTimeRange
+     *
+     * @param sceneId
+     * @param agentName2Element
+     * @param request
+     * @return
+     */
     private ListObjServiceResult<CollectionHostStateBO> doQueryHostStateEventsWithTimeRange(String sceneId, Map<String, SceneElementBO> agentName2Element, WazuhMonitorEventsRequest request) {
         // 执行查询
         List<WazuhHostStateModel> result = dataCollectionService.queryHostStateEventsWithTimeRange(request);
@@ -441,6 +491,15 @@ public class ScenePluginCollectionSceneService {
     }
 
 
+    /**
+     * doMapHostStateEventsWithTimeRange
+     *
+     * @param sceneId
+     * @param agentName2Element
+     * @param request
+     * @param topSize
+     * @return
+     */
     private Map<String, List<CollectionHostStateBO>> doMapHostStateEventsWithTimeRange(String sceneId, Map<String, SceneElementBO> agentName2Element, WazuhMonitorEventsRequest request, int topSize) {
         // 执行查询
         Map<String, List<WazuhHostStateModel>> map = dataCollectionService.mapHostStatesByAgentNamesWithTimeRange(request, topSize);
@@ -459,6 +518,14 @@ public class ScenePluginCollectionSceneService {
     }
 
 
+    /**
+     * hostStateModel2BO
+     *
+     * @param sceneId
+     * @param agentName2Element
+     * @param srcHostState
+     * @return
+     */
     private CollectionHostStateBO hostStateModel2BO(String sceneId, Map<String, SceneElementBO> agentName2Element, WazuhHostStateModel srcHostState) {
         CollectionHostStateBO hostState = new CollectionHostStateBO();
         hostState.setAgentName(srcHostState.getAgentName());
@@ -676,7 +743,9 @@ public class ScenePluginCollectionSceneService {
     /**
      * 滚动分页列表
      *
+     * @param sceneId
      * @param scrollId
+     * @param queryParams
      * @return
      */
     public ListObjServiceResult<CollectionHostEventBO> scrollHostEvents(String sceneId, String scrollId, HostEventQueryParams queryParams) {
@@ -1053,6 +1122,16 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(result);
     }
 
+    /**
+     * timeIntervalLatestHostCpuPercent
+     *
+     * @param sceneIds
+     * @param nodeIds
+     * @param startTime
+     * @param endTime
+     * @param intervalSeconds
+     * @return
+     */
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalLatestHostCpuPercent(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, int intervalSeconds) {
         List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalLatestBy(sceneIds, nodeIds, startTime, endTime, intervalSeconds, (state) -> state.getCpuPercent());
         return new ServiceResult<>(result);
@@ -1073,6 +1152,16 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(result);
     }
 
+    /**
+     * timeIntervalLatestHostMemoryPercent
+     *
+     * @param sceneIds
+     * @param nodeIds
+     * @param startTime
+     * @param endTime
+     * @param intervalNumber
+     * @return
+     */
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalLatestHostMemoryPercent(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, int intervalNumber) {
         List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalLatestBy(sceneIds, nodeIds, startTime, endTime, intervalNumber, (state) -> state.getMemoryPercent());
         return new ServiceResult<>(result);
@@ -1094,6 +1183,16 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(result);
     }
 
+    /**
+     * timeIntervalLatestHostDiskPercent
+     *
+     * @param sceneIds
+     * @param nodeIds
+     * @param startTime
+     * @param endTime
+     * @param intervalNumber
+     * @return
+     */
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalLatestHostDiskPercent(List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime, int intervalNumber) {
         // todo 主机磁盘使用率
         List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalLatestBy(sceneIds, nodeIds, startTime, endTime, intervalNumber, (state) -> state.getDiskPercent());
@@ -1116,6 +1215,8 @@ public class ScenePluginCollectionSceneService {
     }
 
     /**
+     * timeIntervalAvgBy
+     *
      * @param sceneIds        场景id列表，不传默认为全部
      * @param nodeIds         节点id列表，不传默认为全部
      * @param startTime       开始时间
@@ -1157,6 +1258,16 @@ public class ScenePluginCollectionSceneService {
     }
 
 
+    /**
+     * timeIntervalAvgByAgentNames
+     *
+     * @param agentNames
+     * @param startTime
+     * @param endTime
+     * @param intervalSeconds
+     * @param execCal
+     * @return
+     */
     public List<IntervalSizeBO<LocalDateTime, Double>> timeIntervalAvgByAgentNames(List<String> agentNames, LocalDateTime startTime, LocalDateTime endTime, int intervalSeconds, Function<CollectionHostStateBO, Double> execCal) {
         //todo 暂时先支持一个场景的查询
         HostStateQueryParams params = new HostStateQueryParams();
@@ -1167,6 +1278,16 @@ public class ScenePluginCollectionSceneService {
         return processIntervalSizeBOS(startTime, intervalSeconds, execCal, queryResult, false);
     }
 
+    /**
+     * processIntervalSizeBOS
+     *
+     * @param startTime
+     * @param intervalSeconds
+     * @param execCal
+     * @param queryResult
+     * @param latestData
+     * @return
+     */
     private List<IntervalSizeBO<LocalDateTime, Double>> processIntervalSizeBOS(LocalDateTime startTime, int intervalSeconds, Function<CollectionHostStateBO, Double> execCal, ListObjResult<CollectionHostStateBO> queryResult, Boolean latestData) {
         if (queryResult == null || CollectionUtils.isEmpty(queryResult.getObjs())) {
             return new ArrayList<>();
@@ -1217,6 +1338,13 @@ public class ScenePluginCollectionSceneService {
         return result;
     }
 
+    /**
+     * getSrcElements
+     *
+     * @param sceneHandler
+     * @param nodeIds
+     * @return
+     */
     private List<SceneElementBO> getSrcElements(SceneHandler sceneHandler, List<String> nodeIds) {
         List<SceneElementBO> srcElements;
         if (nodeIds == null || nodeIds.isEmpty()) {
@@ -1233,6 +1361,15 @@ public class ScenePluginCollectionSceneService {
         return srcElements;
     }
 
+    /**
+     * buildCollectionFlowBOFrom
+     *
+     * @param flowLogBO
+     * @param mac2ElementMap
+     * @param ipElementMap
+     * @param mac2SceneId
+     * @return
+     */
     private CollectionFlowBO buildCollectionFlowBOFrom(FlowLogBO flowLogBO, Map<String, SceneElementBO> mac2ElementMap, Map<String, SceneElementBO> ipElementMap, Map<String, String> mac2SceneId) {
         CollectionFlowBO flowBO = new CollectionFlowBO();
         if (flowLogBO.getTimestamp() != null) {
@@ -1292,6 +1429,14 @@ public class ScenePluginCollectionSceneService {
         return flowBO;
     }
 
+    /**
+     * loadMac2ElementBOMapAndGetEnableMac
+     *
+     * @param mac2ElementMap
+     * @param srcElements
+     * @param pluginHandler
+     * @return
+     */
     private List<String> loadMac2ElementBOMapAndGetEnableMac(Map<String, SceneElementBO> mac2ElementMap, List<SceneElementBO> srcElements, CollectionScenePluginHandler pluginHandler) {
         List<String> enableMac = new ArrayList<>();
         srcElements.forEach(srcElement -> {
@@ -1371,6 +1516,15 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(finalResult);
     }
 
+    /**
+     * groupCountFlowWithTopSize
+     *
+     * @param sceneIds
+     * @param ips
+     * @param startTime
+     * @param endTime
+     * @return
+     */
     public ServiceResult<Map<String, Integer>> groupCountFlowWithTopSize(List<String> sceneIds, List<String> ips, LocalDateTime startTime, LocalDateTime endTime) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, null);
         if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
@@ -1382,6 +1536,13 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(result);
     }
 
+    /**
+     * groupCountFlowAndNodeInfo
+     *
+     * @param sceneIds
+     * @param params
+     * @return
+     */
     public ServiceResult<List<FlowAttackCountBO>> groupCountFlowAndNodeInfo(List<String> sceneIds, FlowGroupCountParams params) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, null);
         // 场景均未开启流量采集
@@ -1431,6 +1592,16 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(result);
     }
 
+    /**
+     * groupCountFlow
+     *
+     * @param sceneIds
+     * @param ips
+     * @param topSize
+     * @param startTime
+     * @param endTime
+     * @return
+     */
     public ServiceResult<TeamAttackBO> groupCountFlow(List<String> sceneIds, List<String> ips, Integer topSize, LocalDateTime startTime, LocalDateTime endTime) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, null);
         if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
@@ -1448,6 +1619,16 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(teamAttackBO);
     }
 
+    /**
+     * doGroupCountFlowByIp
+     *
+     * @param flowCollectors
+     * @param ips
+     * @param topSize
+     * @param startTime
+     * @param endTime
+     * @return
+     */
     private <T> Map<T, Integer> doGroupCountFlowByIp(List<String> flowCollectors, List<String> ips, Integer topSize, LocalDateTime startTime, LocalDateTime endTime) {
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setAggregationTypeEnum(AggregationTypeEnum.SOURCE_IP);
@@ -1465,14 +1646,32 @@ public class ScenePluginCollectionSceneService {
         return finalResult;
     }
 
+    /**
+     * byte2MB
+     *
+     * @param num
+     * @return long
+     */
     private long byte2MB(long num) {
         return num >> 20;
     }
 
+    /**
+     * byte2GB
+     *
+     * @param num
+     * @return long
+     */
     private long byte2GB(long num) {
         return num >> 30;
     }
 
+    /**
+     * listPagePorts
+     *
+     * @param nodeId
+     * @return
+     */
     public List<Port> listPagePorts(String nodeId) {
         CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
         collectorBaseRequest.setAgentName(nodeId);
@@ -1482,6 +1681,12 @@ public class ScenePluginCollectionSceneService {
         return sysCollectorService.pagePorts(collectorBaseRequest).getSource().getObjs();
     }
 
+    /**
+     * listPagePorts
+     *
+     * @param listPageInfoQueryParams
+     * @return
+     */
     public ListObjServiceResult<Port> listPagePorts(ListPageInfoQueryParams listPageInfoQueryParams) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
         Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
@@ -1497,6 +1702,12 @@ public class ScenePluginCollectionSceneService {
         return sysCollectorService.pagePorts(collectorBaseRequest);
     }
 
+    /**
+     * listPageProcess
+     *
+     * @param listPageInfoQueryParams
+     * @return
+     */
     public ListObjServiceResult<Process> listPageProcess(TimeListPageInfoQueryParams listPageInfoQueryParams) {
 
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
@@ -1548,6 +1759,12 @@ public class ScenePluginCollectionSceneService {
     }
 
 
+    /**
+     * listPageSystemUserEvents
+     *
+     * @param listPageInfoQueryParams
+     * @return
+     */
     public ListObjServiceResult<SystemUser> listPageSystemUserEvents(ListPageInfoQueryParams listPageInfoQueryParams) {
 
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
@@ -1588,6 +1805,12 @@ public class ScenePluginCollectionSceneService {
         return new ListObjServiceResult<>(new ListObjResult<>(systemUsers, totalList.size()).asResult()).asResult();
     }
 
+    /**
+     * listNetifaces
+     *
+     * @param elementId
+     * @return
+     */
     public List<Netiface> listNetifaces(String elementId) {
         CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
         PageInfo<Netiface> pageInfo = new PageInfo<>();
@@ -1602,6 +1825,12 @@ public class ScenePluginCollectionSceneService {
     }
 
 
+    /**
+     * listNetifaces
+     *
+     * @param listPageInfoQueryParams
+     * @return
+     */
     public ListObjServiceResult<Netiface> listNetifaces(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
         Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
@@ -1620,6 +1849,12 @@ public class ScenePluginCollectionSceneService {
     }
 
 
+    /**
+     * listNetworkConnections
+     *
+     * @param listPageInfoQueryParams
+     * @return
+     */
     public ListObjServiceResult<WazuhNetworkConnectionModel> listNetworkConnections(ListPageInfoQueryParams listPageInfoQueryParams) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
         Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
@@ -1650,18 +1885,36 @@ public class ScenePluginCollectionSceneService {
     }
 
 
+    /**
+     * sumEnvVarChangedCount
+     *
+     * @param listPageInfoQueryParams
+     * @return
+     */
     public ServiceResult<Integer> sumEnvVarChangedCount(ListPageInfoQueryParams listPageInfoQueryParams) {
         WazuhMonitorEventsRequest wazuhRequest = buildWazuhMonitorEventsRequest(listPageInfoQueryParams);
         int changedCount = dataCollectionService.sumEnvVarChangedCountByTimeRange(wazuhRequest);
         return new ServiceResult<>(changedCount);
     }
 
+    /**
+     * sumProcessesChangedCount
+     *
+     * @param listPageInfoQueryParams
+     * @return
+     */
     public ServiceResult<Integer> sumProcessesChangedCount(ListPageInfoQueryParams listPageInfoQueryParams) {
         WazuhMonitorEventsRequest wazuhRequest = buildWazuhMonitorEventsRequest(listPageInfoQueryParams);
         int changedCount = dataCollectionService.sumProcessesChangedCountByTimeRange(wazuhRequest);
         return new ServiceResult<>(changedCount);
     }
 
+    /**
+     * sumSysUserChangedCount
+     *
+     * @param listPageInfoQueryParams
+     * @return
+     */
     public ServiceResult<Integer> sumSysUserChangedCount(ListPageInfoQueryParams listPageInfoQueryParams) {
         WazuhMonitorEventsRequest wazuhRequest = buildWazuhMonitorEventsRequest(listPageInfoQueryParams);
         int changedCount = dataCollectionService.sumSysUsersChangedCountByTimeRange(wazuhRequest);
@@ -1690,12 +1943,25 @@ public class ScenePluginCollectionSceneService {
     }
 
 
+    /**
+     * listIPs
+     *
+     * @param sceneId
+     * @param nodeIds
+     * @return
+     */
     public ServiceResult<List<String>> listIPs(String sceneId, List<String> nodeIds) {
         log.info("sceneId:{}, nodeIds:{}", sceneId, nodeIds);
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(CollectionUtil.toList(sceneId), nodeIds);
         return new ServiceResult<>(batchSceneHandler.getAllIps());
     }
 
+    /**
+     * listSceneAssets
+     *
+     * @param sceneIds
+     * @return
+     */
     public ServiceResult<List<SceneAssetsBO>> listSceneAssets(List<String> sceneIds) {
         List<SceneAssetsBO> sceneAssets = new ArrayList<>();
         sceneIds.forEach(s -> {
@@ -1710,6 +1976,12 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(sceneAssets);
     }
 
+    /**
+     * listSceneConfigAssets
+     *
+     * @param sceneConfigId
+     * @return
+     */
     public ServiceResult<SceneConfigAssetBO> listSceneConfigAssets(String sceneConfigId) {
         SceneConfigAssetBO sceneConfigAsset = new SceneConfigAssetBO();
         sceneConfigAsset.setSceneId(sceneConfigId);
@@ -1902,6 +2174,13 @@ public class ScenePluginCollectionSceneService {
         return getRuleId2FileByIds(ruleIds);
     }
 
+    /**
+     * exportFlowPcap
+     *
+     * @param sceneId
+     * @param taskId
+     * @return
+     */
     public ServiceResult<String> exportFlowPcap(String sceneId, String taskId) {
         CollectionPluginSceneModel model = collectionPluginSceneMapper.first(new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId));
         if (model != null && StringUtils.isNotEmpty(model.getFlowFile())) {
@@ -1918,6 +2197,13 @@ public class ScenePluginCollectionSceneService {
         return result;
     }
 
+    /**
+     * saveFlowPcap
+     *
+     * @param sceneId
+     * @param containName
+     * @return
+     */
     public ServiceResult<Boolean> saveFlowPcap(String sceneId, String containName) {
         try {
             String url = this.exportFlowPcap(sceneId, containName).getSource();
@@ -1933,6 +2219,14 @@ public class ScenePluginCollectionSceneService {
         }
     }
 
+    /**
+     * exportFlowPcap
+     *
+     * @param sceneId
+     * @param containName
+     * @param taskId
+     * @return
+     */
     public ServiceResult<String> exportFlowPcap(String sceneId, String containName, String taskId) {
         // containerName -> containerId
         Container container = new Container();
@@ -2066,6 +2360,12 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(list);
     }
 
+    /**
+     * getSceneAttCkTypeCountInfo
+     *
+     * @param sceneId
+     * @return
+     */
     public ServiceResult<List<AttCkTypeCount>> getSceneAttCkTypeCountInfo(String sceneId) {
         BatchSceneHandler sceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), new ArrayList<>());
         ArrayList<String> allElementEids = new ArrayList<>(sceneHandler.getAllEid2ElementMap().keySet());
@@ -2083,6 +2383,12 @@ public class ScenePluginCollectionSceneService {
         return new ServiceResult<>(list);
     }
 
+    /**
+     * buildWazuhMonitorEventsRequest
+     *
+     * @param listPageInfoQueryParams
+     * @return
+     */
     private WazuhMonitorEventsRequest buildWazuhMonitorEventsRequest(ListPageInfoQueryParams listPageInfoQueryParams) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
         Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
@@ -2096,6 +2402,12 @@ public class ScenePluginCollectionSceneService {
     }
 
 
+    /**
+     * convertWazuhProcess2Process
+     *
+     * @param wazuhProcess
+     * @return
+     */
     private Process convertWazuhProcess2Process(WazuhProcessModel wazuhProcess) {
         if (Objects.isNull(wazuhProcess)) {
             return null;
@@ -2117,6 +2429,12 @@ public class ScenePluginCollectionSceneService {
         return process;
     }
 
+    /**
+     * getProcessStartTime
+     *
+     * @param startTime
+     * @return
+     */
     private String getProcessStartTime(String startTime) {
         if (StringUtils.isBlank(startTime)) {
             return null;

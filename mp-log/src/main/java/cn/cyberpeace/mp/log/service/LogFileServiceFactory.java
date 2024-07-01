@@ -47,6 +47,9 @@ public class LogFileServiceFactory {
 
     private Map<String,LogFileService> logFileServiceMap = new ConcurrentHashMap();
 
+    /**
+     * init
+     */
     @PostConstruct
     public void init() {
         Map<String, LogFileService> map = new HashMap<>();
@@ -60,6 +63,8 @@ public class LogFileServiceFactory {
 
     /**
      * 查询全部日志上报数据
+     *
+     * @param basePageRequest
      * @return
      */
     public List<LogReportDTO> listAll(BasePageRequest basePageRequest) {
@@ -111,6 +116,13 @@ public class LogFileServiceFactory {
         return result;
     }
 
+    /**
+     * isReportTypeMatch
+     *
+     * @param reportType
+     * @param codes
+     * @return boolean
+     */
     private boolean isReportTypeMatch(String reportType, Set<String> codes) {
         if (codes.contains(reportType)) {
             return true;
@@ -120,7 +132,9 @@ public class LogFileServiceFactory {
 
     /**
      * 下载日志
+     *
      * @param downloadDTO
+     * @return
      */
     public LogFileDownloadBO downLoad(LogDownloadDTO downloadDTO) throws IOException {
         String logReportType = downloadDTO.getType();

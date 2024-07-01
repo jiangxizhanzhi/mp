@@ -51,6 +51,12 @@ public class RegisterService {
     @Autowired
     private UserRoleService userRoleService;
 
+    /**
+     * register
+     *
+     * @param req
+     * @return
+     */
     @Transactional(rollbackFor = Exception.class)
     public ObjServiceResult<UserModel> register(RegisterRequest req) {
 

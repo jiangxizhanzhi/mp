@@ -68,6 +68,15 @@ public class ResourceCenterService {
     @Resource
     private TargetConverter targetConverter;
 
+    /**
+     * importByConfig
+     *
+     * @param ymlFilePath
+     * @param imageFilePath
+     * @param imageFilePathList
+     * @param sceneFilePath
+     * @return
+     */
     public ServiceResult<CsceneBO> importByConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
         String jsonFilePath = ymlFilePath + "/topo.json";
         File file = new File(jsonFilePath);
@@ -78,6 +87,15 @@ public class ResourceCenterService {
         }
     }
 
+    /**
+     * importByJsonConfig
+     *
+     * @param ymlFilePath
+     * @param imageFilePath
+     * @param imageFilePathList
+     * @param sceneFilePath
+     * @return
+     */
     public ServiceResult<CsceneBO> importByJsonConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
         // 处理附件
         String fdfsSceneFilePath = null;
@@ -128,6 +146,12 @@ public class ResourceCenterService {
         return csceneService.syncForImport(csceneBO, new CsceneContextBO());
     }
 
+    /**
+     * getByImageName
+     *
+     * @param imageName
+     * @return 靶标信息
+     */
     private Device getByImageName(String imageName){
         TargetSceneRequest request = new TargetSceneRequest();
         request.setName(imageName);
@@ -165,6 +189,15 @@ public class ResourceCenterService {
         }
     }
 
+    /**
+     * importByYmlConfig
+     *
+     * @param ymlFilePath
+     * @param imageFilePath
+     * @param imageFilePathList
+     * @param sceneFilePath
+     * @return
+     */
     public ServiceResult<CsceneBO> importByYmlConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
         // 解析 topo.yml
         YmlParseResult ymlParseResult = ResourceCenterYmlParser.parseTopoYml(ymlFilePath);
@@ -204,6 +237,17 @@ public class ResourceCenterService {
         return csceneService.syncForImport(csceneBO, new CsceneContextBO());
     }
 
+    /**
+     * exportScene
+     *
+     * @param csceneId
+     * @param envPath
+     * @param imagePath
+     * @param singleImagePath
+     * @param sceneNumber
+     * @param disableImageExport
+     * @return
+     */
     public ServiceResult<ExportResult> exportScene(String csceneId, String envPath, String imagePath, String singleImagePath, String sceneNumber, boolean disableImageExport) {
         ObjServiceResult<CsceneModel> cscene = csceneService.get(csceneId);
         if (cscene == null || cscene.getSource() == null || cscene.getSource().getObj() == null) {
@@ -229,6 +273,13 @@ public class ResourceCenterService {
         return new ServiceResult<>(result);
     }
 
+    /**
+     * mount
+     *
+     * @param host
+     * @param path
+     * @return
+     */
     public ServiceResult<Boolean> mount(String host, String path) {
         File file = new File(path);
         if (!file.exists()) {
@@ -238,11 +289,22 @@ public class ResourceCenterService {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * umount
+     *
+     * @param path
+     * @return
+     */
     public ServiceResult<Boolean> umount(String path) {
         this.execShell(String.format(UMOUNT_CMD, path));
         return new ServiceResult<>(true);
     }
 
+    /**
+     * execShell
+     *
+     * @param shell
+     */
     private void execShell(String shell) {
         log.info("Start exec shell! command=[{}]", shell);
         try {

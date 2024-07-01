@@ -137,6 +137,12 @@ public class DataCollectionService extends CollectionBaseService {
 
     private static final String CUSTOM_PROBE_ID_PATH = "data.sic_launch_id";
 
+    /**
+     * getUtcTime
+     *
+     * @param time
+     * @return
+     */
     private LocalDateTime getUtcTime(LocalDateTime time) {
         return TimeUtils.utcToLocalDateTime(TimeUtils.localDateTimeToUtcString(time));
     }
@@ -306,6 +312,7 @@ public class DataCollectionService extends CollectionBaseService {
     /**
      * 滚动分页查询文件事件
      *
+     * @param scrollId
      * @return ListObjResult<FileEventModel>
      */
     public ListObjResult<FileEventModel> scrollFileEvents(String scrollId) {
@@ -521,6 +528,7 @@ public class DataCollectionService extends CollectionBaseService {
      * 查询监控数据 查询最近五分钟数据，监控指标频率为 1min, 对五分钟数据按照agentId进行分组，再去最近的时间的数据
      *
      * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
+     * @return
      */
     @Cacheable(value = CACHE_KEY_MONITOR_EVENTS)
     public ListObjResult<WazuhHostStateModel> queryMonitorEvents(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
@@ -589,6 +597,7 @@ public class DataCollectionService extends CollectionBaseService {
      * 查询聚合分析监控事件
      *
      * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
+     * @return
      */
     @Deprecated
     public List<DataCollectionEventModel> queryMonitorEventsAgg(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
@@ -635,6 +644,7 @@ public class DataCollectionService extends CollectionBaseService {
      * 查询监控数据 查询最近五分钟数据，监控指标频率为 1min, 对五分钟数据按照agentId进行分组，再去最近的时间的数据
      *
      * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
+     * @return
      */
     @Cacheable(value = CACHE_KEY_HOST_STATE)
     public List<WazuhHostStateModel> queryHostStateEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
@@ -670,6 +680,8 @@ public class DataCollectionService extends CollectionBaseService {
      * 根据agentName分组查询监控数据
      *
      * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
+     * @param topSize
+     * @return
      */
     @Cacheable(value = CACHE_KEY_MAP_HOST_STATE)
     public Map<String, List<WazuhHostStateModel>> mapHostStatesByAgentNamesWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, int topSize) {
@@ -719,7 +731,7 @@ public class DataCollectionService extends CollectionBaseService {
     /**
      * 查询网络连接
      *
-     * @param
+     * @param wazuhMonitorEventsRequest
      * @return
      */
     @Cacheable(value = CACHE_KEY_NET_CONN)
@@ -759,7 +771,7 @@ public class DataCollectionService extends CollectionBaseService {
     /**
      * 查询进程
      *
-     * @param
+     * @param wazuhMonitorEventsRequest
      * @return
      */
     @Cacheable(value = CACHE_KEY_PROCESS)
@@ -802,7 +814,7 @@ public class DataCollectionService extends CollectionBaseService {
     /**
      * 查询用户变更事件
      *
-     * @param
+     * @param wazuhMonitorEventsRequest
      * @return
      */
     @Cacheable(value = CACHE_KEY_USERS)
@@ -874,6 +886,12 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
 
+    /**
+     * sumProcessesChangedCountByTimeRange
+     *
+     * @param wazuhMonitorEventsRequest
+     * @return int
+     */
     @Cacheable(value = CACHE_KEY_PROCESS_CHANGED_COUNT)
     public int sumProcessesChangedCountByTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
@@ -884,6 +902,12 @@ public class DataCollectionService extends CollectionBaseService {
         return sum;
     }
 
+    /**
+     * sumNetConnsChangedCountByTimeRange
+     *
+     * @param wazuhMonitorEventsRequest
+     * @return int
+     */
     @Cacheable(value = CACHE_KEY_NET_CONNS_CHANGED_COUNT)
     public int sumNetConnsChangedCountByTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
@@ -1076,6 +1100,13 @@ public class DataCollectionService extends CollectionBaseService {
         return null;
     }
 
+    /**
+     * getAttCkTypeCountTrend
+     *
+     * @param wazuhMonitorEventsRequest
+     * @param timeInterval
+     * @return
+     */
     public Map<String, Long> getAttCkTypeCountTrend(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, int timeInterval) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return new HashMap<>();
@@ -1127,6 +1158,12 @@ public class DataCollectionService extends CollectionBaseService {
         return new HashMap<>();
     }
 
+    /**
+     * getAttCkTypeCountInfo
+     *
+     * @param wazuhMonitorEventsRequest
+     * @return
+     */
     public Map<String, Long> getAttCkTypeCountInfo(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return new HashMap<>();
@@ -1172,6 +1209,13 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
 
+    /**
+     * aggsChangedCountWithTimeRange
+     *
+     * @param wazuhMonitorEventsRequest
+     * @param launchId
+     * @return int
+     */
     public int aggsChangedCountWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, String launchId) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return 0;
@@ -1252,6 +1296,8 @@ public class DataCollectionService extends CollectionBaseService {
      *
      * @param wazuhEventRequest wazuhEventRequest
      * @param boolQueryBuilder  boolQueryBuilder
+     * @param allAgentMacAddr
+     * @return int
      */
     private int buildMonitorEventsBuilder(WazuhMonitorEventsRequest wazuhEventRequest,
                                           BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
@@ -1275,6 +1321,7 @@ public class DataCollectionService extends CollectionBaseService {
      *
      * @param wazuhEventRequest wazuhEventRequest
      * @param boolQueryBuilder  boolQueryBuilder
+     * @param allAgentMacAddr
      */
     private void buildMonitorEventsBuilderTimeRange(WazuhMonitorEventsRequest wazuhEventRequest,
                                                     BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
@@ -1303,6 +1350,7 @@ public class DataCollectionService extends CollectionBaseService {
      *
      * @param wazuhEventRequest wazuhEventRequest
      * @param boolQueryBuilder  boolQueryBuilder
+     * @param allAgentMacAddr
      */
     private void buildMonitorEventsAggBuilder(WazuhMonitorEventsRequest wazuhEventRequest,
                                               BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
@@ -1344,6 +1392,7 @@ public class DataCollectionService extends CollectionBaseService {
      * 根据mac地质查询AgentIds
      *
      * @param macs
+     * @param allAgentMacAddr
      * @return agentSet
      */
     public Set<String> queryAgentIdsByMac(List<String> macs, MultiValueMap<String, String> allAgentMacAddr) {
@@ -1518,6 +1567,7 @@ public class DataCollectionService extends CollectionBaseService {
      * 场景删除之后，删除对应es文档数据
      *
      * @param wazuhEventRequest
+     * @return
      */
     public Long deleteDocByAgentNames(WazuhEventRequest wazuhEventRequest) {
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
@@ -1551,6 +1601,7 @@ public class DataCollectionService extends CollectionBaseService {
      * 文件转换
      *
      * @param wazuhFileRoot
+     * @param multiValueMap
      * @return
      */
     private FileEventModel getFileEventModel(WazuhFileRoot wazuhFileRoot, MultiValueMap<String, String> multiValueMap) {
@@ -1611,6 +1662,12 @@ public class DataCollectionService extends CollectionBaseService {
         return builder.updateTime(TimeUtils.dateToLocalDateTime(wazuhFileRoot.getTimestamp())).build();
     }
 
+    /**
+     * processContent
+     *
+     * @param wazuhFileRoot
+     * @return
+     */
     private JSONObject processContent(WazuhFileRoot wazuhFileRoot) {
 
         JSONObject jsonObject = new JSONObject();
@@ -1676,6 +1733,13 @@ public class DataCollectionService extends CollectionBaseService {
         return indexArray;
     }
 
+    /**
+     * buildFileEventBoolQueryBuilder
+     *
+     * @param wazuhEventRequest
+     * @param boolQueryBuilder
+     * @param allAgentMacAddr
+     */
     private void buildFileEventBoolQueryBuilder(WazuhEventRequest wazuhEventRequest,
                                                 BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
         //构造查询条件
@@ -1753,22 +1817,52 @@ public class DataCollectionService extends CollectionBaseService {
 
     }
 
+    /**
+     * buildRuleIdsQuery
+     *
+     * @param ruleIds
+     * @param boolQueryBuilder
+     */
     private void buildRuleIdsQuery(List<String> ruleIds, BoolQueryBuilder boolQueryBuilder) {
         boolQueryBuilder.filter(QueryBuilders.termsQuery("rule.id", ruleIds));
     }
 
+    /**
+     * buildRuleGroupQuery
+     *
+     * @param groups
+     * @param boolQueryBuilder
+     */
     private void buildRuleGroupQuery(List<String> groups, BoolQueryBuilder boolQueryBuilder) {
         boolQueryBuilder.filter(QueryBuilders.termsQuery("rule.groups", groups));
     }
 
+    /**
+     * buildAgentNameQuery
+     *
+     * @param names
+     * @param boolQueryBuilder
+     */
     private void buildAgentNameQuery(List<String> names, BoolQueryBuilder boolQueryBuilder) {
         boolQueryBuilder.filter(QueryBuilders.termsQuery("agent.name", names));
     }
 
+    /**
+     * buildCatagoryQuery
+     *
+     * @param catagories
+     * @param boolQueryBuilder
+     */
     private void buildCatagoryQuery(List<String> catagories, BoolQueryBuilder boolQueryBuilder) {
         // todo 分类 -> *.rules.xml -> ruleId 解析
     }
 
+    /**
+     * buildKeywordsQuery
+     *
+     * @param keywords
+     * @param boolQueryBuilder
+     */
     private void buildKeywordsQuery(List<String> keywords, BoolQueryBuilder boolQueryBuilder) {
         if (!CollectionUtils.isEmpty(keywords)) {
             for (String keyword : keywords) {
@@ -1777,15 +1871,33 @@ public class DataCollectionService extends CollectionBaseService {
         }
     }
 
+    /**
+     * buildPathQuery
+     *
+     * @param path
+     * @param boolQueryBuilder
+     */
     private void buildPathQuery(String path, BoolQueryBuilder boolQueryBuilder) {
         boolQueryBuilder.must(QueryBuilders.wildcardQuery("syscheck.path", "*" + QueryParserUtil.escape(path) + "*"));
     }
 
+    /**
+     * buildSicLaunchIdQuery
+     *
+     * @param sicLaunchId
+     * @param boolQueryBuilder
+     */
     private void buildSicLaunchIdQuery(String sicLaunchId, BoolQueryBuilder boolQueryBuilder) {
         boolQueryBuilder.filter(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, sicLaunchId));
         addLaunchOutputSuccessCondition(boolQueryBuilder);
     }
 
+    /**
+     * buildLevelQuery
+     *
+     * @param levels
+     * @param boolQueryBuilder
+     */
     private void buildLevelQuery(List<Integer> levels, BoolQueryBuilder boolQueryBuilder) {
         boolean lowLevel = levels.get(0) <= 4;
         if (lowLevel) {
@@ -1807,6 +1919,7 @@ public class DataCollectionService extends CollectionBaseService {
      * @param macIds
      * @param boolQueryBuilder
      * @param allAgentMacAddr
+     * @return int
      */
     private int buildAgentIdQuery(List<String> macIds, BoolQueryBuilder boolQueryBuilder,
                                   MultiValueMap<String, String> allAgentMacAddr) {
@@ -1839,6 +1952,8 @@ public class DataCollectionService extends CollectionBaseService {
     /**
      * 构造查询需要的索引
      *
+     * @param start
+     * @param end
      * @return List<IndexBoost>
      */
     @VisibleForTesting
@@ -1875,6 +1990,12 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
 
+    /**
+     * convertHostStateOutput2WazuhModel
+     *
+     * @param output
+     * @return
+     */
     private WazuhHostStateModel convertHostStateOutput2WazuhModel(HostStateOutput output) {
         WazuhHostStateModel wazuhHostStateModel = new WazuhHostStateModel();
         if (StringUtils.isNotBlank(output.getDiskTotal())) {
@@ -1977,16 +2098,34 @@ public class DataCollectionService extends CollectionBaseService {
         return wazuhHostStateModel;
     }
 
+    /**
+     * formatNumber
+     *
+     * @param number
+     * @return
+     */
     private BigDecimal formatNumber(double number) {
         return BigDecimal.valueOf(number).setScale(2, RoundingMode.HALF_DOWN);
     }
 
+    /**
+     * convertEnvVarOutput2EnvVarModel
+     *
+     * @param output
+     * @return
+     */
     private WazuhEnvVarEventModel convertEnvVarOutput2EnvVarModel(BaseChangeCountOutput output) {
         WazuhEnvVarEventModel model = new WazuhEnvVarEventModel();
         BeanUtils.copyProperties(output, model);
         return model;
     }
 
+    /**
+     * string2Long
+     *
+     * @param val
+     * @return
+     */
     private Long string2Long(String val) {
         Double doubleVal = Double.valueOf(val);
         Long longVal = BigDecimal.valueOf(doubleVal).longValue();

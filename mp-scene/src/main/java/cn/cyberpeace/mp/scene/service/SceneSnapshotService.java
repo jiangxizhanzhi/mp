@@ -18,11 +18,22 @@ import java.util.List;
 public class SceneSnapshotService {
     private SceneElementSnapshotMapper snapshotMapper;
 
+    /**
+     * SceneSnapshotService
+     *
+     * @param snapshotMapper
+     */
     @Autowired
     public SceneSnapshotService(SceneElementSnapshotMapper snapshotMapper) {
         this.snapshotMapper = snapshotMapper;
     }
 
+    /**
+     * getElementSnapshots
+     *
+     * @param ids
+     * @return
+     */
     public ServiceResult<List<SceneElementSnapshotModel>> getElementSnapshots(List<String> ids) {
         List<SceneElementSnapshotModel> list = snapshotMapper.list(new HumanCondition()
                 .filterIn(SceneElementSnapshotModel::getId, ids.toArray(new String[]{}))
@@ -30,16 +41,40 @@ public class SceneSnapshotService {
         return new ServiceResult<>(list);
     }
 
+    /**
+     * deleteElementSnapshot
+     *
+     * @param snapshotId
+     * @return
+     */
     public ServiceResult<Boolean> deleteElementSnapshot(String snapshotId) {
         boolean deleted = snapshotMapper.delete(snapshotId);
         return new ServiceResult<>(deleted);
     }
 
+    /**
+     * getElementSnapshot
+     *
+     * @param snapshotId
+     * @return
+     */
     public ServiceResult<SceneElementSnapshotModel> getElementSnapshot(String snapshotId) {
         SceneElementSnapshotModel result = snapshotMapper.get(snapshotId);
         return new ServiceResult<>(result);
     }
 
+    /**
+     * addSnapshot
+     *
+     * @param id
+     * @param sceneId
+     * @param nodeId
+     * @param address
+     * @param name
+     * @param sourceName
+     * @param description
+     * @return
+     */
     public ServiceResult<Boolean> addSnapshot(String id, String sceneId, String nodeId, String address, String name, String sourceName, String description) {
         SceneElementSnapshotModel elementSnapshotModel = new SceneElementSnapshotModel();
         elementSnapshotModel.setScene(sceneId);

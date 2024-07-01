@@ -28,11 +28,19 @@ public class FlowPortProtocolService {
 
     private Cache<String, Object> lfuCache = null;
 
+    /**
+     * init
+     */
     @PostConstruct
     public void init() {
         lfuCache = CacheBuilder.newBuilder().maximumSize(100).build();
     }
 
+    /**
+     * FlowPortProtocolService
+     *
+     * @param flowPortProtocolMapper
+     */
     @Autowired
     public FlowPortProtocolService(FlowPortProtocolMapper flowPortProtocolMapper) {
         this.flowPortProtocolMapper = flowPortProtocolMapper;
@@ -40,6 +48,7 @@ public class FlowPortProtocolService {
 
     /**
      * 查询所有端口与协议
+     *
      * @return
      */
     public List<FlowPortProtocolModel> findAll(){
@@ -55,6 +64,7 @@ public class FlowPortProtocolService {
 
     /**
      * 转成Map格式
+     *
      * @return
      */
     public Map<String, String> convertToMap() {

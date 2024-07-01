@@ -44,6 +44,7 @@ public interface OptionService extends BaseModelService<OptionModel, OptionQuery
 
     /**
      * 分页查询OptionModel列表
+     *
      * @param queryParams
      * @return
      */
@@ -51,24 +52,28 @@ public interface OptionService extends BaseModelService<OptionModel, OptionQuery
 
     /**
      * 新增选项
+     *
      * @param optionModelBO
      */
     void addOption(OptionModelBO optionModelBO);
 
     /**
      * 编辑选项
+     *
      * @param optionModelBO
      */
     void editOption(OptionModelBO optionModelBO);
 
     /**
      * 删除选项
+     *
      * @param ids
      */
     void deleteOptions(List<String> ids);
 
     /**
      * 根据id查询
+     *
      * @param id
      * @return
      */
@@ -76,6 +81,7 @@ public interface OptionService extends BaseModelService<OptionModel, OptionQuery
 
     /**
      * 根据ids查询列表
+     *
      * @param ids
      * @return
      */
@@ -83,6 +89,7 @@ public interface OptionService extends BaseModelService<OptionModel, OptionQuery
 
     /**
      * 根据type类型获取最大的code值（只对数字类型的code有效）
+     *
      * @param type
      * @return
      */
@@ -90,6 +97,7 @@ public interface OptionService extends BaseModelService<OptionModel, OptionQuery
 
     /**
      * 根据type类型获取最大的sort值
+     * 
      * @param type
      * @return
      */

@@ -44,6 +44,19 @@ public class CsceneHostCollectQueryService {
     @Resource
     private WazuhRegistryModifyService wazuhRegistryModifyService;
 
+    /**
+     * getFileModifyData
+     *
+     * @param from
+     * @param size
+     * @param csceneId
+     * @param nodeIds
+     * @param queryStartAt
+     * @param queryEndAt
+     * @param levels
+     * @param filePath
+     * @return
+     */
     public ListObjServiceResult<CollectionHostEventBO> getFileModifyData(int from, int size, String csceneId, List<String> nodeIds, LocalDateTime queryStartAt, LocalDateTime queryEndAt, List<Integer> levels, String filePath) {
         CheckResult checkResult = this.checkAndGetInfo(csceneId, nodeIds);
         if (checkResult.getCheckEnum() != CheckEnum.SUCCESS) {
@@ -72,6 +85,19 @@ public class CsceneHostCollectQueryService {
         return new ListObjServiceResult<>(hostEvents, (int) result.getTotal());
     }
 
+    /**
+     * getRegistryModifyData
+     *
+     * @param from
+     * @param size
+     * @param csceneId
+     * @param nodeIds
+     * @param queryStartAt
+     * @param queryEndAt
+     * @param levels
+     * @param filePath
+     * @return
+     */
     public ListObjServiceResult<CollectionHostEventBO> getRegistryModifyData(int from, int size, String csceneId, List<String> nodeIds, LocalDateTime queryStartAt, LocalDateTime queryEndAt, List<Integer> levels, String filePath) {
         CheckResult checkResult = this.checkAndGetInfo(csceneId, nodeIds);
         if (checkResult.getCheckEnum() != CheckEnum.SUCCESS) {
@@ -98,6 +124,17 @@ public class CsceneHostCollectQueryService {
         return new ListObjServiceResult<>(hostEvents, (int) result.getTotal());
     }
 
+    /**
+     * aggsRegistryModifyData
+     *
+     * @param csceneId
+     * @param nodeIds
+     * @param queryStartAt
+     * @param queryEndAt
+     * @param intervalMinutes
+     * @param bucketSize
+     * @return
+     */
     public List<ElementHistogramInfo> aggsRegistryModifyData(String csceneId, List<String> nodeIds, LocalDateTime queryStartAt, LocalDateTime queryEndAt, Integer intervalMinutes, Integer bucketSize) {
         if (Objects.isNull(intervalMinutes) || Objects.isNull(bucketSize)) {
             log.error("intervalMinutes:{}, bucketSize:{} should not be null!", intervalMinutes, bucketSize);
@@ -131,6 +168,17 @@ public class CsceneHostCollectQueryService {
         return result;
     }
 
+    /**
+     * aggsFileModifyData
+     *
+     * @param csceneId
+     * @param nodeIds
+     * @param queryStartAt
+     * @param queryEndAt
+     * @param intervalMinutes
+     * @param bucketSize
+     * @return
+     */
     public List<ElementHistogramInfo> aggsFileModifyData(String csceneId, List<String> nodeIds, LocalDateTime queryStartAt, LocalDateTime queryEndAt, Integer intervalMinutes, Integer bucketSize) {
         if (Objects.isNull(intervalMinutes) || Objects.isNull(bucketSize)) {
             log.error("intervalMinutes:{}, bucketSize:{} should not be null!", intervalMinutes, bucketSize);
@@ -164,6 +212,14 @@ public class CsceneHostCollectQueryService {
         return result;
     }
 
+    /**
+     * writeNodeInfo
+     *
+     * @param nodeEid
+     * @param sceneHandler
+     * @param cloudScenePluginHandler
+     * @param hostEvent
+     */
     private void writeNodeInfo(String nodeEid, BatchSceneHandler sceneHandler, CloudScenePluginHandler cloudScenePluginHandler, CollectionHostEventBO hostEvent) {
         SceneElementBO srcElement = sceneHandler.getNodeByEid(nodeEid);
         if (srcElement != null) {
@@ -181,6 +237,12 @@ public class CsceneHostCollectQueryService {
         }
     }
 
+    /**
+     * writeBaseInfo
+     *
+     * @param fileEventModel
+     * @param hostEventBO
+     */
     private void writeBaseInfo(FileEventModel fileEventModel, CollectionHostEventBO hostEventBO) {
         hostEventBO.setType(fileEventModel.getFileEventType().name());
         if (StringUtils.isEmpty(fileEventModel.getAction())) {
@@ -200,6 +262,13 @@ public class CsceneHostCollectQueryService {
         hostEventBO.setScrollId(fileEventModel.getScrollId());
     }
 
+    /**
+     * checkAndGetInfo
+     *
+     * @param csceneId
+     * @param nodeIds
+     * @return
+     */
     private CheckResult checkAndGetInfo(String csceneId, List<String> nodeIds) {
         String sceneId = csceneInstanceService.getSceneId(csceneId);
         if (StringUtils.isEmpty(sceneId)) {

@@ -32,6 +32,7 @@ public abstract class AbstractBaseService {
 
     /**
      * 索引
+     *
      * @param startDate
      * @param endDate
      * @return
@@ -48,6 +49,9 @@ public abstract class AbstractBaseService {
     /**
      * 构造查询需要的索引
      *
+     * @param groupList
+     * @param startTime
+     * @param endTime
      * @return List<IndexBoost>
      */
     protected List<String> indexListBuilder(List<String> groupList, LocalDateTime startTime, LocalDateTime endTime) {
@@ -74,6 +78,7 @@ public abstract class AbstractBaseService {
 
     /**
      * 构造流量索引
+     *
      * @param groupId
      * @param dateString dateString
      * @return indexString
@@ -86,6 +91,7 @@ public abstract class AbstractBaseService {
     }
 
     /**
+     * getLocalMessage
      *
      * @param locale
      * @param msgKey

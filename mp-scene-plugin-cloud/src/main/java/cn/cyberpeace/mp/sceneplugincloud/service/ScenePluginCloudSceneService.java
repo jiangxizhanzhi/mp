@@ -114,6 +114,11 @@ public class ScenePluginCloudSceneService {
         private SceneBO srcScene;
         private CloudPluginSceneBO cloudScene;
 
+        /**
+         * toNewNodeConnection
+         *
+         * @return
+         */
         public NodeConnectionBO toNewNodeConnection() {
             NodeConnectionBO nodeConnection = new NodeConnectionBO();
             nodeConnection.setSceneId(srcScene.getEid());
@@ -125,6 +130,13 @@ public class ScenePluginCloudSceneService {
         }
     }
 
+    /**
+     * collectAccessModeLinkInfo
+     *
+     * @param sceneId
+     * @param nodeIds
+     * @return
+     */
     private Map<String, AccessModeLinkInfo> collectAccessModeLinkInfo(String sceneId, List<String> nodeIds) {
         Map<String, AccessModeLinkInfo> accessModeLinkInfoMap = new HashMap<>();
 
@@ -175,6 +187,14 @@ public class ScenePluginCloudSceneService {
         }
     }
 
+    /**
+     * collectConnectionLinkInfo
+     *
+     * @param sceneId
+     * @param nodeIds
+     * @param userIds
+     * @return
+     */
     private Map<String, ConnectionLinkInfo> collectConnectionLinkInfo(String sceneId, List<String> nodeIds,
                                                                       List<String> userIds) {
         Map<String, AccessModeLinkInfo> accessModeLinkInfoMap = collectAccessModeLinkInfo(sceneId, nodeIds);
@@ -202,6 +222,14 @@ public class ScenePluginCloudSceneService {
         return connectionLinkInfoMap;
     }
 
+    /**
+     * collectConnectionLinkInfo
+     *
+     * @param sceneIds
+     * @param nodeIds
+     * @param userIds
+     * @return
+     */
     private Map<String, ConnectionLinkInfo> collectConnectionLinkInfo(List<String> sceneIds, List<String> nodeIds,
                                                                       List<String> userIds) {
         Map<String, ConnectionLinkInfo> connectionLinkInfoMap = new HashMap<>();
@@ -211,6 +239,12 @@ public class ScenePluginCloudSceneService {
         return connectionLinkInfoMap;
     }
 
+    /**
+     * collectRecordingName
+     *
+     * @param sceneId
+     * @return
+     */
     private List<String> collectRecordingName(String sceneId) {
         List<String> connectionIds = new ArrayList<>();
         HumanCondition condition = new HumanCondition().filterEqual(CloudPluginSceneConnectionModel::getScene, sceneId);
@@ -230,6 +264,12 @@ public class ScenePluginCloudSceneService {
         return new ArrayList<>();
     }
 
+    /**
+     * deleteSceneRecords
+     *
+     * @param sceneId
+     * @param logic
+     */
     public void deleteSceneRecords(String sceneId, boolean logic) {
         if (logic) {
             return;
@@ -241,14 +281,35 @@ public class ScenePluginCloudSceneService {
         }
     }
 
+    /**
+     * resetCpcloudAllIps
+     *
+     * @param request
+     * @return
+     */
     public OriginIpsResult resetCpcloudAllIps(ResetCplcoudAllIpsData request) {
         return new Remote().resetCpcloudAllIps(request);
     }
 
+    /**
+     * getCpcloudOriginIps
+     *
+     * @return
+     */
     public OriginIpsResult getCpcloudOriginIps() {
         return new Remote().getCpcloudOriginIps();
     }
 
+    /**
+     * getSceneRemoteSessions
+     *
+     * @param sceneIds
+     * @param nodeIds
+     * @param userIds
+     * @param monitor
+     * @param assistance
+     * @return
+     */
     public ServiceResult<List<NodeSessionBO>> getSceneRemoteSessions(List<String> sceneIds, List<String> nodeIds,
                                                                      List<String> userIds, boolean monitor, boolean assistance) {
         if (!monitor && !assistance) {
@@ -322,6 +383,15 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(new ArrayList<>(connectionIdSessionMap.values()));
     }
 
+    /**
+     * getSceneRemoteRecordings
+     *
+     * @param sceneIds
+     * @param nodeIds
+     * @param userIds
+     * @param queryParams
+     * @return
+     */
     public ListObjServiceResult<NodeRecordingBO> getSceneRemoteRecordings(List<String> sceneIds, List<String> nodeIds,
                                                                           List<String> userIds,
                                                                           RecordingQueryParams queryParams) {
@@ -400,6 +470,16 @@ public class ScenePluginCloudSceneService {
         return new ListObjServiceResult<>(new ListObjResult<>(recordings, rawRecordings.getTotal()));
     }
 
+    /**
+     * enableRemoteRecording
+     *
+     * @param sceneId
+     * @param nodeId
+     * @param userId
+     * @param connectionId
+     * @param context
+     * @return
+     */
     public ServiceResult<NodeConnectionBO> enableRemoteRecording(String sceneId, String nodeId, String userId, String connectionId,
                                                                  CloudScenePluginContext context) {
         Map<String, ConnectionLinkInfo> connectionLinkInfoMap = collectConnectionLinkInfo(sceneId, List.of(nodeId), List.of(userId));
@@ -419,6 +499,15 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(connectionLinkInfo.toNewNodeConnection());
     }
 
+    /**
+     * disableRemoteRecording
+     *
+     * @param sceneId
+     * @param nodeId
+     * @param userId
+     * @param connectionId
+     * @return
+     */
     public ServiceResult<NodeConnectionBO> disableRemoteRecording(String sceneId, String nodeId, String userId, String connectionId) {
         Map<String, ConnectionLinkInfo> connectionLinkInfoMap = collectConnectionLinkInfo(sceneId, List.of(nodeId), List.of(userId));
         if (!connectionLinkInfoMap.containsKey(connectionId)) {
@@ -431,6 +520,13 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(connectionLinkInfo.toNewNodeConnection());
     }
 
+    /**
+     * getRemoteTtyConnection
+     *
+     * @param sceneId
+     * @param nodeId
+     * @return
+     */
     public ServiceResult<NodeConnectionBO> getRemoteTtyConnection(String sceneId, String nodeId) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
         CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
@@ -450,6 +546,16 @@ public class ScenePluginCloudSceneService {
         throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
     }
 
+    /**
+     * getSceneRemoteConnection
+     *
+     * @param sceneId
+     * @param nodeId
+     * @param accessModeId
+     * @param userId
+     * @param context
+     * @return
+     */
     public ServiceResult<NodeConnectionBO> getSceneRemoteConnection(String sceneId, String nodeId,
                                                                     String accessModeId, String userId,
                                                                     CloudScenePluginContext context) {
@@ -496,6 +602,7 @@ public class ScenePluginCloudSceneService {
 
     /**
      * 查询网元指定字段的聚合统计数量
+     *
      * @param sceneIds 场景id列表，不传默认为全部
      * @param nodeIds 节点id列表，不传默认为全部
      * @param fieldNames 聚合统计字段  有效字段 COUNT_ELEMENT_FIELDS
@@ -523,6 +630,7 @@ public class ScenePluginCloudSceneService {
 
     /**
      * 查询网元指定字段的聚合统计数量
+     *
      * @param sceneIds 场景id列表，不传默认为全部
      * @param nodeIds 节点id列表，不传默认为全部
      * @param fieldNames 聚合统计字段  有效字段 COUNT_ELEMENT_FIELDS + CALC_COUNT_ELEMENT_FIELDS
@@ -553,6 +661,7 @@ public class ScenePluginCloudSceneService {
 
     /**
      * 查询端口指定字段的聚合统计数量
+     *
      * @param sceneIds 场景id列表，不传默认为全部
      * @param nodeIds 节点id列表，不传默认为全部
      * @param fieldNames 聚合统计字段  有效字段 COUNT_PORT_FIELDS + CALC_COUNT_PORT_FIELDS
@@ -581,6 +690,12 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(result);
     }
 
+    /**
+     * expireAllRemoteConnect
+     *
+     * @param userId
+     * @return
+     */
     public ServiceResult<Boolean> expireAllRemoteConnect(String userId) {
         Remote remote = new Remote();
         for (int i = 0; i < 2; i++) {
@@ -595,6 +710,13 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * getRecordingUsers
+     *
+     * @param sceneId
+     * @param nodeIds
+     * @return
+     */
     public ServiceResult<List<String>> getRecordingUsers(String sceneId, List<String> nodeIds) {
         HumanCondition humanCondition = new HumanCondition().filterEqual(CloudPluginSceneConnectionModel::getScene, sceneId);
         if (CollectionUtils.isNotEmpty(nodeIds)) {
@@ -613,6 +735,11 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(new ArrayList<>(users));
     }
 
+    /**
+     * changeVlanRange
+     *
+     * @param vlanRange
+     */
     public void changeVlanRange(String vlanRange) {
         TaskCommon.executeTask(() -> {
             if (StringUtils.isEmpty(vlanRange)) {
@@ -627,6 +754,12 @@ public class ScenePluginCloudSceneService {
         });
     }
 
+    /**
+     * linkStatus
+     *
+     * @param sceneId
+     * @return
+     */
     public ServiceResult<List<NodeLinkStatusBO>> linkStatus(String sceneId) {
         try {
             List<NodeLinkStatusBO> list = SceneInstanceLinkCacheUtil.getCached(sceneId);
@@ -638,6 +771,15 @@ public class ScenePluginCloudSceneService {
         }
     }
 
+    /**
+     * execElementCommand
+     *
+     * @param sceneId
+     * @param nodeId
+     * @param command
+     * @param user
+     * @return
+     */
     public ServiceResult<ElementCommandExecBO> execElementCommand(String sceneId, String nodeId, String command, String user) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
@@ -688,6 +830,16 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(execRes);
     }
 
+    /**
+     * uploadElementFile
+     *
+     * @param sceneId
+     * @param nodeId
+     * @param filePath
+     * @param filename
+     * @param destPath
+     * @return
+     */
     public ServiceResult<Boolean> uploadElementFile(String sceneId, String nodeId, String filePath, String filename, String destPath) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
@@ -737,6 +889,16 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * uploadElementFile
+     *
+     * @param sceneId
+     * @param nodeId
+     * @param inputStream
+     * @param filename
+     * @param destPath
+     * @return
+     */
     public ServiceResult<Boolean> uploadElementFile(String sceneId, String nodeId, InputStream inputStream, String filename, String destPath) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
@@ -785,6 +947,13 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * getVirtualMachineUploadFileInfo
+     *
+     * @param pluginHandler
+     * @param node
+     * @return
+     */
     private VirtualMachinePrivateOperateData getVirtualMachineUploadFileInfo(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO node) {
         List<SceneElementPortBO> ports = node.getSrcElement().getPorts();
         if (CollectionUtils.isNotEmpty(ports)) {
@@ -814,6 +983,12 @@ public class ScenePluginCloudSceneService {
         return null;
     }
 
+    /**
+     * countUserConnections
+     *
+     * @param users
+     * @return
+     */
     public ServiceResult<List<UserConnectionNumBO>> countUserConnections(List<String> users) {
         List<UserConnectionNumBO> connectionNumBOS = new ArrayList<>();
         for (String user : users) {
@@ -864,6 +1039,14 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(connectionNumBOS);
     }
 
+    /**
+     * getUserNodeSessions
+     *
+     * @param user
+     * @param monitor
+     * @param assistance
+     * @return
+     */
     public ServiceResult<List<NodeSessionBO>> getUserNodeSessions(String user, boolean monitor, boolean assistance) {
         HumanCondition condition = new HumanCondition()
                 .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
@@ -895,6 +1078,14 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(new ArrayList<>(connectionIdSessionMap.values()));
     }
 
+    /**
+     * getNodeSessions
+     *
+     * @param connectionIds
+     * @param monitor
+     * @param assistance
+     * @return
+     */
     private Map<String, NodeSessionBO> getNodeSessions(String[] connectionIds, boolean monitor, boolean assistance) {
         Remote remoteClient = new Remote();
         Map<String, NodeSessionBO> connectionIdSessionMap = new HashMap<>();
@@ -943,6 +1134,7 @@ public class ScenePluginCloudSceneService {
 
     /**
      * 获取统计环境总速率信息
+     *
      * @param portIds
      * @param totalSecond
      * @return

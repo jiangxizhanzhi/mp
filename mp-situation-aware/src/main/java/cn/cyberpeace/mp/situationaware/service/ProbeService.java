@@ -155,6 +155,11 @@ public class ProbeService {
     }
 
 
+    /**
+     * modifyProbe
+     *
+     * @param probeRequest
+     */
     @Transactional(rollbackFor = Exception.class)
     public void modifyProbe(ProbeRequest probeRequest) {
         modifyProbeCheck(probeRequest);
@@ -244,6 +249,12 @@ public class ProbeService {
     }
 
 
+    /**
+     * getById
+     *
+     * @param id
+     * @return
+     */
     public ProbeDto getById(String id) {
         ProbeDto probeDto = probeMapper.getById(id);
         processProbeDtoOsTypes(probeDto);
@@ -252,6 +263,12 @@ public class ProbeService {
     }
 
 
+    /**
+     * delete
+     *
+     * @param id
+     * @return boolean
+     */
     public boolean delete(String id) {
         return probeMapper.delete(id);
     }
@@ -259,6 +276,7 @@ public class ProbeService {
     /**
      * 分页查询探针列表
      *
+     * @param pageQueryRequest
      * @return
      */
     public PageInfo<ProbeDto> page(ProbePageQueryRequest pageQueryRequest) {
@@ -289,6 +307,7 @@ public class ProbeService {
 
     /**
      * 根据ids查询列表，包含脚本内容，参数
+     *
      * @param ids
      * @return
      */
@@ -307,6 +326,12 @@ public class ProbeService {
     }
 
 
+    /**
+     * listByCondition
+     *
+     * @param condition
+     * @return
+     */
     public List<ProbeDto> listByCondition(ProbeSearchCondition condition) {
         List<ProbeDto> probeDtos = probeMapper.listProbeDtos(condition);
         probeDtos.forEach(p -> {
@@ -320,6 +345,7 @@ public class ProbeService {
 
     /**
      * 根据ids逻辑删除
+     *
      * @param ids
      * @return
      */
@@ -339,6 +365,7 @@ public class ProbeService {
 
     /**
      * 清除探针数据，包括表，es索引，doc等
+     *
      * @param agentNames
      * @param sceneInstanceStartTime
      */
@@ -363,11 +390,22 @@ public class ProbeService {
         // 4. 表数据？
     }
 
+    /**
+     * getByName
+     *
+     * @param name
+     * @return 探针实体
+     */
     public ProbeModel getByName(String name) {
         return probeMapper.getByName(name);
     }
 
 
+    /**
+     * processProbeDtoOsTypes
+     *
+     * @param probeDto
+     */
     private void processProbeDtoOsTypes(ProbeDto probeDto) {
         if (StringUtils.isNotBlank(probeDto.getOsType())) {
             List<Integer> osTypes = new ArrayList<>();
@@ -378,6 +416,11 @@ public class ProbeService {
         }
     }
 
+    /**
+     * processProbeDtoParams
+     *
+     * @param probeDto
+     */
     private void processProbeDtoParams(ProbeDto probeDto) {
         String paramStr = probeParamService.getProbeParamAsJsonStr(probeDto.getId(), null);
         probeDto.setParameter(paramStr);
@@ -385,6 +428,7 @@ public class ProbeService {
 
     /**
      * 国际化转换
+     *
      * @param dto
      */
     private void processInternationalMessage(ProbeDto dto) {
@@ -394,6 +438,11 @@ public class ProbeService {
         dto.setDescription(description);
     }
 
+    /**
+     * check
+     *
+     * @param probeRequest
+     */
     private void check(ProbeRequest probeRequest) {
         if (StringUtils.isNotBlank(probeRequest.getName())) {
             int len = probeRequest.getName().length();

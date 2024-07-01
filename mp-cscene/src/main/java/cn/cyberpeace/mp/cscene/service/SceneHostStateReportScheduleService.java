@@ -14,14 +14,29 @@ public class SceneHostStateReportScheduleService {
 
     private static final Set<String> csceneInstanceIds = new ConcurrentHashSet<>();
 
+    /**
+     * addCsceneInstance
+     *
+     * @param csceneInstanceId
+     */
     public static void addCsceneInstance(String csceneInstanceId) {
         csceneInstanceIds.add(csceneInstanceId);
     }
 
+    /**
+     * removeCsceneInstance
+     *
+     * @param csceneInstanceId
+     */
     public static void removeCsceneInstance(String csceneInstanceId) {
         csceneInstanceIds.remove(csceneInstanceId);
     }
 
+    /**
+     * getCsceneInstanceIds
+     *
+     * @return
+     */
     public List<String> getCsceneInstanceIds() {
         return new ArrayList<String>(csceneInstanceIds);
     }

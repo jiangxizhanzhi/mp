@@ -22,6 +22,12 @@ public class SceneInfoService {
     @Autowired
     private CsceneSpecialService csceneSpecialService;
 
+    /**
+     * processSceneInfo
+     *
+     * @param resourceNames
+     * @param consumer
+     */
     public void processSceneInfo(List<String> resourceNames, Consumer<Map<String, CsceneNodeInfoBO>> consumer) {
         // 添加场景信息
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(resourceNames);

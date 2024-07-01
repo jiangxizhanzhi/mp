@@ -32,6 +32,11 @@ public class OperateRolePermissionService extends OperatePermissionService {
     private UserRoleService userRoleService;
 
 
+    /**
+     * getExcludeRoleIdsByLoginUserForSearchingRoles
+     *
+     * @return
+     */
     public List<String> getExcludeRoleIdsByLoginUserForSearchingRoles() {
 
         boolean isSupserUser = isLoginUserSuperUser();
@@ -53,6 +58,7 @@ public class OperateRolePermissionService extends OperatePermissionService {
     /**
      * 根据操作对象的所有角色名称检查权限
      * 如：excel批量导入
+     *
      * @param targetRoleNames
      */
     public void checkByTargetRoleNames(List<String> targetRoleNames) {

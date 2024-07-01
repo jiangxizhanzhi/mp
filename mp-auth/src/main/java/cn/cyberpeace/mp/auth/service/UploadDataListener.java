@@ -47,6 +47,10 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
      * 如果使用了spring,请使用这个构造方法。每次创建Listener的时候需要把spring管理的类传进来
      *
      * @param userService
+     * @param roleService
+     * @param orgService
+     * @param opUserPermCheckService
+     * @param authConfig
      */
     public UploadDataListener(UserService userService, RoleService roleService, OrgService orgService,
                               OperateUserPermissionService opUserPermCheckService, AuthConfig authConfig) {
@@ -104,7 +108,11 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
     }
 
 
-
+    /**
+     * checkImportUsers
+     *
+     * @param users
+     */
     private void checkImportUsers(List<ImportUserBo> users) {
         if (CollectionUtils.isEmpty(users)) {
             throw new MpRuntimeException(AuthErrorCode.EXCEL_USER_LIST_EMPTY);
@@ -143,6 +151,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
 
     /**
      * 校验简介是否合法
+     *
      * @param description
      * @param index
      */
@@ -155,11 +164,11 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
     }
 
 
-
     /**
      * 校验用户名
      *
-     * @param
+     * @param username
+     * @param index
      */
     private void checkUserName(String username, int index) {
         if (StringUtils.isBlank(username)) {
@@ -319,6 +328,11 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
     }
 
 
+    /**
+     * preProcessOrgsAndRoles
+     *
+     * @param users
+     */
     private void preProcessOrgsAndRoles(List<ImportUserBo> users) {
         preProcessOrgs(users);
         preProcessRoles(users);
@@ -327,6 +341,8 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
     /**
      * 导入excel对密码进行预处理
      * 预处理密码
+     *
+     * @param users
      */
     private void preProcessPwd(List<ImportUserBo> users) {
         List<List<ImportUserBo>> parentList = Lists.partition(users, 20);
@@ -356,6 +372,12 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
     }
 
 
+    /**
+     * enPwd
+     *
+     * @param list
+     * @return
+     */
     private List<ImportUserBo> enPwd(List<ImportUserBo> list) {
         for (ImportUserBo u : list) {
             u.setPassword(PasswordUtils.encode(u.getPassword()));
@@ -366,6 +388,8 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
 
     /**
      * 预处理组织
+     *
+     * @param users
      */
     private void preProcessOrgs(List<ImportUserBo> users) {
         Map<String, OrgBO> orgPath2ModelMap = new HashMap<>();
@@ -403,6 +427,11 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
         }
     }
 
+    /**
+     * preProcessRoles
+     *
+     * @param users
+     */
     private void preProcessRoles(List<ImportUserBo> users) {
         List<String> allRoleNames = new ArrayList<>();
         Map<String, RoleModel> roleName2ModelMap = new HashMap<>();
@@ -447,6 +476,12 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
     }
 
 
+    /**
+     * getDuplicateElements
+     *
+     * @param users
+     * @return
+     */
     public List<Map.Entry<String, Long>> getDuplicateElements(List<ImportUserBo> users) {
         Map<String, Long> map = new HashMap<>();
         for (ImportUserBo u : users) {

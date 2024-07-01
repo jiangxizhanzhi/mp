@@ -18,6 +18,15 @@ import java.util.HashSet;
 @Service
 public class CsceneFileService extends BaseRemoteFileServiceImpl {
 
+    /**
+     * sceneUpload
+     *
+     * @param is
+     * @param fileName
+     * @param fileSuffix
+     * @param legalSuffix
+     * @return
+     */
     public ServiceResult<SceneFileUploadResponse> sceneUpload(InputStream is, String fileName, String fileSuffix, String... legalSuffix) {
         if (!new HashSet<>(Arrays.asList(legalSuffix)).contains(fileSuffix)) {
             return new ServiceResult<>(null, CommonErrorCode.UPLOAD_FILE_TYPE_ERROR);

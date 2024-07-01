@@ -34,6 +34,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
 
     /**
      * 查询平台服务状态列表
+     *
      * @param hostnames
      * @return
      */
@@ -54,6 +55,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
 
     /**
      * 查询业务服务状态列表
+     *
      * @param hostnames
      * @return
      */
@@ -72,6 +74,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
 
     /**
      * 查询服务监控
+     *
      * @param
      * @return
      */
@@ -97,6 +100,13 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
     }
 
 
+    /**
+     * doQueryServiceMonitorDto
+     *
+     * @param hostname
+     * @param launchIds
+     * @return
+     */
     private List<ServiceMonitorDto> doQueryServiceMonitorDto(String hostname, List<String> launchIds) {
         WazuhMonitorEventsRequest wazuhRequest = genDefaultWazuhRequest(hostname);
         List<ServiceMonitorDto> dtos = queryServiceMonitorData(wazuhRequest, launchIds);
@@ -107,7 +117,13 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
     }
 
 
-
+    /**
+     * jsonObj2ServiceMonitorDtos
+     *
+     * @param jsonObject
+     * @param launchId
+     * @return
+     */
     private List<ServiceMonitorDto> jsonObj2ServiceMonitorDtos(JSONObject jsonObject, String launchId) {
         List<ServiceMonitorDto> dtos = new ArrayList<>();
         if (Objects.nonNull(jsonObject)) {
@@ -152,6 +168,12 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
     }
 
 
+    /**
+     * genDefaultWazuhRequest
+     *
+     * @param hostname
+     * @return
+     */
     private WazuhMonitorEventsRequest genDefaultWazuhRequest(String hostname) {
         WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
         wazuhRequest.setAgentNames(Arrays.asList(hostname));

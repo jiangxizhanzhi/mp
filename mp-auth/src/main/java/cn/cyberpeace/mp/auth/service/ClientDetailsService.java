@@ -11,6 +11,12 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
  */
 public interface ClientDetailsService extends BaseModelService<ClientDetailsModel, QueryParams> {
 
+    /**
+     * getByClientId
+     *
+     * @param clientId
+     * @return
+     */
     ClientDetailsModel getByClientId(String clientId);
 
 }
