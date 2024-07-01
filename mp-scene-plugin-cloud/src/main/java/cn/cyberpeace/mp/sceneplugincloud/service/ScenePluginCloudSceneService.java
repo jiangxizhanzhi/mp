@@ -521,7 +521,7 @@ public class ScenePluginCloudSceneService {
                 nodeConnection.setConnectionRecordingName(sceneConnection.getConnectionRecordingName());
             }
         }*/
-
+//                    TODO 录屏暂改
         var nodeConnection1 = new NodeConnectionBO();
         nodeConnection1.setConnectionUrl("http://10.108.1.10:9200/guacamole/#/client/MTE3AGMAbXlzcWw=");
         nodeConnection1.setConnectionId("1");
@@ -547,8 +547,9 @@ public class ScenePluginCloudSceneService {
 
     /**
      * 查询网元指定字段的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
+     *
+     * @param sceneIds   场景id列表，不传默认为全部
+     * @param nodeIds    节点id列表，不传默认为全部
      * @param fieldNames 聚合统计字段  有效字段 COUNT_ELEMENT_FIELDS
      * @return 字段的聚合统计数量 Map<字段名称, Map<字段值, 该字段统计数量>>
      */
@@ -574,8 +575,9 @@ public class ScenePluginCloudSceneService {
 
     /**
      * 查询网元指定字段的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
+     *
+     * @param sceneIds   场景id列表，不传默认为全部
+     * @param nodeIds    节点id列表，不传默认为全部
      * @param fieldNames 聚合统计字段  有效字段 COUNT_ELEMENT_FIELDS + CALC_COUNT_ELEMENT_FIELDS
      * @return 字段的聚合统计数量 Map<字段名称, 该字段统计数量>
      */
@@ -604,8 +606,9 @@ public class ScenePluginCloudSceneService {
 
     /**
      * 查询端口指定字段的聚合统计数量
-     * @param sceneIds 场景id列表，不传默认为全部
-     * @param nodeIds 节点id列表，不传默认为全部
+     *
+     * @param sceneIds   场景id列表，不传默认为全部
+     * @param nodeIds    节点id列表，不传默认为全部
      * @param fieldNames 聚合统计字段  有效字段 COUNT_PORT_FIELDS + CALC_COUNT_PORT_FIELDS
      * @return 字段的聚合统计数量 Map<字段名称, 该字段统计数量>
      */
@@ -696,7 +699,7 @@ public class ScenePluginCloudSceneService {
         if (node != null && node.getVirtualType() != null) {
             if (BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == node.getVirtualType()) {
                 Container container = new Container();
-                var result = container.executeCommand(node.getResourceId(), command,user);
+                var result = container.executeCommand(node.getResourceId(), command, user);
                 if (result.getExitCode() != null && result.getExitCode() == 0) {
                     ElementCommandExecBO execRes = new ElementCommandExecBO();
                     execRes.setOutput(result.getOutput());
@@ -1017,6 +1020,7 @@ public class ScenePluginCloudSceneService {
 
     /**
      * 获取统计环境总速率信息
+     *
      * @param portIds
      * @param totalSecond
      * @return

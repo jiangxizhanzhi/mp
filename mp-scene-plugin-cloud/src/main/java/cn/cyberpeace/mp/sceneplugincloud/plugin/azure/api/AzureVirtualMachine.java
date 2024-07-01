@@ -1,8 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api;
 
-import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
-import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -10,7 +7,6 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceMana
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
-import cn.cyberpeace.mp.sceneplugincloud.util.NetworkSecurityGroupUtils;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
@@ -18,7 +14,6 @@ import com.azure.resourcemanager.compute.fluent.models.ResourceSkuInner;
 import com.azure.resourcemanager.compute.models.*;
 import com.azure.resourcemanager.network.models.Network;
 import com.azure.resourcemanager.network.models.NetworkInterface;
-import com.azure.resourcemanager.network.models.NetworkSecurityGroup;
 import com.azure.resourcemanager.network.models.PublicIpAddress;
 import org.apache.commons.lang3.StringUtils;
 
@@ -142,8 +137,11 @@ public class AzureVirtualMachine {
         return dataMaps;
     }
 
-
     public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData) {
+        cloudElement.setResourceId("1233");
+        cloudElement.setPublicIpAddress("20.30.40.5");
+//        TODO 资源不浪费
+/*
         String groupName = pluginHandler.getSourceSceneId();
 
         // 调用微软云api 创建虚拟机 回写虚拟机id
@@ -191,7 +189,7 @@ public class AzureVirtualMachine {
                 }
             }
 
-        }
+        }*/
 
     }
 

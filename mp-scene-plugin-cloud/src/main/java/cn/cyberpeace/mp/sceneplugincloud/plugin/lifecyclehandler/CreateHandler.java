@@ -140,12 +140,12 @@ public class CreateHandler extends HandlerCommon {
         return genAccessModeKey(protocol, port == null ? StringUtils.EMPTY : port.toString(), username, password);
     }
 
-    private String genAccessModeKey(CloudAccessMode accessMode) {
-        return genAccessModeKey(accessMode.getProtocol(), accessMode.getPort(), accessMode.getUsername(),
+    public String genAccessModeKey(CloudAccessMode accessMode) {
+        return genAccessModeKey(accessMode.getProtocol(), accessMode.getPort() == null ? "0" : accessMode.getPort().toString(), accessMode.getUsername(),
                 accessMode.getPassword());
     }
 
-    private String genAccessModeKey(VirtualNic.AccessMode accessMode) {
+    public String genAccessModeKey(VirtualNic.AccessMode accessMode) {
         String port;
         if (Boolean.TRUE.equals(accessMode.getEnablePortMapping()) && accessMode.getPortMapping() != null) {
             port = accessMode.getPortMapping().getInstancePort();

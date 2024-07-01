@@ -73,7 +73,6 @@ import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
-import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
@@ -678,7 +677,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (recorder != null) {
             recorder.refreshSceneBO(scene);
         }
-        data.getScene().getPlugins().get("cpcloud").getElementPorts().forEach((nodeId, element) -> {
+        //                    TODO 录屏暂改
+        /*data.getScene().getPlugins().get("cpcloud").getElementPorts().forEach((nodeId, element) -> {
             CloudAccessMode accessMode = new CloudAccessMode();
             accessMode.setAvailable(true);
             accessMode.setUsername("admin123");
@@ -692,7 +692,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             ArrayList<CloudAccessMode> cloudAccessModes = new ArrayList<>();
             cloudAccessModes.add(accessMode);
             element.put("access_modes", cloudAccessModes);
-        });
+        });*/
 
         return new ServiceResult<>(data);
     }
@@ -1363,7 +1363,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         } finally {
             CsceneContextHolder.resetContext();
         }*/
-
+//                    TODO 录屏暂改
         var nodeConnection1 = new NodeConnectionBO();
         nodeConnection1.setConnectionUrl("http://10.108.1.10:9200/guacamole/#/client/MTE3AGMAbXlzcWw=");
         nodeConnection1.setConnectionId("1");

@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
@@ -20,11 +19,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,30 +62,26 @@ public class SceneMonitorController {
     public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllElements(@PathVariable String sceneId,
                                                                             @RequestParam(required = false) Boolean realTimeHostState,
                                                                             SceneAllElementsQueryRequest request) {
-        try {
-            List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId, realTimeHostState, request);
-            if (Boolean.TRUE.equals(request.getIncludeDeleting())) {
-                return ResultCommon.success(basicInfoList);
-            }
-            List<ElementMonitorBasicInfo> result = new ArrayList<>();
-            if (CollectionUtils.isNotEmpty(basicInfoList)) {
-                for (var e : basicInfoList) {
-                    if (e.getEvent() != null) {
-                        if (e.getEvent() != SceneElementModel.Event.DELETE) {
-                            result.add(e);
-                        } else if (e.getEvent() == SceneElementModel.Event.DELETE && e.getEventStatus() == EventStatus.OVER) {
-                            result.add(e);
-                        }
-                    } else {
+        List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId, realTimeHostState, request);
+        if (Boolean.TRUE.equals(request.getIncludeDeleting())) {
+            return ResultCommon.success(basicInfoList);
+        }
+        List<ElementMonitorBasicInfo> result = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(basicInfoList)) {
+            for (var e : basicInfoList) {
+                if (e.getEvent() != null) {
+                    if (e.getEvent() != SceneElementModel.Event.DELETE) {
+                        result.add(e);
+                    } else if (e.getEvent() == SceneElementModel.Event.DELETE && e.getEventStatus() == EventStatus.OVER) {
                         result.add(e);
                     }
+                } else {
+                    result.add(e);
                 }
             }
-            return ResultCommon.success(result);
-        }catch (Exception e){
-            log.error(e.getMessage());
-            return ResultCommon.success();
         }
+        return ResultCommon.success(result);
+
     }
 
     @ApiOperation(value = "按需查询场景节点列表")

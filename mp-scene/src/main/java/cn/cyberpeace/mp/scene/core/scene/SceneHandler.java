@@ -8,18 +8,7 @@ import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
 import cn.cyberpeace.mp.scene.constant.CommonSceneStage;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
-import cn.cyberpeace.mp.scene.core.bo.CollectedSceneBO;
-import cn.cyberpeace.mp.scene.core.bo.CollectedSceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
-import cn.cyberpeace.mp.scene.core.bo.ScenePieceBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
-import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
+import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
 import cn.cyberpeace.mp.scene.core.event.SceneEventHandler;
@@ -29,23 +18,8 @@ import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.event.base.EventTransition;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
-import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementPortBO;
-import cn.cyberpeace.mp.scene.model.SceneAreaModel;
-import cn.cyberpeace.mp.scene.model.SceneElementModel;
-import cn.cyberpeace.mp.scene.model.SceneElementPluginModel;
-import cn.cyberpeace.mp.scene.model.SceneElementPortConnectionModel;
-import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
-import cn.cyberpeace.mp.scene.model.SceneModel;
-import cn.cyberpeace.mp.scene.model.ScenePieceModel;
-import cn.cyberpeace.mp.scene.repository.SceneAreaMapper;
-import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
-import cn.cyberpeace.mp.scene.repository.SceneElementPluginMapper;
-import cn.cyberpeace.mp.scene.repository.SceneElementPortConnectionMapper;
-import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
-import cn.cyberpeace.mp.scene.repository.SceneMapper;
-import cn.cyberpeace.mp.scene.repository.ScenePieceMapper;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import cn.cyberpeace.mp.scene.model.*;
+import cn.cyberpeace.mp.scene.repository.*;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -56,14 +30,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Locale;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -295,7 +262,8 @@ public class SceneHandler extends BaseSceneHandler<
                     var portId = sceneElementPort.getId();
                     var pluginPort = plugin.getPort(portId);
                     if (pluginPort != null) {
-                        List<AccessMode> accessModes = pluginPort.getSrcPort().getAccessModes();
+//                    TODO 录屏暂改
+                        /*List<AccessMode> accessModes = pluginPort.getSrcPort().getAccessModes();
                         accessModes.forEach(accessMode -> {
                             accessMode.setAvailable(true);
                             accessMode.setUsername("admin123");
@@ -315,7 +283,8 @@ public class SceneHandler extends BaseSceneHandler<
                             Map<String, Object> map = mapper.convertValue(pluginPorts, Map.class);
                             map.put("access_modes", accessModes);
                             pluginPorts.put(portId, map);
-                        });
+                        });*/
+                        pluginPorts.put(portId, pluginPort);
                     }
                 });
                 portPluginData.put(plugin.getKey(), pluginPorts);
@@ -888,13 +857,13 @@ public class SceneHandler extends BaseSceneHandler<
         }
     }
 
-    public void recreateElement(String nodeId,String image) {
+    public void recreateElement(String nodeId, String image) {
         SceneElementBO element = getElement(nodeId);
         prepareElementEvent(element, SceneElementModel.Event.RECREATE);
         startElementEvent(nodeId, SceneElementModel.Event.RECREATE);
         try {
             for (ScenePluginHandler plugin : getPlugins()) {
-                plugin.recreateElement(nodeId,image);
+                plugin.recreateElement(nodeId, image);
             }
         } catch (Exception e) {
             log.error("failed to recreateElement , sceneId is {} , nodeId is {}, exception is {}", getSceneId(),
