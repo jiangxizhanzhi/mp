@@ -148,6 +148,9 @@ public class CsceneHandler extends BaseCsceneHandler<
             for (Map<String, Object> e : elements.values()) {
                 e.put("vlan_id", vlanId);
                 e.put("vlan", true);
+                e.put("gateway", UserUtils.getLoginUser().getGateway());
+                e.put("cidr", UserUtils.getLoginUser().getCidr());
+                e.put("allocation_pools", JsonCommon.parseList(UserUtils.getLoginUser().getAllocationPools()));
             }
         }
 

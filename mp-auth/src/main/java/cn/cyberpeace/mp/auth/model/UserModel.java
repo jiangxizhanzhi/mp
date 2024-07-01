@@ -143,6 +143,18 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultStr
     private Integer vlanId;
 
+    @ApiModelProperty(value = "用户绑定的cidr")
+    @DefaultStr
+    private String cidr;
+
+    @ApiModelProperty(value = "用户绑定的gateway")
+    @DefaultStr
+    private String gateway;
+
+    @ApiModelProperty(value = "用户绑定的allocationPools")
+    @DefaultStr
+    private String allocationPools;
+
 
     @Builder
     public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin) {
