@@ -87,39 +87,16 @@ public class FlowActuatorServiceImpl extends BaseModelServiceImpl<FlowActuatorMo
     @Override
     public ListObjServiceResult<FlowActuatorResponse> page(FlowActuatorQueryParams queryParams) {
 
-        // 获取流量发生器列表
-        ListObjServiceResult<FlowActuatorModel> listObjServiceResult = list(queryParams);
+        // 获取总数
+        int total = getModelMapper().countForPage(queryParams);
+        // 计算分页偏差值
+        int pageFrontIndex = (queryParams.getPage() - 1) * queryParams.getPerPage();
+        queryParams.setPageFrontIndex(pageFrontIndex);
 
-        // 结果转换
-        List<FlowActuatorResponse> responseList = new ArrayList<>();
-        List<FlowActuatorModel> flowActuatorModels = listObjServiceResult.getSource().getObjs();
-        if (CollectionUtils.isNotEmpty(flowActuatorModels)) {
-            List<String> sceneIds = new ArrayList<>();
-            for (FlowActuatorModel flowActuatorModel : flowActuatorModels) {
-                String id = flowActuatorModel.getInstanceId();
-                sceneIds.add(id);
-            }
-            // 获取关联场景实例数据
-            HumanCondition humanCondition = new HumanCondition().currentLink(SceneModel.class)
-                    .filterIn(SceneModel::getId, sceneIds.toArray());
-            List<SceneModel> sceneModels = sceneMapper.list(humanCondition);
-            Map<String, String> sceneMap = new HashMap<>();
-            for (SceneModel sceneModel : sceneModels) {
-                sceneMap.put(sceneModel.getId(), sceneModel.getName());
-            }
-            // 拼装返回信息
-            for (FlowActuatorModel model : flowActuatorModels) {
-                FlowActuatorResponse response = FlowActuatorResponse.builder()
-                        .id(model.getId()).title(model.getTitle()).sceneName(sceneMap.get(model.getInstanceId()))
-                        .ip(model.getIp()).targetSubnet(model.getNetworkId()).status(model.getStatus()).build();
-                if (Objects.nonNull(model.getCreateTime())) {
-                    response.setCreateTime(TimeUtils.localDateTimeToString(model.getCreateTime()));
-                }
-                responseList.add(response);
-            }
-        }
+        // 获取分页数据
+        List<FlowActuatorResponse> responses = getModelMapper().page(queryParams);
 
-        return new ListObjServiceResult<>(new ListObjResult<>(responseList, listObjServiceResult.getSource().getTotal())).asResult();
+        return new ListObjServiceResult<>(new ListObjResult<>(responses,total)).asResult();
     }
 
     @Override

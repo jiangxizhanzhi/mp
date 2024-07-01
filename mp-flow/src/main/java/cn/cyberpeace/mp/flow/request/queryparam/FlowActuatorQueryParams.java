@@ -23,4 +23,9 @@ public class FlowActuatorQueryParams extends QueryParams {
      * */
     @ApiModelProperty(value = "流量运行状态：0 初始化， 1 运行中， 2 停止中， 3 已停止， 4 未启动过")
     private Integer status;
+
+    /**
+     *  分页计算偏差值
+     */
+    private Integer pageFrontIndex;
 }

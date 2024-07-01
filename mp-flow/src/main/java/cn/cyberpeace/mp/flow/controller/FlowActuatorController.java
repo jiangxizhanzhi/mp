@@ -62,11 +62,9 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
     @ApiOperation("分页查询流量信息")
     @GetMapping("/page")
     public ListObjServiceResult<FlowActuatorResponse> page(FlowActuatorQueryParams queryParams) {
-        if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
-            // 默认按时间降序
-            queryParams.setOrders(new String[]{"-createTime", "-title"});
-        }
+        // 参数处理
         handleQueryParams(BaseConstants.STR_LIST, queryParams);
+        // 分页查询
         return flowActuatorService.page(queryParams);
     }
 

@@ -2,4 +2,47 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.flow.repository.FlowActuatorMapper">
 
+    <resultMap id="ResponseMap" type="cn.cyberpeace.mp.flow.response.FlowActuatorResponse">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="title" jdbcType="VARCHAR" property="title"/>
+        <result column="scene_name" jdbcType="VARCHAR" property="sceneName"/>
+        <result column="ip" jdbcType="VARCHAR" property="ip"/>
+        <result column="target_subnet" jdbcType="VARCHAR" property="targetSubnet"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+
+    <select id="countForPage" parameterType="cn.cyberpeace.mp.flow.request.queryparam.FlowActuatorQueryParams"
+            resultType="java.lang.Integer">
+        SELECT ifnull(count(*), 0) FROM(
+            SELECT DISTINCT fa.*
+            FROM `mp_flow_actuator` fa
+            LEFT JOIN mp_flow_task_task ftt ON fa.id = ftt.actuator_id
+            LEFT JOIN mp.mp_scene_scene ss ON ftt.scene_id = ss.id
+            where 1=1
+            <if test="status!=null">
+                and fa.status = #{status}
+            </if>
+            <if test="instanceId!=null and !instanceId.trim().isEmpty()">
+                and ftt.scene_id = #{instanceId}
+            </if>
+        )temp
+    </select>
+
+    <select id="page" parameterType="cn.cyberpeace.mp.flow.request.queryparam.FlowActuatorQueryParams"
+            resultMap="ResponseMap">
+        SELECT DISTINCT fa.id, fa.title, fa.ip, fa.status, fa.create_time, ss.name as scene_name,
+        fa.network_id as target_subnet
+        FROM `mp_flow_actuator` fa
+        LEFT JOIN mp_flow_task_task ftt ON fa.id = ftt.actuator_id
+        LEFT JOIN mp.mp_scene_scene ss ON ftt.scene_id = ss.id
+        where 1=1
+        <if test="status!=null">
+            and fa.status = #{status}
+        </if>
+        <if test="instanceId!=null and !instanceId.trim().isEmpty()">
+            and ftt.scene_id = #{instanceId}
+        </if>
+        ORDER BY fa.create_time, fa.title desc limit #{pageFrontIndex}, #{perPage}
+    </select>
 </mapper>
