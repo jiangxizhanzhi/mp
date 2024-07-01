@@ -958,15 +958,27 @@ public class DataCollectionService extends CollectionBaseService {
      * @throws IOException
      */
     private SearchResponse getSearchResponse(Integer cloudType, SearchRequest searchRequest) throws IOException {
+        try {
+            return getSearchResponseWithRetry(cloudType, searchRequest);
+        }catch (Exception e){
+            log.error(e.getMessage());
+            try {
+                log.info("Query the timeout reentrant method");
+                return getSearchResponseWithRetry(cloudType, searchRequest);
+            }catch (Exception e1){
+                throw e1;
+            }
+        }
+    }
+
+    private SearchResponse getSearchResponseWithRetry(Integer cloudType, SearchRequest searchRequest) throws IOException {
         if (null != cloudType && BaseSceneModel.CloudType.PUBLIC == cloudType) {
             SearchResponse response = publicWazuhRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             return response;
-        }
-        if (null != cloudType && BaseSceneModel.CloudType.PRIVATE == cloudType) {
+        } else if (null != cloudType && BaseSceneModel.CloudType.PRIVATE == cloudType) {
             SearchResponse response = privateWazuhRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             return response;
-        }
-        if (null != cloudType && BaseSceneModel.CloudType.MIX == cloudType) {
+        } else if (null != cloudType && BaseSceneModel.CloudType.MIX == cloudType) {
             SearchResponse response = mixWazuhRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             return response;
         } else {

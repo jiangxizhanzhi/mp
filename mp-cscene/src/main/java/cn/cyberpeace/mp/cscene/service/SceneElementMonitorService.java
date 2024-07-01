@@ -672,7 +672,8 @@ public class SceneElementMonitorService {
         String minBounds = TimeUtils.localTime2yyyyMMddHHmm(wazuhEventRequest.getEndTime().minusMinutes((long) intervalMinutes * (bucketSize)));
         String maxBounds = TimeUtils.localTime2yyyyMMddHHmm(wazuhEventRequest.getEndTime().minusMinutes(1));
 
-        SceneHandler sceneHandler = new SceneHandler(pageRequest.getSceneId(), null, false, null);
+        String translatedSceneId = csceneCommonService.translateSceneId(pageRequest.getSceneId());
+        SceneHandler sceneHandler = new SceneHandler(translatedSceneId, null, false, null);
         var resultMap = dataCollectionService.aggsDateHistogram(wazuhEventRequest, intervalMinutes + "m", minBounds, maxBounds, sceneHandler.getScene().getCloudType());
 
         if (CollectionUtil.isNotEmpty(resultMap)) {

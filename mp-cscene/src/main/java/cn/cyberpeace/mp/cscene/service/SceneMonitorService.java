@@ -19,13 +19,11 @@ import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.AccessUserBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -361,11 +359,11 @@ public class SceneMonitorService {
                 });
             }
             basicInfos.forEach(basicInfo -> {
-                        basicInfo.setAccessUsers(nodeId2Users.getOrDefault(basicInfo.getId(), new ArrayList<>())
-                                .stream().distinct().collect(Collectors.toList()));
-                for (ElementPort port : basicInfo.getPorts()) {
+                basicInfo.setAccessUsers(nodeId2Users.getOrDefault(basicInfo.getId(), new ArrayList<>())
+                        .stream().distinct().collect(Collectors.toList()));
+//                    TODO 录屏暂改
+                /*for (ElementPort port : basicInfo.getPorts()) {
                     for (AccessMode accessMode : port.getAccessModes()) {
-
                         accessMode.setAvailable(true);
                         accessMode.setUsername("admin123");
                         accessMode.setPassword("NHiOJiZTD4K1");
@@ -377,7 +375,7 @@ public class SceneMonitorService {
                         accessMode.setProxyId("1");
                     }
 
-                }
+                }*/
 
 
             });

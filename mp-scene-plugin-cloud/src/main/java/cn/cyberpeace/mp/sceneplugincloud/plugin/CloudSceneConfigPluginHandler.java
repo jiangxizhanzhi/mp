@@ -192,31 +192,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                         throw new MpRuntimeException(CloudErrorCode.INVALID_PASSWORD.format(element.getPassword()));
                     }
                 }
-//            组装asseccModels
-                /*Map<String, SceneConfigElementPortBO> elementPortMap = getSceneHandler().getElementPortMap();
-                elementPortMap.forEach((portId, elementPort) -> {
-                    if (portId.contains(nodeId)) {
-
-                        String protocols = elementPort.getProtocols();
-                        ArrayList<AccessMode> accessModes = new ArrayList<>();
-                        if (protocols != null) {
-                            for (String protocol : protocols.split(";")) {
-                                AccessMode accessMode = new AccessMode();
-                                accessMode.setUsername(element.getUsername());
-                                accessMode.setPassword(element.getPassword());
-                                accessMode.setPort(AccessMode.Protocol.DEFAULT_PORT_MAP.get(protocol));
-                                accessMode.setPrivateKeyEnable(false);
-                                accessMode.setProtocol(protocol);
-                                accessMode.setProxy(true);
-                                accessModes.add(accessMode);
-                            }
-                            elementPort.setAccessModes(accessModes);
-                        }
-                    }
-                });*/
             });
-
-
         }
 
         for (var srcPort : getSceneHandler().getElementPortMap().values()) {

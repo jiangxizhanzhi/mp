@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.azure.lifecyclehandler;
 
+import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
+import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSceneStage;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.CreateHandler;
 
@@ -16,6 +18,13 @@ public class AzureCreateHandler extends CreateHandler {
     }
 
     public void create() {
+        prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
+        getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
+        getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
+
+        getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CollectionSceneStage.CREATE_DATA_COLLECT);
+        getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_DATA_COLLECT);
+
         try {
 //            TODO arkime暂停开发
             /*prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
