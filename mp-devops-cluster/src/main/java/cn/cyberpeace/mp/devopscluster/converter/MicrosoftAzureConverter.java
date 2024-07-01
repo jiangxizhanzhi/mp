@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
 import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
-import cn.cyberpeace.mp.base.bo.MpSysCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment;
@@ -133,7 +132,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         List<DeviceCloudTargetVO> vos = null;
         //分页时计算总数
         Integer total = 0;
-        if(request.getCloudServiceType() == null || request.getCloudServiceType().isEmpty()){
+        if (request.getCloudServiceType() == null || request.getCloudServiceType().isEmpty()) {
             return new ArrayList<>();
         }
         switch (request.getCloudServiceType()) {
@@ -168,10 +167,10 @@ public class MicrosoftAzureConverter implements BaseConverter {
         //根据convert中subType分类收集成returnDate,list在收集returnDate
         List<JSONObject> list = new ArrayList<>();
         JSONObject returnDate = new JSONObject();
-        returnDate.put("sub_type",null);
-        returnDate.put("data",new ArrayList<CloudDevice>());
+        returnDate.put("sub_type", null);
+        returnDate.put("data", new ArrayList<CloudDevice>());
 
-        // 使用 Map 分组
+        // 使用Map分组
         Map<String, List<CloudDevice>> groupedDevices = new HashMap<>();
         for (CloudDevice cloudDevice : convert) {
             String subType = cloudDevice.getSubType();
@@ -182,11 +181,11 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
         //查询subType对应名称
         List<JSONObject> nameList = microsoftAzureMapper.getSubTypeName();
-        Map<String,String> map = new HashMap<>();
-        if(nameList != null && nameList.size() > 0){
+        Map<String, String> map = new HashMap<>();
+        if (nameList != null && nameList.size() > 0) {
             //将nameList中的codeName和codeOtherName转换成map
             for (JSONObject jsonObject : nameList) {
-                map.put(jsonObject.getString("code_other_name"),jsonObject.getString("code_name"));
+                map.put(jsonObject.getString("code_other_name"), jsonObject.getString("code_name"));
             }
         }
 
@@ -529,6 +528,22 @@ public class MicrosoftAzureConverter implements BaseConverter {
 //                    if (firstTime < 10) {
 //                        firstTime++;
 
+                    //休眠0.5秒,请求速度过快会导致请求微软云的连接中断
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    System.out.println("offerName: " + offer.name());
+                    // 获取该产品的所有SKU
+                    VirtualMachineSkus skus = offer.skus();
+                    PagedIterable<VirtualMachineSku> skuList = skus.list();
+                    int secondTime = 0;
+                    for (VirtualMachineSku sku : skuList) {
+//                            if (secondTime < 10) {
+//                                secondTime++;
+
                         //休眠0.5秒,请求速度过快会导致请求微软云的连接中断
                         try {
                             Thread.sleep(500);
@@ -536,14 +551,13 @@ public class MicrosoftAzureConverter implements BaseConverter {
                             e.printStackTrace();
                         }
 
-                        System.out.println("offerName: " + offer.name());
-                        // 获取该产品的所有SKU
-                        VirtualMachineSkus skus = offer.skus();
-                        PagedIterable<VirtualMachineSku> skuList = skus.list();
-                        int secondTime = 0;
-                        for (VirtualMachineSku sku : skuList) {
-//                            if (secondTime < 10) {
-//                                secondTime++;
+                        System.out.println("skuName: " + sku.name());
+                        // 获取每个SKU的所有版本（image versions）
+                        PagedIterable<VirtualMachineImage> imageList = sku.images().list();
+                        int thirdTime = 0;
+                        for (VirtualMachineImage image : imageList) {
+                            if (thirdTime < 1) {
+                                thirdTime++;
 
                                 //休眠0.5秒,请求速度过快会导致请求微软云的连接中断
                                 try {
@@ -552,33 +566,18 @@ public class MicrosoftAzureConverter implements BaseConverter {
                                     e.printStackTrace();
                                 }
 
-                                System.out.println("skuName: " + sku.name());
-                                // 获取每个SKU的所有版本（image versions）
-                                PagedIterable<VirtualMachineImage> imageList = sku.images().list();
-                                int thirdTime = 0;
-                                for (VirtualMachineImage image : imageList) {
-                                    if (thirdTime < 1) {
-                                        thirdTime++;
-
-                                        //休眠0.5秒,请求速度过快会导致请求微软云的连接中断
-                                        try {
-                                            Thread.sleep(500);
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
-
-                                        JSONObject forth = new JSONObject();
-                                        forth.put("imageName", offer.name());
-                                        forth.put("imageVersion", image.version());
-                                        forth.put("PublisherName", publisher.name());
-                                        forth.put("offerName", offer.name());
-                                        forth.put("skuName", sku.name());
-                                        forth.put("operatingSystem", image.osDiskImage().operatingSystem());
-                                        result.add(forth);
-                                    }
-                                }
-//                            }
+                                JSONObject forth = new JSONObject();
+                                forth.put("imageName", offer.name());
+                                forth.put("imageVersion", image.version());
+                                forth.put("PublisherName", publisher.name());
+                                forth.put("offerName", offer.name());
+                                forth.put("skuName", sku.name());
+                                forth.put("operatingSystem", image.osDiskImage().operatingSystem());
+                                result.add(forth);
+                            }
                         }
+//                            }
+                    }
 //                    }
                 }
             }

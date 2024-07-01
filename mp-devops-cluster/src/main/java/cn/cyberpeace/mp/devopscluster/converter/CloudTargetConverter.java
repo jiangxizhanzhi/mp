@@ -61,7 +61,7 @@ public class CloudTargetConverter {
         device.setImageType("laasVm");
         device.setRole(4);
         ExtVm extVm = new ExtVm();
-        extVm.setFlavor("1c-1g-30g-2i");
+        extVm.setFlavor("1CPU/1g内存/30g磁盘/2网卡");
         extVm.setCpu(1);
         extVm.setRam(1);
         extVm.setDisk(30);
