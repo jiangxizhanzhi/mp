@@ -17,14 +17,29 @@ public class ConvertRegistryParams implements WazuhParamsConvert<WazuhControl.Co
 
     private Probe probe;
 
+    /**
+     * getRegistryRecursionLevel
+     *
+     * @return
+     */
     private Integer getRegistryRecursionLevel() {
         return CollectionSingleton.collectionAppConfig.getRegistryRecursionLevel();
     }
 
+    /**
+     * ConvertRegistryParams
+     *
+     * @param probe
+     */
     public ConvertRegistryParams(Probe probe) {
         this.probe = probe;
     }
 
+    /**
+     * convertParams
+     *
+     * @return
+     */
     @Override
     public List<WazuhControl.ControlRegistryModifyParam> convertParams() {
         if (probe.getDisabled() || probe.getCollectPath() == null || probe.getCollectPath().isEmpty()) {

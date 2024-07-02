@@ -52,6 +52,11 @@ public class RealEquipmentService extends BaseCpService {
     @Autowired
     private DeviceTargetMapper deviceTargetMapper;
 
+    /**
+     * RealEquipmentService
+     *
+     * @param devopsClusterConfig
+     */
     public RealEquipmentService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }

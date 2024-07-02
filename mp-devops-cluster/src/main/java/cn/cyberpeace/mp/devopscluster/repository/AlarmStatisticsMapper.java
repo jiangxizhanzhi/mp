@@ -23,18 +23,26 @@ public interface AlarmStatisticsMapper extends BaseModelMapper<AlarmStatisticsMo
 
     /**
      * 查询今天告警统计信息
+     *
+     * @param currentTime
      * @return
      */
     List<AlarmStatisticsModel> todayAlarmStatistics(@Param("currentTime") LocalDateTime currentTime);
 
     /**
      * 服务告警趋势
+     *
+     * @param currentTime
+     * @param days
      * @return
      */
     List<AlarmStatisticsVO> serviceAlarmStatistics(@Param("currentTime") LocalDateTime currentTime, @Param("days") int days);
 
     /**
      * 设备告警趋势
+     *
+     * @param currentTime
+     * @param days
      * @return
      */
     List<AlarmStatisticsVO> serverAlarmStatistics(@Param("currentTime") LocalDateTime currentTime, @Param("days") int days);

@@ -21,10 +21,20 @@ import java.util.List;
 @Slf4j
 public class PrepareHandler extends HandlerCommon {
 
+    /**
+     * PrepareHandler
+     *
+     * @param pluginHandler
+     */
     public PrepareHandler(FlowScenePluginHandler pluginHandler) {
         super(pluginHandler, RecreateTaskPool.getInstance(), SceneElementModel.Event.INITIATE);
     }
 
+    /**
+     * prepare
+     *
+     * @param partialStart
+     */
     public void prepare(boolean partialStart) {
         SceneStageRecorder stageRecorder = getPluginHandler().getSceneHandler().getSceneStageRecorder();
         stageRecorder.addStage(CommonSceneStage.INIT);

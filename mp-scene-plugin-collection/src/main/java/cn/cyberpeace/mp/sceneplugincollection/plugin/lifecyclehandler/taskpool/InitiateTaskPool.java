@@ -9,11 +9,19 @@ public class InitiateTaskPool extends TaskPool {
         public static final InitiateTaskPool INSTANCE = new InitiateTaskPool();
     }
 
+    /**
+     * InitiateTaskPool
+     */
     private InitiateTaskPool() {
         super(CollectionSingleton.collectionAppConfig.getInitiatePoolSize(),
                 CollectionSingleton.collectionAppConfig.getInitiateHoldSize(), 60L);
     }
 
+    /**
+     * getInstance
+     *
+     * @return
+     */
     public static InitiateTaskPool getInstance() {
         return CreateTaskPoolInstance.INSTANCE;
     }

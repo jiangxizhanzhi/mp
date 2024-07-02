@@ -13,11 +13,24 @@ import org.springframework.stereotype.Component;
 // 删除arkime时对arkime的name有依赖,先不使用
 @Component
 public class CollectionResourceName implements ICollectionResourceName<RsourceNameParams> {
+    /**
+     * generate
+     *
+     * @param id
+     * @param params
+     * @return
+     */
     @Override
     public String generate(String id, RsourceNameParams params) {
         return this.getPrefix() + id;
     }
 
+    /**
+     * parse
+     *
+     * @param name
+     * @return
+     */
     @Override
     public ResourceParseWrapper<RsourceNameParams> parse(String name) {
 //        if (StringUtils.isNotEmpty(name) && name.startsWith(this.getPrefix())) {
@@ -37,6 +50,11 @@ public class CollectionResourceName implements ICollectionResourceName<RsourceNa
         return new ResourceParseWrapper<>();
     }
 
+    /**
+     * getPrefix
+     *
+     * @return
+     */
     private String getPrefix() {
         return "mp_arkime_";
     }

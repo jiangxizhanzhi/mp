@@ -32,6 +32,9 @@ public class BasePageRequest {
     private String[] sort;
 
 
+    /**
+     * ensure
+     */
     public void ensure() {
         if (perPage != null) {
             pageSize = perPage;

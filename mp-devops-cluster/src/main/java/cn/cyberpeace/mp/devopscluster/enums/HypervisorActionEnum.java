@@ -12,10 +12,20 @@ public enum HypervisorActionEnum {
 
     private String action;
 
+    /**
+     * HypervisorActionEnum
+     *
+     * @param action
+     */
     HypervisorActionEnum(String action) {
         this.action = action;
     }
 
+    /**
+     * getAction
+     *
+     * @return
+     */
     public String getAction() {
         return action;
     }

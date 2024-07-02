@@ -16,6 +16,12 @@ public interface WazuhDataQueryParamsBuilder {
 
     List<SortBuilder<?>> sorts();
 
+    /**
+     * getLevelQueryBuilder
+     *
+     * @param levels
+     * @return
+     */
     default BoolQueryBuilder getLevelQueryBuilder(List<Integer> levels) {
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolean lowLevel = levels.get(0) <= 4;
@@ -34,6 +40,13 @@ public interface WazuhDataQueryParamsBuilder {
         return boolQueryBuilder;
     }
 
+    /**
+     * getTimeRangeQueryBuilder
+     *
+     * @param startTime
+     * @param endTime
+     * @return
+     */
     default BoolQueryBuilder getTimeRangeQueryBuilder(LocalDateTime startTime, LocalDateTime endTime) {
         BoolQueryBuilder timeQuery = QueryBuilders.boolQuery()
                 .must(QueryBuilders.rangeQuery(SituationalAwareConstant.ES_TIMESTAMP_FIELD)

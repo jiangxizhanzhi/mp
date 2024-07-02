@@ -21,6 +21,12 @@ public class DockerInstallCommandUtils {
         String ENV = "env";
     }
 
+    /**
+     * genDockerRunDefaultCmd
+     *
+     * @param params
+     * @return
+     */
     public static String genDockerRunDefaultCmd(List<QuickCreateParam.DockerInstaller.StartUpParameter> params) {
         List<String> ports = new ArrayList<>();
         List<String> envs = new ArrayList<>();

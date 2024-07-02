@@ -24,6 +24,12 @@ public abstract class BaseCloudPluginSceneBO<M extends BaseCloudPluginSceneModel
     @ApiModelProperty(value = "dnsNameservers")
     private List<DnsPool> dnsNameservers;
 
+    /**
+     * fromModel
+     *
+     * @param obj
+     * @param ignoreFields
+     */
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         //忽略直接赋值处理的字段，需要定制处理
@@ -36,6 +42,12 @@ public abstract class BaseCloudPluginSceneBO<M extends BaseCloudPluginSceneModel
         });
     }
 
+    /**
+     * toModel
+     *
+     * @param ignoreFields
+     * @return
+     */
     @Override
     public M toModel(String... ignoreFields) {
         M obj = super.toModel(ArrayUtils.addAll(ignoreFields,

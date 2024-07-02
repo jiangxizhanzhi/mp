@@ -14,7 +14,25 @@ import java.util.List;
 @Repository
 @ModelClass(CsceneModel.class)
 public interface CsceneMapper extends BaseCsceneMapper<CsceneModel> {
+    /**
+     * statGroupByType
+     *
+     * @param sceneIds
+     * @param cpu
+     * @param ram
+     * @param disk
+     * @return
+     */
     List<CsceneElementStat> statGroupByType(@Param("ids") String[] sceneIds, @Param("cpu") int cpu, @Param("ram") int ram, @Param("disk") int disk);
 
+    /**
+     * statGroupByFlow
+     *
+     * @param sceneIds
+     * @param cpu
+     * @param ram
+     * @param disk
+     * @return
+     */
     List<CsceneElementStat> statGroupByFlow(@Param("ids") String[] sceneIds, @Param("cpu") int cpu, @Param("ram") int ram, @Param("disk") int disk);
 }

@@ -8,11 +8,19 @@ public class SuspendTaskPool extends TaskPool {
         public static final SuspendTaskPool INSTANCE = new SuspendTaskPool();
     }
 
+    /**
+     * SuspendTaskPool
+     */
     private SuspendTaskPool() {
         super(CloudSingleton.cloudAppConfig.getSuspendPoolSize(),
                 CloudSingleton.cloudAppConfig.getSuspendHoldSize(), 60L);
     }
 
+    /**
+     * getInstance
+     *
+     * @return
+     */
     public static SuspendTaskPool getInstance() {
         return SuspendTaskPoolInstance.INSTANCE;
     }

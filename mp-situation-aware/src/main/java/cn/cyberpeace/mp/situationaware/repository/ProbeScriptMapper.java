@@ -23,9 +23,28 @@ public interface ProbeScriptMapper extends BaseModelMapper<ProbeScriptModel> {
 //    int updateByPrimaryKeyWithBLOBs(ProbeScriptModel record);
 //
 //    int updateByPrimaryKey(ProbeScriptModel record);
+
+    /**
+     * deleteByProbeId
+     *
+     * @param probeId
+     * @return int
+     */
     int deleteByProbeId(String probeId);
 
+    /**
+     * getChecksumByProbeId
+     *
+     * @param probeId
+     * @return
+     */
     String getChecksumByProbeId(String probeId);
 
+    /**
+     * getScriptModelByProbeId
+     *
+     * @param probeId
+     * @return 探针脚本实体，跟探针一对一关系
+     */
     ProbeScriptModel getScriptModelByProbeId(String probeId);
 }

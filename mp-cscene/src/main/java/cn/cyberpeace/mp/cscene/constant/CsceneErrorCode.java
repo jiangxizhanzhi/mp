@@ -45,6 +45,12 @@ public enum CsceneErrorCode implements ErrorCode {
     SCENE_EDIT_LIMIT("MP-110305", "scene_edit_limit"),
     ;
 
+    /**
+     * CsceneErrorCode
+     *
+     * @param code
+     * @param message
+     */
     CsceneErrorCode(String code, String message) {
         setCode(code, "cscene.error_code." + message);
     }

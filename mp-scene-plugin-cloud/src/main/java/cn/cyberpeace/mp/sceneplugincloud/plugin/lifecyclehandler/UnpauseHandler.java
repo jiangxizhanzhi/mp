@@ -38,10 +38,19 @@ public class UnpauseHandler extends HandlerCommon {
         public static final EventProcess UNPAUSE_DYNAMIPS = new EventProcess("unpause_dynamips", "sceneplugincloud.event.unpause_dynamips");
     }
 
+    /**
+     * UnpauseHandler
+     *
+     * @param pluginHandler
+     * @param event
+     */
     public UnpauseHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, UnpauseTaskPool.getInstance(), event);
     }
 
+    /**
+     * unpause
+     */
     public void unpause() {
         prepareEventProcess(SceneModel.Event.UNPAUSE, SceneProcess.class, ElementProcess.class);
         List<Runnable> tasks = new ArrayList<>();
@@ -54,6 +63,11 @@ public class UnpauseHandler extends HandlerCommon {
         runSceneProgress(SceneProcess.UNPAUSE_TERMINALS, () -> runTasks(tasks));
     }
 
+    /**
+     * unpauseElement
+     *
+     * @param element
+     */
     public void unpauseElement(CloudPluginSceneElementBO element) {
         String nodeId = element.getSrcElement().getId();
         Integer virtualType = element.getVirtualType();

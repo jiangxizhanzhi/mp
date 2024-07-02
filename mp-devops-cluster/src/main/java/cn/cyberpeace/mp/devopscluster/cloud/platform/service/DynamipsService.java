@@ -25,15 +25,31 @@ public class DynamipsService {
 
     private VirtualDynamips virtualDynamips;
 
+    /**
+     * DynamipsService
+     *
+     * @param cloudSingleton
+     */
     public DynamipsService(@Autowired CloudSingleton cloudSingleton) {
         virtualDynamips = new VirtualDynamips();
     }
 
 
+    /**
+     * getTypeInfo
+     *
+     * @return
+     */
     public Map<String, Object> getTypeInfo() {
         return Collections.emptyMap();
     }
 
+    /**
+     * getInfo
+     *
+     * @param platform
+     * @return
+     */
     public DynamicImageInfo getInfo(String platform) {
         DynamipsInfoItems result = new DynamipsInfoItems();
         result.setItems(Collections.emptyMap());
@@ -58,6 +74,11 @@ public class DynamipsService {
         return imageInfo;
     }
 
+    /**
+     * reboot
+     *
+     * @param instanceId
+     */
     public void reboot(String instanceId) {
     }
 }

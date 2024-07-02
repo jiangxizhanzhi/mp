@@ -25,6 +25,11 @@ public class InjectFileService extends BaseCpService {
 
     private static final String INJECT_FILE = "/inject_file";
 
+    /**
+     * InjectFileService
+     *
+     * @param devopsClusterConfig
+     */
     public InjectFileService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }
@@ -45,14 +50,20 @@ public class InjectFileService extends BaseCpService {
     }
 
     /**
-     * 创建
+     * create
+     *
+     * @param snapshotCreate
+     * @return
      */
     public Snapshot create(SnapshotCreate snapshotCreate){
         return new Snapshot();
     }
 
     /**
-     * 删除
+     * delete
+     *
+     * @param uuids
+     * @return 基础模型，对应云平台接口返回信息
      */
     public BaseCloudPlatformResult delete(List<String> uuids) {
         JSONObject jsonObject = new JSONObject();

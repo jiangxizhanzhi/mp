@@ -10,6 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class VirtualInstance extends CloudClient {
+    /**
+     * modifyNetwork
+     *
+     * @param modifyNetworkData
+     * @return
+     */
     public InstanceModifyNetworkResult modifyNetwork(InstanceModifyNetworkData modifyNetworkData) {
         heavyConcurrentWait();
 

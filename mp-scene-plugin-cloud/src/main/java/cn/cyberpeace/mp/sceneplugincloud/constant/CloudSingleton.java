@@ -8,6 +8,11 @@ public class CloudSingleton {
 
     public static CloudAppConfig cloudAppConfig;
 
+    /**
+     * CloudSingleton
+     *
+     * @param cloudAppConfig
+     */
     private CloudSingleton(CloudAppConfig cloudAppConfig) {
         CloudSingleton.cloudAppConfig = cloudAppConfig;
     }

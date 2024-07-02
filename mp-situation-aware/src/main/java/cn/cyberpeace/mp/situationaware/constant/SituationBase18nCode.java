@@ -18,6 +18,9 @@ public class SituationBase18nCode {
 
     public static final String COLLECTION_TYPE_PARENT_I18N_CODE_PREFIX = "collection.type.%s";
 
+    /**
+     * SituationBase18nCode
+     */
     private SituationBase18nCode() {
     }
 }

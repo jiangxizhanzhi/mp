@@ -13,6 +13,12 @@ public class StatusChangeRabbitmqSender extends BaseSimpleMessageSender {
     public static final String CSCENE_ROUTING_KEY = SimpleMessageConfig.GROUP_NAME + ".status_change.*";
     public static final String CSCENE_QUEUE_NAME = SimpleMessageConfig.GROUP_NAME + ".cscene_report.default";
 
+    /**
+     * StatusChangeRabbitmqSender
+     *
+     * @param amqpTemplate
+     * @param messageConverter
+     */
     @Autowired
     public StatusChangeRabbitmqSender(AmqpTemplate amqpTemplate, SnakeJsonMessageConverter messageConverter) {
         super(amqpTemplate, messageConverter,

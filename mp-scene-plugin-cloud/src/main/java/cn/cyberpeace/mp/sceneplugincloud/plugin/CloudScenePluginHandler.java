@@ -64,6 +64,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     private volatile boolean networksCreated = false;
 
+    /**
+     * loadRelated
+     */
     private void loadRelated() {
         gatewayElementMap.clear();
         firewallElementMap.clear();
@@ -91,12 +94,20 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         });
     }
 
+    /**
+     * fromData
+     *
+     * @param pluginData
+     */
     @Override
     public void fromData(ScenePluginDataBO pluginData) {
         super.fromData(pluginData);
         loadRelated();
     }
 
+    /**
+     * initBase
+     */
     @Override
     public void initBase() {
         super.initBase();
@@ -110,6 +121,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     }
 
+    /**
+     * reload
+     */
     @Override
     public void reload() {
         super.reload();
@@ -186,6 +200,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         logicalSwitchModels.forEach(model -> logicalSwitch.add(new CloudPluginSceneElementLogicalSwitchBO().fromModel(model)));
     }
 
+    /**
+     * reloadData
+     */
     @Override
     public void reloadData() {
         setScene(null);
@@ -199,21 +216,37 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
 
+    /**
+     * saveScene
+     */
     @Override
     public void saveScene() {
         pluginModelHandler.saveScene();
     }
 
+    /**
+     * deleteScene
+     */
     @Override
     public void deleteScene() {
         pluginModelHandler.deleteScene();
     }
 
+    /**
+     * createElements
+     *
+     * @param elementIds
+     */
     @Override
     public void createElements(String... elementIds) {
         pluginModelHandler.createElements(elementIds);
     }
 
+    /**
+     * updateElements
+     *
+     * @param elementIds
+     */
     @Override
     public void updateElements(String... elementIds) {
         pluginModelHandler.updateElements(elementIds);
@@ -224,6 +257,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         }
     }
 
+    /**
+     * createElementNetworks
+     */
     public void createElementNetworks() {
         List<ConnectedNetworkBO> networks = new ArrayList<>();
         getElementMap().values().forEach(e -> {
@@ -237,70 +273,126 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         this.networksCreated = true;
     }
 
+    /**
+     * updateElementNetworks
+     *
+     * @param elementId
+     */
     public void updateElementNetworks(String elementId) {
         pluginModelHandler.updateElementNetworks(elementId);
     }
 
+    /**
+     * deleteElements
+     *
+     * @param elementIds
+     */
     @Override
     public void deleteElements(String... elementIds) {
         pluginModelHandler.deleteElements(elementIds);
     }
 
+    /**
+     * createElementPorts
+     *
+     * @param elementPortIds
+     */
     @Override
     public void createElementPorts(String... elementPortIds) {
         pluginModelHandler.createElementPorts(elementPortIds);
     }
 
+    /**
+     * updateElementPorts
+     *
+     * @param elementPortIds
+     */
     @Override
     public void updateElementPorts(String... elementPortIds) {
         pluginModelHandler.updateElementPorts(elementPortIds);
     }
 
+    /**
+     * deleteElementPorts
+     *
+     * @param elementPortIds
+     */
     @Override
     public void deleteElementPorts(String... elementPortIds) {
         pluginModelHandler.deleteElementPorts(elementPortIds);
     }
 
+    /**
+     * initiate
+     */
     @Override
     public void initiate() {
         initiateHandler.initiate();
     }
 
+    /**
+     * prepare
+     *
+     * @param partialStart
+     */
     @Override
     public void prepare(boolean partialStart) {
         prepareHandler.prepare(partialStart);
     }
 
+    /**
+     * create
+     */
     @Override
     public void create() {
         createHandler.create();
     }
 
+    /**
+     * delete
+     */
     @Override
     public void delete() {
         deleteHandler.delete();
     }
 
+    /**
+     * pause
+     */
     @Override
     public void pause() {
         new PauseHandler(this, SceneModel.Event.PAUSE).pause();
     }
 
+    /**
+     * unpause
+     */
     @Override
     public void unpause() {
         new UnpauseHandler(this, SceneModel.Event.UNPAUSE).unpause();
     }
 
+    /**
+     * suspend
+     */
     @Override
     public void suspend() {
         new SuspendHandler(this, SceneModel.Event.SUSPEND).suspend();
     }
 
+    /**
+     * resume
+     */
     @Override
     public void resume() {
         new ResumeHandler(this, SceneModel.Event.RESUME).resume();
     }
 
+    /**
+     * initiateElement
+     *
+     * @param nodeId
+     */
     @Override
     public void initiateElement(String nodeId) {
         CloudPluginSceneElementBO element = getElement(nodeId);
@@ -310,6 +402,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new ElementInitiateHandler(this, getSceneHandler().getScene().getEvent()).initiateElement(element);
     }
 
+    /**
+     * createElement
+     *
+     * @param nodeId
+     */
     @Override
     public void createElement(String nodeId) {
         CloudPluginSceneElementBO element = getElement(nodeId);
@@ -319,6 +416,12 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new ElementCreateHandler(this, getSceneHandler().getScene().getEvent()).createElement(element);
     }
 
+    /**
+     * recreateElement
+     *
+     * @param nodeId
+     * @param image
+     */
     @Override
     public void recreateElement(String nodeId, String image) {
         CloudPluginSceneElementBO element = getElement(nodeId);
@@ -335,6 +438,12 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         SceneInstanceLinkCacheUtil.refresh(sceneId);
     }
 
+    /**
+     * modifyElement
+     *
+     * @param nodeId
+     * @param originHandler
+     */
     @Override
     public void modifyElement(String nodeId, SceneHandler originHandler) {
         CloudPluginSceneElementBO element = getElement(nodeId);
@@ -370,6 +479,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new ElementModifyHandler(this, originCloudHandler, SceneElementModel.Event.MODIFY).modifyElement(nodeId);
     }
 
+    /**
+     * deleteElement
+     *
+     * @param nodeId
+     */
     @Override
     public void deleteElement(String nodeId) {
         CloudPluginSceneElementBO element = getElement(nodeId);
@@ -379,6 +493,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new ElementDeleteHandler(this, getSceneHandler().getScene().getEvent()).deleteElement(element);
     }
 
+    /**
+     * startElement
+     *
+     * @param nodeId
+     */
     @Override
     public void startElement(String nodeId) {
         //获取云平台场景业务数据
@@ -390,6 +509,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new StartHandler(this, getSceneHandler().getScene().getEvent()).startElement(element);
     }
 
+    /**
+     * stopElement
+     *
+     * @param nodeId
+     */
     @Override
     public void stopElement(String nodeId) {
         CloudPluginSceneElementBO element = getElement(nodeId);
@@ -400,6 +524,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new StopHandler(this, getSceneHandler().getScene().getEvent()).stopElement(element);
     }
 
+    /**
+     * restartElement
+     *
+     * @param nodeId
+     */
     @Override
     public void restartElement(String nodeId) {
         CloudPluginSceneElementBO element = getElement(nodeId);
@@ -409,6 +538,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new RestartHandler(this, getSceneHandler().getScene().getEvent()).restartElement(element);
     }
 
+    /**
+     * pauseElement
+     *
+     * @param nodeId
+     */
     @Override
     public void pauseElement(String nodeId) {
         CloudPluginSceneElementBO element = getElement(nodeId);
@@ -418,6 +552,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new PauseHandler(this, getSceneHandler().getScene().getEvent()).pauseElement(element);
     }
 
+    /**
+     * unpauseElement
+     *
+     * @param nodeId
+     */
     @Override
     public void unpauseElement(String nodeId) {
         CloudPluginSceneElementBO element = getElement(nodeId);
@@ -427,6 +566,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new UnpauseHandler(this, getSceneHandler().getScene().getEvent()).unpauseElement(element);
     }
 
+    /**
+     * suspendElement
+     *
+     * @param nodeId
+     */
     @Override
     public void suspendElement(String nodeId) {
         CloudPluginSceneElementBO element = getElement(nodeId);
@@ -436,6 +580,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new SuspendHandler(this, getSceneHandler().getScene().getEvent()).suspendElement(element);
     }
 
+    /**
+     * resumeElement
+     *
+     * @param nodeId
+     */
     @Override
     public void resumeElement(String nodeId) {
         CloudPluginSceneElementBO element = getElement(nodeId);
@@ -445,6 +594,14 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new ResumeHandler(this, getSceneHandler().getScene().getEvent()).resumeElement(element);
     }
 
+    /**
+     * snapshotElement
+     *
+     * @param nodeId
+     * @param snapshotId
+     * @param snapshotName
+     * @param description
+     */
     @Override
     public void snapshotElement(String nodeId, String snapshotId, String snapshotName, String description) {
         CloudPluginSceneElementBO element = getElement(nodeId);
@@ -454,6 +611,14 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new SnapshotHandler(this, getSceneHandler().getScene().getEvent()).snapshotElement(element, snapshotId, snapshotName, description);
     }
 
+    /**
+     * snapshotElementV2
+     *
+     * @param nodeId
+     * @param snapshotId
+     * @param snapshotName
+     * @param description
+     */
     @Override
     public void snapshotElementV2(String nodeId, String snapshotId, String snapshotName, String description) {
         CloudPluginSceneElementBO element = getElement(nodeId);
@@ -463,6 +628,12 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new SnapshotHandler(this, getSceneHandler().getScene().getEvent()).snapshotElementV2(element, snapshotId, snapshotName, description);
     }
 
+    /**
+     * deleteElementSnapshot
+     *
+     * @param nodeId
+     * @param snapshotId
+     */
     @Override
     public void deleteElementSnapshot(String nodeId, String snapshotId) {
         CloudPluginSceneElementBO element = getElement(nodeId);
@@ -472,6 +643,13 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new SnapshotHandler(this, getSceneHandler().getScene().getEvent()).deleteElementSnapshot(element, snapshotId);
     }
 
+    /**
+     * elementSnapshotAction
+     *
+     * @param nodeId
+     * @param snapshotId
+     * @param action
+     */
     @Override
     public void elementSnapshotAction(String nodeId, String snapshotId, String action) {
         CloudPluginSceneElementBO element = getElement(nodeId);
@@ -481,6 +659,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         new SnapshotHandler(this, getSceneHandler().getScene().getEvent()).elementSnapshotAction(element, snapshotId, action);
     }
 
+    /**
+     * toData
+     *
+     * @return
+     */
     @Override
     public ScenePluginDataBO toData() {
         getElementPortMap().forEach((portId, cloudPort) -> {
@@ -494,6 +677,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         return super.toData();
     }
 
+    /**
+     * reformTopo
+     */
     @Override
     public void reformTopo() {
         TopoReformUtils topoReformUtils = new TopoReformUtils(this);
@@ -548,6 +734,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         this.getSceneHandler().addPort(portId, srcPort.getElement());
     }
 
+    /**
+     * correctData
+     */
     @Override
     public void correctData() {
         super.correctData();
@@ -601,10 +790,27 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         }
     }
 
+    /**
+     * getModeKey
+     *
+     * @param protocol
+     * @param port
+     * @param user
+     * @param password
+     * @return
+     */
     private String getModeKey(String protocol, String port, String user, String password) {
         return String.format("%s:%s:%s:%s", protocol, AccessMode.Protocol.CONSOLE.equals(protocol) ? StringUtils.EMPTY : port, user, password);
     }
 
+    /**
+     * correctElementRoleRelated
+     *
+     * @param srcElement
+     * @param cloudElement
+     * @param role
+     * @param imageType
+     */
     private void correctElementRoleRelated(SceneElementBO srcElement, CloudPluginSceneElementBO cloudElement,
                                            Integer role, String imageType) {
         if (role == null) {
@@ -685,6 +891,13 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         }
     }
 
+    /**
+     * correctElementImageTypeRelated
+     *
+     * @param srcElement
+     * @param cloudElement
+     * @param imageType
+     */
     private void correctElementImageTypeRelated(SceneElementBO srcElement, CloudPluginSceneElementBO cloudElement,
                                                 String imageType) {
         if (imageType == null) {
@@ -703,6 +916,12 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         }
     }
 
+    /**
+     * modify
+     *
+     * @param originSceneHandler
+     * @param updateElementIds
+     */
     @Override
     public void modify(SceneHandler originSceneHandler, List<String> updateElementIds) {
         // 更新前合并下数据
@@ -732,6 +951,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
 
+    /**
+     * initCoreType
+     *
+     * @param element
+     */
     public void initCoreType(CloudPluginSceneElementBO element) {
         Integer role = element.getRole();
         CoreType coreType = CoreType.NETWORK;
@@ -773,6 +997,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         element.setCoreType(coreType);
     }
 
+    /**
+     * getAuxiliaryNetworkElement
+     *
+     * @return
+     */
     public List<CloudPluginSceneElementBO> getAuxiliaryNetworkElement() {
         List<CloudPluginSceneElementBO> list = new ArrayList<>();
         for (CloudPluginSceneElementBO cloudElement : getElementMap().values()) {
@@ -785,6 +1014,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         return list;
     }
 
+    /**
+     * getGatewayElements
+     *
+     * @return
+     */
     public List<CloudPluginSceneElementBO> getGatewayElements() {
         List<CloudPluginSceneElementBO> list = new ArrayList<>();
         for (CloudPluginSceneElementBO cloudElement : getGatewayElementMap().values()) {
@@ -795,6 +1029,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         return list;
     }
 
+    /**
+     * getFirewallElements
+     *
+     * @return
+     */
     public List<CloudPluginSceneElementBO> getFirewallElements() {
         List<CloudPluginSceneElementBO> list = new ArrayList<>();
         for (CloudPluginSceneElementBO cloudElement : getFirewallElementMap().values()) {
@@ -805,6 +1044,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         return list;
     }
 
+    /**
+     * getTerminalExcludeNpcElements
+     *
+     * @return
+     */
     public List<CloudPluginSceneElementBO> getTerminalExcludeNpcElements() {
         List<CloudPluginSceneElementBO> list = new ArrayList<>();
         for (CloudPluginSceneElementBO cloudElement : getTerminalElementMap().values()) {
@@ -817,6 +1061,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         return list;
     }
 
+    /**
+     * getNpcElements
+     *
+     * @return
+     */
     public List<CloudPluginSceneElementBO> getNpcElements() {
         List<CloudPluginSceneElementBO> list = new ArrayList<>();
         for (CloudPluginSceneElementBO cloudElement : getTerminalElementMap().values()) {
@@ -827,6 +1076,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         return list;
     }
 
+    /**
+     * getDynamicElements
+     *
+     * @return
+     */
     public List<CloudPluginSceneElementBO> getDynamicElements() {
         List<CloudPluginSceneElementBO> list = new ArrayList<>();
         for (CloudPluginSceneElementBO e : new ArrayList<>(getElementMap().values())) {
@@ -837,6 +1091,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         return list;
     }
 
+    /**
+     * initClass
+     */
     @Override
     protected void initClass() {
         super.sceneBOClass = CloudPluginSceneBO.class;

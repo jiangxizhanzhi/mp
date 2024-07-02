@@ -14,6 +14,12 @@ public class EsHttpUtil {
 
     private static HttpClient client = null;
 
+    /**
+     * updateDataMaxQueryNum
+     *
+     * @param indexPrefix
+     * @param total
+     */
     public static void updateDataMaxQueryNum(String indexPrefix, int total) {
         if (client == null) {
             synchronized (EsHttpUtil.class) {

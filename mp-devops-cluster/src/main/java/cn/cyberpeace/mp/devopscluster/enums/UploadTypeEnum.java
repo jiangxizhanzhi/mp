@@ -15,10 +15,20 @@ public enum UploadTypeEnum {
 
     private String desc;
 
+    /**
+     * UploadTypeEnum
+     *
+     * @param desc
+     */
     UploadTypeEnum(String desc) {
         this.desc = desc;
     }
 
+    /**
+     * getDesc
+     *
+     * @return
+     */
     public String getDesc() {
         return desc;
     }
@@ -31,11 +41,22 @@ public enum UploadTypeEnum {
         }
     }
 
+    /**
+     * fromValue
+     *
+     * @param desc
+     * @return
+     */
     @JsonCreator
     public static UploadTypeEnum fromValue(String desc) {
         return map.get(desc);
     }
 
+    /**
+     * toValue
+     *
+     * @return
+     */
     @JsonValue
     public String toValue() {
         return this.getDesc();

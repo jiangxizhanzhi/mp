@@ -14,10 +14,19 @@ import java.util.List;
 
 public class Npc extends CloudClient {
 
+    /**
+     * Npc
+     */
     public Npc() {
         super();
     }
 
+    /**
+     * create
+     *
+     * @param createData
+     * @return
+     */
     public NpcCreateResult create(NpcCreateData createData) {
         heavyConcurrentWait();
 
@@ -28,6 +37,12 @@ public class Npc extends CloudClient {
         return null;
     }
 
+    /**
+     * delete
+     *
+     * @param deleteData
+     * @return boolean
+     */
     public boolean delete(NpcDeleteData deleteData) {
         heavyConcurrentWait();
 
@@ -37,6 +52,13 @@ public class Npc extends CloudClient {
         return true;
     }
 
+    /**
+     * getAllNpc
+     *
+     * @param limit
+     * @param offset
+     * @return
+     */
     public List<NpcGetData> getAllNpc(Integer limit, Integer offset) {
         CommonQueryParam param = new CommonQueryParam();
         param.setLimit(limit);

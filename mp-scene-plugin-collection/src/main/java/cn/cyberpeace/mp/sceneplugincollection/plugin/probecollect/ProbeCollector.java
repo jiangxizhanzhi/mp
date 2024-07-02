@@ -16,10 +16,21 @@ public class ProbeCollector {
 
     private DataCollectionFlowTableService dataCollectionFlowTableService;
 
+    /**
+     * getWazuhHost
+     *
+     * @param collectorId
+     * @return
+     */
     private String getWazuhHost(String collectorId) {
         return CollectionSingleton.collectionAppConfig.getWazuhServerHost();
     }
 
+    /**
+     * ProbeCollector
+     *
+     * @param dataCollectionFlowTableService
+     */
     @Autowired
     public ProbeCollector(DataCollectionFlowTableService dataCollectionFlowTableService) {
         this.dataCollectionFlowTableService = dataCollectionFlowTableService;
@@ -32,17 +43,44 @@ public class ProbeCollector {
         return TextUtils.uuid();
     }
 
+    /**
+     * bindAgent
+     *
+     * @param collectorId
+     * @param agentInstanceId
+     */
     public void bindAgent(String collectorId, String agentInstanceId) {
         dataCollectionFlowTableService.createDataCollectionFlow(List.of(agentInstanceId));
     }
 
+    /**
+     * unbindAgent
+     *
+     * @param collectorId
+     * @param agentInstanceId
+     */
     public void unbindAgent(String collectorId, String agentInstanceId) {
         dataCollectionFlowTableService.deleteDataCollectionFlow(List.of(agentInstanceId));
     }
 
+    /**
+     * deleteCollector
+     *
+     * @param collectorId
+     */
     public void deleteCollector(String collectorId) {
     }
 
+    /**
+     * generateProbeInstallScript
+     *
+     * @param systemType
+     * @param agentName
+     * @param collectorId
+     * @param controlParam
+     * @param isContainer
+     * @return
+     */
     public List<String> generateProbeInstallScript(String systemType, String agentName, String collectorId,
                                                    WazuhControl.ControlConfigParam controlParam, boolean isContainer) {
         return WazuhCommon.generateWazuhAgentInstallScript(systemType, agentName, getWazuhHost(collectorId), controlParam, isContainer);

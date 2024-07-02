@@ -47,6 +47,11 @@ public class SwitchService extends BaseCpService {
         return super.sendGet(LIST_PHYSIC_SWITCH_DETAIL , SwitchesCloudPlatform.class);
     }
 
+    /**
+     * delete
+     *
+     * @param name
+     */
     public void delete(String name) {
         String requestUrl = UriComponentsBuilder.fromUriString(DELETE_PHYSIC_SWITCH).buildAndExpand(name).toUriString();
         CloudDeleteResponse cloudDeleteResponse = super.sendDelete(requestUrl, "", CloudDeleteResponse.class);
@@ -57,18 +62,36 @@ public class SwitchService extends BaseCpService {
     }
 
 
+    /**
+     * modify
+     *
+     * @param modifySdnSwitchCommand
+     * @param name
+     */
     public void modify(ModifySdnSwitchCommand modifySdnSwitchCommand, String name) {
         modifySdnSwitchCommand.base64EncodePw();
         String requestUrl = UriComponentsBuilder.fromUriString(MODIFY_PHYSIC_SWITCH).buildAndExpand(name).toUriString();
         super.sendPatch(requestUrl, JsonCommon.snakeStringify(modifySdnSwitchCommand));
     }
 
+    /**
+     * add
+     *
+     * @param registerSdnSwitchCommand
+     * @return
+     */
     public SdnSwitch add(RegisterSdnSwitchCommand registerSdnSwitchCommand) {
         registerSdnSwitchCommand.base64EncodePw();
         return super.sendPost(REGISTER_PHYSIC_SWITCH, JsonCommon.snakeStringify(registerSdnSwitchCommand), new TypeReference<SdnSwitch>() {
         });
     }
 
+    /**
+     * pageSdnSwitch
+     *
+     * @param searchSdnSwitchRequest
+     * @return
+     */
     public PageInfo<SdnSwitch> pageSdnSwitch(SearchSdnSwitchRequest searchSdnSwitchRequest) {
         String requestParams = ParamUtils.wrapperGetParamsByObject(true, searchSdnSwitchRequest);
         CloudResponse<SdnSwitch> cloudResponse = super.sendGet(LIST_PHYSIC_SWITCH + requestParams, new TypeReference<CloudResponse<SdnSwitch>>() {

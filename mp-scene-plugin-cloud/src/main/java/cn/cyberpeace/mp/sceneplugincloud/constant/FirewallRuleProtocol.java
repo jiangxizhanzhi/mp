@@ -6,5 +6,8 @@ public class FirewallRuleProtocol {
     public static final String UDP = "udp";
     public static final String ALL = "all";
 
+    /**
+     * FirewallRuleProtocol
+     */
     private FirewallRuleProtocol() {}
 }

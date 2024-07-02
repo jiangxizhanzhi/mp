@@ -18,12 +18,18 @@ public class ImportService extends BaseCpService {
 
     private static final String IMPORT = "/import";
 
+    /**
+     * ImportService
+     *
+     * @param devopsClusterConfig
+     */
     public ImportService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }
 
     /**
      * 获取磁盘剩余空间
+     *
      * @return
      */
     public ImportDiskSpaceCloudPlatformResult getDiskSpace(){

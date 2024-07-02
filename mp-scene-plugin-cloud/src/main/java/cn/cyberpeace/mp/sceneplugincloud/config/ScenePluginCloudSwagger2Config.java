@@ -34,6 +34,11 @@ public class ScenePluginCloudSwagger2Config implements ApplicationListener<Appli
     @Autowired
     private Swagger2Config swagger2Config;
 
+    /**
+     * apiScenePluginCloud
+     *
+     * @return
+     */
     @Bean
     public Docket apiScenePluginCloud() {
         Docket docket = new Docket(DocumentationType.SWAGGER_2)
@@ -47,6 +52,11 @@ public class ScenePluginCloudSwagger2Config implements ApplicationListener<Appli
         return docket;
     }
 
+    /**
+     * onApplicationEvent
+     *
+     * @param event
+     */
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         Executors.newScheduledThreadPool(1).schedule(new Runnable() {

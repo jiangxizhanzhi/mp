@@ -27,7 +27,19 @@ public interface CollectionTemplateMapper extends BaseModelMapper<CollectionTemp
 //
 //    int updateByPrimaryKey(CollectionTemplateModel record);
 
+    /**
+     * listTemplateItemDtos
+     *
+     * @param condition
+     * @return
+     */
     List<CollectionTemplatePageItemDto> listTemplateItemDtos(@Param("condition") CollectionTemplateSearchCondition condition);
 
+    /**
+     * getByName
+     *
+     * @param name
+     * @return 采集模板实体
+     */
     CollectionTemplateModel getByName(@Param("name") String name);
 }

@@ -47,14 +47,20 @@ public class ImagesService extends BaseCpService {
     private static final String DEVICE_CONNECT = "/cloud/v1/device/connection";
 
 
-
-
+    /**
+     * ImagesService
+     *
+     * @param devopsClusterConfig
+     */
     public ImagesService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }
 
     /**
-     * 新增
+     * add
+     *
+     * @param device
+     * @return 靶标信息
      */
     public Device add(Device device) {
         CloudPlatformResult res = super.sendPost(ADD_NEW_DEVICE, JsonUtils.snakeStringify(device), CloudPlatformResult.class);
@@ -70,7 +76,11 @@ public class ImagesService extends BaseCpService {
     }
 
     /**
-     * 更新
+     * update
+     *
+     * @param uuid
+     * @param device
+     * @return 靶标信息
      */
     public Device update(String uuid, Device device) {
         final ExtVm extVm = device.getExtVm();
@@ -96,7 +106,11 @@ public class ImagesService extends BaseCpService {
     }
 
     /**
-     * 导出
+     * export
+     *
+     * @param uuid
+     * @param imageName
+     * @return
      */
     public String export(String uuid, String imageName) {
         String api = UriComponentsBuilder.fromPath(EXPORT_DEVICE).buildAndExpand(uuid).toUriString();

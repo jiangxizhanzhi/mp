@@ -24,6 +24,11 @@ public class VmService extends BaseCpService {
 
     private static final String INSTANCES = "/instances";
 
+    /**
+     * VmService
+     *
+     * @param devopsClusterConfig
+     */
     public VmService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }
@@ -40,6 +45,7 @@ public class VmService extends BaseCpService {
 
     /**
      * 操作
+     *
      * @param action
      * @param uuid
      * @return
@@ -52,6 +58,7 @@ public class VmService extends BaseCpService {
     }
 
     /**
+     * osServicesStateFromInstances
      *
      * @return
      */

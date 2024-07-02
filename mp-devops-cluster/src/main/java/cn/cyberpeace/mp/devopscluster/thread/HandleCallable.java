@@ -35,6 +35,14 @@ public class HandleCallable<E> implements Callable<ServiceResult> {
      */
     private ITask<ServiceResult, E> task;
 
+    /**
+     * HandleCallable
+     *
+     * @param threadName
+     * @param data
+     * @param params
+     * @param task
+     */
     public HandleCallable(String threadName, List<E> data, Map<String, Object> params,
                           ITask<ServiceResult, E> task) {
         this.threadName = threadName;
@@ -43,6 +51,11 @@ public class HandleCallable<E> implements Callable<ServiceResult> {
         this.task = task;
     }
 
+    /**
+     * call
+     *
+     * @return 统一服务返回结果
+     */
     @Override
     public ServiceResult call(){
         log.info("Thread：{},total deal:{} size，start......", threadName, data.size());

@@ -27,6 +27,11 @@ public class RabbitmqCsceneSceneReporter implements SceneReporter {
     @Autowired
     private CsceneAppConfig csceneAppConfig;
 
+    /**
+     * reportScene
+     *
+     * @param scene
+     */
     @Override
     public void reportScene(CollectedSceneBO scene) {
         CollectedCsceneBO cscene = CollectedCsceneBO.fromCollectedSceneBO(scene);
@@ -36,6 +41,11 @@ public class RabbitmqCsceneSceneReporter implements SceneReporter {
         messageSender.send(cscene, MESSAGE_TYPE_SCENE, null, csceneAppConfig.getSceneMessageTimeout());
     }
 
+    /**
+     * reportElement
+     *
+     * @param sceneElement
+     */
     @Override
     public void reportElement(CollectedSceneElementBO sceneElement) {
         CollectedCsceneElementBO csceneElement = CollectedCsceneElementBO.fromCollectedSceneElementBO(sceneElement);

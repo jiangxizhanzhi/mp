@@ -56,16 +56,35 @@ public class FlowExecutor {
 
     private static final String TGN_PATH = "/root/.mp/resources/flows/traffic_generators.zip";
 
+    /**
+     * createExecutor
+     *
+     * @param name
+     * @param networkInfos
+     * @return
+     */
     public String createExecutor(String name, List<FlowNetworkInfo> networkInfos) {
         return flowService1.addExecutorSync(name, networkInfos);
     }
 
+    /**
+     * startExecutor
+     *
+     * @param name
+     * @return
+     */
     public String startExecutor(String name) {
         String uuid = TextUtils.uuid();
         this.startExecutor(uuid, name);
         return uuid;
     }
 
+    /**
+     * startExecutor
+     *
+     * @param uuid
+     * @param trexName
+     */
     private void startExecutor(String uuid, String trexName) {
         Network networkClient = new Network();
         VirtualMachine vmClient = new VirtualMachine();
@@ -136,6 +155,11 @@ public class FlowExecutor {
 
     }
 
+    /**
+     * checkStartTrex
+     *
+     * @param fixedIp
+     */
     private void checkStartTrex(String fixedIp) {
         String commands = "./init.sh";
         SshUtil.ServerInfo serverInfo = new SshUtil.ServerInfo();
@@ -151,6 +175,11 @@ public class FlowExecutor {
         }
     }
 
+    /**
+     * deleteExecutor
+     *
+     * @param executorId
+     */
     public void deleteExecutor(String executorId) {
         VirtualMachine vmClient = new VirtualMachine();
         FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(executorId);
@@ -161,6 +190,12 @@ public class FlowExecutor {
     }
 
 
+    /**
+     * startFlow
+     *
+     * @param taskId
+     * @param sourceIp
+     */
     public void startFlow(String taskId, String sourceIp) {
         ServiceResult<Boolean> result = flowService1.startTask(taskId, sourceIp);
 //        var result = flowService3.actuator(taskId, TaskActionEnum.START.toValue(), stopCallback, errorCallback);
@@ -169,6 +204,11 @@ public class FlowExecutor {
         }
     }
 
+    /**
+     * stopFlow
+     *
+     * @param taskId
+     */
     public void stopFlow(String taskId) {
 //        var result = flowService3.actuator(taskId, TaskActionEnum.STOP.toValue(), null, null);
         ServiceResult<Boolean> result = flowService1.stopTask(taskId);
@@ -177,6 +217,11 @@ public class FlowExecutor {
         }
     }
 
+    /**
+     * startFlows
+     *
+     * @param batchStartTaskBO
+     */
     public void startFlows(BatchStartTaskBO batchStartTaskBO) {
         ServiceResult<Boolean> result = flowService1.batchStartTasks(null, batchStartTaskBO);
         if (!result.judgeSuccess()) {
@@ -184,6 +229,11 @@ public class FlowExecutor {
         }
     }
 
+    /**
+     * stopFlows
+     *
+     * @param taskIds
+     */
     public void stopFlows(List<String> taskIds) {
 //        BatchActuatorTaskRequest request = new BatchActuatorTaskRequest();
 //        request.setTaskAction(TaskActionEnum.STOP.toValue());
@@ -194,6 +244,11 @@ public class FlowExecutor {
         }
     }
 
+    /**
+     * deleteFlow
+     *
+     * @param taskId
+     */
     public void deleteFlow(String taskId) {
         ServiceResult<Boolean> result = flowService3.deleteFlowTask(taskId);
         if (!result.judgeSuccess()) {
@@ -201,18 +256,39 @@ public class FlowExecutor {
         }
     }
 
+    /**
+     * updateFlowTaskInfo
+     *
+     * @param flowTaskModel
+     * @return int
+     */
     public int updateFlowTaskInfo(FlowTaskModel flowTaskModel) {
         return this.flowService3.updateFlowTaskInfo(flowTaskModel);
     }
 
+    /**
+     * queryFlowRecords
+     *
+     * @param taskId
+     * @return
+     */
     public ServiceResult<FlowRecordsResponse> queryFlowRecords(String taskId) {
         return this.flowService3.queryFlowRecordsByTaskId(taskId);
     }
 
+    /**
+     * queryBatchFlowRecords
+     *
+     * @param sceneId
+     * @return
+     */
     public ServiceResult<FlowRecordsResponse> queryBatchFlowRecords(String sceneId) {
         return this.flowService3.queryBatchFlowRecords(sceneId);
     }
 
+    /**
+     * initDefaultInstance
+     */
     private synchronized void initDefaultInstance() {
         if (DEFAULT_INSTANCE == null) {
             DEFAULT_INSTANCE = new FlowTaskModel();
@@ -220,14 +296,32 @@ public class FlowExecutor {
         }
     }
 
+    /**
+     * addFlowTask
+     *
+     * @param details
+     * @param sceneId
+     * @param actuatorId
+     */
     public void addFlowTask(List<AddFlowTaskTaskInfo> details, String sceneId, String actuatorId) {
         flowTaskTaskService.addTask(details, sceneId, actuatorId, false, null);
     }
 
+    /**
+     * deleteByNodeIdAndSceneId
+     *
+     * @param nodeId
+     * @param sceneId
+     */
     public void deleteByNodeIdAndSceneId(String nodeId, String sceneId) {
         flowTaskTaskService.deleteByNodeIdAndSceneId(nodeId, sceneId);
     }
 
+    /**
+     * getTaskIdByNodeId
+     *
+     * @return
+     */
     public String getTaskIdByNodeId() {
 
         return null;

@@ -10,6 +10,11 @@ public class SuricataRuleUpdateEventPublisher {
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
+    /**
+     * publishEvent
+     *
+     * @param source
+     */
     public void publishEvent(String source) {
         eventPublisher.publishEvent(new SuricataRuleUpdateEvent(source));
     }

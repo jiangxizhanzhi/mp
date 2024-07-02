@@ -26,11 +26,22 @@ public class ElementModifyBO extends BaseCsceneBO<CsceneInstanceModel, CsceneIns
     @ApiModelProperty(value = "场景上下文属性")
     private CsceneContextBO context;
 
+    /**
+     * createModel
+     *
+     * @return
+     */
     @Override
     public CsceneInstanceModel createModel() {
         return new CsceneInstanceModel();
     }
 
+    /**
+     * fromModel
+     *
+     * @param obj
+     * @param ignoreFields
+     */
     @Override
     public void fromModel(CsceneInstanceModel obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
@@ -46,6 +57,12 @@ public class ElementModifyBO extends BaseCsceneBO<CsceneInstanceModel, CsceneIns
         }
     }
 
+    /**
+     * toModel
+     *
+     * @param ignoreFields
+     * @return
+     */
     @Override
     public CsceneInstanceModel toModel(String... ignoreFields) {
         CsceneInstanceModel obj = super.toModel(ArrayUtils.addAll(ignoreFields,

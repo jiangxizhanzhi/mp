@@ -36,6 +36,11 @@ public class InitRegisterService extends BaseCpService {
     private static final String DEVICE_LIST_ALL = "/cloud/v1/device/virtual_device?limit=9999&is_internal=false";
 
 
+    /**
+     * InitRegisterService
+     *
+     * @param devopsClusterConfig
+     */
     public InitRegisterService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }

@@ -4,5 +4,8 @@ public class QosRuleDirection {
     public static final String INGRESS = "ingress";
     public static final String EGRESS = "egress";
 
+    /**
+     * QosRuleDirection
+     */
     private QosRuleDirection() {}
 }

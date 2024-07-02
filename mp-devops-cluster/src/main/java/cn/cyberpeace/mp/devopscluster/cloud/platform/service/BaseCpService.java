@@ -79,11 +79,25 @@ public class BaseCpService {
         return this.buildSnakeObject(result, valueType);
     }
 
+    /**
+     * sendGet
+     *
+     * @param api
+     * @param typeReference
+     * @return
+     */
     protected <T> T sendGet(String api, TypeReference<T> typeReference) {
         String result = doSendGet(api, null);
         return JsonUtils.snakeParse(result, typeReference);
     }
 
+    /**
+     * doSendGet
+     *
+     * @param api
+     * @param timeout
+     * @return
+     */
     private String doSendGet(String api, Integer timeout) {
         String url = this.buildUrl(api);
         String result = "";
@@ -142,6 +156,13 @@ public class BaseCpService {
         return result;
     }
 
+    /**
+     * sendPatch
+     *
+     * @param api
+     * @param body
+     * @return
+     */
     protected String sendPatch(String api, String body) {
         String url = this.buildUrl(api);
         String result = "";
@@ -160,11 +181,27 @@ public class BaseCpService {
         return result;
     }
 
+    /**
+     * sendPatch
+     *
+     * @param api
+     * @param body
+     * @param typeReference
+     * @return
+     */
     protected <T> T sendPatch(String api, String body, TypeReference<T> typeReference) {
         String result = this.sendPatch(api, body);
         return JsonUtils.snakeParse(result, typeReference);
     }
 
+    /**
+     * sendPost
+     *
+     * @param api
+     * @param body
+     * @param typeReference
+     * @return
+     */
     protected <T> T sendPost(String api, String body, TypeReference<T> typeReference) {
         String result = this.sendPost(api, body);
         return JsonUtils.snakeParse(result, typeReference);
@@ -346,6 +383,11 @@ public class BaseCpService {
         return headers;
     }
 
+    /**
+     * getDefaultHeader
+     *
+     * @return
+     */
     private Map<String, String> getDefaultHeader() {
         Map<String, String> headers = new HashMap<>();
 

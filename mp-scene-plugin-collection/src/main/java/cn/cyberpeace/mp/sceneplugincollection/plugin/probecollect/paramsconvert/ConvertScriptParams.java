@@ -25,15 +25,31 @@ public class ConvertScriptParams implements WazuhParamsConvert<WazuhControl.Cont
     private String agentName;
 
 
+    /**
+     * getCollectInterval
+     *
+     * @return
+     */
     private static String getCollectInterval() {
         return CollectionSingleton.collectionAppConfig.getCollectInterval();
     }
 
+    /**
+     * ConvertScriptParams
+     *
+     * @param probe
+     * @param agentName
+     */
     public ConvertScriptParams(Probe probe, String agentName) {
         this.probe = probe;
         this.agentName = agentName;
     }
 
+    /**
+     * convertParams
+     *
+     * @return
+     */
     @Override
     public List<WazuhControl.ControlProbeParam> convertParams() {
         String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();

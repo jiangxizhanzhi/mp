@@ -10,10 +10,21 @@ public class CloudSceneStage extends SceneStage {
     public static CloudSceneStage CREATE_INSTANCE = new CloudSceneStage("create_instance", "changjingmoban");
     public static CloudSceneStage CONFIG = new CloudSceneStage("config", "renwufangan");
 
+    /**
+     * CloudSceneStage
+     *
+     * @param stage
+     * @param icon
+     */
     private CloudSceneStage(String stage, String icon) {
         super(stage, icon);
     }
 
+    /**
+     * getStageName
+     *
+     * @return
+     */
     @Override
     public String getStageName() {
         return MessageCommon.get("sceneplugincloud.stage." + this.getStage());

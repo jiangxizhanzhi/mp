@@ -24,6 +24,14 @@ public class SceneStatusUtil {
     private static Map<Integer, String> en;
     private static Map<Integer, String> zh;
 
+    /**
+     * getSceneStatus
+     *
+     * @param deleted
+     * @param event
+     * @param eventStatus
+     * @return
+     */
     public static SceneStatus getSceneStatus(Boolean deleted, Integer event, Integer eventStatus) {
         if (en == null || zh == null) {
             en = new HashMap<>();

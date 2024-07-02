@@ -20,6 +20,11 @@ public class ISOService extends BaseCpService {
 
     private static final String UPLOAD_ISO_FILE = "/cloud/v1/device/upload?type=iso";
 
+    /**
+     * ISOService
+     *
+     * @param devopsClusterConfig
+     */
     public ISOService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }
@@ -44,6 +49,13 @@ public class ISOService extends BaseCpService {
         return result;
     }
 
+    /**
+     * download
+     *
+     * @param tmpdirUuid
+     * @param fileName
+     * @return 基础模型，对应云平台接口返回信息
+     */
     public BaseCloudPlatformResult download(String tmpdirUuid, String fileName) {
         BaseCloudPlatformResult result = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE +
                 BaseCloudPlatformConstant.URL_VERSION + "/iso/" + tmpdirUuid + "/" + fileName, BaseCloudPlatformResult.class);
@@ -51,6 +63,12 @@ public class ISOService extends BaseCpService {
         return result;
     }
 
+    /**
+     * delete
+     *
+     * @param tmpdirUuid
+     * @param fileName
+     */
     public void delete(String tmpdirUuid, String fileName) {
         BaseCloudPlatformResult result = super.sendDelete(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + "/iso/" +
                 tmpdirUuid + "/" + fileName, null, BaseCloudPlatformResult.class);

@@ -49,6 +49,11 @@ public class ContainerFileUtils {
 
     public static String centos6UnzipLocalFilepath = null;
 
+    /**
+     * getUnzipLocalFilepath
+     *
+     * @return
+     */
     public static String getUnzipLocalFilepath() {
         if (!StringUtils.isEmpty(unzipLocalFilepath)) {
             return unzipLocalFilepath;
@@ -59,6 +64,11 @@ public class ContainerFileUtils {
         return unzipLocalFilepath;
     }
 
+    /**
+     * getApkUnzipLocalFilepath
+     *
+     * @return
+     */
     public static String getApkUnzipLocalFilepath() {
         if (!StringUtils.isEmpty(apkUnzipLocalFilepath)) {
             return apkUnzipLocalFilepath;
@@ -69,6 +79,11 @@ public class ContainerFileUtils {
         return apkUnzipLocalFilepath;
     }
 
+    /**
+     * getCentos6UnzipLocalFilepath
+     *
+     * @return
+     */
     public static String getCentos6UnzipLocalFilepath() {
         if (!StringUtils.isEmpty(centos6UnzipLocalFilepath)) {
             return centos6UnzipLocalFilepath;
@@ -79,6 +94,11 @@ public class ContainerFileUtils {
         return centos6UnzipLocalFilepath;
     }
 
+    /**
+     * getCentos5UnzipLocalFilepath
+     *
+     * @return
+     */
     public static String getCentos5UnzipLocalFilepath() {
         if (!StringUtils.isEmpty(centos5UnzipLocalFilepath)) {
             return centos5UnzipLocalFilepath;
@@ -90,6 +110,14 @@ public class ContainerFileUtils {
     }
 
 
+    /**
+     * prepareUnzip
+     *
+     * @param containerClient
+     * @param containerId
+     * @param extraCommands
+     * @return boolean
+     */
     public static boolean prepareUnzip(Container containerClient, String containerId, List<String> extraCommands) {
         List<String> commands = new ArrayList<>();
         commands.add(VERSION_TEST_COMMAND);
@@ -120,6 +148,13 @@ public class ContainerFileUtils {
         }
     }
 
+    /**
+     * prepareApkUnzip
+     *
+     * @param containerClient
+     * @param containerId
+     * @return boolean
+     */
     public static boolean prepareApkUnzip(Container containerClient, String containerId) {
         ContainerExecuteResult result = containerClient.executeCommand(containerId, "sh -c \"command -v apk\"");
         if (result.getExitCode() != null && result.getExitCode() == 0 && StringUtils.isNotEmpty(result.getOutput()) && result.getOutput().contains("/apk")) {
@@ -134,6 +169,13 @@ public class ContainerFileUtils {
         return false;
     }
 
+    /**
+     * prepareCentos6Unzip
+     *
+     * @param containerClient
+     * @param containerId
+     * @return boolean
+     */
     public static boolean prepareCentos6Unzip(Container containerClient, String containerId) {
         String unzipLocalFilepath = getCentos6UnzipLocalFilepath();
         if (StringUtils.isEmpty(unzipLocalFilepath)) {
@@ -144,6 +186,13 @@ public class ContainerFileUtils {
         return flag;
     }
 
+    /**
+     * prepareCentos5Unzip
+     *
+     * @param containerClient
+     * @param containerId
+     * @return boolean
+     */
     public static boolean prepareCentos5Unzip(Container containerClient, String containerId) {
         String unzipLocalFilepath = getCentos5UnzipLocalFilepath();
         if (StringUtils.isEmpty(unzipLocalFilepath)) {
@@ -155,6 +204,15 @@ public class ContainerFileUtils {
         return flag;
     }
 
+    /**
+     * prepareZipFile
+     *
+     * @param containerClient
+     * @param containerId
+     * @param fileUrl
+     * @param unzipDir
+     * @return boolean
+     */
     public static boolean prepareZipFile(Container containerClient, String containerId, String fileUrl, String unzipDir) {
         String toPath = StringUtils.join(unzipDir, SceneFileUtils.ZIP_FILE_SUFFIX);
         containerClient.executeCommand(containerId, CommandUtils.linuxMkDir(unzipDir));
@@ -171,6 +229,17 @@ public class ContainerFileUtils {
         return true;
     }
 
+    /**
+     * prepareZipFile
+     *
+     * @param containerClient
+     * @param containerId
+     * @param fileUrl
+     * @param standardSystemType
+     * @param unzipDir
+     * @param unzipDirExists
+     * @return boolean
+     */
     public static boolean prepareZipFile(Container containerClient, String containerId, String fileUrl,String standardSystemType, String unzipDir,boolean unzipDirExists) {
         String toPath = StringUtils.join(unzipDir, SceneFileUtils.ZIP_FILE_SUFFIX);
         if (!unzipDirExists) {
@@ -189,6 +258,15 @@ public class ContainerFileUtils {
         return true;
     }
 
+    /**
+     * prepareLocalFile
+     *
+     * @param containerClient
+     * @param containerId
+     * @param localPath
+     * @param destinationPath
+     * @return boolean
+     */
     public static boolean prepareLocalFile(Container containerClient, String containerId, String localPath, String destinationPath) {
         if (StringUtils.isEmpty(localPath)) {
             return false;

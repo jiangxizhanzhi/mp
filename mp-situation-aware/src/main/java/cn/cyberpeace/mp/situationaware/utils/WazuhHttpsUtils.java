@@ -31,6 +31,11 @@ import java.util.List;
 
 @Slf4j
 public class WazuhHttpsUtils {
+    /**
+     * createIgnoreSSLHttpClient
+     *
+     * @return
+     */
     public static CloseableHttpClient createIgnoreSSLHttpClient() {
         try {
             SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, (TrustStrategy) (chain, authType) -> true).build();
@@ -153,6 +158,13 @@ public class WazuhHttpsUtils {
         }
     }
 
+    /**
+     * doGetRequest
+     *
+     * @param url
+     * @param client
+     * @return
+     */
     private static String doGetRequest(String url, HttpClient client) throws IOException {
         HttpGet httpget = new HttpGet(url);
         HttpResponse resp = client.execute(httpget);

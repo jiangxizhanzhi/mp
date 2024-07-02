@@ -11,6 +11,9 @@ public class WazuhModifyEventConfig {
 
     private static volatile boolean isInit = false;
 
+    /**
+     * init
+     */
     public static synchronized void init() {
         if (isInit) {
             return;
@@ -20,6 +23,11 @@ public class WazuhModifyEventConfig {
         isInit = true;
     }
 
+    /**
+     * getModifyProbe
+     *
+     * @return
+     */
     public ModifyProbe getModifyProbe() {
         return modifyProbe;
     }
@@ -32,6 +40,9 @@ public class WazuhModifyEventConfig {
     }
 
     public static class ProbeType {
+        /**
+         * ProbeType
+         */
         private ProbeType() {
 
         }

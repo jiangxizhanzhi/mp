@@ -17,6 +17,11 @@ public class CsceneSwagger2Config {
     @Autowired
     private Swagger2Config swagger2Config;
 
+    /**
+     * apiCscene
+     *
+     * @return
+     */
     @Bean
     public Docket apiCscene() {
         return new Docket(DocumentationType.SWAGGER_2)

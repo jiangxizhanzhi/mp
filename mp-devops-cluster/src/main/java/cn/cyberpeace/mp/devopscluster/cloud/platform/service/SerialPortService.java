@@ -15,6 +15,11 @@ import org.springframework.stereotype.Service;
 @Deprecated
 public class SerialPortService extends BaseCpService {
 
+    /**
+     * SerialPortService
+     *
+     * @param devopsClusterConfig
+     */
     public SerialPortService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }

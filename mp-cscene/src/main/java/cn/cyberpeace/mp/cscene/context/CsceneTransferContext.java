@@ -13,11 +13,21 @@ public class CsceneTransferContext implements TransferContext<Map<String, String
 
     public static final String CSCENE_INSTANCE_ID_KEY = "CSCENE_INSTANCE_ID";
 
+    /**
+     * getKey
+     *
+     * @return
+     */
     @Override
     public String getKey() {
         return "CSCENE";
     }
 
+    /**
+     * getValue
+     *
+     * @return
+     */
     @Override
     public Map<String, String> getValue() {
         Map<String, String> value = new HashMap<>();
@@ -26,6 +36,11 @@ public class CsceneTransferContext implements TransferContext<Map<String, String
         return value;
     }
 
+    /**
+     * setValue
+     *
+     * @param value
+     */
     @Override
     public void setValue(Map<String, String> value) {
         CsceneContextHolder.setCallAction(value.getOrDefault(CALL_ACTION_KEY, null));

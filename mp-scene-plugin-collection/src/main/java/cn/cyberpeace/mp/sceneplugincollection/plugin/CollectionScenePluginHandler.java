@@ -33,6 +33,9 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
     private ElementCreateHandler elementCreateHandler ;
     private PrepareHandler prepareHandler;
 
+    /**
+     * correctData
+     */
     @Override
     public void correctData() {
         if (getScene() == null) {
@@ -40,6 +43,9 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
         }
     }
 
+    /**
+     * initBase
+     */
     @Override
     public void initBase() {
         super.initBase();
@@ -50,6 +56,9 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
         prepareHandler = new PrepareHandler(this);
     }
 
+    /**
+     * reloadData
+     */
     @Override
     public void reloadData() {
         setScene(null);
@@ -62,66 +71,121 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
                 .toArray(new String[0])));
     }
 
+    /**
+     * saveScene
+     */
     @Override
     public void saveScene() {
         pluginModelHandler.saveScene();
     }
 
+    /**
+     * deleteScene
+     */
     @Override
     public void deleteScene() {
         pluginModelHandler.deleteScene();
     }
 
+    /**
+     * createElements
+     *
+     * @param elementIds
+     */
     @Override
     public void createElements(String... elementIds) {
         pluginModelHandler.createElements(elementIds);
     }
 
+    /**
+     * updateElements
+     *
+     * @param elementIds
+     */
     @Override
     public void updateElements(String... elementIds) {
         pluginModelHandler.updateElements(elementIds);
     }
 
+    /**
+     * deleteElements
+     *
+     * @param elementIds
+     */
     @Override
     public void deleteElements(String... elementIds) {
         pluginModelHandler.deleteElements(elementIds);
     }
 
+    /**
+     * createElementPorts
+     *
+     * @param elementPortIds
+     */
     @Override
     public void createElementPorts(String... elementPortIds) {
         pluginModelHandler.createElementPorts(elementPortIds);
     }
 
+    /**
+     * updateElementPorts
+     *
+     * @param elementPortIds
+     */
     @Override
     public void updateElementPorts(String... elementPortIds) {
         pluginModelHandler.updateElementPorts(elementPortIds);
     }
 
+    /**
+     * deleteElementPorts
+     *
+     * @param elementPortIds
+     */
     @Override
     public void deleteElementPorts(String... elementPortIds) {
         pluginModelHandler.deleteElementPorts(elementPortIds);
     }
 
+    /**
+     * prepare
+     *
+     * @param partialStart
+     */
     @Override
     public void prepare(boolean partialStart) {
         prepareHandler.prepare(partialStart);
     }
 
+    /**
+     * initiate
+     */
     @Override
     public void initiate() {
         initiateHandler.initiate();
     }
 
+    /**
+     * create
+     */
     @Override
     public void create() {
         createHandler.create();
     }
 
+    /**
+     * delete
+     */
     @Override
     public void delete() {
         deleteHandler.delete();
     }
 
+    /**
+     * createElement
+     *
+     * @param nodeId
+     */
     @Override
     public void createElement(String nodeId) {
         CollectionPluginSceneElementBO element = getElement(nodeId);
@@ -131,6 +195,14 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
         new ElementCreateHandler(this, getSceneHandler().getScene().getEvent()).createElement(element);
     }
 
+    /**
+     * snapshotElement
+     *
+     * @param nodeId
+     * @param snapshotId
+     * @param snapshotName
+     * @param description
+     */
     @Override
     public void snapshotElement(String nodeId, String snapshotId, String snapshotName, String description) {
         CollectionPluginSceneElementBO element = getElement(nodeId);
@@ -142,6 +214,14 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
         }
     }
 
+    /**
+     * snapshotElementV2
+     *
+     * @param nodeId
+     * @param snapshotId
+     * @param snapshotName
+     * @param description
+     */
     @Override
     public void snapshotElementV2(String nodeId, String snapshotId, String snapshotName, String description) {
         CollectionPluginSceneElementBO element = getElement(nodeId);
@@ -153,6 +233,9 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
         }
     }
 
+    /**
+     * initClass
+     */
     @Override
     protected void initClass() {
         super.sceneBOClass = CollectionPluginSceneBO.class;

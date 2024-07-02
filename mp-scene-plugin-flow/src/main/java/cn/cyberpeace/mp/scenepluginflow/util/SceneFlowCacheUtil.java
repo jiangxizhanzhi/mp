@@ -53,6 +53,13 @@ public class SceneFlowCacheUtil {
                 }
             });
 
+    /**
+     * get
+     *
+     * @param sceneId
+     * @param nodeId
+     * @return
+     */
     public static List<Flow> get(String sceneId, String nodeId) {
         if (StringUtils.isEmpty(sceneId) || StringUtils.isEmpty(nodeId)) {
             return new ArrayList<>();
@@ -60,14 +67,33 @@ public class SceneFlowCacheUtil {
         return cache.getUnchecked(getKey(sceneId, nodeId));
     }
 
+    /**
+     * getSceneHandler
+     *
+     * @param sceneId
+     * @return 场景实例的处理
+     */
     public static SceneHandler getSceneHandler(String sceneId) {
         return sceneCache.getUnchecked(sceneId);
     }
-    
+
+    /**
+     * getKey
+     *
+     * @param sceneId
+     * @param nodeId
+     * @return
+     */
     private static String getKey(String sceneId, String nodeId) {
         return sceneId + "_" + nodeId;
     }
 
+    /**
+     * parseKey
+     *
+     * @param key
+     * @return
+     */
     private static String[] parseKey(String key) {
         return StringUtils.split(key, "_");
     }

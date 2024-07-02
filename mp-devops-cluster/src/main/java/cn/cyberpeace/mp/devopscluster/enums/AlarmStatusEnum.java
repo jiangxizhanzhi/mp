@@ -13,14 +13,29 @@ public enum AlarmStatusEnum {
 
     private String desc;
 
+    /**
+     * AlarmStatusEnum
+     *
+     * @param desc
+     */
     AlarmStatusEnum(String desc) {
         this.desc = desc;
     }
 
+    /**
+     * getDesc
+     *
+     * @return
+     */
     public String getDesc() {
         return desc;
     }
 
+    /**
+     * toValue
+     *
+     * @return int
+     */
     @JsonValue
     public int toValue(){
        return this.ordinal();

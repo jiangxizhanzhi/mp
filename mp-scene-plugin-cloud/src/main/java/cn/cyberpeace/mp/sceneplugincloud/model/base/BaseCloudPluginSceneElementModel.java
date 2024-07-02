@@ -153,6 +153,9 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final int NPC = 7;
         public static final int DYNAMIPS = 8;
 
+        /**
+         * VirtualType
+         */
         private VirtualType() {
         }
     }
@@ -162,6 +165,9 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final String FE = "FE";
         public static final String GE = "GE";
 
+        /**
+         * ElectricPortType
+         */
         private ElectricPortType() {}
     }
 
@@ -169,12 +175,18 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final String SFP = "sfp";
         public static final String SFP_PLUS = "sfp+";
 
+        /**
+         * OpticalPortType
+         */
         private OpticalPortType() {}
     }
 
     public static class WanPortType {
         public static final String E = "E";
 
+        /**
+         * WanPortType
+         */
         private WanPortType() {
         }
     }
@@ -182,6 +194,9 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     public static class LanPortType {
         public static final String E = "E";
 
+        /**
+         * LanPortType
+         */
         private LanPortType() {
         }
     }
@@ -201,6 +216,9 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final int ENTITY_GATEWAY = 50;
         public static final int ENTITY_TERMINAL = 51;
 
+        /**
+         * Role
+         */
         private Role() {}
     }
 
@@ -211,6 +229,9 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final String ENTITY = "entity";
         public static final String DYNAMIPS = "dynamips";
 
+        /**
+         * ImageType
+         */
         private ImageType() {}
     }
 
@@ -218,6 +239,9 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final Integer NORMAL = 0;
         public static final Integer MACVLAN = 1;
 
+        /**
+         * NetMode
+         */
         private NetMode() {
         }
     }

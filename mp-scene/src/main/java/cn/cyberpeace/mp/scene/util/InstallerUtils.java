@@ -150,9 +150,18 @@ public class InstallerUtils {
 
     public static final String FILE_URL_SEPARATOR = "/";
 
+    /**
+     * InstallerUtils
+     */
     @SuppressWarnings({"java:S1144", "java:S3010"})
     private InstallerUtils() {}
 
+    /**
+     * isNewerWindows
+     *
+     * @param systemType
+     * @return boolean
+     */
     public static boolean isNewerWindows(String systemType) {
         systemType = systemType.toLowerCase();
         return BaseSceneElementModel.SystemType.WINDOWS.equals(systemType)
@@ -168,6 +177,12 @@ public class InstallerUtils {
                 || BaseSceneElementModel.SystemType.WINDOWS_SERVER_2008.equals(systemType);
     }
 
+    /**
+     * isOlderWindows
+     *
+     * @param systemType
+     * @return boolean
+     */
     public static boolean isOlderWindows(String systemType) {
         systemType = systemType.toLowerCase();
         return BaseSceneElementModel.SystemType.WINDOWS_XP.equals(systemType)
@@ -175,6 +190,12 @@ public class InstallerUtils {
                 || BaseSceneElementModel.SystemType.WINDOWS_SERVER_2000.equals(systemType);
     }
 
+    /**
+     * getDefaultInstallDir
+     *
+     * @param systemType
+     * @return
+     */
     public static String getDefaultInstallDir(String systemType) {
         if (SystemTypeCommandUtils.isWindows(systemType)) {
             return SceneSingleton.sceneAppConfig.getWindowsInstallerDir();
@@ -183,6 +204,13 @@ public class InstallerUtils {
         }
     }
 
+    /**
+     * generateFilename
+     *
+     * @param name
+     * @param suffix
+     * @return
+     */
     public static String generateFilename(String name, String suffix) {
         return StringUtils.joinWith("\\.", name, suffix);
     }

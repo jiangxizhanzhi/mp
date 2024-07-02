@@ -49,6 +49,12 @@ public class StartHandler extends HandlerCommon{
         public static final EventProcess START_DYNAMIPS = new EventProcess("start_dynamips", "sceneplugincloud.event.start_dynamips");
     }
 
+    /**
+     * StartHandler
+     *
+     * @param pluginHandler
+     * @param event
+     */
     public StartHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, StartTaskPool.getInstance(), event);
     }
@@ -115,6 +121,11 @@ public class StartHandler extends HandlerCommon{
         }
     }
 
+    /**
+     * attachISO
+     *
+     * @param cloudElement
+     */
     private void attachISO(CloudPluginSceneElementBO cloudElement) {
         VirtualMachineAttachISOData data = new VirtualMachineAttachISOData();
         data.setInstanceUuid(cloudElement.getResourceId());
@@ -123,6 +134,11 @@ public class StartHandler extends HandlerCommon{
         virtualMachine.attachISO(data);
     }
 
+    /**
+     * attachVirtualUsbs
+     *
+     * @param cloudElement
+     */
     private void attachVirtualUsbs(CloudPluginSceneElementBO cloudElement) {
         AttachVirtualUsbsData data = new AttachVirtualUsbsData();
         data.setInstanceUuid(cloudElement.getResourceId());
@@ -135,6 +151,11 @@ public class StartHandler extends HandlerCommon{
         virtualMachine.attachVirtualUsbs(data);
     }
 
+    /**
+     * attachEntityUsbs
+     *
+     * @param cloudElement
+     */
     private void attachEntityUsbs(CloudPluginSceneElementBO cloudElement) {
         AttachEntityUsbsData data = new AttachEntityUsbsData();
         data.setInstanceUuid(cloudElement.getResourceId());

@@ -57,6 +57,9 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
     @Resource
     private FlowPostService postService;
 
+    /**
+     * correctData
+     */
     @Override
     public void correctData() {
         if (getScene() == null) {
@@ -64,6 +67,9 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         }
     }
 
+    /**
+     * initBase
+     */
     @Override
     public void initBase() {
         super.initBase();
@@ -75,6 +81,9 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         initiateHandler = new InitiateHandler(this);
     }
 
+    /**
+     * reloadData
+     */
     @Override
     public void reloadData() {
         setScene(null);
@@ -87,65 +96,120 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
                 .toArray(new String[0])));
     }
 
+    /**
+     * saveScene
+     */
     @Override
     public void saveScene() {
         pluginModelHandler.saveScene();
     }
 
+    /**
+     * deleteScene
+     */
     @Override
     public void deleteScene() {
         pluginModelHandler.deleteScene();
     }
 
+    /**
+     * createElements
+     *
+     * @param elementIds
+     */
     @Override
     public void createElements(String... elementIds) {
         pluginModelHandler.createElements(elementIds);
     }
 
+    /**
+     * updateElements
+     *
+     * @param elementIds
+     */
     @Override
     public void updateElements(String... elementIds) {
         pluginModelHandler.updateElements(elementIds);
     }
 
+    /**
+     * deleteElements
+     *
+     * @param elementIds
+     */
     @Override
     public void deleteElements(String... elementIds) {
         pluginModelHandler.deleteElements(elementIds);
     }
 
+    /**
+     * createElementPorts
+     *
+     * @param elementPortIds
+     */
     @Override
     public void createElementPorts(String... elementPortIds) {
         pluginModelHandler.createElementPorts(elementPortIds);
     }
 
+    /**
+     * updateElementPorts
+     *
+     * @param elementPortIds
+     */
     @Override
     public void updateElementPorts(String... elementPortIds) {
         pluginModelHandler.updateElementPorts(elementPortIds);
     }
 
+    /**
+     * deleteElementPorts
+     *
+     * @param elementPortIds
+     */
     @Override
     public void deleteElementPorts(String... elementPortIds) {
         pluginModelHandler.deleteElementPorts(elementPortIds);
     }
 
+    /**
+     * prepare
+     *
+     * @param partialStart
+     */
     @Override
     public void prepare(boolean partialStart) {
         prepareHandler.prepare(partialStart);
     }
 
+    /**
+     * initiate
+     */
     public void initiate() throws Exception {
         initiateHandler.initiate();
     }
 
+    /**
+     * create
+     */
     @Override
     public void create() {
         createHandler.create();
     }
 
+    /**
+     * delete
+     */
     @Override
     public void delete() {
         deleteHandler.delete();
     }
 
+    /**
+     * createElement
+     *
+     * @param nodeId
+     */
     @Override
     public void createElement(String nodeId) {
         FlowPluginSceneElementBO element = getElement(nodeId);
@@ -201,12 +265,26 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         }
     }
 
+    /**
+     * deleteElement
+     *
+     * @param nodeId
+     */
     @Override
     public void deleteElement(String nodeId) {
         String sceneId = getSourceSceneId();
         getHandlerUtils().deleteByNodeIdAndSceneId(nodeId, sceneId);
     }
 
+    /**
+     * startFlow
+     *
+     * @param nodeId
+     * @param flowId
+     * @param sourceIp
+     * @param async
+     * @return boolean
+     */
     public boolean startFlow(String nodeId, String flowId, String sourceIp, boolean async) {
         FlowPluginSceneElementBO flowElement = getElement(nodeId);
         if (flowElement == null) {
@@ -237,6 +315,13 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         return flag;
     }
 
+    /**
+     * stopFlow
+     *
+     * @param nodeId
+     * @param flowId
+     * @return boolean
+     */
     public boolean stopFlow(String nodeId, String flowId) {
         FlowPluginSceneElementBO flowElement = getElement(nodeId);
         if (flowElement == null) {
@@ -268,6 +353,15 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         return flag;
     }
 
+    /**
+     * startFlows
+     *
+     * @param nodeId
+     * @param flowId2Ips
+     * @param async
+     * @param runType
+     * @return boolean
+     */
     public boolean startFlows(String nodeId, List<FlowIdWithSourceIp> flowId2Ips, boolean async, int runType) {
         FlowPluginSceneElementBO flowElement = getElement(nodeId);
         if (flowElement == null) {
@@ -323,6 +417,13 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         return flag;
     }
 
+    /**
+     * stopFlows
+     *
+     * @param nodeId
+     * @param flowIds
+     * @return boolean
+     */
     public boolean stopFlows(String nodeId, List<String> flowIds) {
         FlowPluginSceneElementBO flowElement = getElement(nodeId);
         if (flowElement == null) {
@@ -362,6 +463,14 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         return flag;
     }
 
+    /**
+     * updateFlowParams
+     *
+     * @param nodeId
+     * @param flowId
+     * @param sourceIp
+     * @return
+     */
     public Flow updateFlowParams(String nodeId, String flowId, String sourceIp) {
         FlowPluginSceneElementBO flowElement = getElement(nodeId);
         if (flowElement == null) {
@@ -388,6 +497,9 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         return flow;
     }
 
+    /**
+     * initClass
+     */
     @Override
     protected void initClass() {
         super.sceneBOClass = FlowPluginSceneBO.class;

@@ -50,6 +50,12 @@ public enum SituationalAwareErrorCode implements ErrorCode {
     SURICATA_FORMAT_ERROR("MP-110448", "suricata_rule_format_error");
 
 
+    /**
+     * SituationalAwareErrorCode
+     *
+     * @param code
+     * @param message
+     */
     SituationalAwareErrorCode(String code, String message) {
         setCode(code, SituationalAwareConstant.ERROR_CODE_PREFIX + message);
     }

@@ -13,11 +13,24 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class FlowResourceNameUtil implements IFlowResourceName<RsourceNameParams> {
+    /**
+     * generate
+     *
+     * @param id
+     * @param params
+     * @return
+     */
     @Override
     public String generate(String id, RsourceNameParams params) {
         return StringUtils.joinWith("_", FlowPlatformEnum.TREX, id);
     }
 
+    /**
+     * parse
+     *
+     * @param name
+     * @return
+     */
     @Override
     public ResourceParseWrapper<RsourceNameParams> parse(String name) {
         if (StringUtils.isNotEmpty(name) && name.startsWith(FlowPlatformEnum.TREX.toString())) {

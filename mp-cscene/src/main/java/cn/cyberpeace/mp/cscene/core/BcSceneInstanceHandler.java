@@ -41,6 +41,11 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
 
     private CsceneInstanceUserCountService csceneInstanceUserCountService;
 
+    /**
+     * generateSceneContext
+     *
+     * @return
+     */
     private SceneContextBO generateSceneContext() {
         CsceneContextBO context = getContext();
         if (context == null) {
@@ -50,16 +55,34 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
         return context.toSceneContext();
     }
 
+    /**
+     * setCsceneId
+     *
+     * @param csceneId
+     */
     @Override
     protected void setCsceneId(String csceneId) {
         super.setCsceneId(csceneId);
         CsceneContextHolder.setCsceneInstanceId(csceneId);
     }
 
+    /**
+     * BcSceneInstanceHandler
+     *
+     * @param csceneBO
+     * @param context
+     */
     public BcSceneInstanceHandler(CsceneInstanceBO csceneBO, CsceneContextBO context) {
         init(csceneBO, context);
     }
 
+    /**
+     * BcSceneInstanceHandler
+     *
+     * @param csceneId
+     * @param context
+     * @param initLazy
+     */
     public BcSceneInstanceHandler(String csceneId, CsceneContextBO context, boolean initLazy) {
         if (initLazy) {
             initLazy(csceneId, context);
@@ -68,20 +91,43 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
         }
     }
 
+    /**
+     * BcSceneInstanceHandler
+     *
+     * @param csceneId
+     * @param context
+     */
     public BcSceneInstanceHandler(String csceneId, CsceneContextBO context) {
         init(csceneId, context);
     }
 
+    /**
+     * BcSceneInstanceHandler
+     *
+     * @param csceneId
+     * @param areaId
+     * @param context
+     */
     public BcSceneInstanceHandler(String csceneId,String areaId, CsceneContextBO context) {
         this.areaId = areaId;
         init(csceneId, context);
     }
 
+    /**
+     * BcSceneInstanceHandler
+     *
+     * @param csceneObj
+     * @param roleObjs
+     * @param context
+     */
     public BcSceneInstanceHandler(CsceneInstanceModel csceneObj, List<CsceneInstanceRoleModel> roleObjs,
                                   CsceneContextBO context) {
         init(csceneObj, roleObjs, context);
     }
 
+    /**
+     * initBase
+     */
     @Override
     public void initBase() {
         super.initBase();
@@ -89,6 +135,9 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
         csceneInstanceUserCountService = BeanCommon.getBean(CsceneInstanceUserCountService.class);
     }
 
+    /**
+     * create
+     */
     public void create() {
         if (Objects.nonNull(getContext())) {
             csceneInstanceUserCountService.increaseCount(getContext().getAccessUserId());
@@ -105,21 +154,44 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
         cscene.fromModel(csceneObj);
     }
 
+    /**
+     * getSceneId
+     *
+     * @param csceneObj
+     * @return
+     */
     @Override
     public String getSceneId(CsceneInstanceModel csceneObj) {
         return csceneObj.getScene();
     }
 
+    /**
+     * loadScene
+     *
+     * @param csceneBO
+     * @param sceneId
+     */
     @Override
     public void loadScene(CsceneInstanceBO csceneBO, String sceneId) {
         csceneBO.setScene(sceneService.get(sceneId, areaId == null ? false : true, areaId, generateSceneContext())
                                   .getSource());
     }
 
+    /**
+     * saveScene
+     *
+     * @param csceneBO
+     */
     @Override
     public void saveScene(CsceneInstanceBO csceneBO) {
     }
 
+    /**
+     * deleteScene
+     *
+     * @param csceneBO
+     * @param logic
+     */
     @Override
     public void deleteScene(CsceneInstanceBO csceneBO, boolean logic) {
         log.info("=======delete scene getContext(): {}", getContext());
@@ -134,6 +206,12 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
         csceneBO.setScene(null);
     }
 
+    /**
+     * deleteScene
+     *
+     * @param sceneId
+     * @param logic
+     */
     @Override
     public void deleteScene(String sceneId, boolean logic) {
         if (sceneId != null) {
@@ -141,12 +219,18 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
         }
     }
 
+    /**
+     * initMapper
+     */
     @Override
     protected void initMapper() {
         super.csceneMapper = BeanCommon.getBean(CsceneInstanceMapper.class);
         super.csceneRoleMapper = BeanCommon.getBean(CsceneInstanceRoleMapper.class);
     }
 
+    /**
+     * initClass
+     */
     @Override
     protected void initClass() {
         super.csceneModelClass = CsceneInstanceModel.class;
@@ -155,6 +239,9 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
         super.csceneRoleBOClass = CsceneInstaneRoleBO.class;
     }
 
+    /**
+     * update
+     */
     public void update() {
         CsceneInstanceBO cscene = getCscene();
         String sceneId = getSceneId();
@@ -176,6 +263,11 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
         cscene.fromModel(csceneObj);
     }
 
+    /**
+     * getSceneId
+     *
+     * @return
+     */
     public String getSceneId() {
         if (this.initLazy) {
             CsceneInstanceModel instance = readCscene();
@@ -185,6 +277,11 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
         }
     }
 
+    /**
+     * toData
+     *
+     * @return
+     */
     @Override
     public CsceneInstanceBO toData() {
         // 深拷贝一下 (createHandler是多线程处理的,CsceneInstanceBO有可能是共用的)
@@ -205,6 +302,11 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
         return csceneInstanceBO;
     }
 
+    /**
+     * toDataWithHidden
+     *
+     * @return
+     */
     public CsceneInstanceBO toDataWithHidden() {
         // 深拷贝一下 (createHandler是多线程处理的,CsceneInstanceBO有可能是共用的)
         CsceneInstanceBO csceneInstanceBO = JsonCommon.mapToBean(JsonCommon.beanToMap(super.toData()), CsceneInstanceBO.class);

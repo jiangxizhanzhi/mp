@@ -26,10 +26,23 @@ public class FlowCollector {
     private static final FlowCollectClient flowCollectClient = new FlowCollectClient();
     private static final Random RANDOM = new Random();
 
+    /**
+     * createCollector
+     *
+     * @return
+     */
     public ArkimeCreateResBo createCollector() {
         return flowCollectClient.createArkimeInstance();
     }
 
+    /**
+     * createFlowMirror
+     *
+     * @param arkimeIp
+     * @param sceneId
+     * @param totalMirrorParams
+     * @return
+     */
     public FlowMirrorCreateRes createFlowMirror(String arkimeIp, String sceneId, List<CreateMirrorData.Param> totalMirrorParams) {
         CreateMirrorData createData = new CreateMirrorData();
         createData.setSrcParam(totalMirrorParams);
@@ -61,6 +74,11 @@ public class FlowCollector {
 
     }
 
+    /**
+     * deleteCollector
+     *
+     * @param deleteFlowCollectBo
+     */
     public void deleteCollector(DeleteFlowCollectBo deleteFlowCollectBo) {
 
         flowCollectClient.delArkimeInstance(deleteFlowCollectBo.getCollectorInstanceId());
@@ -81,6 +99,12 @@ public class FlowCollector {
     }
 
 
+    /**
+     * randomOptionKey
+     *
+     * @param excludeOptionKey
+     * @return int
+     */
     private int randomOptionKey(List<Integer> excludeOptionKey) {
         int optionKey = 1;
         for (int i = 0; i < 1; i++) {

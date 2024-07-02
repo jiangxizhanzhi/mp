@@ -16,6 +16,11 @@ import java.util.Collections;
 @Slf4j
 public class FirewallService extends BaseCpService {
 
+    /**
+     * FirewallService
+     *
+     * @param devopsClusterConfig
+     */
     public FirewallService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }

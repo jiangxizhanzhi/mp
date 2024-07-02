@@ -27,6 +27,11 @@ public class NodeLinkStatusBO {
     @ApiModelProperty("连线状态列表")
     private List<ConnectionStatus> connectionStatusList;
 
+    /**
+     * NodeLinkStatusBO
+     *
+     * @param nodeId
+     */
     public NodeLinkStatusBO(String nodeId) {
         this.nodeId = nodeId;
         this.connectionStatusList = new ArrayList<>();
@@ -42,6 +47,11 @@ public class NodeLinkStatusBO {
         @JsonIgnore
         private String networkId;
 
+        /**
+         * ConnectionStatus
+         *
+         * @param connectionId
+         */
         public ConnectionStatus(String connectionId) {
             this.connectionId = connectionId;
         }

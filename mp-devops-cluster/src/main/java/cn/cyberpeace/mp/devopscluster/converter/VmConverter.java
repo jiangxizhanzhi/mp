@@ -38,6 +38,12 @@ public class VmConverter implements BaseConverter{
     private final CsceneSpecialService csceneSpecialService;
 
 
+    /**
+     * page
+     *
+     * @param request
+     * @return
+     */
     public ListObjServiceResult<VirtualNode> page(VirtualNodePageRequest request) {
         VirtualNodePageParam param = new VirtualNodePageParam();
         param.setName(request.getName());
@@ -115,6 +121,12 @@ public class VmConverter implements BaseConverter{
         return page.getTotal() ;
     }
 
+    /**
+     * batchDelete
+     *
+     * @param request
+     * @return
+     */
     public ServiceResult<Boolean> batchDelete(VirtualNodeDeleteRequest request) {
         InstanceBatchDeleteData deleteData = new InstanceBatchDeleteData();
         deleteData.setUuids(request.getInstances());

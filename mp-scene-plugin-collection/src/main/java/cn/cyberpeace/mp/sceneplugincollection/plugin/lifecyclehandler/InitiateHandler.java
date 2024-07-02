@@ -69,6 +69,11 @@ public class InitiateHandler extends HandlerCommon {
     public static class ElementProcess {
     }
 
+    /**
+     * InitiateHandler
+     *
+     * @param pluginHandler
+     */
     public InitiateHandler(CollectionScenePluginHandler pluginHandler) {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.INITIATE);
     }
@@ -234,6 +239,12 @@ public class InitiateHandler extends HandlerCommon {
 
     }
 
+    /**
+     * getElementCollectRouteCommand
+     *
+     * @param cloudElement
+     * @return
+     */
     private String getElementCollectRouteCommand(CloudPluginSceneElementBO cloudElement) {
         String routeCommand = "";
         List<ConnectedNetworkBO> allConnectNetworks = new ArrayList<>(cloudElement.getDeriveNetworks());
@@ -259,6 +270,10 @@ public class InitiateHandler extends HandlerCommon {
 
     /**
      * 添加采集路由
+     *
+     * @param externalCidr
+     * @param gatewayIp
+     * @param srcElement
      * @return
      */
     private String addCollectRouteCommandWhenInit(String externalCidr, String gatewayIp, SceneElementBO srcElement) {
@@ -274,6 +289,13 @@ public class InitiateHandler extends HandlerCommon {
     }
 
 
+    /**
+     * getLinuxAddRouteCommand
+     *
+     * @param externalCidr
+     * @param gatewayIp
+     * @return
+     */
     private String getLinuxAddRouteCommand(String externalCidr, String gatewayIp) {
         String addRouteCommand = "if command -v ip > /dev/null; then\n" +
                 String.format("    ip route add %s via %s\n", externalCidr, gatewayIp) +
@@ -289,6 +311,13 @@ public class InitiateHandler extends HandlerCommon {
         return addRouteCommand;
     }
 
+    /**
+     * getWindowsAddRouteCommand
+     *
+     * @param externalCidr
+     * @param gatewayIp
+     * @return
+     */
     private String getWindowsAddRouteCommand(String externalCidr, String gatewayIp) {
         try {
             String destinationNetwork = externalCidr.split("/")[0];

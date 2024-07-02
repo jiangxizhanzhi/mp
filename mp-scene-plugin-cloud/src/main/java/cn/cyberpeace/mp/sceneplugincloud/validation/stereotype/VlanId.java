@@ -17,9 +17,24 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 public @interface VlanId {
 
+    /**
+     * message
+     *
+     * @return
+     */
     String message() default "{sceneplugincloud.validation.vlanId}";
 
+    /**
+     * groups
+     *
+     * @return
+     */
     Class<?>[] groups() default { };
 
+    /**
+     * payload
+     *
+     * @return
+     */
     Class<? extends Payload>[] payload() default { };
 }

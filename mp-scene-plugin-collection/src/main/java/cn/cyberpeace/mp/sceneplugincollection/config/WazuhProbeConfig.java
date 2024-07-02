@@ -18,6 +18,9 @@ public class WazuhProbeConfig {
 
     private static volatile boolean isInit = false;
 
+    /**
+     * init
+     */
     public static synchronized void init() {
         if (isInit) {
             return;
@@ -27,6 +30,11 @@ public class WazuhProbeConfig {
         isInit = true;
     }
 
+    /**
+     * getDefaultProbe
+     *
+     * @return
+     */
     public DefaultProbe getDefaultProbe() {
         return defaultProbe;
     }

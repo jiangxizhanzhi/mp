@@ -28,11 +28,22 @@ public class CsceneUpdateBO extends BaseCsceneBO<CsceneInstanceModel, CsceneInst
     @ApiModelProperty(value = "场景上下文属性")
     private CsceneContextBO context;
 
+    /**
+     * createModel
+     *
+     * @return
+     */
     @Override
     public CsceneInstanceModel createModel() {
         return new CsceneInstanceModel();
     }
 
+    /**
+     * fromModel
+     *
+     * @param obj
+     * @param ignoreFields
+     */
     @Override
     public void fromModel(CsceneInstanceModel obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
@@ -48,6 +59,12 @@ public class CsceneUpdateBO extends BaseCsceneBO<CsceneInstanceModel, CsceneInst
         }
     }
 
+    /**
+     * toModel
+     *
+     * @param ignoreFields
+     * @return
+     */
     @Override
     public CsceneInstanceModel toModel(String... ignoreFields) {
         CsceneInstanceModel obj = super.toModel(ArrayUtils.addAll(ignoreFields,
@@ -58,6 +75,11 @@ public class CsceneUpdateBO extends BaseCsceneBO<CsceneInstanceModel, CsceneInst
         return obj;
     }
 
+    /**
+     * export
+     *
+     * @return
+     */
     @Override
     public CsceneUpdateBO export() {
         CsceneUpdateBO csceneBO = super.export();
@@ -67,6 +89,11 @@ public class CsceneUpdateBO extends BaseCsceneBO<CsceneInstanceModel, CsceneInst
         return this;
     }
 
+    /**
+     * exportToCsceneInstance
+     *
+     * @return
+     */
     public CsceneInstanceBO exportToCsceneInstance() {
         CsceneInstanceBO csceneInstance = export(CsceneInstanceBO.class, CsceneInstaneRoleBO.class, CsceneUpdateBO::getUpdateScene);
         if (updateScene != null) {

@@ -8,5 +8,10 @@ import java.util.List;
  * @Date：2022/5/6 9:23
  */
 public interface WazuhParamsConvert <T>{
+    /**
+     * convertParams
+     *
+     * @return
+     */
     public List<T> convertParams();
 }

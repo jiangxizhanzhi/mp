@@ -14,6 +14,9 @@ import java.io.IOException;
 @Slf4j
 public class JsonUtils {
 
+    /**
+     * JsonUtils
+     */
     private JsonUtils(){
         throw new IllegalStateException("Utility class");
     }

@@ -26,6 +26,13 @@ public class CloudHttpClient {
     private static final String EMPTY_RESULT_LOG = "cloud {}[url - {}?{}, data - {}] empty result: ";
     private static final String ERROR_RESULT_LOG = "cloud {}[url - {}?{}, data - {}] parse result[{}] error: {}";
 
+    /**
+     * CloudHttpClient
+     *
+     * @param server
+     * @param timeout
+     * @param poolSize
+     */
     public CloudHttpClient(String server, Integer timeout, Integer poolSize) {
         httpClient = HttpClient.builder()
                 .configServer(server)
@@ -38,44 +45,136 @@ public class CloudHttpClient {
         httpClient.setHeaders(headers);
     }
 
+    /**
+     * cloudPost
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param valueTypeRef
+     * @return
+     */
     public <T> CloudResponse<T> cloudPost(String url, HttpData data, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef) {
 
         return cloudResultBean(httpClient.post(url, data, param, this.getHeaders(), null), valueTypeRef, "post", url, data, param);
     }
 
+    /**
+     * cloudGet
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param valueTypeRef
+     * @return
+     */
     public <T> CloudResponse<T> cloudGet(String url, HttpData data, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef) {
 
         return cloudResultBean(httpClient.get(url, param, this.getHeaders(), null), valueTypeRef, "get", url, data, param);
     }
 
+    /**
+     * cloudDelete
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param valueTypeRef
+     * @return
+     */
     public <T> CloudResponse<T> cloudDelete(String url, HttpData data, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef) {
         return cloudResultBean(httpClient.delete(url, data, param, this.getHeaders(), null), valueTypeRef, METHOD_DELETE, url, data, param);
     }
 
+    /**
+     * get
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param valueType
+     * @return
+     */
     public <T> T get(String url, HttpData data, HttpParam param, Class<T> valueType) {
         return resultBean(httpClient.get(url, param, this.getHeaders(), null), valueType, "get", url, data, param);
     }
 
+    /**
+     * post
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param valueType
+     * @return
+     */
     public <T> T post(String url, HttpData data, HttpParam param, Class<T> valueType) {
         return resultBean(httpClient.post(url, data, param, this.getHeaders(), null), valueType, "post", url, data, param);
     }
 
+    /**
+     * delete
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param valueType
+     * @return
+     */
     public <T> T delete(String url, HttpData data, HttpParam param, Class<T> valueType) {
         return resultBean(httpClient.delete(url, data, param, this.getHeaders(), null), valueType, METHOD_DELETE, url, data, param);
     }
 
+    /**
+     * get
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param valueTypeRef
+     * @return
+     */
     public <T> T get(String url, HttpData data, HttpParam param, TypeReference<T> valueTypeRef) {
         return resultBean(httpClient.get(url, param, this.getHeaders(), null), valueTypeRef, "get", url, data, param);
     }
 
+    /**
+     * post
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param valueTypeRef
+     * @return
+     */
     public <T> T post(String url, HttpData data, HttpParam param, TypeReference<T> valueTypeRef) {
         return resultBean(httpClient.post(url, data, param, this.getHeaders(), null), valueTypeRef, "post", url, data, param);
     }
 
+    /**
+     * delete
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param valueTypeRef
+     * @return
+     */
     public <T> T delete(String url, HttpData data, HttpParam param, TypeReference<T> valueTypeRef) {
         return resultBean(httpClient.delete(url, data, param, this.getHeaders(), null), valueTypeRef, METHOD_DELETE, url, data, param);
     }
 
+    /**
+     * cloudResultBean
+     *
+     * @param result
+     * @param valueTypeRef
+     * @param method
+     * @param url
+     * @param data
+     * @param param
+     * @return
+     */
     private <T> CloudResponse<T> cloudResultBean(HttpResult result, TypeReference<CloudResponse<T>> valueTypeRef,
                                                  String method, String url, HttpData data, HttpParam param) {
         CloudResponse<T> response = new CloudResponse<>();
@@ -109,6 +208,17 @@ public class CloudHttpClient {
         return response;
     }
 
+    /**
+     * resultBean
+     *
+     * @param result
+     * @param valueType
+     * @param method
+     * @param url
+     * @param data
+     * @param param
+     * @return
+     */
     private <T> T resultBean(HttpResult result, Class<T> valueType, String method, String url, HttpData data,
                              HttpParam param) {
         if (StringUtils.isEmpty(result.getResult())) {
@@ -134,6 +244,17 @@ public class CloudHttpClient {
         return response;
     }
 
+    /**
+     * resultBean
+     *
+     * @param result
+     * @param valueTypeRef
+     * @param method
+     * @param url
+     * @param data
+     * @param param
+     * @return
+     */
     private <T> T resultBean(HttpResult result, TypeReference<T> valueTypeRef, String method, String url, HttpData data,
                              HttpParam param) {
         if (StringUtils.isEmpty(result.getResult())) {
@@ -158,6 +279,11 @@ public class CloudHttpClient {
         return response;
     }
 
+    /**
+     * getHeaders
+     *
+     * @return
+     */
     private Map<String, String> getHeaders() {
         Map<String, String> headers = new HashMap<>();
         // 国际化header的处理

@@ -9,11 +9,19 @@ public class CreateTaskPool extends TaskPool {
         public static final CreateTaskPool INSTANCE = new CreateTaskPool();
     }
 
+    /**
+     * CreateTaskPool
+     */
     private CreateTaskPool() {
         super(FlowSingleton.flowAppConfig.getCreatePoolSize(),
                 FlowSingleton.flowAppConfig.getCreateHoldSize(), 60L);
     }
 
+    /**
+     * getInstance
+     *
+     * @return
+     */
     public static CreateTaskPool getInstance() {
         return CreateTaskPoolInstance.INSTANCE;
     }

@@ -23,18 +23,42 @@ public interface ProbeMapper extends BaseModelMapper<ProbeModel> {
 //
 //    ProbeModel selectByPrimaryKey(Integer pk);
 //
+    /**
+     * updateByPrimaryKeySelective
+     *
+     * @param record
+     * @return int
+     */
     int updateByPrimaryKeySelective(ProbeModel record);
 //
 //    int updateByPrimaryKey(ProbeModel record);
 
+    /**
+     * getById
+     *
+     * @param id
+     * @return
+     */
     ProbeDto getById(@Param("id") String id);
 
 //    List<ProbeDto> listProbes(@Param("name") String name, @Param("types") List<Integer> types,
 //                                 @Param("osTypes") List<Integer> osTypes, @Param("catagories") List<String> catagories,
 //                                 @Param("scriptTypes") List<Integer> scriptTypes);
 
+    /**
+     * listProbeDtos
+     *
+     * @param condition
+     * @return
+     */
     List<ProbeDto> listProbeDtos(@Param("condition") ProbeSearchCondition condition);
 
+    /**
+     * getByName
+     *
+     * @param name
+     * @return 探针实体
+     */
     ProbeModel getByName(String name);
 
 }

@@ -81,50 +81,126 @@ public class CommandUtils {
         return StringUtils.joinWith(WINDOWS_LINE_BREAK, "chcp 65001", command, "chcp 936");
     }
 
+    /**
+     * windowsMkDir
+     *
+     * @param dir
+     * @return
+     */
     public static String windowsMkDir(String dir) {
         return String.format(WINDOWS_MK_DIR, dir);
     }
 
+    /**
+     * windowsCdDir
+     *
+     * @param dir
+     * @return
+     */
     public static String windowsCdDir(String dir) {
         return String.format(WINDOWS_CD_DIR, dir);
     }
 
+    /**
+     * windowsCallTarget
+     *
+     * @param target
+     * @return
+     */
     public static String windowsCallTarget(String target) {
         return String.format(WINDOWS_CALL_TARGET, target);
     }
 
+    /**
+     * windowsStartTarget
+     *
+     * @param target
+     * @return
+     */
     public static String windowsStartTarget(String target) {
         return String.format(WINDOWS_START_TARGET, target);
     }
 
+    /**
+     * windowsDownloadFile
+     *
+     * @param fileUrl
+     * @param toPath
+     * @return
+     */
     public static String windowsDownloadFile(String fileUrl, String toPath) {
         return String.format(WINDOWS_DOWNLOAD_FILE, toPath, fileUrl);
     }
 
+    /**
+     * windowsUnzipFile
+     *
+     * @param filePath
+     * @param toDir
+     * @return
+     */
     public static String windowsUnzipFile(String filePath, String toDir) {
         return String.format(WINDOWS_UNZIP_FILE, filePath, toDir);
     }
 
+    /**
+     * linuxMkDir
+     *
+     * @param dir
+     * @return
+     */
     public static String linuxMkDir(String dir) {
         return String.format(LINUX_MK_DIR, dir);
     }
 
+    /**
+     * linuxCdDir
+     *
+     * @param dir
+     * @return
+     */
     public static String linuxCdDir(String dir) {
         return String.format(LINUX_CD_DIR, dir);
     }
 
+    /**
+     * linuxChmodX
+     *
+     * @param filePath
+     * @return
+     */
     public static String linuxChmodX(String filePath) {
         return String.format(LINUX_CHMOD_X, filePath);
     }
 
+    /**
+     * linuxCallSh
+     *
+     * @param shPath
+     * @return
+     */
     public static String linuxCallSh(String shPath) {
         return String.format(LINUX_CALL_SH, shPath);
     }
 
+    /**
+     * linuxDownloadFile
+     *
+     * @param fileUrl
+     * @param toPath
+     * @return
+     */
     public static String linuxDownloadFile(String fileUrl, String toPath) {
         return String.format(LINUX_DOWNLOAD_FILE, toPath, fileUrl);
     }
 
+    /**
+     * linuxUnzipFile
+     *
+     * @param filePath
+     * @param toDir
+     * @return
+     */
     public static String linuxUnzipFile(String filePath, String toDir) {
         return String.format(LINUX_UNZIP_FILE, filePath, toDir);
     }

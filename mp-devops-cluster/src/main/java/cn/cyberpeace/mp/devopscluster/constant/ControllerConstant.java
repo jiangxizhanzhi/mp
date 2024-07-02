@@ -6,6 +6,9 @@ package cn.cyberpeace.mp.devopscluster.constant;
  */
 public final class ControllerConstant {
 
+    /**
+     * ControllerConstant
+     */
     private ControllerConstant(){
         throw new IllegalStateException("Utility class");
     }

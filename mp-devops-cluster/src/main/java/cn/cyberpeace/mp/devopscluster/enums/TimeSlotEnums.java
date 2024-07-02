@@ -20,19 +20,41 @@ public enum TimeSlotEnums {
 
     private Integer count;
 
+    /**
+     * getUnit
+     *
+     * @return
+     */
     public String getUnit() {
         return unit;
     }
 
+    /**
+     * getCount
+     *
+     * @return
+     */
     public Integer getCount() {
         return count;
     }
 
+    /**
+     * TimeSlotEnums
+     *
+     * @param unit
+     * @param count
+     */
     TimeSlotEnums(String unit, Integer count) {
         this.unit = unit;
         this.count = count;
     }
 
+    /**
+     * fromUnit
+     *
+     * @param unit
+     * @return
+     */
     public static TimeSlotEnums fromUnit(String unit) {
         for (TimeSlotEnums e : values()) {
             if (e.getUnit().equals(unit)) {

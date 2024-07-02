@@ -12,12 +12,24 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class VmRouter extends CloudClient {
 
+    /**
+     * createConfig
+     *
+     * @param createData
+     * @return boolean
+     */
     public boolean createConfig(RouterConfigCmdData createData) {
         CloudResponse<Object> response = cloudPost(CloudUrlConstant.ROUTER_CMD_SEND_URL, createData, null, new TypeReference<>() {
         }, true);
         return response.isSuccess();
     }
 
+    /**
+     * queryPort
+     *
+     * @param instanceId
+     * @return
+     */
     public SerialPortQueryResult queryPort(String instanceId) {
         String url = CloudUrlConstant.GET_SERIAL_PORT_URL.replace("{instance_id}", instanceId);
         CloudResponse<SerialPortQueryResult> response = cloudGet(url, null, new TypeReference<>() {
@@ -25,6 +37,13 @@ public class VmRouter extends CloudClient {
         return response.getData();
     }
 
+    /**
+     * sendCommand
+     *
+     * @param createData
+     * @param vmId
+     * @return boolean
+     */
     public boolean sendCommand(RouterConfigCmdData createData, String vmId) {
         CloudResponse<Object> response = cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_COM_EXEC_CMD.replace("{vm_id}", vmId), createData, null, new TypeReference<>() {
         }, true);

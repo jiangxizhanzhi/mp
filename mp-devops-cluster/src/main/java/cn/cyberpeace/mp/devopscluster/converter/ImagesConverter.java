@@ -85,6 +85,12 @@ public class ImagesConverter implements BaseConverter {
     private final SnapshotConverter snapshotConverter;
     private final CloudClient cloudClient;
 
+    /**
+     * getConnections
+     *
+     * @param deviceUuid
+     * @return
+     */
     public List<TargetConnection> getConnections(String deviceUuid) {
         Remote remoteClient = new Remote();
         Device device = deviceService.findByUuid(deviceUuid);
@@ -235,6 +241,11 @@ public class ImagesConverter implements BaseConverter {
         return imageConvertPageModel;
     }
 
+    /**
+     * addSnapshotCountInfo
+     *
+     * @param deviceList
+     */
     private void addSnapshotCountInfo(List<Device> deviceList) {
         for (Device device : deviceList) {
             try {
@@ -349,6 +360,12 @@ public class ImagesConverter implements BaseConverter {
         devopsTargetService.insert(Collections.singletonList(device));
     }
 
+    /**
+     * getQuickCreateParam
+     *
+     * @param v
+     * @return
+     */
     private static QuickCreateParam getQuickCreateParam(InstallerDTO v) {
         QuickCreateParam params = new QuickCreateParam();
         params.setInstallerUuid(v.getUuid());
@@ -357,6 +374,12 @@ public class ImagesConverter implements BaseConverter {
         return params;
     }
 
+    /**
+     * quickCreateList
+     *
+     * @param request
+     * @return
+     */
     public ListObjServiceResult<QuickCreateDevice> quickCreateList(QuickCreatePageRequest request) {
         QuickCreatePageParam param = new QuickCreatePageParam();
         param.setOffset(request.getPage());
@@ -369,6 +392,11 @@ public class ImagesConverter implements BaseConverter {
         return new ListObjServiceResult<>(result);
     }
 
+    /**
+     * quickCreate
+     *
+     * @param request
+     */
     public void quickCreate(QuickCreateRequest request) {
         QuickCreateData data = new QuickCreateData();
         data.setQuickName(request.getName());
@@ -446,6 +474,13 @@ public class ImagesConverter implements BaseConverter {
 
     }
 
+    /**
+     * getDeviceTargetAuthPO
+     *
+     * @param imageId
+     * @param userId
+     * @return
+     */
     private static DeviceTargetAuthPO getDeviceTargetAuthPO(String imageId, String userId) {
         DeviceTargetAuthPO deviceTargetAuthPO = new DeviceTargetAuthPO();
         deviceTargetAuthPO.setOwner(userId);

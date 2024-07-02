@@ -8,11 +8,19 @@ public class UnpauseTaskPool extends TaskPool {
         public static final UnpauseTaskPool INSTANCE = new UnpauseTaskPool();
     }
 
+    /**
+     * UnpauseTaskPool
+     */
     private UnpauseTaskPool() {
         super(CloudSingleton.cloudAppConfig.getUnpausePoolSize(),
                 CloudSingleton.cloudAppConfig.getUnpauseHoldSize(), 60L);
     }
 
+    /**
+     * getInstance
+     *
+     * @return
+     */
     public static UnpauseTaskPool getInstance() {
         return UnpauseTaskPoolInstance.INSTANCE;
     }

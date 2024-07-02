@@ -14,6 +14,9 @@ import java.util.Map;
 
 @Slf4j
 public class SituationAwareCommonConfigUtil {
+    /**
+     * SituationAwareCommonConfigUtil
+     */
     private SituationAwareCommonConfigUtil() {
 
     }
@@ -32,6 +35,12 @@ public class SituationAwareCommonConfigUtil {
 
     private static final Map<String, String> CONFIG_MAP = new HashMap<>();
 
+    /**
+     * getConfigString
+     *
+     * @param config
+     * @return
+     */
     public static String getConfigString(String config) {
         init();
         if (CONFIG_MAP.containsKey(config)) {
@@ -40,6 +49,9 @@ public class SituationAwareCommonConfigUtil {
         return StringUtils.EMPTY;
     }
 
+    /**
+     * init
+     */
     private static synchronized void init() {
         if (LOADED) {
             return;

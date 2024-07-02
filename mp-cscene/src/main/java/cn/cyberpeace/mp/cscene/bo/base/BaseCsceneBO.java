@@ -35,6 +35,12 @@ public abstract class BaseCsceneBO<
     private Boolean enableRecording;
     @ApiModelProperty(value = "是否只是部分启动")
     private Boolean supportPartialStart;
+
+    /**
+     * export
+     *
+     * @return
+     */
     @Override
     public T export() {
         setId(null);
@@ -43,11 +49,26 @@ public abstract class BaseCsceneBO<
         return (T) this;
     }
 
+    /**
+     * export
+     *
+     * @param pClass
+     * @param ignoreFields
+     * @return
+     */
     @Override
     public <P1> P1 export(Class<P1> pClass, String... ignoreFields) {
         return super.export(pClass, ArrayUtils.addAll(ignoreFields, "roles"));
     }
 
+    /**
+     * export
+     *
+     * @param pClass
+     * @param roleClass
+     * @param ignoreFieldGetters
+     * @return
+     */
     @SafeVarargs
     public final <R9 extends BaseCsceneRoleBO<?, R9>, P extends BaseCsceneBO<?, ?, R9, P>> P export(
             Class<P> pClass, Class<R9> roleClass, SerializableFunction<T>... ignoreFieldGetters) {

@@ -23,11 +23,21 @@ public class BaseCsceneModel extends BaseModel {
     @DefaultBool
     private Boolean supportPartialStart;
 
+    /**
+     * hasDeleted
+     *
+     * @return boolean
+     */
     @Override
     public boolean hasDeleted() {
         return getDeleted();
     }
 
+    /**
+     * prepareDeleteFlag
+     *
+     * @return boolean
+     */
     @Override
     public boolean prepareDeleteFlag() {
         setDeleted(true);
@@ -56,6 +66,9 @@ public class BaseCsceneModel extends BaseModel {
         public static final int COMPREHENSIVE_TRAINING = 235;
         public static final int RANGE_TEST = 236;
 
+        /**
+         * ReferenceType
+         */
         private ReferenceType() {}
     }
 }

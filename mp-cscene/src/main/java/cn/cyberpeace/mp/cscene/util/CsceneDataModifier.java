@@ -72,6 +72,9 @@ public class CsceneDataModifier {
 
     /**
      * 端口中补充协议
+     *
+     * @param csceneInstance
+     * @param protocol
      */
     public static void supplyProtocol(CsceneInstanceBO csceneInstance, String protocol) {
         ScenePluginDataBO cloudPlugin = Optional.ofNullable(csceneInstance.getScene().getPlugins()).orElse(new HashMap<>()).get("cpcloud");
@@ -150,6 +153,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * handleAccessModePath
+     *
+     * @param csceneBO
+     */
     public static void handleAccessModePath(CsceneBO csceneBO) {
         try {
             if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getTopology() == null) {
@@ -205,6 +213,12 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * supplyProtocolForCoreRouter
+     *
+     * @param csceneInstance
+     * @param protocol
+     */
     public static void supplyProtocolForCoreRouter(CsceneInstanceBO csceneInstance, String protocol) {
         ScenePluginDataBO cloudPlugin = Optional.ofNullable(csceneInstance.getScene().getPlugins()).orElse(new HashMap<>()).get("cpcloud");
         if (cloudPlugin == null) {
@@ -422,18 +436,33 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * removeFilePathPrefix
+     *
+     * @param csceneBO
+     */
     public static void removeFilePathPrefix(CsceneUpdateBO csceneBO) {
         if (csceneBO != null) {
             removeFilePathPrefix(csceneBO.getUpdateScene());
         }
     }
 
+    /**
+     * removeFilePathPrefix
+     *
+     * @param elementModifyBO
+     */
     public static void removeFilePathPrefix(ElementModifyBO elementModifyBO) {
         if (elementModifyBO != null) {
             removeFilePathPrefix(elementModifyBO.getUpdate());
         }
     }
 
+    /**
+     * removeFilePathPrefix
+     *
+     * @param sceneDataBO
+     */
     private static void removeFilePathPrefix(SceneDataBO sceneDataBO) {
         if (sceneDataBO != null && sceneDataBO.getTopology() != null) {
             SceneBO sceneConfig = sceneDataBO.getTopology().getScene();
@@ -499,6 +528,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * assembleInitCommands
+     *
+     * @param csceneBO
+     */
     public static void assembleInitCommands(CsceneBO csceneBO) {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null) {
             for (SceneConfigElementBO e : csceneBO.getSceneConfig().getTopology().getElements()) {
@@ -517,6 +551,12 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * getString
+     *
+     * @param c
+     * @return
+     */
     private static String getString(String c) {
         // TODO: 临时兼容业务界面
         if (c.startsWith("o:") || c.startsWith("s:") || c.startsWith("n:")) {
@@ -526,6 +566,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * handlerInputEnableRecording
+     *
+     * @param csceneBO
+     */
     public static void handlerInputEnableRecording(CsceneBO csceneBO) {
         if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getPlugins() == null || csceneBO.getSceneConfig().getPlugins().get("cpcloud") == null) {
             return;
@@ -541,6 +586,11 @@ public class CsceneDataModifier {
         scenePluginDataBO.setScene(cpcloudPluginScene);
     }
 
+    /**
+     * handlerEnableRate
+     *
+     * @param csceneBO
+     */
     public static void handlerEnableRate(CsceneBO csceneBO) {
         if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getPlugins() == null || csceneBO.getSceneConfig().getPlugins().get("cpcloud") == null) {
             return;
@@ -555,6 +605,12 @@ public class CsceneDataModifier {
         scenePluginDataBO.setScene(cpcloudPluginScene);
     }
 
+    /**
+     * getOutputEnableRecording
+     *
+     * @param baseSceneDataBO
+     * @return boolean
+     */
     public static boolean getOutputEnableRecording(BaseSceneDataBO baseSceneDataBO) {
         CsceneAppConfig csceneAppConfig = BeanCommon.getBean(CsceneAppConfig.class);
         if (baseSceneDataBO == null || baseSceneDataBO.getPlugins() == null || baseSceneDataBO.getPlugins().get("cpcloud") == null) {
@@ -572,6 +628,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * correctReturnCsceneData
+     *
+     * @param csceneBO
+     */
     public static void correctReturnCsceneData(CsceneBO csceneBO) {
         if (csceneBO == null) {
             return;
@@ -599,6 +660,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * correctVlanId
+     *
+     * @param csceneBO
+     */
     public static void correctVlanId(CsceneBO csceneBO) {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
             Map<String, Map<String, Object>> elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
@@ -631,6 +697,12 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * correctReturnCsceneData
+     *
+     * @param csceneInstanceBO
+     * @param handlerHidden
+     */
     public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO, boolean handlerHidden) {
         addFilePathPrefix(csceneInstanceBO.getScene());
         handlerNodeCommand(csceneInstanceBO.getScene());
@@ -741,6 +813,16 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * correctName
+     *
+     * @param csceneId
+     * @param referenceMetaData
+     * @param csceneInstance
+     * @param cscene
+     * @param dbCscene
+     * @param name
+     */
     public static void correctName(String csceneId, String referenceMetaData, CsceneInstanceBO csceneInstance, CsceneBO cscene, CsceneBO dbCscene, String name) {
         if (csceneInstance == null) {
             return;
@@ -775,6 +857,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * handlerNodeCommand
+     *
+     * @param baseSceneDataBO
+     */
     private static void handlerNodeCommand(BaseSceneDataBO baseSceneDataBO) {
         if (baseSceneDataBO.getTopology() != null) {
             if (CollectionUtils.isNotEmpty(baseSceneDataBO.getTopology().getElements())) {
@@ -785,6 +872,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * extracted
+     *
+     * @param e
+     */
     private static void extracted(BaseSceneElementBO e) {
         BaseSceneElementBO sceneElement = e;
         if (CollectionUtils.isNotEmpty(sceneElement.getInitCommands())) {
@@ -809,6 +901,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * addFilePathPrefix
+     *
+     * @param csceneBO
+     */
     private static void addFilePathPrefix(CsceneBO csceneBO) {
         if (csceneBO != null && StringUtils.isNotEmpty(csceneBO.getLogo())) {
             csceneBO.setLogo(FsCommon.genHttpUrl(csceneBO.getLogo()));
@@ -887,6 +984,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * checkFlowNum
+     *
+     * @param csceneBO
+     */
     public static void checkFlowNum(CsceneBO csceneBO) {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpflow") != null) {
             Map<String, Map<String, Object>> elements = csceneBO.getSceneConfig().getPlugins().get("cpflow").getElements();
@@ -903,6 +1005,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * checkSameCidrForCpcollection
+     *
+     * @param csceneBO
+     */
     public static void checkSameCidrForCpcollection(CsceneBO csceneBO) {
         SceneConfigDataBO sceneConfigDataBO = csceneBO.getSceneConfig();
         if (sceneConfigDataBO != null && sceneConfigDataBO.getPlugins() != null && sceneConfigDataBO.getPlugins().get(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY) != null) {
@@ -944,6 +1051,11 @@ public class CsceneDataModifier {
     }
 
 
+    /**
+     * checkFirewallRules
+     *
+     * @param csceneBO
+     */
     public static void checkFirewallRules(CsceneBO csceneBO) {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
             Map<String, Map<String, Object>> ports = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElementPorts();
@@ -960,6 +1072,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * handlerPortUsable
+     *
+     * @param csceneBO
+     */
     public static void handlerPortUsable(CsceneBO csceneBO) {
         if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getTopology() == null) {
             return;
@@ -988,6 +1105,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * checkCloudElement
+     *
+     * @param csceneBO
+     */
     public static void checkCloudElement(CsceneBO csceneBO) {
         if (csceneBO == null || csceneBO.getSceneConfig() == null || csceneBO.getSceneConfig().getPlugins() == null || csceneBO.getSceneConfig().getPlugins().get("cpcloud") == null) {
             return;
@@ -996,6 +1118,11 @@ public class CsceneDataModifier {
         checkEntityUsb(csceneBO);
     }
 
+    /**
+     * handlerPosition
+     *
+     * @param sceneDataBO
+     */
     public static void handlerPosition(BaseSceneDataBO sceneDataBO) {
         if (sceneDataBO == null || sceneDataBO.getTopology() == null) {
             return;
@@ -1020,6 +1147,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * checkVirtualUsb
+     *
+     * @param csceneBO
+     */
     public static void checkVirtualUsb(CsceneBO csceneBO) {
         Map<String, Map<String, Object>> elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
         if (elements != null && elements.size() > 0) {
@@ -1050,6 +1182,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * checkEntityUsb
+     *
+     * @param csceneBO
+     */
     public static void checkEntityUsb(CsceneBO csceneBO) {
         Map<String, Map<String, Object>> elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
         if (MapUtils.isEmpty(elements)) {
@@ -1078,6 +1215,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * checkVlanId
+     *
+     * @param csceneBO
+     */
     public static void checkVlanId(CsceneBO csceneBO) {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
             Map<String, Map<String, Object>> elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
@@ -1097,6 +1239,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * check
+     *
+     * @param csceneBO
+     */
     public static void check(CsceneBO csceneBO) {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null && csceneBO.getSceneConfig().getTopology().getScene() != null) {
             String name = csceneBO.getSceneConfig().getTopology().getScene().getName();
@@ -1112,6 +1259,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * checkIngressAndEgress
+     *
+     * @param csceneBO
+     */
     public static void checkIngressAndEgress(CsceneBO csceneBO) {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null && csceneBO.getSceneConfig().getTopology().getElements() != null) {
             List<SceneConfigElementBO> elements = csceneBO.getSceneConfig().getTopology().getElements();
@@ -1138,6 +1290,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * correctQuickCreateSupport
+     *
+     * @param csceneBO
+     */
     public static void correctQuickCreateSupport(CsceneBO csceneBO) {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
             ScenePluginDataBO elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud");
@@ -1157,10 +1314,20 @@ public class CsceneDataModifier {
     static private class CpcloudPortData {
         private List<AccessMode> accessModes;
 
+        /**
+         * getAccessModes
+         *
+         * @return
+         */
         public List<AccessMode> getAccessModes() {
             return accessModes;
         }
 
+        /**
+         * setAccessModes
+         *
+         * @param accessModes
+         */
         public void setAccessModes(List<AccessMode> accessModes) {
             this.accessModes = accessModes;
         }
@@ -1196,6 +1363,11 @@ public class CsceneDataModifier {
         }
     }
 
+    /**
+     * removeUnUsePlugin
+     *
+     * @param csceneBO
+     */
     public static void removeUnUsePlugin(CsceneBO csceneBO) {
         if (csceneBO != null && csceneBO.getSceneConfig() != null && csceneBO.getReferenceType() != null) {
             if (csceneBO.getReferenceType() != BaseCsceneModel.ReferenceType.TEAM_TRAINING &&

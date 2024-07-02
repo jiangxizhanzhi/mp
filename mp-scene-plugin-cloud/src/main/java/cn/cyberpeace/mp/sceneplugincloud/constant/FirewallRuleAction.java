@@ -5,5 +5,8 @@ public class FirewallRuleAction {
     public static final String DENY = "deny";
     public static final String REJECT = "reject";
 
+    /**
+     * FirewallRuleAction
+     */
     private FirewallRuleAction() {}
 }

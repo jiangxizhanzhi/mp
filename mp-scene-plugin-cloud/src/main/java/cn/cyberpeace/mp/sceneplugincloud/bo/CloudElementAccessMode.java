@@ -24,6 +24,9 @@ public class CloudElementAccessMode {
         public static final String SPICE = "spice";
         public static final String COM = "com";
 
+        /**
+         * Protocol
+         */
         private Protocol() {}
     }
 }

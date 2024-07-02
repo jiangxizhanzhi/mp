@@ -10,10 +10,18 @@ public class CsceneReportTaskPool extends TaskPool {
         public static final CsceneReportTaskPool INSTANCE = new CsceneReportTaskPool();
     }
 
+    /**
+     * CsceneReportTaskPool
+     */
     private CsceneReportTaskPool() {
         super(Executors.newCachedThreadPool());
     }
 
+    /**
+     * getInstance
+     *
+     * @return
+     */
     public static CsceneReportTaskPool getInstance() {
         return CsceneReportTaskPoolInstance.INSTANCE;
     }

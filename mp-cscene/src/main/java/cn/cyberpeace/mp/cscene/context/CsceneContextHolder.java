@@ -7,12 +7,23 @@ public class CsceneContextHolder {
 
     private static final ThreadLocal<CsceneContext> contextHolder = new ThreadLocal<>();
 
+    /**
+     * CsceneContextHolder
+     */
     private CsceneContextHolder() {}
 
+    /**
+     * resetContext
+     */
     public static void resetContext() {
         contextHolder.remove();
     }
 
+    /**
+     * getContext
+     *
+     * @return
+     */
     public static CsceneContext getContext() {
         CsceneContext context = contextHolder.get();
         if (context == null) {
@@ -22,18 +33,38 @@ public class CsceneContextHolder {
         return context;
     }
 
+    /**
+     * getCallAction
+     *
+     * @return
+     */
     public static String getCallAction() {
         return getContext().getCallAction();
     }
 
+    /**
+     * setCallAction
+     *
+     * @param action
+     */
     public static void setCallAction(String action) {
         getContext().setCallAction(action);
     }
 
+    /**
+     * getCsceneInstanceId
+     *
+     * @return
+     */
     public static String getCsceneInstanceId() {
         return getContext().getCsceneInstanceId();
     }
 
+    /**
+     * setCsceneInstanceId
+     *
+     * @param csceneInstanceId
+     */
     public static void setCsceneInstanceId(String csceneInstanceId) {
         getContext().setCsceneInstanceId(csceneInstanceId);
     }

@@ -30,11 +30,31 @@ public interface CollectionTemplateProbeMapper extends BaseModelMapper<Collectio
 //    int updateByPrimaryKey(CollectionTemplateProbeModel record);
     int deleteByTemplateId(@Param("templateId") String templateId);
 
+    /**
+     * deleteByTemplateIds
+     *
+     * @param templateIds
+     * @return int
+     */
     int deleteByTemplateIds(@Param("templateIds") String[] templateIds);
 
+    /**
+     * listCollectionTemplateProbeDtos
+     *
+     * @param templateId
+     * @param probeCondition
+     * @return
+     */
     @Deprecated
     List<CollectionTemplateProbeDto> listCollectionTemplateProbeDtos(@Param("templateId") String templateId, @Param("probeCondition") ProbeSearchCondition probeCondition);
 
+    /**
+     * listCollectionTemplateProbeModels
+     *
+     * @param templateId
+     * @param probeCondition
+     * @return
+     */
     List<CollectionTemplateProbeModel> listCollectionTemplateProbeModels(@Param("templateId") String templateId, @Param("probeCondition") ProbeSearchCondition probeCondition);
 
     /**
@@ -47,7 +67,22 @@ public interface CollectionTemplateProbeMapper extends BaseModelMapper<Collectio
 
 //    List<CollectionTemplateProbeDto> listByCondition();
 
+    /**
+     * listCustomProbesNotInTemplate
+     *
+     * @param templateId
+     * @param category
+     * @param probeName
+     * @return
+     */
     List<ProbeModel> listCustomProbesNotInTemplate(@Param("templateId") String templateId, @Param("category") Integer category, @Param("probeName") String probeName);
 
+    /**
+     * listCustomProbes
+     *
+     * @param category
+     * @param probeName
+     * @return
+     */
     List<ProbeModel> listCustomProbes(@Param("category") Integer category, @Param("probeName") String probeName);
 }

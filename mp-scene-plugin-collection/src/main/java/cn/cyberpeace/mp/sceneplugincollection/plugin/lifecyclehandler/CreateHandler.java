@@ -43,10 +43,21 @@ public class CreateHandler extends HandlerCommon {
         public static final EventProcess BIND_PROBE_COLLECT_AGENT = new EventProcess("bind_probe_collect_agent", "sceneplugincollection.event.bind_probe_collect_agent");
     }
 
+    /**
+     * CreateHandler
+     *
+     * @param pluginHandler
+     */
     public CreateHandler(CollectionScenePluginHandler pluginHandler) {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.CREATE);
     }
 
+    /**
+     * bindProbeCollectAgent
+     *
+     * @param collectionElement
+     * @param probeCollectorId
+     */
     protected void bindProbeCollectAgent(CollectionPluginSceneElementBO collectionElement, String probeCollectorId) {
         SceneElementBO srcElement = collectionElement.getSrcElement();
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
@@ -63,6 +74,9 @@ public class CreateHandler extends HandlerCommon {
         getProbeCollector().bindAgent(probeCollectorId, cloudResourceId);
     }
 
+    /**
+     * updateProbeRouterPort
+     */
     protected void updateProbeRouterPort() {
         String sceneId = getPluginHandler().getSrcScene().getEid();
         List<CollectionPluginSceneProbeRouterPortModel> routerPorts = getSceneProbeRouterPortMapper().list(
@@ -87,6 +101,9 @@ public class CreateHandler extends HandlerCommon {
         getSceneProbeRouterPortMapper().bulkUpdate(routerPorts);
     }
 
+    /**
+     * create
+     */
     public void create() {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
 
@@ -184,11 +201,23 @@ public class CreateHandler extends HandlerCommon {
         getPluginHandler().getScene().setProbeRouter(getPluginHandler().getSceneHandler().getProbeRouter());
     }
 
+    /**
+     * bindProbeCollectAgentProcess
+     *
+     * @param collectionElement
+     * @param probeCollectorId
+     */
     public void bindProbeCollectAgentProcess(CollectionPluginSceneElementBO collectionElement, String probeCollectorId) {
         runElementProgress(collectionElement.getSrcElement().getId(), ElementProcess.BIND_PROBE_COLLECT_AGENT,
                 () -> bindProbeCollectAgent(collectionElement, probeCollectorId));
     }
 
+    /**
+     * getNodeFlowMirrorParam
+     *
+     * @param nodeId
+     * @return
+     */
     public List<CreateMirrorData.Param> getNodeFlowMirrorParam(String nodeId) {
         CloudScenePluginHandler cloudPlugin = getPluginHandler().getSceneHandler().getPluginHandler(PluginConstant.PLUGIN_KEY);
 
@@ -230,6 +259,13 @@ public class CreateHandler extends HandlerCommon {
     }
 
 
+    /**
+     * genCreateMirrorParam
+     *
+     * @param cloudPlugin
+     * @param cloudElement
+     * @return
+     */
     private List<CreateMirrorData.Param> genCreateMirrorParam(CloudScenePluginHandler cloudPlugin, CloudPluginSceneElementBO cloudElement) {
         List<CreateMirrorData.Param> srcParam = new ArrayList<>();
         var cloudPorts = cloudPlugin.getPorts(cloudElement);

@@ -26,10 +26,24 @@ public class CloudApiProxy<T> implements MethodInterceptor {
 
     private T target;
 
+    /**
+     * CloudApiProxy
+     *
+     * @param target
+     */
     public CloudApiProxy(T target) {
         this.target = target;
     }
 
+    /**
+     * intercept
+     *
+     * @param o
+     * @param method
+     * @param objects
+     * @param methodProxy
+     * @return
+     */
     @Override
     public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
         retryTimes = BeanCommon.getBean(CloudAppConfig.class).getDeleteRetryTimes();
@@ -97,6 +111,12 @@ public class CloudApiProxy<T> implements MethodInterceptor {
         }
     }
 
+    /**
+     * excludeDeleteException
+     *
+     * @param runtimeException
+     * @return boolean
+     */
     private boolean excludeDeleteException(Exception runtimeException) {
         if (runtimeException == null) {
             return true;

@@ -17,22 +17,41 @@ public class CsceneReportRabbitmqSender extends BaseSimpleMessageSender {
     public static final String CSCENE_ROUTING_KEY = SimpleMessageConfig.GROUP_NAME + ".cscene_report.*";
     public static final String CSCENE_QUEUE_NAME = SimpleMessageConfig.GROUP_NAME + ".cscene_report.default";
 
+    /**
+     * CsceneReportRabbitmqSender
+     *
+     * @param amqpTemplate
+     * @param messageConverter
+     */
     @Autowired
     public CsceneReportRabbitmqSender(AmqpTemplate amqpTemplate, SnakeJsonMessageConverter messageConverter) {
         super(amqpTemplate, messageConverter,
                 new SimpleMessageConfig(CSCENE_EXCHANGE_NAME, CSCENE_ROUTING_KEY, CSCENE_QUEUE_NAME));
     }
 
-//    @Bean
+    /**
+     * csceneQueue
+     *
+     * @return
+     *///    @Bean
     public Queue csceneQueue() {
         return getMessageConfig().queue();
     }
 
-//    @Bean
+    /**
+     * csceneBinding
+     *
+     * @return
+     *///    @Bean
     public Binding csceneBinding() {
         return getMessageConfig().topicBinding();
     }
 
+    /**
+     * csceneExchange
+     *
+     * @return
+     */
     @Bean
     public TopicExchange csceneExchange() {
         return getMessageConfig().topicExchange();

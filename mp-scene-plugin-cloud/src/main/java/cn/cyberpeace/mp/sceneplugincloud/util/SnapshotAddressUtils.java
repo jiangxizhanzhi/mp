@@ -11,10 +11,23 @@ import org.apache.commons.lang3.StringUtils;
  */
 public final class SnapshotAddressUtils {
 
+    /**
+     * buildAddress
+     *
+     * @param imageName
+     * @param snapshotUuid
+     * @return
+     */
     public static String buildAddress(String imageName, String snapshotUuid) {
         return StringUtils.joinWith(",", imageName, snapshotUuid);
     }
 
+    /**
+     * parseAddress
+     *
+     * @param address
+     * @return
+     */
     public static SnapshotAddressInfo parseAddress(String address) {
         String[] infos = StringUtils.split(address, ",");
         SnapshotAddressInfo result = new SnapshotAddressInfo();
@@ -29,6 +42,13 @@ public final class SnapshotAddressUtils {
         return result;
     }
 
+    /**
+     * parseImageName
+     *
+     * @param imageName
+     * @param imageUuid
+     * @return
+     */
     public static String parseImageName(String imageName, String imageUuid) {
         if (StringUtils.startsWith(imageName, imageUuid)) {
             return StringUtils.replaceOnce(imageName, imageUuid, StringUtils.EMPTY);

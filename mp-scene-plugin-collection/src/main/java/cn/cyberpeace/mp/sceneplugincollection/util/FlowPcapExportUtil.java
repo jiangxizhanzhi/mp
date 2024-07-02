@@ -23,6 +23,12 @@ public class FlowPcapExportUtil {
                 }
             });
 
+    /**
+     * initProcess
+     *
+     * @param csceneId
+     * @return boolean
+     */
     public static synchronized boolean initProcess(String csceneId) {
         if (!cache.asMap().containsKey(csceneId)) {
             cache.getUnchecked(csceneId);
@@ -32,11 +38,23 @@ public class FlowPcapExportUtil {
         }
     }
 
+    /**
+     * updateProcess
+     *
+     * @param taskId
+     * @param process
+     */
     public static void updateProcess(String taskId, int process) {
         FlowPcapExportProcess result = cache.getUnchecked(taskId);
         result.setProcess(Math.min(result.getProcess() + process, 95));
     }
 
+    /**
+     * getProcess
+     *
+     * @param taskId
+     * @return
+     */
     public static FlowPcapExportProcess getProcess(String taskId) {
         FlowPcapExportProcess result = cache.getUnchecked(taskId);
         if (result.getProcess() == 100) {
@@ -45,6 +63,13 @@ public class FlowPcapExportUtil {
         return result;
     }
 
+    /**
+     * finalProcess
+     *
+     * @param taskId
+     * @param url
+     * @return
+     */
     public static FlowPcapExportProcess finalProcess(String taskId, String url) {
         FlowPcapExportProcess result = cache.getUnchecked(taskId);
         result.setProcess(100);

@@ -7,5 +7,8 @@ public class AccessModeAvailableProtocol {
     public static final String TELNET = "telnet";
     public static final String SERIAL = "serial";
 
+    /**
+     * AccessModeAvailableProtocol
+     */
     private AccessModeAvailableProtocol() {}
 }

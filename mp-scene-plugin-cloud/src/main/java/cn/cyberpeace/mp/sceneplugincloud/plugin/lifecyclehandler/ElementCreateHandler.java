@@ -44,11 +44,22 @@ public class ElementCreateHandler extends HandlerCommon {
 
     private CreateHandler createHandler;
 
+    /**
+     * ElementCreateHandler
+     *
+     * @param pluginHandler
+     * @param event
+     */
     public ElementCreateHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, RecreateTaskPool.getInstance(), event);
         this.createHandler = new CreateHandler(pluginHandler);
     }
 
+    /**
+     * createElement
+     *
+     * @param element
+     */
     public void createElement(CloudPluginSceneElementBO element) {
         String nodeId = element.getSrcElement().getId();
         Integer virtualType = element.getVirtualType();
@@ -72,6 +83,12 @@ public class ElementCreateHandler extends HandlerCommon {
         SceneInstanceLinkCacheUtil.refresh(getPluginHandler().getSourceSceneId());
     }
 
+    /**
+     * createAuxiliaryNetwork
+     *
+     * @param cloudElement
+     * @param networks
+     */
     protected void createAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement, List<ConnectedNetworkBO> networks) {
         int index = 1;
         for (ConnectedNetworkBO connectedNetwork : networks) {
@@ -150,6 +167,12 @@ public class ElementCreateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * prepareElementProcess
+     *
+     * @param nodeId
+     * @param virtualType
+     */
     private void prepareElementProcess(String nodeId, Integer virtualType) {
         if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.CREATE, Arrays.asList(ElementProcess.START_VIRTUAL_ROUTER));

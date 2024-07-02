@@ -61,6 +61,14 @@ public class CsceneLogUtils {
     public static String SCENE_PAUSE = "scene_pause";
     public static String SCENE_UNPAUSE = "scene_unpause";
 
+    /**
+     * recordSceneConfigLog
+     *
+     * @param csceneBO
+     * @param opType
+     * @param desc
+     * @param context
+     */
     public static void recordSceneConfigLog(CsceneBO csceneBO, OpTypeEnums opType, String desc, CsceneContextBO context) {
         if (csceneBO == null) {
             log.info("cscene bo is null");
@@ -81,6 +89,14 @@ public class CsceneLogUtils {
         }
     }
 
+    /**
+     * recordSceneConfigLog
+     *
+     * @param csceneId
+     * @param opType
+     * @param desc
+     * @param context
+     */
     public static void recordSceneConfigLog(String csceneId, OpTypeEnums opType, String desc, CsceneContextBO context) {
         try {
             CsceneLogService csceneLogService = BeanCommon.getBean(CsceneLogService.class);
@@ -97,6 +113,14 @@ public class CsceneLogUtils {
         }
     }
 
+    /**
+     * recordSceneConfigLog
+     *
+     * @param csceneIds
+     * @param opType
+     * @param desc
+     * @param context
+     */
     public static void recordSceneConfigLog(List<String> csceneIds, OpTypeEnums opType, String desc, CsceneContextBO context) {
         try {
             CsceneLogService csceneLogService = BeanCommon.getBean(CsceneLogService.class);
@@ -113,6 +137,14 @@ public class CsceneLogUtils {
         }
     }
 
+    /**
+     * recordSceneInstanceLog
+     *
+     * @param instanceBO
+     * @param opType
+     * @param desc
+     * @param context
+     */
     public static void recordSceneInstanceLog(CsceneInstanceBO instanceBO, OpTypeEnums opType, String desc, CsceneContextBO context) {
         try {
             if (instanceBO == null) {
@@ -125,6 +157,15 @@ public class CsceneLogUtils {
         }
     }
 
+    /**
+     * recordSceneNodeLog
+     *
+     * @param csceneId
+     * @param nodeId
+     * @param opType
+     * @param desc
+     * @param context
+     */
     public static void recordSceneNodeLog(String csceneId, String nodeId, OpTypeEnums opType, String desc, CsceneContextBO context) {
         try {
             CsceneLogService csceneLogService = BeanCommon.getBean(CsceneLogService.class);
@@ -141,6 +182,16 @@ public class CsceneLogUtils {
         }
     }
 
+    /**
+     * recordSceneFlowLog
+     *
+     * @param csceneId
+     * @param nodeId
+     * @param flowId
+     * @param opType
+     * @param desc
+     * @param context
+     */
     public static void recordSceneFlowLog(String csceneId, String nodeId, String flowId, OpTypeEnums opType, String desc, CsceneContextBO context) {
         try {
             CsceneLogService csceneLogService = BeanCommon.getBean(CsceneLogService.class);
@@ -157,6 +208,14 @@ public class CsceneLogUtils {
         }
     }
 
+    /**
+     * recordSceneInstanceLog
+     *
+     * @param csceneId
+     * @param opType
+     * @param desc
+     * @param context
+     */
     public static void recordSceneInstanceLog(String csceneId, OpTypeEnums opType, String desc, CsceneContextBO context) {
         try {
             CsceneLogService csceneLogService = BeanCommon.getBean(CsceneLogService.class);
@@ -173,6 +232,14 @@ public class CsceneLogUtils {
         }
     }
 
+    /**
+     * recordSceneInstanceLog
+     *
+     * @param csceneIds
+     * @param opType
+     * @param desc
+     * @param context
+     */
     public static void recordSceneInstanceLog(List<String> csceneIds, OpTypeEnums opType, String desc, CsceneContextBO context) {
         try {
             CsceneLogService csceneLogService = BeanCommon.getBean(CsceneLogService.class);
@@ -189,6 +256,16 @@ public class CsceneLogUtils {
         }
     }
 
+    /**
+     * getOperationLogRequest
+     *
+     * @param opType
+     * @param target
+     * @param content
+     * @param desc
+     * @param context
+     * @return 操作日志实体类
+     */
     private static OperationLogRequest getOperationLogRequest(OpTypeEnums opType, String target, String content, String desc, CsceneContextBO context) {
         OperationLogRequest logModel = new OperationLogRequest();
         UserModel user = null;
@@ -227,6 +304,15 @@ public class CsceneLogUtils {
         return logModel;
     }
 
+    /**
+     * getOperationLogRequest
+     *
+     * @param opType
+     * @param opTargetEnums
+     * @param desc
+     * @param context
+     * @return 操作日志实体类
+     */
     private static OperationLogRequest getOperationLogRequest(OpTypeEnums opType, OpTargetEnums opTargetEnums, String desc, CsceneContextBO context) {
         OperationLogRequest logModel = new OperationLogRequest();
         UserModel user = null;
@@ -251,6 +337,11 @@ public class CsceneLogUtils {
         return logModel;
     }
 
+    /**
+     * getIp
+     *
+     * @return
+     */
     private static String getIp() {
         RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) attributes;
@@ -258,11 +349,21 @@ public class CsceneLogUtils {
         return SnUtils.getRealRemoteIp(request);
     }
 
+    /**
+     * getUserName
+     *
+     * @return
+     */
     private static String getUserName() {
         // todo
         return "admin";
     }
 
+    /**
+     * getUserId
+     *
+     * @return
+     */
     private static String getUserId() {
         // todo
         return "admin";

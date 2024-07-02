@@ -17,6 +17,12 @@ public class CollectedCsceneBO extends CollectedSceneBO {
     @ApiModelProperty(value = "源操作: 启动流量node_start_flow，关闭流量node_stop_flow，启动探针node_start_probe，关闭探针node_stop_probe")
     private String callAction;
 
+    /**
+     * fromCollectedSceneBO
+     *
+     * @param collectedSceneBO
+     * @return
+     */
     public static CollectedCsceneBO fromCollectedSceneBO(CollectedSceneBO collectedSceneBO) {
         CollectedCsceneBO collectedCsceneBO = new CollectedCsceneBO();
         collectedCsceneBO.setScene(collectedSceneBO.getScene());

@@ -14,6 +14,11 @@ public enum PublicEnum {
     ALL_PUBLIC;
 
 
+    /**
+     * toValue
+     *
+     * @return int
+     */
     @JsonValue
     public int toValue(){
         return this.ordinal();

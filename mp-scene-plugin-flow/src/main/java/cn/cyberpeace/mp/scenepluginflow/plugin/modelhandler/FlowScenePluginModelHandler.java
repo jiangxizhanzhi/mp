@@ -30,10 +30,18 @@ public class FlowScenePluginModelHandler extends BasePluginModelHandler<
         FlowPluginSceneElementMapper,
         FlowPluginSceneElementPortMapper,
         FlowScenePluginHandler> {
+    /**
+     * FlowScenePluginModelHandler
+     *
+     * @param pluginHandler
+     */
     public FlowScenePluginModelHandler(FlowScenePluginHandler pluginHandler) {
         init(pluginHandler);
     }
 
+    /**
+     * initClass
+     */
     @Override
     protected void initClass() {
         super.pluginSceneBOClass = FlowPluginSceneBO.class;
@@ -44,6 +52,9 @@ public class FlowScenePluginModelHandler extends BasePluginModelHandler<
         super.pluginSceneElementPortModelClass = FlowPluginSceneElementPortModel.class;
     }
 
+    /**
+     * initMapper
+     */
     @Override
     protected void initMapper() {
         super.pluginSceneMapper = BeanCommon.getBean(FlowPluginSceneMapper.class);

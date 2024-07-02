@@ -25,10 +25,20 @@ public class WazuhCommon {
 
     private static WazuhProbeConfig wazuhProbeConfig;
 
+    /**
+     * getWazuhRemotePort
+     *
+     * @return
+     */
     private static Integer getWazuhRemotePort(){
         return CollectionSingleton.collectionAppConfig.getWazuhRemotePort();
     }
 
+    /**
+     * getWazuhAuthPort
+     *
+     * @return
+     */
     private static Integer getWazuhAuthPort(){
         return CollectionSingleton.collectionAppConfig.getWazuhAuthPort();
     }
@@ -57,6 +67,11 @@ public class WazuhCommon {
 
     public static String agentLinuxLocalFilepath = null;
 
+    /**
+     * getAgentLinuxLocalFilepath
+     *
+     * @return
+     */
     public static String getAgentLinuxLocalFilepath() {
         if (!StringUtils.isEmpty(agentLinuxLocalFilepath)) {
             return agentLinuxLocalFilepath;
@@ -67,8 +82,21 @@ public class WazuhCommon {
         return agentLinuxLocalFilepath;
     }
 
+    /**
+     * WazuhCommon
+     */
     private WazuhCommon() {}
 
+    /**
+     * generateWazuhAgentInstallScript
+     *
+     * @param systemType
+     * @param agentName
+     * @param wazuhHost
+     * @param controlParam
+     * @param isContainer
+     * @return
+     */
     public static List<String> generateWazuhAgentInstallScript(String systemType, String agentName, String wazuhHost,
                                                                WazuhControl.ControlConfigParam controlParam, boolean isContainer) {
         if (wazuhProbeConfig == null) {
@@ -185,6 +213,12 @@ public class WazuhCommon {
         return result;
     }
 
+    /**
+     * uninstallAgent
+     *
+     * @param agentName
+     * @param systemType
+     */
     public static void uninstallAgent(String agentName, String systemType) {
         /*String cmd = null;
         String osType = null;

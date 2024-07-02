@@ -60,6 +60,12 @@ public class DynamipsConverter implements BaseConverter {
         return convertModel;
     }
 
+    /**
+     * getInstanceBO
+     *
+     * @param v
+     * @return
+     */
     private static InstanceBO getInstanceBO(VirtualDynamicCreateData v) {
         InstanceBO instanceBO = new InstanceBO();
         instanceBO.setId(v.getInstanceId() == null ? StringUtils.EMPTY : v.getInstanceId());

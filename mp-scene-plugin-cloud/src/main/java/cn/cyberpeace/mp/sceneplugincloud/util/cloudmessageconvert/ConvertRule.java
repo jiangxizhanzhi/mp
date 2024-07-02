@@ -26,6 +26,12 @@ class ConvertRule {
 
     private String keyword;
 
+    /**
+     * hit
+     *
+     * @param target
+     * @return boolean
+     */
     public boolean hit(String target) {
         if (START_WITH.equals(relation)) {
             return StringUtils.startsWith(target, keyword);
@@ -44,6 +50,11 @@ class ConvertRule {
         }
     }
 
+    /**
+     * setKeyword
+     *
+     * @param keyword
+     */
     public void setKeyword(String keyword) {
         this.keyword = keyword.toLowerCase();
     }

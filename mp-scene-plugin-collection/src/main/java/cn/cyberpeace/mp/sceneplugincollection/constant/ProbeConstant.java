@@ -46,6 +46,9 @@ public class ProbeConstant {
         String INTERNET_CONNECTION = "013";
     }
 
+    /**
+     * ProbeConstant
+     */
     public ProbeConstant() {
     }
 }

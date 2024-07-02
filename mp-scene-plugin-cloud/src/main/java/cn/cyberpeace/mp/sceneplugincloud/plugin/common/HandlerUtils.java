@@ -50,6 +50,11 @@ public class HandlerUtils {
 
     private List<String> dnsIpAndDomain = null;
 
+    /**
+     * getDnsIpAndDomains
+     *
+     * @return
+     */
     public List<String> getDnsIpAndDomains() {
         if (this.dnsIpAndDomain == null) {
             synchronized (this) {
@@ -80,20 +85,45 @@ public class HandlerUtils {
         return this.dnsIpAndDomain;
     }
 
+    /**
+     * addFwdnsInterfaceIp
+     *
+     * @param node
+     * @param netId
+     * @param fwdnsInterfaceIp
+     */
     public void addFwdnsInterfaceIp(String node, String netId, String fwdnsInterfaceIp) {
         getPluginHandler().getElement(node).getFwdnsIps().putIfAbsent(netId, fwdnsInterfaceIp);
     }
 
+    /**
+     * getFwdnsInterfaceIp
+     *
+     * @param node
+     * @param netId
+     * @return
+     */
     public String getFwdnsInterfaceIp(String node, String netId) {
         return getPluginHandler().getElement(node).getFwdnsIps().get(netId);
     }
 
+    /**
+     * addManualConfigIpPort
+     *
+     * @param port
+     */
     public void addManualConfigIpPort(SceneElementPortBO port) {
         if (port != null && port.getId() != null) {
             this.manualConfigIpPort.add(port.getId());
         }
     }
 
+    /**
+     * isManualConfigIpPort
+     *
+     * @param port
+     * @return boolean
+     */
     public boolean isManualConfigIpPort(SceneElementPortBO port) {
         if (port != null && port.getId() != null) {
             return this.manualConfigIpPort.contains(port.getId());
@@ -101,24 +131,52 @@ public class HandlerUtils {
         return false;
     }
 
+    /**
+     * getNetworkByPort
+     *
+     * @param port
+     * @return
+     */
     public CloudPluginSceneElementNetworkBO getNetworkByPort(SceneElementPortBO port) {
         return this.portId2network.get(port.getId());
     }
 
+    /**
+     * addNetwork
+     *
+     * @param port
+     * @param network
+     */
     public void addNetwork(SceneElementPortBO port, CloudPluginSceneElementNetworkBO network) {
         this.portId2network.put(port.getId(), network);
     }
 
+    /**
+     * setPortNetworks
+     *
+     * @param portId2network
+     */
     public void setPortNetworks(Map<String, CloudPluginSceneElementNetworkBO> portId2network) {
         portId2network.forEach((k, v) -> {
             this.portId2network.put(k, v);
         });
     }
 
+    /**
+     * HandlerUtils
+     *
+     * @param pluginHandler
+     */
     public HandlerUtils(CloudScenePluginHandler pluginHandler) {
         this.pluginHandler = pluginHandler;
     }
 
+    /**
+     * isExternalNetwork
+     *
+     * @param networkId
+     * @return boolean
+     */
     public static boolean isExternalNetwork(String networkId) {
         if (StringUtils.isEmpty(networkId)) {
             return false;
@@ -126,10 +184,23 @@ public class HandlerUtils {
         return networkId.equals(CloudSingleton.cloudAppConfig.getExternalNetId());
     }
 
+    /**
+     * genResourceName
+     *
+     * @param name
+     * @return
+     */
     public static String genResourceName(String name) {
         return BeanCommon.getBean(ICloudResourceName.class).generate(name, null);
     }
 
+    /**
+     * genResourceName
+     *
+     * @param name
+     * @param index
+     * @return
+     */
     public static String genResourceName(String name, int index) {
         RsourceNameParams params = new RsourceNameParams();
         params.setIndex(index);
@@ -222,6 +293,11 @@ public class HandlerUtils {
         return null;
     }
 
+    /**
+     * getRequestUser
+     *
+     * @return
+     */
     public String getRequestUser() {
         CloudScenePluginContext context = getPluginHandler().getContext();
         if (context == null) {
@@ -240,10 +316,22 @@ public class HandlerUtils {
         return context.getRequestUserOrg();
     }
 
+    /**
+     * randomCidrs
+     *
+     * @param count
+     * @param existCidrs
+     * @return
+     */
     public List<String> randomCidrs(int count, List<String> existCidrs) {
         return IpUtils.randomCidrs(cidrPool, count, existCidrs);
     }
 
+    /**
+     * statExistCidrs
+     *
+     * @return
+     */
     public List<String> statExistCidrs() {
         List<String> existCidrs = new ArrayList<>();
         getPluginHandler().getElementMap().forEach((nodeId, element) -> {
@@ -283,11 +371,23 @@ public class HandlerUtils {
         return networkNodeIdPortIdsMap.getOrDefault(auxiliaryNetworkCloudElement.getSrcElement().getId(), null);
     }
 
+    /**
+     * addOuterExistIps
+     *
+     * @param auxiliaryNetworkCloudElement
+     * @param outerExistIps
+     */
     public void addOuterExistIps(CloudPluginSceneElementBO auxiliaryNetworkCloudElement, List<String> outerExistIps) {
         String nodeId = auxiliaryNetworkCloudElement.getSrcElement().getId();
         MapUtils.setDefault(networkNodeIdOuterExistIpsMap, nodeId, new HashSet<>()).addAll(outerExistIps);
     }
 
+    /**
+     * getOuterExistIps
+     *
+     * @param auxiliaryNetworkCloudElement
+     * @return
+     */
     public Set<String> getOuterExistIps(CloudPluginSceneElementBO auxiliaryNetworkCloudElement) {
         String nodeId = auxiliaryNetworkCloudElement.getSrcElement().getId();
         return networkNodeIdOuterExistIpsMap.getOrDefault(nodeId, new HashSet<>());

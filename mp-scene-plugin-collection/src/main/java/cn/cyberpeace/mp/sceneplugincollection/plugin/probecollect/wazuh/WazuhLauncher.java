@@ -69,11 +69,21 @@ public class WazuhLauncher {
     @Getter
     private Boolean callbackSelf;
 
+    /**
+     * runCommandResultCall
+     *
+     * @param alertData
+     */
     public static void runCommandResultCall(LaunchAlert alertData) {
         log.info("Wazuh run command({}) result call", alertData.getData().getSicLaunchId());
         runCommandResultPool.put(alertData.getData().getSicLaunchId(), alertData);
     }
 
+    /**
+     * runCommand
+     *
+     * @param runCommandItem
+     */
     private void runCommand(RunCommandItem runCommandItem) {
         runCommandItem.ensure();
 
@@ -176,6 +186,13 @@ public class WazuhLauncher {
         }
     }
 
+    /**
+     * queryCommandLaunchAlert
+     *
+     * @param agentId
+     * @param runId
+     * @return
+     */
     private LaunchAlert queryCommandLaunchAlert(String agentId, String runId) {
         if (wazuhClient.getMongoClient() != null) {
             return queryCommandLaunchAlertOnMongo(agentId, runId);
@@ -188,6 +205,13 @@ public class WazuhLauncher {
         return null;
     }
 
+    /**
+     * queryCommandLaunchAlertOnEs
+     *
+     * @param agentId
+     * @param runId
+     * @return
+     */
     private LaunchAlert queryCommandLaunchAlertOnEs(String agentId, String runId) {
         LocalDateTime currentDayTime = LocalDateTime.now();
         String currentDayAlertIndex = String.format("%s%s", WAZUH_ALERT_ES_INDEX_PREFIX,
@@ -212,6 +236,13 @@ public class WazuhLauncher {
         }
     }
 
+    /**
+     * queryCommandLaunchAlertOnMongo
+     *
+     * @param agentId
+     * @param runId
+     * @return
+     */
     private LaunchAlert queryCommandLaunchAlertOnMongo(String agentId, String runId) {
         MongoDatabase db = wazuhClient.getMongoClient().getDatabase(WAZUH_ALERT_MONGO_DB);
         MongoCollection<Document> collection = db.getCollection(WAZUH_ALERT_MONGO_COLLECTION);
@@ -224,6 +255,12 @@ public class WazuhLauncher {
         }
     }
 
+    /**
+     * localCheckRunCommandLaunchAlert
+     *
+     * @param runId
+     * @return
+     */
     private LaunchAlert localCheckRunCommandLaunchAlert(String runId) {
         LaunchAlert launchAlert = runCommandResultPool.getIfPresent(runId);
         if (launchAlert == null) {
@@ -240,50 +277,108 @@ public class WazuhLauncher {
         private List<RunCommandHttpCallback> httpCallbacks;
         private Boolean callbackSelf;
 
+        /**
+         * WazuhLauncherBuilder
+         */
         private WazuhLauncherBuilder () {
             wazuhClientBuilder = WazuhClient.builder();
         }
 
+        /**
+         * configWazuh
+         *
+         * @param wazuhServer
+         * @param wazuhUser
+         * @param wazuhPass
+         * @return
+         */
         public WazuhLauncherBuilder configWazuh(String wazuhServer, String wazuhUser, String wazuhPass) {
             wazuhClientBuilder.configWazuh(wazuhServer, wazuhUser, wazuhPass);
             return this;
         }
 
+        /**
+         * configEs
+         *
+         * @param esServer
+         * @return
+         */
         public WazuhLauncherBuilder configEs(String esServer) {
             wazuhClientBuilder.configEs(esServer);
             return this;
         }
 
+        /**
+         * configMongo
+         *
+         * @param mongoServer
+         * @return
+         */
         public WazuhLauncherBuilder configMongo(String mongoServer) {
             wazuhClientBuilder.configMongo(mongoServer);
             return this;
         }
 
+        /**
+         * configCallbackSelf
+         *
+         * @param callbackSelf
+         * @return
+         */
         public WazuhLauncherBuilder configCallbackSelf(boolean callbackSelf) {
             this.callbackSelf = callbackSelf;
             return this;
         }
 
+        /**
+         * configHttpCallbacks
+         *
+         * @param httpCallbacks
+         * @return
+         */
         public WazuhLauncherBuilder configHttpCallbacks(RunCommandHttpCallback... httpCallbacks) {
             this.httpCallbacks = Arrays.asList(httpCallbacks);
             return this;
         }
 
+        /**
+         * build
+         *
+         * @return
+         */
         public WazuhLauncher build() {
             return new WazuhLauncher(wazuhClientBuilder.build(), httpCallbacks, callbackSelf);
         }
     }
 
+    /**
+     * WazuhLauncher
+     *
+     * @param wazuhClient
+     * @param httpCallbacks
+     * @param callbackSelf
+     */
     private WazuhLauncher(WazuhClient wazuhClient, List<RunCommandHttpCallback> httpCallbacks, boolean callbackSelf) {
         this.wazuhClient = wazuhClient;
         this.httpCallbacks = httpCallbacks;
         this.callbackSelf = callbackSelf;
     }
 
+    /**
+     * builder
+     *
+     * @return
+     */
     public static WazuhLauncherBuilder builder() {
         return new WazuhLauncherBuilder();
     }
 
+    /**
+     * runCommand
+     *
+     * @param runCommandItems
+     * @return
+     */
     public List<RunCommandItem> runCommand(List<RunCommandItem> runCommandItems) {
         Set<String> queryIdNames = new HashSet<>();
         for (RunCommandItem runCommandItem : runCommandItems) {
@@ -391,6 +486,9 @@ public class WazuhLauncher {
         private Map<String, Object> output;
         private String error;
 
+        /**
+         * ensure
+         */
         public void ensure() {
             if (StringUtils.isEmpty(runId)) {
                 runId = TextUtils.uuid();

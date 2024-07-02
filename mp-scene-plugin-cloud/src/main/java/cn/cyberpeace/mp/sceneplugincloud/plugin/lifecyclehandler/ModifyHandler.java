@@ -39,6 +39,13 @@ public class ModifyHandler extends HandlerCommon {
     private CloudScenePluginHandler newPlugin;
     private CloudScenePluginHandler originPlugin;
 
+    /**
+     * ModifyHandler
+     *
+     * @param originPlugin
+     * @param newPlugin
+     * @param updateElementIds
+     */
     public ModifyHandler(CloudScenePluginHandler originPlugin, CloudScenePluginHandler newPlugin, List<String> updateElementIds) {
         super(newPlugin, CreateTaskPool.getInstance(), SceneModel.Event.MODIFY);
         Set<String> originNodeIds = new HashSet<>(originPlugin.getSceneHandler().getElementMap().keySet());
@@ -60,6 +67,9 @@ public class ModifyHandler extends HandlerCommon {
         this.originPlugin = originPlugin;
     }
 
+    /**
+     * modify
+     */
     public void modify() {
         prepareEventProcess(SceneModel.Event.MODIFY, SceneProcess.class, ElementProcess.class);
 
@@ -113,6 +123,14 @@ public class ModifyHandler extends HandlerCommon {
         private CloudScenePluginHandler newPlugin;
         private CloudScenePluginHandler originPlugin;
 
+        /**
+         * ModifyInitiateHandler
+         *
+         * @param createdNodeIds
+         * @param newPluginHandler
+         * @param originPluginHandler
+         * @param taskPool
+         */
         public ModifyInitiateHandler(Set<String> createdNodeIds, CloudScenePluginHandler newPluginHandler, CloudScenePluginHandler originPluginHandler, TaskPool taskPool) {
             super(newPluginHandler);
             setTaskPool(taskPool);
@@ -122,21 +140,37 @@ public class ModifyHandler extends HandlerCommon {
             this.originPlugin = originPluginHandler;
         }
 
+        /**
+         * initiate
+         */
         @Override
         public void initiate() {
             super.initiate();
         }
 
+        /**
+         * prepareEventProcess
+         */
         @Override
         protected void prepareEventProcess() {
             prepareEventProcess(SceneModel.Event.MODIFY, SceneProcess.class, ElementProcess.class);
         }
 
+        /**
+         * resetResourceId
+         *
+         * @return boolean
+         */
         @Override
         protected boolean resetResourceId() {
             return false;
         }
 
+        /**
+         * initiateElementBasePropertiesProcess
+         *
+         * @param cloudElement
+         */
         @Override
         public void initiateElementBasePropertiesProcess(CloudPluginSceneElementBO cloudElement) {
             if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
@@ -145,6 +179,11 @@ public class ModifyHandler extends HandlerCommon {
             super.initiateElementBasePropertiesProcess(cloudElement);
         }
 
+        /**
+         * afterOrderElements
+         *
+         * @param allElements
+         */
         @Override
         protected void afterOrderElements(List<CloudPluginSceneElementBO> allElements) {
             List<CloudPluginSceneElementNetworkModel> networks = getPluginHandler().getPluginModelHandler().readNetworks();
@@ -247,6 +286,13 @@ public class ModifyHandler extends HandlerCommon {
     private static class ModifyCreateHandler extends CreateHandler {
         private Set<String> createdNodeIds;
 
+        /**
+         * ModifyCreateHandler
+         *
+         * @param createdNodeIds
+         * @param pluginHandler
+         * @param taskPool
+         */
         public ModifyCreateHandler(Set<String> createdNodeIds, CloudScenePluginHandler pluginHandler, TaskPool taskPool) {
             super(pluginHandler);
             setEvent(SceneModel.Event.MODIFY);
@@ -254,6 +300,11 @@ public class ModifyHandler extends HandlerCommon {
             this.createdNodeIds = createdNodeIds;
         }
 
+        /**
+         * createAuxiliaryNetwork
+         *
+         * @param cloudElement
+         */
         @Override
         protected void createAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
             if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
@@ -262,11 +313,19 @@ public class ModifyHandler extends HandlerCommon {
             super.createAuxiliaryNetwork(cloudElement);
         }
 
+        /**
+         * prepareEventProcess
+         */
         @Override
         protected void prepareEventProcess() {
             prepareEventProcess(SceneModel.Event.MODIFY, SceneProcess.class, ElementProcess.class);
         }
 
+        /**
+         * createVirtualRouter
+         *
+         * @param cloudElement
+         */
         @Override
         protected void createVirtualRouter(CloudPluginSceneElementBO cloudElement) {
             if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
@@ -276,6 +335,11 @@ public class ModifyHandler extends HandlerCommon {
             super.createVirtualRouter(cloudElement);
         }
 
+        /**
+         * createVirtualFirewall
+         *
+         * @param cloudElement
+         */
         @Override
         protected void createVirtualFirewall(CloudPluginSceneElementBO cloudElement) {
             if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
@@ -285,6 +349,11 @@ public class ModifyHandler extends HandlerCommon {
             super.createVirtualFirewall(cloudElement);
         }
 
+        /**
+         * createVirtualMachine
+         *
+         * @param cloudElement
+         */
         @Override
         protected void createVirtualMachine(CloudPluginSceneElementBO cloudElement) {
             if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
@@ -294,6 +363,11 @@ public class ModifyHandler extends HandlerCommon {
             super.createVirtualMachine(cloudElement);
         }
 
+        /**
+         * createContainer
+         *
+         * @param cloudElement
+         */
         @Override
         protected void createContainer(CloudPluginSceneElementBO cloudElement) {
             if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
@@ -303,6 +377,11 @@ public class ModifyHandler extends HandlerCommon {
             super.createContainer(cloudElement);
         }
 
+        /**
+         * createEntityNode
+         *
+         * @param cloudElement
+         */
         @Override
         protected void createEntityNode(CloudPluginSceneElementBO cloudElement) {
             if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
@@ -312,6 +391,11 @@ public class ModifyHandler extends HandlerCommon {
             super.createEntityNode(cloudElement);
         }
 
+        /**
+         * recordNpcNode
+         *
+         * @param cloudElement
+         */
         @Override
         protected void recordNpcNode(CloudPluginSceneElementBO cloudElement) {
             if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId()) && cloudElement.getResourceId() != null) {
@@ -325,6 +409,13 @@ public class ModifyHandler extends HandlerCommon {
     private static class ModifyDeleteHandler extends DeleteHandler {
         private Set<String> deletedNodeIds;
 
+        /**
+         * ModifyDeleteHandler
+         *
+         * @param deletedNodeIds
+         * @param pluginHandler
+         * @param taskPool
+         */
         public ModifyDeleteHandler(Set<String> deletedNodeIds, CloudScenePluginHandler pluginHandler, TaskPool taskPool) {
             super(pluginHandler);
             setEvent(SceneModel.Event.MODIFY);
@@ -332,10 +423,16 @@ public class ModifyHandler extends HandlerCommon {
             this.deletedNodeIds = deletedNodeIds;
         }
 
+        /**
+         * syncFlowPortInfo
+         */
         protected void syncFlowPortInfo() {
             log.info("ModifyDeleteHandler.syncFlowPortInfo.");
         }
 
+        /**
+         * delete
+         */
         @Override
         public void delete() {
             super.delete();
@@ -352,11 +449,19 @@ public class ModifyHandler extends HandlerCommon {
             }
         }
 
+        /**
+         * prepareEventProcess
+         */
         @Override
         protected void prepareEventProcess() {
             prepareEventProcess(SceneModel.Event.MODIFY, SceneProcess.class, ElementProcess.class);
         }
 
+        /**
+         * deleteElementProcess
+         *
+         * @param cloudElement
+         */
         @Override
         protected void deleteElementProcess(CloudPluginSceneElementBO cloudElement) {
             if (deletedNodeIds.contains(cloudElement.getSrcElement().getId())) {
@@ -364,6 +469,11 @@ public class ModifyHandler extends HandlerCommon {
             }
         }
 
+        /**
+         * deleteAuxiliaryNetworkProcess
+         *
+         * @param cloudElement
+         */
         @Override
         public void deleteAuxiliaryNetworkProcess(CloudPluginSceneElementBO cloudElement) {
             if (deletedNodeIds.contains(cloudElement.getSrcElement().getId())) {

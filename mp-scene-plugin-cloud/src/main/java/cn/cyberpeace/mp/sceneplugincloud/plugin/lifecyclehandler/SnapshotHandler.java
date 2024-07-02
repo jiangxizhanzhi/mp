@@ -45,10 +45,24 @@ public class SnapshotHandler extends HandlerCommon {
         public static final EventProcess SNAPSHOT_CONTAINER = new EventProcess("snapshot_container", "sceneplugincloud.event.snapshot_container");
     }
 
+    /**
+     * SnapshotHandler
+     *
+     * @param pluginHandler
+     * @param event
+     */
     public SnapshotHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, ResumeTaskPool.getInstance(), event);
     }
 
+    /**
+     * snapshotElement
+     *
+     * @param element
+     * @param snapshotId
+     * @param snapshotName
+     * @param description
+     */
     public void snapshotElement(CloudPluginSceneElementBO element, String snapshotId, String snapshotName, String description) {
         String nodeId = element.getSrcElement().getId();
         Integer virtualType = element.getVirtualType();
@@ -70,6 +84,14 @@ public class SnapshotHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * snapshotElementV2
+     *
+     * @param element
+     * @param snapshotId
+     * @param snapshotName
+     * @param description
+     */
     public void snapshotElementV2(CloudPluginSceneElementBO element, String snapshotId, String snapshotName, String description) {
         String nodeId = element.getSrcElement().getId();
         Integer virtualType = element.getVirtualType();
@@ -95,6 +117,12 @@ public class SnapshotHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * deleteElementSnapshot
+     *
+     * @param element
+     * @param snapshotId
+     */
     public void deleteElementSnapshot(CloudPluginSceneElementBO element, String snapshotId) {
         String nodeId = element.getSrcElement().getId();
         Integer virtualType = element.getVirtualType();
@@ -120,6 +148,13 @@ public class SnapshotHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * elementSnapshotAction
+     *
+     * @param element
+     * @param snapshotId
+     * @param action
+     */
     public void elementSnapshotAction(CloudPluginSceneElementBO element, String snapshotId, String action) {
         String nodeId = element.getSrcElement().getId();
         Integer virtualType = element.getVirtualType();
@@ -145,6 +180,14 @@ public class SnapshotHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * virtualMachineSnapshot
+     *
+     * @param element
+     * @param snapshotId
+     * @param snapshotName
+     * @param description
+     */
     private void virtualMachineSnapshot(CloudPluginSceneElementBO element, String snapshotId, String snapshotName, String description) {
         // 调用云平台接口 snapshot
         Map<String, Object> extInfo = Collections.singletonMap("sceneId", getPluginHandler().getSourceSceneId());
@@ -165,6 +208,13 @@ public class SnapshotHandler extends HandlerCommon {
         this.setSnapshotNum(element);
     }
 
+    /**
+     * containerSnapshot
+     *
+     * @param element
+     * @param snapshotName
+     * @param description
+     */
     private void containerSnapshot(CloudPluginSceneElementBO element, String snapshotName, String description) {
         ContainerSnapshotData data = new ContainerSnapshotData();
         data.setName(snapshotName);
@@ -182,6 +232,14 @@ public class SnapshotHandler extends HandlerCommon {
     }
 
 
+    /**
+     * snapshot
+     *
+     * @param element
+     * @param snapshotId
+     * @param snapshotName
+     * @param description
+     */
     private void snapshot(CloudPluginSceneElementBO element, String snapshotId, String snapshotName, String description) {
         // 调用云平台接口 snapshot
         Map<String, Object> extInfo = Collections.singletonMap("sceneId", getPluginHandler().getSourceSceneId());

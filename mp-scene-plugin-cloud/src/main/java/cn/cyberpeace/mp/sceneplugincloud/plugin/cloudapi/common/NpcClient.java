@@ -18,6 +18,13 @@ public abstract class NpcClient {
 
     private static final Object syncObj = new Object();
 
+    /**
+     * checkResponse
+     *
+     * @param response
+     * @param throwException
+     * @return
+     */
     private <T> CloudResponse<T> checkResponse(CloudResponse<T> response, boolean throwException) {
         if (throwException && !response.isSuccess()) {
             throw new MpRuntimeException(response.getMessage());
@@ -26,6 +33,9 @@ public abstract class NpcClient {
         return response;
     }
 
+    /**
+     * heavyConcurrentWait
+     */
     protected void heavyConcurrentWait() {
         synchronized (syncObj) {
             try {
@@ -36,21 +46,60 @@ public abstract class NpcClient {
         }
     }
 
+    /**
+     * cloudGet
+     *
+     * @param url
+     * @param param
+     * @param valueTypeRef
+     * @param throwException
+     * @return
+     */
     public <T> CloudResponse<T> cloudGet(String url, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef,
                                          boolean throwException) {
         return checkResponse(httpClient.cloudGet(url, param, valueTypeRef), throwException);
     }
 
+    /**
+     * cloudPost
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param valueTypeRef
+     * @param throwException
+     * @return
+     */
     public <T> CloudResponse<T> cloudPost(String url, HttpData data, HttpParam param,
                                           TypeReference<CloudResponse<T>> valueTypeRef, boolean throwException) {
         return checkResponse(httpClient.cloudPost(url, data, param, valueTypeRef), throwException);
     }
 
+    /**
+     * cloudPatch
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param valueTypeRef
+     * @param throwException
+     * @return
+     */
     public <T> CloudResponse<T> cloudPatch(String url, HttpData data, HttpParam param,
                                            TypeReference<CloudResponse<T>> valueTypeRef, boolean throwException) {
         return checkResponse(httpClient.cloudPatch(url, data, param, valueTypeRef), throwException);
     }
 
+    /**
+     * cloudDelete
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param valueTypeRef
+     * @param throwException
+     * @return
+     */
     public <T> CloudResponse<T> cloudDelete(String url, HttpData data, HttpParam param,
                                             TypeReference<CloudResponse<T>> valueTypeRef, boolean throwException) {
         return checkResponse(httpClient.cloudDelete(url, data, param, valueTypeRef), throwException);

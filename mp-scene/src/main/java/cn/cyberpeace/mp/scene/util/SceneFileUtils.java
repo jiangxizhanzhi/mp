@@ -95,12 +95,29 @@ public class SceneFileUtils {
         return commands;
     }
 
+    /**
+     * genSceneFileInitCommand
+     *
+     * @param systemType
+     * @param fileUrl
+     * @param sceneId
+     * @return
+     */
     public static List<String> genSceneFileInitCommand(String systemType, String fileUrl, String sceneId) {
         String unzipDir = getSceneFileUnzipDir(systemType, sceneId);
         String toPath = StringUtils.join(unzipDir, ZIP_FILE_SUFFIX);
         return genZipFileInitCommand(systemType, fileUrl, toPath, unzipDir);
     }
 
+    /**
+     * genElementFileInitCommand
+     *
+     * @param systemType
+     * @param fileUrl
+     * @param sceneId
+     * @param elementId
+     * @return
+     */
     public static List<String> genElementFileInitCommand(String systemType, String fileUrl, String sceneId, String elementId) {
         String unzipDir = getElementFileUnzipDir(systemType, sceneId, elementId);
         String toPath = StringUtils.join(unzipDir, ZIP_FILE_SUFFIX);

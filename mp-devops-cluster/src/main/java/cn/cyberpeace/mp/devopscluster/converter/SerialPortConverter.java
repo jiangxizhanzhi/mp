@@ -36,6 +36,12 @@ public class SerialPortConverter {
         return list;
     }
 
+    /**
+     * getSerialPortConvertModel
+     *
+     * @param serialPort
+     * @return
+     */
     private static SerialPortConvertModel getSerialPortConvertModel(SerialPort serialPort) {
         SerialPortConvertModel convertModel = new SerialPortConvertModel();
         convertModel.setComAliveT(serialPort.getComAliveTime());

@@ -82,6 +82,13 @@ public class SceneCommandUtils {
         return parsedCommands;
     }
 
+    /**
+     * parseDirCommands
+     *
+     * @param command
+     * @param pathDelimiter
+     * @return
+     */
     private static List<String> parseDirCommands(String command, String pathDelimiter) {
         if (!command.contains(pathDelimiter)) {
             return new ArrayList<>();

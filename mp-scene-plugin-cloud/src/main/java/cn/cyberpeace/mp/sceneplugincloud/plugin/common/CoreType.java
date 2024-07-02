@@ -8,6 +8,12 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.common;
 public enum CoreType {
     NETWORK_0, NETWORK, NETWORK_L2, ROUTER, ROUTER_L2, FIREWALL, TERMINAL;
 
+    /**
+     * isNetwork
+     *
+     * @param coreType
+     * @return boolean
+     */
     public static boolean isNetwork(CoreType coreType) {
         if (coreType == null) {
             return false;
@@ -16,6 +22,12 @@ public enum CoreType {
         }
     }
 
+    /**
+     * isRouter
+     *
+     * @param coreType
+     * @return boolean
+     */
     public static boolean isRouter(CoreType coreType) {
         if (coreType == null) {
             return false;

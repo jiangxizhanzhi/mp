@@ -8,6 +8,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 public class VirtualInternet extends CloudClient {
 
+    /**
+     * create
+     *
+     * @return
+     */
     public VirtualInternetData create() {
         CloudResponse<VirtualInternetData> result = cloudPost(CloudUrlConstant.VIRTUAL_INTERNET_CREATE_URL, null,
                 null, new TypeReference<>() {}, true);

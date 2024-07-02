@@ -227,6 +227,11 @@ public class TargetConverter{
         }
     }
 
+    /**
+     * validTargetCanMerge
+     *
+     * @param uuids
+     */
     public void validTargetCanMerge(List<String> uuids) {
 
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByUuids(uuids);

@@ -5,10 +5,20 @@ import cn.cyberpeace.mp.devopscluster.request.BasePageRequest;
 
 public interface BaseConverter {
 
+    /**
+     * getDefaultPageIgnoreField
+     *
+     * @return
+     */
     default String[] getDefaultPageIgnoreField() {
         return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
+    /**
+     * getTotalPageIgnoreField
+     *
+     * @return
+     */
     default String[] getTotalPageIgnoreField() {
         return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getOffset,
                 BasePageRequest::getPage,BasePageRequest::getPerPage);

@@ -69,6 +69,12 @@ public class SystemTypeUtils {
             new SystemTypeItem("314", "Other", BaseSceneElementModel.SystemType.OTHER)
     ));
 
+    /**
+     * genKeySystemTypeMap
+     *
+     * @param systemTypeItems
+     * @return
+     */
     private static Map<String, SystemTypeItem> genKeySystemTypeMap(List<SystemTypeItem> systemTypeItems) {
         Map<String, SystemTypeItem> keySystemTypeMap = new HashMap<>();
         for (SystemTypeItem systemTypeItem : systemTypeItems) {
@@ -79,8 +85,17 @@ public class SystemTypeUtils {
         return keySystemTypeMap;
     }
 
+    /**
+     * SystemTypeUtils
+     */
     private SystemTypeUtils() {}
 
+    /**
+     * getSystemTypeItem
+     *
+     * @param systemType
+     * @return
+     */
     public static SystemTypeItem getSystemTypeItem(String systemType) {
         if (StringUtils.isEmpty(systemType)) {
             return DEFAULT_SYSTEM_TYPE;
@@ -88,6 +103,12 @@ public class SystemTypeUtils {
         return KEY_SYSTEM_TYPE_MAP.getOrDefault(systemType.toLowerCase(), DEFAULT_SYSTEM_TYPE);
     }
 
+    /**
+     * getStandardSystemType
+     *
+     * @param systemType
+     * @return
+     */
     public static String getStandardSystemType(String systemType) {
         return getSystemTypeItem(systemType).getStandardName();
     }

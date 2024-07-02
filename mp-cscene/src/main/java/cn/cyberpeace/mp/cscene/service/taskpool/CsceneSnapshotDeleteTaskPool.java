@@ -13,10 +13,18 @@ public class CsceneSnapshotDeleteTaskPool extends TaskPool {
         public static final CsceneSnapshotDeleteTaskPool INSTANCE = new CsceneSnapshotDeleteTaskPool();
     }
 
+    /**
+     * CsceneSnapshotDeleteTaskPool
+     */
     private CsceneSnapshotDeleteTaskPool() {
         super(Executors.newSingleThreadExecutor());
     }
 
+    /**
+     * getInstance
+     *
+     * @return 删除场景模板后删除场景快照
+     */
     public static CsceneSnapshotDeleteTaskPool getInstance() {
         return CsceneSnapshotDeleteTaskPoolInstance.INSTANCE;
     }

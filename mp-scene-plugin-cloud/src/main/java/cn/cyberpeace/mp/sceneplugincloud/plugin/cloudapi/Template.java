@@ -12,6 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 public class Template extends CloudClient {
 
+    /**
+     * getTemplateIdByDeviceName
+     *
+     * @param deviceName
+     * @return
+     */
     public String getTemplateIdByDeviceName(String deviceName) {
         String requestUrl = String.format(CloudUrlConstant.GET_TEMPLATE_ID_BY_DEVICE_NAME, deviceName);
         CloudResponse<TemplateIdByDeviceNameRes> response = cloudGet(requestUrl, null, new TypeReference<CloudResponse<TemplateIdByDeviceNameRes>>() {

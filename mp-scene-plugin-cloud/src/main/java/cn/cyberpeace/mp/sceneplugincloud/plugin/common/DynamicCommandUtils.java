@@ -24,11 +24,25 @@ import java.util.stream.Collectors;
  */
 public class DynamicCommandUtils {
 
+    /**
+     * genSetIpCmdList
+     *
+     * @param element
+     * @param pluginHandler
+     * @return
+     */
     public static List<String> genSetIpCmdList(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler) {
         ConfigParamsWrapper paramsWrapper = new ConfigParamsWrapper(element, pluginHandler);
         return new IPCmdBuilder().build(paramsWrapper);
     }
 
+    /**
+     * genNetworkCmdList
+     *
+     * @param element
+     * @param pluginHandler
+     * @return
+     */
     public static List<String> genNetworkCmdList(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler) {
         ConfigParamsWrapper paramsWrapper = new ConfigParamsWrapper(element, pluginHandler);
         return new StaticRouteCmdBuilder().build(paramsWrapper);
@@ -41,6 +55,12 @@ public class DynamicCommandUtils {
         List<CloudPluginSceneElementPortBO> pluginPorts;
         List<SceneElementPortBO> ports;
 
+        /**
+         * ConfigParamsWrapper
+         *
+         * @param element
+         * @param pluginHandler
+         */
         public ConfigParamsWrapper(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler) {
             this.element = element;
             this.pluginHandler = pluginHandler;
@@ -61,6 +81,12 @@ public class DynamicCommandUtils {
     }
 
     private interface NetworkingCmdBuilder {
+        /**
+         * build
+         *
+         * @param paramsWrapper
+         * @return
+         */
         List<String> build(ConfigParamsWrapper paramsWrapper);
     }
 
@@ -74,6 +100,12 @@ public class DynamicCommandUtils {
         private static String EXIT = "exit";
         private static String SAVE = "wr";
 
+        /**
+         * build
+         *
+         * @param paramsWrapper
+         * @return
+         */
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             List<String> cmds = new ArrayList<>();
@@ -108,6 +140,12 @@ public class DynamicCommandUtils {
         private static String SAVE = "wr";
 
 
+        /**
+         * build
+         *
+         * @param paramsWrapper
+         * @return
+         */
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             List<String> cmds = new ArrayList<>();
@@ -128,6 +166,12 @@ public class DynamicCommandUtils {
         private int maskBit;
         private String net;
 
+        /**
+         * IpParser
+         *
+         * @param ipWithMask
+         * @param elementBO
+         */
         IpParser(String ipWithMask, CloudPluginSceneElementBO elementBO) {
             String elementName = elementBO == null ? "" : elementBO.getSrcElement().getName();
             this.ipWithMask = ipWithMask;

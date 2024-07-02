@@ -27,6 +27,11 @@ public class TopoReformUtils {
 
     private CloudScenePluginHandler pluginHandler;
 
+    /**
+     * TopoReformUtils
+     *
+     * @param pluginHandler
+     */
     public TopoReformUtils(CloudScenePluginHandler pluginHandler) {
         this.pluginHandler = pluginHandler;
     }
@@ -100,6 +105,11 @@ public class TopoReformUtils {
         this.pluginHandler.getSceneHandler().getElementPortConnectionMap().put(from.getId() + ":" + to.getId(), sceneElementPortConnectionBO);
     }
 
+    /**
+     * createAuxiliarySwitchNode
+     *
+     * @return
+     */
     private static ElementWrapper createAuxiliarySwitchNode() {
         SceneElementBO sceneElementBO = new SceneElementBO();
         sceneElementBO.setPorts(new ArrayList<>());
@@ -117,6 +127,12 @@ public class TopoReformUtils {
         return new ElementWrapper(sceneElementBO, cloudPluginSceneElementBO);
     }
 
+    /**
+     * createAuxiliaryPort
+     *
+     * @param element
+     * @return
+     */
     private static PortWrapper createAuxiliaryPort(SceneElementBO element) {
         SceneElementPortBO port = new SceneElementPortBO();
         port.setElement(element);
@@ -138,6 +154,12 @@ public class TopoReformUtils {
         SceneElementPortBO scenePort;
         CloudPluginSceneElementPortBO pluginPort;
 
+        /**
+         * PortWrapper
+         *
+         * @param scenePort
+         * @param pluginPort
+         */
         public PortWrapper(SceneElementPortBO scenePort, CloudPluginSceneElementPortBO pluginPort) {
             this.scenePort = scenePort;
             this.pluginPort = pluginPort;
@@ -149,6 +171,12 @@ public class TopoReformUtils {
         SceneElementBO sceneElement;
         CloudPluginSceneElementBO pluginElement;
 
+        /**
+         * ElementWrapper
+         *
+         * @param sceneElement
+         * @param pluginElement
+         */
         public ElementWrapper(SceneElementBO sceneElement, CloudPluginSceneElementBO pluginElement) {
             this.sceneElement = sceneElement;
             this.pluginElement = pluginElement;

@@ -61,6 +61,11 @@ public class SnapshotService extends BaseCpService {
     @Resource
     private CloudClient cloudClient;
 
+    /**
+     * SnapshotService
+     *
+     * @param devopsClusterConfig
+     */
     public SnapshotService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }
@@ -141,6 +146,12 @@ public class SnapshotService extends BaseCpService {
         return new ListObjServiceResult<>(new ListObjResult<>(result, res.getTotal()));
     }
 
+    /**
+     * getContainerSnapshotById
+     *
+     * @param request
+     * @return
+     */
     public ListObjServiceResult<ContainerSnapshot> getContainerSnapshotById(SnapshotPageRequest request) {
         var res = cloudClient.listContainerSnapshot(request);
         if (Objects.isNull(res) || CollectionUtils.isEmpty(res.getList())) {

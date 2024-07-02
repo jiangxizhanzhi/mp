@@ -15,14 +15,29 @@ public enum AlarmTypeEnum {
 
     private String desc;
 
+    /**
+     * AlarmTypeEnum
+     *
+     * @param desc
+     */
     AlarmTypeEnum(String desc) {
         this.desc = desc;
     }
 
+    /**
+     * getDesc
+     *
+     * @return
+     */
     public String getDesc() {
         return desc;
     }
 
+    /**
+     * toValue
+     *
+     * @return int
+     */
     @JsonValue
     public int toValue(){
        return this.ordinal();

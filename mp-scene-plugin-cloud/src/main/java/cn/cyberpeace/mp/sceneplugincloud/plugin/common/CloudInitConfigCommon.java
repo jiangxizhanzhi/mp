@@ -31,10 +31,22 @@ public class CloudInitConfigCommon {
         CHANGE_USER_PROTOCOL.add(AccessMode.Protocol.TELNET);
     }
 
+    /**
+     * canChangeUser
+     *
+     * @param protocol
+     * @return boolean
+     */
     public static boolean canChangeUser(String protocol) {
         return CHANGE_USER_PROTOCOL.contains(protocol);
     }
 
+    /**
+     * builder
+     *
+     * @param standardSystemType
+     * @return
+     */
     public static Builder builder(String standardSystemType) {
         return new Builder(standardSystemType);
     }
@@ -48,6 +60,11 @@ public class CloudInitConfigCommon {
         private List<String> initCommands;
         private List<String> dnsList;
 
+        /**
+         * Builder
+         *
+         * @param standardSystemType
+         */
         public Builder(String standardSystemType) {
             this.standardSystemType = standardSystemType;
             this.users = new ArrayList<>();
@@ -55,6 +72,11 @@ public class CloudInitConfigCommon {
             this.dnsList = new ArrayList<>();
         }
 
+        /**
+         * build
+         *
+         * @return
+         */
         public List<String> build() {
             if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
                 return this.buildForWindows();
@@ -63,18 +85,39 @@ public class CloudInitConfigCommon {
             }
         }
 
+        /**
+         * addAllDns
+         *
+         * @param dnsList
+         */
         public void addAllDns(List<String> dnsList) {
             this.dnsList.addAll(dnsList);
         }
 
+        /**
+         * addUser
+         *
+         * @param username
+         * @param password
+         */
         public void addUser(String username, String password) {
             this.users.add(new User(username, password));
         }
 
+        /**
+         * addAllInitCommands
+         *
+         * @param initCommands
+         */
         public void addAllInitCommands(List<String> initCommands) {
             this.initCommands.addAll(initCommands);
         }
 
+        /**
+         * buildForWindows
+         *
+         * @return
+         */
         private List<String> buildForWindows() {
             if (users == null || users.isEmpty()) {
                 return initCommands;
@@ -109,6 +152,11 @@ public class CloudInitConfigCommon {
             return list;
         }
 
+        /**
+         * buildForLinux
+         *
+         * @return
+         */
         private List<String> buildForLinux() {
             List<String> list = new ArrayList<>();
             if (!this.initCommands.isEmpty()) {
@@ -127,6 +175,12 @@ public class CloudInitConfigCommon {
             return list;
         }
 
+        /**
+         * getChpasswd
+         *
+         * @param rootPassword
+         * @return
+         */
         private List<String> getChpasswd(String rootPassword) {
             return Arrays.asList(
                     "chpasswd:",
@@ -136,6 +190,11 @@ public class CloudInitConfigCommon {
             );
         }
 
+        /**
+         * getGroups
+         *
+         * @return
+         */
         private List<String> getGroups() {
             List<String> list = new ArrayList<>();
             for (User user : users) {
@@ -147,6 +206,11 @@ public class CloudInitConfigCommon {
             return list;
         }
 
+        /**
+         * getUsers
+         *
+         * @return
+         */
         private List<String> getUsers() {
             List<String> list = new ArrayList<>();
             for (User user : users) {
@@ -158,10 +222,22 @@ public class CloudInitConfigCommon {
             return list;
         }
 
+        /**
+         * getGroup
+         *
+         * @param username
+         * @return
+         */
         private String getGroup(String username) {
             return "  " + "- " + username;
         }
 
+        /**
+         * getUser
+         *
+         * @param user
+         * @return
+         */
         private List<String> getUser(User user) {
             return Arrays.asList(
                     "  " + "- name: " + user.username,
@@ -174,6 +250,13 @@ public class CloudInitConfigCommon {
             );
         }
 
+        /**
+         * getDnsList
+         *
+         * @param path
+         * @param dnsList
+         * @return
+         */
         private List<String> getDnsList(String path, List<String> dnsList) {
             List<String> result = new ArrayList<>();
             result.addAll(Arrays.asList(

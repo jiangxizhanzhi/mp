@@ -23,6 +23,11 @@ public class SceneStatusReporter implements StatusReporter<CollectedSceneStatusB
     @Resource
     private CsceneAppConfig csceneAppConfig;
 
+    /**
+     * reportStatus
+     *
+     * @param sceneStatus
+     */
     @Override
     public void reportStatus(CollectedSceneStatusBO sceneStatus) {
         sceneStatus.setCsceneId(CsceneContextHolder.getCsceneInstanceId());

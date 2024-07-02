@@ -19,6 +19,11 @@ public class CsceneCacheConfig {
 
     public static final String CACHE_MANAGER = "csceneCacheManager";
 
+    /**
+     * csceneCacheManager
+     *
+     * @return
+     */
     @Bean(name = CACHE_MANAGER)
     @Primary
     public CacheManager csceneCacheManager() {

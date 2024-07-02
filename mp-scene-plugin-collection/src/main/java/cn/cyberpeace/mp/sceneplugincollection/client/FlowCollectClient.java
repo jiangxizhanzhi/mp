@@ -36,7 +36,11 @@ public class FlowCollectClient {
     private static String indexPrefix = "mp_";
 
 
-
+    /**
+     * createArkimeInstance
+     *
+     * @return
+     */
     public ArkimeCreateResBo createArkimeInstance() {
         //arkime在es上创建索引的开头唯一标识
         String arkimePrefixId = indexPrefix + String.valueOf(System.currentTimeMillis());
@@ -82,6 +86,11 @@ public class FlowCollectClient {
 
     }
 
+    /**
+     * delArkimeInstance
+     *
+     * @param instanceId
+     */
     public void delArkimeInstance(String instanceId) {
         final Container container = new Container();
         final ContainerGetData containerGetData = container.getContainerByName(instanceId);
@@ -94,6 +103,11 @@ public class FlowCollectClient {
         }
     }
 
+    /**
+     * delFlowMirror
+     *
+     * @param flowMirrorId
+     */
     public void delFlowMirror(String flowMirrorId) {
         mirrorClient.delete(flowMirrorId);
     }

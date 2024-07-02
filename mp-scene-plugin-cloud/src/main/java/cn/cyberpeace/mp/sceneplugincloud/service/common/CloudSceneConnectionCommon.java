@@ -26,6 +26,11 @@ public class CloudSceneConnectionCommon {
 
     private static CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper;
 
+    /**
+     * CloudSceneConnectionCommon
+     *
+     * @param cloudPluginSceneConnectionMapper
+     */
     @Autowired
     private CloudSceneConnectionCommon(CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper) {
         CloudSceneConnectionCommon.cloudPluginSceneConnectionMapper = cloudPluginSceneConnectionMapper;
@@ -59,6 +64,19 @@ public class CloudSceneConnectionCommon {
         private String department;
     }
 
+    /**
+     * 文件名：Example.java
+     * 版本信息：v1.0
+     * 日期：2023-04-01
+     * 描述：
+     * 这是一个示例Java文件，展示了开头注释的标准格式。
+     * <p>
+     * 版权信息：
+     * © 2023 你的名字或公司
+     * <p>
+     * 修改历史：
+     * 2023-04-01 初始版本
+     */
     @Data
     @NoArgsConstructor
     public static class SceneConnectionEnableRecordingExtraParam {
@@ -70,6 +88,13 @@ public class CloudSceneConnectionCommon {
         private String department;
     }
 
+    /**
+     * getConnectionUrl
+     *
+     * @param param
+     * @param response
+     * @return
+     */
     public static GetConnectionUrlResult getConnectionUrl(GetConnectionUrlParam param, HttpServletResponse response) {
         var remoteClient = new Remote();
         if (CloudElementAccessMode.Protocol.VNC.equals(param.getConsoleType())) {
@@ -85,6 +110,12 @@ public class CloudSceneConnectionCommon {
         return new GetConnectionUrlResult();
     }
 
+    /**
+     * getOrCreateSceneConnection
+     *
+     * @param param
+     * @return
+     */
     public static CloudPluginSceneConnectionModel getOrCreateSceneConnection(SceneConnectionParam param) {
         var sceneId = param.getSceneId();
         var sceneElementId = param.getSceneElementId();
@@ -146,6 +177,12 @@ public class CloudSceneConnectionCommon {
     }
 
 
+    /**
+     * getOrCreateSdnConnection
+     *
+     * @param param
+     * @return
+     */
     public static CloudPluginSceneConnectionModel getOrCreateSdnConnection(SdnConnectionParam param) {
         CloudPluginSceneConnectionModel sdnConnection = cloudPluginSceneConnectionMapper.first(new HumanCondition()
                 .filterEqual(CloudPluginSceneConnectionModel::getAccessIp, param.getSdnIp())
@@ -195,6 +232,13 @@ public class CloudSceneConnectionCommon {
         return sdnConnection;
     }
 
+    /**
+     * enableRecording
+     *
+     * @param sceneConnection
+     * @param extraParam
+     * @return boolean
+     */
     public static boolean enableRecording(CloudPluginSceneConnectionModel sceneConnection,
                                           SceneConnectionEnableRecordingExtraParam extraParam) {
         String connectionId = sceneConnection.getConnectionId();
@@ -215,6 +259,12 @@ public class CloudSceneConnectionCommon {
         return flag;
     }
 
+    /**
+     * disableRecording
+     *
+     * @param sceneConnection
+     * @return boolean
+     */
     public static boolean disableRecording(CloudPluginSceneConnectionModel sceneConnection) {
         String connectionId = sceneConnection.getConnectionId();
         if (StringUtils.isEmpty(connectionId)) {
@@ -233,6 +283,12 @@ public class CloudSceneConnectionCommon {
         return flag;
     }
 
+    /**
+     * convertRecording
+     *
+     * @param sceneConnection
+     * @return boolean
+     */
     public static boolean convertRecording(CloudPluginSceneConnectionModel sceneConnection) {
         String connectionId = sceneConnection.getConnectionId();
         if (StringUtils.isEmpty(connectionId)) {
@@ -250,6 +306,12 @@ public class CloudSceneConnectionCommon {
         return flag;
     }
 
+    /**
+     * getContainerConsoleUrl
+     *
+     * @param resourceId
+     * @return
+     */
     public static String getContainerConsoleUrl(String resourceId) {
         String url = new Remote().getContainerConsoleUrl(resourceId);
         if (StringUtils.isEmpty(url)) {

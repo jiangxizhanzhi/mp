@@ -9,10 +9,21 @@ public class CollectionSceneStage extends SceneStage {
     public static CollectionSceneStage CREATE_DATA_COLLECT = new CollectionSceneStage("create_data_collect", "zhongduanshebei");
     public static CollectionSceneStage CREATE_COLLECT_NODE_INSTANCE = new CollectionSceneStage("create_collect_node_instance", "tanzhenguanli");
 
+    /**
+     * CollectionSceneStage
+     *
+     * @param stage
+     * @param icon
+     */
     private CollectionSceneStage(String stage, String icon) {
         super(stage, icon);
     }
 
+    /**
+     * getStageName
+     *
+     * @return
+     */
     @Override
     public String getStageName() {
         return MessageCommon.get("sceneplugincollection.stage." + this.getStage());

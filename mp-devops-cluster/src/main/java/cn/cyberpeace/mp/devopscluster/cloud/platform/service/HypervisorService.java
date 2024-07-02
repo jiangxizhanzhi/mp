@@ -20,12 +20,22 @@ public class HypervisorService extends BaseCpService {
 
     public static final String HYPERVISORS = "/hypervisors";
 
+    /**
+     * HypervisorService
+     *
+     * @param devopsClusterConfig
+     */
     public HypervisorService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }
 
 
-
+    /**
+     * page
+     *
+     * @param getParams
+     * @return
+     */
     public HostStatisticsResponse page(String getParams) {
         return super.sendGet(HOSTS_MONITOR_LIST + getParams, new TypeReference<HostStatisticsResponse>() {
         });

@@ -27,6 +27,12 @@ public enum DevopsClusterErrorCode implements ErrorCode {
     USB_NUM_EXCEEDS_LIMIT("MP-110617", "usb_num_exceeds_limit"),
     USB_REFERENCED_SCENE("MP-110618", "usb_referenced_scene");
 
+    /**
+     * DevopsClusterErrorCode
+     *
+     * @param code
+     * @param message
+     */
     DevopsClusterErrorCode(String code, String message) {
         setCode(code, ControllerConstant.ERROR_CODE_PREFIX + message);
     }

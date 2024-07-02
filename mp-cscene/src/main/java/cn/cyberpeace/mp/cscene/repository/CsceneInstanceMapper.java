@@ -40,5 +40,11 @@ public interface CsceneInstanceMapper extends BaseCsceneMapper<CsceneInstanceMod
      */
     Integer countActivitySceneByTime(LocalDateTime startTime, LocalDateTime endTime);
 
+    /**
+     * getVlanUsedInstance
+     *
+     * @param vlanId
+     * @return
+     */
     List<CloudPluginSceneElementModel> getVlanUsedInstance(List<Integer> vlanId);
 }

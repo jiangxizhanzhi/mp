@@ -11,6 +11,13 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<FlowScenePlugin
     @Getter
     private SceneHandlerUtils handlerUtils;
 
+    /**
+     * HandlerCommon
+     *
+     * @param pluginHandler
+     * @param taskPool
+     * @param event
+     */
     public HandlerCommon(FlowScenePluginHandler pluginHandler, TaskPool taskPool, int event) {
         super(pluginHandler, taskPool, event);
         handlerUtils = pluginHandler.getHandlerUtils();

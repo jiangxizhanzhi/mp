@@ -18,10 +18,21 @@ public class ContainerClearJob extends AbstractClearJob<ContainerGetData> {
 
     private Container containerClient = new Container();
 
+    /**
+     * ContainerClearJob
+     *
+     * @param sceneElementMapper
+     */
     public ContainerClearJob(SceneElementMapper sceneElementMapper) {
         super(sceneElementMapper);
     }
 
+    /**
+     * getEid2Node
+     *
+     * @param containers
+     * @return
+     */
     @Override
     protected Map<String, ContainerGetData> getEid2Node(List<ContainerGetData> containers) {
         Map<String, ContainerGetData> result = new HashMap<>();
@@ -36,16 +47,32 @@ public class ContainerClearJob extends AbstractClearJob<ContainerGetData> {
         return result;
     }
 
+    /**
+     * doQuery
+     *
+     * @param offset
+     * @return
+     */
     @Override
     protected List<ContainerGetData> doQuery(int offset) {
         return containerClient.getAllContainer(LIMIT, offset);
     }
 
+    /**
+     * doClear
+     *
+     * @param data
+     */
     @Override
     protected void doClear(ContainerGetData data) {
         containerClient.deleteContainerById(data.getId());
     }
 
+    /**
+     * forceClear
+     *
+     * @param data
+     */
     @Override
     protected void forceClear(ContainerGetData data) {
         containerClient.deleteContainerById(data.getId());

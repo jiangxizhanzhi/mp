@@ -9,6 +9,11 @@ public class WazuhControlCommon {
 
     public static WazuhControl wazuhControl;
 
+    /**
+     * WazuhControlCommon
+     *
+     * @param collectionSingleton
+     */
     private WazuhControlCommon(CollectionSingleton collectionSingleton) {
         WazuhControl.WazuhControlBuilder builder =  WazuhControl.builder()
                 .configWazuh(

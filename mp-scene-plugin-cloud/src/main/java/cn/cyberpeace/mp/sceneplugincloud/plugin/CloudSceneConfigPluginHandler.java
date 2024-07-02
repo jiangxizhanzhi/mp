@@ -41,6 +41,14 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
 
     private ConfigHandlerUtils handlerUtils;
 
+    /**
+     * correctElementRoleRelated
+     *
+     * @param srcElement
+     * @param cloudElement
+     * @param role
+     * @param imageType
+     */
     private void correctElementRoleRelated(SceneConfigElementBO srcElement, CloudPluginSceneConfigElementBO cloudElement,
                                            Integer role, String imageType) {
         if (role == null) {
@@ -139,6 +147,9 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         }
     }
 
+    /**
+     * correctData
+     */
     @Override
     public void correctData() {
         getElementMap().forEach((nodeId, element) -> {
@@ -154,6 +165,9 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         });
     }
 
+    /**
+     * validate
+     */
     @Override
     public void validate() {
         for (SceneConfigElementPortBO srcPort : getSceneHandler().getElementPortMap().values()) {
@@ -202,6 +216,9 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         }
     }
 
+    /**
+     * initBase
+     */
     @Override
     public void initBase() {
         super.initBase();
@@ -209,6 +226,9 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         handlerUtils = new ConfigHandlerUtils(this);
     }
 
+    /**
+     * reloadData
+     */
     @Override
     public void reloadData() {
         setScene(null);
@@ -221,46 +241,87 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                 .toArray(new String[0])));
     }
 
+    /**
+     * saveScene
+     */
     @Override
     public void saveScene() {
         pluginModelHandler.saveScene();
     }
 
+    /**
+     * deleteScene
+     */
     @Override
     public void deleteScene() {
         pluginModelHandler.deleteScene();
     }
 
+    /**
+     * createElements
+     *
+     * @param elementIds
+     */
     @Override
     public void createElements(String... elementIds) {
         pluginModelHandler.createElements(elementIds);
     }
 
+    /**
+     * updateElements
+     *
+     * @param elementIds
+     */
     @Override
     public void updateElements(String... elementIds) {
         pluginModelHandler.updateElements(elementIds);
     }
 
+    /**
+     * deleteElements
+     *
+     * @param elementIds
+     */
     @Override
     public void deleteElements(String... elementIds) {
         pluginModelHandler.deleteElements(elementIds);
     }
 
+    /**
+     * createElementPorts
+     *
+     * @param elementPortIds
+     */
     @Override
     public void createElementPorts(String... elementPortIds) {
         pluginModelHandler.createElementPorts(elementPortIds);
     }
 
+    /**
+     * updateElementPorts
+     *
+     * @param elementPortIds
+     */
     @Override
     public void updateElementPorts(String... elementPortIds) {
         pluginModelHandler.updateElementPorts(elementPortIds);
     }
 
+    /**
+     * deleteElementPorts
+     *
+     * @param elementPortIds
+     */
     @Override
     public void deleteElementPorts(String... elementPortIds) {
         pluginModelHandler.deleteElementPorts(elementPortIds);
     }
 
+    /**
+     * toData
+     *
+     * @return
+     */
     @Override
     public ScenePluginDataBO toData() {
         try {
@@ -278,12 +339,20 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         return super.toData();
     }
 
+    /**
+     * validateData
+     *
+     * @param validateData
+     */
     @Override
     protected void validateData(BaseScenePluginDataBO validateData) {
         Set<ConstraintViolation<BaseScenePluginDataBO>> validateResult = CloudScenePluginValidation.validate(validateData);
         CloudScenePluginValidation.handleValidateResult(validateResult);
     }
 
+    /**
+     * initClass
+     */
     @Override
     protected void initClass() {
         super.sceneBOClass = CloudPluginSceneConfigBO.class;

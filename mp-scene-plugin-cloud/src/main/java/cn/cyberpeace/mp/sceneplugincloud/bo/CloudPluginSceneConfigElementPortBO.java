@@ -9,6 +9,11 @@ import lombok.Data;
 public class CloudPluginSceneConfigElementPortBO
         extends BaseCloudPluginSceneElementPortBO<CloudPluginSceneConfigElementPortModel,
         CloudPluginSceneConfigElementPortBO, SceneConfigElementPortBO> {
+    /**
+     * createModel
+     *
+     * @return
+     */
     @Override
     public CloudPluginSceneConfigElementPortModel createModel() {
         return new CloudPluginSceneConfigElementPortModel();

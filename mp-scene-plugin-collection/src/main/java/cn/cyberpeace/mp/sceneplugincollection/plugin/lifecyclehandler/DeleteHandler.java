@@ -31,10 +31,21 @@ public class DeleteHandler extends HandlerCommon {
         public static final EventProcess UNBIND_PROBE_COLLECT_AGENT = new EventProcess("unbind_probe_collect_agent", "sceneplugincollection.event.unbind_probe_collect_agent");
     }
 
+    /**
+     * DeleteHandler
+     *
+     * @param pluginHandler
+     */
     public DeleteHandler(CollectionScenePluginHandler pluginHandler) {
         super(pluginHandler, DeleteTaskPool.getInstance(), SceneModel.Event.DELETE);
     }
 
+    /**
+     * deleteProbeRouter
+     *
+     * @param probeRouterId
+     * @return boolean
+     */
     protected boolean deleteProbeRouter(String probeRouterId) {
         VirtualRouter vrClient = CloudApiProxyBuilder.build(new VirtualRouter(), VirtualRouter.class);
         VirtualRouterDeleteData deleteData = new VirtualRouterDeleteData();
@@ -42,6 +53,9 @@ public class DeleteHandler extends HandlerCommon {
         return vrClient.delete(deleteData);
     }
 
+    /**
+     * delete
+     */
     public void delete() {
         prepareEventProcess(SceneModel.Event.DELETE, SceneProcess.class, ElementProcess.class);
 

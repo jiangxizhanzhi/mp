@@ -23,6 +23,9 @@ public enum ImageTypeEnum {
     SIMPLE;
 
 
+    /**
+     * ImageTypeEnum
+     */
     ImageTypeEnum() {
 
     }
@@ -35,11 +38,22 @@ public enum ImageTypeEnum {
         }
     }
 
+    /**
+     * fromValue
+     *
+     * @param desc
+     * @return
+     */
     @JsonCreator
     public static ImageTypeEnum fromValue(String desc) {
         return map.get(desc);
     }
 
+    /**
+     * toValue
+     *
+     * @return
+     */
     @JsonValue
     public String toValue() {
         return this.name().toLowerCase(Locale.ROOT);

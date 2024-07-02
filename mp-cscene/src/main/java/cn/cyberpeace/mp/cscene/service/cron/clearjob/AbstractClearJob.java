@@ -30,10 +30,18 @@ public abstract class AbstractClearJob<Q> {
 
     protected SceneElementMapper sceneElementMapper;
 
+    /**
+     * AbstractClearJob
+     *
+     * @param sceneElementMapper
+     */
     public AbstractClearJob(SceneElementMapper sceneElementMapper) {
         this.sceneElementMapper = sceneElementMapper;
     }
 
+    /**
+     * action
+     */
     public void action() {
         for (Integer offset = OFFSET; ; offset++) {
             List<Q> nodes = this.doQuery(offset);
@@ -70,12 +78,35 @@ public abstract class AbstractClearJob<Q> {
         }
     }
 
+    /**
+     * getEid2Node
+     *
+     * @param nodes
+     * @return
+     */
     protected abstract Map<String, Q> getEid2Node(List<Q> nodes);
 
+    /**
+     * doQuery
+     *
+     * @param offset
+     * @return
+     */
     protected abstract List<Q> doQuery(int offset);
 
+    /**
+     * doClear
+     *
+     * @param data
+     */
     protected abstract void doClear(Q data);
 
+    /**
+     * needToClear
+     *
+     * @param id
+     * @return boolean
+     */
     protected boolean needToClear(String id) {
         if (StringUtils.isEmpty(id)) {
             return false;
@@ -105,6 +136,12 @@ public abstract class AbstractClearJob<Q> {
         }
     }
 
+    /**
+     * getEid
+     *
+     * @param nodeName
+     * @return
+     */
     public String getEid(String nodeName) {
         if (nodeName.startsWith(PREFIX)) {
             String sceneInfo = nodeName.replace(PREFIX + "_", "");
@@ -120,6 +157,11 @@ public abstract class AbstractClearJob<Q> {
         return null;
     }
 
+    /**
+     * forceClear
+     *
+     * @param data
+     */
     protected void forceClear(Q data) {
     }
 }

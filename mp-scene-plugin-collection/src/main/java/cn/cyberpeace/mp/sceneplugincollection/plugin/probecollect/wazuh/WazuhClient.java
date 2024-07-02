@@ -47,11 +47,21 @@ public class WazuhClient {
      */
     private static final Map<String, String> agentNameIdMap = new ConcurrentHashMap<>();
 
+    /**
+     * genWazuhBaseAuthHeaders
+     *
+     * @return
+     */
     private Map<String, String> genWazuhBaseAuthHeaders() {
         return Map.of("Authorization", String.format("Basic %s",
                 TextUtils.encodeBase64(String.format("%s:%s", wazuhUser, wazuhPass))));
     }
 
+    /**
+     * getWazuhApiToken
+     *
+     * @return
+     */
     private String getWazuhApiToken() {
         HttpResult httpResult = wazuhHttpClient.get("/security/user/authenticate", null,
                 genWazuhBaseAuthHeaders(), null);
@@ -81,6 +91,11 @@ public class WazuhClient {
         }
     }
 
+    /**
+     * getAgents
+     *
+     * @return
+     */
     private List<AgentItem> getAgents() {
         AgentsQueryWazuhHttpParam agentsQueryHttpParam = new AgentsQueryWazuhHttpParam();
         agentsQueryHttpParam.setStatus("active");
@@ -120,6 +135,14 @@ public class WazuhClient {
         private String esServer;
         private String mongoServer;
 
+        /**
+         * configWazuh
+         *
+         * @param wazuhServer
+         * @param wazuhUser
+         * @param wazuhPass
+         * @return
+         */
         public WazuhClientBuilder configWazuh(String wazuhServer, String wazuhUser, String wazuhPass) {
             this.wazuhServer = wazuhServer;
             this.wazuhUser = wazuhUser;
@@ -127,21 +150,47 @@ public class WazuhClient {
             return this;
         }
 
+        /**
+         * configEs
+         *
+         * @param esServer
+         * @return
+         */
         public WazuhClientBuilder configEs(String esServer) {
             this.esServer = esServer;
             return this;
         }
 
+        /**
+         * configMongo
+         *
+         * @param mongoServer
+         * @return
+         */
         public WazuhClientBuilder configMongo(String mongoServer) {
             this.mongoServer = mongoServer;
             return this;
         }
 
+        /**
+         * build
+         *
+         * @return
+         */
         public WazuhClient build() {
             return new WazuhClient(wazuhServer, wazuhUser, wazuhPass, esServer, mongoServer);
         }
     }
 
+    /**
+     * WazuhClient
+     *
+     * @param wazuhServer
+     * @param wazuhUser
+     * @param wazuhPass
+     * @param esServer
+     * @param mongoServer
+     */
     private WazuhClient(String wazuhServer, String wazuhUser, String wazuhPass, String esServer, String mongoServer) {
         this.wazuhHttpClient = HttpClient.builder()
                 .configServer(wazuhServer)
@@ -164,20 +213,40 @@ public class WazuhClient {
         }
     }
 
+    /**
+     * builder
+     *
+     * @return
+     */
     public static WazuhClientBuilder builder() {
         return new WazuhClientBuilder();
     }
 
+    /**
+     * genWazuhAuthHeaders
+     *
+     * @return
+     */
     public Map<String, String> genWazuhAuthHeaders() {
         syncWazuhApiToken();
         return Map.of("Authorization", String.format("Bearer %s", wazuhToken));
     }
 
+    /**
+     * handleWazuhErrorResult
+     *
+     * @param httpResult
+     */
     public void handleWazuhErrorResult(HttpResult httpResult) {
         WazuhErrorResponse error = httpResult.getResultBean(new TypeReference<WazuhErrorResponse>() {});
         throw new MpRuntimeException("Request wazuh error: " + error.getTitle());
     }
 
+    /**
+     * handleWazuhFailResult
+     *
+     * @param response
+     */
     public <T> void handleWazuhFailResult(WazuhSuccessResponse<WazuhSuccessData<T>> response) {
         List<Object> failedItems = response.getData().getFailedItems();
         if (!failedItems.isEmpty()) {
@@ -185,6 +254,12 @@ public class WazuhClient {
         }
     }
 
+    /**
+     * getAgentIds
+     *
+     * @param agentNames
+     * @return
+     */
     public Map<String, String> getAgentIds(List<String> agentNames) {
         for (String agentName : agentNames) {
             if (!agentNameIdMap.containsKey(agentName)) {

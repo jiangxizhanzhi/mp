@@ -15,11 +15,22 @@ import org.springframework.stereotype.Service;
 public class CsceneInstanceUserCountServiceImpl extends BaseModelServiceImpl<CsceneInstanceUserCountModel, CsceneInstanceUserCountMapper, CsceneInstanceUserCountFields,
         QueryParams> implements CsceneInstanceUserCountService {
 
+    /**
+     * CsceneInstanceUserCountServiceImpl
+     *
+     * @param stuMapper
+     * @param stuFields
+     */
     public CsceneInstanceUserCountServiceImpl(CsceneInstanceUserCountMapper stuMapper, CsceneInstanceUserCountFields stuFields) {
         setModelFields(stuFields);
         setModelMapper(stuMapper);
     }
 
+    /**
+     * increaseCount
+     *
+     * @param userId
+     */
     @Override
     public void increaseCount(String userId) {
         if (countByUserId(userId) == 0) {
@@ -32,6 +43,11 @@ public class CsceneInstanceUserCountServiceImpl extends BaseModelServiceImpl<Csc
         }
     }
 
+    /**
+     * decreaseCount
+     *
+     * @param userId
+     */
     @Override
     public void decreaseCount(String userId) {
         if (countByUserId(userId) == 0) {
@@ -45,6 +61,12 @@ public class CsceneInstanceUserCountServiceImpl extends BaseModelServiceImpl<Csc
         }
     }
 
+    /**
+     * countByUserId
+     *
+     * @param userId
+     * @return int
+     */
     @Override
     public int countByUserId(String userId) {
         HumanCondition humanCondition = new HumanCondition();

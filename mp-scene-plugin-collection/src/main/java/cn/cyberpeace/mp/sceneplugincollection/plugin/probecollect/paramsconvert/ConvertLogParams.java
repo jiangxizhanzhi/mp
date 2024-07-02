@@ -25,12 +25,24 @@ public class ConvertLogParams implements WazuhParamsConvert<WazuhControl.Control
 
     private static final String LOG_FORMAT_SYSLOG = "syslog";
 
+    /**
+     * ConvertLogParams
+     *
+     * @param probe
+     * @param systemType
+     * @param locationMap
+     */
     public ConvertLogParams(Probe probe, String systemType, Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> locationMap) {
         this.probe = probe;
         this.systemType = SystemTypeCommandUtils.getOsType(systemType);
         this.locationMap = locationMap;
     }
 
+    /**
+     * convertParams
+     *
+     * @return
+     */
     @Override
     public List<WazuhControl.ControlLogCollectParam> convertParams() {
         List<WazuhControl.ControlLogCollectParam> logParams = new ArrayList<>();

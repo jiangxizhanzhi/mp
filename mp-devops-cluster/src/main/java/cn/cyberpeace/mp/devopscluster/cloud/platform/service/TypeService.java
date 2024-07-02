@@ -33,6 +33,11 @@ public class TypeService extends BaseCpService {
 
     private static final String cache_prefix_model = "devops:";
 
+    /**
+     * TypeService
+     *
+     * @param devopsClusterConfig
+     */
     public TypeService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }

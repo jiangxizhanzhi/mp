@@ -80,6 +80,12 @@ public class SnapshotConverter {
     }
 
 
+    /**
+     * listSnapshot
+     *
+     * @param deviceUuid
+     * @return
+     */
     public List<SnapshotConvertModel> listSnapshot(String deviceUuid) {
         Device device = deviceService.findByUuid(deviceUuid);
         SnapshotPageRequest snapshotPageRequest = new SnapshotPageRequest();
@@ -118,6 +124,12 @@ public class SnapshotConverter {
         }
     }
 
+    /**
+     * getSnapshotConvertModel
+     *
+     * @param item
+     * @return
+     */
     private static SnapshotConvertModel getSnapshotConvertModel(Snapshot item) {
         SnapshotConvertModel result = new SnapshotConvertModel(item.getUuid(), item.getName(), item.getUserSnapshotName(), item.getDeviceUuid(),
                 item.getDescription(), TimeUtils.utcStringToLocalDateTime(item.getCreatedAt()));

@@ -8,11 +8,19 @@ public class ResumeTaskPool extends TaskPool {
         public static final ResumeTaskPool INSTANCE = new ResumeTaskPool();
     }
 
+    /**
+     * ResumeTaskPool
+     */
     private ResumeTaskPool() {
         super(CloudSingleton.cloudAppConfig.getResumePoolSize(),
                 CloudSingleton.cloudAppConfig.getResumeHoldSize(), 60L);
     }
 
+    /**
+     * getInstance
+     *
+     * @return
+     */
     public static ResumeTaskPool getInstance() {
         return ResumeTaskPoolInstance.INSTANCE;
     }

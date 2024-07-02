@@ -6,6 +6,13 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 public class VlanIdValidator implements ConstraintValidator<VlanId, Integer> {
+    /**
+     * isValid
+     *
+     * @param value
+     * @param constraintValidatorContext
+     * @return boolean
+     */
     @Override
     public boolean isValid(Integer value, ConstraintValidatorContext constraintValidatorContext) {
         if (value == null) {

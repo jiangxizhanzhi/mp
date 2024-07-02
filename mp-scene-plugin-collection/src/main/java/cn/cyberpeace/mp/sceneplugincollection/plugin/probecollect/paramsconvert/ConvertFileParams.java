@@ -17,14 +17,29 @@ public class ConvertFileParams implements WazuhParamsConvert<WazuhControl.Contro
 
     private Probe probe;
 
+    /**
+     * getFileRecursionLevel
+     *
+     * @return
+     */
     private Integer getFileRecursionLevel() {
         return CollectionSingleton.collectionAppConfig.getFileRecursionLevel();
     }
 
+    /**
+     * ConvertFileParams
+     *
+     * @param probe
+     */
     public ConvertFileParams(Probe probe) {
         this.probe = probe;
     }
 
+    /**
+     * convertParams
+     *
+     * @return
+     */
     @Override
     public List<WazuhControl.ControlFileModifyParam> convertParams() {
         List<WazuhControl.ControlFileModifyParam> fileParams = new ArrayList<>();

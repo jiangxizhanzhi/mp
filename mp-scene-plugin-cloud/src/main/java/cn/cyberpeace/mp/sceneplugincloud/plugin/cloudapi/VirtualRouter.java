@@ -14,6 +14,12 @@ public class VirtualRouter extends CloudClient {
     private static final String ROUTER_ID = "{router_id}";
 
 
+    /**
+     * create
+     *
+     * @param createData
+     * @return
+     */
     public VirtualRouterCreateData create(VirtualRouterCreateData createData) {
         heavyConcurrentWait();
 
@@ -23,6 +29,12 @@ public class VirtualRouter extends CloudClient {
         return result.getData();
     }
 
+    /**
+     * delete
+     *
+     * @param deleteData
+     * @return boolean
+     */
     public boolean delete(VirtualRouterDeleteData deleteData) {
         heavyConcurrentWait();
 
@@ -32,6 +44,13 @@ public class VirtualRouter extends CloudClient {
         return true;
     }
 
+    /**
+     * modify
+     *
+     * @param data
+     * @param routerId
+     * @return
+     */
     public VirtualRouterModifyData modify(VirtualRouterModifyData data, String routerId) {
         heavyConcurrentWait();
 
@@ -41,6 +60,13 @@ public class VirtualRouter extends CloudClient {
         return result.getData();
     }
 
+    /**
+     * bindNetwork
+     *
+     * @param routerId
+     * @param data
+     * @return boolean
+     */
     public boolean bindNetwork(String routerId, VirtualRouterBindNetworkData data) {
         heavyConcurrentWait();
 
@@ -50,6 +76,13 @@ public class VirtualRouter extends CloudClient {
         return true;
     }
 
+    /**
+     * unbindNetwork
+     *
+     * @param routerId
+     * @param data
+     * @return boolean
+     */
     public boolean unbindNetwork(String routerId, VirtualRouterUnbindNetworkData data) {
         heavyConcurrentWait();
 
@@ -59,6 +92,13 @@ public class VirtualRouter extends CloudClient {
         return true;
     }
 
+    /**
+     * getAllRouters
+     *
+     * @param limit
+     * @param offset
+     * @return
+     */
     public List<VirtualRouterGetData> getAllRouters(Integer limit, Integer offset) {
         CommonQueryParam param = new CommonQueryParam();
         param.setLimit(limit);
@@ -71,6 +111,11 @@ public class VirtualRouter extends CloudClient {
         return null;
     }
 
+    /**
+     * deleteRouterById
+     *
+     * @param routerId
+     */
     public void deleteRouterById(String routerId) {
         heavyConcurrentWait();
 

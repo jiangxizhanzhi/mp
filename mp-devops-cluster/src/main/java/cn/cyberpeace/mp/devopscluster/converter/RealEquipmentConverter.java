@@ -137,6 +137,14 @@ public class RealEquipmentConverter implements BaseConverter{
         return convertModel;
     }
 
+    /**
+     * getRealEquipmentBO
+     *
+     * @param referStateMap
+     * @param useStateMap
+     * @param device
+     * @return
+     */
     private RealEquipmentBO getRealEquipmentBO(Map<String, List<DeviceReferCsceneStat>> referStateMap, Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap, Device device) {
         RealEquipmentBO realEquipmentBO = convertDevice(device);
         List<DeviceReferCsceneStat> referStateList = new ArrayList<>();
@@ -223,6 +231,13 @@ public class RealEquipmentConverter implements BaseConverter{
         return result;
     }
 
+    /**
+     * report
+     *
+     * @param ip
+     * @param content
+     * @param agreement
+     */
     public void report(String ip, String content, String agreement) {
         if (StringUtils.isEmpty(ip)) {
             throw new MpRuntimeException("ip为空");
@@ -238,11 +253,23 @@ public class RealEquipmentConverter implements BaseConverter{
         csceneCommonCollectMapper.create(model);
     }
 
+    /**
+     * report
+     *
+     * @param request
+     * @param content
+     */
     public void report(HttpServletRequest request, String content) {
         String ip = getClientIp(request);
         report(ip, content, "restapi");
     }
 
+    /**
+     * getClientIp
+     *
+     * @param request
+     * @return
+     */
     public String getClientIp(HttpServletRequest request) {
         String ipAddress = request.getHeader("X-FORWARDED-FOR");
         if (ipAddress == null || ipAddress.length() == 0 || "unknown".equalsIgnoreCase(ipAddress)) {
@@ -335,6 +362,9 @@ public class RealEquipmentConverter implements BaseConverter{
         }
     }
 
+    /**
+     * refreshIfNecessary
+     */
     private void refreshIfNecessary() {
         // 20秒没更新 尝试更新
         if (System.currentTimeMillis() - IN_POSITION_UPDATE_TIME > 20000) {

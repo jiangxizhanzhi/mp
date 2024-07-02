@@ -9,11 +9,22 @@ public enum StatusEnum {
 
     YES;
 
+    /**
+     * fromValue
+     *
+     * @param ordinal
+     * @return
+     */
     @JsonCreator
     public static StatusEnum fromValue(Integer ordinal) {
         return values()[ordinal];
     }
 
+    /**
+     * toValue
+     *
+     * @return
+     */
     @JsonValue
     public Integer toValue() {
         return this.ordinal();

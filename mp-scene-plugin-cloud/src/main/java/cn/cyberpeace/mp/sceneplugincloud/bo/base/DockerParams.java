@@ -17,6 +17,11 @@ public class DockerParams {
     private String environmentStr;
     private Boolean tty;
 
+    /**
+     * setEnvironmentStr
+     *
+     * @param environmentStr
+     */
     public void setEnvironmentStr(String environmentStr) {
         if (this.environment == null || this.environment.isEmpty()) {
             this.environmentStr = environmentStr;
@@ -33,6 +38,11 @@ public class DockerParams {
         }
     }
 
+    /**
+     * setEnvironment
+     *
+     * @param environment
+     */
     public void setEnvironment(Map<String, String> environment) {
         this.environment = environment;
         this.environmentStr = StringUtils.EMPTY;

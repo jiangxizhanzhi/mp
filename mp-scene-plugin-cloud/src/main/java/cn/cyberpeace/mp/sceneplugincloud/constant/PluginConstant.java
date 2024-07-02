@@ -7,5 +7,8 @@ public class PluginConstant {
 
     public static final float PLUGIN_PRIORITY = 0;
 
+    /**
+     * PluginConstant
+     */
     private PluginConstant() {}
 }

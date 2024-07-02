@@ -9,11 +9,19 @@ public class RecreateTaskPool extends TaskPool {
         public static final RecreateTaskPool INSTANCE = new RecreateTaskPool();
     }
 
+    /**
+     * RecreateTaskPool
+     */
     private RecreateTaskPool() {
         super(CloudSingleton.cloudAppConfig.getRecreatePoolSize(),
                 CloudSingleton.cloudAppConfig.getRecreateHoldSize(), 60L);
     }
 
+    /**
+     * getInstance
+     *
+     * @return
+     */
     public static RecreateTaskPool getInstance() {
         return CreateTaskPoolInstance.INSTANCE;
     }

@@ -19,6 +19,11 @@ public class DevopsCacheConfig {
     public static final String CACHE_MANAGER_20S = "devopsCacheManager_20S";
 
 
+    /**
+     * devopsCacheManager20S
+     *
+     * @return
+     */
     @Bean(name = CACHE_MANAGER_20S)
     public CacheManager devopsCacheManager20S() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();

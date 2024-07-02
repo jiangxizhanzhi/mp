@@ -51,17 +51,34 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     private Integer TotalRam ;
     private Integer TotalDisk ;
 
+    /**
+     * createModel
+     *
+     * @return
+     */
     @Override
     public CsceneModel createModel() {
         return new CsceneModel();
     }
 
+    /**
+     * fromModel
+     *
+     * @param obj
+     * @param ignoreFields
+     */
     @Override
     public void fromModel(CsceneModel obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
                 BeanUtils.getBeanGetterFieldName(CsceneModel::getSceneConfig)));
     }
 
+    /**
+     * toModel
+     *
+     * @param ignoreFields
+     * @return
+     */
     @Override
     public CsceneModel toModel(String... ignoreFields) {
         CsceneModel obj = super.toModel(ArrayUtils.addAll(ignoreFields,
@@ -72,6 +89,11 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
         return obj;
     }
 
+    /**
+     * export
+     *
+     * @return
+     */
     @Override
     public CsceneBO export() {
         CsceneBO csceneBO = super.export();
@@ -84,6 +106,9 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
         return this;
     }
 
+    /**
+     * calHardware
+     */
     public void calHardware(){
         int cpu = 0 ,ram = 0 ,disk = 0 ;
         if(!this.sceneConfig.getPlugins().containsKey("cpcloud")) {
@@ -110,6 +135,11 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
         this.setTotalDisk(disk);
     }
 
+    /**
+     * exportToCsceneInstance
+     *
+     * @return
+     */
     public CsceneInstanceBO exportToCsceneInstance() {
         CsceneInstanceBO csceneInstance = export(CsceneInstanceBO.class, CsceneInstaneRoleBO.class,
                 CsceneBO::getType, CsceneBO::getSceneConfig, CsceneBO::getTestScenes, CsceneBO::getAppScenes);

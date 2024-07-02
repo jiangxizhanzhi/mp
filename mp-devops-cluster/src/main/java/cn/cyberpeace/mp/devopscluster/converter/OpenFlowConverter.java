@@ -51,6 +51,12 @@ public class OpenFlowConverter implements BaseConverter{
         return convertModel;
     }
 
+    /**
+     * getOpenFlowVO
+     *
+     * @param v
+     * @return 流表基础信息
+     */
     private OpenFlowVO getOpenFlowVO(OpenFlow v) {
         OpenFlowVO openFlowVO = openFlowVoConverter.sourceToTarget(v);
         Map<String, Object> matchConditionMap = convertMatchCondition(v.getMatchCondition());

@@ -8,6 +8,12 @@ import org.apache.commons.lang3.StringUtils;
 @Getter
 public class HandlerUtils {
 
+    /**
+     * genResourceName
+     *
+     * @param name
+     * @return
+     */
     public static String genResourceName(String name) {
         return StringUtils.joinWith("_",
                 cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils.genResourceName(name), "collection");

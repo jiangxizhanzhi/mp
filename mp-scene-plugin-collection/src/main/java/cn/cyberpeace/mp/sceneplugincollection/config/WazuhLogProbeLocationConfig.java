@@ -19,6 +19,9 @@ public class WazuhLogProbeLocationConfig {
 
     private static volatile boolean isInit = false;
 
+    /**
+     * init
+     */
     public static synchronized void init() {
         if (isInit) {
             return;
@@ -29,6 +32,11 @@ public class WazuhLogProbeLocationConfig {
         isInit = true;
     }
 
+    /**
+     * getLocations
+     *
+     * @return
+     */
     public List<ProbeLocation> getLocations() {
         return locations;
     }

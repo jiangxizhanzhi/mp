@@ -22,6 +22,12 @@ public class VirtualMachine extends CloudClient {
     private static final String CONFLICT = "Conflict";
     private static final String VM_ID = "{vm_id}";
 
+    /**
+     * create
+     *
+     * @param createData
+     * @return
+     */
     public VirtualMachineCreateData create(VirtualMachineCreateData createData) {
         heavyConcurrentWait();
 
@@ -31,6 +37,12 @@ public class VirtualMachine extends CloudClient {
         return result.getData();
     }
 
+    /**
+     * get
+     *
+     * @param instanceId
+     * @return
+     */
     public VirtualMachineGetResult get(String instanceId) {
         CloudResponse<VirtualMachineGetResult> result = cloudGet(CloudUrlConstant.GET_INSTANCE_URL.replace("{instance_id}", instanceId),
                 null, new TypeReference<>() {
@@ -41,6 +53,12 @@ public class VirtualMachine extends CloudClient {
         return null;
     }
 
+    /**
+     * delete
+     *
+     * @param deleteData
+     * @return boolean
+     */
     public boolean delete(VirtualMachineDeleteData deleteData) {
         heavyConcurrentWait();
 
@@ -50,6 +68,12 @@ public class VirtualMachine extends CloudClient {
         return true;
     }
 
+    /**
+     * pause
+     *
+     * @param instanceId
+     * @return boolean
+     */
     public boolean pause(String instanceId) {
         try {
             return doAction(instanceId, "stop");
@@ -65,6 +89,12 @@ public class VirtualMachine extends CloudClient {
         }
     }
 
+    /**
+     * unpause
+     *
+     * @param instanceId
+     * @return boolean
+     */
     public boolean unpause(String instanceId) {
         try {
             return doAction(instanceId, "start");
@@ -80,6 +110,12 @@ public class VirtualMachine extends CloudClient {
         }
     }
 
+    /**
+     * restart
+     *
+     * @param instanceId
+     * @return boolean
+     */
     public boolean restart(String instanceId) {
         try {
             return doAction(instanceId, "reboot");
@@ -94,6 +130,12 @@ public class VirtualMachine extends CloudClient {
         }
     }
 
+    /**
+     * resume
+     *
+     * @param instanceId
+     * @return boolean
+     */
     public boolean resume(String instanceId) {
         try {
             return doAction(instanceId, "resume");
@@ -109,6 +151,12 @@ public class VirtualMachine extends CloudClient {
         }
     }
 
+    /**
+     * suspend
+     *
+     * @param instanceId
+     * @return boolean
+     */
     public boolean suspend(String instanceId) {
         try {
             return doAction(instanceId, "suspend");
@@ -124,6 +172,12 @@ public class VirtualMachine extends CloudClient {
         }
     }
 
+    /**
+     * start
+     *
+     * @param instanceId
+     * @return boolean
+     */
     public boolean start(String instanceId) {
         try{
             return doAction(instanceId, "start");
@@ -139,6 +193,12 @@ public class VirtualMachine extends CloudClient {
         }
     }
 
+    /**
+     * stop
+     *
+     * @param instanceId
+     * @return boolean
+     */
     public boolean stop(String instanceId) {
         try{
             return doAction(instanceId, "stop");
@@ -154,6 +214,13 @@ public class VirtualMachine extends CloudClient {
         }
     }
 
+    /**
+     * resize
+     *
+     * @param instanceId
+     * @param flavorId
+     * @return
+     */
     @Deprecated
     public String resize(String instanceId, String flavorId) {
         VirtualMachineResizeData resizeData = new VirtualMachineResizeData();
@@ -169,6 +236,13 @@ public class VirtualMachine extends CloudClient {
         }
     }
 
+    /**
+     * getConsoleInfo
+     *
+     * @param instanceId
+     * @param hostname
+     * @return
+     */
     @Deprecated
     public ConsoleInfoGetResult getConsoleInfo(String instanceId, String hostname) {
         ConsoleInfoGetParam param = new ConsoleInfoGetParam();
@@ -178,12 +252,25 @@ public class VirtualMachine extends CloudClient {
                 ConsoleInfoGetResult.class);
     }
 
+    /**
+     * getComInfo
+     *
+     * @param instanceId
+     * @return
+     */
     public ComInfoGetResult getComInfo(String instanceId) {
         var response = cloudGet(CloudUrlConstant.COM_INFO_GET_URL.replace(VM_ID, instanceId), null, new TypeReference<CloudResponse<ComInfoGetResult>>() {
         }, true);
         return response.getData();
     }
 
+    /**
+     * doAction
+     *
+     * @param vmId
+     * @param action
+     * @return boolean
+     */
     private boolean doAction(String vmId, String action) {
         try {
             cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_LIFE_CONTROL_URL.replace(VM_ID, vmId)
@@ -195,6 +282,12 @@ public class VirtualMachine extends CloudClient {
         }
     }
 
+    /**
+     * instanceResize
+     *
+     * @param httpData
+     * @return
+     */
     @Deprecated
     private String instanceResize(VirtualMachineResizeData httpData) {
         try {
@@ -206,6 +299,13 @@ public class VirtualMachine extends CloudClient {
         }
     }
 
+    /**
+     * getAllInstance
+     *
+     * @param limit
+     * @param offset
+     * @return
+     */
     public List<VirtualMachineGetData> getAllInstance(Integer limit, Integer offset) {
         CommonQueryParam param = new CommonQueryParam();
         param.setLimit(limit);
@@ -218,6 +318,11 @@ public class VirtualMachine extends CloudClient {
         return null;
     }
 
+    /**
+     * deleteInstanceById
+     *
+     * @param instanceId
+     */
     public void deleteInstanceById(String instanceId) {
         heavyConcurrentWait();
 
@@ -225,6 +330,13 @@ public class VirtualMachine extends CloudClient {
         }, true);
     }
 
+    /**
+     * addPort
+     *
+     * @param instanceId
+     * @param port
+     * @return
+     */
     public VirtualMachineAddPortResult addPort(String instanceId, VirtualMachineAddPortData port) {
         CloudResponse<VirtualMachineAddPortResult> response = cloudPost(CloudUrlConstant.ADD_VM_PORTS.replace("{instance_id}", instanceId), port, null, new TypeReference<CloudResponse<VirtualMachineAddPortResult>>() {
         }, true);
@@ -232,6 +344,13 @@ public class VirtualMachine extends CloudClient {
         return response.getData();
     }
 
+    /**
+     * deletePort
+     *
+     * @param instanceId
+     * @param portId
+     * @return boolean
+     */
     public boolean deletePort(String instanceId, String portId) {
         String url = CloudUrlConstant.DELETE_VM_PORTS.replace("{instance_id}", instanceId);
         url = url.replace("{port_id}", portId);
@@ -240,6 +359,17 @@ public class VirtualMachine extends CloudClient {
         return true;
     }
 
+    /**
+     * snapshot
+     *
+     * @param instanceId
+     * @param image
+     * @param imageUUid
+     * @param snapshotName
+     * @param desc
+     * @param extInfo
+     * @return
+     */
     public SnapshotResultData snapshot(String instanceId, String image, String imageUUid, String snapshotName, String desc, Map<String, Object> extInfo) {
         SnapshotParams params = new SnapshotParams();
         params.setImageName(image);
@@ -254,12 +384,23 @@ public class VirtualMachine extends CloudClient {
         return response.getData();
     }
 
+    /**
+     * deleteSnapshot
+     *
+     * @param instanceId
+     * @param snapshotId
+     */
     public void deleteSnapshot(String instanceId, String snapshotId) {
         cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DELETE_SNAPSHOT_URL.replace(VM_ID, instanceId)
                 .replace("{snapshot_id}", snapshotId), null, null, new TypeReference<>() {
         }, true);
     }
 
+    /**
+     * uploadFile
+     *
+     * @param data
+     */
     @Deprecated
     public void uploadFile(VirtualMachineUploadFileData data) {
         CloudResponse<Object> response = cloudPost(CloudUrlConstant.SCP_FILE, data, null, new TypeReference<CloudResponse<Object>>() {
@@ -267,7 +408,13 @@ public class VirtualMachine extends CloudClient {
     }
 
 
-
+    /**
+     * snapshotAction
+     *
+     * @param instanceId
+     * @param snapshotId
+     * @param action
+     */
     public void snapshotAction(String instanceId, String snapshotId, String action) {
         cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_SNAPSHOT_ACTION_URL.replace(VM_ID, instanceId)
                         .replace("{snapshot_id}", snapshotId)
@@ -276,6 +423,12 @@ public class VirtualMachine extends CloudClient {
                 }, true);
     }
 
+    /**
+     * deleteByName
+     *
+     * @param resourceName
+     * @return boolean
+     */
     public boolean deleteByName(String resourceName) {
         heavyConcurrentWait();
 
@@ -300,6 +453,11 @@ public class VirtualMachine extends CloudClient {
         return true;
     }
 
+    /**
+     * execCmd
+     *
+     * @param data
+     */
     public void execCmd(VirtualMachineExecCmdData data) {
         try {
             cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_EXEC_CMD, data, null, new TypeReference<CloudResponse<Object>>() {
@@ -309,6 +467,13 @@ public class VirtualMachine extends CloudClient {
         }
     }
 
+    /**
+     * modify
+     *
+     * @param data
+     * @param vmId
+     * @return boolean
+     */
     public boolean modify(VirtualMachineModifyData data, String vmId) {
         var result = cloudPatch(CloudUrlConstant.VIRTUAL_MACHINE_MODIFY_URL.replace(VM_ID, vmId),
                 data, null, new TypeReference<CloudResponse<Object>>() {
@@ -317,23 +482,45 @@ public class VirtualMachine extends CloudClient {
     }
 
 
+    /**
+     * execCommand
+     *
+     * @param data
+     * @return
+     */
     @Deprecated
     public VirtualMachineExecuteResult execCommand(VirtualMachineExecCommandData data) {
         VirtualMachineExecuteResult virtualMachineExecuteResult = getHttpClient().post(CloudUrlConstant.SSH_CMD, data, null, VirtualMachineExecuteResult.class);
         return virtualMachineExecuteResult;
     }
+
+    /**
+     * attachISO
+     *
+     * @param data
+     */
     @Deprecated
     public void attachISO(VirtualMachineAttachISOData data) {
         cloudPost(CloudUrlConstant.ATTACH_ISO, data, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
     }
 
+    /**
+     * attachVirtualUsbs
+     *
+     * @param data
+     */
     @Deprecated
     public void attachVirtualUsbs(AttachVirtualUsbsData data) {
         cloudPost(CloudUrlConstant.ATTACH_VIRTUAL_USBS, data, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
     }
 
+    /**
+     * deleteVirtualUsbs
+     *
+     * @param data
+     */
     @Deprecated
     public void deleteVirtualUsbs(AttachVirtualUsbsData data) {
         cloudDelete(CloudUrlConstant.DELETE_VIRTUAL_USBS, data, null, new TypeReference<CloudResponse<Object>>() {
@@ -342,6 +529,7 @@ public class VirtualMachine extends CloudClient {
 
     /**
      * 虚拟机挂载实体USB
+     *
      * @param data
      */
     @Deprecated
@@ -360,6 +548,7 @@ public class VirtualMachine extends CloudClient {
 
     /**
      * 虚拟机卸载实体USB
+     *
      * @param data
      */
     @Deprecated
@@ -371,6 +560,11 @@ public class VirtualMachine extends CloudClient {
         log.info("VirtualMachine.deleteEntityUsbs end.");
     }
 
+    /**
+     * execControllerCmd
+     *
+     * @param cmd
+     */
     @Deprecated
     public void execControllerCmd(String cmd) {
         ExecHostCommandData execHostCommandData = new ExecHostCommandData();

@@ -44,26 +44,53 @@ public enum CloudPlatformEnum{
 
     private String desc;
 
+    /**
+     * CloudPlatformEnum
+     *
+     * @param state
+     * @param desc
+     */
     CloudPlatformEnum(String state, String desc) {
         this.state = state;
         this.desc = desc;
 
     }
 
+    /**
+     * getState
+     *
+     * @return
+     */
     public String getState() {
         return state;
     }
 
+    /**
+     * getDesc
+     *
+     * @return
+     */
     public String getDesc() {
         return desc;
     }
 
 
+    /**
+     * fromValue
+     *
+     * @param state
+     * @return 云平台枚举信息
+     */
     @JsonCreator
     public static CloudPlatformEnum fromValue(String state) {
         return map.get(state);
     }
 
+    /**
+     * toValue
+     *
+     * @return
+     */
     @JsonValue
     public String toValue() {
         Locale locale = LocaleContextHolder.getLocale();

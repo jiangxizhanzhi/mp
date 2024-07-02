@@ -42,6 +42,12 @@ public class VyosNetworkCommandUtils {
         modifyBuilderChains.add(new QosCmdBuilder());
     }
 
+    /**
+     * genOpenDhcpCommands
+     *
+     * @param ethSize
+     * @return
+     */
     public static List<String> genOpenDhcpCommands(int ethSize) {
         List<String> result = new ArrayList<>();
         for (int i = 0; i < ethSize; i++) {
@@ -50,6 +56,13 @@ public class VyosNetworkCommandUtils {
         return result;
     }
 
+    /**
+     * genNetworkCmdList
+     *
+     * @param element
+     * @param pluginHandler
+     * @return
+     */
     public static List<String> genNetworkCmdList(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler) {
         ConfigParamsWrapper paramsWrapper = new ConfigParamsWrapper(element, pluginHandler);
         List<String> result = new ArrayList<>();
@@ -60,6 +73,13 @@ public class VyosNetworkCommandUtils {
         return result;
     }
 
+    /**
+     * genModifyNetworkCmdList
+     *
+     * @param element
+     * @param pluginHandler
+     * @return
+     */
     public static List<String> genModifyNetworkCmdList(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler) {
         ConfigParamsWrapper paramsWrapper = new ConfigParamsWrapper(element, pluginHandler);
         List<String> result = new ArrayList<>();
@@ -76,6 +96,12 @@ public class VyosNetworkCommandUtils {
         List<CloudPluginSceneElementPortBO> pluginPorts;
         List<SceneElementPortBO> ports;
 
+        /**
+         * ConfigParamsWrapper
+         *
+         * @param element
+         * @param pluginHandler
+         */
         public ConfigParamsWrapper(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler) {
             this.element = element;
             this.pluginHandler = pluginHandler;
@@ -96,6 +122,12 @@ public class VyosNetworkCommandUtils {
     }
 
     private interface NetworkingCmdBuilder {
+        /**
+         * build
+         *
+         * @param paramsWrapper
+         * @return
+         */
         List<String> build(ConfigParamsWrapper paramsWrapper);
     }
 
@@ -103,6 +135,12 @@ public class VyosNetworkCommandUtils {
         private static String SET_INTERFACE_IP = "set interfaces ethernet eth%s address %s";
         private static String SET_INTERFACE_MTU = "set interfaces ethernet eth%s mtu 1442";
 
+        /**
+         * build
+         *
+         * @param paramsWrapper
+         * @return
+         */
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             CloudPluginSceneElementBO element = paramsWrapper.element;
@@ -128,6 +166,12 @@ public class VyosNetworkCommandUtils {
     private static class RouterNameCmdBuilder implements NetworkingCmdBuilder {
         private String SET_HOST_NAME = "set system host-name %s";
 
+        /**
+         * build
+         *
+         * @param paramsWrapper
+         * @return
+         */
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             return List.of(
@@ -144,6 +188,12 @@ public class VyosNetworkCommandUtils {
         private static String SET_NEXT_HOP_INTERFACE = "next-hop-interface eth%s";
         private static String SET_ROUTER_ID = "set protocols ospf parameters router-id %s";
 
+        /**
+         * build
+         *
+         * @param paramsWrapper
+         * @return
+         */
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             CloudPluginSceneElementBO element = paramsWrapper.element;
@@ -176,6 +226,12 @@ public class VyosNetworkCommandUtils {
         private static String SET_INTERFACES = "set interfaces ethernet eth%s address %s";
         private static String SET_AREA = "set protocols ospf area %s network %s";
 
+        /**
+         * build
+         *
+         * @param paramsWrapper
+         * @return
+         */
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             if (CollectionUtils.isEmpty(paramsWrapper.pluginPorts)) {
@@ -217,6 +273,12 @@ public class VyosNetworkCommandUtils {
         private static String SET_NEIGHBOR_BFD = "set protocols bgp %s neighbor %s bfd";
         private static String SET_NEIGHBOR_AS = "set protocols bgp %s neighbor %s remote-as %s";
 
+        /**
+         * build
+         *
+         * @param paramsWrapper
+         * @return
+         */
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             if (CollectionUtils.isEmpty(paramsWrapper.pluginPorts)) {
@@ -278,6 +340,12 @@ public class VyosNetworkCommandUtils {
 
         private String REDISTRIBUTE = "set protocols rip redistribute connected";
 
+        /**
+         * build
+         *
+         * @param paramsWrapper
+         * @return
+         */
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             if (CollectionUtils.isEmpty(paramsWrapper.pluginPorts)) {
@@ -343,6 +411,12 @@ public class VyosNetworkCommandUtils {
         //绑定设置的策略（该策略只支持出站流量）
         private String BIND_OUT_TRAFFIC_POLICY = "set interfaces ethernet eth%s traffic-policy out snpolicy%s";
 
+        /**
+         * build
+         *
+         * @param paramsWrapper
+         * @return
+         */
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             if (CollectionUtils.isEmpty(paramsWrapper.pluginPorts)) {
@@ -382,6 +456,15 @@ public class VyosNetworkCommandUtils {
         }
     }
 
+    /**
+     * isQosChange
+     *
+     * @param originElement
+     * @param originPluginHandler
+     * @param newElement
+     * @param newPluginHandler
+     * @return boolean
+     */
     public static boolean isQosChange(CloudPluginSceneElementBO originElement, CloudScenePluginHandler originPluginHandler, CloudPluginSceneElementBO newElement, CloudScenePluginHandler newPluginHandler) {
         ConfigParamsWrapper originWrapper = new ConfigParamsWrapper(originElement, originPluginHandler);
         ConfigParamsWrapper newWrapper = new ConfigParamsWrapper(newElement, newPluginHandler);
@@ -410,11 +493,27 @@ public class VyosNetworkCommandUtils {
         return originKeys.size() != 0;
     }
 
+    /**
+     * isProtocolsChange
+     *
+     * @param originElement
+     * @param originPluginHandler
+     * @param newElement
+     * @param newPluginHandler
+     * @return boolean
+     */
     public static boolean isProtocolsChange(CloudPluginSceneElementBO originElement, CloudScenePluginHandler originPluginHandler, CloudPluginSceneElementBO newElement, CloudScenePluginHandler newPluginHandler) {
         return isProtocolsChange(new ConfigParamsWrapper(originElement, originPluginHandler),
                 new ConfigParamsWrapper(newElement, newPluginHandler));
     }
 
+    /**
+     * isProtocolsChange
+     *
+     * @param originWrapper
+     * @param newWrapper
+     * @return boolean
+     */
     private static boolean isProtocolsChange(ConfigParamsWrapper originWrapper, ConfigParamsWrapper newWrapper) {
         CloudPluginSceneElementBO originCloudElement = originWrapper.element;
         CloudPluginSceneElementBO newCloudElement = newWrapper.element;
@@ -426,6 +525,13 @@ public class VyosNetworkCommandUtils {
         return isProtocolsChange(originPorts, newPorts);
     }
 
+    /**
+     * isProtocolsChange
+     *
+     * @param originPorts
+     * @param newPorts
+     * @return boolean
+     */
     private static boolean isProtocolsChange(List<CloudPluginSceneElementPortBO> originPorts, List<CloudPluginSceneElementPortBO> newPorts) {
         if (CollectionUtils.isEmpty(originPorts) && CollectionUtils.isEmpty(newPorts)) {
             // 都没有端口
@@ -451,6 +557,12 @@ public class VyosNetworkCommandUtils {
         }
     }
 
+    /**
+     * keys
+     *
+     * @param ports
+     * @return
+     */
     private static Set<String> keys(List<CloudPluginSceneElementPortBO> ports) {
         Set<String> keys = new HashSet<>();
         for (CloudPluginSceneElementPortBO p : ports) {
@@ -461,6 +573,12 @@ public class VyosNetworkCommandUtils {
         return keys;
     }
 
+    /**
+     * ripKey
+     *
+     * @param portBO
+     * @return
+     */
     private static String ripKey(CloudPluginSceneElementPortBO portBO) {
         List<String> result = Arrays.asList("rip",
                 Optional.ofNullable(portBO.getRipIp()).orElse(StringUtils.EMPTY),
@@ -469,6 +587,12 @@ public class VyosNetworkCommandUtils {
     }
 
 
+    /**
+     * ospfKey
+     *
+     * @param portBO
+     * @return
+     */
     private static String ospfKey(CloudPluginSceneElementPortBO portBO) {
         List<String> result = Arrays.asList("ospf",
                 Optional.ofNullable(portBO.getOspfArea()).orElse(StringUtils.EMPTY),
@@ -476,6 +600,12 @@ public class VyosNetworkCommandUtils {
         return StringUtils.join(result, "_");
     }
 
+    /**
+     * bgpKey
+     *
+     * @param portBO
+     * @return
+     */
     private static String bgpKey(CloudPluginSceneElementPortBO portBO) {
         List<String> result = Arrays.asList("bgp",
                 Optional.ofNullable(portBO.getBgpAs()).orElse(StringUtils.EMPTY),

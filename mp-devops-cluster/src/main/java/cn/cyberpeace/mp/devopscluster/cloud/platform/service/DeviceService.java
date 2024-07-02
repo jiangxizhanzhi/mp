@@ -46,6 +46,11 @@ public class DeviceService extends BaseCpService {
      */
     private static final String DELETE_DEVICES_BY_UUIDS = "/cloud/v1/device/batch_delete";
 
+    /**
+     * DeviceService
+     *
+     * @param devopsClusterConfig
+     */
     public DeviceService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }

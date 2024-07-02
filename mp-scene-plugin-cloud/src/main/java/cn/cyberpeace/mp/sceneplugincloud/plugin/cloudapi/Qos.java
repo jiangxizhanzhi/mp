@@ -9,6 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Qos extends CloudClient {
+    /**
+     * create
+     *
+     * @param createData
+     * @return boolean
+     */
     public boolean create(QosCreateData createData) {
         heavyConcurrentWait();
 

@@ -88,6 +88,13 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
     private String ripIp;
     @ApiModelProperty(value = "ip下的邻居")
     private String ripPear;
+
+    /**
+     * fromModel
+     *
+     * @param obj
+     * @param ignoreFields
+     */
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
@@ -99,6 +106,12 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
                 : JsonCommon.parse(obj.getAccessModes(), new TypeReference<List<CloudAccessMode>>(){});
     }
 
+    /**
+     * toModel
+     *
+     * @param ignoreFields
+     * @return
+     */
     @Override
     public M toModel(String... ignoreFields) {
         M obj = super.toModel(ArrayUtils.addAll(ignoreFields,

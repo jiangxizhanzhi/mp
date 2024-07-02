@@ -10,6 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class VirtualPort extends CloudClient {
 
+    /**
+     * create
+     *
+     * @param createData
+     * @return
+     */
     public VirtualPortCreateResult create(VirtualPortCreateData createData) {
         heavyConcurrentWait();
 
@@ -18,6 +24,12 @@ public class VirtualPort extends CloudClient {
         return result.getData();
     }
 
+    /**
+     * update
+     *
+     * @param updateData
+     * @return
+     */
     public VirtualPortUpdateResult update(VirtualPortUpdateData updateData) {
         heavyConcurrentWait();
 
@@ -26,6 +38,11 @@ public class VirtualPort extends CloudClient {
         return result.getData();
     }
 
+    /**
+     * modifyInstanceIp
+     *
+     * @param data
+     */
     public void modifyInstanceIp(ModifyInstanceIpData data) {
         heavyConcurrentWait();
 
@@ -33,6 +50,12 @@ public class VirtualPort extends CloudClient {
         }, true);
     }
 
+    /**
+     * createQosRules
+     *
+     * @param data
+     * @return
+     */
     public CreateQosRuleData createQosRules(CreateQosRuleData data) {
         heavyConcurrentWait();
 
@@ -42,6 +65,11 @@ public class VirtualPort extends CloudClient {
         return result.getData();
     }
 
+    /**
+     * updateQosRules
+     *
+     * @param data
+     */
     public void updateQosRules(UpdateQosRuleData data) {
         heavyConcurrentWait();
 

@@ -19,6 +19,12 @@ public enum CloudErrorCode implements ErrorCode {
     UN_SUPPORT_STATIC_ROUTE("MP-110711", "un_support_static_route"),
     UN_SUPPORT_OPERATE("MP-110712", "un_support_operate");
 
+    /**
+     * CloudErrorCode
+     *
+     * @param code
+     * @param message
+     */
     CloudErrorCode(String code, String message) {
         setCode(code, "sceneplugincloud.error_code." + message);
     }

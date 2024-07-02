@@ -65,6 +65,11 @@ public final class NodeLimitUtils {
         return updateElementCount(count);
     }
 
+    /**
+     * refreshCount
+     *
+     * @param count
+     */
     public synchronized static void refreshCount(int count) {
         if (csceneAppConfig == null) {
             csceneAppConfig = BeanCommon.getBean(CsceneAppConfig.class);
@@ -76,6 +81,12 @@ public final class NodeLimitUtils {
         log.info("refresh node limit count , new count: {} , {}", SCENE_USING_NODE_LIMIT, count);
     }
 
+    /**
+     * updateElementCount
+     *
+     * @param count
+     * @return
+     */
     private synchronized static UpdateResult updateElementCount(int count) {
         log.info("current node num {},update num {},limit num {}", NODE_COUNT, count, csceneAppConfig.getSceneUsingNodeLimit());
         if (count > 0) {
@@ -160,6 +171,12 @@ public final class NodeLimitUtils {
         return elementCount;
     }
 
+    /**
+     * isLimitedNode
+     *
+     * @param virtualType
+     * @return boolean
+     */
     public static boolean isLimitedNode(Integer virtualType) {
         if (virtualType == null) {
             return false;

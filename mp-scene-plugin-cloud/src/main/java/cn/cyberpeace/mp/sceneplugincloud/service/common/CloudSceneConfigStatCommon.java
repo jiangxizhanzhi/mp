@@ -21,6 +21,13 @@ import java.util.List;
 public class CloudSceneConfigStatCommon extends CloudSceneStatCommonBase<CloudPluginSceneConfigElementMapper,
         CloudPluginSceneConfigElementPortMapper> {
 
+    /**
+     * genNodeCondition
+     *
+     * @param sceneIds
+     * @param nodeIds
+     * @return 查询条件构造器
+     */
     @Override
     protected HumanCondition genNodeCondition(List<String> sceneIds, List<String> nodeIds) {
         HumanCondition condition = new HumanCondition()
@@ -40,6 +47,13 @@ public class CloudSceneConfigStatCommon extends CloudSceneStatCommonBase<CloudPl
         return condition;
     }
 
+    /**
+     * genNodePortCondition
+     *
+     * @param sceneIds
+     * @param nodeIds
+     * @return 查询条件构造器
+     */
     @Override
     protected HumanCondition genNodePortCondition(List<String> sceneIds, List<String> nodeIds) {
         HumanCondition condition = new HumanCondition()
@@ -68,6 +82,12 @@ public class CloudSceneConfigStatCommon extends CloudSceneStatCommonBase<CloudPl
         return condition;
     }
 
+    /**
+     * CloudSceneConfigStatCommon
+     *
+     * @param cloudPluginSceneConfigElementMapper
+     * @param cloudPluginSceneConfigElementPortMapper
+     */
     @Autowired
     public CloudSceneConfigStatCommon(CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper,
                                       CloudPluginSceneConfigElementPortMapper cloudPluginSceneConfigElementPortMapper) {

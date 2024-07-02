@@ -14,10 +14,21 @@ public class ElementCreateHandler extends HandlerCommon {
     public static class ElementProcess {
     }
 
+    /**
+     * ElementCreateHandler
+     *
+     * @param pluginHandler
+     * @param event
+     */
     public ElementCreateHandler(CollectionScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, CreateTaskPool.getInstance(), event);
     }
 
+    /**
+     * createElement
+     *
+     * @param element
+     */
     public void createElement(CollectionPluginSceneElementBO element) {
         return;
     }

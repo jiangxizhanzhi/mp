@@ -20,10 +20,21 @@ public class NetClearJob extends AbstractClearJob<NetworkData> {
     private VirtualSwitch virtualSwitch = new VirtualSwitch();
     private Network netClient = new Network();
 
+    /**
+     * NetClearJob
+     *
+     * @param sceneElementMapper
+     */
     public NetClearJob(SceneElementMapper sceneElementMapper) {
         super(sceneElementMapper);
     }
 
+    /**
+     * getEid2Node
+     *
+     * @param nets
+     * @return
+     */
     @Override
     protected Map<String, NetworkData> getEid2Node(List<NetworkData> nets) {
         Map<String, NetworkData> result = new HashMap<>();
@@ -38,16 +49,32 @@ public class NetClearJob extends AbstractClearJob<NetworkData> {
         return result;
     }
 
+    /**
+     * doQuery
+     *
+     * @param offset
+     * @return
+     */
     @Override
     protected List<NetworkData> doQuery(int offset) {
         return netClient.getAll(LIMIT, offset);
     }
 
+    /**
+     * doClear
+     *
+     * @param data
+     */
     @Override
     protected void doClear(NetworkData data) {
         virtualSwitch.deleteById(data.getId());
     }
 
+    /**
+     * forceClear
+     *
+     * @param data
+     */
     @Override
     protected void forceClear(NetworkData data) {
 

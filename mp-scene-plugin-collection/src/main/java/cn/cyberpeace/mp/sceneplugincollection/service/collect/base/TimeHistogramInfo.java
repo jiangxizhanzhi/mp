@@ -10,6 +10,13 @@ public class TimeHistogramInfo {
     private long count;
     private LocalDateTime localDateTime;
 
+    /**
+     * TimeHistogramInfo
+     *
+     * @param time
+     * @param count
+     * @param localDateTime
+     */
     public TimeHistogramInfo(String time, long count, LocalDateTime localDateTime) {
         this.time = time;
         this.count = count;

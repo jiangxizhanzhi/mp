@@ -6,6 +6,11 @@ import lombok.Data;
 
 @Data
 public class CsceneRoleBO extends BaseCsceneRoleBO<CsceneRoleModel, CsceneRoleBO> {
+    /**
+     * createModel
+     *
+     * @return
+     */
     @Override
     public CsceneRoleModel createModel() {
         return new CsceneRoleModel();

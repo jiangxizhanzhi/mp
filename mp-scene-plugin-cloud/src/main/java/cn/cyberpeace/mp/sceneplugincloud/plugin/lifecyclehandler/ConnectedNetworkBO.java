@@ -19,16 +19,34 @@ public class ConnectedNetworkBO {
 
     HandlerUtils handlerUtils;
 
+    /**
+     * ConnectedNetworkBO
+     *
+     * @param network
+     * @param handlerUtils
+     */
     public ConnectedNetworkBO(CloudPluginSceneElementNetworkBO network, HandlerUtils handlerUtils) {
         this.network = network;
         this.connectPorts = new ArrayList<>();
         this.handlerUtils = handlerUtils;
     }
 
+    /**
+     * getNetwork
+     *
+     * @return
+     */
     public CloudPluginSceneElementNetworkBO getNetwork() {
         return network;
     }
 
+    /**
+     * addPort
+     *
+     * @param from
+     * @param to
+     * @param create
+     */
     public void addPort(SceneElementPortBO from, SceneElementPortBO to, boolean create) {
         this.connectPorts.add(new ConnectPort(from, to));
         if (create) {
@@ -37,6 +55,11 @@ public class ConnectedNetworkBO {
         handlerUtils.addNetwork(from, network);
     }
 
+    /**
+     * getFromPorts
+     *
+     * @return
+     */
     public List<SceneElementPortBO> getFromPorts() {
         List<SceneElementPortBO> fromPorts = new ArrayList<>();
         connectPorts.forEach(cp -> {
@@ -47,6 +70,11 @@ public class ConnectedNetworkBO {
         return fromPorts;
     }
 
+    /**
+     * getToPorts
+     *
+     * @return
+     */
     public List<SceneElementPortBO> getToPorts() {
         List<SceneElementPortBO> toPorts = new ArrayList<>();
         connectPorts.forEach(cp -> {
@@ -61,6 +89,12 @@ public class ConnectedNetworkBO {
         SceneElementPortBO from;
         SceneElementPortBO to;
 
+        /**
+         * ConnectPort
+         *
+         * @param from
+         * @param to
+         */
         public ConnectPort(SceneElementPortBO from, SceneElementPortBO to) {
             this.from = from;
             this.to = to;

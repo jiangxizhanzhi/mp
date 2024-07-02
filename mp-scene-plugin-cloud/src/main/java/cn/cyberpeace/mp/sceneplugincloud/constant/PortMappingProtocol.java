@@ -4,5 +4,8 @@ public class PortMappingProtocol {
     public static final String TCP = "tcp";
     public static final String UDP = "udp";
 
+    /**
+     * PortMappingProtocol
+     */
     private PortMappingProtocol() {}
 }

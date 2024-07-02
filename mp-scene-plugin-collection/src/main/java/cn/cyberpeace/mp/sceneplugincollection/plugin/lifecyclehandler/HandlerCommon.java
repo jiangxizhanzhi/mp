@@ -24,6 +24,13 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CollectionScene
     @Getter
     private SceneElementPluginMapper sceneElementPluginMapper ;
 
+    /**
+     * HandlerCommon
+     *
+     * @param pluginHandler
+     * @param taskPool
+     * @param event
+     */
     public HandlerCommon(CollectionScenePluginHandler pluginHandler, TaskPool taskPool, int event) {
         super(pluginHandler, taskPool, event);
         flowCollector = BeanCommon.getBean(FlowCollector.class);

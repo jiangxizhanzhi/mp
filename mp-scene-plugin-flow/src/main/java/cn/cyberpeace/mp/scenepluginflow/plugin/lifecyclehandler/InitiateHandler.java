@@ -9,10 +9,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class InitiateHandler extends HandlerCommon {
 
+    /**
+     * InitiateHandler
+     *
+     * @param pluginHandler
+     */
     public InitiateHandler(FlowScenePluginHandler pluginHandler) {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.INITIATE);
     }
 
+    /**
+     * initiate
+     */
     public void initiate() {
         CloudScenePluginHandler pluginHandler = getPluginHandler().getSceneHandler().getPluginHandler("cpcloud");
         pluginHandler.getScene().setEnableRate(true);

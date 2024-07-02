@@ -18,10 +18,21 @@ public class VrClearJob extends AbstractClearJob<VirtualRouterGetData> {
 
     private VirtualRouter vrClient = new VirtualRouter();
 
+    /**
+     * VrClearJob
+     *
+     * @param sceneElementMapper
+     */
     public VrClearJob(SceneElementMapper sceneElementMapper) {
         super(sceneElementMapper);
     }
 
+    /**
+     * getEid2Node
+     *
+     * @param vrs
+     * @return
+     */
     @Override
     protected Map<String, VirtualRouterGetData> getEid2Node(List<VirtualRouterGetData> vrs) {
         Map<String, VirtualRouterGetData> result = new HashMap<>();
@@ -36,16 +47,32 @@ public class VrClearJob extends AbstractClearJob<VirtualRouterGetData> {
         return result;
     }
 
+    /**
+     * doQuery
+     *
+     * @param offset
+     * @return
+     */
     @Override
     protected List<VirtualRouterGetData> doQuery(int offset) {
         return vrClient.getAllRouters(LIMIT, offset);
     }
 
+    /**
+     * doClear
+     *
+     * @param data
+     */
     @Override
     protected void doClear(VirtualRouterGetData data) {
         vrClient.deleteRouterById(data.getId());
     }
 
+    /**
+     * forceClear
+     *
+     * @param data
+     */
     @Override
     protected void forceClear(VirtualRouterGetData data) {
         vrClient.deleteRouterById(data.getId());

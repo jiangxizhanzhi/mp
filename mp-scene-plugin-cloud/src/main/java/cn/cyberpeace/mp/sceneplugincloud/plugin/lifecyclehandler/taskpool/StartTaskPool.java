@@ -16,11 +16,19 @@ public class StartTaskPool extends TaskPool {
         public static final StartTaskPool INSTANCE = new StartTaskPool();
     }
 
+    /**
+     * StartTaskPool
+     */
     private StartTaskPool() {
         super(CloudSingleton.cloudAppConfig.getStartPoolSize(),
             CloudSingleton.cloudAppConfig.getStartHoldSize(), 60L);
     }
 
+    /**
+     * getInstance
+     *
+     * @return
+     */
     public static StartTaskPool getInstance() {
         return StartTaskPool.StartTaskPoolInstance.INSTANCE;
     }

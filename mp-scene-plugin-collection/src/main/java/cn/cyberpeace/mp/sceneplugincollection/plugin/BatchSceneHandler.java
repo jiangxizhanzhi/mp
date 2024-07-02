@@ -66,20 +66,41 @@ public class BatchSceneHandler {
 
     private Map<String, SceneHandler> id2SceneHandler = new HashMap<>();
 
+    /**
+     * BatchSceneHandler
+     *
+     * @param sceneIds
+     * @param nodeIds
+     */
     public BatchSceneHandler(List<String> sceneIds, List<String> nodeIds) {
         this.sceneIds = sceneIds;
         this.nodeIds = nodeIds;
         this.init();
     }
 
+    /**
+     * getEarliestStartTime
+     *
+     * @return
+     */
     public LocalDateTime getEarliestStartTime() {
         return earliestStartTime;
     }
 
+    /**
+     * getLatestUpdateTime
+     *
+     * @return
+     */
     public LocalDateTime getLatestUpdateTime(){
         return latestUpdateTime;
     }
 
+    /**
+     * getLatestSceneRunningTime
+     *
+     * @return
+     */
     public LocalDateTime getLatestSceneRunningTime() {
         LocalDateTime dateTime = null;
         for (SceneHandler s : id2SceneHandler.values()) {
@@ -96,14 +117,30 @@ public class BatchSceneHandler {
         return dateTime == null ? LocalDateTime.now() : dateTime;
     }
 
+    /**
+     * getFlowCollectors
+     *
+     * @return
+     */
     public List<String> getFlowCollectors() {
         return flowCollectors;
     }
 
+    /**
+     * getProbeCollectors
+     *
+     * @return
+     */
     public List<String> getProbeCollectors() {
         return probeCollectors;
     }
 
+    /**
+     * getNodeByMacAddr
+     *
+     * @param macAddr
+     * @return
+     */
     public SceneElementBO getNodeByMacAddr(String macAddr) {
         return this.allMac2ElementMap.get(macAddr);
     }
@@ -140,83 +177,188 @@ public class BatchSceneHandler {
         return allIp2ElementMapForScene;
     }
 
+    /**
+     * getAllIp2SceneIdMap
+     *
+     * @return
+     */
     public Map<String, String> getAllIp2SceneIdMap() {
         return allIp2SceneIdMap;
     }
 
+    /**
+     * getAllMac2SceneIdMap
+     *
+     * @return
+     */
     public Map<String, String> getAllMac2SceneIdMap() {
         return allMac2SceneIdMap;
     }
 
+    /**
+     * setAllMac2SceneIdMap
+     *
+     * @param allMac2SceneIdMap
+     */
     public void setAllMac2SceneIdMap(Map<String, String> allMac2SceneIdMap) {
         this.allMac2SceneIdMap = allMac2SceneIdMap;
     }
 
+    /**
+     * getNodeByNodeId
+     *
+     * @param nodeId
+     * @return
+     */
     public SceneElementBO getNodeByNodeId(String nodeId) {
         return this.allNodeId2ElementMap.get(nodeId);
     }
 
+    /**
+     * getNodeByIpAddr
+     *
+     * @param ip
+     * @return
+     */
     public SceneElementBO getNodeByIpAddr(String ip) {
         return this.allIp2ElementMap.get(ip);
     }
 
+    /**
+     * getSceneIdByIpAddr
+     *
+     * @param ip
+     * @return
+     */
     public String getSceneIdByIpAddr(String ip) {
         return this.allIp2SceneIdMap.get(ip);
     }
 
+    /**
+     * getAllMacAddrs
+     *
+     * @return
+     */
     public List<String> getAllMacAddrs() {
         return new ArrayList<>(this.allMac2ElementMap.keySet());
     }
 
+    /**
+     * getAllIpAddrs
+     *
+     * @return
+     */
     public List<String> getAllIpAddrs() {
         return new ArrayList<>(this.allIp2ElementMap.keySet());
     }
 
+    /**
+     * getFlowCollectedMacAddrs
+     *
+     * @return
+     */
     public List<String> getFlowCollectedMacAddrs() {
         return new ArrayList<>(this.flowCollectEnabledMacAddrs);
     }
 
+    /**
+     * getFlowCollectedIpAddrs
+     *
+     * @return
+     */
     public List<String> getFlowCollectedIpAddrs() {
         return new ArrayList<>(this.flowCollectEnabledIpAddrs);
     }
 
+    /**
+     * getProbeEnabledNodeId2EidMap
+     *
+     * @return
+     */
     public Map<String, String> getProbeEnabledNodeId2EidMap() {
         return probeEnabledNodeId2EidMap;
     }
 
+    /**
+     * getNodeId2NodenameMap
+     *
+     * @return
+     */
     public Map<String, String> getNodeId2NodenameMap() {
         return nodeId2NodenameMap;
     }
 
+    /**
+     * getNodeByEid
+     *
+     * @param eid
+     * @return
+     */
     public SceneElementBO getNodeByEid(String eid) {
         return this.allEid2ElementMap.get(eid);
     }
 
+    /**
+     * getAllEid2ElementMap
+     *
+     * @return
+     */
     public Map<String, SceneElementBO> getAllEid2ElementMap() {
         return this.allEid2ElementMap;
     }
 
+    /**
+     * getAllIps
+     *
+     * @return
+     */
     public List<String> getAllIps() {
         return new ArrayList<>(this.allIp2ElementMap.keySet());
     }
 
+    /**
+     * getIpsByNodeId
+     *
+     * @param nodeId
+     * @return
+     */
     public List<String> getIpsByNodeId(String nodeId) {
         return this.nodeId2Ips.get(nodeId);
     }
 
+    /**
+     * getCategory2CountInfo
+     *
+     * @return
+     */
     public Map<Integer, CategoryGroupBO> getCategory2CountInfo() {
         return this.category2CountInfo;
     }
 
+    /**
+     * getCollectionScenePluginHandler
+     *
+     * @param sceneId
+     * @return
+     */
     public CollectionScenePluginHandler getCollectionScenePluginHandler(String sceneId) {
         return this.id2SceneHandler.get(sceneId).getPluginHandler(PluginConstant.PLUGIN_KEY);
     }
 
+    /**
+     * getCloudScenePluginHandler
+     *
+     * @param sceneId
+     * @return
+     */
     public CloudScenePluginHandler getCloudScenePluginHandler(String sceneId) {
         return this.id2SceneHandler.get(sceneId)
                 .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
     }
 
+    /**
+     * init
+     */
     private void init() {
         for (String sceneId : sceneIds) {
             SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
@@ -261,6 +403,14 @@ public class BatchSceneHandler {
         }
     }
 
+    /**
+     * handlerElement
+     *
+     * @param sceneId
+     * @param srcElements
+     * @param pluginHandler
+     * @param cloudPlugin
+     */
     private void handlerElement(String sceneId, List<SceneElementBO> srcElements, CollectionScenePluginHandler pluginHandler, CloudScenePluginHandler cloudPlugin) {
         srcElements.forEach(srcElement -> {
             this.allEid2ElementMap.put(srcElement.getEid(), srcElement);
@@ -309,6 +459,13 @@ public class BatchSceneHandler {
         });
     }
 
+    /**
+     * getSrcElements
+     *
+     * @param sceneHandler
+     * @param nodeIds
+     * @return
+     */
     private List<SceneElementBO> getSrcElements(SceneHandler sceneHandler, List<String> nodeIds) {
         List<SceneElementBO> srcElements;
         if (nodeIds == null || nodeIds.isEmpty()) {
@@ -325,6 +482,12 @@ public class BatchSceneHandler {
         return srcElements;
     }
 
+    /**
+     * getMacByIp
+     *
+     * @param ip
+     * @return
+     */
     public String getMacByIp(String ip) {
         SceneElementBO elementBO = this.allIp2ElementMap.get(ip);
         if (elementBO != null && CollectionUtils.isNotEmpty(elementBO.getPorts())) {

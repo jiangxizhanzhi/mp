@@ -28,6 +28,13 @@ public class AsyncTargetTask implements ITask<ServiceResult<Integer>, List<Devic
 
     private final DevopsTargetService devopsTargetService;
 
+    /**
+     * execute
+     *
+     * @param deviceList
+     * @param params
+     * @return 统一服务返回结果
+     */
     @Transactional
     @Override
     public ServiceResult execute(List<Device> deviceList, Map<String, Object> params) {

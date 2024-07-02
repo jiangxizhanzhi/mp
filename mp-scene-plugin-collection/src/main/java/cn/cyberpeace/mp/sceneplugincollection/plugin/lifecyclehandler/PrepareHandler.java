@@ -22,10 +22,20 @@ import java.util.List;
 public class PrepareHandler extends HandlerCommon {
 
 
+    /**
+     * PrepareHandler
+     *
+     * @param pluginHandler
+     */
     public PrepareHandler(CollectionScenePluginHandler pluginHandler) {
         super(pluginHandler, RecreateTaskPool.getInstance(), SceneElementModel.Event.INITIATE);
     }
 
+    /**
+     * prepare
+     *
+     * @param partialStart
+     */
     public void prepare(boolean partialStart) {
         SceneStageRecorder stageRecorder = getPluginHandler().getSceneHandler().getSceneStageRecorder();
 

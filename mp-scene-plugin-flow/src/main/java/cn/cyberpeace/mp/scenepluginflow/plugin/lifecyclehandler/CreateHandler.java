@@ -34,10 +34,18 @@ public class CreateHandler extends HandlerCommon {
     }
 
 
+    /**
+     * CreateHandler
+     *
+     * @param pluginHandler
+     */
     public CreateHandler(FlowScenePluginHandler pluginHandler) {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.CREATE);
     }
 
+    /**
+     * create
+     */
     public void create() {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
 

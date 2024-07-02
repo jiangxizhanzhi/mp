@@ -24,15 +24,25 @@ public class CloudResponse<T> {
     private Boolean success;
 
 
-
+    /**
+     * setRequestError
+     */
     public void setRequestError() {
         setCode(EXCEPTION_CODE);
     }
 
+    /**
+     * setParseError
+     */
     public void setParseError() {
         setCode(EXCEPTION_CODE);
     }
 
+    /**
+     * isSuccess
+     *
+     * @return boolean
+     */
     public boolean isSuccess() {
         return StringUtils.isEmpty(code) || SUCCESS_CODE.equals(code);
     }

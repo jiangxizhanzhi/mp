@@ -24,10 +24,20 @@ public class RabbitmqCsceneReporter {
     @Resource
     private CsceneAppConfig csceneAppConfig;
 
+    /**
+     * reportDeleteCsceneInstance
+     *
+     * @param csceneInstanceId
+     */
     public void reportDeleteCsceneInstance(String csceneInstanceId) {
         messageSender.send(csceneInstanceId, MESSAGE_TYPE_DELETE_CSCENE_INSTANCE, null, csceneAppConfig.getSceneMessageTimeout());
     }
 
+    /**
+     * reportElementCommon
+     *
+     * @param csceneElement
+     */
     public void reportElementCommon(CollectedCsceneElementCommonBO<?> csceneElement) {
         if (StringUtils.isEmpty(csceneElement.getCsceneId())) {
             csceneElement.setCsceneId(CsceneContextHolder.getCsceneInstanceId());

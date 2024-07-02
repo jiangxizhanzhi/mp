@@ -39,12 +39,19 @@ public class StopHandler extends HandlerCommon{
         public static final EventProcess STOP_DYNAMIPS = new EventProcess("stop_dynamips", "sceneplugincloud.event.stop_dynamips");
     }
 
+    /**
+     * StopHandler
+     *
+     * @param pluginHandler
+     * @param event
+     */
     public StopHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, StopTaskPool.getInstance(), event);
     }
 
     /**
      * @description: 节点关闭
+     *
      * @param element
      * @return void
      */

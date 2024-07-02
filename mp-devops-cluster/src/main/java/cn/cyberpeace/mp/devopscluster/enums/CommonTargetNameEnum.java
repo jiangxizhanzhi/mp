@@ -38,26 +38,53 @@ public enum CommonTargetNameEnum {
 
     private String desc;
 
+    /**
+     * CommonTargetNameEnum
+     *
+     * @param state
+     * @param desc
+     */
     CommonTargetNameEnum(String state, String desc) {
         this.state = state;
         this.desc = desc;
 
     }
 
+    /**
+     * getState
+     *
+     * @return
+     */
     public String getState() {
         return state;
     }
 
+    /**
+     * getDesc
+     *
+     * @return
+     */
     public String getDesc() {
         return desc;
     }
 
 
+    /**
+     * fromValue
+     *
+     * @param state
+     * @return 常用靶标名称枚举信息
+     */
     @JsonCreator
     public static CommonTargetNameEnum fromValue(String state) {
         return map.get(state);
     }
 
+    /**
+     * toValue
+     *
+     * @return
+     */
     @JsonValue
     public String toValue() {
         Locale locale = LocaleContextHolder.getLocale();

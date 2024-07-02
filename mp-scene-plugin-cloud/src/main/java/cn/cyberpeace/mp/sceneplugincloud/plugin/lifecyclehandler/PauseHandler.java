@@ -38,10 +38,19 @@ public class PauseHandler extends HandlerCommon {
         public static final EventProcess PAUSE_DYNAMIPS = new EventProcess("pause_dynamips", "sceneplugincloud.event.pause_dynamips");
     }
 
+    /**
+     * PauseHandler
+     *
+     * @param pluginHandler
+     * @param event
+     */
     public PauseHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, PauseTaskPool.getInstance(), event);
     }
 
+    /**
+     * pause
+     */
     public void pause() {
         prepareEventProcess(SceneModel.Event.PAUSE, SceneProcess.class, ElementProcess.class);
         List<Runnable> tasks = new ArrayList<>();
@@ -54,6 +63,11 @@ public class PauseHandler extends HandlerCommon {
         runSceneProgress(SceneProcess.PAUSE_TERMINALS, () -> runTasks(tasks));
     }
 
+    /**
+     * pauseElement
+     *
+     * @param element
+     */
     public void pauseElement(CloudPluginSceneElementBO element) {
         String nodeId = element.getSrcElement().getId();
         Integer virtualType = element.getVirtualType();

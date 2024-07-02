@@ -27,6 +27,12 @@ public class Container extends CloudClient {
     private static final String CONTAINER_ID = "{container_id}";
 
 
+    /**
+     * create
+     *
+     * @param createData
+     * @return
+     */
     public ContainerCreateData create(ContainerCreateData createData) {
         heavyConcurrentWait();
 

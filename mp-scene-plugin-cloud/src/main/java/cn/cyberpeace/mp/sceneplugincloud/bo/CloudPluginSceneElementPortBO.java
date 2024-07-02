@@ -13,6 +13,11 @@ public class CloudPluginSceneElementPortBO extends BaseCloudPluginSceneElementPo
 
     private String distributedPortMappingIp;
 
+    /**
+     * createModel
+     *
+     * @return
+     */
     @Override
     public CloudPluginSceneElementPortModel createModel() {
         return new CloudPluginSceneElementPortModel();

@@ -8,11 +8,19 @@ public class PauseTaskPool extends TaskPool {
         public static final PauseTaskPool INSTANCE = new PauseTaskPool();
     }
 
+    /**
+     * PauseTaskPool
+     */
     private PauseTaskPool() {
         super(CloudSingleton.cloudAppConfig.getPausePoolSize(),
                 CloudSingleton.cloudAppConfig.getPauseHoldSize(), 60L);
     }
 
+    /**
+     * getInstance
+     *
+     * @return
+     */
     public static PauseTaskPool getInstance() {
         return PauseTaskPoolInstance.INSTANCE;
     }

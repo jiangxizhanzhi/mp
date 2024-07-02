@@ -13,6 +13,9 @@ import java.util.UUID;
 
 public class FileUtils {
 
+    /**
+     * FileUtils
+     */
     private FileUtils(){
         throw new IllegalStateException("Utility class");
     }
@@ -44,6 +47,12 @@ public class FileUtils {
         return fileList;
     }
 
+    /**
+     * transferToFileList
+     *
+     * @param multipartFiles
+     * @return
+     */
     public static List<File> transferToFileList(List<MultipartFile> multipartFiles) throws IOException {
         if (CollectionUtils.isEmpty(multipartFiles)){
             return Lists.newArrayList();

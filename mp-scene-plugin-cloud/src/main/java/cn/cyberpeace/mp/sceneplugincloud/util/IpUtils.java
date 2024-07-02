@@ -337,6 +337,13 @@ public class IpUtils {
         return (ipLong - Ipv4Util.ipv4ToLong(beginIp)) <= size;
     }
 
+    /**
+     * newIsInCidr2
+     *
+     * @param ip
+     * @param cidr
+     * @return boolean
+     */
     public static boolean newIsInCidr2(String ip, String cidr) {
         String beginIp = null;
         String lastIp = null;
@@ -565,6 +572,14 @@ public class IpUtils {
         return formatIp + "/" + maskBit;
     }
 
+    /**
+     * getIpWithCidr
+     *
+     * @param netIp
+     * @param cidrIp
+     * @param defaultCidr
+     * @return
+     */
     public static String getIpWithCidr(String netIp, String cidrIp, String defaultCidr) {
         if (StringUtils.isEmpty(cidrIp)) {
             return netIp + "/" + defaultCidr;

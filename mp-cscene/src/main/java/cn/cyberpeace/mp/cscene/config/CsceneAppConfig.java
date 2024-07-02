@@ -95,6 +95,11 @@ public class CsceneAppConfig {
     @Autowired
     private MessageSource messageSource;
 
+    /**
+     * getSceneEditNodeLimit
+     *
+     * @return int
+     */
     public int getSceneEditNodeLimit() {
         String value = null;
         try {
@@ -113,6 +118,11 @@ public class CsceneAppConfig {
         return limit;
     }
 
+    /**
+     * getSceneUsingNodeLimit
+     *
+     * @return int
+     */
     public int getSceneUsingNodeLimit() {
         String value = null;
         try {
@@ -131,6 +141,11 @@ public class CsceneAppConfig {
         return limit;
     }
 
+    /**
+     * getSceneEnableRecording
+     *
+     * @return boolean
+     */
     public boolean getSceneEnableRecording() {
         SysConfigModel config = sysConfigService.getByKeyName(sceneEnableRecordingKey);
         if (config == null) {
@@ -141,6 +156,11 @@ public class CsceneAppConfig {
         return BooleanUtils.toBoolean(value);
     }
 
+    /**
+     * getHasOwnRecordingSet
+     *
+     * @return
+     */
     public Set<Integer> getHasOwnRecordingSet() {
         String[] values = this.hasOwnRecordingSet.split(",");
         Set<Integer> set = new HashSet<>();

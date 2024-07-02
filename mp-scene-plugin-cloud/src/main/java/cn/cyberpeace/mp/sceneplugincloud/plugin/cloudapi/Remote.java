@@ -26,6 +26,12 @@ import java.util.*;
 @Slf4j
 public class Remote extends CloudClient {
 
+    /**
+     * createConnection
+     *
+     * @param createConnectionData
+     * @return
+     */
     public GuacamoleCreateConnectionResult createConnection(GuacamoleCreateConnectionData createConnectionData) {
         GuacamoleCreateConnectionResult result = getHttpClient().post(CloudUrlConstant.CREATE_CONNECTION_URL,
                 createConnectionData, null, GuacamoleCreateConnectionResult.class);
@@ -36,6 +42,12 @@ public class Remote extends CloudClient {
         return result;
     }
 
+    /**
+     * deleteConnection
+     *
+     * @param connectionId
+     * @return boolean
+     */
     public boolean deleteConnection(String connectionId) {
         var result = getHttpClient().delete(CloudUrlConstant.DELETE_CONNECTION_URL, new DisableGuacamoleRecordingData(connectionId),
                 null, DisableGuacamoleRecordingResult.class);
@@ -45,6 +57,13 @@ public class Remote extends CloudClient {
         return result.getSuccess();
     }
 
+    /**
+     * getConnectionUrl
+     *
+     * @param connectionId
+     * @param userId
+     * @return
+     */
     @Deprecated
     public GuacamoleGetConnectionUrlResult getConnectionUrl(String connectionId, String userId) {
         GuacamoleGetConnectionUrlResult result = getHttpClient().get(CloudUrlConstant.GET_CONNECTION_URL,
@@ -56,18 +75,36 @@ public class Remote extends CloudClient {
         return result;
     }
 
+    /**
+     * getNoVncConnectionUrl
+     *
+     * @param param
+     * @return
+     */
     public GetConnectionUrlResult getNoVncConnectionUrl(GetConnectionUrlParam param) {
         var res = getHttpClient().get(CloudUrlConstant.VIRTUAL_MACHINE_ACCESS_URL,
                 param, GetConnectionUrlResult.class);
         return res;
     }
 
+    /**
+     * getContainerConnectionUrl
+     *
+     * @param param
+     * @return
+     */
     public GetConnectionUrlResult getContainerConnectionUrl(GetConnectionUrlParam param) {
         var res = getHttpClient().post(CloudUrlConstant.CONTAINER_ACTION_URL.replace("{container_id}", param.getVmId())
                 .replace("{action}", "console"), null, null, GetConnectionUrlResult.class);
         return res;
     }
 
+    /**
+     * getConnectionFile
+     *
+     * @param param
+     * @param response
+     */
     public void getConnectionFile(GetConnectionUrlParam param, HttpServletResponse response) {
 //        BufferedInputStream bin = null;
         OutputStream os = null;
@@ -101,25 +138,53 @@ public class Remote extends CloudClient {
         }
     }
 
+    /**
+     * getContainerConsoleUrl
+     *
+     * @param containerId
+     * @return
+     */
     public String getContainerConsoleUrl(String containerId) {
         ContainerGetResult result = getHttpClient().get(String.format(CloudUrlConstant.CONTAINER_GET_URL, containerId), null, ContainerGetResult.class);
         return result.getData() == null ? null : result.getData().getUrl();
     }
 
+    /**
+     * resetCpcloudAllIps
+     *
+     * @param request
+     * @return
+     */
     public OriginIpsResult resetCpcloudAllIps(ResetCplcoudAllIpsData request) {
         OriginIpsResult result = getHttpClient().post(CloudUrlConstant.RESET_CPCLOUD_ALL_IPS, request, null, OriginIpsResult.class);
         return result;
     }
 
+    /**
+     * getCpcloudOriginIps
+     *
+     * @return
+     */
     public OriginIpsResult getCpcloudOriginIps() {
         OriginIpsResult result = getHttpClient().get(CloudUrlConstant.GET_CPCLOUD_ALL_ORIGIN_IPS, null, OriginIpsResult.class);
         return result;
     }
 
+    /**
+     * removeConnection
+     *
+     * @return
+     */
     public String removeConnection() {
         return null;
     }
 
+    /**
+     * getMonitors
+     *
+     * @param connectionIds
+     * @return
+     */
     public Map<String, GuacamoleMonitorData.MonitorInfo> getMonitors(String[] connectionIds) {
         GuacamoleMonitorData result = getHttpClient().post(CloudUrlConstant.GET_MONITOR_URL,
                 new GetGuacamoleMonitorData(Arrays.asList(connectionIds)), null, GuacamoleMonitorData.class);
@@ -136,6 +201,12 @@ public class Remote extends CloudClient {
         return map;
     }
 
+    /**
+     * getAssistances
+     *
+     * @param connectionIds
+     * @return
+     */
     public Map<String, GuacamoleAssistanceData.AssistanceInfo> getAssistances(String[] connectionIds) {
         GuacamoleAssistanceData result = getHttpClient().post(CloudUrlConstant.GET_ASSISTANCE_URL,
                 new GetGuacamoleAssistanceData(Arrays.asList(connectionIds)), null,
@@ -153,6 +224,12 @@ public class Remote extends CloudClient {
         return map;
     }
 
+    /**
+     * getRecordings
+     *
+     * @param queryData
+     * @return
+     */
     public ListObjResult<GuacamoleRecordingData.RecordingInfo> getRecordings(GetGuacamoleRecordingData queryData) {
         GuacamoleRecordingData result = getHttpClient().post(CloudUrlConstant.GET_RECORDING_URL, queryData, null,
                 GuacamoleRecordingData.class);
@@ -164,6 +241,18 @@ public class Remote extends CloudClient {
         return new ListObjResult<>(result.getData(), total);
     }
 
+    /**
+     * enableRecording
+     *
+     * @param connectionId
+     * @param sceneName
+     * @param sceneId
+     * @param nodeName
+     * @param nodeId
+     * @param username
+     * @param department
+     * @return
+     */
     public String enableRecording(String connectionId, String sceneName,String sceneId, String nodeName,String nodeId, String username,
                                   String department) {
         EnableGuacamoleRecordingData enableGuacamoleRecordingData = new EnableGuacamoleRecordingData();
@@ -187,6 +276,12 @@ public class Remote extends CloudClient {
         return result.getData().getRecordingName();
     }
 
+    /**
+     * disableRecording
+     *
+     * @param connectionId
+     * @return
+     */
     public String disableRecording(String connectionId) {
         DisableGuacamoleRecordingResult result = getHttpClient().put(CloudUrlConstant.DISABLE_RECORDING_URL,
                 new DisableGuacamoleRecordingData(connectionId), null,
@@ -197,6 +292,12 @@ public class Remote extends CloudClient {
         return result.getRecordingName();
     }
 
+    /**
+     * convertRecording
+     *
+     * @param connectionId
+     * @return
+     */
     public String convertRecording(String connectionId) {
         DisableGuacamoleRecordingResult result = getHttpClient().put(CloudUrlConstant.CONVERT_RECORDING_URL,
                 new DisableGuacamoleRecordingData(connectionId), null,
@@ -208,6 +309,11 @@ public class Remote extends CloudClient {
         return result.getRecordingName();
     }
 
+    /**
+     * deleteRecords
+     *
+     * @param recordingNames
+     */
     public void deleteRecords(List<String> recordingNames) {
         DeleteGuacamoleRecordingData deleteGuacamoleRecordingData = new DeleteGuacamoleRecordingData();
         deleteGuacamoleRecordingData.setRecordingFile(recordingNames);
@@ -215,6 +321,12 @@ public class Remote extends CloudClient {
                 , DeleteGuacamoleRecordingResultData.class);
     }
 
+    /**
+     * getRecords
+     *
+     * @param connectionIds
+     * @return
+     */
     public List<String> getRecords(List<String> connectionIds) {
         List<String> recordFiles = new ArrayList<>();
         GetGuacamoleRecordsData getGuacamoleRecordsData = new GetGuacamoleRecordsData();
@@ -232,6 +344,12 @@ public class Remote extends CloudClient {
         return recordFiles;
     }
 
+    /**
+     * changeVlanRange
+     *
+     * @param vlanRange
+     * @return boolean
+     */
     public boolean changeVlanRange(String vlanRange) {
         if (StringUtils.isEmpty(vlanRange)) {
             return false;
@@ -242,6 +360,12 @@ public class Remote extends CloudClient {
         return result.getStatus() == null ? false : result.getStatus();
     }
 
+    /**
+     * expireAllConnect
+     *
+     * @param userId
+     * @return boolean
+     */
     public boolean expireAllConnect(String userId) {
         GuacamoleLogoutData guacamoleLogoutData = new GuacamoleLogoutData();
         guacamoleLogoutData.setUsername(userId);
@@ -254,11 +378,21 @@ public class Remote extends CloudClient {
         }
     }
 
+    /**
+     * getRecordRestoreLimitConfig
+     *
+     * @return
+     */
     public RecordRestoreLimitConfigResult getRecordRestoreLimitConfig() {
         RecordRestoreLimitConfigResult result = getHttpClient().get(CloudUrlConstant.GET_RECORD_CLEAN_CONFIG, null, RecordRestoreLimitConfigResult.class);
         return result;
     }
 
+    /**
+     * updateRecordRestoreLimitConfig
+     *
+     * @param data
+     */
     public void updateRecordRestoreLimitConfig(RecordRestoreLimitConfigData data) {
         getHttpClient().put(CloudUrlConstant.UPDATE_RECORD_CLEAN_CONFIG, data, null, Object.class);
     }
@@ -286,6 +420,12 @@ public class Remote extends CloudClient {
         }
     }
 
+    /**
+     * activeConnection
+     *
+     * @param connectionIdList
+     * @return
+     */
     public List<String> activeConnection(List<String> connectionIdList) {
         log.info("Remote.activeConnection begin. connectionIdList:{},", connectionIdList);
         ActiveConnectionParam activeConnectionParam = new ActiveConnectionParam();

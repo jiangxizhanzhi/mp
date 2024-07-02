@@ -32,12 +32,25 @@ public class NpcClearJob extends AbstractClearJob<NpcGetData> {
 
     private Npc npc = new Npc();
 
+    /**
+     * NpcClearJob
+     *
+     * @param elementPortMapper
+     * @param cloudPortMapper
+     * @param sceneElementMapper
+     */
     public NpcClearJob(SceneElementPortMapper elementPortMapper, CloudPluginSceneElementPortMapper cloudPortMapper, SceneElementMapper sceneElementMapper) {
         super(sceneElementMapper);
         this.cloudPortMapper = cloudPortMapper;
         this.elementPortMapper = elementPortMapper;
     }
 
+    /**
+     * getEid2Node
+     *
+     * @param npcs
+     * @return
+     */
     @Override
     protected Map<String, NpcGetData> getEid2Node(List<NpcGetData> npcs) {
         Map<String, NpcGetData> result = new HashMap<>();
@@ -52,11 +65,22 @@ public class NpcClearJob extends AbstractClearJob<NpcGetData> {
         return result;
     }
 
+    /**
+     * doQuery
+     *
+     * @param offset
+     * @return
+     */
     @Override
     protected List<NpcGetData> doQuery(int offset) {
         return npc.getAllNpc(LIMIT, offset);
     }
 
+    /**
+     * doClear
+     *
+     * @param data
+     */
     @Override
     protected void doClear(NpcGetData data) {
         String eid = super.getEid(data.getNodeName());

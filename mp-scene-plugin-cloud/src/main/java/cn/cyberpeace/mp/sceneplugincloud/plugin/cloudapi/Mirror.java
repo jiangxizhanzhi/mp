@@ -9,6 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Mirror extends CloudClient {
+    /**
+     * create
+     *
+     * @param createData
+     * @return
+     */
     public CreateMirrorData create(CreateMirrorData createData) {
         CloudResponse<CreateMirrorData> result = cloudPost(CloudUrlConstant.CREATE_MIRROR_URL, createData, null,
                 new TypeReference<CloudResponse<CreateMirrorData>>() {
@@ -16,6 +22,11 @@ public class Mirror extends CloudClient {
         return result.getData();
     }
 
+    /**
+     * delete
+     *
+     * @param mirrorId
+     */
     public void delete(String mirrorId) {
         cloudDelete(CloudUrlConstant.DELETE_MIRROR_URL.replace("{mirror_id}", mirrorId), null, null, new TypeReference<>() {
         }, true);

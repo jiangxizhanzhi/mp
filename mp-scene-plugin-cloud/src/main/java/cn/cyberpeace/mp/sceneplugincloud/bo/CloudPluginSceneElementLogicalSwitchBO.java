@@ -29,11 +29,23 @@ public class CloudPluginSceneElementLogicalSwitchBO extends ModelBO<CloudPluginS
     @ApiModelProperty(value = "物理交换机名称")
     private String physicalSwitchName;
 
+    /**
+     * createModel
+     *
+     * @return
+     */
     @Override
     public CloudPluginSceneElementLogicalSwitchModel createModel() {
         return new CloudPluginSceneElementLogicalSwitchModel();
     }
 
+    /**
+     * fromModel
+     *
+     * @param obj
+     * @param ignoreFields
+     * @return
+     */
     @Override
     public CloudPluginSceneElementLogicalSwitchBO fromModel(CloudPluginSceneElementLogicalSwitchModel obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
@@ -45,6 +57,12 @@ public class CloudPluginSceneElementLogicalSwitchBO extends ModelBO<CloudPluginS
         return this;
     }
 
+    /**
+     * toModel
+     *
+     * @param ignoreFields
+     * @return
+     */
     @Override
     public CloudPluginSceneElementLogicalSwitchModel toModel(String... ignoreFields) {
         var obj = super.toModel(

@@ -46,11 +46,22 @@ public class CsceneInstanceBO extends BaseCsceneBO<CsceneInstanceModel, CsceneIn
     @JsonIgnore
     private Boolean deleted;
 
+    /**
+     * createModel
+     *
+     * @return
+     */
     @Override
     public CsceneInstanceModel createModel() {
         return new CsceneInstanceModel();
     }
 
+    /**
+     * fromModel
+     *
+     * @param obj
+     * @param ignoreFields
+     */
     @Override
     public void fromModel(CsceneInstanceModel obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
@@ -64,6 +75,12 @@ public class CsceneInstanceBO extends BaseCsceneBO<CsceneInstanceModel, CsceneIn
         }
     }
 
+    /**
+     * toModel
+     *
+     * @param ignoreFields
+     * @return
+     */
     @Override
     public CsceneInstanceModel toModel(String... ignoreFields) {
         CsceneInstanceModel obj = super.toModel(ArrayUtils.addAll(ignoreFields,
@@ -77,6 +94,11 @@ public class CsceneInstanceBO extends BaseCsceneBO<CsceneInstanceModel, CsceneIn
         return obj;
     }
 
+    /**
+     * exportToCscene
+     *
+     * @return
+     */
     public CsceneBO exportToCscene() {
         CsceneBO csceneBO = export(CsceneBO.class, CsceneRoleBO.class, CsceneInstanceBO::getType,
                 CsceneInstanceBO::getCscene, CsceneInstanceBO::getScene);

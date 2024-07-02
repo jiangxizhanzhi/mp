@@ -16,6 +16,11 @@ public class FlavorService extends BaseCpService {
 
     private static final String LIST_FLAVOR = "/cloud/v1/flavor";
 
+    /**
+     * FlavorService
+     *
+     * @param devopsClusterConfig
+     */
     public FlavorService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }

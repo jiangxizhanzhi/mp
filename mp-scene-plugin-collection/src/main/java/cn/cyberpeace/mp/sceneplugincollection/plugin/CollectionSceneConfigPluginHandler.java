@@ -32,6 +32,9 @@ public class CollectionSceneConfigPluginHandler extends SceneConfigPluginHandler
 
     private CollectionSceneConfigPluginModelHandler pluginModelHandler;
 
+    /**
+     * validate
+     */
     @Override
     public void validate() {
         CloudSceneConfigPluginHandler cloudSceneConfigPluginHandler = getSceneHandler().getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
@@ -71,6 +74,12 @@ public class CollectionSceneConfigPluginHandler extends SceneConfigPluginHandler
         }
     }
 
+    /**
+     * getConnectMachineNodes
+     *
+     * @param nodeId
+     * @return
+     */
     private List<String> getConnectMachineNodes(String nodeId) {
         List<String> results = new ArrayList<>();
         List<SceneConfigElementBO> connects = getElementConnectedSrcElements(nodeId);
@@ -84,6 +93,9 @@ public class CollectionSceneConfigPluginHandler extends SceneConfigPluginHandler
         return results;
     }
 
+    /**
+     * correctData
+     */
     @Override
     public void correctData() {
         //根据探针不同类型设置五种执行类型
@@ -114,12 +126,18 @@ public class CollectionSceneConfigPluginHandler extends SceneConfigPluginHandler
         }
     }
 
+    /**
+     * initBase
+     */
     @Override
     public void initBase() {
         super.initBase();
         pluginModelHandler = new CollectionSceneConfigPluginModelHandler(this);
     }
 
+    /**
+     * reloadData
+     */
     @Override
     public void reloadData() {
         setScene(null);
@@ -131,46 +149,85 @@ public class CollectionSceneConfigPluginHandler extends SceneConfigPluginHandler
         pluginModelHandler.loadElementPorts(pluginModelHandler.readElementPorts(getElementPortIds().toArray(new String[0])));
     }
 
+    /**
+     * saveScene
+     */
     @Override
     public void saveScene() {
         pluginModelHandler.saveScene();
     }
 
+    /**
+     * deleteScene
+     */
     @Override
     public void deleteScene() {
         pluginModelHandler.deleteScene();
     }
 
+    /**
+     * createElements
+     *
+     * @param elementIds
+     */
     @Override
     public void createElements(String... elementIds) {
         pluginModelHandler.createElements(elementIds);
     }
 
+    /**
+     * updateElements
+     *
+     * @param elementIds
+     */
     @Override
     public void updateElements(String... elementIds) {
         pluginModelHandler.updateElements(elementIds);
     }
 
+    /**
+     * deleteElements
+     *
+     * @param elementIds
+     */
     @Override
     public void deleteElements(String... elementIds) {
         pluginModelHandler.deleteElements(elementIds);
     }
 
+    /**
+     * createElementPorts
+     *
+     * @param elementPortIds
+     */
     @Override
     public void createElementPorts(String... elementPortIds) {
         pluginModelHandler.createElementPorts(elementPortIds);
     }
 
+    /**
+     * updateElementPorts
+     *
+     * @param elementPortIds
+     */
     @Override
     public void updateElementPorts(String... elementPortIds) {
         pluginModelHandler.updateElementPorts(elementPortIds);
     }
 
+    /**
+     * deleteElementPorts
+     *
+     * @param elementPortIds
+     */
     @Override
     public void deleteElementPorts(String... elementPortIds) {
         pluginModelHandler.deleteElementPorts(elementPortIds);
     }
 
+    /**
+     * initClass
+     */
     @Override
     protected void initClass() {
         super.sceneBOClass = CollectionPluginSceneConfigBO.class;

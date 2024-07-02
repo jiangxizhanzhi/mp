@@ -27,6 +27,9 @@ public class CloudSceneConfigPluginModelHandler extends BasePluginModelHandler<S
         init(pluginHandler);
     }
 
+    /**
+     * initClass
+     */
     @Override
     protected void initClass() {
         super.pluginSceneBOClass = CloudPluginSceneConfigBO.class;
@@ -37,6 +40,9 @@ public class CloudSceneConfigPluginModelHandler extends BasePluginModelHandler<S
         super.pluginSceneElementPortModelClass = CloudPluginSceneConfigElementPortModel.class;
     }
 
+    /**
+     * initMapper
+     */
     @Override
     protected void initMapper() {
         super.pluginSceneMapper = BeanCommon.getBean(CloudPluginSceneConfigMapper.class);

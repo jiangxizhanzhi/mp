@@ -118,6 +118,13 @@ public class SceneService {
         return create(sceneConfigDataBO.exportToScene(), context, false);
     }
 
+    /**
+     * createFromSceneConfig
+     *
+     * @param sceneConfigId
+     * @param context
+     * @return
+     */
     public ServiceResult<SceneDataBO> createFromSceneConfig(String sceneConfigId, SceneContextBO context) {
         SceneConfigDataBO sceneConfigDataBO = sceneConfigService.get(sceneConfigId, false, null, null)
                 .getSource();

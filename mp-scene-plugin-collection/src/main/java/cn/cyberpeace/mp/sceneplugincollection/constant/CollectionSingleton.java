@@ -8,6 +8,11 @@ public class CollectionSingleton {
 
     public static CollectionAppConfig collectionAppConfig;
 
+    /**
+     * CollectionSingleton
+     *
+     * @param collectionAppConfig
+     */
     private CollectionSingleton(CollectionAppConfig collectionAppConfig) {
         CollectionSingleton.collectionAppConfig = collectionAppConfig;
     }

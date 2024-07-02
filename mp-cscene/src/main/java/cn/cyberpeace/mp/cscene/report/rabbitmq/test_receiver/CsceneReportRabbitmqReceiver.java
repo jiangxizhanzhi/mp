@@ -14,17 +14,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 //@Component  // 测试接收
 public class CsceneReportRabbitmqReceiver extends BaseSimpleMessageReceiver {
 
+    /**
+     * CsceneReportRabbitmqReceiver
+     *
+     * @param messageConverter
+     */
     @Autowired
     public CsceneReportRabbitmqReceiver(SnakeJsonMessageConverter messageConverter) {
         super(messageConverter);
     }
 
+    /**
+     * receive
+     *
+     * @param message
+     */
     @RabbitListener(queues = CsceneReportRabbitmqSender.CSCENE_QUEUE_NAME)
     @Override
     public void receive(Message message) {
         super.receive(message);
     }
 
+    /**
+     * handleMessage
+     *
+     * @param formatMessage
+     */
     @Override
     public void handleMessage(FormatMessage<?> formatMessage) {
         String messageType = formatMessage.getType();
@@ -36,6 +51,11 @@ public class CsceneReportRabbitmqReceiver extends BaseSimpleMessageReceiver {
         }
     }
 
+    /**
+     * handleDeleteCsceneInstance
+     *
+     * @param csceneInstanceId
+     */
     public void handleDeleteCsceneInstance(String csceneInstanceId) {
         log.info("Receive delete_cscene_instance report message: {}", csceneInstanceId);
     }

@@ -76,6 +76,13 @@ public abstract class CloudSceneStatCommonBase<P1 extends BasePluginSceneElement
 
     protected abstract HumanCondition genNodeCondition(List<String> sceneIds, List<String> nodeIds);
 
+    /**
+     * genNodePortCondition
+     *
+     * @param sceneIds
+     * @param nodeIds
+     * @return 查询条件构造器
+     */
     protected abstract HumanCondition genNodePortCondition(List<String> sceneIds, List<String> nodeIds);
 
     /**

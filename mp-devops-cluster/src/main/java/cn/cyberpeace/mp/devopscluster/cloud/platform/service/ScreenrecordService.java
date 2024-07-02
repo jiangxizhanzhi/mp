@@ -58,6 +58,11 @@ import java.util.Set;
 @Deprecated
 public class ScreenrecordService extends BaseCpService {
 
+    /**
+     * ScreenrecordService
+     *
+     * @param devopsClusterConfig
+     */
     public ScreenrecordService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }
@@ -346,6 +351,11 @@ public class ScreenrecordService extends BaseCpService {
         return ResultCommon.success(data.getUrl());
     }
 
+    /**
+     * getRestoreLimitConfig
+     *
+     * @return
+     */
     public ServiceResult<ScreenRecordRestoreConfigVO> getRestoreLimitConfig() {
         RecordRestoreLimitConfigResult result = new Remote().getRecordRestoreLimitConfig();
         ScreenRecordRestoreConfigVO config = new ScreenRecordRestoreConfigVO();
@@ -354,6 +364,11 @@ public class ScreenrecordService extends BaseCpService {
         return new ServiceResult<>(config);
     }
 
+    /**
+     * updateRestoreLimitConfig
+     *
+     * @param request
+     */
     public void updateRestoreLimitConfig(ScreenrecordConfigRequest request){
         RecordRestoreLimitConfigData data = new RecordRestoreLimitConfigData();
         data.setCleanRecordFileLimitTime(request.getFileLimitTime());

@@ -39,12 +39,19 @@ public class ScenariosService extends BaseCpService {
 
             SNAPSHOT = "/snapshot";
 
+    /**
+     * ScenariosService
+     *
+     * @param devopsClusterConfig
+     */
     public ScenariosService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }
 
     /**
-     * 创建快照
+     * create
+     *
+     * @param snapshotCreate
      */
     public void create(ScenariosSnapshot snapshotCreate){
 

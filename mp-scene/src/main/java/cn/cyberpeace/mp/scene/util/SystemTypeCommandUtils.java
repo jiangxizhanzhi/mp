@@ -18,6 +18,9 @@ public class SystemTypeCommandUtils {
 
     public static final String LINUX_COMMAND_INLINE_SEPARATOR = " ; ";
 
+    /**
+     * SystemTypeCommandUtils
+     */
     private SystemTypeCommandUtils() {}
 
     public static final Map<String, String> SYSTEM_TYPE_OS_TYPE = new HashMap<>() {
@@ -45,18 +48,42 @@ public class SystemTypeCommandUtils {
         }
     };
 
+    /**
+     * getOsType
+     *
+     * @param systemType
+     * @return
+     */
     public static String getOsType(String systemType) {
         return SYSTEM_TYPE_OS_TYPE.getOrDefault(systemType.toLowerCase(), OS_TYPE_LINUX);
     }
 
+    /**
+     * isWindows
+     *
+     * @param systemType
+     * @return boolean
+     */
     public static boolean isWindows(String systemType) {
         return OS_TYPE_WINDOWS.equals(getOsType(systemType));
     }
 
+    /**
+     * isLinux
+     *
+     * @param systemType
+     * @return boolean
+     */
     public static boolean isLinux(String systemType) {
         return OS_TYPE_LINUX.equals(getOsType(systemType));
     }
 
+    /**
+     * getLineBreak
+     *
+     * @param systemType
+     * @return
+     */
     public static String getLineBreak(String systemType) {
         String osType = getOsType(systemType);
         if (OS_TYPE_WINDOWS.equals(osType)) {
@@ -68,6 +95,12 @@ public class SystemTypeCommandUtils {
         }
     }
 
+    /**
+     * getPathDelimiter
+     *
+     * @param systemType
+     * @return
+     */
     public static String getPathDelimiter(String systemType) {
         String osType = getOsType(systemType);
         if (OS_TYPE_WINDOWS.equals(osType)) {
@@ -79,6 +112,12 @@ public class SystemTypeCommandUtils {
         }
     }
 
+    /**
+     * getCommandInlineSeparator
+     *
+     * @param systemType
+     * @return
+     */
     public static String getCommandInlineSeparator(String systemType) {
         String osType = getOsType(systemType);
         if (OS_TYPE_WINDOWS.equals(osType)) {
@@ -90,26 +129,70 @@ public class SystemTypeCommandUtils {
         }
     }
 
+    /**
+     * joinCommands
+     *
+     * @param systemType
+     * @param commands
+     * @return
+     */
     public static String joinCommands(String systemType, String... commands) {
         return StringUtils.joinWith(getLineBreak(systemType), (Object[]) commands);
     }
 
+    /**
+     * andJoinCommands
+     *
+     * @param systemType
+     * @param commands
+     * @return
+     */
     public static String andJoinCommands(String systemType, String... commands) {
         return StringUtils.joinWith(COMMAND_AND_SEPARATOR, (Object[]) commands);
     }
 
+    /**
+     * inlineJoinCommands
+     *
+     * @param systemType
+     * @param commands
+     * @return
+     */
     public static String inlineJoinCommands(String systemType, String... commands) {
         return StringUtils.joinWith(getCommandInlineSeparator(systemType), (Object[]) commands);
     }
 
+    /**
+     * appendBeforeCommand
+     *
+     * @param command
+     * @param beforeCommand
+     * @param systemType
+     * @return
+     */
     public static String appendBeforeCommand(String command, String beforeCommand, String systemType) {
         return StringUtils.joinWith(getLineBreak(systemType), beforeCommand, command);
     }
 
+    /**
+     * appendAfterCommand
+     *
+     * @param command
+     * @param afterCommand
+     * @param systemType
+     * @return
+     */
     public static String appendAfterCommand(String command, String afterCommand, String systemType) {
         return StringUtils.joinWith(getLineBreak(systemType), command, afterCommand);
     }
 
+    /**
+     * joinPath
+     *
+     * @param systemType
+     * @param paths
+     * @return
+     */
     public static String joinPath(String systemType, String... paths) {
         return StringUtils.joinWith(getPathDelimiter(systemType), (Object[]) paths);
     }

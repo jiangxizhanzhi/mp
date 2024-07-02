@@ -35,11 +35,17 @@ public class SceneCorrectService {
     @Resource
     private SceneElementMapper sceneElementMapper;
 
+    /**
+     * correctErrorStatusScene
+     */
     public void correctErrorStatusScene() {
         correctStartErrorStatusScene();
         correctDeleteErrorStatusScene();
     }
 
+    /**
+     * correctStartErrorStatusScene
+     */
     private void correctStartErrorStatusScene() {
         HumanCondition humanCondition = new HumanCondition()
                 .filterOrStart()
@@ -83,6 +89,9 @@ public class SceneCorrectService {
         }
     }
 
+    /**
+     * correctDeleteErrorStatusScene
+     */
     private void correctDeleteErrorStatusScene() {
         HumanCondition humanCondition = new HumanCondition()
                 .filterEqual(SceneModel::getEvent, SceneModel.Event.DELETE)

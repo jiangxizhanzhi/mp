@@ -45,13 +45,22 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
     private final VirtualMachine virtualMachine = new VirtualMachine();
 
 
+    /**
+     * HandlerCommon
+     *
+     * @param pluginHandler
+     * @param taskPool
+     * @param event
+     */
     public HandlerCommon(CloudScenePluginHandler pluginHandler, TaskPool taskPool, int event) {
         super(pluginHandler, taskPool, event);
         handlerUtils = pluginHandler.getHandlerUtils();
     }
 
     /**
-     * 检查接入方式可用性
+     * checkAccessModes
+     *
+     * @param cloudElement
      */
     public void checkAccessModes(CloudPluginSceneElementBO cloudElement) {
         List<CloudPluginSceneElementPortBO> cloudPorts = getPluginHandler().getPorts(cloudElement);
@@ -125,6 +134,8 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
 
     /**
      * 关闭接入方式可用性
+     *
+     * @param cloudElement
      */
     public void closeAccessModes(CloudPluginSceneElementBO cloudElement) {
         List<CloudPluginSceneElementPortBO> cloudPorts = getPluginHandler().getPorts(cloudElement);
@@ -153,6 +164,13 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
         }
     }
 
+    /**
+     * handlerSpecialException
+     *
+     * @param element
+     * @param e
+     * @return 文件名：Example.java
+     */
     @Override
     protected <E extends BasePluginSceneElementBO> MpRuntimeException handlerSpecialException(E element, Exception e) {
         if (element == null || e == null || StringUtils.isEmpty(e.getMessage())) {
@@ -198,6 +216,12 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
 //        }
     }
 
+    /**
+     * checkSuccessCallback
+     *
+     * @param ipAccessModesMap
+     * @param nodeId
+     */
     private void checkSuccessCallback(Map<String, List<CloudAccessMode>> ipAccessModesMap, String nodeId) {
         ipAccessModesMap.forEach((ipPortKey, accessModes) -> {
             accessModes.forEach(accessMode -> accessMode.setAvailable(true));
@@ -208,6 +232,12 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
         });
     }
 
+    /**
+     * checkTimeoutCallback
+     *
+     * @param ipAccessModesMap
+     * @param nodeId
+     */
     private void checkTimeoutCallback(Map<String, List<CloudAccessMode>> ipAccessModesMap, String nodeId) {
         ipAccessModesMap.forEach((ipPortKey, accessModes) -> {
             accessModes.forEach(accessMode -> accessMode.setAvailable(true));
@@ -226,6 +256,11 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
         });
     }
 
+    /**
+     * setSnapshotNum
+     *
+     * @param element
+     */
     public void setSnapshotNum(CloudPluginSceneElementBO element) {
         if (StringUtils.isNotEmpty(element.getImageUuid())) {
             try {

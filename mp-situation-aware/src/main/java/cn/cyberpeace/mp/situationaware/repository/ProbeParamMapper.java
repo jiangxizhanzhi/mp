@@ -26,11 +26,37 @@ public interface ProbeParamMapper extends BaseModelMapper<ProbeParamModel> {
 //
 //    int updateByPrimaryKey(ProbeParamModel record);
 
+    /**
+     * selectByProbeIdAndTemplateId
+     *
+     * @param probeId
+     * @param templateId
+     * @return
+     */
     List<ProbeParamModel> selectByProbeIdAndTemplateId(@Param("probeId") String probeId, @Param("templateId") String templateId);
 
+    /**
+     * deleteByProbeIdAndTemplateId
+     *
+     * @param probeId
+     * @param templateId
+     * @return int
+     */
     int deleteByProbeIdAndTemplateId(@Param("probeId") String probeId, @Param("templateId") String templateId);
 
+    /**
+     * deleteByTemplateId
+     *
+     * @param templateId
+     * @return int
+     */
     int deleteByTemplateId(@Param("templateId") String templateId);
 
+    /**
+     * deleteByTemplateIds
+     *
+     * @param templateIds
+     * @return int
+     */
     int deleteByTemplateIds(@Param("templateIds") String[] templateIds);
 }

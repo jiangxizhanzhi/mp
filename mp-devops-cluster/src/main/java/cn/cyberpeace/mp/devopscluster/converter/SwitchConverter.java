@@ -31,20 +31,42 @@ public class SwitchConverter {
     private final SwitchService switchService;
 
 
+    /**
+     * registerSdnSwitch
+     *
+     * @param registerSdnSwitchCommand
+     * @return
+     */
     public SdnSwitch registerSdnSwitch(RegisterSdnSwitchCommand registerSdnSwitchCommand) {
         return switchService.add(registerSdnSwitchCommand);
     }
 
 
-
+    /**
+     * pageSdnSwitch
+     *
+     * @param searchSdnSwitchRequest
+     * @return
+     */
     public PageInfo<SdnSwitch> pageSdnSwitch(SearchSdnSwitchRequest searchSdnSwitchRequest) {
         return switchService.pageSdnSwitch(searchSdnSwitchRequest);
     }
 
+    /**
+     * modifySdnSwitch
+     *
+     * @param modifySdnSwitchCommand
+     * @param name
+     */
     public void modifySdnSwitch(ModifySdnSwitchCommand modifySdnSwitchCommand, String name) {
         switchService.modify(modifySdnSwitchCommand, name);
     }
 
+    /**
+     * deleteSdnSwitch
+     *
+     * @param name
+     */
     public void deleteSdnSwitch(String name) {
         switchService.delete(name);
     }
@@ -84,6 +106,12 @@ public class SwitchConverter {
         }
     }
 
+    /**
+     * getFormatSdnSwitchPortName
+     *
+     * @param portIndex
+     * @return
+     */
     public String getFormatSdnSwitchPortName(Integer portIndex) {
         return "opf_g" + String.format("%0" + 6 + "d", portIndex);
     }

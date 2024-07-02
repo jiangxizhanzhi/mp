@@ -57,6 +57,11 @@ public class BaseRequestUtil {
     }
 
 
+    /**
+     * checkBaseRequestWithSceneIdAndElementIds
+     *
+     * @param pageRequest
+     */
     public static void checkBaseRequestWithSceneIdAndElementIds(BaseSceneElementPageRequest pageRequest) {
         if (StringUtils.isBlank(pageRequest.getSceneId())) {
             throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.SCENE_ID)));
@@ -80,12 +85,22 @@ public class BaseRequestUtil {
         }
     }
 
+    /**
+     * checkBaseRequestWithSceneId
+     *
+     * @param pageRequest
+     */
     public static void checkBaseRequestWithSceneId(BaseSceneElementPageRequest pageRequest) {
         if (StringUtils.isBlank(pageRequest.getSceneId())) {
             throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.SCENE_ID)));
         }
     }
 
+    /**
+     * processDefaultTimeRange
+     *
+     * @param timeRangeRequest
+     */
     public static void processDefaultTimeRange(BaseTimeRangeRequest timeRangeRequest) {
         LocalDateTime now = LocalDateTime.now();
 

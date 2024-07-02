@@ -18,6 +18,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 public class MessageCommonUtil {
+    /**
+     * MessageCommonUtil
+     */
     private MessageCommonUtil() {
 
     }
@@ -26,6 +29,9 @@ public class MessageCommonUtil {
     private static Map<String, String> zhMap;
     private static Map<String, String> enMap;
 
+    /**
+     * init
+     */
     @PostConstruct
     public void init() {
         List<Message> messages = JSON.parseArray(SituationAwareCommonConfigUtil.getConfigString(SituationAwareCommonConfigUtil.INTERNATIONAL_MESSAGE), Message.class);
@@ -42,6 +48,12 @@ public class MessageCommonUtil {
         }
     }
 
+    /**
+     * getProbeIdsByNameBaseLanguage
+     *
+     * @param name
+     * @return
+     */
     public static List<String> getProbeIdsByNameBaseLanguage(String name) {
         if (LocaleContextHolder.getLocale().getLanguage().equals("zh")) {
             return getProbeIdsByName(name, zhMap);
@@ -49,6 +61,13 @@ public class MessageCommonUtil {
         return getProbeIdsByName(name, enMap);
     }
 
+    /**
+     * getProbeIdsByName
+     *
+     * @param name
+     * @param probes
+     * @return
+     */
     private static List<String> getProbeIdsByName(String name, Map<String, String> probes) {
         List<String> probeIds = new ArrayList<>();
         probes.forEach((key, probeName) -> {
@@ -59,6 +78,12 @@ public class MessageCommonUtil {
         return probeIds;
     }
 
+    /**
+     * convertMessage
+     *
+     * @param name
+     * @return
+     */
     public static String convertMessage(String name) {
         if (!keys.contains(name)) {
             return name;
@@ -70,6 +95,12 @@ public class MessageCommonUtil {
         }
     }
 
+    /**
+     * convertMessageWithNull
+     *
+     * @param name
+     * @return
+     */
     public static String convertMessageWithNull(String name) {
         if (!keys.contains(name)) {
             return null;

@@ -8,6 +8,12 @@ import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 public class VirtualDevice extends CloudClient {
+    /**
+     * getTemplateId
+     *
+     * @param name
+     * @return
+     */
     public VirtualDeviceData getTemplateId(String name) {
         GetTemplateIdParam param = new GetTemplateIdParam();
         param.setName(name);

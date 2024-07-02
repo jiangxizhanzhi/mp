@@ -30,10 +30,18 @@ public class CollectionScenePluginModelHandler extends BasePluginModelHandler<
         CollectionPluginSceneElementMapper,
         CollectionPluginSceneElementPortMapper,
         CollectionScenePluginHandler> {
+    /**
+     * CollectionScenePluginModelHandler
+     *
+     * @param pluginHandler
+     */
     public CollectionScenePluginModelHandler(CollectionScenePluginHandler pluginHandler) {
         init(pluginHandler);
     }
 
+    /**
+     * initClass
+     */
     @Override
     protected void initClass() {
         super.pluginSceneBOClass = CollectionPluginSceneBO.class;
@@ -44,6 +52,9 @@ public class CollectionScenePluginModelHandler extends BasePluginModelHandler<
         super.pluginSceneElementPortModelClass = CollectionPluginSceneElementPortModel.class;
     }
 
+    /**
+     * initMapper
+     */
     @Override
     protected void initMapper() {
         super.pluginSceneMapper = BeanCommon.getBean(CollectionPluginSceneMapper.class);

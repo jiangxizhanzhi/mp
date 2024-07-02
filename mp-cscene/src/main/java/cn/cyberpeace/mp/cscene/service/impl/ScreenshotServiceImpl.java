@@ -43,6 +43,12 @@ import java.util.stream.Collectors;
 public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel, ScreenshotMapper, ScreenshotFields,
         ScreenshotQueryParams> implements ScreenshotService {
 
+    /**
+     * ScreenshotServiceImpl
+     *
+     * @param stuMapper
+     * @param stuFields
+     */
     public ScreenshotServiceImpl(ScreenshotMapper stuMapper, ScreenshotFields stuFields) {
         setModelFields(stuFields);
         setModelMapper(stuMapper);
@@ -57,6 +63,12 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
     @Autowired
     private BaseAppConfig baseAppConfig;
 
+    /**
+     * loadListFilterCondition
+     *
+     * @param humanCondition
+     * @param queryParams
+     */
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, ScreenshotQueryParams queryParams) {
         if (Objects.nonNull(queryParams.getStartTime())) {

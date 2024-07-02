@@ -18,6 +18,11 @@ public class ComputeStatusService extends BaseCpService {
     private static final String COMPUTE_STATUS = "/compute_status";
 
 
+    /**
+     * ComputeStatusService
+     *
+     * @param devopsClusterConfig
+     */
     public ComputeStatusService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }

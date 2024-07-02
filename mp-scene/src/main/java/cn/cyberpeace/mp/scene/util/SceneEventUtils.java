@@ -9,6 +9,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SceneEventUtils {
     private static Map<String, SceneEventInfo> scene = new ConcurrentHashMap<>();
 
+    /**
+     * tryLockAndGetInfoIfLockFailed
+     *
+     * @param sceneId
+     * @param eventInfo
+     * @return
+     */
     public static SceneEventInfo tryLockAndGetInfoIfLockFailed(String sceneId, SceneEventInfo eventInfo) {
         SceneEventInfo sceneEventInfo = scene.putIfAbsent(sceneId, eventInfo);
         if (sceneEventInfo != null) {
@@ -18,6 +25,11 @@ public class SceneEventUtils {
         }
     }
 
+    /**
+     * unLock
+     *
+     * @param sceneId
+     */
     public static void unLock(String sceneId) {
         scene.remove(sceneId);
     }

@@ -33,10 +33,21 @@ public class RestartHandler extends HandlerCommon {
         public static final EventProcess RESTART_DYNAMIPS = new EventProcess("restart_dynamips", "sceneplugincloud.event.restart_dynamips");
     }
 
+    /**
+     * RestartHandler
+     *
+     * @param pluginHandler
+     * @param event
+     */
     public RestartHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, RestartTaskPool.getInstance(), event);
     }
 
+    /**
+     * restartElement
+     *
+     * @param element
+     */
     public void restartElement(CloudPluginSceneElementBO element) {
         String nodeId = element.getSrcElement().getId();
         Integer virtualType = element.getVirtualType();
@@ -79,6 +90,11 @@ public class RestartHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * attachISO
+     *
+     * @param cloudElement
+     */
     private void attachISO(CloudPluginSceneElementBO cloudElement) {
         VirtualMachineAttachISOData data = new VirtualMachineAttachISOData();
         data.setInstanceUuid(cloudElement.getResourceId());

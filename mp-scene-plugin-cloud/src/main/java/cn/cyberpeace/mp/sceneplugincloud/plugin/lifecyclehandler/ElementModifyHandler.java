@@ -64,12 +64,24 @@ public class ElementModifyHandler extends HandlerCommon {
 
     private static final String TCP = "tcp";
 
+    /**
+     * ElementModifyHandler
+     *
+     * @param newHandler
+     * @param originHandler
+     * @param event
+     */
     public ElementModifyHandler(CloudScenePluginHandler newHandler, CloudScenePluginHandler originHandler, int event) {
         super(newHandler, RecreateTaskPool.getInstance(), event);
         this.newCloudScenePluginHandler = newHandler;
         this.originCloudScenePluginHandler = originHandler;
     }
 
+    /**
+     * modifyElement
+     *
+     * @param nodeId
+     */
     public void modifyElement(String nodeId) {
         CloudPluginSceneElementBO originCloudElement = this.originCloudScenePluginHandler.getElement(nodeId);
         CloudPluginSceneElementBO newCloudElement = this.newCloudScenePluginHandler.getElement(nodeId);
@@ -107,6 +119,12 @@ public class ElementModifyHandler extends HandlerCommon {
         });
     }
 
+    /**
+     * modifyCoreRoute
+     *
+     * @param newCloudElement
+     * @param originCloudElement
+     */
     private void modifyCoreRoute(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         // 核心路由的端口要注意排序 辅助网络的端口排第一个
         {
@@ -224,6 +242,12 @@ public class ElementModifyHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * modifyVirtualMachine
+     *
+     * @param newCloudElement
+     * @param originCloudElement
+     */
     private void modifyVirtualMachine(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         if (this.isFlavorChange(newCloudElement, originCloudElement)) {
             // 先创建flavor
@@ -236,6 +260,12 @@ public class ElementModifyHandler extends HandlerCommon {
         this.qosRuleChange(newCloudElement, originCloudElement);
     }
 
+    /**
+     * modifyContainer
+     *
+     * @param newCloudElement
+     * @param originCloudElement
+     */
     private void modifyContainer(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         if (this.isFlavorChange(newCloudElement, originCloudElement)) {
             ContainerResizeData resizeData = new ContainerResizeData();
@@ -248,6 +278,12 @@ public class ElementModifyHandler extends HandlerCommon {
         this.qosRuleChange(newCloudElement, originCloudElement);
     }
 
+    /**
+     * modifyVirtualSwitch
+     *
+     * @param newCloudElement
+     * @param originCloudElement
+     */
     private void modifyVirtualSwitch(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         if (CollectionUtils.isEmpty(originCloudElement.getDeriveNetworks())) {
             return;
@@ -275,6 +311,12 @@ public class ElementModifyHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * modifyVirtualRouter
+     *
+     * @param newCloudElement
+     * @param originCloudElement
+     */
     private void modifyVirtualRouter(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         // 静态路由变更
         this.staticRouteChange(newCloudElement, originCloudElement);
@@ -282,6 +324,12 @@ public class ElementModifyHandler extends HandlerCommon {
         this.qosRuleChange(newCloudElement, originCloudElement);
     }
 
+    /**
+     * modifyVirtualFirewall
+     *
+     * @param newCloudElement
+     * @param originCloudElement
+     */
     private void modifyVirtualFirewall(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         // 静态路由变更
         this.staticRouteChange(newCloudElement, originCloudElement);
@@ -291,12 +339,25 @@ public class ElementModifyHandler extends HandlerCommon {
         this.firewallRuleChange(newCloudElement, originCloudElement);
     }
 
+    /**
+     * staticRouteChange
+     *
+     * @param newCloudElement
+     * @param originCloudElement
+     */
     private void staticRouteChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         if (this.isStaticRouteChange(newCloudElement.getStaticRoutes(), originCloudElement.getStaticRoutes())) {
             this.doStaticRouteChange(newCloudElement, originCloudElement);
         }
     }
 
+    /**
+     * isStaticRouteChange
+     *
+     * @param newStaticRoutes
+     * @param originStaticRoutes
+     * @return boolean
+     */
     private boolean isStaticRouteChange(List<StaticRoute> newStaticRoutes, List<StaticRoute> originStaticRoutes) {
         // 数量不同
         if (newStaticRoutes.size() != originStaticRoutes.size()) {
@@ -320,6 +381,12 @@ public class ElementModifyHandler extends HandlerCommon {
         return false;
     }
 
+    /**
+     * doStaticRouteChange
+     *
+     * @param newCloudElement
+     * @param originCloudElement
+     */
     private void doStaticRouteChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         VirtualRouterModifyData updateData = new VirtualRouterModifyData();
         List<VirtualRouterModifyData.StaticRoute> staticRoutes = newCloudElement.getStaticRoutes().stream().map(h -> {
@@ -333,6 +400,13 @@ public class ElementModifyHandler extends HandlerCommon {
         originCloudElement.setStaticRoutes(newCloudElement.getStaticRoutes());
     }
 
+    /**
+     * isDhcpPoolsChange
+     *
+     * @param currentElementNetwork
+     * @param newCloudElement
+     * @return boolean
+     */
     private boolean isDhcpPoolsChange(CloudPluginSceneElementNetworkBO currentElementNetwork, CloudPluginSceneElementBO newCloudElement) {
         boolean dhcpPoolsChange = false;
         if (currentElementNetwork.getAllocationPools().size() != newCloudElement.getAllocationPools().size()) {
@@ -356,6 +430,13 @@ public class ElementModifyHandler extends HandlerCommon {
         return dhcpPoolsChange;
     }
 
+    /**
+     * isDnsChange
+     *
+     * @param currentElementNetwork
+     * @param newCloudElement
+     * @return boolean
+     */
     private boolean isDnsChange(CloudPluginSceneElementNetworkBO currentElementNetwork, CloudPluginSceneElementBO newCloudElement) {
         // dns属性有变化
         boolean dnsChange = false;
@@ -372,6 +453,13 @@ public class ElementModifyHandler extends HandlerCommon {
         return dnsChange;
     }
 
+    /**
+     * doVsChange
+     *
+     * @param currentElementNetwork
+     * @param newCloudElement
+     * @param originCloudElement
+     */
     private void doVsChange(CloudPluginSceneElementNetworkBO currentElementNetwork, CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         VirtualSwitchUpdateData updateData = new VirtualSwitchUpdateData();
         VirtualSwitchCreateData.Subnet subnet = new VirtualSwitchCreateData.Subnet();
@@ -394,6 +482,13 @@ public class ElementModifyHandler extends HandlerCommon {
         this.originCloudScenePluginHandler.updateElementNetworks(newCloudElement.getSrcElement().getId());
     }
 
+    /**
+     * isFlavorChange
+     *
+     * @param newCloudElement
+     * @param originCloudElement
+     * @return boolean
+     */
     private boolean isFlavorChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         SceneElementBO newElement = newCloudElement.getSrcElement();
         SceneElementBO originElement = originCloudElement.getSrcElement();
@@ -403,6 +498,12 @@ public class ElementModifyHandler extends HandlerCommon {
         return false;
     }
 
+    /**
+     * createFlavor
+     *
+     * @param newCloudElement
+     * @return
+     */
     private String createFlavor(CloudPluginSceneElementBO newCloudElement) {
         CreateFlavorData createFlavorData = new CreateFlavorData();
         createFlavorData.setCpu(newCloudElement.getSrcElement().getCpu());
@@ -413,6 +514,12 @@ public class ElementModifyHandler extends HandlerCommon {
         return result.getData().getId();
     }
 
+    /**
+     * qosRuleChange
+     *
+     * @param newCloudElement
+     * @param originCloudElement
+     */
     private void qosRuleChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         Set<String> mayUpdatePortIds = new ConcurrentHashSet<>();
         Set<String> originPortIds = new ConcurrentHashSet<>();
@@ -444,6 +551,13 @@ public class ElementModifyHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * isQosRuleChange
+     *
+     * @param newCloudPort
+     * @param originCloudPort
+     * @return boolean
+     */
     private boolean isQosRuleChange(CloudPluginSceneElementPortBO newCloudPort, CloudPluginSceneElementPortBO originCloudPort) {
         SceneElementPortBO newSrcPort = newCloudPort.getSrcPort();
         if (newSrcPort.getEgress() == null) {
@@ -500,6 +614,12 @@ public class ElementModifyHandler extends HandlerCommon {
         return false;
     }
 
+    /**
+     * doQosChange
+     *
+     * @param newCloudPort
+     * @param originCloudPort
+     */
     private void doQosChange(CloudPluginSceneElementPortBO newCloudPort, CloudPluginSceneElementPortBO originCloudPort) {
         UpdateQosRuleData data = new UpdateQosRuleData();
         data.setQosId(originCloudPort.getQosId());
@@ -568,6 +688,12 @@ public class ElementModifyHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * firewallRuleChange
+     *
+     * @param newCloudElement
+     * @param originCloudElement
+     */
     private void firewallRuleChange(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         Set<String> mayUpdatePortIds = new HashSet<>();
         for (SceneElementPortBO sceneElementPortBO : newCloudElement.getSrcElement().getPorts()) {
@@ -591,6 +717,13 @@ public class ElementModifyHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * isFirewallRuleChange
+     *
+     * @param newCloudPort
+     * @param originCloudPort
+     * @return boolean
+     */
     private boolean isFirewallRuleChange(CloudPluginSceneElementPortBO newCloudPort, CloudPluginSceneElementPortBO originCloudPort) {
         Set<String> newFirewallRules = new HashSet<>();
         for (FirewallRule firewallRule : newCloudPort.getFirewallRules()) {
@@ -611,6 +744,13 @@ public class ElementModifyHandler extends HandlerCommon {
         return !newFirewallRules.isEmpty();
     }
 
+    /**
+     * doFirewallRuleChange
+     *
+     * @param newCloudPort
+     * @param originCloudPort
+     * @param originCloudElement
+     */
     private void doFirewallRuleChange(CloudPluginSceneElementPortBO newCloudPort, CloudPluginSceneElementPortBO originCloudPort, CloudPluginSceneElementBO originCloudElement) {
         VirtualFirewallUpdateData updateData = new VirtualFirewallUpdateData();
         updateData.setName(HandlerUtils.genResourceName(originCloudElement.getSrcElement().getEid()));
@@ -637,6 +777,12 @@ public class ElementModifyHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * changeConnect
+     *
+     * @param newCloudElement
+     * @param originCloudElement
+     */
     private void changeConnect(CloudPluginSceneElementBO newCloudElement, CloudPluginSceneElementBO originCloudElement) {
         Set<String> newPortIds;
         Set<String> originPortIds;
@@ -943,6 +1089,17 @@ public class ElementModifyHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * vmAddPort
+     *
+     * @param elementResourceId
+     * @param networkResourceId
+     * @param fixedIp
+     * @param portResourceId
+     * @param originElement
+     * @param newPort
+     * @return
+     */
     private VirtualMachineAddPortResult vmAddPort(String elementResourceId, String networkResourceId, String fixedIp, String portResourceId, CloudPluginSceneElementBO originElement, CloudPluginSceneElementPortBO newPort) {
         VirtualMachineAddPortData port = new VirtualMachineAddPortData();
         port.setFixedIp(fixedIp);
@@ -985,6 +1142,14 @@ public class ElementModifyHandler extends HandlerCommon {
         return result;
     }
 
+    /**
+     * containerAddPort
+     *
+     * @param elementResourceId
+     * @param networkResourceId
+     * @param fixedIp
+     * @return
+     */
     private ContainerAddPortData containerAddPort(String elementResourceId, String networkResourceId, String fixedIp) {
         ContainerAddPortData addPortData = new ContainerAddPortData();
         addPortData.setContainerId(elementResourceId);
@@ -993,6 +1158,15 @@ public class ElementModifyHandler extends HandlerCommon {
         return container.addPort(addPortData);
     }
 
+    /**
+     * containerDeletePort
+     *
+     * @param elementResourceId
+     * @param networkResourceId
+     * @param portResourceId
+     * @param cloudPluginSceneElementPortBO
+     * @return boolean
+     */
     private boolean containerDeletePort(String elementResourceId, String networkResourceId, String portResourceId, CloudPluginSceneElementPortBO cloudPluginSceneElementPortBO) {
         ContainerDeletePortData deletePortData = new ContainerDeletePortData();
         deletePortData.setContainerId(elementResourceId);
@@ -1001,6 +1175,14 @@ public class ElementModifyHandler extends HandlerCommon {
         return container.deletePort(deletePortData, cloudPluginSceneElementPortBO);
     }
 
+    /**
+     * deletePort
+     *
+     * @param instanceId
+     * @param portId
+     * @param element
+     * @param port
+     */
     private void deletePort(String instanceId, String portId, CloudPluginSceneElementBO element, CloudPluginSceneElementPortBO port) {
         virtualMachine.deletePort(instanceId, portId);
         if (SystemTypeCommandUtils.isWindows(SystemTypeUtils.getStandardSystemType(element.getSrcElement().getSystemType()))) {

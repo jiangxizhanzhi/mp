@@ -73,17 +73,34 @@ public class CloudPluginSceneElementNetworkBO extends ModelBO<CloudPluginSceneEl
     private List<String> ipPool = new ArrayList<>();
     private Set<String> excloudIps = new HashSet<>();
 
+    /**
+     * CloudPluginSceneElementNetworkBO
+     *
+     * @param scene
+     * @param sceneElement
+     */
     public CloudPluginSceneElementNetworkBO(String scene, String sceneElement) {
         this.id = TextUtils.uuid();
         this.scene = scene;
         this.sceneElement = sceneElement;
     }
 
+    /**
+     * createModel
+     *
+     * @return
+     */
     @Override
     public CloudPluginSceneElementNetworkModel createModel() {
         return new CloudPluginSceneElementNetworkModel();
     }
 
+    /**
+     * fromModel
+     *
+     * @param obj
+     * @param ignoreFields
+     */
     @Override
     public void fromModel(CloudPluginSceneElementNetworkModel obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
@@ -102,6 +119,12 @@ public class CloudPluginSceneElementNetworkBO extends ModelBO<CloudPluginSceneEl
         });
     }
 
+    /**
+     * toModel
+     *
+     * @param ignoreFields
+     * @return
+     */
     @Override
     public CloudPluginSceneElementNetworkModel toModel(String... ignoreFields) {
         CloudPluginSceneElementNetworkModel obj = super.toModel(

@@ -40,12 +40,23 @@ public class RecreateHandler extends HandlerCommon {
     private DeleteInRecreateHandler deleteHandler;
     private CreateInRecreateHandler createHandler;
 
+    /**
+     * RecreateHandler
+     *
+     * @param pluginHandler
+     * @param event
+     */
     public RecreateHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, RecreateTaskPool.getInstance(), event);
         this.createHandler = new CreateInRecreateHandler(pluginHandler);
         this.deleteHandler = new DeleteInRecreateHandler(pluginHandler);
     }
 
+    /**
+     * recreateElement
+     *
+     * @param element
+     */
     public void recreateElement(CloudPluginSceneElementBO element) {
         String nodeId = element.getSrcElement().getId();
         Integer virtualType = element.getVirtualType();
@@ -64,6 +75,12 @@ public class RecreateHandler extends HandlerCommon {
         getPluginHandler().updateElements(element.getSrcElement().getId());
     }
 
+    /**
+     * prepareElementProcess
+     *
+     * @param nodeId
+     * @param virtualType
+     */
     private void prepareElementProcess(String nodeId, Integer virtualType) {
         if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RECREATE, Arrays.asList(ElementProcess.RECREATE_VIRTUAL_ROUTER));
@@ -79,11 +96,21 @@ public class RecreateHandler extends HandlerCommon {
     }
 
     private static class DeleteInRecreateHandler extends DeleteHandler {
+        /**
+         * DeleteInRecreateHandler
+         *
+         * @param pluginHandler
+         */
         public DeleteInRecreateHandler(CloudScenePluginHandler pluginHandler) {
             super(pluginHandler);
             this.setEvent(SceneElementModel.Event.RECREATE);
         }
 
+        /**
+         * deleteElementProcess
+         *
+         * @param cloudElement
+         */
         protected void deleteElementProcess(CloudPluginSceneElementBO cloudElement) {
             if (Boolean.TRUE.equals(cloudElement.getExternal())) {
                 return;
@@ -149,11 +176,21 @@ public class RecreateHandler extends HandlerCommon {
     }
 
     private static class CreateInRecreateHandler extends CreateHandler {
+        /**
+         * CreateInRecreateHandler
+         *
+         * @param pluginHandler
+         */
         public CreateInRecreateHandler(CloudScenePluginHandler pluginHandler) {
             super(pluginHandler);
             this.setEvent(SceneElementModel.Event.RECREATE);
         }
 
+        /**
+         * createElementProcess
+         *
+         * @param cloudElement
+         */
         @Override
         public void createElementProcess(CloudPluginSceneElementBO cloudElement) {
             if (Boolean.TRUE.equals(cloudElement.getExternal())) {

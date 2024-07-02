@@ -20,6 +20,12 @@ public class VirtualSwitch extends CloudClient {
 
     private static final Logger log = LoggerFactory.getLogger(VirtualSwitch.class);
 
+    /**
+     * create
+     *
+     * @param createData
+     * @return
+     */
     public VirtualSwitchCreateData create(VirtualSwitchCreateData createData) {
         heavyConcurrentWait();
 
@@ -29,6 +35,12 @@ public class VirtualSwitch extends CloudClient {
         return result.getData();
     }
 
+    /**
+     * deleteById
+     *
+     * @param networkId
+     * @return boolean
+     */
     public boolean deleteById(String networkId) {
         heavyConcurrentWait();
         try {
@@ -41,6 +53,12 @@ public class VirtualSwitch extends CloudClient {
         return true;
     }
 
+    /**
+     * createAcl
+     *
+     * @param networkAclData
+     * @return boolean
+     */
     public boolean createAcl(NetworkAclData networkAclData) {
         heavyConcurrentWait();
         try {
@@ -54,6 +72,12 @@ public class VirtualSwitch extends CloudClient {
         return true;
     }
 
+    /**
+     * deleteAcl
+     *
+     * @param networkAclData
+     * @return boolean
+     */
     public boolean deleteAcl(NetworkAclData networkAclData) {
         heavyConcurrentWait();
         try {
@@ -67,6 +91,12 @@ public class VirtualSwitch extends CloudClient {
         return true;
     }
 
+    /**
+     * update
+     *
+     * @param resourceId
+     * @param updateData
+     */
     public void update(String resourceId, VirtualSwitchUpdateData updateData) {
         heavyConcurrentWait();
 
@@ -82,6 +112,19 @@ public class VirtualSwitch extends CloudClient {
         return result;
     }
 
+    /**
+     * 文件名：Example.java
+     * 版本信息：v1.0
+     * 日期：2023-04-01
+     * 描述：
+     * 这是一个示例Java文件，展示了开头注释的标准格式。
+     * <p>
+     * 版权信息：
+     * © 2023 你的名字或公司
+     * <p>
+     * 修改历史：
+     * 2023-04-01 初始版本
+     */
     @Getter
     @Setter
     private static class NetworkParam implements CloudHttpData {

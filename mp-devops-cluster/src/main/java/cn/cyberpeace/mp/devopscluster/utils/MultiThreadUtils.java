@@ -116,6 +116,11 @@ public class MultiThreadUtils {
         return new ServiceResult(result);
     }
 
+    /**
+     * setThreadCount
+     *
+     * @param threadCount
+     */
     public void setThreadCount(int threadCount) {
         this.threadCount = threadCount;
     }

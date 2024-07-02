@@ -28,12 +28,20 @@ public class CsceneContextBO {
     @ApiModelProperty(value = "透明上下文")
     private Map<String, Object> passThrough;
 
+    /**
+     * loadTransparentContext
+     */
     public void loadTransparentContext() {
         if (passThrough != null) {
             SysContextHolder.setPassThroughMap(passThrough);
         }
     }
 
+    /**
+     * toSceneContext
+     *
+     * @return
+     */
     public SceneContextBO toSceneContext() {
         SceneContextBO sceneContext = new SceneContextBO();
         Map<String, Object> plugins = new HashMap<>();
@@ -43,6 +51,11 @@ public class CsceneContextBO {
         return sceneContext;
     }
 
+    /**
+     * toCloudScenePluginContext
+     *
+     * @return
+     */
     public CloudScenePluginContext toCloudScenePluginContext() {
         CloudScenePluginContext cloudScenePluginContext = new CloudScenePluginContext();
         if (StringUtils.isNotEmpty(accessUserId)) {

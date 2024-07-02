@@ -14,10 +14,18 @@ public class ResourceParseWrapper<T extends RsourceNameParams> {
     private boolean success;
     private T result;
 
+    /**
+     * ResourceParseWrapper
+     */
     public ResourceParseWrapper() {
         this.success = false;
     }
 
+    /**
+     * ResourceParseWrapper
+     *
+     * @param result
+     */
     public ResourceParseWrapper(@NotNull T result) {
         this.result = result;
         this.success = true;

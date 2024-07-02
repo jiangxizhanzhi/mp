@@ -18,6 +18,11 @@ public class BehaviorSwagger2Config {
 	@Autowired
 	private Swagger2Config swagger2Config;
 
+	/**
+	 * apiBehavior
+	 *
+	 * @return
+	 */
 	@Bean
 	public Docket apiBehavior() {
 		return new Docket(DocumentationType.SWAGGER_2)

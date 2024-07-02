@@ -26,6 +26,9 @@ public class ServerMonitorConfig {
     // 业务服务监控
     public static List<MonitorProbe> businessSrvMonitors;
 
+    /**
+     * init
+     */
     @PostConstruct
     public void init() {
         MonitorProbe cpCloudMonitor = JSON.parseObject(SituationAwareCommonConfigUtil.getConfigString(SituationAwareCommonConfigUtil.CP_SRV_MONITORS), MonitorProbe.class);

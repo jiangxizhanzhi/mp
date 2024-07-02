@@ -38,10 +38,19 @@ public class ResumeHandler extends HandlerCommon {
         public static final EventProcess RESUME_DYNAMIPS = new EventProcess("resume_dynamips", "sceneplugincloud.event.resume_dynamips");
     }
 
+    /**
+     * ResumeHandler
+     *
+     * @param pluginHandler
+     * @param event
+     */
     public ResumeHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, ResumeTaskPool.getInstance(), event);
     }
 
+    /**
+     * resume
+     */
     public void resume() {
         prepareEventProcess(SceneModel.Event.RESUME, SceneProcess.class, ElementProcess.class);
         List<Runnable> tasks = new ArrayList<>();
@@ -52,6 +61,11 @@ public class ResumeHandler extends HandlerCommon {
         runSceneProgress(SceneProcess.RESUME_TERMINALS, () -> runTasks(tasks));
     }
 
+    /**
+     * resumeElement
+     *
+     * @param element
+     */
     public void resumeElement(CloudPluginSceneElementBO element) {
         String nodeId = element.getSrcElement().getId();
         Integer virtualType = element.getVirtualType();

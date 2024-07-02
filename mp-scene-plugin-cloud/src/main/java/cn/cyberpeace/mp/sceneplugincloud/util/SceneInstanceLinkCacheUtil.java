@@ -64,6 +64,9 @@ public class SceneInstanceLinkCacheUtil {
 
     private static Set<String> existsNodeTask = new ConcurrentHashSet<>();
 
+    /**
+     * init
+     */
     public static void init() {
         if (!cacheInit) {
             taskPool = LinkStatusTaskPool.getInstance();
@@ -85,6 +88,11 @@ public class SceneInstanceLinkCacheUtil {
         }
     }
 
+    /**
+     * clear
+     *
+     * @param sceneId
+     */
     public static void clear(String sceneId) {
         try {
             cache.invalidate(sceneId);
@@ -93,10 +101,21 @@ public class SceneInstanceLinkCacheUtil {
         }
     }
 
+    /**
+     * getCached
+     *
+     * @param sceneId
+     * @return
+     */
     public static List<NodeLinkStatusBO> getCached(String sceneId) {
         return cache.getUnchecked(sceneId);
     }
 
+    /**
+     * refresh
+     *
+     * @param sceneId
+     */
     public static void refresh(String sceneId) {
         cache.refresh(sceneId);
         // 10s之后再刷一次缓存 避免并发刷新时刷到旧的数据
@@ -105,6 +124,9 @@ public class SceneInstanceLinkCacheUtil {
         }, 10, TimeUnit.SECONDS);
     }
 
+    /**
+     * tryStartCronRefresh
+     */
     public static void tryStartCronRefresh() {
         if (!startCronRefresh) {
             CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
@@ -119,6 +141,12 @@ public class SceneInstanceLinkCacheUtil {
         }
     }
 
+    /**
+     * getNodeLinkStatusList
+     *
+     * @param sceneId
+     * @return
+     */
     private static List<NodeLinkStatusBO> getNodeLinkStatusList(String sceneId) {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
         CloudScenePluginHandler handler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
@@ -164,6 +192,12 @@ public class SceneInstanceLinkCacheUtil {
         return nodeLinkStatusList;
     }
 
+    /**
+     * loadStatus
+     *
+     * @param sceneId
+     * @param nodeLinkStatusList
+     */
     private static void loadStatus(String sceneId, List<NodeLinkStatusBO> nodeLinkStatusList) {
         try {
             List<Runnable> tasks = new ArrayList<>();
@@ -243,6 +277,11 @@ public class SceneInstanceLinkCacheUtil {
         }
     }
 
+    /**
+     * getCronRefreshTask
+     *
+     * @return
+     */
     private static Runnable getCronRefreshTask() {
         return () -> {
             cache.asMap().entrySet().forEach(e -> {
@@ -251,6 +290,13 @@ public class SceneInstanceLinkCacheUtil {
         };
     }
 
+    /**
+     * getKey
+     *
+     * @param resourceId
+     * @param networkId
+     * @return
+     */
     private static String getKey(String resourceId, String networkId) {
         return StringUtils.joinWith("_", resourceId, networkId);
     }
@@ -259,12 +305,20 @@ public class SceneInstanceLinkCacheUtil {
 
         public static final LinkStatusTaskPool INSTANCE = new LinkStatusTaskPool();
 
+        /**
+         * LinkStatusTaskPool
+         */
         private LinkStatusTaskPool() {
             super(CloudSingleton.cloudAppConfig.getLinkStatusPoolSize(),
                     CloudSingleton.cloudAppConfig.getLinkStatusHoldSize(), 60L);
             executor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy());
         }
 
+        /**
+         * getInstance
+         *
+         * @return
+         */
         public static LinkStatusTaskPool getInstance() {
             return INSTANCE;
         }

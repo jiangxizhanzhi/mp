@@ -31,10 +31,22 @@ public class ElementTypeUtils {
         return isCoreRouter(element.getImage());
     }
 
+    /**
+     * isExternal
+     *
+     * @param element
+     * @return boolean
+     */
     public static boolean isExternal(CloudPluginSceneElementBO element) {
         return Boolean.TRUE.equals(element.getExternal());
     }
 
+    /**
+     * isExternalTerminal
+     *
+     * @param cloudElement
+     * @return boolean
+     */
     public static boolean isExternalTerminal(CloudPluginSceneElementBO cloudElement) {
         if (!Boolean.TRUE.equals(cloudElement.getExternal())) {
             return false;
@@ -47,6 +59,12 @@ public class ElementTypeUtils {
         }
     }
 
+    /**
+     * isEntityGateway
+     *
+     * @param cloudElement
+     * @return boolean
+     */
     public static boolean isEntityGateway(CloudPluginSceneElementBO cloudElement) {
         String entityType = BaseCloudPluginSceneElementModel.ImageType.ENTITY;
         int routerRole = BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER;
@@ -59,6 +77,12 @@ public class ElementTypeUtils {
         return false;
     }
 
+    /**
+     * isVirtualGateway
+     *
+     * @param element
+     * @return boolean
+     */
     public static boolean isVirtualGateway(CloudPluginSceneElementBO element) {
         if (element == null) {
             return false;
@@ -77,6 +101,12 @@ public class ElementTypeUtils {
         return isVirtualGateWayNode;
     }
 
+    /**
+     * isVirtualNode
+     *
+     * @param element
+     * @return boolean
+     */
     public static boolean isVirtualNode(CloudPluginSceneElementBO element) {
         Integer virtualType = element.getVirtualType();
         boolean isVirtualElement = virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)

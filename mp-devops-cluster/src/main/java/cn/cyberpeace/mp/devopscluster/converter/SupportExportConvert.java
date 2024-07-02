@@ -35,6 +35,12 @@ public class SupportExportConvert {
     @Resource
     private DevopsTargetAuthService devopsTargetAuthService;
 
+    /**
+     * page
+     *
+     * @param dto
+     * @return
+     */
     public BasePageBO<ImageConvertModel> page(ImagePageDTO dto) {
         Integer total = deviceTargetMapper.totalCount(dto);
 
@@ -112,10 +118,22 @@ public class SupportExportConvert {
         return imageConvertPageModel;
     }
 
+    /**
+     * findByIds
+     *
+     * @param ids
+     * @return
+     */
     public List<Device> findByIds(List<Integer> ids) {
         return deviceService.findByIds(ids);
     }
 
+    /**
+     * wrapperImageConvertModel
+     *
+     * @param device
+     * @return
+     */
     protected ImageConvertModel wrapperImageConvertModel(Device device){
         ImageConvertModel imageModel = new ImageConvertModel();
         imageModel.setUuid(device.getUuid());

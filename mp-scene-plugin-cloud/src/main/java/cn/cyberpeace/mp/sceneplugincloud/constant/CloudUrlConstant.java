@@ -273,6 +273,9 @@ public class CloudUrlConstant {
 
     public static final String HYPERVISORS_STATISTICS = "/v1/hypervisors";
 
+    /**
+     * CloudUrlConstant
+     */
     private CloudUrlConstant() {
     }
 }

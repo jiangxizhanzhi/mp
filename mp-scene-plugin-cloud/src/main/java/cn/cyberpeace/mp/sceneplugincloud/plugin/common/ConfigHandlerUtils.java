@@ -19,6 +19,11 @@ import java.util.List;
 public class ConfigHandlerUtils {
     private CloudSceneConfigPluginHandler pluginHandler;
 
+    /**
+     * ConfigHandlerUtils
+     *
+     * @param pluginHandler
+     */
     public ConfigHandlerUtils(CloudSceneConfigPluginHandler pluginHandler) {
         this.pluginHandler = pluginHandler;
     }
@@ -92,6 +97,13 @@ public class ConfigHandlerUtils {
         return null;
     }
 
+    /**
+     * confirmAuxiliaryNetworkCloudElement
+     *
+     * @param cloudElement
+     * @param connectedCloudElement
+     * @return
+     */
     public static CloudPluginSceneConfigElementBO confirmAuxiliaryNetworkCloudElement(
             CloudPluginSceneConfigElementBO cloudElement, CloudPluginSceneConfigElementBO connectedCloudElement) {
         if (cloudElement == null || connectedCloudElement == null) {

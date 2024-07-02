@@ -60,6 +60,14 @@ public class SegmentCount2IntervalSecondsUtil {
         return intervalSeconds;
     }
 
+    /**
+     * generateTimeList
+     *
+     * @param start
+     * @param end
+     * @param intervalSeconds
+     * @return
+     */
     public static List<LocalDateTime> generateTimeList(LocalDateTime start, LocalDateTime end, long intervalSeconds) {
         List<LocalDateTime> timeList = new ArrayList<>();
         while (!start.isAfter(end)) {

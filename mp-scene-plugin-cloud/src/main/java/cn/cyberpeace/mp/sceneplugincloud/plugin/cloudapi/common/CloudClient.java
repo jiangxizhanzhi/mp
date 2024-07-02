@@ -24,6 +24,13 @@ public abstract class CloudClient {
 
     private static final Object syncObj = new Object();
 
+    /**
+     * checkResponse
+     *
+     * @param response
+     * @param throwException
+     * @return
+     */
     private <T> CloudResponse<T> checkResponse(CloudResponse<T> response, boolean throwException) {
         if (throwException && !response.isSuccess()) {
             throw new MpRuntimeException(response.getMessage());
@@ -32,6 +39,9 @@ public abstract class CloudClient {
         return response;
     }
 
+    /**
+     * heavyConcurrentWait
+     */
     protected void heavyConcurrentWait() {
         if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getCloudHeavyConcurrentDelayEnable())) {
             synchronized (syncObj) {
@@ -44,11 +54,29 @@ public abstract class CloudClient {
         }
     }
 
+    /**
+     * cloudGet
+     *
+     * @param url
+     * @param param
+     * @param valueTypeRef
+     * @param throwException
+     * @return
+     */
     public <T> CloudResponse<T> cloudGet(String url, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef,
                                          boolean throwException) {
         return checkResponse(httpClient.cloudGet(url, param, valueTypeRef), throwException);
     }
 
+    /**
+     * cloudGetWithoutResponseWrapper
+     *
+     * @param url
+     * @param param
+     * @param valueTypeRef
+     * @param throwException
+     * @return
+     */
     public <T> T cloudGetWithoutResponseWrapper(String url, HttpParam param, TypeReference<T> valueTypeRef, boolean throwException) {
         try {
             return httpClient.get(url, param, valueTypeRef);
@@ -61,30 +89,83 @@ public abstract class CloudClient {
         }
     }
 
+    /**
+     * cloudGet
+     *
+     * @param url
+     * @param param
+     * @param valueTypeRef
+     * @param throwException
+     * @param timeout
+     * @return
+     */
     public <T> CloudResponse<T> cloudGet(String url, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef,
                                          boolean throwException, Integer timeout) {
         return checkResponse(httpClient.cloudGet(url, param, valueTypeRef, timeout), throwException);
     }
 
+    /**
+     * cloudPost
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param valueTypeRef
+     * @param throwException
+     * @return
+     */
     public <T> CloudResponse<T> cloudPost(String url, HttpData data, HttpParam param,
                                           TypeReference<CloudResponse<T>> valueTypeRef, boolean throwException) {
         return checkResponse(httpClient.cloudPost(url, data, param, valueTypeRef), throwException);
     }
 
+    /**
+     * cloudPatch
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param valueTypeRef
+     * @param throwException
+     * @return
+     */
     public <T> CloudResponse<T> cloudPatch(String url, HttpData data, HttpParam param,
                                            TypeReference<CloudResponse<T>> valueTypeRef, boolean throwException) {
         return checkResponse(httpClient.cloudPatch(url, data, param, valueTypeRef), throwException);
     }
 
+    /**
+     * cloudDelete
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param valueTypeRef
+     * @param throwException
+     * @return
+     */
     public <T> CloudResponse<T> cloudDelete(String url, HttpData data, HttpParam param,
                                             TypeReference<CloudResponse<T>> valueTypeRef, boolean throwException) {
         return checkResponse(httpClient.cloudDelete(url, data, param, valueTypeRef), throwException);
     }
 
+    /**
+     * cloudDownload
+     *
+     * @param url
+     * @param param
+     * @return
+     */
     public HttpResult cloudDownload(String url, HttpParam param) {
         return httpClient.cloudDownload(url, param);
     }
 
+    /**
+     * excludeDeleteException
+     *
+     * @param runtimeException
+     * @return boolean
+     */
     protected boolean excludeDeleteException(Exception runtimeException) {
         Boolean ignoreDeleteException = BeanCommon.getBean(CloudAppConfig.class).getIgnoreDeleteException();
         if (Boolean.TRUE.equals(ignoreDeleteException)) {

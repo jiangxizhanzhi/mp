@@ -15,6 +15,11 @@ public class ScenePluginFlowSwagger2Config {
     @Autowired
     private Swagger2Config swagger2Config;
 
+    /**
+     * apiScenePluginFlow
+     *
+     * @return
+     */
     @Bean
     public Docket apiScenePluginFlow() {
         return new Docket(DocumentationType.SWAGGER_2)

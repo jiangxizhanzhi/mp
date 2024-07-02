@@ -19,6 +19,12 @@ import java.util.List;
 @ModelClass(ProbeAbilityModel.class)
 public interface ProbeAbilityMapper extends BaseModelMapper<ProbeAbilityModel> {
 
+    /**
+     * listProbeAbilityDtos
+     *
+     * @param condition
+     * @return
+     */
     List<ProbeAbilityDto> listProbeAbilityDtos(@Param("condition") ProbeSearchCondition condition);
 
 }

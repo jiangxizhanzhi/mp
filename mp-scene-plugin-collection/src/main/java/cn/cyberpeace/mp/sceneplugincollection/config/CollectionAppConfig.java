@@ -106,6 +106,11 @@ public class CollectionAppConfig {
     @Autowired
     private BaseAppConfig baseAppConfig;
 
+    /**
+     * getWazuhAgentInstallerDir
+     *
+     * @return
+     */
     public String getWazuhAgentInstallerDir() {
         if (!StringUtils.isEmpty(wazuhAgentInstallerDir)) {
             return wazuhAgentInstallerDir;
@@ -116,6 +121,11 @@ public class CollectionAppConfig {
         return wazuhAgentInstallerDir;
     }
 
+    /**
+     * getSuricataRuleDir
+     *
+     * @return
+     */
     public String getSuricataRuleDir() {
         if (!StringUtils.isEmpty(this.suricataRuleDir)) {
             return this.suricataRuleDir;
@@ -127,6 +137,11 @@ public class CollectionAppConfig {
     }
 
 
+    /**
+     * getBizScriptsInstallerDir
+     *
+     * @return
+     */
     public String getBizScriptsInstallerDir() {
         if (!StringUtils.isEmpty(bizScriptsInstallerDir)) {
             return bizScriptsInstallerDir;

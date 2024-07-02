@@ -29,6 +29,12 @@ public class EntityNode extends CloudClient {
         return result.getData();
     }
 
+    /**
+     * delete
+     *
+     * @param deleteData
+     * @return boolean
+     */
     public boolean delete(EntityNodeDeleteData deleteData) {
         heavyConcurrentWait();
 
@@ -47,6 +53,12 @@ public class EntityNode extends CloudClient {
         }
     }
 
+    /**
+     * createLogicalSwitch
+     *
+     * @param createData
+     * @return
+     */
     public LogicalSwitchCreateData createLogicalSwitch(LogicalSwitchCreateData createData) {
         CloudResponse<LogicalSwitchCreateData> result = cloudPost(CloudUrlConstant.LOGICAL_SWITCH_CREATE_URL, createData,
                 null, new TypeReference<CloudResponse<LogicalSwitchCreateData>>() {
@@ -54,6 +66,11 @@ public class EntityNode extends CloudClient {
         return result.getData();
     }
 
+    /**
+     * deleteLogicalSwitch
+     *
+     * @param deleteData
+     */
     public void deleteLogicalSwitch(LogicalSwitchDeleteData deleteData) {
         try {
             cloudDelete(CloudUrlConstant.LOGICAL_SWITCH_DELETE_URL, deleteData, null,

@@ -13,8 +13,19 @@ import java.util.List;
 @ModelClass(CpNodeMonitorScriptConfigModel.class)
 public interface CpNodeMonitorScriptConfigMapper extends BaseModelMapper<CpNodeMonitorScriptConfigModel> {
 
+    /**
+     * listAll
+     *
+     * @return
+     */
     List<CpNodeMonitorScriptConfigModel> listAll();
 
+    /**
+     * getByAgentName
+     *
+     * @param agentName
+     * @return
+     */
     CpNodeMonitorScriptConfigModel getByAgentName(String agentName);
 
 }

@@ -9,11 +9,19 @@ public class DeleteTaskPool extends TaskPool {
         public static final DeleteTaskPool INSTANCE = new DeleteTaskPool();
     }
 
+    /**
+     * DeleteTaskPool
+     */
     private DeleteTaskPool() {
         super(CollectionSingleton.collectionAppConfig.getDeletePoolSize(),
                 CollectionSingleton.collectionAppConfig.getDeleteHoldSize(), 60L);
     }
 
+    /**
+     * getInstance
+     *
+     * @return
+     */
     public static DeleteTaskPool getInstance() {
         return DeleteTaskPoolInstance.INSTANCE;
     }

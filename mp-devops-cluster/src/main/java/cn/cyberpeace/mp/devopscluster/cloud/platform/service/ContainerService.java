@@ -28,6 +28,11 @@ public class ContainerService extends BaseCpService {
      */
     private static final String CONTAINER_ACTION = "/cloud/v1/container/{container_id}/{action}";
 
+    /**
+     * ContainerService
+     *
+     * @param devopsClusterConfig
+     */
     public ContainerService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }

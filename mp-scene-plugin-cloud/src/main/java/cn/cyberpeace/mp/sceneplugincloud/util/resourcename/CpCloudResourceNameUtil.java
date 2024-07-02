@@ -12,6 +12,13 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CpCloudResourceNameUtil implements ICloudResourceName<RsourceNameParams> {
+    /**
+     * generate
+     *
+     * @param id
+     * @param params
+     * @return
+     */
     @Override
     public String generate(String id, RsourceNameParams params) {
         if (params == null || params.getIndex() == null) {
@@ -21,6 +28,12 @@ public class CpCloudResourceNameUtil implements ICloudResourceName<RsourceNamePa
         }
     }
 
+    /**
+     * parse
+     *
+     * @param name
+     * @return
+     */
     @Override
     public ResourceParseWrapper<RsourceNameParams> parse(String name) {
         if (StringUtils.isEmpty(name) || !name.startsWith(this.getPrefix())) {
@@ -44,6 +57,11 @@ public class CpCloudResourceNameUtil implements ICloudResourceName<RsourceNamePa
         return new ResourceParseWrapper<>(result);
     }
 
+    /**
+     * getPrefix
+     *
+     * @return
+     */
     private String getPrefix() {
         return CloudSingleton.cloudAppConfig.getCpcloudResourceGroup();
     }

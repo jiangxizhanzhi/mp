@@ -8,6 +8,11 @@ public class FlowSingleton {
 
     public static FlowAppConfig flowAppConfig;
 
+    /**
+     * FlowSingleton
+     *
+     * @param flowAppConfig
+     */
     private FlowSingleton(FlowAppConfig flowAppConfig) {
         FlowSingleton.flowAppConfig = flowAppConfig;
     }

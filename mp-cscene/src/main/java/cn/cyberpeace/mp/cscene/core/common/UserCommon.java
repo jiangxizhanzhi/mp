@@ -18,6 +18,11 @@ public class UserCommon {
 
     private static UserService userService;
 
+    /**
+     * getCurrentUser
+     *
+     * @return
+     */
     public static UserModel getCurrentUser() {
 
         UserModel user = UserUtils.getLoginUser();
@@ -28,6 +33,12 @@ public class UserCommon {
         return user;
     }
 
+    /**
+     * getUser
+     *
+     * @param userId
+     * @return
+     */
     public static UserModel getUser(String userId) {
         UserModel user = null;
         try {
@@ -39,10 +50,22 @@ public class UserCommon {
     }
 
 
+    /**
+     * getUsers
+     *
+     * @param userIds
+     * @return
+     */
     public static List<UserModel> getUsers(List<String> userIds) {
         return userService.getUserModelNoRestrictByUserIds(userIds);
     }
 
+    /**
+     * getUserWithContext
+     *
+     * @param context
+     * @return
+     */
     public static UserModel getUserWithContext(CsceneContextBO context) {
         if (context == null || StringUtils.isEmpty(context.getAccessUserId())) {
             return getCurrentUser();
@@ -51,6 +74,12 @@ public class UserCommon {
         return getUser(context.getAccessUserId());
     }
 
+    /**
+     * getUserDetail
+     *
+     * @param userId
+     * @return
+     */
     public static UserBo getUserDetail(String userId) {
         UserBo user = null;
         try {
@@ -61,6 +90,11 @@ public class UserCommon {
         return user;
     }
 
+    /**
+     * UserCommon
+     *
+     * @param userService
+     */
     @SuppressWarnings({"java:S3010"})
     private UserCommon(UserService userService) {
         UserCommon.userService = userService;

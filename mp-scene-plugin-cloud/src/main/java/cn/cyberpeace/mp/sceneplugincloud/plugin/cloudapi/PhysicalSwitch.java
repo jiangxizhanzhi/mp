@@ -14,6 +14,12 @@ import java.util.List;
 
 @Slf4j
 public class PhysicalSwitch extends CloudClient {
+    /**
+     * getPortConnections
+     *
+     * @param name
+     * @return
+     */
     public CloudListData<List<String>> getPortConnections(String name) {
         GetPhysicalSwitchPortConnectionParam param = new GetPhysicalSwitchPortConnectionParam();
         param.setL1SwitchName(name);
@@ -23,16 +29,32 @@ public class PhysicalSwitch extends CloudClient {
         return result.getData();
     }
 
+    /**
+     * createPortConnection
+     *
+     * @param data
+     */
     public void createPortConnection(PhysicalSwitchPortConnectionCreateData data) {
         cloudPost(CloudUrlConstant.ADD_PHYSICAL_SWITCH_PORT_CONNECTION, data, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
     }
 
+    /**
+     * deletePortConnection
+     *
+     * @param data
+     */
     public void deletePortConnection(PhysicalSwitchPortConnectionDeleteData data) {
         cloudDelete(CloudUrlConstant.DELETE_PHYSICAL_SWITCH_PORT_CONNECTION, data, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
     }
 
+    /**
+     * getPorts
+     *
+     * @param name
+     * @return
+     */
     public CloudListData<String> getPorts(String name) {
         GetPhysicalSwitchPortConnectionParam param = new GetPhysicalSwitchPortConnectionParam();
         param.setL1SwitchName(name);

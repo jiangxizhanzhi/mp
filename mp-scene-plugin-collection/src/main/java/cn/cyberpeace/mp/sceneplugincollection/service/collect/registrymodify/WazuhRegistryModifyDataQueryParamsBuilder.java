@@ -28,6 +28,14 @@ public class WazuhRegistryModifyDataQueryParamsBuilder implements WazuhDataQuery
     private boolean single = true;
     private boolean sicLaunchData;
 
+    /**
+     * WazuhRegistryModifyDataQueryParamsBuilder
+     *
+     * @param sicLaunchData
+     * @param agentNames
+     * @param startTime
+     * @param endTime
+     */
     public WazuhRegistryModifyDataQueryParamsBuilder(boolean sicLaunchData, List<String> agentNames, LocalDateTime startTime, LocalDateTime endTime) {
         this.startTime = startTime;
         this.endTime = endTime;
@@ -35,6 +43,11 @@ public class WazuhRegistryModifyDataQueryParamsBuilder implements WazuhDataQuery
         this.sicLaunchData = sicLaunchData;
     }
 
+    /**
+     * build
+     *
+     * @return
+     */
     @Override
     public BoolQueryBuilder build() {
         BoolQueryBuilder finalQueryBuilder = QueryBuilders.boolQuery();
@@ -74,6 +87,11 @@ public class WazuhRegistryModifyDataQueryParamsBuilder implements WazuhDataQuery
         return finalQueryBuilder;
     }
 
+    /**
+     * sorts
+     *
+     * @return
+     */
     @Override
     public List<SortBuilder<?>> sorts() {
         List<SortBuilder<?>> sortBuilders = new ArrayList<>();
@@ -81,10 +99,20 @@ public class WazuhRegistryModifyDataQueryParamsBuilder implements WazuhDataQuery
         return sortBuilders;
     }
 
+    /**
+     * setFilePath
+     *
+     * @param filePath
+     */
     public void setFilePath(String filePath) {
         this.filePath = filePath;
     }
 
+    /**
+     * setLevels
+     *
+     * @param levels
+     */
     public void setLevels(List<Integer> levels) {
         this.levels = levels;
     }

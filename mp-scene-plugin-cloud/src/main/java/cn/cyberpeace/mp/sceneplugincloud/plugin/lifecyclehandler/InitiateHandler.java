@@ -51,10 +51,20 @@ public class InitiateHandler extends HandlerCommon {
 
     private List<String> existCidrs;
 
+    /**
+     * InitiateHandler
+     *
+     * @param pluginHandler
+     */
     public InitiateHandler(CloudScenePluginHandler pluginHandler) {
         super(pluginHandler, InitiateTaskPool.getInstance(), SceneModel.Event.INITIATE);
     }
 
+    /**
+     * initCoreType
+     *
+     * @param element
+     */
     public void initCoreType(CloudPluginSceneElementBO element) {
         Integer role = element.getRole();
         CoreType coreType = CoreType.NETWORK;
@@ -96,6 +106,9 @@ public class InitiateHandler extends HandlerCommon {
         element.setCoreType(coreType);
     }
 
+    /**
+     * initiate
+     */
     public void initiate() {
         this.prepareEventProcess();
 
@@ -183,6 +196,11 @@ public class InitiateHandler extends HandlerCommon {
 //        this.initiateForSingleNode(noEventElements);
     }
 
+    /**
+     * initiateForSingleNode
+     *
+     * @param noEventElements
+     */
     public void initiateForSingleNode(List<CloudPluginSceneElementBO> noEventElements) {
         List<CloudPluginSceneElementBO> cloudElements = noEventElements
                 .stream()
@@ -296,29 +314,58 @@ public class InitiateHandler extends HandlerCommon {
         setFwdnsInterfaceIps(cloudElements);
     }
 
+    /**
+     * initiateElementBasePropertiesProcess
+     *
+     * @param cloudElement
+     */
     public void initiateElementBasePropertiesProcess(CloudPluginSceneElementBO cloudElement) {
         runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.INITIATE_BASE_PROPERTIES,
                 () -> initiateElementBaseProperties(cloudElement));
     }
 
+    /**
+     * initiateElementIpPoolProcess
+     *
+     * @param cloudElement
+     */
     public void initiateElementIpPoolProcess(CloudPluginSceneElementBO cloudElement) {
         runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.INITIATE_IP_POOL,
                 () -> initIpPool(cloudElement));
     }
 
+    /**
+     * initiateElementPortsProcess
+     *
+     * @param cloudElement
+     */
     public void initiateElementPortsProcess(CloudPluginSceneElementBO cloudElement) {
         runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.INITIATE_PORTS,
                 () -> initiateElementPorts(cloudElement));
     }
 
+    /**
+     * ip2Cidr24
+     *
+     * @param ip
+     * @return
+     */
     public String ip2Cidr24(String ip) {
         return ip.substring(0, ip.lastIndexOf(".")) + ".0/24";
     }
 
+    /**
+     * prepareEventProcess
+     */
     protected void prepareEventProcess() {
         prepareEventProcess(SceneModel.Event.INITIATE, SceneProcess.class, ElementProcess.class);
     }
 
+    /**
+     * resetResourceId
+     *
+     * @return boolean
+     */
     protected boolean resetResourceId() {
         return true;
     }
@@ -548,24 +595,45 @@ public class InitiateHandler extends HandlerCommon {
         initiateAuxiliaryNetwork(cloudElement);
     }
 
+    /**
+     * allocateCidrs
+     *
+     * @param count
+     * @return
+     */
     private synchronized List<String> allocateCidrs(int count) {
         List<String> cidrs = getHandlerUtils().randomCidrs(count, existCidrs);
         existCidrs.addAll(cidrs);
         return cidrs;
     }
 
+    /**
+     * prepareExistCidrs
+     */
     private void prepareExistCidrs() {
         if (existCidrs == null) {
             existCidrs = getHandlerUtils().statExistCidrs();
         }
     }
 
+    /**
+     * isCoreRouter
+     *
+     * @param cloudElement
+     * @return boolean
+     */
     private boolean isCoreRouter(CloudPluginSceneElementBO cloudElement) {
         boolean isCoreRouter = (cloudElement.getRole() != null && cloudElement.getRole().equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER))
                 && BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType());
         return isCoreRouter;
     }
 
+    /**
+     * isDynamips
+     *
+     * @param cloudElement
+     * @return boolean
+     */
     private boolean isDynamips(CloudPluginSceneElementBO cloudElement) {
         boolean isDynamips = (BaseCloudPluginSceneElementModel.ImageType.DYNAMIPS.equals(cloudElement.getImageType())
                 && cloudElement.getCoreType() != null
@@ -652,6 +720,14 @@ public class InitiateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * isGateway
+     *
+     * @param coreType
+     * @param virtualType
+     * @param type
+     * @return boolean
+     */
     private boolean isGateway(CoreType coreType, Integer virtualType, Integer type) {
         if (this.isRouter(coreType, virtualType)) {
             return true;
@@ -669,6 +745,13 @@ public class InitiateHandler extends HandlerCommon {
         return false;
     }
 
+    /**
+     * isRouter
+     *
+     * @param coreType
+     * @param virtualType
+     * @return boolean
+     */
     private boolean isRouter(CoreType coreType, Integer virtualType) {
         return (CoreType.isRouter(coreType)) || (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER));
     }
@@ -898,6 +981,11 @@ public class InitiateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * initiateVirtualToPort
+     *
+     * @param cloudElement
+     */
     private void initiateVirtualToPort(CloudPluginSceneElementBO cloudElement) {
         List<ConnectedNetworkBO> connectedNetworks = cloudElement.getDeriveNetworks();
         for (ConnectedNetworkBO connectedNetwork : connectedNetworks) {
@@ -973,6 +1061,12 @@ public class InitiateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * loadProperties2Network
+     *
+     * @param network
+     * @param element
+     */
     private void loadProperties2Network(CloudPluginSceneElementNetworkBO network, CloudPluginSceneElementBO element) {
         network.setAllocationPools(element.getAllocationPools());
         network.setDnsNameservers(element.getDnsNameservers());
@@ -986,10 +1080,20 @@ public class InitiateHandler extends HandlerCommon {
         network.setNetMode(element.getNetMode());
     }
 
+    /**
+     * afterOrderElements
+     *
+     * @param allElements
+     */
     protected void afterOrderElements(List<CloudPluginSceneElementBO> allElements) {
 
     }
 
+    /**
+     * reallocateIpPorts
+     *
+     * @param networkElements
+     */
     private void reallocateIpPorts(List<CloudPluginSceneElementBO> networkElements) {
         for (CloudPluginSceneElementBO element : networkElements) {
             for (ConnectedNetworkBO network : element.getDeriveNetworks()) {
@@ -1057,6 +1161,11 @@ public class InitiateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * portCheck
+     *
+     * @param networkElements
+     */
     private void portCheck(List<CloudPluginSceneElementBO> networkElements) {
         for (CloudPluginSceneElementBO element : networkElements) {
             for (ConnectedNetworkBO network : element.getDeriveNetworks()) {
@@ -1094,6 +1203,14 @@ public class InitiateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * getNewReallocateIp
+     *
+     * @param element
+     * @param network
+     * @param excloudIps
+     * @return
+     */
     private String getNewReallocateIp(CloudPluginSceneElementBO element, ConnectedNetworkBO network, List<String> excloudIps) {
         // 重新选ip
         if (element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH
@@ -1116,6 +1233,14 @@ public class InitiateHandler extends HandlerCommon {
         return null;
     }
 
+    /**
+     * getPossibleDhcpIps
+     *
+     * @param gateway
+     * @param allocationPools
+     * @param cidr
+     * @return
+     */
     private List<String> getPossibleDhcpIps(String gateway, List<AllocationPool> allocationPools, String cidr) {
         List<String> possibleDhcpIps = this.getPossibleDhcpIps(gateway, cidr);
         if (CollectionUtils.isNotEmpty(allocationPools)) {
@@ -1128,6 +1253,13 @@ public class InitiateHandler extends HandlerCommon {
         return possibleDhcpIps;
     }
 
+    /**
+     * getPossibleDhcpIps
+     *
+     * @param gateway
+     * @param cidr
+     * @return
+     */
     private List<String> getPossibleDhcpIps(String gateway, String cidr) {
         Set<String> possibleDhcpIps = new HashSet<>();
         if (StringUtils.isNotEmpty(cidr)) {
@@ -1146,6 +1278,13 @@ public class InitiateHandler extends HandlerCommon {
         return new ArrayList<>(possibleDhcpIps);
     }
 
+    /**
+     * isInCidr
+     *
+     * @param cidr
+     * @param ip
+     * @return boolean
+     */
     private boolean isInCidr(String cidr, String ip) {
         if (StringUtils.isEmpty(cidr) || StringUtils.isEmpty(ip)) {
             return false;
@@ -1156,6 +1295,11 @@ public class InitiateHandler extends HandlerCommon {
         return IpUtils.newIsInCidr(ip, cidr);
     }
 
+    /**
+     * setFwdnsInterfaceIps
+     *
+     * @param cloudElements
+     */
     private void setFwdnsInterfaceIps(List<CloudPluginSceneElementBO> cloudElements) {
         for (CloudPluginSceneElementBO element : cloudElements) {
             Integer virtualType = element.getVirtualType();
@@ -1202,6 +1346,13 @@ public class InitiateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * loadInitaitePortsTasks
+     *
+     * @param cloudElements
+     * @param initiateRouterElementPortsTasks
+     * @param initiateOtherElementPortsTasks
+     */
     private void loadInitaitePortsTasks(List<CloudPluginSceneElementBO> cloudElements, List<Runnable> initiateRouterElementPortsTasks, List<Runnable> initiateOtherElementPortsTasks) {
         for (CloudPluginSceneElementBO cloudElement : cloudElements) {
             Integer virtualType = cloudElement.getVirtualType();
@@ -1228,6 +1379,11 @@ public class InitiateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * getOrderedAllCloudElements
+     *
+     * @return
+     */
     private List<CloudPluginSceneElementBO> getOrderedAllCloudElements() {
         List<CloudPluginSceneElementBO> allCloudElements = new ArrayList<>();
         for (CloudPluginSceneElementBO cloudPluginSceneElementBO : new ArrayList<>(getPluginHandler().getElementMap().values())) {
@@ -1249,6 +1405,9 @@ public class InitiateHandler extends HandlerCommon {
         return allCloudElements;
     }
 
+    /**
+     * markIpSetedPorts
+     */
     private void markIpSetedPorts() {
         if (getPluginHandler().getElementPortMap() != null) {
             getPluginHandler().getElementPortMap().values().forEach(p -> {

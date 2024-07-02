@@ -8,6 +8,11 @@ import lombok.Data;
 @Data
 public class CloudPluginSceneConfigBO extends BaseCloudPluginSceneBO<CloudPluginSceneConfigModel,
         CloudPluginSceneConfigBO, SceneConfigBO> {
+    /**
+     * createModel
+     *
+     * @return
+     */
     @Override
     public CloudPluginSceneConfigModel createModel() {
         return new CloudPluginSceneConfigModel();

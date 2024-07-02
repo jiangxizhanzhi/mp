@@ -21,6 +21,9 @@ import java.util.stream.IntStream;
  */
 public class LocalDateUtils {
 
+    /**
+     * LocalDateUtils
+     */
     private LocalDateUtils() {
     }
 

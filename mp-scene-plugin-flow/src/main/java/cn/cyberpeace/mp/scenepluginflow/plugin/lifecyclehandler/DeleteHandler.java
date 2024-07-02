@@ -24,10 +24,18 @@ public class DeleteHandler extends HandlerCommon {
         public static final EventProcess DELETE_FLOW = new EventProcess("delete_flow", "scenepluginflow.event.delete_flow");
     }
 
+    /**
+     * DeleteHandler
+     *
+     * @param pluginHandler
+     */
     public DeleteHandler(FlowScenePluginHandler pluginHandler) {
         super(pluginHandler, DeleteTaskPool.getInstance(), SceneModel.Event.DELETE);
     }
 
+    /**
+     * delete
+     */
     public void delete() {
         prepareEventProcess(SceneModel.Event.DELETE, SceneProcess.class, ElementProcess.class);
 
@@ -53,6 +61,13 @@ public class DeleteHandler extends HandlerCommon {
 
     }
 
+    /**
+     * createDeleteFlowTask
+     *
+     * @param nodeId
+     * @param flow
+     * @return
+     */
     private Runnable createDeleteFlowTask(String nodeId, Flow flow) {
         return () -> runElementProgress(nodeId, ElementProcess.DELETE_FLOW, () -> getHandlerUtils().deleteFlow(flow));
     }

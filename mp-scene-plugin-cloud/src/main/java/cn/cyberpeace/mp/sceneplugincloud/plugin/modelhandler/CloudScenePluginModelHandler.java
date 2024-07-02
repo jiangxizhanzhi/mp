@@ -46,12 +46,22 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
 
     private CloudPluginSceneElementNetworkMapper cloudPluginSceneElementNetworkMapper;
 
+    /**
+     * CloudScenePluginModelHandler
+     *
+     * @param pluginHandler
+     */
     public CloudScenePluginModelHandler(CloudScenePluginHandler pluginHandler) {
         init(pluginHandler);
         this.pluginHandler = pluginHandler;
         this.cloudPluginSceneElementNetworkMapper = BeanCommon.getBean(CloudPluginSceneElementNetworkMapper.class);
     }
 
+    /**
+     * readNetworks
+     *
+     * @return
+     */
     public List<CloudPluginSceneElementNetworkModel> readNetworks() {
         String scene = pluginHandler.getSourceSceneId();
         return this.cloudPluginSceneElementNetworkMapper.list(
@@ -60,6 +70,12 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
         );
     }
 
+    /**
+     * readElementNetworks
+     *
+     * @param sceneElement
+     * @return
+     */
     public List<CloudPluginSceneElementNetworkModel> readElementNetworks(String sceneElement) {
         String scene = pluginHandler.getSourceSceneId();
         return this.cloudPluginSceneElementNetworkMapper.list(
@@ -69,6 +85,12 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
         );
     }
 
+    /**
+     * createElementNetworks
+     *
+     * @param deriveNetworks
+     * @return int
+     */
     public int createElementNetworks(List<ConnectedNetworkBO> deriveNetworks) {
         // 删除原来的
         List<String> list = new ArrayList<>();
@@ -88,10 +110,21 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
         return this.cloudPluginSceneElementNetworkMapper.bulkCreate(result).getSuccessCount();
     }
 
+    /**
+     * deleteElementNetworks
+     *
+     * @param networkIds
+     */
     public void deleteElementNetworks(String... networkIds) {
         this.cloudPluginSceneElementNetworkMapper.bulkDelete(networkIds);
     }
 
+    /**
+     * updateElementNetworks
+     *
+     * @param sceneElement
+     * @return int
+     */
     public int updateElementNetworks(String sceneElement) {
         List<ConnectedNetworkBO> deriveNetworks = this.pluginHandler.getElement(sceneElement).getDeriveNetworks();
         List<CloudPluginSceneElementNetworkModel> existNetworks = this.readElementNetworks(sceneElement);
@@ -123,6 +156,13 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
         return result;
     }
 
+    /**
+     * diffTargets
+     *
+     * @param targetMap
+     * @param existTargetMap
+     * @return
+     */
     private DiffTargets<CloudPluginSceneElementNetworkModel> diffTargets(Map<String, CloudPluginSceneElementNetworkModel> targetMap,
                                                                          Map<String, CloudPluginSceneElementNetworkModel> existTargetMap) {
         DiffTargets<CloudPluginSceneElementNetworkModel> diff = new DiffTargets<CloudPluginSceneElementNetworkModel>();
@@ -140,6 +180,9 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
         return diff;
     }
 
+    /**
+     * initClass
+     */
     @Override
     protected void initClass() {
         super.pluginSceneBOClass = CloudPluginSceneBO.class;
@@ -150,6 +193,9 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
         super.pluginSceneElementPortModelClass = CloudPluginSceneElementPortModel.class;
     }
 
+    /**
+     * initMapper
+     */
     @Override
     protected void initMapper() {
         super.pluginSceneMapper = BeanCommon.getBean(CloudPluginSceneMapper.class);

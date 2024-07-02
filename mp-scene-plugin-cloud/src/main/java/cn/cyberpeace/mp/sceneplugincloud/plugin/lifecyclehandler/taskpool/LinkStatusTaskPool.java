@@ -9,11 +9,19 @@ public class LinkStatusTaskPool extends TaskPool {
         public static final LinkStatusTaskPool INSTANCE = new LinkStatusTaskPool();
     }
 
+    /**
+     * LinkStatusTaskPool
+     */
     private LinkStatusTaskPool() {
         super(CloudSingleton.cloudAppConfig.getLinkStatusPoolSize(),
                 CloudSingleton.cloudAppConfig.getLinkStatusHoldSize(), 60L);
     }
 
+    /**
+     * getInstance
+     *
+     * @return
+     */
     public static LinkStatusTaskPool getInstance() {
         return CreateTaskPoolInstance.INSTANCE;
     }

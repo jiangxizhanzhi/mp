@@ -61,6 +61,13 @@ public class WazuhControl {
 
     public static final String FILE_CONTROL_REMOTE_TYPE_GOFDFS = "godfs";
 
+    /**
+     * controlConfigOld
+     *
+     * @param agentName
+     * @param osType
+     * @param controlConfigParam
+     */
     public void controlConfigOld(String agentName, String osType, ControlConfigParam controlConfigParam) {
         WazuhLauncher.RunCommandItem runCommandItem = new WazuhLauncher.RunCommandItem();
         runCommandItem.setAgentName(agentName);
@@ -74,6 +81,14 @@ public class WazuhControl {
         return genControlConfigCommandOld(osType, controlConfigParam, false);
     }
 
+    /**
+     * genControlConfigCommandOld
+     *
+     * @param osType
+     * @param controlConfigParam
+     * @param restart
+     * @return
+     */
     public static String genControlConfigCommandOld(String osType, ControlConfigParam controlConfigParam, boolean restart) {
         String controlScriptPath;
         if (WazuhLauncher.OS_TYPE_WINDOWS.equals(osType)) {
@@ -120,10 +135,25 @@ public class WazuhControl {
         }
     }
 
+    /**
+     * genControlConfigCommand
+     *
+     * @param osType
+     * @param controlConfigParam
+     * @return
+     */
     public static String genControlConfigCommand(String osType, ControlConfigParam controlConfigParam) {
         return genControlConfigCommand(osType, controlConfigParam, false);
     }
 
+    /**
+     * genControlConfigCommand
+     *
+     * @param osType
+     * @param controlConfigParam
+     * @param restart
+     * @return
+     */
     public static String genControlConfigCommand(String osType, ControlConfigParam controlConfigParam, boolean restart) {
         String controlScriptPath;
         if (WazuhLauncher.OS_TYPE_WINDOWS.equals(osType)) {
@@ -172,6 +202,12 @@ public class WazuhControl {
         }
     }
 
+    /**
+     * genQueryConfigCommand
+     *
+     * @param osType
+     * @return
+     */
     public static String genQueryConfigCommand(String osType) {
         String queryScriptPath;
         if (WazuhLauncher.OS_TYPE_WINDOWS.equals(osType)) {
@@ -182,6 +218,13 @@ public class WazuhControl {
         return String.format("%s", queryScriptPath);
     }
 
+    /**
+     * genSpecQueryCommand
+     *
+     * @param osType
+     * @param specQueryParam
+     * @return
+     */
     public static String genSpecQueryCommand(String osType, SpecQueryParam specQueryParam) {
         String controlScriptPath;
         if (WazuhLauncher.OS_TYPE_WINDOWS.equals(osType)) {
@@ -196,6 +239,13 @@ public class WazuhControl {
         return String.format("%s \"%s\"", controlScriptPath, scriptParamsStr);
     }
 
+    /**
+     * genControlFileCommand
+     *
+     * @param osType
+     * @param controlFileParams
+     * @return
+     */
     public static String genControlFileCommand(String osType, List<ControlFileParam> controlFileParams) {
         String controlScriptPath;
         if (WazuhLauncher.OS_TYPE_WINDOWS.equals(osType)) {
@@ -224,53 +274,117 @@ public class WazuhControl {
         private WazuhLauncher.WazuhLauncherBuilder wazuhLauncherBuilder;
         private String godfsServer;
 
+        /**
+         * WazuhControlBuilder
+         */
         private WazuhControlBuilder () {
             wazuhLauncherBuilder = WazuhLauncher.builder();
         }
 
+        /**
+         * configWazuh
+         *
+         * @param wazuhServer
+         * @param wazuhUser
+         * @param wazuhPass
+         * @return
+         */
         public WazuhControlBuilder configWazuh(String wazuhServer, String wazuhUser, String wazuhPass) {
             wazuhLauncherBuilder.configWazuh(wazuhServer, wazuhUser, wazuhPass);
             return this;
         }
 
+        /**
+         * configEs
+         *
+         * @param esServer
+         * @return
+         */
         public WazuhControlBuilder configEs(String esServer) {
             wazuhLauncherBuilder.configEs(esServer);
             return this;
         }
 
+        /**
+         * configMongo
+         *
+         * @param mongoServer
+         * @return
+         */
         public WazuhControlBuilder configMongo(String mongoServer) {
             wazuhLauncherBuilder.configMongo(mongoServer);
             return this;
         }
 
+        /**
+         * configCallbackSelf
+         *
+         * @param callbackSelf
+         * @return
+         */
         public WazuhControlBuilder configCallbackSelf(boolean callbackSelf) {
             wazuhLauncherBuilder.configCallbackSelf(callbackSelf);
             return this;
         }
 
+        /**
+         * configHttpCallbacks
+         *
+         * @param httpCallbacks
+         * @return
+         */
         public WazuhControlBuilder configHttpCallbacks(WazuhLauncher.RunCommandHttpCallback... httpCallbacks) {
             wazuhLauncherBuilder.configHttpCallbacks(httpCallbacks);
             return this;
         }
 
+        /**
+         * configGodfs
+         *
+         * @param godfsServer
+         * @return
+         */
         public WazuhControlBuilder configGodfs(String godfsServer) {
             this.godfsServer = godfsServer;
             return this;
         }
 
+        /**
+         * build
+         *
+         * @return
+         */
         public WazuhControl build() {
             return new WazuhControl(wazuhLauncherBuilder.build(), godfsServer);
         }
     }
 
+    /**
+     * WazuhControl
+     *
+     * @param wazuhLauncher
+     * @param godfsServer
+     */
     private WazuhControl(WazuhLauncher wazuhLauncher, String godfsServer) {
         this.wazuhLauncher = wazuhLauncher;
     }
 
+    /**
+     * builder
+     *
+     * @return
+     */
     public static WazuhControlBuilder builder() {
         return new WazuhControlBuilder();
     }
 
+    /**
+     * controlConfig
+     *
+     * @param agentName
+     * @param osType
+     * @param controlConfigParam
+     */
     public void controlConfig(String agentName, String osType, ControlConfigParam controlConfigParam) {
         WazuhLauncher.RunCommandItem runCommandItem = new WazuhLauncher.RunCommandItem();
         runCommandItem.setAgentName(agentName);
@@ -279,6 +393,13 @@ public class WazuhControl {
         wazuhLauncher.runCommand(List.of(runCommandItem));
     }
 
+    /**
+     * queryConfig
+     *
+     * @param agentName
+     * @param osType
+     * @return
+     */
     public QueryConfigData queryConfig(String agentName, String osType) {
         WazuhLauncher.RunCommandItem runCommandItem = new WazuhLauncher.RunCommandItem();
         runCommandItem.setAgentName(agentName);
@@ -316,6 +437,13 @@ public class WazuhControl {
         return configData;
     }
 
+    /**
+     * queryLogCollectFiles
+     *
+     * @param agentName
+     * @param osType
+     * @return
+     */
     public List<QueryLogCollectFileData> queryLogCollectFiles(String agentName, String osType) {
         WazuhLauncher.RunCommandItem runCommandItem = new WazuhLauncher.RunCommandItem();
         runCommandItem.setAgentName(agentName);
@@ -355,6 +483,17 @@ public class WazuhControl {
         return result;
     }
 
+    /**
+     * controlFile
+     *
+     * @param agentName
+     * @param osType
+     * @param controlFileParams
+     * @param checkOutput
+     * @param checkOutputTIme
+     * @param checkOutputInterval
+     * @return
+     */
     public Map<String, ControlFileResult> controlFile(String agentName, String osType,
                                                       List<ControlFileParam> controlFileParams,
                                                       boolean checkOutput,
@@ -596,12 +735,21 @@ public class WazuhControl {
         // action: write, append
         private String fileContent;
 
+        /**
+         * ensureId
+         */
         private void ensureId() {
             if (StringUtils.isEmpty(this.id)) {
                 this.id = TextUtils.uuid();
             }
         }
 
+        /**
+         * configUploadParam
+         *
+         * @param filepath
+         * @param uploadUrl
+         */
         public void configUploadParam(String filepath, String uploadUrl) {
             ensureId();
             this.action = FILE_CONTROL_ACTION_UPLOAD;
@@ -610,6 +758,12 @@ public class WazuhControl {
             this.uploadUrl = uploadUrl;
         }
 
+        /**
+         * configDownloadParam
+         *
+         * @param filepath
+         * @param downloadUrl
+         */
         public void configDownloadParam(String filepath, String downloadUrl) {
             ensureId();
             this.action = FILE_CONTROL_ACTION_DOWNLOAD;
@@ -617,12 +771,23 @@ public class WazuhControl {
             this.downloadUrl = downloadUrl;
         }
 
+        /**
+         * configReadParam
+         *
+         * @param filepath
+         */
         public void configReadParam(String filepath) {
             ensureId();
             this.action = FILE_CONTROL_ACTION_READ;
             this.filepath = filepath;
         }
 
+        /**
+         * configWriteParam
+         *
+         * @param filepath
+         * @param fileContent
+         */
         public void configWriteParam(String filepath, String fileContent) {
             ensureId();
             this.action = FILE_CONTROL_ACTION_WRITE;
@@ -630,6 +795,12 @@ public class WazuhControl {
             this.fileContent = fileContent;
         }
 
+        /**
+         * configAppendParam
+         *
+         * @param filepath
+         * @param fileContent
+         */
         public void configAppendParam(String filepath, String fileContent) {
             ensureId();
             this.action = FILE_CONTROL_ACTION_APPEND;
@@ -637,6 +808,11 @@ public class WazuhControl {
             this.fileContent = fileContent;
         }
 
+        /**
+         * configRemoveParam
+         *
+         * @param filepath
+         */
         public void configRemoveParam(String filepath) {
             ensureId();
             this.action = FILE_CONTROL_ACTION_REMOVE;

@@ -101,6 +101,12 @@ public class CreateHandler extends HandlerCommon {
         private List<VirtualFirewallCreateData.Rule> ingressRules;
         private List<VirtualFirewallCreateData.Rule> egressRules;
 
+        /**
+         * fromSrcRules
+         *
+         * @param srcRules
+         * @return
+         */
         public static CloudFirewallRules fromSrcRules(List<FirewallRule> srcRules) {
             List<VirtualFirewallCreateData.Rule> ingressRules = new ArrayList<>();
             List<VirtualFirewallCreateData.Rule> egressRules = new ArrayList<>();
@@ -150,19 +156,49 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * genAccessModeKey
+     *
+     * @param protocol
+     * @param port
+     * @param username
+     * @param password
+     * @return
+     */
     private String genAccessModeKey(String protocol, String port, String username, String password) {
         return String.format("%s:%s:%s:%s", protocol, AccessMode.Protocol.CONSOLE.equals(protocol) ? StringUtils.EMPTY : port, username, password);
     }
 
+    /**
+     * genAccessModeKey
+     *
+     * @param protocol
+     * @param port
+     * @param username
+     * @param password
+     * @return
+     */
     private String genAccessModeKey(String protocol, Integer port, String username, String password) {
         return genAccessModeKey(protocol, port == null ? StringUtils.EMPTY : port.toString(), username, password);
     }
 
+    /**
+     * genAccessModeKey
+     *
+     * @param accessMode
+     * @return
+     */
     private String genAccessModeKey(CloudAccessMode accessMode) {
         return genAccessModeKey(accessMode.getProtocol(), accessMode.getPort(), accessMode.getUsername(),
                 accessMode.getPassword());
     }
 
+    /**
+     * genAccessModeKey
+     *
+     * @param accessMode
+     * @return
+     */
     private String genAccessModeKey(VirtualNic.AccessMode accessMode) {
         String port;
         if (Boolean.TRUE.equals(accessMode.getEnablePortMapping()) && accessMode.getPortMapping() != null) {
@@ -174,11 +210,22 @@ public class CreateHandler extends HandlerCommon {
                 accessMode.getPassword());
     }
 
+    /**
+     * genAccessModeKey
+     *
+     * @param accessMode
+     * @return
+     */
     private String genAccessModeKey(EntityNodeCreateData.Interface.AccessMode accessMode) {
         return genAccessModeKey(accessMode.getProtocol(), accessMode.getPort(), accessMode.getUsername(),
                 accessMode.getPassword());
     }
 
+    /**
+     * createAuxiliaryNetwork
+     *
+     * @param cloudElement
+     */
     protected void createAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
         List<ConnectedNetworkBO> networks = cloudElement.getDeriveNetworks();
         int index = 1;
@@ -234,6 +281,13 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * createAuxiliaryNetworkRouter
+     *
+     * @param cloudElement
+     * @param network
+     * @param index
+     */
     protected void createAuxiliaryNetworkRouter(CloudPluginSceneElementBO cloudElement, CloudPluginSceneElementNetworkBO network, int index) {
         if (!Boolean.TRUE.equals(network.getAuxiliaryNetworkRouterOn())) {
             return;
@@ -290,6 +344,11 @@ public class CreateHandler extends HandlerCommon {
         createVirtualRouterGroupPortFirewall(cloudElement);
     }
 
+    /**
+     * createVirtualRouterGroupPortFirewall
+     *
+     * @param cloudElement
+     */
     private void createVirtualRouterGroupPortFirewall(CloudPluginSceneElementBO cloudElement) {
         // 单独创建端口防火墙
         for (ConnectedNetworkBO network : cloudElement.getDeriveNetworks()) {
@@ -300,6 +359,12 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * createVirtualRouterPortsFirewall
+     *
+     * @param cloudElement
+     * @param ports
+     */
     public void createVirtualRouterPortsFirewall(CloudPluginSceneElementBO cloudElement, List<SceneElementPortBO> ports) {
         // 防火墙的虚拟路由端口
         Set<String> targetPorts = new HashSet<>();
@@ -517,6 +582,12 @@ public class CreateHandler extends HandlerCommon {
         return entityInterfaces;
     }
 
+    /**
+     * combineInitCommand
+     *
+     * @param cloudElement
+     * @return
+     */
     private String combineInitCommand(CloudPluginSceneElementBO cloudElement) {
         SceneElementBO srcElement = cloudElement.getSrcElement();
         List<String> commands = new ArrayList<>();
@@ -617,6 +688,12 @@ public class CreateHandler extends HandlerCommon {
         return command;
     }
 
+    /**
+     * behaviorSupportInitCommand
+     *
+     * @param sceneElementBO
+     * @return
+     */
     private List<String> behaviorSupportInitCommand(SceneElementBO sceneElementBO) {
         List<String> behaviorInitCommand = new ArrayList<>();
         // 支持行为
@@ -629,6 +706,12 @@ public class CreateHandler extends HandlerCommon {
 
     }
 
+    /**
+     * getBasDeviceInitCommand
+     *
+     * @param sceneElementBO
+     * @return
+     */
     private List<String> getBasDeviceInitCommand(SceneElementBO sceneElementBO) {
         List<String> basDeviceInitCommand = new ArrayList<>();
 
@@ -794,6 +877,11 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * receiveVirtualPortInfo
+     *
+     * @param cloudElement
+     */
     private void receiveVirtualPortInfo(CloudPluginSceneElementBO cloudElement) {
         String ip = cloudElement.getSrcElement().getPorts().get(0).getIp();
         List<CloudPluginSceneElementPortBO> ports = getPluginHandler().getPorts(cloudElement);
@@ -810,6 +898,12 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * receiveVirtualPortInfo
+     *
+     * @param cloudElement
+     * @param virtualNics
+     */
     private void receiveVirtualPortInfo(CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics) {
         if (virtualNics == null) {
             return;
@@ -907,6 +1001,12 @@ public class CreateHandler extends HandlerCommon {
 
     }
 
+    /**
+     * receiveEntityInterfaceInfo
+     *
+     * @param cloudElement
+     * @param entityInterfaces
+     */
     private void receiveEntityInterfaceInfo(CloudPluginSceneElementBO cloudElement,
                                             List<EntityNodeCreateData.Interface> entityInterfaces) {
         if (entityInterfaces == null) {
@@ -983,6 +1083,11 @@ public class CreateHandler extends HandlerCommon {
         });
     }
 
+    /**
+     * createVirtualRouter
+     *
+     * @param cloudElement
+     */
     protected void createVirtualRouter(CloudPluginSceneElementBO cloudElement) {
         var createData = new VirtualRouterCreateData();
         createData.setName(HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid()));
@@ -1011,6 +1116,12 @@ public class CreateHandler extends HandlerCommon {
         receiveVirtualRouterPortInfo(cloudElement, virtualRouter.getNetworks());
     }
 
+    /**
+     * receiveVirtualRouterPortInfo
+     *
+     * @param cloudElement
+     * @param virtualRouterNics
+     */
     private void receiveVirtualRouterPortInfo(CloudPluginSceneElementBO cloudElement, List<VirtualRouterNic> virtualRouterNics) {
         if (virtualRouterNics == null) {
             return;
@@ -1054,6 +1165,11 @@ public class CreateHandler extends HandlerCommon {
         });
     }
 
+    /**
+     * createVirtualFirewall
+     *
+     * @param cloudElement
+     */
     protected void createVirtualFirewall(CloudPluginSceneElementBO cloudElement) {
         SceneElementBO srcElement = cloudElement.getSrcElement();
         VirtualFirewallCreateData createData = new VirtualFirewallCreateData();
@@ -1087,6 +1203,11 @@ public class CreateHandler extends HandlerCommon {
         cloudElement.setResourceId(virtualFirewall.getId());
     }
 
+    /**
+     * createVirtualMachine
+     *
+     * @param cloudElement
+     */
     protected void createVirtualMachine(CloudPluginSceneElementBO cloudElement) {
         // 1. 处理外部虚机
         if (ElementTypeUtils.isExternal(cloudElement)) {
@@ -1246,6 +1367,11 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * createContainer
+     *
+     * @param cloudElement
+     */
     protected void createContainer(CloudPluginSceneElementBO cloudElement) {
 
         SceneElementBO srcElement = cloudElement.getSrcElement();
@@ -1352,6 +1478,11 @@ public class CreateHandler extends HandlerCommon {
         this.genEntityCreateData(cloudElement);
     }
 
+    /**
+     * genEntityCreateData
+     *
+     * @param cloudElement
+     */
     private void genEntityCreateData(CloudPluginSceneElementBO cloudElement) {
         log.info("CreateHandler.genEntityCreateData begin. cloudElement: {}", cloudElement);
         var srcElement = cloudElement.getSrcElement();
@@ -1423,6 +1554,12 @@ public class CreateHandler extends HandlerCommon {
         cloudElement.setResourceId(TextUtils.uuid());
     }
 
+    /**
+     * convertFirstAlphaToNumber
+     *
+     * @param logicSwitchName
+     * @return
+     */
     private String convertFirstAlphaToNumber(String logicSwitchName) {
         String suffix = logicSwitchName.substring(1, logicSwitchName.length());
         String prefixNumber = String.valueOf(this.random.nextInt(9));
@@ -1430,6 +1567,11 @@ public class CreateHandler extends HandlerCommon {
     }
 
 
+    /**
+     * recordNpcNode
+     *
+     * @param cloudElement
+     */
     protected void recordNpcNode(CloudPluginSceneElementBO cloudElement) {
         String npcName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
         synchronized (network2Info) {
@@ -1455,10 +1597,18 @@ public class CreateHandler extends HandlerCommon {
     }
 
 
+    /**
+     * CreateHandler
+     *
+     * @param pluginHandler
+     */
     public CreateHandler(CloudScenePluginHandler pluginHandler) {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.CREATE);
     }
 
+    /**
+     * create
+     */
     public void create() {
         this.prepareEventProcess();
 
@@ -1548,6 +1698,9 @@ public class CreateHandler extends HandlerCommon {
         createEntityElementProcess();
     }
 
+    /**
+     * createNodeToExternalRouter
+     */
     protected void createNodeToExternalRouter() {
         String sceneId = getPluginHandler().getSrcScene().getEid();
         VirtualRouter vrClient = new VirtualRouter();
@@ -1621,12 +1774,20 @@ public class CreateHandler extends HandlerCommon {
         getPluginHandler().getSceneHandler().setProbeRouter(virtualRouter.getId());
     }
 
+    /**
+     * createLogicSwitchProcess
+     */
     protected void createLogicSwitchProcess() {
         if (!network2LogicalSwitch.values().isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_LOGICAL_SWITCHES, () -> createLogicalSwitch(new ArrayList<>(network2LogicalSwitch.values())));
         }
     }
 
+    /**
+     * createLogicalSwitch
+     *
+     * @param list
+     */
     public void createLogicalSwitch(List<LogicalSwitchCreateData> list) {
         List<CloudPluginSceneElementLogicalSwitchModel> logicalSwitchModels = new ArrayList<>();
         CloudPluginSceneElementLogicalSwitchMapper logicalSwitchMapper = BeanCommon.getBean(CloudPluginSceneElementLogicalSwitchMapper.class);
@@ -1642,20 +1803,36 @@ public class CreateHandler extends HandlerCommon {
         list.forEach(enClient::createLogicalSwitch);
     }
 
+    /**
+     * createEntityElementProcess
+     */
     protected void createEntityElementProcess() {
         if (!entityCreateData.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_ENTITIES, () -> createEntityElements(new ArrayList<>(entityCreateData)));
         }
     }
 
+    /**
+     * createEntityElements
+     *
+     * @param list
+     */
     public void createEntityElements(List<EntityNodeCreateData> list) {
         list.forEach(enClient::create);
     }
 
+    /**
+     * prepareEventProcess
+     */
     protected void prepareEventProcess() {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
     }
 
+    /**
+     * createNpcElements
+     *
+     * @param list
+     */
     public void createNpcElements(List<BaseNpcData.NetWorkNpcInfo> list) {
         NpcCreateData npcCreateData = new NpcCreateData();
         npcCreateData.setNetWorkNpcInfos(list);
@@ -1668,10 +1845,20 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * createAuxiliaryNetworkProcess
+     *
+     * @param cloudElement
+     */
     public void createAuxiliaryNetworkProcess(CloudPluginSceneElementBO cloudElement) {
         runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_AUXILIARY_NETWORK, () -> createAuxiliaryNetwork(cloudElement));
     }
 
+    /**
+     * createElementProcess
+     *
+     * @param cloudElement
+     */
     public void createElementProcess(CloudPluginSceneElementBO cloudElement) {
         if (Boolean.TRUE.equals(cloudElement.getExternal()) && !ElementTypeUtils.isExternalTerminal(cloudElement)) {
             return;
@@ -1753,6 +1940,11 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * waitSeconds
+     *
+     * @param millSeconds
+     */
     private void waitSeconds(long millSeconds) {
         try {
             Thread.sleep(millSeconds);
@@ -1760,6 +1952,11 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * trySetPublicNetProxy
+     *
+     * @param accessMode
+     */
     private void trySetPublicNetProxy(CloudAccessMode accessMode) {
         boolean publicNetProxy = accessMode.getPublicNetProxy() != null ? accessMode.getPublicNetProxy() : CloudSingleton.cloudAppConfig.getPublicNetProxy();
         if (publicNetProxy) {
@@ -1775,6 +1972,11 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * attachISO
+     *
+     * @param cloudElement
+     */
     private void attachISO(CloudPluginSceneElementBO cloudElement) {
         VirtualMachineAttachISOData data = new VirtualMachineAttachISOData();
         data.setInstanceUuid(cloudElement.getResourceId());
@@ -1783,6 +1985,11 @@ public class CreateHandler extends HandlerCommon {
         vmClient.attachISO(data);
     }
 
+    /**
+     * attachVirtualUsbs
+     *
+     * @param cloudElement
+     */
     private void attachVirtualUsbs(CloudPluginSceneElementBO cloudElement) {
         AttachVirtualUsbsData data = new AttachVirtualUsbsData();
         data.setInstanceUuid(cloudElement.getResourceId());
@@ -1795,6 +2002,11 @@ public class CreateHandler extends HandlerCommon {
         vmClient.attachVirtualUsbs(data);
     }
 
+    /**
+     * attachEntityUsbs
+     *
+     * @param cloudElement
+     */
     private void attachEntityUsbs(CloudPluginSceneElementBO cloudElement) {
         log.info("CreateHandler.attachEntityUsbs begin. cloudElement:{}", cloudElement);
         AttachEntityUsbsData data = new AttachEntityUsbsData();

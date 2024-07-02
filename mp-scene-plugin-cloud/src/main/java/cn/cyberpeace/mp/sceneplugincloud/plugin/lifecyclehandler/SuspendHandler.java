@@ -38,10 +38,19 @@ public class SuspendHandler extends HandlerCommon {
         public static final EventProcess SUSPEND_DYNAMIPS = new EventProcess("suspend_dynamips", "sceneplugincloud.event.suspend_dynamips");
     }
 
+    /**
+     * SuspendHandler
+     *
+     * @param pluginHandler
+     * @param event
+     */
     public SuspendHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, SuspendTaskPool.getInstance(), event);
     }
 
+    /**
+     * suspend
+     */
     public void suspend() {
         prepareEventProcess(SceneModel.Event.SUSPEND, SceneProcess.class, ElementProcess.class);
         List<Runnable> tasks = new ArrayList<>();
@@ -52,6 +61,11 @@ public class SuspendHandler extends HandlerCommon {
         runSceneProgress(SceneProcess.SUSPEND_TERMINALS, () -> runTasks(tasks));
     }
 
+    /**
+     * suspendElement
+     *
+     * @param element
+     */
     public void suspendElement(CloudPluginSceneElementBO element) {
         String nodeId = element.getSrcElement().getId();
         Integer virtualType = element.getVirtualType();

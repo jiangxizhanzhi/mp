@@ -16,11 +16,19 @@ public class StopTaskPool extends TaskPool {
         public static final StopTaskPool INSTANCE = new StopTaskPool();
     }
 
+    /**
+     * StopTaskPool
+     */
     private StopTaskPool() {
         super(CloudSingleton.cloudAppConfig.getStopPoolSize(),
             CloudSingleton.cloudAppConfig.getStopHoldSize(), 60L);
     }
 
+    /**
+     * getInstance
+     *
+     * @return
+     */
     public static StopTaskPool getInstance() {
         return StopTaskPool.StopTaskPoolInstance.INSTANCE;
     }

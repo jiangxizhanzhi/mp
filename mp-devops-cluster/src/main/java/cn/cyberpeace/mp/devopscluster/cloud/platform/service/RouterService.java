@@ -16,6 +16,11 @@ public class RouterService extends BaseCpService {
     private static final String LIST_ROUTER = "/cloud/v1/router";
 
 
+    /**
+     * RouterService
+     *
+     * @param devopsClusterConfig
+     */
     public RouterService(DevopsClusterConfig devopsClusterConfig) {
         super(devopsClusterConfig);
     }

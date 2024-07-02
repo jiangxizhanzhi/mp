@@ -8,11 +8,19 @@ public class RestartTaskPool extends TaskPool {
         public static final RestartTaskPool INSTANCE = new RestartTaskPool();
     }
 
+    /**
+     * RestartTaskPool
+     */
     private RestartTaskPool() {
         super(CloudSingleton.cloudAppConfig.getRestartPoolSize(),
                 CloudSingleton.cloudAppConfig.getRestartHoldSize(), 60L);
     }
 
+    /**
+     * getInstance
+     *
+     * @return
+     */
     public static RestartTaskPool getInstance() {
         return RestartTaskPoolInstance.INSTANCE;
     }

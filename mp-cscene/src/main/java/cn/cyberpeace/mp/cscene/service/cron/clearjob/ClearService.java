@@ -27,6 +27,9 @@ public class ClearService {
     @Resource
     private CloudPluginSceneElementPortMapper portMapper;
 
+    /**
+     * clearUselessResource
+     */
     public void clearUselessResource() {
         List<AbstractClearJob> jobs = new ArrayList<>() {{
             this.add(new NpcClearJob(sceneElementPortMapper, portMapper, sceneElementMapper));

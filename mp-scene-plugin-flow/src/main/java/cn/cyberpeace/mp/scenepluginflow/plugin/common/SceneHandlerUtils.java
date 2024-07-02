@@ -38,30 +38,57 @@ public class SceneHandlerUtils {
 
     private FlowTaskTaskService flowTaskTaskService;
 
+    /**
+     * successOnFLow
+     *
+     * @param flow
+     */
     private void successOnFLow(Flow flow) {
         log.info("flow success on,flowId is {},taskId is {}", flow.getId(), flow.getTaskId());
         flow.setStatus(Flow.Status.ON);
         flow.setStatusText(null);
     }
 
+    /**
+     * successOffFLow
+     *
+     * @param flow
+     */
     private void successOffFLow(Flow flow) {
         log.info("flow success off,flowId is {},taskId is {}", flow.getId(), flow.getTaskId());
         flow.setStatus(Flow.Status.OFF);
         flow.setStatusText(null);
     }
 
+    /**
+     * errorFLow
+     *
+     * @param flow
+     * @param error
+     */
     private void errorFLow(Flow flow, String error) {
         log.info("flow error,flowId is {},taskId is {},error is {}", flow.getId(), flow.getTaskId(), error);
         flow.setStatus(Flow.Status.ERROR);
         flow.setStatusText(error);
     }
 
+    /**
+     * preparingFLow
+     *
+     * @param flow
+     */
     private void preparingFLow(Flow flow) {
         log.info("flow preparing ,flowId is {},taskId is {}", flow.getId(), flow.getTaskId());
         flow.setStatus(Flow.Status.PREPARING);
         flow.setStatusText(null);
     }
 
+    /**
+     * startFlow
+     *
+     * @param flow
+     * @return boolean
+     */
     private boolean startFlow(Flow flow) {
         String taskId = flow.getTaskId();
         try {
@@ -82,6 +109,13 @@ public class SceneHandlerUtils {
         return true;
     }
 
+    /**
+     * startFlows
+     *
+     * @param flows
+     * @param runType
+     * @return boolean
+     */
     private boolean startFlows(List<Flow> flows, int runType) {
         BatchStartTaskBO batchStartTaskBO = new BatchStartTaskBO();
         List<TaskSipBO> taskSipBOList = new ArrayList<>();
@@ -129,29 +163,67 @@ public class SceneHandlerUtils {
         return true;
     }
 
+    /**
+     * SceneHandlerUtils
+     *
+     * @param pluginHandler
+     */
     public SceneHandlerUtils(FlowScenePluginHandler pluginHandler) {
         this.pluginHandler = pluginHandler;
         flowExecutor = BeanCommon.getBean(FlowExecutor.class);
         flowTaskTaskService = BeanCommon.getBean(FlowTaskTaskService.class);
     }
 
+    /**
+     * startExecutor
+     *
+     * @param sceneEid
+     * @return
+     */
     public String startExecutor(String sceneEid) {
         String name = BeanCommon.getBean(IFlowResourceName.class).generate(sceneEid, null);
         return flowExecutor.startExecutor(name);
     }
 
+    /**
+     * deleteExecutor
+     *
+     * @param executorId
+     */
     public void deleteExecutor(String executorId) {
         flowExecutor.deleteExecutor(executorId);
     }
 
+    /**
+     * addFlowTask
+     *
+     * @param details
+     * @param sceneId
+     * @param actuatorId
+     */
     public void addFlowTask(List<AddFlowTaskTaskInfo> details, String sceneId, String actuatorId) {
         flowExecutor.addFlowTask(details, sceneId, actuatorId);
     }
 
+    /**
+     * deleteByNodeIdAndSceneId
+     *
+     * @param nodeId
+     * @param sceneId
+     */
     public void deleteByNodeIdAndSceneId(String nodeId, String sceneId) {
         flowExecutor.deleteByNodeIdAndSceneId(nodeId, sceneId);
     }
 
+    /**
+     * startFlow
+     *
+     * @param flowElement
+     * @param flow
+     * @param sourceIp
+     * @param async
+     * @return boolean
+     */
     public boolean startFlow(FlowPluginSceneElementBO flowElement, Flow flow,String sourceIp,
                              boolean async) {
         String taskId = flow.getTaskId();
@@ -247,6 +319,12 @@ public class SceneHandlerUtils {
         }
     }
 
+    /**
+     * stopFlow
+     *
+     * @param flow
+     * @return boolean
+     */
     public boolean stopFlow(Flow flow) {
         String taskId = flow.getTaskId();
         if (StringUtils.isEmpty(taskId)) {
@@ -264,6 +342,17 @@ public class SceneHandlerUtils {
         return true;
     }
 
+    /**
+     * startFlows
+     *
+     * @param flowElement
+     * @param flowWithSourceIps
+     * @param async
+     * @param asyncCallback
+     * @param runType
+     * @param nodeId
+     * @return boolean
+     */
     public boolean startFlows(FlowPluginSceneElementBO flowElement, List<FlowWithSourceIp> flowWithSourceIps,
                               boolean async, Runnable asyncCallback, int runType, String nodeId) {
         List<Flow> flows = new ArrayList<>();
@@ -294,6 +383,12 @@ public class SceneHandlerUtils {
         return startFlows(flows, runType);
     }
 
+    /**
+     * stopFlows
+     *
+     * @param flows
+     * @return boolean
+     */
     public boolean stopFlows(List<Flow> flows) {
         List<String> taskIds = new ArrayList<>();
         for (Flow flow1 : flows) {
@@ -323,6 +418,12 @@ public class SceneHandlerUtils {
         return true;
     }
 
+    /**
+     * deleteFlow
+     *
+     * @param flow
+     * @return boolean
+     */
     public boolean  deleteFlow(Flow flow) {
         String taskId = flow.getTaskId();
         if (!StringUtils.isEmpty(taskId)) {

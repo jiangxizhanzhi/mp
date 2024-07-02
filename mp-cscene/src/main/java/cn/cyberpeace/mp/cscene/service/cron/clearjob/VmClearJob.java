@@ -18,10 +18,21 @@ public class VmClearJob extends AbstractClearJob<VirtualMachineGetData> {
 
     private VirtualMachine vmClient = new VirtualMachine();
 
+    /**
+     * VmClearJob
+     *
+     * @param sceneElementMapper
+     */
     public VmClearJob(SceneElementMapper sceneElementMapper) {
         super(sceneElementMapper);
     }
 
+    /**
+     * getEid2Node
+     *
+     * @param vms
+     * @return
+     */
     @Override
     protected Map<String, VirtualMachineGetData> getEid2Node(List<VirtualMachineGetData> vms) {
         Map<String, VirtualMachineGetData> result = new HashMap<>();
@@ -36,16 +47,32 @@ public class VmClearJob extends AbstractClearJob<VirtualMachineGetData> {
         return result;
     }
 
+    /**
+     * doQuery
+     *
+     * @param offset
+     * @return
+     */
     @Override
     protected List<VirtualMachineGetData> doQuery(int offset) {
         return vmClient.getAllInstance(LIMIT, offset);
     }
 
+    /**
+     * doClear
+     *
+     * @param data
+     */
     @Override
     protected void doClear(VirtualMachineGetData data) {
         vmClient.deleteInstanceById(data.getId());
     }
 
+    /**
+     * forceClear
+     *
+     * @param data
+     */
     @Override
     protected void forceClear(VirtualMachineGetData data) {
         vmClient.deleteInstanceById(data.getId());

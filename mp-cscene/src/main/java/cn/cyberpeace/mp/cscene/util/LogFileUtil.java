@@ -18,6 +18,11 @@ public class LogFileUtil {
 
     private static LoadingCache<String, Map<String, List<LogFileVO>>> cache = null;
 
+    /**
+     * init
+     *
+     * @param logFileService
+     */
     public static void init(LogFileService logFileService) {
         cache = CacheBuilder.newBuilder()
                 .maximumSize(300)
@@ -30,6 +35,12 @@ public class LogFileUtil {
                 });
     }
 
+    /**
+     * getLogFile
+     *
+     * @param sceneId
+     * @return
+     */
     public static Map<String, List<LogFileVO>> getLogFile(String sceneId) {
         try {
             return cache.get(sceneId);

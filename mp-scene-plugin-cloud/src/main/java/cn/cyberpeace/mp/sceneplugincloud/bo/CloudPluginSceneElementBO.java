@@ -39,11 +39,22 @@ public class CloudPluginSceneElementBO extends BaseCloudPluginSceneElementBO<Clo
     @JsonIgnore
     private List<ConnectedNetworkBO> deriveNetworks = new ArrayList<>();
 
+    /**
+     * createModel
+     *
+     * @return
+     */
     @Override
     public CloudPluginSceneElementModel createModel() {
         return new CloudPluginSceneElementModel();
     }
 
+    /**
+     * fromModel
+     *
+     * @param obj
+     * @param ignoreFields
+     */
     @Override
     public void fromModel(CloudPluginSceneElementModel obj, String... ignoreFields) {
         super.fromModel(obj, "fwdnsIps");
@@ -52,6 +63,12 @@ public class CloudPluginSceneElementBO extends BaseCloudPluginSceneElementBO<Clo
         });
     }
 
+    /**
+     * toModel
+     *
+     * @param ignoreFields
+     * @return
+     */
     public CloudPluginSceneElementModel toModel(String... ignoreFields) {
         CloudPluginSceneElementModel obj = super.toModel("fwdnsIps");
         if (fwdnsIps != null) {

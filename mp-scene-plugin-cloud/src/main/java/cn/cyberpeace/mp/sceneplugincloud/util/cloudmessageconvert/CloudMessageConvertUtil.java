@@ -22,6 +22,11 @@ import java.util.Locale;
 public class CloudMessageConvertUtil {
     private static List<Convert> converts = new ArrayList<>();
 
+    /**
+     * init
+     *
+     * @param content
+     */
     public static void init(String content) {
         try {
             converts.clear();
@@ -32,6 +37,13 @@ public class CloudMessageConvertUtil {
         }
     }
 
+    /**
+     * getMessage
+     *
+     * @param target
+     * @param params
+     * @return
+     */
     public static String getMessage(String target, String... params) {
         String formatMessage = target.toLowerCase();
         for (Convert convert : converts) {
@@ -49,6 +61,12 @@ public class CloudMessageConvertUtil {
         private List<Message> messages;
 
 
+        /**
+         * hit
+         *
+         * @param target
+         * @return boolean
+         */
         public boolean hit(String target) {
             for (ConvertRule rule : rules) {
                 if (!rule.hit(target)) {
@@ -58,6 +76,12 @@ public class CloudMessageConvertUtil {
             return true;
         }
 
+        /**
+         * getMessage
+         *
+         * @param params
+         * @return
+         */
         public String getMessage(String... params) {
             Locale locale = LocaleContextHolder.getLocale();
             for (Message message : messages) {
@@ -68,6 +92,13 @@ public class CloudMessageConvertUtil {
             return null;
         }
 
+        /**
+         * formatMessage
+         *
+         * @param message
+         * @param params
+         * @return
+         */
         private String formatMessage(String message, String... params) {
             String formatMessage = message;
             if (params != null && params.length > 0) {

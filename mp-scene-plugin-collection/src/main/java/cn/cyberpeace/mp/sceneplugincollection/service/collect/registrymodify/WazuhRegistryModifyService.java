@@ -47,6 +47,18 @@ public class WazuhRegistryModifyService {
     @Resource
     private WazuhDataQueryService wazuhDataQueryService;
 
+    /**
+     * queryRegistryModifyData
+     *
+     * @param from
+     * @param size
+     * @param agentNames
+     * @param startTime
+     * @param endTime
+     * @param levels
+     * @param filePath
+     * @return
+     */
     public WazuhResult<FileEventModel> queryRegistryModifyData(int from, int size, List<String> agentNames, LocalDateTime startTime, LocalDateTime endTime, List<Integer> levels, String filePath) {
         // 有采集插件 先拼接查询参数
         WazuhRegistryModifyDataQueryParamsBuilder paramsBuilder = new WazuhRegistryModifyDataQueryParamsBuilder(true, agentNames, startTime, endTime);
@@ -67,6 +79,17 @@ public class WazuhRegistryModifyService {
         return new WazuhResult<>(fileEventModels, (int) result.getTotal());
     }
 
+    /**
+     * aggsDateHistogram
+     *
+     * @param agentNames
+     * @param startTime
+     * @param endTime
+     * @param interval
+     * @param minBounds
+     * @param maxBounds
+     * @return
+     */
     public List<TimeHistogramInfo> aggsDateHistogram(List<String> agentNames, LocalDateTime startTime, LocalDateTime endTime, String interval, String minBounds, String maxBounds) {
         String aggregationName = "aggs_date_histogram";
         //构造索引
@@ -101,6 +124,12 @@ public class WazuhRegistryModifyService {
         return infos;
     }
 
+    /**
+     * getFileEventModels
+     *
+     * @param wazuhFileRoots
+     * @return
+     */
     private List<FileEventModel> getFileEventModels(List<WazuhFileRoot> wazuhFileRoots) {
         List<FileEventModel> fileEventModels = new ArrayList<>();
         for (WazuhFileRoot wazuhFileRoot : wazuhFileRoots) {
@@ -122,6 +151,12 @@ public class WazuhRegistryModifyService {
         return fileEventModels;
     }
 
+    /**
+     * parsedOneScriptData
+     *
+     * @param wazuhFileRoot
+     * @param fileEventModel
+     */
     private void parsedOneScriptData(WazuhFileRoot wazuhFileRoot, FileEventModel fileEventModel) {
         WazuhFileRoot.CommonData commonData = wazuhFileRoot.getData();
         if (commonData == null) {
@@ -140,6 +175,12 @@ public class WazuhRegistryModifyService {
         }
     }
 
+    /**
+     * parsedOneSyscheckData
+     *
+     * @param wazuhFileRoot
+     * @param fileEventModel
+     */
     private void parsedOneSyscheckData(WazuhFileRoot wazuhFileRoot, FileEventModel fileEventModel) {
         WazuhFileRoot.Syscheck syscheck = wazuhFileRoot.getSyscheck();
         if (syscheck != null) {
@@ -174,6 +215,12 @@ public class WazuhRegistryModifyService {
         }
     }
 
+    /**
+     * processContent
+     *
+     * @param wazuhFileRoot
+     * @return
+     */
     private JSONObject processContent(WazuhFileRoot wazuhFileRoot) {
         JSONObject jsonObject = new JSONObject();
         WazuhFileRoot.Rule rule = wazuhFileRoot.getRule();

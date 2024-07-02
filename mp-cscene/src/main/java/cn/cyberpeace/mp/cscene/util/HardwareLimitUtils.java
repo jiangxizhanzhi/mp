@@ -19,6 +19,13 @@ public class HardwareLimitUtils {
 
     private static HardwareCount USED = new HardwareCount(0, 0, 0);
 
+    /**
+     * initTotal
+     *
+     * @param cpu
+     * @param ram
+     * @param disk
+     */
     public static void initTotal(int cpu, int ram, int disk) {
         TOTAL = new HardwareCount();
         TOTAL.setCpu(cpu);
@@ -26,6 +33,13 @@ public class HardwareLimitUtils {
         TOTAL.setDisk(disk);
     }
 
+    /**
+     * initUsed
+     *
+     * @param cpu
+     * @param ram
+     * @param disk
+     */
     public static void initUsed(int cpu, int ram, int disk) {
         USED = new HardwareCount();
         USED.setCpu(cpu);
@@ -33,11 +47,23 @@ public class HardwareLimitUtils {
         USED.setDisk(disk);
     }
 
+    /**
+     * addHardware
+     *
+     * @param instance
+     * @return
+     */
     public static UpdateResult addHardware(CsceneInstanceBO instance) {
         HardwareCount count = getHardwareCount(instance.getScene().getTopology().getElements());
         return updateHardware(count);
     }
 
+    /**
+     * substractHardware
+     *
+     * @param instance
+     * @return
+     */
     public static UpdateResult substractHardware(CsceneInstanceBO instance) {
         HardwareCount count = getHardwareCount(instance.getScene().getTopology().getElements());
         count.setDisk(-1 * Math.abs(count.getDisk()));
@@ -46,6 +72,12 @@ public class HardwareLimitUtils {
         return updateHardware(count);
     }
 
+    /**
+     * updateHardware
+     *
+     * @param count
+     * @return
+     */
     private static synchronized UpdateResult updateHardware(HardwareCount count) {
         UpdateResult successResult = new UpdateResult();
         successResult.setSuccess(true);
@@ -99,6 +131,12 @@ public class HardwareLimitUtils {
         return result;
     }
 
+    /**
+     * getHardwareCount
+     *
+     * @param elements
+     * @return
+     */
     private static HardwareCount getHardwareCount(List<SceneElementBO> elements) {
         int cpu = 0;
         int disk = 0;
@@ -128,6 +166,11 @@ public class HardwareLimitUtils {
         private int existNode;
         private CsceneErrorCode errorCode;
 
+        /**
+         * getMessage
+         *
+         * @return
+         */
         public MessageServiceCode getMessage() {
             return errorCode.format(String.valueOf(limitNode), String.valueOf(existNode), String.valueOf(currentNode));
         }

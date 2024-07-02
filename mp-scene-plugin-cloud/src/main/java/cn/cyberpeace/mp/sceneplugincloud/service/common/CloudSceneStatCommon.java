@@ -26,6 +26,13 @@ import java.util.*;
 public class CloudSceneStatCommon extends CloudSceneStatCommonBase<CloudPluginSceneElementMapper,
         CloudPluginSceneElementPortMapper> {
 
+    /**
+     * genNodeCondition
+     *
+     * @param sceneIds
+     * @param nodeIds
+     * @return 查询条件构造器
+     */
     @Override
     protected HumanCondition genNodeCondition(List<String> sceneIds, List<String> nodeIds) {
         HumanCondition condition = new HumanCondition()
@@ -45,6 +52,13 @@ public class CloudSceneStatCommon extends CloudSceneStatCommonBase<CloudPluginSc
         return condition;
     }
 
+    /**
+     * genNodePortCondition
+     *
+     * @param sceneIds
+     * @param nodeIds
+     * @return 查询条件构造器
+     */
     @Override
     protected HumanCondition genNodePortCondition(List<String> sceneIds, List<String> nodeIds) {
         HumanCondition condition = new HumanCondition()
@@ -72,6 +86,12 @@ public class CloudSceneStatCommon extends CloudSceneStatCommonBase<CloudPluginSc
         return condition;
     }
 
+    /**
+     * CloudSceneStatCommon
+     *
+     * @param cloudPluginSceneElementMapper
+     * @param cloudPluginSceneElementPortMapper
+     */
     @Autowired
     public CloudSceneStatCommon(CloudPluginSceneElementMapper cloudPluginSceneElementMapper,
                                 CloudPluginSceneElementPortMapper cloudPluginSceneElementPortMapper) {

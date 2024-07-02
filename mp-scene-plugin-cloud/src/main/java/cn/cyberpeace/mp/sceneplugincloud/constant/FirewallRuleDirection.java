@@ -5,5 +5,8 @@ public class FirewallRuleDirection {
     public static final String EGRESS = "egress";
     public static final String BOTH = "both";
 
+    /**
+     * FirewallRuleDirection
+     */
     private FirewallRuleDirection() {}
 }

@@ -6,6 +6,9 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.constants;
  */
 public final class BaseCloudPlatformConstant {
 
+    /**
+     * BaseCloudPlatformConstant
+     */
     private BaseCloudPlatformConstant(){
         throw new IllegalStateException("Utility class");
     }

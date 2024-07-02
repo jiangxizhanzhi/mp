@@ -35,6 +35,12 @@ public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends 
     @ApiModelProperty(value = "子角色信息")
     private List<T> children;
 
+    /**
+     * fromModel
+     *
+     * @param obj
+     * @param ignoreFields
+     */
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
@@ -49,6 +55,12 @@ public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends 
                 : JsonCommon.parse(obj.getUsers(), new TypeReference<List<String>>(){});
     }
 
+    /**
+     * toModel
+     *
+     * @param ignoreFields
+     * @return
+     */
     @Override
     public M toModel(String... ignoreFields) {
         M obj = super.toModel(ArrayUtils.addAll(ignoreFields,
@@ -67,6 +79,11 @@ public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends 
         return obj;
     }
 
+    /**
+     * export
+     *
+     * @return
+     */
     @Override
     public T export() {
         setId(null);
@@ -81,11 +98,25 @@ public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends 
         return (T) this;
     }
 
+    /**
+     * export
+     *
+     * @param pClass
+     * @param ignoreFields
+     * @return
+     */
     @Override
     public <P1> P1 export(Class<P1> pClass, String... ignoreFields) {
         return super.export(pClass, ArrayUtils.addAll(ignoreFields, "children"));
     }
 
+    /**
+     * exportIgnore2
+     *
+     * @param pClass
+     * @param ignoreFieldGetters
+     * @return
+     */
     @SafeVarargs
     public final <P extends BaseCsceneRoleBO<?, P>> P exportIgnore2(Class<P> pClass,
                                                                     SerializableFunction<T>... ignoreFieldGetters) {

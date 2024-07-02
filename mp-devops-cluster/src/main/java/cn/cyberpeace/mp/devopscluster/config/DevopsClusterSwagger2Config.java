@@ -18,6 +18,11 @@ public class DevopsClusterSwagger2Config {
     @Autowired
     private Swagger2Config swagger2Config;
 
+    /**
+     * apiDevopsCluster
+     *
+     * @return
+     */
     @Bean
     public Docket apiDevopsCluster() {
         return new Docket(DocumentationType.SWAGGER_2)

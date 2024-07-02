@@ -11,10 +11,19 @@ public class WazuhResult<T> {
     private List<T> list;
     private long total;
 
+    /**
+     * WazuhResult
+     */
     public WazuhResult() {
 
     }
 
+    /**
+     * WazuhResult
+     *
+     * @param list
+     * @param total
+     */
     public WazuhResult(List<T> list, long total) {
         this.list = list;
         this.total = total;

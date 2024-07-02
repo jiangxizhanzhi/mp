@@ -191,10 +191,18 @@ public class CloudAppConfig {
 
     private List<String> cachedCidrs;
 
+    /**
+     * init
+     */
     public void init() {
         this.getCidrPool();
     }
 
+    /**
+     * getExternalNetPool
+     *
+     * @return
+     */
     public List<AllocationPool> getExternalNetPool() {
         final ArrayList<AllocationPool> allocationPools = new ArrayList<>();
         if (!StringUtils.isEmpty(externalNetPool)) {
@@ -209,6 +217,11 @@ public class CloudAppConfig {
         return allocationPools;
     }
 
+    /**
+     * getCidrPool
+     *
+     * @return
+     */
     public List<String> getCidrPool() {
         if (cachedCidrs == null) {
             List<String> cidrPool = new ArrayList<>();
@@ -226,6 +239,11 @@ public class CloudAppConfig {
         return cidrPool;
     }
 
+    /**
+     * getExternalNetId
+     *
+     * @return
+     */
     public String getExternalNetId() {
         if (!StringUtils.isEmpty(externalNetId)) {
             return externalNetId;
@@ -241,6 +259,11 @@ public class CloudAppConfig {
         return externalNetId;
     }
 
+    /**
+     * getExternalNetCidr
+     *
+     * @return
+     */
     public String getExternalNetCidr() {
         if (!StringUtils.isEmpty(externalNetCidr)) {
             return externalNetCidr;
@@ -261,6 +284,11 @@ public class CloudAppConfig {
         return externalNetCidr;
     }
 
+    /**
+     * getMgmtNetId
+     *
+     * @return
+     */
     public String getMgmtNetId() {
         if (!StringUtils.isEmpty(mgmtNetId)) {
             return mgmtNetId;
@@ -285,6 +313,11 @@ public class CloudAppConfig {
         return mgmtNetId;
     }
 
+    /**
+     * getContainerHelpInstallerDir
+     *
+     * @return
+     */
     public String getContainerHelpInstallerDir() {
         if (!StringUtils.isEmpty(containerHelpInstallerDir)) {
             return containerHelpInstallerDir;

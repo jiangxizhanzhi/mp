@@ -24,6 +24,11 @@ public class ElementStatusReporter implements StatusReporter<CollectedElementSta
     @Resource
     private CsceneAppConfig csceneAppConfig;
 
+    /**
+     * reportStatus
+     *
+     * @param sceneStatus
+     */
     @Override
     public void reportStatus(CollectedElementStatusBO sceneStatus) {
         sceneStatus.setCsceneId(CsceneContextHolder.getCsceneInstanceId());

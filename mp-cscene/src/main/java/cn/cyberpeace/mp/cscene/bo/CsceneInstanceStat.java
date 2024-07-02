@@ -64,6 +64,11 @@ public class CsceneInstanceStat {
     @ApiModelProperty(value = "场景实例状态描述")
     private String sceneStatusDesc;
 
+    /**
+     * getEventMessage
+     *
+     * @return
+     */
     public String getEventMessage() {
         if (eventMessage != null && eventMessage.length() >= 1) {
             String newEventMessage = eventMessage.substring(0, 1).toUpperCase();

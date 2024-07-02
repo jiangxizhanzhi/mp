@@ -20,18 +20,34 @@ import static cn.cyberpeace.mp.base.constant.BaseErrorCode.CUSTOM_ERROR;
 @Slf4j
 public class Network extends CloudClient {
 
+    /**
+     * get
+     *
+     * @param id
+     * @return
+     */
     public NetworkData get(String id) {
         String url = String.format(CloudUrlConstant.NETWORK_GET_URL, id);
         CloudResponse<NetworkData> result = cloudGet(url, null, new TypeReference<>() {}, true);
         return result.getData();
     }
 
+    /**
+     * getExternalNetworkId
+     *
+     * @return
+     */
     public String getExternalNetworkId() {
         CloudResponse<ExternalNetworkIdRes> response = cloudPost(CloudUrlConstant.GET_EXTERNAL_NETWORK, null, null, new TypeReference<CloudResponse<ExternalNetworkIdRes>>() {
         }, true);
         return response.getData().getExternalNetId();
     }
 
+    /**
+     * getExternalNetworkInfo
+     *
+     * @return
+     */
     public ExternalNetworkInfoRes getExternalNetworkInfo() {
         try {
             String externalId = getExternalNetworkId();
@@ -49,7 +65,12 @@ public class Network extends CloudClient {
     }
 
 
-
+    /**
+     * getByName
+     *
+     * @param name
+     * @return
+     */
     public NetworkData getByName(String name) {
         NetworkQueryParam queryParam = new NetworkQueryParam();
         queryParam.setName(name);
@@ -64,6 +85,13 @@ public class Network extends CloudClient {
         }
     }
 
+    /**
+     * getAll
+     *
+     * @param limit
+     * @param offset
+     * @return
+     */
     public List<NetworkData> getAll(Integer limit, Integer offset) {
         CommonQueryParam param = new CommonQueryParam();
         param.setLimit(limit);

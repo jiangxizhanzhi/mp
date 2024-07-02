@@ -31,6 +31,16 @@ public class WazuhDataQueryService {
     @Resource(name = "wazuhRestHighLevelClient")
     protected RestHighLevelClient restHighLevelClient;
 
+    /**
+     * queryWazuhData
+     *
+     * @param indexArray
+     * @param from
+     * @param size
+     * @param boolQueryBuilders
+     * @param sorts
+     * @return
+     */
     public WazuhResult<WazuhFileRoot> queryWazuhData(String[] indexArray, int from, int size, List<BoolQueryBuilder> boolQueryBuilders, List<SortBuilder<?>> sorts) {
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
@@ -63,6 +73,12 @@ public class WazuhDataQueryService {
         }
     }
 
+    /**
+     * aggregations
+     *
+     * @param searchRequest
+     * @return
+     */
     public Aggregations aggregations(SearchRequest searchRequest) {
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);

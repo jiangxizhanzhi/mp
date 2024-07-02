@@ -15,12 +15,23 @@ public class ElementDeleteHandler extends HandlerCommon {
 
     private DeleteHandler deleteHandler;
 
+    /**
+     * ElementDeleteHandler
+     *
+     * @param pluginHandler
+     * @param event
+     */
     public ElementDeleteHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, RecreateTaskPool.getInstance(), event);
         this.deleteHandler = new DeleteHandler(pluginHandler);
     }
 
 
+    /**
+     * deleteElement
+     *
+     * @param element
+     */
     public void deleteElement(CloudPluginSceneElementBO element) {
         this.deleteHandler.deleteElementProcess(element);
     }
