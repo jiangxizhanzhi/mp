@@ -258,10 +258,10 @@ public class InitiateHandler extends HandlerCommon {
         WazuhControl.ControlConfigParam controlParam = new WazuhControl.ControlConfigParam();
         for (Probe probe : probes) {
             // 脚本驱动类型，新增脚本参数
-            if (probe.getExecType() == Probe.ExecType.SCRIPT_PROBE) {
+            if (null != probe.getExecType() && probe.getExecType() == Probe.ExecType.SCRIPT_PROBE) {
                 ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName);
                 customProbeParams.addAll(convertScript.convertParams());
-            } else if (probe.getExecType() == Probe.ExecType.REGISTRY_PROBE) {
+            } else if (null != probe.getExecType() && probe.getExecType() == Probe.ExecType.REGISTRY_PROBE) {
                 // 注册表变更类型，新增注册表参数
                 ConvertRegistryParams convertRegistry = new ConvertRegistryParams(probe);
                 registryParams.addAll(convertRegistry.convertParams());
@@ -269,7 +269,7 @@ public class InitiateHandler extends HandlerCommon {
                 if (Boolean.FALSE.equals(probe.getDisabled()) && CollectionUtils.isNotEmpty(collectPath)) {
                     customProbeParams.add(getModifyProbeParam(agentName, collectPath, REGISTRY));
                 }
-            } else if (probe.getExecType() == Probe.ExecType.FILE_PROBE) {
+            } else if (null != probe.getExecType() && probe.getExecType() == Probe.ExecType.FILE_PROBE) {
                 // 文件变更类型，新增文件参数
                 ConvertFileParams convertFile = new ConvertFileParams(probe);
                 fileParams.addAll(convertFile.convertParams());
@@ -277,7 +277,7 @@ public class InitiateHandler extends HandlerCommon {
                 if (Boolean.FALSE.equals(probe.getDisabled()) && CollectionUtils.isNotEmpty(collectPath)) {
                     customProbeParams.add(getModifyProbeParam(agentName, collectPath, FILE));
                 }
-            } else if (probe.getExecType() == Probe.ExecType.LOG_PROBE) {
+            } else if (null != probe.getExecType() && probe.getExecType() == Probe.ExecType.LOG_PROBE) {
                 // 日志采集类型，新增日志参数
                 ConvertLogParams convertLog = new ConvertLogParams(probe, systemType, locationMap);
                 logParams.addAll(convertLog.convertParams());
