@@ -1,11 +1,15 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.protocolcollection.MibFileInfo;
+import cn.cyberpeace.mp.cscene.model.CsceneElementSoftVersionModel;
+import cn.cyberpeace.mp.cscene.repository.CsceneElementSoftVersionMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.ProtocolCollectionService;
 import cn.cyberpeace.mp.cscene.vo.MibFileUploadResponse;
@@ -23,10 +27,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -181,9 +187,34 @@ public class CsceneFileController {
     @ApiImplicitParam(name = "file", value = "mib文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/upload_versions")
     public void uploadElementVersion(@RequestParam(value = "file") MultipartFile file, @RequestParam(value = "eid") String eid) {
-        String content = readJsonStrFromMultipartFile(file);
-        log.info(content);
-        log.info(eid);
+        String fileName = eid;
+        File x = new File(fileName);
+        try {
+            FileUtils.copyInputStreamToFile(file.getInputStream(), new File(eid));
+            var list = FileUtils.readLines(x);
+            List<CsceneElementSoftVersionModel> models = new ArrayList<>();
+            for (String l : list) {
+                String[] s = l.split(" ");
+                String soft = s[0].split("/")[0];
+                String version = s[1];
+                CsceneElementSoftVersionModel model = new CsceneElementSoftVersionModel();
+                model.setVersion(version);
+                model.setSoft(soft);
+                model.setEid(eid);
+                models.add(model);
+            }
+            var mapper = BeanCommon.getBean(CsceneElementSoftVersionMapper.class);
+            mapper.filterDelete(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, eid));
+            mapper.bulkCreate(models);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                x.delete();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private String readJsonStrFromMultipartFile(MultipartFile file) {
