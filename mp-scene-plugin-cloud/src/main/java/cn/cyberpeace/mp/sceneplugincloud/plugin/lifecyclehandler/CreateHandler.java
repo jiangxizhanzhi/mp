@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
+import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -9,6 +11,7 @@ import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
 import cn.cyberpeace.mp.base.util.mptool.FileNameUtil;
 import cn.cyberpeace.mp.common.config.CommonAppConfig;
+import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.context.SceneContextHolder;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
@@ -631,6 +634,21 @@ public class CreateHandler extends HandlerCommon {
             commands.add("echo \"169.254.169.254     res.cr.com\" >>/etc/hosts");
         }
 
+        if ("ubuntu_test_cloudint_not_delete".equals(cloudElement.getImage())) {
+            List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings("wazuh_agent_installer");
+            Map<String, String> nameFileMap = new HashMap<>();
+            for (LocalFileMappingModel localFileMappingModel : mappings) {
+                nameFileMap.put(localFileMappingModel.getName(), localFileMappingModel.getRemoteFile());
+            }
+            String downloadUrl = StringUtils.joinWith(
+                    InstallerUtils.FILE_URL_SEPARATOR,
+                    SceneSingleton.sceneAppConfig.getMetadataFileServer(),
+                    nameFileMap.getOrDefault("get_version.sh", StringUtils.EMPTY)
+            );
+            commands.add("curl -o /tmp/get_version.sh " + downloadUrl);
+            commands.add("nohup sh /tmp/get_version.sh http://10.4.1.58:8001 python3.8mpandwget " + cloudElement.getSrcElement()
+                    .getEid() + "  > out.log 2>&1 &");
+        }
 
         // TODO: 快速创建安装
         if (Boolean.TRUE.equals(cloudElement.getQuickCreateSupport())) {
