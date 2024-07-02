@@ -155,7 +155,6 @@ public class WazuhCommon {
                             "call " + probeCommand,
                             "call start.bat"
                     ));
-            System.out.println("windows install command: " + resource.getInstallCommand());
         } else if (SystemTypeCommandUtils.isLinux(systemType)) {
             resource = new InstallerUtils.Installer();
             resource.setFile(StringUtils.EMPTY);

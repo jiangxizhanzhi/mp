@@ -53,6 +53,32 @@ public class CloudTargetConverter {
         device.setDeviceCloudTarget(target);
     }
 
+    public void convertExtNetFW(CloudDevice device, DeviceCloudTargetVO target) {
+        /**
+         * ext_net
+         */
+        device.setRole(21);
+        device.setImageType("fireWall");
+
+        /**
+         * device_cloud_target
+         */
+        device.setDeviceCloudTarget(target);
+    }
+
+    public void convertExtNetWAF(CloudDevice device, DeviceCloudTargetVO target) {
+        /**
+         * ext_net
+         */
+        device.setRole(21);
+        device.setImageType("WAF");
+
+        /**
+         * device_cloud_target
+         */
+        device.setDeviceCloudTarget(target);
+    }
+
     public void convertExtVm(CloudDevice device, DeviceCloudTargetVO target) {
         String operatingSystem = target.getOperatingSystem();
         /**
@@ -133,9 +159,9 @@ public class CloudTargetConverter {
         device.setImageType("containerRegistry");
         device.setRole(4);
         ExtDocker extDocker = new ExtDocker();
-        extDocker.setFlavor("1vcpu/1.5GiB内存");
+        extDocker.setFlavor("1vcpu/1GiB内存");
         extDocker.setCpu(1);
-        extDocker.setRam(1.5);
+        extDocker.setRam(1);
         extDocker.setInstanceState(0);
         extDocker.setInitSupport(true);
         extDocker.setQuickCreateSupport(true);
