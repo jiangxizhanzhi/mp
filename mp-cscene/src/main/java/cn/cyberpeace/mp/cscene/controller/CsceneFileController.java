@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +25,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.List;
 import java.util.Objects;
 
@@ -173,4 +176,30 @@ public class CsceneFileController {
         return new ServiceResult<>(mibFileUploadResponse).asResult();
     }
 
+
+    @ApiOperation("上传虚拟机内的软件版本")
+    @ApiImplicitParam(name = "file", value = "mib文件", dataTypeClass = MultipartFile.class)
+    @PostMapping("/upload_versions")
+    public void uploadElementVersion(@RequestParam(value = "file") MultipartFile file, @RequestParam(value = "eid") String eid) {
+        String content = readJsonStrFromMultipartFile(file);
+        log.info(content);
+        log.info(eid);
+    }
+
+    private String readJsonStrFromMultipartFile(MultipartFile file) {
+        String jsonStr = "";
+        try (Reader reader = new InputStreamReader(file.getInputStream(), "utf-8")) {
+            int ch = 0;
+            StringBuffer sb = new StringBuffer();
+            while ((ch = reader.read()) != -1) {
+                sb.append((char) ch);
+            }
+            reader.close();
+            jsonStr = sb.toString();
+            return jsonStr;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
