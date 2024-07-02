@@ -1,5 +1,12 @@
 package cn.cyberpeace.mp.sceneplugincloud.constant;
 
+/**
+ * @ClassName CloudUrlConstant
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class CloudUrlConstant {
     /**
      * macvlan, 30s版本没有

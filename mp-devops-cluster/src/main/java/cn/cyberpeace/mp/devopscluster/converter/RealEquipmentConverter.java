@@ -47,8 +47,12 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
- * 实装管理
- * @author wanggang
+ * @ClassName RealEquipmentConverter
+ * @Description 实装管理
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseConverter
  */
 @Service
 @RequiredArgsConstructor

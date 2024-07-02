@@ -11,9 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Description: 业务服务监控对象
+ * @ClassName BizServiceMonitorVO
+ * @Description
  * @Author qiaokang
- * @Date：2022/7/16 16:48
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

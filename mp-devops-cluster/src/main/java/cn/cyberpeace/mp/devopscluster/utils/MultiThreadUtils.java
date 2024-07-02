@@ -12,8 +12,11 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 /**
- * 多线程工具类
- *
+ * @ClassName MultiThreadUtils
+ * @Description 多线程工具类
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Slf4j
 public class MultiThreadUtils {

@@ -4,6 +4,14 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Component;
 
+/**
+ * @ClassName UserEventPublisher
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ApplicationEventPublisherAware
+ */
 @Component
 public class UserEventPublisher implements ApplicationEventPublisherAware {
 

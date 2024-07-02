@@ -9,9 +9,11 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * @description:
- * @author：Geek Wang
- * @date: 2022/6/8
+ * @ClassName IConverter
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @MapperConfig
 public interface IConverter<SOURCE,TARGET> {

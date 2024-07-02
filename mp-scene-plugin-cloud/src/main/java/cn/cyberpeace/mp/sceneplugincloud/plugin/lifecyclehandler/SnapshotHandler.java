@@ -23,9 +23,12 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
+ * @ClassName SnapshotHandler
  * @Description
  * @Author maojun
  * @Date 2021/10/28
+ * @Version 1.0.0
+ * @see HandlerCommon
  */
 @Slf4j
 public class SnapshotHandler extends HandlerCommon {

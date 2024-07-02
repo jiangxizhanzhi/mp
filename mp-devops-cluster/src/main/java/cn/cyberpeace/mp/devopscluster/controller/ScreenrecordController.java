@@ -32,9 +32,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * @ClassName ScreenrecordController
  * @Description 录屏文件管理controller
  * @Author qiaokang
  * @Date 2021-09-13 11:05:18
+ * @Version 1.0.0
  */
 @Slf4j
 @Api(tags = "录屏文件管理接口")

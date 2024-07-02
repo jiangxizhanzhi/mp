@@ -8,6 +8,14 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
+/**
+ * @ClassName Resource
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Serializable
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

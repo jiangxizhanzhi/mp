@@ -24,6 +24,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * @ClassName EsCollectionDataStorageServiceImpl
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see EsCollectionDataStorageService
+ */
 @Service
 @Slf4j
 public class EsCollectionDataStorageServiceImpl extends BaseModelServiceImpl<EsCollectionDataStorageModel, EsCollectionDataStorageMapper,

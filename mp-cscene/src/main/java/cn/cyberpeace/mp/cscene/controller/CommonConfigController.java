@@ -16,6 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.util.Map;
 
+/**
+ * @ClassName CommonConfigController
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Api(value = "场景通用配置", tags = "CSCENE-场景通用配置")
 @Slf4j
 @RestController

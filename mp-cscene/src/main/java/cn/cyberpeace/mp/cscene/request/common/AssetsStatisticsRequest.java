@@ -7,9 +7,11 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * @Description: 资产统计请求
+ * @ClassName AssetsStatisticsRequest
+ * @Description 资产统计请求
  * @Author qiaokang
- * @Date：2022/03/14 14:22
+ * @Date 2022/03/14 14:22
+ * @Version 1.0.0
  */
 @Data
 public class AssetsStatisticsRequest {

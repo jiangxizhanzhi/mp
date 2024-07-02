@@ -3,6 +3,13 @@ package cn.cyberpeace.mp.job.base;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+/**
+ * @ClassName MethodJobWrapper
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class MethodJobWrapper {
 
     private Method method;

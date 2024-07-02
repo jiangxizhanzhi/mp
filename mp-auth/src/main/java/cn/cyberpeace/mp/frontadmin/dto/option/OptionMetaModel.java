@@ -3,9 +3,11 @@ package cn.cyberpeace.mp.frontadmin.dto.option;
 import lombok.Data;
 
 /**
- * @Description:
+ * @ClassName OptionMetaModel
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/8/15 14:39
+ * @Date 2022/8/15 14:39
+ * @Version 1.0.0
  */
 @Data
 public class OptionMetaModel {

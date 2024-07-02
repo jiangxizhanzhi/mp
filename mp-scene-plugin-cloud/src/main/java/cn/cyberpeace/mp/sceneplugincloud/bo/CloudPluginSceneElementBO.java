@@ -18,6 +18,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @ClassName CloudPluginSceneElementBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCloudPluginSceneElementBO
+ */
 @Data
 public class CloudPluginSceneElementBO extends BaseCloudPluginSceneElementBO<CloudPluginSceneElementModel,
         CloudPluginSceneElementBO, SceneElementBO> {

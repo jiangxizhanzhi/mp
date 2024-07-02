@@ -9,9 +9,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName UrlAccessCtlDto
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/5/19 19:53
+ * @Date 2022/5/19 19:53
+ * @Version 1.0.0
  */
 @Data
 @Builder

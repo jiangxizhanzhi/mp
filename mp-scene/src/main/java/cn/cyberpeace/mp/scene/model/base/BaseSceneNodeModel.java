@@ -6,6 +6,14 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import lombok.Data;
 
+/**
+ * @ClassName BaseSceneNodeModel
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModel
+ */
 @Data
 public class BaseSceneNodeModel extends BaseModel {
     private String scene;

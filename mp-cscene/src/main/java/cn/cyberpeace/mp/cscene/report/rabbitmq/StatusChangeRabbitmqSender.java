@@ -7,6 +7,14 @@ import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * @ClassName StatusChangeRabbitmqSender
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseSimpleMessageSender
+ */
 @Component
 public class StatusChangeRabbitmqSender extends BaseSimpleMessageSender {
     public static final String CSCENE_EXCHANGE_NAME = SimpleMessageConfig.GROUP_NAME + ".cscene";

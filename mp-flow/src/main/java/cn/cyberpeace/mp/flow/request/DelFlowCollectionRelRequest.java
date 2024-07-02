@@ -11,9 +11,11 @@ import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 /**
- * @Description: 删除流量集合关联请求
+ * @ClassName DelFlowCollectionRelRequest
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/23 10:36
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

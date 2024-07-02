@@ -5,6 +5,13 @@ import com.google.common.cache.CacheBuilder;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @ClassName CacheUtil
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class CacheUtil {
 
     /**

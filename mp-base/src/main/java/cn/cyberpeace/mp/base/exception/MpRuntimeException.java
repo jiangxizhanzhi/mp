@@ -4,45 +4,12 @@ import cn.cyberpeace.mp.base.service.code.ServiceCode;
 import lombok.Data;
 
 /**
- * 文件名：Example.java
- * <p>
- * <p>
- * <p>
- * 版本信息：v1.0
- * <p>
- * <p>
- * <p>
- * 日期：2023-04-01
- * <p>
- * <p>
- * <p>
- * 描述：
- * <p>
- * <p>
- * <p>
- * 这是一个示例Java文件，展示了开头注释的标准格式。
- * <p>
- * <p>
- * <p>
- * <p>
- * <p>
- * <p>
- * 版权信息：
- * <p>
- * <p>
- * <p>
- * © 2023 你的名字或公司
- * <p>
- * <p>
- * <p>
- * <p>
- * <p>
- * <p>
- * 修改历史：
- * <p>
- * <p>
- * <p>
- * 2023-04-01 初始版本
+ * @ClassName MpRuntimeException
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see RuntimeException
  */
 @Data
 public class MpRuntimeException extends RuntimeException {

@@ -5,9 +5,11 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 
 /**
+ * @ClassName ElementTypeUtils
  * @Description 用于节点类型的判断
  * @Author maojun
  * @Date 2022/4/28
+ * @Version 1.0.0
  */
 public class ElementTypeUtils {
 

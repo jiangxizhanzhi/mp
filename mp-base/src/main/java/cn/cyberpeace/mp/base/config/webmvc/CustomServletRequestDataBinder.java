@@ -11,7 +11,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * 自定义请求数据绑定处理类，主要解决将前端传递的下划线格式的字段自动转为驼峰格式
+ * @ClassName CustomServletRequestDataBinder
+ * @Description 自定义请求数据绑定处理类，主要解决将前端传递的下划线格式的字段自动转为驼峰格式
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ServletRequestDataBinder
  */
 public class CustomServletRequestDataBinder extends ServletRequestDataBinder {
 

@@ -8,6 +8,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @ClassName Snapshot
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCloudPlatformResult
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

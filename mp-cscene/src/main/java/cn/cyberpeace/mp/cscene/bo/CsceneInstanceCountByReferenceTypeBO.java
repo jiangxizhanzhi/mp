@@ -6,7 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @author wanggang
+ * @ClassName CsceneInstanceCountByReferenceTypeBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

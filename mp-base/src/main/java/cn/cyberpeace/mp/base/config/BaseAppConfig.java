@@ -12,9 +12,13 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 /**
- * 模块下定义的独立配置信息
+ * @ClassName BaseAppConfig
+ * @Description  模块下定义的独立配置信息
  * 约定：各模块的独立配置命名 {模块名}AppConfig
  * 如：base模块下为 BaseAppConfig
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Configuration
 @ConfigurationProperties(prefix = "mp.base")

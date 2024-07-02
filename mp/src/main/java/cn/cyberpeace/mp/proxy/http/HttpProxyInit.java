@@ -12,6 +12,14 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 import java.util.List;
 
+/**
+ * @ClassName HttpProxyInit
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ServletContextInitializer
+ */
 @Component
 public class HttpProxyInit implements ServletContextInitializer {
 

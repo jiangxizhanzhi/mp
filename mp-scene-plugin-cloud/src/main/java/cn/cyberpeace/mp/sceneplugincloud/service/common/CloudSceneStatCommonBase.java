@@ -25,6 +25,13 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * @ClassName CloudSceneStatCommonBase
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Slf4j
 public abstract class CloudSceneStatCommonBase<P1 extends BasePluginSceneElementMapper<?>,
         P2 extends BasePluginSceneElementPortMapper<?>> {

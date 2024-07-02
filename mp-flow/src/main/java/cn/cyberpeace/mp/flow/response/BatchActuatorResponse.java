@@ -10,9 +10,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * @Description: 流量批量执行回调方法返回信息
+ * @ClassName BatchActuatorResponse
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/10 16:57
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

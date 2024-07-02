@@ -10,9 +10,11 @@ import org.springframework.context.annotation.Primary;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @Description:
+ * @ClassName CsceneCacheConfig
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/4/7 20:04
+ * @Date 2022/4/7 20:04
+ * @Version 1.0.0
  */
 @Configuration
 public class CsceneCacheConfig {

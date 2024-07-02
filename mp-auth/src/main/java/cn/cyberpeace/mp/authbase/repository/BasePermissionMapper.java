@@ -27,6 +27,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * @ClassName BasePermissionMapper
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelMapper
+ */
 public interface BasePermissionMapper<P extends BasePermissionModel, T extends BaseModel> extends BaseModelMapper {
 
 

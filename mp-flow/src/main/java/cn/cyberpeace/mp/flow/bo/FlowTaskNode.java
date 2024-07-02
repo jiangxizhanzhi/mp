@@ -7,9 +7,11 @@ import lombok.Data;
 import java.util.Objects;
 
 /**
- * @Description: 节点
- * @Author: guquan
- * @Date：2023/5/27 15:22
+ * @ClassName FlowTaskNode
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @ApiModel("节点")

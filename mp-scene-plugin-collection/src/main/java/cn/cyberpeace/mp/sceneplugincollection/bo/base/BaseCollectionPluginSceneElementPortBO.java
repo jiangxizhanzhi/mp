@@ -6,6 +6,14 @@ import cn.cyberpeace.mp.sceneplugincollection.model.base.BaseCollectionPluginSce
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+/**
+ * @ClassName BaseCollectionPluginSceneElementPortBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BasePluginSceneElementPortBO
+ */
 @Data
 public abstract class BaseCollectionPluginSceneElementPortBO<M extends BaseCollectionPluginSceneElementPortModel,
         T extends BaseCollectionPluginSceneElementPortBO<M, T, S>, S extends BaseSceneElementPortBO<?, S, ?>>

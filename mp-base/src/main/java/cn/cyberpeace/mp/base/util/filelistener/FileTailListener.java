@@ -7,6 +7,14 @@ import org.apache.commons.io.input.TailerListenerAdapter;
 import java.io.File;
 import java.util.function.Consumer;
 
+/**
+ * @ClassName FileTailListener
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see TailerListenerAdapter
+ */
 @Slf4j
 public class FileTailListener extends TailerListenerAdapter {
 

@@ -10,6 +10,13 @@ import lombok.Data;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @ClassName FlowPcapExportUtil
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 public class FlowPcapExportUtil {
     private static LoadingCache<String, FlowPcapExportProcess> cache = CacheBuilder.newBuilder().maximumSize(500)

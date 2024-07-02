@@ -3,6 +3,13 @@ package cn.cyberpeace.mp.proxy.lf;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import lombok.Data;
 
+/**
+ * @ClassName LfProxyConfig
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 public class LfProxyConfig {
     public static final String URL_SEPARATOR = "/";

@@ -10,10 +10,12 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
-  *@Desciption 查询日志
-  *@Author zhangjin
-  *@Date 9/13/21 9:30 上午
-**/
+ * @ClassName RunTimeLogDTO
+ * @Description
+ * @Author zhangjin
+ * @Date 9/13/21 9:30 上午
+ * @Version 1.0.0
+ */
 @Data
 @Builder
 @AllArgsConstructor

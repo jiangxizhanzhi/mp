@@ -14,6 +14,13 @@ import springfox.documentation.spring.web.plugins.Docket;
 
 import java.util.Collections;
 
+/**
+ * @ClassName FlowSwagger2Config
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Configuration
 public class FlowSwagger2Config {
 

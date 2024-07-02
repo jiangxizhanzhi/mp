@@ -9,9 +9,12 @@ import lombok.NoArgsConstructor;
 
 
 /**
- * @Description: 流量执行请求对象
+ * @ClassName FlowExecuteRequest
+ * @Description
  * @Author qiaokang
- * @Date：2021/6/17 09:56
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see FlowBaseModel
  */
 @Data
 @AllArgsConstructor

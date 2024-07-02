@@ -6,6 +6,13 @@ import lombok.Data;
 
 import java.util.Map;
 
+/**
+ * @ClassName FormatMessage
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 public class FormatMessage<T> {
     @ApiModelProperty(value = "上下文数据, 目前包含CALL_CHAIN_ID(调用id), LOCALE(LANGUAGE, COUNTRY, VARIANT), PASS_THROUGH(透明上下文)")

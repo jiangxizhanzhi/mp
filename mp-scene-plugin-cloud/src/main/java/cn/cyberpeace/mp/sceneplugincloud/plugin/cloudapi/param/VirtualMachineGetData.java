@@ -8,6 +8,14 @@ import lombok.Setter;
 
 import java.util.List;
 
+/**
+ * @ClassName VirtualMachineGetData
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see CloudHttpData
+ */
 @Data
 @NoArgsConstructor
 public class VirtualMachineGetData implements CloudHttpData {

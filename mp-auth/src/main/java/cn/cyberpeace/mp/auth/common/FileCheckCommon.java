@@ -16,9 +16,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * @ClassName FileCheckCommon
  * @Description
  * @Author shgang
  * @Date 2022/10/26
+ * @Version 1.0.0
  */
 public class FileCheckCommon {
 

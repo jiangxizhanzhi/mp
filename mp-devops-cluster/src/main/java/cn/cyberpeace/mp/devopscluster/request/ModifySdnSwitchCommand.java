@@ -7,6 +7,14 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+
+/**
+ * @ClassName ModifySdnSwitchCommand
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @ApiModel("修改sdn")
 @Data
 public class ModifySdnSwitchCommand {

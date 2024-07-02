@@ -28,9 +28,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Description:
+ * @ClassName SceneMonitorController
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/11/22 10:15
+ * @Date 2021/11/22 10:15
+ * @Version 1.0.0
  */
 @Api(value = "场景监控", tags = "场景监控")
 @Slf4j

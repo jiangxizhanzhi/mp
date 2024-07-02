@@ -7,9 +7,11 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * @Description: 流量统计条件
- * @Author: guquan
- * @Date：2023/5/16 11:38
+ * @ClassName FlowStatisticalCondition
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @ApiModel("流量统计条件")

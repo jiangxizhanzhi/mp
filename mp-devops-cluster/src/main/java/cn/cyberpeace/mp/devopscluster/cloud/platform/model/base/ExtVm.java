@@ -10,8 +10,12 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 扩展虚拟机信息
- * @author wanggang
+ * @ClassName ExtVm
+ * @Description 扩展虚拟机信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Serializable
  */
 @Data
 @NoArgsConstructor

@@ -8,9 +8,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * @Description: 流量任务启动对象
+ * @ClassName FlowTaskStart
+ * @Description
  * @Author qiaokang
- * @Date：2023/5/24 17:39
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

@@ -7,9 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * @ClassName FlowAttackTime
  * @Description
  * @Author maojun
  * @Date 2022/2/22
+ * @Version 1.0.0
  */
 @Data
 @Builder

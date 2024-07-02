@@ -14,9 +14,12 @@ import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsTrendVO;
 import java.util.List;
 
 /**
+ * @ClassName SystemAlarmService
  * @Description 告警信息service
  * @Author qiaokang
  * @Date 2022-07-18 17:35:04
+ * @Version 1.0.0
+ * @see BaseModelService
  */
 public interface SystemAlarmService extends BaseModelService<SystemAlarmModel, QueryParams> {
 

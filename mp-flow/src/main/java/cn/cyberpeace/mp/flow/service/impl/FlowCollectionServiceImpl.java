@@ -36,9 +36,13 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * @Description: 流量集合service
+ * @ClassName FlowCollectionServiceImpl
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/31 10:31
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see FlowCollectionService
  */
 @Service
 @Slf4j

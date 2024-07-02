@@ -6,9 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @Description: 流量类型
+ * @ClassName FlowCategory
+ * @Description
  * @Author qiaokang
- * @Date：2022/6/23 11:52
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Component
 public class FlowCategory {

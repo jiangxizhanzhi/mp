@@ -5,9 +5,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
+ * @ClassName ImageExportRequest
  * @Description
  * @Author zhanglin
  * @Date 2022/09/19
+ * @Version 1.0.0
  */
 @Getter
 @Setter

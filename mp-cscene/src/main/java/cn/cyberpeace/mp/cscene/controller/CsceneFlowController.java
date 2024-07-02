@@ -29,9 +29,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * @Description: 场景流量
- * @Author: guquan
- * @Date：2023/5/8 14:56
+ * @ClassName CsceneFlowController
+ * @Description 场景流量
+ * @Author guquan
+ * @Date 2023/5/8 14:56
+ * @Version 1.0.0
+ * @see BaseModelListControllerBase
  */
 @Api(value = "场景流量", tags = "场景流量")
 @Slf4j

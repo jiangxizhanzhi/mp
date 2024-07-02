@@ -21,9 +21,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Set;
 
 /**
- * @Description: 组织-权限管理接口
+ * @ClassName OrgPermissionController
+ * @Description 组织-权限管理接口
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 @Api(value = "组织管理接口", tags = "组织管理接口")
 @Slf4j

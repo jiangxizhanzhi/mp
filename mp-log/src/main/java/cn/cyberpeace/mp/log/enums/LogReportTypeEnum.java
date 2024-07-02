@@ -9,7 +9,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 日志上报类型
+ * @ClassName LogReportTypeEnum
+ * @Description 日志上报类型
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Enum
  */
 @SwaggerDisplayEnum
 public enum LogReportTypeEnum {

@@ -8,9 +8,11 @@ import lombok.NoArgsConstructor;
 import java.io.ByteArrayInputStream;
 
 /**
- * @description:
- * @author：Geek Wang
- * @date: 2022/6/17
+ * @ClassName LogFileDownloadBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

@@ -6,9 +6,12 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description:
- * @Author: guquan
- * @Date：2023/6/20 9:49
+ * @ClassName ActiveConnectionParam
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see CloudHttpData
  */
 @Data
 public class ActiveConnectionParam implements CloudHttpData {

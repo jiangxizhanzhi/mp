@@ -8,9 +8,12 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 /**
+ * @ClassName FlowScriptParamService
  * @Description 流量脚本参数service
  * @Author qiaokang
  * @Date 2021-11-25 15:00:45
+ * @Version 1.0.0
+ * @see BaseModelService
  */
 public interface FlowScriptParamService extends BaseModelService<FlowScriptParamModel, QueryParams> {
 

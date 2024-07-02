@@ -4,6 +4,13 @@ import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
+/**
+ * @ClassName BaseObjResult
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 public abstract class BaseObjResult<T, R> {
     @JsonIgnore

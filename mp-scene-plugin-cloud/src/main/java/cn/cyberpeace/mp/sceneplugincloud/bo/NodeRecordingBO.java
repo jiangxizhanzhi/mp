@@ -6,6 +6,13 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * @ClassName NodeRecordingBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @ApiModel(description = "场景接入录屏数据")
 @Data
 public class NodeRecordingBO {

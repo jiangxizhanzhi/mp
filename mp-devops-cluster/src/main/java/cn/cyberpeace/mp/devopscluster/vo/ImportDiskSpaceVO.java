@@ -8,9 +8,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description: 磁盘剩余空间返回对象
+ * @ClassName ImportDiskSpaceVO
+ * @Description
  * @Author qiaokang
- * @Date：2022/3/10 10:25
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseVO
  */
 @Data
 @NoArgsConstructor

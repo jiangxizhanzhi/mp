@@ -5,9 +5,11 @@ import lombok.Getter;
 import javax.validation.constraints.NotNull;
 
 /**
+ * @ClassName ResourceParseWrapper
  * @Description
  * @Author maojun
  * @Date 2022/5/18
+ * @Version 1.0.0
  */
 @Getter
 public class ResourceParseWrapper<T extends RsourceNameParams> {

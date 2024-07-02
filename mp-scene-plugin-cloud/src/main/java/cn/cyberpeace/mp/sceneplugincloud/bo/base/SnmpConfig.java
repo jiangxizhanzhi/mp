@@ -6,11 +6,12 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * @BelongsPackage: cn.cyberpeace.mp.sceneplugincloud.bo.base
- * @Author: hhuang
- * @CreateTime: 2023/05/18  17:34
- * @Description: snmp配置信息
- * @Version: 1.0
+ * @ClassName SnmpConfig
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Serializable
  */
 @Data
 public class SnmpConfig implements Serializable {

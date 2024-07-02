@@ -66,6 +66,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * @ClassName CsceneInstanceController
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelListControllerBase
+ */
 @Api(value = "场景实例", tags = "CSCENE-场景实例")
 @Slf4j
 @RestController

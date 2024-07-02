@@ -4,6 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+/**
+ * @ClassName StrUtil
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see CharSequenceUtil
+ * @see StrPool
+ */
 public class StrUtil extends CharSequenceUtil implements StrPool {
 
 

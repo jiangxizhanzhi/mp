@@ -8,9 +8,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description: 资产统计返回
+ * @ClassName AssetsStatisticsResponse
+ * @Description 资产统计返回
  * @Author qiaokang
- * @Date：2022/3/16 16:01
+ * @Date 2022/3/16 16:01
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

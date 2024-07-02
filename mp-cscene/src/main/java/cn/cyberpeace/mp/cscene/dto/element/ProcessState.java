@@ -4,9 +4,11 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description:
+ * @ClassName ProcessState
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/11/29 20:14
+ * @Date 2021/11/29 20:14
+ * @Version 1.0.0
  */
 @Data
 public class ProcessState {

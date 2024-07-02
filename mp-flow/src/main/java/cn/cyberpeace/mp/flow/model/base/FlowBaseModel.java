@@ -6,9 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description: 流量基础对象
+ * @ClassName FlowBaseModel
+ * @Description
  * @Author qiaokang
- * @Date：2021/6/17 10:29
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

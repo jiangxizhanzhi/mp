@@ -14,9 +14,12 @@ import java.io.File;
 import java.util.List;
 
 /**
+ * @ClassName MpEnvironmentPostProcessor
  * @Description
  * @Author maojun
  * @Date 2021/11/29
+ * @Version 1.0.0
+ * @see EnvironmentPostProcessor
  */
 @Slf4j
 public class MpEnvironmentPostProcessor implements EnvironmentPostProcessor {

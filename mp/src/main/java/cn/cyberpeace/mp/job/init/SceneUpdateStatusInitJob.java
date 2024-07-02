@@ -15,9 +15,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
+ * @ClassName SceneUpdateStatusInitJob
  * @Description 清理mp服务启动之前正在创建中的场景, 仅修改状态
  * @Author zhanglin
  * @Date 2022/9/21
+ * @Version 1.0.0
  */
 @Slf4j
 @Component

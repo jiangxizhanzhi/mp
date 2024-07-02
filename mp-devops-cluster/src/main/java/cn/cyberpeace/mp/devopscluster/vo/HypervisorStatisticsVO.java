@@ -14,7 +14,12 @@ import java.math.RoundingMode;
 import java.util.Objects;
 
 /**
- * 资源统计信息
+ * @ClassName HypervisorStatisticsVO
+ * @Description 资源统计信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseVO
  */
 @Data
 @NoArgsConstructor

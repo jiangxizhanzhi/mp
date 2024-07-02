@@ -28,7 +28,12 @@ import javax.annotation.Resource;
 import java.util.Objects;
 
 /**
- * 流量发生器管理
+ * @ClassName FlowActuatorController
+ * @Description 流量发生器管理
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelController
  */
 @Slf4j
 @Api(tags = "流量发生器接口")

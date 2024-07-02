@@ -5,8 +5,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * SNMP参数信息
- * @author wanggang
+ * @ClassName SnmpParams
+ * @Description SNMP参数信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

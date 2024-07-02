@@ -5,6 +5,14 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import lombok.Data;
 
+/**
+ * @ClassName BaseSceneElementModel
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseSceneNodeModel
+ */
 @Data
 public class BaseSceneElementModel extends BaseSceneNodeModel {
     @DefaultInt

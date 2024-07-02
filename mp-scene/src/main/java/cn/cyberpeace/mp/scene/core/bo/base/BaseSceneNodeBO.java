@@ -12,6 +12,14 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @ClassName BaseSceneNodeBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see EidBO
+ */
 @Data
 public abstract class BaseSceneNodeBO<M extends BaseSceneNodeModel, T extends BaseSceneNodeBO<M, T>>
         extends EidBO<M, T> {

@@ -7,9 +7,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName FlowBO
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/1 17:10
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 public class FlowBO {

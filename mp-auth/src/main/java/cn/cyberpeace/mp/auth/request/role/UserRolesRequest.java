@@ -8,6 +8,13 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
+/**
+ * @ClassName UserRolesRequest
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @ApiModel(value = "绑定用户-角色关系请求（一个用户，多个角色）")
 @Data
 public class UserRolesRequest {

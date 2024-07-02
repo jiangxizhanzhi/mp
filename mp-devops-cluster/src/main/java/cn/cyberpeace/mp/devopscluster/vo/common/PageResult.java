@@ -6,6 +6,14 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * @ClassName PageResult
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ListObjServiceResult
+ */
 @NoArgsConstructor
 public class PageResult<T> extends ListObjServiceResult<T> {
 

@@ -16,7 +16,12 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 服务管理-Docker文件上传
+ * @ClassName InstallerDockerUploadService
+ * @Description 服务管理-Docker文件上传
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseUploadService
  */
 @Service
 @Slf4j

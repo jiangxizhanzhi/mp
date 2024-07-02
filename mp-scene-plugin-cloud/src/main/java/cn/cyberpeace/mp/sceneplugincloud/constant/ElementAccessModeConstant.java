@@ -1,5 +1,12 @@
 package cn.cyberpeace.mp.sceneplugincloud.constant;
 
+/**
+ * @ClassName ElementAccessModeConstant
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class ElementAccessModeConstant {
     public static final String SPICE = "spice";
 

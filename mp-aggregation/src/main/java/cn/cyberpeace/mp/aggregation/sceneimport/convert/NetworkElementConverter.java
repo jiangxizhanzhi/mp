@@ -26,9 +26,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * @ClassName NetworkElementConverter
  * @Description
  * @Author maojun
  * @Date 2021/10/12
+ * @Version 1.0.0
+ * @see IConverter
  */
 class NetworkElementConverter implements IConverter {
 

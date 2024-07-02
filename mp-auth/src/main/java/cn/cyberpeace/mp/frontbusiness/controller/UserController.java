@@ -37,9 +37,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * @Description: 用户管理接口(业务)
+ * @ClassName UserController
+ * @Description 用户管理接口(业务)
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 @Api(value = "用户管理接口", tags = "用户管理接口")
 @Slf4j

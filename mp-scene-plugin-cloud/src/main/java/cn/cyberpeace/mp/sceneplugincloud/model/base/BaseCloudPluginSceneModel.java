@@ -5,6 +5,14 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.scene.core.plugin.model.BasePluginSceneModel;
 import lombok.Data;
 
+/**
+ * @ClassName BaseCloudPluginSceneModel
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BasePluginSceneModel
+ */
 @Data
 public class BaseCloudPluginSceneModel extends BasePluginSceneModel {
     @DefaultBool

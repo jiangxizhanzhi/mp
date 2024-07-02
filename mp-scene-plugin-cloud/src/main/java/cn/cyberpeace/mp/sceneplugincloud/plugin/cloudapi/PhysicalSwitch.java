@@ -12,6 +12,14 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
+/**
+ * @ClassName PhysicalSwitch
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see CloudClient
+ */
 @Slf4j
 public class PhysicalSwitch extends CloudClient {
     /**

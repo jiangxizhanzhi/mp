@@ -4,6 +4,14 @@ import cn.cyberpeace.mp.base.util.http.HttpData;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+/**
+ * @ClassName DynamipsImageGetData
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see HttpData
+ */
 @Data
 public class DynamipsImageGetData implements HttpData {
     // 镜像ID

@@ -4,9 +4,11 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description:
+ * @ClassName AttackInfo
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/1 17:07
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 public class AttackInfo {

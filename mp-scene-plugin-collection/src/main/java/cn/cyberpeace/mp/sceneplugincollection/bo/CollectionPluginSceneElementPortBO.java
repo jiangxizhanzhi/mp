@@ -5,6 +5,14 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.base.BaseCollectionPluginSceneE
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneElementPortModel;
 import lombok.Data;
 
+/**
+ * @ClassName CollectionPluginSceneElementPortBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCollectionPluginSceneElementPortBO
+ */
 @Data
 public class CollectionPluginSceneElementPortBO
         extends BaseCollectionPluginSceneElementPortBO<CollectionPluginSceneElementPortModel,

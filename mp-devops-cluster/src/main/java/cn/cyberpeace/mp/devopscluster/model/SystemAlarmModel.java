@@ -10,9 +10,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * @ClassName SystemAlarmModel
  * @Description 告警信息对象
  * @Author qiaokang
  * @Date 2022-07-18 17:35:04
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @AllArgsConstructor

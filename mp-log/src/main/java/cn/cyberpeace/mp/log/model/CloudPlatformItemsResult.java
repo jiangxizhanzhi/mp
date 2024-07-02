@@ -9,8 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 分页
- * @author wanggang
+ * @ClassName CloudPlatformItemsResult
+ * @Description 分页
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCloudPlatformResult
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

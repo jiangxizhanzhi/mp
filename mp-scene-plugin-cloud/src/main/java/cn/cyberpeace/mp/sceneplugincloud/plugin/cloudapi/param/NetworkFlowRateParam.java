@@ -6,9 +6,12 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description: 环境总速率查询条件
- * @Author: guquan
- * @Date：2023/5/30 10:35
+ * @ClassName NetworkFlowRateParam
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see CloudHttpParam
  */
 @Data
 public class NetworkFlowRateParam implements CloudHttpParam {

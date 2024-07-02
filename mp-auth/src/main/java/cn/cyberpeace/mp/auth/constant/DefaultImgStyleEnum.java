@@ -1,9 +1,12 @@
 package cn.cyberpeace.mp.auth.constant;
 
 /**
- * @Description:
- * @Author: guquan
- * @Date：2023/9/1 17:37
+ * @ClassName DefaultImgStyleEnum
+ * @Description
+ * @Author guquan
+ * @Date 2023/9/1 17:37
+ * @Version 1.0.0
+ * @see Enum
  */
 public enum DefaultImgStyleEnum {
 

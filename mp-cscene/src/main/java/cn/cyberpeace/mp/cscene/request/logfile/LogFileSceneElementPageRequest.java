@@ -5,9 +5,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description:
+ * @ClassName LogFileSceneElementPageRequest
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/5/7 10:04
+ * @Date 2022/5/7 10:04
+ * @Version 1.0.0
+ * @see BaseSceneElementPageRequest
  */
 @Data
 public class LogFileSceneElementPageRequest extends BaseSceneElementPageRequest {

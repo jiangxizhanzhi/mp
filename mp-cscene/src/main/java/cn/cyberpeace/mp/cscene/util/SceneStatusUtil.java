@@ -16,9 +16,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * @ClassName SceneStatusUtil
  * @Description
  * @Author hewei
  * @Date 2022/8/3
+ * @Version 1.0.0
  */
 public class SceneStatusUtil {
     private static Map<Integer, String> en;

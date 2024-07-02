@@ -15,7 +15,12 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 基础的上传方法
+ * @ClassName BaseUploadService
+ * @Description 基础的上传方法
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseAbstractUploadService
  */
 @Service
 public class BaseUploadService extends BaseAbstractUploadService{

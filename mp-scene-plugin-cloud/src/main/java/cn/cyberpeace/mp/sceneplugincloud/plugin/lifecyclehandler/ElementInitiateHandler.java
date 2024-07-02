@@ -29,9 +29,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
+ * @ClassName ElementInitiateHandler
  * @Description
  * @Author maojun
  * @Date 2021/10/25
+ * @Version 1.0.0
+ * @see HandlerCommon
  */
 @Slf4j
 public class ElementInitiateHandler extends HandlerCommon {

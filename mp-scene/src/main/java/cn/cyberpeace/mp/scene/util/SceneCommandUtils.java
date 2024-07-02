@@ -5,6 +5,13 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @ClassName SceneCommandUtils
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class SceneCommandUtils {
 
     public static final String ORIGIN_COMMAND_PREFIX = "o:";

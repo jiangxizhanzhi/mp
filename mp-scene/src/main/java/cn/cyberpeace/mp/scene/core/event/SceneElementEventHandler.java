@@ -13,6 +13,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @ClassName SceneElementEventHandler
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseEventHandler
+ */
 public class SceneElementEventHandler extends BaseEventHandler<SceneElementBO, EventModel> {
 
     public static final Map<Integer, String> EVENT_NAME_MAP = MapUtils.putAll(

@@ -9,9 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * @ClassName NodeElementParseResult
  * @Description
  * @Author maojun
  * @Date 2021/10/9
+ * @Version 1.0.0
  */
 @Getter
 @Setter

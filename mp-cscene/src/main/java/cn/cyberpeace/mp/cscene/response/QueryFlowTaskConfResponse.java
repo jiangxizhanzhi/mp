@@ -7,9 +7,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description: 查询流量任务配置响应体
- * @Author: guquan
- * @Date：2023/5/9 20:45
+ * @ClassName QueryFlowTaskConfResponse
+ * @Description 查询流量任务配置响应体
+ * @Author guquan
+ * @Date 2023/5/9 20:45
+ * @Version 1.0.0
+ * @see FlowTaskConfModel
  */
 @Data
 @ApiModel("查询流量任务配置响应体")

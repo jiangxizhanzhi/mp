@@ -6,9 +6,11 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName FlowAttackConfigInfo
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/1 19:04
+ * @Date 2021/12/1 19:04
+ * @Version 1.0.0
  */
 @Data
 public class FlowAttackConfigInfo {

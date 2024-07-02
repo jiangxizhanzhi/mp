@@ -1,5 +1,12 @@
 package cn.cyberpeace.mp.scene.constant;
 
+/**
+ * @ClassName SceneStage
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public abstract class SceneStage {
 
     private String stage;

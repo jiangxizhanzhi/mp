@@ -10,6 +10,14 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.ProbeCollector
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneProbeRouterPortMapper;
 import lombok.Getter;
 
+/**
+ * @ClassName HandlerCommon
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see PluginSceneEventHandlerCommon
+ */
 public class HandlerCommon extends PluginSceneEventHandlerCommon<CollectionScenePluginHandler> {
 
     @Getter

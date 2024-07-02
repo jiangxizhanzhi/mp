@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.frontadmin.constant;
 
 /**
- * @Description:
+ * @ClassName AdminBasei18nCode
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/21 11:03
+ * @Date 2021/12/21 11:03
+ * @Version 1.0.0
  */
 public class AdminBasei18nCode {
 

@@ -7,9 +7,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
+ * @ClassName CreateFlavorData
  * @Description
  * @Author maojun
  * @Date 2022/4/1
+ * @Version 1.0.0
+ * @see CloudHttpData
  */
 @Getter
 @Setter

@@ -9,9 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Description: 注册表变更探针参数转换
+ * @ClassName ConvertRegistryParams
+ * @Description
  * @Author hewei
- * @Date：2022/5/6 9:23
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see WazuhParamsConvert
  */
 public class ConvertRegistryParams implements WazuhParamsConvert<WazuhControl.ControlRegistryModifyParam> {
 

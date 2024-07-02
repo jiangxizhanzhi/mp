@@ -4,9 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
+ * @ClassName UserDelayRemindLicenseTimeService
  * @Description
  * @Author zhanglin
  * @Date 2023/6/12
+ * @Version 1.0.0
  */
 @Service
 @Slf4j

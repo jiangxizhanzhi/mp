@@ -7,8 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 端口维度
- * @author wanggang
+ * @ClassName FlowGroupPortWithProtocolVO
+ * @Description 端口维度
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

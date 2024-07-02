@@ -9,6 +9,13 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @ClassName ModelUtils
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class ModelUtils {
 
     private static final Map<Class<?>, Map<String, Object[]>> initDefaultFieldsCache = new HashMap<>();

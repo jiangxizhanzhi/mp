@@ -9,9 +9,12 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 /**
+ * @ClassName SysNoticeOrgService
  * @Description
  * @Author shgang
  * @Date 2022/9/22
+ * @Version 1.0.0
+ * @see BaseModelService
  */
 public interface SysNoticeOrgService extends BaseModelService<SysNoticeOrgModel, QueryParams> {
 

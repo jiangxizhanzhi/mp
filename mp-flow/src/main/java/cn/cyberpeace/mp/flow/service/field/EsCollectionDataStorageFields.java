@@ -7,6 +7,14 @@ import cn.cyberpeace.mp.flow.model.EsCollectionDataStorageModel;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import org.springframework.stereotype.Component;
 
+/**
+ * @ClassName EsCollectionDataStorageFields
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelFields
+ */
 @Component
 public class EsCollectionDataStorageFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(EsCollectionDataStorageModel.class));

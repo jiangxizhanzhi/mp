@@ -11,6 +11,14 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
+/**
+ * @ClassName EsCollectionDataStorageModel
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModel
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -13,9 +13,11 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 
 /**
+ * @ClassName ProtocolProbe
  * @Description
  * @Author maojun
  * @Date 2022/1/14
+ * @Version 1.0.0
  */
 @Slf4j
 public abstract class ProtocolProbe {

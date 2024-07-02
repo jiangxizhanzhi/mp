@@ -1,8 +1,11 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.constants;
 
 /**
- * 基础对接云平台接口
- * @author wanggang
+ * @ClassName BaseCloudPlatformConstant
+ * @Description 基础对接云平台接口
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public final class BaseCloudPlatformConstant {
 

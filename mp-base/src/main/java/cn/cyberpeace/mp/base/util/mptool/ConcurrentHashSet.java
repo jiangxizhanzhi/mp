@@ -5,6 +5,15 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @ClassName ConcurrentHashSet
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see AbstractSet
+ * @see Serializable
+ */
 public class ConcurrentHashSet<E> extends AbstractSet<E> implements java.io.Serializable {
     private static final long serialVersionUID = 7997886765361607470L;
 

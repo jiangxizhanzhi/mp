@@ -13,9 +13,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
+ * @ClassName FlowTaskTaskMapper
  * @Description 流量执行任务mapper
  * @Author qiaokang
  * @Date 2023-04-27 09:21:37
+ * @Version 1.0.0
+ * @see BaseModelMapper
  */
 @Mapper
 @Repository

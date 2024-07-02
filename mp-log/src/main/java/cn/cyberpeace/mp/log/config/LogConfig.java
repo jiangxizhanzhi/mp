@@ -7,9 +7,11 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 /**
+ * @ClassName LogConfig
  * @Description
  * @Author shgang
  * @Date 2022/8/31
+ * @Version 1.0.0
  */
 @Data
 @Configuration

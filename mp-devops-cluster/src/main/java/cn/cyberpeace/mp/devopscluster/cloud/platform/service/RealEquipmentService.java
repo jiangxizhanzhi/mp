@@ -32,8 +32,12 @@ import java.util.Objects;
 import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant.*;
 
 /**
- * 实装管理接口
- * @author wanggang
+ * @ClassName RealEquipmentService
+ * @Description 实装管理接口
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCpService
  */
 @Service
 @Slf4j

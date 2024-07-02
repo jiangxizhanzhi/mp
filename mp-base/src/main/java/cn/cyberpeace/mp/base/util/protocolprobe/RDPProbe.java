@@ -1,11 +1,14 @@
 package cn.cyberpeace.mp.base.util.protocolprobe;
 
 /**
+ * @ClassName RDPProbe
  * @Description
- * @Author maojun
- * @Date 2022/1/14
  *         探测rdp服务是否准备好
  *         主要原理: 建立TCP连接之后,给服务端发送一个TPKT数据包,服务端要能返回一个TPKT数据包
+ * @Author maojun
+ * @Date 2022/1/14
+ * @Version 1.0.0
+ * @see ProtocolProbe
  */
 public class RDPProbe extends ProtocolProbe {
     private final static String PROTOCOL = "rdp";

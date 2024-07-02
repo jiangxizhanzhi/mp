@@ -14,6 +14,13 @@ import java.util.concurrent.TimeUnit;
  * communicate with the next server, with a {@link WsProxyClientHandler}
  * to copy data from the 'client' to the supplied 'server' session.
  */
+/**
+ * @ClassName NextHop
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class NextHop {
 
     private WsProxyTargetConfig targetConfig;

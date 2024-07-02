@@ -23,6 +23,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 
+/**
+ * @ClassName UserBehaviorController
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Api(tags = "用户行为管理")
 @Slf4j
 @RestController

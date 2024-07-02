@@ -10,9 +10,11 @@ import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 /**
- * @Description: 删除流量分类请求
- * @Author: guquan
- * @Date：2023/5/6 10:54
+ * @ClassName DeleteCategoryRequest
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

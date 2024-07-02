@@ -6,9 +6,11 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * @Description:
+ * @ClassName ServiceRestartStatusDto
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/7/29 13:57
+ * @Date 2022/7/29 13:57
+ * @Version 1.0.0
  */
 @Data
 @Builder

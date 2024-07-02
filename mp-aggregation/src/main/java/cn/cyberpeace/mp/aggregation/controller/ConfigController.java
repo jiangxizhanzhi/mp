@@ -14,6 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
+/**
+ * @ClassName ConfigController
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Api(value = "配置查询", tags = "配置查询")
 @Slf4j
 @RestController

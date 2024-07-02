@@ -6,9 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description:
+ * @ClassName FlowGroupByDestinationIpAndSeverityVO
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/1 17:21
+ * @Date 2021/12/1 17:21
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

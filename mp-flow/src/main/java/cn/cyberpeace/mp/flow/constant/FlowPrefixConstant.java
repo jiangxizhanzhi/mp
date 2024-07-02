@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.flow.constant;
 
 /**
+ * @ClassName FlowPrefixConstant
  * @Description
- * @author: shgang
- * @Date: 2022/7/20
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public interface FlowPrefixConstant {
 

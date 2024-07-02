@@ -10,8 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * 运维管控-系统运维-计算实例管理-容器
- * @author wanggang
+ * @ClassName ContainerService
+ * @Description 运维管控-系统运维-计算实例管理-容器
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCpService
  */
 @Service
 @Slf4j

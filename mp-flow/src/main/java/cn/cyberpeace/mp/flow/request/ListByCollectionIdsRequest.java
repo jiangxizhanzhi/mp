@@ -10,9 +10,11 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * @Description: 根据集合id批量查询请求
+ * @ClassName ListByCollectionIdsRequest
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/23 10:36
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

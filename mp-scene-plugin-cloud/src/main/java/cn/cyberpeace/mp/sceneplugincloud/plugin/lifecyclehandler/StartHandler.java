@@ -22,11 +22,12 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @BelongsPackage: cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler
- * @Author: hhuang
- * @CreateTime: 2023/04/27  11:07
- * @Description: 节点启动处理
- * @Version: 1.0
+ * @ClassName StartHandler
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see HandlerCommon
  */
 @Slf4j
 public class StartHandler extends HandlerCommon{

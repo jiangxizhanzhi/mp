@@ -22,11 +22,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * @ClassName BaseModelServiceImpl
+ * @Description
  * 单表通用服务实现类，包含通用的增删改查能力
  *
  * @param <M> 数据model
  * @param <P> 数据mapper接口
  * @param <F> 业务处理字段
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelService
  */
 @Slf4j
 @Data

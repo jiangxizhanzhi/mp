@@ -6,11 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @BelongsPackage: cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param
- * @Author: hhuang
- * @CreateTime: 2023/05/17  17:08
- * @Description: mib上传参数
- * @Version: 1.0
+ * @ClassName EntityNodeMibUploadParam
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see CloudHttpParam
  */
 @Data
 @NoArgsConstructor

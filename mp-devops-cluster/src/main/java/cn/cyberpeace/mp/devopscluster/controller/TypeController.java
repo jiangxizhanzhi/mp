@@ -37,7 +37,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 类型管理类
+ * @ClassName TypeController
+ * @Description 类型管理类
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Validated
 @Slf4j

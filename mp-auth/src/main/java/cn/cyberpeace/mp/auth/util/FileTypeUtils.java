@@ -4,7 +4,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
- * 文件类型集合
+ * @ClassName FileTypeUtils
+ * @Description 文件类型集合
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public class FileTypeUtils {
 

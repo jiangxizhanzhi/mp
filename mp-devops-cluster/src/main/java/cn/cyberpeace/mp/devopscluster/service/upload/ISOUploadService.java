@@ -16,7 +16,12 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 上传ISO文件
+ * @ClassName ISOUploadService
+ * @Description 上传ISO文件
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseUploadService
  */
 @Service
 @Slf4j

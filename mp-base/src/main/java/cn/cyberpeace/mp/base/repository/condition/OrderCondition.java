@@ -4,6 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * @ClassName OrderCondition
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCondition
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -3,6 +3,14 @@ package cn.cyberpeace.mp.base.repository.condition;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @ClassName BaseConnectorCondition
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCondition
+ */
 public class BaseConnectorCondition implements BaseCondition {
 
     private final List<Object> conds = new ArrayList<>();

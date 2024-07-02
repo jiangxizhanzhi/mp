@@ -9,9 +9,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description:
- * @Author: guquan
- * @Date：2023/8/23 15:27
+ * @ClassName SysModelVersionModel
+ * @Description
+ * @Author maojun
+ * @Date 2023/8/23 15:27
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @AllArgsConstructor

@@ -6,6 +6,13 @@ import lombok.Setter;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @ClassName SceneEventUtils
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class SceneEventUtils {
     private static Map<String, SceneEventInfo> scene = new ConcurrentHashMap<>();
 

@@ -11,8 +11,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * @ClassName BaseServiceResult
+ * @Description
  * 统一服务返回结果
  * @param <T> 返回结果数据源对象类型
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

@@ -11,9 +11,11 @@ import lombok.Getter;
 import java.util.List;
 
 /**
+ * @ClassName ConfigHandlerUtils
  * @Description
  * @Author maojun
  * @Date 2022/1/5
+ * @Version 1.0.0
  */
 @Getter
 public class ConfigHandlerUtils {

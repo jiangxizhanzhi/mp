@@ -10,9 +10,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
+ * @ClassName FlowScriptParamMapper
  * @Description 流量脚本参数mapper
  * @Author qiaokang
  * @Date 2021-11-25 15:00:45
+ * @Version 1.0.0
+ * @see BaseModelMapper
  */
 @Mapper
 @Repository

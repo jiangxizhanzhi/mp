@@ -11,9 +11,12 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName FlowCollectionResponse
+ * @Description
  * @Author qiaokang
- * @Date：2022/5/10 10:38
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see FlowCollectionModel
  */
 @Data
 @AllArgsConstructor

@@ -17,9 +17,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * @Description: 流量集合关联service
+ * @ClassName FlowCollectionRelServiceImpl
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/31 10:31
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see FlowCollectionRelService
  */
 @Service
 @Slf4j

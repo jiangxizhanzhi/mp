@@ -11,9 +11,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Description: 日志采集探针参数转换
+ * @ClassName ConvertLogParams
+ * @Description
  * @Author hewei
- * @Date：2022/5/6 9:23
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see WazuhParamsConvert
  */
 public class ConvertLogParams implements WazuhParamsConvert<WazuhControl.ControlLogCollectParam> {
 

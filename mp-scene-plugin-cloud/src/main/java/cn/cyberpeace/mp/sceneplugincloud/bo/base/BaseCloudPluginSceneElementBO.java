@@ -18,6 +18,14 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @ClassName BaseCloudPluginSceneElementBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BasePluginSceneElementBO
+ */
 @Data
 public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSceneElementModel,
         T extends BaseCloudPluginSceneElementBO<M, T, S>, S extends BaseSceneElementBO<?, ?, S>>

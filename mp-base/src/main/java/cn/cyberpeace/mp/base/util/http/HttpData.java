@@ -6,7 +6,11 @@ import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import java.util.Map;
 
 /**
- * http请求体数据，实现该接口定义对应bean
+ * @ClassName HttpData
+ * @Description http请求体数据，实现该接口定义对应bean
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public interface HttpData {
 

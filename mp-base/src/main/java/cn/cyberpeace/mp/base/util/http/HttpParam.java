@@ -6,7 +6,11 @@ import cn.cyberpeace.mp.base.util.mptool.URLUtil;
 import java.nio.charset.StandardCharsets;
 
 /**
- * http查询参数，实现该接口定义对应bean
+ * @ClassName HttpParam
+ * @Description http查询参数，实现该接口定义对应bean
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public interface HttpParam {
 

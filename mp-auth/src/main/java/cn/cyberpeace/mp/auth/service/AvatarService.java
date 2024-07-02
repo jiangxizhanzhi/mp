@@ -12,9 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * @Description: 头像管理service
+ * @ClassName AvatarService
+ * @Description 头像管理service
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 @Service
 @Slf4j

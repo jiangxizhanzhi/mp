@@ -16,9 +16,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * @ClassName ResourceCenterConverter
  * @Description
  * @Author maojun
  * @Date 2021/10/12
+ * @Version 1.0.0
  */
 @Component
 public class ResourceCenterConverter {

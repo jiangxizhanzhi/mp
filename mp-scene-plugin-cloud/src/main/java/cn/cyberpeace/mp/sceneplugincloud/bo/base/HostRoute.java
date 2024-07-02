@@ -3,6 +3,13 @@ package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+/**
+ * @ClassName HostRoute
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 public class HostRoute {
     @ApiModelProperty(value = "目的地址(cidr)")

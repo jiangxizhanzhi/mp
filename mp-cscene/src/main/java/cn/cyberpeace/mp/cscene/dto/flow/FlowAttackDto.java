@@ -6,9 +6,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description:
+ * @ClassName FlowAttackDto
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/1 19:04
+ * @Date 2021/12/1 19:04
+ * @Version 1.0.0
+ * @see FlowBO
  */
 @Data
 public class FlowAttackDto extends FlowBO {

@@ -16,9 +16,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
+ * @ClassName SysNoticeRoleServiceImpl
  * @Description
  * @Author shgang
  * @Date 2022/9/22
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see SysNoticeRoleService
  */
 @Service
 public class SysNoticeRoleServiceImpl extends BaseModelServiceImpl<SysNoticeRoleModel, SysNoticeRoleMapper, SysNoticeRoleFields, QueryParams>

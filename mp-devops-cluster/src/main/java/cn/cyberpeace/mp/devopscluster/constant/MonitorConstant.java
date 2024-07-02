@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.devopscluster.constant;
 
 /**
- * @Description:
+ * @ClassName MonitorConstant
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/7/14 16:26
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public class MonitorConstant {
 

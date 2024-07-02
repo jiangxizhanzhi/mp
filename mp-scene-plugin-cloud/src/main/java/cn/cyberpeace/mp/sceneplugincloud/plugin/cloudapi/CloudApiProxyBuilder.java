@@ -3,9 +3,11 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 import org.springframework.cglib.proxy.Enhancer;
 
 /**
+ * @ClassName CloudApiProxyBuilder
  * @Description
  * @Author maojun
  * @Date 2022/6/10
+ * @Version 1.0.0
  */
 public class CloudApiProxyBuilder {
     /**

@@ -8,9 +8,12 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 /**
+ * @ClassName OptionMapper
  * @Description
- * @author: shgang
- * @Date: 2022/7/28
+ * @Author maojun
+ * @Date 2022/7/28
+ * @Version 1.0.0
+ * @see BaseModelMapper
  */
 @Mapper
 @Repository

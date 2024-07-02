@@ -10,6 +10,14 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/**
+ * @ClassName CsceneReportRabbitmqReceiver
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseSimpleMessageReceiver
+ */
 @Slf4j
 //@Component  // 测试接收
 public class CsceneReportRabbitmqReceiver extends BaseSimpleMessageReceiver {

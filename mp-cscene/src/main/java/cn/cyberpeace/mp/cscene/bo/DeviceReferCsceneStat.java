@@ -3,6 +3,13 @@ package cn.cyberpeace.mp.cscene.bo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+/**
+ * @ClassName DeviceReferCsceneStat
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 public class DeviceReferCsceneStat {
     @ApiModelProperty(value = "靶标uuid")

@@ -31,9 +31,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * @ClassName NodeElementConverter
  * @Description 将解析出的node节点转成BO
  * @Author maojun
  * @Date 2021/10/12
+ * @Version 1.0.0
+ * @see IConverter
  */
 @Slf4j
 class NodeElementConverter implements IConverter {

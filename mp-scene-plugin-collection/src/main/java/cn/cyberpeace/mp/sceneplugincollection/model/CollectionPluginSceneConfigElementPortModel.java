@@ -5,6 +5,14 @@ import cn.cyberpeace.mp.sceneplugincollection.model.base.BaseCollectionPluginSce
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * @ClassName CollectionPluginSceneConfigElementPortModel
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCollectionPluginSceneElementPortModel
+ */
 @Data
 @AllArgsConstructor
 @Table("mp_sceneplugincollection_scene_config_element_port")

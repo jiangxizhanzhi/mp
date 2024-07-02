@@ -7,6 +7,14 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * @ClassName NetworkBehaviorModel
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModel
+ */
 @Data
 @NoArgsConstructor
 @Table("mp_network_behavior")

@@ -8,9 +8,13 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 /**
- * @Description: 云平台服务监控分页查询
+ * @ClassName CloudPlatformPageRequest
+ * @Description 云平台服务监控分页查询
  * @Author qiaokang
- * @Date：2022/7/15 14:56
+ * @Date 2022/7/15 14:56
+ * @Version 1.0.0
+ * @see BasePageRequest
+ * @see Serializable
  */
 @Data
 @NoArgsConstructor

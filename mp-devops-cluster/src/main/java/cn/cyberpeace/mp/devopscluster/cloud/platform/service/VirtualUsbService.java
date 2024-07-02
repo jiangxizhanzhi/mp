@@ -9,9 +9,11 @@ import cn.cyberpeace.mp.devopscluster.vo.VirtualUsbVO;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * @Description: 虚拟USB服务
- * @Author: guquan
- * @Date：2023/4/17 10:27
+ * @ClassName VirtualUsbService
+ * @Description 虚拟USB服务
+ * @Author guquan
+ * @Date 2023/4/17 10:27
+ * @Version 1.0.0
  */
 @Deprecated
 public interface VirtualUsbService {

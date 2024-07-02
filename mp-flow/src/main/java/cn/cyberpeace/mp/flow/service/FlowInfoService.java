@@ -6,6 +6,14 @@ import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 
 import java.util.List;
 
+/**
+ * @ClassName FlowInfoService
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelService
+ */
 public interface FlowInfoService extends BaseModelService<FlowInfoModel, FlowInfoQueryParams>  {
 
     /**

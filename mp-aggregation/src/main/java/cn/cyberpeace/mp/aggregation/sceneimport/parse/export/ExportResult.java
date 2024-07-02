@@ -8,9 +8,11 @@ import lombok.Setter;
 import java.util.List;
 
 /**
+ * @ClassName ExportResult
  * @Description
  * @Author maojun
  * @Date 2022/8/24
+ * @Version 1.0.0
  */
 @Getter
 @Setter

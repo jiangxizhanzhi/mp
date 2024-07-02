@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.cscene.constant;
 
 /**
- * @Description:
+ * @ClassName CsceneBasei18nCode
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/28 14:58
+ * @Date 2021/12/28 14:58
+ * @Version 1.0.0
  */
 public class CsceneBasei18nCode {
 

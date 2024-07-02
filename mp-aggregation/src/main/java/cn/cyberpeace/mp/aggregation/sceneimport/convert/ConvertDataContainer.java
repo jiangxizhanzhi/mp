@@ -25,9 +25,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
+ * @ClassName ConvertDataContainer
  * @Description
  * @Author maojun
  * @Date 2021/10/12
+ * @Version 1.0.0
  */
 @Getter
 class ConvertDataContainer {

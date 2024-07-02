@@ -4,9 +4,12 @@ import cn.cyberpeace.mp.base.context.transfercontext.TransferContext;
 import org.springframework.stereotype.Component;
 
 /**
- * @Description:
+ * @ClassName LoginUserContext
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/10/13 17:59
+ * @Date 2021/10/13 17:59
+ * @Version 1.0.0
+ * @see TransferContext
  */
 @Component
 public class LoginUserContext implements TransferContext<String> {

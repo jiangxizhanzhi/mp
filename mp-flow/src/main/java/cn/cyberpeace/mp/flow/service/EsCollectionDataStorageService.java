@@ -9,6 +9,14 @@ import cn.cyberpeace.mp.flow.request.queryparam.FlowCollectionQueryParams;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * @ClassName EsCollectionDataStorageService
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelService
+ */
 public interface EsCollectionDataStorageService extends BaseModelService<EsCollectionDataStorageModel, QueryParams>  {
 
     /**

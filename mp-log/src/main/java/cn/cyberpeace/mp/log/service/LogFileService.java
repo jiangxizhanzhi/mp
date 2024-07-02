@@ -9,9 +9,12 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * @description:
- * @author：Geek Wang
- * @date: 2022/6/15
+ * @ClassName LogFileService
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Ordered
  */
 public interface LogFileService extends Ordered {
 

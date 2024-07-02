@@ -6,9 +6,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description: 实体USB
- * @Author: guquan
- * @Date：2023/4/21 10:15
+ * @ClassName EntityUsb
+ * @Description 实体USB
+ * @Author guquan
+ * @Date 2023/4/21 10:15
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @ApiModel("实体USB")

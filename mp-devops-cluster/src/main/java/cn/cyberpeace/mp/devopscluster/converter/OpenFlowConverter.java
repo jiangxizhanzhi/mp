@@ -20,6 +20,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * @ClassName OpenFlowConverter
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseConverter
+ */
 @Service
 @RequiredArgsConstructor
 public class OpenFlowConverter implements BaseConverter{

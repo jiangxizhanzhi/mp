@@ -5,6 +5,14 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandle
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @ClassName ElementCreateHandler
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see HandlerCommon
+ */
 @Slf4j
 public class ElementCreateHandler extends HandlerCommon {
 

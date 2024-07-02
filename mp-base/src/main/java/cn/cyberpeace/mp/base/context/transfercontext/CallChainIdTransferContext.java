@@ -3,6 +3,14 @@ package cn.cyberpeace.mp.base.context.transfercontext;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
 import org.springframework.stereotype.Component;
 
+/**
+ * @ClassName CallChainIdTransferContext
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see TransferContext
+ */
 @Component
 public class CallChainIdTransferContext implements TransferContext<String> {
     /**

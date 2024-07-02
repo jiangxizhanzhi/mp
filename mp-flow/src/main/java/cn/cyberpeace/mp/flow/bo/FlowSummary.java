@@ -5,9 +5,11 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description: 仿真概况
- * @Author: guquan
- * @Date：2023/5/16 16:45
+ * @ClassName FlowSummary
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @ApiModel("仿真概况")

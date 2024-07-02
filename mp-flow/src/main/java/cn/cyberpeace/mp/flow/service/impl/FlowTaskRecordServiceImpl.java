@@ -26,6 +26,15 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * @ClassName FlowTaskRecordServiceImpl
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see FlowTaskRecordService
+ */
 @Service
 @Slf4j
 public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskRecordModel, FlowTaskRecordMapper, FlowTaskRecordFields,

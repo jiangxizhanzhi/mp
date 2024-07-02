@@ -18,8 +18,12 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 /**
- * 靶标导入管理
- * @author qiaokang
+ * @ClassName ImportConverter
+ * @Description 靶标导入管理
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseConverter
  */
 @Service
 @Slf4j

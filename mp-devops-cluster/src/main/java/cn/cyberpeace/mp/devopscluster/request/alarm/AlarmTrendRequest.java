@@ -12,9 +12,13 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
+ * @ClassName AlarmTrendRequest
  * @Description 告警趋势请求
  * @Author zhouxinghuai
  * @Date 2022-11-01 11:35:04
+ * @Version 1.0.0
+ * @see BaseRequest
+ * @see Serializable
  */
 @Data
 @NoArgsConstructor

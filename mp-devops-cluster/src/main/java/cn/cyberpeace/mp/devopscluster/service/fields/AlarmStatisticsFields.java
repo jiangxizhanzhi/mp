@@ -7,9 +7,12 @@ import cn.cyberpeace.mp.devopscluster.model.AlarmStatisticsModel;
 import org.springframework.stereotype.Component;
 
 /**
+ * @ClassName AlarmStatisticsFields
  * @Description 告警统计信息Fields
  * @Author qiaokang
  * @Date 2022-07-19 16:17:26
+ * @Version 1.0.0
+ * @see BaseModelFields
  */
 @Component
 public class AlarmStatisticsFields extends BaseModelFields {

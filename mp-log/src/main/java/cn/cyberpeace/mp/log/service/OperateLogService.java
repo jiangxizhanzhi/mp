@@ -9,9 +9,11 @@ import cn.cyberpeace.mp.log.response.OperationLogPageResponse;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * @ClassName OperateLogService
  * @Description
  * @Author shgang
  * @Date 2022/9/14
+ * @Version 1.0.0
  */
 public interface OperateLogService {
 

@@ -16,6 +16,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ * @ClassName LocalFileMappingServiceImpl
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseObjMappingServiceImpl
+ * @see LocalFileMappingService
+ */
 @Slf4j
 @Service
 public class LocalFileMappingServiceImpl

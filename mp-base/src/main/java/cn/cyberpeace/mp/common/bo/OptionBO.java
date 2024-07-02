@@ -12,9 +12,11 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
+ * @ClassName OptionBO
  * @Description
- * @author: shgang
- * @Date: 2022/7/28
+ * @Author shgang
+ * @Date 2022/7/28
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

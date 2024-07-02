@@ -10,7 +10,13 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * 基础的分页参数
+ * @ClassName BasePageRequest
+ * @Description 基础的分页参数
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseRequest
+ * @see Serializable
  */
 @Data
 @NoArgsConstructor

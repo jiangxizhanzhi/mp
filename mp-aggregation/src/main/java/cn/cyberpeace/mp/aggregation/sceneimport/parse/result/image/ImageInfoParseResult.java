@@ -11,9 +11,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * @ClassName ImageInfoParseResult
  * @Description
  * @Author maojun
  * @Date 2021/11/2
+ * @Version 1.0.0
  */
 @Setter
 @Getter

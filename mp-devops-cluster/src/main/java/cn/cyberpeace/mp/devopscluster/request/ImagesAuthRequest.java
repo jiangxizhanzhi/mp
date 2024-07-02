@@ -11,7 +11,12 @@ import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 /**
- * 镜像授权请求信息
+ * @ClassName ImagesAuthRequest
+ * @Description 镜像授权请求信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseRequest
  */
 @Data
 @NoArgsConstructor

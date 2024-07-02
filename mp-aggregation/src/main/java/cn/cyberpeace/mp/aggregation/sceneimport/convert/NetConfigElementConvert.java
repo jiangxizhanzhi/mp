@@ -17,9 +17,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * @ClassName NetConfigElementConvert
  * @Description 将解析出的scene节点转成BO
  * @Author maojun
  * @Date 2021/10/12
+ * @Version 1.0.0
+ * @see IConverter
  */
 class NetConfigElementConvert implements IConverter {
 

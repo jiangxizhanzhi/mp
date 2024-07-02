@@ -13,6 +13,14 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @ClassName BaseSceneElementPortBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see EidBO
+ */
 @Data
 public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel,
         T extends BaseSceneElementPortBO<M, T, E>, E extends BaseSceneElementBO<?, T, E>> extends EidBO<M, T> {

@@ -7,6 +7,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 
+/**
+ * @ClassName FileModifyListener
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Slf4j
 public abstract class FileModifyListener {
 

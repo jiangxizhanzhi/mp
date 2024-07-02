@@ -14,6 +14,14 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @ClassName MpJobScanner
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BeanPostProcessor
+ */
 @Component
 @Slf4j
 public class MpJobScanner implements BeanPostProcessor {

@@ -16,6 +16,14 @@ import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneEl
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneElementPortMapper;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneMapper;
 
+/**
+ * @ClassName CollectionScenePluginModelHandler
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BasePluginModelHandler
+ */
 public class CollectionScenePluginModelHandler extends BasePluginModelHandler<
         SceneBO,
         SceneElementBO,

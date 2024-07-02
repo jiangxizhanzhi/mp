@@ -8,6 +8,14 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.util.Map;
 
+/**
+ * @ClassName SnmpCloudPlatform
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCloudPlatformResult
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

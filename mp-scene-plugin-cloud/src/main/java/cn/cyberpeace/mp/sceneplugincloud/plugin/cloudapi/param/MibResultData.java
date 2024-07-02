@@ -5,11 +5,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @BelongsPackage: cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param
- * @Author: hhuang
- * @CreateTime: 2023/05/12  17:49
- * @Description: mib节点结果
- * @Version: 1.0
+ * @ClassName MibResultData
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

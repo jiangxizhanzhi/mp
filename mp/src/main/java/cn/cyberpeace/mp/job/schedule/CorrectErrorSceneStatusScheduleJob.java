@@ -9,9 +9,11 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 /**
- * @Description:
+ * @ClassName CorrectErrorSceneStatusScheduleJob
+ * @Description
  * @Author hewei
- * @Date：2022/3/9 16:37
+ * @Date 2022/3/9 16:37
+ * @Version 1.0.0
  */
 @Component
 @Slf4j

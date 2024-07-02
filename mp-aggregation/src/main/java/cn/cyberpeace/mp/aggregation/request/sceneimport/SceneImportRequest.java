@@ -7,9 +7,11 @@ import lombok.Setter;
 import java.util.List;
 
 /**
+ * @ClassName SceneImportRequest
  * @Description
  * @Author maojun
  * @Date 2021/10/11
+ * @Version 1.0.0
  */
 @Getter
 @Setter

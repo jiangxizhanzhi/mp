@@ -5,6 +5,13 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * @ClassName Probe
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 public class Probe {
     @ApiModelProperty(value = "探针id")

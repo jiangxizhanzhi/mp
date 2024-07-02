@@ -16,7 +16,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * @Deprecated 使用`HttpParam`/`SnakeHttpParam`构造请求参数
+ * @ClassName ParamUtils
+ * @Description 使用`HttpParam`/`SnakeHttpParam`构造请求参数
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Slf4j
 public class ParamUtils {

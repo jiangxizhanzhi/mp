@@ -10,9 +10,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * @Description: 流量记录返回信息
+ * @ClassName FlowRecordsResponse
+ * @Description
  * @Author qiaokang
- * @Date：2022/4/21 13:55
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

@@ -12,6 +12,14 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @ClassName InstallerByIdVO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseVO
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

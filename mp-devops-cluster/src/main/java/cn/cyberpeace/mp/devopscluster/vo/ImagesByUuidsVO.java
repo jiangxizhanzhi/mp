@@ -8,7 +8,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 根据ID查询返回信息
+ * @ClassName ImagesByUuidsVO
+ * @Description 根据ID查询返回信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

@@ -15,6 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * @ClassName BaseCsceneRoleBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ModelBO
+ */
 @Data
 public abstract class BaseCsceneRoleBO<M extends BaseCsceneRoleModel, T extends BaseCsceneRoleBO<M, T>>
         extends ModelBO<M, T> {

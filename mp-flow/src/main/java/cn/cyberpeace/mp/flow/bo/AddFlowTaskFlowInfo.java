@@ -7,9 +7,11 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description: 新增流量任务流量详情
- * @Author: guquan
- * @Date：2023/6/6 15:55
+ * @ClassName AddFlowTaskFlowInfo
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @ApiModel(value = "新增流量任务流量详情")

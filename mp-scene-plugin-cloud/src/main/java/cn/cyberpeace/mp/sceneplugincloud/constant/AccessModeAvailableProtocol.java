@@ -1,5 +1,12 @@
 package cn.cyberpeace.mp.sceneplugincloud.constant;
 
+/**
+ * @ClassName AccessModeAvailableProtocol
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class AccessModeAvailableProtocol {
     public static final String SSH = "ssh";
     public static final String RDP = "rdp";

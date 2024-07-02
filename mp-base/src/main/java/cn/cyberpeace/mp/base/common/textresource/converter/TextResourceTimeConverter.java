@@ -7,6 +7,14 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalTime;
 
+/**
+ * @ClassName TextResourceTimeConverter
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see TextResourceConverter
+ */
 @Slf4j
 @Component
 public class TextResourceTimeConverter implements TextResourceConverter<LocalTime> {

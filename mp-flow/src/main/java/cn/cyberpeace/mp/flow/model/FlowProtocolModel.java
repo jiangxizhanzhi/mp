@@ -11,9 +11,12 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 /**
+ * @ClassName FlowProtocolModel
  * @Description 流量协议对象
  * @Author qiaokang
  * @Date 2023-04-27 09:22:12
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @AllArgsConstructor

@@ -7,9 +7,11 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description: 流量任务批量停止请求
- * @Author: guquan
- * @Date：2023/6/2 8:59
+ * @ClassName FlowTaskBatchStopRequest
+ * @Description 流量任务批量停止请求
+ * @Author guquan
+ * @Date 2023/6/2 8:59
+ * @Version 1.0.0
  */
 @Data
 @ApiModel("流量任务批量停止请求")

@@ -5,6 +5,13 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * @ClassName SceneAllElementsQueryRequest
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 public class SceneAllElementsQueryRequest {
     @ApiModelProperty(value = "节点名称 模糊查询")

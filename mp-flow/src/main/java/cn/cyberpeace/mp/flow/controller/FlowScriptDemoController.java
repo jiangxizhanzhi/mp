@@ -21,9 +21,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @Description: 流量模板控制器
+ * @ClassName FlowScriptDemoController
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/31 17:17
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelController
  */
 @Slf4j
 @Api(tags = "流量脚本模板接口")

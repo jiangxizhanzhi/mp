@@ -7,9 +7,12 @@ import cn.cyberpeace.mp.flow.model.FlowProtocolModel;
 import org.springframework.stereotype.Component;
 
 /**
+ * @ClassName FlowProtocolFields
  * @Description 流量协议Fields
  * @Author qiaokang
  * @Date 2023-04-27 09:22:12
+ * @Version 1.0.0
+ * @see BaseModelFields
  */
 @Component
 public class FlowProtocolFields extends BaseModelFields {

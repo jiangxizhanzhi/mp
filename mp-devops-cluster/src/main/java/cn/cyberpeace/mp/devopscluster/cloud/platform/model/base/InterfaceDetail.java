@@ -9,8 +9,12 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 /**
- * 网络端口详细信息
- * @author wanggang
+ * @ClassName InterfaceDetail
+ * @Description 网络端口详细信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Serializable
  */
 @Data
 @NoArgsConstructor

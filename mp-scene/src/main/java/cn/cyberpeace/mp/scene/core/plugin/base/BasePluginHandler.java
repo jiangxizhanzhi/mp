@@ -17,12 +17,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * 基础的场景插件处理类
+ * @ClassName BasePluginHandler
+ * @Description 基础的场景插件处理类
  * 场景插件处理目前只对网元节点和网元端口做插件配置处理
- *
- * @param <TSceneBO> 插件对应配置类
- * @param <TPluginSceneElementBO> 网元节点的插件对应配置类
- * @param <TPluginSceneElementPortBO> 网元端口的插件对应配置类
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Slf4j
 @Data

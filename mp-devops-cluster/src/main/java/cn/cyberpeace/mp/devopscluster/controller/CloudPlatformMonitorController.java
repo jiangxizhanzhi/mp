@@ -52,8 +52,11 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * 云平台监控
- * @author wanggang
+ * @ClassName CloudPlatformMonitorController
+ * @Description 云平台监控
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Slf4j
 @RestController

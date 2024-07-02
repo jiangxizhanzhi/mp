@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.authbase.context;
 
 /**
- * @Description:
+ * @ClassName LoginUserHolder
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/10/13 18:49
+ * @Date 2021/10/13 18:49
+ * @Version 1.0.0
  */
 public class LoginUserHolder {
 

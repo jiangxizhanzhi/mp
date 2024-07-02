@@ -7,6 +7,14 @@ import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @ClassName Qos
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see CloudClient
+ */
 @Slf4j
 public class Qos extends CloudClient {
     /**

@@ -12,9 +12,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description: 系统公告消息(已读/删除)统计表
+ * @ClassName SysNoticeReadModel
+ * @Description 系统公告消息(已读 / 删除)统计表
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @AllArgsConstructor

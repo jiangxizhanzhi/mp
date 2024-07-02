@@ -12,7 +12,11 @@ import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 /**
- * 公告请求信息
+ * @ClassName SysNoticeRequest
+ * @Description 公告请求信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

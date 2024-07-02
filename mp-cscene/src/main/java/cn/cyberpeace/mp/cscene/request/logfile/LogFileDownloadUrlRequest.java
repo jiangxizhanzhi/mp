@@ -6,9 +6,11 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName LogFileDownloadUrlRequest
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/5/7 10:04
+ * @Date 2022/5/7 10:04
+ * @Version 1.0.0
  */
 @Data
 public class LogFileDownloadUrlRequest {

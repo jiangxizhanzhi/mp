@@ -4,6 +4,14 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import lombok.AllArgsConstructor;
 
+/**
+ * @ClassName Min
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Aggregation
+ */
 @AllArgsConstructor
 public class Min extends Aggregation<Min> {
 

@@ -40,9 +40,11 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
+ * @ClassName CsceneSnapshotService
  * @Description
  * @Author maojun
  * @Date 2022/8/2
+ * @Version 1.0.0
  */
 @Slf4j
 @Service

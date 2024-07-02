@@ -47,6 +47,14 @@ import java.util.*;
 import static cn.cyberpeace.mp.sceneplugincollection.config.WazuhModifyEventConfig.ProbeType.FILE;
 import static cn.cyberpeace.mp.sceneplugincollection.config.WazuhModifyEventConfig.ProbeType.REGISTRY;
 
+/**
+ * @ClassName InitiateHandler
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see HandlerCommon
+ */
 @Slf4j
 public class InitiateHandler extends HandlerCommon {
 

@@ -6,10 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
- * 场景节点连接模型
- *
- * @author 何韦
- * @date 2023/05/05
+ * @ClassName SceneAreaNodeConnectionModel
+ * @Description 场景节点连接模型
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseSceneAreaNodeConnectionModel
  */
 @Data
 @AllArgsConstructor

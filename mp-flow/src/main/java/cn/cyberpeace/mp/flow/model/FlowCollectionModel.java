@@ -13,9 +13,12 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 /**
- * @Description: 流量集合对象
+ * @ClassName FlowCollectionModel
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/31 10:31
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @AllArgsConstructor

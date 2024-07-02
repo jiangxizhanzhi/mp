@@ -5,6 +5,14 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+/**
+ * @ClassName EidBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ModelBO
+ */
 @Data
 public abstract class EidBO<M extends BaseModel, T extends EidBO<M, T>> extends ModelBO<M, T> {
     @ApiModelProperty(value = "服务端id")

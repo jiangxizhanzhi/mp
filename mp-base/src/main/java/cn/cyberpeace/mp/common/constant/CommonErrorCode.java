@@ -3,7 +3,13 @@ package cn.cyberpeace.mp.common.constant;
 import cn.cyberpeace.mp.base.service.code.ErrorCode;
 
 /**
- * common模块的错误码定义
+ * @ClassName CommonErrorCode
+ * @Description common模块的错误码定义
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Enum
+ * @see ErrorCode
  */
 public enum CommonErrorCode implements ErrorCode {
     UPLOAD_FILE_TYPE_ERROR("MP-110800", "upload_file_type_error"),

@@ -10,9 +10,11 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 /**
- * @Description: 流表操作请求信息
+ * @ClassName OpenFlowPageParams
+ * @Description 流表操作请求信息
  * @Author qiaokang
- * @Date：2021/7/9 14:43
+ * @Date 2021/7/9 14:43
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

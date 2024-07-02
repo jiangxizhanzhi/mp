@@ -10,6 +10,14 @@ import cn.cyberpeace.mp.flow.response.SceneInstanceResponse;
 
 import java.util.List;
 
+/**
+ * @ClassName FlowActuatorService
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelService
+ */
 public interface FlowActuatorService extends BaseModelService<FlowActuatorModel, FlowActuatorQueryParams> {
 
 

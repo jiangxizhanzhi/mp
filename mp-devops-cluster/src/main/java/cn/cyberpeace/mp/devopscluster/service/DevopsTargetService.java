@@ -30,8 +30,11 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 靶标管理
- * @author wanggang
+ * @ClassName DevopsTargetService
+ * @Description 靶标管理
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Service
 @RequiredArgsConstructor

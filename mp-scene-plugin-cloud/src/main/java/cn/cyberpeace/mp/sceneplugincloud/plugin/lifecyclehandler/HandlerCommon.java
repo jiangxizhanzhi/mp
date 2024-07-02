@@ -35,6 +35,14 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.*;
 
 
+/**
+ * @ClassName HandlerCommon
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see PluginSceneEventHandlerCommon
+ */
 @Slf4j
 public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePluginHandler> {
 

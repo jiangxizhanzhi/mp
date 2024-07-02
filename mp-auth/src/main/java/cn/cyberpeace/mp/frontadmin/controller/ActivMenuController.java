@@ -32,9 +32,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @Description:
+ * @ClassName ActivMenuController
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/16 19:02
+ * @Date 2021/12/16 19:02
+ * @Version 1.0.0
  */
 @Api(value = "SYS-ADMIN", tags = "页面菜单管理接口")
 @Slf4j

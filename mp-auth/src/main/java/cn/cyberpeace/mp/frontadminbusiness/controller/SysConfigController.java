@@ -42,9 +42,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @Description: 系统配置管理接口
+ * @ClassName SysConfigController
+ * @Description 系统配置管理接口
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 @Api(value = "配置管理接口", tags = "系统配置管理接口")
 @Slf4j

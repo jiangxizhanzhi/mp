@@ -1,5 +1,12 @@
 package cn.cyberpeace.mp.base.util.mptool;
 
+/**
+ * @ClassName ArrayUtil
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class ArrayUtil {
 
     public static final int INDEX_NOT_FOUND = -1;

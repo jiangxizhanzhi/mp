@@ -16,9 +16,12 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * @Description: 流表监控service
+ * @ClassName OpenFlowService
+ * @Description 流表监控service
  * @Author qiaokang
- * @Date：2021/7/9 14:57
+ * @Date 2021/7/9 14:57
+ * @Version 1.0.0
+ * @see BaseCpService
  */
 @Service
 @Slf4j

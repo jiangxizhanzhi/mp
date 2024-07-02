@@ -17,6 +17,13 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
+/**
+ * @ClassName SceneBehaviorController
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Api(tags = "场景行为管理")
 @Slf4j
 @RestController

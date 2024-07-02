@@ -8,10 +8,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 基础场景节点连接bo
- *
- * @author 何韦
- * @date 2023/05/05
+ * @ClassName BaseSceneAreaNodeConnectionBO
+ * @Description 基础场景节点连接bo
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see EidBO
  */
 @Data
 public abstract class BaseSceneAreaNodeConnectionBO<M extends BaseSceneAreaNodeConnectionModel,

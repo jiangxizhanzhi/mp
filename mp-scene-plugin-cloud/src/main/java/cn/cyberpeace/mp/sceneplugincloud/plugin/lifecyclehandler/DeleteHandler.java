@@ -35,6 +35,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+/**
+ * @ClassName DeleteHandler
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see HandlerCommon
+ */
 @Slf4j
 public class DeleteHandler extends HandlerCommon {
 

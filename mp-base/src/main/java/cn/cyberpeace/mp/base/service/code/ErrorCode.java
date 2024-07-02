@@ -4,8 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * @ClassName ErrorCode
+ * @Description
  * 错误码接口，定义服务错误码枚举实现本接口
  * 通过构造函数setCode
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ServiceCode
  */
 public interface ErrorCode extends ServiceCode {
 

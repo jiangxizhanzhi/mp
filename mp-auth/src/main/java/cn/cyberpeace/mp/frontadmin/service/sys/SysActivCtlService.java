@@ -5,9 +5,12 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
 
 /**
- * @Description:
+ * @ClassName SysActivCtlService
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/2/15 14:18
+ * @Date 2022/2/15 14:18
+ * @Version 1.0.0
+ * @see BaseModelService
  */
 public interface SysActivCtlService extends BaseModelService<SysActivCtlModel, QueryParams> {
 

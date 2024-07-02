@@ -7,6 +7,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * @ClassName ModuleUtils
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class ModuleUtils {
 
     public static final String GROUP_NAME = "cn.cyberpeace.mp";

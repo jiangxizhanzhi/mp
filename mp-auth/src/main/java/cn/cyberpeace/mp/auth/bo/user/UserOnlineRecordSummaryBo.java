@@ -7,9 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description:
+ * @ClassName UserOnlineRecordSummaryBo
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/10/25 17:37
+ * @Date 2021/10/25 17:37
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

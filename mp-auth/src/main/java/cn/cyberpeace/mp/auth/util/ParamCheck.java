@@ -10,9 +10,11 @@ import java.util.Collection;
 import java.util.Objects;
 
 /**
- * @Description:
+ * @ClassName ParamCheck
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/20 19:23
+ * @Date 2021/12/20 19:23
+ * @Version 1.0.0
  */
 public class ParamCheck {
 

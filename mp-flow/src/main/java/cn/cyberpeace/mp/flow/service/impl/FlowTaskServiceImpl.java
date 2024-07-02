@@ -48,9 +48,13 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @Description: 流量任务service
+ * @ClassName FlowTaskServiceImpl
+ * @Description
  * @Author qiaokang
- * @Date：2021/6/10 10:31
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see FlowTaskService
  */
 @Service
 @Slf4j

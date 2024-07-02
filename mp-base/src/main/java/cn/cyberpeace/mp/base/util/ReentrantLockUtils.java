@@ -5,9 +5,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
+ * @ClassName ReentrantLockUtils
  * @Description
  * @Author maojun
  * @Date 2022/2/16
+ * @Version 1.0.0
  */
 public final class ReentrantLockUtils {
 

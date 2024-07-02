@@ -29,6 +29,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * @ClassName SystemAlarmServiceImpl
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see SystemAlarmService
+ */
 @Service
 @Slf4j
 public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmModel, SystemAlarmMapper, SystemAlarmFields,

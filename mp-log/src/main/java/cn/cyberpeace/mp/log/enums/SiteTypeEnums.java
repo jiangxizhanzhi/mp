@@ -4,8 +4,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * 站点枚举
- * @author wanggang
+ * @ClassName SiteTypeEnums
+ * @Description 站点枚举
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Enum
  */
 public enum SiteTypeEnums {
 

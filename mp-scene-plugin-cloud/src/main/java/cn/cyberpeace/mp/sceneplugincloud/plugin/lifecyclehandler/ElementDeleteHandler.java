@@ -6,9 +6,12 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.Recrea
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * @ClassName ElementDeleteHandler
  * @Description
  * @Author maojun
  * @Date 2021/10/25
+ * @Version 1.0.0
+ * @see HandlerCommon
  */
 @Slf4j
 public class ElementDeleteHandler extends HandlerCommon {

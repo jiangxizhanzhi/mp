@@ -7,9 +7,12 @@ import cn.cyberpeace.mp.devopscluster.model.SystemAlarmModel;
 import org.springframework.stereotype.Component;
 
 /**
+ * @ClassName SystemAlarmFields
  * @Description 告警信息Fields
  * @Author qiaokang
  * @Date 2022-07-18 17:35:04
+ * @Version 1.0.0
+ * @see BaseModelFields
  */
 @Component
 public class SystemAlarmFields extends BaseModelFields {

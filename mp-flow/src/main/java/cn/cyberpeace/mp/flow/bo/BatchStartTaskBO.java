@@ -5,9 +5,11 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description: 批量启动任务bo
+ * @ClassName BatchStartTaskBO
+ * @Description
  * @Author qiaokang
- * @Date：2023/6/8 11:41
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 public class BatchStartTaskBO {

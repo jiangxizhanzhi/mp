@@ -1,5 +1,13 @@
 package cn.cyberpeace.mp.base.repository.condition;
 
+/**
+ * @ClassName Connector
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Enum
+ */
 public enum Connector {
     LINK("link"),
     IN("in"),

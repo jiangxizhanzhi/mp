@@ -4,9 +4,11 @@ package cn.cyberpeace.mp.devopscluster.thread;
 import java.util.Map;
 
 /**
- * 任务处理接口，具体业务逻辑可实现该接口
- * @param <R> 返回值类型
- * @param <T> 入参类型
+ * @ClassName ITask
+ * @Description 任务处理接口，具体业务逻辑可实现该接口
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public interface ITask<R,T> {
 

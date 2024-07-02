@@ -12,9 +12,11 @@ import java.util.List;
 import java.util.Locale;
 
 /**
+ * @ClassName CloudMessageConvertUtil
  * @Description
  * @Author maojun
  * @Date 2022/7/11
+ * @Version 1.0.0
  */
 @Getter
 @Setter

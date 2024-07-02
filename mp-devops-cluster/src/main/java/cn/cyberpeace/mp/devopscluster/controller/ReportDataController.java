@@ -18,6 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * @ClassName ReportDataController
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Api(value = "场景实例", tags = "CSCENE-场景实例")
 @Slf4j
 @RestController

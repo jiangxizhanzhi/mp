@@ -5,6 +5,14 @@ import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+/**
+ * @ClassName SysConfigBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ModelBO
+ */
 @Data
 public class SysConfigBO extends ModelBO<SysConfigModel, SysConfigBO> {
     @ApiModelProperty(value = "租户")

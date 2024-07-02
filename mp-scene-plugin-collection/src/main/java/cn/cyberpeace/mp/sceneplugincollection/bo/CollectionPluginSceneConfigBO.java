@@ -5,6 +5,14 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.base.BaseCollectionPluginSceneB
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneConfigModel;
 import lombok.Data;
 
+/**
+ * @ClassName CollectionPluginSceneConfigBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCollectionPluginSceneBO
+ */
 @Data
 public class CollectionPluginSceneConfigBO extends BaseCollectionPluginSceneBO<CollectionPluginSceneConfigModel,
         CollectionPluginSceneConfigBO, SceneConfigBO> {

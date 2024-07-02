@@ -6,9 +6,12 @@ import javax.annotation.concurrent.NotThreadSafe;
 import java.net.URI;
 
 /**
- * @Description: 重写HttpDelete
+ * @ClassName HttpDeleteWithBody
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/11 16:24
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see HttpEntityEnclosingRequestBase
  */
 @NotThreadSafe
 public class HttpDeleteWithBody extends HttpEntityEnclosingRequestBase {

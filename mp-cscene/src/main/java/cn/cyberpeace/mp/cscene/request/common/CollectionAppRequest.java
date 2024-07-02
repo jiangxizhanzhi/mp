@@ -7,9 +7,12 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName CollectionAppRequest
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/5/18 17:02
+ * @Date 2022/5/18 17:02
+ * @Version 1.0.0
+ * @see BaseTimeRangeRequest
  */
 @Data
 @ApiModel

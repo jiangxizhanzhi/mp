@@ -2,6 +2,13 @@ package cn.cyberpeace.mp.base.util.basic;
 
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * @ClassName IntUtils
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class IntUtils {
 
     /**

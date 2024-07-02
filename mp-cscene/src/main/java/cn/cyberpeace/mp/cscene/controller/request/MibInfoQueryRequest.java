@@ -8,11 +8,12 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
- * @BelongsPackage: cn.cyberpeace.mp.cscene.controller.request
- * @Author: hhuang
- * @CreateTime: 2023/05/12  18:03
- * @Description: mib节点信息查询请求
- * @Version: 1.0
+ * @ClassName MibInfoQueryRequest
+ * @Description mib节点信息查询请求
+ * @Author hhuang
+ * @Date 2024/07/02
+ * @Version 1.0
+ * @see Serializable
  */
 @Data
 public class MibInfoQueryRequest implements Serializable {

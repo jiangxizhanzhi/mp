@@ -1,5 +1,12 @@
 package cn.cyberpeace.mp.base.util.mptool;
 
+/**
+ * @ClassName FileNameUtil
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class FileNameUtil {
     public static final String EXT_JAR = ".jar";
     public static final char UNIX_SEPARATOR = CharUtil.SLASH;

@@ -3,6 +3,14 @@ package cn.cyberpeace.mp.base.message;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import org.springframework.stereotype.Component;
 
+/**
+ * @ClassName JsonMessageConverter
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see MessageConverter
+ */
 @Component
 public class JsonMessageConverter implements MessageConverter {
 

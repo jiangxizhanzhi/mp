@@ -14,9 +14,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @Description: 新增app任务请求
+ * @ClassName AddAppTaskRequest
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/18 14:13
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

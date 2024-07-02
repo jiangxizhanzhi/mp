@@ -9,7 +9,13 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 /**
- * 网络分页请求信息
+ * @ClassName NetworkPageRequest
+ * @Description 网络分页请求信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BasePageRequest
+ * @see Serializable
  */
 @Data
 @NoArgsConstructor

@@ -7,6 +7,13 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * @ClassName CsceneInstanceStat
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @ApiModel(description = "场景实例运维数据")
 @Data
 public class CsceneInstanceStat {

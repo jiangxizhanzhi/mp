@@ -6,6 +6,13 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
+/**
+ * @ClassName SceneFileUtils
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class SceneFileUtils {
 
     public static final String SCENE_FILE_DIR_NAME = "scene_file";

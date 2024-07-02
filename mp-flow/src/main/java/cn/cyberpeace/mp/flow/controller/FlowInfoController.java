@@ -49,9 +49,13 @@ import java.util.Locale;
 import java.util.Objects;
 
 /**
- * @Description: 流量信息控制器
+ * @ClassName FlowInfoController
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/31 17:17
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelController
+ * @see FlowPrefixConstant
  */
 @Slf4j
 @Api(tags = "流量管理接口")

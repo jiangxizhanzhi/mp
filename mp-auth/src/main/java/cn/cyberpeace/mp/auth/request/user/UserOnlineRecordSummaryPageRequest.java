@@ -8,9 +8,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName UserOnlineRecordSummaryPageRequest
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
+ * @see PageRequest
  */
 @Data
 public class UserOnlineRecordSummaryPageRequest extends PageRequest {

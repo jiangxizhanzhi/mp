@@ -9,6 +9,13 @@ import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
+/**
+ * @ClassName ScenePluginCollectionSwagger2Config
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Configuration
 public class ScenePluginCollectionSwagger2Config {
 

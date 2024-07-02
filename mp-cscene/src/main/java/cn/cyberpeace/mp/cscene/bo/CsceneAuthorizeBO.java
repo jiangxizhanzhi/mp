@@ -5,6 +5,13 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * @ClassName CsceneAuthorizeBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 public class CsceneAuthorizeBO {
     @ApiModelProperty(value = "场景模板授权类型 0:私有 1:授权所有 2:共享")

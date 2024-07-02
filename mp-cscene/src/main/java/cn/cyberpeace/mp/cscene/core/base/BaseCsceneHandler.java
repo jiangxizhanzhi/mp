@@ -25,7 +25,11 @@ import java.util.Map;
 
 
 /**
- * 综合场景处理
+ * @ClassName BaseCsceneHandler
+ * @Description 综合场景处理
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Getter
 public abstract class BaseCsceneHandler<

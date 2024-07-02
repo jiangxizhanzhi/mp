@@ -18,9 +18,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * @ClassName AbstractClearJob
  * @Description
  * @Author maojun
  * @Date 2022/3/24
+ * @Version 1.0.0
  */
 @Slf4j
 public abstract class AbstractClearJob<Q> {

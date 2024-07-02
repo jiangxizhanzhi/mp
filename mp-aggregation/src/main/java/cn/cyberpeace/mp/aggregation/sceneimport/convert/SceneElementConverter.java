@@ -5,9 +5,12 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigBO;
 
 /**
+ * @ClassName SceneElementConverter
  * @Description 将解析出的scene节点转成BO
  * @Author maojun
  * @Date 2021/10/12
+ * @Version 1.0.0
+ * @see IConverter
  */
 class SceneElementConverter implements IConverter {
 

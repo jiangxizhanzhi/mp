@@ -8,9 +8,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName FlowGroupByDestinationIpAndSeverityBO
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/1 17:21
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

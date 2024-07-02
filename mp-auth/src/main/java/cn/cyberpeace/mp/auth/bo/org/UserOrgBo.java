@@ -5,9 +5,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description: 用户组织对象
+ * @ClassName UserOrgBo
+ * @Description
  * @Author qiaokang
- * @Date：2022/8/26 09:47
+ * @Date 2022/8/26 09:47
+ * @Version 1.0.0
+ * @see OrgBO
  */
 @Data
 @ApiModel("用户组织对象")

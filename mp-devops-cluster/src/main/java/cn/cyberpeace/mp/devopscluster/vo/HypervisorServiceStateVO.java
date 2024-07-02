@@ -12,7 +12,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 服务状态信息
+ * @ClassName HypervisorServiceStateVO
+ * @Description 服务状态信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseVO
  */
 @Data
 @NoArgsConstructor

@@ -7,7 +7,12 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
- * 容器分页请求信息
+ * @ClassName ContainerPageDTO
+ * @Description 容器分页请求信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BasePageDTO
  */
 @Data
 @NoArgsConstructor

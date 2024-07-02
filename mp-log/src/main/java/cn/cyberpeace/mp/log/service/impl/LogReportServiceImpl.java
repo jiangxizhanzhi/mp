@@ -16,9 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * @description: 日志文件上报接口
- * @author：Geek Wang
- * @date: 2022/6/15
+ * @ClassName LogReportServiceImpl
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see LogReportService
  */
 @Slf4j
 @Service

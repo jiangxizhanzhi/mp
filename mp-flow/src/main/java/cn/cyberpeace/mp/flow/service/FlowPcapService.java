@@ -7,9 +7,12 @@ import cn.cyberpeace.mp.flow.model.FlowPcapModel;
 import java.util.List;
 
 /**
+ * @ClassName FlowPcapService
  * @Description 流量包service
  * @Author qiaokang
  * @Date 2023-04-27 09:21:37
+ * @Version 1.0.0
+ * @see BaseModelService
  */
 public interface FlowPcapService extends BaseModelService<FlowPcapModel, QueryParams> {
 

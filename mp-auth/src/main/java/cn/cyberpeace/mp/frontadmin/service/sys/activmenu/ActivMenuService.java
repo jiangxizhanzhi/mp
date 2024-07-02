@@ -40,9 +40,11 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * @Description:
+ * @ClassName ActivMenuService
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 @Service
 @Slf4j

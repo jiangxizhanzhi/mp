@@ -4,9 +4,12 @@ import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import lombok.Getter;
 
 /**
+ * @ClassName ElementLifeCycleEnum
  * @Description
  * @Author maojun
  * @Date 2021/10/21
+ * @Version 1.0.0
+ * @see Enum
  */
 @Getter
 public enum ElementLifeCycleEnum {

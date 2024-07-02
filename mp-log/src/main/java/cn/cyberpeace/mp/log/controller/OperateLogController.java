@@ -26,8 +26,11 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
- * 用户操作日志记录
- * @author wanggang
+ * @ClassName OperateLogController
+ * @Description 用户操作日志记录
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Slf4j
 @RestController

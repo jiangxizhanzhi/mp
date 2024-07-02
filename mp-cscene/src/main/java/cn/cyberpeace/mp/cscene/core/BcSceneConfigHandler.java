@@ -42,7 +42,12 @@ import java.util.Map;
 
 
 /**
- * 综合场景处理
+ * @ClassName BcSceneConfigHandler
+ * @Description 综合场景处理
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCsceneHandler
  */
 @Slf4j
 @Deprecated

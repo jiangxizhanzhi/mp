@@ -10,9 +10,12 @@ import lombok.NoArgsConstructor;
 import java.util.Objects;
 
 /**
- * @Description:
+ * @ClassName AlarmQueryParams
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/11/7 15:38
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see QueryParams
  */
 @Data
 @NoArgsConstructor

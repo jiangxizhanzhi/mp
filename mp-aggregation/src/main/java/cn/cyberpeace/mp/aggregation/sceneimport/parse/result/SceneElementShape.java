@@ -6,9 +6,11 @@ import lombok.Setter;
 import java.util.List;
 
 /**
+ * @ClassName SceneElementShape
  * @Description
  * @Author maojun
  * @Date 2022/8/29
+ * @Version 1.0.0
  */
 @Getter
 @Setter

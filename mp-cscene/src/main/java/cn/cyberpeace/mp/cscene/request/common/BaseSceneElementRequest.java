@@ -10,9 +10,11 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName BaseSceneElementRequest
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/11/29 19:52
+ * @Date 2021/11/29 19:52
+ * @Version 1.0.0
  */
 @Data
 @Builder

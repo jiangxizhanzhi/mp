@@ -8,9 +8,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description: 资源用量情况返回
+ * @ClassName ScreenRecordRestoreConfigVO
+ * @Description
  * @Author qiaokang
- * @Date：2021/9/13 19:55
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

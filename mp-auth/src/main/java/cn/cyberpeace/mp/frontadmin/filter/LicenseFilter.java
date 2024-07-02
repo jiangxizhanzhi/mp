@@ -23,6 +23,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Objects;
 
+/**
+ * @ClassName LicenseFilter
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see OncePerRequestFilter
+ */
 @Slf4j
 public class LicenseFilter extends OncePerRequestFilter {
 

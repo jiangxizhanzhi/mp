@@ -10,9 +10,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @author litian
- * @date 2023年09月25 11:22
- * 访问黑名单模型数据
+ * @ClassName BlacklistModel
+ * @Description 访问黑名单模型数据
+ * @Author litian
+ * @Date 2023年09月25 11:22
+ * @Version 1.0.0
  */
 @Component
 @Data

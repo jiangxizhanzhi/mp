@@ -5,11 +5,12 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * @BelongsPackage: cn.cyberpeace.mp.sceneplugincloud.bo.base
- * @Author: hhuang
- * @CreateTime: 2023/05/18  17:44
- * @Description: 上传文件信息
- * @Version: 1.0
+ * @ClassName FileUploadInfo
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Serializable
  */
 @Data
 public class FileUploadInfo implements Serializable {

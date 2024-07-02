@@ -13,9 +13,13 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 /**
- * @Description:
+ * @ClassName AuthInitService
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/6/21 17:53
+ * @Date 2022/6/21 17:53
+ * @Version 1.0.0
+ * @see ApplicationListener
+ * @see EnvironmentAware
  */
 @Slf4j
 @Component

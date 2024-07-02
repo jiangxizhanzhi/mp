@@ -14,9 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * @Description:
+ * @ClassName UserCreateCheckService
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
+ * @see UserCheckService
  */
 @Service
 public class UserCreateCheckService implements UserCheckService {

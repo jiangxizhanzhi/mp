@@ -3,9 +3,11 @@ package cn.cyberpeace.mp.flow.bo;
 import lombok.Data;
 
 /**
- * @Description: 任务源ip对象
+ * @ClassName TaskSipBO
+ * @Description
  * @Author qiaokang
- * @Date：2023/6/8 11:42
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 public class TaskSipBO {

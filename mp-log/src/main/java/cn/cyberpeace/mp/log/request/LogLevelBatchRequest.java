@@ -11,11 +11,13 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * @description 日志级别批量请求
- * @author wangssh
- * @date 2023/5/30
- * @version 1.0
- **/
+ * @ClassName LogLevelBatchRequest
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Serializable
+ */
 @Data
 @Builder
 @AllArgsConstructor

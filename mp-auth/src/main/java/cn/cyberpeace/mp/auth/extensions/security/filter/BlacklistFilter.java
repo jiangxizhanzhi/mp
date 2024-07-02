@@ -23,8 +23,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
- * @author litian
- * @date 2023年09月25 11:18
+ * @ClassName BlacklistFilter
+ * @Description
+ * @Author litian
+ * @Date 2023年09月25 11:18
+ * @Version 1.0.0
+ * @see OncePerRequestFilter
  */
 @Slf4j
 @Component

@@ -9,9 +9,12 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * @Description: 录屏分页查询返回结果
+ * @ClassName ScreenrecordPageVO
+ * @Description
  * @Author qiaokang
- * @Date：2021/9/13 16:29
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCloudPlatformResult
  */
 @Data
 @AllArgsConstructor

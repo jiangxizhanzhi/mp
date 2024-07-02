@@ -5,9 +5,12 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Component;
 
 /**
- * @Description:
+ * @ClassName ConfigEventPublisher
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/4/1 16:27
+ * @Date 2022/4/1 16:27
+ * @Version 1.0.0
+ * @see ApplicationEventPublisherAware
  */
 @Component
 public class ConfigEventPublisher implements ApplicationEventPublisherAware {

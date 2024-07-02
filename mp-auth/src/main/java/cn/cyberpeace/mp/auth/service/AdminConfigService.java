@@ -8,9 +8,11 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 /**
- * @Description:
+ * @ClassName AdminConfigService
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/11/6 14:21
+ * @Date 2021/11/6 14:21
+ * @Version 1.0.0
  */
 @Service
 public class AdminConfigService {

@@ -4,8 +4,13 @@ import cn.cyberpeace.mp.base.service.code.ErrorCode;
 
 
 /**
- * 错误码
- * @author wanggang
+ * @ClassName LogErrorCode
+ * @Description 错误码
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Enum
+ * @see ErrorCode
  */
 public enum LogErrorCode implements ErrorCode {
     REQUEST_CLOUD_INTERFACE_BUSINESS_ERROR("MP-111001", "request_cloud_interface_business_error"),

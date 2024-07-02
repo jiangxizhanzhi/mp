@@ -8,6 +8,14 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * @ClassName FlowScriptDemoMapper
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelMapper
+ */
 @Mapper
 @Repository
 @ModelClass(FlowScriptDemoModel.class)

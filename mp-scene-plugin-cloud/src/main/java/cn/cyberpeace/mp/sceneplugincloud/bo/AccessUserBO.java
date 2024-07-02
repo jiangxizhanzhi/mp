@@ -3,6 +3,13 @@ package cn.cyberpeace.mp.sceneplugincloud.bo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+/**
+ * @ClassName AccessUserBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 public class AccessUserBO {
     @ApiModelProperty(value = "ID")

@@ -14,9 +14,11 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * Flavor
- *
- * @author wanggang
+ * @ClassName DynamipsService
+ * @Description Flavor
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Service
 @Slf4j

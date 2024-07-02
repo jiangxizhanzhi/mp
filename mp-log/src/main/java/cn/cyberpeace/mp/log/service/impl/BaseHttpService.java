@@ -17,8 +17,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 /**
- * 基础对接接口层
- * @author wanggang
+ * @ClassName BaseHttpService
+ * @Description 基础对接接口层
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Slf4j
 @Service

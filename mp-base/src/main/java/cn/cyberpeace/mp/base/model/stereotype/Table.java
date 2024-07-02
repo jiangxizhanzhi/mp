@@ -5,7 +5,12 @@ import org.apache.commons.lang3.StringUtils;
 import java.lang.annotation.*;
 
 /**
- * 标记model对应的表名
+ * @ClassName Table
+ * @Description 标记model对应的表名
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Annotation
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

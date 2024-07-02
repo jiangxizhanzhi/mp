@@ -8,9 +8,11 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 /**
+ * @ClassName SceneNodeNumInitJob
  * @Description 初始化场景使用的节点数量
  * @Author maojun
  * @Date 2022/8/5
+ * @Version 1.0.0
  */
 @Component
 public class SceneNodeNumInitJob {

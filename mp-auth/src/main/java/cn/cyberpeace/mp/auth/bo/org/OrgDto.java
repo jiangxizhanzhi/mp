@@ -7,9 +7,12 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName OrgDto
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
+ * @see OrgBO
  */
 @Data
 public class OrgDto extends OrgBO {

@@ -9,6 +9,14 @@ import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 
+/**
+ * @ClassName MarkdownFileService
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseRemoteFileServiceImpl
+ */
 @Service
 public class MarkdownFileService extends BaseRemoteFileServiceImpl {
 

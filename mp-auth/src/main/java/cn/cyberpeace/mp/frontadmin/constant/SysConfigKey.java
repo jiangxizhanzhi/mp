@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.frontadmin.constant;
 
 /**
- * @Description:
+ * @ClassName SysConfigKey
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/9 17:49
+ * @Date 2021/12/9 17:49
+ * @Version 1.0.0
  */
 public class SysConfigKey {
 

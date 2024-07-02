@@ -49,9 +49,12 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * @Description: 录屏service
+ * @ClassName ScreenrecordService
+ * @Description 录屏service
  * @Author qiaokang
- * @Date：2021/9/13 16:40
+ * @Date 2021/9/13 16:40
+ * @Version 1.0.0
+ * @see BaseCpService
  */
 @Service
 @Slf4j

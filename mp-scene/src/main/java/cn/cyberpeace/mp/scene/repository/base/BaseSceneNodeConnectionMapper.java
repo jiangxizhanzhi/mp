@@ -4,10 +4,12 @@ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaNodeConnectionModel;
 
 /**
- * 基础场景节点连接映射器
- *
- * @author 何韦
- * @date 2023/05/05
+ * @ClassName BaseSceneNodeConnectionMapper
+ * @Description 基础场景节点连接映射器
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelMapper
  */
 public interface BaseSceneNodeConnectionMapper<M extends BaseSceneAreaNodeConnectionModel> extends BaseModelMapper<M> {
 }

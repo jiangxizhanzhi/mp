@@ -6,9 +6,12 @@ import lombok.Data;
 import java.util.List;
 
 /**
+ * @ClassName ResetCplcoudAllIpsData
  * @Description
  * @Author zhanglin
  * @Date 2023/3/21
+ * @Version 1.0.0
+ * @see CloudHttpData
  */
 @Data
 public class ResetCplcoudAllIpsData implements CloudHttpData {

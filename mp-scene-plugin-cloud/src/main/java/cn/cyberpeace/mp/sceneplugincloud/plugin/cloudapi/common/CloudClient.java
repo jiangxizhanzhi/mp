@@ -16,6 +16,13 @@ import org.apache.commons.lang3.StringUtils;
 
 import static cn.cyberpeace.mp.base.constant.BaseErrorCode.CUSTOM_ERROR;
 
+/**
+ * @ClassName CloudClient
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Slf4j
 @Data
 public abstract class CloudClient {

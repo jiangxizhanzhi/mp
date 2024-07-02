@@ -1,10 +1,11 @@
 package cn.cyberpeace.mp.flow.constant;
 
 /**
- * es数据转存记录常量
- *
- * @author erZhu
- * @date 2024/6/5 10:57
+ * @ClassName EsDataStorageConstant
+ * @Description es数据转存记录常量
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public class EsDataStorageConstant {
     // 通道

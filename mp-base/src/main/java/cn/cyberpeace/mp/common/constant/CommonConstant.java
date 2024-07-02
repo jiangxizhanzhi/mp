@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.common.constant;
 
 /**
- * @Description:
+ * @ClassName CommonConstant
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/8/9 11:04
+ * @Date 2022/8/9 11:04
+ * @Version 1.0.0
  */
 public class CommonConstant {
 

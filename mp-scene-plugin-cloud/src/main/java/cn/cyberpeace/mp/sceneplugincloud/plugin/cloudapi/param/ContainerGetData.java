@@ -10,6 +10,14 @@ import org.apache.catalina.startup.SetAllPropertiesRule;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @ClassName ContainerGetData
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see CloudHttpData
+ */
 @Data
 @NoArgsConstructor
 public class ContainerGetData implements CloudHttpData {

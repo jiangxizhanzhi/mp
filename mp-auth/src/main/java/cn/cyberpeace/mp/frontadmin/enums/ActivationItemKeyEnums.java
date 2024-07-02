@@ -1,9 +1,12 @@
 package cn.cyberpeace.mp.frontadmin.enums;
 
 /**
+ * @ClassName ActivationItemKeyEnums
  * @Description 激活项枚举
- * @author: zhouxinghuai
- * @Date: 2023/01/17
+ * @Author maojun
+ * @Date 2023/01/17
+ * @Version 1.0.0
+ * @see Enum
  */
 public enum ActivationItemKeyEnums {
 

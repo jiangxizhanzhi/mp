@@ -7,9 +7,11 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description: 流量仿真统计对象
- * @Author: guquan
- * @Date：2023/5/17 10:48
+ * @ClassName FlowStatisticsInfo
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @ApiModel("流量仿真统计对象")

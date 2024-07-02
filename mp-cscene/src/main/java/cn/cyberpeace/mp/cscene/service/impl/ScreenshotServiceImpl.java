@@ -38,6 +38,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * @ClassName ScreenshotServiceImpl
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see ScreenshotService
+ */
 @Service
 @Slf4j
 public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel, ScreenshotMapper, ScreenshotFields,

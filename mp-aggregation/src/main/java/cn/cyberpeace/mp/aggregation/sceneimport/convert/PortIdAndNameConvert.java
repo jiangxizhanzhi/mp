@@ -11,9 +11,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * @ClassName PortIdAndNameConvert
  * @Description
  * @Author maojun
  * @Date 2022/1/24
+ * @Version 1.0.0
+ * @see IConverter
  */
 public class PortIdAndNameConvert implements IConverter {
 

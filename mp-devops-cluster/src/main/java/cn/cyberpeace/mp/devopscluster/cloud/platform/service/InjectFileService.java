@@ -15,8 +15,12 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * 文件注入管理
- * @author wanggang
+ * @ClassName InjectFileService
+ * @Description 文件注入管理
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCpService
  */
 @Service
 @Slf4j

@@ -14,9 +14,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * @Description:
+ * @ClassName QueryParentTargetOperation
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
+ * @see TargetOperation
  */
 @Component
 @Scope("prototype")

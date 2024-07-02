@@ -15,6 +15,15 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @ClassName SceneBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseSceneBO
+ * @see BaseSceneEventModel
+ */
 @Data
 public class SceneBO extends BaseSceneBO<SceneModel, SceneBO> implements BaseSceneEventModel {
     @ApiModelProperty(value = "事件")

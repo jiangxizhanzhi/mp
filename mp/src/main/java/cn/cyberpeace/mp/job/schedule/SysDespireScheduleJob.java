@@ -31,9 +31,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @Description: 系统过期检查定时任务
+ * @ClassName SysDespireScheduleJob
+ * @Description 系统过期检查定时任务
  * @Author qiaokang
- * @Date：2023/8/21 17:17
+ * @Date 2023/8/21 17:17
+ * @Version 1.0.0
  */
 @Service
 @Slf4j

@@ -10,11 +10,13 @@ import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 /**
- * @description 日志级别BO
- * @author wangssh
- * @date 2023/5/30
- * @version 1.0
- **/
+ * @ClassName LogLevelBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Serializable
+ */
 @Data
 @Builder
 @AllArgsConstructor

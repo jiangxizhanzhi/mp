@@ -14,9 +14,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @Description: 查看当前用户，是否有权对角色进行增删改查
+ * @ClassName OperateRolePermissionService
+ * @Description 查看当前用户，是否有权对角色进行增删改查
  * @Author zhouxinghuai
- * @Date：2022/05/12 11:15
+ * @Date 2022/05/12 11:15
+ * @Version 1.0.0
+ * @see OperatePermissionService
  */
 @Slf4j
 @Service

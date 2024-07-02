@@ -1,5 +1,12 @@
 package cn.cyberpeace.mp.scene.context;
 
+/**
+ * @ClassName SceneContextHolder
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class SceneContextHolder {
 
     private static final ThreadLocal<SceneContext> contextHolder = new ThreadLocal<>();

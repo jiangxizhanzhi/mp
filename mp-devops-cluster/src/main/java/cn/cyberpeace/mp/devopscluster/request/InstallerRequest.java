@@ -9,6 +9,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+/**
+ * @ClassName InstallerRequest
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseRequest
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

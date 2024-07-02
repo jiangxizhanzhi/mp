@@ -19,9 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * @Description: 头像管理接口
+ * @ClassName AvatarController
+ * @Description 头像管理接口
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 @Api(value = "用户管理接口", tags = "用户管理接口")
 @Slf4j

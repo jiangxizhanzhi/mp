@@ -8,9 +8,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName AttackCountRequest
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/11/29 19:52
+ * @Date 2021/11/29 19:52
+ * @Version 1.0.0
+ * @see BaseSceneElementRequest
  */
 @Data
 public class AttackCountRequest extends BaseSceneElementRequest {

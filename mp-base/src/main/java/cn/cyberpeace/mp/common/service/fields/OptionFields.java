@@ -8,9 +8,12 @@ import cn.cyberpeace.mp.common.model.OptionModel;
 import org.springframework.stereotype.Component;
 
 /**
+ * @ClassName OptionFields
  * @Description
- * @author: shgang
- * @Date: 2022/7/28
+ * @Author maojun
+ * @Date 2022/7/28
+ * @Version 1.0.0
+ * @see BaseModelFields
  */
 @Component
 public class OptionFields extends BaseModelFields {

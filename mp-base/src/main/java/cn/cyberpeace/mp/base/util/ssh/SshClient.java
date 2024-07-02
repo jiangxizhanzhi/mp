@@ -28,6 +28,14 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * @ClassName SshClient
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Closeable
+ */
 @Slf4j
 public class SshClient implements Closeable {
 

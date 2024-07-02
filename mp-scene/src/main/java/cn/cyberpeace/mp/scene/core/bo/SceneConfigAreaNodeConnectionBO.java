@@ -5,10 +5,12 @@ import cn.cyberpeace.mp.scene.model.SceneConfigAreaNodeConnectionModel;
 import lombok.Data;
 
 /**
- * 场景模板节点连接bo
- *
- * @author 何韦
- * @date 2023/05/05
+ * @ClassName SceneConfigAreaNodeConnectionBO
+ * @Description 场景模板节点连接bo
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseSceneAreaNodeConnectionBO
  */
 @Data
 public class SceneConfigAreaNodeConnectionBO

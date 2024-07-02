@@ -10,6 +10,14 @@ import org.springframework.amqp.core.Message;
 
 import java.util.Map;
 
+/**
+ * @ClassName BaseSimpleMessageReceiver
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseMessageReceiver
+ */
 @Slf4j
 public abstract class BaseSimpleMessageReceiver extends BaseMessageReceiver {
 

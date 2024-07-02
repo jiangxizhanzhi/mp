@@ -8,6 +8,13 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.util.Set;
 
+/**
+ * @ClassName CloudScenePluginValidation
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Component
 public class CloudScenePluginValidation {
 

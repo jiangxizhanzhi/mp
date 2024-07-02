@@ -26,6 +26,14 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+/**
+ * @ClassName UrlAcInterceptor
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see HandlerInterceptor
+ */
 @Slf4j
 public class UrlAcInterceptor implements HandlerInterceptor {
 

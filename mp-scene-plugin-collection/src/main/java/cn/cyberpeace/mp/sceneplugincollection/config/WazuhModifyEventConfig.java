@@ -5,6 +5,13 @@ import cn.cyberpeace.mp.sceneplugincollection.util.CollectionCommonConfigUtil;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
+/**
+ * @ClassName WazuhModifyEventConfig
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Component
 public class WazuhModifyEventConfig {
     private static ModifyProbe modifyProbe;

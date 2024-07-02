@@ -6,7 +6,13 @@ import lombok.*;
 import java.io.Serializable;
 
 /**
- * 磁盘剩余空间
+ * @ClassName ImportDiskSpaceCloudPlatformResult
+ * @Description 磁盘剩余空间
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCloudPlatformResult
+ * @see Serializable
  */
 @Data
 @NoArgsConstructor

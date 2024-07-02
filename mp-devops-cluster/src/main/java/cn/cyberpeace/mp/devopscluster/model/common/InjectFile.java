@@ -6,7 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 文件注入
+ * @ClassName InjectFile
+ * @Description 文件注入
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCloudPlatformResult
  */
 @Data
 @NoArgsConstructor

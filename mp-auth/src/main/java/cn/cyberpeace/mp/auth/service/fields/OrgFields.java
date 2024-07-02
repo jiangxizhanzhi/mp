@@ -7,9 +7,12 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import org.springframework.stereotype.Component;
 
 /**
- * @Description:
+ * @ClassName OrgFields
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
+ * @see BaseModelFields
  */
 @Component
 public class OrgFields extends BaseModelFields {

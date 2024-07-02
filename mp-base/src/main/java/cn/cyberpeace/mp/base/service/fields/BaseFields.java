@@ -11,7 +11,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 定义对model业务处理字段，实现类只需要具体定义对应的静态字段
+ * @ClassName BaseFields
+ * @Description 定义对model业务处理字段，实现类只需要具体定义对应的静态字段
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public abstract class BaseFields {
     /** 全部字段 */

@@ -11,9 +11,11 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 /**
+ * @ClassName CloudLocalFileMappingInitJob
  * @Description
  * @Author maojun
  * @Date 2022/8/5
+ * @Version 1.0.0
  */
 @Component
 public class CloudLocalFileMappingInitJob  {

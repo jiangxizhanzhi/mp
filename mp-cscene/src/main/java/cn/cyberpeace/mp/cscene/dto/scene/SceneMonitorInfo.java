@@ -10,9 +10,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * @Description:
+ * @ClassName SceneMonitorInfo
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/11/22 11:36
+ * @Date 2021/11/22 11:36
+ * @Version 1.0.0
  */
 @Data
 @Builder

@@ -5,6 +5,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+/**
+ * @ClassName CloudPlatformResult
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCloudPlatformResult
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor

@@ -10,9 +10,11 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.constraints.NotBlank;
 
 /**
- * @Description: 更新背景流量请求
+ * @ClassName ModifyBackgroundFlowRequest
+ * @Description
  * @Author qiaokang
- * @Date：2021/9/2 16:48
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

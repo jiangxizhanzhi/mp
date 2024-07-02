@@ -21,9 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 
 /**
+ * @ClassName RestCpcloudAllIpsController
  * @Description
  * @Author zhanglin
  * @Date 2023/3/22
+ * @Version 1.0.0
  */
 @Api(value = "重置云平台ip接口", tags = "重置云平台ip接口")
 @Slf4j

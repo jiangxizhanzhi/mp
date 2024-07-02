@@ -30,9 +30,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import javax.annotation.Resource;
 
 /**
- * @Description: Security配置化类
+ * @ClassName WebSecurityConfig
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
+ * @see WebSecurityConfigurerAdapter
  */
 @Configuration
 @EnableWebSecurity

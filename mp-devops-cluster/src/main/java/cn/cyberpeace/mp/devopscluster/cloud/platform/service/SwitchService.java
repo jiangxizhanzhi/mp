@@ -20,8 +20,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 import static cn.cyberpeace.mp.base.constant.BaseErrorCode.CUSTOM_ERROR;
 
 /**
- * 运维管控-系统运维-网络实例管理-交换机
- * @author wanggang
+ * @ClassName SwitchService
+ * @Description 运维管控-系统运维-网络实例管理-交换机
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCpService
  */
 @Service
 @Slf4j

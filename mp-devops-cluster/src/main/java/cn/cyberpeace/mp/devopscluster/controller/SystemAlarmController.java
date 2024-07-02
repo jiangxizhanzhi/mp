@@ -42,9 +42,12 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * @ClassName SystemAlarmController
  * @Description 告警信息controller
  * @Author qiaokang
  * @Date 2022-07-18 17:35:04
+ * @Version 1.0.0
+ * @see BaseModelController
  */
 @Slf4j
 @Api(tags = "告警信息接口")

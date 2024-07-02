@@ -43,9 +43,13 @@ import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudP
 import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
 
 /**
- * @Description: 虚拟USB服务
- * @Author: guquan
- * @Date：2023/4/17 10:28
+ * @ClassName VirtualUsbServiceImpl
+ * @Description 虚拟USB服务
+ * @Author guquan
+ * @Date 2023/4/17 10:28
+ * @Version 1.0.0
+ * @see BaseCpService
+ * @see VirtualUsbService
  */
 @Service
 @Slf4j

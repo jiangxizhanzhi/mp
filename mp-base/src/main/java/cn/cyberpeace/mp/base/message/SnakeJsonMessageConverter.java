@@ -3,6 +3,14 @@ package cn.cyberpeace.mp.base.message;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import org.springframework.stereotype.Component;
 
+/**
+ * @ClassName SnakeJsonMessageConverter
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see MessageConverter
+ */
 @Component
 public class SnakeJsonMessageConverter implements MessageConverter {
 

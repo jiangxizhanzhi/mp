@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 
 /**
- * @BelongsPackage: cn.cyberpeace.mp.cscene.controller
- * @Author: hhuang
- * @CreateTime: 2023/05/10  09:12
- * @Description: 协议采集相关处理
- * @Version: 1.0
+ * @ClassName ProtocolCollectionController
+ * @Description 协议采集相关处理
+ * @Author hhuang
+ * @Date 2024/07/02
+ * @Version 1.0
  */
 @Api(value = "协议采集", tags = "协议采集")
 @Slf4j

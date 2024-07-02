@@ -9,6 +9,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @ClassName ImageTypeEnum
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Enum
+ */
 @SwaggerDisplayEnum
 public enum ImageTypeEnum {
 

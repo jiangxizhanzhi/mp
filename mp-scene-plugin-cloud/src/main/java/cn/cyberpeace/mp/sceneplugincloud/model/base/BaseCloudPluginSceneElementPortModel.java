@@ -6,6 +6,14 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.scene.core.plugin.model.BasePluginSceneElementPortModel;
 import lombok.Data;
 
+/**
+ * @ClassName BaseCloudPluginSceneElementPortModel
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BasePluginSceneElementPortModel
+ */
 @Data
 public class BaseCloudPluginSceneElementPortModel extends BasePluginSceneElementPortModel {
 

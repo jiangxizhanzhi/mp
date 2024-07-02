@@ -4,9 +4,11 @@ import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 
 /**
+ * @ClassName IConverter
  * @Description
  * @Author maojun
  * @Date 2021/10/12
+ * @Version 1.0.0
  */
 interface IConverter {
     /**

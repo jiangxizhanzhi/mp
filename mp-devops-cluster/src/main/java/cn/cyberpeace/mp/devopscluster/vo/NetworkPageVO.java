@@ -11,7 +11,12 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 网络分页返回信息
+ * @ClassName NetworkPageVO
+ * @Description 网络分页返回信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see SceneInfoVO
  */
 @Data
 @NoArgsConstructor

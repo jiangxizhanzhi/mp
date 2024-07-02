@@ -7,9 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description: 删除流量信息请求
+ * @ClassName DeleteFlowInfoRequest
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/10 15:50
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

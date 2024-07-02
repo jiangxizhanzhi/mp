@@ -13,9 +13,12 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
 /**
- * @Description: 流量任务对象
+ * @ClassName FlowTaskModel
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/31 17:17
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @AllArgsConstructor

@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.devopscluster.constant;
 
 /**
+ * @ClassName DevopsClusterConstant
  * @Description
- * @author: shgang
- * @Date: 2022/7/28
+ * @Author shgang
+ * @Date 2022/7/28
+ * @Version 1.0.0
  */
 public class DevopsClusterConstant {
 

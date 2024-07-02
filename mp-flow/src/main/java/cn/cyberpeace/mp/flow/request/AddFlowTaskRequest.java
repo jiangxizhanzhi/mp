@@ -9,9 +9,12 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description: 新增流量任务请求
+ * @ClassName AddFlowTaskRequest
+ * @Description
  * @Author qiaokang
- * @Date：2021/10/11 16:16
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see FlowTaskModel
  */
 @Data
 @ApiModel(value = "新增流量任务请求")

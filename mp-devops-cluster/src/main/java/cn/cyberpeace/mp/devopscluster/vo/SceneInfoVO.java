@@ -6,9 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description:
+ * @ClassName SceneInfoVO
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/12/30 11:29
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseVO
  */
 @Data
 @NoArgsConstructor

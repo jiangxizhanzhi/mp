@@ -7,9 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description: 流量上传返回信息
+ * @ClassName FlowInfoUploadResponse
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/10 16:57
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

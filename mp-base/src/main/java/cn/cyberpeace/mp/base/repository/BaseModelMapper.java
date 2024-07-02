@@ -31,6 +31,13 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * @ClassName BaseModelMapper
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public interface BaseModelMapper<M extends BaseModel> {
 
     String pkFieldName = BeanUtils.getBeanGetterFieldName(BaseModel::getPk);

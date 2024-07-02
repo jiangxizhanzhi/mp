@@ -6,9 +6,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * @Description: URL工具类
+ * @ClassName URLUtils
+ * @Description
  * @Author qiaokang
- * @Date：2023/8/17 15:33
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Slf4j
 public class URLUtils {

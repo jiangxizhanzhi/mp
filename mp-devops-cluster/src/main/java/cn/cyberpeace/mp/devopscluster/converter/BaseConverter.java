@@ -3,6 +3,13 @@ package cn.cyberpeace.mp.devopscluster.converter;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.devopscluster.request.BasePageRequest;
 
+/**
+ * @ClassName BaseConverter
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public interface BaseConverter {
 
     /**

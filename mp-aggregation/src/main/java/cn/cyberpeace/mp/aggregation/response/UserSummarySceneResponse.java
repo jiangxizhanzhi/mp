@@ -10,9 +10,11 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 /**
- * @Description:
+ * @ClassName UserSummarySceneResponse
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/9/13 11:09
+ * @Date 2021/9/13 11:09
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

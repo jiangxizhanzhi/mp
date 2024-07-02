@@ -8,9 +8,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * @ClassName ConvertRule
  * @Description
  * @Author maojun
  * @Date 2022/7/11
+ * @Version 1.0.0
  */
 @Getter
 @Setter

@@ -7,9 +7,12 @@ import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName SysConfigService
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
+ * @see BaseModelService
  */
 public interface SysConfigService extends BaseModelService<SysConfigModel, QueryParams> {
 

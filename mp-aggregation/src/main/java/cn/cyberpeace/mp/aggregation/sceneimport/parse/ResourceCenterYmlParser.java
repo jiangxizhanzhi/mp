@@ -18,9 +18,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * @ClassName ResourceCenterYmlParser
  * @Description 解析资管的yml
  * @Author maojun
  * @Date 2021/10/12
+ * @Version 1.0.0
  */
 public final class ResourceCenterYmlParser {
     private static String FILE_PATH_SEPARATOR = "/";

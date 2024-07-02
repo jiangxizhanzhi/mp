@@ -10,9 +10,12 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 
 /**
- * @Description: 流量集合关联对象
+ * @ClassName FlowCollectionRelModel
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/31 10:31
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @AllArgsConstructor

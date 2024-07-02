@@ -5,9 +5,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @description:
- * @author：Geek Wang
- * @date: 2022/6/15
+ * @ClassName RunTimeLogDownloadRequest
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

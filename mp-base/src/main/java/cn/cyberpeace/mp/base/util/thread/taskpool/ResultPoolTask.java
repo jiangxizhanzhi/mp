@@ -5,6 +5,14 @@ import lombok.NoArgsConstructor;
 
 import java.util.concurrent.Callable;
 
+/**
+ * @ClassName ResultPoolTask
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BasePoolTask
+ */
 @Data
 @NoArgsConstructor
 public class ResultPoolTask<C, R> extends BasePoolTask<C, Callable<R>, R> {

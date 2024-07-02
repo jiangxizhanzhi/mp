@@ -2,6 +2,15 @@ package cn.cyberpeace.mp.flow.constant;
 
 import cn.cyberpeace.mp.base.service.code.ErrorCode;
 
+/**
+ * @ClassName FlowErrorCode
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Enum
+ * @see ErrorCode
+ */
 public enum FlowErrorCode implements ErrorCode {
 
     FLOW_NOT_EXIST("MP-110300", "flow_not_exist"),

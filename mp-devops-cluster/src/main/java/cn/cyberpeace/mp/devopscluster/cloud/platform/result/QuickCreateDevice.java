@@ -2,6 +2,13 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.result;
 
 import lombok.Data;
 
+/**
+ * @ClassName QuickCreateDevice
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 public class QuickCreateDevice {
     private String name;

@@ -4,9 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
+ * @ClassName NpcGetData
  * @Description
  * @Author maojun
  * @Date 2022/4/8
+ * @Version 1.0.0
  */
 @Getter
 @Setter

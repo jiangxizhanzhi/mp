@@ -10,9 +10,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
+ * @ClassName AlarmStatisticsService
  * @Description 告警统计信息service
  * @Author qiaokang
  * @Date 2022-07-19 16:17:26
+ * @Version 1.0.0
+ * @see BaseModelService
  */
 public interface AlarmStatisticsService extends BaseModelService<AlarmStatisticsModel, QueryParams> {
 

@@ -8,6 +8,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
+/**
+ * @ClassName LfProxyInit
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see WebMvcConfigurer
+ */
 @Component
 public class LfProxyInit implements WebMvcConfigurer {
 

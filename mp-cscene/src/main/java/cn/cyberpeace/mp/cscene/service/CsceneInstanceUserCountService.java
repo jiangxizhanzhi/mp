@@ -5,9 +5,12 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceUserCountModel;
 
 /**
+ * @ClassName CsceneInstanceUserCountService
  * @Description 用户场景统计service
  * @Author qiaokang
  * @Date 2023-06-20 14:26:35
+ * @Version 1.0.0
+ * @see BaseModelService
  */
 public interface CsceneInstanceUserCountService extends BaseModelService<CsceneInstanceUserCountModel, QueryParams> {
 

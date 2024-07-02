@@ -9,9 +9,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * @Description: 批量启动流量任务请求
+ * @ClassName BatchStartFlowTaskRequest
+ * @Description
  * @Author qiaokang
- * @Date：2023/5/24 17:39
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

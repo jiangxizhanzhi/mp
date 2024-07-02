@@ -7,9 +7,12 @@ import cn.cyberpeace.mp.frontadmin.model.SysNoticeUserModel;
 import org.springframework.stereotype.Component;
 
 /**
- * @Description:
+ * @ClassName SysNoticeUserFields
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/9/20 11:13
+ * @Date 2022/9/20 11:13
+ * @Version 1.0.0
+ * @see BaseModelFields
  */
 @Component
 public class SysNoticeUserFields extends BaseModelFields {

@@ -26,7 +26,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 网络管理类
+ * @ClassName NetworkController
+ * @Description 网络管理类
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Slf4j
 @RestController

@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * @Description: 组织路径处理类
+ * @ClassName OrgPathService
+ * @Description 组织路径处理类
  * @Author qiaokang
- * @Date：2022/9/1 11:22
+ * @Date 2022/9/1 11:22
+ * @Version 1.0.0
  */
 @Service
 public class OrgPathService {

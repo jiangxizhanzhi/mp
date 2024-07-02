@@ -7,9 +7,12 @@ import cn.cyberpeace.mp.cscene.model.ScreenshotModel;
 import org.springframework.stereotype.Component;
 
 /**
+ * @ClassName ScreenshotFields
  * @Description 截屏文件管理Fields
  * @Author qiaokang
  * @Date 2021-09-13 11:05:18
+ * @Version 1.0.0
+ * @see BaseModelFields
  */
 @Component
 public class ScreenshotFields extends BaseModelFields {

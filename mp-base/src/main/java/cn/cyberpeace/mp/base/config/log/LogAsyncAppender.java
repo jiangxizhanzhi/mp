@@ -9,6 +9,14 @@ import org.slf4j.MDC;
 
 import java.lang.reflect.Field;
 
+/**
+ * @ClassName LogAsyncAppender
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see AsyncAppender
+ */
 public class LogAsyncAppender extends AsyncAppender {
 
     private static final Field mdcPropertyMapField = ClassUtils.getField(LoggingEvent.class, "mdcPropertyMap", false, false);

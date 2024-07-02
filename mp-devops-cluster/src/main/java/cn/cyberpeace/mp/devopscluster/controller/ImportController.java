@@ -16,7 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 靶标导入管理类
+ * @ClassName ImportController
+ * @Description 靶标导入管理类
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Validated
 @Slf4j

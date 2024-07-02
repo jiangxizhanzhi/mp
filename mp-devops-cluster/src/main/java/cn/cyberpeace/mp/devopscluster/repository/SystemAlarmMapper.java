@@ -12,9 +12,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
+ * @ClassName SystemAlarmMapper
  * @Description 告警信息mapper
  * @Author qiaokang
  * @Date 2022-07-18 17:35:04
+ * @Version 1.0.0
+ * @see BaseModelMapper
  */
 @Mapper
 @Repository

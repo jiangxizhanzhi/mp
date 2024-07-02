@@ -21,18 +21,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 场景插件model实现处理基类
- *
- * @param <TPluginSceneModel> 表模型类   场景模板/场景实例
- * @param <TPluginSceneElementModel> 表模型类   网元节点
- * @param <TPluginSceneElementPortModel> 表模型类   网元端口
- * @param <TPluginSceneBO> 业务模型类   场景模板/场景实例
- * @param <TPluginSceneElementBO> 业务模型类   网元节点
- * @param <TPluginSceneElementPortBO> 业务模型类   网元端口
- * @param <1> mapper类  场景模板/场景实例
- * @param <TPluginSceneElementMapper> mapper类  网元节点
- * @param <TPluginSceneElementPortMapper> mapper类  网元端口
- * @param <TPluginHandler> 场景插件处理类
+ * @ClassName BasePluginModelHandler
+ * @Description 场景插件model实现处理基类
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public abstract class BasePluginModelHandler<
         TSceneBO extends BaseSceneBO<?, TSceneBO>,

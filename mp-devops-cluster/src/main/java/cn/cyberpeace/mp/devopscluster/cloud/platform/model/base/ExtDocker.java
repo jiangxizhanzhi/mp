@@ -9,8 +9,12 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 扩展容器信息
- * @author wanggang
+ * @ClassName ExtDocker
+ * @Description 扩展容器信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Serializable
  */
 @Data
 @NoArgsConstructor

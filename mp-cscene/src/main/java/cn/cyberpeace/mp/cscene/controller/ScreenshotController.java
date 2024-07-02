@@ -32,9 +32,12 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * @ClassName ScreenshotController
  * @Description 截屏文件管理controller
  * @Author qiaokang
  * @Date 2021-09-13 11:05:18
+ * @Version 1.0.0
+ * @see BaseModelController
  */
 @Slf4j
 @Api(tags = "截屏文件管理接口")

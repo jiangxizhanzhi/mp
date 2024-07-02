@@ -11,6 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+/**
+ * @ClassName CsceneSceneReportRabbitmqSender
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseSimpleMessageSender
+ */
 @Component
 public class CsceneSceneReportRabbitmqSender extends BaseSimpleMessageSender {
     public static final String CSCENE_SCENE_REPORT_EXCHANGE_NAME = CsceneReportRabbitmqSender.CSCENE_EXCHANGE_NAME;

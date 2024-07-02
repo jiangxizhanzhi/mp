@@ -5,9 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 
 /**
- * @Description:
+ * @ClassName FlowAnalysisSummary
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/3/16 09:55
+ * @Date 2022/3/16 09:55
+ * @Version 1.0.0
  */
 @Data
 @Builder

@@ -8,9 +8,11 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description: pcap解析返回体
+ * @ClassName PcapAnalyseResponse
+ * @Description
  * @Author qiaokang
- * @Date：2022/11/1 15:23
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @ApiModel("pcap解析返回体")

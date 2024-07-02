@@ -11,6 +11,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * @ClassName ListObjResult
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseObjResult
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

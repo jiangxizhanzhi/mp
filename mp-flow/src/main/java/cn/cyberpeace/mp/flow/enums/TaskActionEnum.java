@@ -3,7 +3,12 @@ package cn.cyberpeace.mp.flow.enums;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * 任务操作枚举类：1 start， 2 stop, 3 reset
+ * @ClassName TaskActionEnum
+ * @Description 任务操作枚举类：1 start， 2 stop, 3 reset
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Enum
  */
 public enum TaskActionEnum {
 

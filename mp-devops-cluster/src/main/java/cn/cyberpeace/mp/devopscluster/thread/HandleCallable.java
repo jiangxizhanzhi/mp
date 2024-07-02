@@ -9,8 +9,12 @@ import java.util.concurrent.Callable;
 
 
 /**
- * 实现Callable接口，来处理任务
- * @param <E>
+ * @ClassName HandleCallable
+ * @Description 实现Callable接口，来处理任务
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Callable
  */
 @Slf4j
 public class HandleCallable<E> implements Callable<ServiceResult> {

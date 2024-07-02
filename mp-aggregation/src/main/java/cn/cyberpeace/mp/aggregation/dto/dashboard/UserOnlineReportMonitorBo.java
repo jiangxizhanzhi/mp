@@ -5,9 +5,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description:
+ * @ClassName UserOnlineReportMonitorBo
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/8/26 11:04
+ * @Date 2022/8/26 11:04
+ * @Version 1.0.0
+ * @see UserOnlineReportBo
  */
 @Data
 public class UserOnlineReportMonitorBo extends UserOnlineReportBo {

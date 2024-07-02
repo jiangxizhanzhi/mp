@@ -2,6 +2,13 @@ package cn.cyberpeace.mp.base.service.code;
 
 import cn.cyberpeace.mp.base.common.MessageCommon;
 
+/**
+ * @ClassName ServiceCode
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public interface ServiceCode {
 
     default void setCode(String code, String message) {

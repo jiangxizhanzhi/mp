@@ -14,11 +14,12 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Arrays;
 
 /**
- * @BelongsPackage: cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler
- * @Author: hhuang
- * @CreateTime: 2023/04/27  15:18
- * @Description: 关闭节点处理
- * @Version: 1.0
+ * @ClassName StopHandler
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see HandlerCommon
  */
 @Slf4j
 public class StopHandler extends HandlerCommon{

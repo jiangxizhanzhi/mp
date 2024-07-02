@@ -13,6 +13,13 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+/**
+ * @ClassName TextUtils
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class TextUtils {
     private static final Pattern linePattern = Pattern.compile("_([a-z])");
 

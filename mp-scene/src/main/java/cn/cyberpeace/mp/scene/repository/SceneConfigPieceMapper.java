@@ -6,6 +6,14 @@ import cn.cyberpeace.mp.scene.repository.base.BaseScenePieceMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
+/**
+ * @ClassName SceneConfigPieceMapper
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseScenePieceMapper
+ */
 @Mapper
 @Repository
 @ModelClass(SceneConfigPieceModel.class)

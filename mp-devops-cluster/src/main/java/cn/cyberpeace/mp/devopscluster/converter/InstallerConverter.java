@@ -27,8 +27,12 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * 服务管理
- * @author wanggang
+ * @ClassName InstallerConverter
+ * @Description 服务管理
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseConverter
  */
 @Slf4j
 @Service

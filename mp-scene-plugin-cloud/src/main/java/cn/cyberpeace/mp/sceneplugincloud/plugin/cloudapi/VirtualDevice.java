@@ -7,6 +7,14 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDeviceData
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 
+/**
+ * @ClassName VirtualDevice
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see CloudClient
+ */
 public class VirtualDevice extends CloudClient {
     /**
      * getTemplateId

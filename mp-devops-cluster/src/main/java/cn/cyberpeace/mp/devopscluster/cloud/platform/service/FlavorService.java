@@ -7,8 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Flavor
- * @author wanggang
+ * @ClassName FlavorService
+ * @Description Flavor
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCpService
  */
 @Service
 @Slf4j

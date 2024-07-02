@@ -10,6 +10,14 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * @ClassName BaseRemoteFileServiceImpl
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseRemoteFileService
+ */
 @Slf4j
 @Data
 public abstract class BaseRemoteFileServiceImpl implements BaseRemoteFileService {

@@ -7,9 +7,11 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description: 批量新增流量任务请求
+ * @ClassName BatchAddFlowTaskRequest
+ * @Description
  * @Author qiaokang
- * @Date：2021/10/11 16:16
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @ApiModel(value = "批量新增流量任务请求")

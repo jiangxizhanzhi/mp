@@ -1,9 +1,12 @@
 package cn.cyberpeace.mp.frontadmin.enums;
 
 /**
- * @Description:
+ * @ClassName ModuleEnums
+ * @Description
  * @Author zhouxinghuai
- * @Date：2023/1/17 17:15
+ * @Date 2023/1/17 17:15
+ * @Version 1.0.0
+ * @see Enum
  */
 public enum ModuleEnums {
 

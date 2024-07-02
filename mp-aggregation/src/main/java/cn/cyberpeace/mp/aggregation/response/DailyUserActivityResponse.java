@@ -6,9 +6,11 @@ import lombok.Builder;
 import lombok.Data;
 
 /**
- * @Description:
+ * @ClassName DailyUserActivityResponse
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/9/13 11:03
+ * @Date 2021/9/13 11:03
+ * @Version 1.0.0
  */
 @Data
 @Builder

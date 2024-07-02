@@ -32,9 +32,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName RolePermissionModelServiceImpl
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see RolePermissionModelService
  */
 @Service
 @CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL)

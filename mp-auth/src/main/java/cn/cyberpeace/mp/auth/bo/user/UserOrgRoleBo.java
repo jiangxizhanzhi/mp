@@ -4,9 +4,12 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import lombok.Data;
 
 /**
- * @Description:
+ * @ClassName UserOrgRoleBo
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/7/22 09:43
+ * @Date 2022/7/22 09:43
+ * @Version 1.0.0
+ * @see UserModel
  */
 @Data
 public class UserOrgRoleBo extends UserModel {

@@ -5,9 +5,11 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description: 速率配置
- * @Author: guquan
- * @Date：2023/5/9 13:55
+ * @ClassName FlowTaskRateConf
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @ApiModel("速率配置")

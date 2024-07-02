@@ -6,9 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description:
- * @Author: guquan
- * @Date：2023/7/11 20:19
+ * @ClassName VirtualMachineInstanceResizeResult
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see CloudHttpData
  */
 @Data
 @AllArgsConstructor

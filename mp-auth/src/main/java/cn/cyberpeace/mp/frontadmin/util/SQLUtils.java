@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.frontadmin.util;
 
 /**
- * @Description:
+ * @ClassName SQLUtils
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/10/13 09:15
+ * @Date 2021/10/13 09:15
+ * @Version 1.0.0
  */
 public class SQLUtils {
 

@@ -39,8 +39,12 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * 快照管理
- * @author wanggang
+ * @ClassName SnapshotService
+ * @Description 快照管理
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCpService
  */
 @Service
 @Slf4j

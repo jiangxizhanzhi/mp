@@ -14,6 +14,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+/**
+ * @ClassName VirtualSwitch
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see CloudClient
+ */
 public class VirtualSwitch extends CloudClient {
     private static final String NETWORK_ID = "{network_id}";
 

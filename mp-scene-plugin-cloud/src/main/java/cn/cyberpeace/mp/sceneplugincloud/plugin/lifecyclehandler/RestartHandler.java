@@ -17,9 +17,12 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Arrays;
 
 /**
+ * @ClassName RestartHandler
  * @Description
  * @Author maojun
  * @Date 2021/10/28
+ * @Version 1.0.0
+ * @see HandlerCommon
  */
 @Slf4j
 public class RestartHandler extends HandlerCommon {

@@ -28,9 +28,12 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * @Description:
+ * @ClassName LoadAuthoritiesFilter
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/8/22 15:47
+ * @Date 2022/8/22 15:47
+ * @Version 1.0.0
+ * @see OncePerRequestFilter
  */
 @Component
 @Slf4j

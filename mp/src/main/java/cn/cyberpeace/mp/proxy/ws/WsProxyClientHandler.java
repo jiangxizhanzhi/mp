@@ -8,6 +8,14 @@ import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 /**
  * Copies data from the client to the server session.
  */
+/**
+ * @ClassName WsProxyClientHandler
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see AbstractWebSocketHandler
+ */
 public class WsProxyClientHandler extends AbstractWebSocketHandler {
 
     private WsProxyTargetConfig targetConfig;

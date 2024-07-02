@@ -3,9 +3,13 @@ package cn.cyberpeace.mp.frontbusiness.constant;
 import cn.cyberpeace.mp.base.service.code.ErrorCode;
 
 /**
- * @Description:
+ * @ClassName FrontBizErrorCode
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/5/21 17:36
+ * @Date 2022/5/21 17:36
+ * @Version 1.0.0
+ * @see Enum
+ * @see ErrorCode
  */
 public enum FrontBizErrorCode implements ErrorCode {
 

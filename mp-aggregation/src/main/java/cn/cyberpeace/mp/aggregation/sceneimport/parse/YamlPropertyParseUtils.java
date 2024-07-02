@@ -7,9 +7,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * @ClassName YamlPropertyParseUtils
  * @Description yml文件中key名称格式化为驼峰
  * @Author maojun
  * @Date 2021/10/11
+ * @Version 1.0.0
+ * @see PropertyUtils
  */
 class YamlPropertyParseUtils extends PropertyUtils {
     private static final Pattern middleLinePattern = Pattern.compile("-([a-z])");

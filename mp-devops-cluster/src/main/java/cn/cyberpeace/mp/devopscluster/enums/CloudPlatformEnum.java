@@ -10,7 +10,12 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * 云平台枚举信息
+ * @ClassName CloudPlatformEnum
+ * @Description 云平台枚举信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Enum
  */
 public enum CloudPlatformEnum{
 

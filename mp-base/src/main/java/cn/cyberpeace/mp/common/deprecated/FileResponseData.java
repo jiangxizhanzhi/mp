@@ -6,10 +6,11 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Deprecated
- * @Description: FastDFS返回对象
+ * @ClassName FileResponseData
+ * @Description FastDFS返回对象
  * @Author qiaokang
- * @Date：2021/6/21 15:01
+ * @Date 2021/6/21 15:01
+ * @Version 1.0.0
  */
 @Data
 public class FileResponseData {

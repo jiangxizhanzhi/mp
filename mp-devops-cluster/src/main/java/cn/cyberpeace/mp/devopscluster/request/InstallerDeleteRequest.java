@@ -10,6 +10,14 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
+/**
+ * @ClassName InstallerDeleteRequest
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseRequest
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

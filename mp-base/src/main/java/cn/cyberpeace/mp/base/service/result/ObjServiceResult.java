@@ -4,6 +4,14 @@ import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.code.ServiceCode;
 import lombok.NoArgsConstructor;
 
+/**
+ * @ClassName ObjServiceResult
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseServiceResult
+ */
 @NoArgsConstructor
 public class ObjServiceResult<T> extends BaseServiceResult<ObjResult<T>, T> {
 

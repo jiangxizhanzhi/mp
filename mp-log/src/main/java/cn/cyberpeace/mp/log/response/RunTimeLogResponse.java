@@ -5,10 +5,12 @@ import java.time.LocalDateTime;
 import lombok.*;
 
 /**
-  *@Desciption 查询日志
-  *@Author zhangjin
-  *@Date 9/13/21 9:30 上午
-**/
+ * @ClassName RunTimeLogResponse
+ * @Description
+ * @Author zhangjin
+ * @Date 9/13/21 9:30 上午
+ * @Version 1.0.0
+ */
 @Data
 @Builder
 @AllArgsConstructor

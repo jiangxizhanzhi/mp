@@ -6,9 +6,11 @@ import lombok.Data;
 import java.util.Objects;
 
 /**
- * @Description:
+ * @ClassName BasePageRequest
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/2/24 16:08
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 public class BasePageRequest {

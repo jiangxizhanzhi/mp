@@ -11,9 +11,12 @@ import cn.cyberpeace.mp.common.request.queryparam.OptionQueryParams;
 import java.util.List;
 
 /**
+ * @ClassName OptionService
  * @Description
- * @author: shgang
- * @Date: 2022/7/28
+ * @Author maojun
+ * @Date 2022/7/28
+ * @Version 1.0.0
+ * @see BaseModelService
  */
 public interface OptionService extends BaseModelService<OptionModel, OptionQueryParams> {
 

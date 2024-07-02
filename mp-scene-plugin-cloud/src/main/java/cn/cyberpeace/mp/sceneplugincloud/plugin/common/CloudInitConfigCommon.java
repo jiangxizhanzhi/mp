@@ -13,9 +13,11 @@ import java.util.*;
 import static cn.cyberpeace.mp.scene.util.CommandUtils.WINDOWS_LINE_BREAK;
 
 /**
+ * @ClassName CloudInitConfigCommon
  * @Description
  * @Author maojun
  * @Date 2022/4/6
+ * @Version 1.0.0
  */
 public class CloudInitConfigCommon {
     public static final String WINDOWS_HOSTS_PATH = "C:\\Windows\\System32\\drivers\\etc\\hosts";

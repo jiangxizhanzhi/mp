@@ -8,9 +8,12 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description: 虚拟USB存储文件列表
- * @Author: guquan
- * @Date：2023/4/18 10:24
+ * @ClassName VirtualUsbFileList
+ * @Description 虚拟USB存储文件列表
+ * @Author guquan
+ * @Date 2023/4/18 10:24
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @ApiModel("虚拟USB存储文件列表")

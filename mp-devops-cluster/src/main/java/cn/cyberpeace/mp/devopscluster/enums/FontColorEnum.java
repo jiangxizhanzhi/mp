@@ -3,7 +3,12 @@ package cn.cyberpeace.mp.devopscluster.enums;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * 字体颜色枚举信息
+ * @ClassName FontColorEnum
+ * @Description 字体颜色枚举信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Enum
  */
 public enum FontColorEnum {
 

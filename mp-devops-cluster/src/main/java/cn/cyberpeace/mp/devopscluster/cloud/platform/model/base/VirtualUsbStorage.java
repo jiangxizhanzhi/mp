@@ -6,9 +6,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description: 虚拟USB存储信息
- * @Author: guquan
- * @Date：2023/4/18 10:30
+ * @ClassName VirtualUsbStorage
+ * @Description 虚拟USB存储信息
+ * @Author guquan
+ * @Date 2023/4/18 10:30
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @ApiModel("虚拟USB存储信息")

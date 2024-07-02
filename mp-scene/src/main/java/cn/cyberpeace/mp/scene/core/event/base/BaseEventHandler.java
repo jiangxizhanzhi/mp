@@ -12,12 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 事件处理
- * @param <TEventModelInterface> 事件目标模型类
- * @param <TEventModel> 事件模型类
- *           1.不做特殊处理
- *           2.当前最新事件状态存储到缓存（TODO）
- *           3.事件每一个状态变化都持久化（暂不实现）
+ * @ClassName BaseEventHandler
+ * @Description 事件处理
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Slf4j
 @Data

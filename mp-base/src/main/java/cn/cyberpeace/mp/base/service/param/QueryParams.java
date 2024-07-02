@@ -7,7 +7,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 查询参数定义
+ * @ClassName QueryParams
+ * @Description 查询参数定义
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see IdsQueryParams
+ * @see ExcludeQueryParams
+ * @see SearchQueryParams
+ * @see OrderQueryParams
+ * @see PageQueryParams
+ * @see FieldsQueryParams
+ * @see CompatiblePageQueryParams
+ * @see CompatibleOrderQueryParams
  */
 @Data
 @AllArgsConstructor

@@ -5,6 +5,13 @@ import org.springframework.util.FastByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Map;
 
+/**
+ * @ClassName ExceptionUtil
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class ExceptionUtil {
 
     /**

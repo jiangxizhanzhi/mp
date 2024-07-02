@@ -8,11 +8,12 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 
 /**
- * @description 日志级别响应
- * @author wangssh
- * @date 2023/5/30
- * @version 1.0
- **/
+ * @ClassName LogLevelResponse
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 @Builder
 @AllArgsConstructor

@@ -13,8 +13,11 @@ import java.util.List;
 
 
 /**
- * 流量分析Request
- * @author wanggang
+ * @ClassName FlowSceneSimulationRequest
+ * @Description 流量分析Request
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

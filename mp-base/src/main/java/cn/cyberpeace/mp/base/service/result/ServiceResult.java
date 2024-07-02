@@ -6,8 +6,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
+ * @ClassName ServiceResult
+ * @Description
  * 统一服务返回结果
  * @param <T> 返回结果数据源对象类型
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseServiceResult
  */
 @Data
 @AllArgsConstructor

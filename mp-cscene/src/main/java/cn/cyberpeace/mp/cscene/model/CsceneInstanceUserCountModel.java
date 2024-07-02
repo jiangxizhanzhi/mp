@@ -9,9 +9,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * @ClassName CsceneInstanceUserCountModel
  * @Description 用户场景统计对象
  * @Author qiaokang
  * @Date 2023-06-20 14:26:35
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @AllArgsConstructor

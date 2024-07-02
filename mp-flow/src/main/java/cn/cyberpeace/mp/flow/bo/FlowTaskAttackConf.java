@@ -5,9 +5,11 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description: 攻击流量参数配置
- * @Author: guquan
- * @Date：2023/5/9 13:56
+ * @ClassName FlowTaskAttackConf
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @ApiModel("攻击流量参数配置")

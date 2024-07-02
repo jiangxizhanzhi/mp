@@ -11,6 +11,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 
+/**
+ * @ClassName WazuhDataQueryParamsBuilder
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public interface WazuhDataQueryParamsBuilder {
     BoolQueryBuilder build();
 

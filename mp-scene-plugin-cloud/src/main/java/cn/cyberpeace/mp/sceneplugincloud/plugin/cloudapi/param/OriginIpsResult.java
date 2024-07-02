@@ -9,9 +9,12 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
+ * @ClassName OriginIpsResult
  * @Description
  * @Author zhanglin
  * @Date 2023/3/21
+ * @Version 1.0.0
+ * @see CloudHttpData
  */
 @Data
 @AllArgsConstructor

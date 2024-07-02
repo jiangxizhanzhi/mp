@@ -7,9 +7,12 @@ import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
 import org.springframework.stereotype.Component;
 
 /**
+ * @ClassName FlowScriptParamFields
  * @Description 流量脚本参数Fields
  * @Author qiaokang
  * @Date 2021-11-25 15:00:45
+ * @Version 1.0.0
+ * @see BaseModelFields
  */
 @Component
 public class FlowScriptParamFields extends BaseModelFields {

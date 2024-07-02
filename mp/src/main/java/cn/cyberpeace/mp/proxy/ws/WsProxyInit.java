@@ -9,6 +9,14 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 
 import java.util.List;
 
+/**
+ * @ClassName WsProxyInit
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see WebSocketConfigurer
+ */
 @Component
 public class WsProxyInit implements WebSocketConfigurer {
 

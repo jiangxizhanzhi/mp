@@ -7,9 +7,11 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 /**
- * @Description:
+ * @ClassName LogFileBasicDto
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/5/6 22:53
+ * @Date 2022/5/6 22:53
+ * @Version 1.0.0
  */
 @Data
 @SuperBuilder

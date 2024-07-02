@@ -8,9 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * @ClassName InitCommandParseResult
  * @Description
  * @Author maojun
  * @Date 2021/10/12
+ * @Version 1.0.0
  */
 @Data
 public class InitCommandParseResult {

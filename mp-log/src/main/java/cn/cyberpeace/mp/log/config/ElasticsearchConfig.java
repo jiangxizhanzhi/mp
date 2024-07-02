@@ -10,8 +10,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ObjectUtils;
 
 /**
- * ES配置类
- * @author wanggang
+ * @ClassName ElasticsearchConfig
+ * @Description ES配置类
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Configuration(value = "LogElasticsearchConfig")
 public class ElasticsearchConfig {

@@ -20,9 +20,12 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * @ClassName Node2NodeConnectConverter
  * @Description
  * @Author maojun
  * @Date 2021/10/12
+ * @Version 1.0.0
+ * @see IConverter
  */
 class Node2NodeConnectConverter implements IConverter {
 

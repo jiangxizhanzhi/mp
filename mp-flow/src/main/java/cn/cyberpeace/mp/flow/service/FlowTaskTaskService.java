@@ -10,9 +10,12 @@ import cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams;
 import java.util.List;
 
 /**
+ * @ClassName FlowTaskTaskService
  * @Description 流量执行任务service
  * @Author qiaokang
  * @Date 2023-04-27 09:21:37
+ * @Version 1.0.0
+ * @see BaseModelService
  */
 public interface FlowTaskTaskService extends BaseModelService<FlowTaskTaskModel, QueryParams> {
 

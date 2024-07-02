@@ -8,9 +8,12 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import java.util.List;
 
 /**
- * @Description: 激活响应
+ * @ClassName ActivationResponse
+ * @Description 激活响应
  * @Author zhouxinghuai
- * @Date：2021/09/07 11:13
+ * @Date 2021/09/07 11:13
+ * @Version 1.0.0
+ * @see ActivationRequest
  */
 @Data
 public class ActivationResponse extends ActivationRequest {

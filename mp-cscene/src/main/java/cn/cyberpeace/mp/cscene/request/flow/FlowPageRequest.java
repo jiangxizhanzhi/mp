@@ -7,9 +7,12 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * @Description:
+ * @ClassName FlowPageRequest
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/11/22 17:40
+ * @Date 2021/11/22 17:40
+ * @Version 1.0.0
+ * @see PageRequest
  */
 @Data
 public class FlowPageRequest extends PageRequest {

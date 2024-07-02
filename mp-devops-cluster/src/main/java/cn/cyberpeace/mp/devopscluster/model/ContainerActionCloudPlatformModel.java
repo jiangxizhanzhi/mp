@@ -5,7 +5,13 @@ import lombok.*;
 import java.io.Serializable;
 
 /**
- * 容器创建模型
+ * @ClassName ContainerActionCloudPlatformModel
+ * @Description 容器创建模型
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModel
+ * @see Serializable
  */
 @Data
 @NoArgsConstructor

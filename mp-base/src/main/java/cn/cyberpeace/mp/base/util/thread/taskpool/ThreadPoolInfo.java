@@ -7,11 +7,12 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
- * @author wangssh
- * @version 1.0
- * @description 线程池信息
- * @date 2023/6/29
- **/
+ * @ClassName ThreadPoolInfo
+ * @Description 线程池信息
+ * @Author wangssh
+ * @Date 2023/6/29
+ * @Version 1.0
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

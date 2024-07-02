@@ -1,5 +1,12 @@
 package cn.cyberpeace.mp.cscene.service.action;
 
+/**
+ * @ClassName CsceneCallAction
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class CsceneCallAction {
     public static final String NODE_START_FLOW = "node_start_flow";
     public static final String NODE_STOP_FLOW = "node_stop_flow";

@@ -28,6 +28,14 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @ClassName ScenePluginCloudSwagger2Config
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ApplicationListener
+ */
 @Configuration
 public class ScenePluginCloudSwagger2Config implements ApplicationListener<ApplicationReadyEvent> {
 

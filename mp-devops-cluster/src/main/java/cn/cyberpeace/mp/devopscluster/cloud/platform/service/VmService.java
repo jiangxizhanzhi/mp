@@ -11,8 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * 虚拟机
- * @author wanggang
+ * @ClassName VmService
+ * @Description 虚拟机
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCpService
  */
 @Service
 @Slf4j

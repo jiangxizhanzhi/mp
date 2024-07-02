@@ -8,9 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * @ClassName DockerInstallCommandUtils
  * @Description
  * @Author maojun
  * @Date 2022/5/6
+ * @Version 1.0.0
  */
 public class DockerInstallCommandUtils {
     private static final String DOCKER_RUN_DEFAULT = "docker run -d %s %s $repo_tag %s";

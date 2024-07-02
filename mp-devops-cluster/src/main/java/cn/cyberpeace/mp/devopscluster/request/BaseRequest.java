@@ -6,7 +6,12 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 /**
- * 基础参数
+ * @ClassName BaseRequest
+ * @Description 基础参数
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Serializable
  */
 @Data
 @NoArgsConstructor

@@ -13,9 +13,13 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 /**
- * @Description:
+ * @ClassName UrlACModel
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/5/19 19:15
+ * @Date 2022/5/19 19:15
+ * @Version 1.0.0
+ * @see BaseModel
+ * @see Serializable
  */
 @Data
 @Builder

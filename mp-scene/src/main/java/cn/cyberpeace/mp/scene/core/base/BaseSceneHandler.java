@@ -67,31 +67,16 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * 基础的场景处理类，场景模板和场景实例的拓扑数据操作都是一样的
+ * @ClassName BaseSceneHandler
+ * @Description 基础的场景处理类，场景模板和场景实例的拓扑数据操作都是一样的
  * 对于场景拓扑分为全拓扑操作、区域拓扑操作
  * 全拓扑操作可视作特殊的区域拓扑操作，其处理逻辑都是一样的，都是对节点、连线的数据处理
  * 区域拓扑操作需要特别考虑边界连线(连线的另一端涉及到其他区域的节点)的数据处理，不能遗漏
- *
+ * <p>
  * TODO: 部分节点模式，只对部分节点进行有限的处理
- *
- * @param <TSceneModel> 表模型类   场景模板/场景实例
- * @param <TSceneAreaModel> 表模型类   区域节点
- * @param <TSceneElementModel> 表模型类   网元节点
- * @param <TSceneElementPortModel> 表模型类   网元端口
- * @param <TSceneElementPortConnectionModel> 表模型类   网元端口连接（也代表节点之间连接）
- * @param <TSceneElementPluginModel> 表模型类   网元节点插件关系
- * @param <TScenePieceModel> 表模型类   碎片节点
- * @param <TSceneBO>  业务模型类  场景模板/场景实例
- * @param <TSceneAreaBO>  业务模型类  区域节点
- * @param <TSceneElementPortBO>  业务模型类  网元端口
- * @param <TSceneElementBO>  业务模型类  网元节点
- * @param <TSceneElementPortConnectionBO>  业务模型类  网元端口连接（也代表节点之间连接）
- * @param <TScenePieceBO> 业务模型类  碎片节点
- * @param <TSceneTopologyBO>  业务模型类  场景拓扑数据
- * @param <TSceneDataBO>  业务模型类  场景数据（包含拓扑数据、插件数据）
- * @param <TSceneContextBO> 场景上下文
- * @param <TScenePluginHandler> 场景插件处理接口类
- * @param <TSceneHandler> 场景处理实现类
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Getter
 public abstract class BaseSceneHandler<

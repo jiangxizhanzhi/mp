@@ -10,9 +10,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description: 公告-用户表
+ * @ClassName SysNoticeUserModel
+ * @Description 公告-用户表
  * @Author zhouxinghuai
- * @Date：2022/9/20 11:13
+ * @Date 2022/9/20 11:13
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @AllArgsConstructor

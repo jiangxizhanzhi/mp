@@ -6,6 +6,14 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @ClassName SceneTransferContext
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see TransferContext
+ */
 @Component
 public class SceneTransferContext implements TransferContext<Map<String, String>> {
 

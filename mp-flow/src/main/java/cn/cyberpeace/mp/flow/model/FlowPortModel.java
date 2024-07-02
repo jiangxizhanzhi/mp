@@ -11,9 +11,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description: 流量网口对象
+ * @ClassName FlowPortModel
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/31 17:17
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @AllArgsConstructor

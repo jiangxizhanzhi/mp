@@ -1,9 +1,12 @@
 package cn.cyberpeace.mp.frontadmin.enums;
 
 /**
+ * @ClassName NoticeTopTypeEnum
  * @Description
- * @author: zhouxinghuai
- * @Date: 2022/9/23
+ * @Author maojun
+ * @Date 2022/9/23
+ * @Version 1.0.0
+ * @see Enum
  */
 public enum NoticeTopTypeEnum {
 

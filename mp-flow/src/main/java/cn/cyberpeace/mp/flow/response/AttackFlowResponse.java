@@ -19,9 +19,12 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @Description: 攻击流量返回信息
+ * @ClassName AttackFlowResponse
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/10 16:57
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see FlowInfoResponse
  */
 @Data
 @AllArgsConstructor

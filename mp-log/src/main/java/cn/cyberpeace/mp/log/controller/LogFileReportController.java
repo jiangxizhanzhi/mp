@@ -16,8 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 日志上报接口
- **/
+ * @ClassName LogFileReportController
+ * @Description 日志上报接口
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/report")
 @Api(value = "日志模块", tags = "日志模块")

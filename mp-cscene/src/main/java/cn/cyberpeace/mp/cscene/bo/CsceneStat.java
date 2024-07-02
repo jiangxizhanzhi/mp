@@ -5,6 +5,13 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * @ClassName CsceneStat
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @ApiModel(description = "场景模板统计数据")
 @Data
 @AllArgsConstructor

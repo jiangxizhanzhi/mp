@@ -10,8 +10,12 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 端口配置
- * @author wanggang
+ * @ClassName PortConfig
+ * @Description 端口配置
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Serializable
  */
 @Data
 @NoArgsConstructor

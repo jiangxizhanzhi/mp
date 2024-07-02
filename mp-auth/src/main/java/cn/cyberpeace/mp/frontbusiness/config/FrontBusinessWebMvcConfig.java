@@ -9,9 +9,12 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * @Description:
+ * @ClassName FrontBusinessWebMvcConfig
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/10 21:15
+ * @Date 2021/12/10 21:15
+ * @Version 1.0.0
+ * @see WebMvcConfigurer
  */
 @Configuration
 public class FrontBusinessWebMvcConfig implements WebMvcConfigurer {

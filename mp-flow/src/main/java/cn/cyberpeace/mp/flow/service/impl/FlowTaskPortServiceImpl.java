@@ -13,6 +13,15 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * @ClassName FlowTaskPortServiceImpl
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see FlowTaskPortService
+ */
 @Service
 @Slf4j
 public class FlowTaskPortServiceImpl extends BaseModelServiceImpl<FlowTaskPortModel, FlowTaskPortMapper, FlowTaskPortFields,

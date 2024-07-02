@@ -7,9 +7,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
+ * @ClassName SnapshotDeleteParams
  * @Description
  * @Author maojun
  * @Date 2022/7/8
+ * @Version 1.0.0
+ * @see CloudHttpData
  */
 @Getter
 @Setter

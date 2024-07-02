@@ -9,6 +9,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.List;
 
+/**
+ * @ClassName VirtualRouter
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see CloudClient
+ */
 public class VirtualRouter extends CloudClient {
 
     private static final String ROUTER_ID = "{router_id}";

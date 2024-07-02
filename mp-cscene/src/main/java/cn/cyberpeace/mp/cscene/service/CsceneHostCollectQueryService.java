@@ -31,6 +31,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * @ClassName CsceneHostCollectQueryService
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Slf4j
 @Service
 public class CsceneHostCollectQueryService {

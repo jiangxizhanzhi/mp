@@ -5,7 +5,13 @@ import lombok.*;
 import java.io.Serializable;
 
 /**
- * 虚拟机模型，对应云平台接口返回信息
+ * @ClassName VmActionCloudPlatformModel
+ * @Description 虚拟机模型，对应云平台接口返回信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModel
+ * @see Serializable
  */
 @Data
 @NoArgsConstructor

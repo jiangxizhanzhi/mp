@@ -8,9 +8,11 @@ import lombok.NoArgsConstructor;
 import java.util.Objects;
 
 /**
- * @Description:
+ * @ClassName PageRequest
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/11/22 11:13
+ * @Date 2021/11/22 11:13
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

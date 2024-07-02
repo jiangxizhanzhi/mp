@@ -4,9 +4,11 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description: 采集事件分类
+ * @ClassName EventAggr
+ * @Description 采集事件分类
  * @Author zhouxinghuai
- * @Date：2021/11/22 17:35
+ * @Date 2021/11/22 17:35
+ * @Version 1.0.0
  */
 @Data
 public class EventAggr {

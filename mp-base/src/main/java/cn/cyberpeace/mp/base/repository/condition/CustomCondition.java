@@ -11,7 +11,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 自定义业务条件
+ * @ClassName CustomCondition
+ * @Description 自定义业务条件
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCondition
  */
 @Data
 @AllArgsConstructor

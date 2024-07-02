@@ -17,7 +17,8 @@ import java.util.Objects;
  * @Description 从classification.json取到的流量类型分类数据，提供给外界
  * @Author zhanzhi
  * @Date 2023/9/19 13:54
- **/
+ * @Version 1.0.0
+ */
 @Data
 @Accessors(chain = true)
 public class FlowClassificationDto {

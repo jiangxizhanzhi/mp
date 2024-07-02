@@ -12,6 +12,13 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * @ClassName RefreshOriginLogFileScheduleJob
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Slf4j
 @Component
 public class RefreshOriginLogFileScheduleJob {

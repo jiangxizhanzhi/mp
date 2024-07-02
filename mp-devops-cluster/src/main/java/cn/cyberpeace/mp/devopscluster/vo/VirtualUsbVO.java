@@ -5,9 +5,12 @@ import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 /**
- * @Description: 虚拟USB对象VO
- * @Author: guquan
- * @Date：2023/4/17 9:01
+ * @ClassName VirtualUsbVO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see VirtualUsb
  */
 @Data
 @ApiModel("虚拟USB对象VO")

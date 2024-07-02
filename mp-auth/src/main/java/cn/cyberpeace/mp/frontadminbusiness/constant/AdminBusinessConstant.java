@@ -3,9 +3,11 @@ package cn.cyberpeace.mp.frontadminbusiness.constant;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName AdminBusinessConstant
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/9 19:38
+ * @Date 2021/12/9 19:38
+ * @Version 1.0.0
  */
 public class AdminBusinessConstant {
     private AdminBusinessConstant() {

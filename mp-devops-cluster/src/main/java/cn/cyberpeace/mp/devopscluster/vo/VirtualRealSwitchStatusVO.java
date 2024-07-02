@@ -8,7 +8,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 虚实结合交换机状态
+ * @ClassName VirtualRealSwitchStatusVO
+ * @Description 虚实结合交换机状态
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseVO
  */
 @Data
 @NoArgsConstructor

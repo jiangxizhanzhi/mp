@@ -5,6 +5,14 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.base.BaseCloudPluginSceneElementPort
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementPortModel;
 import lombok.Data;
 
+/**
+ * @ClassName CloudPluginSceneElementPortBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCloudPluginSceneElementPortBO
+ */
 @Data
 public class CloudPluginSceneElementPortBO extends BaseCloudPluginSceneElementPortBO<CloudPluginSceneElementPortModel,
         CloudPluginSceneElementPortBO, SceneElementPortBO> {

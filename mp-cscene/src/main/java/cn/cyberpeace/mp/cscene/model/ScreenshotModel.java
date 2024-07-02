@@ -9,9 +9,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * @ClassName ScreenshotModel
  * @Description 截屏文件管理对象
  * @Author qiaokang
  * @Date 2021-09-13 11:05:18
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @AllArgsConstructor

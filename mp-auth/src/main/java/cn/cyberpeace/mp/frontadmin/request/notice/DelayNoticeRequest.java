@@ -7,9 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description: 延迟提醒请求
+ * @ClassName DelayNoticeRequest
+ * @Description 延迟提醒请求
  * @Author qiaokang
- * @Date：2023/8/22 16:36
+ * @Date 2023/8/22 16:36
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

@@ -8,9 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * @ClassName ConnectedNetworkBO
  * @Description
  * @Author maojun
  * @Date 2022/3/11
+ * @Version 1.0.0
  */
 public class ConnectedNetworkBO {
     CloudPluginSceneElementNetworkBO network;

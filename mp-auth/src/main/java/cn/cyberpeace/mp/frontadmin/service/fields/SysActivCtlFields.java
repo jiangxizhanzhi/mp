@@ -8,9 +8,12 @@ import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
 import org.springframework.stereotype.Component;
 
 /**
- * @Description:
+ * @ClassName SysActivCtlFields
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/2/15 11:13
+ * @Date 2022/2/15 11:13
+ * @Version 1.0.0
+ * @see BaseModelFields
  */
 @Component
 public class SysActivCtlFields extends BaseModelFields {

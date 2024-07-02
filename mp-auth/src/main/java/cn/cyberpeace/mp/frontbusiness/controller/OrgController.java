@@ -21,9 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * @Description: 组织管理接口(业务)
+ * @ClassName OrgController
+ * @Description 组织管理接口(业务)
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 @Api(value = "组织管理接口", tags = "组织管理接口")
 @Slf4j

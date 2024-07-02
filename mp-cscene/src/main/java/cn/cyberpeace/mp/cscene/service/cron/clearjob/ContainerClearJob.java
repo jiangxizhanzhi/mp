@@ -10,9 +10,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * @ClassName ContainerClearJob
  * @Description
  * @Author maojun
  * @Date 2022/3/24
+ * @Version 1.0.0
+ * @see AbstractClearJob
  */
 public class ContainerClearJob extends AbstractClearJob<ContainerGetData> {
 

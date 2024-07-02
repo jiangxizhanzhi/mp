@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.frontadmin.constant;
 
 /**
- * @Description: 全局变量
+ * @ClassName AdminConstant
+ * @Description 全局变量
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 public class AdminConstant {
 

@@ -18,9 +18,12 @@ import java.util.List;
 import java.util.Locale;
 
 /**
+ * @ClassName OperateLogServiceImpl
  * @Description
  * @Author shgang
  * @Date 2022/9/14
+ * @Version 1.0.0
+ * @see OperateLogService
  */
 @Repository
 public class OperateLogServiceImpl implements OperateLogService {

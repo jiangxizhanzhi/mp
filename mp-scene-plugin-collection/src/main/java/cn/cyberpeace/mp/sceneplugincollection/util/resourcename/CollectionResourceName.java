@@ -6,9 +6,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 /**
+ * @ClassName CollectionResourceName
  * @Description
  * @Author maojun
  * @Date 2022/5/20
+ * @Version 1.0.0
+ * @see ICollectionResourceName
  */
 // 删除arkime时对arkime的name有依赖,先不使用
 @Component

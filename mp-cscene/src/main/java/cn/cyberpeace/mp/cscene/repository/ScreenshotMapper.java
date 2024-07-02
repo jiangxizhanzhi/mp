@@ -10,9 +10,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
+ * @ClassName ScreenshotMapper
  * @Description 截屏文件管理mapper
  * @Author qiaokang
  * @Date 2021-09-13 11:05:18
+ * @Version 1.0.0
+ * @see BaseModelMapper
  */
 @Mapper
 @Repository

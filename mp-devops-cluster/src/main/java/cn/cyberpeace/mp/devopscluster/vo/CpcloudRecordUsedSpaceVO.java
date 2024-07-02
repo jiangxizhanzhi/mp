@@ -4,9 +4,12 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatf
 import lombok.Data;
 
 /**
- * @Description: 云平台录屏使用空间返回
+ * @ClassName CpcloudRecordUsedSpaceVO
+ * @Description
  * @Author qiaokang
- * @Date：2021/9/13 19:47
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCloudPlatformResult
  */
 @Data
 public class CpcloudRecordUsedSpaceVO extends BaseCloudPlatformResult {

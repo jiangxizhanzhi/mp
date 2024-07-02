@@ -3,6 +3,14 @@ package cn.cyberpeace.mp.scene.service.taskpool;
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 
+/**
+ * @ClassName ElementTaskPool
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see TaskPool
+ */
 public class ElementTaskPool extends TaskPool {
 
     private static class ElementTaskPoolInstance {

@@ -13,6 +13,13 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * @ClassName HardwareLimitUtils
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Slf4j
 public class HardwareLimitUtils {
     private static HardwareCount TOTAL = new HardwareCount(64, 1823127060, 128799);

@@ -15,6 +15,14 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @ClassName BaseCollectionPluginSceneElementBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BasePluginSceneElementBO
+ */
 @Data
 public abstract class BaseCollectionPluginSceneElementBO<M extends BaseCollectionPluginSceneElementModel,
         T extends BaseCollectionPluginSceneElementBO<M, T, S>, S extends BaseSceneElementBO<?, ?, S>>

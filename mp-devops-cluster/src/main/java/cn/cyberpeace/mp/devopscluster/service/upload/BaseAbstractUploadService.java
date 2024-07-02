@@ -5,7 +5,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 /**
- * 基础的上传方法
+ * @ClassName BaseAbstractUploadService
+ * @Description 基础的上传方法
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public abstract class BaseAbstractUploadService {
 

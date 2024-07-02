@@ -7,9 +7,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * @Description: 新增虚拟机请求
+ * @ClassName AddVmRequest
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/23 10:36
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

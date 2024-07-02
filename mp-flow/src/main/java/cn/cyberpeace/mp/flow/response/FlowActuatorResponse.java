@@ -18,7 +18,12 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @Description: 流量发生器返回信息
+ * @ClassName FlowActuatorResponse
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Serializable
  */
 @Data
 @AllArgsConstructor

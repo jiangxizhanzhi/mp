@@ -11,9 +11,12 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 
 /**
- * @Description: 流量执行对象
+ * @ClassName FlowActuatorModel
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/31 17:17
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @AllArgsConstructor

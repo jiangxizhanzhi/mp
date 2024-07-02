@@ -8,9 +8,11 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 /**
+ * @ClassName CloudMessageConvertInitJob
  * @Description 初始化云平台错误码转换的配置
  * @Author maojun
  * @Date 2022/8/5
+ * @Version 1.0.0
  */
 @Component
 public class CloudMessageConvertInitJob {

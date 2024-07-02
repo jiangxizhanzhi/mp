@@ -7,6 +7,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+/**
+ * @ClassName RealEquipmentPageRequest
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BasePageRequest
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -10,6 +10,14 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * @ClassName HostStateQueryParams
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see QueryParams
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

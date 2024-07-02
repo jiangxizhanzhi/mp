@@ -18,7 +18,14 @@ import lombok.Data;
 import org.springframework.stereotype.Component;
 
 
-
+/**
+ * @ClassName CollectionScenePluginHandler
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ScenePluginHandler
+ */
 @Component
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)
 @Data

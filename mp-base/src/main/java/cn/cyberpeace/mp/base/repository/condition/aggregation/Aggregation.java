@@ -6,8 +6,12 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.function.Function;
 
 /**
- * 标记聚合函数
+ * @ClassName Aggregation
+ * @Description  标记聚合函数
  * 约定：子类通过静态方法f载入聚合字段
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 public abstract class Aggregation<T extends Aggregation<T>> {

@@ -6,9 +6,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description: 选项通用查询条件
- * @Author: guquan
- * @Date：2023/5/5 14:31
+ * @ClassName OptionQueryParams
+ * @Description 选项通用查询条件
+ * @Author guquan
+ * @Date 2023/5/5 14:31
+ * @Version 1.0.0
+ * @see QueryParams
  */
 @Data
 @ApiModel(value = "选项通用查询条件")

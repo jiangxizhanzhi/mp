@@ -25,6 +25,13 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.util.List;
 
+/**
+ * @ClassName TaiShiGuidesController
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Api(value = "态势导调", tags = "CSCENE-态势导调")
 @Slf4j
 @RestController

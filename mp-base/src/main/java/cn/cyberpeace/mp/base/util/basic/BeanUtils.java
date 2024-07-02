@@ -8,6 +8,13 @@ import org.springframework.beans.BeanWrapperImpl;
 import java.beans.PropertyDescriptor;
 import java.util.*;
 
+/**
+ * @ClassName BeanUtils
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class BeanUtils {
 
     /**

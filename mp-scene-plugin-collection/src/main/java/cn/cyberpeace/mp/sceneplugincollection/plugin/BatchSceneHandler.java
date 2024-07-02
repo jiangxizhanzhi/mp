@@ -19,9 +19,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * @ClassName BatchSceneHandler
  * @Description
  * @Author maojun
  * @Date 2022/2/23
+ * @Version 1.0.0
  */
 public class BatchSceneHandler {
     private List<String> sceneIds;

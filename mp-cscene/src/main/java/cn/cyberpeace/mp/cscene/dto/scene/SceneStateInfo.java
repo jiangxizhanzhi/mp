@@ -6,9 +6,11 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * @ClassName SceneStateInfo
  * @Description
  * @Author maojun
  * @Date 2022/1/20
+ * @Version 1.0.0
  */
 @Slf4j
 @Getter

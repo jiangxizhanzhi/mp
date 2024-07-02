@@ -12,6 +12,13 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * @ClassName ScenePluginCollectionController
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Api(value = "场景采集插件", tags = "场景采集插件")
 @Slf4j
 @RestController

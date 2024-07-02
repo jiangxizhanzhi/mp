@@ -15,9 +15,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @Description:
+ * @ClassName OperatePermissionService
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/5/13 11:57
+ * @Date 2022/5/13 11:57
+ * @Version 1.0.0
  */
 @Slf4j
 @Service

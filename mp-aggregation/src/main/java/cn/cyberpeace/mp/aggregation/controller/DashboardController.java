@@ -32,9 +32,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * @Description: Dashboard相关统计接口
+ * @ClassName DashboardController
+ * @Description Dashboard相关统计接口
  * @Author zhouxinghuai
- * @Date：2021/9/13 10:32
+ * @Date 2021/9/13 10:32
+ * @Version 1.0.0
  */
 @Api(value = "仪表盘统计接口", tags = "仪表盘统计接口")
 @Slf4j

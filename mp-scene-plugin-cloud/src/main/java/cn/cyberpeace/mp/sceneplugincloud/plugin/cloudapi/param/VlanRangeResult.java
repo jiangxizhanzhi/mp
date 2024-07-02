@@ -6,9 +6,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
+ * @ClassName VlanRangeResult
  * @Description
  * @Author maojun
  * @Date 2022/4/1
+ * @Version 1.0.0
  */
 @Getter
 @Setter

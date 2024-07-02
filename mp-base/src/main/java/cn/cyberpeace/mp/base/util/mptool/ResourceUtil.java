@@ -2,6 +2,13 @@ package cn.cyberpeace.mp.base.util.mptool;
 
 import java.net.URL;
 
+/**
+ * @ClassName ResourceUtil
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class ResourceUtil {
 
     /**

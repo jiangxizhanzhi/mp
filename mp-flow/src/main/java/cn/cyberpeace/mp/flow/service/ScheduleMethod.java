@@ -3,9 +3,11 @@ package cn.cyberpeace.mp.flow.service;
 import cn.cyberpeace.mp.flow.model.base.FlowBaseModel;
 
 /**
- * @Description: 定时任务执行方法接口
+ * @ClassName ScheduleMethod
+ * @Description
  * @Author qiaokang
- * @Date：2021/6/16 14:50
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public interface ScheduleMethod {
 

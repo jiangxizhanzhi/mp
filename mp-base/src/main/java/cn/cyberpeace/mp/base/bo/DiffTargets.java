@@ -9,8 +9,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 差异比较结果
- * @param <T> 目标类型
+ * @ClassName DiffTargets
+ * @Description 差异比较结果
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

@@ -7,9 +7,12 @@ import cn.cyberpeace.mp.frontadmin.model.SysNoticeUserModel;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName SysNoticeUserService
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/9/20 13:55
+ * @Date 2022/9/20 13:55
+ * @Version 1.0.0
+ * @see BaseModelService
  */
 public interface SysNoticeUserService extends BaseModelService<SysNoticeUserModel, QueryParams> {
 

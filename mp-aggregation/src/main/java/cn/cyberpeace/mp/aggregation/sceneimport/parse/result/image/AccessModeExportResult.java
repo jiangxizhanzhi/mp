@@ -4,9 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
+ * @ClassName AccessModeExportResult
  * @Description
  * @Author maojun
  * @Date 2021/11/2
+ * @Version 1.0.0
  */
 @Getter
 @Setter

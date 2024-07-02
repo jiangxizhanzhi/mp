@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.aggregation.constant;
 
 /**
+ * @ClassName CommonConstant
  * @Description
  * @Author maojun
  * @Date 2021/12/18
+ * @Version 1.0.0
  */
 public final class CommonConstant {
 

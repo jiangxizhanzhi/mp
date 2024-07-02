@@ -10,6 +10,14 @@ import javax.validation.ConstraintValidatorContext;
 import java.util.regex.Pattern;
 
 
+/**
+ * @ClassName CidrValidator
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ConstraintValidator
+ */
 public class CidrValidator implements ConstraintValidator<Cidr, CharSequence> {
 
     public static final Pattern CIDR = Pattern.compile("^(?:(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\/([0-9]|[1-2]\\d|3[0-2])$");

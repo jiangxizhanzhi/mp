@@ -4,9 +4,12 @@ package cn.cyberpeace.mp.frontadmin.event;
 import org.springframework.context.ApplicationEvent;
 
 /**
- * @Description:
+ * @ClassName SysConfigUpdateEvent
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/4/1 15:59
+ * @Date 2022/4/1 15:59
+ * @Version 1.0.0
+ * @see ApplicationEvent
  */
 public class SysConfigUpdateEvent extends ApplicationEvent {
 

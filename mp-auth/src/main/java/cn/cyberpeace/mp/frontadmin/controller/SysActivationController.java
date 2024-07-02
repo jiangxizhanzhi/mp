@@ -27,9 +27,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @Description: 系统激活管理接口
+ * @ClassName SysActivationController
+ * @Description 系统激活管理接口
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 @Api(value = "系统激活管理接口", tags = "系统激活管理接口")
 @Slf4j

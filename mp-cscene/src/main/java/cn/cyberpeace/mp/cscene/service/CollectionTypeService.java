@@ -23,9 +23,11 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * @Description:
+ * @ClassName CollectionTypeService
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/5/18 16:15
+ * @Date 2022/5/18 16:15
+ * @Version 1.0.0
  */
 @Slf4j
 @Service

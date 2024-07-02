@@ -7,6 +7,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 
+/**
+ * @ClassName BasePluginSceneElementPortBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ModelBO
+ */
 @Data
 public abstract class BasePluginSceneElementPortBO<M extends BasePluginSceneElementPortModel,
         T extends BasePluginSceneElementPortBO<M, T, S>, S extends BaseSceneElementPortBO<?, S, ?>> extends ModelBO<M, T> {

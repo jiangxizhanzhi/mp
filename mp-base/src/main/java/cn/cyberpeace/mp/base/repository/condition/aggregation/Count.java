@@ -5,6 +5,14 @@ import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 
 import java.util.function.Function;
 
+/**
+ * @ClassName Count
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Aggregation
+ */
 public class Count extends Aggregation<Count> {
 
     /**

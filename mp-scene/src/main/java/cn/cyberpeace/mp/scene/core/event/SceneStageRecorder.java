@@ -20,6 +20,13 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @ClassName SceneStageRecorder
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class SceneStageRecorder {
 
     private static Map<String, SceneStageRecorder> RECORDER_MAP = new ConcurrentHashMap<>(8);

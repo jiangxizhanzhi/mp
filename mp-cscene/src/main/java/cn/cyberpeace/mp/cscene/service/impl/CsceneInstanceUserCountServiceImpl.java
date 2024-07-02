@@ -10,6 +10,15 @@ import cn.cyberpeace.mp.cscene.service.fields.CsceneInstanceUserCountFields;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/**
+ * @ClassName CsceneInstanceUserCountServiceImpl
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see CsceneInstanceUserCountService
+ */
 @Service
 @Slf4j
 public class CsceneInstanceUserCountServiceImpl extends BaseModelServiceImpl<CsceneInstanceUserCountModel, CsceneInstanceUserCountMapper, CsceneInstanceUserCountFields,

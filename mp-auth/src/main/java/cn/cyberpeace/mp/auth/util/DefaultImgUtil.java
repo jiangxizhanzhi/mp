@@ -15,9 +15,11 @@ import java.io.File;
 import java.util.*;
 
 /**
- * @Description: 默认图片工具类
+ * @ClassName DefaultImgUtil
+ * @Description 默认图片工具类
  * @Author qiaokang
- * @Date：2022/9/19 15:49
+ * @Date 2022/9/19 15:49
+ * @Version 1.0.0
  */
 @Component
 @Slf4j

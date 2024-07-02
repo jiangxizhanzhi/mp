@@ -27,9 +27,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Objects;
 
 /**
- * @Description: 认证接口
+ * @ClassName AuthenticateController
+ * @Description 认证接口
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 @Api(value = "认证相关接口", tags = "认证相关接口")
 @Slf4j

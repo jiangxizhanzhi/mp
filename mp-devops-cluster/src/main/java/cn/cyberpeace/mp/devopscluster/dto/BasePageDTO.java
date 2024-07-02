@@ -3,6 +3,14 @@ package cn.cyberpeace.mp.devopscluster.dto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * @ClassName BasePageDTO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseDTO
+ */
 @Data
 @NoArgsConstructor
 public class BasePageDTO extends BaseDTO{

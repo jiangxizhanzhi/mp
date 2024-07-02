@@ -18,9 +18,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @Description:
+ * @ClassName LicenseService
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 @Service
 @Slf4j

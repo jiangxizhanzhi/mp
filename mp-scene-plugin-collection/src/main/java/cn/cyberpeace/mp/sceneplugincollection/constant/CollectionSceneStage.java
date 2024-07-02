@@ -3,6 +3,14 @@ package cn.cyberpeace.mp.sceneplugincollection.constant;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.scene.constant.SceneStage;
 
+/**
+ * @ClassName CollectionSceneStage
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see SceneStage
+ */
 public class CollectionSceneStage extends SceneStage {
 
     public static CollectionSceneStage CREATE_FLOW_COLLECT = new CollectionSceneStage("create_flow_collect", "tanzhenguanli");

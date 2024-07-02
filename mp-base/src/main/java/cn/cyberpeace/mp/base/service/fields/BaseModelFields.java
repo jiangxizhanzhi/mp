@@ -4,6 +4,14 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 
+/**
+ * @ClassName BaseModelFields
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseFields
+ */
 public abstract class BaseModelFields extends BaseFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(BaseModel.class));
 

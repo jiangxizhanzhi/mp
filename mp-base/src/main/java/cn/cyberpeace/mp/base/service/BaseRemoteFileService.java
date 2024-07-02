@@ -5,6 +5,13 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * @ClassName BaseRemoteFileService
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public interface BaseRemoteFileService {
 
     /**

@@ -7,6 +7,21 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @ClassName BaseModelBOController
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelListBOController
+ * @see BaseModelGetBOController
+ * @see BaseModelCreateBOController
+ * @see BaseModelBulkCreateBOController
+ * @see BaseModelUpdateBOController
+ * @see BaseModelBulkUpdateBOController
+ * @see BaseModelDeleteBOController
+ * @see BaseModelBulkDeleteBOController
+ */
 @Slf4j
 @Data
 @Deprecated

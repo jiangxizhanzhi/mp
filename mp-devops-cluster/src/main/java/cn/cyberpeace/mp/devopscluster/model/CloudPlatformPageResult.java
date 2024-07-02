@@ -7,7 +7,12 @@ import lombok.*;
 import java.util.List;
 
 /**
- * 分页基础模型，对应云平台接口返回信息
+ * @ClassName CloudPlatformPageResult
+ * @Description 分页基础模型，对应云平台接口返回信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCloudPlatformResult
  */
 @Data
 @NoArgsConstructor

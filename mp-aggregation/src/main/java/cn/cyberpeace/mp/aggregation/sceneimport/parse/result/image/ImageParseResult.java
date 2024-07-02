@@ -6,9 +6,11 @@ import lombok.Setter;
 import java.util.Map;
 
 /**
+ * @ClassName ImageParseResult
  * @Description
  * @Author maojun
  * @Date 2021/11/2
+ * @Version 1.0.0
  */
 @Setter
 @Getter

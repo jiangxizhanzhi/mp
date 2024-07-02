@@ -15,6 +15,14 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @ClassName WazuhFileModifyDataQueryParamsBuilder
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see WazuhDataQueryParamsBuilder
+ */
 @Getter
 public class WazuhFileModifyDataQueryParamsBuilder implements WazuhDataQueryParamsBuilder {
     private static final TermQueryBuilder SYS_CHECK_FILE_MATCH = QueryBuilders.termQuery("rule.groups", "syscheck_file");

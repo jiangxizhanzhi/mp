@@ -6,9 +6,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * @ClassName FlowConfig
  * @Description
  * @Author shgang
  * @Date 2022/8/31
+ * @Version 1.0.0
  */
 @Data
 @Configuration

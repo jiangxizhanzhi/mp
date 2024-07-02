@@ -8,7 +8,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 查询参数定义
+ * @ClassName CsceneInstanceStatQueryParams
+ * @Description 查询参数定义
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see QueryParams
  */
 @Data
 @AllArgsConstructor

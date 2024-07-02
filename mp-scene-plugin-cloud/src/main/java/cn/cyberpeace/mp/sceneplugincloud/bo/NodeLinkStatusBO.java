@@ -9,9 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * @ClassName NodeLinkStatusBO
  * @Description
  * @Author maojun
  * @Date 2022/7/8
+ * @Version 1.0.0
  */
 @Getter
 @Setter

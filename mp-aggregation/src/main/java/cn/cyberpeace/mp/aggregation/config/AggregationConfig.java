@@ -9,6 +9,13 @@ import org.springframework.context.annotation.Configuration;
  * 模块下定义的独立配置信息
  * 约定：各模块的独立配置命名 {模块名}AppConfig
  */
+/**
+ * @ClassName AggregationConfig
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Configuration
 @ConfigurationProperties(prefix = "spring")
 @Data

@@ -6,6 +6,13 @@ import lombok.Data;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+/**
+ * @ClassName RegisterSdnSwitchCommand
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 public class RegisterSdnSwitchCommand {
     @ApiModelProperty("交换机名称")

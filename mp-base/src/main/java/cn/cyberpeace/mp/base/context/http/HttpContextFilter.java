@@ -10,6 +10,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * @ClassName HttpContextFilter
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see OncePerRequestFilter
+ */
 public class HttpContextFilter extends OncePerRequestFilter {
 
     private final static String X_REQUEST_ID = "X-Request-Id";

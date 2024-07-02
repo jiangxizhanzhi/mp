@@ -10,9 +10,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * @Description: 节点监控统计信息
+ * @ClassName ElementMonitorBasicInfo
+ * @Description 节点监控统计信息
  * @Author zhouxinghuai
- * @Date：2021/11/22 14:03
+ * @Date 2021/11/22 14:03
+ * @Version 1.0.0
  */
 @Data
 //@Builder

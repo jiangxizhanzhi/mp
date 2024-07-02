@@ -7,6 +7,14 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * @ClassName RoleBo
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see RoleModel
+ */
 @Data
 public class RoleBo extends RoleModel {
 

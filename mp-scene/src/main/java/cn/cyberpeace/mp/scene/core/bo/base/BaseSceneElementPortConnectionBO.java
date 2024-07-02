@@ -13,6 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @ClassName BaseSceneElementPortConnectionBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see EidBO
+ */
 @Data
 public abstract class BaseSceneElementPortConnectionBO<M extends BaseSceneElementPortConnectionModel,
         T extends BaseSceneElementPortConnectionBO<M, T>> extends EidBO<M, T> {

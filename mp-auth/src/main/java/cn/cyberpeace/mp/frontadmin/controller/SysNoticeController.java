@@ -40,9 +40,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @Description: 系统公告管理接口
+ * @ClassName SysNoticeController
+ * @Description 系统公告管理接口
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 @Api(value = "公告管理接口", tags = "公告管理接口")
 @Slf4j

@@ -3,7 +3,12 @@ package cn.cyberpeace.mp.devopscluster.enums;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * 监控服务状态：0 ERROR, 1 DOWN 2 RUNNING
+ * @ClassName MonitorStateEnum
+ * @Description 监控服务状态：0 ERROR, 1 DOWN 2 RUNNING
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Enum
  */
 public enum MonitorStateEnum {
 

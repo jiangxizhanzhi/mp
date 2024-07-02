@@ -7,9 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * @ClassName AlarmDistributionVo
  * @Description
  * @Author shgang
  * @Date 2022/11/12
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

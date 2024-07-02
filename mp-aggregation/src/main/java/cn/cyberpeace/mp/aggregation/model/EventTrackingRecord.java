@@ -6,6 +6,14 @@ import cn.cyberpeace.mp.base.model.stereotype.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * @ClassName EventTrackingRecord
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModel
+ */
 @Data
 @NoArgsConstructor
 @Table("mp_event_tracking_record")

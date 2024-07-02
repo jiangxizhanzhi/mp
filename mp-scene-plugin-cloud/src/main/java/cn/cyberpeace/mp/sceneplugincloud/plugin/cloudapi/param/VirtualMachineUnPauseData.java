@@ -9,6 +9,14 @@ import lombok.Setter;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @ClassName VirtualMachineUnPauseData
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see CloudHttpData
+ */
 @Setter
 @Getter
 @AllArgsConstructor

@@ -13,9 +13,11 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 /**
- * @Description:  导入预制流量信息
+ * @ClassName InitFlowFileInitJob
+ * @Description 导入预制流量信息
  * @Author qiaokang
- * @Date：2021/9/1 14:36
+ * @Date 2021/9/1 14:36
+ * @Version 1.0.0
  */
 @Component
 @Slf4j

@@ -24,8 +24,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 初始化注册MP信息到云平台
- * @author wanggang
+ * @ClassName InitRegisterService
+ * @Description 初始化注册MP信息到云平台
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCpService
  */
 @Service
 @Slf4j

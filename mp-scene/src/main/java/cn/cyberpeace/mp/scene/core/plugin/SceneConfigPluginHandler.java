@@ -11,11 +11,12 @@ import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import lombok.Data;
 
 /**
- * 场景模板插件基础类，场景模板的插件通过继承本类拓展插件功能
- * @param <S> 插件对应配置类
- * @param <E> 网元节点的插件对应配置类
- * @param <P> 网元端口的插件对应配置类
- * @param <C> 插件上下文类
+ * @ClassName SceneConfigPluginHandler
+ * @Description 场景模板插件基础类，场景模板的插件通过继承本类拓展插件功能
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BasePluginCommonHandler
  */
 @Data
 public abstract class SceneConfigPluginHandler<S extends BasePluginSceneBO<?, S, SceneConfigBO>,

@@ -17,7 +17,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.client.HttpServerErrorException;
 
 /**
- * 业务异常统一处理
+ * @ClassName MpRuntimeExceptionHandler
+ * @Description 业务异常统一处理
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @ControllerAdvice
 @Slf4j

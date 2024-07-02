@@ -37,11 +37,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @author wangssh
- * @version 1.0
- * @description 日志级别设置
- * @date 2023/5/30
- **/
+ * @ClassName LogSettingServiceImpl
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ILogSettingService
+ */
 @Slf4j
 @Service
 public class LogSettingServiceImpl implements ILogSettingService {

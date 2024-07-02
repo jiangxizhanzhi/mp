@@ -13,9 +13,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @Description:
+ * @ClassName SysConfigCheckService
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/9 17:34
+ * @Date 2021/12/9 17:34
+ * @Version 1.0.0
  */
 @Slf4j
 @Service

@@ -10,9 +10,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName FlowTrendRequest
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/11/22 17:58
+ * @Date 2021/11/22 17:58
+ * @Version 1.0.0
+ * @see BaseSceneElementRequest
  */
 @Data
 public class FlowTrendRequest extends BaseSceneElementRequest {

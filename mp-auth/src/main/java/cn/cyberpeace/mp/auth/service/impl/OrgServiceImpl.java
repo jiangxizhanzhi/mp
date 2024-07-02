@@ -35,9 +35,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * @Description:
+ * @ClassName OrgServiceImpl
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see OrgService
  */
 @Service
 @Slf4j

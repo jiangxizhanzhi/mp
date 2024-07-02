@@ -9,8 +9,12 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 /**
- * 扩展镜像信息
- * @author wanggang
+ * @ClassName ExtImageInfo
+ * @Description 扩展镜像信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Serializable
  */
 @NoArgsConstructor
 @AllArgsConstructor

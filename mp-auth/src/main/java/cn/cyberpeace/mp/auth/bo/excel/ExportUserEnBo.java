@@ -7,9 +7,11 @@ import lombok.Builder;
 import lombok.Data;
 
 /**
- * @Description:
+ * @ClassName ExportUserEnBo
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 @Data
 @HeadRowHeight(20)

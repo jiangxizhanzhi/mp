@@ -8,9 +8,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * @Description: 批量停止流量任务请求
- * @Author: guquan
- * @Date：2023/6/2 9:31
+ * @ClassName BatchStopFlowTaskRequest
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

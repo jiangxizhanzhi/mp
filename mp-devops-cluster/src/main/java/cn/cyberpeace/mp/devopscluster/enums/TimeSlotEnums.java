@@ -3,9 +3,12 @@ package cn.cyberpeace.mp.devopscluster.enums;
 import java.util.Arrays;
 
 /**
- * @Description:
+ * @ClassName TimeSlotEnums
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/11/1 15:25
+ * @Date 2022/11/1 15:25
+ * @Version 1.0.0
+ * @see Enum
  */
 public enum TimeSlotEnums {
 

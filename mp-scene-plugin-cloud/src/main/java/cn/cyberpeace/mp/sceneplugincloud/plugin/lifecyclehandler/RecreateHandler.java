@@ -19,9 +19,12 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * @ClassName RecreateHandler
  * @Description
  * @Author maojun
  * @Date 2021/10/25
+ * @Version 1.0.0
+ * @see HandlerCommon
  */
 @Slf4j
 public class RecreateHandler extends HandlerCommon {

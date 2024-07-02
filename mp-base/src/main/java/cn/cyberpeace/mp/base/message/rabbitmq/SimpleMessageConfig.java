@@ -6,6 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.amqp.core.*;
 
+/**
+ * @ClassName SimpleMessageConfig
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -5,9 +5,12 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.frontadmin.model.SysNoticeReadModel;
 
 /**
+ * @ClassName SysNoticeReadService
  * @Description
  * @Author shgang
  * @Date 2022/9/22
+ * @Version 1.0.0
+ * @see BaseModelService
  */
 public interface SysNoticeReadService extends BaseModelService<SysNoticeReadModel, QueryParams> {
 

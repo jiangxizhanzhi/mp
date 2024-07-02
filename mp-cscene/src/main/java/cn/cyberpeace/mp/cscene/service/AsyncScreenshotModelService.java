@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * @Description: 截屏文件异步操作类
+ * @ClassName AsyncScreenshotModelService
+ * @Description 截屏文件异步操作类
  * @Author qiaokang
- * @Date：2021/9/13 16:17
+ * @Date 2021/9/13 16:17
+ * @Version 1.0.0
  */
 @Service
 @Slf4j

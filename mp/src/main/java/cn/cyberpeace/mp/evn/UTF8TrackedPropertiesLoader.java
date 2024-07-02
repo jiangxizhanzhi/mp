@@ -22,7 +22,8 @@ import java.util.function.BooleanSupplier;
  * @Description
  * @Author zhanzhi
  * @Date 2023/11/1 16:32
- **/
+ * @Version 1.0.0
+ */
 public class UTF8TrackedPropertiesLoader {
 
     private final Resource resource;

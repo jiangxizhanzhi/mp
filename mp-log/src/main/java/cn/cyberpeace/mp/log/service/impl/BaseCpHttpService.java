@@ -9,9 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * 基础对接云平台接口层
- *
- * @author wanggang
+ * @ClassName BaseCpHttpService
+ * @Description 基础对接云平台接口层
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseHttpService
  */
 @Slf4j
 @Service

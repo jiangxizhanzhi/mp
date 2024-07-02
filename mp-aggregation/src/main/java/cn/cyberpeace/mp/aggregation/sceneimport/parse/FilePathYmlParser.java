@@ -16,9 +16,12 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
+ * @ClassName FilePathYmlParser
  * @Description
  * @Author maojun
  * @Date 2021/11/2
+ * @Version 1.0.0
+ * @see YmlParse
  */
 @Slf4j
 class FilePathYmlParser<T> implements YmlParse<T> {

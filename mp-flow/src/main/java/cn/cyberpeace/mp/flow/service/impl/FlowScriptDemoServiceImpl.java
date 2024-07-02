@@ -21,9 +21,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @Description: 流量脚本模板service
+ * @ClassName FlowScriptDemoServiceImpl
+ * @Description
  * @Author qiaokang
- * @Date：2021/6/10 10:31
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see FlowScriptDemoService
  */
 @Service
 @Slf4j

@@ -10,9 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Description: 系统告警对象
+ * @ClassName SystemAlarmVO
+ * @Description
  * @Author qiaokang
- * @Date：2022/7/16 17:06
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

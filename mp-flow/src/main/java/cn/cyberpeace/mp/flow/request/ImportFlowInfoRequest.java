@@ -7,9 +7,11 @@ import lombok.Data;
 import javax.validation.constraints.NotNull;
 
 /**
- * @Description: 流量信息导入请求
+ * @ClassName ImportFlowInfoRequest
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/23 10:36
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @ApiModel(value = "流量信息导入请求")

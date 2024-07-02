@@ -20,9 +20,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @Description:
+ * @ClassName BaseRequestUtil
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/1 09:34
+ * @Date 2021/12/1 09:34
+ * @Version 1.0.0
  */
 @Slf4j
 @Component

@@ -16,6 +16,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @ClassName BaseSceneElementBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseSceneNodeBO
+ */
 @Data
 public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P extends BaseSceneElementPortBO<?, P, T>,
         T extends BaseSceneElementBO<M, P, T>> extends BaseSceneNodeBO<M, T> {

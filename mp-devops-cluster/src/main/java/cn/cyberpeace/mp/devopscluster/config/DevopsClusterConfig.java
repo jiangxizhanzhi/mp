@@ -8,8 +8,11 @@ import java.util.List;
 
 
 /**
- * 对接云平台配置类
- * @author wanggang
+ * @ClassName DevopsClusterConfig
+ * @Description 对接云平台配置类
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Configuration
 @ConfigurationProperties(prefix = "mp.devopscluster",ignoreInvalidFields = true)

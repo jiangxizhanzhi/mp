@@ -10,9 +10,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * @ClassName OperateLogSqlMapper
  * @Description
  * @Author shgang
  * @Date 2022/9/13
+ * @Version 1.0.0
+ * @see BaseModelMapper
  */
 @Mapper
 @Repository

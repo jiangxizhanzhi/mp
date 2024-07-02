@@ -6,9 +6,12 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName TargetActivBo
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/16 20:13
+ * @Date 2021/12/16 20:13
+ * @Version 1.0.0
+ * @see TargetModel
  */
 @Data
 public class TargetActivBo extends TargetModel {

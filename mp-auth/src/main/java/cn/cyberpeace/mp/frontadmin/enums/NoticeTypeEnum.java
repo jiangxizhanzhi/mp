@@ -3,9 +3,12 @@ package cn.cyberpeace.mp.frontadmin.enums;
 import cn.cyberpeace.mp.frontadmin.constant.ControllerConstant;
 
 /**
+ * @ClassName NoticeTypeEnum
  * @Description
- * @author: shgang
- * @Date: 2022/7/21
+ * @Author maojun
+ * @Date 2022/7/21
+ * @Version 1.0.0
+ * @see Enum
  */
 public enum NoticeTypeEnum {
 

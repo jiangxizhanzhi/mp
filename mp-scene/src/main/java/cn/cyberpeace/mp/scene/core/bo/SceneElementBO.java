@@ -6,6 +6,15 @@ import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+/**
+ * @ClassName SceneElementBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseSceneElementBO
+ * @see BaseEventModel
+ */
 @Data
 public class SceneElementBO extends BaseSceneElementBO<SceneElementModel, SceneElementPortBO, SceneElementBO>
         implements BaseEventModel {

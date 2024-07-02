@@ -10,7 +10,12 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * 虚拟机分页返回信息
+ * @ClassName InstancePageVO
+ * @Description 虚拟机分页返回信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseVO
  */
 @Data
 @NoArgsConstructor

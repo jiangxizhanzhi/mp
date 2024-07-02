@@ -16,9 +16,11 @@ import java.io.PrintWriter;
 import java.util.Objects;
 
 /**
+ * @ClassName KaptchaUtil
  * @Description
  * @Author shgang
  * @Date 2022/12/27
+ * @Version 1.0.0
  */
 public class KaptchaUtil {
 

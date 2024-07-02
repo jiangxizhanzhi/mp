@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @ClassName LogDynamicSettingController
- * @description 日志级别设置Controller
- * @author wangssh
- * @date 2023/6/29
- * @version 1.0
- **/
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/system")

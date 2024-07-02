@@ -5,9 +5,11 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
+ * @ClassName MoundRequest
  * @Description
  * @Author maojun
  * @Date 2022/6/21
+ * @Version 1.0.0
  */
 @Data
 @ApiModel("挂载请求")

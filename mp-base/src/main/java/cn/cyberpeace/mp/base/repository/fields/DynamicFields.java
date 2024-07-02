@@ -9,6 +9,13 @@ import org.springframework.beans.BeanWrapperImpl;
 
 import java.util.*;
 
+/**
+ * @ClassName DynamicFields
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class DynamicFields {
 
     private Map<String, Object> fieldsMap;

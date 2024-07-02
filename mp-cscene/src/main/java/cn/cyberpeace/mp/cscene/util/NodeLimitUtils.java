@@ -16,9 +16,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * @ClassName NodeLimitUtils
  * @Description
  * @Author maojun
  * @Date 2022/2/16
+ * @Version 1.0.0
  */
 @Slf4j
 public final class NodeLimitUtils {

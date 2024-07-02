@@ -12,9 +12,11 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 /**
- * @Description:
+ * @ClassName SysCtlScheduleJob
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/2/14 18:07
+ * @Date 2022/2/14 18:07
+ * @Version 1.0.0
  */
 @Slf4j
 @Service

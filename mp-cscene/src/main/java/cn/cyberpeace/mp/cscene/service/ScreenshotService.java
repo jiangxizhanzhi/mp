@@ -10,9 +10,12 @@ import cn.cyberpeace.mp.cscene.request.queryparam.ScreenshotQueryParams;
 import cn.cyberpeace.mp.cscene.response.ScreenshotUsedSpaceResponse;
 
 /**
+ * @ClassName ScreenshotService
  * @Description 截屏文件管理service
  * @Author qiaokang
  * @Date 2021-09-13 11:05:18
+ * @Version 1.0.0
+ * @see BaseModelService
  */
 public interface ScreenshotService extends BaseModelService<ScreenshotModel, ScreenshotQueryParams> {
 

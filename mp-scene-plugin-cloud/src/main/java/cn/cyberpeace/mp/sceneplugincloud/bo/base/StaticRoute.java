@@ -5,6 +5,13 @@ import cn.cyberpeace.mp.base.validation.stereotype.IpAddress;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+/**
+ * @ClassName StaticRoute
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 public class StaticRoute {
     @ApiModelProperty(value = "目的地址(cidr)")

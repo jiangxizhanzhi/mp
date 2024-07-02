@@ -3,7 +3,12 @@ package cn.cyberpeace.mp.flow.enums;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * 交互类型枚举类：0 背景流量，1 攻击流量，2 全流量
+ * @ClassName InteractiveTypeEnum
+ * @Description 交互类型枚举类：0 背景流量，1 攻击流量，2 全流量
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Enum
  */
 public enum InteractiveTypeEnum {
 

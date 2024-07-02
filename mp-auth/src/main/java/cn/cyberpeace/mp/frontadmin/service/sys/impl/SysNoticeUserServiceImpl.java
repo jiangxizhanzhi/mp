@@ -17,9 +17,13 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName SysNoticeUserServiceImpl
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/9/20 13:56
+ * @Date 2022/9/20 13:56
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see SysNoticeUserService
  */
 @Service
 @Slf4j

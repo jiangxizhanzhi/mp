@@ -22,6 +22,14 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * @ClassName Swagger2Config
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ModelPropertyBuilderPlugin
+ */
 @Slf4j
 @Configuration
 @EnableKnife4j

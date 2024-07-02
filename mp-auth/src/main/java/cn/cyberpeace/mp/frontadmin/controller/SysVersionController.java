@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @Description:
- * @Author: guquan
- * @Date：2023/8/23 11:21
+ * @ClassName SysVersionController
+ * @Description
+ * @Author maojun
+ * @Date 2023/8/23 11:21
+ * @Version 1.0.0
  */
 
 @Api(value = "系统版本管理接口", tags = "系统版本管理接口")

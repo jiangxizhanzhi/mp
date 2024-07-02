@@ -35,8 +35,13 @@ import cn.cyberpeace.mp.scene.repository.SceneConfigPieceMapper;
 import java.lang.reflect.Field;
 
 /**
- * 场景模板的处理
+ * @ClassName SceneConfigHandler
+ * @Description 场景模板的处理
  * 场景模板的功能由本类对外提供
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseSceneHandler
  */
 public class SceneConfigHandler extends BaseSceneHandler<
         SceneConfigModel,

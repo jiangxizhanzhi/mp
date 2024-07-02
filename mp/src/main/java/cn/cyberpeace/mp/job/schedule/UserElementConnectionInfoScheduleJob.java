@@ -30,9 +30,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Description:
- * @Author: guquan
- * @Date：2023/6/19 14:07
+ * @ClassName UserElementConnectionInfoScheduleJob
+ * @Description
+ * @Author guquan
+ * @Date 2023/6/19 14:07
+ * @Version 1.0.0
  */
 @Slf4j
 @Component

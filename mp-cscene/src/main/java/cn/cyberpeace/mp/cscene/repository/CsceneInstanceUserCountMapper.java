@@ -8,9 +8,12 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 /**
+ * @ClassName CsceneInstanceUserCountMapper
  * @Description 用户场景统计mapper
  * @Author qiaokang
  * @Date 2023-06-20 14:26:35
+ * @Version 1.0.0
+ * @see BaseModelMapper
  */
 @Mapper
 @Repository

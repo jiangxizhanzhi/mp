@@ -16,11 +16,13 @@ import java.util.concurrent.ThreadFactory;
 import java.util.stream.Collectors;
 
 /**
- * @author wangssh
- * @version 1.0
- * @description TODO
- * @date 2023/6/29
- **/
+ * @ClassName SystemStatusInfoImpl
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ISystemStatusInfo
+ */
 @Slf4j
 @Lazy
 @Service

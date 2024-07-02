@@ -5,9 +5,11 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description:
- * @Author: guquan
- * @Date：2023/6/20 9:52
+ * @ClassName ActiveConnectionData
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 public class ActiveConnectionData {

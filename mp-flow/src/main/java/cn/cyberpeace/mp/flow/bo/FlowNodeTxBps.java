@@ -5,9 +5,11 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description: 节点实时速率对象
- * @Author: guquan
- * @Date：2023/5/20 16:11
+ * @ClassName FlowNodeTxBps
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @ApiModel("节点实时速率对象")

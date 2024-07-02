@@ -16,6 +16,13 @@ import org.springframework.context.annotation.Configuration;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * @ClassName CsceneAppConfig
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Slf4j
 @Configuration
 @ConfigurationProperties(prefix = "mp.cscene")

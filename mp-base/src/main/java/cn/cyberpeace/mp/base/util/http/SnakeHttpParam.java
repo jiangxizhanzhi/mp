@@ -9,6 +9,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * @ClassName SnakeHttpParam
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see HttpParam
+ */
 public interface SnakeHttpParam extends HttpParam {
 
     /**

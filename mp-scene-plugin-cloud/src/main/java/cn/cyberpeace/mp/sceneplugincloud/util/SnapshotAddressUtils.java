@@ -5,9 +5,11 @@ import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 
 /**
+ * @ClassName SnapshotAddressUtils
  * @Description
  * @Author maojun
  * @Date 2022/7/27
+ * @Version 1.0.0
  */
 public final class SnapshotAddressUtils {
 

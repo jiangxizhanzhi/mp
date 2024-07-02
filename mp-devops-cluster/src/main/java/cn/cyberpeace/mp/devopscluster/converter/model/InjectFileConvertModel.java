@@ -7,7 +7,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 文件注入
+ * @ClassName InjectFileConvertModel
+ * @Description 文件注入
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BasePageConvertModel
  */
 @NoArgsConstructor
 @AllArgsConstructor

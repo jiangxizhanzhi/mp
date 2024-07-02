@@ -10,9 +10,11 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Locale;
 
 /**
+ * @ClassName OperateLogDbService
  * @Description
  * @Author shgang
  * @Date 2022/10/12
+ * @Version 1.0.0
  */
 public interface OperateLogDbService {
     /**

@@ -7,9 +7,11 @@ import lombok.Data;
 import javax.validation.constraints.NotNull;
 
 /**
- * @Description: 按时间删除截屏请求
+ * @ClassName ScreenshotDeleteRequest
+ * @Description 按时间删除截屏请求
  * @Author qiaokang
- * @Date：2021/9/14 10:50
+ * @Date 2021/9/14 10:50
+ * @Version 1.0.0
  */
 @Data
 @ApiModel("按时间删除截屏请求")

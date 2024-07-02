@@ -7,11 +7,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @BelongsPackage: cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param
- * @Author: hhuang
- * @CreateTime: 2023/05/12  17:55
- * @Description: mib节点查询参数
- * @Version: 1.0
+ * @ClassName MibNodeQueryParam
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see CloudHttpParam
  */
 @Data
 @AllArgsConstructor

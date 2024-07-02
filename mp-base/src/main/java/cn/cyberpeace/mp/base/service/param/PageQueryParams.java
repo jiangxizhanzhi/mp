@@ -1,7 +1,11 @@
 package cn.cyberpeace.mp.base.service.param;
 
 /**
- * 分页查询参数
+ * @ClassName PageQueryParams
+ * @Description 分页查询参数
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public interface PageQueryParams {
 

@@ -14,7 +14,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 镜像管理
+ * @ClassName DeviceTargetMapper
+ * @Description 镜像管理
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelMapper
  */
 @Mapper
 @Repository

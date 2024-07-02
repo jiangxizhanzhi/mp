@@ -10,9 +10,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * @Description:
- * @Author: guquan
- * @Date：2023/9/15 14:53
+ * @ClassName SysVersionResponse
+ * @Description
+ * @Author guquan
+ * @Date 2023/9/15 14:53
+ * @Version 1.0.0
  */
 @Data
 @Builder

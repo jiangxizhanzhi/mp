@@ -9,9 +9,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName AgentNameBasedRequest
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/7/20 15:19
+ * @Date 2022/7/20 15:19
+ * @Version 1.0.0
+ * @see PageRequest
  */
 @Data
 public class AgentNameBasedRequest extends PageRequest {

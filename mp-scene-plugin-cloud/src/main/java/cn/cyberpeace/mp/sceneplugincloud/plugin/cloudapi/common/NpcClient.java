@@ -10,6 +10,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @ClassName NpcClient
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Slf4j
 @Data
 public abstract class NpcClient {

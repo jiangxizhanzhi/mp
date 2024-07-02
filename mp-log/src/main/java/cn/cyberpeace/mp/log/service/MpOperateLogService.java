@@ -7,7 +7,11 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
 
 /**
- * @author wanggang
+ * @ClassName MpOperateLogService
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public interface MpOperateLogService {
 

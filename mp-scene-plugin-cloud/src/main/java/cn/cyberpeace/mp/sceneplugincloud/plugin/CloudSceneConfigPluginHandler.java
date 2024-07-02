@@ -31,6 +31,14 @@ import java.net.URL;
 import java.util.Set;
 
 
+/**
+ * @ClassName CloudSceneConfigPluginHandler
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see SceneConfigPluginHandler
+ */
 @Slf4j
 @Component
 @PluginKey(value = PluginConstant.PLUGIN_KEY, priority = PluginConstant.PLUGIN_PRIORITY)

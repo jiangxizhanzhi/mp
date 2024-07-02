@@ -7,9 +7,12 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 /**
- * @Description: 协议解析结果对象
+ * @ClassName ProtocolBO
+ * @Description
  * @Author qiaokang
- * @Date：2022/11/15 17:14
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Comparable
  */
 @Data
 @ApiModel("协议解析结果对象BO")

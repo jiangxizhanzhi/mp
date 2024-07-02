@@ -18,6 +18,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @ClassName JsonUtils
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class JsonUtils {
 
     public static final String DEFAULT_DATETIME_PATTERN = "yyyy-MM-dd HH:mm:ss";

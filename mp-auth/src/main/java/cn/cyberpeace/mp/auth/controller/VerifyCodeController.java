@@ -22,9 +22,11 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 /**
+ * @ClassName VerifyCodeController
  * @Description
  * @Author shgang
  * @Date 2022/12/27
+ * @Version 1.0.0
  */
 @Api(value = "认证相关接口", tags = "认证相关接口")
 @Slf4j

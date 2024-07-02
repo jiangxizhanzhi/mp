@@ -39,9 +39,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * @ClassName SceneInstanceLinkCacheUtil
  * @Description
  * @Author maojun
  * @Date 2022/3/1
+ * @Version 1.0.0
  */
 @Slf4j
 public class SceneInstanceLinkCacheUtil {

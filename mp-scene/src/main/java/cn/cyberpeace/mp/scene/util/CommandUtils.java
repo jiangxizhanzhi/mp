@@ -2,6 +2,13 @@ package cn.cyberpeace.mp.scene.util;
 
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * @ClassName CommandUtils
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class CommandUtils {
 
     public static final String WINDOWS_LINE_BREAK = "\r\n";

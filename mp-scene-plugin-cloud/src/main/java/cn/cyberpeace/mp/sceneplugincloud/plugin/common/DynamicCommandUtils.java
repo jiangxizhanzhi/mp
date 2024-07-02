@@ -18,9 +18,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * @ClassName DynamicCommandUtils
  * @Description
  * @Author maojun
  * @Date 2022/4/20
+ * @Version 1.0.0
  */
 public class DynamicCommandUtils {
 

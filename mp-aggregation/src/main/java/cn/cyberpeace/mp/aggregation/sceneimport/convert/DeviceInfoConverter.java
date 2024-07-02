@@ -26,9 +26,12 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * @ClassName DeviceInfoConverter
  * @Description 写入设备信息
  * @Author maojun
  * @Date 2021/10/12
+ * @Version 1.0.0
+ * @see IConverter
  */
 @Slf4j
 class DeviceInfoConverter implements IConverter {

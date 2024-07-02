@@ -9,9 +9,12 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Map;
 
 /**
+ * @ClassName SceneFilePathConverter
  * @Description 写入images目录中解析出来的镜像信息
  * @Author maojun
  * @Date 2021/10/12
+ * @Version 1.0.0
+ * @see IConverter
  */
 class SceneFilePathConverter implements IConverter {
 

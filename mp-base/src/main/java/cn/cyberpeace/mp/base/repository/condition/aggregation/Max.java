@@ -3,6 +3,14 @@ package cn.cyberpeace.mp.base.repository.condition.aggregation;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 
+/**
+ * @ClassName Max
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Aggregation
+ */
 public class Max extends Aggregation<Max> {
 
     /**

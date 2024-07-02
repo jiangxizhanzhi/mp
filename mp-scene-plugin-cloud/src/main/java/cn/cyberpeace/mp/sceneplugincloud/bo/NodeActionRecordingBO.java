@@ -5,7 +5,11 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Deprecated
+ * @ClassName NodeActionRecordingBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @ApiModel(description = "场景关闭录屏数据")
 @Data

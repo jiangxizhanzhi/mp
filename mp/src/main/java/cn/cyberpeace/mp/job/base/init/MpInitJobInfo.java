@@ -5,6 +5,14 @@ import cn.cyberpeace.mp.job.base.MpJobInfo;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * @ClassName MpInitJobInfo
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see MpJobInfo
+ */
 @Getter
 @Setter
 public class MpInitJobInfo extends MpJobInfo {

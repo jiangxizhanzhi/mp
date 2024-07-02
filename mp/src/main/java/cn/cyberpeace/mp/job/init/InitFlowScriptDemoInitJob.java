@@ -18,9 +18,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @Description:  脚本模板初始化
+ * @ClassName InitFlowScriptDemoInitJob
+ * @Description 脚本模板初始化
  * @Author qiaokang
- * @Date：2021/9/1 14:36
+ * @Date 2021/9/1 14:36
+ * @Version 1.0.0
  */
 @Component
 @Slf4j

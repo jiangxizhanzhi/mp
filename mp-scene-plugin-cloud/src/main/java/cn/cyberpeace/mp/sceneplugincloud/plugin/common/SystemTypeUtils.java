@@ -10,6 +10,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @ClassName SystemTypeUtils
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class SystemTypeUtils {
 
     public static final SystemTypeItem DEFAULT_SYSTEM_TYPE = new SystemTypeItem("LINUX", "LINUX", BaseSceneElementModel.SystemType.LINUX);

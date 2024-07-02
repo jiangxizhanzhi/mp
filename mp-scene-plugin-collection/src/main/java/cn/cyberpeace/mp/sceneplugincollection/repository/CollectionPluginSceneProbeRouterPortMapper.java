@@ -6,6 +6,14 @@ import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRo
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
+/**
+ * @ClassName CollectionPluginSceneProbeRouterPortMapper
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelMapper
+ */
 @Mapper
 @Repository
 @ModelClass(CollectionPluginSceneProbeRouterPortModel.class)

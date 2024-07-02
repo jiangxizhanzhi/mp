@@ -1,7 +1,13 @@
 package cn.cyberpeace.mp.base.service.param;
 
 /**
- * 排序查询参数
+ * @ClassName CompatibleOrderQueryParams
+ * @Description 排序查询参数
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see OrderQueryParams
+ * @see CompatibleQueryParams
  */
 public interface CompatibleOrderQueryParams extends OrderQueryParams, CompatibleQueryParams {
 

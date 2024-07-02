@@ -7,7 +7,12 @@ import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
 /**
- * 日志上报管理
+ * @ClassName LogReportMapper
+ * @Description 日志上报管理
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelMapper
  */
 @Mapper
 @Repository

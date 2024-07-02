@@ -7,7 +7,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 本地文件和远程文件映射模型
+ * @ClassName LocalFileMappingModel
+ * @Description 本地文件和远程文件映射模型
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseObjMappingModel
  */
 @Data
 @AllArgsConstructor

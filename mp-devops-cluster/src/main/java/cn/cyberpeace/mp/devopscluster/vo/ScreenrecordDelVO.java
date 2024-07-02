@@ -6,9 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description: 录屏删除返回
+ * @ClassName ScreenrecordDelVO
+ * @Description
  * @Author qiaokang
- * @Date：2021/9/13 19:37
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCloudPlatformResult
  */
 @Data
 @AllArgsConstructor

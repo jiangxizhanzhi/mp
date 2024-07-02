@@ -16,7 +16,14 @@ import javax.websocket.server.ServerEndpointConfig;
 import java.util.*;
 
 /**
- * from org.springframework.web.socket.server.standard.ServerEndpointExporter
+ * @ClassName ServerEndpointExporter
+ * @Description from org.springframework.web.socket.server.standard.ServerEndpointExporter
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see WebApplicationObjectSupport
+ * @see InitializingBean
+ * @see SmartInitializingSingleton
  */
 public class ServerEndpointExporter extends WebApplicationObjectSupport
         implements InitializingBean, SmartInitializingSingleton {

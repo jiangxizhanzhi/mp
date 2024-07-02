@@ -15,9 +15,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * @ClassName SceneElementShapeConverter
  * @Description 经过多层解析的处理仍没有值的属性, 在这里做默认的处理
  * @Author maojun
  * @Date 2021/10/12
+ * @Version 1.0.0
+ * @see IConverter
  */
 class SceneElementShapeConverter implements IConverter {
 

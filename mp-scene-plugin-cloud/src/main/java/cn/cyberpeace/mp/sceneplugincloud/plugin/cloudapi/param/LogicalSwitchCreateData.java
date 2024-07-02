@@ -5,6 +5,14 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * @ClassName LogicalSwitchCreateData
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see CloudHttpData
+ */
 @Data
 public class LogicalSwitchCreateData implements CloudHttpData {
     private String logicalSwitchName;

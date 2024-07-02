@@ -6,9 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * @ClassName FlowAttackTypeCount
  * @Description
  * @Author maojun
  * @Date 2022/2/22
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

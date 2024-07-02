@@ -12,9 +12,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName FlowCommonRequest
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/11/22 17:58
+ * @Date 2021/11/22 17:58
+ * @Version 1.0.0
+ * @see BaseSceneElementRequest
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

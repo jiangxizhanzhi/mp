@@ -16,9 +16,13 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 /**
+ * @ClassName SysNoticeReadServiceImpl
  * @Description
  * @Author shgang
  * @Date 2022/9/22
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see SysNoticeReadService
  */
 @Service
 public class SysNoticeReadServiceImpl extends BaseModelServiceImpl<SysNoticeReadModel, SysNoticeReadMapper, SysNoticeReadFields, QueryParams>

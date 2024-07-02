@@ -7,9 +7,12 @@ import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
 /**
- * @Description:
- * @Author: guquan
- * @Date：2023/8/23 15:33
+ * @ClassName SysModelVersionMapper
+ * @Description
+ * @Author guquan
+ * @Date 2023/8/23 15:33
+ * @Version 1.0.0
+ * @see BaseModelMapper
  */
 @Mapper
 @Repository

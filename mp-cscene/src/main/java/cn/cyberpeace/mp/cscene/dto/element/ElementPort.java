@@ -8,9 +8,11 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName ElementPort
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/11/30 14:53
+ * @Date 2021/11/30 14:53
+ * @Version 1.0.0
  */
 @Data
 public class ElementPort {

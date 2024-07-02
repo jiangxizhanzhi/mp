@@ -11,9 +11,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @Deprecated
- * 对应表模型主体的业务模型
- * @param <M> 表模型类型
+ * @ClassName ModelBO
+ * @Description 对应表模型主体的业务模型
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @SuppressWarnings("java:S1610")
 @Data

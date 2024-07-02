@@ -26,11 +26,11 @@ import java.io.File;
 import java.util.*;
 
 /**
- * @BelongsPackage: cn.cyberpeace.mp.cscene.service
- * @Author: hhuang
- * @CreateTime: 2023/05/10  09:28
- * @Description: 实装协议采集mib处理
- * @Version: 1.0
+ * @ClassName ProtocolCollectionService
+ * @Description 实装协议采集mib处理
+ * @Author hhuang
+ * @Date 2024/07/02
+ * @Version 1.0
  */
 @Slf4j
 @Service

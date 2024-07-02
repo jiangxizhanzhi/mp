@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.sceneplugincollection.constant;
 
 /**
- * @Description: 探针常量
+ * @ClassName ProbeConstant
+ * @Description
  * @Author hewei
- * @Date：2022/5/6 9:23
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public class ProbeConstant {
     // 探针类型

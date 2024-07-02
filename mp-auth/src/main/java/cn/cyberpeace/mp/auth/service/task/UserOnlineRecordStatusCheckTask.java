@@ -10,9 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Description: 定时任务，用于更新用于在线记录表中的状态
+ * @ClassName UserOnlineRecordStatusCheckTask
+ * @Description 定时任务，用于更新用于在线记录表中的状态
  * @Author zhouxinghuai
- * @Date：2021/10/22 11:13
+ * @Date 2021/10/22 11:13
+ * @Version 1.0.0
+ * @see Runnable
  */
 @Slf4j
 public class UserOnlineRecordStatusCheckTask implements Runnable {

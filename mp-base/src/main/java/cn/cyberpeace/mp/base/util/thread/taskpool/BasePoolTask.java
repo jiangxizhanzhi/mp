@@ -2,6 +2,13 @@ package cn.cyberpeace.mp.base.util.thread.taskpool;
 
 import lombok.Data;
 
+/**
+ * @ClassName BasePoolTask
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 public abstract class BasePoolTask<C, T, R> {
     private C context;

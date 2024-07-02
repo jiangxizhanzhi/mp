@@ -16,9 +16,12 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * @Description: 创建或者更新用户在线记录
+ * @ClassName UserOnlineRecordTask
+ * @Description 创建或者更新用户在线记录
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
+ * @see Runnable
  */
 @Slf4j
 public class UserOnlineRecordTask implements Runnable {

@@ -14,9 +14,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName SysActivCtlServiceImpl
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/2/15 11:13
+ * @Date 2022/2/15 11:13
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see SysActivCtlService
  */
 @Service
 @Slf4j

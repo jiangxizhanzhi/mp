@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.auth.constant;
 
 /**
- * @Description:
+ * @ClassName AuthBasei18nCode
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/20 17:20
+ * @Date 2021/12/20 17:20
+ * @Version 1.0.0
  */
 public class AuthBasei18nCode {
 

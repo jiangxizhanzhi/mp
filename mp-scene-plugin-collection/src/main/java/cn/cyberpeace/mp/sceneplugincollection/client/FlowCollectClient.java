@@ -27,6 +27,13 @@ import java.util.Objects;
 
 import static cn.cyberpeace.mp.common.constant.CommonSingleton.commonAppConfig;
 
+/**
+ * @ClassName FlowCollectClient
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 @Slf4j
 public class FlowCollectClient {

@@ -4,6 +4,13 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * @ClassName ImportTemplateBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 public class ImportTemplateBO {
     @ApiModelProperty(value = "场景拓扑id")

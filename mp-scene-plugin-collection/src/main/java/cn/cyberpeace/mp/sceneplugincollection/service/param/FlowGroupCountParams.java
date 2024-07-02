@@ -7,9 +7,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
+ * @ClassName FlowGroupCountParams
  * @Description
  * @Author maojun
  * @Date 2022/2/24
+ * @Version 1.0.0
  */
 @Setter
 @Getter

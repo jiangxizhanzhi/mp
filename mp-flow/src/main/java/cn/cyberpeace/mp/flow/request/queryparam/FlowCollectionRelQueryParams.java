@@ -6,9 +6,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description: 流量集合关联通用查询条件
+ * @ClassName FlowCollectionRelQueryParams
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/31 17:17
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see QueryParams
  */
 @Data
 @ApiModel(value = "流量集合关联通用查询条件")

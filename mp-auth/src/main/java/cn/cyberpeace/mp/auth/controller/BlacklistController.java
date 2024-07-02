@@ -19,8 +19,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 
 /**
- * @author litian
- * @date 2023年09月25 13:54
+ * @ClassName BlacklistController
+ * @Description
+ * @Author litian
+ * @Date 2023年09月25 13:54
+ * @Version 1.0.0
  */
 @Api(value = "访问黑名单开关", tags = "AUTH-访问黑名单开关")
 @Slf4j

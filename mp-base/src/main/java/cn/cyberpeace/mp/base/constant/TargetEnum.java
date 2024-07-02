@@ -1,7 +1,12 @@
 package cn.cyberpeace.mp.base.constant;
 
 /**
- * target静态类
+ * @ClassName TargetEnum
+ * @Description target静态类
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Enum
  */
 public enum TargetEnum {
     AUDIT_LOG(new String[]{"audit-log"}),

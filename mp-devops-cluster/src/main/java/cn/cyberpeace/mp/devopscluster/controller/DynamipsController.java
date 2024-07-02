@@ -22,7 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Collections;
 
 /**
- * 虚拟机管理类
+ * @ClassName DynamipsController
+ * @Description 虚拟机管理类
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Validated
 @Slf4j

@@ -7,9 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description: 录屏使用空间返回
+ * @ClassName ScreenRecordUsedSpaceVO
+ * @Description
  * @Author qiaokang
- * @Date：2021/9/13 19:55
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

@@ -3,7 +3,11 @@ package cn.cyberpeace.mp.flow.service;
 import cn.cyberpeace.mp.flow.response.BatchActuatorResponse;
 
 /**
- * 流量任务后处理逻辑
+ * @ClassName FlowPostService
+ * @Description 流量任务后处理逻辑
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public interface FlowPostService {
     /**

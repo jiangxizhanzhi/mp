@@ -42,8 +42,13 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 场景实例的处理
+ * @ClassName SceneHandler
+ * @Description 场景实例的处理
  * 场景实例的功能由本类对外提供
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseSceneHandler
  */
 @Slf4j
 public class SceneHandler extends BaseSceneHandler<

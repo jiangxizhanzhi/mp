@@ -15,9 +15,12 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 /**
- * @Description: 流量执行实现类
+ * @ClassName FlowExecuteScheduleMethodImpl
+ * @Description
  * @Author qiaokang
- * @Date：2021/6/16 15:51
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ScheduleMethod
  */
 @Service
 @Slf4j

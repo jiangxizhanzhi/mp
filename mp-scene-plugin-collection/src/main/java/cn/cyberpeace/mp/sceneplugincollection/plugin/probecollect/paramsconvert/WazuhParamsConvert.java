@@ -3,9 +3,11 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert
 import java.util.List;
 
 /**
- * @Description: 探针参数转换接口
+ * @ClassName WazuhParamsConvert
+ * @Description
  * @Author hewei
- * @Date：2022/5/6 9:23
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public interface WazuhParamsConvert <T>{
     /**

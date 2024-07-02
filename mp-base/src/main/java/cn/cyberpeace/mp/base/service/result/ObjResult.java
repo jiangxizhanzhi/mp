@@ -5,6 +5,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * @ClassName ObjResult
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseObjResult
+ */
 @Data
 @NoArgsConstructor
 public class ObjResult<T> extends BaseObjResult<T, T>  {

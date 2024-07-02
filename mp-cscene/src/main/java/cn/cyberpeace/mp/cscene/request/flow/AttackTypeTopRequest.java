@@ -5,6 +5,14 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+/**
+ * @ClassName AttackTypeTopRequest
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseSceneElementRequest
+ */
 @Data
 @ApiModel(value = "流量攻击类型查询")
 public class AttackTypeTopRequest extends BaseSceneElementRequest {

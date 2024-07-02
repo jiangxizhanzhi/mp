@@ -6,9 +6,12 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description: 挂载实体USB对象
- * @Author: guquan
- * @Date：2023/4/27 10:16
+ * @ClassName AttachEntityUsbsData
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see CloudHttpData
  */
 @Data
 public class AttachEntityUsbsData implements CloudHttpData {

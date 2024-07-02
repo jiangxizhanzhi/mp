@@ -40,9 +40,11 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * @ClassName ResourceCenterService
  * @Description
  * @Author maojun
  * @Date 2021/10/11
+ * @Version 1.0.0
  */
 @Slf4j
 @Service

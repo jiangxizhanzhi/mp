@@ -11,9 +11,11 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 /**
- * @Description: 新增背景流量请求
+ * @ClassName AddBackgroundFlowRequest
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/10 15:50
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

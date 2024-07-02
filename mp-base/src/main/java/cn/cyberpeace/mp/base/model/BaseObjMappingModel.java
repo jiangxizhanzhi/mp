@@ -7,7 +7,12 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import lombok.Data;
 
 /**
- * 对象映射模型基类
+ * @ClassName BaseObjMappingModel
+ * @Description 对象映射模型基类
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 public abstract class BaseObjMappingModel extends BaseModel {

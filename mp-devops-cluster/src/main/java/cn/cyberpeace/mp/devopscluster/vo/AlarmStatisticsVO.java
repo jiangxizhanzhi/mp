@@ -10,9 +10,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 /**
- * @Description: 告警数量统计信息
+ * @ClassName AlarmStatisticsVO
+ * @Description
  * @Author qiaokang
- * @Date：2022/7/19 19:49
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

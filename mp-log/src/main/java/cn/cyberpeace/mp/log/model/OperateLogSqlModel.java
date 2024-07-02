@@ -11,9 +11,12 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
+ * @ClassName OperateLogSqlModel
  * @Description 审计日志
  * @Author shgang
  * @Date 2022/9/13
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @NoArgsConstructor

@@ -6,6 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * @ClassName UpdateReferenceAndUseStatusScheduleJob
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Component
 @Slf4j
 public class UpdateReferenceAndUseStatusScheduleJob {

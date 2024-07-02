@@ -6,9 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description:
+ * @ClassName ElementEventPercent
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/11/29 16:40
+ * @Date 2021/11/29 16:40
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

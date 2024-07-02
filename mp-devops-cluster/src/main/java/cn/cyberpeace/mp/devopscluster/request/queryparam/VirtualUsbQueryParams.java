@@ -6,9 +6,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description: 虚拟USB通用查询条件
- * @Author: guquan
- * @Date：2023/4/15 14:53
+ * @ClassName VirtualUsbQueryParams
+ * @Description 虚拟USB通用查询条件
+ * @Author guquan
+ * @Date 2023/4/15 14:53
+ * @Version 1.0.0
+ * @see QueryParams
  */
 @Data
 @ApiModel("虚拟USB通用查询条件")

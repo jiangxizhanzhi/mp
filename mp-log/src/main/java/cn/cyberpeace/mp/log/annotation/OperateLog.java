@@ -11,8 +11,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 操作日志注解
- * @author wanggang
+ * @ClassName OperateLog
+ * @Description 操作日志注解
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Annotation
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

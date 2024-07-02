@@ -7,6 +7,13 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * @ClassName CollecitonFlowAttackBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

@@ -5,9 +5,11 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 /**
- * @Description:
+ * @ClassName AdminMapper
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/11/6 14:23
+ * @Date 2021/11/6 14:23
+ * @Version 1.0.0
  */
 @Mapper
 @Repository

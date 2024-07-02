@@ -13,7 +13,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 镜像分页对应的ws
+ * @ClassName ImagesByUuidSocketServer
+ * @Description 镜像分页对应的ws
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Slf4j
 @Component

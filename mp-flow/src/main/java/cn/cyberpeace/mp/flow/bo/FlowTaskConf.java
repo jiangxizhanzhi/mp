@@ -7,9 +7,11 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description: 流量任务配置
- * @Author: guquan
- * @Date：2023/5/9 16:03
+ * @ClassName FlowTaskConf
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @ApiModel("流量任务配置")

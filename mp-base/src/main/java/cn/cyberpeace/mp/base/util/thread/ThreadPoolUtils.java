@@ -7,9 +7,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
- * @Description: 全局ScheduledThreadPool工具类
+ * @ClassName ThreadPoolUtils
+ * @Description 全局ScheduledThreadPool工具类
  * @Author qiaokang
- * @Date：2021/8/9 11:29
+ * @Date 2021/8/9 11:29
+ * @Version 1.0.0
  */
 public class ThreadPoolUtils {
 

@@ -10,9 +10,11 @@ import java.io.InputStream;
 import java.util.Objects;
 
 /**
- * @Description:
+ * @ClassName ExcelCheck
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/22 13:57
+ * @Date 2021/12/22 13:57
+ * @Version 1.0.0
  */
 @Slf4j
 public class ExcelCheck {

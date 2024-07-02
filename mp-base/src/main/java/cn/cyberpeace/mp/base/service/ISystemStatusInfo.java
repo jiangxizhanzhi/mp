@@ -5,11 +5,12 @@ import cn.cyberpeace.mp.base.util.thread.taskpool.ThreadPoolInfo;
 import java.util.List;
 
 /**
- * @author wangssh
- * @version 1.0
- * @description TODO
- * @date 2023/6/29
- **/
+ * @ClassName ISystemStatusInfo
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public interface ISystemStatusInfo {
 
     /**

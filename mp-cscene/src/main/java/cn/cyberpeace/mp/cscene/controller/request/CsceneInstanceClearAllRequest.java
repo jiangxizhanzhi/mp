@@ -5,9 +5,11 @@ import lombok.Data;
 import java.util.List;
 
 /**
+ * @ClassName CsceneInstanceClearAllRequest
  * @Description
  * @Author zhanglin
  * @Date 2023/3/21
+ * @Version 1.0.0
  */
 @Data
 public class CsceneInstanceClearAllRequest {

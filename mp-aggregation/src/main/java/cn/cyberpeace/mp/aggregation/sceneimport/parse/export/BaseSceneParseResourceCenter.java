@@ -38,9 +38,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
+ * @ClassName BaseSceneParseResourceCenter
  * @Description
  * @Author maojun
  * @Date 2022/8/20
+ * @Version 1.0.0
  */
 public class BaseSceneParseResourceCenter {
 

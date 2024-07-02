@@ -10,9 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName SegmentCount2IntervalSecondsUtil
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/6 13:51
+ * @Date 2021/12/6 13:51
+ * @Version 1.0.0
  */
 @Slf4j
 public class SegmentCount2IntervalSecondsUtil {

@@ -23,6 +23,13 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * @ClassName JacksonConfig
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Configuration
 @ConfigurationProperties(prefix = "spring.jackson")
 public class JacksonConfig {

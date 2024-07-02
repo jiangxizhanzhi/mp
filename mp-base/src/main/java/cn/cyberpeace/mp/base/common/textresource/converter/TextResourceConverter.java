@@ -1,7 +1,11 @@
 package cn.cyberpeace.mp.base.common.textresource.converter;
 
 /**
- * 值转换接口，用于定义文本资源和对象字段的转换方法
+ * @ClassName TextResourceConverter
+ * @Description 值转换接口，用于定义文本资源和对象字段的转换方法
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public interface TextResourceConverter<T> {
 

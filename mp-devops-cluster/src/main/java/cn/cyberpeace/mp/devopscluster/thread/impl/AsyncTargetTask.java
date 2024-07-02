@@ -18,7 +18,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * 同步靶标任务类
+ * @ClassName AsyncTargetTask
+ * @Description 同步靶标任务类
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ITask
  */
 @Service
 @RequiredArgsConstructor

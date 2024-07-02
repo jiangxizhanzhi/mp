@@ -4,9 +4,11 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description:
+ * @ClassName ActivationStatus
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/10/26 14:22
+ * @Date 2022/10/26 14:22
+ * @Version 1.0.0
  */
 @Data
 public class ActivationStatus {

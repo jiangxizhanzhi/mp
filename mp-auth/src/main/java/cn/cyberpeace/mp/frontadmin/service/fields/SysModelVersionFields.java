@@ -6,9 +6,12 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.frontadmin.model.SysModelVersionModel;
 
 /**
- * @Description:
- * @Author: guquan
- * @Date：2023/8/23 15:48
+ * @ClassName SysModelVersionFields
+ * @Description
+ * @Author guquan
+ * @Date 2023/8/23 15:48
+ * @Version 1.0.0
+ * @see BaseModelFields
  */
 public class SysModelVersionFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(SysModelVersionModel.class));

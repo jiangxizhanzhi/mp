@@ -13,9 +13,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Description: 文件工具类
+ * @ClassName FileUtils
+ * @Description 文件工具类
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 @Component
 @Slf4j

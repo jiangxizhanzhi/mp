@@ -35,8 +35,11 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
- * 记录请求日志的切面
- * @author wanggang
+ * @ClassName RequestLogAspect
+ * @Description 记录请求日志的切面
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Aspect
 @Slf4j

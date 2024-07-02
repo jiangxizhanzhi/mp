@@ -9,9 +9,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 
 /**
+ * @ClassName AlarmDistributionRequest
  * @Description
  * @Author shgang
  * @Date 2022/11/12
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

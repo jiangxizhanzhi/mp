@@ -6,6 +6,14 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementPort
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
+/**
+ * @ClassName CloudPluginSceneConfigElementPortMapper
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BasePluginSceneElementPortMapper
+ */
 @Mapper
 @Repository
 @ModelClass(CloudPluginSceneConfigElementPortModel.class)

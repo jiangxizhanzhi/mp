@@ -15,11 +15,12 @@ import java.util.List;
 
 
 /**
- * 场景实例插件基础类，场景实例的插件通过继承本类拓展插件功能
- * @param <S> 插件对应配置类
- * @param <E> 网元节点的插件对应配置类
- * @param <P> 网元端口的插件对应配置类
- * @param <C> 插件上下文类
+ * @ClassName ScenePluginHandler
+ * @Description 场景实例插件基础类，场景实例的插件通过继承本类拓展插件功能
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BasePluginCommonHandler
  */
 @Data
 public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, SceneBO>,

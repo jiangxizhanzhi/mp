@@ -11,9 +11,12 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
+ * @ClassName PrepareConverter
  * @Description 将解析出的scene节点转成BO
  * @Author maojun
  * @Date 2021/10/12
+ * @Version 1.0.0
+ * @see IConverter
  */
 class PrepareConverter implements IConverter {
 

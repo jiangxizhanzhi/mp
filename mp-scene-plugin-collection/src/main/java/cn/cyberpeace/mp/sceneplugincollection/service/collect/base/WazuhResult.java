@@ -5,6 +5,13 @@ import lombok.Setter;
 
 import java.util.List;
 
+/**
+ * @ClassName WazuhResult
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Getter
 @Setter
 public class WazuhResult<T> {

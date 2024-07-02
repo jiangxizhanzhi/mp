@@ -3,6 +3,13 @@ package cn.cyberpeace.mp.cscene.report.bo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+/**
+ * @ClassName CollectedCsceneElementCommonBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Data
 public class CollectedCsceneElementCommonBO<T> {
     @ApiModelProperty(value = "业务场景id")

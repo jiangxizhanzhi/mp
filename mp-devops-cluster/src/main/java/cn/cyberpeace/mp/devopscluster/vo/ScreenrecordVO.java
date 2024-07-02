@@ -13,9 +13,12 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * @Description: 录屏结果
+ * @ClassName ScreenrecordVO
+ * @Description
  * @Author qiaokang
- * @Date：2021/9/13 18:51
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @ApiModel("录屏结果")

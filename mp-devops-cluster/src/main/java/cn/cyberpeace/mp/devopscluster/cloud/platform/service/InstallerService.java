@@ -19,8 +19,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 靶标管理-服务管理
- * @author wanggang
+ * @ClassName InstallerService
+ * @Description 靶标管理-服务管理
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCpService
  */
 @Service
 @Slf4j

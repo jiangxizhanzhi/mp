@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.frontadmin.constant;
 
 /**
- * @Description:
+ * @ClassName AuthLogConstant
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 public class AuthLogConstant {
     // 账号模块

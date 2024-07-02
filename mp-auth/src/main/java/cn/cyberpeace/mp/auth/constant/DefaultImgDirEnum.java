@@ -1,8 +1,12 @@
 package cn.cyberpeace.mp.auth.constant;
 
 /**
- * 默认图片文件夹
- * @author wanggang
+ * @ClassName DefaultImgDirEnum
+ * @Description 默认图片文件夹
+ * @Author wanggang
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Enum
  */
 public enum DefaultImgDirEnum  {
 

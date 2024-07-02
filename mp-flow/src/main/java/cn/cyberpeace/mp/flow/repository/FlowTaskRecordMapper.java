@@ -12,9 +12,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
+ * @ClassName FlowTaskRecordMapper
  * @Description 流量任务记录mapper
  * @Author qiaokang
  * @Date 2023-04-27 09:21:37
+ * @Version 1.0.0
+ * @see BaseModelMapper
  */
 @Mapper
 @Repository

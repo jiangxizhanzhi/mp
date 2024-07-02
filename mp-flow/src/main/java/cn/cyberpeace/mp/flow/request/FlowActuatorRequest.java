@@ -11,7 +11,12 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 镜像发生器操作请求
+ * @ClassName FlowActuatorRequest
+ * @Description 镜像发生器操作请求
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Serializable
  */
 @Data
 @NoArgsConstructor

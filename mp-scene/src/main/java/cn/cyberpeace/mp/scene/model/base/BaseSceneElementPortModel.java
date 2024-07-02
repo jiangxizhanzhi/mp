@@ -9,6 +9,14 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+/**
+ * @ClassName BaseSceneElementPortModel
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModel
+ */
 @Data
 public class BaseSceneElementPortModel extends BaseModel {
     private String scene;

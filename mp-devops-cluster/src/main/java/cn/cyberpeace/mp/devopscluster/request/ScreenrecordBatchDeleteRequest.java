@@ -8,9 +8,11 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * @Description: 批量删除录屏文件请求
+ * @ClassName ScreenrecordBatchDeleteRequest
+ * @Description 批量删除录屏文件请求
  * @Author qiaokang
- * @Date：2021/9/14 10:50
+ * @Date 2021/9/14 10:50
+ * @Version 1.0.0
  */
 @Data
 @ApiModel("批量删除录屏文件请求")

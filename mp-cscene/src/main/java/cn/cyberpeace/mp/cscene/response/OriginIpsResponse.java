@@ -8,9 +8,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
+ * @ClassName OriginIpsResponse
  * @Description
  * @Author zhanglin
  * @Date 2023/3/21
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

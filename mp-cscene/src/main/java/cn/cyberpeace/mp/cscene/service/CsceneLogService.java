@@ -23,9 +23,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * @ClassName CsceneLogService
  * @Description
  * @Author maojun
  * @Date 2022/6/23
+ * @Version 1.0.0
  */
 @Service
 public class CsceneLogService {

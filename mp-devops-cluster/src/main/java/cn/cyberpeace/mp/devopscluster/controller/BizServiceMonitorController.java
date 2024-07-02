@@ -18,9 +18,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @Description: 业务服务监控
+ * @ClassName BizServiceMonitorController
+ * @Description 业务服务监控
  * @Author qiaokang
- * @Date：2022/7/15 14:18
+ * @Date 2022/7/15 14:18
+ * @Version 1.0.0
  */
 @Slf4j
 @RestController

@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
+ * @ClassName SceneSnapshotService
  * @Description
  * @Author maojun
  * @Date 2022/7/28
+ * @Version 1.0.0
  */
 @Service
 public class SceneSnapshotService {

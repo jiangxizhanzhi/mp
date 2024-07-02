@@ -6,6 +6,13 @@ import org.springframework.stereotype.Component;
 /**
  * 模块下单例对象的快捷引用
  */
+/**
+ * @ClassName AggregationSingleton
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Component
 public class AggregationSingleton {
 

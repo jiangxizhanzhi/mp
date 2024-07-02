@@ -6,9 +6,12 @@ import cn.cyberpeace.mp.frontadmin.model.SysModelVersionModel;
 import cn.cyberpeace.mp.frontadmin.response.SysVersionResponse;
 
 /**
- * @Description:
- * @Author: guquan
- * @Date：2023/8/23 15:36
+ * @ClassName SysModelVersionService
+ * @Description
+ * @Author maojun
+ * @Date 2023/8/23 15:36
+ * @Version 1.0.0
+ * @see BaseModelService
  */
 public interface SysModelVersionService extends BaseModelService<SysModelVersionModel, QueryParams> {
 

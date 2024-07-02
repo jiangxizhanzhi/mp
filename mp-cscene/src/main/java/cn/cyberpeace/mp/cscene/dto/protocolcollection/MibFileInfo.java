@@ -9,11 +9,12 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @BelongsPackage: cn.cyberpeace.mp.cscene.dto.protocolcollection
- * @Author: hhuang
- * @CreateTime: 2023/05/15  09:44
- * @Description: mib信息
- * @Version: 1.0
+ * @ClassName MibFileInfo
+ * @Description mib信息
+ * @Author hhuang
+ * @Date 2024/07/02
+ * @Version 1.0
+ * @see EntityNodeMibFileResult
  */
 @Data
 public class MibFileInfo extends EntityNodeMibFileResult {

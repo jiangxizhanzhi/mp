@@ -7,9 +7,12 @@ import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import org.springframework.stereotype.Component;
 
 /**
+ * @ClassName FlowTaskTaskFields
  * @Description 流量执行任务Fields
  * @Author qiaokang
  * @Date 2023-04-27 09:21:37
+ * @Version 1.0.0
+ * @see BaseModelFields
  */
 @Component
 public class FlowTaskTaskFields extends BaseModelFields {

@@ -17,6 +17,13 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
+/**
+ * @ClassName FsCommon
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Slf4j
 @Component
 public class FsCommon {

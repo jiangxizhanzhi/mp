@@ -6,9 +6,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description: 流量仿真统计临时存放数据
- * @Author: guquan
- * @Date：2023/5/17 15:37
+ * @ClassName FlowStatisticsTemp
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see FlowTaskRecordModel
  */
 @Data
 @ApiModel("流量仿真统计临时存放数据")

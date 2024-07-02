@@ -7,9 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description: 流量记录
+ * @ClassName FlowRecords
+ * @Description
  * @Author qiaokang
- * @Date：2022/4/21 14:02
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

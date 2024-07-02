@@ -8,7 +8,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 路由分页返回信息
+ * @ClassName RouterPageVO
+ * @Description 路由分页返回信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see SceneInfoVO
  */
 @Data
 @NoArgsConstructor

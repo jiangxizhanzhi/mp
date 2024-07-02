@@ -10,9 +10,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * @ClassName FlowTaskRecordService
  * @Description 流量任务记录service
  * @Author qiaokang
  * @Date 2023-04-27 09:21:37
+ * @Version 1.0.0
+ * @see BaseModelService
  */
 public interface FlowTaskRecordService extends BaseModelService<FlowTaskRecordModel, QueryParams> {
 

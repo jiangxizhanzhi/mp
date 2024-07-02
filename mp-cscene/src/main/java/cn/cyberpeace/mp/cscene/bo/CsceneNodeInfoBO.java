@@ -5,9 +5,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * @ClassName CsceneNodeInfoBO
  * @Description
  * @Author maojun
  * @Date 2022/5/16
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

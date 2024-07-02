@@ -5,9 +5,11 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description:
+ * @ClassName ScreenrecordConfigRequest
+ * @Description
  * @Author qiaokang
- * @Date：2021/9/14 10:50
+ * @Date 2021/9/14 10:50
+ * @Version 1.0.0
  */
 @Data
 @ApiModel("录屏空间自动清除配置")

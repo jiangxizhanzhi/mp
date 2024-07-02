@@ -18,9 +18,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * @Description:
+ * @ClassName UserHeartbeatServiceImpl
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see UserHeartbeatService
  */
 @Service
 @Slf4j

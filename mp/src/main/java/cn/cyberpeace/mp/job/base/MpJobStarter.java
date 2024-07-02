@@ -14,6 +14,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * @ClassName MpJobStarter
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ApplicationRunner
+ */
 @Component
 @Slf4j
 public class MpJobStarter implements ApplicationRunner {

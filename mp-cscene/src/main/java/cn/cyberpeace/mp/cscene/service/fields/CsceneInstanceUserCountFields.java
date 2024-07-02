@@ -7,9 +7,12 @@ import cn.cyberpeace.mp.cscene.model.CsceneInstanceUserCountModel;
 import org.springframework.stereotype.Component;
 
 /**
+ * @ClassName CsceneInstanceUserCountFields
  * @Description 用户场景统计Fields
  * @Author qiaokang
  * @Date 2023-06-20 14:26:35
+ * @Version 1.0.0
+ * @see BaseModelFields
  */
 @Component
 public class CsceneInstanceUserCountFields extends BaseModelFields {

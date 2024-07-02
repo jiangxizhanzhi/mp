@@ -7,6 +7,14 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 
+/**
+ * @ClassName LengthValidator
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ConstraintValidator
+ */
 public class LengthValidator implements ConstraintValidator<Length, CharSequence> {
 
     private int min;

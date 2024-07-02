@@ -16,9 +16,12 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 /**
+ * @ClassName CloudApiProxy
  * @Description
  * @Author maojun
  * @Date 2022/6/10
+ * @Version 1.0.0
+ * @see MethodInterceptor
  */
 @Slf4j
 public class CloudApiProxy<T> implements MethodInterceptor {

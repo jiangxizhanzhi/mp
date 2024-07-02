@@ -18,8 +18,13 @@ import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigMapper
 
 
 /**
- * 场景实例的处理
+ * @ClassName CloudSceneConfigPluginModelHandler
+ * @Description 场景实例的处理
  * 场景实例的功能由本类对外提供
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BasePluginModelHandler
  */
 public class CloudSceneConfigPluginModelHandler extends BasePluginModelHandler<SceneConfigBO, SceneConfigElementBO, SceneConfigElementPortBO, CloudPluginSceneConfigModel, CloudPluginSceneConfigElementModel, CloudPluginSceneConfigElementPortModel, CloudPluginSceneConfigBO, CloudPluginSceneConfigElementBO, CloudPluginSceneConfigElementPortBO, CloudPluginSceneConfigMapper, CloudPluginSceneConfigElementMapper, CloudPluginSceneConfigElementPortMapper, CloudSceneConfigPluginHandler> {
 

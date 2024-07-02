@@ -39,9 +39,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * @Description: 角色管理接口
+ * @ClassName RoleController
+ * @Description 角色管理接口
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 @Api(value = "角色管理接口", tags = "角色管理接口")
 @Slf4j

@@ -9,9 +9,11 @@ import lombok.Data;
 import javax.validation.constraints.NotEmpty;
 
 /**
- * @Description:
+ * @ClassName ResetPwdRequest
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 @ApiModel(value = "修改密码请求体")
 @Data

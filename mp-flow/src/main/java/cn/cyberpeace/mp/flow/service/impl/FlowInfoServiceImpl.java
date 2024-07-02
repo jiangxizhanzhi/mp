@@ -61,9 +61,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @Description: 流量service
+ * @ClassName FlowInfoServiceImpl
+ * @Description
  * @Author qiaokang
- * @Date：2021/6/10 10:31
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see FlowInfoService
  */
 @Service
 @Slf4j

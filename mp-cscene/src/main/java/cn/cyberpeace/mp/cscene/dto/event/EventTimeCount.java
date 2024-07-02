@@ -8,9 +8,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * @Description:
+ * @ClassName EventTimeCount
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/3/12 17:03
+ * @Date 2022/3/12 17:03
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

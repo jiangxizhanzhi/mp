@@ -4,7 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 文件上传支持后缀常量
+ * @ClassName FileSuffixConstant
+ * @Description 文件上传支持后缀常量
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public interface FileSuffixConstant {
 

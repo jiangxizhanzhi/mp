@@ -34,9 +34,11 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 /**
- * @Description: 服务监控服务类
+ * @ClassName ServiceMonitorService
+ * @Description 服务监控服务类
  * @Author qiaokang
- * @Date：2022/7/15 14:27
+ * @Date 2022/7/15 14:27
+ * @Version 1.0.0
  */
 @Service
 @RequiredArgsConstructor

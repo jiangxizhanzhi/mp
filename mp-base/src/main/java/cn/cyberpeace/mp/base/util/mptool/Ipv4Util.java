@@ -4,6 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * @ClassName Ipv4Util
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class Ipv4Util {
 
     public static final String IP_MASK_SPLIT_MARK = "/";

@@ -5,9 +5,11 @@ import cn.cyberpeace.mp.base.util.mptool.CollUtil;
 import java.util.List;
 
 /**
+ * @ClassName CsceneBizConstant
  * @Description
  * @Author maojun
  * @Date 2022/1/6
+ * @Version 1.0.0
  */
 public final class CsceneBizConstant {
     public static class Event {

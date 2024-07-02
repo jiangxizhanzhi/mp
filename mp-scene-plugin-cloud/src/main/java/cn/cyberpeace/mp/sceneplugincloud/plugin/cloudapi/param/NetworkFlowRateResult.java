@@ -6,9 +6,12 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description: 环境总速率响应数据
- * @Author: guquan
- * @Date：2023/5/30 10:19
+ * @ClassName NetworkFlowRateResult
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see CloudHttpData
  */
 @Data
 public class NetworkFlowRateResult implements CloudHttpData {

@@ -30,8 +30,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 靶标
- * @author wanggang
+ * @ClassName TargetConverter
+ * @Description 靶标
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Service
 @RequiredArgsConstructor

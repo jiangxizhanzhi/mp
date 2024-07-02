@@ -43,9 +43,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
+ * @ClassName SceneParseResourceCenterV1
  * @Description
  * @Author maojun
  * @Date 2022/8/20
+ * @Version 1.0.0
+ * @see BaseSceneParseResourceCenter
  */
 public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
 

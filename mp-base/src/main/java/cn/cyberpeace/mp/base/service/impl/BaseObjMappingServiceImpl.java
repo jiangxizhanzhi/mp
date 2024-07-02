@@ -15,6 +15,14 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * @ClassName BaseObjMappingServiceImpl
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseObjMappingService
+ */
 @Slf4j
 public abstract class BaseObjMappingServiceImpl<M extends BaseObjMappingModel, P extends BaseObjMappingMapper<M>>
         implements BaseObjMappingService<M> {

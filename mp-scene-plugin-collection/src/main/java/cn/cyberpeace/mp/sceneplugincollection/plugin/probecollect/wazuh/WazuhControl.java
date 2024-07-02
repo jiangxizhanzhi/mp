@@ -15,6 +15,13 @@ import java.util.List;
 import java.util.Map;
 
 
+/**
+ * @ClassName WazuhControl
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Slf4j
 public class WazuhControl {
     public static final String WINDOWS_CONTROL_SCRIPT_PATH = "C:\\ossec-agent\\probe-control.bat";

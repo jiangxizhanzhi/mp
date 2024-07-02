@@ -5,6 +5,14 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * @ClassName ListPageInfoQueryParams
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BasePageRequest
+ */
 @Data
 public class ListPageInfoQueryParams extends BasePageRequest {
     @ApiModelProperty(value = "代理名称")

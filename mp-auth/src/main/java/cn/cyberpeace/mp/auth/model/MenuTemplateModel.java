@@ -11,11 +11,12 @@ import javax.validation.constraints.NotBlank;
 import java.util.Objects;
 
 /**
- * 这个target以后就当做menu
- *
- * @Description:
+ * @ClassName MenuTemplateModel
+ * @Description 这个target以后就当做menu
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
+ * @see TargetModel
  */
 @Data
 @AllArgsConstructor

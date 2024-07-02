@@ -13,7 +13,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 镜像的连接信息WS
+ * @ClassName ImagesConnectSocketServer
+ * @Description 镜像的连接信息WS
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Slf4j
 @Component

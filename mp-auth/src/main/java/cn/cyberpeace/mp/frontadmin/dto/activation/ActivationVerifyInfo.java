@@ -5,9 +5,11 @@ import lombok.Data;
 import java.util.Map;
 
 /**
- * @Description:
+ * @ClassName ActivationVerifyInfo
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 @Data
 public class ActivationVerifyInfo {

@@ -3,6 +3,14 @@ package cn.cyberpeace.mp.sceneplugincloud.constant;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.scene.constant.SceneStage;
 
+/**
+ * @ClassName CloudSceneStage
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see SceneStage
+ */
 public class CloudSceneStage extends SceneStage {
 
     public static CloudSceneStage CREATE_NETWORK = new CloudSceneStage("create_network", "wangluoyu");

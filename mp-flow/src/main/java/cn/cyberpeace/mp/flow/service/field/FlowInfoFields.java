@@ -7,6 +7,14 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import org.springframework.stereotype.Component;
 
+/**
+ * @ClassName FlowInfoFields
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelFields
+ */
 @Component
 public class FlowInfoFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(FlowInfoModel.class));

@@ -6,7 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 基础模型，对应云平台接口返回信息
+ * @ClassName BaseCloudPlatformResult
+ * @Description 基础模型，对应云平台接口返回信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @NoArgsConstructor

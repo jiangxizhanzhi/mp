@@ -13,6 +13,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * @ClassName SerialPortConverter
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Service
 @RequiredArgsConstructor
 public class SerialPortConverter {

@@ -14,6 +14,14 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * @ClassName CollectionPluginSceneBO
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCollectionPluginSceneBO
+ */
 @Data
 public class CollectionPluginSceneBO extends BaseCollectionPluginSceneBO<CollectionPluginSceneModel,
         CollectionPluginSceneBO, SceneBO> {

@@ -27,7 +27,12 @@ import java.util.Objects;
 
 
 /**
- * 综合场景实例处理
+ * @ClassName BcSceneInstanceHandler
+ * @Description 综合场景实例处理
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCsceneHandler
  */
 @Slf4j
 @Deprecated

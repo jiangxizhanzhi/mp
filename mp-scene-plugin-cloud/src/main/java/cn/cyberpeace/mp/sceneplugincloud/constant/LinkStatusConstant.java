@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.sceneplugincloud.constant;
 
 /**
+ * @ClassName LinkStatusConstant
  * @Description
  * @Author maojun
  * @Date 2022/7/11
+ * @Version 1.0.0
  */
 public interface LinkStatusConstant {
 

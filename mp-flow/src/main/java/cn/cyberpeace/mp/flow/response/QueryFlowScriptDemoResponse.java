@@ -9,9 +9,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * @Description: 流量脚本查询返回信息
+ * @ClassName QueryFlowScriptDemoResponse
+ * @Description
  * @Author qiaokang
- * @Date：2021/9/1 15:15
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

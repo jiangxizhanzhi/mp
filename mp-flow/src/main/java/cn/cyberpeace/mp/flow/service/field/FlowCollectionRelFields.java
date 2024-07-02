@@ -6,6 +6,14 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.flow.model.FlowCollectionRelModel;
 import org.springframework.stereotype.Component;
 
+/**
+ * @ClassName FlowCollectionRelFields
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelFields
+ */
 @Component
 public class FlowCollectionRelFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(FlowCollectionRelModel.class));

@@ -11,6 +11,13 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+/**
+ * @ClassName BaseModelBulkDeleteBOController
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Deprecated
 public interface BaseModelBulkDeleteBOController<T extends ModelBO<M, T>, M extends BaseModel, S extends BaseModelService<M, ?>> {
 

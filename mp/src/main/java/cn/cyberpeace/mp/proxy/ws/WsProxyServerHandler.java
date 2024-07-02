@@ -13,6 +13,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * Handles establishment and tracking of next 'hop', and
  * copies data from the current session to the next hop.
  */
+/**
+ * @ClassName WsProxyServerHandler
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see AbstractWebSocketHandler
+ */
 @Component
 public class WsProxyServerHandler extends AbstractWebSocketHandler {
 

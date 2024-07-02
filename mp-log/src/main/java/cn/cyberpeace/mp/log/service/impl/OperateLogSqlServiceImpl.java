@@ -36,9 +36,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * @ClassName OperateLogSqlServiceImpl
  * @Description
  * @Author shgang
  * @Date 2022/9/13
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see OperateLogDbService
  */
 @Slf4j
 @Component

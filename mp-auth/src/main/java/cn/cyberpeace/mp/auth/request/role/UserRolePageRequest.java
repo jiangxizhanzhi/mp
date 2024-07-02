@@ -4,6 +4,14 @@ import cn.cyberpeace.mp.auth.request.common.PageRequest;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+/**
+ * @ClassName UserRolePageRequest
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see PageRequest
+ */
 @Data
 public class UserRolePageRequest extends PageRequest {
 

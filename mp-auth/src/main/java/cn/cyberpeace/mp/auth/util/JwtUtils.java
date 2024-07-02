@@ -40,9 +40,11 @@ import java.util.Objects;
 import static cn.cyberpeace.mp.auth.constant.AuthConstant.FAIL_VERIFY_JWT_TOKEN;
 
 /**
- * @Description:
+ * @ClassName JwtUtils
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
  */
 @Slf4j
 @Component

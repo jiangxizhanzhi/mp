@@ -9,6 +9,14 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 
+/**
+ * @ClassName ExpireRemindDateGetterImpl
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ExpireRemindDateGetter
+ */
 @Service
 public class ExpireRemindDateGetterImpl implements ExpireRemindDateGetter {
 

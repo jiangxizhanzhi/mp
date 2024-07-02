@@ -34,7 +34,11 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * WS通知管理
+ * @ClassName WebSocketNoticeController
+ * @Description WS通知管理
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Validated
 @Slf4j

@@ -12,8 +12,12 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 靶标信息
- * @author wanggang
+ * @ClassName DeviceVO
+ * @Description 靶标信息
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Serializable
  */
 @Data
 @NoArgsConstructor

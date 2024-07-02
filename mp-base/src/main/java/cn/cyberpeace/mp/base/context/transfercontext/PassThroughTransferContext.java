@@ -5,6 +5,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+/**
+ * @ClassName PassThroughTransferContext
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see TransferContext
+ */
 @Component
 public class PassThroughTransferContext implements TransferContext<Map<String, Object>> {
 

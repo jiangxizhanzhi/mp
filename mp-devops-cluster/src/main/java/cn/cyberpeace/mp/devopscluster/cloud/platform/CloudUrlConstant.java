@@ -1,5 +1,12 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform;
 
+/**
+ * @ClassName CloudUrlConstant
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 public class CloudUrlConstant {
     public static final String MONITOR_NETWORKS = "/cloud/v1/monitor/networks";
     public static final String MONITOR_COMPUTE_NODES = "/cloud/v1/monitor/compute_nodes";

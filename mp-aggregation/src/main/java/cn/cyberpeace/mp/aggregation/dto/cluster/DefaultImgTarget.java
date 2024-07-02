@@ -10,9 +10,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * @Description:
- * @Author: guquan
- * @Date：2023/9/2 11:22
+ * @ClassName DefaultImgTarget
+ * @Description
+ * @Author guquan
+ * @Date 2023/9/2 11:22
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

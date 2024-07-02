@@ -5,9 +5,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description:
+ * @ClassName EventPercentRequest
+ * @Description
  * @Author zhouxinghuai
- * @Date：2022/3/14 14:15
+ * @Date 2022/3/14 14:15
+ * @Version 1.0.0
+ * @see BaseTimeRangeRequest
  */
 @Data
 public class EventPercentRequest extends BaseTimeRangeRequest {

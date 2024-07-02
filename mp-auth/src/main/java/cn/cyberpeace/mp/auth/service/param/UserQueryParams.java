@@ -6,9 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description: 用户查询参数定义
+ * @ClassName UserQueryParams
+ * @Description 用户查询参数定义
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
+ * @see QueryParams
  */
 @Data
 @AllArgsConstructor

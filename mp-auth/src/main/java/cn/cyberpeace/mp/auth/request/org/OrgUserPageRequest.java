@@ -6,10 +6,14 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
 /**
- * @Description:
+ * @ClassName OrgUserPageRequest
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
+ * @see PageRequest
  */
 @Data
 public class OrgUserPageRequest extends PageRequest {

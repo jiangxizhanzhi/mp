@@ -11,7 +11,8 @@ import java.util.Objects;
  * @Description
  * @Author zhanzhi
  * @Date 2023/9/25 14:13
- **/
+ * @Version 1.0.0
+ */
 public class LocaleUtil {
 
     public static boolean chineseLocalFlag() {

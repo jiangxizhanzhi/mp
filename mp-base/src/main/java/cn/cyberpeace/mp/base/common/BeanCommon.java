@@ -7,6 +7,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+/**
+ * @ClassName BeanCommon
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ApplicationContextAware
+ */
 @Component
 public class BeanCommon implements ApplicationContextAware {
 

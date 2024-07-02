@@ -12,9 +12,11 @@ import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 /**
- * @Description: 更新流量集合请求
+ * @ClassName ModifyCollectionRequest
+ * @Description
  * @Author qiaokang
- * @Date：2021/9/2 16:48
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

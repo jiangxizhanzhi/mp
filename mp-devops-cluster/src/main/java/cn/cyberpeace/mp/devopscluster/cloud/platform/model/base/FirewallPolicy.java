@@ -8,8 +8,12 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 防火墙策略
- * @author wanggang
+ * @ClassName FirewallPolicy
+ * @Description 防火墙策略
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Serializable
  */
 @Data
 @NoArgsConstructor

@@ -7,9 +7,11 @@ import cn.cyberpeace.mp.log.response.LogLevelResponse;
 import java.util.List;
 
 /**
- * @description  描述
- * @author wangssh
- * @date 2023/6/1
+ * @ClassName ILogSettingService
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 public interface ILogSettingService {
 

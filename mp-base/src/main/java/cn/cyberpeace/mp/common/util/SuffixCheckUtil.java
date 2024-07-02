@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @Description: 文件后缀校验工具
+ * @ClassName SuffixCheckUtil
+ * @Description 文件后缀校验工具
  * @Author qiaokang
- * @Date：2022/5/18 15:56
+ * @Date 2022/5/18 15:56
+ * @Version 1.0.0
  */
 public class SuffixCheckUtil {
 

@@ -6,9 +6,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 /**
+ * @ClassName CpCloudResourceNameUtil
  * @Description
  * @Author maojun
  * @Date 2022/5/18
+ * @Version 1.0.0
+ * @see ICloudResourceName
  */
 @Component
 public class CpCloudResourceNameUtil implements ICloudResourceName<RsourceNameParams> {

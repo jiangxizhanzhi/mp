@@ -3,7 +3,13 @@ package cn.cyberpeace.mp.base.constant;
 import cn.cyberpeace.mp.base.service.code.ErrorCode;
 
 /**
- * base模块的错误码定义
+ * @ClassName BaseErrorCode
+ * @Description base模块的错误码定义
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Enum
+ * @see ErrorCode
  */
 public enum BaseErrorCode implements ErrorCode {
     SUCCESS("MP-000000", "success"),

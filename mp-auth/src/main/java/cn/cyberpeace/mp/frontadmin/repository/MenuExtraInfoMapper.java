@@ -9,9 +9,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName MenuExtraInfoMapper
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/12/17 11:13
+ * @Date 2021/12/17 11:13
+ * @Version 1.0.0
+ * @see BaseModelMapper
  */
 @Mapper
 @Repository

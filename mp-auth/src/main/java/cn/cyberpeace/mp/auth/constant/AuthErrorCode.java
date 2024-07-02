@@ -3,9 +3,13 @@ package cn.cyberpeace.mp.auth.constant;
 import cn.cyberpeace.mp.base.service.code.ErrorCode;
 
 /**
- * @Description: 全局错误枚举
+ * @ClassName AuthErrorCode
+ * @Description 全局错误枚举
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
+ * @see Enum
+ * @see ErrorCode
  */
 public enum AuthErrorCode implements ErrorCode {
     OP_ERROR("MP-110000", "op_error"),

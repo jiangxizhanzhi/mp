@@ -4,9 +4,11 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description:
+ * @ClassName FlowRiskCount
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/11/22 17:58
+ * @Date 2021/11/22 17:58
+ * @Version 1.0.0
  */
 @Data
 public class FlowRiskCount {

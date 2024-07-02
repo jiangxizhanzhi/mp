@@ -10,9 +10,11 @@ import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 /**
- * @Description: 批量删除流量信息请求
+ * @ClassName BatchDeleteFlowInfoRequest
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/10 15:50
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

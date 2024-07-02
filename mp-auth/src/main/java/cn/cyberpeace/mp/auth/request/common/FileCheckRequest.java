@@ -6,9 +6,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
+ * @ClassName FileCheckRequest
  * @Description 封装文件验证参数
  * @Author shgang
  * @Date 2022/10/27
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

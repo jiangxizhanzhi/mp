@@ -30,9 +30,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Collections;
 
 /**
- * @Description: 靶标管理-USB仿真
- * @Author: guquan
- * @Date：2023/4/17 10:39
+ * @ClassName VirtualUsbController
+ * @Description 靶标管理-USB仿真
+ * @Author guquan
+ * @Date 2023/4/17 10:39
+ * @Version 1.0.0
  */
 @Slf4j
 @RestController

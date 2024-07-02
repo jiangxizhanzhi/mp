@@ -8,6 +8,14 @@ import cn.cyberpeace.mp.flow.model.FlowPortModel;
 
 import java.util.List;
 
+/**
+ * @ClassName FlowPortService
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelService
+ */
 public interface FlowPortService extends BaseModelService<FlowPortModel, QueryParams>  {
 
     /**

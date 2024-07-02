@@ -42,9 +42,12 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @Description: 流量集合控制器
+ * @ClassName FlowCollectionController
+ * @Description
  * @Author qiaokang
- * @Date：2021/8/31 17:17
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelController
  */
 @Slf4j
 @Api(tags = "流量集合管理接口")

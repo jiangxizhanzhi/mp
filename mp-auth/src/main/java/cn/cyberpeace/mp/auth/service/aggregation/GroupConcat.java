@@ -7,9 +7,12 @@ import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import java.util.function.Function;
 
 /**
+ * @ClassName GroupConcat
  * @Description
  * @Author shgang
  * @Date 2022/11/2
+ * @Version 1.0.0
+ * @see Aggregation
  */
 public class GroupConcat extends Aggregation<GroupConcat> {
     public static Function<String, String> genDistinct() {

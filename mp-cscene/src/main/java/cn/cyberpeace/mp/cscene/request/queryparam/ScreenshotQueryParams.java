@@ -6,9 +6,12 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
- * @Description: 截屏通用查询条件
+ * @ClassName ScreenshotQueryParams
+ * @Description 截屏通用查询条件
  * @Author qiaokang
- * @Date：2021/8/31 17:17
+ * @Date 2021/8/31 17:17
+ * @Version 1.0.0
+ * @see QueryParams
  */
 @Data
 @ApiModel(value = "截屏通用查询条件")

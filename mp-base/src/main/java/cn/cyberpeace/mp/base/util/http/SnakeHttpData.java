@@ -7,6 +7,14 @@ import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @ClassName SnakeHttpData
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see HttpData
+ */
 public interface SnakeHttpData extends HttpData {
 
     /**

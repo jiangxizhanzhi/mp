@@ -15,8 +15,12 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * 靶标枚举值接口
- * @author wanggang
+ * @ClassName TypeService
+ * @Description 靶标枚举值接口
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseCpService
  */
 @Service
 @Slf4j

@@ -9,6 +9,14 @@ import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 
+/**
+ * @ClassName TargetConnection
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Serializable
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

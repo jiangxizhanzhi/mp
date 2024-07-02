@@ -11,9 +11,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * @ClassName OptionModel
  * @Description
- * @author: shgang
- * @Date: 2022/7/28
+ * @Author maojun
+ * @Date 2022/7/28
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @NoArgsConstructor

@@ -4,6 +4,13 @@ import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
 import org.springframework.stereotype.Component;
 
+/**
+ * @ClassName HangTaskCommon
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Component
 public class HangTaskCommon {
 

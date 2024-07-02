@@ -6,9 +6,11 @@ import lombok.Builder;
 import lombok.Data;
 
 /**
- * @Description:
+ * @ClassName SystemData
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/9/13 13:58
+ * @Date 2021/9/13 13:58
+ * @Version 1.0.0
  */
 
 @Data

@@ -12,9 +12,12 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 /**
+ * @ClassName AlarmStatisticsModel
  * @Description 告警统计信息对象
  * @Author qiaokang
  * @Date 2022-07-19 16:17:26
+ * @Version 1.0.0
+ * @see BaseModel
  */
 @Data
 @AllArgsConstructor

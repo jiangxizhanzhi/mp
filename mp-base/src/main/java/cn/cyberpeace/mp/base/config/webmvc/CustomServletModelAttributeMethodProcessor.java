@@ -9,7 +9,12 @@ import org.springframework.web.servlet.mvc.method.annotation.ServletModelAttribu
 import javax.servlet.ServletRequest;
 
 /**
- * 自定义请求参数映射实体处理器，主要解决将前端传递的下划线格式的字段自动转为驼峰格式
+ * @ClassName CustomServletModelAttributeMethodProcessor
+ * @Description 自定义请求参数映射实体处理器，主要解决将前端传递的下划线格式的字段自动转为驼峰格式
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ServletModelAttributeMethodProcessor
  */
 public class CustomServletModelAttributeMethodProcessor extends ServletModelAttributeMethodProcessor {
 

@@ -6,9 +6,12 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description:
+ * @ClassName ElementMonitorRequest
+ * @Description
  * @Author hewei
- * @Date：2022/5/18 15:46
+ * @Date 2022/5/18 15:46
+ * @Version 1.0.0
+ * @see BaseSceneElementPageRequest
  */
 @Data
 public class ElementMonitorRequest extends BaseSceneElementPageRequest {

@@ -9,9 +9,11 @@ import lombok.Setter;
 import java.util.List;
 
 /**
+ * @ClassName SceneLinkStatusInfo
  * @Description
  * @Author maojun
  * @Date 2022/7/8
+ * @Version 1.0.0
  */
 @ApiModel(description = "场景链路状态")
 @Getter

@@ -8,8 +8,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 操作日志实体类
- * @author wanggang
+ * @ClassName OperationLogModel
+ * @Description 操作日志实体类
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @NoArgsConstructor

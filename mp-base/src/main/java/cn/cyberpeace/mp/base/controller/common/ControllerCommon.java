@@ -18,6 +18,13 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * @ClassName ControllerCommon
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Deprecated
 public class ControllerCommon {
 

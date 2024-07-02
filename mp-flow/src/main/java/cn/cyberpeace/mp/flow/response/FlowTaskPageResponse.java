@@ -9,9 +9,11 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @Description: 查询流量任务列表响应体
- * @Author: guquan
- * @Date：2023/5/13 14:27
+ * @ClassName FlowTaskPageResponse
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Data
 @ApiModel("查询流量任务列表响应体")

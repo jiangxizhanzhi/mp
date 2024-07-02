@@ -7,7 +7,11 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import java.util.Arrays;
 
 /**
- * 通用的查询列表的controller base
+ * @ClassName BaseModelListControllerBase
+ * @Description 通用的查询列表的controller base
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Deprecated
 public interface BaseModelListControllerBase {

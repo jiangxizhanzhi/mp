@@ -88,6 +88,14 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * @ClassName CsceneController
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see BaseModelListControllerBase
+ */
 @Api(value = "场景模板", tags = "CSCENE-场景模板")
 @Slf4j
 @RestController

@@ -8,9 +8,11 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.List;
 
 /**
+ * @ClassName NetworkElementParseResultV2
  * @Description
  * @Author maojun
  * @Date 2021/10/9
+ * @Version 1.0.0
  */
 @Setter
 @Getter

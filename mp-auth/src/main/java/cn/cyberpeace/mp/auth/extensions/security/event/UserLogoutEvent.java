@@ -3,6 +3,14 @@ package cn.cyberpeace.mp.auth.extensions.security.event;
 
 import org.springframework.context.ApplicationEvent;
 
+/**
+ * @ClassName UserLogoutEvent
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see ApplicationEvent
+ */
 public class UserLogoutEvent extends ApplicationEvent {
 
     /**

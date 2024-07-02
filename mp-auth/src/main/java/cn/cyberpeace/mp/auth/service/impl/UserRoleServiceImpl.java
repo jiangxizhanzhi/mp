@@ -52,9 +52,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * @Description:
+ * @ClassName UserRoleServiceImpl
+ * @Description
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date 2021/8/31 11:13
+ * @Version 1.0.0
+ * @see BaseModelServiceImpl
+ * @see UserRoleService
  */
 @Slf4j
 @Service

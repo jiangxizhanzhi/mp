@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.frontadmin.constant;
 
 /**
+ * @ClassName FrontAdminConstant
  * @Description
- * @author: shgang
- * @Date: 2022/7/28
+ * @Author maojun
+ * @Date 2022/7/28
+ * @Version 1.0.0
  */
 public class FrontAdminConstant {
     /**

@@ -132,6 +132,13 @@ import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant.ERROR_CODE_SUFFIX;
 
+/**
+ * @ClassName ScenePluginCollectionSceneService
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
 @Slf4j
 @Service
 public class ScenePluginCollectionSceneService {

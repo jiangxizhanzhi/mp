@@ -11,9 +11,11 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 /**
- * @Description: 上传截屏文件请求
+ * @ClassName ScreenshotUploadRequest
+ * @Description 上传截屏文件请求
  * @Author qiaokang
- * @Date：2021/9/13 11:21
+ * @Date 2021/9/13 11:21
+ * @Version 1.0.0
  */
 @Data
 @AllArgsConstructor

@@ -30,7 +30,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * @author wanggang
+ * @ClassName DefaultImgController
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
  */
 @Api(value = "默认图片接口", tags = "默认图片接口")
 @Slf4j

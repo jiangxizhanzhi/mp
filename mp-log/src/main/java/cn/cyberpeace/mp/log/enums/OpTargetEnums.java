@@ -5,6 +5,14 @@ import cn.cyberpeace.mp.log.constant.LogConstant;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * @ClassName OpTargetEnums
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see Enum
+ */
 @SwaggerDisplayEnum
 public enum OpTargetEnums {
 

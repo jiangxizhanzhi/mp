@@ -7,9 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @Description:
+ * @ClassName ModuleInfoResponse
+ * @Description
  * @Author zhouxinghuai
- * @Date：2023/1/17 16:55
+ * @Date 2023/1/17 16:55
+ * @Version 1.0.0
  */
 @Data
 @Builder
