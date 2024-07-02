@@ -225,11 +225,11 @@ public class MicrosoftAzureConverter implements BaseConverter {
                     case "1":
                         device.setServiceType(target.getNetType());
                         device.setSubType(target.getSubType());
-                        if (target.getNetType() != null && target.getNetType().equals("VNet")) {
+                        if (target.getSubType() != null && target.getSubType().equals("VNet")) {
                             cloudTargetConverter.convertExtNet(device, target);
-                        } else if (target.getNetType() != null && target.getNetType().equals("fireWall")) {
+                        } else if (target.getSubType() != null && target.getSubType().equals("fireWall")) {
                             cloudTargetConverter.convertExtNetFW(device, target);
-                        } else if (target.getNetType() != null && target.getNetType().equals("WAF")) {
+                        } else if (target.getSubType() != null && target.getSubType().equals("WAF")) {
                             cloudTargetConverter.convertExtNetWAF(device, target);
                         }
                         break;
