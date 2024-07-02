@@ -28,12 +28,24 @@ public class ClientDetailsServiceImpl extends BaseModelServiceImpl<ClientDetails
 
     public static final String CACHE_VAL_CLIENTS= "CLIENTS_CACHE";
 
+    /**
+     * ClientDetailsServiceImpl
+     *
+     * @param modelMapper
+     * @param modelFields
+     */
     @Autowired
     public ClientDetailsServiceImpl(ClientDetailsMapper modelMapper, ClientDetailsFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
     }
 
+    /**
+     * getByClientId
+     *
+     * @param clientId
+     * @return
+     */
     @Override
     @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_LONG, value = CACHE_VAL_CLIENTS)
     public ClientDetailsModel getByClientId(String clientId) {

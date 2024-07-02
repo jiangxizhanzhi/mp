@@ -7,6 +7,11 @@ import java.lang.annotation.*;
 @Documented
 public @interface DefaultInt {
 
+    /**
+     * value
+     *
+     * @return int
+     */
     int value() default 0;
 
 }

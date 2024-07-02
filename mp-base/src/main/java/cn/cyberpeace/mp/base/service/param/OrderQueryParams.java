@@ -5,8 +5,18 @@ package cn.cyberpeace.mp.base.service.param;
  */
 public interface OrderQueryParams {
 
+    /**
+     * getOrders
+     *
+     * @return
+     */
     String[] getOrders();
 
+    /**
+     * setOrders
+     *
+     * @param fields
+     */
     void setOrders(String[] fields);
 
 }

@@ -13,6 +13,11 @@ public class PaginationCondition implements BaseCondition {
 
     private Integer offset;
 
+    /**
+     * isEmpty
+     *
+     * @return boolean
+     */
     @Override
     public boolean isEmpty() {
         return limit == null || limit <= 0;

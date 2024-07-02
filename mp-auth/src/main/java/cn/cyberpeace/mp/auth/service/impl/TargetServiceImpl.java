@@ -56,12 +56,24 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     @Autowired
     private RolePermissionModelService rolePermissionService;
 
+    /**
+     * TargetServiceImpl
+     *
+     * @param modelMapper
+     * @param modelFields
+     */
     @Autowired
     public TargetServiceImpl(TargetMapper modelMapper, TargetFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
     }
 
+    /**
+     * delete
+     *
+     * @param id
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Boolean> delete(String id) {
@@ -69,6 +81,12 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         return super.delete(id);
     }
 
+    /**
+     * bulkDelete
+     *
+     * @param ids
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Integer> bulkDelete(String[] ids) {
@@ -78,6 +96,13 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         return super.bulkDelete(ids);
     }
 
+    /**
+     * update
+     *
+     * @param obj
+     * @param fields
+     * @return
+     */
     @Override
     public ObjServiceResult<TargetModel> update(TargetModel obj, String[] fields) {
         if (StringUtils.isBlank(obj.getIdentifier())) {
@@ -86,6 +111,12 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         return super.update(obj, fields);
     }
 
+    /**
+     * exists
+     *
+     * @param id
+     * @return boolean
+     */
     @Override
     public boolean exists(String id) {
         ParamCheck.notBlank(id, AuthBasei18nCode.TARGET_ID);
@@ -93,6 +124,12 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         return Objects.nonNull(targetModel);
     }
 
+    /**
+     * listByParent
+     *
+     * @param parentId
+     * @return
+     */
     @Override
     public List<TargetModel> listByParent(String parentId) {
         ParamCheck.notBlank(parentId, AuthBasei18nCode.TARGET_PARENT);
@@ -103,12 +140,26 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         return targetModels;
     }
 
+    /**
+     * create
+     *
+     * @param obj
+     * @param fields
+     * @return
+     */
     @Override
     public ObjServiceResult<TargetModel> create(TargetModel obj, String[] fields) {
         check(obj);
         return super.create(obj, fields);
     }
 
+    /**
+     * getTree
+     *
+     * @param parentId
+     * @param type
+     * @return
+     */
     @Override
     public List<TargetBo> getTree(String parentId, Integer type) {
         if (Objects.isNull(type)) {
@@ -145,6 +196,13 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         return Collections.singletonList(targetBo);
     }
 
+    /**
+     * listAll
+     *
+     * @param tenant
+     * @param type
+     * @return
+     */
     @Override
     @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_LONG, value = CACHE_VAL_TARGETS)
     public List<TargetModel> listAll(String tenant, Integer type) {
@@ -160,6 +218,13 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         return targets;
     }
 
+    /**
+     * listAllIgnoreVisible
+     *
+     * @param tenant
+     * @param type
+     * @return
+     */
     @Override
     public List<TargetModel> listAllIgnoreVisible(String tenant, Integer type) {
         HumanCondition humanCondition = new HumanCondition();
@@ -173,6 +238,11 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         return targets;
     }
 
+    /**
+     * deleteAll
+     *
+     * @return boolean
+     */
     @Override
     public boolean deleteAll() {
         HumanCondition humanCondition = new HumanCondition()
@@ -182,6 +252,11 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         return true;
     }
 
+    /**
+     * check
+     *
+     * @param target
+     */
     private void check(TargetModel target) {
         boolean supportedType = false;
         if (target.getType() != null) {
@@ -200,7 +275,12 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     }
 
 
-
+    /**
+     * toTree
+     *
+     * @param targets
+     * @return
+     */
     private List<TargetBo> toTree(List<TargetModel> targets) {
         ParamCheck.notEmpty(targets, AuthBasei18nCode.TARGET_LIST);
         Map<String, TargetBo> mapTmp = new HashMap<>();
@@ -243,6 +323,11 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     }
 
 
+    /**
+     * deleteReleated
+     *
+     * @param targetId
+     */
     private void deleteReleated(String targetId) {
         if (StringUtils.isBlank(targetId)) {
             return;
@@ -258,7 +343,11 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         }
     }
 
-    // 权限树排序
+    /**
+     * 权限树排序
+     *
+     * @param targets
+     */
     private void sortTree(List<TargetBo> targets) {
         for (TargetBo t : targets) {
             if (CollectionUtils.isNotEmpty(t.getChildren())) {

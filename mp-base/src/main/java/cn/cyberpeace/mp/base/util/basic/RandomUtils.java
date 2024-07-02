@@ -10,8 +10,18 @@ public class RandomUtils {
 
     private static final Random RANDOM = new Random();
 
+    /**
+     * RandomUtils
+     */
     private RandomUtils() {}
 
+    /**
+     * sample
+     *
+     * @param pool
+     * @param count
+     * @return
+     */
     public static <T> List<T> sample(List<T> pool, int count) {
         int poolSize = pool.size();
         if (poolSize < count) {

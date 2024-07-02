@@ -11,6 +11,12 @@ import java.time.LocalTime;
 @Component
 public class TextResourceTimeConverter implements TextResourceConverter<LocalTime> {
 
+    /**
+     * convert
+     *
+     * @param value
+     * @return
+     */
     @Override
     public LocalTime convert(String value) {
         if (StringUtils.isEmpty(value)) {
@@ -25,6 +31,12 @@ public class TextResourceTimeConverter implements TextResourceConverter<LocalTim
         }
     }
 
+    /**
+     * reconvert
+     *
+     * @param value
+     * @return
+     */
     @Override
     public String reconvert(LocalTime value) {
         return value == null ? null : TimeCommon.localTimeToString(value);

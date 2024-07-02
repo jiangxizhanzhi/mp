@@ -27,11 +27,24 @@ public abstract class BaseFields {
     /** 业务可排序字段 */
     public static final DynamicFields orderFields = null;
 
+    /**
+     * getDefinedFields
+     *
+     * @param fieldName
+     * @return
+     */
     private DynamicFields getDefinedFields(String fieldName) {
         return ClassUtils.getStaticFieldValue(getClass(), fieldName,
                 DynamicFields.class);
     }
 
+    /**
+     * getIntersectionFields
+     *
+     * @param fieldName
+     * @param uncertainFields
+     * @return
+     */
     private DynamicFields getIntersectionFields(String fieldName, String[] uncertainFields) {
         DynamicFields intersectionFields = null;
         if (uncertainFields != null) {
@@ -47,26 +60,56 @@ public abstract class BaseFields {
         return intersectionFields;
     }
 
+    /**
+     * getAllFields
+     *
+     * @return
+     */
     public DynamicFields getAllFields() {
         return getDefinedFields("allFields");
     }
 
+    /**
+     * getAvailableFields
+     *
+     * @return
+     */
     public DynamicFields getAvailableFields() {
         return getDefinedFields("availableFields");
     }
 
+    /**
+     * getHiddenFields
+     *
+     * @return
+     */
     public DynamicFields getHiddenFields() {
         return getDefinedFields("hiddenFields");
     }
 
+    /**
+     * getReadonlyFields
+     *
+     * @return
+     */
     public DynamicFields getReadonlyFields() {
         return getDefinedFields("readonlyFields");
     }
 
+    /**
+     * getSearchFields
+     *
+     * @return
+     */
     public DynamicFields getSearchFields() {
         return getDefinedFields("searchFields");
     }
 
+    /**
+     * getOrderFields
+     *
+     * @return
+     */
     public DynamicFields getOrderFields() {
         return getDefinedFields("orderFields");
     }

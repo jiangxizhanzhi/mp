@@ -22,11 +22,21 @@ public class LocalFileMappingServiceImpl
         extends BaseObjMappingServiceImpl<LocalFileMappingModel, LocalFileMappingMapper>
         implements LocalFileMappingService {
 
+    /**
+     * LocalFileMappingServiceImpl
+     *
+     * @param modelMapper
+     */
     @Autowired
     public LocalFileMappingServiceImpl(LocalFileMappingMapper modelMapper) {
         setModelMapper(modelMapper);
     }
 
+    /**
+     * removeRemoteFiles
+     *
+     * @param remoteFiles
+     */
     private void removeRemoteFiles(List<String> remoteFiles) {
         for (String remoteFile : remoteFiles) {
             try {
@@ -37,6 +47,13 @@ public class LocalFileMappingServiceImpl
         }
     }
 
+    /**
+     * judgeKeepObjMapping
+     *
+     * @param newObjMapping
+     * @param existObjMapping
+     * @return boolean
+     */
     protected boolean judgeKeepObjMapping(LocalFileMappingModel newObjMapping, LocalFileMappingModel existObjMapping) {
         return super.judgeKeepObjMapping(newObjMapping, existObjMapping)
                 && existObjMapping.getLocalFile().equals(newObjMapping.getLocalFile())

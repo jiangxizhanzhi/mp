@@ -46,6 +46,11 @@ public class CustomCondition implements BaseCondition {
         return this;
     }
 
+    /**
+     * isEmpty
+     *
+     * @return boolean
+     */
     @Override
     public boolean isEmpty() {
         String[] fieldNames = ClassUtils.getBeanClassFields(this.getClass());

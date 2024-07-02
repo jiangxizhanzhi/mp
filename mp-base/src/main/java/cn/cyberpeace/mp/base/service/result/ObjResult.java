@@ -12,15 +12,31 @@ public class ObjResult<T> extends BaseObjResult<T, T>  {
     @JsonIgnore
     private T obj;
 
+    /**
+     * ObjResult
+     *
+     * @param obj
+     */
     public ObjResult(T obj) {
         setObj(obj);
     }
 
+    /**
+     * ObjResult
+     *
+     * @param obj
+     * @param fields
+     */
     public ObjResult(T obj, DynamicFields fields) {
         setObj(obj);
         setFields(fields);
     }
 
+    /**
+     * asResult
+     *
+     * @return
+     */
     @Override
     public T asResult() {
         if (obj == null) {

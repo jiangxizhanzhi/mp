@@ -42,10 +42,20 @@ class NodeElementConverter implements IConverter {
 
     private List<NodeElementParseResult> parseResult;
 
+    /**
+     * NodeElementConverter
+     *
+     * @param parseResult
+     */
     public NodeElementConverter(List<NodeElementParseResult> parseResult) {
         this.parseResult = parseResult;
     }
 
+    /**
+     * convert2BO
+     *
+     * @param container
+     */
     public void convert2BO(ConvertDataContainer container) {
         if (CollectionUtils.isNotEmpty(this.parseResult)) {
             for (NodeElementParseResult node : this.parseResult) {
@@ -54,6 +64,12 @@ class NodeElementConverter implements IConverter {
         }
     }
 
+    /**
+     * createElementAndPort
+     *
+     * @param node
+     * @param container
+     */
     private void createElementAndPort(NodeElementParseResult node, ConvertDataContainer container) {
         // 主表
         SceneConfigElementBO sceneConfigElementBO = new SceneConfigElementBO();
@@ -172,6 +188,12 @@ class NodeElementConverter implements IConverter {
         }
     }
 
+    /**
+     * buildFirewallRules
+     *
+     * @param aclsInfos
+     * @return
+     */
     private List<FirewallRule> buildFirewallRules(List<AclsInfo> aclsInfos) {
         // ip与端口
         // 协议
@@ -215,6 +237,12 @@ class NodeElementConverter implements IConverter {
         return list;
     }
 
+    /**
+     * formatDouble
+     *
+     * @param number
+     * @return double
+     */
     private double formatDouble(String number) {
         return new BigDecimal(number).setScale(6, RoundingMode.HALF_DOWN).doubleValue();
     }

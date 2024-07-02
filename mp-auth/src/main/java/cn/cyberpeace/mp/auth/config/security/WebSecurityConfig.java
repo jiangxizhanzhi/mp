@@ -57,6 +57,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Resource(name = AuthCacheConfig.LOGIN_FAILURE)
     private Cache<String, Integer> loginFailureCache;
 
+    /**
+     * WebSecurityConfig
+     *
+     * @param userDetailsService
+     * @param authenticationEntryPoint
+     * @param logoutSuccessHandler
+     * @param jwtAuthenticationFilter
+     * @param authenticationSuccessHandler
+     * @param authenticationFailureHandler
+     * @param clientAuthenticationFilter
+     * @param loadAuthoritiesFilter
+     */
     @Autowired
     public WebSecurityConfig(AuthUserDetailsService userDetailsService,
                              HttpAuthenticationEntryPoint authenticationEntryPoint,
@@ -76,11 +88,21 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         this.loadAuthoritiesFilter = loadAuthoritiesFilter;
     }
 
+    /**
+     * configure
+     *
+     * @param auth
+     */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(PasswordUtils.getPasswordEncoder());
     }
 
+    /**
+     * configure
+     *
+     * @param http
+     */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 

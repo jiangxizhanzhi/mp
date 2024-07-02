@@ -29,6 +29,11 @@ public class CommonSwagger2Config {
     @Autowired
     private Swagger2Config swagger2Config;
 
+    /**
+     * apiBase
+     *
+     * @return
+     */
     @Bean
     public Docket apiBase() {
         return new Docket(DocumentationType.SWAGGER_2)

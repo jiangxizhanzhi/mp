@@ -8,6 +8,11 @@ import java.util.concurrent.Callable;
 @Data
 @NoArgsConstructor
 public class DefaultResultPoolTask<R> extends ResultPoolTask<Object, R> {
+    /**
+     * DefaultResultPoolTask
+     *
+     * @param task
+     */
     public DefaultResultPoolTask(Callable<R> task) {
         super(task);
     }

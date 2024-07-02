@@ -20,14 +20,43 @@ import java.util.List;
 public interface SysNoticeService extends BaseModelService<SysNoticeModel, QueryParams> {
 
 
+    /**
+     * unpush
+     *
+     * @param noticeIds
+     */
     void unpush(List<String> noticeIds);
 
+    /**
+     * read
+     *
+     * @param noticeId
+     */
     void read(String noticeId);
 
+    /**
+     * top
+     *
+     * @param noticeId
+     * @param type
+     */
     void top(String noticeId, Integer type);
 
+    /**
+     * add
+     *
+     * @param sysNoticeRequest
+     * @return
+     */
     SysNoticeModel add(SysNoticeRequest sysNoticeRequest);
 
+    /**
+     * modify
+     *
+     * @param id
+     * @param sysNoticeRequest
+     * @return
+     */
     SysNoticeModel modify(String id, SysNoticeRequest sysNoticeRequest);
 
     /**
@@ -45,10 +74,27 @@ public interface SysNoticeService extends BaseModelService<SysNoticeModel, Query
      */
     ListObjServiceResult getCurrentUserNoticeMessagesPage(SysNoticePageRequest pageRequest);
 
+    /**
+     * getCurrentUserNoticeMessagesUnreadCount
+     *
+     * @return int
+     */
     int getCurrentUserNoticeMessagesUnreadCount();
 
+    /**
+     * noticeModel2NoticeDto
+     *
+     * @param noticeModel
+     * @param checkCurrentUserIsRead
+     * @return
+     */
     SysNoticeDto noticeModel2NoticeDto(SysNoticeModel noticeModel, boolean checkCurrentUserIsRead);
 
+    /**
+     * unReadCount
+     *
+     * @return int
+     */
     int unReadCount();
 
     /**

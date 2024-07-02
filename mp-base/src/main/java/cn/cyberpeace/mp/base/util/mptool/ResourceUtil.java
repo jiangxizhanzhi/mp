@@ -4,10 +4,22 @@ import java.net.URL;
 
 public class ResourceUtil {
 
+    /**
+     * getResource
+     *
+     * @param resource
+     * @param baseClass
+     * @return
+     */
     public static URL getResource(String resource, Class<?> baseClass) {
         return (null != baseClass) ? baseClass.getResource(resource) : getClassLoader().getResource(resource);
     }
 
+    /**
+     * getClassLoader
+     *
+     * @return
+     */
     public static ClassLoader getClassLoader() {
         ClassLoader classLoader = getContextClassLoader();
         if (classLoader == null) {
@@ -19,6 +31,11 @@ public class ResourceUtil {
         return classLoader;
     }
 
+    /**
+     * getContextClassLoader
+     *
+     * @return
+     */
     public static ClassLoader getContextClassLoader() {
         return Thread.currentThread().getContextClassLoader();
     }

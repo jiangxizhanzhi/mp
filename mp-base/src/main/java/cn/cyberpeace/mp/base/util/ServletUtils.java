@@ -11,6 +11,11 @@ import java.util.Objects;
 public class ServletUtils {
 
 
+    /**
+     * getResponse
+     *
+     * @return
+     */
     public static HttpServletResponse getResponse() {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (Objects.isNull(requestAttributes)) {
@@ -20,6 +25,11 @@ public class ServletUtils {
         return servletRequestAttributes.getResponse();
     }
 
+    /**
+     * getRequest
+     *
+     * @return
+     */
     public static HttpServletRequest getRequest() {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (Objects.isNull(requestAttributes)) {

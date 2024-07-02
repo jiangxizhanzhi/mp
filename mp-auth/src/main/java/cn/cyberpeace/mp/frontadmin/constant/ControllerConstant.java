@@ -14,5 +14,8 @@ public class ControllerConstant {
 
     public static final String SYS_NOTICE_TYPE_PREFIX = "sys.notice.type";
 
+    /**
+     * ControllerConstant
+     */
     private ControllerConstant() {}
 }

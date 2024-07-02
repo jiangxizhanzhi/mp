@@ -15,16 +15,37 @@ public class FormatMessage<T> {
     @ApiModelProperty(value = "数据内容")
     private T data;
 
+    /**
+     * FormatMessage
+     */
     public FormatMessage() {}
 
+    /**
+     * FormatMessage
+     *
+     * @param data
+     */
     public FormatMessage(T data) {
         this(data, null);
     }
 
+    /**
+     * FormatMessage
+     *
+     * @param data
+     * @param type
+     */
     public FormatMessage(T data, String type) {
         this(data, type, null);
     }
 
+    /**
+     * FormatMessage
+     *
+     * @param data
+     * @param type
+     * @param context
+     */
     public FormatMessage(T data, String type, Map<String, Object> context) {
         Map<String, Object> allContext = TransferContext.getContextMap();
         if (context != null) {

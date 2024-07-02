@@ -10,6 +10,13 @@ import java.util.Map;
 
 @Slf4j
 public class HttpRequest {
+    /**
+     * sendGetRequest
+     *
+     * @param urlString
+     * @param headers
+     * @return
+     */
     public static String sendGetRequest(String urlString, Map<String, String> headers) {
         try {
             URL url = new URL(urlString);

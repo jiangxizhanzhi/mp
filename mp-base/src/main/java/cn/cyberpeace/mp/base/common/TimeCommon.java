@@ -20,40 +20,93 @@ public class TimeCommon {
 
     public static DateTimeFormatter timeFormatter;
 
+    /**
+     * TimeCommon
+     *
+     * @param baseAppConfig
+     */
     private TimeCommon(BaseAppConfig baseAppConfig) {
         TimeCommon.dateTimeFormatter = DateTimeFormatter.ofPattern(baseAppConfig.getDateTimePattern());
         TimeCommon.dateFormatter = DateTimeFormatter.ofPattern(baseAppConfig.getDatePattern());
         TimeCommon.timeFormatter = DateTimeFormatter.ofPattern(baseAppConfig.getTimePattern());
     }
 
+    /**
+     * localDateTimeToString
+     *
+     * @param localDateTime
+     * @return
+     */
     public static String localDateTimeToString(LocalDateTime localDateTime) {
         return TimeUtils.localDateTimeToString(localDateTime, dateTimeFormatter);
     }
 
+    /**
+     * localDateToString
+     *
+     * @param localDate
+     * @return
+     */
     public static String localDateToString(LocalDate localDate) {
         return TimeUtils.localDateToString(localDate, dateFormatter);
     }
 
+    /**
+     * localTimeToString
+     *
+     * @param localTime
+     * @return
+     */
     public static String localTimeToString(LocalTime localTime) {
         return TimeUtils.localTimeToString(localTime, timeFormatter);
     }
 
+    /**
+     * stringToLocalDateTime
+     *
+     * @param localDateTimeStr
+     * @return
+     */
     public static LocalDateTime stringToLocalDateTime(String localDateTimeStr) {
         return TimeUtils.stringToLocalDateTime(localDateTimeStr, dateTimeFormatter);
     }
 
+    /**
+     * stringToLocalDate
+     *
+     * @param localDateStr
+     * @return
+     */
     public static LocalDate stringToLocalDate(String localDateStr) {
         return TimeUtils.stringToLocalDate(localDateStr, dateFormatter);
     }
 
+    /**
+     * stringToLocalTime
+     *
+     * @param localTimeStr
+     * @return
+     */
     public static LocalTime stringToLocalTime(String localTimeStr) {
         return TimeUtils.stringToLocalTime(localTimeStr, timeFormatter);
     }
 
+    /**
+     * utcStringToLocalDateTimeString
+     *
+     * @param utcDateTimeStr
+     * @return
+     */
     public static String utcStringToLocalDateTimeString(String utcDateTimeStr) {
         return localDateTimeToString(TimeUtils.utcStringToLocalDateTime(utcDateTimeStr));
     }
 
+    /**
+     * localDateTimeStringToUtcString
+     *
+     * @param localDateTimeStr
+     * @return
+     */
     public static String localDateTimeStringToUtcString(String localDateTimeStr) {
         return TimeUtils.localDateTimeToUtcString(stringToLocalDateTime(localDateTimeStr));
     }

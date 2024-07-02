@@ -93,14 +93,34 @@ public class URLUtil {
     private static final String PARAMETER_DELIMITER = "&";
     private static final String KEY_VALUE_SEPARATOR = "=";
 
+    /**
+     * encodeKey
+     *
+     * @param key
+     * @param charset
+     * @return
+     */
     private static String encodeKey(String key, Charset charset) {
         return StringUtils.newStringUsAscii(URLCodec.encodeUrl(QUERY_PARAM_NAME_SET, key.getBytes(charset)));
     }
 
+    /**
+     * encodeValue
+     *
+     * @param value
+     * @param charset
+     * @return
+     */
     private static String encodeValue(String value, Charset charset) {
         return StringUtils.newStringUsAscii(URLCodec.encodeUrl(QUERY_PARAM_VALUE_SET, value.getBytes(charset)));
     }
 
+    /**
+     * toStr
+     *
+     * @param value
+     * @return
+     */
     private static  String toStr(Object value) {
         if (value == null) {
             return "";
@@ -179,6 +199,12 @@ public class URLUtil {
         }
     }
 
+    /**
+     * getDecodedPath
+     *
+     * @param url
+     * @return
+     */
     public static String getDecodedPath(URL url) {
         if (null == url) {
             return null;
@@ -195,10 +221,23 @@ public class URLUtil {
         return (null != path) ? path : url.getPath();
     }
 
+    /**
+     * toURI
+     *
+     * @param url
+     * @return
+     */
     public static URI toURI(URL url) throws Exception {
         return toURI(url, false);
     }
 
+    /**
+     * toURI
+     *
+     * @param url
+     * @param isEncode
+     * @return
+     */
     public static URI toURI(URL url, boolean isEncode) throws Exception {
         if (null == url) {
             return null;
@@ -207,6 +246,13 @@ public class URLUtil {
         return toURI(url.toString(), isEncode);
     }
 
+    /**
+     * toURI
+     *
+     * @param location
+     * @param isEncode
+     * @return
+     */
     public static URI toURI(String location, boolean isEncode) throws Exception {
         try {
             return new URI(StrUtil.trim(location));
@@ -216,6 +262,11 @@ public class URLUtil {
         }
     }
 
+    /**
+     * unreservedChars
+     *
+     * @return
+     */
     private static StringBuilder unreservedChars() {
         StringBuilder sb = new StringBuilder();
 
@@ -238,6 +289,12 @@ public class URLUtil {
         return sb;
     }
 
+    /**
+     * buildBitSet
+     *
+     * @param value
+     * @return
+     */
     private static BitSet buildBitSet(String value){
         BitSet set = new BitSet(value.length());
         for(int i=0;i<value.length();i++){
@@ -246,6 +303,11 @@ public class URLUtil {
         return set;
     }
 
+    /**
+     * main
+     *
+     * @param args
+     */
     public static void main(String[] args) {
         Map<String,Object> params=new HashMap<>();
         params.put("name",12345);

@@ -27,6 +27,12 @@ import java.util.Objects;
 public class AuthExceptionHandler {
 
 
+    /**
+     * accessDeniedExceptionHandle
+     *
+     * @param ex
+     * @return
+     */
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody

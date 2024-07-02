@@ -5,8 +5,18 @@ package cn.cyberpeace.mp.base.service.param;
  */
 public interface ExcludeQueryParams {
 
+    /**
+     * getExclude
+     *
+     * @return
+     */
     String[] getExclude();
 
+    /**
+     * setExclude
+     *
+     * @param exclude
+     */
     void setExclude(String[] exclude);
 
 }

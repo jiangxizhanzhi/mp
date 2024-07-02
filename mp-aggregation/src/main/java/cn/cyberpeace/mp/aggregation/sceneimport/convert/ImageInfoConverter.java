@@ -27,6 +27,11 @@ import java.util.stream.Collectors;
  */
 class ImageInfoConverter implements IConverter {
 
+    /**
+     * convert2BO
+     *
+     * @param container
+     */
     public void convert2BO(ConvertDataContainer container) {
         if (CollectionUtils.isNotEmpty(container.getNetworkElements())) {
             this.doConvert(container.getNetworkElements(), container);
@@ -36,6 +41,12 @@ class ImageInfoConverter implements IConverter {
         }
     }
 
+    /**
+     * doConvert
+     *
+     * @param list
+     * @param container
+     */
     private void doConvert(List<SceneConfigElementBO> list, ConvertDataContainer container) {
         Map<String, CloudPluginSceneConfigElementBO> pluginElements = container.getCloudPluginElements();
         Map<String, CloudPluginSceneConfigElementPortBO> pluginPorts = container.getCloudPluginPorts();
@@ -135,6 +146,12 @@ class ImageInfoConverter implements IConverter {
         }
     }
 
+    /**
+     * getManageAccessModes
+     *
+     * @param results
+     * @return
+     */
     private List<AccessMode> getManageAccessModes(List<AccessModeParseResult> results) {
         List<AccessMode> result = getAccessModes(results, new ArrayList<>());
         for (AccessMode r : result) {
@@ -143,6 +160,13 @@ class ImageInfoConverter implements IConverter {
         return result;
     }
 
+    /**
+     * getAccessModes
+     *
+     * @param results
+     * @param existAccessMode
+     * @return
+     */
     private List<AccessMode> getAccessModes(List<AccessModeParseResult> results, List<AccessMode> existAccessMode) {
         if (CollectionUtils.isEmpty(results)) {
             return new ArrayList<>();
@@ -172,6 +196,12 @@ class ImageInfoConverter implements IConverter {
         return filterResults;
     }
 
+    /**
+     * getManageCloudAccessModes
+     *
+     * @param results
+     * @return
+     */
     private List<CloudAccessMode> getManageCloudAccessModes(List<AccessModeParseResult> results) {
         List<CloudAccessMode> result = getCloudAccessModes(results, new ArrayList<>());
         for (CloudAccessMode r : result) {
@@ -180,6 +210,13 @@ class ImageInfoConverter implements IConverter {
         return result;
     }
 
+    /**
+     * getCloudAccessModes
+     *
+     * @param results
+     * @param existAccessMode
+     * @return
+     */
     private List<CloudAccessMode> getCloudAccessModes(List<AccessModeParseResult> results, List<CloudAccessMode> existAccessMode) {
         if (CollectionUtils.isEmpty(results)) {
             return new ArrayList<>();
@@ -209,6 +246,12 @@ class ImageInfoConverter implements IConverter {
         return filterResults;
     }
 
+    /**
+     * loadAccessModeInfo
+     *
+     * @param accessMode
+     * @param result
+     */
     private void loadAccessModeInfo(AccessMode accessMode, AccessModeParseResult result) {
         accessMode.setUsername(result.getUsername());
         accessMode.setProtocol(result.getProtocol());

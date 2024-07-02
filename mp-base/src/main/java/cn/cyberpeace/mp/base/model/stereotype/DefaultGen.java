@@ -12,6 +12,11 @@ import java.lang.annotation.*;
 @Documented
 public @interface DefaultGen {
 
+    /**
+     * value
+     *
+     * @return
+     */
     Class<? extends Generator> value();
 
 }

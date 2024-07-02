@@ -19,6 +19,12 @@ public class MobilePasswordAuthenticationToken  extends AbstractAuthenticationTo
 
     private Object credentials;
 
+    /**
+     * MobilePasswordAuthenticationToken
+     *
+     * @param mobile
+     * @param credentials
+     */
     public MobilePasswordAuthenticationToken(String mobile, Object credentials) {
         super(null);
         this.principal = mobile;
@@ -40,11 +46,21 @@ public class MobilePasswordAuthenticationToken  extends AbstractAuthenticationTo
     }
 
 
+    /**
+     * getCredentials
+     *
+     * @return
+     */
     @Override
     public Object getCredentials() {
         return this.credentials;
     }
 
+    /**
+     * getPrincipal
+     *
+     * @return
+     */
     @Override
     public Object getPrincipal() {
         return this.principal;

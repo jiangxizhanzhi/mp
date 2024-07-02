@@ -10,12 +10,20 @@ import java.nio.charset.StandardCharsets;
  */
 public interface HttpParam {
 
+    /**
+     * toPathString
+     *
+     * @param httpParam
+     * @return
+     */
     static String toPathString(Object httpParam) {
         return URLUtil.buildQuery(BeanUtils.getMap(httpParam), StandardCharsets.UTF_8);
     }
 
     /**
      * 转换为Url参数
+     *
+     * @return
      */
     default String toPathString() {
         return toPathString(this);

@@ -37,6 +37,13 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
 
     private F modelFields;
 
+    /**
+     * handleSearchCondition
+     *
+     * @param humanCondition
+     * @param search
+     * @param searchFields
+     */
     private void handleSearchCondition(HumanCondition humanCondition, String search, String[] searchFields) {
         F actualModelFields = getModelFields();
         if (StringUtils.isEmpty(search) || actualModelFields == null) {
@@ -61,6 +68,12 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         }
     }
 
+    /**
+     * getHumanCondition
+     *
+     * @param selectFields
+     * @return 查询条件构造器
+     */
     public HumanCondition getHumanCondition(String[] selectFields) {
         HumanCondition humanCondition = new HumanCondition();
         if (selectFields != null) {
@@ -70,6 +83,19 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
     }
 
 
+    /**
+     * getHumanCondition
+     *
+     * @param selectFields
+     * @param ids
+     * @param exclude
+     * @param search
+     * @param searchFields
+     * @param orders
+     * @param page
+     * @param pageSize
+     * @return 查询条件构造器
+     */
     public HumanCondition getHumanCondition(String[] selectFields, String[] ids, String[] exclude,
                                             String search, String[] searchFields,
                                             String[] orders, Integer page, Integer pageSize) {
@@ -92,6 +118,13 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         return humanCondition;
     }
 
+    /**
+     * getCustomCondition
+     *
+     * @param params
+     * @param customConditionClass
+     * @return 自定义业务条件
+     */
     public CustomCondition getCustomCondition(Map<String, Object> params,
                                               Class<? extends CustomConditionClass> customConditionClass) {
         Class<?> actualCustomConditionClass;
@@ -113,9 +146,22 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         return customCondition.loadFromParams(params);
     }
 
+    /**
+     * loadListFilterCondition
+     *
+     * @param humanCondition
+     * @param queryParams
+     */
     public void loadListFilterCondition(HumanCondition humanCondition, Q queryParams) {
     }
 
+    /**
+     * list
+     *
+     * @param queryParams
+     * @param withTotal
+     * @return
+     */
     @Override
     public ListObjServiceResult<M> list(Q queryParams, boolean withTotal) {
         F actualModelFields = getModelFields();
@@ -146,6 +192,13 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         return new ListObjServiceResult<>(new ListObjResult<>(data, total, resultFields));
     }
 
+    /**
+     * get
+     *
+     * @param id
+     * @param fields
+     * @return
+     */
     @Override
     public ObjServiceResult<M> get(String id, String[] fields) {
         F actualModelFields = getModelFields();
@@ -168,6 +221,13 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         return new ObjServiceResult<>(new ObjResult<>(obj, resultFields));
     }
 
+    /**
+     * create
+     *
+     * @param obj
+     * @param fields
+     * @return
+     */
     @Override
     public ObjServiceResult<M> create(M obj, String[] fields) {
         F actualModelFields = getModelFields();
@@ -197,6 +257,13 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         }
     }
 
+    /**
+     * update
+     *
+     * @param obj
+     * @param fields
+     * @return
+     */
     @Override
     public ObjServiceResult<M> update(M obj, String[] fields) {
         F actualModelFields = getModelFields();
@@ -226,6 +293,12 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         }
     }
 
+    /**
+     * delete
+     *
+     * @param id
+     * @return
+     */
     @Override
     public ServiceResult<Boolean> delete(String id) {
         boolean result;
@@ -244,6 +317,12 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         }
     }
 
+    /**
+     * bulkCreate
+     *
+     * @param objs
+     * @return
+     */
     @Override
     public ServiceResult<Integer> bulkCreate(List<M> objs) {
         F actualModelFields = getModelFields();
@@ -272,6 +351,12 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         }
     }
 
+    /**
+     * bulkUpdate
+     *
+     * @param objs
+     * @return
+     */
     @Override
     public ServiceResult<Integer> bulkUpdate(List<M> objs) {
         F actualModelFields = getModelFields();
@@ -300,6 +385,12 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         }
     }
 
+    /**
+     * bulkDelete
+     *
+     * @param ids
+     * @return
+     */
     @Override
     public ServiceResult<Integer> bulkDelete(String[] ids) {
         int result;

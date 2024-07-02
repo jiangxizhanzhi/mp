@@ -30,6 +30,13 @@ public class OptionBO<T> {
     @ApiModelProperty(value = "子选项")
     private List<OptionBO<T>> children;
 
+    /**
+     * fromModel
+     *
+     * @param model
+     * @param locale
+     * @param function
+     */
     public void fromModel(OptionModel model, Locale locale, Function<String, T> function) {
         String boName = Objects.equals(locale, Locale.US) ? model.getEnName() : model.getZhName();
         this.setName(boName);

@@ -12,6 +12,11 @@ import cn.cyberpeace.mp.frontadmin.response.SysVersionResponse;
  */
 public interface SysModelVersionService extends BaseModelService<SysModelVersionModel, QueryParams> {
 
+    /**
+     * listSysVersion
+     *
+     * @return
+     */
     SysVersionResponse listSysVersion();
 
 }

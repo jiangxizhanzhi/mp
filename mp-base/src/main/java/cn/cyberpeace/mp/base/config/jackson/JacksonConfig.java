@@ -30,6 +30,11 @@ public class JacksonConfig {
     @Autowired
     private BaseAppConfig baseAppConfig;
 
+    /**
+     * objectMapper
+     *
+     * @return
+     */
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();

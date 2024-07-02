@@ -11,11 +11,22 @@ public class MessageCommon {
 
     private static MessageSource messageSource;
 
+    /**
+     * MessageCommon
+     *
+     * @param messageSource
+     */
     @SuppressWarnings({"java:S1144", "java:S3010"})
     private MessageCommon(MessageSource messageSource) {
         MessageCommon.messageSource = messageSource;
     }
 
+    /**
+     * get
+     *
+     * @param msgKey
+     * @return
+     */
     public static String get(String msgKey) {
         try {
             return messageSource.getMessage(msgKey, null, LocaleContextHolder.getLocale());
@@ -26,6 +37,13 @@ public class MessageCommon {
         }
     }
 
+    /**
+     * get
+     *
+     * @param msgKey
+     * @param params
+     * @return
+     */
     public static String get(String msgKey, String... params) {
         try {
             return messageSource.getMessage(msgKey, params, LocaleContextHolder.getLocale());
@@ -36,6 +54,14 @@ public class MessageCommon {
         }
     }
 
+    /**
+     * getOrDefault
+     *
+     * @param msgKey
+     * @param defaultMsg
+     * @param params
+     * @return
+     */
     public static String getOrDefault(String msgKey, String defaultMsg, String... params) {
         try {
             return messageSource.getMessage(msgKey, params, defaultMsg, LocaleContextHolder.getLocale());

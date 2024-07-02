@@ -31,6 +31,11 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
     @Autowired
     public BaseAppConfig baseAppConfig;
 
+    /**
+     * apiInfo
+     *
+     * @return
+     */
     public ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title(baseAppConfig.getSwaggerDocTitle())
@@ -40,6 +45,11 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
                 .build();
     }
 
+    /**
+     * apply
+     *
+     * @param context
+     */
     @Override
     public void apply(ModelPropertyContext context) {
         // 为枚举字段设置注释
@@ -112,6 +122,12 @@ public class Swagger2Config implements ModelPropertyBuilderPlugin {
         context.getSpecificationBuilder().description(joinText).build();
     }
 
+    /**
+     * supports
+     *
+     * @param documentationType
+     * @return boolean
+     */
     @Override
     public boolean supports(DocumentationType documentationType) {
         return true;

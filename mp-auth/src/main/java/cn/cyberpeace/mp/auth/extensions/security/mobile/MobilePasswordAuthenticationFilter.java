@@ -39,23 +39,48 @@ public class MobilePasswordAuthenticationFilter extends AbstractAuthenticationPr
 
     private String passwordParameter = SPRING_SECURITY_FORM_PASSWORD_KEY;
 
+    /**
+     * MobilePasswordAuthenticationFilter
+     */
     public MobilePasswordAuthenticationFilter() {
         super(DEFAULT_ANT_PATH_REQUEST_MATCHER);
     }
 
+    /**
+     * MobilePasswordAuthenticationFilter
+     *
+     * @param authenticationManager
+     */
     public MobilePasswordAuthenticationFilter(AuthenticationManager authenticationManager) {
         super(DEFAULT_ANT_PATH_REQUEST_MATCHER, authenticationManager);
     }
 
+    /**
+     * getMobileParameter
+     *
+     * @return
+     */
     public final String getMobileParameter() {
         return this.mobileParameter;
     }
 
+    /**
+     * getPasswordParameter
+     *
+     * @return
+     */
     public final String getPasswordParameter() {
         return this.passwordParameter;
     }
 
 
+    /**
+     * attemptAuthentication
+     *
+     * @param request
+     * @param response
+     * @return
+     */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
 
@@ -83,6 +108,12 @@ public class MobilePasswordAuthenticationFilter extends AbstractAuthenticationPr
     }
 
 
+    /**
+     * setDetails
+     *
+     * @param request
+     * @param authRequest
+     */
     protected void setDetails(HttpServletRequest request, MobilePasswordAuthenticationToken authRequest) {
         authRequest.setDetails(this.authenticationDetailsSource.buildDetails(request));
     }

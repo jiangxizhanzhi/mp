@@ -6,6 +6,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class DefaultPoolTask extends PoolTask<Object> {
+    /**
+     * DefaultPoolTask
+     *
+     * @param task
+     */
     public DefaultPoolTask(Runnable task) {
         super(task);
     }

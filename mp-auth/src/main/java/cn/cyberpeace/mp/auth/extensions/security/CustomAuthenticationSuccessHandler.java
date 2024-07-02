@@ -66,11 +66,23 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     @Resource(name = AuthCacheConfig.LOGIN_FAILURE)
     private Cache<String, Integer> loginFailureCache;
 
+    /**
+     * CustomAuthenticationSuccessHandler
+     *
+     * @param messageConverter
+     */
     @Autowired
     public CustomAuthenticationSuccessHandler(MappingJackson2HttpMessageConverter messageConverter) {
         this.mapper = messageConverter.getObjectMapper();
     }
 
+    /**
+     * onAuthenticationSuccess
+     *
+     * @param request
+     * @param response
+     * @param authentication
+     */
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
@@ -143,6 +155,12 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     }
 
 
+    /**
+     * checkUserErrorStatus
+     *
+     * @param user
+     * @return
+     */
     private AuthErrorCode checkUserErrorStatus(UserModel user) {
         String errorStatusMsg = null;
         AuthErrorCode errorCode = null;
@@ -170,6 +188,12 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         return errorCode;
     }
 
+    /**
+     * recordLoginLog
+     *
+     * @param user
+     * @param request
+     */
     private void recordLoginLog(UserModel user, HttpServletRequest request) {
         OperationLogRequest logModel = new OperationLogRequest();
         //操作类型

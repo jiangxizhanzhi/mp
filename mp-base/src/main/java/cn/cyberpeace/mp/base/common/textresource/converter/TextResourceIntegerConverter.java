@@ -6,6 +6,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class TextResourceIntegerConverter implements TextResourceConverter<Integer> {
 
+    /**
+     * convert
+     *
+     * @param value
+     * @return
+     */
     @Override
     public Integer convert(String value) {
         return StringUtils.isNumeric(value) ? Integer.parseInt(value) : null;

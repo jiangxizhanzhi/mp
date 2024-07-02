@@ -23,6 +23,12 @@ public class EncryptUtils {
 
     private static final String DES_KEY = AuthConstant.PASSWORD_DES_KEY;
 
+    /**
+     * desEncrypt
+     *
+     * @param password
+     * @return
+     */
     public static String desEncrypt(String password) {
         try {
             Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
@@ -41,6 +47,12 @@ public class EncryptUtils {
         }
     }
 
+    /**
+     * desDecrypt
+     *
+     * @param encryptHex
+     * @return
+     */
     public static String desDecrypt(String encryptHex) {
         try {
             Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
@@ -78,6 +90,12 @@ public class EncryptUtils {
         return md5Str;
     }
 
+    /**
+     * bytesToHex
+     *
+     * @param bytes
+     * @return
+     */
     private static String bytesToHex(byte[] bytes) {
         StringBuilder result = new StringBuilder();
         for (byte b : bytes) {
@@ -86,6 +104,12 @@ public class EncryptUtils {
         return result.toString().toLowerCase();
     }
 
+    /**
+     * hexToBytes
+     *
+     * @param hex
+     * @return
+     */
     private static byte[] hexToBytes(String hex) {
         int len = hex.length();
         byte[] data = new byte[len / 2];

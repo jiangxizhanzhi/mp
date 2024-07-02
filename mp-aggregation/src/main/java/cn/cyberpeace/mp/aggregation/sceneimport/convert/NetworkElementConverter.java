@@ -34,10 +34,20 @@ class NetworkElementConverter implements IConverter {
 
     private List<NetworkElementParseResult> results;
 
+    /**
+     * NetworkElementConverter
+     *
+     * @param results
+     */
     public NetworkElementConverter(List<NetworkElementParseResult> results) {
         this.results = results == null ? new ArrayList<>() : results;
     }
 
+    /**
+     * convert2BO
+     *
+     * @param container
+     */
     public void convert2BO(ConvertDataContainer container) {
         // 处理下外部网络
         this.prepareExternalNetwork(container);
@@ -48,6 +58,11 @@ class NetworkElementConverter implements IConverter {
         }
     }
 
+    /**
+     * prepareExternalNetwork
+     *
+     * @param container
+     */
     private void prepareExternalNetwork(ConvertDataContainer container) {
         if (CollectionUtils.isEmpty(container.getNoNetworkNodeElements())) {
             // 不存在未连接的节点,不需要单独处理外部网络
@@ -57,6 +72,12 @@ class NetworkElementConverter implements IConverter {
         }
     }
 
+    /**
+     * createElementAndPort
+     *
+     * @param network
+     * @param container
+     */
     private void createElementAndPort(NetworkElementParseResult network, ConvertDataContainer container) {
         SceneConfigElementBO sceneConfigElementBO = new SceneConfigElementBO();
         container.addNetworkElement(sceneConfigElementBO);
@@ -157,6 +178,12 @@ class NetworkElementConverter implements IConverter {
 
     }
 
+    /**
+     * formatDouble
+     *
+     * @param number
+     * @return double
+     */
     private double formatDouble(String number) {
         return new BigDecimal(number).setScale(6, RoundingMode.HALF_DOWN).doubleValue();
     }

@@ -17,6 +17,11 @@ import java.util.Map;
  */
 public class PortIdAndNameConvert implements IConverter {
 
+    /**
+     * convert2BO
+     *
+     * @param container
+     */
     @Override
     public void convert2BO(ConvertDataContainer container) {
         Map<String, CloudPluginSceneConfigElementBO> cloudElementMap = container.getCloudPluginElements();
@@ -54,6 +59,13 @@ public class PortIdAndNameConvert implements IConverter {
         }
     }
 
+    /**
+     * getNewName
+     *
+     * @param name
+     * @param container
+     * @return
+     */
     private String getNewName(String name,ConvertDataContainer container) {
         if (container.getEntityPortId2Name().containsKey(name)) {
             return container.getEntityPortId2Name().get(name);

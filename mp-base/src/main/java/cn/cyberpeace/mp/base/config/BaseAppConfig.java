@@ -108,6 +108,11 @@ public class BaseAppConfig {
     @Value("${mp.base.swagger-doc-url:}")
     private String swaggerDocUrl;
 
+    /**
+     * getHomeDir
+     *
+     * @return
+     */
     public String getHomeDir() {
         if (!StringUtils.isEmpty(homeDir)) {
             return homeDir;
@@ -117,6 +122,11 @@ public class BaseAppConfig {
         return homeDir;
     }
 
+    /**
+     * getResourcesDir
+     *
+     * @return
+     */
     public String getResourcesDir() {
         if (!StringUtils.isEmpty(resourcesDir)) {
             return resourcesDir;
@@ -126,6 +136,11 @@ public class BaseAppConfig {
         return resourcesDir;
     }
 
+    /**
+     * getFileServerDir
+     *
+     * @return
+     */
     public String getFileServerDir() {
         if (!StringUtils.isEmpty(fileServerDir)) {
             return fileServerDir;

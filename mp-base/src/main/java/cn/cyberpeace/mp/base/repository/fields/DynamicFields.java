@@ -13,27 +13,55 @@ public class DynamicFields {
 
     private Map<String, Object> fieldsMap;
 
+    /**
+     * DynamicFields
+     */
     public DynamicFields() {
         this.resetFieldsMap();
     }
 
+    /**
+     * DynamicFields
+     *
+     * @param fields
+     */
     public DynamicFields(String... fields) {
         setFields(fields);
     }
 
+    /**
+     * DynamicFields
+     *
+     * @param fieldGetters
+     */
     @SafeVarargs
     public <T> DynamicFields(SerializableFunction<T>... fieldGetters) {
         this(Arrays.stream(fieldGetters).map(BeanUtils::getBeanGetterFieldName).toArray(String[]::new));
     }
 
+    /**
+     * DynamicFields
+     *
+     * @param fields
+     */
     public DynamicFields(List<String> fields) {
         setFields(fields);
     }
 
+    /**
+     * DynamicFields
+     *
+     * @param fieldsMap
+     */
     public DynamicFields(Map<String, Object> fieldsMap) {
         setFieldsMap(fieldsMap);
     }
 
+    /**
+     * DynamicFields
+     *
+     * @param dynamicFields
+     */
     public DynamicFields(DynamicFields dynamicFields) {
         if (dynamicFields != null) {
             setFieldsMap(dynamicFields.getFieldsMap());
@@ -143,10 +171,21 @@ public class DynamicFields {
         return obj;
     }
 
+    /**
+     * hasField
+     *
+     * @param fieldName
+     * @return boolean
+     */
     public boolean hasField(String fieldName) {
         return (boolean) fieldsMap.getOrDefault(fieldName, false);
     }
 
+    /**
+     * getFields
+     *
+     * @return
+     */
     public String[] getFields() {
         List<String> fields = new ArrayList<>();
         for (Map.Entry<String, Object> entry : fieldsMap.entrySet()) {
@@ -159,29 +198,57 @@ public class DynamicFields {
         return fields.toArray(new String[0]);
     }
 
+    /**
+     * setFields
+     *
+     * @param fields
+     */
     public void setFields(String[] fields) {
         this.resetFieldsMap();
         this.merge(fields);
     }
 
+    /**
+     * setFields
+     *
+     * @param fields
+     */
     public void setFields(List<String> fields) {
         this.resetFieldsMap();
         this.merge(fields);
     }
 
+    /**
+     * getFieldsMap
+     *
+     * @return
+     */
     public Map<String, Object> getFieldsMap() {
         return fieldsMap;
     }
 
+    /**
+     * setFieldsMap
+     *
+     * @param fieldsMap
+     */
     public void setFieldsMap(Map<String, Object> fieldsMap) {
         this.resetFieldsMap();
         this.merge(fieldsMap);
     }
 
+    /**
+     * resetFieldsMap
+     */
     public void resetFieldsMap() {
         this.fieldsMap = new HashMap<>();
     }
 
+    /**
+     * hasValidFields
+     *
+     * @return boolean
+     */
     public boolean hasValidFields() {
         for(Object entry : this.fieldsMap.values()) {
             if ((entry instanceof Boolean && (boolean) entry)
@@ -193,10 +260,22 @@ public class DynamicFields {
         return false;
     }
 
+    /**
+     * merge
+     *
+     * @param field
+     * @param value
+     */
     public void merge(String field, boolean value) {
         this.fieldsMap.put(field, value);
     }
 
+    /**
+     * merge
+     *
+     * @param field
+     * @param value
+     */
     public void merge(String field, String[] value) {
         Object originSubFields = this.fieldsMap.getOrDefault(field, null);
         if (originSubFields instanceof DynamicFields) {
@@ -206,6 +285,12 @@ public class DynamicFields {
         }
     }
 
+    /**
+     * merge
+     *
+     * @param field
+     * @param value
+     */
     public void merge(String field, List<String> value) {
         Object originSubFields = this.fieldsMap.getOrDefault(field, null);
         if (originSubFields instanceof DynamicFields) {
@@ -215,6 +300,12 @@ public class DynamicFields {
         }
     }
 
+    /**
+     * merge
+     *
+     * @param field
+     * @param value
+     */
     public void merge(String field, Map<String, Object> value) {
         Object originSubFields = this.fieldsMap.getOrDefault(field, null);
         if (originSubFields instanceof DynamicFields) {
@@ -224,6 +315,12 @@ public class DynamicFields {
         }
     }
 
+    /**
+     * merge
+     *
+     * @param field
+     * @param value
+     */
     public void merge(String field, DynamicFields value) {
         Object originSubFields = this.fieldsMap.getOrDefault(field, null);
         if (originSubFields instanceof DynamicFields) {
@@ -233,6 +330,12 @@ public class DynamicFields {
         }
     }
 
+    /**
+     * merge
+     *
+     * @param field
+     * @param value
+     */
     public void merge(String field, Object value) {
         if (value instanceof Boolean) {
             merge(field, (boolean) value);
@@ -253,6 +356,12 @@ public class DynamicFields {
         }
     }
 
+    /**
+     * merge
+     *
+     * @param targetFields
+     * @return
+     */
     public DynamicFields merge(String[] targetFields) {
         if (targetFields == null) {
             return this;
@@ -264,6 +373,12 @@ public class DynamicFields {
         return this;
     }
 
+    /**
+     * merge
+     *
+     * @param targetFields
+     * @return
+     */
     public DynamicFields merge(List<String> targetFields) {
         if (targetFields == null) {
             return this;
@@ -275,6 +390,12 @@ public class DynamicFields {
         return this;
     }
 
+    /**
+     * merge
+     *
+     * @param targetFieldsMap
+     * @return
+     */
     public DynamicFields merge(Map<String, Object> targetFieldsMap) {
         if (targetFieldsMap == null) {
             return this;
@@ -288,6 +409,12 @@ public class DynamicFields {
         return this;
     }
 
+    /**
+     * merge
+     *
+     * @param targetDynamicFields
+     * @return
+     */
     public DynamicFields merge(DynamicFields targetDynamicFields) {
         if (targetDynamicFields == null) {
             return this;
@@ -297,6 +424,13 @@ public class DynamicFields {
         return this;
     }
 
+    /**
+     * intersect
+     *
+     * @param field
+     * @param value
+     * @return
+     */
     public Object intersect(String field, boolean value) {
         if (!value) {
             return null;
@@ -312,6 +446,13 @@ public class DynamicFields {
         return null;
     }
 
+    /**
+     * intersect
+     *
+     * @param field
+     * @param value
+     * @return
+     */
     public Object intersect(String field, String[] value) {
         Object originValue = this.fieldsMap.getOrDefault(field, false);
         if (originValue instanceof Boolean && (boolean) originValue) {
@@ -323,6 +464,13 @@ public class DynamicFields {
         return null;
     }
 
+    /**
+     * intersect
+     *
+     * @param field
+     * @param value
+     * @return
+     */
     public Object intersect(String field, List<String> value) {
         Object originValue = this.fieldsMap.getOrDefault(field, false);
         if (originValue instanceof Boolean && (boolean) originValue) {
@@ -334,6 +482,13 @@ public class DynamicFields {
         return null;
     }
 
+    /**
+     * intersect
+     *
+     * @param field
+     * @param value
+     * @return
+     */
     public Object intersect(String field, Map<String, Object> value) {
         Object originValue = this.fieldsMap.getOrDefault(field, false);
         if (originValue instanceof Boolean && (boolean) originValue) {
@@ -345,6 +500,13 @@ public class DynamicFields {
         return null;
     }
 
+    /**
+     * intersect
+     *
+     * @param field
+     * @param value
+     * @return
+     */
     public Object intersect(String field, DynamicFields value) {
         Object originValue = this.fieldsMap.getOrDefault(field, false);
         if (originValue instanceof Boolean && (boolean) originValue) {
@@ -356,6 +518,13 @@ public class DynamicFields {
         return null;
     }
 
+    /**
+     * intersect
+     *
+     * @param field
+     * @param value
+     * @return
+     */
     public Object intersect(String field, Object value) {
         if (value instanceof Boolean) {
             return intersect(field, (boolean) value);
@@ -378,6 +547,12 @@ public class DynamicFields {
         return null;
     }
 
+    /**
+     * intersect
+     *
+     * @param targetFields
+     * @return
+     */
     public DynamicFields intersect(String[] targetFields) {
         if (targetFields == null) {
             return null;
@@ -394,6 +569,12 @@ public class DynamicFields {
         return intersectFields;
     }
 
+    /**
+     * intersect
+     *
+     * @param targetFields
+     * @return
+     */
     public DynamicFields intersect(List<String> targetFields) {
         if (targetFields == null) {
             return null;
@@ -410,6 +591,12 @@ public class DynamicFields {
         return intersectFields;
     }
 
+    /**
+     * intersect
+     *
+     * @param targetFieldsMap
+     * @return
+     */
     public DynamicFields intersect(Map<String, Object> targetFieldsMap) {
         if (targetFieldsMap == null) {
             return null;
@@ -428,6 +615,12 @@ public class DynamicFields {
         return intersectFields;
     }
 
+    /**
+     * intersect
+     *
+     * @param targetDynamicFields
+     * @return
+     */
     public DynamicFields intersect(DynamicFields targetDynamicFields) {
         if (targetDynamicFields == null) {
             return null;
@@ -436,6 +629,13 @@ public class DynamicFields {
         return intersect(targetDynamicFields.getFieldsMap());
     }
 
+    /**
+     * subtract
+     *
+     * @param field
+     * @param value
+     * @return
+     */
     @SuppressWarnings("java:S1172")
     public Object subtract(String field, boolean value) {
         if (value) {
@@ -445,6 +645,13 @@ public class DynamicFields {
         return null;
     }
 
+    /**
+     * subtract
+     *
+     * @param field
+     * @param value
+     * @return
+     */
     public Object subtract(String field, String[] value) {
         if (value.length == 0) {
             return null;
@@ -460,6 +667,13 @@ public class DynamicFields {
         return null;
     }
 
+    /**
+     * subtract
+     *
+     * @param field
+     * @param value
+     * @return
+     */
     public Object subtract(String field, List<String> value) {
         if (value.isEmpty()) {
             return null;
@@ -475,6 +689,13 @@ public class DynamicFields {
         return null;
     }
 
+    /**
+     * subtract
+     *
+     * @param field
+     * @param value
+     * @return
+     */
     public Object subtract(String field, Map<String, Object> value) {
         if (value.size() == 0) {
             return null;
@@ -490,6 +711,13 @@ public class DynamicFields {
         return null;
     }
 
+    /**
+     * subtract
+     *
+     * @param field
+     * @param value
+     * @return
+     */
     public Object subtract(String field, DynamicFields value) {
         if (!value.hasValidFields()) {
             return null;
@@ -505,6 +733,13 @@ public class DynamicFields {
         return null;
     }
 
+    /**
+     * subtract
+     *
+     * @param field
+     * @param value
+     * @return
+     */
     public Object subtract(String field, Object value) {
         if (value instanceof Boolean) {
             return subtract(field, (boolean) value);
@@ -527,6 +762,12 @@ public class DynamicFields {
         return null;
     }
 
+    /**
+     * subtract
+     *
+     * @param targetFields
+     * @return
+     */
     public DynamicFields subtract(String[] targetFields) {
         DynamicFields subtractionFields = new DynamicFields(this);
         if (targetFields == null) {
@@ -543,6 +784,12 @@ public class DynamicFields {
         return subtractionFields;
     }
 
+    /**
+     * subtract
+     *
+     * @param targetFields
+     * @return
+     */
     public DynamicFields subtract(List<String> targetFields) {
         DynamicFields subtractionFields = new DynamicFields(this);
         if (targetFields == null) {
@@ -559,6 +806,12 @@ public class DynamicFields {
         return subtractionFields;
     }
 
+    /**
+     * subtract
+     *
+     * @param targetFieldsMap
+     * @return
+     */
     public DynamicFields subtract(Map<String, Object> targetFieldsMap) {
         DynamicFields subtractionFields = new DynamicFields(this);
         if (targetFieldsMap == null) {
@@ -577,6 +830,12 @@ public class DynamicFields {
         return subtractionFields;
     }
 
+    /**
+     * subtract
+     *
+     * @param targetDynamicFields
+     * @return
+     */
     public DynamicFields subtract(DynamicFields targetDynamicFields) {
         if (targetDynamicFields == null) {
             return new DynamicFields(this);

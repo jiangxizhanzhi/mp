@@ -24,11 +24,23 @@ import java.util.Map;
 public class SysNoticeReadServiceImpl extends BaseModelServiceImpl<SysNoticeReadModel, SysNoticeReadMapper, SysNoticeReadFields, QueryParams>
     implements SysNoticeReadService {
 
+    /**
+     * SysNoticeReadServiceImpl
+     *
+     * @param sysNoticeReadMapper
+     */
     @Autowired
     public SysNoticeReadServiceImpl(SysNoticeReadMapper sysNoticeReadMapper) {
         setModelMapper(sysNoticeReadMapper);
     }
 
+    /**
+     * selectByUserIdAndNoticeId
+     *
+     * @param user
+     * @param noticeId
+     * @return
+     */
     @Override
     public SysNoticeReadModel selectByUserIdAndNoticeId(String user, String noticeId) {
         HumanCondition condition = new HumanCondition();
@@ -42,6 +54,12 @@ public class SysNoticeReadServiceImpl extends BaseModelServiceImpl<SysNoticeRead
         return model;
     }
 
+    /**
+     * increaseReadCount
+     *
+     * @param id
+     * @return int
+     */
     @Override
     public int increaseReadCount(String id) {
         HumanCondition selectCondition = new HumanCondition()
@@ -56,6 +74,12 @@ public class SysNoticeReadServiceImpl extends BaseModelServiceImpl<SysNoticeRead
         return rows;
     }
 
+    /**
+     * countIsReadedOrIsUnPush
+     *
+     * @param user
+     * @return int
+     */
     @Override
     public int countIsReadedOrIsUnPush(String user) {
         HumanCondition condition = new HumanCondition();

@@ -6,6 +6,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class TextResourceLongConverter implements TextResourceConverter<Long> {
 
+    /**
+     * convert
+     *
+     * @param value
+     * @return
+     */
     @Override
     public Long convert(String value) {
         return StringUtils.isNumeric(value) ? Long.parseLong(value) : null;

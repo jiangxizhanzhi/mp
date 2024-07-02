@@ -29,6 +29,11 @@ public enum Connector {
         this.operator = operator;
     }
 
+    /**
+     * getOperator
+     *
+     * @return
+     */
     public String getOperator() {
         return operator;
     }

@@ -11,6 +11,12 @@ import java.util.Objects;
 
 public interface SnakeHttpParam extends HttpParam {
 
+    /**
+     * toPathString
+     *
+     * @param httpParam
+     * @return
+     */
     static String toPathString(Object httpParam) {
         Map<String, Object> map = new HashMap<>();
         for (Map.Entry<String, Object> entry : BeanUtils.getMap(httpParam).entrySet()) {
@@ -23,6 +29,11 @@ public interface SnakeHttpParam extends HttpParam {
         return URLUtil.buildQuery(map, StandardCharsets.UTF_8);
     }
 
+    /**
+     * toPathString
+     *
+     * @return
+     */
     @Override
     default String toPathString() {
         return toPathString(this);

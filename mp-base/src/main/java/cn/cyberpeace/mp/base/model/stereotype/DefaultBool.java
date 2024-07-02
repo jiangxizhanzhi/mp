@@ -7,6 +7,11 @@ import java.lang.annotation.*;
 @Documented
 public @interface DefaultBool {
 
+    /**
+     * value
+     *
+     * @return boolean
+     */
     boolean value() default false;
 
 }

@@ -11,6 +11,11 @@ public class GroupCondition implements BaseCondition {
 
     private String[] groupFields;
 
+    /**
+     * isEmpty
+     *
+     * @return boolean
+     */
     @Override
     public boolean isEmpty() {
         return groupFields == null || groupFields.length == 0;

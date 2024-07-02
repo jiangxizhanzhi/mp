@@ -13,8 +13,20 @@ import java.util.List;
  */
 public interface SysNoticeUserService extends BaseModelService<SysNoticeUserModel, QueryParams> {
 
+    /**
+     * deleteByNoticeIds
+     *
+     * @param noticeIds
+     * @return int
+     */
     int deleteByNoticeIds(List<String> noticeIds);
 
+    /**
+     * deleteByUser
+     *
+     * @param userId
+     * @return int
+     */
     int deleteByUser(String userId);
 
 }

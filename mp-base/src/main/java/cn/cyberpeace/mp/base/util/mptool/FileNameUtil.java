@@ -37,6 +37,12 @@ public class FileNameUtil {
         return filePath.substring(begin, len);
     }
 
+    /**
+     * getSuffix
+     *
+     * @param fileName
+     * @return
+     */
     public static String getSuffix(String fileName) {
         if (fileName == null) {
             return null;

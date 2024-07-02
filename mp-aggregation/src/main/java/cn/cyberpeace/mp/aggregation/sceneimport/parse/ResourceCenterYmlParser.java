@@ -27,6 +27,12 @@ public final class ResourceCenterYmlParser {
 
     private static Logger log = LoggerFactory.getLogger(ResourceCenterYmlParser.class);
 
+    /**
+     * parseTopoYml
+     *
+     * @param filePath
+     * @return
+     */
     public static YmlParseResult parseTopoYml(String filePath) {
         YmlParseResult result = null;
         File topoV2 = new File(filePath + FILE_PATH_SEPARATOR + "topo2.yml");
@@ -63,6 +69,13 @@ public final class ResourceCenterYmlParser {
         return result;
     }
 
+    /**
+     * parseImageServicesYml
+     *
+     * @param filePath
+     * @param imageFilePath
+     * @return
+     */
     public static List<ImageParseResult> parseImageServicesYml(String filePath, String imageFilePath) {
         List<ImageParseResult> results = new ArrayList<>();
         // env/images 下的目录
@@ -85,6 +98,13 @@ public final class ResourceCenterYmlParser {
         return results;
     }
 
+    /**
+     * parseImageServicesYml
+     *
+     * @param filePath
+     * @param imageFilePathList
+     * @return
+     */
     public static List<ImageParseResult> parseImageServicesYml(String filePath, List<String> imageFilePathList) {
         List<ImageParseResult> results = new ArrayList<>();
         // env/images 下的目录
@@ -109,6 +129,12 @@ public final class ResourceCenterYmlParser {
         return results;
     }
 
+    /**
+     * parseServicesYml
+     *
+     * @param dirPath
+     * @return
+     */
     private static List<ImageParseResult> parseServicesYml(String dirPath) {
         File file = new File(dirPath);
         if (!file.exists() || !file.isDirectory() || file.listFiles() == null || file.listFiles().length == 0) {
@@ -142,6 +168,12 @@ public final class ResourceCenterYmlParser {
         return imageParseResult;
     }
 
+    /**
+     * addAllPrivateKey
+     *
+     * @param servers
+     * @param path
+     */
     private static void addAllPrivateKey(Map<String, ImageInfoParseResult> servers, String path) {
         if (servers != null && !servers.isEmpty()) {
             Optional<ImageInfoParseResult> result = Optional.empty();

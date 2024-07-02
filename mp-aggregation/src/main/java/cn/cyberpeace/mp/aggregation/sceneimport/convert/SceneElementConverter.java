@@ -13,10 +13,20 @@ class SceneElementConverter implements IConverter {
 
     private SceneElementParseResult parseResult;
 
+    /**
+     * SceneElementConverter
+     *
+     * @param parseResult
+     */
     public SceneElementConverter(SceneElementParseResult parseResult) {
         this.parseResult = parseResult;
     }
 
+    /**
+     * convert2BO
+     *
+     * @param container
+     */
     public void convert2BO(ConvertDataContainer container) {
         SceneConfigBO sceneConfigBO = this.createSceneConfigBO(this.parseResult);
         container.setSceneConfigBO(sceneConfigBO);
@@ -25,6 +35,12 @@ class SceneElementConverter implements IConverter {
         container.setPluginSceneConfigBO(cloudPlugin);
     }
 
+    /**
+     * createSceneConfigBO
+     *
+     * @param scene
+     * @return
+     */
     private SceneConfigBO createSceneConfigBO(SceneElementParseResult scene) {
         if (scene == null) {
             return null;

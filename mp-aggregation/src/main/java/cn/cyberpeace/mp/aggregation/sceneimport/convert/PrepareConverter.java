@@ -19,10 +19,20 @@ class PrepareConverter implements IConverter {
 
     private YmlParseResult parseResult;
 
+    /**
+     * PrepareConverter
+     *
+     * @param parseResult
+     */
     public PrepareConverter(YmlParseResult parseResult) {
         this.parseResult = parseResult;
     }
 
+    /**
+     * convert2BO
+     *
+     * @param container
+     */
     public void convert2BO(ConvertDataContainer container) {
         if (CollectionUtils.isNotEmpty(parseResult.getNetworks()) && CollectionUtils.isNotEmpty(parseResult.getNodes())) {
             Set<String> simpleSwitchIds = new HashSet<>();

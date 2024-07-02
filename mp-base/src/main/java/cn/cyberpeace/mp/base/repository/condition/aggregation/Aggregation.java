@@ -16,14 +16,31 @@ public abstract class Aggregation<T extends Aggregation<T>> {
 
     private Function<String, String> calc;
 
+    /**
+     * genCalcEqual
+     *
+     * @param value
+     * @return
+     */
     public static Function<String, String> genCalcEqual(Object value) {
         return column -> String.format("case when %s = %s then 1 else null end", column, value.toString());
     }
 
+    /**
+     * genCalcEmptyNull
+     *
+     * @return
+     */
     public static Function<String, String> genCalcEmptyNull() {
         return column -> String.format("case when %s <> '' then %s else null end", column, column);
     }
 
+    /**
+     * addCalc
+     *
+     * @param calc
+     * @return
+     */
     public T addCalc(Function<String, String> calc) {
         Function<String, String> rawCalc = this.calc;
         if (rawCalc == null) {
@@ -34,11 +51,22 @@ public abstract class Aggregation<T extends Aggregation<T>> {
         return (T) this;
     }
 
+    /**
+     * calcEqual
+     *
+     * @param value
+     * @return
+     */
     public T calcEqual(Object value) {
         this.addCalc(genCalcEqual(value));
         return (T) this;
     }
 
+    /**
+     * calcEmptyNull
+     *
+     * @return
+     */
     public T calcEmptyNull() {
         this.addCalc(genCalcEmptyNull());
         return (T) this;

@@ -19,8 +19,16 @@ public class ThreadPoolUtils {
                 new ThreadFactoryBuilder().setNameFormat("scheduled-thread-pool-%d").build());
     }
 
+    /**
+     * ThreadPoolUtils
+     */
     private ThreadPoolUtils(){}
 
+    /**
+     * getScheduledExecutorService
+     *
+     * @return
+     */
     public static ScheduledExecutorService getScheduledExecutorService() {
         return SingletonHolder.scheduledExecutorService;
     }

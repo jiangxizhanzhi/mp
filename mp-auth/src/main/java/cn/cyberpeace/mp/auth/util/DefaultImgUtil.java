@@ -25,6 +25,11 @@ public class DefaultImgUtil {
 
     private static LocalFileMappingMapper localFileMappingMapper;
 
+    /**
+     * DefaultImgUtil
+     *
+     * @param localFileMappingMapper
+     */
     public DefaultImgUtil(LocalFileMappingMapper localFileMappingMapper) {
         DefaultImgUtil.localFileMappingMapper = localFileMappingMapper;
     }
@@ -54,6 +59,11 @@ public class DefaultImgUtil {
         return path;
     }
 
+    /**
+     * getGroupNamePathMap
+     *
+     * @return
+     */
     public static Map<String, String> getGroupNamePathMap() {
         Map<String, String> rtnMap = new HashMap<>();
         HumanCondition humanCondition = new HumanCondition();

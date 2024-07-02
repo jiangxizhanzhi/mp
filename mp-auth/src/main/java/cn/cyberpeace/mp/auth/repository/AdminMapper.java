@@ -13,6 +13,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AdminMapper {
 
+    /**
+     * getConfigValue
+     *
+     * @param keyName
+     * @return
+     */
     String getConfigValue(@Param("keyName") String keyName);
 
 }

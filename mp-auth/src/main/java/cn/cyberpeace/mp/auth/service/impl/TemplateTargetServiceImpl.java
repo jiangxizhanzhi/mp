@@ -51,6 +51,12 @@ public class TemplateTargetServiceImpl implements TargetService {
     @Autowired
     private MenuTemplateRoleMapper menuTemplateRoleMapper;
 
+    /**
+     * exists
+     *
+     * @param id
+     * @return boolean
+     */
     @Override
     public boolean exists(String id) {
         ParamCheck.notBlank(id, AuthBasei18nCode.TARGET_ID);
@@ -59,6 +65,12 @@ public class TemplateTargetServiceImpl implements TargetService {
         return Objects.nonNull(result);
     }
 
+    /**
+     * listByParent
+     *
+     * @param parentId
+     * @return
+     */
     @Override
     public List<MenuTemplateModel> listByParent(String parentId) {
         ParamCheck.notBlank(parentId, AuthBasei18nCode.TARGET_PARENT);
@@ -70,6 +82,13 @@ public class TemplateTargetServiceImpl implements TargetService {
         return targetModels;
     }
 
+    /**
+     * getTree
+     *
+     * @param parentId
+     * @param type
+     * @return
+     */
     @Override
     public List<TargetBo> getTree(String parentId, Integer type) {
         if (Objects.isNull(type)) {
@@ -112,6 +131,13 @@ public class TemplateTargetServiceImpl implements TargetService {
         }
     }
 
+    /**
+     * listAll
+     *
+     * @param tenant
+     * @param type
+     * @return
+     */
     @Override
     public List<MenuTemplateModel> listAll(String tenant, Integer type) {
         HumanCondition humanCondition = new HumanCondition();
@@ -126,6 +152,13 @@ public class TemplateTargetServiceImpl implements TargetService {
         return targets;
     }
 
+    /**
+     * listAllIgnoreVisible
+     *
+     * @param tenant
+     * @param type
+     * @return
+     */
     @Override
     public List<MenuTemplateModel> listAllIgnoreVisible(String tenant, Integer type) {
         HumanCondition humanCondition = new HumanCondition();
@@ -139,6 +172,11 @@ public class TemplateTargetServiceImpl implements TargetService {
         return targets;
     }
 
+    /**
+     * deleteAll
+     *
+     * @return boolean
+     */
     @Override
     public boolean deleteAll() {
         HumanCondition humanCondition = new HumanCondition().filterEqual(MenuTemplateModel::getTemplateId, "1");
@@ -147,6 +185,12 @@ public class TemplateTargetServiceImpl implements TargetService {
         return true;
     }
 
+    /**
+     * toTree
+     *
+     * @param targets
+     * @return
+     */
     private List<TargetBo> toTree(List<MenuTemplateModel> targets) {
         ParamCheck.notEmpty(targets, AuthBasei18nCode.TARGET_LIST);
         Map<String, TargetBo> mapTmp = new HashMap<>();
@@ -189,7 +233,11 @@ public class TemplateTargetServiceImpl implements TargetService {
         return parentTargets;
     }
 
-    // 权限树排序
+    /**
+     * 权限树排序
+     *
+     * @param targets
+     */
     private void sortTree(List<TargetBo> targets) {
         for (TargetBo t : targets) {
             if (CollectionUtils.isNotEmpty(t.getChildren())) {
@@ -200,10 +248,20 @@ public class TemplateTargetServiceImpl implements TargetService {
         targets.sort(Comparator.comparingInt(BaseModel::getPk));
     }
 
+    /**
+     * getModelMapper
+     *
+     * @return
+     */
     private MenuTemplateMapper getModelMapper() {
         return this.menuTemplateMapper;
     }
 
+    /**
+     * getUserTemplateId
+     *
+     * @return
+     */
     private String getUserTemplateId() {
         String userMenuTemplateId = "1";
         if (UserUtils.getLoginUser() != null) {

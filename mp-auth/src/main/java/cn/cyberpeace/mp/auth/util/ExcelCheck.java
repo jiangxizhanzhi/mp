@@ -22,6 +22,12 @@ public class ExcelCheck {
 
     public static final String[] EXCEL_TYPES = {"xls", "xlsx"};
 
+    /**
+     * check
+     *
+     * @param inputStream
+     * @param fileName
+     */
     public static void check(InputStream inputStream, String fileName) {
         String type = null;
         if (StringUtils.isNotEmpty(fileName)){

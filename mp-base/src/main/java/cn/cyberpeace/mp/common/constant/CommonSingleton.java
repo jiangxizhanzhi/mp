@@ -11,6 +11,11 @@ public class CommonSingleton {
 
     public static CommonAppConfig commonAppConfig;
 
+    /**
+     * CommonSingleton
+     *
+     * @param commonAppConfig
+     */
     private CommonSingleton(CommonAppConfig commonAppConfig) {
         CommonSingleton.commonAppConfig = commonAppConfig;
     }

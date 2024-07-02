@@ -12,15 +12,32 @@ public class SSHProbe extends ProtocolProbe {
 
     private final static String CLIENT_SSH_VERSION = "SSH-2.0-mp";
 
+    /**
+     * SSHProbe
+     *
+     * @param host
+     * @param port
+     */
     public SSHProbe(String host, int port) {
         super(PROTOCOL, host, port);
     }
 
+    /**
+     * getClientInfo
+     *
+     * @return
+     */
     @Override
     protected byte[] getClientInfo() {
         return CLIENT_SSH_VERSION.getBytes();
     }
 
+    /**
+     * checkServerInfo
+     *
+     * @param serverInfo
+     * @return boolean
+     */
     @Override
     protected boolean checkServerInfo(byte[] serverInfo) {
         if (serverInfo == null || serverInfo.length == 0) {

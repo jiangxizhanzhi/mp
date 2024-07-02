@@ -55,14 +55,26 @@ public class JwtUtils {
 
     //private static final long JWT_EXPIRATION = 24 * 3600 * 1000L * 7;
 
+    /**
+     * JwtUtils
+     */
     private JwtUtils() {}
 
+    /**
+     * init
+     */
     @PostConstruct
     public void init() {
         jwtUtils = this;
         jwtUtils.authConfig = authConfig;
     }
 
+    /**
+     * getSecret
+     *
+     * @param user
+     * @return
+     */
     private static String getSecret(UserInfo user) {
         String secret = "";
         if (jwtUtils.authConfig.getAuthenticateUseIndividualTokenSecret()) {
@@ -75,6 +87,12 @@ public class JwtUtils {
         return secret;
     }
 
+    /**
+     * generateJwtSecret
+     *
+     * @param user
+     * @return
+     */
     private static String generateJwtSecret(UserInfo user) {
         String secret = getSecret(user);
         final Mac mac;
@@ -114,6 +132,12 @@ public class JwtUtils {
         }
     }
 
+    /**
+     * generateToken
+     *
+     * @param user
+     * @return
+     */
     public static String generateToken(UserInfo user) {
         String jwtSecret = generateJwtSecret(user);
         Long expireSeconds = jwtUtils.authConfig.getAuthenticateJwtExpires();
@@ -133,6 +157,12 @@ public class JwtUtils {
     }
 
 
+    /**
+     * addResponseHeaderWithJWT
+     *
+     * @param user
+     * @return boolean
+     */
     @Deprecated
     public static boolean addResponseHeaderWithJWT(UserModel user) {
         if (user == null) {
@@ -153,6 +183,12 @@ public class JwtUtils {
         return true;
     }
 
+    /**
+     * validateToken
+     *
+     * @param token
+     * @return
+     */
     public static UserInfo validateToken(String token) {
         UserInfo user = getUserInfo(token);
         String jwtSecret = generateJwtSecret(user);
@@ -183,6 +219,12 @@ public class JwtUtils {
         return user;
     }
 
+    /**
+     * getTokenExpiredTime
+     *
+     * @param token
+     * @return
+     */
     public static Date getTokenExpiredTime(String token) {
         if (StringUtils.isBlank(token)) {
             return null;
@@ -192,6 +234,12 @@ public class JwtUtils {
         return date;
     }
 
+    /**
+     * getUserInfo
+     *
+     * @param token
+     * @return
+     */
     public static UserInfo getUserInfo(String token) {
         DecodedJWT jwt;
         try {
@@ -208,6 +256,12 @@ public class JwtUtils {
         return user;
     }
 
+    /**
+     * shortenToken
+     *
+     * @param token
+     * @return
+     */
     public static String shortenToken(String token) {
         String[] tokenParts = StringUtils.split(token, AuthConstant.SEPARATOR_CHAR_DOT);
         if (tokenParts.length > 0) {

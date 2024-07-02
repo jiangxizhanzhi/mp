@@ -10,6 +10,11 @@ import java.lang.annotation.*;
 @Documented
 public @interface CustomConditionClass {
 
+    /**
+     * value
+     *
+     * @return
+     */
     Class<?> value();
 
 }

@@ -14,6 +14,13 @@ public class CidrValidator implements ConstraintValidator<Cidr, CharSequence> {
 
     public static final Pattern CIDR = Pattern.compile("^(?:(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}(?:[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\/([0-9]|[1-2]\\d|3[0-2])$");
 
+    /**
+     * isValid
+     *
+     * @param value
+     * @param constraintValidatorContext
+     * @return boolean
+     */
     @Override
     public boolean isValid(CharSequence value, ConstraintValidatorContext constraintValidatorContext) {
         if (StringUtils.isEmpty(value)) {

@@ -35,10 +35,20 @@ class DeviceInfoConverter implements IConverter {
 
     private TargetConverter targetConverter;
 
+    /**
+     * DeviceInfoConverter
+     *
+     * @param targetConverter
+     */
     public DeviceInfoConverter(TargetConverter targetConverter) {
         this.targetConverter = targetConverter;
     }
 
+    /**
+     * convert2BO
+     *
+     * @param container
+     */
     public void convert2BO(ConvertDataContainer container) {
         if (CollectionUtils.isNotEmpty(container.getNetworkElements())) {
             this.doConvert(container.getNetworkElements(), container.getCloudPluginElements(), container.getCloudPluginPorts(), container);
@@ -48,6 +58,14 @@ class DeviceInfoConverter implements IConverter {
         }
     }
 
+    /**
+     * doConvert
+     *
+     * @param list
+     * @param pluginElements
+     * @param pluginPorts
+     * @param container
+     */
     private void doConvert(List<SceneConfigElementBO> list, Map<String, CloudPluginSceneConfigElementBO> pluginElements, Map<String, CloudPluginSceneConfigElementPortBO> pluginPorts, ConvertDataContainer container) {
         for (SceneConfigElementBO element : list) {
             CloudPluginSceneConfigElementBO elementBO = pluginElements.get(element.getId());
@@ -94,6 +112,13 @@ class DeviceInfoConverter implements IConverter {
         }
     }
 
+    /**
+     * loadDeviceInfo
+     *
+     * @param params
+     * @param device
+     * @param container
+     */
     private void loadDeviceInfo(Params params, Device device, ConvertDataContainer container) {
         SceneConfigElementBO element = params.element;
         CloudPluginSceneConfigElementBO pluginElement = params.pluginElement;
@@ -139,6 +164,13 @@ class DeviceInfoConverter implements IConverter {
         }
     }
 
+    /**
+     * loadExtEntityAccesses
+     *
+     * @param params
+     * @param accesses
+     * @param container
+     */
     private void loadExtEntityAccesses(Params params, List<ExtEntityAccess> accesses, ConvertDataContainer container) {
         SceneConfigElementBO element = params.element;
         Map<String, CloudPluginSceneConfigElementPortBO> pluginPorts = params.pluginPorts;
@@ -194,6 +226,12 @@ class DeviceInfoConverter implements IConverter {
         }
     }
 
+    /**
+     * loadExtGatewayPortConfigs
+     *
+     * @param params
+     * @param portConfigs
+     */
     private void loadExtGatewayPortConfigs(Params params, List<PortConfig> portConfigs) {
         SceneConfigElementBO element = params.element;
 
@@ -209,6 +247,12 @@ class DeviceInfoConverter implements IConverter {
         }
     }
 
+    /**
+     * loadExtSystemInfo
+     *
+     * @param element
+     * @param extSystemInfo
+     */
     private void loadExtSystemInfo(SceneConfigElementBO element, ExtSystemInfo extSystemInfo) {
         // language_name systemTypeName systemTypeName 都是null?
         element.setSystemLanguage(extSystemInfo.getLanguage());
@@ -216,6 +260,12 @@ class DeviceInfoConverter implements IConverter {
         element.setSystemType(extSystemInfo.getSystemType() == null ? StringUtils.EMPTY : String.valueOf(extSystemInfo.getSystemType()));
     }
 
+    /**
+     * loadExtVm
+     *
+     * @param params
+     * @param extVm
+     */
     private void loadExtVm(Params params, ExtVm extVm) {
         SceneConfigElementBO element = params.element;
         CloudPluginSceneConfigElementBO pluginElement = params.pluginElement;
@@ -234,6 +284,13 @@ class DeviceInfoConverter implements IConverter {
         CloudPluginSceneConfigElementBO pluginElement;
         Map<String, CloudPluginSceneConfigElementPortBO> pluginPorts;
 
+        /**
+         * Params
+         *
+         * @param element
+         * @param pluginElement
+         * @param pluginPorts
+         */
         public Params(SceneConfigElementBO element, CloudPluginSceneConfigElementBO pluginElement, Map<String, CloudPluginSceneConfigElementPortBO> pluginPorts) {
             this.element = element;
             this.pluginElement = pluginElement;
@@ -245,6 +302,13 @@ class DeviceInfoConverter implements IConverter {
         SceneConfigElementPortBO port;
         CloudPluginSceneConfigElementPortBO pluginPort;
 
+        /**
+         * PortParams
+         *
+         * @param index
+         * @param originPortNum
+         * @param params
+         */
         PortParams(int index, int originPortNum, Params params) {
             SceneConfigElementBO element = params.element;
             Map<String, CloudPluginSceneConfigElementPortBO> pluginPorts = params.pluginPorts;
@@ -261,10 +325,20 @@ class DeviceInfoConverter implements IConverter {
             }
         }
 
+        /**
+         * getPort
+         *
+         * @return
+         */
         public SceneConfigElementPortBO getPort() {
             return port;
         }
 
+        /**
+         * getPluginPort
+         *
+         * @return
+         */
         public CloudPluginSceneConfigElementPortBO getPluginPort() {
             return pluginPort;
         }

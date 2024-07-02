@@ -31,6 +31,11 @@ public class BaseCommon {
 
     public static BaseAppConfig baseAppConfig;
 
+    /**
+     * BaseCommon
+     *
+     * @param baseAppConfig
+     */
     private BaseCommon(BaseAppConfig baseAppConfig) {
         BaseCommon.baseAppConfig = baseAppConfig;
         BaseCommon.dateTimeFormatter = DateTimeFormatter.ofPattern(baseAppConfig.getDateTimePattern());

@@ -4,14 +4,34 @@ public class ArrayUtil {
 
     public static final int INDEX_NOT_FOUND = -1;
 
+    /**
+     * isNotEmpty
+     *
+     * @param array
+     * @return boolean
+     */
     public static <T> boolean isNotEmpty(T[] array) {
         return (null != array && array.length != 0);
     }
 
+    /**
+     * contains
+     *
+     * @param array
+     * @param value
+     * @return boolean
+     */
     public static boolean contains(char[] array, char value) {
         return indexOf(array, value) > INDEX_NOT_FOUND;
     }
 
+    /**
+     * indexOf
+     *
+     * @param array
+     * @param value
+     * @return int
+     */
     public static int indexOf(char[] array, char value) {
         if (null != array) {
             for (int i = 0; i < array.length; i++) {

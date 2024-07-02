@@ -57,6 +57,12 @@ public class TenantUserServiceImpl
         extends BaseModelServiceImpl<TenantUserModel, TenantUserMapper, TenantUserFields, QueryParams>
         implements TenantUserService {
 
+    /**
+     * TenantUserServiceImpl
+     *
+     * @param modelMapper
+     * @param modelFields
+     */
     @Autowired
     public TenantUserServiceImpl(TenantUserMapper modelMapper, TenantUserFields modelFields) {
         setModelMapper(modelMapper);
@@ -94,6 +100,12 @@ public class TenantUserServiceImpl
     @Autowired
     private UserMapper userMapper;
 
+    /**
+     * listUsersByOrgId
+     *
+     * @param orgId
+     * @return
+     */
     @Override
     public List<UserModel> listUsersByOrgId(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
@@ -111,6 +123,12 @@ public class TenantUserServiceImpl
         return users;
     }
 
+    /**
+     * listUsersByOrgIdNoRestrict
+     *
+     * @param orgId
+     * @return
+     */
     @Override
     public List<UserModel> listUsersByOrgIdNoRestrict(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
@@ -121,6 +139,14 @@ public class TenantUserServiceImpl
         return users;
     }
 
+    /**
+     * listUsersByOrgAndUname
+     *
+     * @param orgId
+     * @param uname
+     * @param userIds
+     * @return
+     */
     @Override
     public List<UserModel> listUsersByOrgAndUname(String orgId, String uname, List<String> userIds) {
         // 默认查出orgId下所有子组织的用户
@@ -163,6 +189,12 @@ public class TenantUserServiceImpl
         return userModels;
     }
 
+    /**
+     * listOrgsByUserId
+     *
+     * @param userId
+     * @return
+     */
     @Override
     @Cacheable(value = CACHE_VAL_ORGS_BY_USERID)
     public List<OrgBO> listOrgsByUserId(String userId) {
@@ -180,6 +212,12 @@ public class TenantUserServiceImpl
         return orgBOS;
     }
 
+    /**
+     * listUserOrgMapDtosByUserIds
+     *
+     * @param userIds
+     * @return
+     */
     @Override
     @Cacheable(value = CACHE_VAL_ORGS_BY_USERID)
     public List<UserOrgMapBo> listUserOrgMapDtosByUserIds(List<String> userIds) {
@@ -203,6 +241,12 @@ public class TenantUserServiceImpl
         return getModelMapper().list(humanCondition, UserOrgMapBo.class);
     }
 
+    /**
+     * listUserOrgByUserIds
+     *
+     * @param userIds
+     * @return
+     */
     @Override
     public List<UserOrgBo> listUserOrgByUserIds(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_ID);
@@ -228,6 +272,12 @@ public class TenantUserServiceImpl
         return userOrgBos;
     }
 
+    /**
+     * listHierarchicalOrgsByUserId
+     *
+     * @param userId
+     * @return
+     */
     @Override
     public List<OrgDto> listHierarchicalOrgsByUserId(String userId) {
         List<OrgModel> orgModels = selectOrgsByUserId(userId);
@@ -249,6 +299,13 @@ public class TenantUserServiceImpl
         return orgDtos;
     }
 
+    /**
+     * additionalBindOrgUsers
+     *
+     * @param orgId
+     * @param userIds
+     * @return boolean
+     */
     @Override
     public boolean additionalBindOrgUsers(String orgId, List<String> userIds) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
@@ -291,6 +348,12 @@ public class TenantUserServiceImpl
         return true;
     }
 
+    /**
+     * getAllOrgPathByUserId
+     *
+     * @param userId
+     * @return
+     */
     @Override
     public String getAllOrgPathByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
@@ -306,6 +369,12 @@ public class TenantUserServiceImpl
         return allorgpath;
     }
 
+    /**
+     * getUserCnt
+     *
+     * @param orgId
+     * @return
+     */
     @Override
     public Integer getUserCnt(String orgId) {
         HumanCondition humanCondition = new HumanCondition()
@@ -314,6 +383,12 @@ public class TenantUserServiceImpl
         return userCnt;
     }
 
+    /**
+     * pageUsersByOrg
+     *
+     * @param req
+     * @return
+     */
     @Override
     public PageInfo<UserBo> pageUsersByOrg(OrgUserPageRequest req) {
         List<String> idsList = null;
@@ -365,6 +440,12 @@ public class TenantUserServiceImpl
     }
 
 
+    /**
+     * listByUserIds
+     *
+     * @param ids
+     * @return
+     */
     public List<UserBo> listByUserIds(List<String> ids) {
         UserModel selfUser = UserUtils.getLoginUser();
         String selfUserId = null;
@@ -381,6 +462,12 @@ public class TenantUserServiceImpl
 
     }
 
+    /**
+     * deleteByUserId
+     *
+     * @param userId
+     * @return boolean
+     */
     @Override
     public boolean deleteByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
@@ -391,6 +478,12 @@ public class TenantUserServiceImpl
         return true;
     }
 
+    /**
+     * deleteByOrgId
+     *
+     * @param orgId
+     * @return boolean
+     */
     @Override
     public boolean deleteByOrgId(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
@@ -401,6 +494,12 @@ public class TenantUserServiceImpl
         return true;
     }
 
+    /**
+     * selectOrgsByUserId
+     *
+     * @param userId
+     * @return
+     */
     private List<OrgModel> selectOrgsByUserId(String userId) {
         HumanCondition tenantUserCondition = new HumanCondition()
                 .filterEqual(TenantUserModel::getUser, userId)
@@ -420,6 +519,15 @@ public class TenantUserServiceImpl
         return list;
     }
 
+    /**
+     * getUsersByOrgId
+     *
+     * @param orgId
+     * @param selfUserId
+     * @param excludeRoleIds
+     * @param excludeUserIds
+     * @return
+     */
     private List<UserModel> getUsersByOrgId(String orgId, String selfUserId, List<String> excludeRoleIds, List<String> excludeUserIds) {
         HumanCondition humanCondition = new HumanCondition();
 
@@ -462,6 +570,19 @@ public class TenantUserServiceImpl
         return userModels;
     }
 
+    /**
+     * listAllUsers
+     *
+     * @param orgIds
+     * @param userIds
+     * @param orders
+     * @param userBo
+     * @param selfUserId
+     * @param excludeRoleIds
+     * @param excludeUserIds
+     * @param currentDateTime
+     * @return
+     */
     public List<UserOrgRoleBo> listAllUsers(List<String> orgIds,
                                             List<String> userIds,
                                             List<String> orders,
@@ -495,6 +616,21 @@ public class TenantUserServiceImpl
         return userOrgRoleBos;
     }
 
+    /**
+     * listPageUsers
+     *
+     * @param orgIds
+     * @param userIds
+     * @param orders
+     * @param userBo
+     * @param selfUserId
+     * @param excludeRoleIds
+     * @param excludeUserIds
+     * @param currentDateTime
+     * @param page
+     * @param pageSize
+     * @return
+     */
     public PageInfo<UserBo> listPageUsers(List<String> orgIds,
                                          List<String> userIds,
                                          List<String> orders,
@@ -539,6 +675,19 @@ public class TenantUserServiceImpl
         return pageInfo;
     }
 
+    /**
+     * genHumanCondition
+     *
+     * @param orgIds
+     * @param userIds
+     * @param orders
+     * @param userBo
+     * @param selfUserId
+     * @param excludeRoleIds
+     * @param excludeUserIds
+     * @param currentDateTime
+     * @return 查询条件构造器
+     */
     private HumanCondition genHumanCondition(List<String> orgIds,
                                              List<String> userIds,
                                              List<String> orders,
@@ -625,6 +774,12 @@ public class TenantUserServiceImpl
         return humanCondition;
     }
 
+    /**
+     * getUserOrgMap
+     *
+     * @param userIdList
+     * @return
+     */
     private Map<String, String> getUserOrgMap(List<String> userIdList) {
         HumanCondition orgCondition = new HumanCondition()
                 .select(TenantUserModel::getUser)
@@ -643,6 +798,12 @@ public class TenantUserServiceImpl
         return userOrgMap;
     }
 
+    /**
+     * getUserRoleMap
+     *
+     * @param userIdList
+     * @return
+     */
     private Map<String, String> getUserRoleMap(List<String> userIdList) {
         HumanCondition roleCondition = new HumanCondition()
                 .select(UserRoleModel::getUser)

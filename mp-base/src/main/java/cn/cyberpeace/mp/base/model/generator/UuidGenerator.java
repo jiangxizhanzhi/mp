@@ -5,6 +5,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UuidGenerator implements Generator {
+    /**
+     * generate
+     *
+     * @return
+     */
     @Override
     public String generate() {
         return TextUtils.uuid();

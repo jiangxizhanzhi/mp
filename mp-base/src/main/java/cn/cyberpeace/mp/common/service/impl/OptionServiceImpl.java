@@ -36,6 +36,12 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
     @Autowired
     private OptionMapper optionMapper;
 
+    /**
+     * OptionServiceImpl
+     *
+     * @param optionMapper
+     * @param optionFields
+     */
     @Autowired
     public OptionServiceImpl(OptionMapper optionMapper, OptionFields optionFields) {
         setModelFields(optionFields);
@@ -85,12 +91,24 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         return optionModels;
     }
 
+    /**
+     * getStrOptions
+     *
+     * @param type
+     * @return
+     */
     @Override
     public ServiceResult<List<OptionBO>> getStrOptions(String type) {
         return new ServiceResult<>(getOptionsByType(type, false)).asResult();
     }
 
 
+    /**
+     * getIntOptions
+     *
+     * @param type
+     * @return
+     */
     @Override
     public ServiceResult<List<OptionBO>> getIntOptions(String type) {
         return new ServiceResult<>(getOptionsByType(type, true)).asResult();

@@ -26,6 +26,12 @@ public class QueryParentOrgDtoOperation implements OrgDtoOperation<OrgDto> {
     private OrgService orgService;
 
 
+    /**
+     * doExecute
+     *
+     * @param orgDto
+     * @return
+     */
     @Override
     public OrgDto doExecute(OrgDto orgDto) {
         if (StringUtils.isBlank(orgDto.getParent())) {

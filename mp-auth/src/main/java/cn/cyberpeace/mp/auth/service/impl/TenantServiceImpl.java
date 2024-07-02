@@ -19,12 +19,24 @@ import org.springframework.stereotype.Service;
 public class TenantServiceImpl extends BaseModelServiceImpl<TenantModel, TenantMapper, TenantFields, TenantQueryParams>
         implements TenantService {
 
+    /**
+     * TenantServiceImpl
+     *
+     * @param modelMapper
+     * @param modelFields
+     */
     @Autowired
     public TenantServiceImpl(TenantMapper modelMapper, TenantFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
     }
 
+    /**
+     * loadListFilterCondition
+     *
+     * @param humanCondition
+     * @param queryParams
+     */
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, TenantQueryParams queryParams) {
         String name = queryParams.getName();

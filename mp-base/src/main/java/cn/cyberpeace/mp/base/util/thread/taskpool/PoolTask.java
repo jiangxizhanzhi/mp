@@ -6,10 +6,18 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class PoolTask<C> extends BasePoolTask<C, Runnable, Object> {
+    /**
+     * PoolTask
+     *
+     * @param task
+     */
     public PoolTask(Runnable task) {
         setTask(task);
     }
 
+    /**
+     * invoke
+     */
     @Override
     public void invoke() {
         getTask().run();

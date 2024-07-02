@@ -68,26 +68,59 @@ class ConvertDataContainer {
     private Map<String, ExtNodeInfo.PortProtocolExportInfo> portId2Protocol = new HashMap<>();
     private Set<String> simpleLayer3Switch = new HashSet<>();
 
+    /**
+     * putImageInfo
+     *
+     * @param image
+     * @param result
+     */
     public void putImageInfo(String image, ImageInfoParseResult result) {
         this.imageInfos.put(image, result);
     }
 
+    /**
+     * addAreaElement
+     *
+     * @param area
+     */
     public void addAreaElement(SceneConfigAreaBO area) {
         this.areaBOS.add(area);
     }
 
+    /**
+     * addNetworkElement
+     *
+     * @param element
+     */
     public void addNetworkElement(SceneConfigElementBO element) {
         this.networkElements.add(element);
     }
 
+    /**
+     * addNodeElement
+     *
+     * @param element
+     */
     public void addNodeElement(SceneConfigElementBO element) {
         this.nodeElements.add(element);
     }
 
+    /**
+     * addNoNetworkNodeElements
+     *
+     * @param element
+     */
     public void addNoNetworkNodeElements(SceneConfigElementBO element) {
         this.noNetworkNodeElements.add(element);
     }
 
+    /**
+     * putNode2NetworkPorts
+     *
+     * @param nodeId
+     * @param networkId
+     * @param sceneConfigElementPortBO
+     */
     public void putNode2NetworkPorts(String nodeId, String networkId, SceneConfigElementPortBO sceneConfigElementPortBO) {
         if (!this.node2NetworkPorts.containsKey(nodeId)) {
             this.node2NetworkPorts.put(nodeId, new HashMap<>());
@@ -95,22 +128,44 @@ class ConvertDataContainer {
         this.node2NetworkPorts.get(nodeId).put(networkId, sceneConfigElementPortBO);
     }
 
+    /**
+     * addConnection
+     *
+     * @param connection
+     */
     public void addConnection(SceneConfigElementPortConnectionBO connection) {
         this.connections.add(connection);
     }
 
+    /**
+     * putPluginElement
+     *
+     * @param elementId
+     * @param pluginElement
+     */
     public void putPluginElement(String elementId, BasePluginSceneElementBO pluginElement) {
         if (pluginElement instanceof CloudPluginSceneConfigElementBO) {
             this.cloudPluginElements.put(elementId, (CloudPluginSceneConfigElementBO) pluginElement);
         }
     }
 
+    /**
+     * putPluginElementPort
+     *
+     * @param portId
+     * @param pluginPort
+     */
     public void putPluginElementPort(String portId, BasePluginSceneElementPortBO pluginPort) {
         if (pluginPort instanceof CloudPluginSceneConfigElementPortBO) {
             this.cloudPluginPorts.put(portId, (CloudPluginSceneConfigElementPortBO) pluginPort);
         }
     }
 
+    /**
+     * toCsceneBO
+     *
+     * @return
+     */
     public CsceneBO toCsceneBO() {
         SceneConfigDataBO configDataBO = new SceneConfigDataBO();
         configDataBO.setTopology(this.getSceneConfigTopologyBO());
@@ -133,6 +188,11 @@ class ConvertDataContainer {
         return csceneBO;
     }
 
+    /**
+     * getAllElements
+     *
+     * @return
+     */
     public List<SceneConfigElementBO> getAllElements() {
         List<SceneConfigElementBO> allElements = new ArrayList<>();
         allElements.addAll(this.networkElements);
@@ -140,20 +200,40 @@ class ConvertDataContainer {
         return allElements;
     }
 
+    /**
+     * setSceneConfigBO
+     *
+     * @param sceneConfigBO
+     */
     public void setSceneConfigBO(SceneConfigBO sceneConfigBO) {
         this.sceneConfigBO = sceneConfigBO;
     }
 
+    /**
+     * setPluginSceneConfigBO
+     *
+     * @param pluginSceneConfigBO
+     */
     public void setPluginSceneConfigBO(CloudPluginSceneConfigBO pluginSceneConfigBO) {
         this.cloudPluginConfig = pluginSceneConfigBO;
     }
 
+    /**
+     * getPlugins
+     *
+     * @return
+     */
     private Map<String, ScenePluginDataBO> getPlugins() {
         Map<String, ScenePluginDataBO> plugins = new HashMap<>();
         plugins.put(CLOUD_PLUGIN_KEY, this.getCloudPlugin());
         return plugins;
     }
 
+    /**
+     * getCloudPlugin
+     *
+     * @return
+     */
     private ScenePluginDataBO getCloudPlugin() {
         ScenePluginDataBO scenePluginDataBO = new ScenePluginDataBO();
         scenePluginDataBO.setScene(JsonCommon.beanToMap(this.cloudPluginConfig));
@@ -174,6 +254,11 @@ class ConvertDataContainer {
         return scenePluginDataBO;
     }
 
+    /**
+     * getSceneConfigTopologyBO
+     *
+     * @return
+     */
     private SceneConfigTopologyBO getSceneConfigTopologyBO() {
         SceneConfigTopologyBO topology = new SceneConfigTopologyBO();
         topology.setConnections(this.connections);
@@ -182,14 +267,31 @@ class ConvertDataContainer {
         return topology;
     }
 
+    /**
+     * setSceneFilePath
+     *
+     * @param sceneFilePath
+     */
     public void setSceneFilePath(String sceneFilePath) {
         this.sceneFilePath = sceneFilePath;
     }
 
+    /**
+     * addNode2NodePort
+     *
+     * @param fromNode
+     * @param toNode
+     * @param fromPort
+     */
     public void addNode2NodePort(String fromNode, String toNode, SceneConfigElementPortBO fromPort) {
         this.node2NodePort.put(fromNode + "_" + toNode, fromPort);
     }
 
+    /**
+     * getSimpleLayer3Switch
+     *
+     * @return
+     */
     public Set<String> getSimpleLayer3Switch() {
         return simpleLayer3Switch;
     }

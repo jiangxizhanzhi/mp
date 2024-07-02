@@ -6,12 +6,28 @@ import java.util.function.Consumer;
 
 public class CollectionUtils {
 
+    /**
+     * CollectionUtils
+     */
     private CollectionUtils() {}
 
+    /**
+     * emptyNull
+     *
+     * @param value
+     * @return
+     */
     public static <T extends Collection<?>> T emptyNull(T value) {
         return (value == null || value.isEmpty()) ? null : value;
     }
 
+    /**
+     * batchHandle
+     *
+     * @param values
+     * @param batchSize
+     * @param batchHandler
+     */
     public static <T> void batchHandle(List<T> values, int batchSize, Consumer<List<T>> batchHandler) {
         if (values.isEmpty() || batchSize <= 0) {
             return;

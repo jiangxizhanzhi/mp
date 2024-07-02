@@ -25,6 +25,14 @@ public class ResourceCenterConverter {
     @Resource
     private TargetConverter targetConverter;
 
+    /**
+     * convert
+     *
+     * @param parseResult
+     * @param imageInfos
+     * @param sceneFilePath
+     * @return
+     */
     public CsceneBO convert(YmlParseResult parseResult, List<ImageParseResult> imageInfos, String sceneFilePath) {
         // 构建用于存储数据的容器
         ConvertDataContainer container = new ConvertDataContainer();

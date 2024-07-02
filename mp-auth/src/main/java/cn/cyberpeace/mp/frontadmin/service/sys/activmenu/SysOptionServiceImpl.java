@@ -41,6 +41,12 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
     @Autowired
     private OptionMapper optionMapper;
 
+    /**
+     * SysOptionServiceImpl
+     *
+     * @param optionMapper
+     * @param optionFields
+     */
     @Autowired
     public SysOptionServiceImpl(OptionMapper optionMapper, OptionFields optionFields) {
         setModelFields(optionFields);
@@ -94,6 +100,12 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         return flatModels2NestedBos(models, function);
     }
 
+    /**
+     * findByType
+     *
+     * @param type
+     * @return
+     */
     @Override
     public List<OptionModel> findByType(String type) {
         HumanCondition condition = new HumanCondition();
@@ -104,12 +116,24 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         return optionModels;
     }
 
+    /**
+     * getStrOptions
+     *
+     * @param type
+     * @return
+     */
     @Override
     public ServiceResult<List<OptionBO>> getStrOptions(String type) {
         return new ServiceResult<>(getOptionsByType(type, false, true)).asResult();
     }
 
 
+    /**
+     * getIntOptions
+     *
+     * @param type
+     * @return
+     */
     @Override
     public ServiceResult<List<OptionBO>> getIntOptions(String type) {
         return new ServiceResult<>(getOptionsByType(type, true, true)).asResult();
@@ -280,6 +304,13 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         }
     }
 
+    /**
+     * flatModels2NestedBos
+     *
+     * @param models
+     * @param function
+     * @return
+     */
     private List<OptionBO> flatModels2NestedBos(List<OptionModel> models, Function<String, ?> function) {
         Locale locale = LocaleContextHolder.getLocale();
         List<OptionBO> rootBos = new ArrayList<>();

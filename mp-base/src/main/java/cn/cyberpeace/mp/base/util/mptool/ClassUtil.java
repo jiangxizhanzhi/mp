@@ -7,12 +7,22 @@ import java.net.URL;
 @Slf4j
 public class ClassUtil {
 
+    /**
+     * getClassPath
+     *
+     * @return
+     */
     public static String getClassPath() {
         final URL classPathURL = getClassPathURL();
         String url = URLUtil.getDecodedPath(classPathURL);
         return FileUtil.normalize(url);
     }
 
+    /**
+     * getClassPathURL
+     *
+     * @return
+     */
     public static URL getClassPathURL() {
         try {
             return getResourceURL(StrUtil.EMPTY);
@@ -22,6 +32,12 @@ public class ClassUtil {
         }
     }
 
+    /**
+     * getResourceURL
+     *
+     * @param resource
+     * @return
+     */
     public static URL getResourceURL(String resource) {
         return ResourceUtil.getResource(resource, null);
     }

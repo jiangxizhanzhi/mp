@@ -26,6 +26,11 @@ public class UserUpdateCheckService implements UserCheckService {
     @Autowired
     private UserService userService;
 
+    /**
+     * check
+     *
+     * @param user
+     */
     public void check(UserModel user) {
         ParamCheck.notBlank(user.getId(), AuthBasei18nCode.USER_ID);
         ObjServiceResult<UserModel> result = userService.get(user.getId());

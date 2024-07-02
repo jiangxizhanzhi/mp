@@ -20,6 +20,13 @@ public class ZipUtil {
 
     private static final String SUFFIX = ".zip";
 
+    /**
+     * listFileNames
+     *
+     * @param zipFile
+     * @param dir
+     * @return
+     */
     public static List<String> listFileNames(ZipFile zipFile, String dir) {
         if (StrUtil.isNotBlank(dir)) {
             // 目录尾部添加"/"
@@ -41,6 +48,12 @@ public class ZipUtil {
         return fileNames;
     }
 
+    /**
+     * toZip
+     *
+     * @param srcDir
+     * @return
+     */
     public static String toZip(String srcDir) throws RuntimeException {
         ZipOutputStream zos = null;
         File src = new File(srcDir);
@@ -72,6 +85,13 @@ public class ZipUtil {
         return zipPath;
     }
 
+    /**
+     * compress
+     *
+     * @param sourceFile
+     * @param zos
+     * @param name
+     */
     private static void compress(File sourceFile, ZipOutputStream zos, String name)
             throws Exception {
         byte[] buf = new byte[BUFFER_SIZE];

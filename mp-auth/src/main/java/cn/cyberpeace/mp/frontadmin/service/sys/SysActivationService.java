@@ -182,6 +182,9 @@ public class SysActivationService {
 
     }
 
+    /**
+     * resetMenuVisibility
+     */
     public void resetMenuVisibility() {
         ACTIVATION_CONTENT = status();
         activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
@@ -278,6 +281,12 @@ public class SysActivationService {
         activationRequest.setMachineCode(String.join("-", hardwareUuid, suffix));
     }
 
+    /**
+     * getSuffixFromMachineCode
+     *
+     * @param machineCode
+     * @return
+     */
     private String getSuffixFromMachineCode(String machineCode) {
         return StringUtils.substringAfterLast(machineCode, "-");
     }
@@ -301,7 +310,12 @@ public class SysActivationService {
     }
 
 
-
+    /**
+     * getValueByKey
+     *
+     * @param key
+     * @return
+     */
     public String getValueByKey(String key) {
         ActivationResponse activationResponse = status();
         if (Objects.isNull(activationResponse) || !Objects.equals(AdminConstant.STATUS_ACTIVITED, activationResponse.getIsActived())) {
@@ -367,6 +381,13 @@ public class SysActivationService {
         return uuid;
     }
 
+    /**
+     * generateCustomizedVerifyJSONInfo
+     *
+     * @param moduleItems
+     * @param resourceItems
+     * @return
+     */
     @Deprecated
     public String generateCustomizedVerifyJSONInfo(List<ActivationModuleItem> moduleItems, List<ActivationResourceItem> resourceItems) {
         JSONObject jsonObject = new JSONObject();
@@ -522,6 +543,11 @@ public class SysActivationService {
     }
 
 
+    /**
+     * parseContentFromDecrpytedFile
+     *
+     * @return
+     */
     private ActivationResponse parseContentFromDecrpytedFile() {
         File activationFile = new File(frontAdminConfig.getLicenseDir() + File.separator + ACTIVATION_FILE);
         if (!activationFile.exists()) {
@@ -546,6 +572,12 @@ public class SysActivationService {
     }
 
 
+    /**
+     * convertActivationItems2CustomVerifyInfoMap
+     *
+     * @param items
+     * @return
+     */
     private Map<String, String> convertActivationItems2CustomVerifyInfoMap(List<ActivationItem> items) {
         ParamCheck.notEmpty(items, AuthBasei18nCode.REQUEST_PARAMS);
         Map<String, String> map = new HashMap<>();
@@ -555,18 +587,37 @@ public class SysActivationService {
         return map;
     }
 
+    /**
+     * getExpiredDateStr
+     *
+     * @param months
+     * @return
+     */
     private String getExpiredDateStr(Integer months) {
         LocalDate localDate = LocalDate.now().plusMonths(months);
         String expiredDate = localDate.format(dateFormatter);
         return expiredDate;
     }
 
+    /**
+     * getExpiredDateStrDay
+     *
+     * @param days
+     * @return
+     */
     private String getExpiredDateStrDay(Integer days) {
         LocalDate localDate = LocalDate.now().plusDays(days);
         String expiredDate = localDate.format(dateFormatter);
         return expiredDate;
     }
 
+    /**
+     * getDelayExpireDateStr
+     *
+     * @param months
+     * @param strExpireDate
+     * @return
+     */
     private String getDelayExpireDateStr(Integer months, String strExpireDate) {
         LocalDate oldExpireDate = TimeUtils.stringToLocalDate(strExpireDate);
         LocalDate localDate = oldExpireDate.plusMonths(months);
@@ -761,7 +812,11 @@ public class SysActivationService {
     }
 
 
-
+    /**
+     * mockActivationContent
+     *
+     * @return
+     */
     @Deprecated
     private ActivationResponse mockActivationContent() {
         ActivationResponse content = new ActivationResponse();

@@ -17,6 +17,11 @@ public class CustomWebMvcConfigurer implements WebMvcConfigurer {
     @Autowired
     private BaseAppConfig baseAppConfig;
 
+    /**
+     * addArgumentResolvers
+     *
+     * @param argumentResolvers
+     */
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
         if (Boolean.TRUE.equals(baseAppConfig.getSnakeApiMode())) {
@@ -24,6 +29,11 @@ public class CustomWebMvcConfigurer implements WebMvcConfigurer {
         }
     }
 
+    /**
+     * addResourceHandlers
+     *
+     * @param registry
+     */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler(baseAppConfig.getLfsUrlPattern())

@@ -22,6 +22,12 @@ import java.util.Objects;
  */
 public class KaptchaUtil {
 
+    /**
+     * checkKaptcha
+     *
+     * @param code
+     * @return
+     */
     public static ServiceResult<Object> checkKaptcha(String code) {
         ServiceResult<Object> result = null;
         HttpServletRequest request = ServletUtils.getRequest();
@@ -60,6 +66,12 @@ public class KaptchaUtil {
         return result;
     }
 
+    /**
+     * checkFail
+     *
+     * @param response
+     * @param result
+     */
     public static void checkFail(HttpServletResponse response, ServiceResult<Object> result) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
         result = result.asResult();

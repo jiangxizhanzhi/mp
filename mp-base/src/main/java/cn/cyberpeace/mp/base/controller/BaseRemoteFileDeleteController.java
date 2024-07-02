@@ -17,6 +17,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Deprecated
 public interface BaseRemoteFileDeleteController<S extends BaseRemoteFileService> {
 
+    /**
+     * getRemoteFileService
+     *
+     * @return
+     */
     S getRemoteFileService();
 
     /**

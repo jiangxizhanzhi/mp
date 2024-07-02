@@ -7,6 +7,12 @@ package cn.cyberpeace.mp.frontadmin.util;
  */
 public class SQLUtils {
 
+    /**
+     * escapeLike
+     *
+     * @param value
+     * @return
+     */
     public static String escapeLike(String value) {
         if (value != null) {
             return value

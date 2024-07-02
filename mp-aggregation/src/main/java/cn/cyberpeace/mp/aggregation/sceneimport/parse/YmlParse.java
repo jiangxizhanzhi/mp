@@ -6,5 +6,10 @@ package cn.cyberpeace.mp.aggregation.sceneimport.parse;
  * @Date 2021/11/2
  */
 interface YmlParse<T> {
+    /**
+     * parse
+     *
+     * @return
+     */
     T parse();
 }

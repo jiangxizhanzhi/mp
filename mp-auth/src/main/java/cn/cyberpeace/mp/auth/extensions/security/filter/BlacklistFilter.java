@@ -40,6 +40,13 @@ public class BlacklistFilter extends OncePerRequestFilter {
     @Resource
     private MappingJackson2HttpMessageConverter converter;
 
+    /**
+     * doFilterInternal
+     *
+     * @param request
+     * @param response
+     * @param filterChain
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (blacklistModel.isEnabled()) {
@@ -62,6 +69,12 @@ public class BlacklistFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    /**
+     * denyAccess
+     *
+     * @param response
+     * @param uri
+     */
     private void denyAccess(HttpServletResponse response, String uri) throws IOException {
         log.error("access to {} was forbidden！", uri);
         response.setStatus(HttpServletResponse.SC_OK);

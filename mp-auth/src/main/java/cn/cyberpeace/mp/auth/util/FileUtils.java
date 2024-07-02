@@ -23,6 +23,7 @@ public class FileUtils {
 
     /**
      * 获取文件后缀
+     *
      * @param filename
      * @return
      */
@@ -44,6 +45,7 @@ public class FileUtils {
 
     /**
      * 获取文件类型
+     *
      * @param inputStream
      * @return
      */
@@ -70,6 +72,7 @@ public class FileUtils {
 
     /**
      * 写入文件
+     *
      * @param content
      * @param file
      * @param charset
@@ -86,6 +89,7 @@ public class FileUtils {
 
     /**
      * 逐行读取文件
+     *
      * @param file
      * @return
      */
@@ -104,6 +108,7 @@ public class FileUtils {
 
     /**
      * 解析文件类型
+     *
      * @param fileHeader
      * @return
      */

@@ -9,8 +9,18 @@ import java.util.*;
 
 public class ExcelCommon {
 
+    /**
+     * ExcelCommon
+     */
     private ExcelCommon() {}
 
+    /**
+     * read
+     *
+     * @param is
+     * @param headerFieldMap
+     * @return
+     */
     public static List<LinkedHashMap<String, String>> read(InputStream is, Map<String, String> headerFieldMap) {
         List<Map<Integer, String>> sourceLines = EasyExcel.read(is).headRowNumber(0).sheet().doReadSync();
         List<List<String>> lines = new ArrayList<>();
@@ -36,12 +46,26 @@ public class ExcelCommon {
         return TextResourceBase.lineToMaps(lines, headerFieldMap);
     }
 
+    /**
+     * read
+     *
+     * @param is
+     * @param clazz
+     * @return
+     */
     public static <T> List<T> read(InputStream is, Class<T> clazz) {
         Map<String, String> headerFieldMap = TextResourceBase.getHeaderFieldMap(clazz);
         List<LinkedHashMap<String, String>> maps = read(is, headerFieldMap);
         return TextResourceBase.mapToObjs(maps, clazz);
     }
 
+    /**
+     * write
+     *
+     * @param maps
+     * @param os
+     * @param headerFieldMap
+     */
     public static void write(List<LinkedHashMap<String, String>> maps, OutputStream os,
                              Map<String, String> headerFieldMap) {
         if (maps == null || maps.isEmpty()) {
@@ -52,6 +76,12 @@ public class ExcelCommon {
         EasyExcel.write(os).sheet().doWrite(lines);
     }
 
+    /**
+     * write
+     *
+     * @param objs
+     * @param os
+     */
     public static <T> void write(List<T> objs, OutputStream os) {
         if (objs == null || objs.isEmpty()) {
             return;
@@ -63,10 +93,22 @@ public class ExcelCommon {
         write(maps, os, fieldHeaderMap);
     }
 
+    /**
+     * writeHeaderOnly
+     *
+     * @param headerLine
+     * @param os
+     */
     public static void writeHeaderOnly(List<String> headerLine, OutputStream os) {
         EasyExcel.write(os).sheet().doWrite(List.of(headerLine));
     }
 
+    /**
+     * writeHeaderOnly
+     *
+     * @param clazz
+     * @param os
+     */
     public static <T> void writeHeaderOnly(Class<T> clazz, OutputStream os) {
         writeHeaderOnly(TextResourceBase.getHeaderLine(clazz), os);
     }

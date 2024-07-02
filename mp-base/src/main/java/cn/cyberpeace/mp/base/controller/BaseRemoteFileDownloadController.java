@@ -22,6 +22,11 @@ import java.nio.charset.StandardCharsets;
 @Deprecated
 public interface BaseRemoteFileDownloadController<S extends BaseRemoteFileService> {
 
+    /**
+     * getRemoteFileService
+     *
+     * @return
+     */
     S getRemoteFileService();
 
     /**

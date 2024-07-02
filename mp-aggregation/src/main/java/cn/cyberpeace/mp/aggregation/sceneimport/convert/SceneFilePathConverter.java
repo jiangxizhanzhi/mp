@@ -15,6 +15,11 @@ import java.util.Map;
  */
 class SceneFilePathConverter implements IConverter {
 
+    /**
+     * convert2BO
+     *
+     * @param container
+     */
     @Override
     public void convert2BO(ConvertDataContainer container) {
         String sceneFilePath = container.getSceneFilePath();

@@ -16,9 +16,19 @@ public class NetworkUtils {
 
     private static final int DEFAULT_PROBE_TIMEOUT = 300 * 1000;
 
+    /**
+     * NetworkUtils
+     */
     private NetworkUtils() {
     }
 
+    /**
+     * checkPortConnectable
+     *
+     * @param host
+     * @param port
+     * @return boolean
+     */
     public static boolean checkPortConnectable(String host, int port) {
         return checkPortConnectable(host, port, 0);
     }
@@ -39,6 +49,15 @@ public class NetworkUtils {
         return true;
     }
 
+    /**
+     * checkPortConnectable
+     *
+     * @param protocol
+     * @param host
+     * @param port
+     * @param timeout
+     * @return boolean
+     */
     public static boolean checkPortConnectable(String protocol, String host, int port, int timeout) {
         if ("ssh".equalsIgnoreCase(protocol)) {
             ProtocolProbe protocolProbe = new SSHProbe(host, port);
@@ -56,6 +75,12 @@ public class NetworkUtils {
         }
     }
 
+    /**
+     * checkHostReachable
+     *
+     * @param host
+     * @return boolean
+     */
     public static boolean checkHostReachable(String host) {
         return checkHostReachable(host, 0);
     }
@@ -75,6 +100,14 @@ public class NetworkUtils {
     }
 
 
+    /**
+     * probePort
+     *
+     * @param protocol
+     * @param host
+     * @param port
+     * @return boolean
+     */
     public static boolean probePort(String protocol, String host, int port) {
         return probePort(protocol, host, port, 0, 0, 0, null, 0);
     }
@@ -101,10 +134,23 @@ public class NetworkUtils {
                 stepTime, probeTimeout, stopCheck, stopCheckIntervalCount, String.format("host port[%s:%d]", host, port));
     }
 
+    /**
+     * probeHost
+     *
+     * @param host
+     * @return boolean
+     */
     public static boolean probeHost(String host) {
         return probeHost(host, 0);
     }
 
+    /**
+     * probeHost
+     *
+     * @param host
+     * @param timeout
+     * @return boolean
+     */
     public static boolean probeHost(String host, int timeout) {
         return probeHost(host, 0, 0, timeout, null, 0);
     }

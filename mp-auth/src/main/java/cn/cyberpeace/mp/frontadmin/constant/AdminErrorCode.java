@@ -31,6 +31,12 @@ public enum AdminErrorCode implements ErrorCode {
 
     OPTION_NAME_EXIST("MP-110060", "option_name_exist");
 
+    /**
+     * AdminErrorCode
+     *
+     * @param code
+     * @param message
+     */
     AdminErrorCode(String code, String message) {
         setCode(code, AdminConstant.ERROR_CODE_PREFIX + message);
     }

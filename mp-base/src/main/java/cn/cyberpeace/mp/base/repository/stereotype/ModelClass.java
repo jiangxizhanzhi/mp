@@ -10,6 +10,11 @@ import java.lang.annotation.*;
 @Documented
 public @interface ModelClass {
 
+    /**
+     * value
+     *
+     * @return
+     */
     Class<?> value();
 
 }

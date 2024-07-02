@@ -13,16 +13,31 @@ public class LoginUserContext implements TransferContext<String> {
 
     private static String KEY = "USER_ID";
 
+    /**
+     * getKey
+     *
+     * @return
+     */
     @Override
     public String getKey() {
         return KEY;
     }
 
+    /**
+     * getValue
+     *
+     * @return
+     */
     @Override
     public String getValue() {
         return LoginUserHolder.get().get();
     }
 
+    /**
+     * setValue
+     *
+     * @param value
+     */
     @Override
     public void setValue(String value) {
         LoginUserHolder.get().set(value);

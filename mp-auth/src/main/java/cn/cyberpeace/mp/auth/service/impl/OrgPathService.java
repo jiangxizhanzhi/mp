@@ -22,6 +22,7 @@ public class OrgPathService {
 
     /**
      * 根据租户获取所有组织信息
+     *
      * @param tenant
      * @return
      */

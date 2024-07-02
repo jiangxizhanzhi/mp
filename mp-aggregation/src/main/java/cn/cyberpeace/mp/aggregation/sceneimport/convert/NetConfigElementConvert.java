@@ -23,6 +23,11 @@ import java.util.Map;
  */
 class NetConfigElementConvert implements IConverter {
 
+    /**
+     * convert2BO
+     *
+     * @param container
+     */
     public void convert2BO(ConvertDataContainer container) {
         CsceneBO csceneBO = container.toCsceneBO();
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(csceneBO.getSceneConfig(), null);

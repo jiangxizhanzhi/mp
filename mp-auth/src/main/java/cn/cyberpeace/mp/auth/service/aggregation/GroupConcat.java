@@ -16,22 +16,44 @@ public class GroupConcat extends Aggregation<GroupConcat> {
         return column -> String.format("distinct (%s)", column);
     }
 
+    /**
+     * distinct
+     *
+     * @return
+     */
     public GroupConcat distinct() {
         addCalc(genDistinct());
         return this;
     }
 
+    /**
+     * f
+     *
+     * @param fieldName
+     * @return
+     */
     public static GroupConcat f(String fieldName) {
         GroupConcat aggregation = new GroupConcat();
         aggregation.setFieldName(fieldName);
         return aggregation;
     }
 
+    /**
+     * f
+     *
+     * @param getter
+     * @return
+     */
     public static <T> GroupConcat f(SerializableFunction<T> getter) {
         String fieldName = BeanUtils.getBeanGetterFieldName(getter);
         return f(fieldName);
     }
 
+    /**
+     * getFuncName
+     *
+     * @return
+     */
     @Override
     public String getFuncName() {
         return "group_concat";

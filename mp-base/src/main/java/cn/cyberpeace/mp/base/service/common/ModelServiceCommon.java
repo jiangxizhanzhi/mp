@@ -17,6 +17,13 @@ import java.util.stream.Collectors;
 
 public class ModelServiceCommon {
 
+    /**
+     * toListBOResult
+     *
+     * @param modelResult
+     * @param tClass
+     * @return
+     */
     public static <T extends ModelBO<M, T>, M extends BaseModel> ListObjServiceResult<T> toListBOResult(
             ListObjServiceResult<M> modelResult, Class<T> tClass) {
         modelResult = modelResult.asResult();
@@ -33,6 +40,13 @@ public class ModelServiceCommon {
         return new ListObjServiceResult<>(boSource, modelResult.getServiceCode(), modelResult.getDetail());
     }
 
+    /**
+     * toBOResult
+     *
+     * @param modelResult
+     * @param tClass
+     * @return
+     */
     public static <T extends ModelBO<M, T>, M extends BaseModel> ObjServiceResult<T> toBOResult(
             ObjServiceResult<M> modelResult, Class<T> tClass) {
         modelResult = modelResult.asResult();
@@ -45,6 +59,13 @@ public class ModelServiceCommon {
         return new ObjServiceResult<>(boSource, modelResult.getServiceCode(), modelResult.getDetail());
     }
 
+    /**
+     * exportListExcel
+     *
+     * @param modelResult
+     * @param os
+     * @param textResourceClass
+     */
     public static <M extends BaseModel, T extends ModelBO<M, T>> void exportListExcel(
             ListObjServiceResult<M> modelResult, OutputStream os, Class<T> textResourceClass) {
         ListObjResult<M> modelData = modelResult.asResult().getData();
@@ -66,6 +87,13 @@ public class ModelServiceCommon {
         }
     }
 
+    /**
+     * importListExcel
+     *
+     * @param is
+     * @param textResourceClass
+     * @return
+     */
     public static <M extends BaseModel, T extends ModelBO<M, T>> List<M> importListExcel(InputStream is,
                                                                                          Class<T> textResourceClass) {
         List<T> bos = ExcelCommon.read(is, textResourceClass);

@@ -13,8 +13,18 @@ public class ModelUtils {
 
     private static final Map<Class<?>, Map<String, Object[]>> initDefaultFieldsCache = new HashMap<>();
 
+    /**
+     * ModelUtils
+     */
     private ModelUtils() {}
 
+    /**
+     * parseDefaultValue
+     *
+     * @param clazz
+     * @param field
+     * @return
+     */
     private static Object parseDefaultValue(Class<?> clazz, Field field) {
         String fieldName = field.getName();
         String methodName = "initDefault" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
@@ -52,11 +62,23 @@ public class ModelUtils {
         return defaultValue;
     }
 
+    /**
+     * getTableName
+     *
+     * @param clazz
+     * @return
+     */
     public static <M> String getTableName(Class<M> clazz) {
         Table table = clazz.getAnnotation(Table.class);
         return table != null ? table.value() : null;
     }
 
+    /**
+     * getInitDefaultFields
+     *
+     * @param clazz
+     * @return
+     */
     public static <M> Map<String, Object[]> getInitDefaultFields(Class<M> clazz) {
         Map<String, Object[]> fieldValues = initDefaultFieldsCache.getOrDefault(clazz, null);
         if (fieldValues != null) {

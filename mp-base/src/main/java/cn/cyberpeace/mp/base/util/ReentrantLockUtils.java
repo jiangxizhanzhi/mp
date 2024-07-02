@@ -25,6 +25,11 @@ public final class ReentrantLockUtils {
         return LOCKS.get(key).tryLock();
     }
 
+    /**
+     * unLock
+     *
+     * @param key
+     */
     public synchronized static void unLock(String key) {
         ReentrantLock lock = LOCKS.remove(key);
         if (lock != null) {

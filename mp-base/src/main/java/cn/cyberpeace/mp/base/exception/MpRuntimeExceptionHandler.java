@@ -25,6 +25,12 @@ public class MpRuntimeExceptionHandler {
 
     private static final String LOGGER_FORMAT = "System error: {}, detail: {}";
 
+    /**
+     * b2bRuntimeExceptionHandler
+     *
+     * @param ex
+     * @return
+     */
     @ExceptionHandler(MpRuntimeException.class)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
@@ -38,6 +44,12 @@ public class MpRuntimeExceptionHandler {
         return new ServiceResult<>(null, serviceCode, detail).asResult();
     }
 
+    /**
+     * validationExceptionHandle
+     *
+     * @param ex
+     * @return
+     */
     @ExceptionHandler({BindException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
@@ -57,6 +69,12 @@ public class MpRuntimeExceptionHandler {
         return new ServiceResult<>(null, BaseErrorCode.PARAMS_INVALID, detail).asResult();
     }
 
+    /**
+     * handException
+     *
+     * @param ex
+     * @return 统一服务返回结果
+     */
     @ExceptionHandler(HttpServerErrorException.GatewayTimeout.class)
     @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
     @ResponseBody
@@ -65,6 +83,12 @@ public class MpRuntimeExceptionHandler {
         return new ServiceResult(null,BaseErrorCode.GATEWAY_TIME_OUT).asResult();
     }
 
+    /**
+     * handleException
+     *
+     * @param ex
+     * @return
+     */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody

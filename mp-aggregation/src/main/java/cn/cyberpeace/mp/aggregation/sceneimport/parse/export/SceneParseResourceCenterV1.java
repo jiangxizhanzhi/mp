@@ -49,6 +49,12 @@ import java.util.stream.Collectors;
  */
 public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
 
+    /**
+     * parseAndLoadInfo
+     *
+     * @param sceneId
+     * @return
+     */
     public Result parseAndLoadInfo(String sceneId) {
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, null, false, null);
         SceneHandler sceneHandler = new InitiateSceneHandler(sceneConfigHandler.toData().exportToScene());
@@ -90,6 +96,12 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
         return result;
     }
 
+    /**
+     * getSceneElementParseResult
+     *
+     * @param sceneHandler
+     * @return
+     */
     private SceneElementParseResult getSceneElementParseResult(SceneConfigHandler sceneHandler) {
         SceneElementParseResult sceneElementParseResult = new SceneElementParseResult();
         sceneElementParseResult.setName(sceneHandler.getScene().getName());
@@ -103,6 +115,15 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
         return sceneElementParseResult;
     }
 
+    /**
+     * parseNodeAndNet
+     *
+     * @param sceneHandler
+     * @param networks
+     * @param nodes
+     * @param id2Network
+     * @param id2Node
+     */
     private void parseNodeAndNet(SceneHandler sceneHandler, List<NetworkElementParseResultV2> networks, List<NodeElementParseResult> nodes,
                                  Map<String, NetworkElementParseResultV2> id2Network, Map<String, NodeElementParseResult> id2Node) {
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
@@ -180,6 +201,13 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
         }
     }
 
+    /**
+     * addConnect
+     *
+     * @param sceneHandler
+     * @param id2Network
+     * @param id2Node
+     */
     private void addConnect(SceneHandler sceneHandler, Map<String, NetworkElementParseResultV2> id2Network, Map<String, NodeElementParseResult> id2Node) {
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         for (String nodeId : id2Node.keySet()) {
@@ -220,6 +248,13 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
         }
     }
 
+    /**
+     * buildNetworkElementParseResultV2
+     *
+     * @param e
+     * @param pluginElement
+     * @return
+     */
     private NetworkElementParseResultV2 buildNetworkElementParseResultV2(SceneElementBO e, CloudPluginSceneElementBO pluginElement) {
         NetworkElementParseResultV2 networkElementParseResult = new NetworkElementParseResultV2();
         if (BaseSceneElementModel.Type.SWITCH == e.getType()) {
@@ -259,6 +294,13 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
         return networkElementParseResult;
     }
 
+    /**
+     * buildNodeElementParseResult
+     *
+     * @param e
+     * @param pluginElement
+     * @return
+     */
     private NodeElementParseResult buildNodeElementParseResult(SceneElementBO e, CloudPluginSceneElementBO pluginElement) {
         NodeElementParseResult nodeElementParseResult = new NodeElementParseResult();
         nodeElementParseResult.setFile(e.getFile());
@@ -313,6 +355,12 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
         return nodeElementParseResult;
     }
 
+    /**
+     * buildAclsInfos
+     *
+     * @param pluginPort
+     * @return
+     */
     private List<AclsInfo> buildAclsInfos(CloudPluginSceneElementPortBO pluginPort) {
         List<AclsInfo> aclsInfos = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(pluginPort.getFirewallRules())) {
@@ -361,6 +409,11 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
 
         private String sceneId;
 
+        /**
+         * InitiateSceneHandler
+         *
+         * @param sceneDataBO
+         */
         public InitiateSceneHandler(SceneDataBO sceneDataBO) {
             super(sceneDataBO, null);
             this.sceneId = TextUtils.uuid();
@@ -375,17 +428,35 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
             }
         }
 
+        /**
+         * getSceneId
+         *
+         * @return
+         */
         @Override
         public String getSceneId() {
             return sceneId;
         }
 
 
+        /**
+         * asyncAckElementChanged
+         *
+         * @param nodeId
+         * @param forceSave
+         * @param withPlugins
+         */
         @Override
         public void asyncAckElementChanged(String nodeId, boolean forceSave, boolean withPlugins) {
             // do nothing
         }
 
+        /**
+         * asyncAckSceneChanged
+         *
+         * @param forceSave
+         * @param withPlugins
+         */
         @Override
         public void asyncAckSceneChanged(boolean forceSave, boolean withPlugins) {
             // do nothing

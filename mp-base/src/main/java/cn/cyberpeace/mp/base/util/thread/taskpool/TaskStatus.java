@@ -7,5 +7,8 @@ public class TaskStatus {
     public static final Integer ERROR = 3;
     public static final Integer INTERRUPTED = 4;
 
+    /**
+     * TaskStatus
+     */
     private TaskStatus() {}
 }

@@ -23,6 +23,12 @@ public class ResetPwdLocalCallService {
     @Autowired
     private UserService userService;
 
+    /**
+     * resetPwd
+     *
+     * @param username
+     * @param password
+     */
     @LocalCallFunc
     public void resetPwd(String username, String password) {
         log.info("local-call resetPwd");

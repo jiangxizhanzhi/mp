@@ -23,12 +23,23 @@ import java.util.List;
 public class SysActivCtlServiceImpl extends BaseModelServiceImpl<SysActivCtlModel, SysActivCtlMapper, SysActivCtlFields, QueryParams>
         implements SysActivCtlService {
 
+    /**
+     * SysActivCtlServiceImpl
+     *
+     * @param modelMapper
+     * @param modelFields
+     */
     @Autowired
     public SysActivCtlServiceImpl(SysActivCtlMapper modelMapper, SysActivCtlFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
     }
 
+    /**
+     * selectUnused
+     *
+     * @return
+     */
     @Override
     public SysActivCtlModel selectUnused() {
         HumanCondition humanCondition = new HumanCondition()
@@ -36,6 +47,11 @@ public class SysActivCtlServiceImpl extends BaseModelServiceImpl<SysActivCtlMode
         return getModelMapper().first(humanCondition);
     }
 
+    /**
+     * selectValid
+     *
+     * @return
+     */
     @Override
     public SysActivCtlModel selectValid() {
         HumanCondition humanCondition = new HumanCondition()
@@ -43,6 +59,11 @@ public class SysActivCtlServiceImpl extends BaseModelServiceImpl<SysActivCtlMode
         return getModelMapper().first(humanCondition);
     }
 
+    /**
+     * invalidOtherExceptOne
+     *
+     * @param exceptedId
+     */
     @Override
     public void invalidOtherExceptOne(String exceptedId) {
         HumanCondition humanCondition = new HumanCondition()
@@ -52,6 +73,11 @@ public class SysActivCtlServiceImpl extends BaseModelServiceImpl<SysActivCtlMode
         getModelMapper().filterUpdate(model, humanCondition);
     }
 
+    /**
+     * selectAll
+     *
+     * @return
+     */
     private List<SysActivCtlModel> selectAll() {
         List<SysActivCtlModel> list = getModelMapper().list(new HumanCondition());
         return list;

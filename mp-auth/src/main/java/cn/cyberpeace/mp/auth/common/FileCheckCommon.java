@@ -22,6 +22,13 @@ import java.util.Objects;
  */
 public class FileCheckCommon {
 
+    /**
+     * checkFile
+     *
+     * @param file
+     * @param fileCheckRequest
+     * @return
+     */
     public static ServiceResult<Boolean> checkFile(MultipartFile file, FileCheckRequest fileCheckRequest) {
         boolean match = true;
         if (Objects.nonNull(fileCheckRequest.getMaxSize())) {
@@ -57,10 +64,24 @@ public class FileCheckCommon {
         return new ServiceResult<>(true);
     }
 
+    /**
+     * checkSize
+     *
+     * @param file
+     * @param maxSize
+     * @return boolean
+     */
     public static boolean checkSize(MultipartFile file, long maxSize) {
         return file.getSize() <= maxSize;
     }
 
+    /**
+     * checkSuffix
+     *
+     * @param fileName
+     * @param suffixList
+     * @return boolean
+     */
     public static boolean checkSuffix(String fileName, List<String> suffixList) {
         String suffix = FileUtils.getSuffix(fileName);
         for (String x : suffixList) {
@@ -71,10 +92,24 @@ public class FileCheckCommon {
         return false;
     }
 
+    /**
+     * checkSuffix
+     *
+     * @param file
+     * @param suffixList
+     * @return boolean
+     */
     public static boolean checkSuffix(MultipartFile file, List<String> suffixList) {
         return checkSuffix(file.getOriginalFilename(), suffixList);
     }
 
+    /**
+     * checkMagicHeader
+     *
+     * @param inputStream
+     * @param magicHeaderList
+     * @return boolean
+     */
     public static boolean checkMagicHeader(InputStream inputStream, List<String> magicHeaderList) {
         String type = FileUtils.getType(inputStream);
         if (StringUtils.isBlank(type)) {
@@ -89,6 +124,13 @@ public class FileCheckCommon {
         return false;
     }
 
+    /**
+     * checkMagicHeader
+     *
+     * @param file
+     * @param magicHeaderList
+     * @return boolean
+     */
     public static boolean checkMagicHeader(MultipartFile file, List<String> magicHeaderList) {
         InputStream inputStream = null;
         try {
@@ -99,6 +141,9 @@ public class FileCheckCommon {
         return checkMagicHeader(inputStream, magicHeaderList);
     }
 
+    /**
+     * FileCheckCommon
+     */
     private FileCheckCommon() {
     }
 }

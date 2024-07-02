@@ -7,8 +7,18 @@ import java.util.Map;
 
 public class CastUtils {
 
+    /**
+     * CastUtils
+     */
     private CastUtils() {}
 
+    /**
+     * castList
+     *
+     * @param obj
+     * @param clazz
+     * @return
+     */
     public static <T> List<T> castList(Object obj, Class<T> clazz) {
         List<T> result = new ArrayList<>();
         if (obj instanceof List<?>) {
@@ -20,6 +30,14 @@ public class CastUtils {
         return result;
     }
 
+    /**
+     * castMap
+     *
+     * @param obj
+     * @param kClass
+     * @param vClass
+     * @return
+     */
     public static <K, V> Map<K, V> castMap(Object obj, Class<K> kClass, Class<V> vClass) {
         Map<K, V> result = new HashMap<>();
         if (obj instanceof Map<?, ?>) {

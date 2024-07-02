@@ -12,44 +12,110 @@ public class TaskCommon {
 
     public static TaskCommonPool taskCommonPool;
 
+    /**
+     * TaskCommon
+     *
+     * @param taskCommonPool
+     */
     private TaskCommon(TaskCommonPool taskCommonPool) {
         TaskCommon.taskCommonPool = taskCommonPool;
     }
 
+    /**
+     * executeTask
+     *
+     * @param task
+     */
     public static void executeTask(Runnable task) {
         taskCommonPool.executeTask(task);
     }
 
+    /**
+     * runTasks
+     *
+     * @param tasks
+     * @return
+     */
     public static List<DefaultPoolTask> runTasks(List<Runnable> tasks) {
         return taskCommonPool.runTasks(tasks);
     }
 
+    /**
+     * runTasks
+     *
+     * @param tasks
+     * @param independent
+     * @param format
+     * @return
+     */
     public static List<DefaultPoolTask> runTasks(List<Runnable> tasks, boolean independent, boolean format) {
         return taskCommonPool.runTasks(tasks, independent, format);
     }
 
+    /**
+     * runPoolTasks
+     *
+     * @param poolTasks
+     * @return
+     */
     public static <C, T extends PoolTask<C>> List<T> runPoolTasks(List<T> poolTasks) {
         return taskCommonPool.runPoolTasks(poolTasks);
     }
 
+    /**
+     * runPoolTasks
+     *
+     * @param poolTasks
+     * @param independent
+     * @param format
+     * @return
+     */
     public static <C, T extends PoolTask<C>> List<T> runPoolTasks(List<T> poolTasks, boolean independent,
                                                                   boolean format) {
         return taskCommonPool.runPoolTasks(poolTasks, independent, format);
     }
 
+    /**
+     * callTasks
+     *
+     * @param tasks
+     * @return
+     */
     public static <R> List<DefaultResultPoolTask<R>> callTasks(List<Callable<R>> tasks) {
         return taskCommonPool.callTasks(tasks);
     }
 
+    /**
+     * callTasks
+     *
+     * @param tasks
+     * @param independent
+     * @param format
+     * @return
+     */
     public static <R> List<DefaultResultPoolTask<R>> callTasks(List<Callable<R>> tasks, boolean independent,
                                                                boolean format) {
         return taskCommonPool.callTasks(tasks, independent, format);
     }
 
+    /**
+     * callPoolTasks
+     *
+     * @param poolTasks
+     * @return
+     */
     public static <C, R, T extends ResultPoolTask<C, R>> List<T> callPoolTasks(List<T> poolTasks) {
         return taskCommonPool.callPoolTasks(poolTasks);
     }
 
+    /**
+     * callPoolTasks
+     *
+     * @param poolTasks
+     * @param independent
+     * @param format
+     * @return
+     */
     public static <C, R, T extends ResultPoolTask<C, R>> List<T> callPoolTasks(List<T> poolTasks, boolean independent,
                                                                                boolean format) {
         return taskCommonPool.callPoolTasks(poolTasks, independent, format);
@@ -57,6 +123,11 @@ public class TaskCommon {
 
     @Component
     public static class TaskCommonPool extends TaskPool {
+        /**
+         * TaskCommonPool
+         *
+         * @param baseAppConfig
+         */
         public TaskCommonPool(BaseAppConfig baseAppConfig) {
             super(baseAppConfig.getTaskPoolSize(), baseAppConfig.getTaskHoldSize(), 60L);
         }

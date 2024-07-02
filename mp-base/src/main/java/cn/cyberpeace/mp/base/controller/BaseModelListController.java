@@ -16,6 +16,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 public interface BaseModelListController<M extends BaseModel, Q extends QueryParams, S extends BaseModelService<M, Q>>
         extends BaseModelListControllerBase {
 
+    /**
+     * getModelService
+     *
+     * @return
+     */
     S getModelService();
 
     /**

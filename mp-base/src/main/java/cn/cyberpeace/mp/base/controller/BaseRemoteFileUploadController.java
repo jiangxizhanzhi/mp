@@ -19,6 +19,11 @@ import java.io.IOException;
 @Deprecated
 public interface BaseRemoteFileUploadController<S extends BaseRemoteFileService> {
 
+    /**
+     * getRemoteFileService
+     *
+     * @return
+     */
     S getRemoteFileService();
 
     /**

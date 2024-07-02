@@ -24,6 +24,11 @@ import java.util.List;
 public class SysNoticeRoleServiceImpl extends BaseModelServiceImpl<SysNoticeRoleModel, SysNoticeRoleMapper, SysNoticeRoleFields, QueryParams>
     implements SysNoticeRoleService {
 
+    /**
+     * SysNoticeRoleServiceImpl
+     *
+     * @param sysNoticeRoleMapper
+     */
     @Autowired
     public SysNoticeRoleServiceImpl(SysNoticeRoleMapper sysNoticeRoleMapper) {
         setModelMapper(sysNoticeRoleMapper);
@@ -31,6 +36,13 @@ public class SysNoticeRoleServiceImpl extends BaseModelServiceImpl<SysNoticeRole
 
     @Autowired
     private RoleMapper roleMapper;
+
+    /**
+     * listByNoticeIds
+     *
+     * @param noticeIds
+     * @return
+     */
     @Override
     public List<RoleModel> listByNoticeIds(List<String> noticeIds) {
         HumanCondition humanCondition = new HumanCondition();
@@ -45,6 +57,12 @@ public class SysNoticeRoleServiceImpl extends BaseModelServiceImpl<SysNoticeRole
         return models;
     }
 
+    /**
+     * deleteByNoticeIds
+     *
+     * @param noticeIds
+     * @return int
+     */
     @Override
     public int deleteByNoticeIds(List<String> noticeIds) {
         HumanCondition condition = new HumanCondition();
@@ -55,6 +73,12 @@ public class SysNoticeRoleServiceImpl extends BaseModelServiceImpl<SysNoticeRole
         return rows;
     }
 
+    /**
+     * deleteByRole
+     *
+     * @param roleId
+     * @return int
+     */
     @Override
     public int deleteByRole(String roleId) {
         HumanCondition condition = new HumanCondition()

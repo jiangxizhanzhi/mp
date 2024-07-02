@@ -7,6 +7,13 @@ public class Validator {
     public final static Pattern IPV4 = Pattern.compile("\\b((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\.((?!\\d\\d\\d)\\d+|1\\d\\d|2[0-4]\\d|25[0-5])\\b");
 
 
+    /**
+     * isMatchRegex
+     *
+     * @param pattern
+     * @param input
+     * @return boolean
+     */
     public static boolean isMatchRegex(Pattern pattern, CharSequence input) {
         if (input == null || pattern == null) {
             // 提供null的字符串为不匹配
@@ -16,6 +23,12 @@ public class Validator {
     }
 
 
+    /**
+     * isIpv4
+     *
+     * @param input
+     * @return boolean
+     */
     public static boolean isIpv4(CharSequence input) {
         return IPV4.matcher(input).matches();
     }

@@ -23,11 +23,23 @@ import java.io.PrintWriter;
 public class HttpAuthenticationEntryPoint implements AuthenticationEntryPoint {
     private final ObjectMapper mapper;
 
+    /**
+     * HttpAuthenticationEntryPoint
+     *
+     * @param messageConverter
+     */
     @Autowired
     public HttpAuthenticationEntryPoint(MappingJackson2HttpMessageConverter messageConverter) {
         this.mapper = messageConverter.getObjectMapper();
     }
 
+    /**
+     * commence
+     *
+     * @param request
+     * @param response
+     * @param authException
+     */
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException {

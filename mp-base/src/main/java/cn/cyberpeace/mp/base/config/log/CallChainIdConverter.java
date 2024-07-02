@@ -5,6 +5,12 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
 
 public class CallChainIdConverter extends ClassicConverter {
+    /**
+     * convert
+     *
+     * @param event
+     * @return
+     */
     @Override
     public String convert(ILoggingEvent event) {
         return SysContextHolder.getCallChainId();

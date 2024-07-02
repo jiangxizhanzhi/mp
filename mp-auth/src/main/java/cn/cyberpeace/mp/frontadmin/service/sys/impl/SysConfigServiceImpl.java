@@ -44,6 +44,12 @@ import java.util.Objects;
 public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, SysConfigMapper, SysConfigFields, QueryParams>
         implements SysConfigService {
 
+    /**
+     * SysConfigServiceImpl
+     *
+     * @param modelMapper
+     * @param modelFields
+     */
     @Autowired
     public SysConfigServiceImpl(SysConfigMapper modelMapper, SysConfigFields modelFields) {
         setModelMapper(modelMapper);
@@ -57,6 +63,13 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
     private ConfigEventPublisher configEventPublisher;
 
 
+    /**
+     * create
+     *
+     * @param obj
+     * @param fields
+     * @return
+     */
     @Override
     public ObjServiceResult<SysConfigModel> create(SysConfigModel obj, String[] fields) {
         SysConfigModel config = getByKeyName(obj.getKeyName());
@@ -67,6 +80,12 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         return create(obj);
     }
 
+    /**
+     * bulkCreate
+     *
+     * @param objs
+     * @return
+     */
     @Override
     @Transactional
     public ServiceResult<Integer> bulkCreate(List<SysConfigModel> objs) {
@@ -76,11 +95,22 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         return new ServiceResult<>(objs.size());
     }
 
+    /**
+     * listAll
+     *
+     * @return
+     */
     @Override
     public List<SysConfigModel> listAll() {
         return getModelMapper().list(new HumanCondition());
     }
 
+    /**
+     * getByKeyName
+     *
+     * @param keyName
+     * @return
+     */
     @Override
     public SysConfigModel getByKeyName(String keyName) {
         ParamCheck.notEmpty(keyName, AdminBasei18nCode.SYS_CONFIG_KEY_NAME);
@@ -96,6 +126,12 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         return model;
     }
 
+    /**
+     * updateByKeyName
+     *
+     * @param sysConfigModel
+     * @return boolean
+     */
     @Override
     public boolean updateByKeyName(SysConfigModel sysConfigModel) {
         ParamCheck.notEmpty(sysConfigModel.getKeyName(), AdminBasei18nCode.SYS_CONFIG_KEY_NAME);
@@ -116,6 +152,12 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         return true;
     }
 
+    /**
+     * batchUpdateByKeyname
+     *
+     * @param configs
+     * @return boolean
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean batchUpdateByKeyname(List<SysConfigModel> configs) {
@@ -132,6 +174,13 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
     }
 
 
+    /**
+     * update
+     *
+     * @param obj
+     * @param fields
+     * @return
+     */
     @Override
     public ObjServiceResult<SysConfigModel> update(SysConfigModel obj, String[] fields) {
         ParamCheck.notBlank(obj.getId(), AdminBasei18nCode.SYS_CONFIG_ID);
@@ -154,6 +203,11 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         return super.update(obj, fields);
     }
 
+    /**
+     * isNewUserNeedAudit
+     *
+     * @return boolean
+     */
     @Override
     public boolean isNewUserNeedAudit() {
         SysConfigModel config = getByKeyName(SysConfigConstant.USER_AUDIT_KEY);
@@ -164,6 +218,11 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         return false;
     }
 
+    /**
+     * publishConfigUpdateEvent
+     *
+     * @param configs
+     */
     @Override
     public void publishConfigUpdateEvent(List<SysConfigModel> configs) {
         if (CollectionUtils.isNotEmpty(configs)) {
@@ -173,6 +232,12 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         }
     }
 
+    /**
+     * configs2Map
+     *
+     * @param configs
+     * @return
+     */
     private Map<String, String> configs2Map(List<SysConfigModel> configs) {
         Map<String, String> configMap = new HashMap();
         for (SysConfigModel model : configs) {

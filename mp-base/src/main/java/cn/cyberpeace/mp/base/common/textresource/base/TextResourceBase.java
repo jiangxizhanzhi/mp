@@ -16,6 +16,12 @@ public class TextResourceBase {
 
     private static final Map<Class<?>, Map<String, TextResourceColumn>> beanClassFieldColumnAnnotationMapCache = new ConcurrentHashMap<>();
 
+    /**
+     * getFieldColumnAnnotationMap
+     *
+     * @param clazz
+     * @return
+     */
     public static Map<String, TextResourceColumn> getFieldColumnAnnotationMap(Class<?> clazz) {
         Map<String, TextResourceColumn> fieldColumnAnnotationMap = beanClassFieldColumnAnnotationMapCache.getOrDefault(clazz, null);
         if (fieldColumnAnnotationMap != null) {
@@ -40,6 +46,12 @@ public class TextResourceBase {
         return fieldColumnAnnotationMap;
     }
 
+    /**
+     * getHeaderFieldMap
+     *
+     * @param clazz
+     * @return
+     */
     public static Map<String, String> getHeaderFieldMap(Class<?> clazz) {
         Map<String, TextResourceColumn> fieldColumnAnnotationMap = getFieldColumnAnnotationMap(clazz);
         Map<String, String> headerFieldMap = new HashMap<>();
@@ -53,6 +65,12 @@ public class TextResourceBase {
         return headerFieldMap;
     }
 
+    /**
+     * getFieldHeaderMap
+     *
+     * @param clazz
+     * @return
+     */
     public static Map<String, String> getFieldHeaderMap(Class<?> clazz) {
         Map<String, TextResourceColumn> fieldColumnAnnotationMap = getFieldColumnAnnotationMap(clazz);
         Map<String, String> fieldHeaderMap = new HashMap<>();
@@ -67,6 +85,12 @@ public class TextResourceBase {
         return fieldHeaderMap;
     }
 
+    /**
+     * getFieldConverterMap
+     *
+     * @param clazz
+     * @return
+     */
     public static Map<String, Class<? extends TextResourceConverter>> getFieldConverterMap(Class<?> clazz) {
         Map<String, TextResourceColumn> fieldColumnAnnotationMap = getFieldColumnAnnotationMap(clazz);
         Map<String, Class<? extends TextResourceConverter>> fieldConverterMap = new HashMap<>();
@@ -79,6 +103,12 @@ public class TextResourceBase {
         return fieldConverterMap;
     }
 
+    /**
+     * getLinkedFields
+     *
+     * @param clazz
+     * @return
+     */
     public static List<String> getLinkedFields(Class<?> clazz) {
         Map<String, TextResourceColumn> fieldColumnAnnotationMap = getFieldColumnAnnotationMap(clazz);
 
@@ -105,6 +135,12 @@ public class TextResourceBase {
         return list;
     }
 
+    /**
+     * getHeaderLine
+     *
+     * @param clazz
+     * @return
+     */
     public static List<String> getHeaderLine(Class<?> clazz) {
         List<String> headerLine = new ArrayList<>();
         Map<String, TextResourceColumn> fieldColumnAnnotationMap = getFieldColumnAnnotationMap(clazz);
@@ -125,6 +161,13 @@ public class TextResourceBase {
         return headerLine;
     }
 
+    /**
+     * lineToMaps
+     *
+     * @param lines
+     * @param headerFieldMap
+     * @return
+     */
     public static List<LinkedHashMap<String, String>> lineToMaps(List<List<String>> lines,
                                                                  Map<String, String> headerFieldMap) {
         if (lines == null || lines.size() <= 1) {
@@ -157,6 +200,13 @@ public class TextResourceBase {
         return maps;
     }
 
+    /**
+     * mapToLines
+     *
+     * @param maps
+     * @param fieldHeaderMap
+     * @return
+     */
     public static List<List<String>> mapToLines(List<LinkedHashMap<String, String>> maps,
                                                 Map<String, String> fieldHeaderMap) {
         if (maps == null) {
@@ -192,6 +242,13 @@ public class TextResourceBase {
         return lines;
     }
 
+    /**
+     * mapToObjs
+     *
+     * @param maps
+     * @param clazz
+     * @return
+     */
     public static <T> List<T> mapToObjs(List<LinkedHashMap<String, String>> maps, Class<T> clazz) {
         if (maps == null || maps.isEmpty()) {
             return new ArrayList<>();
@@ -213,6 +270,12 @@ public class TextResourceBase {
         return objs;
     }
 
+    /**
+     * objToMaps
+     *
+     * @param objs
+     * @return
+     */
     public static <T> List<LinkedHashMap<String, String>> objToMaps(List<T> objs) {
         if (objs == null || objs.isEmpty()) {
             return new ArrayList<>();

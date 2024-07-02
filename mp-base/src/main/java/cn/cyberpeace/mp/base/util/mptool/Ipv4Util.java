@@ -46,6 +46,12 @@ public class Ipv4Util {
         return (ip[0] << 24) + (ip[1] << 16) + (ip[2] << 8) + ip[3];
     }
 
+    /**
+     * convertToLongArray
+     *
+     * @param stringArray
+     * @return
+     */
     public static long[] convertToLongArray(String[] stringArray) {
         long[] longArray = new long[stringArray.length];
 
@@ -56,6 +62,12 @@ public class Ipv4Util {
         return longArray;
     }
 
+    /**
+     * convertToIntArray
+     *
+     * @param stringArray
+     * @return
+     */
     public static int[] convertToIntArray(String[] stringArray) {
         int[] longArray = new int[stringArray.length];
 
@@ -106,6 +118,14 @@ public class Ipv4Util {
         }
     }
 
+    /**
+     * list
+     *
+     * @param ip
+     * @param maskBit
+     * @param isAll
+     * @return
+     */
     public static List<String> list(String ip, int maskBit, boolean isAll) {
         if (maskBit == IP_MASK_MAX) {
             final List<String> list = new ArrayList<>();
@@ -169,6 +189,13 @@ public class Ipv4Util {
         return longToIpv4(getEndIpLong(ip, maskBit));
     }
 
+    /**
+     * getEndIpLong
+     *
+     * @param ip
+     * @param maskBit
+     * @return
+     */
     private static Long getEndIpLong(String ip, int maskBit) {
         return getBeginIpLong(ip, maskBit)
                 + ~ipv4ToLong(getMaskByMaskBit(maskBit));
@@ -186,6 +213,13 @@ public class Ipv4Util {
         return longToIpv4(getBeginIpLong(ip, maskBit));
     }
 
+    /**
+     * getBeginIpLong
+     *
+     * @param ip
+     * @param maskBit
+     * @return
+     */
     private static Long getBeginIpLong(String ip, int maskBit) {
         return ipv4ToLong(ip) & ipv4ToLong(getMaskByMaskBit(maskBit));
     }

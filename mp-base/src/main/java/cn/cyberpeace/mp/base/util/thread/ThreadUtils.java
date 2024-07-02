@@ -9,6 +9,12 @@ import java.util.concurrent.Callable;
 @Slf4j
 public class ThreadUtils {
 
+    /**
+     * format
+     *
+     * @param task
+     * @return
+     */
     public static Runnable format(Runnable task) {
         Map<String, Object> contextMap = TransferContext.getContextMap();
         return () -> {
@@ -19,6 +25,12 @@ public class ThreadUtils {
         };
     }
 
+    /**
+     * format
+     *
+     * @param task
+     * @return
+     */
     public static <T> Callable<T> format(Callable<T> task) {
         Map<String, Object> contextMap = TransferContext.getContextMap();
         return  () -> {

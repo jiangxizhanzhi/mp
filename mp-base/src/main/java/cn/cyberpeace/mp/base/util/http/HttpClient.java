@@ -55,6 +55,13 @@ public class HttpClient {
 
     private String contentType = DEFAULT_CONTENT_TYPE;
 
+    /**
+     * formatUrl
+     *
+     * @param url
+     * @param param
+     * @return
+     */
     private String formatUrl(String url, HttpParam param) {
         String serverUrl = StringUtils.join(server, url);
         if (param == null) {
@@ -64,6 +71,12 @@ public class HttpClient {
         return StringUtils.joinWith("?", serverUrl, param.toPathString());
     }
 
+    /**
+     * mergeHeaders
+     *
+     * @param mergingHeaders
+     * @return
+     */
     private Map<String, String> mergeHeaders(Map<String, String> mergingHeaders) {
         if (headers != null && mergingHeaders == null) {
             return null;
@@ -86,6 +99,17 @@ public class HttpClient {
         return mergedHeaders;
     }
 
+    /**
+     * genRequest
+     *
+     * @param requestClass
+     * @param url
+     * @param param
+     * @param data
+     * @param headers
+     * @param timeout
+     * @return
+     */
     private <T extends HttpRequestBase> T genRequest(Class<T> requestClass, String url, HttpParam param, HttpData data,
                                                      Map<String, String> headers, Integer timeout) {
         T request = ClassUtils.createInstance(requestClass);
@@ -137,6 +161,18 @@ public class HttpClient {
         return request;
     }
 
+    /**
+     * request
+     *
+     * @param requestClass
+     * @param url
+     * @param data
+     * @param param
+     * @param headers
+     * @param timeout
+     * @param loadResult
+     * @return
+     */
     private <T extends HttpRequestBase> HttpResult request(Class<T> requestClass, String url, HttpData data,
                                                            HttpParam param, Map<String, String> headers,
                                                            Integer timeout, boolean loadResult) {
@@ -189,37 +225,83 @@ public class HttpClient {
         private String username;
         private String password;
 
+        /**
+         * configServer
+         *
+         * @param server
+         * @return
+         */
         public HttpClientBuilder configServer(String server) {
             this.server = server;
             return this;
         }
 
+        /**
+         * configTimeout
+         *
+         * @param timeout
+         * @return
+         */
         public HttpClientBuilder configTimeout(Integer timeout) {
             this.timeout = timeout;
             return this;
         }
 
+        /**
+         * configMaxConnPerRoute
+         *
+         * @param maxConnPerRoute
+         * @return
+         */
         public HttpClientBuilder configMaxConnPerRoute(Integer maxConnPerRoute) {
             this.maxConnPerRoute = maxConnPerRoute;
             return this;
         }
 
+        /**
+         * configMaxConnTotal
+         *
+         * @param maxConnTotal
+         * @return
+         */
         public HttpClientBuilder configMaxConnTotal(Integer maxConnTotal) {
             this.maxConnTotal = maxConnTotal;
             return this;
         }
 
+        /**
+         * configBasicAuth
+         *
+         * @param username
+         * @param password
+         * @return
+         */
         public HttpClientBuilder configBasicAuth(String username, String password) {
             this.username = username;
             this.password = password;
             return this;
         }
 
+        /**
+         * build
+         *
+         * @return
+         */
         public HttpClient build() {
             return new HttpClient(server, timeout, maxConnPerRoute, maxConnTotal, username, password);
         }
     }
 
+    /**
+     * HttpClient
+     *
+     * @param server
+     * @param timeout
+     * @param maxConnPerRoute
+     * @param maxConnTotal
+     * @param username
+     * @param password
+     */
     private HttpClient(String server, Integer timeout, Integer maxConnPerRoute, Integer maxConnTotal,
                       String username, String password) {
         this.server = server;
@@ -242,34 +324,107 @@ public class HttpClient {
         }
     }
 
+    /**
+     * builder
+     *
+     * @return
+     */
     public static HttpClientBuilder builder() {
         return new HttpClientBuilder();
     }
 
+    /**
+     * get
+     *
+     * @param url
+     * @param param
+     * @param headers
+     * @param timeout
+     * @return
+     */
     public HttpResult get(String url, HttpParam param, Map<String, String> headers, Integer timeout) {
         return request(HttpGet.class, url, null, param, headers, timeout, true);
     }
 
+    /**
+     * post
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param headers
+     * @param timeout
+     * @return
+     */
     public HttpResult post(String url, HttpData data, HttpParam param, Map<String, String> headers, Integer timeout) {
         return request(HttpPost.class, url, data, param, headers, timeout, true);
     }
 
+    /**
+     * put
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param headers
+     * @param timeout
+     * @return
+     */
     public HttpResult put(String url, HttpData data, HttpParam param, Map<String, String> headers, Integer timeout) {
         return request(HttpPut.class, url, data, param, headers, timeout, true);
     }
 
+    /**
+     * patch
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param headers
+     * @param timeout
+     * @return
+     */
     public HttpResult patch(String url, HttpData data, HttpParam param, Map<String, String> headers, Integer timeout) {
         return request(HttpPatch.class, url, data, param, headers, timeout, true);
     }
 
+    /**
+     * delete
+     *
+     * @param url
+     * @param data
+     * @param param
+     * @param headers
+     * @param timeout
+     * @return
+     */
     public HttpResult delete(String url, HttpData data, HttpParam param, Map<String, String> headers, Integer timeout) {
         return request(HttpDeleteWithBody.class, url, data, param, headers, timeout, true);
     }
 
+    /**
+     * streamGet
+     *
+     * @param url
+     * @param param
+     * @param headers
+     * @param timeout
+     * @return
+     */
     public HttpResult streamGet(String url, HttpParam param, Map<String, String> headers, Integer timeout) {
         return request(HttpGet.class, url, null, param, headers, timeout, false);
     }
 
+    /**
+     * download
+     *
+     * @param os
+     * @param url
+     * @param param
+     * @param headers
+     * @param timeout
+     * @return
+     */
     public HttpResult download(OutputStream os, String url, HttpParam param, Map<String, String> headers,
                                Integer timeout) {
         HttpResult httpResult = streamGet(url, param, headers, timeout);

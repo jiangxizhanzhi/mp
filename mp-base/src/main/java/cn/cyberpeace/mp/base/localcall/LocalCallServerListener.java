@@ -64,6 +64,9 @@ public class LocalCallServerListener extends FileModifyListener {
 
     /**
      * run this method after bean initiated
+     *
+     * @param baseAppConfig
+     * @param context
      */
     public static void initStart(BaseAppConfig baseAppConfig, ApplicationContext context) {
         String messageFilepath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR,
@@ -87,6 +90,12 @@ public class LocalCallServerListener extends FileModifyListener {
         localCallServerListener.startListen();
     }
 
+    /**
+     * prepareWindowsClientScript
+     *
+     * @param targetDir
+     * @param messageFilepath
+     */
     public static void prepareWindowsClientScript(String targetDir, String messageFilepath) {
         String scriptFilePath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, targetDir, "local_call.bat");
         log.info("Local call client script file: {}", scriptFilePath);
@@ -119,6 +128,12 @@ public class LocalCallServerListener extends FileModifyListener {
         FileUtil.writeUtf8Lines(contentLines, scriptFilePath);
     }
 
+    /**
+     * prepareLinuxClientScript
+     *
+     * @param targetDir
+     * @param messageFilepath
+     */
     public static void prepareLinuxClientScript(String targetDir, String messageFilepath) {
         String scriptFilePath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, targetDir, "local_call.sh");
         log.info("Local call client script file: {}", scriptFilePath);
@@ -152,6 +167,11 @@ public class LocalCallServerListener extends FileModifyListener {
         }
     }
 
+    /**
+     * fileChanged
+     *
+     * @param filePath
+     */
     @Override
     protected void fileChanged(String filePath) {
         if (!fileChangedLock.tryLock()) {
@@ -171,6 +191,11 @@ public class LocalCallServerListener extends FileModifyListener {
         }
     }
 
+    /**
+     * runFileChanged
+     *
+     * @param filePath
+     */
     private void runFileChanged(String filePath) {
         File file = new File(filePath);
         if (file.length() == 0) {
@@ -209,6 +234,12 @@ public class LocalCallServerListener extends FileModifyListener {
         TaskCommon.runTasks(tasks, true, true);
     }
 
+    /**
+     * call
+     *
+     * @param formatMethodName
+     * @param args
+     */
     private void call(String formatMethodName, String... args) {
         List<String> methodPaths = new ArrayList<>(Arrays.asList(formatMethodName.split("::")));
         if (methodPaths.size() != 2) {

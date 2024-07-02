@@ -27,6 +27,11 @@ public class AuthSwagger2Config {
     @Autowired
     private Swagger2Config swagger2Config;
 
+    /**
+     * apiAuth
+     *
+     * @return
+     */
     @Bean
     public Docket apiAuth() {
         return new Docket(DocumentationType.SWAGGER_2)

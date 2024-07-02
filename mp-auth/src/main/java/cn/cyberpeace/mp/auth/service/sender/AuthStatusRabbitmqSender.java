@@ -18,16 +18,35 @@ public class AuthStatusRabbitmqSender extends BaseSimpleMessageSender {
     @Autowired
     private AuthConfig authConfig;
 
+    /**
+     * AuthStatusRabbitmqSender
+     *
+     * @param amqpTemplate
+     * @param messageConverter
+     */
     @Autowired
     public AuthStatusRabbitmqSender(AmqpTemplate amqpTemplate, SnakeJsonMessageConverter messageConverter) {
         super(amqpTemplate, messageConverter, new SimpleMessageConfig(AuthConstant.AUTH_EXCHANGE_NAME, null, null));
     }
 
+    /**
+     * authTopicExchange
+     *
+     * @return
+     */
     @Bean
     public TopicExchange authTopicExchange() {
         return getMessageConfig().topicExchange();
     }
 
+    /**
+     * send
+     *
+     * @param data
+     * @param type
+     * @param routingKey
+     * @param timeout
+     */
     public <T> void send(T data, String type, String routingKey, Long timeout) {
         FormatMessage<T> formatMessage = new FormatMessage<>(data, type, null);
         formatMessage.setContext(null);

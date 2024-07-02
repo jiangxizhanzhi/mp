@@ -5,6 +5,9 @@ package cn.cyberpeace.mp.base.service.param;
  */
 public interface CompatibleQueryParams {
 
+    /**
+     * ensure
+     */
     void ensure();
     
 }

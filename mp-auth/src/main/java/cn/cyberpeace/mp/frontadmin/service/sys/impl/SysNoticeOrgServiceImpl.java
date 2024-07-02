@@ -32,6 +32,12 @@ public class SysNoticeOrgServiceImpl extends BaseModelServiceImpl<SysNoticeOrgMo
     @Autowired
     private OrgMapper orgMapper;
 
+    /**
+     * listByNoticeIds
+     *
+     * @param noticeIds
+     * @return
+     */
     @Override
     public List<OrgModel> listByNoticeIds(List<String> noticeIds) {
         HumanCondition humanCondition = new HumanCondition();
@@ -46,6 +52,12 @@ public class SysNoticeOrgServiceImpl extends BaseModelServiceImpl<SysNoticeOrgMo
         return orgModels;
     }
 
+    /**
+     * deleteByNoticeIds
+     *
+     * @param noticeIds
+     * @return int
+     */
     @Override
     public int deleteByNoticeIds(List<String> noticeIds) {
         HumanCondition condition = new HumanCondition();
@@ -56,6 +68,12 @@ public class SysNoticeOrgServiceImpl extends BaseModelServiceImpl<SysNoticeOrgMo
         return rows;
     }
 
+    /**
+     * deleteByOrg
+     *
+     * @param orgId
+     * @return int
+     */
     @Override
     public int deleteByOrg(String orgId) {
         HumanCondition condition = new HumanCondition()

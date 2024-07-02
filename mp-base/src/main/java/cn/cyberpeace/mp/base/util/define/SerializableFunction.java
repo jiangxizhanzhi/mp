@@ -4,5 +4,11 @@ import java.io.Serializable;
 
 @FunctionalInterface
 public interface SerializableFunction<T> extends Serializable {
+    /**
+     * get
+     *
+     * @param source
+     * @return
+     */
     Object get(T source);
 }

@@ -23,12 +23,24 @@ public abstract class ProtocolProbe {
     private String host;
     private int port;
 
+    /**
+     * ProtocolProbe
+     *
+     * @param protocol
+     * @param host
+     * @param port
+     */
     public ProtocolProbe(String protocol, String host, int port) {
         this.protocol = protocol;
         this.host = host;
         this.port = port;
     }
 
+    /**
+     * probe
+     *
+     * @return boolean
+     */
     public boolean probe() {
         // 建立socket连接
         Socket socket = null;

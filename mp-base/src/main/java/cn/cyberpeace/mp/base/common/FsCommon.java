@@ -32,6 +32,11 @@ public class FsCommon {
 
     private static Boolean unique;
 
+    /**
+     * FsCommon
+     *
+     * @param baseAppConfig
+     */
     @Autowired
     public FsCommon(BaseAppConfig baseAppConfig) {
         FsCommon.baseAppConfig = baseAppConfig;
@@ -41,6 +46,12 @@ public class FsCommon {
         FsCommon.unique = true;
     }
 
+    /**
+     * genHttpUrl
+     *
+     * @param fileKey
+     * @return
+     */
     public static String genHttpUrl(String fileKey) {
         if (StringUtils.isEmpty(fileKey)) {
             return fileKey;
@@ -52,22 +63,54 @@ public class FsCommon {
         }
     }
 
+    /**
+     * genInnerHttpUrl
+     *
+     * @param fileKey
+     * @return
+     */
     public static String genInnerHttpUrl(String fileKey) {
         return String.format(baseAppConfig.getLfsInnerHttpUrlTemplate(), fileKey);
     }
 
+    /**
+     * uploadContent
+     *
+     * @param content
+     * @return
+     */
     public static String uploadContent(String content) {
         return uploadContent(content, null);
     }
 
+    /**
+     * uploadContent
+     *
+     * @param content
+     * @param fileSuffix
+     * @return
+     */
     public static String uploadContent(String content, String fileSuffix) {
         return uploadRawContent(content.getBytes(StandardCharsets.UTF_8), fileSuffix);
     }
 
+    /**
+     * uploadRawContent
+     *
+     * @param content
+     * @param fileSuffix
+     * @return
+     */
     public static String uploadRawContent(byte[] content, String fileSuffix) {
         return upload(new ByteArrayInputStream(content), fileSuffix);
     }
 
+    /**
+     * upload
+     *
+     * @param localFilepath
+     * @return
+     */
     public static String upload(String localFilepath) {
         String fileSuffix = FileUtil.getSuffix(localFilepath);
         try (InputStream is = new FileInputStream(localFilepath)) {
@@ -80,10 +123,23 @@ public class FsCommon {
         }
     }
 
+    /**
+     * upload
+     *
+     * @param is
+     * @return
+     */
     public static String upload(InputStream is) {
         return upload(is, null);
     }
 
+    /**
+     * upload
+     *
+     * @param is
+     * @param fileSuffix
+     * @return
+     */
     public static String upload(InputStream is, String fileSuffix) {
         long filesize;
         try {
@@ -96,6 +152,14 @@ public class FsCommon {
         return upload(is, filesize, fileSuffix);
     }
 
+    /**
+     * upload
+     *
+     * @param is
+     * @param filesize
+     * @param fileSuffix
+     * @return
+     */
     public static String upload(InputStream is, long filesize, String fileSuffix) {
         log.info("filesize:{}, fileSuffix:{}", filesize, fileSuffix);
         String tmpFileKey = genFileKey(null, fileSuffix, false);
@@ -141,6 +205,12 @@ public class FsCommon {
         return fileKey;
     }
 
+    /**
+     * download
+     *
+     * @param fileKey
+     * @param os
+     */
     public static void download(String fileKey, OutputStream os) {
         validateFileKey(fileKey);
 
@@ -159,6 +229,13 @@ public class FsCommon {
         }
     }
 
+    /**
+     * download
+     *
+     * @param fileKey
+     * @param localFilepath
+     * @return boolean
+     */
     public static boolean download(String fileKey, String localFilepath) {
         try (OutputStream os = new FileOutputStream(localFilepath)) {
             download(fileKey, os);
@@ -171,10 +248,23 @@ public class FsCommon {
         return true;
     }
 
+    /**
+     * downloadTmp
+     *
+     * @param fileKey
+     * @return
+     */
     public static String downloadTmp(String fileKey) {
         return downloadTmp(fileKey, null);
     }
 
+    /**
+     * downloadTmp
+     *
+     * @param fileKey
+     * @param filename
+     * @return
+     */
     public static String downloadTmp(String fileKey, String filename) {
         String baseTmpDir = FileUtil.getTmpDirPath();
         String tmpFileDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, baseTmpDir, TMP_DIR_NAME);
@@ -189,11 +279,23 @@ public class FsCommon {
         return tmpFilepath;
     }
 
+    /**
+     * downloadContent
+     *
+     * @param fileKey
+     * @return
+     */
     public static String downloadContent(String fileKey) {
         byte[] byteContent = downloadRawContent(fileKey);
         return new String(byteContent, StandardCharsets.UTF_8);
     }
 
+    /**
+     * downloadRawContent
+     *
+     * @param fileKey
+     * @return
+     */
     public static byte[] downloadRawContent(String fileKey) {
         byte[] byteContent;
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
@@ -207,6 +309,12 @@ public class FsCommon {
         return byteContent;
     }
 
+    /**
+     * delete
+     *
+     * @param fileKey
+     * @return boolean
+     */
     public static boolean delete(String fileKey) {
         validateFileKey(fileKey);
 
@@ -217,11 +325,23 @@ public class FsCommon {
         return true;
     }
 
+    /**
+     * isFileServerOuterUrl
+     *
+     * @param path
+     * @return boolean
+     */
     public static boolean isFileServerOuterUrl(String path) {
         String prefix = String.format(BaseSingleton.baseAppConfig.getLfsOuterHttpUrlTemplate(), StringUtils.EMPTY);
         return StringUtils.startsWith(path, prefix);
     }
 
+    /**
+     * getFileKey
+     *
+     * @param path
+     * @return
+     */
     public static String getFileKey(String path) {
         if (StringUtils.isEmpty(path)) {
             return path;
@@ -230,14 +350,33 @@ public class FsCommon {
         return StringUtils.replaceOnce(path, prefix, StringUtils.EMPTY);
     }
 
+    /**
+     * getGroupDir
+     *
+     * @return
+     */
     public static String getGroupDir() {
         return FsCommon.groupDir;
     }
 
+    /**
+     * getTargetFilePath
+     *
+     * @param fileKey
+     * @return
+     */
     private static String getTargetFilePath(String fileKey) {
         return StringUtils.joinWith(FileUtil.FILE_SEPARATOR, groupDir, fileKey);
     }
 
+    /**
+     * genFileKey
+     *
+     * @param filename
+     * @param fileSuffix
+     * @param groupByFilename
+     * @return
+     */
     private static String genFileKey(String filename, String fileSuffix, boolean groupByFilename) {
         if (StringUtils.isEmpty(filename)) {
             filename = TextUtils.uuid();
@@ -251,6 +390,12 @@ public class FsCommon {
         return filename;
     }
 
+    /**
+     * genFilenameGroup
+     *
+     * @param filename
+     * @return
+     */
     private static String genFilenameGroup(String filename) {
         int[] fileGroupLengthPattern = new int[]{3, 3};
         int filenameLength = filename.length();
@@ -270,12 +415,24 @@ public class FsCommon {
         return StringUtils.joinWith(FileUtil.FILE_SEPARATOR, (Object[]) fileGroups);
     }
 
+    /**
+     * genGroupDir
+     *
+     * @param storeDir
+     * @param group
+     * @return
+     */
     private static String genGroupDir(String storeDir, String group) {
         String groupDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, storeDir, group);
         FileUtil.mkdir(groupDir);
         return groupDir;
     }
 
+    /**
+     * validateFileKey
+     *
+     * @param fileKey
+     */
     private static void validateFileKey(String fileKey) {
         if (!Validator.isMatchRegex(FILE_KEY_PATTERN, fileKey)) {
             throw new MpRuntimeException(String.format("Invalid local file key %s", fileKey));

@@ -42,6 +42,13 @@ public class LoadAuthoritiesFilter extends OncePerRequestFilter {
     @Autowired
     private ClientDetailsService clientDetailsService;
 
+    /**
+     * doFilterInternal
+     *
+     * @param request
+     * @param response
+     * @param filterChain
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 

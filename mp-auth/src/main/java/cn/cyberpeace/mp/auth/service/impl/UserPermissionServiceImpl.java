@@ -66,12 +66,24 @@ public class UserPermissionServiceImpl
     @Autowired
     private OrgPermissionService orgPermissionService;
 
+    /**
+     * UserPermissionServiceImpl
+     *
+     * @param modelMapper
+     * @param modelFields
+     */
     @Autowired
     public UserPermissionServiceImpl(UserPermissionMapper modelMapper, UserPermissionFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
     }
 
+    /**
+     * listTargetsByUserId
+     *
+     * @param userId
+     * @return
+     */
     @Override
     @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL, value = CACHE_VAL_USER_TARGETS)
     public List<TargetModel> listTargetsByUserId(String userId) {
@@ -121,6 +133,12 @@ public class UserPermissionServiceImpl
         return targetModelList;
     }
 
+    /**
+     * listMenusByUserId
+     *
+     * @param userId
+     * @return
+     */
     @Override
     @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL, value = CACHE_VAL_USER_TARGETS)
     public List<TargetModel> listMenusByUserId(String userId) {
@@ -139,6 +157,12 @@ public class UserPermissionServiceImpl
     }
 
 
+    /**
+     * getTreeByUserId
+     *
+     * @param userId
+     * @return
+     */
     public List<TargetBo> getTreeByUserId(String userId) {
         List<TargetModel> targets = listTargetsByUserId(userId);
         if (CollectionUtils.isEmpty(targets)) {
@@ -148,6 +172,14 @@ public class UserPermissionServiceImpl
         return tree;
     }
 
+    /**
+     * bindUserTargets
+     *
+     * @param userId
+     * @param targetIds
+     * @param cleanOldTargets
+     * @return boolean
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean bindUserTargets(String userId, List<String> targetIds, boolean cleanOldTargets) {
@@ -183,6 +215,12 @@ public class UserPermissionServiceImpl
     }
 
 
+    /**
+     * toTree
+     *
+     * @param targets
+     * @return
+     */
     public List<TargetBo> toTree(List<TargetModel> targets) {
         ParamCheck.notEmpty(targets, AuthBasei18nCode.TARGET_LIST);
         Map<String, TargetBo> mapTmp = new HashMap<>();
@@ -226,8 +264,12 @@ public class UserPermissionServiceImpl
     }
 
 
-
-
+    /**
+     * hasAdminRole
+     *
+     * @param roles
+     * @return boolean
+     */
     public boolean hasAdminRole(List<RoleModel> roles) {
         for (RoleModel r : roles) {
             if (Objects.equals(r.getId(), AuthConstant.ROLE_ADMIN_ID)) {
@@ -238,6 +280,12 @@ public class UserPermissionServiceImpl
     }
 
 
+    /**
+     * deleteByUserId
+     *
+     * @param userId
+     * @return boolean
+     */
     public boolean  deleteByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         HumanCondition humanCondition = new HumanCondition()
@@ -246,6 +294,12 @@ public class UserPermissionServiceImpl
         return true;
     }
 
+    /**
+     * deleteByTargetId
+     *
+     * @param targetId
+     * @return boolean
+     */
     public boolean deleteByTargetId(String targetId) {
         ParamCheck.notBlank(targetId, AuthBasei18nCode.TARGET_ID);
         HumanCondition humanCondition = new HumanCondition()
@@ -254,6 +308,11 @@ public class UserPermissionServiceImpl
         return true;
     }
 
+    /**
+     * listMenusByLoginUser
+     *
+     * @return
+     */
     @Override
     public List<TargetModel> listMenusByLoginUser() {
         UserModel user = UserUtils.getLoginUser();
@@ -265,6 +324,11 @@ public class UserPermissionServiceImpl
     }
 
 
+    /**
+     * listMenuIdentsByLoginUser
+     *
+     * @return
+     */
     @Override
     public List<String> listMenuIdentsByLoginUser() {
         List<TargetModel> menus = listMenusByLoginUser();
@@ -276,6 +340,12 @@ public class UserPermissionServiceImpl
         return menuIdents;
     }
 
+    /**
+     * getUsersByTargetId
+     *
+     * @param targetId
+     * @return
+     */
     public List<UserModel> getUsersByTargetId(String targetId) {
         HumanCondition permissionCondition = new HumanCondition()
                 .filterEqual(UserPermissionModel::getTarget, targetId)

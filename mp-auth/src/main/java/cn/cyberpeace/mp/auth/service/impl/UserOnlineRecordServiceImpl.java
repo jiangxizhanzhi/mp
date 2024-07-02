@@ -64,7 +64,12 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     private static final int DEFAULT_MINUTES = 5;
 
 
-
+    /**
+     * UserOnlineRecordServiceImpl
+     *
+     * @param modelMapper
+     * @param modelFields
+     */
     @Autowired
     public UserOnlineRecordServiceImpl(UserOnlineRecordMapper modelMapper, UserOnlineRecordFields modelFields) {
         setModelMapper(modelMapper);
@@ -72,6 +77,12 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     }
 
 
+    /**
+     * recordSummaryPage
+     *
+     * @param req
+     * @return
+     */
     @Override
     public PageInfo<UserOnlineReportBo> recordSummaryPage(UserOnlineRecordSummaryPageRequest req) {
 
@@ -176,6 +187,12 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         return pageInfo;
     }
 
+    /**
+     * listCurrentOnlined
+     *
+     * @param userIds
+     * @return
+     */
     @Override
     public List<UserOnlineRecordModel> listCurrentOnlined(List<String> userIds) {
         LocalDateTime fromTime = LocalDateTime.now().minusMinutes(DEFAULT_MINUTES);
@@ -189,6 +206,12 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         return onlineList;
     }
 
+    /**
+     * listCurrentOfflined
+     *
+     * @param userIds
+     * @return
+     */
     @Override
     public List<UserOnlineRecordModel> listCurrentOfflined(List<String> userIds) {
         // 默认超过5分钟没有更新end_time既判定为离线
@@ -223,12 +246,24 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     }*/
 
 
+    /**
+     * getOnlinedUserCntByPeriod
+     *
+     * @param startTime
+     * @param endTime
+     * @return
+     */
     @Override
     public Integer getOnlinedUserCntByPeriod(LocalDateTime startTime, LocalDateTime endTime) {
         Integer cnt = findOnlineUserCntByPeriod(startTime, endTime);
         return cnt;
     }
 
+    /**
+     * onlineUserCnt
+     *
+     * @return
+     */
     @Override
     @Cacheable(value = CACHE_KEY_USER_OL_CNT)
     public UserOnlineCntBo onlineUserCnt() {
@@ -246,6 +281,13 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         return userOnlineCntBo;
     }
 
+    /**
+     * findOnlineUserCntByPeriod
+     *
+     * @param startTime
+     * @param endTime
+     * @return
+     */
     private Integer findOnlineUserCntByPeriod(LocalDateTime startTime, LocalDateTime endTime) {
         HumanCondition notOnlineCondition = new HumanCondition()
                 .filterOrStart()

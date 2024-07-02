@@ -39,6 +39,13 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
 
     private Cache<String, Integer> loginFailureCache;
 
+    /**
+     * attemptAuthentication
+     *
+     * @param request
+     * @param response
+     * @return
+     */
     @SneakyThrows
     @Override
     @SuppressWarnings("unchecked")
@@ -64,6 +71,14 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
         }
     }
 
+    /**
+     * checkVerifyCode
+     *
+     * @param verifyCode
+     * @param username
+     * @param response
+     * @return boolean
+     */
     private boolean checkVerifyCode(String verifyCode, String username, HttpServletResponse response) throws IOException {
         String needVerifyCode = AuthConstant.LOGIN_NEED_VERIFY_CODE + ":" + username;
         Integer flag = loginFailureCache.getIfPresent(needVerifyCode);
@@ -80,6 +95,14 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
     }
 
 
+    /**
+     * processAuthRequest
+     *
+     * @param loginData
+     * @param request
+     * @param response
+     * @return
+     */
     private UsernamePasswordAuthenticationToken processAuthRequest(Map<String, String> loginData, HttpServletRequest request, HttpServletResponse response) throws IOException {
         String username = loginData.getOrDefault(getUsernameParameter(), StringUtils.EMPTY);
         String decryptedPwd = loginData.getOrDefault(getPasswordParameter(), StringUtils.EMPTY);

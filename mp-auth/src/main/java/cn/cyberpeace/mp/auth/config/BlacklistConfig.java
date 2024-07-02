@@ -29,6 +29,11 @@ public class BlacklistConfig implements ApplicationRunner {
     @Resource
     private BlacklistModel blacklistModel;
 
+    /**
+     * run
+     *
+     * @param args
+     */
     @Override
     public void run(ApplicationArguments args) throws Exception {
         String dataPath = appConfig.getResourcesDir() + File.separator + "auth" + File.separator + "blacklist.txt";

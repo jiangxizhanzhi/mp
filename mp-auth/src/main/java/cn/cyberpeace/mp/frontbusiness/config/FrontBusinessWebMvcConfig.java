@@ -24,6 +24,11 @@ public class FrontBusinessWebMvcConfig implements WebMvcConfigurer {
     private UserPermissionService userPermissionService;
 
 
+    /**
+     * addInterceptors
+     *
+     * @param registry
+     */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new UrlAcInterceptor(frontBusinessConfig, operateUserPermissionService, userPermissionService));

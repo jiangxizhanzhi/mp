@@ -15,6 +15,12 @@ public abstract class BaseMessageReceiver {
 
     private MessageConverter messageConverter;
 
+    /**
+     * getMessageBody
+     *
+     * @param message
+     * @return
+     */
     private String getMessageBody(Message message) {
         byte[] body = message.getBody();
         if (body == null) {
@@ -23,8 +29,20 @@ public abstract class BaseMessageReceiver {
         return new String(body, StandardCharsets.UTF_8);
     }
 
+    /**
+     * receive
+     *
+     * @param message
+     */
     public abstract void receive(Message message);
 
+    /**
+     * parseMessage
+     *
+     * @param message
+     * @param resultClass
+     * @return
+     */
     public <T> T parseMessage(Message message, Class<T> resultClass) {
         String body = getMessageBody(message);
         if (StringUtils.isEmpty(body)) {

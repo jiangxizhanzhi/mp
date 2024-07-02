@@ -13,10 +13,21 @@ import javax.servlet.ServletRequest;
  */
 public class CustomServletModelAttributeMethodProcessor extends ServletModelAttributeMethodProcessor {
 
+    /**
+     * CustomServletModelAttributeMethodProcessor
+     *
+     * @param annotationNotRequired
+     */
     public CustomServletModelAttributeMethodProcessor(boolean annotationNotRequired) {
         super(annotationNotRequired);
     }
 
+    /**
+     * bindRequestParameters
+     *
+     * @param binder
+     * @param request
+     */
     @Override
     protected void bindRequestParameters(WebDataBinder binder, NativeWebRequest request) {
         ServletRequest servletRequest = request.getNativeRequest(ServletRequest.class);

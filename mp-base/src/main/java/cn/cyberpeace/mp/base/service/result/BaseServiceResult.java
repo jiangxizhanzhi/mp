@@ -40,21 +40,44 @@ public class BaseServiceResult<T, R> {
     @JsonIgnore
     private T source;
 
+    /**
+     * BaseServiceResult
+     *
+     * @param source
+     */
     public BaseServiceResult(T source) {
         this();
         setSource(source);
     }
 
+    /**
+     * BaseServiceResult
+     *
+     * @param source
+     * @param code
+     */
     public BaseServiceResult(T source, ServiceCode code) {
         this(source);
         setServiceCode(code);
     }
 
+    /**
+     * BaseServiceResult
+     *
+     * @param source
+     * @param code
+     * @param detail
+     */
     public BaseServiceResult(T source, ServiceCode code, String detail) {
         this(source, code);
         setDetail(detail);
     }
 
+    /**
+     * judgeSuccess
+     *
+     * @return boolean
+     */
     public boolean judgeSuccess() {
         return BaseErrorCode.SUCCESS.getCode().equals(getServiceCode().getCode());
     }
@@ -66,6 +89,12 @@ public class BaseServiceResult<T, R> {
         return BaseErrorCode.SUCCESS.getCode().equals(getServiceCode().getCode());
     }
 
+    /**
+     * sourceToData
+     *
+     * @param source
+     * @return
+     */
     public R sourceToData(T source) {
         if (source == null) {
             return null;

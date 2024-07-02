@@ -9,11 +9,21 @@ public class UserEventPublisher implements ApplicationEventPublisherAware {
 
     private ApplicationEventPublisher applicationEventPublisher;
 
+    /**
+     * setApplicationEventPublisher
+     *
+     * @param applicationEventPublisher
+     */
     @Override
     public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
+    /**
+     * publishEvent
+     *
+     * @param event
+     */
     public void publishEvent(Object event) {
         applicationEventPublisher.publishEvent(event);
     }

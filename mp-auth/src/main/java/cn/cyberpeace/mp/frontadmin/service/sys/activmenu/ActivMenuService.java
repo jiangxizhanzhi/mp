@@ -122,6 +122,11 @@ public class ActivMenuService {
     }
 
 
+    /**
+     * check
+     *
+     * @param targetModels
+     */
     private void check(List<TargetModel> targetModels) {
         List<TargetModel> notEqualList = new ArrayList<>();
         for (TargetModel targetModel : targetModels) {
@@ -292,6 +297,14 @@ public class ActivMenuService {
         return target;
     }
 
+    /**
+     * activMenuDto2TemplateModel
+     *
+     * @param menuDTO
+     * @param parentId
+     * @param enNameMap
+     * @return 这个target以后就当做menu
+     */
     private MenuTemplateModel activMenuDto2TemplateModel(ActivMenuDTO menuDTO, String parentId, Map<String, String> enNameMap) {
         MenuTemplateModel menuTemplateModel = new MenuTemplateModel();
         menuTemplateModel.setTemplateId("1");
@@ -305,6 +318,13 @@ public class ActivMenuService {
         return menuTemplateModel;
     }
 
+    /**
+     * activMenuDto2MenuExtraInfo
+     *
+     * @param menuDTO
+     * @param parentId
+     * @return
+     */
     private MenuExtraInfoModel activMenuDto2MenuExtraInfo(ActivMenuDTO menuDTO, String parentId) {
         MenuExtraInfoModel menuExtraInfo = new MenuExtraInfoModel();
         menuExtraInfo.setMenu(menuDTO.getId());
@@ -329,8 +349,16 @@ public class ActivMenuService {
     }
 
 
-
-
+    /**
+     * recursion
+     *
+     * @param targets
+     * @param menuTemplateModels
+     * @param menuExtraInfos
+     * @param menu
+     * @param parentId
+     * @param enNameMap
+     */
     private void recursion(List<TargetModel> targets, List<MenuTemplateModel> menuTemplateModels, List<MenuExtraInfoModel> menuExtraInfos, ActivMenuDTO menu, String parentId, Map<String, String> enNameMap) {
         List<ActivMenuDTO> children = menu.getChildren();
         if (CollectionUtil.isNotEmpty(children)) {
@@ -348,6 +376,12 @@ public class ActivMenuService {
     }
 
 
+    /**
+     * readJsonStrFromPath
+     *
+     * @param filePath
+     * @return
+     */
     private String readJsonStrFromPath(String filePath) {
 //        filePath = "/Users/sternberg/work/saining/all_permissions_json_activ.json";
         String jsonStr = "";
@@ -369,6 +403,12 @@ public class ActivMenuService {
         }
     }
 
+    /**
+     * readJsonStrFromMultipartFile
+     *
+     * @param file
+     * @return
+     */
     private String readJsonStrFromMultipartFile(MultipartFile file) {
         String jsonStr = "";
         try (Reader reader = new InputStreamReader(file.getInputStream(), "utf-8")) {
@@ -386,6 +426,12 @@ public class ActivMenuService {
         }
     }
 
+    /**
+     * targetActivDtos2TargetModels
+     *
+     * @param activDtos
+     * @return
+     */
     private List<TargetModel> targetActivDtos2TargetModels(List<TargetActivBo> activDtos) {
         List<TargetModel> targetModels =
                 new ArrayList<>();
@@ -397,6 +443,12 @@ public class ActivMenuService {
         return targetModels;
     }
 
+    /**
+     * getTargetModel
+     *
+     * @param a
+     * @return 这个target以后就当做menu
+     */
     private static TargetModel getTargetModel(TargetActivBo a) {
         TargetModel model = new TargetModel();
         BeanUtils.copyProperties(a, model);
@@ -494,6 +546,9 @@ public class ActivMenuService {
     }
 
 
+    /**
+     * evictCache
+     */
     private void evictCache() {
         userCacheService.evictAllUserCache();
         userCacheService.evictAllTargetsCache();

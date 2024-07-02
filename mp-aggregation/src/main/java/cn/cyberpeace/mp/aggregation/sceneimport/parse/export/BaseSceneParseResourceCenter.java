@@ -50,6 +50,12 @@ public class BaseSceneParseResourceCenter {
 
     public static String SPECIAL_STR_EMPTY = "mp_special_str_empty";
 
+    /**
+     * handleNodeFile
+     *
+     * @param nodes
+     * @param file2Download
+     */
     protected void handleNodeFile(List<NodeElementParseResult> nodes, Map<String, String> file2Download) {
         Map<String, Integer> fileName2Index = new HashMap<>();
         fileName2Index.put("file", 1);
@@ -76,6 +82,13 @@ public class BaseSceneParseResourceCenter {
         }
     }
 
+    /**
+     * handleNodeImage
+     *
+     * @param sceneHandler
+     * @param id2Node
+     * @param devices
+     */
     protected void handleNodeImage(SceneConfigHandler sceneHandler, Map<String, NodeElementParseResult> id2Node, List<Device> devices) {
         CloudSceneConfigPluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         Set<String> existImage = new HashSet<>();

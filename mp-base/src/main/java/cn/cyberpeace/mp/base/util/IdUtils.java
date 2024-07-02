@@ -15,9 +15,17 @@ public class IdUtils {
         YitIdHelper.setIdGenerator(options);
     }
 
+    /**
+     * IdUtils
+     */
     private IdUtils() {}
 
 
+    /**
+     * globalId
+     *
+     * @return
+     */
     public static String globalId(){
         return String.valueOf(YitIdHelper.nextId());
     }
@@ -74,6 +82,11 @@ class SnowWorkerM1 {
     protected int _GenCountInOneTerm = 0;
     protected int _TermIndex = 0;
 
+    /**
+     * SnowWorkerM1
+     *
+     * @param options
+     */
     public SnowWorkerM1(IdGeneratorOptions options) {
         BaseTime = options.BaseTime != 0 ? options.BaseTime : 1582136402000L;
         WorkerIdBitLength = options.WorkerIdBitLength == 0 ? 6 : options.WorkerIdBitLength;
@@ -87,28 +100,58 @@ class SnowWorkerM1 {
         _CurrentSeqNumber = MinSeqNumber;
     }
 
+    /**
+     * DoGenIdAction
+     *
+     * @param arg
+     */
     private void DoGenIdAction(OverCostActionArg arg) {
 
     }
 
+    /**
+     * BeginOverCostAction
+     *
+     * @param useTimeTick
+     */
     private void BeginOverCostAction(long useTimeTick) {
 
     }
 
+    /**
+     * EndOverCostAction
+     *
+     * @param useTimeTick
+     */
     private void EndOverCostAction(long useTimeTick) {
         // if (_TermIndex > 10000) {
         //     _TermIndex = 0;
         // }
     }
 
+    /**
+     * BeginTurnBackAction
+     *
+     * @param useTimeTick
+     */
     private void BeginTurnBackAction(long useTimeTick) {
 
     }
 
+    /**
+     * EndTurnBackAction
+     *
+     * @param useTimeTick
+     */
     private void EndTurnBackAction(long useTimeTick) {
 
     }
 
+    /**
+     * NextOverCostId
+     *
+     * @return long
+     */
     private long NextOverCostId() {
         long currentTimeTick = GetCurrentTimeTick();
 
@@ -150,6 +193,11 @@ class SnowWorkerM1 {
         return CalcId(_LastTimeTick);
     }
 
+    /**
+     * NextNormalId
+     *
+     * @return long
+     */
     private long NextNormalId() {
         long currentTimeTick = GetCurrentTimeTick();
 
@@ -196,6 +244,12 @@ class SnowWorkerM1 {
         return CalcId(_LastTimeTick);
     }
 
+    /**
+     * CalcId
+     *
+     * @param useTimeTick
+     * @return long
+     */
     private long CalcId(long useTimeTick) {
         long result = ((useTimeTick << _TimestampShift) +
                 ((long) WorkerId << SeqBitLength) +
@@ -205,6 +259,12 @@ class SnowWorkerM1 {
         return result;
     }
 
+    /**
+     * CalcTurnBackId
+     *
+     * @param useTimeTick
+     * @return long
+     */
     private long CalcTurnBackId(long useTimeTick) {
         long result = ((useTimeTick << _TimestampShift) +
                 ((long) WorkerId << SeqBitLength) + _TurnBackIndex);
@@ -213,11 +273,21 @@ class SnowWorkerM1 {
         return result;
     }
 
+    /**
+     * GetCurrentTimeTick
+     *
+     * @return long
+     */
     protected long GetCurrentTimeTick() {
         long millis = System.currentTimeMillis();
         return millis - BaseTime;
     }
 
+    /**
+     * GetNextTimeTick
+     *
+     * @return long
+     */
     protected long GetNextTimeTick() {
         long tempTimeTicker = GetCurrentTimeTick();
 
@@ -233,6 +303,11 @@ class SnowWorkerM1 {
         return tempTimeTicker;
     }
 
+    /**
+     * nextId
+     *
+     * @return long
+     */
     public long nextId() {
         synchronized (_SyncLock) {
             return _IsOverCost ? NextOverCostId() : NextNormalId();
@@ -294,10 +369,18 @@ class IdGeneratorOptions {
      */
     public short TopOverCostCount = 2000;
 
+    /**
+     * IdGeneratorOptions
+     */
     public IdGeneratorOptions() {
 
     }
 
+    /**
+     * IdGeneratorOptions
+     *
+     * @param workerId
+     */
     public IdGeneratorOptions(short workerId) {
         WorkerId = workerId;
     }
@@ -339,6 +422,16 @@ class OverCostActionArg {
      */
     public int TermIndex = 0;
 
+    /**
+     * OverCostActionArg
+     *
+     * @param workerId
+     * @param timeTick
+     * @param actionType
+     * @param overCostCountInOneTerm
+     * @param genCountWhenOverCost
+     * @param index
+     */
     public OverCostActionArg(short workerId, long timeTick, int actionType, int overCostCountInOneTerm, int genCountWhenOverCost, int index) {
         ActionType = actionType;
         TimeTick = timeTick;
@@ -351,10 +444,20 @@ class OverCostActionArg {
 
 class SnowWorkerM2 extends SnowWorkerM1 {
 
+    /**
+     * SnowWorkerM2
+     *
+     * @param options
+     */
     public SnowWorkerM2(IdGeneratorOptions options) {
         super(options);
     }
 
+    /**
+     * nextId
+     *
+     * @return long
+     */
     @Override
     public long nextId() {
         synchronized (_SyncLock) {
@@ -415,6 +518,11 @@ class DefaultIdGenerator {
 
     private static SnowWorkerM1 _SnowWorker = null;
 
+    /**
+     * DefaultIdGenerator
+     *
+     * @param options
+     */
     public DefaultIdGenerator(IdGeneratorOptions options) {
         if (options == null) {
             throw new MpRuntimeException("options error.");
@@ -486,6 +594,11 @@ class DefaultIdGenerator {
         }
     }
 
+    /**
+     * newLong
+     *
+     * @return long
+     */
     public long newLong() {
         return _SnowWorker.nextId();
     }

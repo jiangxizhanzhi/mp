@@ -32,19 +32,38 @@ public class MobilePasswordAuthenticationProvider implements AuthenticationProvi
 
     private AuthUserDetailsService userDetailsService;
 
+    /**
+     * setUserDetailsService
+     *
+     * @param userDetailsService
+     */
     public void setUserDetailsService(AuthUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 
+    /**
+     * setPasswordEncoder
+     *
+     * @param passwordEncoder
+     */
     public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * MobilePasswordAuthenticationProvider
+     */
     public MobilePasswordAuthenticationProvider() {
         setPasswordEncoder(PasswordUtils.getPasswordEncoder());
     }
 
 
+    /**
+     * authenticate
+     *
+     * @param authentication
+     * @return
+     */
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         MobilePasswordAuthenticationToken authenticationToken = (MobilePasswordAuthenticationToken) authentication;
@@ -70,6 +89,13 @@ public class MobilePasswordAuthenticationProvider implements AuthenticationProvi
 
     }
 
+    /**
+     * retrieveUser
+     *
+     * @param mobile
+     * @param authentication
+     * @return
+     */
     protected UserDetails retrieveUser(String mobile, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
         try {
             UserDetails loadedUser = userDetailsService.loadUserByMobile(mobile);
@@ -83,6 +109,12 @@ public class MobilePasswordAuthenticationProvider implements AuthenticationProvi
         }
     }
 
+    /**
+     * additionalAuthenticationChecks
+     *
+     * @param userDetails
+     * @param authentication
+     */
     protected void additionalAuthenticationChecks(UserDetails userDetails, MobilePasswordAuthenticationToken authentication) throws AuthenticationException {
         if (authentication.getCredentials() == null) {
             throw new BadCredentialsException(this.messages
@@ -96,6 +128,12 @@ public class MobilePasswordAuthenticationProvider implements AuthenticationProvi
     }
 
 
+    /**
+     * supports
+     *
+     * @param authentication
+     * @return boolean
+     */
     @Override
     public boolean supports(Class<?> authentication) {
         return MobilePasswordAuthenticationToken.class.isAssignableFrom(authentication);

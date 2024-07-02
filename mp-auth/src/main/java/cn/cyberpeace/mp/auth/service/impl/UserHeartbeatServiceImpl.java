@@ -29,12 +29,21 @@ public class UserHeartbeatServiceImpl extends BaseModelServiceImpl<UserHeartbeat
     private static ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> heartbeatMap = new ConcurrentHashMap<>();
 
 
+    /**
+     * UserHeartbeatServiceImpl
+     *
+     * @param modelMapper
+     * @param modelFields
+     */
     @Autowired
     public UserHeartbeatServiceImpl(UserHeartbeatMapper modelMapper, UserHeartbeatFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
     }
 
+    /**
+     * heartbeat
+     */
     @Override
     public void heartbeat() {
         UserModel userModel = UserUtils.getLoginUser();
@@ -52,6 +61,11 @@ public class UserHeartbeatServiceImpl extends BaseModelServiceImpl<UserHeartbeat
         }
     }
 
+    /**
+     * getHeartbeatMap
+     *
+     * @return
+     */
     @Override
     public ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> getHeartbeatMap() {
         return heartbeatMap;

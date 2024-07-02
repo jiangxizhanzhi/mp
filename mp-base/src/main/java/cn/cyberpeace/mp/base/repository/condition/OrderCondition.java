@@ -11,6 +11,11 @@ public class OrderCondition implements BaseCondition {
 
     private String[] orders;
 
+    /**
+     * isEmpty
+     *
+     * @return boolean
+     */
     @Override
     public boolean isEmpty() {
         return orders == null || orders.length == 0;

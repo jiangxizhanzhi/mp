@@ -19,6 +19,12 @@ public class ClientAuthenticationToken extends AbstractAuthenticationToken {
 
     private Object credentials;
 
+    /**
+     * ClientAuthenticationToken
+     *
+     * @param clientId
+     * @param credentials
+     */
     public ClientAuthenticationToken(String clientId, Object credentials) {
         super(null);
         this.principal = clientId;
@@ -40,11 +46,21 @@ public class ClientAuthenticationToken extends AbstractAuthenticationToken {
     }
 
 
+    /**
+     * getCredentials
+     *
+     * @return
+     */
     @Override
     public Object getCredentials() {
         return this.credentials;
     }
 
+    /**
+     * getPrincipal
+     *
+     * @return
+     */
     @Override
     public Object getPrincipal() {
         return this.principal;

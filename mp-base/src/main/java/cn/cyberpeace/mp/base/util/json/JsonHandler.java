@@ -16,10 +16,22 @@ public class JsonHandler {
     @Getter
     private final ObjectMapper objectMapper;
 
+    /**
+     * JsonHandler
+     *
+     * @param objectMapper
+     */
     public JsonHandler(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * parse
+     *
+     * @param content
+     * @param valueType
+     * @return
+     */
     public <T> T parse(String content, Class<T> valueType) {
         T obj;
         try {
@@ -31,6 +43,13 @@ public class JsonHandler {
         return obj;
     }
 
+    /**
+     * parse
+     *
+     * @param content
+     * @param valueTypeRef
+     * @return
+     */
     public <T> T parse(String content, TypeReference<T> valueTypeRef) {
         T obj;
         try {
@@ -42,16 +61,35 @@ public class JsonHandler {
         return obj;
     }
 
+    /**
+     * parseMap
+     *
+     * @param content
+     * @return
+     */
     public Map<String, Object> parseMap(String content) {
         return parse(content, new TypeReference<>() {
         });
     }
 
+    /**
+     * parseList
+     *
+     * @param content
+     * @return
+     */
     public List<Object> parseList(String content) {
         return parse(content, new TypeReference<>() {
         });
     }
 
+    /**
+     * parseList
+     *
+     * @param content
+     * @param valueType
+     * @return
+     */
     public <T> List<T> parseList(String content, Class<T> valueType) {
         try {
             return objectMapper.readValue(content, objectMapper.getTypeFactory().constructCollectionType(List.class, valueType));
@@ -60,6 +98,12 @@ public class JsonHandler {
         }
     }
 
+    /**
+     * parseTree
+     *
+     * @param content
+     * @return
+     */
     public JsonNode parseTree(String content) {
         JsonNode obj;
         try {
@@ -71,6 +115,12 @@ public class JsonHandler {
     }
 
 
+    /**
+     * stringify
+     *
+     * @param obj
+     * @return
+     */
     public String stringify(Object obj) {
         String result;
         try {
@@ -82,15 +132,34 @@ public class JsonHandler {
         return result;
     }
 
+    /**
+     * mapToBean
+     *
+     * @param map
+     * @param beanClass
+     * @return
+     */
     public <T> T mapToBean(Map<String, Object> map, Class<T> beanClass) {
         return parse(stringify(map), beanClass);
     }
 
+    /**
+     * beanToMap
+     *
+     * @param obj
+     * @return
+     */
     public <T> Map<String, Object> beanToMap(T obj) {
         return parse(stringify(obj), new TypeReference<>() {
         });
     }
 
+    /**
+     * isJsonString
+     *
+     * @param json
+     * @return boolean
+     */
     public boolean isJsonString(final String json) {
         try {
             objectMapper.readTree(json);
@@ -100,6 +169,11 @@ public class JsonHandler {
         }
     }
 
+    /**
+     * createArrayNode
+     *
+     * @return
+     */
     public ArrayNode createArrayNode() {
         return objectMapper.createArrayNode();
     }

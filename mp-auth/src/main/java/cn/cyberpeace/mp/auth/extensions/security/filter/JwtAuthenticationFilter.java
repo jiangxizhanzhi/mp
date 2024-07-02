@@ -48,6 +48,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final ObjectMapper mapper;
 
+    /**
+     * JwtAuthenticationFilter
+     *
+     * @param messageConverter
+     */
     @Autowired
     public JwtAuthenticationFilter(MappingJackson2HttpMessageConverter messageConverter) {
         this.mapper = messageConverter.getObjectMapper();
@@ -55,6 +60,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     public static final String SKIP_JWT_FILTER = "SKIP_JWT_FILTER";
 
+    /**
+     * doFilterInternal
+     *
+     * @param request
+     * @param response
+     * @param filterChain
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -93,6 +105,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
 
+    /**
+     * refreshToken
+     *
+     * @param response
+     * @param token
+     * @param userModel
+     */
     private void refreshToken(HttpServletResponse response, String token, UserModel userModel) {
         Cache tokenCache = cacheManager.getCache("_token");
         String newJwt = tokenCache.get(token, String.class);
@@ -120,6 +139,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
 
+    /**
+     * setCookie
+     *
+     * @param response
+     * @param name
+     * @param value
+     * @param path
+     * @param domain
+     * @param maxAge
+     */
     private void setCookie(HttpServletResponse response, String name, String value, String path, String domain, int maxAge) {
         Cookie cookie = new Cookie(name, null);
         cookie.setPath(path);

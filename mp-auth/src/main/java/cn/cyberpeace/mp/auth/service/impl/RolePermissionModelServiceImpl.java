@@ -47,6 +47,12 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
     private RoleService roleService;
 
 
+    /**
+     * RolePermissionModelServiceImpl
+     *
+     * @param modelMapper
+     * @param modelFields
+     */
     @Autowired
     public RolePermissionModelServiceImpl(RolePermissionMapper modelMapper, RolePermissionFields modelFields) {
         setModelMapper(modelMapper);
@@ -59,6 +65,12 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
     @Autowired
     private TargetMapper targetMapper;
 
+    /**
+     * listTargetsByRoleIds
+     *
+     * @param roleIds
+     * @return
+     */
     @Override
     @Cacheable(value = CACHE_TARGETS_BY_ROLES)
     public List<TargetModel> listTargetsByRoleIds(List<String> roleIds) {
@@ -85,6 +97,12 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
         return targetModels;
     }
 
+    /**
+     * listTargetRoleDtosByRoleIds
+     *
+     * @param roleIds
+     * @return
+     */
     @Override
     public List<TargetRoleBo> listTargetRoleDtosByRoleIds(List<String> roleIds) {
         if (CollectionUtils.isEmpty(roleIds)) {
@@ -116,7 +134,14 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
     }
 
 
-
+    /**
+     * bindRoleTargets
+     *
+     * @param roleId
+     * @param targetIds
+     * @param cleanOldTargets
+     * @return boolean
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean bindRoleTargets(String roleId, List<String> targetIds, boolean cleanOldTargets) {
@@ -152,6 +177,12 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
         return true;
     }
 
+    /**
+     * deleteByRoleId
+     *
+     * @param roleId
+     * @return boolean
+     */
     @Override
     public boolean deleteByRoleId(String roleId) {
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
@@ -162,6 +193,12 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
     }
 
 
+    /**
+     * deleteByTargetId
+     *
+     * @param targetId
+     * @return boolean
+     */
     @Override
     public boolean deleteByTargetId(String targetId) {
         ParamCheck.notBlank(targetId, AuthBasei18nCode.TARGET_ID);

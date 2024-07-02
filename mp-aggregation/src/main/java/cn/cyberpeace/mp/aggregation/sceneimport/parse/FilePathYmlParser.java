@@ -26,11 +26,22 @@ class FilePathYmlParser<T> implements YmlParse<T> {
 
     private Class<T> resultType;
 
+    /**
+     * FilePathYmlParser
+     *
+     * @param filePath
+     * @param resultType
+     */
     public FilePathYmlParser(String filePath, Class<T> resultType) {
         this.filePath = filePath;
         this.resultType = resultType;
     }
 
+    /**
+     * parse
+     *
+     * @return
+     */
     @Override
     public T parse() {
         InputStream inputStream = null;

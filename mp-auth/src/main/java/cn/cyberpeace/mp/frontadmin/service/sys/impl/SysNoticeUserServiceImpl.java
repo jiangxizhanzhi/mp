@@ -25,12 +25,24 @@ import java.util.List;
 @Slf4j
 public class SysNoticeUserServiceImpl extends BaseModelServiceImpl<SysNoticeUserModel, SysNoticeUserMapper, SysNoticeUserFields, QueryParams> implements SysNoticeUserService {
 
+    /**
+     * SysNoticeUserServiceImpl
+     *
+     * @param modelMapper
+     * @param modelFields
+     */
     @Autowired
     public SysNoticeUserServiceImpl(SysNoticeUserMapper modelMapper, SysNoticeUserFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
     }
 
+    /**
+     * deleteByNoticeIds
+     *
+     * @param noticeIds
+     * @return int
+     */
     @Override
     public int deleteByNoticeIds(List<String> noticeIds) {
         if (CollectionUtils.isEmpty(noticeIds)) {
@@ -41,6 +53,12 @@ public class SysNoticeUserServiceImpl extends BaseModelServiceImpl<SysNoticeUser
 
     }
 
+    /**
+     * deleteByUser
+     *
+     * @param userId
+     * @return int
+     */
     @Override
     public int deleteByUser(String userId) {
         if (StringUtils.isBlank(userId)) {

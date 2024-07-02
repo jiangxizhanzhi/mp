@@ -24,16 +24,37 @@ public class TextUtils {
 
     private static final Base64.Encoder base64Encoder = Base64.getEncoder();
 
+    /**
+     * TextUtils
+     */
     private TextUtils() {}
 
+    /**
+     * emptyNull
+     *
+     * @param str
+     * @return
+     */
     public static String emptyNull(String str) {
         return StringUtils.isEmpty(str) ? null : str;
     }
 
+    /**
+     * uuid
+     *
+     * @return
+     */
     public static String uuid() {
         return UUID.randomUUID().toString().replace("-", StringUtils.EMPTY).toLowerCase();
     }
 
+    /**
+     * coupleStrip
+     *
+     * @param str
+     * @param stripChars
+     * @return
+     */
     public static String coupleStrip(String str, final String stripChars) {
         String result;
         int strLength = str.length();
@@ -46,6 +67,12 @@ public class TextUtils {
         return result;
     }
 
+    /**
+     * lineToHump
+     *
+     * @param str
+     * @return
+     */
     public static String lineToHump(String str) {
         if (str == null) {
             return null;
@@ -60,6 +87,12 @@ public class TextUtils {
         return sb.toString();
     }
 
+    /**
+     * lineToHump
+     *
+     * @param strs
+     * @return
+     */
     public static String[] lineToHump(String[] strs) {
         if (strs == null) {
             return new String[0];
@@ -72,6 +105,12 @@ public class TextUtils {
         return result;
     }
 
+    /**
+     * humpToLine
+     *
+     * @param str
+     * @return
+     */
     public static String humpToLine(String str) {
         if (str == null) {
             return null;
@@ -86,6 +125,12 @@ public class TextUtils {
         return sb.toString();
     }
 
+    /**
+     * humpToLine
+     *
+     * @param strs
+     * @return
+     */
     public static String[] humpToLine(String[] strs) {
         if (strs == null) {
             return new String[0];
@@ -98,41 +143,102 @@ public class TextUtils {
         return result;
     }
 
+    /**
+     * containChinese
+     *
+     * @param str
+     * @return boolean
+     */
     public static boolean containChinese(String str) {
         return chinesePattern.matcher(str).find();
     }
 
+    /**
+     * rawEncodeBase64
+     *
+     * @param bytes
+     * @return
+     */
     public static byte[] rawEncodeBase64(byte[] bytes) {
         return base64Encoder.encode(bytes);
     }
 
+    /**
+     * rawEncodeBase64
+     *
+     * @param str
+     * @return
+     */
     public static byte[] rawEncodeBase64(String str) {
         return base64Encoder.encode(str.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * rawDecodeBase64
+     *
+     * @param bytes
+     * @return
+     */
     public static byte[] rawDecodeBase64(byte[] bytes) {
         return base64Decoder.decode(bytes);
     }
+
+    /**
+     * rawDecodeBase64
+     *
+     * @param str
+     * @return
+     */
     public static byte[] rawDecodeBase64(String str) {
         return base64Decoder.decode(str);
     }
 
+    /**
+     * encodeBase64
+     *
+     * @param bytes
+     * @return
+     */
     public static String encodeBase64(byte[] bytes) {
         return base64Encoder.encodeToString(bytes);
     }
 
+    /**
+     * encodeBase64
+     *
+     * @param str
+     * @return
+     */
     public static String encodeBase64(String str) {
         return base64Encoder.encodeToString(str.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * decodeBase64
+     *
+     * @param str
+     * @return
+     */
     public static String decodeBase64(String str) {
         return new String(rawDecodeBase64(str), StandardCharsets.UTF_8);
     }
 
+    /**
+     * decodeBase64
+     *
+     * @param bytes
+     * @return
+     */
     public static String decodeBase64(byte[] bytes) {
         return new String(rawDecodeBase64(bytes), StandardCharsets.UTF_8);
     }
 
+    /**
+     * rawCompress
+     *
+     * @param bytesToCompress
+     * @return
+     */
     public static byte[] rawCompress(byte[] bytesToCompress) {
         Deflater deflater = new Deflater();
         deflater.setInput(bytesToCompress);
@@ -146,6 +252,12 @@ public class TextUtils {
         return returnValues;
     }
 
+    /**
+     * rawDecompress
+     *
+     * @param bytesToDecompress
+     * @return
+     */
     public static byte[] rawDecompress(byte[] bytesToDecompress) {
         byte[] returnValues = null;
 
@@ -177,10 +289,22 @@ public class TextUtils {
         return returnValues;
     }
 
+    /**
+     * compress
+     *
+     * @param str
+     * @return
+     */
     public static byte[] compress(String str) {
         return rawCompress(str.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * decompress
+     *
+     * @param bytesToDecompress
+     * @return
+     */
     public static String decompress(byte[] bytesToDecompress) {
         byte[] bytesDecompressed = rawDecompress(bytesToDecompress);
         return new String(bytesDecompressed, StandardCharsets.UTF_8);

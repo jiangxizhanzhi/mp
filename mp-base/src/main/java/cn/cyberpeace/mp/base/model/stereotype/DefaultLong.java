@@ -7,6 +7,11 @@ import java.lang.annotation.*;
 @Documented
 public @interface DefaultLong {
 
+    /**
+     * value
+     *
+     * @return long
+     */
     long value() default 0L;
 
 }

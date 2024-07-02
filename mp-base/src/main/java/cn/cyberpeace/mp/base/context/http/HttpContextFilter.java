@@ -14,6 +14,13 @@ public class HttpContextFilter extends OncePerRequestFilter {
 
     private final static String X_REQUEST_ID = "X-Request-Id";
 
+    /**
+     * doFilterInternal
+     *
+     * @param request
+     * @param response
+     * @param filterChain
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {

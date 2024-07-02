@@ -18,6 +18,11 @@ public class AggregationSwagger2Config {
     @Autowired
     private Swagger2Config swagger2Config;
 
+    /**
+     * apiAggregation
+     *
+     * @return
+     */
     @Bean
     public Docket apiAggregation() {
         return new Docket(DocumentationType.SWAGGER_2)

@@ -30,7 +30,13 @@ import java.util.Objects;
 public interface BasePermissionMapper<P extends BasePermissionModel, T extends BaseModel> extends BaseModelMapper {
 
 
-
+    /**
+     * listTargetsByOwner
+     *
+     * @param owner
+     * @param outerCondition
+     * @return
+     */
     @Recommendation
     default List<T> listTargetsByOwner(String owner, HumanCondition outerCondition) {
         HumanCondition innerCondition = processOuterCondition(owner, outerCondition);
@@ -47,6 +53,13 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         return objs;
     }
 
+    /**
+     * totalTargetsByOwner
+     *
+     * @param owner
+     * @param outerCondition
+     * @return int
+     */
     @Recommendation
     default int totalTargetsByOwner(String owner, HumanCondition outerCondition) {
         HumanCondition innerCondition = processOuterCondition(owner, outerCondition);
@@ -76,6 +89,12 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
     }
     */
 
+    /**
+     * deleteByOwner
+     *
+     * @param owner
+     * @return int
+     */
     @Recommendation
     default int deleteByOwner(String owner) {
         HumanCondition humanCondition = new HumanCondition();
@@ -85,6 +104,12 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
     }
 
 
+    /**
+     * deleteByTarget
+     *
+     * @param target
+     * @return int
+     */
     @Recommendation
     default int deleteByTarget(String target) {
         HumanCondition humanCondition = new HumanCondition();
@@ -93,6 +118,13 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         return filterDelete(humanCondition);
     }
 
+    /**
+     * processOuterCondition
+     *
+     * @param owner
+     * @param outerCondition
+     * @return 查询条件构造器
+     */
     private HumanCondition processOuterCondition(String owner, HumanCondition outerCondition) {
         HumanCondition innerCondition = getInnerCondition(owner);
         String currentLinkName = innerCondition.getCurrentLinkName();
@@ -114,6 +146,11 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
     }
 
 
+    /**
+     * getPermissionClass
+     *
+     * @return
+     */
     private Class<P> getPermissionClass() {
         Class<?> actualModelClassSource;
         Class<?> mapperInterface = getMapperInterface();
@@ -136,6 +173,11 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
     }
 
 
+    /**
+     * getTargetClass
+     *
+     * @return
+     */
     private Class<T> getTargetClass() {
         Class<?> actualModelClassSource;
         Class<?> mapperInterface = getMapperInterface();
@@ -158,6 +200,12 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
     }
 
 
+    /**
+     * mapToTargetObj
+     *
+     * @param map
+     * @return
+     */
     private T mapToTargetObj(Map<String, Object> map) {
         if (map == null) {
             return null;
@@ -192,6 +240,13 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
     }
 
 
+    /**
+     * handleRawFieldValue
+     *
+     * @param fieldType
+     * @param fieldValue
+     * @return
+     */
     private Object handleRawFieldValue(Class<?> fieldType, Object fieldValue) {
         if (fieldType == LocalDateTime.class && fieldValue instanceof java.sql.Timestamp) {
             return ((java.sql.Timestamp) fieldValue).toLocalDateTime();
@@ -204,17 +259,33 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         }
     }
 
+    /**
+     * getMapperInterface
+     *
+     * @param proxy
+     * @return
+     */
     private Class<?> getMapperInterface(Proxy proxy) {
         return ClassUtils.getObjFieldValue(Proxy.getInvocationHandler(proxy),
                 "mapperInterface", Class.class);
     }
 
+    /**
+     * getMapperInterface
+     *
+     * @return
+     */
     private Class<?> getMapperInterface() {
         return getMapperInterface((Proxy) this);
     }
 
 
-
+    /**
+     * getInnerCondition
+     *
+     * @param owner
+     * @return 查询条件构造器
+     */
     private HumanCondition getInnerCondition(String owner) {
         HumanCondition condition = new HumanCondition();
 
@@ -229,6 +300,13 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
     }
 
 
+    /**
+     * convertFieldName
+     *
+     * @param currentLinkName
+     * @param fieldName
+     * @return
+     */
     private String convertFieldName(String currentLinkName, String fieldName) {
         String prefix = currentLinkName + ".";
         if(fieldName.contains(prefix)) {
@@ -237,6 +315,13 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         return prefix + fieldName;
     }
 
+    /**
+     * convertSelectFields
+     *
+     * @param currentLinkName
+     * @param condition
+     * @return
+     */
     private Map<String, String> convertSelectFields(String currentLinkName, HumanCondition condition) {
         Map<String, String> selectFields = condition.getSelectFields();
         if (MapUtils.isEmpty(selectFields)) {
@@ -252,6 +337,13 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         return newSelectFields;
     }
 
+    /**
+     * convertGroupFields
+     *
+     * @param currentLinkName
+     * @param condition
+     * @return
+     */
     private List<String> convertGroupFields(String currentLinkName, HumanCondition condition) {
         List<String> groupFields = condition.getGroupFields();
         if (CollectionUtils.isEmpty(groupFields)) {
@@ -266,6 +358,13 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         return newGroupFields;
     }
 
+    /**
+     * convertOrders
+     *
+     * @param currentLinkName
+     * @param condition
+     * @return
+     */
     private List<String> convertOrders(String currentLinkName, HumanCondition condition) {
         List<String> orders = condition.getOrders();
         if (CollectionUtils.isEmpty(orders)) {
@@ -280,6 +379,13 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         return newOrders;
     }
 
+    /**
+     * convertAndCondition
+     *
+     * @param currentLinkName
+     * @param condition
+     * @return
+     */
     private AndCondition convertAndCondition(String currentLinkName, HumanCondition condition) {
         AndCondition andCondition = condition.getAndCondition();
         if (Objects.isNull(andCondition)) {

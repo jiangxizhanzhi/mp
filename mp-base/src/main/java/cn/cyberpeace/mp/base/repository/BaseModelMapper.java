@@ -39,15 +39,33 @@ public interface BaseModelMapper<M extends BaseModel> {
 
     Class<?> modelClass = null;
 
+    /**
+     * getCommonMapper
+     *
+     * @return
+     */
     private static CommonMapper getCommonMapper() {
         return BeanCommon.getBean(CommonMapper.class);
     }
 
+    /**
+     * getMapperInterface
+     *
+     * @param proxy
+     * @return
+     */
     private static Class<?> getMapperInterface(Proxy proxy) {
         return ClassUtils.getObjFieldValue(Proxy.getInvocationHandler(proxy),
                 "mapperInterface", Class.class);
     }
 
+    /**
+     * handleRawFieldValue
+     *
+     * @param fieldType
+     * @param fieldValue
+     * @return
+     */
     private static Object handleRawFieldValue(Class<?> fieldType, Object fieldValue) {
         if (LocalDateTime.class.equals(fieldType) && fieldValue instanceof java.sql.Timestamp) {
             return ((java.sql.Timestamp) fieldValue).toLocalDateTime();
@@ -60,6 +78,13 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
     }
 
+    /**
+     * mapToObj
+     *
+     * @param map
+     * @param objClass
+     * @return
+     */
     private static <T> T mapToObj(Map<String, Object> map, Class<T> objClass) {
         if (map == null) {
             return null;
@@ -97,15 +122,31 @@ public interface BaseModelMapper<M extends BaseModel> {
         return obj;
     }
 
+    /**
+     * getMapperInterface
+     *
+     * @return
+     */
     private Class<?> getMapperInterface() {
         return getMapperInterface((Proxy) this);
     }
 
+    /**
+     * getTableName
+     *
+     * @return
+     */
     private String getTableName() {
         Class<M> actualModelClass = getModelClass();
         return actualModelClass != null ? ModelUtils.getTableName(actualModelClass) : null;
     }
 
+    /**
+     * getTableName
+     *
+     * @param humanCondition
+     * @return
+     */
     private String getTableName(HumanCondition humanCondition) {
         String tableName = humanCondition.toTableName();
         if (tableName == null) {
@@ -114,6 +155,12 @@ public interface BaseModelMapper<M extends BaseModel> {
         return tableName;
     }
 
+    /**
+     * getMappedStatement
+     *
+     * @param humanName
+     * @return
+     */
     private MappedStatement getMappedStatement(String humanName) {
         String mapperId = getMapperInterface().getName() + "." + humanName;
         MappedStatement mappedStatement;
@@ -127,6 +174,12 @@ public interface BaseModelMapper<M extends BaseModel> {
         return mappedStatement;
     }
 
+    /**
+     * getSelectFields
+     *
+     * @param humanCondition
+     * @return
+     */
     private String[] getSelectFields(HumanCondition humanCondition) {
         String[] selectFields = humanCondition.toSelectFields();
         if (selectFields.length == 0) {
@@ -139,6 +192,12 @@ public interface BaseModelMapper<M extends BaseModel> {
         return selectFields;
     }
 
+    /**
+     * mapToObj
+     *
+     * @param map
+     * @return
+     */
     private M mapToObj(Map<String, Object> map) {
         if (map == null) {
             return null;
@@ -152,6 +211,12 @@ public interface BaseModelMapper<M extends BaseModel> {
         return mapToObj(map, actualModelClass);
     }
 
+    /**
+     * convertCreateParams
+     *
+     * @param objs
+     * @return
+     */
     private Object[] convertCreateParams(List<M> objs) {
         DynamicFields allModelFields = new DynamicFields(ClassUtils.getBeanClassFields(getModelClass()));
         List<String> list = new ArrayList<>();
@@ -185,6 +250,12 @@ public interface BaseModelMapper<M extends BaseModel> {
         return new Object[]{ createColumnFields, createFieldValuesList };
     }
 
+    /**
+     * convertUpdateParams
+     *
+     * @param objs
+     * @return
+     */
     private Object[] convertUpdateParams(List<M> objs) {
         M sampleObj = objs.get(0);
         sampleObj.setUpdateTime(null);
@@ -245,6 +316,11 @@ public interface BaseModelMapper<M extends BaseModel> {
         return validFieldsObjs;
     }
 
+    /**
+     * getModelClass
+     *
+     * @return
+     */
     @SuppressWarnings("unchecked")
     default Class<M> getModelClass() {
         Class<?> actualModelClassSource;
@@ -268,6 +344,12 @@ public interface BaseModelMapper<M extends BaseModel> {
         return actualModelClass;
     }
 
+    /**
+     * list
+     *
+     * @param humanCondition
+     * @return
+     */
     @Recommendation
     default List<M> list(HumanCondition humanCondition) {
         if (humanCondition.getLimit() != null && humanCondition.getLimit() == 0) {
@@ -310,6 +392,12 @@ public interface BaseModelMapper<M extends BaseModel> {
         return objs;
     }
 
+    /**
+     * total
+     *
+     * @param humanCondition
+     * @return int
+     */
     @Recommendation
     default int total(HumanCondition humanCondition) {
         if (getMappedStatement("total") == null) {
@@ -319,6 +407,12 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
     }
 
+    /**
+     * first
+     *
+     * @param humanCondition
+     * @return
+     */
     @Recommendation
     default M first(HumanCondition humanCondition) {
         humanCondition.slice(0, 1);
@@ -344,6 +438,12 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
     }
 
+    /**
+     * exist
+     *
+     * @param humanCondition
+     * @return boolean
+     */
     @Recommendation
     default boolean exist(HumanCondition humanCondition) {
         if (getMappedStatement("exist") == null) {
@@ -353,12 +453,25 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
     }
 
+    /**
+     * get
+     *
+     * @param id
+     * @param humanSelectCondition
+     * @return
+     */
     @Recommendation
     default M get(String id, HumanCondition humanSelectCondition) {
         Map<String, Object> map = getCommonMapper().get(getTableName(), id, getSelectFields(humanSelectCondition));
         return mapToObj(map);
     }
 
+    /**
+     * create
+     *
+     * @param obj
+     * @return boolean
+     */
     @Recommendation
     default boolean create(M obj) {
         Object[] createParams = convertCreateParams(List.of(obj));
@@ -396,6 +509,12 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
     }
 
+    /**
+     * bulkCreate
+     *
+     * @param objs
+     * @return
+     */
     @Recommendation
     default BulkResult<M> bulkCreate(List<M> objs) {
         BulkResult<M> result = new BulkResult<>(0);
@@ -417,6 +536,14 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
     }
 
+    /**
+     * bulkCreate
+     *
+     * @param objs
+     * @param batchSize
+     * @param concurrent
+     * @return
+     */
     @Recommendation
     default BulkResult<M> bulkCreate(List<M> objs, int batchSize, boolean concurrent) {
         BulkResult<M> result = new BulkResult<>(0);
@@ -513,42 +640,116 @@ public interface BaseModelMapper<M extends BaseModel> {
         return objs;
     }
 
+    /**
+     * commonTotal
+     *
+     * @param tableName
+     * @param condition
+     * @return int
+     */
     default int commonTotal(String tableName, @Param("condition") Condition condition) {
         return getCommonMapper().total(tableName, condition);
     }
 
+    /**
+     * commonExist
+     *
+     * @param tableName
+     * @param condition
+     * @return boolean
+     */
     default boolean commonExist(String tableName, @Param("condition") Condition condition) {
         return getCommonMapper().exist(tableName, condition);
     }
 
+    /**
+     * list
+     *
+     * @param condition
+     * @param selectFields
+     * @return
+     */
     List<M> list(@Param("condition") Condition condition, String[] selectFields);
+
+    /**
+     * total
+     *
+     * @param condition
+     * @return int
+     */
     int total(@Param("condition") Condition condition);
+
+    /**
+     * exist
+     *
+     * @param condition
+     * @return boolean
+     */
     boolean exist(@Param("condition") Condition condition);
 
+    /**
+     * get
+     *
+     * @param id
+     * @return
+     */
     @Recommendation
     default M get(String id) {
         return get(id, new HumanCondition());
     }
 
+    /**
+     * logicGet
+     *
+     * @param id
+     * @return
+     */
     @Recommendation
     default M logicGet(String id) {
         M obj = get(id);
         return (obj != null && obj.hasDeleted()) ? null : obj;
     }
 
+    /**
+     * create
+     *
+     * @param createFields
+     * @param createFieldValues
+     * @return boolean
+     */
     default boolean create(String[] createFields, Object[] createFieldValues) {
         return getCommonMapper().create(getTableName(), createFields, createFieldValues);
     }
 
+    /**
+     * update
+     *
+     * @param id
+     * @param updateFields
+     * @param updateFieldValues
+     * @return boolean
+     */
     default boolean update(String id, String[] updateFields, Object[] updateFieldValues) {
         return getCommonMapper().update(getTableName(), id, updateFields, updateFieldValues);
     }
 
+    /**
+     * delete
+     *
+     * @param id
+     * @return boolean
+     */
     @Recommendation
     default boolean delete(String id) {
         return getCommonMapper().delete(getTableName(), id);
     }
 
+    /**
+     * logicDelete
+     *
+     * @param id
+     * @return boolean
+     */
     @Recommendation
     default boolean logicDelete(String id) {
         Class<M> actualModelClass = getModelClass();
@@ -571,14 +772,34 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
     }
 
+    /**
+     * bulkCreate
+     *
+     * @param createFields
+     * @param createFieldValuesList
+     * @return int
+     */
     default int bulkCreate(String[] createFields, Object[][] createFieldValuesList) {
         return getCommonMapper().bulkCreate(getTableName(), createFields, createFieldValuesList);
     }
 
+    /**
+     * bulkUpdate
+     *
+     * @param updateFields
+     * @param updateFieldValuesList
+     * @return int
+     */
     default int bulkUpdate(String[] updateFields, Object[][] updateFieldValuesList) {
         return getCommonMapper().bulkUpdate(getTableName(), updateFields, updateFieldValuesList);
     }
 
+    /**
+     * bulkDelete
+     *
+     * @param ids
+     * @return
+     */
     @Recommendation
     default BulkResult<String> bulkDelete(String[] ids) {
         BulkResult<String> result = new BulkResult<>(0);
@@ -594,6 +815,14 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
     }
 
+    /**
+     * bulkDelete
+     *
+     * @param ids
+     * @param batchSize
+     * @param concurrent
+     * @return
+     */
     @Recommendation
     default BulkResult<String> bulkDelete(String[] ids, int batchSize, boolean concurrent) {
         BulkResult<String> result = new BulkResult<>(0);
@@ -620,6 +849,12 @@ public interface BaseModelMapper<M extends BaseModel> {
         return result;
     }
 
+    /**
+     * bulkLogicDelete
+     *
+     * @param ids
+     * @return
+     */
     @Recommendation
     default BulkResult<String> bulkLogicDelete(String[] ids) {
         BulkResult<String> result = new BulkResult<>(0);
@@ -668,6 +903,14 @@ public interface BaseModelMapper<M extends BaseModel> {
         return result;
     }
 
+    /**
+     * bulkLogicDelete
+     *
+     * @param ids
+     * @param batchSize
+     * @param concurrent
+     * @return
+     */
     @Recommendation
     default BulkResult<String> bulkLogicDelete(String[] ids, int batchSize, boolean concurrent) {
         BulkResult<String> result = new BulkResult<>(0);
@@ -717,18 +960,122 @@ public interface BaseModelMapper<M extends BaseModel> {
         return getCommonMapper().filterDelete(getTableName(humanCondition), humanCondition.toCondition());
     }
 
+    /**
+     * list
+     *
+     * @param table
+     * @param condition
+     * @param selectFields
+     * @return
+     */
     List<M> list(String table, @Param("condition") Condition condition, String[] selectFields);
+
+    /**
+     * total
+     *
+     * @param table
+     * @param condition
+     * @return int
+     */
     int total(String table, @Param("condition") Condition condition);
+
+    /**
+     * exist
+     *
+     * @param table
+     * @param condition
+     * @return boolean
+     */
     boolean exist(String table, @Param("condition") Condition condition);
+
+    /**
+     * get
+     *
+     * @param table
+     * @param id
+     * @param selectFields
+     * @return
+     */
     M get(String table, String id, String[] selectFields);
+
+    /**
+     * create
+     *
+     * @param table
+     * @param createFields
+     * @param createFieldValues
+     * @return boolean
+     */
     boolean create(String table, String[] createFields, Object[] createFieldValues);
+
+    /**
+     * update
+     *
+     * @param table
+     * @param id
+     * @param updateFields
+     * @param updateFieldValues
+     * @return boolean
+     */
     boolean update(String table, String id, String[] updateFields, Object[] updateFieldValues);
+
+    /**
+     * delete
+     *
+     * @param table
+     * @param id
+     * @return boolean
+     */
     boolean delete(String table, String id);
+
+    /**
+     * bulkCreate
+     *
+     * @param table
+     * @param createFields
+     * @param createFieldValuesList
+     * @return int
+     */
     int bulkCreate(String table, String[] createFields, Object[][] createFieldValuesList);
+
+    /**
+     * bulkUpdate
+     *
+     * @param table
+     * @param updateFields
+     * @param updateFieldValuesList
+     * @return int
+     */
     int bulkUpdate(String table, String[] updateFields, Object[][] updateFieldValuesList);
+
+    /**
+     * bulkDelete
+     *
+     * @param table
+     * @param ids
+     * @return int
+     */
     int bulkDelete(String table, String[] ids);
+
+    /**
+     * filterUpdate
+     *
+     * @param table
+     * @param updateFields
+     * @param updateFieldValues
+     * @param condition
+     * @return int
+     */
     int filterUpdate(String table, String[] updateFields, Object[] updateFieldValues,
                      @Param("condition") Condition condition);
+
+    /**
+     * filterDelete
+     *
+     * @param table
+     * @param condition
+     * @return int
+     */
     int filterDelete(String table, @Param("condition") Condition condition);
 
     @Data
@@ -738,15 +1085,32 @@ public interface BaseModelMapper<M extends BaseModel> {
 
         public BulkResult() {}
 
+        /**
+         * BulkResult
+         *
+         * @param successCount
+         */
         public BulkResult(int successCount) {
             this.successCount = successCount;
         }
 
+        /**
+         * BulkResult
+         *
+         * @param successCount
+         * @param fail
+         */
         public BulkResult(int successCount, List<T> fail) {
             this.successCount = successCount;
             this.fail = fail;
         }
 
+        /**
+         * add
+         *
+         * @param result
+         * @return
+         */
         public BulkResult<T> add(BulkResult<T> result) {
             this.addSuccessCount(result.getSuccessCount());
             if (result.getFail() != null) {
@@ -755,11 +1119,23 @@ public interface BaseModelMapper<M extends BaseModel> {
             return this;
         }
 
+        /**
+         * addSuccessCount
+         *
+         * @param successCount
+         * @return
+         */
         public BulkResult<T> addSuccessCount(int successCount) {
             this.successCount += successCount;
             return this;
         }
 
+        /**
+         * addFail
+         *
+         * @param fail
+         * @return
+         */
         public BulkResult<T> addFail(List<T> fail) {
             if (this.fail == null) {
                 this.fail = new ArrayList<>();

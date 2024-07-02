@@ -14,8 +14,17 @@ public class ModuleUtils {
     @SuppressWarnings("java:S2386")
     public static final String[] MODULE_NAMES = getModuleNames();
 
+    /**
+     * ModuleUtils
+     */
     private ModuleUtils() {}
 
+    /**
+     * findPackageNamesStartingWith
+     *
+     * @param prefix
+     * @return
+     */
     public static List<String> findPackageNamesStartingWith(String prefix) {
         List<String> packageNames = new ArrayList<>();
         for (Package pkg: Package.getPackages()) {
@@ -27,6 +36,11 @@ public class ModuleUtils {
         return packageNames;
     }
 
+    /**
+     * getModuleNames
+     *
+     * @return
+     */
     public static String[] getModuleNames() {
         Set<String> moduleNames = new LinkedHashSet<>();
         for (String packageName: findPackageNamesStartingWith(GROUP_NAME)) {

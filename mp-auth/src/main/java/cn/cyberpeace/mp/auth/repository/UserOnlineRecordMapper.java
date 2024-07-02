@@ -21,6 +21,15 @@ import java.util.List;
 @ModelClass(UserOnlineRecordModel.class)
 public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecordModel> {
 
+    /**
+     * listRecordSummary
+     *
+     * @param userIds
+     * @param priorityUserIds
+     * @param startTime
+     * @param endTime
+     * @return
+     */
     List<UserOnlineRecordSummaryBo> listRecordSummary(@Param("userIds") List<String> userIds,
                                                       @Param("priorityUserIds") List<String> priorityUserIds,
                                                       @Param("startTime") LocalDateTime startTime,

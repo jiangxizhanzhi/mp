@@ -37,12 +37,27 @@ public class UrlAcInterceptor implements HandlerInterceptor {
     private final UserPermissionService userPermissionService;
 
 
+    /**
+     * UrlAcInterceptor
+     *
+     * @param frontBusinessConfig
+     * @param operateUserPermissionService
+     * @param userPermissionService
+     */
     public UrlAcInterceptor(FrontBusinessConfig frontBusinessConfig, OperateUserPermissionService operateUserPermissionService, UserPermissionService userPermissionService) {
         this.frontBusinessConfig = frontBusinessConfig;
         this.operateUserPermissionService = operateUserPermissionService;
         this.userPermissionService = userPermissionService;
     }
 
+    /**
+     * preHandle
+     *
+     * @param request
+     * @param response
+     * @param handler
+     * @return boolean
+     */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 
@@ -66,6 +81,13 @@ public class UrlAcInterceptor implements HandlerInterceptor {
         return true;
     }
 
+    /**
+     * validateAuthTargetByHandlerMethod
+     *
+     * @param request
+     * @param handler
+     * @return boolean
+     */
     private boolean validateAuthTargetByHandlerMethod(HttpServletRequest request, Object handler) {
         if (handler instanceof HandlerMethod) {
             if (!((HandlerMethod) handler).getBeanType().getPackageName().startsWith("cn.cyberpeace")) {
@@ -108,6 +130,12 @@ public class UrlAcInterceptor implements HandlerInterceptor {
         return true;
     }
 
+    /**
+     * setAuthFailedResponse
+     *
+     * @param request
+     * @param response
+     */
     private void setAuthFailedResponse(HttpServletRequest request, HttpServletResponse response) {
         try {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -125,6 +153,12 @@ public class UrlAcInterceptor implements HandlerInterceptor {
         }
     }
 
+    /**
+     * getTargetsFromAnnotation
+     *
+     * @param authTarget
+     * @return
+     */
     private Set<String> getTargetsFromAnnotation(AuthTarget authTarget) {
         if (Objects.isNull(authTarget)) {
             return Collections.emptySet();
@@ -134,6 +168,12 @@ public class UrlAcInterceptor implements HandlerInterceptor {
         }
     }
 
+    /**
+     * urlIsExcludeAuthFlagFromCache
+     *
+     * @param request
+     * @return boolean
+     */
     private boolean urlIsExcludeAuthFlagFromCache(HttpServletRequest request) {
         String requestUrl = request.getRequestURI();
         requestUrl = trimLastSlash(requestUrl);
@@ -147,6 +187,12 @@ public class UrlAcInterceptor implements HandlerInterceptor {
         }
     }
 
+    /**
+     * urlIsExcludeAuthFlag
+     *
+     * @param requestUrl
+     * @return boolean
+     */
     private boolean urlIsExcludeAuthFlag(String requestUrl) {
         List<String> excludeUrls = frontBusinessConfig.getUrlAcFilterExcludeUrls();
         if (CollectionUtils.isNotEmpty(excludeUrls)) {
@@ -159,10 +205,22 @@ public class UrlAcInterceptor implements HandlerInterceptor {
         return false;
     }
 
+    /**
+     * updateExcludeUrlCache
+     *
+     * @param requestUrl
+     * @param flag
+     */
     private void updateExcludeUrlCache(String requestUrl, boolean flag) {
         EXCLUDE_URL_CACHE.put(requestUrl, flag);
     }
 
+    /**
+     * trimLastSlash
+     *
+     * @param requestUrl
+     * @return
+     */
     private String trimLastSlash(String requestUrl) {
         if (StringUtils.isNotBlank(requestUrl)) {
             if (requestUrl.endsWith("/")) {

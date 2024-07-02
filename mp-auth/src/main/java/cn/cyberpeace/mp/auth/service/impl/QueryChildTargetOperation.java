@@ -27,6 +27,12 @@ public class QueryChildTargetOperation implements TargetOperation<TargetBo> {
     private TargetService targetService;
 
 
+    /**
+     * doExecute
+     *
+     * @param targetBo
+     * @return
+     */
     @Override
     public TargetBo doExecute(TargetBo targetBo) {
 //        if (StringUtils.isBlank(targetDto.getParent())) {

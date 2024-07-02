@@ -16,6 +16,12 @@ public enum BaseErrorCode implements ErrorCode {
     FIELD_VALUE_INVALID("MP-000006", "field_value_invalid"),
     CUSTOM_ERROR("MP-000007", "custom_error");
 
+    /**
+     * BaseErrorCode
+     *
+     * @param code
+     * @param message
+     */
     BaseErrorCode(String code, String message) {
         setCode(code, "base.error_code." + message);
     }

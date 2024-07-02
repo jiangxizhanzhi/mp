@@ -16,24 +16,48 @@ import java.util.Objects;
  */
 public class ParamCheck {
 
+    /**
+     * notNull
+     *
+     * @param param
+     * @param code
+     */
     public static void notNull(Object param, String code) {
         if (Objects.isNull(param)) {
             throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_NULL.format(MessageCommon.get(code)));
         }
     }
 
+    /**
+     * notBlank
+     *
+     * @param param
+     * @param code
+     */
     public static void notBlank(String param, String code) {
         if (StringUtils.isBlank(param)) {
             throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(code)));
         }
     }
 
+    /**
+     * notEmpty
+     *
+     * @param param
+     * @param code
+     */
     public static void notEmpty(String param, String code) {
         if (StringUtils.isEmpty(param)) {
             throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(code)));
         }
     }
 
+    /**
+     * notEmpty
+     *
+     * @param collection
+     * @param code
+     */
     public static void notEmpty(Collection<?> collection, String code) {
         if (CollectionUtils.isEmpty(collection)) {
             throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(code)));

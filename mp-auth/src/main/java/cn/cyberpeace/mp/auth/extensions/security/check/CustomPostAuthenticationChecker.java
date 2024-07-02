@@ -14,6 +14,11 @@ import org.springframework.security.core.userdetails.UserDetailsChecker;
 @Slf4j
 public class CustomPostAuthenticationChecker implements UserDetailsChecker {
 
+    /**
+     * check
+     *
+     * @param user
+     */
     @Override
     public void check(UserDetails user) {
         if (!user.isCredentialsNonExpired()) {

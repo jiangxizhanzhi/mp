@@ -14,6 +14,12 @@ import java.io.OutputStream;
 @Data
 public abstract class BaseRemoteFileServiceImpl implements BaseRemoteFileService {
 
+    /**
+     * upload
+     *
+     * @param localFilepath
+     * @return
+     */
     @Override
     public ServiceResult<String> upload(String localFilepath) {
         ServiceResult<Boolean> validateResult = validateUploadLocalFile(localFilepath);
@@ -31,6 +37,13 @@ public abstract class BaseRemoteFileServiceImpl implements BaseRemoteFileService
         return new ServiceResult<>(remoteFileKey);
     }
 
+    /**
+     * uploadContent
+     *
+     * @param content
+     * @param fileSuffix
+     * @return
+     */
     @Override
     public ServiceResult<String> uploadContent(String content, String fileSuffix) {
         ServiceResult<Boolean> validateResult = validateUploadContent(content, fileSuffix);
@@ -48,6 +61,13 @@ public abstract class BaseRemoteFileServiceImpl implements BaseRemoteFileService
         return new ServiceResult<>(remoteFileKey);
     }
 
+    /**
+     * upload
+     *
+     * @param is
+     * @param fileSuffix
+     * @return
+     */
     @Override
     public ServiceResult<String> upload(InputStream is, String fileSuffix) {
         ServiceResult<Boolean> validateResult = validateUploadInput(is, fileSuffix);
@@ -65,11 +85,24 @@ public abstract class BaseRemoteFileServiceImpl implements BaseRemoteFileService
         return new ServiceResult<>(remoteFileKey);
     }
 
+    /**
+     * download
+     *
+     * @param remoteFileKey
+     * @param os
+     */
     @Override
     public void download(String remoteFileKey, OutputStream os) {
         FsCommon.download(remoteFileKey, os);
     }
 
+    /**
+     * download
+     *
+     * @param remoteFileKey
+     * @param localFilepath
+     * @return
+     */
     @Override
     public ServiceResult<Boolean> download(String remoteFileKey, String localFilepath) {
         boolean result;
@@ -82,6 +115,12 @@ public abstract class BaseRemoteFileServiceImpl implements BaseRemoteFileService
         return new ServiceResult<>(result);
     }
 
+    /**
+     * downloadTmp
+     *
+     * @param remoteFileKey
+     * @return
+     */
     @Override
     public ServiceResult<String> downloadTmp(String remoteFileKey) {
         String localFilepath;
@@ -94,6 +133,12 @@ public abstract class BaseRemoteFileServiceImpl implements BaseRemoteFileService
         return new ServiceResult<>(localFilepath);
     }
 
+    /**
+     * downloadContent
+     *
+     * @param remoteFileKey
+     * @return
+     */
     @Override
     public ServiceResult<String> downloadContent(String remoteFileKey) {
         String content;
@@ -106,6 +151,12 @@ public abstract class BaseRemoteFileServiceImpl implements BaseRemoteFileService
         return new ServiceResult<>(content);
     }
 
+    /**
+     * delete
+     *
+     * @param remoteFileKey
+     * @return
+     */
     @Override
     public ServiceResult<Boolean> delete(String remoteFileKey) {
         boolean result;
@@ -118,6 +169,14 @@ public abstract class BaseRemoteFileServiceImpl implements BaseRemoteFileService
         return new ServiceResult<>(result);
     }
 
+    /**
+     * upload
+     *
+     * @param is
+     * @param fileSize
+     * @param fileSuffix
+     * @return
+     */
     @Override
     public ServiceResult<String> upload(InputStream is, long fileSize, String fileSuffix) {
         ServiceResult<Boolean> validateResult = validateUploadInput(is, fileSuffix);

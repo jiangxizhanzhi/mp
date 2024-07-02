@@ -65,12 +65,25 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Autowired
     private AuthStatusRabbitmqSender messageSender;
 
+    /**
+     * OrgServiceImpl
+     *
+     * @param modelMapper
+     * @param modelFields
+     */
     @Autowired
     public OrgServiceImpl(OrgMapper modelMapper, OrgFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
     }
 
+    /**
+     * create
+     *
+     * @param obj
+     * @param fields
+     * @return
+     */
     @Override
     @CacheEvict(value = TenantUserServiceImpl.CACHE_VAL_ORGS_LIST_ALL, allEntries = true)
     public ObjServiceResult<OrgModel> create(OrgModel obj, String[] fields) {
@@ -93,6 +106,13 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return result;
     }
 
+    /**
+     * update
+     *
+     * @param obj
+     * @param fields
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = TenantUserServiceImpl.CACHE_VAL_ORGS_LIST_ALL, allEntries = true)
@@ -125,6 +145,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return result;
     }
 
+    /**
+     * getOrgBO
+     *
+     * @param id
+     * @return
+     */
     @Override
     public OrgBO getOrgBO(String id) {
         OrgModel orgModel = getModelMapper().get(id);
@@ -134,6 +160,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return orgModel2OrgBO(orgModel);
     }
 
+    /**
+     * getOrgModel
+     *
+     * @param id
+     * @return
+     */
     @Override
     public OrgModel getOrgModel(String id) {
         return getModelMapper().get(id);
@@ -141,6 +173,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     /**
      * 校验组织是否重复
+     *
      * @param obj
      * @return
      */
@@ -165,11 +198,24 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return false;
     }
 
+    /**
+     * getPath
+     *
+     * @param orgModel
+     * @return
+     */
     @Override
     public String getPath(OrgModel orgModel) {
         return getPath(orgModel, null);
     }
 
+    /**
+     * getOrgPath
+     *
+     * @param orgModel
+     * @param orgMap
+     * @return
+     */
     private String getOrgPath(OrgModel orgModel, Map<String, OrgModel> orgMap) {
         String path = orgModel.getName();
         OrgModel current = orgModel;
@@ -186,6 +232,13 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return path;
     }
 
+    /**
+     * getPath
+     *
+     * @param orgModel
+     * @param orgModelList
+     * @return
+     */
     @Override
     public String getPath(OrgModel orgModel, List<OrgModel> orgModelList) {
         String path = orgModel.getName();
@@ -217,6 +270,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return path;
     }
 
+    /**
+     * orgModel2OrgBO
+     *
+     * @param orgModel
+     * @return
+     */
     @Override
     public OrgBO orgModel2OrgBO(OrgModel orgModel) {
         if (Objects.isNull(orgModel)) {
@@ -228,6 +287,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return orgBO;
     }
 
+    /**
+     * getBatchPath
+     *
+     * @param orgModelList
+     * @return
+     */
     @Override
     public String getBatchPath(List<OrgModel> orgModelList) {
         String allOrgPath = StringUtils.EMPTY;
@@ -241,6 +306,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return allOrgPath;
     }
 
+    /**
+     * getBathPathToList
+     *
+     * @param orgModelList
+     * @return
+     */
     @Override
     public List<List<String>> getBathPathToList(List<OrgModel> orgModelList) {
         List<List<String>> resultList = new ArrayList<>();
@@ -275,12 +346,24 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return resultList;
     }
 
+    /**
+     * bulkUpdate
+     *
+     * @param objs
+     * @return
+     */
     @Override
     public ServiceResult<Integer> bulkUpdate(List<OrgModel> objs) {
 //        return super.bulkUpdate(objs);
         throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
     }
 
+    /**
+     * delete
+     *
+     * @param orgId
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = TenantUserServiceImpl.CACHE_VAL_ORGS_LIST_ALL, allEntries = true)
@@ -301,6 +384,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return ret;
     }
 
+    /**
+     * bulkDelete
+     *
+     * @param ids
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = TenantUserServiceImpl.CACHE_VAL_ORGS_LIST_ALL, allEntries = true)
@@ -321,6 +410,11 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return ret;
     }
 
+    /**
+     * listParents
+     *
+     * @return
+     */
     @Override
     public List<OrgBO> listParents() {
         HumanCondition humanCondition = new HumanCondition();
@@ -341,6 +435,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return orgBOS;
     }
 
+    /**
+     * listByParent
+     *
+     * @param parentId
+     * @return
+     */
     @Override
     public List<OrgBO> listByParent(String parentId) {
         ParamCheck.notBlank(parentId, AuthBasei18nCode.ORG_PARENT);
@@ -357,6 +457,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return orgBOS;
     }
 
+    /**
+     * listAll
+     *
+     * @param tenantId
+     * @return
+     */
     @Override
     public List<OrgBO> listAll(String tenantId) {
         List<OrgModel> orgs = orgPathService.listByTenant(tenantId);
@@ -379,6 +485,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return orgBOS;
     }
 
+    /**
+     * getTree
+     *
+     * @param parentOrgId
+     * @return
+     */
     @Override
     public List<OrgDto> getTree(String parentOrgId) {
         if (StringUtils.isBlank(parentOrgId)) {
@@ -408,6 +520,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
 
+    /**
+     * getHierarchicalOrgsByOrgId
+     *
+     * @param orgId
+     * @return
+     */
     @Override
     public OrgDto getHierarchicalOrgsByOrgId(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
@@ -427,6 +545,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
 
+    /**
+     * getByPath
+     *
+     * @param path
+     * @return
+     */
     @Override
     public OrgBO getByPath(String path) {
         ParamCheck.notBlank(path, AuthBasei18nCode.ORG_PATH);
@@ -441,6 +565,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         }
     }
 
+    /**
+     * exists
+     *
+     * @param id
+     * @return boolean
+     */
     @Override
     public boolean exists(String id) {
         ParamCheck.notBlank(id, AuthBasei18nCode.ORG_ID);
@@ -453,7 +583,9 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     /**
      * 列出所有的子组织，忽略层级限制
      * 注意！不包括传入的org本身
+     *
      * @param orgId
+     * @return
      */
     @Override
     public List<OrgDto> listAllChildIgnoreLevelExcludeSelf(String orgId) {
@@ -475,6 +607,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
 
+    /**
+     * listAllParentIgnoreLevelExcludeSelf
+     *
+     * @param orgId
+     * @return
+     */
     @Override
     public List<OrgDto> listAllParentIgnoreLevelExcludeSelf(String orgId) {
         // 展示所有层级的父组织，不包括自己
@@ -495,6 +633,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return new ArrayList<>();
     }
 
+    /**
+     * toTree
+     *
+     * @param orgs
+     * @return
+     */
     private List<OrgDto> toTree(List<OrgBO> orgs) {
         ParamCheck.notEmpty(orgs, AuthBasei18nCode.ORG_LIST);
         Map<String, OrgDto> mapTmp = new HashMap<>();
@@ -540,6 +684,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     /**
      * 删除组织-权限，组织-人员的关系
+     *
      * @param orgId
      */
     private void deleteReleated(String orgId) {
@@ -562,7 +707,11 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         }
     }
 
-    // 组织树排序
+    /**
+     * 组织树排序
+     *
+     * @param orgs
+     */
     private void sortTree(List<OrgDto> orgs) {
         for (OrgDto o : orgs) {
             if (CollectionUtils.isNotEmpty(o.getChildren())) {
@@ -573,6 +722,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         orgs.sort((o1, o2) -> o1.getPk() - o2.getPk());
     }
 
+    /**
+     * listByParentId
+     *
+     * @param parentId
+     * @return
+     */
     private List<OrgModel> listByParentId(String parentId) {
         HumanCondition humanCondition = new HumanCondition();
         humanCondition.filterEqual(OrgModel::getParent, parentId);
@@ -580,6 +735,13 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return list;
     }
 
+    /**
+     * listByParentIdAndName
+     *
+     * @param parentId
+     * @param name
+     * @return
+     */
     private List<OrgModel> listByParentIdAndName(String parentId, String name) {
         HumanCondition humanCondition = new HumanCondition().
                 filterEqual(OrgModel::getParent, parentId).
@@ -587,6 +749,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return getModelMapper().list(humanCondition);
     }
 
+    /**
+     * listByPathNames
+     *
+     * @param pathList
+     * @return
+     */
     private List<OrgModel> listByPathNames(List<String> pathList) {
         if (CollectionUtils.isEmpty(pathList)) {
             return Collections.emptyList();
@@ -595,6 +763,13 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         }
     }
 
+    /**
+     * getLastOrgByPath
+     *
+     * @param pathList
+     * @param orgModelList
+     * @return
+     */
     private OrgModel getLastOrgByPath(List<String> pathList, List<OrgModel> orgModelList) {
         String path = String.join("/", pathList);
 
@@ -614,6 +789,13 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(path));
     }
 
+    /**
+     * getOrgPathByLastOrg
+     *
+     * @param lastOrgModel
+     * @param fullOrgModelList
+     * @return
+     */
     private String getOrgPathByLastOrg(OrgModel lastOrgModel, List<OrgModel> fullOrgModelList) {
         if (CollectionUtils.isEmpty(fullOrgModelList)) {
             return StringUtils.EMPTY;

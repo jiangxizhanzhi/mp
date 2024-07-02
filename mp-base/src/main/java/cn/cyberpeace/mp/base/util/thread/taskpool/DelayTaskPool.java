@@ -37,14 +37,28 @@ public class DelayTaskPool {
         private boolean running = false;
     }
 
+    /**
+     * DelayTaskPool
+     */
     public DelayTaskPool() {
         this(new TaskPool(DEFAULT_POOL_SIZE));
     }
 
+    /**
+     * DelayTaskPool
+     *
+     * @param taskPool
+     */
     public DelayTaskPool(TaskPool taskPool) {
         this(taskPool, DEFAULT_RUN_DELAY);
     }
 
+    /**
+     * DelayTaskPool
+     *
+     * @param taskPool
+     * @param runDelay
+     */
     public DelayTaskPool(TaskPool taskPool, int runDelay) {
         this.taskPool = taskPool;
         this.runPool = new TaskPool(2);

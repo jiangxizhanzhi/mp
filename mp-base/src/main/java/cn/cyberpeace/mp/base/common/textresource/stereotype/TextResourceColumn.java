@@ -10,10 +10,25 @@ import java.lang.annotation.*;
 @Documented
 public @interface TextResourceColumn {
 
+    /**
+     * headers
+     *
+     * @return
+     */
     String[] headers() default {};
 
+    /**
+     * converter
+     *
+     * @return
+     */
     Class<? extends TextResourceConverter> converter() default TextResourceDefaultConverter.class;
 
+    /**
+     * seq
+     *
+     * @return int
+     */
     int seq() default 0;
 
 }

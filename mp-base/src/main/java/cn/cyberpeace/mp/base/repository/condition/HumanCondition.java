@@ -54,19 +54,45 @@ public class HumanCondition {
     /** 当前表别名，设置后构造条件对应于该关联表 */
     private String currentLinkName;
 
+    /**
+     * formatSqlElement
+     *
+     * @param sqlElement
+     * @return
+     */
     public static String formatSqlElement(String sqlElement) {
         return String.format("`%s`", sqlElement);
     }
 
+    /**
+     * genLinkFieldName
+     *
+     * @param linkName
+     * @param fieldName
+     * @return
+     */
     public String genLinkFieldName(String linkName, String fieldName) {
         return StringUtils.joinWith(".", linkName, fieldName);
     }
 
+    /**
+     * genLinkFieldName
+     *
+     * @param model
+     * @param fieldName
+     * @return
+     */
     public String genLinkFieldName(Class<?> model, String fieldName) {
         String linkName = linkedModelNames.get(model);
         return genLinkFieldName(linkName, fieldName);
     }
 
+    /**
+     * currentFieldName
+     *
+     * @param fieldName
+     * @return
+     */
     public String currentFieldName(String fieldName) {
         if (currentLinkName == null) {
             return formatSqlElement(fieldName);
@@ -75,6 +101,12 @@ public class HumanCondition {
         }
     }
 
+    /**
+     * currentColumnName
+     *
+     * @param fieldName
+     * @return
+     */
     public String currentColumnName(String fieldName) {
         return currentFieldName(TextUtils.humpToLine(fieldName));
     }

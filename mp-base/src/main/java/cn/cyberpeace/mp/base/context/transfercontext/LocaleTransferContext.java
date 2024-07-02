@@ -16,11 +16,21 @@ public class LocaleTransferContext implements TransferContext<Map<String, String
 
     public static final String VARIANT_KEY = "VARIANT";
 
+    /**
+     * getKey
+     *
+     * @return
+     */
     @Override
     public String getKey() {
         return "LOCALE";
     }
 
+    /**
+     * getValue
+     *
+     * @return
+     */
     @Override
     public Map<String, String> getValue() {
         Locale locale = LocaleContextHolder.getLocale();
@@ -28,6 +38,11 @@ public class LocaleTransferContext implements TransferContext<Map<String, String
                 locale.getVariant());
     }
 
+    /**
+     * setValue
+     *
+     * @param value
+     */
     @Override
     public void setValue(Map<String, String> value) {
         LocaleContextHolder.setLocale(new Locale(value.getOrDefault(LANGUAGE_KEY, StringUtils.EMPTY),

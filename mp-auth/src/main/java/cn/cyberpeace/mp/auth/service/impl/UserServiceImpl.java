@@ -122,12 +122,24 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     private UserRoleMapper userRoleMapper;
 
 
+    /**
+     * UserServiceImpl
+     *
+     * @param modelMapper
+     * @param modelFields
+     */
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
     }
 
+    /**
+     * get
+     *
+     * @param id
+     * @return
+     */
     @Override
     @Cacheable(value = CACHE_VAL_USERMODEL_BY_ID)
     public ObjServiceResult<UserModel> get(String id) {
@@ -137,6 +149,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userModelObjServiceResult;
     }
 
+    /**
+     * getUserDto
+     *
+     * @param id
+     * @return
+     */
     @Override
     @Cacheable(value = CACHE_VAL_USERDTO)
     public UserBo getUserDto(String id) {
@@ -147,6 +165,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userBo;
     }
 
+    /**
+     * getUserDtoNoRestrict
+     *
+     * @param id
+     * @return
+     */
     @Override
     public UserBo getUserDtoNoRestrict(String id) {
         UserModel userModel = getModelMapper().get(id);
@@ -156,6 +180,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    /**
+     * getUserModelNoRestrictByUserIds
+     *
+     * @param ids
+     * @return
+     */
     @Override
     public List<UserModel> getUserModelNoRestrictByUserIds(List<String> ids) {
         if (CollectionUtils.isEmpty(ids)) {
@@ -172,6 +202,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     /**
      * 判断是否有头像，没有则设置为默认头像
+     *
      * @param userModel
      */
     @Override
@@ -187,6 +218,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     /**
      * 判断是否有头像，没有则设置为默认头像
+     *
      * @param userModels
      */
     @Override
@@ -213,6 +245,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     /**
      * 批量转换头像路径为fdfs地址
+     *
      * @param userBos
      */
     public void batchSetDefaultIfNoAvatar(List<UserBo> userBos) {
@@ -231,6 +264,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    /**
+     * getCurrentUserDto
+     *
+     * @return
+     */
     @Override
     public UserBo getCurrentUserDto() {
         UserModel userModel = UserUtils.getLoginUser();
@@ -242,6 +280,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userBo;
     }
 
+    /**
+     * list
+     *
+     * @param queryParams
+     * @return
+     */
     @Override
     public ListObjServiceResult list(UserQueryParams queryParams) {
         opUserPermCheckService.checkByTargetUserIdsForSearching(Objects.nonNull(queryParams.getIds()) ? Arrays.asList(queryParams.getIds()) : null);
@@ -266,6 +310,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return listObjSrvResult;
     }
 
+    /**
+     * create
+     *
+     * @param obj
+     * @param fields
+     * @return
+     */
     @Override
     public ObjServiceResult<UserModel> create(UserModel obj, String[] fields) {
         obj.encodePassword();
@@ -277,6 +328,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return super.create(obj, fields);
     }
 
+    /**
+     * update
+     *
+     * @param obj
+     * @param fields
+     * @return
+     */
     @Override
     public ObjServiceResult<UserModel> update(UserModel obj, String[] fields) {
         obj.encodePassword();
@@ -289,6 +347,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return ret;
     }
 
+    /**
+     * bulkCreate
+     *
+     * @param objs
+     * @return
+     */
     @Override
     public ServiceResult<Integer> bulkCreate(List<UserModel> objs) {
         for (UserModel obj : objs) {
@@ -300,12 +364,24 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return ret;
     }
 
+    /**
+     * bulkCreateWithPasswordPreSet
+     *
+     * @param objs
+     * @return
+     */
     @Override
     public ServiceResult<Integer> bulkCreateWithPasswordPreSet(List<UserModel> objs) {
         ServiceResult<Integer> ret = super.bulkCreate(objs);
         return ret;
     }
 
+    /**
+     * bulkUpdate
+     *
+     * @param objs
+     * @return
+     */
     @Override
     public ServiceResult<Integer> bulkUpdate(List<UserModel> objs) {
         for (UserModel obj : objs) {
@@ -316,6 +392,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return ret;
     }
 
+    /**
+     * delete
+     *
+     * @param userId
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Boolean>  delete(String userId) {
@@ -334,6 +416,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return ret;
     }
 
+    /**
+     * bulkDelete
+     *
+     * @param userIds
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Integer> bulkDelete(String[] userIds) {
@@ -354,6 +442,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return ret;
     }
 
+    /**
+     * add
+     *
+     * @param createRequest
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserModel add(UserRequest createRequest) {
@@ -373,6 +467,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userCreated;
     }
 
+    /**
+     * modify
+     *
+     * @param modifyRequest
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserModel modify(UserRequest modifyRequest) {
@@ -392,6 +492,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userModified;
     }
 
+    /**
+     * upsertUserModel
+     *
+     * @param userModel
+     * @return
+     */
     private UserModel upsertUserModel(UserModel userModel) {
         if (StringUtils.isNotBlank(userModel.getId())) {
             UserModel existUser = super.getModelMapper().get(userModel.getId());
@@ -405,6 +511,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
     }
 
+    /**
+     * saveNewUser
+     *
+     * @param inputUserModel
+     * @return
+     */
     private UserModel saveNewUser(UserModel inputUserModel) {
         // 保存用户
         UserModel userModel = new UserModel();
@@ -431,6 +543,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return result.getSource().getObj();
     }
 
+    /**
+     * updateExistUser
+     *
+     * @param inputUserModel
+     * @return
+     */
     private UserModel updateExistUser(UserModel inputUserModel) {
         // 保存用户
         UserModel userModel = new UserModel();
@@ -464,6 +582,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    /**
+     * saveUserRoleRelation
+     *
+     * @param roleIds
+     * @param userId
+     */
     private void saveUserRoleRelation(List<String> roleIds, String userId) {
         // 保存角色-用户关系
         if (CollectionUtils.isNotEmpty(roleIds)) {
@@ -483,6 +607,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
     }
 
+    /**
+     * saveUserOrgRelation
+     *
+     * @param orgIds
+     * @param userId
+     */
     private void saveUserOrgRelation(List<String> orgIds, String userId) {
 
         // 保存组织-用户关系
@@ -505,6 +635,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    /**
+     * getByUserName
+     *
+     * @param userName
+     * @return
+     */
     @Override
     @Cacheable(value = CACHE_VAL_USERMODEL_BY_USERNAME)
     public UserModel getByUserName(String userName) {
@@ -513,6 +649,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userModel;
     }
 
+    /**
+     * getByIdent
+     *
+     * @param ident
+     * @return
+     */
     @Override
     public UserModel getByIdent(String ident) {
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("identifier", ident));
@@ -520,6 +662,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userModel;
     }
 
+    /**
+     * getByMobile
+     *
+     * @param mobile
+     * @return
+     */
     @Override
     public UserModel getByMobile(String mobile) {
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("mobile", mobile));
@@ -527,6 +675,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userModel;
     }
 
+    /**
+     * resetSelfPwd
+     *
+     * @param oldPwd
+     * @param newPwd
+     * @return boolean
+     */
     @Override
     public boolean resetSelfPwd(String oldPwd, String newPwd) {
         UserModel currentUser = UserUtils.getLoginUser();
@@ -552,6 +707,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return true;
     }
 
+    /**
+     * resetPwd
+     *
+     * @param userId
+     * @param newPwd
+     * @return boolean
+     */
     @Override
     public boolean resetPwd(String userId, String newPwd) {
         // 密码是否合法
@@ -573,6 +735,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return true;
     }
 
+    /**
+     * disable
+     *
+     * @param userId
+     * @return boolean
+     */
     @Override
     public boolean disable(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
@@ -598,6 +766,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    /**
+     * batchDisable
+     *
+     * @param userIds
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String batchDisable(List<String> userIds) {
@@ -619,6 +793,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return errMsg.toString();
     }
 
+    /**
+     * enable
+     *
+     * @param userId
+     * @return boolean
+     */
     @Override
     public boolean enable(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
@@ -643,6 +823,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    /**
+     * batchEnable
+     *
+     * @param userIds
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String batchEnable(List<String> userIds) {
@@ -665,6 +851,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    /**
+     * approve
+     *
+     * @param userId
+     * @return boolean
+     */
     @Override
     public boolean approve(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
@@ -688,6 +880,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    /**
+     * batchApprove
+     *
+     * @param userIds
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String batchApprove(List<String> userIds) {
@@ -709,6 +907,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return errMsg.toString();
     }
 
+    /**
+     * loadListFilterCondition
+     *
+     * @param humanCondition
+     * @param queryParams
+     */
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, UserQueryParams queryParams) {
         String tenant = queryParams.getTenant();
@@ -733,6 +937,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    /**
+     * downloadExcelTemplate
+     */
     @Override
     public void downloadExcelTemplate() {
         try {
@@ -770,6 +977,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
     }
 
+    /**
+     * importUsers
+     *
+     * @param list
+     */
     @Override
     public void importUsers(List<ImportUserBo> list) {
         List<UserModel> userModels = new ArrayList<>();
@@ -818,6 +1030,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         userImportService.doImport(userModels, userRoleModels, tenantUserModels);
     }
 
+    /**
+     * exportExcel
+     *
+     * @param users
+     * @return
+     */
     @Override
     public List<ExportUserBo> exportExcel(List<UserModel> users) {
         List<ExportUserBo> exportUserBoList = new ArrayList<>();
@@ -830,6 +1048,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return exportUserBoList;
     }
 
+    /**
+     * exportExcelEn
+     *
+     * @param users
+     * @return
+     */
     @Override
     public List<ExportUserEnBo> exportExcelEn(List<UserModel> users) {
         List<ExportUserEnBo> exportUserList = new ArrayList<>();
@@ -842,6 +1066,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return exportUserList;
     }
 
+    /**
+     * updateAvatar
+     *
+     * @param userId
+     * @param multipartFile
+     * @return boolean
+     */
     @Override
     public boolean updateAvatar(String userId, MultipartFile multipartFile) throws MpRuntimeException {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
@@ -899,6 +1130,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    /**
+     * userModel2UserDto
+     *
+     * @param userModel
+     * @return
+     */
     @Override
     public UserBo userModel2UserDto(UserModel userModel) {
         if (Objects.isNull(userModel)) {
@@ -908,6 +1145,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    /**
+     * userModel2UserDtoWithoutOrg
+     *
+     * @param userModel
+     * @return
+     */
     @Override
     public UserBo userModel2UserDtoWithoutOrg(UserModel userModel) {
         if (Objects.isNull(userModel)) {
@@ -916,6 +1159,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return doModel2Dto(userModel, false, true);
     }
 
+    /**
+     * userOrgRoleDtos2UserDtos
+     *
+     * @param userOrgRoleBos
+     * @return
+     */
     @Override
     // 这个缓存无效，变量不可控
     // @Cacheable(value = CACHE_VAL_ORGDTOS_TO_USERDTOS)
@@ -1003,6 +1252,14 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userBos;
     }
 
+    /**
+     * doModel2Dto
+     *
+     * @param userModel
+     * @param needOrg
+     * @param needRole
+     * @return
+     */
     @Override
     public UserBo doModel2Dto(UserModel userModel, boolean needOrg, boolean needRole) {
         ParamCheck.notBlank(userModel.getId(), AuthBasei18nCode.USER_ID);
@@ -1058,6 +1315,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 //        return userOnlineReportService.page(pageRequest);
 //    }
 
+    /**
+     * listNotAudited
+     *
+     * @return
+     */
     @Override
     public List<UserModel> listNotAudited() {
         List<UserModel> userModels = getModelMapper().list(new HumanCondition().filterEqual("is_audited", "0"));
@@ -1067,6 +1329,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userModels;
     }
 
+    /**
+     * listByUserIds
+     *
+     * @param userIds
+     * @return
+     */
     @Override
     public List<UserBo> listByUserIds(String[] userIds) {
         List<UserOrgRoleBo> userOrgRoleBos = getByUserIds(userIds);
@@ -1077,6 +1345,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userBos;
     }
 
+    /**
+     * totalUserCnt
+     *
+     * @return int
+     */
     @Override
     public int totalUserCnt() {
         int userCnt = getModelMapper().total(new HumanCondition());
@@ -1084,18 +1357,35 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    /**
+     * setModelMapper
+     *
+     * @param modelMapper
+     */
     @Override
     public void setModelMapper(UserMapper modelMapper) {
         super.setModelMapper(modelMapper);
     }
 
 
+    /**
+     * getDefaultUserAvatar
+     *
+     * @return
+     */
     @Override
     public String getDefaultUserAvatar() {
         return authConfig.getDefaultUserAvatar();
     }
 
 
+    /**
+     * processIsAdminSuperUser
+     *
+     * @param userBo
+     * @param isAdmin
+     * @param isSuperUser
+     */
     private void processIsAdminSuperUser(UserBo userBo, boolean isAdmin, boolean isSuperUser) {
         if (isAdmin) {
             userBo.setIsAdmin(1);
@@ -1110,6 +1400,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
     }
 
+    /**
+     * importUser2UserModel
+     *
+     * @param importUserBo
+     * @return
+     */
     private UserModel importUser2UserModel(ImportUserBo importUserBo) {
         if (Objects.isNull(importUserBo)) {
             return null;
@@ -1131,6 +1427,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    /**
+     * user2ExportUser
+     *
+     * @param user
+     * @return
+     */
     private ExportUserBo user2ExportUser(UserModel user) {
         if (Objects.isNull(user)) {
             return null;
@@ -1188,6 +1490,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    /**
+     * user2ExportUserEn
+     *
+     * @param userModel
+     * @return
+     */
     private ExportUserEnBo user2ExportUserEn(UserModel userModel) {
         ExportUserBo exportUserBo = user2ExportUser(userModel);
 
@@ -1200,6 +1508,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    /**
+     * deleteReleated
+     *
+     * @param userId
+     */
     private void deleteReleated(String userId) {
         if (StringUtils.isBlank(userId)) {
             return;
@@ -1221,6 +1534,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
     }
 
+    /**
+     * getByUserIds
+     *
+     * @param userIds
+     * @return
+     */
     public List<UserOrgRoleBo> getByUserIds(String[] userIds) {
         HumanCondition userCondition = new HumanCondition()
                 .filterIn(UserModel::getId, userIds)
@@ -1263,6 +1582,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
+    /**
+     * listExistedUserNames
+     *
+     * @param userNames
+     * @param limit
+     * @return
+     */
     @Override
     public List<String> listExistedUserNames(List<String> userNames, Integer limit) {
         HumanCondition condition = new HumanCondition().filterIn(UserModel::getUsername, userNames.toArray());
@@ -1282,26 +1608,53 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 class GroupConcat extends Aggregation<GroupConcat> {
 
+    /**
+     * genDistinct
+     *
+     * @return
+     */
     public static Function<String, String> genDistinct() {
         return column -> String.format("distinct (%s)", column);
     }
 
+    /**
+     * distinct
+     *
+     * @return
+     */
     public GroupConcat distinct() {
         addCalc(genDistinct());
         return this;
     }
 
+    /**
+     * f
+     *
+     * @param fieldName
+     * @return
+     */
     public static GroupConcat f(String fieldName) {
         GroupConcat aggregation = new GroupConcat();
         aggregation.setFieldName(fieldName);
         return aggregation;
     }
 
+    /**
+     * f
+     *
+     * @param getter
+     * @return
+     */
     public static <T> GroupConcat f(SerializableFunction<T> getter) {
         String fieldName = BeanUtils.getBeanGetterFieldName(getter);
         return f(fieldName);
     }
 
+    /**
+     * getFuncName
+     *
+     * @return
+     */
     @Override
     public String getFuncName() {
         return "group_concat";

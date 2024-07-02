@@ -10,24 +10,48 @@ public class ListTreeNode<T> {
 
     private final List<ListTreeNode<T>> children = new ArrayList<>();
 
+    /**
+     * ListTreeNode
+     */
     public ListTreeNode() {
         value = null;
     }
 
+    /**
+     * ListTreeNode
+     *
+     * @param value
+     */
     public ListTreeNode(T value) {
         this.value = value;
     }
 
+    /**
+     * get
+     *
+     * @return
+     */
     public T get() {
         return value;
     }
 
+    /**
+     * addChild
+     *
+     * @param children
+     * @return
+     */
     @SafeVarargs
     public final ListTreeNode<T> addChild(ListTreeNode<T>... children) {
         this.children.addAll(Arrays.asList(children));
         return this;
     }
 
+    /**
+     * getChildren
+     *
+     * @return
+     */
     public List<ListTreeNode<T>> getChildren() {
         return children;
     }

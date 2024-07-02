@@ -5,10 +5,25 @@ public class CharSequenceUtil {
     public static final int INDEX_NOT_FOUND = -1;
 
 
+    /**
+     * subPre
+     *
+     * @param string
+     * @param toIndexExclude
+     * @return
+     */
     public static String subPre(CharSequence string, int toIndexExclude) {
         return sub(string, 0, toIndexExclude);
     }
 
+    /**
+     * sub
+     *
+     * @param str
+     * @param fromIndexInclude
+     * @param toIndexExclude
+     * @return
+     */
     public static String sub(CharSequence str, int fromIndexInclude, int toIndexExclude) {
         if (isEmpty(str)) {
             return str(str);
@@ -46,18 +61,42 @@ public class CharSequenceUtil {
         return str.toString().substring(fromIndexInclude, toIndexExclude);
     }
 
+    /**
+     * isEmpty
+     *
+     * @param str
+     * @return boolean
+     */
     public static boolean isEmpty(CharSequence str) {
         return str == null || str.length() == 0;
     }
 
+    /**
+     * str
+     *
+     * @param cs
+     * @return
+     */
     public static String str(CharSequence cs) {
         return null == cs ? null : cs.toString();
     }
 
+    /**
+     * isNotBlank
+     *
+     * @param str
+     * @return boolean
+     */
     public static boolean isNotBlank(CharSequence str) {
         return false == isBlank(str);
     }
 
+    /**
+     * isBlank
+     *
+     * @param str
+     * @return boolean
+     */
     public static boolean isBlank(CharSequence str) {
         int length;
 
@@ -75,14 +114,38 @@ public class CharSequenceUtil {
         return true;
     }
 
+    /**
+     * addSuffixIfNot
+     *
+     * @param str
+     * @param suffix
+     * @return
+     */
     public static String addSuffixIfNot(CharSequence str, CharSequence suffix) {
         return appendIfMissing(str, suffix, suffix);
     }
 
+    /**
+     * appendIfMissing
+     *
+     * @param str
+     * @param suffix
+     * @param suffixes
+     * @return
+     */
     public static String appendIfMissing(CharSequence str, CharSequence suffix, CharSequence... suffixes) {
         return appendIfMissing(str, suffix, false, suffixes);
     }
 
+    /**
+     * appendIfMissing
+     *
+     * @param str
+     * @param suffix
+     * @param ignoreCase
+     * @param testSuffixes
+     * @return
+     */
     public static String appendIfMissing(CharSequence str, CharSequence suffix, boolean ignoreCase, CharSequence... testSuffixes) {
         if (str == null || isEmpty(suffix) || endWith(str, suffix, ignoreCase)) {
             return str(str);
@@ -97,6 +160,14 @@ public class CharSequenceUtil {
         return str.toString().concat(suffix.toString());
     }
 
+    /**
+     * endWith
+     *
+     * @param str
+     * @param suffix
+     * @param isIgnoreCase
+     * @return boolean
+     */
     public static boolean endWith(CharSequence str, CharSequence suffix, boolean isIgnoreCase) {
         if (null == str || null == suffix) {
             return null == str && null == suffix;
@@ -109,6 +180,13 @@ public class CharSequenceUtil {
         }
     }
 
+    /**
+     * removePrefix
+     *
+     * @param str
+     * @param prefix
+     * @return
+     */
     public static String removePrefix(CharSequence str, CharSequence prefix) {
         if (isEmpty(str) || isEmpty(prefix)) {
             return str(str);
@@ -121,6 +199,13 @@ public class CharSequenceUtil {
         return str2;
     }
 
+    /**
+     * subSuf
+     *
+     * @param string
+     * @param fromIndex
+     * @return
+     */
     public static String subSuf(CharSequence string, int fromIndex) {
         if (isEmpty(string)) {
             return null;
@@ -128,18 +213,46 @@ public class CharSequenceUtil {
         return sub(string, fromIndex, string.length());
     }
 
+    /**
+     * isNotEmpty
+     *
+     * @param str
+     * @return boolean
+     */
     public static boolean isNotEmpty(CharSequence str) {
         return false == isEmpty(str);
     }
 
+    /**
+     * contains
+     *
+     * @param str
+     * @param searchChar
+     * @return boolean
+     */
     public static boolean contains(CharSequence str, char searchChar) {
         return indexOf(str, searchChar) > -1;
     }
 
+    /**
+     * indexOf
+     *
+     * @param str
+     * @param searchChar
+     * @return int
+     */
     public static int indexOf(final CharSequence str, char searchChar) {
         return indexOf(str, searchChar, 0);
     }
 
+    /**
+     * indexOf
+     *
+     * @param str
+     * @param searchChar
+     * @param start
+     * @return int
+     */
     public static int indexOf(CharSequence str, char searchChar, int start) {
         if (str instanceof String) {
             return ((String) str).indexOf(searchChar, start);
@@ -148,6 +261,15 @@ public class CharSequenceUtil {
         }
     }
 
+    /**
+     * indexOf
+     *
+     * @param str
+     * @param searchChar
+     * @param start
+     * @param end
+     * @return int
+     */
     public static int indexOf(final CharSequence str, char searchChar, int start, int end) {
         if (isEmpty(str)) {
             return INDEX_NOT_FOUND;
@@ -167,10 +289,23 @@ public class CharSequenceUtil {
         return INDEX_NOT_FOUND;
     }
 
+    /**
+     * trim
+     *
+     * @param str
+     * @return
+     */
     public static String trim(CharSequence str) {
         return (null == str) ? null : trim(str, 0);
     }
 
+    /**
+     * trim
+     *
+     * @param str
+     * @param mode
+     * @return
+     */
     public static String trim(CharSequence str, int mode) {
         String result;
         if (str == null) {
@@ -199,6 +334,13 @@ public class CharSequenceUtil {
         return result;
     }
 
+    /**
+     * removePrefixIgnoreCase
+     *
+     * @param str
+     * @param prefix
+     * @return
+     */
     public static String removePrefixIgnoreCase(CharSequence str, CharSequence prefix) {
         if (isEmpty(str) || isEmpty(prefix)) {
             return str(str);
@@ -211,6 +353,13 @@ public class CharSequenceUtil {
         return str2;
     }
 
+    /**
+     * startWith
+     *
+     * @param str
+     * @param c
+     * @return boolean
+     */
     public static boolean startWith(CharSequence str, char c) {
         if (isEmpty(str)) {
             return false;

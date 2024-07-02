@@ -20,6 +20,13 @@ class YamlPropertyParseUtils extends PropertyUtils {
         this.setSkipMissingProperties(true);
     }
 
+    /**
+     * getProperty
+     *
+     * @param type
+     * @param name
+     * @return
+     */
     @Override
     public Property getProperty(Class<?> type, String name) {
         String formatName = name;
@@ -32,6 +39,13 @@ class YamlPropertyParseUtils extends PropertyUtils {
         return super.getProperty(type, formatName);
     }
 
+    /**
+     * lineToHump
+     *
+     * @param str
+     * @param linePattern
+     * @return
+     */
     public String lineToHump(String str, Pattern linePattern) {
         StringBuilder sb = new StringBuilder();
         Matcher matcher = linePattern.matcher(str);

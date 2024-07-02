@@ -39,6 +39,12 @@ public class UserUtils {
         UserUtils.userService = userService;
     }
 
+    /**
+     * getUser
+     *
+     * @param id
+     * @return
+     */
     public static UserModel getUser(String id) {
         UserModel user;
         ObjResult<UserModel> result = userService.get(id).getSource();
@@ -47,6 +53,14 @@ public class UserUtils {
     }
 
 
+    /**
+     * setLoginUser2RequestAttr
+     *
+     * @param request
+     * @param id
+     * @param username
+     * @param userType
+     */
     public static void setLoginUser2RequestAttr(HttpServletRequest request, String id, String username, String userType) {
         if (Objects.isNull(request)) {
             request = ServletUtils.getRequest();
@@ -104,6 +118,11 @@ public class UserUtils {
     }
 
 
+    /**
+     * getLoginUserAuthorities
+     *
+     * @return
+     */
     public static Set<String> getLoginUserAuthorities() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (Objects.isNull(authentication)) {
@@ -116,7 +135,11 @@ public class UserUtils {
     }
 
 
-
+    /**
+     * getLoginUserDtoWithoutOrg
+     *
+     * @return
+     */
     public static UserBo getLoginUserDtoWithoutOrg() {
         UserModel currentUserModel = getLoginUser();
         if (Objects.isNull(currentUserModel)) {

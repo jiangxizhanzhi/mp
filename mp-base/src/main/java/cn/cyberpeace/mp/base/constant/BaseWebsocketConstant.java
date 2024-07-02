@@ -5,5 +5,8 @@ public class BaseWebsocketConstant {
     @SuppressWarnings("java:S1075")
     public static final String BASE_API_PREFIX = "/ws";
 
+    /**
+     * BaseWebsocketConstant
+     */
     private BaseWebsocketConstant() {}
 }

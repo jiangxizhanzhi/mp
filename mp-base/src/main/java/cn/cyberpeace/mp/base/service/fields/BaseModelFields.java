@@ -20,6 +20,12 @@ public abstract class BaseModelFields extends BaseFields {
     public static final DynamicFields orderFields = new DynamicFields(BaseModel::getCreateTime,
             BaseModel::getUpdateTime);
 
+    /**
+     * clearNotWritableFields
+     *
+     * @param obj
+     * @param keepId
+     */
     public void clearNotWritableFields(BaseModel obj, boolean keepId) {
         String id = keepId ? obj.getId() : null;
 

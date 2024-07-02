@@ -11,6 +11,11 @@ import java.util.Map;
 @Configuration
 public class WebSocketConfig {
 
+    /**
+     * serverEndpointExporter
+     *
+     * @return fromorg.springframework.web.socket.server.standard.ServerEndpointExporter
+     */
     @Bean
     public ServerEndpointExporter serverEndpointExporter() {
         return new ServerEndpointExporter();
@@ -20,6 +25,13 @@ public class WebSocketConfig {
 
         public static final String USER_HEADERS_KEY = "headers";
 
+        /**
+         * modifyHandshake
+         *
+         * @param sec
+         * @param request
+         * @param response
+         */
         @Override
         public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
             super.modifyHandshake(sec, request, response);

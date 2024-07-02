@@ -12,6 +12,11 @@ public interface ErrorCode extends ServiceCode {
     @SuppressWarnings("java:S2386")
     Map<Integer, InnerCode> codeMap = new HashMap<>();
 
+    /**
+     * getInnerCode
+     *
+     * @return
+     */
     @Override
     default InnerCode getInnerCode() {
         Integer key = this.hashCode();

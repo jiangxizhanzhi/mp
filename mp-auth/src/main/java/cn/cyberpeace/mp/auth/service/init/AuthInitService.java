@@ -26,6 +26,11 @@ public class AuthInitService implements ApplicationListener<ContextRefreshedEven
     @Autowired
     private AuthConfig authConfig;
 
+    /**
+     * onApplicationEvent
+     *
+     * @param event
+     */
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         String jwtSecret = authConfig.getAuthenticateJwtSecret();
@@ -46,6 +51,11 @@ public class AuthInitService implements ApplicationListener<ContextRefreshedEven
         }*/
     }
 
+    /**
+     * setEnvironment
+     *
+     * @param environment
+     */
     @Override
     public void setEnvironment(Environment environment) {
         this.environment = environment;

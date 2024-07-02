@@ -123,6 +123,9 @@ public abstract class BaseGroupServer extends BaseServer {
 
     private static final Map<Class<?>, List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>>> serverGroupSessionsListMap = new HashMap<>();
 
+    /**
+     * initServerGroupSessionsListMap
+     */
     public static void initServerGroupSessionsListMap() {
         for (Map.Entry<String, BaseGroupServer> entry : BeanCommon.getBeanType(BaseGroupServer.class).entrySet()) {
             String name = entry.getKey();
@@ -136,11 +139,30 @@ public abstract class BaseGroupServer extends BaseServer {
         }
     }
 
+    /**
+     * sendToGroup
+     *
+     * @param serverClass
+     * @param groupKey
+     * @param data
+     * @param type
+     * @param context
+     */
     public static <T> void sendToGroup(Class<?> serverClass, String groupKey,
                                        T data, String type, Map<String, Object> context) {
         sendToGroup(serverClass, 0, groupKey, data, type, context);
     }
 
+    /**
+     * sendToGroup
+     *
+     * @param serverClass
+     * @param groupIndex
+     * @param groupKey
+     * @param data
+     * @param type
+     * @param context
+     */
     public static <T> void sendToGroup(Class<?> serverClass, int groupIndex, String groupKey,
                                        T data, String type, Map<String, Object> context) {
         List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>> groupSessionsList = serverGroupSessionsListMap.get(serverClass);
@@ -160,6 +182,15 @@ public abstract class BaseGroupServer extends BaseServer {
         }
     }
 
+    /**
+     * sendToGroupIndex
+     *
+     * @param serverClass
+     * @param groupIndex
+     * @param data
+     * @param type
+     * @param context
+     */
     public static <T> void sendToGroupIndex(Class<?> serverClass, int groupIndex,
                                             T data, String type, Map<String, Object> context) {
         List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>> groupSessionsList = serverGroupSessionsListMap.get(serverClass);
@@ -178,40 +209,98 @@ public abstract class BaseGroupServer extends BaseServer {
         }
     }
 
+    /**
+     * sendToSession
+     *
+     * @param serverClass
+     * @param sessionKey
+     * @param data
+     * @param type
+     * @param context
+     */
     public static <T> void sendToSession(Class<?> serverClass, String sessionKey,
                                          T data, String type, Map<String, Object> context) {
         BaseServer.sendToSession(serverClass, sessionKey, data, type, context);
     }
 
+    /**
+     * sendToAllSessions
+     *
+     * @param serverClass
+     * @param data
+     * @param type
+     * @param context
+     */
     public static <T> void sendToAllSessions(Class<?> serverClass,
                                              T data, String type, Map<String, Object> context) {
         BaseServer.sendToAllSessions(serverClass, data, type, context);
     }
 
+    /**
+     * sendCloseToGroup
+     *
+     * @param serverClass
+     * @param groupKey
+     */
     public static void sendCloseToGroup(Class<?> serverClass, String groupKey) {
         sendToGroup(serverClass, groupKey, null, BaseServer.CLOSE_TYPE, null);
     }
 
+    /**
+     * sendCloseToGroup
+     *
+     * @param serverClass
+     * @param groupIndex
+     * @param groupKey
+     */
     public static void sendCloseToGroup(Class<?> serverClass, int groupIndex, String groupKey) {
         sendToGroup(serverClass, groupIndex, groupKey, null, BaseServer.CLOSE_TYPE, null);
     }
 
+    /**
+     * sendCloseToGroupIndex
+     *
+     * @param serverClass
+     * @param groupIndex
+     */
     public static void sendCloseToGroupIndex(Class<?> serverClass, int groupIndex) {
         sendToGroupIndex(serverClass, groupIndex, null, BaseServer.CLOSE_TYPE, null);
     }
 
+    /**
+     * sendCloseToSession
+     *
+     * @param serverClass
+     * @param sessionKey
+     */
     public static void sendCloseToSession(Class<?> serverClass, String sessionKey) {
         sendToSession(serverClass, sessionKey, null, CLOSE_TYPE, null);
     }
 
+    /**
+     * sendCloseToAllSessions
+     *
+     * @param serverClass
+     */
     public static void sendCloseToAllSessions(Class<?> serverClass) {
         sendToAllSessions(serverClass, null, CLOSE_TYPE, null);
     }
 
+    /**
+     * getGroupSessionsList
+     *
+     * @return
+     */
     protected List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>> getGroupSessionsList() {
         return serverGroupSessionsListMap.get(this.getClass());
     }
 
+    /**
+     * getGroupSessionsMap
+     *
+     * @param groupIndex
+     * @return
+     */
     protected ConcurrentHashMap<String, ConcurrentHashMap<String, Session>> getGroupSessionsMap(int groupIndex) {
         List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>> groupSessionsList = getGroupSessionsList();
         if (groupSessionsList.size() < groupIndex + 1) {
@@ -239,6 +328,11 @@ public abstract class BaseGroupServer extends BaseServer {
         this.groupKeys = groupKeys;
     }
 
+    /**
+     * onOpen
+     *
+     * @param session
+     */
     @Override
     @OnOpen
     public void onOpen(Session session) throws ValidateException {
@@ -257,6 +351,9 @@ public abstract class BaseGroupServer extends BaseServer {
         }
     }
 
+    /**
+     * onClose
+     */
     @Override
     @OnClose
     public void onClose() {

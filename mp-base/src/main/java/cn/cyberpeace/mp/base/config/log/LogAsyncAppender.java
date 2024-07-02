@@ -13,6 +13,11 @@ public class LogAsyncAppender extends AsyncAppender {
 
     private static final Field mdcPropertyMapField = ClassUtils.getField(LoggingEvent.class, "mdcPropertyMap", false, false);
 
+    /**
+     * preprocess
+     *
+     * @param eventObject
+     */
     @Override
     protected void preprocess(ILoggingEvent eventObject) {
         // 每次打印日志前设置 追踪id

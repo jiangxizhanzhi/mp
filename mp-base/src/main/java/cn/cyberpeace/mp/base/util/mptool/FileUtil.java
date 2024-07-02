@@ -56,6 +56,12 @@ public class FileUtil {
         return mkParentDirs(file(path));
     }
 
+    /**
+     * file
+     *
+     * @param path
+     * @return
+     */
     public static File file(String path) {
         if (null == path) {
             return null;
@@ -63,6 +69,12 @@ public class FileUtil {
         return new File(getAbsolutePath(path));
     }
 
+    /**
+     * mkParentDirs
+     *
+     * @param file
+     * @return
+     */
     public static File mkParentDirs(File file) {
         if (null == file) {
             return null;
@@ -70,6 +82,12 @@ public class FileUtil {
         return mkdir(file.getParentFile());
     }
 
+    /**
+     * mkdir
+     *
+     * @param dir
+     * @return
+     */
     public static File mkdir(File dir) {
         if (dir == null) {
             return null;
@@ -121,6 +139,12 @@ public class FileUtil {
         }
     }
 
+    /**
+     * ls
+     *
+     * @param path
+     * @return
+     */
     public static File[] ls(String path) {
         if (path == null) {
             return null;
@@ -173,6 +197,12 @@ public class FileUtil {
         return normalize(classPath.concat(Objects.requireNonNull(path)));
     }
 
+    /**
+     * isAbsolutePath
+     *
+     * @param path
+     * @return boolean
+     */
     public static boolean isAbsolutePath(String path) {
         if (StrUtil.isEmpty(path)) {
             return false;
@@ -182,6 +212,12 @@ public class FileUtil {
         return StrUtil.C_SLASH == path.charAt(0) || path.matches("^[a-zA-Z]:([/\\\\].*)?");
     }
 
+    /**
+     * normalize
+     *
+     * @param path
+     * @return
+     */
     public static String normalize(String path) {
         if (path == null) {
             return null;
@@ -279,6 +315,12 @@ public class FileUtil {
         return file.delete();
     }
 
+    /**
+     * clean
+     *
+     * @param directory
+     * @return boolean
+     */
     public static boolean clean(File directory) {
         if (directory == null || directory.exists() == false || false == directory.isDirectory()) {
             return true;
@@ -312,10 +354,20 @@ public class FileUtil {
         return mkdir(dir);
     }
 
+    /**
+     * getTmpDirPath
+     *
+     * @return
+     */
     public static String getTmpDirPath() {
         return System.getProperty("java.io.tmpdir");
     }
 
+    /**
+     * getUserHomePath
+     *
+     * @return
+     */
     public static String getUserHomePath() {
         return System.getProperty("user.home");
     }
@@ -341,6 +393,13 @@ public class FileUtil {
         }
     }
 
+    /**
+     * getParent
+     *
+     * @param file
+     * @param level
+     * @return
+     */
     public static File getParent(File file, int level) {
         if (level < 1 || null == file) {
             return file;
@@ -453,10 +512,22 @@ public class FileUtil {
         }
     }
 
+    /**
+     * mkParentDirs
+     *
+     * @param path
+     * @return
+     */
     public static Path mkParentDirs(Path path) {
         return mkdir(path.getParent());
     }
 
+    /**
+     * mkdir
+     *
+     * @param dir
+     * @return
+     */
     public static Path mkdir(Path dir) {
         if (null != dir && false == exists(dir, false)) {
             try {
@@ -469,11 +540,25 @@ public class FileUtil {
         return dir;
     }
 
+    /**
+     * exists
+     *
+     * @param path
+     * @param isFollowLinks
+     * @return boolean
+     */
     public static boolean exists(Path path, boolean isFollowLinks) {
         final LinkOption[] options = isFollowLinks ? new LinkOption[0] : new LinkOption[]{LinkOption.NOFOLLOW_LINKS};
         return Files.exists(path, options);
     }
 
+    /**
+     * isDirectory
+     *
+     * @param path
+     * @param isFollowLinks
+     * @return boolean
+     */
     public static boolean isDirectory(Path path, boolean isFollowLinks) {
         if (null == path) {
             return false;
@@ -501,6 +586,13 @@ public class FileUtil {
     }
 
 
+    /**
+     * setResponse
+     *
+     * @param file
+     * @param delete
+     * @param response
+     */
     public static void setResponse(File file, Boolean delete, HttpServletResponse response) {
         // 以流的形式下载文件。
         InputStream fis = null;

@@ -23,10 +23,20 @@ class SceneElementShapeConverter implements IConverter {
 
     private List<SceneElementShape> shapes;
 
+    /**
+     * SceneElementShapeConverter
+     *
+     * @param shapes
+     */
     public SceneElementShapeConverter(List<SceneElementShape> shapes) {
         this.shapes = shapes;
     }
 
+    /**
+     * convert2BO
+     *
+     * @param container
+     */
     @Override
     public void convert2BO(ConvertDataContainer container) {
         if (CollectionUtils.isEmpty(this.shapes)) {
@@ -60,10 +70,22 @@ class SceneElementShapeConverter implements IConverter {
         }
     }
 
+    /**
+     * formatDouble
+     *
+     * @param number
+     * @return double
+     */
     private double formatDouble(double number) {
         return BigDecimal.valueOf(number).setScale(6, RoundingMode.HALF_DOWN).doubleValue();
     }
 
+    /**
+     * formatDouble
+     *
+     * @param number
+     * @return double
+     */
     private double formatDouble(String number) {
         return new BigDecimal(number).setScale(6, RoundingMode.HALF_DOWN).doubleValue();
     }

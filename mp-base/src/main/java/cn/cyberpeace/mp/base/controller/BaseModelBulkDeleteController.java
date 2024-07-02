@@ -17,6 +17,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Deprecated
 public interface BaseModelBulkDeleteController<M extends BaseModel, S extends BaseModelService<M, ?>> {
 
+    /**
+     * getModelService
+     *
+     * @return
+     */
     S getModelService();
 
     /**

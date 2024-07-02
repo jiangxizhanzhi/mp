@@ -24,6 +24,11 @@ public class UserCreateCheckService implements UserCheckService {
     @Autowired
     private UserService userService;
 
+    /**
+     * check
+     *
+     * @param user
+     */
     public void check(UserModel user) {
 
         ParamCheck.notBlank(user.getUsername(), AuthBasei18nCode.USER_USERNAME);

@@ -5,8 +5,18 @@ package cn.cyberpeace.mp.base.service.param;
  */
 public interface FieldsQueryParams {
 
+    /**
+     * getFields
+     *
+     * @return
+     */
     String[] getFields();
 
+    /**
+     * setFields
+     *
+     * @param fields
+     */
     void setFields(String[] fields);
 
 }

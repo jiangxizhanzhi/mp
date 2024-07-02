@@ -23,6 +23,7 @@ public class JwtCommon {
 
     /**
      * 获取登录token
+     *
      * @return
      */
     public static String getToken() {
@@ -30,6 +31,12 @@ public class JwtCommon {
         return token;
     }
 
+    /**
+     * getToken
+     *
+     * @param request
+     * @return
+     */
     public static String getToken(HttpServletRequest request) {
         String token = request.getHeader(AuthConstant.JWT_HEADER_KEY);
         if (token != null) {
@@ -38,6 +45,12 @@ public class JwtCommon {
         return token;
     }
 
+    /**
+     * verifyToken
+     *
+     * @param token
+     * @return
+     */
     public static UserModel verifyToken(String token) {
         if (token == null) {
             throw new MpRuntimeException(AuthErrorCode.TOKEN_EMPTY_ERROR);
@@ -48,6 +61,12 @@ public class JwtCommon {
         return UserUtils.getUser(user.getId());
     }
 
+    /**
+     * verifyToken
+     *
+     * @param request
+     * @return
+     */
     public static UserModel verifyToken(HttpServletRequest request) {
         String token = JwtCommon.getToken(request);
         return JwtCommon.verifyToken(token);
@@ -55,6 +74,7 @@ public class JwtCommon {
 
     /**
      * 获取当前HTTP请求对象
+     *
      * @return
      */
     public static HttpServletRequest getRequest() {

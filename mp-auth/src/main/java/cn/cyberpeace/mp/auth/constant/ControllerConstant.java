@@ -12,5 +12,8 @@ public class ControllerConstant {
 
     public static final String BASE_UNAUTH_API_PATH = "/unauth";
 
+    /**
+     * ControllerConstant
+     */
     private ControllerConstant() {}
 }

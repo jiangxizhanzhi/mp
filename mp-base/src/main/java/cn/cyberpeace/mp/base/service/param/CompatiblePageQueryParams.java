@@ -5,6 +5,11 @@ package cn.cyberpeace.mp.base.service.param;
  */
 public interface CompatiblePageQueryParams extends PageQueryParams, CompatibleQueryParams {
 
+    /**
+     * ensureCompatible
+     *
+     * @param queryParams
+     */
     static void ensureCompatible(CompatiblePageQueryParams queryParams) {
         Integer perPage = queryParams.getPerPage();
         if (perPage != null) {
@@ -12,10 +17,23 @@ public interface CompatiblePageQueryParams extends PageQueryParams, CompatibleQu
         }
     }
 
+    /**
+     * getPerPage
+     *
+     * @return
+     */
     Integer getPerPage();
 
+    /**
+     * setPerPage
+     *
+     * @param perPage
+     */
     void setPerPage(Integer perPage);
 
+    /**
+     * ensure
+     */
     @Override
     default void ensure() {
         ensureCompatible(this);

@@ -21,10 +21,20 @@ public class Condition implements BaseCondition {
 
     private PaginationCondition pagination;
 
+    /**
+     * isWhereFull
+     *
+     * @return boolean
+     */
     public boolean isWhereFull() {
         return custom != null && !custom.isEmpty() && andi != null && andi.isEmpty();
     }
 
+    /**
+     * isWhereEmpty
+     *
+     * @return boolean
+     */
     public boolean isWhereEmpty() {
         if (custom != null && !custom.isEmpty()) {
             return false;
@@ -33,6 +43,11 @@ public class Condition implements BaseCondition {
         return andi == null || andi.isEmpty();
     }
 
+    /**
+     * isEmpty
+     *
+     * @return boolean
+     */
     @Override
     public boolean isEmpty() {
         if (!isWhereEmpty()) {

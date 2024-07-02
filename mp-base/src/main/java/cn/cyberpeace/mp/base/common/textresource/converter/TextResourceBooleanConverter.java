@@ -6,6 +6,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class TextResourceBooleanConverter implements TextResourceConverter<Boolean> {
 
+    /**
+     * convert
+     *
+     * @param value
+     * @return
+     */
     @Override
     public Boolean convert(String value) {
         return BooleanUtils.toBoolean(value);

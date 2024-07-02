@@ -18,6 +18,11 @@ import java.util.List;
 @Deprecated
 public interface BaseModelBulkUpdateController<M extends BaseModel, S extends BaseModelService<M, ?>> {
 
+    /**
+     * getModelService
+     *
+     * @return
+     */
     S getModelService();
 
     /**

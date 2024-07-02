@@ -45,6 +45,12 @@ import java.util.stream.Collectors;
  */
 public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
 
+    /**
+     * parseAndLoadInfo
+     *
+     * @param sceneId
+     * @return
+     */
     public Result parseAndLoadInfo(String sceneId) {
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, null, false, null);
         YmlParseResultV2 ymlParseResult = new YmlParseResultV2();
@@ -88,6 +94,13 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
         return result;
     }
 
+    /**
+     * handlerShapes
+     *
+     * @param sceneHandler
+     * @param shapes
+     * @param idConvert
+     */
     private void handlerShapes(SceneConfigHandler sceneHandler, List<SceneElementShape> shapes, Map<String, String> idConvert) {
         if (sceneHandler.getAreaMap() == null || sceneHandler.getAreaMap().isEmpty()) {
             return;
@@ -116,6 +129,12 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
         shapes.addAll(id2Shape.values());
     }
 
+    /**
+     * formatDouble
+     *
+     * @param number
+     * @return double
+     */
     private double formatDouble(double number) {
         return BigDecimal.valueOf(number).setScale(6, RoundingMode.HALF_DOWN).doubleValue();
     }
@@ -132,6 +151,15 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
         return sceneElementParseResult;
     }
 
+    /**
+     * parseNodeAndNet
+     *
+     * @param sceneHandler
+     * @param networks
+     * @param nodes
+     * @param id2Network
+     * @param id2Node
+     */
     private void parseNodeAndNet(SceneConfigHandler sceneHandler, List<NetworkElementParseResultV2> networks, List<NodeElementParseResult> nodes, Map<String, NetworkElementParseResultV2> id2Network, Map<String, NodeElementParseResult> id2Node) {
         CloudSceneConfigPluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         int networkIndex = 1;
@@ -236,6 +264,13 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
         }
     }
 
+    /**
+     * addConnect
+     *
+     * @param sceneHandler
+     * @param id2Network
+     * @param id2Node
+     */
     private void addConnect(SceneConfigHandler sceneHandler, Map<String, NetworkElementParseResultV2> id2Network, Map<String, NodeElementParseResult> id2Node) {
         CloudSceneConfigPluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         for (String nodeId : id2Node.keySet()) {
@@ -268,6 +303,12 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
         }
     }
 
+    /**
+     * buildAclsInfos
+     *
+     * @param pluginPort
+     * @return
+     */
     private List<AclsInfo> buildAclsInfos(CloudPluginSceneConfigElementPortBO pluginPort) {
         List<AclsInfo> aclsInfos = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(pluginPort.getFirewallRules())) {
@@ -299,6 +340,13 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
         return aclsInfos;
     }
 
+    /**
+     * buildNetworkElementParseResultV2
+     *
+     * @param e
+     * @param pluginElement
+     * @return
+     */
     private NetworkElementParseResultV2 buildNetworkElementParseResultV2(SceneConfigElementBO e, CloudPluginSceneConfigElementBO pluginElement) {
         NetworkElementParseResultV2 networkElementParseResult = new NetworkElementParseResultV2();
         networkElementParseResult.setName(e.getName());
@@ -322,6 +370,14 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
         return networkElementParseResult;
     }
 
+    /**
+     * buildNodeElementParseResult
+     *
+     * @param sceneHandler
+     * @param e
+     * @param pluginElement
+     * @return
+     */
     private NodeElementParseResult buildNodeElementParseResult(SceneConfigHandler sceneHandler, SceneConfigElementBO e, CloudPluginSceneConfigElementBO pluginElement) {
         NodeElementParseResult nodeElementParseResult = new NodeElementParseResult();
         nodeElementParseResult.setFile(e.getFile());

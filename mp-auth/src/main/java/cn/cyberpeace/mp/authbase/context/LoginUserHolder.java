@@ -9,6 +9,11 @@ public class LoginUserHolder {
 
     private static ThreadLocal<String> userContext = new ThreadLocal();
 
+    /**
+     * get
+     *
+     * @return
+     */
     public static ThreadLocal<String> get() {
         return userContext;
     }

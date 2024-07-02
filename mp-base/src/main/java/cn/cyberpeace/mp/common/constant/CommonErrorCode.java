@@ -13,6 +13,12 @@ public enum CommonErrorCode implements ErrorCode {
     ;
 
 
+    /**
+     * CommonErrorCode
+     *
+     * @param code
+     * @param message
+     */
     CommonErrorCode(String code, String message) {
         setCode(code, "common.error_code." + message);
     }

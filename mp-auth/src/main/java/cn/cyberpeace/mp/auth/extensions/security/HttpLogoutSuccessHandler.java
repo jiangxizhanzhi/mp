@@ -53,12 +53,25 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     @Autowired
     private UserEventPublisher userEventPublisher ;
 
+    /**
+     * HttpLogoutSuccessHandler
+     *
+     * @param messageConverter
+     * @param userService
+     */
     @Autowired
     public HttpLogoutSuccessHandler(MappingJackson2HttpMessageConverter messageConverter, UserService userService) {
         this.mapper = messageConverter.getObjectMapper();
         this.userService = userService;
     }
 
+    /**
+     * onLogoutSuccess
+     *
+     * @param request
+     * @param response
+     * @param authentication
+     */
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException {
@@ -97,6 +110,12 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
         writer.flush();
     }
 
+    /**
+     * recordLogoutLog
+     *
+     * @param user
+     * @param request
+     */
     private void recordLogoutLog(UserModel user, HttpServletRequest request) {
         OperationLogRequest logModel = new OperationLogRequest();
         //操作类型

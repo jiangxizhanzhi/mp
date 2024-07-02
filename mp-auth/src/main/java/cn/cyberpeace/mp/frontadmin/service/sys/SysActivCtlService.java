@@ -11,8 +11,18 @@ import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
  */
 public interface SysActivCtlService extends BaseModelService<SysActivCtlModel, QueryParams> {
 
+    /**
+     * selectValid
+     *
+     * @return
+     */
     SysActivCtlModel selectValid();
 
+    /**
+     * selectUnused
+     *
+     * @return
+     */
     SysActivCtlModel selectUnused();
 
     /**

@@ -23,10 +23,24 @@ public abstract class BaseObjMappingServiceImpl<M extends BaseObjMappingModel, P
     @Setter
     private P modelMapper;
 
+    /**
+     * judgeKeepObjMapping
+     *
+     * @param newObjMapping
+     * @param existObjMapping
+     * @return boolean
+     */
     protected boolean judgeKeepObjMapping(M newObjMapping, M existObjMapping) {
         return existObjMapping.getSeq().equals(newObjMapping.getSeq());
     }
 
+    /**
+     * diffObjMappings
+     *
+     * @param group
+     * @param objMappings
+     * @return
+     */
     protected DiffTargets<M> diffObjMappings(String group, List<M> objMappings) {
         List<M> existMappings = modelMapper.list(new HumanCondition()
                 .filterEqual(BaseObjMappingModel::getGroup, group));
@@ -55,6 +69,11 @@ public abstract class BaseObjMappingServiceImpl<M extends BaseObjMappingModel, P
         return DiffTargets.keyDiff(nameMapping, existNameMapping, this::judgeKeepObjMapping);
     }
 
+    /**
+     * saveDiffObjMappings
+     *
+     * @param diff
+     */
     protected void saveDiffObjMappings(DiffTargets<M> diff) {
         try {
             log.info("save diff : {}" + JsonCommon.stringify(diff));
@@ -72,6 +91,12 @@ public abstract class BaseObjMappingServiceImpl<M extends BaseObjMappingModel, P
         }
     }
 
+    /**
+     * collectDiffObjMappings
+     *
+     * @param diff
+     * @return
+     */
     protected List<M> collectDiffObjMappings(DiffTargets<M> diff) {
         List<M> resultObjMappings = new ArrayList<>();
         resultObjMappings.addAll(diff.getAddingTargets());
@@ -86,37 +111,82 @@ public abstract class BaseObjMappingServiceImpl<M extends BaseObjMappingModel, P
         return resultObjMappings;
     }
 
+    /**
+     * getObjMapping
+     *
+     * @param group
+     * @param name
+     * @return
+     */
     protected M getObjMapping(String group, String name) {
         return modelMapper.first(new HumanCondition()
                 .filterEqual(BaseObjMappingModel::getGroup, group)
                 .filterEqual(BaseObjMappingModel::getName, name));
     }
 
+    /**
+     * getObjMappings
+     *
+     * @param group
+     * @return
+     */
     protected List<M> getObjMappings(String group) {
         return modelMapper.list(new HumanCondition()
                 .filterEqual(BaseObjMappingModel::getGroup, group)
                 .orderBy(BaseObjMappingModel::getSeq));
     }
 
+    /**
+     * syncObjMappings
+     *
+     * @param group
+     * @param objMappings
+     * @return
+     */
     protected List<M> syncObjMappings(String group, List<M> objMappings) {
         DiffTargets<M> diff = diffObjMappings(group, objMappings);
         saveDiffObjMappings(diff);
         return collectDiffObjMappings(diff);
     }
 
+    /**
+     * deleteObjMappings
+     *
+     * @param group
+     * @return int
+     */
     protected int deleteObjMappings(String group) {
         return modelMapper.filterDelete(new HumanCondition()
                 .filterEqual(BaseObjMappingModel::getGroup, group));
     }
 
+    /**
+     * getMapping
+     *
+     * @param group
+     * @param name
+     * @return
+     */
     public ServiceResult<M> getMapping(String group, String name) {
         return new ServiceResult<>(getObjMapping(group, name));
     }
 
+    /**
+     * getMappings
+     *
+     * @param group
+     * @return
+     */
     public ServiceResult<List<M>> getMappings(String group) {
         return new ServiceResult<>(getObjMappings(group));
     }
 
+    /**
+     * deleteMappings
+     *
+     * @param group
+     * @return
+     */
     public ServiceResult<Integer> deleteMappings(String group) {
         return new ServiceResult<>(deleteObjMappings(group));
     }

@@ -25,30 +25,65 @@ public class SimpleMessageConfig {
 
     private String queueName = DEFAULT_MP_QUEUE;
 
+    /**
+     * directExchange
+     *
+     * @return
+     */
     public DirectExchange directExchange() {
         return new DirectExchange(getExchangeName());
     }
 
+    /**
+     * topicExchange
+     *
+     * @return
+     */
     public TopicExchange topicExchange() {
         return new TopicExchange(getExchangeName());
     }
 
+    /**
+     * fanoutExchange
+     *
+     * @return
+     */
     public FanoutExchange fanoutExchange() {
         return new FanoutExchange(getExchangeName());
     }
 
+    /**
+     * queue
+     *
+     * @return
+     */
     public Queue queue() {
         return new Queue(getQueueName());
     }
 
+    /**
+     * directBinding
+     *
+     * @return
+     */
     public Binding directBinding() {
         return BindingBuilder.bind(queue()).to(directExchange()).with(getRoutingKey());
     }
 
+    /**
+     * topicBinding
+     *
+     * @return
+     */
     public Binding topicBinding() {
         return BindingBuilder.bind(queue()).to(topicExchange()).with(getRoutingKey());
     }
 
+    /**
+     * fanoutBinding
+     *
+     * @return
+     */
     public Binding fanoutBinding() {
         return BindingBuilder.bind(queue()).to(fanoutExchange());
     }

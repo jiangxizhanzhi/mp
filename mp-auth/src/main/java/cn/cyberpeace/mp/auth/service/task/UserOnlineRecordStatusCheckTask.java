@@ -17,6 +17,9 @@ import java.util.List;
 @Slf4j
 public class UserOnlineRecordStatusCheckTask implements Runnable {
 
+    /**
+     * run
+     */
     @Override
     public void run() {
         // 更新用户在线记录信息

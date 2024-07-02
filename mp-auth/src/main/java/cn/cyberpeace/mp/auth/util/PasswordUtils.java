@@ -45,23 +45,52 @@ public class PasswordUtils {
         }
     }
 
+    /**
+     * getPasswordEncoder
+     *
+     * @return
+     */
     public static Pbkdf2PasswordEncoder getPasswordEncoder() {
         return passwordEncoder;
     }
 
+    /**
+     * encode
+     *
+     * @param password
+     * @return
+     */
     public static String encode(String password) {
         return passwordEncoder.encode(password);
     }
 
 
+    /**
+     * isPasswordInvalid
+     *
+     * @param password
+     * @return boolean
+     */
     public static boolean isPasswordInvalid(String password) {
         return !PasswordStrengthChecker.isValidPassword(password);
     }
 
+    /**
+     * desEncrypt
+     *
+     * @param password
+     * @return
+     */
     public static String desEncrypt(String password) {
        return EncryptUtils.desEncrypt(password);
     }
 
+    /**
+     * desDecrypt
+     *
+     * @param encryptHex
+     * @return
+     */
     public static String desDecrypt(String encryptHex) {
         return EncryptUtils.desDecrypt(encryptHex);
     }

@@ -13,6 +13,11 @@ import org.springframework.security.core.userdetails.UserDetailsChecker;
  */
 @Slf4j
 public class CustomPreAuthenticationChecker implements UserDetailsChecker {
+    /**
+     * check
+     *
+     * @param user
+     */
     @Override
     public void check(UserDetails user) {
         if (!user.isAccountNonLocked()) {

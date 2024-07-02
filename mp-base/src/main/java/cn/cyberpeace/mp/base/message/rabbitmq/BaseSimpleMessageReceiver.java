@@ -13,10 +13,20 @@ import java.util.Map;
 @Slf4j
 public abstract class BaseSimpleMessageReceiver extends BaseMessageReceiver {
 
+    /**
+     * BaseSimpleMessageReceiver
+     *
+     * @param messageConverter
+     */
     protected BaseSimpleMessageReceiver(MessageConverter messageConverter) {
         setMessageConverter(messageConverter);
     }
 
+    /**
+     * receive
+     *
+     * @param message
+     */
     @Override
     public void receive(Message message) {
         FormatMessage formatMessage = parseMessage(message, FormatMessage.class);
@@ -31,8 +41,19 @@ public abstract class BaseSimpleMessageReceiver extends BaseMessageReceiver {
         handleMessage(formatMessage);
     }
 
+    /**
+     * handleMessage
+     *
+     * @param formatMessage
+     */
     public abstract void handleMessage(FormatMessage<?> formatMessage);
 
+    /**
+     * toFormatMessage
+     *
+     * @param formatMessage
+     * @return
+     */
     public <T> FormatMessage<T> toFormatMessage(FormatMessage<?> formatMessage) {
         T data = null;
         try {
@@ -44,6 +65,13 @@ public abstract class BaseSimpleMessageReceiver extends BaseMessageReceiver {
         return new FormatMessage<>(data, formatMessage.getType(), formatMessage.getContext());
     }
 
+    /**
+     * toFormatMessage
+     *
+     * @param formatMessage
+     * @param dataClass
+     * @return
+     */
     public <T> FormatMessage<T> toFormatMessage(FormatMessage<?> formatMessage, Class<T> dataClass) {
         Map<String, Object> rawData = null;
         try {

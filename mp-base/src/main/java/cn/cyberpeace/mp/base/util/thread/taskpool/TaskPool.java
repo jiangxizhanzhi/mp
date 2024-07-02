@@ -17,10 +17,20 @@ public class TaskPool {
 
     public static final Set<TaskPool> TASK_POOL_INSTANCE_CACHE = new CopyOnWriteArraySet();
 
+    /**
+     * getTaskPoolInstanceCache
+     *
+     * @return
+     */
     public static Set<TaskPool> getTaskPoolInstanceCache(){
         return Collections.unmodifiableSet(TASK_POOL_INSTANCE_CACHE);
     }
 
+    /**
+     * getExecutorService
+     *
+     * @return
+     */
     public ThreadPoolExecutor getExecutorService(){
         return (ThreadPoolExecutor)executor;
     }
@@ -42,6 +52,11 @@ public class TaskPool {
         return new CustomizableThreadFactory(threadName);
     }
 
+    /**
+     * invokeTask
+     *
+     * @param poolTask
+     */
     public static <C, T, R> void invokeTask(BasePoolTask<C, T, R> poolTask) {
         if (poolTask.getStatus() == null) {
             return;
@@ -62,6 +77,12 @@ public class TaskPool {
         }
     }
 
+    /**
+     * interruptTask
+     *
+     * @param poolTask
+     * @param e
+     */
     public static void interruptTask(BasePoolTask<?, ?, ?> poolTask, Exception e) {
         if (TaskStatus.WAITING.equals(poolTask.getStatus())) {
             poolTask.setStatus(TaskStatus.INTERRUPTED);
@@ -129,34 +150,76 @@ public class TaskPool {
         return invokePoolTasks(poolTasks, independent, format);
     }
 
+    /**
+     * TaskPool
+     *
+     * @param poolSize
+     */
     public TaskPool(int poolSize) {
         this(poolSize, Integer.MAX_VALUE);
     }
 
+    /**
+     * TaskPool
+     *
+     * @param poolSize
+     * @param holdSize
+     */
     public TaskPool(int poolSize, int holdSize) {
         this(poolSize, holdSize, 0L);
     }
 
+    /**
+     * TaskPool
+     *
+     * @param poolSize
+     * @param holdSize
+     * @param keepAliveTime
+     * @param factory
+     */
     public TaskPool(int poolSize, int holdSize, long keepAliveTime, ThreadFactory factory) {
         executor = new ThreadPoolExecutor(poolSize, poolSize, keepAliveTime, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(holdSize - poolSize), factory);
         TASK_POOL_INSTANCE_CACHE.add(this);
     }
 
+    /**
+     * TaskPool
+     *
+     * @param poolSize
+     * @param holdSize
+     * @param keepAliveTime
+     */
     public TaskPool(int poolSize, int holdSize, long keepAliveTime) {
         executor = new ThreadPoolExecutor(poolSize, poolSize, keepAliveTime, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(holdSize - poolSize), createNameThreadFactory(""));
         TASK_POOL_INSTANCE_CACHE.add(this);
     }
 
+    /**
+     * TaskPool
+     *
+     * @param executor
+     */
     public TaskPool(ExecutorService executor) {
         this.executor = executor;
     }
 
+    /**
+     * executeTask
+     *
+     * @param task
+     */
     public void executeTask(Runnable task) {
         executeTask(task, true);
     }
 
+    /**
+     * executeTask
+     *
+     * @param task
+     * @param format
+     */
     public void executeTask(Runnable task, boolean format) {
         DefaultPoolTask poolTask = new DefaultPoolTask(task);
         Runnable command = () -> invokeTask(poolTask);
@@ -166,40 +229,102 @@ public class TaskPool {
         executor.execute(command);
     }
 
+    /**
+     * runTasks
+     *
+     * @param tasks
+     * @return
+     */
     public List<DefaultPoolTask> runTasks(List<Runnable> tasks) {
         return runTasks(tasks, false, true);
     }
 
+    /**
+     * runTasks
+     *
+     * @param tasks
+     * @param independent
+     * @param format
+     * @return
+     */
     public List<DefaultPoolTask> runTasks(List<Runnable> tasks, boolean independent, boolean format) {
         return invokeTasks(tasks, independent, format, DefaultPoolTask.class);
     }
 
+    /**
+     * runPoolTasks
+     *
+     * @param poolTasks
+     * @return
+     */
     public <C, T extends PoolTask<C>> List<T> runPoolTasks(List<T> poolTasks) {
         return runPoolTasks(poolTasks, false, true);
     }
 
+    /**
+     * runPoolTasks
+     *
+     * @param poolTasks
+     * @param independent
+     * @param format
+     * @return
+     */
     public <C, T extends PoolTask<C>> List<T> runPoolTasks(List<T> poolTasks, boolean independent, boolean format) {
         return invokePoolTasks(poolTasks, independent, format);
     }
 
+    /**
+     * callTasks
+     *
+     * @param tasks
+     * @return
+     */
     public <R> List<DefaultResultPoolTask<R>> callTasks(List<Callable<R>> tasks) {
         return callTasks(tasks, false, true);
     }
 
+    /**
+     * callTasks
+     *
+     * @param tasks
+     * @param independent
+     * @param format
+     * @return
+     */
     public <R> List<DefaultResultPoolTask<R>> callTasks(List<Callable<R>> tasks, boolean independent, boolean format) {
         return invokeTasks(tasks, independent, format, new DefaultResultPoolTask<R>().getClass());
     }
 
+    /**
+     * callPoolTasks
+     *
+     * @param poolTasks
+     * @return
+     */
     public <C, R, T extends ResultPoolTask<C, R>> List<T> callPoolTasks(List<T> poolTasks) {
         return callPoolTasks(poolTasks, false, true);
     }
 
+    /**
+     * callPoolTasks
+     *
+     * @param poolTasks
+     * @param independent
+     * @param format
+     * @return
+     */
     public <C, R, T extends ResultPoolTask<C, R>> List<T> callPoolTasks(List<T> poolTasks, boolean independent,
                                                                         boolean format) {
         return invokePoolTasks(poolTasks, independent, format);
     }
 
 
+    /**
+     * equals
+     *
+     * @param o
+     * @return boolean
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -212,6 +337,11 @@ public class TaskPool {
         return executor.equals(taskPool.executor);
     }
 
+    /**
+     * hashCode
+     *
+     * @return int
+     */
     @Override
     public int hashCode() {
         return Objects.hash(executor);

@@ -5,5 +5,8 @@ public class BaseControllerConstant {
     @SuppressWarnings("java:S1075")
     public static final String BASE_API_PREFIX = "/api";
 
+    /**
+     * BaseControllerConstant
+     */
     private BaseControllerConstant() {}
 }

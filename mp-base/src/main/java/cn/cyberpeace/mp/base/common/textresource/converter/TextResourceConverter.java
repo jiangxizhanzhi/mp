@@ -5,10 +5,22 @@ package cn.cyberpeace.mp.base.common.textresource.converter;
  */
 public interface TextResourceConverter<T> {
 
+    /**
+     * convert
+     *
+     * @param value
+     * @return
+     */
     default T convert(String value) {
         return (T) value;
     }
 
+    /**
+     * reconvert
+     *
+     * @param value
+     * @return
+     */
     default String reconvert(T value) {
         return value == null ? null : value.toString();
     }

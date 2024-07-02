@@ -25,12 +25,25 @@ public class ListObjResult<T> extends BaseObjResult<T, ListObjResult<T>> {
     @JsonIgnore
     private List<T> objs = new ArrayList<>();
 
+    /**
+     * ListObjResult
+     *
+     * @param objs
+     * @param total
+     */
     public ListObjResult(List<T> objs, int total) {
         this();
         setObjs(objs);
         setTotal(total);
     }
 
+    /**
+     * ListObjResult
+     *
+     * @param objs
+     * @param total
+     * @param fields
+     */
     public ListObjResult(List<T> objs, Integer total, DynamicFields fields) {
         this();
         setObjs(objs);
@@ -38,6 +51,11 @@ public class ListObjResult<T> extends BaseObjResult<T, ListObjResult<T>> {
         setFields(fields);
     }
 
+    /**
+     * asResult
+     *
+     * @return
+     */
     @Override
     public ListObjResult<T> asResult() {
         list.clear();

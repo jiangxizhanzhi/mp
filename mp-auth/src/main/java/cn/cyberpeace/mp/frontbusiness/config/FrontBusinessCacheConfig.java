@@ -21,6 +21,11 @@ public class FrontBusinessCacheConfig {
     public static final String CACHE_MANAGER_10M = "frontBizCacheManager_10M";
 
 
+    /**
+     * frontBizCacheManager1M
+     *
+     * @return
+     */
     @Bean(name = CACHE_MANAGER_1M)
     public CacheManager frontBizCacheManager1M() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
@@ -30,6 +35,11 @@ public class FrontBusinessCacheConfig {
     }
 
 
+    /**
+     * frontBizCacheManager5M
+     *
+     * @return
+     */
     @Bean(name = CACHE_MANAGER_5M)
     public CacheManager frontBizCacheManager5M() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
@@ -38,6 +48,11 @@ public class FrontBusinessCacheConfig {
         return caffeineCacheManager;
     }
 
+    /**
+     * frontBizCacheManager10M
+     *
+     * @return
+     */
     @Bean(name = CACHE_MANAGER_10M)
     public CacheManager frontBizCacheManager10M() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();

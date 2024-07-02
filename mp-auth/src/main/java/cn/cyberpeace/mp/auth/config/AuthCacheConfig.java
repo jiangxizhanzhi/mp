@@ -38,6 +38,11 @@ public class AuthCacheConfig {
     private AuthConfig authConfig;
 
 
+    /**
+     * authCacheManagerNormal
+     *
+     * @return
+     */
     @Bean(name = CACHE_MANAGER_NORMAL)
     public CacheManager authCacheManagerNormal() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
@@ -50,6 +55,11 @@ public class AuthCacheConfig {
         return caffeineCacheManager;
     }
 
+    /**
+     * authCacheManagerMedium
+     *
+     * @return
+     */
     @Bean(name = CACHE_MANAGER_MEDIUM)
     public CacheManager authCacheManagerMedium() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
@@ -62,6 +72,11 @@ public class AuthCacheConfig {
         return caffeineCacheManager;
     }
 
+    /**
+     * authCacheManagerLong
+     *
+     * @return
+     */
     @Bean(name = CACHE_MANAGER_LONG)
     public CacheManager authCacheManagerLong() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
@@ -70,6 +85,11 @@ public class AuthCacheConfig {
         return caffeineCacheManager;
     }
 
+    /**
+     * authCacheManager6H
+     *
+     * @return
+     */
     @Bean(name = CACHE_MANAGER_6H)
     public CacheManager authCacheManager6H() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
@@ -78,6 +98,11 @@ public class AuthCacheConfig {
         return caffeineCacheManager;
     }
 
+    /**
+     * loginFailureCache
+     *
+     * @return
+     */
     @Bean(name = LOGIN_FAILURE)
     public Cache<String, Integer> loginFailureCache() {
         return Caffeine.newBuilder()

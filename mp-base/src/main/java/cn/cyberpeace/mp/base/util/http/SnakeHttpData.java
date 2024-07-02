@@ -9,10 +9,22 @@ import java.util.Map;
 
 public interface SnakeHttpData extends HttpData {
 
+    /**
+     * toContent
+     *
+     * @param httpData
+     * @return
+     */
     static String toContent(Object httpData) {
         return JsonUtils.snakeStringify(httpData);
     }
 
+    /**
+     * toMultipart
+     *
+     * @param httpData
+     * @return
+     */
     static Map<String, Object> toMultipart(Object httpData) {
         Map<String, Object> map = new HashMap<>();
         for (Map.Entry<String, Object> entry : BeanUtils.getMap(httpData).entrySet()) {
@@ -23,11 +35,21 @@ public interface SnakeHttpData extends HttpData {
         return map;
     }
 
+    /**
+     * toContent
+     *
+     * @return
+     */
     @Override
     default String toContent() {
         return toContent(this);
     }
 
+    /**
+     * toMultipart
+     *
+     * @return
+     */
     @Override
     default Map<String, Object> toMultipart() {
         return toMultipart(this);

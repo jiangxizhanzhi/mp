@@ -12,6 +12,9 @@ public class ResultPoolTask<C, R> extends BasePoolTask<C, Callable<R>, R> {
         setTask(task);
     }
 
+    /**
+     * invoke
+     */
     @Override
     public void invoke() throws Exception {
         setResult(getTask().call());

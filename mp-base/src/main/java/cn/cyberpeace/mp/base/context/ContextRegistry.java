@@ -8,6 +8,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ContextRegistry {
 
+    /**
+     * httpContextFilter
+     *
+     * @return
+     */
     @Bean
     public FilterRegistrationBean httpContextFilter() {
         FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();

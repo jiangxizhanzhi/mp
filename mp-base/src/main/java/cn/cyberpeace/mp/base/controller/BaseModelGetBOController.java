@@ -15,6 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Deprecated
 public interface BaseModelGetBOController<T extends ModelBO<M, T>, M extends BaseModel, S extends BaseModelService<M, ?>> {
 
+    /**
+     * getModelService
+     *
+     * @return
+     */
     S getModelService();
 
     /**

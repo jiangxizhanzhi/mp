@@ -18,10 +18,18 @@ public abstract class FileModifyListener {
 
     private WatchKey watchKey;
 
+    /**
+     * FileModifyListener
+     *
+     * @param filepath
+     */
     protected FileModifyListener(String filepath) {
         this.filepath = filepath;
     }
 
+    /**
+     * startListen
+     */
     public void startListen() {
         stopped = false;
 
@@ -54,6 +62,9 @@ public abstract class FileModifyListener {
         startListen();
     }
 
+    /**
+     * stopListen
+     */
     public void stopListen() {
         log.info("File({}) watch prepare stop", filepath);
         stopped = true;
@@ -62,6 +73,9 @@ public abstract class FileModifyListener {
         }
     }
 
+    /**
+     * listen
+     */
     protected void listen() {
         String fileDir = FileUtil.getParent(filepath, 1);
         String filename = FileUtil.getName(filepath);
@@ -102,6 +116,11 @@ public abstract class FileModifyListener {
         }
     }
 
+    /**
+     * fileChanged
+     *
+     * @param filepath
+     */
     protected abstract void fileChanged(String filepath);
 
 }

@@ -310,6 +310,11 @@ public class StatCommon {
             return field;
         }
 
+        /**
+         * loadToCondition
+         *
+         * @param condition
+         */
         @Override
         public void loadToCondition(HumanCondition condition) {
             if (Boolean.TRUE.equals(getDistinct())) {
@@ -328,6 +333,11 @@ public class StatCommon {
             return field;
         }
 
+        /**
+         * loadToCondition
+         *
+         * @param condition
+         */
         @Override
         public void loadToCondition(HumanCondition condition) {
             condition.selectAs(Sum.f(getName()), getQueryKey());

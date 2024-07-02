@@ -6,6 +6,11 @@ import java.time.LocalDate;
 
 @Component
 public class DateGenerator implements Generator {
+    /**
+     * generate
+     *
+     * @return
+     */
     @Override
     public LocalDate generate() {
         return LocalDate.now();

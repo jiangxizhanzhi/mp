@@ -29,6 +29,9 @@ public abstract class BaseServer {
 
     private static final Map<Class<?>, ConcurrentHashMap<String, BaseServer>> serverSessionMap = new HashMap<>();
 
+    /**
+     * initServerSessionMap
+     */
     public static void initServerSessionMap() {
         for (Map.Entry<String, BaseServer> entry : BeanCommon.getBeanType(BaseServer.class).entrySet()) {
             String name = entry.getKey();
@@ -37,6 +40,15 @@ public abstract class BaseServer {
         }
     }
 
+    /**
+     * sendToSession
+     *
+     * @param serverClass
+     * @param sessionKey
+     * @param data
+     * @param type
+     * @param context
+     */
     public static <T> void sendToSession(Class<?> serverClass, String sessionKey,
                                          T data, String type, Map<String, Object> context) {
         ConcurrentHashMap<String, BaseServer> sessionMap = serverSessionMap.get(serverClass);
@@ -48,6 +60,14 @@ public abstract class BaseServer {
         server.send(data, type, context);
     }
 
+    /**
+     * sendToAllSessions
+     *
+     * @param serverClass
+     * @param data
+     * @param type
+     * @param context
+     */
     public static <T> void sendToAllSessions(Class<?> serverClass, T data, String type, Map<String, Object> context) {
         ConcurrentHashMap<String, BaseServer> sessionMap = serverSessionMap.get(serverClass);
         for (Map.Entry<String, BaseServer> entry : sessionMap.entrySet()) {
@@ -57,14 +77,31 @@ public abstract class BaseServer {
         }
     }
 
+    /**
+     * sendCloseToSession
+     *
+     * @param serverClass
+     * @param sessionKey
+     */
     public static void sendCloseToSession(Class<?> serverClass, String sessionKey) {
         sendToSession(serverClass, sessionKey, null, CLOSE_TYPE, null);
     }
 
+    /**
+     * sendCloseToAllSessions
+     *
+     * @param serverClass
+     */
     public static void sendCloseToAllSessions(Class<?> serverClass) {
         sendToAllSessions(serverClass, null, CLOSE_TYPE, null);
     }
 
+    /**
+     * getHeaders
+     *
+     * @param session
+     * @return
+     */
     public static Map<String, Object> getHeaders(Session session) {
         Object headers = session.getUserProperties().getOrDefault(WebSocketConfig.Configurator.USER_HEADERS_KEY, null);
         if (headers == null) {
@@ -73,6 +110,11 @@ public abstract class BaseServer {
         return (Map<String, Object>) headers;
     }
 
+    /**
+     * getSessionMap
+     *
+     * @return
+     */
     protected ConcurrentHashMap<String, BaseServer> getSessionMap() {
         return serverSessionMap.get(this.getClass());
     }
@@ -96,6 +138,11 @@ public abstract class BaseServer {
         this.sessionKey = sessionKey;
     }
 
+    /**
+     * onOpen
+     *
+     * @param session
+     */
     @OnOpen
     public void onOpen(Session session) throws ValidateException {
         try {
@@ -117,6 +164,9 @@ public abstract class BaseServer {
         getSessionMap().put(this.sessionKey, this);
     }
 
+    /**
+     * onClose
+     */
     @OnClose
     public void onClose() {
         if (!StringUtils.isEmpty(sessionKey)) {
@@ -124,11 +174,23 @@ public abstract class BaseServer {
         }
     }
 
+    /**
+     * onMessage
+     *
+     * @param message
+     * @param session
+     */
     @OnMessage
     public void onMessage(String message, Session session) {
 
     }
 
+    /**
+     * onError
+     *
+     * @param session
+     * @param e
+     */
     @OnError
     public void onError(Session session, Throwable e) {
         if (e instanceof ValidateException) {
@@ -140,14 +202,32 @@ public abstract class BaseServer {
 
     public abstract MessageConverter getMessageConverter();
 
+    /**
+     * send
+     *
+     * @param data
+     */
     public <T> void send(T data) {
         send(data, null, null);
     }
 
+    /**
+     * send
+     *
+     * @param data
+     * @param type
+     */
     public <T> void send(T data, String type) {
         send(data, type, null);
     }
 
+    /**
+     * send
+     *
+     * @param data
+     * @param type
+     * @param context
+     */
     public <T> void send(T data, String type, Map<String, Object> context) {
         FormatMessage<T> formatMessage = new FormatMessage<>(data, type, context);
         log.debug("ws content:{}", JsonCommon.stringify(formatMessage));
@@ -160,10 +240,16 @@ public abstract class BaseServer {
         }
     }
 
+    /**
+     * sendClose
+     */
     public void sendClose() {
         send(null, CLOSE_TYPE);
     }
 
+    /**
+     * close
+     */
     public void close() {
         if (this.session != null) {
             try {
@@ -175,9 +261,18 @@ public abstract class BaseServer {
     }
 
     public static class ValidateException extends Exception {
+        /**
+         * ValidateException
+         */
         public ValidateException() {
             super();
         }
+
+        /**
+         * ValidateException
+         *
+         * @param message
+         */
         public ValidateException(String message) {
             super(message);
         }

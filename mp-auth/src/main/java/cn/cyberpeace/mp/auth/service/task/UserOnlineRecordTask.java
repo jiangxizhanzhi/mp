@@ -25,10 +25,18 @@ public class UserOnlineRecordTask implements Runnable {
 
     private Map<UserModel, LocalDateTime> userModel2LastTsMap;
 
+    /**
+     * UserOnlineRecordTask
+     *
+     * @param userModel2LastTsMap
+     */
     public UserOnlineRecordTask(Map<UserModel, LocalDateTime> userModel2LastTsMap) {
         this.userModel2LastTsMap = userModel2LastTsMap;
     }
 
+    /**
+     * run
+     */
     @Override
     public void run() {
         // 更新用户在线记录信息

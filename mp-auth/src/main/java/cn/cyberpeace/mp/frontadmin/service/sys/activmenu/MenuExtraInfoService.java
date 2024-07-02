@@ -21,21 +21,43 @@ public class MenuExtraInfoService {
     @Autowired
     private MenuExtraInfoMapper menuExtraInfoMapper;
 
+    /**
+     * save
+     *
+     * @param menuExtraInfoModel
+     * @return boolean
+     */
     public boolean save(MenuExtraInfoModel menuExtraInfoModel) {
         menuExtraInfoMapper.create(menuExtraInfoModel);
         return true;
     }
 
+    /**
+     * bulkCreate
+     *
+     * @param menuExtraInfoModels
+     * @return boolean
+     */
     public boolean bulkCreate(List<MenuExtraInfoModel> menuExtraInfoModels) {
         int result = menuExtraInfoMapper.bulkCreate(menuExtraInfoModels).getSuccessCount();
         log.info("added {} menu extra info rows", result);
         return true;
     }
 
+    /**
+     * listAll
+     *
+     * @return
+     */
     public List<MenuExtraInfoModel> listAll() {
         return menuExtraInfoMapper.list(new HumanCondition());
     }
 
+    /**
+     * deleteAll
+     *
+     * @return boolean
+     */
     public boolean deleteAll() {
         HumanCondition condition = new HumanCondition()
                 .filterGreaterThan(MenuExtraInfoModel::getPk, MenuExtraInfoModel.PK_DELETE_ALL_START);

@@ -89,12 +89,24 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @Autowired
     private AuthStatusRabbitmqSender messageSender;
 
+    /**
+     * UserRoleServiceImpl
+     *
+     * @param modelMapper
+     * @param modelFields
+     */
     @Autowired
     public UserRoleServiceImpl(UserRoleMapper modelMapper, UserRoleFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
     }
 
+    /**
+     * listByUserId
+     *
+     * @param userId
+     * @return
+     */
     @Override
     @Cacheable(value = CACHE_VAL_ROLES)
     public List<RoleModel> listByUserId(String userId) {
@@ -103,6 +115,12 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         return roles;
     }
 
+    /**
+     * listByUserIds
+     *
+     * @param userIds
+     * @return
+     */
     @Override
     @Cacheable(value = CACHE_VAL_ROLES)
     public List<RoleModel> listByUserIds(List<String> userIds) {
@@ -125,6 +143,12 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         return roles;
     }
 
+    /**
+     * listUsersByRoleIdNoRestrict
+     *
+     * @param roleId
+     * @return
+     */
     @Override
     public List<UserModel> listUsersByRoleIdNoRestrict(String roleId) {
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
@@ -146,6 +170,12 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         return userModels;
     }
 
+    /**
+     * pageByUserId
+     *
+     * @param pageRequest
+     * @return
+     */
     @Override
     public ListObjServiceResult pageByUserId(UserRolePageRequest pageRequest) {
         pageRequest.ensure();
@@ -158,6 +188,12 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         return result;
     }
 
+    /**
+     * pageByRoleId
+     *
+     * @param pageRequest
+     * @return
+     */
     @Override
     public ListObjServiceResult pageByRoleId(UserRolePageRequest pageRequest) {
         pageRequest.ensure();
@@ -170,6 +206,14 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         return result;
     }
 
+    /**
+     * bindUserRoles
+     *
+     * @param userId
+     * @param roleIds
+     * @param cleanOldRoles
+     * @return boolean
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean bindUserRoles(String userId, List<String> roleIds, boolean cleanOldRoles) {
@@ -207,6 +251,13 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         return true;
     }
 
+    /**
+     * bindRoleUsers
+     *
+     * @param roleId
+     * @param userIds
+     * @return boolean
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean bindRoleUsers(String roleId, List<String> userIds) {
@@ -236,6 +287,12 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         return true;
     }
 
+    /**
+     * deleteByUserId
+     *
+     * @param userId
+     * @return boolean
+     */
     @Override
     public boolean deleteByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
@@ -251,6 +308,12 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         return true;
     }
 
+    /**
+     * deleteByRoleId
+     *
+     * @param roleId
+     * @return boolean
+     */
     @Override
     public boolean deleteByRoleId(String roleId) {
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
@@ -262,6 +325,11 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         return true;
     }
 
+    /**
+     * getUserRoleStatistics
+     *
+     * @return
+     */
     @Override
     public List<UserRoleStatisticBo> getUserRoleStatistics() {
         HumanCondition userRoleCondition = new HumanCondition()
@@ -297,6 +365,13 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         return statistics;
     }
 
+    /**
+     * deleteByRoleIdAndUserIds
+     *
+     * @param roleId
+     * @param userIds
+     * @return boolean
+     */
     @Override
     public boolean deleteByRoleIdAndUserIds(String roleId, List<String> userIds) {
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
@@ -325,6 +400,12 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         return true;
     }
 
+    /**
+     * getRolesByUserId
+     *
+     * @param userId
+     * @return
+     */
     private List<RoleModel> getRolesByUserId(String userId) {
         HumanCondition userRoleCondition = new HumanCondition()
                 .filterEqual(UserRoleModel::getUser, userId)
@@ -344,6 +425,14 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         return roleMapper.list(roleCondition);
     }
 
+    /**
+     * getPageRolesByUserId
+     *
+     * @param userId
+     * @param page
+     * @param pageSize
+     * @return
+     */
     private ListObjServiceResult getPageRolesByUserId(String userId, int page, int pageSize) {
         HumanCondition userRoleCondition = new HumanCondition()
                 .filterEqual(UserRoleModel::getUser, userId)
@@ -367,6 +456,12 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         return result;
     }
 
+    /**
+     * listUsersByRoleId
+     *
+     * @param roleId
+     * @return
+     */
     public List<UserOrgRoleBo> listUsersByRoleId(String roleId) {
         HumanCondition roleIdCondition = new HumanCondition()
                 .filterEqual(UserRoleModel::getRole, roleId)
@@ -422,6 +517,14 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         return UserOrgRoleBos;
     }
 
+    /**
+     * listPageUsersByRoleId
+     *
+     * @param roleId
+     * @param page
+     * @param pageSize
+     * @return
+     */
     public ListObjServiceResult listPageUsersByRoleId(String roleId, int page, int pageSize) {
         HumanCondition roleIdCondition = new HumanCondition()
                 .filterEqual(UserRoleModel::getRole, roleId)

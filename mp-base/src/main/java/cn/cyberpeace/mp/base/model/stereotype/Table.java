@@ -12,6 +12,11 @@ import java.lang.annotation.*;
 @Documented
 public @interface Table {
 
+    /**
+     * value
+     *
+     * @return
+     */
     String value() default StringUtils.EMPTY;
 
 }

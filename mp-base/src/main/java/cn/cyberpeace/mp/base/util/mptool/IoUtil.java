@@ -7,6 +7,11 @@ import java.io.Closeable;
 @Slf4j
 public class IoUtil {
 
+    /**
+     * close
+     *
+     * @param closeable
+     */
     public static void close(Closeable closeable) {
         if (null != closeable) {
             try {

@@ -12,6 +12,11 @@ public class AggregationSingleton {
     /** 模块配置bean的引用, 需要在bean初始化完成之后调用 */
     public static AggregationConfig aggregationConfig;
 
+    /**
+     * AggregationSingleton
+     *
+     * @param aggregationConfig
+     */
     private AggregationSingleton(AggregationConfig aggregationConfig) {
         AggregationSingleton.aggregationConfig = aggregationConfig;
     }

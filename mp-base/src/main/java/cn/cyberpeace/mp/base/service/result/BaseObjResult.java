@@ -9,6 +9,13 @@ public abstract class BaseObjResult<T, R> {
     @JsonIgnore
     private DynamicFields fields;
 
+    /**
+     * objToResult
+     *
+     * @param obj
+     * @param fields
+     * @return
+     */
     public Object objToResult(T obj, DynamicFields fields) {
         if (obj == null || fields == null) {
             return obj;
@@ -17,6 +24,13 @@ public abstract class BaseObjResult<T, R> {
         return fields.apply(obj);
     }
 
+    /**
+     * objToResultWithNull
+     *
+     * @param obj
+     * @param fields
+     * @return
+     */
     public T objToResultWithNull(T obj, DynamicFields fields) {
         if (obj == null || fields == null) {
             return obj;
@@ -25,5 +39,10 @@ public abstract class BaseObjResult<T, R> {
         return fields.applyWithNull(obj);
     }
 
+    /**
+     * asResult
+     *
+     * @return
+     */
     public abstract R asResult();
 }

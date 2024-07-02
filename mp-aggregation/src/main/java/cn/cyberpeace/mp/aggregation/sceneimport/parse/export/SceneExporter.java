@@ -60,6 +60,17 @@ public class SceneExporter {
 
     private static String EXPORT_DEVICE_YML = "/cpcloud/device/v1/image/export_device_yml";
 
+    /**
+     * export
+     *
+     * @param sceneId
+     * @param envPath
+     * @param imagePath
+     * @param singleImagePath
+     * @param sceneNumber
+     * @param disableImageExport
+     * @return
+     */
     public ExportResult export(String sceneId, String envPath, String imagePath, String singleImagePath, String sceneNumber, boolean disableImageExport) {
         // 生成topo.yml
         SceneParseResourceCenterV1.Result resultV1 = new SceneParseResourceCenterV1().parseAndLoadInfo(sceneId);
@@ -133,6 +144,13 @@ public class SceneExporter {
         return exportResult;
     }
 
+    /**
+     * createTopoJson
+     *
+     * @param sceneId
+     * @param sceneNum
+     * @param filePath
+     */
     private void createTopoJson(String sceneId,String sceneNum, String filePath) {
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, null, null);
         this.removeEid(sceneConfigHandler);
@@ -162,6 +180,12 @@ public class SceneExporter {
         }
     }
 
+    /**
+     * removeEid
+     *
+     * @param sceneConfigHandler
+     * @return 场景模板的处理
+     */
     private SceneConfigHandler removeEid(SceneConfigHandler sceneConfigHandler){
         sceneConfigHandler.getScene().setEid(null);
         for (Map.Entry<String, SceneConfigElementBO> entry : sceneConfigHandler.getElementMap().entrySet()) {
@@ -185,6 +209,14 @@ public class SceneExporter {
         return sceneConfigHandler;
     }
 
+    /**
+     * createImageAndServiceYml
+     *
+     * @param imagePath
+     * @param singleImagePath
+     * @param devices
+     * @param sceneNumber
+     */
     private void createImageAndServiceYml(String imagePath, String singleImagePath, List<SceneParseResourceCenterV2.Device> devices, String sceneNumber) {
         if (CollectionUtils.isNotEmpty(devices)) {
             for (SceneParseResourceCenterV2.Device device : devices) {
@@ -371,6 +403,12 @@ public class SceneExporter {
         return true;
     }
 
+    /**
+     * createFile
+     *
+     * @param content
+     * @param filePath
+     */
     private void createFile(byte[] content, String filePath) {
         try {
             FileUtils.writeByteArrayToFile(new File(filePath), content);
@@ -381,6 +419,12 @@ public class SceneExporter {
         }
     }
 
+    /**
+     * createFile
+     *
+     * @param content
+     * @param filePath
+     */
     private void createFile(String content, String filePath) {
         try {
             FileUtils.write(new File(filePath), content, "utf8");
@@ -391,6 +435,12 @@ public class SceneExporter {
         }
     }
 
+    /**
+     * downloadNodeFile
+     *
+     * @param envPath
+     * @param file2Download
+     */
     private void downloadNodeFile(String envPath, Map<String, String> file2Download) {
         for (Map.Entry<String, String> entry : file2Download.entrySet()) {
             // 下载附件
@@ -408,6 +458,13 @@ public class SceneExporter {
         }
     }
 
+    /**
+     * downloadPrivateKeyFile
+     *
+     * @param fdfsFilePath
+     * @param imagePath
+     * @param fileName
+     */
     private void downloadPrivateKeyFile(String fdfsFilePath, String imagePath, String fileName) {
         if (StringUtils.isNotEmpty(fdfsFilePath) && StringUtils.isNotEmpty(imagePath)) {
             byte[] content = FsCommon.downloadRawContent(fdfsFilePath);
@@ -420,6 +477,13 @@ public class SceneExporter {
         }
     }
 
+    /**
+     * createSceneYml
+     *
+     * @param ymlParseResult
+     * @param envPath
+     * @param name
+     */
     private void createSceneYml(YmlParseResultV2 ymlParseResult, String envPath, String name) {
         DumperOptions dumperOptions = new DumperOptions();
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
@@ -436,6 +500,11 @@ public class SceneExporter {
         }
     }
 
+    /**
+     * specialYmlFields
+     *
+     * @return
+     */
     private Map<String, String> specialYmlFields() {
         Map<String, String> result = new HashMap<>();
         result.put("initCommands", "init_commands");
@@ -466,6 +535,13 @@ public class SceneExporter {
             FIELD_ORDER.put("shape", 4);
         }
 
+        /**
+         * representJavaBean
+         *
+         * @param properties
+         * @param javaBean
+         * @return
+         */
         @Override
         protected MappingNode representJavaBean(Set<Property> properties, Object javaBean) {
             Set<Property> filterProperties = new TreeSet<>();

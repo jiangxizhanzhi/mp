@@ -14,6 +14,11 @@ public class ValidationConfig {
     @Autowired
     private MessageSource messageSource;
 
+    /**
+     * initValidator
+     *
+     * @return
+     */
     @Bean
     public Validator initValidator() {
         LocalValidatorFactoryBean validatorFactoryBean = new LocalValidatorFactoryBean();

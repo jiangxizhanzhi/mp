@@ -51,12 +51,24 @@ public class OrgPermissionServiceImpl
     @Autowired
     private TargetMapper targetMapper;
 
+    /**
+     * OrgPermissionServiceImpl
+     *
+     * @param modelMapper
+     * @param modelFields
+     */
     @Autowired
     public OrgPermissionServiceImpl(OrgPermissionMapper modelMapper, OrgPermissionFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
     }
 
+    /**
+     * listTargetsByOrgId
+     *
+     * @param orgId
+     * @return
+     */
     @Override
     public Set<TargetModel> listTargetsByOrgId(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
@@ -80,6 +92,12 @@ public class OrgPermissionServiceImpl
         return new HashSet<>(targets);
     }
 
+    /**
+     * listTargetsByOrgIdIncludeAllParentsOrg
+     *
+     * @param orgId
+     * @return
+     */
     @Override
     public Set<TargetModel> listTargetsByOrgIdIncludeAllParentsOrg(String orgId) {
         OrgDto orgDto = orgService.getHierarchicalOrgsByOrgId(orgId);
@@ -92,6 +110,14 @@ public class OrgPermissionServiceImpl
         return targetSet;
     }
 
+    /**
+     * bindOrgTargets
+     *
+     * @param orgId
+     * @param targetIds
+     * @param cleanOldTargets
+     * @return boolean
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean bindOrgTargets(String orgId, List<String> targetIds, boolean cleanOldTargets) {
@@ -129,6 +155,12 @@ public class OrgPermissionServiceImpl
     }
 
 
+    /**
+     * deleteByOrgId
+     *
+     * @param orgId
+     * @return boolean
+     */
     @Override
     public boolean deleteByOrgId(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
@@ -138,6 +170,12 @@ public class OrgPermissionServiceImpl
         return true;
     }
 
+    /**
+     * deleteByTargetId
+     *
+     * @param targetId
+     * @return boolean
+     */
     @Override
     public boolean deleteByTargetId(String targetId) {
         ParamCheck.notBlank(targetId, AuthBasei18nCode.TARGET_ID);
@@ -148,7 +186,12 @@ public class OrgPermissionServiceImpl
     }
 
 
-    // 递归查询组织绑定的权限（如果有父级组织，则继续查找）
+    /**
+     * 递归查询组织绑定的权限（如果有父级组织，则继续查找）
+     *
+     * @param set
+     * @param orgDto
+     */
     private void recursionTargetsByOrgDto(Set<TargetModel> set, OrgDto orgDto) {
         if (orgDto == null || StringUtils.isBlank(orgDto.getParent())) {
             return;

@@ -17,5 +17,8 @@ public class AdminConstant {
 
     public static final String SYS_NOTICE_READ_COUNT_DISTINCT_NOTICEID = "cnt";
 
+    /**
+     * AdminConstant
+     */
     private AdminConstant() {}
 }

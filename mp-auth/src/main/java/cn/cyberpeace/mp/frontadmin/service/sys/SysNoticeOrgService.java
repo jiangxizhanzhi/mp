@@ -15,9 +15,27 @@ import java.util.List;
  */
 public interface SysNoticeOrgService extends BaseModelService<SysNoticeOrgModel, QueryParams> {
 
+    /**
+     * listByNoticeIds
+     *
+     * @param noticeIds
+     * @return
+     */
     List<OrgModel> listByNoticeIds(@Param("noticeIds") List<String> noticeIds);
 
+    /**
+     * deleteByNoticeIds
+     *
+     * @param noticeIds
+     * @return int
+     */
     int deleteByNoticeIds(@Param("noticeIds") List<String> noticeIds);
 
+    /**
+     * deleteByOrg
+     *
+     * @param orgId
+     * @return int
+     */
     int deleteByOrg(@Param("orgId") String orgId);
 }

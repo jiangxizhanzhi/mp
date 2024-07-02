@@ -17,14 +17,35 @@ public class FileTailListener extends TailerListenerAdapter {
     private final Boolean end;
     private final Consumer<String> handleLine;
 
+    /**
+     * FileTailListener
+     *
+     * @param file
+     * @param handleLine
+     */
     public FileTailListener(File file, Consumer<String> handleLine) {
         this(file, handleLine, 1000L);
     }
 
+    /**
+     * FileTailListener
+     *
+     * @param file
+     * @param handleLine
+     * @param delay
+     */
     public FileTailListener(File file, Consumer<String> handleLine, long delay) {
         this(file, handleLine, delay, false);
     }
 
+    /**
+     * FileTailListener
+     *
+     * @param file
+     * @param handleLine
+     * @param delay
+     * @param end
+     */
     public FileTailListener(File file, Consumer<String> handleLine, long delay, boolean end) {
         this.file = file;
         this.delay = delay;
@@ -32,11 +53,19 @@ public class FileTailListener extends TailerListenerAdapter {
         this.handleLine = handleLine;
     }
 
+    /**
+     * handle
+     *
+     * @param line
+     */
     @Override
     public void handle(String line) {
         handleLine.accept(line);
     }
 
+    /**
+     * start
+     */
     public synchronized void start() {
         stop();
 
@@ -44,6 +73,9 @@ public class FileTailListener extends TailerListenerAdapter {
         tailer = Tailer.create(file, this, delay, end);
     }
 
+    /**
+     * stop
+     */
     public synchronized void stop() {
         if (tailer != null) {
             log.info("Stop file tailer: {}", file.getAbsolutePath());

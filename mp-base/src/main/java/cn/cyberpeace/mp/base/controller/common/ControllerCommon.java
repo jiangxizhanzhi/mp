@@ -21,6 +21,12 @@ import java.nio.charset.StandardCharsets;
 @Deprecated
 public class ControllerCommon {
 
+    /**
+     * convertValidFields
+     *
+     * @param fields
+     * @return
+     */
     public static String[] convertValidFields(String[] fields) {
         if (fields == null) {
             return null;
@@ -33,6 +39,12 @@ public class ControllerCommon {
         return fields;
     }
 
+    /**
+     * convertValidQueryParams
+     *
+     * @param queryParams
+     * @param unlimitPagination
+     */
     public static <Q> void convertValidQueryParams(Q queryParams, boolean unlimitPagination) {
         if (queryParams instanceof FieldsQueryParams) {
             ((FieldsQueryParams) queryParams).setFields(ControllerCommon.convertValidFields(((FieldsQueryParams) queryParams).getFields()));
@@ -63,6 +75,15 @@ public class ControllerCommon {
         }
     }
 
+    /**
+     * exportExcel
+     *
+     * @param service
+     * @param queryParams
+     * @param textResourceClass
+     * @param filename
+     * @param response
+     */
     public static <S extends BaseModelService<M, Q>, M extends BaseModel, Q, T extends ModelBO<M, T>> void exportExcel(
             S service, Q queryParams,  Class<T> textResourceClass,
             String filename, HttpServletResponse response) throws IOException {
@@ -79,6 +100,14 @@ public class ControllerCommon {
         service.exportExcel(queryParams, os, textResourceClass);
     }
 
+    /**
+     * importExcel
+     *
+     * @param file
+     * @param service
+     * @param textResourceClass
+     * @return
+     */
     public static <S extends BaseModelService<M, ?>, M extends BaseModel, T extends ModelBO<M, T>> ServiceResult<Integer> importExcel(
             MultipartFile file,
             S service, Class<T> textResourceClass) throws IOException {
@@ -86,6 +115,12 @@ public class ControllerCommon {
         return service.importExcel(is, textResourceClass);
     }
 
+    /**
+     * getModelBOClass
+     *
+     * @param controllerClass
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public static <T> Class<T> getModelBOClass(Class<?> controllerClass) {
         ModelBOClass modelBOClassAnnotation = controllerClass.getAnnotation(ModelBOClass.class);

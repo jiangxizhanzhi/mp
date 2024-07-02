@@ -10,10 +10,22 @@ import java.util.Map;
  */
 public interface HttpData {
 
+    /**
+     * toContent
+     *
+     * @param httpData
+     * @return
+     */
     static String toContent(Object httpData) {
         return JsonUtils.stringify(httpData);
     }
 
+    /**
+     * toMultipart
+     *
+     * @param httpData
+     * @return
+     */
     static Map<String, Object> toMultipart(Object httpData) {
         return BeanUtils.getMap(httpData);
     }
@@ -39,6 +51,11 @@ public interface HttpData {
         return toMultipart(this);
     }
 
+    /**
+     * contentType
+     *
+     * @return
+     */
     default String contentType() {
         return null;
     }

@@ -28,6 +28,11 @@ public class SystemStatusInfoImpl implements ISystemStatusInfo {
 
     public static final String SUFFIX = "-";
 
+    /**
+     * getThreadPoolInfos
+     *
+     * @return
+     */
     @Override
     public List<ThreadPoolInfo> getThreadPoolInfos() {
         Set<TaskPool> poolSet = TaskPool.getTaskPoolInstanceCache();
@@ -73,6 +78,9 @@ public class SystemStatusInfoImpl implements ISystemStatusInfo {
         return list;
     }
 
+    /**
+     * print
+     */
     @PostConstruct
     public void print(){
         getThreadPoolInfos();

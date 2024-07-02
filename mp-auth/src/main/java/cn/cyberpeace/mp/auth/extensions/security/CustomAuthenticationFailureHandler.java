@@ -36,6 +36,11 @@ import java.util.Objects;
 public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
     private final ObjectMapper mapper;
 
+    /**
+     * CustomAuthenticationFailureHandler
+     *
+     * @param messageConverter
+     */
     @Autowired
     public CustomAuthenticationFailureHandler(MappingJackson2HttpMessageConverter messageConverter) {
         this.mapper = messageConverter.getObjectMapper();
@@ -44,6 +49,13 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
     @Resource(name = AuthCacheConfig.LOGIN_FAILURE)
     private Cache<String, Integer> loginFailureCache;
 
+    /**
+     * onAuthenticationFailure
+     *
+     * @param request
+     * @param response
+     * @param exception
+     */
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) throws IOException {
@@ -101,6 +113,12 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
         writer.flush();
     }
 
+    /**
+     * getUserName
+     *
+     * @param request
+     * @return
+     */
     private String getUserName(HttpServletRequest request) {
         if (Objects.equals(request.getContentType(), MediaType.APPLICATION_JSON_VALUE)) {
             return (String) request.getAttribute(AuthConstant.REQUEST_PARAMETER_USERNAME);

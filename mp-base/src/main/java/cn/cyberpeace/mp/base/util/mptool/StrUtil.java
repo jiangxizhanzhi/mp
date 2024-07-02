@@ -49,6 +49,13 @@ public class StrUtil extends CharSequenceUtil implements StrPool {
         return result;
     }
 
+    /**
+     * containsAny
+     *
+     * @param str
+     * @param testChars
+     * @return boolean
+     */
     public static boolean containsAny(CharSequence str, char... testChars) {
         if (false == isEmpty(str)) {
             int len = str.length();

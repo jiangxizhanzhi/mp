@@ -13,12 +13,35 @@ import java.util.List;
  */
 public interface SysConfigService extends BaseModelService<SysConfigModel, QueryParams> {
 
+    /**
+     * listAll
+     *
+     * @return
+     */
     List<SysConfigModel> listAll();
 
+    /**
+     * getByKeyName
+     *
+     * @param keyName
+     * @return
+     */
     SysConfigModel getByKeyName(String keyName);
 
+    /**
+     * updateByKeyName
+     *
+     * @param sysConfigModel
+     * @return boolean
+     */
     boolean updateByKeyName(SysConfigModel sysConfigModel);
 
+    /**
+     * batchUpdateByKeyname
+     *
+     * @param configs
+     * @return boolean
+     */
     boolean batchUpdateByKeyname(List<SysConfigModel> configs);
 
     /**
@@ -27,6 +50,11 @@ public interface SysConfigService extends BaseModelService<SysConfigModel, Query
      */
     boolean isNewUserNeedAudit();
 
+    /**
+     * publishConfigUpdateEvent
+     *
+     * @param configs
+     */
     void publishConfigUpdateEvent(List<SysConfigModel> configs);
 
 }

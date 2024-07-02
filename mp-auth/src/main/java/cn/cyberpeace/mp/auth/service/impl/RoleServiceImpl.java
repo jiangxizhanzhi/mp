@@ -83,12 +83,24 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Autowired
     private AdminConfigService adminConfigService;
 
+    /**
+     * RoleServiceImpl
+     *
+     * @param modelMapper
+     * @param modelFields
+     */
     @Autowired
     public RoleServiceImpl(RoleMapper modelMapper, RoleFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
     }
 
+    /**
+     * delete
+     *
+     * @param roleId
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Boolean> delete(String roleId) {
@@ -103,6 +115,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return ret;
     }
 
+    /**
+     * bulkDelete
+     *
+     * @param ids
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Integer> bulkDelete(String[] ids) {
@@ -119,6 +137,13 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return ret;
     }
 
+    /**
+     * update
+     *
+     * @param obj
+     * @param fields
+     * @return
+     */
     @Override
     public ObjServiceResult<RoleModel> update(RoleModel obj, String[] fields) {
         if (StringUtils.isBlank(obj.getIdentifier())) {
@@ -127,6 +152,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return super.update(obj, fields);
     }
 
+    /**
+     * listByTenantId
+     *
+     * @param tenantId
+     * @return
+     */
     @Override
     public List<RoleModel> listByTenantId(String tenantId) {
         ParamCheck.notBlank(tenantId, AuthBasei18nCode.TENANT_ID);
@@ -137,6 +168,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return roles;
     }
 
+    /**
+     * listByIds
+     *
+     * @param ids
+     * @return
+     */
     @Override
     public List<RoleModel> listByIds(Collection<String> ids) {
         HumanCondition humanCondition = new HumanCondition().filterIn("id", ids.toArray());
@@ -144,6 +181,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
 
+    /**
+     * listAll
+     *
+     * @param rolePageRequest
+     * @return
+     */
     @Override
     public List<RoleModel> listAll(RolePageRequest rolePageRequest) {
         List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles();
@@ -165,6 +208,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return roles;
     }
 
+    /**
+     * getByName
+     *
+     * @param name
+     * @return
+     */
     @Override
     @Cacheable(value = CACHE_VAL_ROLE_GETBY_NAME)
     public RoleModel getByName(String name) {
@@ -177,6 +226,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
 
+    /**
+     * listByNames
+     *
+     * @param names
+     * @return
+     */
     @Override
     @Cacheable(value = CACHE_VAL_ROLE_LISTBY_NAMES)
     public List<RoleModel> listByNames(List<String> names) {
@@ -188,6 +243,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return roleModels;
     }
 
+    /**
+     * exists
+     *
+     * @param id
+     * @return boolean
+     */
     @Override
     public boolean exists(String id) {
         ParamCheck.notBlank(id, AuthBasei18nCode.ROLE_ID);
@@ -196,6 +257,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return Objects.nonNull(roleModel);
     }
 
+    /**
+     * getPageWithUserCnt
+     *
+     * @param rolePageRequest
+     * @return
+     */
     @Override
     public ListObjServiceResult getPageWithUserCnt(RolePageRequest rolePageRequest) {
         ArrayList<String> orders = null;
@@ -208,6 +275,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return result;
     }
 
+    /**
+     * getRoleDto
+     *
+     * @param id
+     * @return
+     */
     @Override
     public RoleBo getRoleDto(String id) {
         ParamCheck.notBlank(id, AuthBasei18nCode.ROLE_ID);
@@ -220,6 +293,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return roleDto;
     }
 
+    /**
+     * getRolePermDto
+     *
+     * @param id
+     * @return
+     */
     @Override
     public RolePermBo getRolePermDto(String id) {
         ParamCheck.notBlank(id, AuthBasei18nCode.ROLE_ID);
@@ -232,6 +311,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return rolePermBo;
     }
 
+    /**
+     * add
+     *
+     * @param createRequest
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public RoleModel add(RoleRequest createRequest) {
@@ -279,6 +364,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
 
+    /**
+     * modify
+     *
+     * @param modifyRequest
+     * @return
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public RoleModel modify(RoleRequest modifyRequest) {
@@ -325,6 +416,11 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return updateResult.getSource().getObj();
     }
 
+    /**
+     * getSystemUnVisibleRoleIds
+     *
+     * @return
+     */
     @Override
     public List<String> getSystemUnVisibleRoleIds() {
         List<RoleModel> models = getModelMapper().list(new HumanCondition().filterEqual(RoleModel::getVisible, false));
@@ -340,6 +436,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
 
+    /**
+     * roleModel2RoleDto
+     *
+     * @param roleModel
+     * @return
+     */
     private RoleBo roleModel2RoleDto(RoleModel roleModel) {
         if (Objects.isNull(roleModel)) {
             return null;
@@ -355,6 +457,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
 
+    /**
+     * roleModel2RolePermDto
+     *
+     * @param roleModel
+     * @return
+     */
     private RolePermBo roleModel2RolePermDto(RoleModel roleModel) {
         if (Objects.isNull(roleModel)) {
             return null;
@@ -369,6 +477,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return rolePermBo;
     }
 
+    /**
+     * getRoleTargets
+     *
+     * @param roleModel
+     * @return
+     */
     private List<TargetModel> getRoleTargets(RoleModel roleModel) {
         List<TargetModel> targets = new ArrayList<>();
         if (Objects.equals(roleModel.getId(), AuthConstant.ROLE_ADMIN_ID)) {
@@ -380,6 +494,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return targets;
     }
 
+    /**
+     * targetModel2PermissionDto
+     *
+     * @param targets
+     * @return
+     */
     private List<PermissionBo> targetModel2PermissionDto(List<TargetModel> targets) {
         List<PermissionBo> permissionBos =
                 new ArrayList<>();
@@ -395,6 +515,11 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
 
+    /**
+     * deleteReleated
+     *
+     * @param roleId
+     */
     private void deleteReleated(String roleId) {
         if (StringUtils.isBlank(roleId)) {
             return;
@@ -426,6 +551,11 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         }
     }
 
+    /**
+     * createCheck
+     *
+     * @param roleModel
+     */
     private void createCheck(RoleModel roleModel) {
         if (StringUtils.isNotBlank(roleModel.getName())) {
             if (getByName(roleModel.getName()) != null) {
@@ -439,6 +569,16 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         }
     }
 
+    /**
+     * listWithUserCnt
+     *
+     * @param roleName
+     * @param orders
+     * @param excludeRoleIds
+     * @param page
+     * @param pageSize
+     * @return
+     */
     public ListObjServiceResult listWithUserCnt(String roleName, List<String> orders, List<String> excludeRoleIds, int page, int pageSize) {
         HumanCondition roleCondition = new HumanCondition();
         roleCondition.filterEqual(RoleModel::getVisible, true);

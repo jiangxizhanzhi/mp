@@ -18,22 +18,54 @@ public class LocalFileMappingCommon {
 
     public static LocalFileMappingService localFileMappingService;
 
+    /**
+     * LocalFileMappingCommon
+     *
+     * @param localFileMappingService
+     */
     private LocalFileMappingCommon(LocalFileMappingService localFileMappingService) {
         LocalFileMappingCommon.localFileMappingService = localFileMappingService;
     }
 
+    /**
+     * getMapping
+     *
+     * @param group
+     * @param name
+     * @return 本地文件和远程文件映射模型
+     */
     public static LocalFileMappingModel getMapping(String group, String name) {
         return localFileMappingService.getMapping(group, name).getSource();
     }
 
+    /**
+     * getMappings
+     *
+     * @param group
+     * @return
+     */
     public static List<LocalFileMappingModel> getMappings(String group) {
         return localFileMappingService.getMappings(group).getSource();
     }
 
+    /**
+     * syncMappings
+     *
+     * @param group
+     * @param mappings
+     * @return
+     */
     public static List<LocalFileMappingModel> syncMappings(String group, List<LocalFileMappingModel> mappings) {
         return localFileMappingService.syncMappings(group, mappings).getSource();
     }
 
+    /**
+     * syncMap
+     *
+     * @param group
+     * @param namePathMap
+     * @return
+     */
     public static List<LocalFileMappingModel> syncMap(String group, Map<String, String> namePathMap) {
         List<LocalFileMappingModel> mappings = new ArrayList<>();
         for (Map.Entry<String, String> entry : namePathMap.entrySet()) {
@@ -47,6 +79,13 @@ public class LocalFileMappingCommon {
         return syncMappings(group, mappings);
     }
 
+    /**
+     * syncDir
+     *
+     * @param group
+     * @param localDir
+     * @return
+     */
     public static List<LocalFileMappingModel> syncDir(String group, String localDir) {
         log.info("sync file begin, group is {},dir is {}", group, localDir);
         List<String> fileNames = FileUtil.listFileNames(localDir);
@@ -59,6 +98,12 @@ public class LocalFileMappingCommon {
         return result;
     }
 
+    /**
+     * deleteMappings
+     *
+     * @param group
+     * @return int
+     */
     public static int deleteMappings(String group) {
         return localFileMappingService.deleteMappings(group).getSource();
     }

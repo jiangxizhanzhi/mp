@@ -17,6 +17,14 @@ public class ExceptionUtil {
         return stacktraceToString(throwable, 3000, null);
     }
 
+    /**
+     * stacktraceToString
+     *
+     * @param throwable
+     * @param limit
+     * @param replaceCharToStrMap
+     * @return
+     */
     public static String stacktraceToString(Throwable throwable, int limit, Map<Character, String> replaceCharToStrMap) {
         final FastByteArrayOutputStream baos = new FastByteArrayOutputStream();
         throwable.printStackTrace(new PrintStream(baos));

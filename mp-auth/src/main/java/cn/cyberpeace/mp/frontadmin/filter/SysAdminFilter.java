@@ -27,11 +27,24 @@ public class SysAdminFilter extends OncePerRequestFilter {
     @Autowired
     private MappingJackson2HttpMessageConverter converter;
 
+    /**
+     * SysAdminFilter
+     *
+     * @param sysCtlService
+     * @param converter
+     */
     public SysAdminFilter(SysCtlService sysCtlService, MappingJackson2HttpMessageConverter converter) {
         this.sysCtlService = sysCtlService;
         this.converter = converter;
     }
 
+    /**
+     * doFilterInternal
+     *
+     * @param request
+     * @param response
+     * @param filterChain
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {

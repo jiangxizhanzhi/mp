@@ -44,6 +44,13 @@ public class LicenseFilter extends OncePerRequestFilter {
         this.frontAdminConfig = frontAdminConfig;
     }
 
+    /**
+     * doFilterInternal
+     *
+     * @param request
+     * @param response
+     * @param filterChain
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {

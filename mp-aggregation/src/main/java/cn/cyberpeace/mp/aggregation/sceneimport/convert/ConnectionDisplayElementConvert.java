@@ -18,6 +18,11 @@ import java.util.Map;
  */
 class ConnectionDisplayElementConvert implements IConverter {
 
+    /**
+     * convert2BO
+     *
+     * @param container
+     */
     public void convert2BO(ConvertDataContainer container) {
 
         if (CollectionUtils.isNotEmpty(container.getConnections()) && CollectionUtils.isNotEmpty(container.getPortId2Protocol().values())) {

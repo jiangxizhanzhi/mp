@@ -28,10 +28,20 @@ class Node2NodeConnectConverter implements IConverter {
 
     private List<NodeElementParseResult> nodes;
 
+    /**
+     * Node2NodeConnectConverter
+     *
+     * @param nodes
+     */
     public Node2NodeConnectConverter(List<NodeElementParseResult> nodes) {
         this.nodes = nodes;
     }
 
+    /**
+     * convert2BO
+     *
+     * @param container
+     */
     public void convert2BO(ConvertDataContainer container) {
         Set<String> networkIds = new HashSet<>();
         if (CollectionUtils.isNotEmpty(container.getNetworkElements())) {
