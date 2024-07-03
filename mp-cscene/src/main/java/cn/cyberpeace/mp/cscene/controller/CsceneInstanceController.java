@@ -2,12 +2,14 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
@@ -22,7 +24,10 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.cscene.model.CsceneElementSoftVersionModel;
+import cn.cyberpeace.mp.cscene.repository.CsceneElementSoftVersionMapper;
 import cn.cyberpeace.mp.cscene.response.CommonCollectRes;
+import cn.cyberpeace.mp.cscene.response.SoftVersionInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonCollectService;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
@@ -37,6 +42,8 @@ import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
@@ -1537,5 +1544,41 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiParam(name = "agreement", value = "协议") @RequestParam(value = "agreement", required = false) String agreement
             ) {
         return new ServiceResult<>(commonCollectService.getCollect(sceneId, nodeId, agreement)).asResult();
+    }
+
+    @GetMapping("/get_soft_version_info")
+    @ApiOperation(value = "查看节点软件版本信息")
+    public ServiceResult<List<SoftVersionInfo>> getSoftVersionInfo(@RequestParam("id")String id, @RequestParam("node_id")String nodeId) {
+        List<SoftVersionInfo> result = new ArrayList<>();
+        var mapper = BeanCommon.getBean(CsceneElementSoftVersionMapper.class);
+        var defaultModels = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, "default"));
+        if (defaultModels.isEmpty()) {
+            return new ServiceResult<>(result).asResult();
+        }
+
+        for (CsceneElementSoftVersionModel d : defaultModels) {
+            SoftVersionInfo softVersionInfo = new SoftVersionInfo();
+            softVersionInfo.setSoft(d.getSoft());
+            softVersionInfo.setOriginVersion(d.getVersion());
+            softVersionInfo.setNewVersion(d.getVersion());
+            result.add(softVersionInfo);
+        }
+
+        String sceneId = getModelService().getSceneId(id);
+        var elementMapper = BeanCommon.getBean(SceneElementMapper.class);
+        var element = elementMapper.first(new HumanCondition().filterEqual(BaseSceneElementModel::getScene, sceneId)
+                                                  .filterEqual(BaseSceneElementModel::getNodeId, nodeId));
+        var models = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, element.getId()));
+        Map<String, String> softVersion = new HashMap<>();
+        models.forEach(m -> {
+            softVersion.put(m.getSoft(), m.getVersion());
+        });
+
+        for (var r : result) {
+            r.setNewVersion(softVersion.getOrDefault(r.getSoft(), r.getOriginVersion()));
+            r.setUpgradeResult(!StringUtils.equals(r.getNewVersion(), r.getOriginVersion()));
+        }
+        Collections.sort(result, Comparator.comparing(SoftVersionInfo::getSoft));
+        return new ServiceResult<>(result).asResult();
     }
 }

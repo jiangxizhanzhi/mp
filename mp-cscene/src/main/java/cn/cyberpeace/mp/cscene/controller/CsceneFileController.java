@@ -33,8 +33,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @ClassName CsceneFileController
@@ -189,6 +191,16 @@ public class CsceneFileController {
     @ApiImplicitParam(name = "file", value = "mib文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/upload_versions")
     public void uploadElementVersion(@RequestParam(value = "file") MultipartFile file, @RequestParam(value = "eid") String eid) {
+        var mapper = BeanCommon.getBean(CsceneElementSoftVersionMapper.class);
+        var defaultModels = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, "default"));
+        if (defaultModels.isEmpty()) {
+            return;
+        }
+        Set<String> softs = new HashSet<>();
+        for (CsceneElementSoftVersionModel d : defaultModels) {
+            softs.add(d.getSoft());
+        }
+
         String fileName = eid;
         File x = new File(fileName);
         try {
@@ -199,15 +211,18 @@ public class CsceneFileController {
                 String[] s = l.split(" ");
                 String soft = s[0].split("/")[0];
                 String version = s[1];
-                CsceneElementSoftVersionModel model = new CsceneElementSoftVersionModel();
-                model.setVersion(version);
-                model.setSoft(soft);
-                model.setEid(eid);
-                models.add(model);
+                if (softs.contains(soft)) {
+                    CsceneElementSoftVersionModel model = new CsceneElementSoftVersionModel();
+                    model.setVersion(version);
+                    model.setSoft(soft);
+                    model.setEid(eid);
+                    models.add(model);
+                }
             }
-            var mapper = BeanCommon.getBean(CsceneElementSoftVersionMapper.class);
-            mapper.filterDelete(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, eid));
-            mapper.bulkCreate(models);
+            if (!models.isEmpty()) {
+                mapper.filterDelete(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, eid));
+                mapper.bulkCreate(models);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
