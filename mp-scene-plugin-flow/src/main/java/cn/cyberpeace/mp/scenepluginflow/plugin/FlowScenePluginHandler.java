@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
@@ -24,6 +25,7 @@ import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.PrepareHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.modelhandler.FlowScenePluginModelHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowWithSourceIp;
+import cn.cyberpeace.mp.scenepluginflow.service.FlowTaskPostService;
 import cn.cyberpeace.mp.scenepluginflow.util.SceneFlowCacheUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -311,7 +313,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
 
         String finalSourceIp = sourceIp == null ? flow.getSourceIp() : sourceIp;
         boolean flag = handlerUtils.startFlow(flowElement, flow, finalSourceIp, async);
-        postService.onStopTaskNode(getSourceSceneId(), nodeId);
+        BeanCommon.getBean(FlowTaskPostService.class).onStopTaskNode(getSourceSceneId(), nodeId);
         return flag;
     }
 

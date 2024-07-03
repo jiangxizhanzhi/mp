@@ -645,7 +645,7 @@ public class CreateHandler extends HandlerCommon {
                     SceneSingleton.sceneAppConfig.getMetadataFileServer(),
                     nameFileMap.getOrDefault("get_version.sh", StringUtils.EMPTY)
             );
-            commands.add("curl -o /tmp/get_version.sh " + downloadUrl);
+            commands.add("cd /tmp & curl -o /tmp/get_version.sh " + downloadUrl);
             commands.add("nohup sh /tmp/get_version.sh http://10.4.1.58:8001 wget " + cloudElement.getSrcElement()
                     .getEid() + "  > out.log 2>&1 &");
         }
