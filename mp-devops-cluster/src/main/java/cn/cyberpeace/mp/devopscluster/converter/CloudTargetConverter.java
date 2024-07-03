@@ -22,6 +22,7 @@ public class CloudTargetConverter {
         List<AddressPool> addressPools = new ArrayList<>();
         AddressPool addressPool = new AddressPool();
         addressPools.add(addressPool);
+        extNet.setAddressPools(addressPools);
         device.setExtNet(extNet);
 
         /**
