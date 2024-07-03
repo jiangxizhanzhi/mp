@@ -67,9 +67,6 @@ public class SceneAppConfig {
     @Value("${mp.scene.version_report_url:http://10.4.1.58:8001/api/mp/cscene/file/upload_versions}")
     private String versionReportUrl;
 
-    @Value("${mp.scene.version_soft:wget_and_libpcre3}")
-    private String versionSoft;
-
     @Value("${mp.scene.version_image:ubuntu_test_cloudint_not_delete}")
     private String versionImage ;
 

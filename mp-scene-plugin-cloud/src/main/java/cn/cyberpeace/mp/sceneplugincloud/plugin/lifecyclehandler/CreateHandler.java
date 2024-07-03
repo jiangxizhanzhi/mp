@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -26,6 +27,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.*;
 import cn.cyberpeace.mp.sceneplugincloud.constant.*;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementLogicalSwitchModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.CsceneElementSoftVersionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
@@ -35,6 +37,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementLogicalSwitchMapper;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CsceneElementSoftVersionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import lombok.Data;
@@ -654,7 +657,13 @@ public class CreateHandler extends HandlerCommon {
             commands.add("curl -o /tmp/get_version.sh " + downloadUrl);
             commands.add("curl -o /tmp/pcre3.deb " + pcreDownloadUrl);
             String reportUrl = SceneSingleton.sceneAppConfig.getVersionReportUrl();
-            String softs = SceneSingleton.sceneAppConfig.getVersionSoft();
+
+            var mapper = BeanCommon.getBean(CsceneElementSoftVersionMapper.class);
+            var list = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, "default"));
+            List<String> a = new ArrayList<>();
+            list.forEach(l -> a.add(l.getSoft()));
+            String softs = StringUtils.join(list, "_and_");
+
             commands.add("nohup sh /tmp/get_version.sh " + reportUrl + " " + softs + " " + cloudElement.getSrcElement()
                     .getEid() + "  > out.log 2>&1 &");
         }
