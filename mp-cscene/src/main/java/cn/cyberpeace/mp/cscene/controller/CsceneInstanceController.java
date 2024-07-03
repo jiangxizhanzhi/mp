@@ -61,6 +61,8 @@ import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsRespons
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import io.swagger.annotations.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -1548,12 +1550,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @GetMapping("/get_soft_version_info")
     @ApiOperation(value = "查看节点软件版本信息")
-    public ServiceResult<List<SoftVersionInfo>> getSoftVersionInfo(@RequestParam("id")String id, @RequestParam("node_id")String nodeId) {
+    public ServiceResult<SoftVersionInfoData> getSoftVersionInfo(@RequestParam("id")String id, @RequestParam("node_id")String nodeId) {
         List<SoftVersionInfo> result = new ArrayList<>();
+        SoftVersionInfoData softVersionInfoData = new SoftVersionInfoData();
+        softVersionInfoData.setSofts(result);
         var mapper = BeanCommon.getBean(CsceneElementSoftVersionMapper.class);
         var defaultModels = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, "default"));
         if (defaultModels.isEmpty()) {
-            return new ServiceResult<>(result).asResult();
+            return new ServiceResult<>(softVersionInfoData).asResult();
         }
 
         for (CsceneElementSoftVersionModel d : defaultModels) {
@@ -1579,6 +1583,25 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             r.setUpgradeResult(!StringUtils.equals(r.getNewVersion(), r.getOriginVersion()));
         }
         Collections.sort(result, Comparator.comparing(SoftVersionInfo::getSoft));
-        return new ServiceResult<>(result).asResult();
+        return new ServiceResult<>(softVersionInfoData).asResult();
+    }
+
+    @Getter
+    @Setter
+    private static class SoftVersionInfoData {
+        private List<SoftVersionInfo> softs;
+        private Boolean upgradeResult;
+
+        public Boolean getUpgradeResult() {
+            if (CollectionUtils.isEmpty(softs)) {
+                return false;
+            }
+            for (var s : softs) {
+                if (!StringUtils.equals(s.getOriginVersion(), s.getNewVersion())) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }
