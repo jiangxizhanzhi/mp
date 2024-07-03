@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.behavior.repository.NetworkBehaviorMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,6 +81,9 @@ public class CsceneNetworkBehaviorService {
 	 * @param sceneId
 	 */
 	public void create(List<String> networkIds, String sceneId) {
+		if (CollectionUtils.isEmpty(networkIds)) {
+			return;
+		}
 		List<CsceneNetworkBehaviorModel> modelList = csceneNetworkBehaviorMapper.getTopoAllByIds(networkIds);
 		modelList.forEach(model ->{
 			model.setSceneId(sceneId);

@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -117,7 +118,13 @@ public class CsceneUserBehaviorService {
 	 * @param sceneId
 	 */
 	public void create(List<String> nodeIds, String sceneId) {
+		if (CollectionUtils.isEmpty(nodeIds)) {
+			return;
+		}
 		List<CsceneUserBehaviorModel> userModels = csceneUserBehaviorMapper.getTopoAllByNodeIds(nodeIds);
+		if (CollectionUtils.isEmpty(userModels)) {
+			return;
+		}
 		List<String> networkIds = new ArrayList<>();
 		for (CsceneUserBehaviorModel userModel : userModels) {
 			networkIds.addAll(JSON.parseArray(userModel.getNetworkIds(), String.class));
