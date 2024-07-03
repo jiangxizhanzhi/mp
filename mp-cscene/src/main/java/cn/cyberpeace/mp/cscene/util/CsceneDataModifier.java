@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
@@ -15,6 +16,7 @@ import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
+import cn.cyberpeace.mp.cscene.response.SoftVersionInfo;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaNodeConnectionBO;
@@ -39,7 +41,9 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.EntityUsb;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.VirtualUsb;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.CsceneElementSoftVersionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CsceneElementSoftVersionMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -50,6 +54,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -680,8 +685,47 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void handlerSoftVersion(CsceneInstanceBO csceneInstanceBO){
+        Map<String,String> idMap = new HashMap<>();
+        for (SceneElementBO elementBO : csceneInstanceBO.getScene().getTopology().getElements()) {
+            idMap.put(elementBO.getId(), elementBO.getEid());
+        }
+
+        Map<String, String> defaultSoftVersions = null;
+        var mapper = BeanCommon.getBean(CsceneElementSoftVersionMapper.class);
+        for (var e : csceneInstanceBO.getScene().getPlugins().get("cpcloud").getElements().entrySet()) {
+            if (Boolean.TRUE.equals(e.getValue().get("support_soft_version"))) {
+                if (defaultSoftVersions == null) {
+                    defaultSoftVersions = new HashMap<>();
+                    var defaultModels = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, "default"));
+                    if (CollectionUtils.isNotEmpty(defaultModels)) {
+                        for (CsceneElementSoftVersionModel d : defaultModels) {
+                            defaultSoftVersions.put(d.getSoft(), d.getVersion());
+                        }
+                    }
+                }
+
+                String eid = idMap.get(e.getKey());
+                var models = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, eid));
+                Map<String, String> softVersion = new HashMap<>();
+                models.forEach(m -> {
+                    softVersion.put(m.getSoft(), m.getVersion());
+                });
+                e.getValue().put("upgrade_result", false);
+                for (String soft : defaultSoftVersions.keySet()) {
+                    if (!StringUtils.equals(defaultSoftVersions.get(soft), softVersion.get(soft))) {
+                        e.getValue().put("upgrade_result", true);
+                        break;
+                    }
+                }
+
+            }
+        }
+    }
+
     public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO) {
         correctReturnCsceneData(csceneInstanceBO, true);
+        handlerSoftVersion(csceneInstanceBO);
 
         Set<String> portIds = new HashSet<>();
         csceneInstanceBO.getScene().getTopology().getElements().forEach(e -> {
