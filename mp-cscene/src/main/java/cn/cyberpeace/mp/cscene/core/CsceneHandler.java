@@ -166,17 +166,23 @@ public class CsceneHandler extends BaseCsceneHandler<
             log.info("check user {} run instance", getContext().getAccessUserId());
         }
 
-        try {
-            this.checkVlanIds(getCscene());
-        } catch (Exception e) {
-            log.error("check failed and wait 3 seconds");
+        for (int i = 0; i < 10; i++) {
             try {
-                Thread.sleep(3000);
-            } catch (InterruptedException ex) {
-                throw new RuntimeException(ex);
+                this.checkVlanIds(getCscene());
+                break;
+            } catch (Exception e) {
+                if (i == 9) {
+                    throw e;
+                }
+                log.error("check failed and wait 1 seconds");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
-            this.checkVlanIds(getCscene());
         }
+
         var instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
         // 节点数量增加失败 说明已到达数量上限
         NodeLimitUtils.UpdateResult updateResult = NodeLimitUtils.addLimitedNodeCount(instanceHandler);
