@@ -64,6 +64,12 @@ public class SceneAppConfig {
     @Value("${mp.scene.dhcp_control:false}")
     private Boolean dhcpControl;
 
+    @Value("${mp.scene.version_report_url:http://10.4.1.58:8001/api/mp/cscene/file/upload_versions}")
+    private String versionReportUrl;
+
+    @Value("${mp.scene.version_soft:wget_and_libpcre3}")
+    private String versionSoft;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 

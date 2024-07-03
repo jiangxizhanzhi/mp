@@ -647,7 +647,9 @@ public class CreateHandler extends HandlerCommon {
             );
             commands.add("cd /tmp");
             commands.add("curl -o /tmp/get_version.sh " + downloadUrl);
-            commands.add("nohup sh /tmp/get_version.sh http://10.4.1.58:8001 wget " + cloudElement.getSrcElement()
+            String reportUrl = SceneSingleton.sceneAppConfig.getVersionReportUrl();
+            String softs = SceneSingleton.sceneAppConfig.getVersionSoft();
+            commands.add("nohup sh /tmp/get_version.sh " + reportUrl + " " + softs + " " + cloudElement.getSrcElement()
                     .getEid() + "  > out.log 2>&1 &");
         }
 

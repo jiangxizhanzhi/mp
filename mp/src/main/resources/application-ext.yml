@@ -187,6 +187,8 @@ mp:
       scene-process-save-realtime: ${MP_SCENE_PROCESS_SAVE_REALTIME:true}
       element-process-save-realtime: ${MP_ELEMENT_PROCESS_SAVE_REALTIME:true}
       dhcp-control: ${MP_SCENE_DHCP_CONTROL:false}
+      version-report-url: ${MP_VERSION_REPORT_URL:http://10.4.1.58:8001/api/mp/cscene/file/upload_versions}
+      version-soft: ${MP_VERSION_SOFT:wget_and_libpcre3}
       metadata-file-server: http://${MP_API_IP:10.100.25.1}:${MP_API_PORT:8002}/api/mp/file
 # for kaptcha
 #kaptcha:

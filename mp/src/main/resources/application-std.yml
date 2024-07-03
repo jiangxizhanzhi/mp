@@ -312,6 +312,8 @@ mp:
     scene-process-save-realtime: ${mp.scene.ext-var.scene-process-save-realtime}
     element-process-save-realtime: ${mp.scene.ext-var.element-process-save-realtime}
     dhcp-control: ${mp.scene.ext-var.dhcp-control}
+    version-report-url: ${mp.scene.ext-var.version-report-url}
+    version-soft: ${mp.scene.ext-var.version-soft}
     metadata-file-server: ${mp.scene.ext-var.metadata-file-server}
   aggregation:
     export-image-timeout: ${mp.aggregation.ext-var.export-image-timeout}
