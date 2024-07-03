@@ -660,9 +660,9 @@ public class CreateHandler extends HandlerCommon {
 
             var mapper = BeanCommon.getBean(CsceneElementSoftVersionMapper.class);
             var list = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, "default"));
-            List<String> a = new ArrayList<>();
-            list.forEach(l -> a.add(l.getSoft()));
-            String softs = StringUtils.join(list, "_and_");
+            List<String> softNames = new ArrayList<>();
+            list.forEach(l -> softNames.add(l.getSoft()));
+            String softs = StringUtils.join(softNames, "_and_");
 
             commands.add("nohup sh /tmp/get_version.sh " + reportUrl + " " + softs + " " + cloudElement.getSrcElement()
                     .getEid() + "  > out.log 2>&1 &");
