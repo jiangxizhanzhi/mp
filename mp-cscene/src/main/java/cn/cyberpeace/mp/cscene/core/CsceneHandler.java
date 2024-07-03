@@ -158,7 +158,11 @@ public class CsceneHandler extends BaseCsceneHandler<
                                                              .filterEqual(BaseCsceneModel::getCreateUser, UserUtils.getLoginUser()
                                                                      .getId()));
         if (runInstance != null) {
+            log.info("check user {} run instance , running instance id is {}", UserUtils.getLoginUser()
+                    .getId(), runInstance.getId());
             throw new MpRuntimeException(CsceneErrorCode.USER_CSCENE_INSTANCE_LIMIT);
+        } else {
+            log.info("check user {} run instance", UserUtils.getLoginUser().getId());
         }
 
         this.checkVlanIds(getCscene());
