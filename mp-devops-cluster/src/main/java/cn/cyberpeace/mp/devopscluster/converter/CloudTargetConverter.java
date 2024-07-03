@@ -16,22 +16,13 @@ public class CloudTargetConverter {
         /**
          * ext_net
          */
-        device.setRole(21);
+        device.setRole(24);
         device.setImageType("VNet");
         ExtNet extNet = new ExtNet();
-        extNet.setIpv4Address(null);
-        extNet.setIpv4AddressPool(null);
+        List<AddressPool> addressPools = new ArrayList<>();
+        AddressPool addressPool = new AddressPool();
+        addressPools.add(addressPool);
         device.setExtNet(extNet);
-
-        //访问协议
-        List<AccessProtocol> accessProtocols = new ArrayList<>();
-        AccessProtocol accessProtocol = new AccessProtocol();
-        accessProtocol.setProtocol("SSH");
-        accessProtocol.setUsername("admin123");
-        accessProtocol.setPassword("NHiOJiZTD4K1");
-        accessProtocol.setPort(22);
-        accessProtocols.add(accessProtocol);
-        extNet.setAccessProtocols(accessProtocols);
 
         /**
          * ext_system_info
@@ -59,6 +50,29 @@ public class CloudTargetConverter {
          */
         device.setRole(21);
         device.setImageType("fireWall");
+        ExtFireWall extFireWall = new ExtFireWall();
+        extFireWall.setIsPublicIp(true);
+        //防火墙策略
+        FirewallPolicy firewallPolicy = new FirewallPolicy();
+        List<FirewallPolicyRule> rules = new ArrayList<>();
+        rules.add(new FirewallPolicyRule());
+        firewallPolicy.setRules(rules);
+        extFireWall.setFirewallPolicy(firewallPolicy);
+        device.setExtFireWall(extFireWall);
+
+        /**
+         * ext_system_info
+         */
+        ExtSystemInfo extSystemInfo = new ExtSystemInfo();
+        extSystemInfo.setLanguage("cn");
+        extSystemInfo.setSystemArchitecture("64");
+        device.setExtSystemInfo(extSystemInfo);
+
+        /**
+         * ext_image_info
+         */
+        ExtImageInfo extImageInfo = new ExtImageInfo();
+        device.setExtImageInfo(extImageInfo);
 
         /**
          * device_cloud_target

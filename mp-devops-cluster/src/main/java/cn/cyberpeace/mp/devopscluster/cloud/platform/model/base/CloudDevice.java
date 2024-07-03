@@ -168,7 +168,15 @@ public class CloudDevice extends BaseCloudPlatformResult {
 
     private ExtDocker extDocker;
 
+    /**
+     * 网络信息
+     */
     private ExtNet extNet;
+
+    /**
+     * 防火墙信息
+     */
+    private ExtFireWall extFireWall;
 
     /**
      * 实体USB信息

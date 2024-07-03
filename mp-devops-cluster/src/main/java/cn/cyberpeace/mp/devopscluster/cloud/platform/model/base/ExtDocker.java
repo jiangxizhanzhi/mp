@@ -41,10 +41,8 @@ public class ExtDocker implements Serializable {
     @ApiModelProperty("临时文件ID")
     private String tmpdirUuid;
 
-
     @ApiModelProperty("用户文件名称")
     private String userFilename;
-
 
     @ApiModelProperty("实例ID")
     private String instanceUuid;
@@ -81,4 +79,7 @@ public class ExtDocker implements Serializable {
 
     @ApiModelProperty("操作系统")
     private String vmType;
+
+    @ApiModelProperty("漏洞信息")
+    private String loopholeInfo;
 }
