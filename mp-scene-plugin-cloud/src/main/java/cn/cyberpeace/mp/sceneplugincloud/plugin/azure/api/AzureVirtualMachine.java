@@ -1,20 +1,24 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api;
 
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.NetworkSecurityGroupUtils;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.fluent.models.ResourceSkuInner;
 import com.azure.resourcemanager.compute.models.*;
-import com.azure.resourcemanager.network.models.Network;
-import com.azure.resourcemanager.network.models.NetworkInterface;
-import com.azure.resourcemanager.network.models.PublicIpAddress;
+import com.azure.resourcemanager.network.models.*;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileWriter;
@@ -140,8 +144,66 @@ public class AzureVirtualMachine {
     public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData) {
         cloudElement.setResourceId("1233");
         cloudElement.setPublicIpAddress("20.30.40.5");
+
 //        TODO 资源不浪费
 /*
+        String groupName = pluginHandler.getSourceSceneId();
+
+        // 调用微软云api 创建虚拟机 回写虚拟机id
+        VirtualMachine vm = createVirtualMachine(cloudElement,virtualNics, userData, groupName);
+        cloudElement.setResourceId(vm.id());
+        if(cloudElement.getIsPublicIp()){
+            cloudElement.setPublicIpAddress(vm.getPrimaryPublicIPAddress().ipAddress());
+        }
+
+//        创建网络安全组
+//        绑定网络接口
+//        设置入站规则
+//        更新网络安全组
+
+        SceneElementBO srcElement = cloudElement.getSrcElement();
+
+        for (SceneElementPortBO port : srcElement.getPorts()) {
+            List<AccessMode> accessModes = port.getAccessModes();
+            String ip = port.getIp();
+//            匹配网络接口
+            if (StringUtils.isNotBlank(ip)) {
+                PagedIterable<NetworkInterface> networkInterfaces = azureResourceManager.networkInterfaces().list();
+
+                Optional<NetworkInterface> first = networkInterfaces.stream().filter(networkInterface -> ip.equals(networkInterface.primaryPrivateIP())).findFirst();
+                if (first.isPresent()) {
+                    NetworkInterface networkInterface = first.get();
+                    //            创建nsg
+                    NetworkSecurityGroup nsg = azureResourceManager.networkSecurityGroups()
+                            .define("ssh-nsg-" + networkInterface.name())
+                            .withRegion(this.region)
+                            .withExistingResourceGroup(groupName)
+                            .create();
+                    NetworkSecurityGroup.Update nsgUpdate = nsg.update();
+                    for (int i = 0; i < accessModes.size(); i++) {
+                        AccessMode accessMode = accessModes.get(i);
+                        String protocol = accessMode.getProtocol();
+                        if (null == protocol) continue;
+                        String[] protoclos = protocol.split(";");
+                        for (int j = 0; j < protoclos.length; j++) {
+                            NetworkSecurityGroupUtils.addInRule(accessMode.getProtocol().toLowerCase(), nsgUpdate, 3100 + i * 200 + j * 10);
+                        }
+                    }
+                    nsgUpdate.apply();
+                    networkInterface.update().withExistingNetworkSecurityGroup(nsg).apply();
+                }
+            }
+
+        }*/
+
+    }
+
+    public void create1(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData) {
+//        cloudElement.setResourceId("1233");
+//        cloudElement.setPublicIpAddress("20.30.40.5");
+
+//        TODO 资源不浪费
+
         String groupName = pluginHandler.getSourceSceneId();
 
         // 调用微软云api 创建虚拟机 回写虚拟机id
@@ -189,7 +251,7 @@ public class AzureVirtualMachine {
                 }
             }
 
-        }*/
+        }
 
     }
 
@@ -268,12 +330,57 @@ public class AzureVirtualMachine {
      * 创建虚拟机的方法
      *
      * @param cloudElement 云插件场景元素
-     * @param virtualNics  虚拟网卡列表
      * @param userData     用户数据
      * @param groupName    资源组名称
      * @return 创建的虚拟机对象
      */
     private VirtualMachine createVirtualMachine(CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData, String groupName) {
+        // 生成虚拟机名称
+        String vmName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
+
+        // 获取磁盘信息
+        Integer disk = cloudElement.getSrcElement().getDisk();
+        Integer expansionDisk = cloudElement.getSrcElement().getExpansionDisk();
+        String vmExpansionDiskType = cloudElement.getVmExpansionDiskType();
+
+        // 定义虚拟机大小和存储账户类型
+        VirtualMachineSizeTypes flavor = StringUtils.isNotBlank(cloudElement.getVmSizeType()) ? VirtualMachineSizeTypes.fromString(cloudElement.getVmSizeType()) : VirtualMachineSizeTypes.STANDARD_B1S;
+        StorageAccountTypes storageAccountTypes = StringUtils.isNotBlank(cloudElement.getVmOsDiskType()) ? StorageAccountTypes.fromString(cloudElement.getVmOsDiskType()) : StorageAccountTypes.STANDARD_SSD_LRS;
+
+        VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged creator;
+        // 取第一块网卡
+        // azure todo 调整 root name
+        VirtualNic virtualNic = virtualNics.get(0);
+        String netId = virtualNic.getNetworkId();
+        if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudElement.getVmType())) {
+            creator = createWindowsVM(cloudElement, userData, groupName, azureResourceManager, region, vmName, netId, virtualNic, disk, expansionDisk, vmExpansionDiskType, storageAccountTypes, flavor);
+        } else {
+            creator = createLinuxVM(cloudElement, userData, groupName, azureResourceManager, region, vmName, netId, virtualNic, disk, expansionDisk, vmExpansionDiskType, storageAccountTypes, flavor);
+        }
+//        TODO 绑定管理网络 回写管理网络信息
+//        element.getMgmtIp()
+
+        // 添加其他网卡
+        for (int i = 1; i < virtualNics.size(); i++) {
+            VirtualNic nic = virtualNics.get(i);
+            NetworkInterface ni = createNetworkInterface(azureResourceManager, region, groupName, nic, netId);
+            creator.withExistingSecondaryNetworkInterface(ni);
+        }
+
+        // 创建虚拟机
+        return creator.create();
+    }
+
+    /**
+     * 创建虚拟机的方法
+     *
+     * @param cloudElement 云插件场景元素
+     * @param virtualNics  虚拟网卡列表
+     * @param userData     用户数据
+     * @param groupName    资源组名称
+     * @return 创建的虚拟机对象
+     */
+    private VirtualMachine createVirtualMachine1(CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData, String groupName) {
         // 生成虚拟机名称
         String vmName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
 
@@ -303,6 +410,8 @@ public class AzureVirtualMachine {
         } else {
             creator = createLinuxVM(cloudElement, userData, groupName, azureResourceManager, region, vmName, netId, virtualNic, disk, expansionDisk, vmExpansionDiskType, storageAccountTypes, flavor);
         }
+//        TODO 绑定管理网络 回写管理网络信息
+//        element.getMgmtIp()
 
         // 添加其他网卡
         for (int i = 1; i < virtualNics.size(); i++) {
@@ -314,6 +423,7 @@ public class AzureVirtualMachine {
         // 创建虚拟机
         return creator.create();
     }
+
 
     /**
      * 创建Windows虚拟机

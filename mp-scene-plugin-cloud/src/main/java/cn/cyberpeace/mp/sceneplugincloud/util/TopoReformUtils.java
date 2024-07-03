@@ -12,12 +12,14 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * @Description 用于动态更新topo和插件结构
@@ -104,7 +106,7 @@ public class TopoReformUtils {
     private static ElementWrapper createAuxiliarySwitchNode() {
         SceneElementBO sceneElementBO = new SceneElementBO();
         sceneElementBO.setPorts(new ArrayList<>());
-        sceneElementBO.setId(TextUtils.uuid());
+        sceneElementBO.setId(UUID.randomUUID().toString().toLowerCase());
         sceneElementBO.setEvent(SceneElementModel.Event.DEFAULT);
         sceneElementBO.setEventStatus(EventStatus.INITIAL);
         sceneElementBO.setProcess(StringUtils.EMPTY);
@@ -118,9 +120,10 @@ public class TopoReformUtils {
 
         sceneElementBO.setType(BaseSceneElementModel.Type.SWITCH);
         // azure todo 把两个字段补充
-//        sceneElementBO.setName();
-//        sceneElementBO.setIcon2();
-        cloudPluginSceneElementBO.setImageType("simple");
+        sceneElementBO.setName("VNet");
+        sceneElementBO.setIcon2("/api/mp/file/710/017/93dde93031be465c3a7bb20381f4cd6e.png");
+
+        cloudPluginSceneElementBO.setImageType(CloudPluginSceneElementModel.ImageType.VNET);
         cloudPluginSceneElementBO.setElectricPortNumber(1);
         cloudPluginSceneElementBO.setLanPortNumber(1);
         cloudPluginSceneElementBO.setWanPortNumber(1);

@@ -319,6 +319,7 @@ public class InitiateHandler extends HandlerCommon {
 
     /**
      * 初始化节点
+     *
      * @param cloudElement 网元节点
      */
     protected void initiateElementBaseProperties(CloudPluginSceneElementBO cloudElement) {
@@ -528,7 +529,10 @@ public class InitiateHandler extends HandlerCommon {
                         )
                 ) {
                     for (ConnectedNetworkBO n : cidr2ConnectedNetwork.values()) {
-                        if (CollectionUtils.isNotEmpty(n.getFromPorts())) {
+                        if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(cloudElement.getImageType())
+                                || BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(cloudElement.getImageType())) {
+                            deriveNetworks.add(n);
+                        } else if (CollectionUtils.isNotEmpty(n.getFromPorts())) {
                             deriveNetworks.add(n);
                             break;
                         }
@@ -568,6 +572,7 @@ public class InitiateHandler extends HandlerCommon {
 
     /**
      * 初始化辅助网络
+     *
      * @param cloudElement 网元节点
      */
     private void initiateAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
@@ -664,6 +669,7 @@ public class InitiateHandler extends HandlerCommon {
 
     /**
      * 初始化辅助网络节点的ip池
+     *
      * @param element 辅助网络节点
      */
     private void initIpPool(CloudPluginSceneElementBO element) {
@@ -806,6 +812,7 @@ public class InitiateHandler extends HandlerCommon {
 
     /**
      * 初始化虚拟网络端口
+     *
      * @param cloudElement 网元节点
      */
     private void initiateVirtualPort(CloudPluginSceneElementBO cloudElement) {
@@ -924,6 +931,7 @@ public class InitiateHandler extends HandlerCommon {
 
     /**
      * 初始化网络端口
+     *
      * @param cloudElement 网元节点
      */
     private void initiateElementPorts(CloudPluginSceneElementBO cloudElement) {
@@ -993,7 +1001,7 @@ public class InitiateHandler extends HandlerCommon {
                     if (CollectionUtils.isEmpty(ports)) {
                         continue;
                     }
-                    List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getNetwork().getGateway(), network.getNetwork().getAllocationPools(),network.getNetwork().getCidr());
+                    List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getNetwork().getGateway(), network.getNetwork().getAllocationPools(), network.getNetwork().getCidr());
                     if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate())) {
                         possibleDhcpIps = new ArrayList<>();
                     }
