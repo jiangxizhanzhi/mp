@@ -221,7 +221,26 @@ public class CreateHandler extends HandlerCommon {
             subnet.setDnsNameservers(CollectionUtils.emptyNull(connectedNetwork.network.getDnsNameservers()));
             createData.setSubnet(subnet);
             if (connectedNetwork.network.getNetMode() == null || BaseCloudPluginSceneElementModel.NetMode.NORMAL.equals(connectedNetwork.network.getNetMode())) {
-                var virtualSwitch = vsClient.create(createData);
+
+                VirtualSwitchCreateData virtualSwitch = null ;
+
+                for (int i = 0; i < 3; i++) {
+                    try {
+                        virtualSwitch = vsClient.create(createData);
+                        break;
+                    } catch (Exception e) {
+                        if (i == 2) {
+                            throw e;
+                        }
+                        log.error("check failed and wait 1 seconds");
+                        try {
+                            Thread.sleep(5000);
+                        } catch (InterruptedException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
+                }
+
                 cloudElement.setVlanId(virtualSwitch.getSegmentationId());
                 connectedNetwork.network.setVlanId(virtualSwitch.getSegmentationId());
                 connectedNetwork.network.setResourceId(virtualSwitch.getId());
@@ -229,18 +248,18 @@ public class CreateHandler extends HandlerCommon {
                     cloudElement.setResourceId(virtualSwitch.getId());
                 }
                 // 向端口回写网络id
-                connectedNetwork.getFromPorts().forEach(p -> {
+                for (SceneElementPortBO sceneElementPortBO : connectedNetwork.getFromPorts()) {
+                    var pluginPort = getPluginHandler().getPort(sceneElementPortBO.getId());
+                    if (pluginPort != null) {
+                        pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
+                    }
+                }
+                for (SceneElementPortBO p : connectedNetwork.getToPorts()) {
                     var pluginPort = getPluginHandler().getPort(p.getId());
                     if (pluginPort != null) {
                         pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
                     }
-                });
-                connectedNetwork.getToPorts().forEach(p -> {
-                    var pluginPort = getPluginHandler().getPort(p.getId());
-                    if (pluginPort != null) {
-                        pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
-                    }
-                });
+                }
                 createAuxiliaryNetworkRouter(cloudElement, connectedNetwork.network);
             }
         }
