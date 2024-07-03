@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.behavior.res.CsceneNodeBehaviorRes;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -234,10 +235,12 @@ public class CsceneUserBehaviorService {
 				}
 				String fileString = getRemoteFileContent(networkModel.getFileUrl());
 				JSONObject content = JSONObject.parseObject(fileString);
-				//替换side文件中的url、urls
-				content.put("url", networkModel.getUrl());
-				List<String> urls = Arrays.asList(networkModel.getUrl());
-				content.put("urls", urls);
+				if (StringUtils.isNotEmpty(networkModel.getUrl())) {
+					//替换side文件中的url、urls
+					content.put("url", networkModel.getUrl());
+					List<String> urls = Arrays.asList(networkModel.getUrl());
+					content.put("urls", urls);
+				}
 				try (FileWriter writer = new FileWriter(fileName)){
 					writer.write(content.toString());
 				}catch (IOException e) {
