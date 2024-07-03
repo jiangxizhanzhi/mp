@@ -154,13 +154,16 @@ public class CsceneHandler extends BaseCsceneHandler<
             }
         }
 
-        var runInstance = csceneInstanceMapper.first(new HumanCondition().filterEqual(BaseCsceneModel::getDeleted, false)
-                                                             .filterEqual(CsceneInstanceModel::getCreateUser, csceneInstance.getCreateUser()));
-        if (runInstance != null) {
-            log.info("check user {} run instance , running instance id is {}", csceneInstance.getCreateUser(), runInstance.getId());
+        var runInstance = csceneInstanceMapper.list(new HumanCondition()
+                                                            .filterEqual(CsceneInstanceModel::getDeleted, false)
+                                                            .filterEqual(CsceneInstanceModel::getCreateUser, csceneInstance.getCreateUser())
+        );
+        if (CollectionUtils.isNotEmpty(runInstance)) {
+            log.info("check user {} run instance , running instance id is {}", csceneInstance.getCreateUser(), runInstance.get(0)
+                    .getId());
             throw new MpRuntimeException(CsceneErrorCode.USER_CSCENE_INSTANCE_LIMIT);
         } else {
-            log.info("check user {} run instance", UserUtils.getLoginUser().getId());
+            log.info("check user {} run instance", csceneInstance.getCreateUser());
         }
 
         this.checkVlanIds(getCscene());
