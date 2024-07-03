@@ -83,6 +83,9 @@ public class MenuConfigService {
                 backChildren = node.getChildren();
             }
             if ("前台".equals(node.getName()) && null != backChildren){
+                if (node.getChildren() == null) {
+                    node.setChildren(new ArrayList<>());
+                }
                 node.getChildren().addAll(backChildren);
                 backChildren = null;
             }
