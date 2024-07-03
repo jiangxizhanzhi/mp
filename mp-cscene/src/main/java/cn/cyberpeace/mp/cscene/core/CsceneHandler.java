@@ -156,14 +156,14 @@ public class CsceneHandler extends BaseCsceneHandler<
 
         var runInstance = csceneInstanceMapper.list(new HumanCondition()
                                                             .filterEqual(CsceneInstanceModel::getDeleted, false)
-                                                            .filterEqual(CsceneInstanceModel::getCreateUser, csceneInstance.getCreateUser())
+                                                            .filterEqual(CsceneInstanceModel::getCreateUser, getContext().getAccessUserId())
         );
         if (CollectionUtils.isNotEmpty(runInstance)) {
-            log.info("check user {} run instance , running instance id is {}", csceneInstance.getCreateUser(), runInstance.get(0)
+            log.info("check user {} run instance , running instance id is {}", getContext().getAccessUserId(), runInstance.get(0)
                     .getId());
             throw new MpRuntimeException(CsceneErrorCode.USER_CSCENE_INSTANCE_LIMIT);
         } else {
-            log.info("check user {} run instance", csceneInstance.getCreateUser());
+            log.info("check user {} run instance", getContext().getAccessUserId());
         }
 
         this.checkVlanIds(getCscene());
