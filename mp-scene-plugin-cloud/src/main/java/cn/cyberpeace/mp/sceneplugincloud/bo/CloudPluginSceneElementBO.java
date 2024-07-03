@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.bo;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.BaseCloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
@@ -38,6 +39,9 @@ public class CloudPluginSceneElementBO extends BaseCloudPluginSceneElementBO<Clo
 
     @ApiModelProperty(value = "云平台用于分布式部署时需要的ip,节点的每个网络需要一个")
     private Map<String, String> fwdnsIps = new ConcurrentHashMap<>();
+
+    @ApiModelProperty(value = "是否支持查询软件版本")
+    private Boolean supportSoftVersion;
 
     // 加入的网络
     @JsonIgnore
@@ -85,4 +89,7 @@ public class CloudPluginSceneElementBO extends BaseCloudPluginSceneElementBO<Clo
         return obj;
     }
 
+    public Boolean getSupportSoftVersion() {
+        return StringUtils.equals(SceneSingleton.sceneAppConfig.getVersionImage(), this.getImage());
+    }
 }

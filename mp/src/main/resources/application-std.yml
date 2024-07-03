@@ -314,6 +314,7 @@ mp:
     dhcp-control: ${mp.scene.ext-var.dhcp-control}
     version-report-url: ${mp.scene.ext-var.version-report-url}
     version-soft: ${mp.scene.ext-var.version-soft}
+    version-image: ${mp.scene.ext-var.version-image}
     metadata-file-server: ${mp.scene.ext-var.metadata-file-server}
   aggregation:
     export-image-timeout: ${mp.aggregation.ext-var.export-image-timeout}

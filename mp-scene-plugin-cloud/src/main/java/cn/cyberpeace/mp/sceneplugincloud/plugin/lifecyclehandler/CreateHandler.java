@@ -634,7 +634,7 @@ public class CreateHandler extends HandlerCommon {
             commands.add("echo \"169.254.169.254     res.cr.com\" >>/etc/hosts");
         }
 
-        if ("ubuntu_test_cloudint_not_delete".equals(cloudElement.getImage())) {
+        if (SceneSingleton.sceneAppConfig.getVersionImage().equals(cloudElement.getImage())) {
             List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings("wazuh_agent_installer");
             Map<String, String> nameFileMap = new HashMap<>();
             for (LocalFileMappingModel localFileMappingModel : mappings) {

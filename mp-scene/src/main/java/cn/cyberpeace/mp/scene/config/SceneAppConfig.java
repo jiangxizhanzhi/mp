@@ -70,6 +70,9 @@ public class SceneAppConfig {
     @Value("${mp.scene.version_soft:wget_and_libpcre3}")
     private String versionSoft;
 
+    @Value("${mp.scene.version_image:ubuntu_test_cloudint_not_delete}")
+    private String versionImage ;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 
