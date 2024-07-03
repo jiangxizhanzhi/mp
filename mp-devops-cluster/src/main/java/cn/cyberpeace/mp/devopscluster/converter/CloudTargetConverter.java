@@ -23,6 +23,9 @@ public class CloudTargetConverter {
         AddressPool addressPool = new AddressPool();
         addressPools.add(addressPool);
         extNet.setAddressPools(addressPools);
+        extNet.setIpv4AddressRange("10.0.0.0/6");
+        extNet.setIPv4AddressStartIp("8.0.0.0");
+        extNet.setIPv4AddressFinalIp("11.255.255.255");
         device.setExtNet(extNet);
 
         /**

@@ -8,16 +8,16 @@ import lombok.Data;
  * 地址池
  */
 @Data
-@ApiModel("地址池")
+@ApiModel("子网地址池")
 public class AddressPool extends DeviceCloudTargetNet {
 
     /**
-     * IPv4地址
+     * IPv4起始地址
      */
-    private String ipv4Address;
+    private String ipv4StartAddress;
 
     /**
-     * IPv4地址池范围
+     * IPv4地址范围
      */
     private Integer ipv4AddressPool;
 

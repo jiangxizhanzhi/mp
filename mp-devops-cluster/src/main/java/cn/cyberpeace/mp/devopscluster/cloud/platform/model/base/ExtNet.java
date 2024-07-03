@@ -18,4 +18,19 @@ public class ExtNet extends DeviceCloudTargetNet {
      */
     List<AddressPool> addressPools;
 
+    /**
+     * IPv4地址范围
+     */
+    private String ipv4AddressRange;
+
+    /**
+     * IPv4地址范围起始ip
+     */
+    private String IPv4AddressStartIp;
+
+    /**
+     * IPv4地址范围末尾ip
+     */
+    private String IPv4AddressFinalIp;
+
 }
