@@ -58,7 +58,7 @@ public class ReportDataController {
 	@PostMapping("/data/soap")
 	@ApiOperation(value = "上报通用协议采集数据(soap)")
 	public ServiceResult<Boolean> report(@RequestBody ReportCollectSoapReq collectReq) {
-		realEquipmentConverter.report(collectReq.getIp(), collectReq.getContent(), "soap");
+		realEquipmentConverter.report(collectReq.getIp(), collectReq.getContent(), RealEquipmentConverter.WEBSERVICE);
 		return new ServiceResult<>(true);
 	}
 }

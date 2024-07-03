@@ -63,7 +63,7 @@ public class KafkaScheduleJob {
 						JSONObject data = JSONObject.parseObject(record.value());
 						String ip = data.getString("ip");
 						String content = data.getString("content");
-						realEquipmentConverter.report(ip, content, "kafka");
+						realEquipmentConverter.report(ip, content, RealEquipmentConverter.KAFKA);
 					}catch (JSONException e) {
 						log.error("message = {}, e = {}", record.value(), ExceptionUtils.getStackTrace(e));
 					}

@@ -17,4 +17,12 @@ public class SceneRealEquipmentBo {
 	private String name;
 
 	private String nodeId;
+
+	private Boolean openSyslog;
+
+	private Boolean openKafka;
+
+	private Boolean openRestapi;
+
+	private Boolean openSoap;
 }

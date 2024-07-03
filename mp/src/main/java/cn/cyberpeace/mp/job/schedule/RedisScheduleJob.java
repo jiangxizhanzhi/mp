@@ -55,7 +55,7 @@ public class RedisScheduleJob {
 						JSONObject data = JSONObject.parseObject(message);
 						String ip = data.getString("ip");
 						String content = data.getString("content");
-						realEquipmentConverter.report(ip, content, "syslog");
+						realEquipmentConverter.report(ip, content, RealEquipmentConverter.SYSLOG);
 					}catch (JSONException e) {
 						log.error("message = {}, e = {}", message, ExceptionUtils.getStackTrace(e));
 					}

@@ -36,7 +36,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,8 +72,16 @@ public class RealEquipmentConverter implements BaseConverter{
 
     private final CsceneSpecialService csceneSpecialService;
 
-    @Autowired
-    private CsceneCommonCollectMapper csceneCommonCollectMapper;
+    private final CsceneCommonCollectMapper csceneCommonCollectMapper;
+
+
+    public static final String SYSLOG = "syslog";
+
+    public static final String KAFKA = "kafka";
+
+    public static final String RESTAPI = "restapi";
+
+    public static final String WEBSERVICE = "webservice";
 
     /**
      * 获取实装总数
@@ -246,10 +253,34 @@ public class RealEquipmentConverter implements BaseConverter{
         if (StringUtils.isEmpty(ip)) {
             throw new MpRuntimeException("ip为空");
         }
+
+        SceneRealEquipmentBo realEquipmentBo = getRealEquipmentId(ip);
+
+        switch (agreement) {
+            case SYSLOG:
+                if (!realEquipmentBo.getOpenSyslog()) {
+                    return;
+                }
+                break;
+            case KAFKA:
+                if (!realEquipmentBo.getOpenKafka()) {
+                    return;
+                }
+                break;
+            case RESTAPI:
+                if (!realEquipmentBo.getOpenRestapi()) {
+                    return;
+                }
+                break;
+            case WEBSERVICE:
+                if (!realEquipmentBo.getOpenSoap()) {
+                    return;
+                }
+                break;
+        }
         CsceneCommonCollectModel model = new CsceneCommonCollectModel();
         model.setAgreement(agreement);
         model.setDetail(content);
-        SceneRealEquipmentBo realEquipmentBo = getRealEquipmentId(ip);
         model.setCsceneId(realEquipmentBo.getSceneId());
         model.setHostName(realEquipmentBo.getName());
         model.setNodeId(realEquipmentBo.getNodeId());
@@ -265,7 +296,7 @@ public class RealEquipmentConverter implements BaseConverter{
      */
     public void report(HttpServletRequest request, String content) {
         String ip = getClientIp(request);
-        report(ip, content, "restapi");
+        report(ip, content, RESTAPI);
     }
 
     /**
