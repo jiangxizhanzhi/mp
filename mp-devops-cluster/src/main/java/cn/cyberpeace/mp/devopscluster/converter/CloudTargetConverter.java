@@ -22,10 +22,13 @@ public class CloudTargetConverter {
         List<AddressPool> addressPools = new ArrayList<>();
         AddressPool addressPool = new AddressPool();
         addressPools.add(addressPool);
+//        //如果子网用途为防火墙时
+//        AddressPool fireWallAddressPool = new AddressPool();
+//        fireWallAddressPool.setSubnetUsage("Azure Firewall");
+//        fireWallAddressPool.setSubnetName("AzureFirewallSubnet");
+//        fireWallAddressPool.setIpv4AddressPool(26);
+//        addressPools.add(fireWallAddressPool);
         extNet.setAddressPools(addressPools);
-        extNet.setIpv4AddressRange("10.0.0.0/6");
-        extNet.setIPv4AddressStartIp("8.0.0.0");
-        extNet.setIPv4AddressFinalIp("11.255.255.255");
         device.setExtNet(extNet);
 
         /**

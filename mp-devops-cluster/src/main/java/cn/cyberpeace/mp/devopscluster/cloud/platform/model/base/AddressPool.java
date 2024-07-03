@@ -12,6 +12,16 @@ import lombok.Data;
 public class AddressPool extends DeviceCloudTargetNet {
 
     /**
+     * 子网用途
+     */
+    private String subnetUsage;
+
+    /**
+     * 子网名称
+     */
+    private String subnetName;
+
+    /**
      * IPv4起始地址
      */
     private String ipv4StartAddress;
