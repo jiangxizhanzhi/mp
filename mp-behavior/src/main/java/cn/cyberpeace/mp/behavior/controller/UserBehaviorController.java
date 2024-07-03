@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.behavior.constant.ControllerConstant;
-import cn.cyberpeace.mp.behavior.model.UserBehaviorModel;
 import cn.cyberpeace.mp.behavior.repository.UserBehaviorMapper;
 import cn.cyberpeace.mp.behavior.req.AddUserBehaviorReq;
 import cn.cyberpeace.mp.behavior.req.DeleteReq;
@@ -88,7 +87,7 @@ public class UserBehaviorController {
 	 */
 	@GetMapping("/page")
 	@ApiOperation("分页查询用户行为")
-	public ListObjServiceResult<UserBehaviorModel> pageBehavior(PageRequest pageReq) {
+	public ListObjServiceResult<UserBehaviorDetail> pageBehavior(PageRequest pageReq) {
 		return userBehaviorService.page(pageReq).asResult();
 	}
 

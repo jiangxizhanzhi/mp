@@ -61,6 +61,7 @@ public class CsceneNetworkBehaviorService {
 			BeanUtils.copyProperties(originalModel, model);
 			model.setNetworkBehaviorId(bo.getNetworkBehaviorId());
 			model.setNodeId(nodeId);
+			model.setSceneId("");
 			model.setCreateTime(null);
 			model.setUpdateTime(null);
 			model.setUrl(bo.getUrl());
@@ -73,13 +74,19 @@ public class CsceneNetworkBehaviorService {
 	}
 
 	/**
-	 * deleteByNodeId
+	 * create
 	 *
-	 * @param nodeId
+	 * @param networkIds
+	 * @param sceneId
 	 */
-	public void deleteByNodeId(String nodeId) {
-		HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneNetworkBehaviorModel::getNodeId, nodeId);
-		csceneNetworkBehaviorMapper.filterDelete(humanCondition);
+	public void create(List<String> networkIds, String sceneId) {
+		List<CsceneNetworkBehaviorModel> modelList = csceneNetworkBehaviorMapper.getTopoAllByIds(networkIds);
+		modelList.forEach(model ->{
+			model.setSceneId(sceneId);
+			model.setCreateTime(null);
+			model.setUpdateTime(null);
+		});
+		csceneNetworkBehaviorMapper.bulkCreate(modelList);
 	}
 
 	/**
@@ -89,7 +96,6 @@ public class CsceneNetworkBehaviorService {
 	 * @return
 	 */
 	public Map<String, CsceneNetworkBehaviorModel> getMapByNodeId(String nodeId) {
-		HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneNetworkBehaviorModel::getNodeId, nodeId);
-		return csceneNetworkBehaviorMapper.list(humanCondition).stream().collect(Collectors.toMap(CsceneNetworkBehaviorModel::getId, m -> m));
+		return csceneNetworkBehaviorMapper.getTopoAllByNodeId(nodeId).stream().collect(Collectors.toMap(CsceneNetworkBehaviorModel::getId, m -> m));
 	}
 }

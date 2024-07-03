@@ -38,6 +38,7 @@ CREATE TABLE `mp_cscene_network_behavior` (
                                               `network_behavior_id` varchar(64) NOT NULL COMMENT '网络行为id',
                                               `create_time` datetime NOT NULL COMMENT '创建时间',
                                               `update_time` datetime NOT NULL COMMENT '更新时间',
+                                              `scene_id` varchar(64) DEFAULT NULL COMMENT '场景id',
                                               PRIMARY KEY (`pk`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='场景网络行为表';
 
@@ -54,6 +55,7 @@ CREATE TABLE `mp_cscene_user_behavior` (
                                            `user_behavior_id` varchar(64) NOT NULL COMMENT '用户行为id',
                                            `create_time` datetime NOT NULL COMMENT '创建时间',
                                            `update_time` datetime NOT NULL COMMENT '更新时间',
+                                           `scene_id` varchar(64) DEFAULT NULL COMMENT '场景id',
                                            PRIMARY KEY (`pk`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='场景用户行为表';
 

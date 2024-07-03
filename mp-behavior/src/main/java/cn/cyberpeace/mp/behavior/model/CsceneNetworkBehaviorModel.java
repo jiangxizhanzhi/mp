@@ -25,4 +25,7 @@ public class CsceneNetworkBehaviorModel extends NetworkBehaviorModel {
 	@ApiModelProperty("网络行为id")
 	private String networkBehaviorId;
 
+	@ApiModelProperty("场景id")
+	private String sceneId;
+
 }

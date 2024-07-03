@@ -21,8 +21,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -93,7 +95,7 @@ public class UserBehaviorService {
 	 * @param pageReq
 	 * @return
 	 */
-	public ListObjServiceResult<UserBehaviorModel> page(PageRequest pageReq) {
+	public ListObjServiceResult<UserBehaviorDetail> page(PageRequest pageReq) {
 		pageReq.ensure();
 		HumanCondition humanCondition = new HumanCondition()
 				.pagination(pageReq.getPage(), pageReq.getPageSize());
@@ -102,9 +104,31 @@ public class UserBehaviorService {
 			humanCondition.filterIContains(UserBehaviorModel::getName, pageReq.getSearch());
 		}
 
-		List<UserBehaviorModel> modelList = userBehaviorMapper.list(humanCondition);
+		List<UserBehaviorModel> userModelList = userBehaviorMapper.list(humanCondition);
 		int total = userBehaviorMapper.total(humanCondition);
-		return new ListObjServiceResult(new ListObjResult(modelList, total).asResult());
+
+		List<String> networkIds = new ArrayList<>();
+		for (UserBehaviorModel userModel : userModelList) {
+			networkIds.addAll(JSON.parseArray(userModel.getNetworkIds(), String.class));
+		}
+		humanCondition = new HumanCondition().filterIn(NetworkBehaviorModel::getId, networkIds.toArray(new String[0]));
+		List<NetworkBehaviorModel> networkModelList = networkBehaviorMapper.list(humanCondition);
+		Map<String, NetworkBehaviorModel> networkModelMap = networkModelList.stream().collect(Collectors.toMap(NetworkBehaviorModel::getId, n -> n));
+		List<UserBehaviorDetail> details = userModelList.stream().map(userModel -> {
+			UserBehaviorDetail detail = new UserBehaviorDetail();
+			BeanUtils.copyProperties(userModel, detail);
+			List<NetworkBehaviorModel> networkList = new ArrayList<>();
+			for (String networkId : JSON.parseArray(detail.getNetworkIds(), String.class)) {
+				NetworkBehaviorModel networkModel = networkModelMap.get(networkId);
+				if (networkModel!= null) {
+					networkList.add(networkModelMap.get(networkId));
+				}
+			}
+			detail.setNetworkBehaviorModelList(networkList);
+			detail.setNetworkBehaviorIdList(networkList.stream().map(NetworkBehaviorModel::getId).collect(Collectors.toList()));
+			return detail;
+		}).collect(Collectors.toList());
+		return new ListObjServiceResult(new ListObjResult(details, total).asResult());
 	}
 
 	/**

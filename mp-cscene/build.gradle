@@ -8,4 +8,5 @@ dependencies {
     implementation project(':mp-situation-aware')
     implementation project(':mp-log')
     implementation project(':mp-flow')
+    implementation project(':mp-behavior')
 }

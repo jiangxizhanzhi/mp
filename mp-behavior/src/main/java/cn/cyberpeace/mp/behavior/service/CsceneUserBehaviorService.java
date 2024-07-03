@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.behavior.bo.UserBehaviorConfigBo;
 import cn.cyberpeace.mp.behavior.model.CsceneNetworkBehaviorModel;
 import cn.cyberpeace.mp.behavior.model.CsceneUserBehaviorModel;
 import cn.cyberpeace.mp.behavior.model.UserBehaviorModel;
+import cn.cyberpeace.mp.behavior.repository.CsceneNetworkBehaviorMapper;
 import cn.cyberpeace.mp.behavior.repository.CsceneUserBehaviorMapper;
 import cn.cyberpeace.mp.behavior.repository.UserBehaviorMapper;
 import cn.cyberpeace.mp.behavior.req.ElementBehaviorReq;
@@ -62,6 +63,9 @@ public class CsceneUserBehaviorService {
 	@Autowired
 	private CsceneNetworkBehaviorService csceneNetworkBehaviorService;
 
+	@Autowired
+	private CsceneNetworkBehaviorMapper csceneNetworkBehaviorMapper;
+
 	/**
 	 * add
 	 *
@@ -81,8 +85,8 @@ public class CsceneUserBehaviorService {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
 
-				csceneNetworkBehaviorService.deleteByNodeId(nodeId);
-				deleteByNodeId(nodeId);
+				csceneNetworkBehaviorMapper.deleteTopoByNodeId(nodeId);
+				csceneUserBehaviorMapper.deleteTopoByNodeId(nodeId);
 				for (UserBehaviorConfigBo userBo : elementBehaviorReq.getUserBos()) {
 					List<String> networkIds = csceneNetworkBehaviorService.add(userBo.getNetworkBos(), nodeId);
 					CsceneUserBehaviorModel model = new CsceneUserBehaviorModel();
@@ -92,6 +96,7 @@ public class CsceneUserBehaviorService {
 					}
 					BeanUtils.copyProperties(originalModel, model);
 					model.setNodeId(nodeId);
+					model.setSceneId("");
 					model.setUserBehaviorId(userBo.getUserBehaviorId());
 					model.setNetworkIds(JSON.toJSONString(networkIds));
 					model.setCreateTime(null);
@@ -106,14 +111,58 @@ public class CsceneUserBehaviorService {
 	}
 
 	/**
+	 * create
+	 *
+	 * @param nodeIds
+	 * @param sceneId
+	 */
+	public void create(List<String> nodeIds, String sceneId) {
+		List<CsceneUserBehaviorModel> userModels = csceneUserBehaviorMapper.getTopoAllByNodeIds(nodeIds);
+		List<String> networkIds = new ArrayList<>();
+		for (CsceneUserBehaviorModel userModel : userModels) {
+			networkIds.addAll(JSON.parseArray(userModel.getNetworkIds(), String.class));
+		}
+		userModels.forEach(userModel -> {
+			userModel.setSceneId(sceneId);
+			userModel.setCreateTime(null);
+			userModel.setUpdateTime(null);
+			userModel.setId(null);
+		});
+
+
+		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+
+				csceneNetworkBehaviorService.create(networkIds, sceneId);
+				csceneUserBehaviorMapper.bulkCreate(userModels);
+
+			}
+		});
+	}
+
+
+	public void delete(String sceneId) {
+
+		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
+
+				csceneUserBehaviorMapper.deleteBySceneId(sceneId);
+				csceneNetworkBehaviorMapper.deleteBySceneId(sceneId);
+
+			}
+		});
+	}
+
+	/**
 	 * get
 	 *
 	 * @param nodeId
 	 * @return
 	 */
 	public List<CsceneNodeBehaviorRes> get(String nodeId) {
-		HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneUserBehaviorModel::getNodeId, nodeId);
-		List<CsceneUserBehaviorModel> userModelList = csceneUserBehaviorMapper.list(humanCondition);
+		List<CsceneUserBehaviorModel> userModelList = csceneUserBehaviorMapper.getTopoAllByNodeId(nodeId);
 		Map<String, CsceneNetworkBehaviorModel> networkModelMap = csceneNetworkBehaviorService.getMapByNodeId(nodeId);
 		List<CsceneNodeBehaviorRes> nodeBehaviorResList = new ArrayList<>();
 		for (CsceneUserBehaviorModel userModel : userModelList) {
@@ -144,15 +193,18 @@ public class CsceneUserBehaviorService {
 	 * @param sceneId
 	 */
 	public void getElementResource(HttpServletResponse response, String nodeId, String sceneId) {
-		HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneUserBehaviorModel::getNodeId, nodeId);
+		HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneUserBehaviorModel::getNodeId, nodeId)
+				.filterEqual(CsceneUserBehaviorModel::getSceneId, sceneId);
 		List<CsceneUserBehaviorModel> userModels = csceneUserBehaviorMapper.list(humanCondition);
-		Map<String, CsceneNetworkBehaviorModel> networkModelMap = csceneNetworkBehaviorService.getMapByNodeId(nodeId);
+		humanCondition = new HumanCondition().filterEqual(CsceneNetworkBehaviorModel::getNodeId, nodeId)
+				.filterEqual(CsceneNetworkBehaviorModel::getSceneId, sceneId);
+		List<CsceneNetworkBehaviorModel> networkModels = csceneNetworkBehaviorMapper.list(humanCondition);
+		Map<String, CsceneNetworkBehaviorModel> networkModelMap = networkModels.stream().collect(Collectors.toMap(CsceneNetworkBehaviorModel::getId, m -> m));
 		String originalPath = FileUtil.getTmpDirPath() + File.separator + sceneId + "_" + nodeId;
 		Map<Integer, String> typeMap = Arrays.stream(UserBehaviorModel.UserType.values())
 											 .collect(Collectors.toMap(UserBehaviorModel.UserType::getCode, type -> type.getDesc().substring(0, 2)));
-		int userModelNumber = 1;
 		for (CsceneUserBehaviorModel userModel : userModels) {
-			String folderPath = originalPath + File.separator + "用户模型" + userModelNumber++;
+			String folderPath = originalPath + File.separator + userModel.getName();
 			//config.json内容
 			JSONObject config = new JSONObject();
 			config.put("scene_id", sceneId);
@@ -168,7 +220,7 @@ public class CsceneUserBehaviorService {
 				//网络行为文件导出部分
 				String networkId = networkIds.get(i);
 				CsceneNetworkBehaviorModel networkModel = networkModelMap.get(networkId);
-				String fileName = folderPath + File.separator + (i+1) + ".side";
+				String fileName = folderPath + File.separator + networkModel.getName() + ".side";
 				File file = new File(folderPath);
 				if (!file.exists()) {
 					file.mkdirs();
@@ -185,7 +237,7 @@ public class CsceneUserBehaviorService {
 					log.error("export file fail, networkBehaviorId = {}, e = {}", networkId, e);
 					throw new MpRuntimeException("导出文件失败");
 				}
-				networkNameList.add((i+1) + ".side");
+				networkNameList.add(networkModel.getName() + ".side");
 			}
 			config.put("actions", networkNameList);
 			try (FileWriter writer = new FileWriter(folderPath + File.separator + "config.json")){
@@ -205,8 +257,9 @@ public class CsceneUserBehaviorService {
 	 *
 	 * @param nodeId
 	 */
-	private void deleteByNodeId(String nodeId) {
-		HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneUserBehaviorModel::getNodeId, nodeId);
+	private void deleteByNodeIdAndTopo(String nodeId) {
+		HumanCondition humanCondition = new HumanCondition().filterEqual(CsceneUserBehaviorModel::getNodeId, nodeId)
+				.filterEqual(CsceneUserBehaviorModel::getSceneId, null);
 		csceneUserBehaviorMapper.filterDelete(humanCondition);
 	}
 

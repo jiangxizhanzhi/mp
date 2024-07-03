@@ -22,4 +22,7 @@ public class CsceneUserBehaviorModel extends UserBehaviorModel {
 	@ApiModelProperty("用户行为id")
 	private String userBehaviorId;
 
+	@ApiModelProperty("场景id")
+	private String sceneId;
+
 }
