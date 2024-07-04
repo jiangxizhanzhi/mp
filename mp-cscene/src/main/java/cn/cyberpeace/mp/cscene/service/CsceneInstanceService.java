@@ -240,6 +240,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Autowired
     private WazuhProbeDataMapper wazuhProbeDataMapper;
 
+    @Autowired
+    private CsceneCommonService csceneCommonService;
+
     // expires in 10 minutes
     private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
 
@@ -887,21 +890,19 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public List<CloudPluginSceneElementModel> listLoads(String id) {
-
 //        2.根据sceneId查询场景
 //            plugins.topology
-        SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
+        SceneHandler sceneHandler = new SceneHandler(csceneCommonService.translateSceneId(id), null, false, null);
 //            plugins.cpcloud
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
 //        3.获取节点内工具idList
         Map<String, CloudPluginSceneElementBO> elementMap = pluginHandler.getElementMap();
-        List<String> loadToolIdList = elementMap.values().stream().map(element -> element.getLoadToolId()).collect(Collectors.toList());
+        List<CloudPluginSceneElementModel> list = elementMap.values()
+                .stream()
+                .filter(element -> element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.LOAD)
+                .map(element -> element.toModel())
+                .collect(Collectors.toList());
 
-
-        HumanCondition humanCondition = new HumanCondition()
-                .filterEqual(CloudPluginSceneElementModel::getScene, id)
-                .filterEqual(CloudPluginSceneElementModel::getVirtualType, BaseCloudPluginSceneElementModel.VirtualType.LOAD);
-        List<CloudPluginSceneElementModel> list = cloudPluginSceneElementMapper.list(humanCondition);
         return list;
     }
 
@@ -2045,11 +2046,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
      */
     @Transactional(rollbackFor = Exception.class)
     public void modifyProbes(String id, String nodeId, List<Probe> probeList, int status, Boolean isDelete, SceneElementSituationProbeModel.ProbeType probeType) {
-        SceneHandler sceneHandler = new SceneHandler(id, null, null);
+        String sceneId = csceneCommonService.translateSceneId(id);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
 
 //        先更新状态为更新
         HumanCondition probeListHumanCondition = new HumanCondition()
-                .filterEqual(SceneElementSituationProbeModel::getScene, id)
+                .filterEqual(SceneElementSituationProbeModel::getScene, sceneId)
                 .filterEqual(SceneElementSituationProbeModel::getSceneElement, nodeId)
                 .filterIn(SceneElementSituationProbeModel::getProbeId, probeList.stream().filter(probe -> null != probe.getId()).map(Probe::getId).toArray());
         sceneElementSituationProbeMapper.filterDelete(probeListHumanCondition);
@@ -2058,7 +2060,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 probeList.stream()
                         .map(probe -> {
                             SceneElementSituationProbeModel sceneElementSituationProbeModel = new SceneElementSituationProbeModel();
-                            sceneElementSituationProbeModel.setScene(id);
+                            sceneElementSituationProbeModel.setScene(sceneId);
                             sceneElementSituationProbeModel.setSceneElement(nodeId);
                             sceneElementSituationProbeModel.setProbeId(probe.getId());
                             sceneElementSituationProbeModel.setStatus(SceneElementSituationProbeModel.ProbeStatus.UPDATING.getValue());
