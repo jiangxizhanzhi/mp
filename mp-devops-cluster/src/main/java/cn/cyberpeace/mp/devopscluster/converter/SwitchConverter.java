@@ -125,10 +125,10 @@ public class SwitchConverter {
      */
     public List<Switches> list() {
         SwitchesCloudPlatform model = switchService.list();
-        if (Objects.isNull(model) || !model.isSuccess()){
+        if (Objects.isNull(model) || null == model.getSwitchs()){
             return Lists.newArrayList();
         }
-        return model.getSwitchs();
+        return model.getSwitchs().getData();
     }
 
     /**

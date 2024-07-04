@@ -169,11 +169,11 @@ public class HypervisorConverter implements BaseConverter {
      */
     public ListResult<VirtualRealSwitchBO> listVirtualRealSwitch() {
         SwitchesCloudPlatform model = switchService.list();
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getSwitchs())){
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getSwitchs().getData())){
             return null;
         }
         List<VirtualRealSwitchBO> list = new ArrayList<>();
-        for (Switches v : model.getSwitchs()) {
+        for (Switches v : model.getSwitchs().getData()) {
             VirtualRealSwitchBO build = VirtualRealSwitchBO.builder().name(v.getName()).managementIp(v.getManagementIp()).state(v.getStatus())
                     .usedPorts(v.getInterfaceUpNums()).ports(v.getInterfaceNums()).build();
             list.add(build);

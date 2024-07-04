@@ -21,5 +21,5 @@ import java.util.List;
 @AllArgsConstructor
 public class SwitchesCloudPlatform extends BaseCloudPlatformResult {
 
-    private List<Switches> switchs;
+    private SwitchesCloudPlatformData switchs;
 }

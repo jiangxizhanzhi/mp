@@ -30,6 +30,9 @@ public class Switches implements Serializable {
     @ApiModelProperty("状态")
     private String status;
 
+    @ApiModelProperty("类型")
+    private String type;
+
     @ApiModelProperty("接口数量")
     private Integer interfaceNums;
 

@@ -23,7 +23,10 @@ import java.io.Serializable;
 public class InterfaceDetail implements Serializable {
 
     @ApiModelProperty("端口号")
-    private String interfaceName;
+    private String name;
+
+    @ApiModelProperty("psPortName")
+    private String psPortName;
 
     @ApiModelProperty("状态")
     private String status;
