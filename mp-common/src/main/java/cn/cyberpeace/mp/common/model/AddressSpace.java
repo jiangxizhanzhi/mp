@@ -13,5 +13,10 @@ public class AddressSpace {
 
     @ApiModelProperty(value = "地址大小")
     private Integer addressSize;
+
+    public AddressSpace(String address, int addressSize) {
+        this.address = address;
+        this.addressSize = addressSize;
+    }
 }
 

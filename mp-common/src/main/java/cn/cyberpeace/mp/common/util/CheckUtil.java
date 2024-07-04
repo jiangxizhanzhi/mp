@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -88,21 +89,36 @@ public class CheckUtil {
         }
     }
 
+//    //判断ips是否在该地址空间集合内案例
+//    public static void main(String[] args) {
+//        List<AddressSpace> addressSpaces = new ArrayList<>();
+//        addressSpaces.add(new AddressSpace("10.0.0.0", 16));
+//        addressSpaces.add(new AddressSpace("10.1.0.0", 16));
+//        List<String> ips = new ArrayList<>();
+//        ips.add("10.0.1.0");
+//        ips.add("10.1.1.1");
+//        boolean result = checkIpsInAddressSpaces(ips, addressSpaces);
+//        System.out.println("IPs is in address spaces: " + result);
+//    }
+
     //判断ips是否在该地址空间集合内
     public static boolean checkIpsInAddressSpaces(List<String> ips, List<AddressSpace> addressSpaces) {
-        Boolean haveNoFault = true;
         try {
-            for(String ip : ips){
+            for (String ip : ips) {
+                boolean inAnyAddressSpace = false;
                 for (AddressSpace addressSpace : addressSpaces) {
-                    String address = addressSpace.getAddress();
-                    Integer addressSize = addressSpace.getAddressSize();
-                    boolean b = checkIpInAddressSpace(ip, address, addressSize);
-                    if(!b){
-                        haveNoFault = false;
+                    if (checkIpInAddressSpace(ip, addressSpace.getAddress(), addressSpace.getAddressSize())) {
+                        inAnyAddressSpace = true;
+                        break;
                     }
                 }
+                if (!inAnyAddressSpace) {
+                    // 如果某个IP不在任何地址空间内，返回false
+                    return false;
+                }
             }
-            return haveNoFault;
+            // 所有IP都在至少一个地址空间内，返回true
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
