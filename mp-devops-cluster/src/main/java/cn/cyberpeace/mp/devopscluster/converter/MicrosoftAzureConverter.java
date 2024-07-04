@@ -767,6 +767,17 @@ public class MicrosoftAzureConverter implements BaseConverter {
     @Cacheable(key = "#root.method.name", value = "getLoadListConditions")
     public List<MpSysCodeEnum> getLoadListConditions() {
         List<MpSysCodeEnum> nextAllTreeDataByCode = commonCodeService.getNextAllTreeDataByCode(CommonStatusCodeEnum.CODE_LOAD.getCode(), false);
+        nextAllTreeDataByCode.removeIf(item -> item.getCode().equals(CommonStatusCodeEnum.ACTION_TYPE.getCode()));
+        for(MpSysCodeEnum item : nextAllTreeDataByCode){
+            List<MpSysCodeEnum> children = item.getChildren();
+            MpSysCodeEnum sourceSysCodeEnum = new MpSysCodeEnum();
+            sourceSysCodeEnum.setCode("");
+            sourceSysCodeEnum.setCodeName("全部");
+            //将sourceSysCodeEnum放在children中的第一位
+            children.add(0, sourceSysCodeEnum);
+            item.setChildren(children);
+        }
+
         MpSysCodeEnum mpSysCodeEnum = new MpSysCodeEnum();
         mpSysCodeEnum.setCode("10050299");
         mpSysCodeEnum.setCodeName("来源");

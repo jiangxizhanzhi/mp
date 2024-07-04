@@ -367,19 +367,19 @@ public class LoadServiceImpl {
                 .filter(Objects::nonNull)
                 .distinct()
                 .collect(Collectors.toList());
-        List<MpDevopsLoad> getLoadByPks = new ArrayList<>();
+        List<MpDevopsLoad> getLoadByIds = new ArrayList<>();
         if (loadIds != null && loadIds.size() > 0) {
-            getLoadByPks = loadMapper.getLoadByIds(loadIds);
+            getLoadByIds = loadMapper.getLoadByIds(loadIds);
         }
-        return getLoadByPks;
+        return getLoadByIds;
 
 //        //暂用这个
 //        JSONObject jsonObject = new JSONObject();
 //        jsonObject.put("pageNum", 1);
 //        jsonObject.put("pageSize", 1000);
 //        JSONObject loads = getLoadList(new JSONObject());
-//        List<MpDevopsLoad> getLoadByPks = (List) loads.get("source");
-//        return getLoadByPks;
+//        List<MpDevopsLoad> getLoadByIds = (List) loads.get("source");
+//        return getLoadByIds;
     }
 
     /*

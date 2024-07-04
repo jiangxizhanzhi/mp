@@ -74,7 +74,7 @@ public class CloudDevopsTargetController {
      * 查询所有云靶标信息
      */
     @ApiOperation("拓扑编辑获取载荷列表")
-    @GetMapping("/getLoadList")
+    @PostMapping("/getLoadList")
     public ServiceResult getLoadList(@RequestBody LoadRequestVO request) {
         List<MpDevopsLoad> result = microsoftAzureConverter.getTopoLoadList(request);
         return new ServiceResult(result).asResult();
