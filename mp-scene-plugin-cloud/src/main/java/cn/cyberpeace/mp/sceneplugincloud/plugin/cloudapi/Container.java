@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
@@ -13,9 +14,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -155,16 +159,29 @@ public class Container extends CloudClient {
 
     public ContainerExecuteResult executeCommand(String containerId, String command) {
         log.info("executeCommand split containerId is [{}], command is [{}]", containerId, command);
-        final ContainerExecuteData data = getContainerExecuteDataByCommand(command);
+        File file = new File(TextUtils.uuid());
+        try {
+            FileUtils.writeStringToFile(file, command, Charset.forName("utf8"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        this.copyFile(containerId, file.getAbsolutePath(), "/tmp/tmp_exec.sh");
 
+        ContainerExecuteData execCmd = new ContainerExecuteData();
+        execCmd.setCmd("sh");
+        execCmd.setArgs(Arrays.asList("/tmp/tmp_exec.sh"));
+        return this.executeCommand(containerId, execCmd);
+    }
+
+    public ContainerExecuteResult executeCommand(String containerId, ContainerExecuteData data) {
         String requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
         CloudResponse<ContainerExecuteResult> result = new CloudResponse<ContainerExecuteResult>();
         try {
             result = cloudPost(requestUrl, data, null,
-                    new TypeReference<>() {
-                    }, true);
+                               new TypeReference<>() {
+                               }, true);
         } catch (Exception e) {
-            log.error("container execute command error containerId:{} command:{}", containerId, command, e);
+            log.error("container execute command error containerId:{} command:{}", containerId, JsonCommon.stringify(data), e);
         }
         return result.getData();
     }
