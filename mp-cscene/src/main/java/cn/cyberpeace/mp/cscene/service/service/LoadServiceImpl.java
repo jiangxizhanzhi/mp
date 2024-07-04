@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.common.constant.codeEnum.CommonConvertStatusEnum;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonFunctionCodeEnum;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonStatusCodeEnum;
 import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
+import cn.cyberpeace.mp.common.service.impl.CommonConfigServiceImpl;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
@@ -65,6 +66,9 @@ public class LoadServiceImpl {
     private CommonCodeServiceImpl commonCodeService;
 
     @Autowired
+    private CommonConfigServiceImpl commonConfigService;
+
+    @Autowired
     private OutLoadServiceImpl outLoadService;
 
     @Resource
@@ -92,6 +96,12 @@ public class LoadServiceImpl {
             item.setRunTableName(nextLevelMapsByCodes.get(item.getRunTable()));
             item.setActionTypeName(nextLevelMapsByCodes.get(item.getActionType()));
             item.setControlTypeName(nextLevelMapsByCodes.get(item.getControlType()));
+            String source = item.getSource();
+            if(source != null && source.equals("1")){
+                item.setSource("外部同步");
+            }else if(source != null && source.equals("2")){
+                item.setSource("本地创建");
+            }
         });
         Integer total = loadMapper.getLoadListNum(requestData);
         JSONObject result = new JSONObject();
@@ -100,10 +110,27 @@ public class LoadServiceImpl {
         return result;
     }
 
+    /*
+     * 载荷详情
+     * */
+    public MpDevopsLoad getLoadByPk(String pk) {
+        MpDevopsLoad load = loadMapper.getLoadByPk(pk);
+        Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes(CommonStatusCodeEnum.CODE.getCode());
+        load.setRunTableName(nextLevelMapsByCodes.get(load.getRunTable()));
+        load.setActionTypeName(nextLevelMapsByCodes.get(load.getActionType()));
+        load.setControlTypeName(nextLevelMapsByCodes.get(load.getControlType()));
+        String source = load.getSource();
+        if(source != null && source.equals("1")){
+            load.setSource("外部同步");
+        }else if(source != null && source.equals("2")){
+            load.setSource("本地创建");
+        }
+        return load;
+    }
+
     //调用ojj服务
     public List getBindLoopholes(String id) {
-        //todo 服务地址
-        String url = "http://10.108.1.10:80/api/vuln/admin/vuln/load_code";
+        String url = commonConfigService.getUrlByKey("getBindLoopholes").getServiceUrl();
         url = url + "?load_id=" + id;
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
@@ -283,7 +310,7 @@ public class LoadServiceImpl {
         mpDevopsLoadSceneLog.setReadMeName(tool.get("readMeName").toString());
         mpDevopsLoadSceneLog.setAttachment(tool.get("attachment").toString());
         mpDevopsLoadSceneLog.setAttachmentName(tool.get("attachmentName").toString());
-        mpDevopsLoadSceneLog.setCover(tool.get("cover").toString());
+        mpDevopsLoadSceneLog.setCover(tool.get("cover").toString() != null ? tool.get("cover").toString() : "/api/mp/file/877/298/b99fc02c34507fb82c5a800bcbe65287.png");
         mpDevopsLoadSceneLog.setCoverName(tool.get("coverName").toString());
 
         Object createTimeObj = tool.get("createTime");
@@ -900,14 +927,6 @@ public class LoadServiceImpl {
         return data;
     }
 
-    public List<MpDevopsLoad> getToolByLoopholes(JSONObject requestData) {
-        return null;
-    }
-
-    public List<MpDevopsLoad> getToolBytactics(JSONObject requestData) {
-        return null;
-    }
-
     /**
      * 获取阶段载荷访问地址
      */
@@ -951,8 +970,7 @@ public class LoadServiceImpl {
 
     //调用ojj方法
     public List getStagesBySceneId(String sceneId) {
-        //todo 服务地址
-        String url = "http://10.108.1.10:80/api/vuln/admin/vuln/load_code";
+        String url = commonConfigService.getUrlByKey("getStagesBySceneId").getServiceUrl();
         url = url + "?scene_id=" + sceneId;
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
@@ -1013,7 +1031,7 @@ public class LoadServiceImpl {
             }
         }
         LinkedList<JSONObject> returnList = new LinkedList<>();
-        if(idList != null && idList.size() > 0){
+        if (idList != null && idList.size() > 0) {
             List<MpDevopsLoad> loadByIds = loadMapper.getLoadByIds(idList);
             for (MpDevopsLoad load : loadByIds) {
                 JSONObject jsonObject = new JSONObject();

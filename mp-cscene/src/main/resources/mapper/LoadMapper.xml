@@ -618,4 +618,13 @@
         select load_tool_id from mp_sceneplugincloud_scene_config_element where scene = #{sceneId} and image_type = 'load'
         select scene from mp_cscene_cscene_instance where id = #{sceneId}
     </select>
+
+    <select id="getLoadByPk" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoad">
+        SELECT
+        *
+        FROM
+        mp_devops_load
+        WHERE
+        pk = #{pk}
+    </select>
 </mapper>

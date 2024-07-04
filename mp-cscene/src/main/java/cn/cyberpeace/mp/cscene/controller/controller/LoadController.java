@@ -92,18 +92,9 @@ public class LoadController {
      * */
     @ApiOperation(value = "查询载荷", notes = "")
     @GetMapping("/getLoadByPk")
-    public ServiceResult getLoadList(@RequestParam(value = "pk") String pk) {
-        JSONObject requestData = new JSONObject();
-        requestData.put("pk", pk);
-        JSONObject result = loadService.getLoadList(requestData);
-        if (result != null && result.get("source") != null && ((List) result.get("source")).size() == 1) {
-            MpDevopsLoad load = (MpDevopsLoad) ((List) result.get("source")).get(0);
-            List loopholes = loadService.getBindLoopholes(load.getId());
-            load.setLoopholes(loopholes);
-            return new ServiceResult(load, BaseErrorCode.SUCCESS).asResult();
-        } else {
-            return new ServiceResult(null, BaseErrorCode.DATA_NOT_EXIST, "不存在该载荷").asResult();
-        }
+    public ServiceResult getLoadByPk(@RequestParam(value = "pk") String pk) {
+        MpDevopsLoad result = loadService.getLoadByPk(pk);
+        return new ServiceResult(result, BaseErrorCode.SUCCESS).asResult();
     }
 
     /*

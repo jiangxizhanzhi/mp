@@ -768,7 +768,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
     public List<MpSysCodeEnum> getLoadListConditions() {
         List<MpSysCodeEnum> nextAllTreeDataByCode = commonCodeService.getNextAllTreeDataByCode(CommonStatusCodeEnum.CODE_LOAD.getCode(), false);
         nextAllTreeDataByCode.removeIf(item -> item.getCode().equals(CommonStatusCodeEnum.ACTION_TYPE.getCode()));
-        for(MpSysCodeEnum item : nextAllTreeDataByCode){
+        for (MpSysCodeEnum item : nextAllTreeDataByCode) {
             List<MpSysCodeEnum> children = item.getChildren();
             MpSysCodeEnum sourceSysCodeEnum = new MpSysCodeEnum();
             sourceSysCodeEnum.setCode("");
@@ -783,6 +783,10 @@ public class MicrosoftAzureConverter implements BaseConverter {
         mpSysCodeEnum.setCodeName("来源");
 
         List<MpSysCodeEnum> sourceChildren = new ArrayList<>();
+        MpSysCodeEnum sourceSysCodeEnum0 = new MpSysCodeEnum();
+        sourceSysCodeEnum0.setCode("");
+        sourceSysCodeEnum0.setCodeName("全部");
+        sourceChildren.add(sourceSysCodeEnum0);
         MpSysCodeEnum sourceSysCodeEnum1 = new MpSysCodeEnum();
         sourceSysCodeEnum1.setCode("1");
         sourceSysCodeEnum1.setCodeName("外部同步");
