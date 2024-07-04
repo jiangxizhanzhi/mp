@@ -70,8 +70,8 @@ public class DeleteHandler extends HandlerCommon {
         CollectionPluginSceneBO scene = getPluginHandler().getScene();
         String flowCollectorId = scene.getFlowCollector();
         if (!StringUtils.isEmpty(flowCollectorId)) {
-            // 先保存流量数据
-            BeanCommon.getBean(ScenePluginCollectionSceneService.class).saveFlowPcap(getPluginHandler().getSourceSceneId(), flowCollectorId);
+            // 先保存流量数据 todo
+//            BeanCommon.getBean(ScenePluginCollectionSceneService.class).saveFlowPcap(getPluginHandler().getSourceSceneId(), flowCollectorId);
 
             runSceneProgress(SceneProcess.DELETE_FLOW_COLLECTOR, () -> {
                 getFlowCollector().deleteCollector(new DeleteFlowCollectBo()
