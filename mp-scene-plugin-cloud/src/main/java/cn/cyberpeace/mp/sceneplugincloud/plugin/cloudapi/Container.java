@@ -159,21 +159,24 @@ public class Container extends CloudClient {
 
     public ContainerExecuteResult executeCommand(String containerId, String command) {
         log.info("executeCommand split containerId is [{}], command is [{}]", containerId, command);
-        File file = new File(TextUtils.uuid());
+        String fileName = TextUtils.uuid()+".sh";
+        File file = new File(fileName);
         try {
             FileUtils.writeStringToFile(file, command, Charset.forName("utf8"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        this.copyFile(containerId, file.getAbsolutePath(), "/tmp/tmp_exec.sh");
+        this.copyFile(containerId, file.getAbsolutePath(), "/tmp/tmp_exec");
 
         ContainerExecuteData execCmd = new ContainerExecuteData();
         execCmd.setCmd("sh");
-        execCmd.setArgs(Arrays.asList("/tmp/tmp_exec.sh"));
-        return this.executeCommand(containerId, execCmd);
+        execCmd.setArgs(Arrays.asList("/tmp/tmp_exec/" + fileName));
+        var result = this.executeCommand(containerId, execCmd);
+        log.info("executeCommand result is {}", JsonCommon.stringify(result));
+        return result;
     }
 
-    public ContainerExecuteResult executeCommand(String containerId, ContainerExecuteData data) {
+    private ContainerExecuteResult executeCommand(String containerId, ContainerExecuteData data) {
         String requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
         CloudResponse<ContainerExecuteResult> result = new CloudResponse<ContainerExecuteResult>();
         try {
