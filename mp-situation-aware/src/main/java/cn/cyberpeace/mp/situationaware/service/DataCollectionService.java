@@ -154,7 +154,7 @@ public class DataCollectionService extends CollectionBaseService {
      * @return ListObjResult<FileEventModel>
      */
     @Cacheable(value = CACHE_KEY_FILE_EVENTS)
-    public ListObjResult<FileEventModel> queryFileEvents(WazuhEventRequest wazuhEventRequest) {
+    public ListObjResult<FileEventModel> queryFileEvents(WazuhEventRequest wazuhEventRequest,Integer cloudType) {
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
@@ -182,7 +182,7 @@ public class DataCollectionService extends CollectionBaseService {
 
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
         try {
-            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            SearchResponse response = getSearchResponseWithRetry(cloudType, searchRequest);
             List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
             List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root, null))).collect(Collectors.toList());
 
@@ -277,12 +277,12 @@ public class DataCollectionService extends CollectionBaseService {
      *
      * @return ListObjResult<FileEventModel>
      */
-    public ListObjResult<FileEventModel> scrollFileEvents(String scrollId) {
+    public ListObjResult<FileEventModel> scrollFileEvents(String scrollId,Integer cloudType) {
         final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(11L));
         SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
         scrollRequest.scroll(scroll);
         try {
-            SearchResponse response = restHighLevelClient.scroll(scrollRequest, RequestOptions.DEFAULT);
+            SearchResponse response = getScrollResponseWithRetry(cloudType,scrollRequest);
             List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
             List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root, null))).collect(Collectors.toList());
 
@@ -301,9 +301,10 @@ public class DataCollectionService extends CollectionBaseService {
      *
      * @param wazuhEventRequest
      * @param probeIds          自定义探针id集合
+     * @param cloudType
      * @return ListObjResult<WazuhProbeCommonModel>
      */
-    public ListObjResult<WazuhProbeCommonModel> queryCustomProbeData(WazuhEventRequest wazuhEventRequest, List<String> probeIds) {
+    public ListObjResult<WazuhProbeCommonModel> queryCustomProbeData(WazuhEventRequest wazuhEventRequest, List<String> probeIds,Integer cloudType) {
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
@@ -329,7 +330,7 @@ public class DataCollectionService extends CollectionBaseService {
 
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
         try {
-            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            SearchResponse response = getSearchResponseWithRetry(cloudType, searchRequest);
             List<WazuhProbeCommonModel> wazuhModelList = new ArrayList<>();
             for (var hit : response.getHits().getHits()) {
                 WazuhMonitorRoot<Launch<Object, BaseInput>> wazuhMonitorRoot = JSON.parseObject(hit.getSourceAsString(),
@@ -675,13 +676,13 @@ public class DataCollectionService extends CollectionBaseService {
      * @return
      */
     @Cacheable(value = CACHE_KEY_NET_CONN)
-    public List<WazuhNetworkConnectionModel> queryNetConnEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
+    public List<WazuhNetworkConnectionModel> queryNetConnEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest,Integer cloudType) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
         }
         // 只取一条数据，做假分页处理
         wazuhMonitorEventsRequest.setPageSize(1);
-        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_NET_CONNS, null);
+        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_NET_CONNS, cloudType);
         JSONObject jsonObject = processBaseChangeOutput(response);
         if (Objects.isNull(jsonObject)) {
             return Collections.emptyList();
@@ -758,13 +759,13 @@ public class DataCollectionService extends CollectionBaseService {
      * @return
      */
     @Cacheable(value = CACHE_KEY_USERS)
-    public List<WazuhSystemUserModel> queryUserChangeEventWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
+    public List<WazuhSystemUserModel> queryUserChangeEventWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest,Integer cloudType) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
         }
         // 只取一条数据，做假分页处理
         wazuhMonitorEventsRequest.setPageSize(1);
-        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS, null);
+        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS, cloudType);
         JSONObject jsonObject = processBaseChangeOutput(response);
         if (Objects.isNull(jsonObject)) {
             return Collections.emptyList();
@@ -983,6 +984,22 @@ public class DataCollectionService extends CollectionBaseService {
             return response;
         } else {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            return response;
+        }
+    }
+
+    private SearchResponse getScrollResponseWithRetry(Integer cloudType, SearchScrollRequest searchScrollRequest) throws IOException {
+        if (null != cloudType && BaseSceneModel.CloudType.PUBLIC == cloudType) {
+            SearchResponse response = publicWazuhRestHighLevelClient.scroll(searchScrollRequest, RequestOptions.DEFAULT);
+            return response;
+        } else if (null != cloudType && BaseSceneModel.CloudType.PRIVATE == cloudType) {
+            SearchResponse response = privateWazuhRestHighLevelClient.scroll(searchScrollRequest, RequestOptions.DEFAULT);
+            return response;
+        } else if (null != cloudType && BaseSceneModel.CloudType.MIX == cloudType) {
+            SearchResponse response = mixWazuhRestHighLevelClient.scroll(searchScrollRequest, RequestOptions.DEFAULT);
+            return response;
+        } else {
+            SearchResponse response = restHighLevelClient.scroll(searchScrollRequest, RequestOptions.DEFAULT);
             return response;
         }
     }

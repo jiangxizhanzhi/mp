@@ -44,7 +44,7 @@ public class DataCollectionController {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         wazuhEventRequest.setRuleGroups(Arrays.asList("syscheck"));
-        return new ListObjServiceResult<>(dataCollectionService.queryFileEvents(wazuhEventRequest)).asResult();
+        return new ListObjServiceResult<>(dataCollectionService.queryFileEvents(wazuhEventRequest,null)).asResult();
     }
 
     @PostMapping("/monitor_events")

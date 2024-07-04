@@ -439,6 +439,7 @@ public class ScenePluginCollectionSceneService {
     public ListObjServiceResult<CollectionHostEventBO> listHostEvents(String sceneId, HostEventQueryParams queryParams) {
         log.info("sceneId:{}, scroll:{}", sceneId, queryParams.getScroll());
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        Integer cloudType = sceneHandler.getScene().getCloudType();
         List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         if (pluginHandler == null) {
@@ -492,7 +493,7 @@ public class ScenePluginCollectionSceneService {
                 request.setRuleIds(ruleIds);
             }
         }
-        var result = dataCollectionService.queryFileEvents(request);
+        var result = dataCollectionService.queryFileEvents(request,cloudType);
 
         CloudScenePluginHandler cloudScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         List<CollectionHostEventBO> hostEvents = new ArrayList<>();
@@ -611,7 +612,7 @@ public class ScenePluginCollectionSceneService {
             agentNameElementMap.put(srcElement.getEid(), srcElement);
         });
 
-        ListObjResult<FileEventModel> result = dataCollectionService.scrollFileEvents(scrollId);
+        ListObjResult<FileEventModel> result = dataCollectionService.scrollFileEvents(scrollId,sceneHandler.getScene().getCloudType());
 
         CloudScenePluginHandler cloudScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         List<CollectionHostEventBO> hostEvents = new ArrayList<>();
@@ -1457,6 +1458,7 @@ public class ScenePluginCollectionSceneService {
 
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
         Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
+        SceneHandler sceneHandler = new SceneHandler(listPageInfoQueryParams.getSceneIds().get(0), null, false, null);
 
         int pageSize = listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize();
         int page = listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage();
@@ -1474,7 +1476,7 @@ public class ScenePluginCollectionSceneService {
             return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
         }
 
-        List<WazuhSystemUserModel> totalList = dataCollectionService.queryUserChangeEventWithTimeRange(wazuhRequest);
+        List<WazuhSystemUserModel> totalList = dataCollectionService.queryUserChangeEventWithTimeRange(wazuhRequest,sceneHandler.getScene().getCloudType());
 
         int skip = (page - 1) * pageSize;
         log.info("skip:{}, limit:{}", skip, pageSize);
@@ -1526,6 +1528,7 @@ public class ScenePluginCollectionSceneService {
     public ListObjServiceResult<WazuhNetworkConnectionModel> listNetworkConnections(ListPageInfoQueryParams listPageInfoQueryParams) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
         Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
+        SceneHandler sceneHandler = new SceneHandler(listPageInfoQueryParams.getSceneIds().get(0), null, false, null);
 
         int pageSize = listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize();
         int page = listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage();
@@ -1543,7 +1546,7 @@ public class ScenePluginCollectionSceneService {
             return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
         }
 
-        List<WazuhNetworkConnectionModel> totalList = dataCollectionService.queryNetConnEventsWithTimeRange(wazuhRequest);
+        List<WazuhNetworkConnectionModel> totalList = dataCollectionService.queryNetConnEventsWithTimeRange(wazuhRequest,sceneHandler.getScene().getCloudType());
 
         int skip = (page - 1) * pageSize;
         log.info("skip:{}, limit:{}", skip, pageSize);

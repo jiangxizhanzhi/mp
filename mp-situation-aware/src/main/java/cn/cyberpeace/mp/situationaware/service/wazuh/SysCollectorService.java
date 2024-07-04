@@ -207,13 +207,8 @@ public class SysCollectorService extends RequestProcessor {
             return null;
         }
         String res = "";
-        if (null != cloudType && BaseSceneModel.CloudType.PUBLIC == cloudType) {
-            String requestUrl = situationAwareConfig.getPublicWazuhBaseUrl() + "/syscollector/" + agentId + "/os";
-            res = PublicWazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
-        } else {
-            String requestUrl = situationAwareConfig.getWazuhBaseUrl() + "/syscollector/" + agentId + "/os";
-            res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
-        }
+        String requestUrl = CloudAwareWazuhHttpClient.getRequestUrl(situationAwareConfig, cloudType, "/syscollector/" + agentId + "/os");
+        res = PublicWazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         BaseResponse<OS> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
         log.info("{}", result);

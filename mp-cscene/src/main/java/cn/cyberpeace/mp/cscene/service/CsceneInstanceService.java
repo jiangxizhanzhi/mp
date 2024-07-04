@@ -497,7 +497,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 request.setPageNum(queryParams.getPage());
                 request.setPageSize(queryParams.getPageSize());
                 request.setLevels(queryParams.getLevels());
-                var r = dataCollectionService.queryCustomProbeData(request, CollUtil.toList(probeId));
+                var r = dataCollectionService.queryCustomProbeData(request, CollUtil.toList(probeId), sceneHandler.getScene().getCloudType());
                 res = r.getObjs();
                 total = r.getTotal() + total;
             }
@@ -580,6 +580,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         List<CollectionHostEventBO> result = new ArrayList<>();
         var batchSceneHandler = new BatchSceneHandler(CollUtil.toList(sceneId), null);
         var eid2Element = batchSceneHandler.getAllEid2ElementMap();
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         // 获取节点所有自定义探针id
         List<String> agentNames = new ArrayList<>();
         List<String> probeIds = new ArrayList<>();
@@ -618,7 +619,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         request.setPageSize(queryParams.getPageSize());
         request.setAgentNames(agentNames);
         // 分页查询自定义探针数据
-        var listObjResult = dataCollectionService.queryCustomProbeData(request, queryProbeIds);
+        var listObjResult = dataCollectionService.queryCustomProbeData(request, queryProbeIds, sceneHandler.getScene().getCloudType());
         var res = listObjResult.getObjs();
         if (CollUtil.isEmpty(res)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));

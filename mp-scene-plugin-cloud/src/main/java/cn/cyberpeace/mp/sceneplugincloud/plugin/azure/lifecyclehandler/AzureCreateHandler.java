@@ -143,6 +143,11 @@ public class AzureCreateHandler extends CreateHandler {
             for (CloudPluginSceneElementBO element : filteredVirtualMachineElements) {
                 String nodeId = element.getSrcElement().getId();
                 List<VirtualNic> virtualNics = this.genVirutalNics(element);
+                //            创建虚拟机时不允许扩容
+                element.getSrcElement().setExpansionDisk(null);
+                element.setVmExpansionDiskType(null);
+//                处理云场景无登录按钮、接收虚拟端口信息
+                receiveVirtualPortInfo(element, virtualNics);
                 AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics, combineInitCommand(element));
                 Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_VIRTUAL_MACHINE, task);
                 createVirtualMachineTasks.add(formatTask);
@@ -274,6 +279,12 @@ public class AzureCreateHandler extends CreateHandler {
         return stepPercentage;
     }
 
+    /**
+     * 处理云场景无登录按钮、接收虚拟端口信息，用于云节点和虚拟网络接口的绑定及配置管理。
+     *
+     * @param cloudElement 云端场景节点，包含云端设备的配置信息。
+     * @param virtualNics 虚拟网络接口列表，用于和云端设备进行网络连接。
+     */
     public void receiveVirtualPortInfo(CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics) {
         if (virtualNics == null) {
             return;
