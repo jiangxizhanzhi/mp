@@ -1,9 +1,12 @@
 package cn.cyberpeace.mp.common.util;
 
+import cn.cyberpeace.mp.common.model.AddressSpace;
+
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -85,6 +88,25 @@ public class CheckUtil {
         }
     }
 
-
+    //判断ips是否在该地址空间集合内
+    public static boolean checkIpsInAddressSpaces(List<String> ips, List<AddressSpace> addressSpaces) {
+        Boolean haveNoFault = true;
+        try {
+            for(String ip : ips){
+                for (AddressSpace addressSpace : addressSpaces) {
+                    String address = addressSpace.getAddress();
+                    Integer addressSize = addressSpace.getAddressSize();
+                    boolean b = checkIpInAddressSpace(ip, address, addressSize);
+                    if(!b){
+                        haveNoFault = false;
+                    }
+                }
+            }
+            return haveNoFault;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
 }
