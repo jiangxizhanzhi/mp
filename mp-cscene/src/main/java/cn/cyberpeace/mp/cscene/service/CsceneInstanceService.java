@@ -107,6 +107,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
+import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhProbeDataModel;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
@@ -242,6 +243,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private CsceneCommonService csceneCommonService;
+
 
     // expires in 10 minutes
     private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -2048,14 +2050,32 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Transactional(rollbackFor = Exception.class)
     public void modifyProbes(String id, String nodeId, List<Probe> probeList, int status, Boolean isDelete, SceneElementSituationProbeModel.ProbeType probeType) {
         SceneHandler sceneHandler = new SceneHandler(id, null, null);
-
-//        先更新状态为更新
+//        先删除
         HumanCondition probeListHumanCondition = new HumanCondition()
                 .filterEqual(SceneElementSituationProbeModel::getScene, id)
                 .filterEqual(SceneElementSituationProbeModel::getSceneElement, nodeId)
                 .filterIn(SceneElementSituationProbeModel::getProbeId, probeList.stream().filter(probe -> null != probe.getId()).map(Probe::getId).toArray());
         sceneElementSituationProbeMapper.filterDelete(probeListHumanCondition);
 
+//        查探针详细信息
+        String[] probeIds = probeList.stream().map(Probe::getId).toArray(String[]::new);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterIn(ProbeScriptModel::getProbeId, probeIds);
+        Map<String, ProbeScriptModel> probeScriptMap = probeScriptMapper.list(humanCondition).stream().collect(Collectors.toMap(ProbeScriptModel::getProbeId, Function.identity()));
+
+
+//        sceneElementSituationProbeMapper.bulkCreate(sceneElementSituationProbeModels);
+
+//        更新探针
+//        SceneTaskPool.getInstance().executeTask(() -> {
+            probeList.forEach(probe -> {
+                ProbeScriptModel probeScriptModel = probeScriptMap.get(probe.getId());
+                if(null != probeScriptModel){
+                    BeanUtils.copyProperties(probeScriptModel,probe);
+                }
+                modifyProbe(sceneHandler, nodeId, probe, probeType);
+            });
+//            默认执行完成
         List<SceneElementSituationProbeModel> sceneElementSituationProbeModels =
                 probeList.stream()
                         .map(probe -> {
@@ -2063,25 +2083,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                             sceneElementSituationProbeModel.setScene(id);
                             sceneElementSituationProbeModel.setSceneElement(nodeId);
                             sceneElementSituationProbeModel.setProbeId(probe.getId());
-                            sceneElementSituationProbeModel.setStatus(SceneElementSituationProbeModel.ProbeStatus.UPDATING.getValue());
+                            sceneElementSituationProbeModel.setStatus(status);
                             sceneElementSituationProbeModel.setDeleted(false);
+                            sceneElementSituationProbeModel.setDeleted(isDelete);
                             return sceneElementSituationProbeModel;
                         }).collect(Collectors.toList());
-
-        sceneElementSituationProbeMapper.bulkCreate(sceneElementSituationProbeModels);
-
-//        更新探针
-        SceneTaskPool.getInstance().executeTask(() -> {
-            probeList.forEach(probe -> {
-                modifyProbe(sceneHandler, nodeId, probe, probeType);
-            });
-//            默认执行完成
-            sceneElementSituationProbeModels.stream().forEach(probe -> {
-                probe.setStatus(status);
-                probe.setDeleted(isDelete);
-            });
-            sceneElementSituationProbeMapper.bulkUpdate(sceneElementSituationProbeModels);
-        });
+            sceneElementSituationProbeMapper.bulkCreate(sceneElementSituationProbeModels);
+//        });
 
     }
 
@@ -2268,14 +2276,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (SceneElementSituationProbeModel.ProbeType.REMOVE == probeType || SceneElementSituationProbeModel.ProbeType.UPDATE == probeType) {
             var removeParams = convertScript.convertParams().get(0);
 //            convertScript.convertParams()内拼接url错误 重新拼接
-            removeParams.setScriptUrl(StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, probe.getScriptUrl().replaceFirst("^/api/mp/file/", "")));
+            removeParams.setScriptUrl(StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, probe.getScriptUrl().replaceFirst("/api/mp/file/", "")));
             removeParams.setAction(WazuhControl.CONTROL_ACTION_REMOVE);
             controlConfigParam.getProbeParams().add(removeParams);
         }
         // 新增操作
         if (SceneElementSituationProbeModel.ProbeType.ADD == probeType || SceneElementSituationProbeModel.ProbeType.UPDATE == probeType) {
             var addParams = convertScript.convertParams().get(0);
-            addParams.setScriptUrl(StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, probe.getScriptUrl().replaceFirst("^/api/mp/file/", "")));
+            addParams.setScriptUrl(StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, probe.getScriptUrl().replaceFirst("/api/mp/file/", "")));
             String groupId = TextUtils.uuid();
             addParams.setGroup(groupId);
             addParams.setAction(WazuhControl.CONTROL_ACTION_ADD);
