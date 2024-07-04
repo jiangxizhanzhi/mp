@@ -193,7 +193,7 @@ public class AzureCreateHandler extends CreateHandler {
             createTerminalTasks.addAll(createWebAppTasks);
 
             if (!createTerminalTasks.isEmpty()) {
-//                runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
+                runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
             }
             getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_INSTANCE);
             getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CONFIG);
