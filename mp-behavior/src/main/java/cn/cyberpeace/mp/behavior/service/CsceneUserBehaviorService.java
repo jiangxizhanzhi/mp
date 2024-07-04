@@ -36,10 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -79,34 +76,40 @@ public class CsceneUserBehaviorService {
 		List<String> userBehaviorIds = elementBehaviorReq.getUserBos().stream()
 														 .map(UserBehaviorConfigBo::getUserBehaviorId).collect(Collectors.toList());
 		HumanCondition humanCondition = new HumanCondition().filterIn(UserBehaviorModel::getId, userBehaviorIds.toArray());
-		Map<String, UserBehaviorModel> behaviorModelMap = userBehaviorMapper.list(humanCondition)
-																			.stream().collect(Collectors.toMap(UserBehaviorModel::getId, m -> m));
+		Map<String, UserBehaviorModel> behaviorModelMap = new HashMap<>();
+		if(!userBehaviorIds.isEmpty()){
+			behaviorModelMap = userBehaviorMapper.list(humanCondition)
+							  .stream().collect(Collectors.toMap(UserBehaviorModel::getId, m -> m));
+		}
 		List<CsceneUserBehaviorModel> modelList = new ArrayList<>();
 
+		Map<String, UserBehaviorModel> finalBehaviorModelMap = behaviorModelMap;
 		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus transactionStatus) {
 
 				csceneNetworkBehaviorMapper.deleteTopoByNodeId(nodeId);
 				csceneUserBehaviorMapper.deleteTopoByNodeId(nodeId);
-				for (UserBehaviorConfigBo userBo : elementBehaviorReq.getUserBos()) {
-					List<String> networkIds = csceneNetworkBehaviorService.add(userBo.getNetworkBos(), nodeId);
-					CsceneUserBehaviorModel model = new CsceneUserBehaviorModel();
-					UserBehaviorModel originalModel = behaviorModelMap.get(userBo.getUserBehaviorId());
-					if (originalModel == null) {
-						throw new MpRuntimeException("找不到用户行为数据");
+				if(!userBehaviorIds.isEmpty()){
+					for (UserBehaviorConfigBo userBo : elementBehaviorReq.getUserBos()) {
+						List<String> networkIds = csceneNetworkBehaviorService.add(userBo.getNetworkBos(), nodeId);
+						CsceneUserBehaviorModel model = new CsceneUserBehaviorModel();
+						UserBehaviorModel originalModel = finalBehaviorModelMap.get(userBo.getUserBehaviorId());
+						if (originalModel == null) {
+							throw new MpRuntimeException("找不到用户行为数据");
+						}
+						BeanUtils.copyProperties(originalModel, model);
+						model.setNodeId(nodeId);
+						model.setSceneId("");
+						model.setUserBehaviorId(userBo.getUserBehaviorId());
+						model.setNetworkIds(JSON.toJSONString(networkIds));
+						model.setCreateTime(null);
+						model.setUpdateTime(null);
+						model.setId(null);
+						modelList.add(model);
 					}
-					BeanUtils.copyProperties(originalModel, model);
-					model.setNodeId(nodeId);
-					model.setSceneId("");
-					model.setUserBehaviorId(userBo.getUserBehaviorId());
-					model.setNetworkIds(JSON.toJSONString(networkIds));
-					model.setCreateTime(null);
-					model.setUpdateTime(null);
-					model.setId(null);
-					modelList.add(model);
+					csceneUserBehaviorMapper.bulkCreate(modelList);
 				}
-				csceneUserBehaviorMapper.bulkCreate(modelList);
 			}
 		});
 		return true;
