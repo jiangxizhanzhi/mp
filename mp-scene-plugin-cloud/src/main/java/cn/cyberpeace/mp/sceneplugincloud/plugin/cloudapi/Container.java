@@ -172,6 +172,11 @@ public class Container extends CloudClient {
         execCmd.setCmd("sh");
         execCmd.setArgs(Arrays.asList("/tmp/tmp_exec/" + fileName));
         var result = this.executeCommand(containerId, execCmd);
+
+        // 兼容 30所 返回的数据结构
+        result.setExitCode(0);
+        result.setOutput(result.getResult());
+
         log.info("executeCommand result is {}", JsonCommon.stringify(result));
         return result;
     }

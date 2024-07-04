@@ -26,4 +26,5 @@ public class ContainerExecuteResult implements CloudHttpData {
 
     private String proxyUrl;
 
+    private String result ;
 }
