@@ -14,8 +14,10 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformR
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
+import cn.cyberpeace.mp.devopscluster.model.CloudResponse;
 import cn.cyberpeace.mp.devopscluster.model.DeviceQuickCreateCloudPlatformModel;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
+import cn.cyberpeace.mp.devopscluster.vo.TemplateVO;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -48,6 +51,7 @@ public class ImagesService extends BaseCpService {
     private static final String UPLOAD_FILE = "/cloud/v1/device/upload?type={type}";
 
     private static final String DEVICE_CONNECT = "/cloud/v1/device/connection";
+    private static final String LIST_TEMPLATE = "/cloud/v1/template/no_register";
 
 
     /**
@@ -182,5 +186,11 @@ public class ImagesService extends BaseCpService {
         CloudPlatformPageResult<TargetConnection> model = new CloudPlatformPageResult<>();
         model.setList(list);
         return model;
+    }
+
+    public List<TemplateVO> listTemplate(){
+        var res = super.sendGet(LIST_TEMPLATE, new TypeReference<CloudResponse<TemplateVO>>() {
+        });
+        return res.getData();
     }
 }

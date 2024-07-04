@@ -119,6 +119,14 @@ public class ImagesController {
     @NonNull
     private CsceneSnapshotService csceneSnapshotService;
 
+    @AuthTarget(TargetEnum.DEVOPS_IMAGE_GROUP)
+    @ApiOperation("分页查询")
+    @GetMapping("/list_template")
+    public PageResult<TemplateVO> page() {
+        var res = imagesService.listTemplate();
+        return new PageResult<>(res, res.size());
+    }
+
     /**
      * 分页查询
      *
