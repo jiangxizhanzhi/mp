@@ -105,8 +105,9 @@ public class TargetConverter{
                 .collect(Collectors.toMap(DeviceTargetPO::getId, DeviceTargetPO::getAttackMockDeviceType, (a, b) -> a));
         for (Device d : deviceList) {
             d.setAttackMockDeviceType(deviceIdToAttackMockTypeMap.get(String.valueOf(d.getId())));
-            if (ImageTypeEnum.CONTAINER.toValue().equals(d.getImageType()) && supportExports.containsKey(d.getUuid())) {
-                if (d.getExtDocker() != null) {
+            if (supportExports.containsKey(d.getUuid())) {
+                d.setBehaveSupport(supportExports.get(d.getUuid()).getBehaveSupport());
+                if (ImageTypeEnum.CONTAINER.toValue().equals(d.getImageType()) && d.getExtDocker() != null) {
                     d.getExtDocker().setInitSupport(supportExports.get(d.getUuid()).getInitSupport());
                 }
             }
