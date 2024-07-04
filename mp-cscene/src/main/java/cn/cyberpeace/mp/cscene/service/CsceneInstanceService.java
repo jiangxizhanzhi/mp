@@ -2046,12 +2046,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
      */
     @Transactional(rollbackFor = Exception.class)
     public void modifyProbes(String id, String nodeId, List<Probe> probeList, int status, Boolean isDelete, SceneElementSituationProbeModel.ProbeType probeType) {
-        String sceneId = csceneCommonService.translateSceneId(id);
-        SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
+//        String sceneId = csceneCommonService.translateSceneId(id);
+        SceneHandler sceneHandler = new SceneHandler(id, null, null);
 
 //        先更新状态为更新
         HumanCondition probeListHumanCondition = new HumanCondition()
-                .filterEqual(SceneElementSituationProbeModel::getScene, sceneId)
+                .filterEqual(SceneElementSituationProbeModel::getScene, id)
                 .filterEqual(SceneElementSituationProbeModel::getSceneElement, nodeId)
                 .filterIn(SceneElementSituationProbeModel::getProbeId, probeList.stream().filter(probe -> null != probe.getId()).map(Probe::getId).toArray());
         sceneElementSituationProbeMapper.filterDelete(probeListHumanCondition);
@@ -2060,7 +2060,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 probeList.stream()
                         .map(probe -> {
                             SceneElementSituationProbeModel sceneElementSituationProbeModel = new SceneElementSituationProbeModel();
-                            sceneElementSituationProbeModel.setScene(sceneId);
+                            sceneElementSituationProbeModel.setScene(id);
                             sceneElementSituationProbeModel.setSceneElement(nodeId);
                             sceneElementSituationProbeModel.setProbeId(probe.getId());
                             sceneElementSituationProbeModel.setStatus(SceneElementSituationProbeModel.ProbeStatus.UPDATING.getValue());
