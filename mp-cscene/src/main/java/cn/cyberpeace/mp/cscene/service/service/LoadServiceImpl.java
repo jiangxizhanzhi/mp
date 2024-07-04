@@ -81,7 +81,7 @@ public class LoadServiceImpl {
      * */
     public JSONObject getLoadList(JSONObject requestData) {
         Integer pageNum = requestData.get("pageNum") != null ? requestData.getInteger("pageNum") : 1;
-        Integer pageSize = requestData.get("pageSize") != null ? requestData.getInteger("pageSize") : 10;
+        Integer pageSize = requestData.get("pageSize") != null ? requestData.getInteger("pageSize") : 10000;
         requestData.put("pageSize", pageSize);
         requestData.put("offset", (pageNum - 1) * pageSize);
         List<MpDevopsLoad> list = loadMapper.getLoadList(requestData);
@@ -362,26 +362,26 @@ public class LoadServiceImpl {
      * 根据场景id获取绑定的载荷
      * */
     public List<MpDevopsLoad> getLoadBySceneId(String sceneId) {
-//        //节点表
-//        List<CloudPluginSceneElementModel> loadList = csceneInstanceService.listLoads(sceneId);
-//        List<String> loadIds = loadList.stream()
-//                .map(CloudPluginSceneElementModel::getLoadToolId)
-//                .filter(Objects::nonNull)
-//                .distinct()
-//                .collect(Collectors.toList());
-//        List<MpDevopsLoad> getLoadByPks = new ArrayList<>();
-//        if (loadIds != null && loadIds.size() > 0) {
-//            getLoadByPks = loadMapper.getLoadByIds(loadIds);
-//        }
-//        return getLoadByPks;
-
-        //暂用这个
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("pageNum", 1);
-        jsonObject.put("pageSize", 100);
-        JSONObject loads = getLoadList(new JSONObject());
-        List<MpDevopsLoad> getLoadByPks = (List) loads.get("source");
+        //节点表
+        List<CloudPluginSceneElementModel> loadList = csceneInstanceService.listLoads(sceneId);
+        List<String> loadIds = loadList.stream()
+                .map(CloudPluginSceneElementModel::getLoadToolId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        List<MpDevopsLoad> getLoadByPks = new ArrayList<>();
+        if (loadIds != null && loadIds.size() > 0) {
+            getLoadByPks = loadMapper.getLoadByIds(loadIds);
+        }
         return getLoadByPks;
+
+//        //暂用这个
+//        JSONObject jsonObject = new JSONObject();
+//        jsonObject.put("pageNum", 1);
+//        jsonObject.put("pageSize", 100);
+//        JSONObject loads = getLoadList(new JSONObject());
+//        List<MpDevopsLoad> getLoadByPks = (List) loads.get("source");
+//        return getLoadByPks;
     }
 
     /*

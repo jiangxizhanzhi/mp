@@ -54,7 +54,6 @@
         </set>
         WHERE
             pk = #{pk}
-
     </update>
 
     <delete id="deleteAzurer">

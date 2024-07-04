@@ -25,7 +25,7 @@ public class MicrosoftAzureUserModel extends BaseModel {
     private Integer pk;
 
     @ApiModelProperty(value = "连接地址")
-    private Integer connectIp;
+    private String connectIp;
 
     @ApiModelProperty(value = "云类型")
     private Integer cloudType;

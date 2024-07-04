@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.common.util.CheckUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,12 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
 
     @Override
     public ServiceResult updateLocalAzurer(MicrosoftAzureUserModel requestData) {
+        if(requestData.getConnectIp() != null && !requestData.getConnectIp().equals("")){
+            Boolean aBoolean = CheckUtil.checkPrivateCloudAddress(requestData.getConnectIp());
+            if(!aBoolean){
+                return new ServiceResult<>(null, BaseErrorCode.ERROR,"私有云地址格式错误");
+            }
+        }
         if(requestData == null || requestData.getPk() == null || requestData.getPk().equals("")){
             Boolean addAzurer = microsoftAzureLoginMapper.addAzurer(requestData);
             if(addAzurer){
@@ -64,5 +71,4 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
             }
         }
     }
-
 }

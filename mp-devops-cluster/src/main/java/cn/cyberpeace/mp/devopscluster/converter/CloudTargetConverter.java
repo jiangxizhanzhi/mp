@@ -262,7 +262,16 @@ public class CloudTargetConverter {
                 deviceCloudTargetNet.setIsHide(0);
                 deviceCloudTargetNet.setIsPublic(2);
                 deviceCloudTargetNet.setIsPublic(2);
-                deviceCloudTargetNet.setLogo("/api/mp/file/710/017/93dde93031be465c3a7bb20381f4cd6e.png");
+                String subType = ((JSONObject) getCloudInternetServices.get(i)).get("subType") != null ? ((JSONObject) getCloudInternetServices.get(i)).get("subType").toString() : "";
+                if(subType.equals("fireWall")){
+                    deviceCloudTargetNet.setLogo("/api/mp/file/229/718/ff193b62dc805ee24838086d083fd7fe.png");
+                }else if(subType.equals("VNet")){
+                    deviceCloudTargetNet.setLogo("/api/mp/file/177/108/39ae20d4c7de4ab7a9aa9de270c1d143.png");
+                }else if(subType.equals("WAF")){
+                    deviceCloudTargetNet.setLogo("/api/mp/file/229/718/ff193b62dc805ee24838086d083fd7fe.png");
+                }else{
+                    deviceCloudTargetNet.setLogo("/api/mp/file/710/017/93dde93031be465c3a7bb20381f4cd6e.png");
+                }
                 netList.add(deviceCloudTargetNet);
             }
         }
@@ -350,7 +359,7 @@ public class CloudTargetConverter {
                 deviceCloudTargetCalculate.setIsHide(0);
                 deviceCloudTargetCalculate.setIsPublic(2);
                 deviceCloudTargetCalculate.setIsPublic(2);
-                deviceCloudTargetCalculate.setLogo("/api/mp/file/710/017/93dde93031be465c3a7bb20381f4cd6e.png");
+                deviceCloudTargetCalculate.setLogo("/api/mp/file/247/911/4691e31013c189bd4c63360326497e25.png");
                 deviceCloudTargetCalculate.setGeneration("第一代");
                 deviceCloudTargetCalculate.setVersion(((JSONObject) images.get(i)).get("imageVersion") != null ? ((JSONObject) images.get(i)).get("imageVersion").toString() : "");
                 calculateList.add(deviceCloudTargetCalculate);
@@ -398,7 +407,7 @@ public class CloudTargetConverter {
                 deviceCloudTargetCalculate.setIsHide(0);
                 deviceCloudTargetCalculate.setIsPublic(2);
                 deviceCloudTargetCalculate.setIsPublic(2);
-                deviceCloudTargetCalculate.setLogo("/api/mp/file/710/017/93dde93031be465c3a7bb20381f4cd6e.png");
+                deviceCloudTargetCalculate.setLogo("/api/mp/file/726/170/948392075ab1178b725e3068137fcd29.png");
                 deviceCloudTargetCalculate.setGeneration("第一代");
                 deviceCloudTargetCalculate.setVersion(((JSONObject) localImages.get(i)).get("imageVersion") != null ? ((JSONObject) localImages.get(i)).get("imageVersion").toString() : "");
                 calculateList.add(deviceCloudTargetCalculate);
