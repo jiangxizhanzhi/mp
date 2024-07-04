@@ -89,8 +89,6 @@ public class LoadServiceImpl {
         Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes(CommonStatusCodeEnum.CODE.getCode());
         //list每个成员的imageType赋值
         list.forEach(item -> {
-            item.setImageType("load");
-            item.setRole(60);
             item.setRunTableName(nextLevelMapsByCodes.get(item.getRunTable()));
             item.setActionTypeName(nextLevelMapsByCodes.get(item.getActionType()));
             item.setControlTypeName(nextLevelMapsByCodes.get(item.getControlType()));
@@ -378,7 +376,7 @@ public class LoadServiceImpl {
 //        //暂用这个
 //        JSONObject jsonObject = new JSONObject();
 //        jsonObject.put("pageNum", 1);
-//        jsonObject.put("pageSize", 100);
+//        jsonObject.put("pageSize", 1000);
 //        JSONObject loads = getLoadList(new JSONObject());
 //        List<MpDevopsLoad> getLoadByPks = (List) loads.get("source");
 //        return getLoadByPks;

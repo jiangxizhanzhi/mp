@@ -574,4 +574,27 @@
             code_name IS NOT NULL
           AND code_other_name IS NOT NULL
     </select>
+
+    <select id="getTopoLoadList" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoad">
+        SELECT
+        *
+        FROM
+        mp_devops_load
+        <where>
+            <if test="param != null and param.toolName != null and param.toolName != ''">
+                and tool_name like concat('%', #{param.toolName}, '%')
+            </if>
+            <if test="param != null and param.runTable != null and param.runTable != ''">
+                and run_table = #{param.runTable}
+            </if>
+            <if test="param != null and param.source != null and param.source != ''">
+                and source = #{param.source}
+            </if>
+            <if test="param != null and param.controlType != null and param.controlType != ''">
+                and control_type = #{param.controlType}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
 </mapper>

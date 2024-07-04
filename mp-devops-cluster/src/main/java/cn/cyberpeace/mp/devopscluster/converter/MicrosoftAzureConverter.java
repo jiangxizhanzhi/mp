@@ -1,13 +1,19 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
 import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
+import cn.cyberpeace.mp.base.bo.MpSysCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.common.constant.codeEnum.CommonStatusCodeEnum;
+import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
 import cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
+import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.CloudDevice;
 import cn.cyberpeace.mp.devopscluster.po.*;
 import cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper;
 import cn.cyberpeace.mp.devopscluster.vo.EquipmentRequestVO;
+import cn.cyberpeace.mp.devopscluster.vo.LoadRequestVO;
 import cn.cyberpeace.mp.devopscluster.vo.MpSysCodeMenuVO;
 import cn.cyberpeace.mp.devopscluster.vo.TargerRequestVO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
@@ -28,6 +34,7 @@ import com.azure.resourcemanager.containerinstance.models.ContainerGroup;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +54,12 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
     @Autowired
     private CloudTargetConverter cloudTargetConverter;
+
+    @Autowired
+    private CommonCodeServiceImpl commonCodeService;
+
+    @Autowired
+    private LoadMapper loadMapper;
 
     /**
      * 云镜像管理页面分页查询
@@ -718,6 +731,20 @@ public class MicrosoftAzureConverter implements BaseConverter {
         return menuDto;
     }
 
+    public List<MpDevopsLoad> getTopoLoadList(LoadRequestVO requestData) {
+        List<MpDevopsLoad> list = microsoftAzureMapper.getTopoLoadList(requestData);
+        Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes(CommonStatusCodeEnum.CODE.getCode());
+        //list每个成员的imageType赋值
+        list.forEach(item -> {
+            item.setImageType("load");
+            item.setRole(60);
+            item.setRunTableName(nextLevelMapsByCodes.get(item.getRunTable()));
+            item.setActionTypeName(nextLevelMapsByCodes.get(item.getActionType()));
+            item.setControlTypeName(nextLevelMapsByCodes.get(item.getControlType()));
+        });
+        return list;
+    }
+
     /**
      * 查询常用靶标信息
      */
@@ -735,5 +762,27 @@ public class MicrosoftAzureConverter implements BaseConverter {
         });
         Integer num = microsoftAzureMapper.getCommonTargetNum(request, offset, pageSize);
         return new ListObjServiceResult(list, num).asResult();
+    }
+
+    @Cacheable(key = "#root.method.name", value = "getLoadListConditions")
+    public List<MpSysCodeEnum> getLoadListConditions() {
+        List<MpSysCodeEnum> nextAllTreeDataByCode = commonCodeService.getNextAllTreeDataByCode(CommonStatusCodeEnum.CODE_LOAD.getCode(), false);
+        MpSysCodeEnum mpSysCodeEnum = new MpSysCodeEnum();
+        mpSysCodeEnum.setCode("10050299");
+        mpSysCodeEnum.setCodeName("来源");
+
+        List<MpSysCodeEnum> sourceChildren = new ArrayList<>();
+        MpSysCodeEnum sourceSysCodeEnum1 = new MpSysCodeEnum();
+        sourceSysCodeEnum1.setCode("1");
+        sourceSysCodeEnum1.setCodeName("外部同步");
+        sourceChildren.add(sourceSysCodeEnum1);
+        MpSysCodeEnum sourceSysCodeEnum2 = new MpSysCodeEnum();
+        sourceSysCodeEnum2.setCode("2");
+        sourceSysCodeEnum2.setCodeName("本地创建");
+        sourceChildren.add(sourceSysCodeEnum2);
+
+        mpSysCodeEnum.setChildren(sourceChildren);
+        nextAllTreeDataByCode.add(mpSysCodeEnum);
+        return nextAllTreeDataByCode;
     }
 }

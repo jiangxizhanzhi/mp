@@ -4,8 +4,10 @@ import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.devopscluster.po.*;
 import cn.cyberpeace.mp.devopscluster.vo.EquipmentRequestVO;
+import cn.cyberpeace.mp.devopscluster.vo.LoadRequestVO;
 import cn.cyberpeace.mp.devopscluster.vo.MpSysCodeMenuVO;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.annotations.Mapper;
@@ -73,6 +75,7 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
 
     Integer getCommonTargetNum(EquipmentRequestVO request, Integer offset, Integer pageSize);
 
-
     List<JSONObject> getSubTypeName();
+
+    List<MpDevopsLoad> getTopoLoadList(@Param("param") LoadRequestVO requestData);
 }

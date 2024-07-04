@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * 获取云镜像列表的请求参数格式
+ * 拓扑中获取云镜像列表的请求参数格式
  */
 @Data
 @NoArgsConstructor
