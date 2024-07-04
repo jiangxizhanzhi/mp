@@ -142,11 +142,11 @@ public class AzureVirtualMachine {
     }
 
     public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData) {
-        cloudElement.setResourceId("1233");
-        cloudElement.setPublicIpAddress("20.30.40.5");
+//        cloudElement.setResourceId("1233");
+//        cloudElement.setPublicIpAddress("20.30.40.5");
 
 //        TODO 资源不浪费
-/*
+
         String groupName = pluginHandler.getSourceSceneId();
 
         // 调用微软云api 创建虚拟机 回写虚拟机id
@@ -194,7 +194,7 @@ public class AzureVirtualMachine {
                 }
             }
 
-        }*/
+        }
 
     }
 

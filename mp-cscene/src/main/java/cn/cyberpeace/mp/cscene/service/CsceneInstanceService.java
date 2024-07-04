@@ -2046,7 +2046,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
      */
     @Transactional(rollbackFor = Exception.class)
     public void modifyProbes(String id, String nodeId, List<Probe> probeList, int status, Boolean isDelete, SceneElementSituationProbeModel.ProbeType probeType) {
-//        String sceneId = csceneCommonService.translateSceneId(id);
         SceneHandler sceneHandler = new SceneHandler(id, null, null);
 
 //        先更新状态为更新
