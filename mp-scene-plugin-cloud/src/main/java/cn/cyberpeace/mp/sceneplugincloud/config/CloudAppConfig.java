@@ -183,6 +183,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.dhcp_ip_allocate:true}")
     private Boolean dhcpIpAllocate;
 
+    @Value("${mp.sceneplugincloud.public_mgmt_id:0}")
+    private String publicMgmtId;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 

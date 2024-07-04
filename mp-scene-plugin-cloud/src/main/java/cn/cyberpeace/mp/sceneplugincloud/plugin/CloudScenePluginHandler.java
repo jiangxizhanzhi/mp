@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.AzureCreateHandler;
@@ -523,7 +524,6 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     @Override
     public void completionTopo(Set<String> existingIpSet) {
         TopoReformUtils topoReformUtils = new TopoReformUtils(this);
-        Map<String, SceneAreaBO> areaMap = getSceneHandler().getAreaMap();
 
         // 如果节点没有连线的 把交换机补充上
         for (CloudPluginSceneElementBO element : getElementMap().values()) {
@@ -537,8 +537,12 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                     TopoReformUtils.ElementWrapper nodeWrapper = topoReformUtils.addAuxiliarySwitchNode();
                     SceneElementBO sceneElement = nodeWrapper.getSceneElement();
                     sceneElement.setIsAuxiliary(false);
+//                    云场景网络节点类型更改
+                    CloudPluginSceneElementBO pluginElement = nodeWrapper.getPluginElement();
+                    pluginElement.setImageType(CloudPluginSceneElementModel.ImageType.VNET);
+
                     TopoReformUtils.PortWrapper port1Wrapper = topoReformUtils.addAuxiliaryPort(element);
-                    TopoReformUtils.PortWrapper port2Wrapper = topoReformUtils.addAuxiliaryPort(nodeWrapper.getPluginElement());
+                    TopoReformUtils.PortWrapper port2Wrapper = topoReformUtils.addAuxiliaryPort(pluginElement);
                     port1Wrapper.getScenePort().setIsAuxiliary(false);
                     port2Wrapper.getScenePort().setIsAuxiliary(false);
                     topoReformUtils.addConnect(port1Wrapper.getScenePort(), port2Wrapper.getScenePort());
@@ -552,8 +556,13 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                     TopoReformUtils.ElementWrapper nodeWrapper = topoReformUtils.addAuxiliarySwitchNode();
                     SceneElementBO sceneElement = nodeWrapper.getSceneElement();
                     sceneElement.setIsAuxiliary(false);
+
+                    //                    云场景网络节点类型更改
+                    CloudPluginSceneElementBO pluginElement = nodeWrapper.getPluginElement();
+                    pluginElement.setImageType(CloudPluginSceneElementModel.ImageType.VNET);
+
                     //                    加交换机端口 不创建element端口
-                    TopoReformUtils.PortWrapper port2Wrapper = topoReformUtils.addAuxiliaryPort(nodeWrapper.getPluginElement());
+                    TopoReformUtils.PortWrapper port2Wrapper = topoReformUtils.addAuxiliaryPort(pluginElement);
                     //                    连线
                     p.setIsAuxiliary(false);
                     port2Wrapper.getScenePort().setIsAuxiliary(false);

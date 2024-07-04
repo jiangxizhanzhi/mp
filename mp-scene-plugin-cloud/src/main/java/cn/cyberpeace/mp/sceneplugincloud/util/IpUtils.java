@@ -546,6 +546,39 @@ public class IpUtils {
 
     /**
      * 通过掩码位数格式化ip地址
+     * 192.168.10.4 -> 192.168.10.0/24
+     *
+     * @param ipAddress
+     * @return
+     */
+    public static String formatIpAddressWithDefaultMask(String ipAddress) {
+        // 检查IP地址是否符合规范
+        if (!isValidIpAddress(ipAddress)) {
+            throw new IllegalArgumentException("Invalid IP address");
+        }
+
+        // 分割IP地址为四部分
+        String[] ipParts = ipAddress.split("\\.");
+
+        // 前三部分与第四部分的补码拼接，形成"192.168.10.0"
+        StringBuilder networkPart = new StringBuilder();
+        for (int i = 0; i < 3; i++) {
+            networkPart.append(ipParts[i]).append('.');
+        }
+        networkPart.append(0).append('/').append(24);
+
+        return networkPart.toString();
+    }
+
+    private static boolean isValidIpAddress(String ipAddress) {
+        String[] parts = ipAddress.split("\\.");
+        return parts.length == 4 && Arrays.stream(parts)
+                .allMatch(part -> part.matches("\\d{1,3}"));
+    }
+
+
+    /**
+     * 通过掩码位数格式化ip地址
      * 192.168.10.254/24 -> 192.168.10.0/24
      *
      * @param cidrIp
@@ -611,5 +644,21 @@ public class IpUtils {
         };
 
         return specificIPs;
+    }
+
+    /**
+     * 判断给定的IP地址的最后一位是否属于从CIDR中提取的五个特定保留IP之一。
+     *
+     * @param ipAddress 需要检查的IP地址
+     * @return true 如果IP地址的最后一位匹配保留IP范围，否则false
+     */
+    public static boolean isLastOctetInReservedRange(String ipAddress) {
+        String[] reservedIPLastOctets = {"0", "1", "2", "3", "255"};
+
+        // 提取IP地址的最后一部分（即最后一段数字）
+        String lastOctetOfIP = ipAddress.substring(ipAddress.lastIndexOf('.') + 1);
+
+        // 检查该IP地址的最后一位是否在保留的范围内
+        return Arrays.asList(reservedIPLastOctets).contains(lastOctetOfIP);
     }
 }

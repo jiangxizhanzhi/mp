@@ -25,28 +25,35 @@ public class ElementNetworkUtils {
     public static ConcurrentHashMap<String, Boolean> getCidrContainerMap(List<CloudPluginSceneElementBO> allElements) {
         ConcurrentHashMap<String, Boolean> cidrContainerMap = new ConcurrentHashMap<>();
         allElements.forEach(cloudElement -> {
-            cloudElement.getDeriveNetworks().forEach(connectedNetworkBO -> {
-                String cidr = connectedNetworkBO.getNetwork().getCidr();
-                AtomicReference<Boolean> isContainer = new AtomicReference<>(false);
+            ConcurrentHashMap<String, Boolean> extracted = getCidrToContainerMap(allElements, cloudElement);
+            cidrContainerMap.putAll(extracted);
+        });
+        return cidrContainerMap;
+    }
 
+    public static ConcurrentHashMap<String, Boolean> getCidrToContainerMap(List<CloudPluginSceneElementBO> allElements, CloudPluginSceneElementBO cloudElement) {
+        AtomicReference<Boolean> isContainer = new AtomicReference<>(false);
+        ConcurrentHashMap<String, Boolean> cidrContainerMap = new ConcurrentHashMap<>();
+        cloudElement.getDeriveNetworks().forEach(connectedNetworkBO -> {
+            isContainer.set(false);
+            String cidr = connectedNetworkBO.getNetwork().getCidr();
 //              拓扑未连线增加子网委托  查 getFromPorts 中有ip 且 getToPorts==null 的 想办法找出是否是container
-                for (ConnectedNetworkBO.ConnectPort connectPort : connectedNetworkBO.getConnectPorts()) {
-                    SceneElementPortBO from = connectPort.getFrom();
-                    if (null != from.getIp() && null == connectPort.getTo()) {
-                        checkIfElementIsContainerById(allElements, isContainer, from.getElement().getId());
-                    }
+            for (ConnectedNetworkBO.ConnectPort connectPort : connectedNetworkBO.getConnectPorts()) {
+                SceneElementPortBO from = connectPort.getFrom();
+                if (null != from.getIp() && null == connectPort.getTo()) {
+                    checkIfElementIsContainerById(allElements, isContainer, from.getElement().getId());
                 }
+            }
 
-                connectedNetworkBO
-                        .getToPorts()
-                        .stream()
-                        .filter(sceneElementPortBO -> null != sceneElementPortBO)
-                        .map(sceneElementPortBO -> sceneElementPortBO.getElement().getId())
-                        .forEach(id -> {
-                            checkIfElementIsContainerById(allElements, isContainer, id);
-                        });
-                cidrContainerMap.put(cidr, isContainer.get());
-            });
+            connectedNetworkBO
+                    .getToPorts()
+                    .stream()
+                    .filter(sceneElementPortBO -> null != sceneElementPortBO)
+                    .map(sceneElementPortBO -> sceneElementPortBO.getElement().getId())
+                    .forEach(id -> {
+                        checkIfElementIsContainerById(allElements, isContainer, id);
+                    });
+            cidrContainerMap.put(cidr, isContainer.get());
         });
         return cidrContainerMap;
     }
@@ -59,7 +66,8 @@ public class ElementNetworkUtils {
                 .findFirst()
                 .get();
         if (null != cloudElement1) {
-            if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(cloudElement1.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == cloudElement1.getVirtualType()) {
+            if ((BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(cloudElement1.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == cloudElement1.getVirtualType())
+                    || (BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(cloudElement1.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == cloudElement1.getVirtualType())) {
                 isContainer.set(true);
             }
         }

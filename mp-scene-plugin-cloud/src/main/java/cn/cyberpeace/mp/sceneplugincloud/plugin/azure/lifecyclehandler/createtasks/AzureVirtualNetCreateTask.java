@@ -22,14 +22,15 @@ public class AzureVirtualNetCreateTask implements Runnable {
 
     public AzureVirtualNetCreateTask(IAzureResourceManager resourceService,
                                      CloudScenePluginHandler pluginHandler,
-                                     CloudPluginSceneElementBO element, ConcurrentHashMap<String, Boolean> cidrContainerMap) {
+                                     CloudPluginSceneElementBO element,
+                                     ConcurrentHashMap<String, Boolean> cidrContainerMap) {
         this.azureVirtualNet = new AzureVirtualNet(resourceService);
         this.pluginHandler = pluginHandler;
         this.element = element;
         this.cidrContainerMap = cidrContainerMap;
     }
 
-    @Override
+   @Override
     public void run() {
         this.azureVirtualNet.create(this.pluginHandler, element, cidrContainerMap);
     }

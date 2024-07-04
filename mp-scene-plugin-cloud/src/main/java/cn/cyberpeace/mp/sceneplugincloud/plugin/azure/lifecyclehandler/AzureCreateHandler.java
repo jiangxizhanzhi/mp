@@ -54,6 +54,7 @@ public class AzureCreateHandler extends CreateHandler {
         int stepPercentage = this.getStepPercentage();
         List<CloudPluginSceneElementBO> allElements = new ArrayList<>(getPluginHandler().getElementMap().values());
 
+        //  TODO 测试载荷用 start
         // 再创建终端 终端分虚拟机、容器、和web服务
         /*List<Runnable> createTerminalTasks = new ArrayList<>();
         // 载荷
@@ -71,16 +72,39 @@ public class AzureCreateHandler extends CreateHandler {
         if (!createTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
         }*/
-        //  TODO 测试载荷暂时去除
+        //  TODO 测试载荷用 end
 
+        getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_NETWORK);
         // 创建微软云的资源组
         String groupName = getPluginHandler().getSourceSceneId();
         try {
             new AzureResourceGroup(resourceService).create(groupName);
+            // 先创建辅助网络
+            List<CloudPluginSceneElementBO> filteredAuxiliaryNetworkElements = this.filterAuxiliaryNetworkElements(allElements);
+            List<Runnable> createAuxiliaryNetworkTasks = new ArrayList<>();
+            for (CloudPluginSceneElementBO element : filteredAuxiliaryNetworkElements) {
+                //筛选出所有cidr是否连接容器
+                ConcurrentHashMap<String, Boolean> cidrContainerMap = ElementNetworkUtils.getCidrToContainerMap(allElements, element);
+                String nodeId = element.getSrcElement().getId();
+                // 封装创建网络的任务
+                AzureVirtualNetCreateTask task = new AzureVirtualNetCreateTask(resourceService, getPluginHandler(), element, cidrContainerMap);
+                // 格式化任务执行过程，添加 runElementProgress
+                Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_AUXILIARY_NETWORK, task);
+                // 添加格式化后的任务到列表
+                createAuxiliaryNetworkTasks.add(formatTask);
+            }
+            if (!createAuxiliaryNetworkTasks.isEmpty()) {
+                // 执行 创建所有网络
+                runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> runTasks(createAuxiliaryNetworkTasks));
+            }
+            getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_NETWORK);
 
+            // 再创建网关 和 防火墙
+            getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_GATEWAY);
+            getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_GATEWAY);
+
+            /*
             // 先创建辅助网络(包含虚拟交换机)
-            getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_NETWORK);
-
             // 先创建辅助网络
             List<CloudPluginSceneElementBO> filteredAuxiliaryNetworkElements = this.filterAuxiliaryNetworkElements(allElements);
             List<Runnable> createAuxiliaryNetworkTasks = new ArrayList<>();
@@ -101,18 +125,12 @@ public class AzureCreateHandler extends CreateHandler {
                     runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> runTasks(createAuxiliaryNetworkTasks));
                 }
 
-                getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_NETWORK);
-
-                // 再创建网关 和 防火墙
-                getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_GATEWAY);
-                getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_NETWORK);
-
 //        保存网络id
                 String azureNetworkId = filteredAuxiliaryNetworkElements.get(0).getDeriveNetworks().get(0).getNetwork().getResourceId();
                 filteredAuxiliaryNetworkElements.stream()
                         .flatMap(cloudElement -> cloudElement.getDeriveNetworks().stream())
                         .forEach(cloudElement -> cloudElement.getNetwork().setResourceId(azureNetworkId));
-            }
+            }*/
 
 
             getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_INSTANCE);
@@ -125,16 +143,22 @@ public class AzureCreateHandler extends CreateHandler {
             for (CloudPluginSceneElementBO element : filteredVirtualMachineElements) {
                 String nodeId = element.getSrcElement().getId();
                 List<VirtualNic> virtualNics = this.genVirutalNics(element);
+                AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics, combineInitCommand(element));
+                Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_VIRTUAL_MACHINE, task);
+                createVirtualMachineTasks.add(formatTask);
+
+                /* 修改前
+                String nodeId = element.getSrcElement().getId();
+                List<VirtualNic> virtualNics = this.genVirutalNics(element);
 //            创建虚拟机时不允许扩容
                 element.getSrcElement().setExpansionDisk(null);
                 element.setVmExpansionDiskType(null);
                 receiveVirtualPortInfo(element, virtualNics);
                 AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics, combineInitCommand(element));
                 Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_VIRTUAL_MACHINE, task);
-                createVirtualMachineTasks.add(formatTask);
+                createVirtualMachineTasks.add(formatTask);*/
             }
             createTerminalTasks.addAll(createVirtualMachineTasks);
-
             // 容器
             List<CloudPluginSceneElementBO> filteredContainerElements = this.filterContainerElements(allElements);
             List<Runnable> createContainerTasks = new ArrayList<>();
@@ -146,7 +170,6 @@ public class AzureCreateHandler extends CreateHandler {
                 createContainerTasks.add(formatTask);
             }
             createTerminalTasks.addAll(createContainerTasks);
-
             // 载荷
             List<CloudPluginSceneElementBO> filteredLoadElements = this.filterLoadElements(allElements);
             List<Runnable> createLoadTasks = new ArrayList<>();
@@ -157,7 +180,6 @@ public class AzureCreateHandler extends CreateHandler {
                 createLoadTasks.add(formatTask);
             }
             createTerminalTasks.addAll(createLoadTasks);
-
             // webapp
             List<CloudPluginSceneElementBO> filteredWebAppElements = this.filterWebAppElements(allElements);
             List<Runnable> createWebAppTasks = new ArrayList<>();
@@ -170,13 +192,13 @@ public class AzureCreateHandler extends CreateHandler {
             }
             createTerminalTasks.addAll(createWebAppTasks);
 
+            if (!createTerminalTasks.isEmpty()) {
+//                runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
+            }
             getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_INSTANCE);
             getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CONFIG);
             getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CONFIG);
 
-            if (!createTerminalTasks.isEmpty()) {
-                runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
-            }
         } catch (Exception e) {
 //            云场景启动失败立即删除云资源
             resourceService.getManager().resourceGroups().deleteByName(groupName);

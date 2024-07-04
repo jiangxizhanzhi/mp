@@ -211,10 +211,15 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                     }
                     if (!StringUtils.isEmpty(cidr) && !IpUtils.newIsInCidr(ip, cidr)) {
                         throw new MpRuntimeException(CloudErrorCode.INVALID_IP_ON_CIDR.format(ip, cidr));
-                    } else if (!StringUtils.isEmpty(cidr) && Arrays.asList(IpUtils.getSpecificIPsFromCIDR(cidr)).contains(ip)) {
+                    }
+                }
+//                公有云场景需要验证ip是否在保留ip段内
+                if (BaseSceneModel.CloudType.DEFAULT != getSceneHandler().getScene().getCloudType()) {
+                     if (IpUtils.isLastOctetInReservedRange(ip)) {
                         throw new MpRuntimeException(CloudErrorCode.IP_CONFLICT_WITH_RESERVED_IP.format(ip));
                     }
                 }
+
             }
         }
         if (getElementPortMap() != null) {
