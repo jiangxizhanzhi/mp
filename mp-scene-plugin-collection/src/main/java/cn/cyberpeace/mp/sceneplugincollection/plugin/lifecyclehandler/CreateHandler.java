@@ -193,7 +193,7 @@ public class CreateHandler extends HandlerCommon {
                             return (Runnable) () -> container.addRoute(cloudElement.getResourceId());
                         })
                         .collect(Collectors.toList());
-                runTasks(addRouterTasks);
+//                runTasks(addRouterTasks);
             }
 
             getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CollectionSceneStage.CREATE_DATA_COLLECT);
