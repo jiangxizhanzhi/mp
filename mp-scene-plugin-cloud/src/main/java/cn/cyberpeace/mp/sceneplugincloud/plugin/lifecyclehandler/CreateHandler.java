@@ -82,6 +82,7 @@ public class CreateHandler extends HandlerCommon {
 
     private final Random random = new Random();
 
+    private VirtualRouterCreateData probeRouteInfo = null;
 
     public static class SceneProcess {
         public static final SceneEventProcess CREATE_AUXILIARY_NETWORKS = new SceneEventProcess("create_auxiliary_networks", "sceneplugincloud.event.create_auxiliary_network", "create_network", 1);
@@ -1154,6 +1155,30 @@ public class CreateHandler extends HandlerCommon {
             return virtualRouterNic;
         }).collect(Collectors.toList()));
 
+        // 设定各路由的路由表：网络中的网关，如果遇到发往外部网络的流量时，将流量转发到 ProbeRouter 上的端口
+        if (probeRouteInfo != null) {
+            for (var net : createData.getNetworks()) {
+                boolean addOk = false;
+                for (var probeRouteNet : probeRouteInfo.getNetworks()) {
+                    if (StringUtils.equals(net.getId(), probeRouteNet.getId())) {
+                        String nextHop = probeRouteNet.getFixedIp();
+                        String externalNetCidr = CloudSingleton.cloudAppConfig.getExternalNetCidr();
+                        if (createData.getRouteStatics() == null) {
+                            createData.setRouteStatics(new ArrayList<>());
+                        }
+                        createData.getRouteStatics()
+                                .add(new VirtualRouterCreateData.StaticRoute(externalNetCidr, nextHop));
+                        // 只需要设置一条路由即可
+                        addOk = true;
+                        break;
+                    }
+                }
+                if (addOk) {
+                    break;
+                }
+            }
+        }
+
         var virtualRouter = vrClient.create(createData);
 
         cloudElement.setResourceId(virtualRouter.getId());
@@ -1814,6 +1839,7 @@ public class CreateHandler extends HandlerCommon {
         }).collect(Collectors.toList()));
 
         VirtualRouterCreateData virtualRouter = vrClient.create(createData);
+        probeRouteInfo = createData;
         log.info("collected router {}", virtualRouter.getId());
         getPluginHandler().getSceneHandler().setProbeRouter(virtualRouter.getId());
     }
