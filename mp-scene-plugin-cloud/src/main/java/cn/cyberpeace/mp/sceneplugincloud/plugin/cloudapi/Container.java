@@ -158,15 +158,17 @@ public class Container extends CloudClient {
     }
 
     public ContainerExecuteResult executeCommand(String containerId, String command) {
-        log.info("executeCommand split containerId is [{}], command is [{}]", containerId, command);
-        String fileName = TextUtils.uuid()+".sh";
+        String fileName = TextUtils.uuid() + ".sh";
         File file = new File(fileName);
+        log.info("executeCommand split containerId is [{}], command is [{}], tmp sh is [{}]", containerId, command, file.getAbsolutePath());
         try {
             FileUtils.writeStringToFile(file, command, Charset.forName("utf8"));
+            this.copyFile(containerId, file.getAbsolutePath(), "/tmp/tmp_exec");
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            file.delete();
         }
-        this.copyFile(containerId, file.getAbsolutePath(), "/tmp/tmp_exec");
 
         ContainerExecuteData execCmd = new ContainerExecuteData();
         execCmd.setCmd("sh");
