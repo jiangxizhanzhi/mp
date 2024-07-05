@@ -165,6 +165,7 @@ public class Container extends CloudClient {
             FileUtils.writeStringToFile(file, command, Charset.forName("utf8"));
             this.copyFile(containerId, file.getAbsolutePath(), "/tmp/tmp_exec");
         } catch (IOException e) {
+            log.error("executeCommand split containerId is " + containerId + ", command is " + command + ", tmp sh is " + file.getAbsolutePath() + "", e);
             throw new RuntimeException(e);
         } finally {
             file.delete();
