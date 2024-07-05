@@ -1,6 +1,7 @@
-package cn.cyberpeace.mp.job.schedule;
+package cn.cyberpeace.mp.job.init;
 
 import cn.cyberpeace.mp.devopscluster.converter.RealEquipmentConverter;
+import cn.cyberpeace.mp.job.base.init.MpInitiate;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
@@ -37,7 +38,7 @@ public class RedisScheduleJob {
 
 	private final static String CHANNEL = "combat_log";
 
-	@PostConstruct
+	@MpInitiate(description = "redis 连接", id = "init_read_redis")
 	public void	readRedis() {
 		// 连接到Redis服务器
 		Jedis jedis = new Jedis(situationAwareConfig.getStorageRedisIp(), situationAwareConfig.getStorageRedisPort());
