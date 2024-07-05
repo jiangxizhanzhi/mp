@@ -206,4 +206,10 @@ public class DeviceTargetPO extends BaseModel {
 
     @DefaultBool
     private Boolean openSnmp;
+
+    @DefaultStr
+    private String templateId ;
+
+    @DefaultStr
+    private String templateName;
 }

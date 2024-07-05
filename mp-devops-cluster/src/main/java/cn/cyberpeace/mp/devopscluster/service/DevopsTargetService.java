@@ -206,6 +206,13 @@ public class DevopsTargetService {
         deviceTargetPO.setIsPublic(PublicEnum.ALL_PUBLIC);
         deviceTargetPO.setUseStatus(StatusEnum.NO);
         deviceTargetPO.setReferenceStatus(NumberUtils.INTEGER_ZERO);
+        if (device.getExtVm() != null) {
+            deviceTargetPO.setTemplateId(device.getExtVm().getTemplateId());
+            deviceTargetPO.setTemplateName(device.getExtVm().getTemplateName());
+        } else {
+            deviceTargetPO.setTemplateId("");
+            deviceTargetPO.setTemplateName("");
+        }
         return deviceTargetPO;
     }
 
@@ -242,6 +249,10 @@ public class DevopsTargetService {
         deviceTargetPO.setIsImport(device.getIsImport());
         ExtVm extVm = device.getExtVm();
         ExtDocker extDocker = device.getExtDocker();
+        if (extVm != null) {
+            deviceTargetPO.setTemplateName(extVm.getTemplateName());
+            deviceTargetPO.setTemplateId(extVm.getTemplateId());
+        }
         if (StringUtils.isNotBlank(imageType) && (imageType.equals(ImageTypeEnum.VM.toValue()) || imageType.equals(ImageTypeEnum.DYNAMIPS.toValue()))
                 && Objects.nonNull(extVm)) {
             deviceTargetPO.setQuickCreateSupport(extVm.getQuickCreateSupport());

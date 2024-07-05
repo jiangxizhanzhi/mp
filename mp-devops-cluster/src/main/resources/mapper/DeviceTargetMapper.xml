@@ -403,7 +403,13 @@
                 instance_create_user = #{instanceCreateUser}
             </if>
             <if test="behaveSupport != null">
-                behave_support = #{behaveSupport}
+                behave_support = #{behaveSupport},
+            </if>
+            <if test="templateId != null">
+                template_id = #{templateId},
+            </if>
+            <if test="templateName != null">
+                template_name = #{templateName},
             </if>
         </set>
         where uuid = #{uuid}
@@ -460,7 +466,7 @@
         create_time, update_time, in_position,use_status,reference_status,parent_system_type,
         system_type,system_architecure, language,image_status,base_image_support,
         init_support,image_source,is_import,is_hide,is_init,support_export,create_user,create_user_name,
-        attack_mock_device_flag, behave_support, open_syslog, open_kafka, open_restapi, open_soap, open_snmp)
+        attack_mock_device_flag, behave_support, open_syslog, open_kafka, open_restapi, open_soap, open_snmp,template_id,template_name)
         VALUES
         <foreach collection="list" item="item" index="index" separator=",">
             (
@@ -474,7 +480,7 @@
             #{item.systemArchitecure},#{item.language}, #{item.imageStatus},
             #{item.baseImageSupport}, #{item.initSupport}, #{item.imageSource}, #{item.isImport},
             #{item.isHide},#{item.isInit},#{item.supportExport},#{item.createUser},#{item.createUserName}, #{item.attackMockDeviceFlag}, #{item.behaveSupport},
-            #{item.openSyslog}, #{item.openKafka}, #{item.openRestapi}, #{item.openSoap}, #{item.openSnmp}
+            #{item.openSyslog}, #{item.openKafka}, #{item.openRestapi}, #{item.openSoap}, #{item.openSnmp}, #{item.templateId}, #{item.templateName}
             )
         </foreach>
     </insert>

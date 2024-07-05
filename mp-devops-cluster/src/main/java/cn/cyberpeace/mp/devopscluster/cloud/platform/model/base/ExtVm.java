@@ -94,4 +94,7 @@ public class ExtVm implements Serializable {
 
     @ApiModelProperty("模板id")
     private String templateId;
+
+    @ApiModelProperty("模板名称")
+    private String templateName;
 }
