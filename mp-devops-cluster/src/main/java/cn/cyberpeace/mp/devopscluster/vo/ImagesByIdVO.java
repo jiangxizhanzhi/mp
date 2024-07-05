@@ -147,4 +147,6 @@ public class ImagesByIdVO extends BaseVO {
     private String modelId;
     @ApiModelProperty("模型Code")
     private String modelCode;
+    @ApiModelProperty("是否支持行为仿真")
+    private Boolean behaveSupport;
 }

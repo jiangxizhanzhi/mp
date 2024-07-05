@@ -80,7 +80,11 @@ public class DeviceService extends BaseCpService {
      */
     public Device findByUuid(String uuid){
         String api = UriComponentsBuilder.fromPath(GET_DEVICE_BY_UUID).buildAndExpand(uuid).toUriString();
-        return super.sendGet(api, Device.class);
+        Device result = super.sendGet(api, Device.class);
+        if (null == result.getBehaveSupport() && null != result.getExtVm() && null != result.getExtVm().getBehaveSupport()){
+            result.setBehaveSupport(result.getExtVm().getBehaveSupport());
+        }
+        return result;
     }
 
     /**
