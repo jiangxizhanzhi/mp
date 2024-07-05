@@ -437,6 +437,7 @@ public class InitiateHandler extends HandlerCommon {
                     continue;
                 }
             }
+//           TODO 需要修改此处代码 VNet 只填cidr 此处判断是否是VNet且cidr不为空
             // 需要自己处理网络的端口
             String cidrDivideIp = null;
             if (StringUtils.isNotEmpty(port.getIp())) {
@@ -475,6 +476,7 @@ public class InitiateHandler extends HandlerCommon {
                 } else if (this.isInCidr(defaultConnectedNetwork.getNetwork().getCidr(), cidrDivideIp)) {
                     defaultConnectedNetwork.addPort(port, connectPort, true);
                 } else {
+//                    TODO 未连线路由器在此处创建网络 VNet照做
                     // 和默认网段不同,构建网络
                     ConnectedNetworkBO connectedNetwork = cidr2ConnectedNetwork.get(cidr);
                     if (connectedNetwork == null) {
@@ -489,6 +491,7 @@ public class InitiateHandler extends HandlerCommon {
         }
         if (this.isCoreRouter(cloudElement)) {
             // 核心路由 每个端口都接网络
+//            TODO VNet每个端口都需要网络
             if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
                 if (defaultNetwordIsDerive) {
                     cloudElement.getDeriveNetworks().add(defaultConnectedNetwork);
@@ -558,7 +561,8 @@ public class InitiateHandler extends HandlerCommon {
     }
 
     private boolean isCoreRouter(CloudPluginSceneElementBO cloudElement) {
-        boolean isCoreRouter = (cloudElement.getRole() != null && cloudElement.getRole().equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER))
+        boolean isCoreRouter = (cloudElement.getRole() != null
+                && cloudElement.getRole().equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER))
                 && BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType());
         return isCoreRouter;
     }

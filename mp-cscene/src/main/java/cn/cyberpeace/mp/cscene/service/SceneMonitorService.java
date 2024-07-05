@@ -324,7 +324,8 @@ public class SceneMonitorService {
                     var hostStates = map.get(basicInfo.getEid());
                     //非容器的，如果从ES取到了系统运行资源信息，就设置上，否则就使用靶标创建时配置上的。容器如果靶标创建时有配置就使用配置，否则使用默认1C512MB10GB
                     if (CollectionUtils.isNotEmpty(hostStates)) {
-                        if (!BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(basicInfo.getImageType())) {
+                        if (!(BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(basicInfo.getImageType())
+                                || BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(basicInfo.getImageType()))) {
                             basicInfo.setHostState(hostStates.get(0));
                         } else {
                             HostState realTimeHostState = getRealTimeHostState(basicInfo, hostStates);

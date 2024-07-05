@@ -71,16 +71,16 @@ public class CollectionTypeService {
 
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         wazuhEventRequest.setAgentNames(agentNames);
+        String translateSceneId = csceneCommonService.translateSceneId(appRequest.getSceneId());
+        var sceneHandler = new SceneHandler(translateSceneId, null, false, null);
         if (Objects.nonNull(appRequest.getStartTime())) {
             wazuhEventRequest.setStartTime(appRequest.getStartTime());
         } else {
-            String translateSceneId = csceneCommonService.translateSceneId(appRequest.getSceneId());
-            var sceneHandler = new SceneHandler(translateSceneId, null, false, null);
             wazuhEventRequest.setStartTime(sceneHandler.getScene().getCreateTime());
         }
         wazuhEventRequest.setEndTime(Optional.ofNullable(appRequest.getEndTime()).orElse(LocalDateTime.now()));
         // es中的事件总数，暂不包括进程，端口等system_inventory中的数据
-        Map<String, Long> ruleIdCntMap = dataCollectionService.aggsRuleIdsByAgentName(wazuhEventRequest);
+        Map<String, Long> ruleIdCntMap = dataCollectionService.aggsRuleIdsByAgentName(wazuhEventRequest,sceneHandler.getScene().getCloudType());
         List<String> ruleIdsByAgentName = new ArrayList<>(ruleIdCntMap.keySet());
         if (CollectionUtil.isEmpty(ruleIdsByAgentName)) {
             return Collections.emptyList();

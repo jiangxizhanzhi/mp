@@ -154,7 +154,7 @@ public class DataCollectionService extends CollectionBaseService {
      * @return ListObjResult<FileEventModel>
      */
     @Cacheable(value = CACHE_KEY_FILE_EVENTS)
-    public ListObjResult<FileEventModel> queryFileEvents(WazuhEventRequest wazuhEventRequest,Integer cloudType) {
+    public ListObjResult<FileEventModel> queryFileEvents(WazuhEventRequest wazuhEventRequest, Integer cloudType) {
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
@@ -277,12 +277,12 @@ public class DataCollectionService extends CollectionBaseService {
      *
      * @return ListObjResult<FileEventModel>
      */
-    public ListObjResult<FileEventModel> scrollFileEvents(String scrollId,Integer cloudType) {
+    public ListObjResult<FileEventModel> scrollFileEvents(String scrollId, Integer cloudType) {
         final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(11L));
         SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
         scrollRequest.scroll(scroll);
         try {
-            SearchResponse response = getScrollResponseWithRetry(cloudType,scrollRequest);
+            SearchResponse response = getScrollResponseWithRetry(cloudType, scrollRequest);
             List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
             List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root, null))).collect(Collectors.toList());
 
@@ -304,7 +304,7 @@ public class DataCollectionService extends CollectionBaseService {
      * @param cloudType
      * @return ListObjResult<WazuhProbeCommonModel>
      */
-    public ListObjResult<WazuhProbeCommonModel> queryCustomProbeData(WazuhEventRequest wazuhEventRequest, List<String> probeIds,Integer cloudType) {
+    public ListObjResult<WazuhProbeCommonModel> queryCustomProbeData(WazuhEventRequest wazuhEventRequest, List<String> probeIds, Integer cloudType) {
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
@@ -676,7 +676,7 @@ public class DataCollectionService extends CollectionBaseService {
      * @return
      */
     @Cacheable(value = CACHE_KEY_NET_CONN)
-    public List<WazuhNetworkConnectionModel> queryNetConnEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest,Integer cloudType) {
+    public List<WazuhNetworkConnectionModel> queryNetConnEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, Integer cloudType) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
         }
@@ -759,7 +759,7 @@ public class DataCollectionService extends CollectionBaseService {
      * @return
      */
     @Cacheable(value = CACHE_KEY_USERS)
-    public List<WazuhSystemUserModel> queryUserChangeEventWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest,Integer cloudType) {
+    public List<WazuhSystemUserModel> queryUserChangeEventWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, Integer cloudType) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
         }
@@ -961,12 +961,12 @@ public class DataCollectionService extends CollectionBaseService {
     private SearchResponse getSearchResponse(Integer cloudType, SearchRequest searchRequest) throws IOException {
         try {
             return getSearchResponseWithRetry(cloudType, searchRequest);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage());
             try {
                 log.info("Query the timeout reentrant method");
                 return getSearchResponseWithRetry(cloudType, searchRequest);
-            }catch (Exception e1){
+            } catch (Exception e1) {
                 throw e1;
             }
         }
@@ -1471,7 +1471,7 @@ public class DataCollectionService extends CollectionBaseService {
      * @return
      */
     @Cacheable(value = CACHE_KEY_AGGS_RULEIDS_BY_AGENTNAME)
-    public Map<String, Long> aggsRuleIdsByAgentName(WazuhEventRequest wazuhEventRequest) {
+    public Map<String, Long> aggsRuleIdsByAgentName(WazuhEventRequest wazuhEventRequest, Integer cloudType) {
         Map<String, Long> map = new LinkedHashMap<>();
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return map;
@@ -1502,7 +1502,7 @@ public class DataCollectionService extends CollectionBaseService {
         log.info("elasticsearch aggs request query... index:{}, JSON query:\n{}", indexArray, searchRequest.source().toString());
 
         try {
-            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            SearchResponse response = getSearchResponseWithRetry(cloudType, searchRequest);
 
             if (Objects.nonNull(response.getAggregations())) {
                 Terms terms = response.getAggregations().get(aggregationName);

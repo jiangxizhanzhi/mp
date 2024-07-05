@@ -50,7 +50,7 @@ public class BaseDataCollectionServiceTest {
         wazuhEventRequest.setEndTime(LocalDateTime.now());
         wazuhEventRequest.setPageNum(1);
         wazuhEventRequest.setPageSize(10);
-        ListObjResult<FileEventModel> listObjResult =  dataCollectionService.queryFileEvents(wazuhEventRequest);
+        ListObjResult<FileEventModel> listObjResult =  dataCollectionService.queryFileEvents(wazuhEventRequest,null);
         Assert.isTrue(listObjResult.getObjs().size() >0, "查询文件监控分页有数据");
     }
 
@@ -63,7 +63,7 @@ public class BaseDataCollectionServiceTest {
         wazuhEventRequest.setEndTime(LocalDateTime.now());
         wazuhEventRequest.setPageNum(1);
         wazuhEventRequest.setPageSize(10);
-        ListObjResult<FileEventModel> listObjResult =  dataCollectionService.queryFileEvents(wazuhEventRequest);
+        ListObjResult<FileEventModel> listObjResult =  dataCollectionService.queryFileEvents(wazuhEventRequest,null);
         Assert.isTrue(listObjResult.getObjs().get(0).getFileEventType().equals(FileEventType.REGISTRY), "查询文件监控分页有数据");
     }
 

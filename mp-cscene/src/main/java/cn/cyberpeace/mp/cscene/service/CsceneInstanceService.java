@@ -2057,24 +2057,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 .filterIn(SceneElementSituationProbeModel::getProbeId, probeList.stream().filter(probe -> null != probe.getId()).map(Probe::getId).toArray());
         sceneElementSituationProbeMapper.filterDelete(probeListHumanCondition);
 
-//        查探针详细信息
-        String[] probeIds = probeList.stream().map(Probe::getId).toArray(String[]::new);
-        HumanCondition humanCondition = new HumanCondition()
-                .filterIn(ProbeScriptModel::getProbeId, probeIds);
-        Map<String, ProbeScriptModel> probeScriptMap = probeScriptMapper.list(humanCondition).stream().collect(Collectors.toMap(ProbeScriptModel::getProbeId, Function.identity()));
-
-
-//        sceneElementSituationProbeMapper.bulkCreate(sceneElementSituationProbeModels);
-
 //        更新探针
-//        SceneTaskPool.getInstance().executeTask(() -> {
-            probeList.forEach(probe -> {
-                ProbeScriptModel probeScriptModel = probeScriptMap.get(probe.getId());
-                if(null != probeScriptModel){
-                    BeanUtils.copyProperties(probeScriptModel,probe);
-                }
-                modifyProbe(sceneHandler, nodeId, probe, probeType);
-            });
+        probeList.forEach(probe -> {
+            modifyProbe(sceneHandler, nodeId, probe, probeType);
+        });
 //            默认执行完成
         List<SceneElementSituationProbeModel> sceneElementSituationProbeModels =
                 probeList.stream()
@@ -2088,8 +2074,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                             sceneElementSituationProbeModel.setDeleted(isDelete);
                             return sceneElementSituationProbeModel;
                         }).collect(Collectors.toList());
-            sceneElementSituationProbeMapper.bulkCreate(sceneElementSituationProbeModels);
-//        });
+        sceneElementSituationProbeMapper.bulkCreate(sceneElementSituationProbeModels);
 
     }
 
