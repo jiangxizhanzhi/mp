@@ -43,6 +43,22 @@ public class MpDevopsBoundaryNetworkEquipment extends BaseModel {
      */
     private String ipConnect;
     /**
+     * 端口号
+     */
+    private Integer port;
+    /**
+     * 接入协议
+     */
+    private String protocol;
+    /**
+     * 用户名
+     */
+    private String userName;
+    /**
+     * 密码
+     */
+    private String password;
+    /**
      * 更新时间
      */
     private LocalDateTime updateTime;

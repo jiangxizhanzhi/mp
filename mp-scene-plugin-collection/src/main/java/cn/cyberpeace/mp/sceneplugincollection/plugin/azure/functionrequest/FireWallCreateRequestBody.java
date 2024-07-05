@@ -1,0 +1,36 @@
+package cn.cyberpeace.mp.sceneplugincollection.plugin.azure.functionrequest;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * 防火墙创建请求体
+ */
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class FireWallCreateRequestBody {
+
+    //资源组
+    private String resourceGroup;
+
+    //名称
+    private String name;
+
+    //区域
+    private String region;
+
+    //防火墙SKU
+    private String sku;
+
+    //防火墙策略
+    private String firewallPolicy;
+
+    //虚拟网络
+    private String virtualNetwork;
+
+    //公共ip地址
+    private String publicIpAddress;
+}

@@ -6,7 +6,6 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,7 +39,7 @@ public class CheckUtil {
 //        boolean result = checkIpAddressSpace(largeAddress, largeAddressSize, smallAddress, smallAddressSize);
 //    }
 
-    //比较两个地址空间
+    //比较两个地址空间, 判断小地址空间是否在大地址空间内
     public static boolean checkIpAddressSpace(String largeAddress, Integer largeAddressSize, String smallAddress, Integer smallAddressSize) {
         try {
             BigInteger network1 = getNetworkAddress(smallAddress, smallAddressSize);
