@@ -402,6 +402,9 @@
             <if test="instanceCreateUser != null">
                 instance_create_user = #{instanceCreateUser}
             </if>
+            <if test="behaveSupport != null">
+                behave_support = #{behaveSupport}
+            </if>
         </set>
         where uuid = #{uuid}
     </update>
