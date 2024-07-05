@@ -764,7 +764,7 @@ public class CreateHandler extends HandlerCommon {
             if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
                 basDeviceInitCommand.add("@echo off");
                 basDeviceInitCommand.add("setlocal enabledelayedexpansion");
-                basDeviceInitCommand.add("set \"search_ip=server_ip\")");
+                basDeviceInitCommand.add("set \"search_ip=server_ip\"");
                 basDeviceInitCommand.add(String.format("set \"replace_ip=%s\"", BeanCommon.getBean(CommonAppConfig.class).getBasIp()));
                 basDeviceInitCommand.add("set \"search_port=server_port\"");
                 basDeviceInitCommand.add(String.format("set \"replace_port=%s\"", BeanCommon.getBean(CommonAppConfig.class).getBasPort()));
@@ -786,7 +786,7 @@ public class CreateHandler extends HandlerCommon {
                 basDeviceInitCommand.add("endlocal");
 
             } else if (SystemTypeCommandUtils.isLinux(standardSystemType)) {
-                basDeviceInitCommand.add(String.format("sed -i \"/platform_address:/s/server_ip/%s/\" /opt/cpbas/client/application.yml",
+                basDeviceInitCommand.add(String.format("sed -i \"/platform_address:/s/bas-server/%s/\" /opt/cpbas/client/application.yml",
                         BeanCommon.getBean(CommonAppConfig.class).getBasIp()));
                 basDeviceInitCommand.add(String.format("sed -i \"/platform_port:/s/server_port/%s/\" /opt/cpbas/client/application.yml",
                         BeanCommon.getBean(CommonAppConfig.class).getBasPort()));
