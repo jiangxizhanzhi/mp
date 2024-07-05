@@ -130,22 +130,32 @@ public class Container extends CloudClient {
     }
 
     public boolean copyFile(String containerId, String filepath, String dstPath) {
-
-        // 只能上传已存在的文件夹中，若是文件夹不存在需要调用命令创建文件夹
-        ContainerMkdirData dataMkdir = new ContainerMkdirData();
-        dataMkdir.setCmd("mkdir");
-        dataMkdir.setArgs(Arrays.asList("-p", dstPath));
-        String mkdirUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
-        cloudPost(mkdirUrl, dataMkdir, null, new TypeReference<CloudResponse<Object>>() {}, true);
-
-        // 上传文件
-        ContainerArchiveData data = new ContainerArchiveData();
-        data.setFile(new File(filepath));
-        data.setPath(dstPath);
-        String requestUrl = String.format(CloudUrlConstant.CONTAINER_COPY_FILE_URL, containerId);
-        CloudResponse<Object> result = cloudPost(requestUrl, data, null,
-                new TypeReference<CloudResponse<Object>>() {
+        for (int i = 0; i < 3; i++) {
+            try {
+                // 只能上传已存在的文件夹中，若是文件夹不存在需要调用命令创建文件夹
+                ContainerMkdirData dataMkdir = new ContainerMkdirData();
+                dataMkdir.setCmd("mkdir");
+                dataMkdir.setArgs(Arrays.asList("-p", dstPath));
+                String mkdirUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
+                cloudPost(mkdirUrl, dataMkdir, null, new TypeReference<CloudResponse<Object>>() {
                 }, true);
+
+                // 上传文件
+                ContainerArchiveData data = new ContainerArchiveData();
+                data.setFile(new File(filepath));
+                data.setPath(dstPath);
+                String requestUrl = String.format(CloudUrlConstant.CONTAINER_COPY_FILE_URL, containerId);
+                CloudResponse<Object> result = cloudPost(requestUrl, data, null, new TypeReference<CloudResponse<Object>>() {
+                }, true);
+                return true;
+            }catch (Exception e){
+                if (i == 2) {
+                    throw e;
+                } else {
+                    log.error("failed to copy file from {} to {},container id is {}", filepath, dstPath, containerId);
+                }
+            }
+        }
         return true;
     }
 
@@ -187,12 +197,18 @@ public class Container extends CloudClient {
     private ContainerExecuteResult executeCommand(String containerId, ContainerExecuteData data) {
         String requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
         CloudResponse<ContainerExecuteResult> result = new CloudResponse<ContainerExecuteResult>();
-        try {
-            result = cloudPost(requestUrl, data, null,
-                               new TypeReference<>() {
-                               }, true);
-        } catch (Exception e) {
-            log.error("container execute command error containerId:{} command:{}", containerId, JsonCommon.stringify(data), e);
+        for (int i = 0; i < 3; i++) {
+            try {
+                result = cloudPost(requestUrl, data, null,
+                                   new TypeReference<>() {
+                                   }, true);
+                break;
+            } catch (Exception e) {
+                log.error("container execute command error containerId:{} command:{}", containerId, JsonCommon.stringify(data), e);
+                if (i == 2) {
+                    throw e;
+                }
+            }
         }
         return result.getData();
     }
