@@ -27,6 +27,10 @@ public class MpDevopsBoundaryNetworkEquipment extends BaseModel {
      */
     private String equipmentType;
     /**
+     * 设备类型名称
+     */
+    private String equipmentTypeName;
+    /**
      * 别名
      */
     private String otherName;

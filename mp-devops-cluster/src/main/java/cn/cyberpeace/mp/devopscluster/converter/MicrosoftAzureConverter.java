@@ -757,6 +757,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         }
         //sql同时修改
         List<MpDevopsBoundaryNetworkEquipment> list = microsoftAzureMapper.getCommonTargets(request, offset, pageSize);
+
         list.forEach(item -> {
             item.setImageType("networkEquipment");
         });
