@@ -654,6 +654,7 @@ public class ImagesConverter implements BaseConverter {
         device.setImageType(request.getImageType());
         device.setMaintype(MainTypeEnum.NORMAL.ordinal());
         device.setRootPassword(request.getRootPassword());
+        device.setBehaveSupport(request.getBehaveSupport());
         device.setUsername(request.getUsername());
         device.setAttackMockDeviceFlag(request.getAttackMockDeviceFlag());
         final ExtVm extVm = request.getExtVm();

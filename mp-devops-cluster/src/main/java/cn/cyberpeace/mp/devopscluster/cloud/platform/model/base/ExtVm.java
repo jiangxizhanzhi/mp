@@ -23,6 +23,9 @@ import java.util.List;
 @ApiModel("虚拟机信息")
 public class ExtVm implements Serializable {
 
+    @ApiModelProperty(value = "是否支持用户行为")
+    private Boolean behaveSupport;
+
     @ApiModelProperty("flavor信息")
     private String flavor;
 

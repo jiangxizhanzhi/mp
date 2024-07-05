@@ -94,6 +94,7 @@ public class ImagesService extends BaseCpService {
         //此状态MP只可查看，不可更新
         if (Objects.nonNull(extVm)) {
             extVm.setInstanceState(null);
+            extVm.setBehaveSupport(device.getBehaveSupport());
         }
         final ExtDocker extDocker = device.getExtDocker();
         //此状态MP只可查看，不可更新
@@ -109,7 +110,11 @@ public class ImagesService extends BaseCpService {
 
         CloudPlatformResult res = super.sendPut(api, JsonUtils.snakeStringify(device), CloudPlatformResult.class);
         super.checkResult(res);
-        return JsonCommon.snakeParse(JsonCommon.snakeStringify(res.getData()), Device.class);
+        Device result = JsonCommon.snakeParse(JsonCommon.snakeStringify(res.getData()), Device.class);
+        if (null != result.getExtVm()){
+            result.setBehaveSupport(result.getExtVm().getBehaveSupport());
+        }
+        return result;
     }
 
     /**
