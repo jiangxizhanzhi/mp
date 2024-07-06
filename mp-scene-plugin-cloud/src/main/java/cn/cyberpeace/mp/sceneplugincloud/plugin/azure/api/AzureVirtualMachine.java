@@ -5,8 +5,6 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
-import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
-import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
@@ -18,7 +16,10 @@ import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.fluent.models.ResourceSkuInner;
 import com.azure.resourcemanager.compute.models.*;
-import com.azure.resourcemanager.network.models.*;
+import com.azure.resourcemanager.network.models.Network;
+import com.azure.resourcemanager.network.models.NetworkInterface;
+import com.azure.resourcemanager.network.models.NetworkSecurityGroup;
+import com.azure.resourcemanager.network.models.PublicIpAddress;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileWriter;
@@ -150,9 +151,9 @@ public class AzureVirtualMachine {
         String groupName = pluginHandler.getSourceSceneId();
 
         // 调用微软云api 创建虚拟机 回写虚拟机id
-        VirtualMachine vm = createVirtualMachine(cloudElement,virtualNics, userData, groupName);
+        VirtualMachine vm = createVirtualMachine(cloudElement, virtualNics, userData, groupName);
         cloudElement.setResourceId(vm.id());
-        if(cloudElement.getIsPublicIp()){
+        if (cloudElement.getIsPublicIp()) {
             cloudElement.setPublicIpAddress(vm.getPrimaryPublicIPAddress().ipAddress());
         }
 
@@ -209,7 +210,7 @@ public class AzureVirtualMachine {
         // 调用微软云api 创建虚拟机 回写虚拟机id
         VirtualMachine vm = createVirtualMachine(cloudElement, virtualNics, userData, groupName);
         cloudElement.setResourceId(vm.id());
-        if(cloudElement.getIsPublicIp()){
+        if (cloudElement.getIsPublicIp()) {
             cloudElement.setPublicIpAddress(vm.getPrimaryPublicIPAddress().ipAddress());
         }
 
@@ -493,7 +494,8 @@ public class AzureVirtualMachine {
             CloudPluginSceneElementBO cloudElement, String userData, String groupName, AzureResourceManager azureResourceManager,
             Region region, String vmName, String netId, VirtualNic virtualNic, Integer disk, Integer expansionDisk, String vmExpansionDiskType,
             StorageAccountTypes storageAccountTypes, VirtualMachineSizeTypes flavor) {
-        VirtualMachine.DefinitionStages.WithProximityPlacementGroup withProximityPlacementGroup = createVMWithProximityPlacementGroup(cloudElement, groupName, azureResourceManager, region, vmName, netId, virtualNic);
+        VirtualMachine.DefinitionStages.WithProximityPlacementGroup withProximityPlacementGroup =
+                createVMWithProximityPlacementGroup(cloudElement, groupName, azureResourceManager, region, vmName, netId, virtualNic);
 
         VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged creator;
 

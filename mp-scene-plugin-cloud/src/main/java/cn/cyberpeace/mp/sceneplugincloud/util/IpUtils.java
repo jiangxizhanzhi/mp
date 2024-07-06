@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.util.mptool.StrUtil;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.net.util.SubnetUtils;
 
 import java.util.*;
 
@@ -660,5 +661,38 @@ public class IpUtils {
 
         // 检查该IP地址的最后一位是否在保留的范围内
         return Arrays.asList(reservedIPLastOctets).contains(lastOctetOfIP);
+    }
+
+    // 设置了ip值,根据ip值计算网段
+    public static String ip2Cidr24(String ip) {
+        return ip.substring(0, ip.lastIndexOf(".")) + ".0/24";
+    }
+
+    /**
+     * 根据给定的CIDR子网和需要排除的IP集合，生成该子网范围内未被排除的一个随机IP地址。
+     *
+     * @param cidr        子网CIDR表示，如"192.168.1.0/24"。
+     * @param excludedIps 需要排除的IP地址集合，不应包含在返回结果中的IP列表。
+     * @return 子网内且不在排除列表中的随机IP地址。
+     */
+    public static String generateRandomIpNotInList(String cidr, Set<String> excludedIps) {
+        SubnetUtils subnetUtils = new SubnetUtils(cidr);
+        SubnetUtils.SubnetInfo subnetInfo = subnetUtils.getInfo();
+        String[] allIps = subnetInfo.getAllAddresses();
+
+        // 创建一个HashSet用于快速查找排除的IP
+        Set<String> excludedSet = new HashSet<>(excludedIps);
+
+        Random random = new Random();
+        while (true) {
+            // 在子网范围内随机选择一个索引
+            int randomIndex = random.nextInt(allIps.length);
+            String randomIp = allIps[randomIndex];
+
+            // 检查该IP是否已被排除
+            if (!excludedSet.contains(randomIp)) {
+                return randomIp;
+            }
+        }
     }
 }

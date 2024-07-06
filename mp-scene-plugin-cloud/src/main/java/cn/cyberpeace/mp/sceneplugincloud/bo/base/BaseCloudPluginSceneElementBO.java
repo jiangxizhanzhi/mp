@@ -153,6 +153,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private Boolean isPublicIp;
     @ApiModelProperty(value = "公共ip")
     private String publicIpAddress;
+    @ApiModelProperty(value = "VNet网段信息")
+    private List<String> cidrPools;
 
     //    漏洞
     @ApiModelProperty(value = "漏洞")
@@ -274,6 +276,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     public void fromModel(M obj, String... ignoreFields) {
         //忽略直接赋值处理的字段，需要定制处理
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getCidrPools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAllocationPools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getStaticRoutes),
@@ -288,6 +291,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getSnmpConfig),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getMibData)
         ));
+        cidrPools = StringUtils.isEmpty(obj.getCidrPools()) ? new ArrayList<>()
+                : JsonCommon.parse(obj.getCidrPools(), new TypeReference<List<String>>() {
+        });
         dnsNameservers = StringUtils.isEmpty(obj.getDnsNameservers()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getDnsNameservers(), new TypeReference<List<String>>() {
         });
@@ -338,6 +344,7 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @Override
     public M toModel(String... ignoreFields) {
         var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
+                BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getCidrPools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getDnsNameservers),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getAllocationPools),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getStaticRoutes),
@@ -351,6 +358,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getSnmpConfig),
                 BeanUtils.getBeanGetterFieldName(BaseCloudPluginSceneElementModel::getMibData)
         ));
+        if (cidrPools != null) {
+            obj.setCidrPools(JsonCommon.stringify(cidrPools));
+        }
         if (dnsNameservers != null) {
             obj.setDnsNameservers(JsonCommon.stringify(dnsNameservers));
         }

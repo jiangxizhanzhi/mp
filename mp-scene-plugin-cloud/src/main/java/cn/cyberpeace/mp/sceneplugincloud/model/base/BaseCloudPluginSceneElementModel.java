@@ -164,6 +164,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private Boolean isPublicIp;
     @DefaultStr
     private String publicIpAddress;
+    @DefaultStr
+    private String cidrPools;
 
     // 靶标属性
     @DefaultInt
@@ -255,13 +257,12 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final int VIRTUAL_LAYER_3_SIMPLE_ROUTER = 21;
         public static final int VIRTUAL_LAYER_3_SIMPLE_SWITCH = 22;
         public static final int VIRTUAL_LAYER_3_SIMPLE_FIREWALL = 23;
+
+        public static final int VIRTUAL_LAYER_3_SIMPLE_ROUTER_VNET = 24;
         public static final int ENTITY_GATEWAY = 50;
         public static final int ENTITY_TERMINAL = 51;
 
         public static final int LOAD = 60;
-
-        private Role() {
-        }
     }
 
     public static class ImageType {

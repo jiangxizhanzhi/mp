@@ -1,22 +1,24 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api;
 
-import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
-import cn.cyberpeace.mp.sceneplugincloud.util.NetworkSecurityGroupUtils;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.network.models.Network;
-import com.azure.resourcemanager.network.models.NetworkSecurityGroup;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class AzureVirtualNet {
     private IAzureResourceManager resourceService;
@@ -53,7 +55,9 @@ public class AzureVirtualNet {
         }
     }
 
-    public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, ConcurrentHashMap<String, Boolean> cidrContainerMap) {
+    public void create(
+            CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement,
+            ConcurrentHashMap<String, Boolean> cidrContainerMap, HashMap<String, List<VirtualNic>> virtualNicsMap) {
 //        for (int i = 0; i < cloudElement.getDeriveNetworks().size(); i++) {
 //        var net = cloudElement.getDeriveNetworks().get(0).getNetwork();
 
@@ -63,13 +67,6 @@ public class AzureVirtualNet {
 //        String gateway = net.getGateway();
 //            String cidr = net.getCidr();
         String groupName = pluginHandler.getSourceSceneId();
-        //        nsg设置子网间网络隔离（不包括arkime）
-//            创建nsg
-        NetworkSecurityGroup nsg = azureResourceManager.networkSecurityGroups()
-                .define("nsg")
-                .withRegion(this.region)
-                .withExistingResourceGroup(groupName)
-                .create();
 
         //  azure 调用微软云api 创建网络
         var createdNet = azureResourceManager.networks()
@@ -86,21 +83,16 @@ public class AzureVirtualNet {
                         .defineSubnet(IpUtils.extractNetworkPart(entry.getKey()))
                         .withAddressPrefix(entry.getKey())
                         .withDelegation("Microsoft.ContainerInstance/containerGroups")
-//                          子网加入nsg
-                        .withExistingNetworkSecurityGroup(nsg)
                         .attach();
             } else {
                 createdNet
                         .withAddressSpace(entry.getKey())
                         .defineSubnet(IpUtils.extractNetworkPart(entry.getKey()))
                         .withAddressPrefix(entry.getKey())
-                        .withExistingNetworkSecurityGroup(nsg)
                         .attach();
             }
         }
-
         Network network = createdNet.create();
-
 
         // azure 回写网络id
         cloudElement.getDeriveNetworks().stream().forEach(networkBO -> {
@@ -108,43 +100,20 @@ public class AzureVirtualNet {
             net.setResourceId(network.id());
         });
 
-//            创建入站规则
-        NetworkSecurityGroup.Update update = nsg.update();
-        ArrayList<String> cidrs = new ArrayList<>(cidrContainerMap.keySet());
-        for (int i = 0; i < cidrs.size(); i++) {
-            for (int j = i + 1; j < cidrs.size(); j++) {
-//                TODO 入站规则
-                String ipi = IpUtils.extractNetworkPart(cidrs.get(i)).replaceAll("\\.", "");
-                String ipj = IpUtils.extractNetworkPart(cidrs.get(j)).replaceAll("\\.", "");
-                update.defineRule(ipi + "deny" + ipj)
-                        .denyInbound()
-                        .fromAddress(cidrs.get(i))
-//                        .fromPortRanges("*")
-                        .fromAnyPort()
-                        .toAddress(cidrs.get(j))
-                        .toAnyPort()
-                        .withAnyProtocol()
-                        .withPriority(1000 + i * 10 + j)
-                        .attach()
-                        .defineRule(ipj + "deny" + ipi)
-                        .denyInbound()
-                        .fromAddress(cidrs.get(j))
-                        .fromAnyPort()
-                        .toAddress(cidrs.get(i))
-                        .toAnyPort()
-                        .withAnyProtocol()
-                        .withPriority(1000 + j * 10 + i)
-                        .attach();
-            }
-        }
+        List<String> nodeIds = cloudElement.getDeriveNetworks().stream()
+                .flatMap(connectedNetworkBO -> connectedNetworkBO.getToPorts().stream())
+                .map(SceneElementPortBO::getElement)
+                .map(SceneElementBO::getId)
+                .distinct()
+                .collect(Collectors.toList());
+        nodeIds.stream().forEach(nodeId -> {
+            List<VirtualNic> virtualNics = virtualNicsMap.get(nodeId);
+            virtualNics.forEach(virtualNic -> {
+                virtualNic.setNetworkId(network.id());
+            });
+            virtualNicsMap.put(nodeId, virtualNics);
+        });
 
-//        放开ssh rdp hhtp https 在创建虚拟机时的第二个网络安全组内做限制
-        NetworkSecurityGroupUtils.addInRule(AccessMode.Protocol.SSH, update, 1000);
-        NetworkSecurityGroupUtils.addInRule(AccessMode.Protocol.HTTP, update, 1100);
-        NetworkSecurityGroupUtils.addInRule(AccessMode.Protocol.HTTPS, update, 1200);
-        NetworkSecurityGroupUtils.addInRule(AccessMode.Protocol.RDP, update, 1300);
-
-        update.apply();
 
     }
 
