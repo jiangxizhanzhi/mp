@@ -772,7 +772,7 @@ public class ScenePluginCloudSceneService {
 //            List<NodeLinkStatusBO> list = SceneInstanceLinkCacheUtil.getCached(sceneId);
 //            SceneInstanceLinkCacheUtil.tryStartCronRefresh();
             List<NodeLinkStatusBO> list = new ArrayList<>();
-            log.warn("not run link status function");
+            //log.warn("not run link status function");
             return new ServiceResult<>(list);
         } catch (Exception e) {
             log.error("failed get link status for scene {} , message is {}", sceneId, ExceptionUtils.getStackTrace(e));

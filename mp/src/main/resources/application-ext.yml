@@ -137,17 +137,17 @@ mp:
       es-date-pattern: ${ES_DATE_PATTERN:yyyy-MM-dd'T'HH:mm:ss.SSSZ}
       self-port: ${MP_SELF_PORT:8001}
       # 其他存储数据库信息（redis、kafka、tidb）
-      storage-redis-ip: ${STORAGE_REDIS_IP:127.0.0.1}
-      storage-redis-port: ${STORAGE_REDIS_PORT:6379}
+      storage-redis-ip: ${STORAGE_REDIS_IP:10.100.25.1}
+      storage-redis-port: ${STORAGE_REDIS_PORT:6389}
       storage-redis-password: ${STORAGE_REDIS_PASSWORD:password}
-      storage-kafka-ip: ${STORAGE_KAFKA_IP:localhost}
+      storage-kafka-ip: ${STORAGE_KAFKA_IP:10.100.25.1}
       storage-kafka-port: ${STORAGE_KAFKA_PORT:9092}
-      storage-kafka-topic: ${STORAGE_KAFKA_TOPIC:test}
-      storage-tidb-ip: ${STORAGE_TIDB_IP:127.0.0.1}
+      storage-kafka-topic: ${STORAGE_KAFKA_TOPIC:datastorage}
+      storage-tidb-ip: ${STORAGE_TIDB_IP:10.100.25.1}
       storage-tidb-port: ${STORAGE_TIDB_PORT:4000}
       storage-tidb-user: ${STORAGE_TIDB_USER:root}
       storage-tidb-password: ${STORAGE_TIDB_PASSWORD:password}
-      storage-tidb-name: ${STORAGE_TIDB_NAME:mp_data}
+      storage-tidb-name: ${STORAGE_TIDB_NAME:data}
 
   # mp-log 模块
   log:
