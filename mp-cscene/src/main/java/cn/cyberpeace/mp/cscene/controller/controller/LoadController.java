@@ -13,8 +13,8 @@ import cn.cyberpeace.mp.cscene.request.load.LoadResultSearchRequest;
 import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
 import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.FireWallFunction;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.functionrequest.FireWallCreateRequestBody;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.FirewallFunction;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.functionrequest.FirewallCreateRequestBody;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -40,7 +40,7 @@ public class LoadController {
     private LoadServiceImpl loadService;
 
     @Autowired
-    private FireWallFunction fireWallFunction;
+    private FirewallFunction firewallFunction;
 
     /*
      * 载荷页面
@@ -396,8 +396,8 @@ public class LoadController {
      */
     @ApiOperation(value = "创建防火墙", notes = "")
     @PostMapping("/createFireWall")
-    public ServiceResult createFireWall(@RequestBody FireWallCreateRequestBody fireWallCreateRequestBody) {
-        fireWallFunction.createFireWall(1, fireWallCreateRequestBody);
+    public ServiceResult createFireWall(@RequestBody FirewallCreateRequestBody fireWallCreateRequestBody) {
+        firewallFunction.createFireWall(1, fireWallCreateRequestBody);
         return new ServiceResult(log, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 

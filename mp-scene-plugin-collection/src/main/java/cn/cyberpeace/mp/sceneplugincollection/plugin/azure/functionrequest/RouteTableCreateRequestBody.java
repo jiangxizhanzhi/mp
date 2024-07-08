@@ -6,29 +6,26 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 防火墙创建请求体
+ * 路由表创建请求体
  */
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FireWallCreateRequestBody {
+public class RouteTableCreateRequestBody {
 
     //资源组名称
     private String resourceGroup;
 
-    //防火墙名称
+    //路由表名称
     private String name;
 
     //创建区域
     private String region;
 
-    //防火墙SKU
-    private String sku;
-
-    //防火墙策略
-    private FirewallPolicy firewallPolicy;
-
     //虚拟网络
     private Network virtualNetwork;
+
+    //防火墙私有地址
+    private String firewallPrivateAddress;
 }

@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction;
 
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.functionrequest.FireWallCreateRequestBody;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.functionrequest.FirewallCreateRequestBody;
 import com.azure.core.management.SubResource;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.network.NetworkManager;
@@ -16,11 +16,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @RequiredArgsConstructor
-public class FireWallFunction {
+public class FirewallFunction {
 
     // 防火墙创建
     // 创建前需要将虚拟网络和专有的防火墙子网创建好(防火墙子网名称必须为AzureFirewallSubnet且地址空间后缀必须为/26)
-    public Boolean createFireWall(Integer cloudType, FireWallCreateRequestBody body) {
+    public Boolean createFireWall(Integer cloudType, FirewallCreateRequestBody body) {
         // 获取默认订阅Id的资源管理器
         AzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(cloudType).getManager();
         NetworkManager networkManager = azureResourceManager.networks().manager();
@@ -107,7 +107,7 @@ public class FireWallFunction {
 
             // 应用防火墙实例
             NetworkManagementClient networkManagementClient = networkManager.serviceClient();
-            networkManagementClient.getAzureFirewalls().createOrUpdate(resourceGroupName, body.getName(), azureFirewallInner);
+            AzureFirewallInner newInner = networkManagementClient.getAzureFirewalls().createOrUpdate(resourceGroupName, body.getName(), azureFirewallInner);
             System.out.println("创建防火墙成功！");
         } catch (Exception e) {
             System.err.println("创建防火墙失败：" + e.getMessage());
