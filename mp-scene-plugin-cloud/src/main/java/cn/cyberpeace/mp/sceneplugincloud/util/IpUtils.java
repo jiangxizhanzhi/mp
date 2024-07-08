@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.SubnetUtils;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Slf4j
 public class IpUtils {
@@ -680,9 +681,6 @@ public class IpUtils {
         SubnetUtils.SubnetInfo subnetInfo = subnetUtils.getInfo();
         String[] allIps = subnetInfo.getAllAddresses();
 
-        // 创建一个HashSet用于快速查找排除的IP
-        Set<String> excludedSet = new HashSet<>(excludedIps);
-
         Random random = new Random();
         while (true) {
             // 在子网范围内随机选择一个索引
@@ -690,9 +688,71 @@ public class IpUtils {
             String randomIp = allIps[randomIndex];
 
             // 检查该IP是否已被排除
-            if (!excludedSet.contains(randomIp)) {
+            if (null == excludedIps || !excludedIps.contains(randomIp)) {
                 return randomIp;
             }
         }
+    }
+
+    private static final Random RANDOM = new Random();
+    private static final int PREFIX_LENGTH = 24;
+
+    /**
+     * 生成一个随机的CIDR，确保它不在给定的CIDR列表中。
+     *
+     * @param existingCidrs 需要避免的现有CIDR列表。
+     * @return 一个新的随机CIDR字符串。
+     */
+    public static String generateRandomCidrNotIn(List<String> existingCidrs) {
+        // Generate a random IPv4 address and prefix length
+        int ipAddress = RANDOM.nextInt(256 * 256 * 256);
+        String cidr = String.format("%d.%d.%d.0/%d",
+                ipAddress >> 16 & 0xFF,
+                ipAddress >> 8 & 0xFF,
+                ipAddress & 0xFF,
+                PREFIX_LENGTH);
+
+        // Check if the generated CIDR is not in the existing CIDRs
+        if (existingCidrs.contains(cidr)) {
+            cidr = generateRandomCidrNotIn(existingCidrs);
+        }
+        return cidr;
+    }
+
+    /**
+     * Validates a list of CIDRs against a specific rule: the IP part must be between 0 and 255 for each octet,
+     * and the CIDR notation must end with "/24".
+     *
+     * @param cidrPools The list of CIDRs to validate.
+     * @return A list of CIDRs that do not conform to the rule.
+     */
+    public static List<String> validateCidrPools(List<String> cidrPools) {
+        List<String> invalidCidrs = new ArrayList<>();
+        Pattern pattern = Pattern.compile("^(\\d{1,3}\\.){3}\\d{1,3}/24$");
+
+        for (String cidr : cidrPools) {
+            if (!pattern.matcher(cidr).matches()) {
+                // Check if all numbers are between 0 and 255
+                String ipPart = cidr.split("/")[0];
+                String[] octets = ipPart.split("\\.");
+                boolean isValid = true;
+                for (String octet : octets) {
+                    try {
+                        int value = Integer.parseInt(octet);
+                        if (value < 0 || value > 255) {
+                            isValid = false;
+                            break;
+                        }
+                    } catch (NumberFormatException e) {
+                        isValid = false;
+                        break;
+                    }
+                }
+                if (!isValid) {
+                    invalidCidrs.add(cidr);
+                }
+            }
+        }
+        return invalidCidrs;
     }
 }

@@ -45,7 +45,7 @@ public class AzureFlowCollector extends FlowCollector {
         HashMap<String, String> environment = super.getArkimeEnvironment(containerGroupName);
 
         ContainerGroup container = new AzureContainer(resourceService)
-                .creatContainer(imageName, null, netWorkId, "containerSub", groupName,
+                .creatContainer(false, imageName, null, netWorkId, "containerSub", groupName,
                         "arkime", "arkime", environment,
                         4, 4);
 

@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -74,7 +76,6 @@ public class AzureCreateHandler extends CreateHandler {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
         }*/
         //  TODO 测试载荷用 end
-
         getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_NETWORK);
         // 创建微软云的资源组
         String groupName = getPluginHandler().getSourceSceneId();
@@ -98,7 +99,8 @@ public class AzureCreateHandler extends CreateHandler {
             List<Runnable> createAuxiliaryNetworkTasks = new ArrayList<>();
             for (CloudPluginSceneElementBO element : filteredAuxiliaryNetworkElements) {
                 //筛选出所有cidr是否连接容器
-                ConcurrentHashMap<String, Boolean> cidrContainerMap = ElementNetworkUtils.getCidrToContainerMap(allElements, element, virtualNicsMap);
+                CloudScenePluginHandler pluginHandler = getPluginHandler();
+                ConcurrentHashMap<String, Boolean> cidrContainerMap = ElementNetworkUtils.getCidrToContainerMap(pluginHandler, allElements, element, virtualNicsMap);
                 String nodeId = element.getSrcElement().getId();
                 // 封装创建网络的任务
                 AzureVirtualNetCreateTask task = new AzureVirtualNetCreateTask(resourceService, getPluginHandler(), element, cidrContainerMap, virtualNicsMap);
@@ -163,7 +165,6 @@ public class AzureCreateHandler extends CreateHandler {
                 SceneElementBO vNetElement;
                 if (accessNetworks.size() > 0) {
                     vNetElement = accessNetworks.get(0).getConnectPorts().get(0).getTo().getElement();
-//                 TODO   查看节点是否加入VNet 如果加入
                     if (null != vNetElement) {
                         CloudPluginSceneElementBO vNetPluginElement = getPluginHandler().getElement(vNetElement.getId());
                         List<String> cidrPools = vNetPluginElement.getCidrPools();
@@ -223,7 +224,7 @@ public class AzureCreateHandler extends CreateHandler {
             List<Runnable> createContainerTasks = new ArrayList<>();
             for (CloudPluginSceneElementBO element : filteredContainerElements) {
                 String nodeId = element.getSrcElement().getId();
-                List<VirtualNic> virtualNics = this.genVirutalNics(element);
+                List<VirtualNic> virtualNics = virtualNicsMap.get(nodeId);
                 AzureContainerCreateTask task = new AzureContainerCreateTask(resourceService, getPluginHandler(), element, virtualNics);
                 Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_CONTAINER, task);
                 createContainerTasks.add(formatTask);
@@ -254,14 +255,16 @@ public class AzureCreateHandler extends CreateHandler {
             if (!createTerminalTasks.isEmpty()) {
                 runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
             }
+
+
             getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_INSTANCE);
             getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CONFIG);
             getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CONFIG);
 
         } catch (Exception e) {
-            log.error(e.getMessage());
 //            云场景启动失败立即删除云资源
             resourceService.getManager().resourceGroups().deleteByName(groupName);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, e);
         }
     }
 

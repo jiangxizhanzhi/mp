@@ -1,10 +1,16 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api;
 
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
@@ -13,11 +19,9 @@ import com.azure.resourcemanager.containerinstance.models.ContainerGroupRestartP
 import com.azure.resourcemanager.containerregistry.models.AccessKeyType;
 import com.azure.resourcemanager.containerregistry.models.Registry;
 import com.azure.resourcemanager.containerregistry.models.RegistryCredentials;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class AzureContainer {
     private IAzureResourceManager resourceService;
@@ -50,23 +54,116 @@ public class AzureContainer {
         double cpu = srcElement.getCpu() == null ? 1 : srcElement.getCpu();
         double ram = srcElement.getRam() == null ? 1.5 : srcElement.getRam();
 
-        ContainerGroup container = creatContainer(cloudElement.getImage(), virtualNics,
+        ContainerGroup container = creatContainer(cloudElement.getIsPublicIp(), cloudElement.getImage(), virtualNics,
                 networkId, subnetName, groupName,
                 containerName, containerGroupName, new HashMap(),
                 cpu, ram);
 
         cloudElement.setResourceId(container.id());
+        if (cloudElement.getIsPublicIp()) {
+            cloudElement.setPublicIpAddress(container.ipAddress());
+            virtualNic.setFixedIp(container.ipAddress());
+        } else {
+            virtualNic.setFixedIp(container.ipAddress());
+        }
+        receiveVirtualPortInfo(pluginHandler, cloudElement, virtualNics);
     }
 
-    public ContainerGroup creatContainer(String image, List<VirtualNic> virtualNics, String networkId,
-                                         String subnetName, String groupName, String containerName,
-                                         String containerGroupName, Map environment,
+    /**
+     * 处理云场景无登录按钮、接收虚拟端口信息，用于云节点和虚拟网络接口的绑定及配置管理。
+     *
+     * @param cloudElement 云端场景节点，包含云端设备的配置信息。
+     * @param virtualNics  虚拟网络接口列表，用于和云端设备进行网络连接。
+     */
+    public void receiveVirtualPortInfo(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics) {
+        if (virtualNics == null) {
+            return;
+        }
+
+        var cloudPorts = pluginHandler.getPorts(cloudElement);
+        if (cloudPorts.isEmpty()) {
+            return;
+        }
+
+        Map<String, List<CloudPluginSceneElementPortBO>> networkIdCloudPortsMap = new HashMap<>();
+        List<ConnectedNetworkBO> networks = new ArrayList<>();
+        networks.addAll(cloudElement.getDeriveNetworks());
+        networks.addAll(cloudElement.getAccessNetworks());
+        for (ConnectedNetworkBO network : networks) {
+            var auxiliaryNetworkId = network.getNetwork().getResourceId();
+            var networkIdCloudPorts = networkIdCloudPortsMap.getOrDefault(
+                    auxiliaryNetworkId, new ArrayList<>());
+            network.getFromPorts().forEach(port -> {
+                var pluginPort = pluginHandler.getPort(port.getId());
+                networkIdCloudPorts.add(pluginPort);
+            });
+            networkIdCloudPortsMap.put(auxiliaryNetworkId, networkIdCloudPorts);
+        }
+
+        virtualNics.forEach(virtualNic -> {
+            var networkId = virtualNic.getNetworkId();
+            // 管理网卡判断
+            if (Boolean.TRUE.equals(cloudElement.getEnableMgmt())
+                    && CloudSingleton.cloudAppConfig.getMgmtNetId().equals(networkId)) {
+                cloudElement.setMgmtPortResourceId(virtualNic.getPortId());
+                cloudElement.setMgmtIp(virtualNic.getFixedIp());
+                cloudElement.setMgmtMacAddr(virtualNic.getMacAddress());
+                return;
+            }
+
+            var networkCloudPorts = networkIdCloudPortsMap.getOrDefault(networkId, null);
+            if (networkCloudPorts == null) {
+                return;
+            }
+
+            // 多个端口连到同一个网络上的时候暂时当做一个端口处理
+            networkCloudPorts.forEach(cloudPort -> {
+                var srcPort = cloudPort.getSrcPort();
+                if (srcPort.isUsing()) {
+                    srcPort.setIp(virtualNic.getFixedIp());
+                    srcPort.setMacAddr(virtualNic.getMacAddress());
+                }
+
+                cloudPort.setResourceId(virtualNic.getPortId());
+                cloudPort.setQosId(virtualNic.getQosId());
+                cloudPort.setFloatingIp(virtualNic.getFloatingip());
+                cloudPort.setFloatingIpId(virtualNic.getFloatingipId());
+                cloudPort.setAuxiliaryNetworkId(virtualNic.getNetworkId());
+
+                if (null != virtualNic.getAccessModes() && null != virtualNic.getAccessModes().get(0)) {
+                    VirtualNic.AccessMode accessMode = virtualNic.getAccessModes().get(0);
+                    String protocol = accessMode.getProtocol();
+                    String[] protoclos = protocol.split(";");
+                    List<CloudAccessMode> accessModes = cloudPort.getAccessModes();
+                    accessModes.clear();
+                    for (int j = 0; j < protoclos.length; j++) {
+                        CloudAccessMode cloudAccessMode = new CloudAccessMode();
+//                        TODO 管理网络ip port
+                        cloudAccessMode.setAccessIp(virtualNic.getFixedIp());
+                        cloudAccessMode.setProtocol(protoclos[j]);
+                        cloudAccessMode.setAccessPort(AccessMode.Protocol.DEFAULT_PORT_MAP.get(protoclos[j].toLowerCase()));
+                        cloudAccessMode.setUsername(cloudElement.getUsername());
+                        cloudAccessMode.setPassword(cloudElement.getPassword());
+                        cloudAccessMode.setAvailable(true);
+                        cloudAccessMode.setProxy(true);
+                        cloudAccessMode.setId(TextUtils.uuid());
+
+                        if (StringUtils.isEmpty(cloudAccessMode.getAccessIp()) && cloudPort.getSrcPort() != null) {
+                            cloudAccessMode.setAccessIp(cloudPort.getSrcPort().getIp());
+                        }
+                        accessModes.add(cloudAccessMode);
+                    }
+                }
+            });
+        });
+    }
+
+    public ContainerGroup creatContainer(Boolean isPublicIp, String image, List<VirtualNic> virtualNics,
+                                         String networkId, String subnetName, String groupName,
+                                         String containerName, String containerGroupName, Map environment,
                                          double cpu, double ram) {
-        //        TODO 注册表信息如何获取 是否只使用一个祖册表 多个注册表是否在同一个资源组 若不在容器镜像参数要包含资源组、注册表名、等信息
-        Registry registrytest0407 = azureResourceManager.containerRegistries().getByResourceGroup("container_registry0530", "registry0530");
+        Registry registrytest0407 = azureResourceManager.containerRegistries().getByResourceGroup("upload_resources", "registry0530");
         RegistryCredentials acrCredentials = registrytest0407.getCredentials();
-//        String imageName = cloudElement.getImage();
-//        String imageName = registrytest0407.loginServerUrl() + "/samples/nginx";
         String imageName = registrytest0407.loginServerUrl() + "/" + image;
 
         ContainerGroup.DefinitionStages.WithNextContainerInstance attach = (ContainerGroup.DefinitionStages.WithNextContainerInstance) azureResourceManager
@@ -78,16 +175,26 @@ public class AzureContainer {
                 .withPrivateImageRegistry(registrytest0407.loginServerUrl(), acrCredentials.username(), acrCredentials.accessKeys().get(AccessKeyType.PRIMARY))
                 .withoutVolume()
                 .defineContainerInstance(containerGroupName)
-//                TODO 前端未传先写死
                 .withImage(imageName)
                 .withExternalTcpPort(80)
                 .withCpuCoreCount(cpu)
                 .withMemorySizeInGB(ram)
                 .withEnvironmentVariables(environment)
                 .attach();
-        ContainerGroup container = attach.withNewNetworkProfileOnExistingVirtualNetwork(networkId, subnetName)
-                .withRestartPolicy(ContainerGroupRestartPolicy.NEVER)
-                .create();
+        ContainerGroup container;
+        if (isPublicIp) {
+            container = attach.withDnsPrefix("yourDNSPrefix") // 这里指定DNS前缀
+                    .withRestartPolicy(ContainerGroupRestartPolicy.NEVER)
+                    .create();
+        } else {
+            container = attach.withNewNetworkProfileOnExistingVirtualNetwork(networkId, subnetName)
+                    .withRestartPolicy(ContainerGroupRestartPolicy.NEVER)
+                    .create();
+        }
+//        receiveVirtualPortInfo(element, virtualNics);
+
+
+//        attach.withDnsPrefix("").d
 
         // azure todo  怎么添加网卡呢?
 /*        for (var virtualNic1 : virtualNics) {
