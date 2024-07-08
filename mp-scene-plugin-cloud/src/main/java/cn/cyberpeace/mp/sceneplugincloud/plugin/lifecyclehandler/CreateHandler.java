@@ -61,17 +61,64 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CreateHandler extends HandlerCommon {
 
+    /**
+     * 虚拟交换机客户端实例，用于管理虚拟网络交换机相关操作。
+     */
     private final VirtualSwitch vsClient = new VirtualSwitch();
+
+    /**
+     * 虚拟路由器客户端实例，用于执行虚拟路由器相关功能。
+     */
     private final VirtualRouter vrClient = new VirtualRouter();
+
+    /**
+     * 虚拟防火墙客户端实例，用于配置和管理虚拟环境中的防火墙规则。
+     */
     private final VirtualFirewall vfClient = new VirtualFirewall();
+
+    /**
+     * 虚拟机客户端实例，用于创建、管理和操作虚拟机。
+     */
     private final VirtualMachine vmClient = new VirtualMachine();
+
+    /**
+     * 虚拟端口客户端实例，用于管理和操作虚拟网络端口。
+     */
     protected final VirtualPort vpClient = new VirtualPort();
+
+    /**
+     * 容器客户端实例，用于管理和操作容器实例。
+     */
     private final Container containerClient = new Container();
+
+    /**
+     * 实体节点客户端实例，用于管理和操作实体节点。
+     */
     private final EntityNode enClient = new EntityNode();
+
+    /**
+     * 远程客户端实例，用于远程访问和管理其他设备或服务。
+     */
     private final Remote remoteClient = new Remote();
+
+    /**
+     * 非玩家角色客户端实例，可能用于模拟或测试环境中的虚拟角色。
+     */
     private final Npc npcClient = new Npc();
+
+    /**
+     * 虚拟路由器实例，用于配置和管理虚拟网络中的路由功能。
+     */
     private final VmRouter vmRouter = new VmRouter();
+
+    /**
+     * 虚拟Dynamips实例，Dynamips是一个开源的路由器模拟器，这里用于模拟路由器功能。
+     */
     private VirtualDynamips vdClient = new VirtualDynamips();
+
+    /**
+     * 设备客户端实例，用于通用设备的管理和操作。
+     */
     private DeviceClient deviceClient = new DeviceClient();
 
     private final Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
@@ -83,39 +130,81 @@ public class CreateHandler extends HandlerCommon {
     private final Random random = new Random();
 
     private VirtualRouterCreateData probeRouteInfo = null;
-
+    /**
+     * 场景处理相关的静态常量类。
+     * 提供了场景中各种元素创建和配置过程的枚举常量。
+     */
     public static class SceneProcess {
+        // 创建辅助网络的事件处理过程
         public static final SceneEventProcess CREATE_AUXILIARY_NETWORKS = new SceneEventProcess("create_auxiliary_networks", "sceneplugincloud.event.create_auxiliary_network", "create_network", 1);
+        // 创建节点到外部路由器的事件处理过程
         public static final SceneEventProcess CREATE_NODE_TO_EXTERNAL_ROUTER = new SceneEventProcess("create_node_to_external_router", "sceneplugincloud.event.create_node_to_external_router", "create_network", 1);
+        // 创建网关的事件处理过程
         public static final SceneEventProcess CREATE_GATEWAYS = new SceneEventProcess("create_gateways", "sceneplugincloud.event.create_gateway", "create_gateway", 1);
+        // 创建防火墙的事件处理过程
         public static final SceneEventProcess CREATE_FIREWALLS = new SceneEventProcess("create_firewalls", "sceneplugincloud.event.create_firewall", "create_gateway", 2);
+        // 创建终端的事件处理过程
         public static final SceneEventProcess CREATE_TERMINALS = new SceneEventProcess("create_terminals", "sceneplugincloud.event.create_terminal", "create_instance", 1);
 
+        // 创建逻辑交换机的事件处理过程
         public static final EventProcess CREATE_LOGICAL_SWITCHES = new EventProcess("create_logical_switches", "sceneplugincloud.event.create_logical_switch");
+        // 创建实体的事件处理过程
         public static final EventProcess CREATE_ENTITIES = new EventProcess("bind_physical_port", "sceneplugincloud.event.bind_physical_port");
 
-
+        // 创建NPC的事件处理过程
         public static final SceneEventProcess CREATE_NPCS = new SceneEventProcess("create_npcs", "sceneplugincloud.event.create_npcs", "create_instance", 1);
+        // 配置场景的事件处理过程
         public static final SceneEventProcess CONFIGURE = new SceneEventProcess("configure", "sceneplugincloud.event.configure", "config", 1);
     }
 
+    /**
+     * 元素处理相关的静态常量类。
+     * 提供了场景中各种元素创建过程的枚举常量。
+     */
     public static class ElementProcess {
+        // 创建辅助网络的事件处理过程
         public static final EventProcess CREATE_AUXILIARY_NETWORK = new EventProcess("create_auxiliary_network", "sceneplugincloud.event.create_auxiliary_network");
+        // 创建虚拟交换机的事件处理过程
         public static final EventProcess CREATE_VIRTUAL_SWITCH = new EventProcess("create_virtual_switch", "sceneplugincloud.event.create_virtual_switch");
+        // 创建虚拟路由器的事件处理过程
         public static final EventProcess CREATE_VIRTUAL_ROUTER = new EventProcess("create_virtual_router", "sceneplugincloud.event.create_virtual_router");
+        // 创建虚拟防火墙的事件处理过程
         public static final EventProcess CREATE_VIRTUAL_FIREWALL = new EventProcess("create_virtual_firewall", "sceneplugincloud.event.create_virtual_firewall");
+        // 创建虚拟机器的事件处理过程
         public static final EventProcess CREATE_VIRTUAL_MACHINE = new EventProcess("create_virtual_machine", "sceneplugincloud.event.create_virtual_machine");
+        // 创建容器的事件处理过程
         public static final EventProcess CREATE_CONTAINER = new EventProcess("create_container", "sceneplugincloud.event.create_container");
+        // 创建实体节点的事件处理过程
         public static final EventProcess CREATE_ENTITY_NODE = new EventProcess("create_entity_node", "sceneplugincloud.event.create_entity_node");
+        // 创建NPC的事件处理过程
         public static final EventProcess CREATE_NPC = new EventProcess("create_npc", "sceneplugincloud.event.create_npc");
+        // 创建动态元素的事件处理过程
         public static final EventProcess CREATE_DYNAMIC = new EventProcess("create_dynamic", "sceneplugincloud.event.create_dynamic");
     }
 
+    /**
+     * 云防火墙规则类，用于存储入站和出站防火墙规则。
+     *
+     * @author
+     * @since
+     */
     @Data
     public static class CloudFirewallRules {
+        /**
+         * 入站防火墙规则列表。
+         */
         private List<VirtualFirewallCreateData.Rule> ingressRules;
+        /**
+         * 出站防火墙规则列表。
+         */
         private List<VirtualFirewallCreateData.Rule> egressRules;
 
+        /**
+         * 根据源防火墙规则列表创建云防火墙规则对象。
+         *
+         * @param srcRules 源防火墙规则列表。
+         * @return CloudFirewallRules 对象，包含入站和出站规则。
+         */
         /**
          * fromSrcRules
          *
@@ -127,31 +216,40 @@ public class CreateHandler extends HandlerCommon {
             List<VirtualFirewallCreateData.Rule> egressRules = new ArrayList<>();
             if (srcRules != null) {
                 srcRules.forEach(srcRule -> {
+                    // 初始化源端口和目标端口列表，如果未指定端口，则使用null占位
                     // 如果未设置端口 则使用一个null的元素,使用统一的一个循环
                     List<String> sourcePorts = Arrays.asList(new String[]{null});
                     List<String> desPorts = Arrays.asList(new String[]{null});
+
+                    // 如果指定了源端口，则将其拆分并存储
                     if (StringUtils.isNotEmpty(srcRule.getSourcePort())) {
                         String[] portsArray = srcRule.getSourcePort().split(",");
                         if (portsArray != null && portsArray.length > 0) {
                             sourcePorts = Arrays.asList(portsArray);
                         }
                     }
+                    // 如果指定了目标端口，则将其拆分并存储
                     if (StringUtils.isNotEmpty(srcRule.getDestinationPort())) {
                         String[] portsArray = srcRule.getDestinationPort().split(",");
                         if (portsArray != null && portsArray.length > 0) {
                             desPorts = Arrays.asList(portsArray);
                         }
                     }
+
+                    // 遍历所有组合的源端口和目标端口，创建并添加相应的防火墙规则
                     for (String sourcePort : sourcePorts) {
                         for (String desPort : desPorts) {
                             String direction = srcRule.getDirection();
                             VirtualFirewallCreateData.Rule rule = new VirtualFirewallCreateData.Rule();
+                            // 设置规则的属性
                             rule.setSourceIpAddress(srcRule.getSourceIpAddress());
                             rule.setDestinationIpAddress(srcRule.getDestinationIpAddress());
                             rule.setSourcePort(sourcePort);
                             rule.setDestinationPort(desPort);
                             rule.setProtocol(srcRule.getProtocol());
                             rule.setAction(srcRule.getAction());
+
+                            // 根据方向，将规则添加到入站或出站规则列表，如果是双向，则同时添加
                             if (FirewallRuleDirection.INGRESS.equals(direction)) {
                                 ingressRules.add(rule);
                             } else if (FirewallRuleDirection.EGRESS.equals(direction)) {
