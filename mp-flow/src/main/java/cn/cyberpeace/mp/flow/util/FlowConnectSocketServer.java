@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.util;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.flow.service.FlowTaskRecordService;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +44,7 @@ public class FlowConnectSocketServer {
         log.info("Received message v2: " + message);
         JSONObject jsonMessage = JSONObject.parseObject(message);
         try {
-            flowTaskRecordService.syncRecord(jsonMessage);
+            BeanCommon.getBean(FlowTaskRecordService.class).syncRecord(jsonMessage);
         }catch (Exception e){
             log.error("error", e);
             e.printStackTrace();
