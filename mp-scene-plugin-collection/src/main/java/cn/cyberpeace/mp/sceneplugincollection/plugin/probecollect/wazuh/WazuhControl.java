@@ -24,49 +24,82 @@ import java.util.Map;
  */
 @Slf4j
 public class WazuhControl {
+    // 定义Windows平台下控制脚本的路径
     public static final String WINDOWS_CONTROL_SCRIPT_PATH = "C:\\ossec-agent\\probe-control.bat";
+    // 定义Linux平台下控制脚本的路径
     public static final String LINUX_CONTROL_SCRIPT_PATH = "/var/ossec/bin/probe-control.py";
 
+    // 定义Windows平台下查询脚本的路径
     public static final String WINDOWS_QUERY_SCRIPT_PATH = "C:\\ossec-agent\\probe-query.bat";
+    // 定义Linux平台下查询脚本的路径
     public static final String LINUX_QUERY_SCRIPT_PATH = "/var/ossec/bin/probe-query.py";
 
+    // 定义Windows平台下特殊查询脚本的路径
     public static final String WINDOWS_SPEC_QUERY_SCRIPT_PATH = "C:\\ossec-agent\\spec-query.bat";
+    // 定义Linux平台下特殊查询脚本的路径
     public static final String LINUX_SPEC_QUERY_SCRIPT_PATH = "/var/ossec/bin/spec-query.py";
 
+    // 定义控制操作的添加动作
     public static final String CONTROL_ACTION_ADD = "add";
+    // 定义控制操作的移除动作
     public static final String CONTROL_ACTION_REMOVE = "remove";
+    // 定义控制操作的启用动作
     public static final String CONTROL_ACTION_ENABLE = "enable";
+    // 定义控制操作的禁用动作
     public static final String CONTROL_ACTION_DISABLE = "disable";
+    // 定义控制操作的脚本类型
     public static final String CONTROL_ACTION_TYPE_SCRIPT = "script";
+    // 定义控制操作的日志类型
     public static final String CONTROL_ACTION_TYPE_LOG = "log";
+    // 定义控制操作的系统检查类型
     public static final String CONTROL_ACTION_TYPE_SYSCHECK = "syscheck";
+    // 定义控制操作的文件修改类型
     public static final String CONTROL_ACTION_TYPE_FILE_MODIFY = "file_modify";
+    // 定义控制操作的注册表修改类型
     public static final String CONTROL_ACTION_TYPE_REGISTRY_MODIFY = "registry_modify";
+    // 定义控制操作的系统收集器类型
     public static final String CONTROL_ACTION_TYPE_SYSCOLLECTOR = "syscollector";
 
+    // 定义脚本禁用状态的否选项
     public static final String SCRIPT_DISABLED_NO = "no";
+    // 定义脚本禁用状态的是选项
     public static final String SCRIPT_DISABLED_YES = "yes";
+    // 定义系统检查禁用状态的否选项
     public static final String SYSCHECK_DISABLED_NO = "no";
+    // 定义系统检查禁用状态的是选项
     public static final String SYSCHECK_DISABLED_YES = "yes";
 
+    // 定义脚本的Python后缀
     public static final String SCRIPT_SUFFIX_PY = "py";
+    // 定义脚本的批处理后缀
     public static final String SCRIPT_SUFFIX_BAT = "bat";
+    // 定义脚本的Shell后缀
     public static final String SCRIPT_SUFFIX_SH = "sh";
 
-
+    // 定义特殊查询操作获取日志收集文件的选项
     public static final String SPEC_QUERY_ACTION_GET_LOG_COLLECT_FILES = "get_log_collect_files";
 
+    // 定义Windows平台下文件控制脚本的路径
     public static final String WINDOWS_FILE_CONTROL_SCRIPT_PATH = "C:\\ossec-agent\\file-control.bat";
+    // 定义Linux平台下文件控制脚本的路径
     public static final String LINUX_FILE_CONTROL_SCRIPT_PATH = "/var/ossec/bin/file-control.py";
 
+    // 定义文件控制操作的上传动作
     public static final String FILE_CONTROL_ACTION_UPLOAD = "upload";
+    // 定义文件控制操作的下载动作
     public static final String FILE_CONTROL_ACTION_DOWNLOAD = "download";
+    // 定义文件控制操作的读取动作
     public static final String FILE_CONTROL_ACTION_READ = "read";
+    // 定义文件控制操作的写入动作
     public static final String FILE_CONTROL_ACTION_WRITE = "write";
+    // 定义文件控制操作的追加动作
     public static final String FILE_CONTROL_ACTION_APPEND = "append";
+    // 定义文件控制操作的移除动作
     public static final String FILE_CONTROL_ACTION_REMOVE = "remove";
 
+    // 定义文件控制的远程类型为GOFDFS
     public static final String FILE_CONTROL_REMOTE_TYPE_GOFDFS = "godfs";
+
 
     /**
      * controlConfigOld
@@ -74,6 +107,14 @@ public class WazuhControl {
      * @param agentName
      * @param osType
      * @param controlConfigParam
+     */
+    /**
+     * 控制配置老版本代理的函数。
+     * 此方法通过生成并执行针对指定操作系统类型和代理名称的控制配置命令，来更新老版本代理的配置。
+     *
+     * @param agentName 要操作的代理名称。
+     * @param osType 代理所在操作系统的类型。
+     * @param controlConfigParam 包含控制配置参数的对象。
      */
     public void controlConfigOld(String agentName, String osType, ControlConfigParam controlConfigParam) {
         WazuhLauncher.RunCommandItem runCommandItem = new WazuhLauncher.RunCommandItem();
@@ -83,10 +124,19 @@ public class WazuhControl {
         wazuhLauncher.runCommand(List.of(runCommandItem));
     }
 
-    // TODO 需要和 genControlConfigCommand 整合
+    /**
+     * 生成控制配置命令（老版本）。
+     * 根据给定的操作系统类型和控制配置参数，生成用于控制配置的命令。
+     * 此方法是为不需立即执行命令的情境设计，与直接控制配置不同的是，它返回命令字符串而非直接执行。
+     *
+     * @param osType 代理所在操作系统的类型。
+     * @param controlConfigParam 包含控制配置参数的对象。
+     * @return 生成的控制配置命令字符串。
+     */
     public static String genControlConfigCommandOld(String osType, ControlConfigParam controlConfigParam) {
         return genControlConfigCommandOld(osType, controlConfigParam, false);
     }
+
 
     /**
      * genControlConfigCommandOld
@@ -96,51 +146,83 @@ public class WazuhControl {
      * @param restart
      * @return
      */
+    /**
+     * 根据操作系统的类型生成控制配置的命令。
+     * 该方法用于根据不同的操作系统类型（Windows或Linux）生成相应的控制脚本路径，并根据传入的控制配置参数构建命令行参数。
+     * 如果需要重启，命令行中会包含重启标志。
+     *
+     * @param osType 操作系统的类型，用于确定控制脚本的路径。
+     * @param controlConfigParam 包含各种控制配置参数的对象。
+     * @param restart 表示是否需要重启，用于决定命令行中是否包含重启标志。
+     * @return 生成的控制配置命令的字符串表示。
+     */
     public static String genControlConfigCommandOld(String osType, ControlConfigParam controlConfigParam, boolean restart) {
+        // 根据操作系统类型选择控制脚本的路径
         String controlScriptPath;
         if (WazuhLauncher.OS_TYPE_WINDOWS.equals(osType)) {
             controlScriptPath = WINDOWS_CONTROL_SCRIPT_PATH;
         } else {
             controlScriptPath = LINUX_CONTROL_SCRIPT_PATH;
         }
+
+        // 初始化脚本参数列表，用于存储转换后的参数对象
         List<Map<String, Object>> scriptParams = new ArrayList<>();
+
+        // 将probe参数转换为snake命名规范的Map，并添加到脚本参数列表
         if (controlConfigParam.getProbeParams() != null) {
             for (ControlProbeParam probeParam : controlConfigParam.getProbeParams()) {
                 scriptParams.add(JsonCommon.beanToSnakeMap(probeParam));
             }
         }
+
+        // 将log收集参数转换为snake命名规范的Map，并添加到脚本参数列表
         if (controlConfigParam.getLogCollectParams() != null) {
             for (ControlLogCollectParam logCollectParam : controlConfigParam.getLogCollectParams()) {
                 scriptParams.add(JsonCommon.beanToSnakeMap(logCollectParam));
             }
         }
+
+        // 将syscheck参数转换为snake命名规范的Map，并添加到脚本参数列表
         if (controlConfigParam.getSyscheckParam() != null) {
             scriptParams.add(JsonCommon.beanToSnakeMap(controlConfigParam.getSyscheckParam()));
         }
+
+        // 将file修改参数转换为snake命名规范的Map，并添加到脚本参数列表
         if (controlConfigParam.getFileModifyParams() != null) {
             for (ControlFileModifyParam fileModifyParam : controlConfigParam.getFileModifyParams()) {
                 scriptParams.add(JsonCommon.beanToSnakeMap(fileModifyParam));
             }
         }
+
+        // 将registry修改参数转换为snake命名规范的Map，并添加到脚本参数列表
         if (controlConfigParam.getRegistryModifyParams() != null) {
             for (ControlRegistryModifyParam registryModifyParam : controlConfigParam.getRegistryModifyParams()) {
                 scriptParams.add(JsonCommon.beanToSnakeMap(registryModifyParam));
             }
         }
+
+        // 将syscollector参数转换为snake命名规范的Map，并添加到脚本参数列表
         if (controlConfigParam.getSyscollectorParam() != null) {
             scriptParams.add(JsonCommon.beanToSnakeMap(controlConfigParam.getSyscollectorParam()));
         }
+
+        // 如果脚本参数列表为空，返回空字符串
         if (scriptParams.isEmpty()) {
             return StringUtils.EMPTY;
         }
+
+        // 将脚本参数列表转换为Base64编码的字符串
         // 把参数上传到文件服务器
         String scriptParamsStr = TextUtils.encodeBase64(JsonCommon.stringify(scriptParams));
+
+        // 根据是否需要重启，构造并返回相应的命令行字符串
         if (restart) {
             return String.format("%s \"%s\" -r", controlScriptPath, scriptParamsStr);
         } else {
             return String.format("%s \"%s\"", controlScriptPath, scriptParamsStr);
         }
     }
+
 
     /**
      * genControlConfigCommand
@@ -161,47 +243,81 @@ public class WazuhControl {
      * @param restart
      * @return
      */
+    /**
+     * 根据操作系统的类型生成控制配置的命令。
+     * 该方法用于根据不同的操作系统类型（Windows或Linux）生成相应的控制脚本路径，并根据传入的控制配置参数生成相应的脚本参数，
+     * 最后组合成一个完整的命令字符串。
+     *
+     * @param osType 操作系统的类型，用于确定控制脚本的路径。
+     * @param controlConfigParam 包含各种控制配置参数的对象，如探针参数、日志收集参数等。
+     * @param restart 标志位，表示是否需要重启，用于决定命令中是否包含重启参数。
+     * @return 生成的控制配置命令字符串。
+     */
     public static String genControlConfigCommand(String osType, ControlConfigParam controlConfigParam, boolean restart) {
+        // 根据操作系统类型选择控制脚本路径
         String controlScriptPath;
         if (WazuhLauncher.OS_TYPE_WINDOWS.equals(osType)) {
             controlScriptPath = WINDOWS_CONTROL_SCRIPT_PATH;
         } else {
             controlScriptPath = LINUX_CONTROL_SCRIPT_PATH;
         }
+
+        // 初始化脚本参数列表
         List<Map<String, Object>> scriptParams = new ArrayList<>();
+
+        // 将探针参数转换为脚本参数并添加到列表中
         if (controlConfigParam.getProbeParams() != null) {
             for (ControlProbeParam probeParam : controlConfigParam.getProbeParams()) {
                 scriptParams.add(JsonCommon.beanToSnakeMap(probeParam));
             }
         }
+
+        // 将日志收集参数转换为脚本参数并添加到列表中
         if (controlConfigParam.getLogCollectParams() != null) {
             for (ControlLogCollectParam logCollectParam : controlConfigParam.getLogCollectParams()) {
                 scriptParams.add(JsonCommon.beanToSnakeMap(logCollectParam));
             }
         }
+
+        // 将syscheck参数转换为脚本参数并添加到列表中
         if (controlConfigParam.getSyscheckParam() != null) {
             scriptParams.add(JsonCommon.beanToSnakeMap(controlConfigParam.getSyscheckParam()));
         }
+
+        // 将文件修改参数转换为脚本参数并添加到列表中
         if (controlConfigParam.getFileModifyParams() != null) {
             for (ControlFileModifyParam fileModifyParam : controlConfigParam.getFileModifyParams()) {
                 scriptParams.add(JsonCommon.beanToSnakeMap(fileModifyParam));
             }
         }
+
+        // 将注册表修改参数转换为脚本参数并添加到列表中
         if (controlConfigParam.getRegistryModifyParams() != null) {
             for (ControlRegistryModifyParam registryModifyParam : controlConfigParam.getRegistryModifyParams()) {
                 scriptParams.add(JsonCommon.beanToSnakeMap(registryModifyParam));
             }
         }
+
+        // 将syscollector参数转换为脚本参数并添加到列表中
         if (controlConfigParam.getSyscollectorParam() != null) {
             scriptParams.add(JsonCommon.beanToSnakeMap(controlConfigParam.getSyscollectorParam()));
         }
+
+        // 如果脚本参数列表为空，返回空字符串
         if (scriptParams.isEmpty()) {
             return StringUtils.EMPTY;
         }
+
+        // 将脚本参数列表转换为Base64编码的字符串
         // 把参数上传到文件服务器
         String scriptParamsStr = TextUtils.encodeBase64(JsonCommon.stringify(scriptParams));
+
+        // 将脚本参数上传到文件服务器，并获取上传后的文件路径
         String result = FsCommon.uploadContent(scriptParamsStr);
+        // 组合文件服务器地址和上传后的文件路径
         result = SceneSingleton.sceneAppConfig.getMetadataFileServer() + "/" + result;
+
+        // 根据restart参数决定是否添加重启选项
         if (restart) {
             return String.format("%s \"%s\" -r", controlScriptPath, result);
         } else {
