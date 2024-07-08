@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.functionrequest.FireW
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.network.fluent.NetworkManagementClient;
 import com.azure.resourcemanager.network.fluent.models.AzureFirewallInner;
-import com.azure.resourcemanager.network.implementation.NetworkManagementClientBuilder;
 import com.azure.resourcemanager.network.models.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,22 +22,20 @@ public class FireWallFunction {
         AzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(cloudType).getManager();
         // 资源组名称
         String resourceGroupName = body.getResourceGroup();
-        // 防火墙名称
-        String firewallName = body.getName();
         // 区域
         String region = body.getRegion();
 
         try {
-            // 创建虚拟网络和对应的防火墙子网
-            azureResourceManager.networks().define(firewallName)
-                    .withRegion(region)
-                    .withExistingResourceGroup(resourceGroupName)
-                    .withAddressSpace(null)
-                    .defineSubnet("AzureFirewallManagementSubnet")
-                    .withAddressPrefix(null)
-                    .disableNetworkPoliciesOnPrivateEndpoint()
-                    .withExistingNetworkSecurityGroup("")
-                    .attach();
+//            // 创建虚拟网络和对应的防火墙子网
+//            Network.DefinitionStages.WithCreateAndSubnet azureFirewallManagementSubnet = azureResourceManager.networks().define(firewallName)
+//                    .withRegion(region)
+//                    .withExistingResourceGroup(resourceGroupName)
+//                    .withAddressSpace(null)
+//                    .defineSubnet("AzureFirewallManagementSubnet")
+//                    .withAddressPrefix(null)
+////                    .disableNetworkPoliciesOnPrivateEndpoint()
+////                    .withExistingNetworkSecurityGroup("")
+//                    .attach();
 
             // 创建防火墙实例
             AzureFirewallInner azureFirewallInner = new AzureFirewallInner()
@@ -65,8 +62,8 @@ public class FireWallFunction {
                     ));
 
             // 应用防火墙实例
-            NetworkManagementClient networkManagementClient = new NetworkManagementClientBuilder().buildClient();
-            networkManagementClient.getAzureFirewalls().createOrUpdate(resourceGroupName, firewallName, azureFirewallInner);
+            NetworkManagementClient networkManagementClient = azureResourceManager.networks().manager().serviceClient();
+            networkManagementClient.getAzureFirewalls().createOrUpdate(resourceGroupName, body.getName(), azureFirewallInner);
             System.out.println("Initiated create or update for Azure Firewall.");
         } catch (Exception e) {
             System.err.println("Error creating or updating Azure Firewall: " + e.getMessage());

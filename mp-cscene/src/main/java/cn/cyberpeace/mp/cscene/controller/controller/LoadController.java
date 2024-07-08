@@ -13,6 +13,8 @@ import cn.cyberpeace.mp.cscene.request.load.LoadResultSearchRequest;
 import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
 import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.FireWallFunction;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.functionrequest.FireWallCreateRequestBody;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -36,6 +38,9 @@ public class LoadController {
 
     @Autowired
     private LoadServiceImpl loadService;
+
+    @Autowired
+    private FireWallFunction fireWallFunction;
 
     /*
      * 载荷页面
@@ -384,4 +389,17 @@ public class LoadController {
         List<MpDevopsLoadSceneLog> log = loadService.getLoadResultByNodeIds(nodeIds);
         return new ServiceResult(log, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
+
+
+    /**
+     * 创建防火墙
+     */
+    @ApiOperation(value = "创建防火墙", notes = "")
+    @PostMapping("/createFireWall")
+    public ServiceResult createFireWall(@RequestBody FireWallCreateRequestBody fireWallCreateRequestBody) {
+        fireWallFunction.createFireWall(1, fireWallCreateRequestBody);
+        return new ServiceResult(log, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+    }
+
+
 }

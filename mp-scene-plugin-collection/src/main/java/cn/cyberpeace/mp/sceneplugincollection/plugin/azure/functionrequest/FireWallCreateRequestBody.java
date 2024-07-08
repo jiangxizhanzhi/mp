@@ -13,13 +13,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FireWallCreateRequestBody {
 
-    //资源组
+    //资源组名称
     private String resourceGroup;
 
-    //名称
+    //防火墙名称
     private String name;
 
-    //区域
+    //创建区域
     private String region;
 
     //防火墙SKU
