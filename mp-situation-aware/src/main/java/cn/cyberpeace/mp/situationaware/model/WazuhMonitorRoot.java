@@ -7,16 +7,46 @@ import java.util.List;
 
 public class WazuhMonitorRoot<T> {
 
+    /**
+     * 代理信息，包含代理的IP、名称和ID。
+     */
     private Agent agent;
+    /**
+     * 管理器信息，主要指Wazuh manager的名称。
+     */
     private Manager manager;
+    /**
+     * 规则信息，包括规则的触发次数、是否发送邮件通知、级别、描述和所属组。
+     */
     private Rule rule;
+    /**
+     * 解码器信息，主要指解码器的名称。
+     */
     private Decoder decoder;
+    /**
+     * 事件的完整日志。
+     */
     @JSONField(name = "full_log")
     private String fullLog;
+    /**
+     * 事件的输入类型。
+     */
     private Input input;
+    /**
+     * 事件的时间戳。
+     */
     private Date timestamp;
+    /**
+     * 事件的发生位置。
+     */
     private String location;
+    /**
+     * 事件的唯一ID。
+     */
     private String id;
+    /**
+     * 存储任意类型的数据，取决于具体使用场景。
+     */
     private T data;
 
     public Agent getAgent() {
