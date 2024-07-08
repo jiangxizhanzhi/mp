@@ -42,7 +42,11 @@ public class FlowConnectSocketServer {
     public void onMessage(String message) {
         log.info("Received message v2: " + message);
         JSONObject jsonMessage = JSONObject.parseObject(message);
-        flowTaskRecordService.syncRecord(jsonMessage);
+        try {
+            flowTaskRecordService.syncRecord(jsonMessage);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
