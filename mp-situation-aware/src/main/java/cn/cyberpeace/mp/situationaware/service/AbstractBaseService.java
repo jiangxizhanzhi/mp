@@ -21,15 +21,35 @@ import java.util.stream.Collectors;
  * @author wanggang
  */
 @Slf4j
+/**
+ * 抽象基础服务类，提供通用的服务功能。
+ */
 public abstract class AbstractBaseService {
 
+    /**
+     * 会话索引常量，用于构建索引字符串。
+     */
     protected static final String SESSION3 = "sessions3";
 
+    /**
+     * 默认语言标签，用于当没有指定语言时的默认选择。
+     */
     private static final String DEFAULT_LANGUAGE_TAG = "zh-CN";
 
+    /**
+     * 消息源，用于获取本地化的消息。
+     */
     @Autowired
     private MessageSource messageSource;
 
+    /**
+     * 根据组列表和时间范围构建索引数组。
+     *
+     * @param groupList 组列表，用于生成索引。
+     * @param startDate 开始时间，用于确定索引的时间范围。
+     * @param endDate 结束时间，用于确定索引的时间范围。
+     * @return 索引字符串数组。
+     */
     /**
      * 索引
      *
@@ -46,6 +66,14 @@ public abstract class AbstractBaseService {
         return indexList.toArray(indexArray);
     }
 
+    /**
+     * 构建索引列表。
+     *
+     * @param groupList 组列表，用于生成索引。
+     * @param startTime 开始时间，用于确定索引的时间范围。
+     * @param endTime 结束时间，用于确定索引的时间范围。
+     * @return 索引字符串列表。
+     */
     /**
      * 构造查询需要的索引
      *
@@ -75,7 +103,13 @@ public abstract class AbstractBaseService {
                 .collect(Collectors.toList());
     }
 
-
+    /**
+     * 根据组ID和日期构建会话索引字符串。
+     *
+     * @param groupId 组ID，用于构建索引。
+     * @param dateString 日期字符串，用于构建索引。
+     * @return 会话索引字符串。
+     */
     /**
      * 构造流量索引
      *
@@ -90,6 +124,14 @@ public abstract class AbstractBaseService {
         return sessionIndexBuilder.toString();
     }
 
+    /**
+     * 根据地域、消息键和参数获取本地化消息。
+     *
+     * @param locale 地域，用于获取相应语言的消息。
+     * @param msgKey 消息键，用于查找消息。
+     * @param params 参数，用于消息格式化。
+     * @return 本地化消息字符串。
+     */
     /**
      * getLocalMessage
      *

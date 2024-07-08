@@ -43,14 +43,29 @@ import java.util.Set;
 @RestController
 @RequestMapping("/sys/admin")
 @AuthTarget(TargetEnum.NO_AUTH)
+/**
+ * 菜单管理控制器，负责菜单的导入、查询、模板管理等相关操作。
+ */
 public class ActivMenuController {
 
+    /**
+     * 菜单服务自动注入，用于执行菜单相关的业务操作。
+     */
     @Autowired
     private ActivMenuService activMenuService;
 
+    /**
+     * 菜单集服务自动注入，用于查询和管理菜单集。
+     */
     @Autowired
     private MenuSetService menuSetService;
 
+    /**
+     * 通过上传文件重新导入菜单。
+     *
+     * @param file 上传的文件，包含菜单信息。
+     * @return 操作结果。
+     */
     /**
      * 更新菜单列表
      *
@@ -65,6 +80,12 @@ public class ActivMenuController {
         return ResultCommon.success();
     }
 
+    /**
+     * 根据激活配置查询菜单树。
+     *
+     * @param actives 激活的配置列表。
+     * @return 菜单树结构。
+     */
     /**
      * 根据激活配置查询所有菜单
      *
@@ -86,6 +107,12 @@ public class ActivMenuController {
     }
 
     /**
+     * 刷新默认菜单模板。
+     *
+     * @param template 菜单模板信息。
+     * @return 刷新后的菜单模板信息。
+     */
+    /**
      * 刷新默认菜单模板
      *
      * @param template
@@ -98,6 +125,12 @@ public class ActivMenuController {
         return new ServiceResult(result).asResult();
     }
 
+    /**
+     * 新增菜单模板。
+     *
+     * @param template 菜单模板信息，包含模板内容和可选的角色ID。
+     * @return 新增后的菜单模板信息。
+     */
     /**
      * 新增一套模板
      *
@@ -118,6 +151,12 @@ public class ActivMenuController {
     }
 
     /**
+     * 导入并覆盖默认菜单模板。
+     *
+     * @param file 上传的文件，包含新的菜单模板信息。
+     * @return 导入后的菜单模板信息。
+     */
+    /**
      * 导入并覆盖默认菜单模板
      *
      * @param file
@@ -130,6 +169,12 @@ public class ActivMenuController {
         return new ServiceResult(result).asResult();
     }
 
+    /**
+     * 更新角色与菜单模板的关联关系。
+     *
+     * @param roleTemplate 角色与模板的关联信息。
+     * @return 更新结果。
+     */
     /**
      * 修改角色和模板的关联关系
      *
