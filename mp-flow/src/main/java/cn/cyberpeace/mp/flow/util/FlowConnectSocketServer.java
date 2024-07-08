@@ -45,6 +45,7 @@ public class FlowConnectSocketServer {
         try {
             flowTaskRecordService.syncRecord(jsonMessage);
         }catch (Exception e){
+            log.error("error", e);
             e.printStackTrace();
         }
     }
