@@ -153,57 +153,11 @@ public class CreateHandler extends HandlerCommon {
         // 绑定探针agent到探针采集器
         String probeCollectorId = getPluginHandler().getScene().getProbeCollector();
         if (!StringUtils.isEmpty(probeCollectorId)) {
-            List<CollectionPluginSceneElementBO> containerElements = getPluginHandler().getElementMap().values().stream()
-                    .filter(e -> Boolean.TRUE.equals(e.getEnableProbeCollect()))
-                    .filter(e -> {
-                        // 非macvlan模式下的容器 且 有探针安装需要的可以加路由
-                        CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(e.getSrcElement().getId());
-                        if (cloudElement == null || cloudElement.getVirtualType() == null) {
-                            return false;
-                        }
-                        if (cloudElement.getVirtualType() != BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
-                            return false;
-                        }
-                        List<ConnectedNetworkBO> allNets = new ArrayList<>();
-                        allNets.addAll(Optional.ofNullable(cloudElement.getAccessNetworks()).orElse(new ArrayList<>()));
-                        allNets.addAll(Optional.ofNullable(cloudElement.getDeriveNetworks()).orElse(new ArrayList<>()));
-                        boolean normalNet = true;
-                        for (ConnectedNetworkBO net : allNets) {
-                            net.getNetwork().getNetMode();
-                            if (BaseCloudPluginSceneElementModel.NetMode.MACVLAN.equals(net.getNetwork().getNetMode())) {
-                                normalNet = false;
-                                break;
-                            }
-                        }
-                        return normalNet;
-                    })
-                    .collect(Collectors.toList());
-            if (CollectionUtils.isNotEmpty(containerElements)) {
-                Container container = new Container();
-                List<Runnable> addRouterTasks = containerElements.stream().filter(c -> {
-                    CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(c.getSrcElement().getId());
-                            if (cloudElement != null && StringUtils.isNotEmpty(cloudElement.getResourceId())) {
-                                return true;
-                            } else {
-                                return false;
-                            }
-                        })
-                        .map(e -> {
-                            CloudPluginSceneElementBO cloudElement = cloudPluginHandler.getElement(e.getSrcElement().getId());
-                            return (Runnable) () -> container.addRoute(cloudElement.getResourceId());
-                        })
-                        .collect(Collectors.toList());
-//                runTasks(addRouterTasks);
-            }
-
             getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CollectionSceneStage.CREATE_DATA_COLLECT);
 
             runSceneProgress(SceneProcess.CREATE_PROBE_ROUTER, this::updateProbeRouterPort);
 
             getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_DATA_COLLECT);
-
-
-
 
         }
         getPluginHandler().getScene().setProbeRouter(getPluginHandler().getSceneHandler().getProbeRouter());

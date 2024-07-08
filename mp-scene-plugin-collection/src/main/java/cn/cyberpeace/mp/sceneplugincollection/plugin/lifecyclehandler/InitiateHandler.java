@@ -233,10 +233,6 @@ public class InitiateHandler extends HandlerCommon {
                         initCommands.addAll(probeInstallScript);
                     }
 
-                    //首先添加路由信息，防止缺失路由，导致无法和mp通信
-                    String addCollectRouteCommand = getElementCollectRouteCommand(cloudElement);
-                    initCommands.add(0, addCollectRouteCommand);
-
                     srcElement.setInitCommands(initCommands);
                 });
             });
@@ -248,22 +244,34 @@ public class InitiateHandler extends HandlerCommon {
     }
 
     /**
-     * getElementCollectRouteCommand
+     * 根据云元素获取收集路由命令
+     * 此方法用于根据给定的云元素信息，构建用于收集路由的命令。它首先整合了云元素的所有连接网络，
+     * 然后检查这些网络中的主机路由，如果找到与外部网络CIDR匹配的路由，就构建并返回收集路由的命令。
+     * 如果没有找到匹配的路由，则返回空字符串。
      *
-     * @param cloudElement
-     * @return
+     * @param cloudElement 云插件场景元素业务对象，包含了云元素的连接和访问网络信息。
+     * @return 返回收集路由的命令字符串，如果没有匹配的路由则返回空字符串。
      */
     private String getElementCollectRouteCommand(CloudPluginSceneElementBO cloudElement) {
+        // 初始化路由命令字符串为空
         String routeCommand = "";
+        // 综合云元素的衍生网络和访问网络，形成所有连接网络的列表
         List<ConnectedNetworkBO> allConnectNetworks = new ArrayList<>(cloudElement.getDeriveNetworks());
         allConnectNetworks.addAll(cloudElement.getAccessNetworks());
 
+        // 获取外部网络的CIDR
         String externalCidr = CloudSingleton.cloudAppConfig.getExternalNetCidr();
+        // 如果连接网络列表不为空
         if (CollectionUtils.isNotEmpty(allConnectNetworks)) {
+            // 遍历所有连接网络
             for (ConnectedNetworkBO network : allConnectNetworks) {
+                // 如果当前网络的主机路由不为空
                 if (CollectionUtils.isNotEmpty(network.getNetwork().getHostRoutes())) {
+                    // 遍历当前网络的主机路由
                     for (HostRoute hostRoute : network.getNetwork().getHostRoutes()) {
+                        // 如果找到与外部网络CIDR匹配的路由
                         if (externalCidr.equals(hostRoute.getDestination())) {
+                            // 构建并返回收集路由的命令
                             return addCollectRouteCommandWhenInit(externalCidr, hostRoute.getNexthop(), cloudElement.getSrcElement());
                         }
                     }
@@ -271,11 +279,23 @@ public class InitiateHandler extends HandlerCommon {
             }
         }
 
+        // 如果没有找到匹配的路由，记录错误日志
         log.error("get element collect route failed!!!");
+        // 返回空字符串
         return routeCommand;
     }
 
 
+
+    /**
+     * 根据系统类型生成添加采集路由的命令。
+     * 该方法用于在系统初始化时，根据源元素的系统类型生成对应的添加路由命令，以确保数据采集的路由正确配置。
+     *
+     * @param externalCidr 外部网络的CIDR格式地址，用于指定路由的目标网络。
+     * @param gatewayIp 路由的网关IP，即数据将通过该IP转发到外部网络。
+     * @param srcElement 源元素对象，包含需要获取系统类型的信息，用于判断生成哪种系统的路由命令。
+     * @return 返回生成的路由命令字符串。如果系统类型不是Linux或Windows，则返回空字符串。
+     */
     /**
      * 添加采集路由
      *
@@ -285,18 +305,33 @@ public class InitiateHandler extends HandlerCommon {
      * @return
      */
     private String addCollectRouteCommandWhenInit(String externalCidr, String gatewayIp, SceneElementBO srcElement) {
+        // 获取源元素的标准化系统类型
         String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
+
+        // 根据系统类型生成对应的路由命令
         if (SystemTypeCommandUtils.isLinux(systemType)) {
             return getLinuxAddRouteCommand(externalCidr, gatewayIp);
         } else if (SystemTypeCommandUtils.isWindows(systemType)) {
             return getWindowsAddRouteCommand(externalCidr, gatewayIp);
         } else {
+            // 如果系统类型既不是Linux也不是Windows，则记录错误并返回空字符串
             log.error("system type not windows or linux, gen collect route command failed!!!");
             return "";
         }
     }
 
 
+
+    /**
+     * 根据不同的操作系统命令行工具，生成在Linux系统中添加路由的命令。
+     * 由于不同的Linux发行版可能使用不同的命令行工具来管理网络路由（如ip命令或route命令），
+     * 此方法旨在提供一种兼容性方案，自动检测可用的命令行工具并生成相应的路由添加命令。
+     *
+     * @param externalCidr 外部网络的CIDR格式地址块，例如192.168.1.0/24。
+     * @param gatewayIp 外部网络的网关IP地址。
+     * @return 返回一个字符串，包含用于添加路由的Shell命令。如果既找不到ip命令也找不到route命令，
+     *         则返回一个提示信息。
+     */
     /**
      * getLinuxAddRouteCommand
      *
@@ -305,6 +340,9 @@ public class InitiateHandler extends HandlerCommon {
      * @return
      */
     private String getLinuxAddRouteCommand(String externalCidr, String gatewayIp) {
+        // 构造一个条件判断语句，用于根据系统中可用的命令行工具来添加路由。
+        // 首先尝试使用ip命令，如果不可用，则尝试使用route命令。
+        // 如果两个命令都不可用，则输出错误提示信息。
         String addRouteCommand = "if command -v ip > /dev/null; then\n" +
                 String.format("    ip route add %s via %s\n", externalCidr, gatewayIp) +
                 "elif command -v route > /dev/null; then\n" +
@@ -313,11 +351,9 @@ public class InitiateHandler extends HandlerCommon {
                 "    echo \"Neither 'ip' nor 'route' command found.\"\n" +
                 "fi\n";
 
-
-
-
         return addRouteCommand;
     }
+
 
     /**
      * getWindowsAddRouteCommand
