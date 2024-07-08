@@ -17,7 +17,7 @@ public class AggregationConfig {
     @Value("${spring.web.resources.static-locations}")
     private String staticLocation;
 
-    @Value("${mp.aggregation.export-image-timeout:1200000}")
+    @Value("${mp.aggregation.export-image-timeout:3600000}")
     private Integer exportImageTimeout;
 
 }
