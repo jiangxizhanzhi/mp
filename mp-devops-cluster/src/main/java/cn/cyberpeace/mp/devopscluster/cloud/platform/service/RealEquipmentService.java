@@ -157,7 +157,10 @@ public class RealEquipmentService extends BaseCpService {
     public CloudPlatformPageResult<RealEquipmentByParams> findBySwitchName(String switchName){
         CloudPlatformItemsPageResult pageResult =  super.sendGet(SWITCH_CONNECT_ENTITY_DETAIL+"?switch_name=" + switchName,CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
-        List<RealEquipmentByParams> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getData().getItems()),RealEquipmentByParams.class);
+        List<RealEquipmentByParams> list = new ArrayList<>();
+        if (null != pageResult.getData()){
+            list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getData().getItems()),RealEquipmentByParams.class);
+        }
         POLogoUtils.changeLogoPathToUrl(list);
         CloudPlatformPageResult<RealEquipmentByParams> model = new CloudPlatformPageResult<>();
         model.setList(list);
