@@ -526,7 +526,7 @@ public class DataCollectionService extends CollectionBaseService {
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        log.info("monitor JSON query index:{}, DSL: {}", indexArray, searchRequest.source().toString());
+        log.debug("monitor JSON query index:{}, DSL: {}", indexArray, searchRequest.source().toString());
 
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
@@ -905,7 +905,7 @@ public class DataCollectionService extends CollectionBaseService {
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        log.info("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
+        log.debug("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
 
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
@@ -955,7 +955,7 @@ public class DataCollectionService extends CollectionBaseService {
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        log.info("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
+        log.debug("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
 
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
@@ -1073,7 +1073,7 @@ public class DataCollectionService extends CollectionBaseService {
         searchRequest.source(sourceBuilder);
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
-        log.info("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
+        log.debug("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             if (Objects.nonNull(response.getAggregations())) {
@@ -1122,7 +1122,7 @@ public class DataCollectionService extends CollectionBaseService {
         searchRequest.source(sourceBuilder);
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
-        log.info("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
+        log.debug("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             if (Objects.nonNull(response.getAggregations())) {
@@ -1175,7 +1175,7 @@ public class DataCollectionService extends CollectionBaseService {
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        log.info("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
+        log.debug("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
 
         int changedCount = 0;
         try {

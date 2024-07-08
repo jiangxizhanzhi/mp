@@ -117,7 +117,7 @@ public class CsceneFlowService {
      * @param request
      */
     public void addTask(AddFlowTaskTaskRequest request) {
-        log.info("CsceneFlowService.addTask begin. request:{}", request);
+        log.debug("CsceneFlowService.addTask begin. request:{}", request);
         var sceneId = csceneInstanceService.getSceneId(request.getId());
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
@@ -149,7 +149,7 @@ public class CsceneFlowService {
 
         TaskCommon.executeTask(() -> asyncAddTask(sceneId, request.getDetails(), flowTaskTaskModelList));
 
-        log.info("CsceneFlowService.addTask end.");
+        log.debug("CsceneFlowService.addTask end.");
     }
 
     public void asyncAddTask(String sceneId, List<AddFlowTaskTaskDetail> addFlowTaskTaskDetails, List<FlowTaskTaskModel> flowTaskTaskModelList) {
@@ -229,14 +229,14 @@ public class CsceneFlowService {
      */
     @Transactional
     public void deleteTask(String id) {
-        log.info("CsceneFlowService.deleteTask begin. id:{}", id);
+        log.debug("CsceneFlowService.deleteTask begin. id:{}", id);
         flowTaskTaskService.delete(id);
         FlowTaskConfModel flowTaskConfModel = flowTaskConfService.findByTaskId(id);
         if (flowTaskConfModel != null) {
             flowTaskConfService.delete(flowTaskConfModel.getId());
         }
         flowTaskRecordService.deleteByTaskId(id);
-        log.info("CsceneFlowService.deleteTask end.");
+        log.debug("CsceneFlowService.deleteTask end.");
     }
 
     /**
@@ -245,7 +245,7 @@ public class CsceneFlowService {
      * @param request
      */
     public void editTaskConf(EditFlowTaskConfRequest request) {
-        log.info("CsceneFlowService.editTaskConf begin. request:{}", request);
+        log.debug("CsceneFlowService.editTaskConf begin. request:{}", request);
         FlowTaskConf flowTaskConf = request.getFlowTaskConf();
         FlowTaskConfModel flowTaskConfModel = flowTaskConfService.findByTaskId(request.getTaskId());
         flowTaskConfModel.setKeepRunning(request.getKeepRunning());
@@ -253,7 +253,7 @@ public class CsceneFlowService {
         flowTaskConfModel.setRateUnlimited(request.getRateUnlimited());
         flowTaskConfModel.setConf(JsonCommon.stringify(flowTaskConf));
         flowTaskConfService.update(flowTaskConfModel);
-        log.info("CsceneFlowService.editTaskConf end.");
+        log.debug("CsceneFlowService.editTaskConf end.");
     }
 
     /**
@@ -263,7 +263,7 @@ public class CsceneFlowService {
      * @return
      */
     public ListObjServiceResult<FlowTaskPageResponse> taskList(FlowTaskPageQueryParams request) {
-        log.info("CsceneFlowService.taskList begin. request:{}", request);
+        log.debug("CsceneFlowService.taskList begin. request:{}", request);
         String sceneId = csceneInstanceService.getSceneId(request.getId());
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
@@ -298,7 +298,7 @@ public class CsceneFlowService {
         }
 
         ListObjServiceResult<FlowTaskPageResponse> result = new ListObjServiceResult(new ListObjResult<>(flowTaskPageResponseList, total).asResult()).asResult();
-        log.info("CsceneFlowService.taskList end. result:{}", result);
+        log.debug("CsceneFlowService.taskList end. result:{}", result);
         return result;
     }
 
@@ -330,13 +330,13 @@ public class CsceneFlowService {
      * @return
      */
     public QueryFlowTaskConfResponse queryConfByTaskId(String taskId) {
-        log.info("CsceneFlowService.queryConfByTaskId begin. taskId:{}", taskId);
+        log.debug("CsceneFlowService.queryConfByTaskId begin. taskId:{}", taskId);
         QueryFlowTaskConfResponse result = new QueryFlowTaskConfResponse();
         FlowTaskConfModel flowTaskConfModel = flowTaskConfService.findByTaskId(taskId);
         BeanUtils.copyProperties(flowTaskConfModel, result);
         FlowTaskConf flowTaskConf = JsonCommon.parse(flowTaskConfModel.getConf(), FlowTaskConf.class);
         result.setFlowTaskConf(flowTaskConf);
-        log.info("CsceneFlowService.queryConfByTaskId end. result:{}", result);
+        log.debug("CsceneFlowService.queryConfByTaskId end. result:{}", result);
         return result;
     }
 
@@ -347,13 +347,13 @@ public class CsceneFlowService {
      * @return
      */
     public FlowSummary queryFlowSummary(String id) {
-        log.info("CsceneFlowService.queryFlowSummary begin. id:{}", id);
+        log.debug("CsceneFlowService.queryFlowSummary begin. id:{}", id);
         String sceneId = csceneInstanceService.getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
         }
         FlowSummary flowSummary = flowTaskRecordService.queryFlowSummary(sceneId);
-        log.info("CsceneFlowService.queryFlowSummary end. flowSummary:{}", flowSummary);
+        log.debug("CsceneFlowService.queryFlowSummary end. flowSummary:{}", flowSummary);
         return flowSummary;
     }
 
@@ -364,7 +364,7 @@ public class CsceneFlowService {
      * @return
      */
     public List<FlowNodeTxBps> top5NodeTxBps(String id) {
-        log.info("CsceneFlowService.top5NodeTxBps begin. id:{}", id);
+        log.debug("CsceneFlowService.top5NodeTxBps begin. id:{}", id);
         String sceneId = csceneInstanceService.getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
@@ -373,7 +373,7 @@ public class CsceneFlowService {
         if (CollectionUtils.isNotEmpty(flowNodeTxBpsList) && flowNodeTxBpsList.size() > 5) {
             flowNodeTxBpsList = flowNodeTxBpsList.subList(0, 5);
         }
-        log.info("CsceneFlowService.top5NodeTxBps end. flowNodeTxBpsList:{}", flowNodeTxBpsList);
+        log.debug("CsceneFlowService.top5NodeTxBps end. flowNodeTxBpsList:{}", flowNodeTxBpsList);
         return flowNodeTxBpsList;
     }
 
@@ -384,7 +384,7 @@ public class CsceneFlowService {
      * @return
      */
     public ArrayNode top5Protocols(String id) {
-        log.info("CsceneFlowService.top5Protocols begin. id:{}", id);
+        log.debug("CsceneFlowService.top5Protocols begin. id:{}", id);
         ArrayNode protocols = JsonCommon.createArrayNode();
         String sceneId = csceneInstanceService.getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
@@ -415,7 +415,7 @@ public class CsceneFlowService {
                 }
             }
         }
-        log.info("CsceneFlowService.top5Protocols end. protocols:{}", protocols);
+        log.debug("CsceneFlowService.top5Protocols end. protocols:{}", protocols);
         return protocols;
     }
 
@@ -426,13 +426,13 @@ public class CsceneFlowService {
      * @return
      */
     public FlowStatisticsInfo flowStatistics(String id) {
-        log.info("CsceneFlowService.flowStatistics begin. id:{}", id);
+        log.debug("CsceneFlowService.flowStatistics begin. id:{}", id);
         String sceneId = csceneInstanceService.getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
         }
         FlowStatisticsInfo flowStatisticsInfo = flowTaskRecordService.flowStatistics(sceneId);
-        log.info("CsceneFlowService.flowStatistics end. flowStatisticsInfo:{}", flowStatisticsInfo);
+        log.debug("CsceneFlowService.flowStatistics end. flowStatisticsInfo:{}", flowStatisticsInfo);
         return flowStatisticsInfo;
     }
 
@@ -443,7 +443,7 @@ public class CsceneFlowService {
      * @return
      */
     public FlowStatisticsAll flowStatisticsAll(String id) {
-        log.info("CsceneFlowService.flowStatisticsAll begin. id:{}", id);
+        log.debug("CsceneFlowService.flowStatisticsAll begin. id:{}", id);
         String sceneId = csceneInstanceService.getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
@@ -454,7 +454,7 @@ public class CsceneFlowService {
         flowStatisticsAll.setTop5NodeTxBpsList(this.top5NodeTxBps(id));
         flowStatisticsAll.setTop5Protocols(this.top5Protocols(id));
         flowStatisticsAll.setTotalRateList(this.totalRate(id));
-        log.info("CsceneFlowService.flowStatisticsAll end. flowStatisticsAll:{}", flowStatisticsAll);
+        log.debug("CsceneFlowService.flowStatisticsAll end. flowStatisticsAll:{}", flowStatisticsAll);
         return flowStatisticsAll;
     }
 
@@ -464,9 +464,9 @@ public class CsceneFlowService {
      * @param taskId
      */
     public void startTask(String taskId) {
-        log.info("CsceneFlowService.startTask begin. taskId:{}", taskId);
+        log.debug("CsceneFlowService.startTask begin. taskId:{}", taskId);
         asyncPlatFlowTaskService.startTask(taskId, null);
-        log.info("CsceneFlowService.startTask end.");
+        log.debug("CsceneFlowService.startTask end.");
     }
 
     /**
@@ -475,9 +475,9 @@ public class CsceneFlowService {
      * @param taskIds
      */
     public void batchStartTasks(List<String> taskIds) {
-        log.info("CsceneFlowService.batchStartTasks begin. taskIds:{}", taskIds);
+        log.debug("CsceneFlowService.batchStartTasks begin. taskIds:{}", taskIds);
         asyncPlatFlowTaskService.batchStartTasks(taskIds, null);
-        log.info("CsceneFlowService.batchStartTasks end.");
+        log.debug("CsceneFlowService.batchStartTasks end.");
     }
 
     /**
@@ -486,9 +486,9 @@ public class CsceneFlowService {
      * @param taskId
      */
     public void stopTask(String taskId) {
-        log.info("CsceneFlowService.stopTask begin. taskId:{}", taskId);
+        log.debug("CsceneFlowService.stopTask begin. taskId:{}", taskId);
         asyncPlatFlowTaskService.stopTask(taskId);
-        log.info("CsceneFlowService.stopTask end.");
+        log.debug("CsceneFlowService.stopTask end.");
     }
 
     /**
@@ -497,9 +497,9 @@ public class CsceneFlowService {
      * @param taskIds
      */
     public void batchStopTasks(List<String> taskIds) {
-        log.info("CsceneFlowService.batchStopTasks begin. taskIds:{}", taskIds);
+        log.debug("CsceneFlowService.batchStopTasks begin. taskIds:{}", taskIds);
         asyncPlatFlowTaskService.batchStopTasks(taskIds);
-        log.info("CsceneFlowService.batchStopTasks end.");
+        log.debug("CsceneFlowService.batchStopTasks end.");
     }
 
     /**
@@ -509,7 +509,7 @@ public class CsceneFlowService {
      * @return
      */
     public List<FlowTaskNode> nodeOption(String id) {
-        log.info("CsceneFlowService.nodeOption begin. id:{}", id);
+        log.debug("CsceneFlowService.nodeOption begin. id:{}", id);
         var sceneId = csceneInstanceService.getSceneId(id);
         List<FlowTaskNode> nodeList = flowTaskTaskService.nodeList(sceneId);
 
@@ -529,7 +529,7 @@ public class CsceneFlowService {
 
         nodeList = nodeList.stream().distinct().collect(Collectors.toList());
 
-        log.info("CsceneFlowService.nodeOption end. nodeList:{}", nodeList);
+        log.debug("CsceneFlowService.nodeOption end. nodeList:{}", nodeList);
         return nodeList;
     }
 
@@ -539,7 +539,7 @@ public class CsceneFlowService {
      * @return
      */
     public List<FlowStatisticsDetail> totalRate(String id) {
-        log.info("CsceneFlowService.totalRate begin. id:{}", id);
+        log.debug("CsceneFlowService.totalRate begin. id:{}", id);
         var sceneId = csceneInstanceService.getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_STARTED);
@@ -576,7 +576,7 @@ public class CsceneFlowService {
                 }
             }
         }
-        log.info("CsceneFlowService.totalRate end. result:{}", result);
+        log.debug("CsceneFlowService.totalRate end. result:{}", result);
         return result;
     }
 
@@ -586,7 +586,7 @@ public class CsceneFlowService {
      * @return
      */
     private List<FlowStatisticalCondition> getRealTimeCondition() {
-        log.info("CsceneFlowService.getRealTimeCondition begin.");
+        log.debug("CsceneFlowService.getRealTimeCondition begin.");
         LocalDateTime endTime = LocalDateTime.now();
         LocalDateTime startTime = endTime.plusSeconds(-300);
         List<FlowStatisticalCondition> queryList = new ArrayList<FlowStatisticalCondition>();
@@ -601,7 +601,7 @@ public class CsceneFlowService {
             endTime = endTime.minusSeconds(5);
             offSet -= 10;
         }
-        log.info("CsceneFlowService.getRealTimeCondition end. queryList:{}", queryList);
+        log.debug("CsceneFlowService.getRealTimeCondition end. queryList:{}", queryList);
         return queryList;
     }
 

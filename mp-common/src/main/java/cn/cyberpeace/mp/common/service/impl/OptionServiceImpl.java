@@ -103,7 +103,7 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
      */
     @Override
     public ListObjServiceResult<OptionModelBO> page(OptionQueryParams queryParams) {
-        log.info("OptionServiceImpl.page begin. queryParams:{}", queryParams);
+        log.debug("OptionServiceImpl.page begin. queryParams:{}", queryParams);
         ListObjServiceResult<OptionModel> listObjServiceResult = this.list(queryParams);
         Locale locale = LocaleContextHolder.getLocale();
         List<OptionModelBO> boList = new ArrayList<>();
@@ -120,7 +120,7 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
             }
         }
         ListObjServiceResult<OptionModelBO> result = new ListObjServiceResult<>(new ListObjResult<>(boList, listObjServiceResult.getSource().getTotal())).asResult();
-        log.info("OptionServiceImpl.page end. result:{}", result);
+        log.debug("OptionServiceImpl.page end. result:{}", result);
         return result;
     }
 

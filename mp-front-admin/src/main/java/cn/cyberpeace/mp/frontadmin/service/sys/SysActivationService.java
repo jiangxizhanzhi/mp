@@ -299,11 +299,11 @@ public class SysActivationService {
 
         if (Objects.isNull(ACTIVATION_CONTENT)) {
             ActivationResponse activationResponse = parseContentFromDecrpytedFile();
-            log.info("activationResponse from file: {}", activationResponse);
+            log.debug("activationResponse from file: {}", activationResponse);
             ACTIVATION_CONTENT = activationResponse;
         }
 
-        log.info("before processActived status: {}", ACTIVATION_CONTENT);
+        log.debug("before processActived status: {}", ACTIVATION_CONTENT);
         processActivedStatus();
 
         return ACTIVATION_CONTENT;
@@ -431,7 +431,7 @@ public class SysActivationService {
                     if (StringUtils.isNotBlank(sysLifeTimeSecondsStr) && StringUtils.isNotBlank(currentRunSecondsStr)) {
                         Long currentRunSeconds = Long.valueOf(EncryptUtils.desDecrypt(currentRunSecondsStr));
                         Long sysLifeTimeSeconds = Long.valueOf(EncryptUtils.desDecrypt(sysLifeTimeSecondsStr));
-                        log.info("currentRunSeconds:{}, sysLifeTimeSeconds:{}", currentRunSeconds, sysLifeTimeSeconds);
+                        log.debug("currentRunSeconds:{}, sysLifeTimeSeconds:{}", currentRunSeconds, sysLifeTimeSeconds);
                         if (currentRunSeconds > sysLifeTimeSeconds) {
                             isRunSecondsExceeded = true;
                         }

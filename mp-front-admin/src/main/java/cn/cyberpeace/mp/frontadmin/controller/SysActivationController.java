@@ -58,7 +58,7 @@ public class SysActivationController {
     @ApiOperation("查询激活选项内容")
     @GetMapping("/status")
     public ServiceResult<ActivationResponse> status() {
-        log.info("query activation status...");
+        log.debug("query activation status...");
         ActivationResponse content = getActivationResponse();
         if (content != null && AdminConstant.STATUS_NOT_ACTIVITED == content.getIsActived()) {
             content = new ActivationResponse();

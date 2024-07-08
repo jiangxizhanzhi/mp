@@ -1019,9 +1019,9 @@ public class ScenePluginCloudSceneService {
      * @return
      */
     public NetworkFlowRateResult networkFlowRate(List<String> portIds, Long totalSecond) {
-        log.info("ScenePluginCloudSceneService.networkFlowRate begin. portIds:{}", portIds);
+        log.debug("ScenePluginCloudSceneService.networkFlowRate begin. portIds:{}", portIds);
         NetworkFlowRateResult result = new Remote().networkFlowRate(portIds, totalSecond);
-        log.info("ScenePluginCloudSceneService.networkFlowRate end. result:{}", result);
+        log.debug("ScenePluginCloudSceneService.networkFlowRate end. result:{}", result);
         return result;
     }
 }

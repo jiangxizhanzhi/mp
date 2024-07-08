@@ -202,7 +202,7 @@ public class LogFileService {
      * @return
      */
     public List<LogFileDownloadUrlDto> getDownloadUrls(LogFileDownloadUrlRequest request) {
-        log.info("downloadurl request:{}", request);
+        log.debug("downloadurl request:{}", request);
         if (Objects.isNull(request) || CollectionUtil.isEmpty(request.getPaths())) {
             return Collections.emptyList();
         }
@@ -239,7 +239,7 @@ public class LogFileService {
             }
         });
 
-        log.info("downloadUrlDtos:{}", dtos);
+        log.debug("downloadUrlDtos:{}", dtos);
         return dtos;
     }
 

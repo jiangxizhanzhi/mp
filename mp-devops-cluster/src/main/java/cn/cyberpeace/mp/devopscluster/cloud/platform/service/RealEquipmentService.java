@@ -187,7 +187,7 @@ public class RealEquipmentService extends BaseCpService {
      * @return
      */
     public List<Hypervisor> hypervisorList() {
-        log.info("RealEquipmentService.hypervisorList begin.");
+        log.debug("RealEquipmentService.hypervisorList begin.");
         CloudPlatformResult result = super.sendGet(URL_VERSION + "/hypervisors", CloudPlatformResult.class);
         super.checkResult(result);
         List<Hypervisor> hypervisorList = JSONObject.parseArray(JSONObject.toJSONString(((JSONObject)result.getData()).getJSONArray("list")), Hypervisor.class);
@@ -199,7 +199,7 @@ public class RealEquipmentService extends BaseCpService {
                 }
             }
         }
-        log.info("RealEquipmentService.hypervisorList end. rtnList:{}", rtnList);
+        log.debug("RealEquipmentService.hypervisorList end. rtnList:{}", rtnList);
         return rtnList;
     }
 
@@ -208,7 +208,7 @@ public class RealEquipmentService extends BaseCpService {
      * @return
      */
     public ListObjServiceResult<EntityUsb> physicalUsbListByHost(String hostName) {
-        log.info("RealEquipmentService.physicalUsbListByHost begin. hostName:{}", hostName);
+        log.debug("RealEquipmentService.physicalUsbListByHost begin. hostName:{}", hostName);
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY_USB + "?host=" + hostName, CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<EntityUsb> responseList = new ArrayList<>();
@@ -217,7 +217,7 @@ public class RealEquipmentService extends BaseCpService {
             count = pageResult.getTotal();
             responseList = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), EntityUsb.class);
         }
-        log.info("RealEquipmentService.physicalUsbListByHost end.");
+        log.debug("RealEquipmentService.physicalUsbListByHost end.");
         return new ListObjServiceResult(new ListObjResult<>(responseList, count)).asResult();
     }
 }
