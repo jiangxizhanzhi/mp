@@ -214,7 +214,12 @@ public class CloudSceneConnectionCommon {
             if (BaseSceneModel.CloudType.DEFAULT != cloudType) {
                 CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
                 CloudPluginSceneElementBO element = pluginHandler.getElement(sceneElementId);
-                connectionParams.setHostname(element.getMgmtIp());
+                if(element.getIsPublicIp()){
+                    connectionParams.setHostname(element.getPublicIpAddress());
+                }else {
+//                    TODO 后期换成管理网络
+                    connectionParams.setHostname(sceneConnection.getAccessIp());
+                }
             } else {
                 connectionParams.setHostname(sceneConnection.getAccessIp());
             }
