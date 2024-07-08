@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.azure.functionrequest;
 
+import com.azure.resourcemanager.network.models.Network;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,11 +27,8 @@ public class FireWallCreateRequestBody {
     private String sku;
 
     //防火墙策略
-    private String firewallPolicy;
+    private FirewallPolicy firewallPolicy;
 
     //虚拟网络
-    private String virtualNetwork;
-
-    //公共ip地址
-    private String publicIpAddress;
+    private Network virtualNetwork;
 }
