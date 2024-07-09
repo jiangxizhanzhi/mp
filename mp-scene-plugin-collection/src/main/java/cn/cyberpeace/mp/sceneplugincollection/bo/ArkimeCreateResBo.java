@@ -13,4 +13,5 @@ import lombok.Data;
 public class ArkimeCreateResBo {
     private String resourceId;
     private String ip;
+    private String arkimeContainerId;
 }

@@ -38,6 +38,12 @@ public class Container extends CloudClient {
 
     private static final String CONTAINER_ID = "{container_id}";
 
+    public ContainerGetData get(String containerId) {
+        CloudResponse<ContainerGetData> result = cloudGet(CloudUrlConstant.GET_CONTAINER_URL.replace("{container_id}", containerId), null, new TypeReference<CloudResponse<ContainerGetData>>() {
+        }, true);
+        return result.getData();
+    }
+
 
     /**
      * create

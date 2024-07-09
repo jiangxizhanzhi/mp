@@ -2194,13 +2194,13 @@ public class ScenePluginCollectionSceneService {
             return new ServiceResult<>(model.getFlowFile());
         }
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Lists.newArrayList(sceneId), null);
-        List<String> flowCollectors = batchSceneHandler.getFlowCollectors();
+        List<String> flowCollectors = batchSceneHandler.getFlowCollectorContainerIds();
         if (CollectionUtils.isEmpty(flowCollectors)) {
             log.error("find no flowCollectors by sceneId {}", sceneId);
             return new ServiceResult<>(StringUtils.EMPTY);
         }
-        String containName = flowCollectors.get(0);
-        ServiceResult<String> result = this.exportFlowPcap(sceneId, containName, taskId);
+        String containId = flowCollectors.get(0);
+        ServiceResult<String> result = this.exportFlowPcap(sceneId, containId, taskId);
         return result;
     }
 
@@ -2230,16 +2230,16 @@ public class ScenePluginCollectionSceneService {
      * exportFlowPcap
      *
      * @param sceneId
-     * @param containName
+     * @param containId
      * @param taskId
      * @return
      */
-    public ServiceResult<String> exportFlowPcap(String sceneId, String containName, String taskId) {
+    public ServiceResult<String> exportFlowPcap(String sceneId, String containId, String taskId) {
         // containerName -> containerId
         Container container = new Container();
-        ContainerGetData containerResult = container.getContainerByName(containName);
+        ContainerGetData containerResult = container.get(containId);
         if (containerResult == null) {
-            log.error("find no containerId by containName {}", containName);
+            log.error("find no containerId by containName {}", containId);
             return new ServiceResult<>(StringUtils.EMPTY);
         }
         String containerId = containerResult.getId();

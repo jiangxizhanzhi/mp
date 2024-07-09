@@ -29,6 +29,9 @@ public class CollectionPluginSceneBO extends BaseCollectionPluginSceneBO<Collect
     @ApiModelProperty(value = "流量采集id")
     private String flowCollector;
 
+    @ApiModelProperty(value = "流量采集器即arkime容器的id")
+    private String flowCollectorContainerId;
+
     @ApiModelProperty(value = "流量镜像id")
     private String flowMirrorId;
 

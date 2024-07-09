@@ -89,6 +89,7 @@ public class FlowCollectClient {
         ArkimeCreateResBo arkimeCreateResBo = new ArkimeCreateResBo();
         arkimeCreateResBo.setIp(fixedIp);
         arkimeCreateResBo.setResourceId(arkimePrefixId);
+        arkimeCreateResBo.setArkimeContainerId(createData.getId());
         return arkimeCreateResBo;
 
     }
@@ -99,15 +100,9 @@ public class FlowCollectClient {
      * @param instanceId
      */
     public void delArkimeInstance(String instanceId) {
-        final Container container = new Container();
-        final ContainerGetData containerGetData = container.getContainerByName(instanceId);
-        if (containerGetData == null) {
-            log.error("delArkimeInstance find no containerId by containName {}", instanceId);
-        } else {
-            ContainerDeleteData containerDeleteData = new ContainerDeleteData();
-            containerDeleteData.setContainers(Lists.newArrayList(containerGetData.getId()));
-            containerClient.delete(containerDeleteData);
-        }
+        ContainerDeleteData containerDeleteData = new ContainerDeleteData();
+        containerDeleteData.setContainers(Lists.newArrayList(instanceId));
+        containerClient.delete(containerDeleteData);
     }
 
     /**

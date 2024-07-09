@@ -77,7 +77,7 @@ public class DeleteHandler extends HandlerCommon {
                 getFlowCollector().deleteCollector(new DeleteFlowCollectBo()
                         .setFlowMirrorId(scene.getFlowMirrorId())
                         .setSceneId(getPluginHandler().getSceneHandler().getSceneId())
-                        .setCollectorInstanceId(scene.getFlowCollector()));
+                        .setCollectorInstanceId(scene.getFlowCollectorContainerId()));
             });
         }
 

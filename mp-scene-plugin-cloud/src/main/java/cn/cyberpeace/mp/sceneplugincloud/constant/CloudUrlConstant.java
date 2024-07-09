@@ -49,6 +49,8 @@ public class CloudUrlConstant {
 
     public static final String DELETE_CONTAINER_URL = "/cloud/v1/container/{container_id}";
 
+    public static final String GET_CONTAINER_URL = "/cloud/v1/container/{container_id}";
+
 
     /**
      * 容器创建接口，这个是必须的

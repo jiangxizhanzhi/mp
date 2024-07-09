@@ -24,6 +24,9 @@ public class CollectionPluginSceneModel extends BaseCollectionPluginSceneModel {
     private String flowCollector;
 
     @DefaultStr
+    private String flowCollectorContainerId;
+
+    @DefaultStr
     private String probeCollector;
 
     @DefaultStr

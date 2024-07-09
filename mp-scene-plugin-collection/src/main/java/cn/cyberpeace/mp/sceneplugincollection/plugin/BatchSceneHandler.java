@@ -36,6 +36,8 @@ public class BatchSceneHandler {
 
     private List<String> flowCollectors = new ArrayList<>();
 
+    private List<String> flowCollectorContainerIds = new ArrayList<>();
+
     private List<String> probeCollectors = new ArrayList<>();
 
     private Set<String> flowCollectEnabledMacAddrs = new HashSet<>();
@@ -126,6 +128,10 @@ public class BatchSceneHandler {
      */
     public List<String> getFlowCollectors() {
         return flowCollectors;
+    }
+
+    public List<String> getFlowCollectorContainerIds() {
+        return flowCollectorContainerIds;
     }
 
     /**
@@ -376,6 +382,7 @@ public class BatchSceneHandler {
             if (pluginHandler != null && pluginHandler.getScene() != null) {
                 if (StringUtils.isNotEmpty(pluginHandler.getScene().getFlowCollector())) {
                     this.flowCollectors.add(pluginHandler.getScene().getFlowCollector());
+                    this.flowCollectorContainerIds.add(pluginHandler.getScene().getFlowCollectorContainerId());
                 }
                 if (StringUtils.isNotEmpty(pluginHandler.getScene().getProbeCollector())) {
                     this.probeCollectors.add(pluginHandler.getScene().getProbeCollector());
