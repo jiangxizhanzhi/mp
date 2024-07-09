@@ -168,7 +168,7 @@ public class ImagesController {
      * @return 统一服务返回结果
      */
     @ApiOperation("新增")
-    @ApiImplicitParam(name = "request", value = "查询信息请求体", dataTypeClass = ImageRequest.class)
+    @ApiImplicitParam(name = "request", value = "查询信息请求体", dataTypeClass = CopyImageRequest.class)
     @PostMapping("/copy")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult copy(@RequestBody CopyImageRequest request) {
