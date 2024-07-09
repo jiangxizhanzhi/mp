@@ -2345,7 +2345,7 @@ public class ScenePluginCollectionSceneService {
             if (zipSh != null) {
                 zipSh.delete();
             }
-            container.executeCommand(containerId, "rm -rf " + dir);
+//            container.executeCommand(containerId, "rm -rf " + dir);
         }
         return new ServiceResult<>(null);
     }
