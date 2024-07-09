@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.CloudClient;
@@ -300,6 +301,17 @@ public class ImagesConverter implements BaseConverter {
         device.setAttackMockDeviceFlag(Objects.nonNull(request.getAttackMockDeviceFlag()) ? request.getAttackMockDeviceFlag() : Boolean.FALSE);
         device.setBehaveSupport(Objects.nonNull(request.getBehaviorSimulation()) ? request.getBehaviorSimulation() : Boolean.FALSE);
         devopsTargetService.insert(Collections.singletonList(device));
+    }
+
+    public void copy(CopyImageRequest request) {
+        var device = deviceService.findByUuid(request.getUuid());
+        device.setName(request.getName());
+        device.setUuid(null);
+        device.setId(null);
+        device.setCreatedAt(null);
+        device.setUpdatedAt(null);
+        device.setInstanceUuid(device.getExtVm().getInstanceUuid());
+        Device result =imagesService.copy(device);
     }
 
     /**

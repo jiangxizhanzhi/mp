@@ -55,6 +55,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -158,6 +159,21 @@ public class ImagesController {
         validImageRequest(request);
         imagesConverter.add(request);
         return ResultCommon.success();
+    }
+
+    /**
+     * 新增
+     *
+     * @param request
+     * @return 统一服务返回结果
+     */
+    @ApiOperation("新增")
+    @ApiImplicitParam(name = "request", value = "查询信息请求体", dataTypeClass = ImageRequest.class)
+    @PostMapping("/copy")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增镜像", target = OpTargetEnums.IMAGE)
+    public ServiceResult copy(@RequestBody CopyImageRequest request) {
+        imagesConverter.copy(request);
+        return new ServiceResult(true).asResult();
     }
 
     /**

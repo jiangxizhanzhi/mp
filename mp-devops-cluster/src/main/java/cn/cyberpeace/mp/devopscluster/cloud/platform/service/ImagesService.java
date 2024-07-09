@@ -45,6 +45,7 @@ import java.util.Objects;
 public class ImagesService extends BaseCpService {
 
     private static final String ADD_NEW_DEVICE = "/cloud/v1/device/virtual_device";
+    private static final String COPY_NEW_DEVICE = "/cloud/v1/device/create_device_from_instance";
     private static final String UPDATE_DEVICE = "/cloud/v1/device/virtual_device/{uuid}";
     private static final String EXPORT_DEVICE = "/cloud/v1/device/export?device_uuid={device_uuid}";
     private static final String QUICK_CREATE = "/cloud/v1/device/quick_create";
@@ -80,6 +81,11 @@ public class ImagesService extends BaseCpService {
             }
         }
         return JsonCommon.snakeParse(JsonCommon.snakeStringify(res.getData()), Device.class);
+    }
+
+    public Device copy(Device device) {
+        Device res = super.sendPost(COPY_NEW_DEVICE, JsonUtils.snakeStringify(device), Device.class);
+        return res;
     }
 
     /**

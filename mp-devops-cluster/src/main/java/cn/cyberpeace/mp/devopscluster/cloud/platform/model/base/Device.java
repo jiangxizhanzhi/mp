@@ -24,6 +24,8 @@ import java.util.Objects;
 @AllArgsConstructor
 public class Device extends BaseCloudPlatformResult {
 
+    @ApiModelProperty(value = "资源id")
+    private String instanceUuid;
     /**
      * ID
      */
