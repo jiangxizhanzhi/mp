@@ -55,7 +55,7 @@ public class SceneAppConfig {
     @Value("${mp.scene.element_process_save_realtime:true}")
     private Boolean elementProcessSaveRealtime;
 
-    @Value("${mp.scene.dhcp_control:false}")
+    @Value("${mp.scene.dhcp_control:true}")
     private Boolean dhcpControl;
 
     @Autowired

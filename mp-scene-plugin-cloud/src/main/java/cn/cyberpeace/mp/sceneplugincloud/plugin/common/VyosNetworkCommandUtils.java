@@ -33,15 +33,17 @@ public class VyosNetworkCommandUtils {
     private static List<NetworkingCmdBuilder> modifyBuilderChains = new ArrayList<>();
 
     static {
+        builderChains.add(new InterfaceIpSetCmdBuilder());
         builderChains.add(new StaticRouteCmdBuilder());
         builderChains.add(new OSPFCmdBuilder());
         builderChains.add(new BGPCmdBuilder());
-        builderChains.add(new RouterNameCmdBuilder());
         builderChains.add(new RIPCmdBuilder());
         builderChains.add(new QosCmdBuilder());
+        builderChains.add(new RouterNameCmdBuilder());
     }
 
     static {
+        modifyBuilderChains.add(new InterfaceIpSetCmdBuilder());
         modifyBuilderChains.add(new StaticRouteCmdBuilder());
         modifyBuilderChains.add(new OSPFCmdBuilder());
         modifyBuilderChains.add(new BGPCmdBuilder());
@@ -49,10 +51,13 @@ public class VyosNetworkCommandUtils {
         modifyBuilderChains.add(new QosCmdBuilder());
     }
 
-    public static List<String> genOpenDhcpCommands(int ethSize) {
+    public static List<String> genOpenDhcpCommands(List<SceneElementPortBO> ports,HandlerUtils handlerUtils) {
         List<String> result = new ArrayList<>();
-        for (int i = 0; i < ethSize; i++) {
-            result.add("set interface ethernet eth" + i + " address dhcp");
+        for (int i = 0; i < ports.size(); i++) {
+            var net = handlerUtils.getNetworkByPort(ports.get(i));
+            if (net != null && !Boolean.FALSE.equals(net.getDhcp())) {
+                result.add("set interface ethernet eth" + i + " address dhcp");
+            }
         }
         return result;
     }
@@ -75,6 +80,34 @@ public class VyosNetworkCommandUtils {
             result.addAll(cmds);
         }
         return result;
+    }
+
+    private static class InterfaceIpSetCmdBuilder implements NetworkingCmdBuilder {
+
+        private static String SET_INTERFACES = "set interfaces ethernet eth%s address %s";
+
+        @Override
+        public List<String> build(ConfigParamsWrapper paramsWrapper) {
+            if (CollectionUtils.isEmpty(paramsWrapper.pluginPorts)) {
+                return new ArrayList<>();
+            }
+            List<String> result = new ArrayList<>();
+            paramsWrapper.pluginPorts.forEach(p -> {
+                boolean noOspf = StringUtils.isEmpty(p.getOspfIp());
+                boolean noRip = StringUtils.isEmpty(p.getRipIp());
+                boolean noBgp = StringUtils.isEmpty(p.getBgpIp());
+                if (noOspf && noBgp && noRip) {
+                    var net = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
+                    if (Objects.nonNull(net)) {
+                        String interfaceAddr = p.getSrcPort().getIp() + net.getCidr().substring(net.getCidr().indexOf("/"));
+                        result.add(
+                                String.format(SET_INTERFACES, p.getSrcPort().getOrder(), interfaceAddr)
+                        );
+                    }
+                }
+            });
+            return result;
+        }
     }
 
     private static class ConfigParamsWrapper {

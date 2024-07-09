@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
@@ -149,8 +150,23 @@ public class InitiateHandler extends HandlerCommon {
                         return;
                     }
                     for (var network : cloudElement.getDeriveNetworks()) {
+
+                        //当连接两端只有virtual machine router, 不需要采集路由
+                        boolean currentNodeIsVirtualMachineRouter = ElementTypeUtils.isVirtualRouter(cloudElement);
+                        if (currentNodeIsVirtualMachineRouter) {
+                            if (CollectionUtils.isEmpty(network.getToPorts())) {
+                                continue;
+                            } else if (network.getToPorts().size() == 1) {
+                                boolean connectElementIsVirtualMachineRouter =
+                                        ElementTypeUtils.isVirtualRouter(cloudPluginHandler.getElementMap().get(network.getToPorts().get(0).getElement().getId()));
+                                if (connectElementIsVirtualMachineRouter) {
+                                    continue;
+                                }
+                            }
+                        }
+
                         var networkInfo = network.getNetwork();
-                        List<String> ips = IpUtils.newRandomIps(networkInfo.getCidr(), 1, new ArrayList<>(networkInfo.getExcloudIps()), networkInfo.getAllocationPools(), Boolean.TRUE.equals(networkInfo.getDhcp()));
+                        List<String> ips = IpUtils.newRandomIps(networkInfo.getCidr(), 1, new ArrayList<>(networkInfo.getExcloudIps()), networkInfo.getAllocationPools(), false);
                         if (CollectionUtils.isEmpty(ips)) {
                             log.info("ip pool is empty when initate collection,node {}", cloudElement.getSrcElement().getName());
                             return;

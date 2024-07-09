@@ -110,7 +110,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 elementCountMap.getOrDefault(
                         BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0L) +
                 elementCountMap.getOrDefault(
-                        BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0L);
+                        BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0L)+
+                elementCountMap.getOrDefault(
+                        BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS, 0L);
         return (int) activeVirtualDeviceCount;
     }
 
@@ -124,7 +126,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 elementCountMap.getOrDefault(
                         BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0L) +
                 elementCountMap.getOrDefault(
-                        BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0L);
+                        BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0L) +
+                elementCountMap.getOrDefault(
+                        BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS, 0L);
         return (int) virtualDeviceCount;
     }
 
@@ -175,7 +179,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                         if (virtualType != null) {
                             if (Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER ||
                                     Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE ||
-                                    Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE
+                                    Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE ||
+                                    Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS
                             ) {
                                 elementCount++;
                             }

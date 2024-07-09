@@ -47,6 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -55,6 +56,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -224,7 +227,12 @@ public class FlowMonitorController {
             FlowAttackConfigInfo.FlowAttackType type = new FlowAttackConfigInfo.FlowAttackType();
             type.setValue(r.getCategoryEn());
             type.setSeverity(r.getSeverity());
-            type.setName(r.getCategoryZh());
+            Locale locale = LocaleContextHolder.getLocale();
+            if (Objects.equals(locale, Locale.US)) {
+                type.setName(r.getCategoryEn());
+            } else {
+                type.setName(r.getCategoryZh());
+            }
             return type;
         }).collect(Collectors.toList());
         FlowAttackConfigInfo info = new FlowAttackConfigInfo();

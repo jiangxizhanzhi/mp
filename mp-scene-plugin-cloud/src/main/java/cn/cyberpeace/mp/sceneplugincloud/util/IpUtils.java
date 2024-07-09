@@ -70,7 +70,7 @@ public class IpUtils {
                 size = size - 1L;
             }
             allocationPools = List.of(new AllocationPool(nextIp(beginIp), previousIp(lastIp)));
-            int ipSize = (int) (Ipv4Util.ipv4ToLong(lastIp) - beginIpLong) + 1;
+            int ipSize = (int) (Ipv4Util.ipv4ToLong(lastIp) - beginIpLong);
             if (excludeIps != null && !excludeIps.isEmpty()) {
                 ipSize = ipSize - excludeIps.size();
             }
@@ -379,6 +379,16 @@ public class IpUtils {
     public static String beginIp(String cidr) {
         String[] param = StrUtil.split(cidr, Ipv4Util.IP_MASK_SPLIT_MARK);
         return Ipv4Util.getBeginIpStr(param[0], Integer.parseInt(param[1]));
+    }
+
+    public static String cidrFirstCanUseIp(String cidr) {
+        String[] param = StrUtil.split(cidr, Ipv4Util.IP_MASK_SPLIT_MARK);
+        return Ipv4Util.longToIpv4(
+                getBeginIpLong(param[0], Integer.parseInt(param[1])) + 1);
+    }
+
+    private static Long getBeginIpLong(String ip, int maskBit) {
+        return Ipv4Util.ipv4ToLong(ip) & Ipv4Util.ipv4ToLong(Ipv4Util.getMaskByMaskBit(maskBit));
     }
 
     /**

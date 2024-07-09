@@ -82,6 +82,12 @@ public class CsceneAppConfig {
     @Value("${mp.cscene.enable_node_limit_db_check:true}")
     private Boolean enableNodeLimitDbCheck;
 
+    @Value("${mp.cscene.flow-seconds:25}")
+    private Integer flowSeconds;
+
+    @Value("${mp.cscene.flow-segment:5}")
+    private Integer flowSegment;
+
     @Autowired
     private MessageSource messageSource;
 

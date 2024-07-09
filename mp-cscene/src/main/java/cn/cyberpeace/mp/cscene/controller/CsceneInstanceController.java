@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.model.BlacklistModel;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
@@ -75,6 +78,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -241,6 +246,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @DeleteMapping
     public ServiceResult<Boolean> delete(@RequestParam(required = false) String id,
                                          @RequestBody(required = false) CsceneInstanceActionRequest request) {
+        this.checkBlackList();
         request = formatActionRequest(request, id);
         var result = modelService.deleteById(request.getId(), true, request.getContext()).asResult();
         CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.DELETE, CsceneLogUtils.DELETE_SCENE, request.getContext());
@@ -251,6 +257,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = CsceneInstancesActionRequest.class)
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody CsceneInstancesActionRequest request) {
+        this.checkBlackList();
         var result = modelService.bulkDeleteByIds(request.getIds(), true, request.getContext()).asResult();
         CsceneLogUtils.recordSceneInstanceLog(Arrays.asList(request.getIds()), OpTypeEnums.DELETE, CsceneLogUtils.BATCH_DELETE_SCENES, request.getContext());
         return result;
@@ -264,6 +271,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @DeleteMapping(value = "/clear")
     public ServiceResult<Boolean> clear(@RequestParam(required = false) String id,
                                         @RequestBody(required = false) CsceneInstanceActionRequest request) {
+        this.checkBlackList();
         request = formatActionRequest(request, id);
         CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.DELETE, CsceneLogUtils.CLEAR_SCENE, request.getContext());
         var result = modelService.clearById(request.getId(), request.getContext()).asResult();
@@ -274,6 +282,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = CsceneInstancesActionRequest.class)
     @DeleteMapping("/bulk_clear")
     public ServiceResult<Integer> bulkClear(@RequestBody CsceneInstancesActionRequest request) {
+        this.checkBlackList();
         CsceneLogUtils.recordSceneInstanceLog(Arrays.asList(request.getIds()), OpTypeEnums.DELETE, CsceneLogUtils.BATCH_CLEAR_SCENE, request.getContext());
         var result = modelService.bulkClearByIds(request.getIds(), request.getContext()).asResult();
         return result;
@@ -887,5 +896,15 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation(value = "查询靶场监控的场景实例类型")
     public ServiceResult<List<OptionBO>> getSceneType() {
         return optionService.getIntOptions(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_TYPE);
+    }
+
+    private void checkBlackList() {
+        if (BeanCommon.getBean(BlacklistModel.class).isEnabled()) {
+            // 开启演示模式 而且 不存在clientId(认为是来自页面的直接请求,比如靶场实例监控的关闭)
+            var request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            if (request.getHeader("clientId") == null) {
+                throw new MpRuntimeException(AuthErrorCode.DEMO_ACCESS_ERROR);
+            }
+        }
     }
 }

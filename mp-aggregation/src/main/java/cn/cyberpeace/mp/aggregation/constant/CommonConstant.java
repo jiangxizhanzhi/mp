@@ -12,5 +12,6 @@ public final class CommonConstant {
         String ROUTER = "/api/mp/network-equipment/router.png";
         String FIREWALL = "/api/mp/safety-equipment/firewall.png";
         String SERVER = "/api/mp/safety-equipment/server.png";
+        String NPC = "/api/mp/common-target/npc.png";
     }
 }

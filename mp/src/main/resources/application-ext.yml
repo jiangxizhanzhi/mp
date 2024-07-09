@@ -130,7 +130,7 @@ mp:
       scene-handler-realtime-update: ${MP_SCENE_HANDLER_REALTIME_UPDATE:true}
       scene-process-save-realtime: ${MP_SCENE_PROCESS_SAVE_REALTIME:true}
       element-process-save-realtime: ${MP_ELEMENT_PROCESS_SAVE_REALTIME:true}
-      dhcp-control: ${MP_SCENE_DHCP_CONTROL:false}
+      dhcp-control: ${MP_SCENE_DHCP_CONTROL:true}
   cscene:
     ext-var:
       has-own-recording-set: ${HAS_OWN_RECORDING_SET:213,214,236}
@@ -141,6 +141,8 @@ mp:
       enable-command-change: ${MP_ENABLE_COMMAND_CHANGE:false}
       cron-job-expression: ${MP_CRON_JOB_EXPRESSION:0 0/15 * * * ?}
       enable-node-limit-db-check: ${MP_ENABLE_NODE_LIMIT_DB_CHECK:true}
+      flow-seconds: ${MP_FLOW_SECONDS:14400}
+      flow-segment: ${MP_FLOW_SEGMENT:40}
   aggregation:
     ext-var:
       export-image-timeout: ${MP_EXPORT_IMAGE_TIMEOUT:1200000}
