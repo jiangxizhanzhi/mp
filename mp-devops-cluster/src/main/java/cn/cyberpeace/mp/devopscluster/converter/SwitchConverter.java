@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.SdnSwitch;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.SdnSwitchBase;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.SdnSwitchBaseData;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Switches;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.SwitchService;
 import cn.cyberpeace.mp.devopscluster.converter.model.SwitchConvertModel;
@@ -74,9 +76,9 @@ public class SwitchConverter {
         switchService.delete(name);
     }
 
-
-
-
+    public SdnSwitchBaseData getSdnSwitch(String name) {
+        return switchService.get(name);
+    }
 
     /**
      * 树形结构-交换机列表

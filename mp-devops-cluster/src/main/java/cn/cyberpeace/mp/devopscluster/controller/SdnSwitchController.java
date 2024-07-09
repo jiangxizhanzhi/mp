@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.SdnSwitch;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.SdnSwitchBase;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.SdnSwitchBaseData;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.SwitchConverter;
 import cn.cyberpeace.mp.devopscluster.request.ModifySdnSwitchCommand;
@@ -63,6 +65,19 @@ public class SdnSwitchController {
     }
 
     /**
+     * 获取物理交换机信息
+     *
+     * @param name 交换机名称
+     * @return 交换机信息
+     */
+    @ApiOperation("获取物理交换机信息")
+    @GetMapping("/{name}")
+    public ServiceResult<SdnSwitchBaseData> getSdnSwitch(@PathVariable(name = "name") String name) {
+        SdnSwitchBaseData sdnSwitchBaseData = switchConverter.getSdnSwitch(name);
+        return new ServiceResult<>(sdnSwitchBaseData).asResult();
+    }
+
+    /**
      * 修改物理交换机名称
      *
      * @param name
@@ -88,7 +103,4 @@ public class SdnSwitchController {
         switchConverter.deleteSdnSwitch(name);
         return new ServiceResult<>(Boolean.TRUE).asResult();
     }
-
-
-
 }

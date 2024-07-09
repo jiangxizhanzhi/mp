@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.SdnSwitch;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.SdnSwitchBase;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.SdnSwitchBaseData;
 import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.CloudDeleteResponse;
 import cn.cyberpeace.mp.devopscluster.model.CloudResponse;
@@ -37,6 +39,8 @@ public class SwitchService extends BaseCpService {
 
     public static final String DELETE_PHYSIC_SWITCH = "/cloud/v1/physical/physical_switch/{name}";
 
+    public static final String GET_PHYSIC_SWITCH = "/cloud/v1/physical/physical_switch/{name}";
+
     public static final String LIST_PHYSIC_SWITCH_DETAIL = "/cloud/v1/switch/switchs";
 
     public SwitchService(DevopsClusterConfig devopsClusterConfig) {
@@ -62,7 +66,18 @@ public class SwitchService extends BaseCpService {
         if (!cloudDeleteResponse.successFlag()) {
             throw new MpRuntimeException(CUSTOM_ERROR.format("删除交换机异常"), cloudDeleteResponse.getMessage());
         }
+    }
 
+    public SdnSwitchBaseData get(String name) {
+        String requestUrl = UriComponentsBuilder.fromPath(GET_PHYSIC_SWITCH).buildAndExpand(name).toUriString();
+        SdnSwitchBase sdnSwitchBase = super.sendGet(requestUrl, SdnSwitchBase.class);
+        if (null == sdnSwitchBase) {
+            throw new MpRuntimeException(CUSTOM_ERROR.format("获取交换机信息异常"));
+        }
+
+        // 解码，云平台已解码
+        //sdnSwitchBase.getData().base64EncodePw();
+        return sdnSwitchBase.getData();
     }
 
 
