@@ -299,12 +299,16 @@ public class SysActivationService {
 
         if (Objects.isNull(ACTIVATION_CONTENT)) {
             ActivationResponse activationResponse = parseContentFromDecrpytedFile();
+            if (activationResponse == null) {
+                activationResponse = mockActivationContent();
+            }
             log.debug("activationResponse from file: {}", activationResponse);
             ACTIVATION_CONTENT = activationResponse;
         }
 
         log.debug("before processActived status: {}", ACTIVATION_CONTENT);
         processActivedStatus();
+        ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_ACTIVITED);
 
         return ACTIVATION_CONTENT;
     }
@@ -348,6 +352,9 @@ public class SysActivationService {
             sysActivCtlModel = sysCtlService.generateOrGetUnusedActivCtlModel();
         } else {
             sysActivCtlModel = sysCtlService.getValidCtlModel();
+            if (sysActivCtlModel == null) {
+                sysActivCtlModel = sysCtlService.getUnusedActivCtlModel();
+            }
         }
         if (Objects.isNull(sysActivCtlModel)) {
             log.error("sysActivCtlModel is null!");
@@ -763,7 +770,7 @@ public class SysActivationService {
     @Deprecated
     private ActivationResponse mockActivationContent() {
         ActivationResponse content = new ActivationResponse();
-        content.setExpiredDate("2022-05-26");
+        content.setExpiredDate("9999-12-31");
         content.setIsActived(AdminConstant.STATUS_ACTIVITED);
         content.setEdition(1);
 
@@ -777,43 +784,43 @@ public class SysActivationService {
 
         ActivationItem item2 = new ActivationItem();
         item2.setKey("LCS-FUNC-CR-JINGSAI");
-        item2.setValue("0");
+        item2.setValue("1");
         item2.setType(1);
         list.add(item2);
 
         ActivationItem item3 = new ActivationItem();
         item3.setKey("LCS-FUNC-CR-HUOTILOUDONG");
-        item3.setValue("0");
+        item3.setValue("1");
         item3.setType(1);
         list.add(item3);
 
         ActivationItem item4 = new ActivationItem();
         item4.setKey("LCS-FUNC-CR-ZHISHIKU");
-        item4.setValue("0");
+        item4.setValue("1");
         item4.setType(1);
         list.add(item4);
 
         ActivationItem item5 = new ActivationItem();
         item5.setKey("LCS-FUNC-CR-ZONGHEXUNLIAN");
-        item5.setValue("0");
+        item5.setValue("1");
         item5.setType(1);
         list.add(item5);
 
         ActivationItem item6 = new ActivationItem();
         item6.setKey("LCS-FUNC-CR-HONGLANDUIKANG");
-        item6.setValue("0");
+        item6.setValue("1");
         item6.setType(1);
         list.add(item6);
 
         ActivationItem item7 = new ActivationItem();
         item7.setKey("LCS-FUNC-CR-SHENTOUSAI");
-        item7.setValue("0");
+        item7.setValue("1");
         item7.setType(1);
         list.add(item7);
 
         ActivationItem item8 = new ActivationItem();
         item8.setKey("LCS-FUNC-CR-YUNWEISAI");
-        item8.setValue("0");
+        item8.setValue("1");
         item8.setType(1);
         list.add(item8);
 
