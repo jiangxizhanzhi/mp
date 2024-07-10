@@ -1477,61 +1477,7 @@ public class CreateHandler extends HandlerCommon {
         if (ElementTypeUtils.isCoreRouter(cloudElement)) {
             this.configVyosNetwork(cloudElement);
         }
-
-
-        List<CloudPluginSceneElementPortBO> cloudPorts = getPluginHandler().getPorts(cloudElement);
-        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudPorts)) {
-            Set<String> supportProtocols = new HashSet<>();
-            supportProtocols.add(CloudElementAccessMode.Protocol.CONSOLE);
-            supportProtocols.add(CloudElementAccessMode.Protocol.COM);
-            supportProtocols.add(CloudElementAccessMode.Protocol.VNC);
-            supportProtocols.add(CloudElementAccessMode.Protocol.SPICE);
-            supportProtocols.add(CloudElementAccessMode.Protocol.NO_VNC);
-            AtomicBoolean accessModeEmptyFlag = new AtomicBoolean(true);
-            cloudPorts.forEach(port -> {
-                port.getAccessModes().forEach(accessMode -> {
-                    String protocol = accessMode.getProtocol();
-                    if (supportProtocols.contains(protocol)) {
-                        accessModeEmptyFlag.set(false);
-                    }
-                });
-            });
-            if (accessModeEmptyFlag.get()) {
-                CloudPluginSceneElementPortBO cloudPort = cloudPorts.get(0);
-                String ip = cloudPort.getSrcPort().getIp();
-                List<CloudAccessMode> cloudAccessModes = new ArrayList<>();
-                if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(cloudElement.getImageType())) {
-                    CloudAccessMode cloudAccessMode = new CloudAccessMode();
-                    cloudAccessMode.setAccessIp(ip);
-                    cloudAccessMode.setAvailable(true);
-                    cloudAccessMode.setConnectionUrl(remoteClient.getContainerConnectionUrl(new GetConnectionUrlParam()
-                            .setConsoleType(CloudElementAccessMode.Protocol.CONSOLE)
-                            .setVmId(cloudElement.getResourceId())).getData());
-                    cloudAccessMode.setProtocol(CloudElementAccessMode.Protocol.CONSOLE);
-                    cloudAccessMode.setId(TextUtils.uuid());
-                    cloudAccessModes.add(cloudAccessMode);
-                } else if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType())) {
-                    CloudAccessMode spiceAccessMode = new CloudAccessMode();
-                    spiceAccessMode.setAccessIp(ip);
-                    spiceAccessMode.setConnectionUrl("");
-                    spiceAccessMode.setProtocol(CloudElementAccessMode.Protocol.SPICE);
-                    spiceAccessMode.setId(TextUtils.uuid());
-                    spiceAccessMode.setAvailable(true);
-                    cloudAccessModes.add(spiceAccessMode);
-
-                    CloudAccessMode vncAccessMode = new CloudAccessMode();
-                    vncAccessMode.setAccessIp(ip);
-                    vncAccessMode.setConnectionUrl(remoteClient.getNoVncConnectionUrl(new GetConnectionUrlParam()
-                            .setConsoleType(CloudElementAccessMode.Protocol.NO_VNC)
-                            .setVmId(cloudElement.getResourceId())).getData());
-                    vncAccessMode.setProtocol(CloudElementAccessMode.Protocol.VNC);
-                    vncAccessMode.setAvailable(true);
-                    vncAccessMode.setId(TextUtils.uuid());
-                    cloudAccessModes.add(vncAccessMode);
-                }
-                cloudPort.setAccessModes(cloudAccessModes);
-            }
-        }
+        this.checkAndAddAccessModes(cloudElement);
     }
 
     /**
@@ -1582,58 +1528,7 @@ public class CreateHandler extends HandlerCommon {
         receiveVirtualPortInfo(cloudElement, container.getNetwork());
 
         execContainerInitCommand(cloudElement);
-
-        List<CloudPluginSceneElementPortBO> cloudPorts = getPluginHandler().getPorts(cloudElement);
-        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudPorts)) {
-            Set<String> supportProtocols = new HashSet<>();
-            supportProtocols.add(CloudElementAccessMode.Protocol.CONSOLE);
-            supportProtocols.add(CloudElementAccessMode.Protocol.COM);
-            supportProtocols.add(CloudElementAccessMode.Protocol.VNC);
-            supportProtocols.add(CloudElementAccessMode.Protocol.SPICE);
-            supportProtocols.add(CloudElementAccessMode.Protocol.NO_VNC);
-            AtomicBoolean accessModeEmptyFlag = new AtomicBoolean(true);
-            cloudPorts.forEach(port -> {
-                port.getAccessModes().forEach(accessMode -> {
-                    String protocol = accessMode.getProtocol();
-                    if (supportProtocols.contains(protocol)) {
-                        accessModeEmptyFlag.set(false);
-                    }
-                });
-            });
-            CloudPluginSceneElementPortBO cloudPort = cloudPorts.get(0);
-            String ip = cloudPort.getSrcPort().getIp();
-            List<CloudAccessMode> cloudAccessModes = new ArrayList<>();
-            if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(cloudElement.getImageType())) {
-                CloudAccessMode cloudAccessMode = new CloudAccessMode();
-                cloudAccessMode.setAccessIp(ip);
-                cloudAccessMode.setAvailable(true);
-                cloudAccessMode.setConnectionUrl(remoteClient.getContainerConnectionUrl(new GetConnectionUrlParam().setConsoleType(CloudElementAccessMode.Protocol.CONSOLE)
-                                                                                                .setVmId(cloudElement.getResourceId()))
-                                                         .getData());
-                cloudAccessMode.setProtocol(CloudElementAccessMode.Protocol.CONSOLE);
-                cloudAccessMode.setId(TextUtils.uuid());
-                cloudAccessModes.add(cloudAccessMode);
-            } else if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType())) {
-                CloudAccessMode spiceAccessMode = new CloudAccessMode();
-                spiceAccessMode.setAccessIp(ip);
-                spiceAccessMode.setConnectionUrl("");
-                spiceAccessMode.setProtocol(CloudElementAccessMode.Protocol.SPICE);
-                spiceAccessMode.setId(TextUtils.uuid());
-                spiceAccessMode.setAvailable(true);
-                cloudAccessModes.add(spiceAccessMode);
-
-                CloudAccessMode vncAccessMode = new CloudAccessMode();
-                vncAccessMode.setAccessIp(ip);
-                vncAccessMode.setConnectionUrl(remoteClient.getNoVncConnectionUrl(new GetConnectionUrlParam().setConsoleType(CloudElementAccessMode.Protocol.NO_VNC)
-                                                                                          .setVmId(cloudElement.getResourceId()))
-                                                       .getData());
-                vncAccessMode.setProtocol(CloudElementAccessMode.Protocol.VNC);
-                vncAccessMode.setAvailable(true);
-                vncAccessMode.setId(TextUtils.uuid());
-                cloudAccessModes.add(vncAccessMode);
-            }
-            cloudPort.setAccessModes(cloudAccessModes);
-        }
+        this.checkAndAddAccessModes(cloudElement);
     }
 
     /**
@@ -2186,5 +2081,65 @@ public class CreateHandler extends HandlerCommon {
         }
         data.setEntityUsbUuids(usbUuids);
         vmClient.attachEntityUsbs(data);
+    }
+
+    private void checkAndAddAccessModes(CloudPluginSceneElementBO cloudElement) {
+        List<CloudPluginSceneElementPortBO> cloudPorts = getPluginHandler().getPorts(cloudElement);
+        if (cloudPorts == null || cloudPorts.size() == 0) {
+            return;
+        }
+        Set<String> supportProtocols = new HashSet<>();
+        supportProtocols.add(CloudElementAccessMode.Protocol.VNC);
+        supportProtocols.add(CloudElementAccessMode.Protocol.SPICE);
+
+        boolean existsSupportProtocols = false;
+        for (CloudPluginSceneElementPortBO port : cloudPorts) {
+            if (port.getAccessModes() != null) {
+                for (CloudAccessMode accessMode : port.getAccessModes()) {
+                    String protocol = accessMode.getProtocol();
+                    if (supportProtocols.contains(protocol)) {
+                        existsSupportProtocols = true;
+                    }
+                }
+            }
+        }
+        // 不存在 VNC/SPICE ，则给虚拟机自动加上 VNC和SPICE  ， 给容器自动加上console
+        if (!existsSupportProtocols) {
+            CloudPluginSceneElementPortBO cloudPort = cloudPorts.get(0);
+            if (cloudPort.getAccessModes() == null) {
+                cloudPort.setAccessModes(new ArrayList<>());
+            }
+            List<CloudAccessMode> cloudAccessModes = cloudPort.getAccessModes();
+            String ip = cloudPort.getSrcPort().getIp();
+            if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(cloudElement.getImageType())) {
+                CloudAccessMode cloudAccessMode = new CloudAccessMode();
+                cloudAccessMode.setAccessIp(ip);
+                cloudAccessMode.setAvailable(true);
+                cloudAccessMode.setConnectionUrl(remoteClient.getContainerConnectionUrl(new GetConnectionUrlParam().setConsoleType(CloudElementAccessMode.Protocol.CONSOLE)
+                                                                                                .setVmId(cloudElement.getResourceId()))
+                                                         .getData());
+                cloudAccessMode.setProtocol(CloudElementAccessMode.Protocol.CONSOLE);
+                cloudAccessMode.setId(TextUtils.uuid());
+                cloudAccessModes.add(cloudAccessMode);
+            } else if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType())) {
+                CloudAccessMode spiceAccessMode = new CloudAccessMode();
+                spiceAccessMode.setAccessIp(ip);
+                spiceAccessMode.setConnectionUrl("");
+                spiceAccessMode.setProtocol(CloudElementAccessMode.Protocol.SPICE);
+                spiceAccessMode.setId(TextUtils.uuid());
+                spiceAccessMode.setAvailable(true);
+                cloudAccessModes.add(spiceAccessMode);
+
+                CloudAccessMode vncAccessMode = new CloudAccessMode();
+                vncAccessMode.setAccessIp(ip);
+                vncAccessMode.setConnectionUrl(remoteClient.getNoVncConnectionUrl(new GetConnectionUrlParam().setConsoleType(CloudElementAccessMode.Protocol.NO_VNC)
+                                                                                          .setVmId(cloudElement.getResourceId()))
+                                                       .getData());
+                vncAccessMode.setProtocol(CloudElementAccessMode.Protocol.VNC);
+                vncAccessMode.setAvailable(true);
+                vncAccessMode.setId(TextUtils.uuid());
+                cloudAccessModes.add(vncAccessMode);
+            }
+        }
     }
 }
