@@ -29,6 +29,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -108,15 +109,28 @@ public class OperateLogController {
 
     /**
      *
-     * @param list1 modules的集合
+     * @param type module audio-log 审计日志模块  operate-log 操作日志模块
      * @return
      */
-    @PostMapping("/moduless")
+    @GetMapping("/moduless")
     @ApiOperation(value = "查询审计日志操作模块")
-    public ServiceResult<List<OptionBO>> getModules(@RequestBody List<Integer> list1) {
+    public ServiceResult<List<OptionBO>> getModules(String type) {
         val intOptions = optionService.getIntOptions(LogConstant.MP_COMMON_OPTION_TYPE_LOG_OP_MODULE);
-        val boList = intOptions.getSource().stream().filter(s ->list1.contains(s.getCode())).collect(Collectors.toList());
-        intOptions.setData(boList);
+
+        if (StringUtils.equals(LogConstant.AUDIO_LOG, type)) { // 审计日志模块
+            List<Integer> list1 = LogConstant.AUDIO_LOG_CODES;
+
+            val boList = intOptions.getSource().stream().filter(s ->list1.contains(s.getCode())).collect(Collectors.toList());
+            intOptions.setData(boList);
+
+        }
+        if (StringUtils.equals(LogConstant.OPERATE_LOG, type)) { // 操作日志模块
+            List<Integer> list1 = LogConstant.OPERATE_LOG_CODES;
+
+            val boList = intOptions.getSource().stream().filter(s ->list1.contains(s.getCode())).collect(Collectors.toList());
+            intOptions.setData(boList);
+        }
+
         return intOptions;
     }
 

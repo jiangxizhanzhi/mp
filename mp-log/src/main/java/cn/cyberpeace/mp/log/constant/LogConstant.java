@@ -1,5 +1,9 @@
 package cn.cyberpeace.mp.log.constant;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class LogConstant {
 
     // 用户id
@@ -41,5 +45,23 @@ public class LogConstant {
     public static final String LOG_DB_SQL = "sql";
 
     public static final String EXCEL_EXPORT_NAME = "log.op.target.excel_name";
+
+    /**
+     * 审计日志模块
+     */
+    public static final String AUDIO_LOG= "audio-log";
+    /**
+     * 审计日志模块Code
+     */
+    public static final List<Integer> AUDIO_LOG_CODES = new ArrayList<>(Arrays.asList(0,4));
+
+    /**
+     * 操作日志模块
+     */
+    public static final String OPERATE_LOG= "operate-log";
+    /**
+     * 操作日志模块Code
+     */
+    public static final List<Integer> OPERATE_LOG_CODES = new ArrayList<>(Arrays.asList(1,13,14,15));
 
 }
