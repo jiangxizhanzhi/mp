@@ -3,7 +3,9 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionrequest.FirewallBuildRequestBody;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionrequest.FirewallPolicyRuleRequestBody;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionrequest.RouteTableCreateRequestBody;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionresponse.FirewallBuildResponseBody;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionresponse.FirewallBuildResult;
 import com.azure.core.management.SubResource;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.network.fluent.models.AzureFirewallInner;
@@ -11,6 +13,7 @@ import com.azure.resourcemanager.network.fluent.models.FirewallPolicyInner;
 import com.azure.resourcemanager.network.fluent.models.FirewallPolicyRuleCollectionGroupInner;
 import com.azure.resourcemanager.network.models.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -20,10 +23,14 @@ import java.util.concurrent.atomic.AtomicReference;
 @RequiredArgsConstructor
 public class FirewallFunction {
 
+    @Autowired
+    private RouteTableFunction routeTableFunction;
+
     // 防火墙创建(防火墙和防火墙策略的SKU用标准,如果需要变动，需要保持一致)
     // 创建前需要将虚拟网络和专有的防火墙子网创建好(防火墙子网名称必须为AzureFirewallSubnet且地址空间后缀必须为/26)
     public FirewallBuildResponseBody createFireWall(Integer cloudType, FirewallBuildRequestBody requestBody) {
         FirewallBuildResponseBody responseBody = new FirewallBuildResponseBody();
+        responseBody.setFirewallBuildResult(new FirewallBuildResult());
         // 获取默认订阅Id的资源管理器
         AzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(cloudType).getManager();
         try {
@@ -41,8 +48,9 @@ public class FirewallFunction {
                             .withAddressPrefix("10.0.2.0/26")  // 设置子网的地址前缀
                             .attach()
                         .create();
-                responseBody.setFirewallSubnetAddressSpace("10.0.2.0/26");
-                responseBody.setFirewallSubnetName("AzureFirewallSubnet");
+                responseBody.getFirewallBuildResult().setFirewallSubnetAddressSpace("10.0.2.0/26");
+                responseBody.getFirewallBuildResult().setFirewallSubnetName("AzureFirewallSubnet");
+                requestBody.setVirtualNetwork(firewallNet);
                 System.out.println("创建虚拟网络及防火墙子网成功!");
             } else {
                 firewallNet = requestBody.getVirtualNetwork();
@@ -59,8 +67,8 @@ public class FirewallFunction {
                                 .withAddressPrefix(randomNewAddressSpace)  // 设置子网的地址前缀
                                 .attach()
                             .create();
-                    responseBody.setFirewallSubnetAddressSpace(randomNewAddressSpace);
-                    responseBody.setFirewallSubnetName("AzureFirewallSubnet");
+                    responseBody.getFirewallBuildResult().setFirewallSubnetAddressSpace(randomNewAddressSpace);
+                    responseBody.getFirewallBuildResult().setFirewallSubnetName("AzureFirewallSubnet");
 
                     System.out.println("该虚拟网络创建防火墙子网成功!");
                 }
@@ -156,75 +164,29 @@ public class FirewallFunction {
                     .withIpConfigurations(firewallIPConfigs);
 
             // 提交创建防火墙实例的操作
-            AzureFirewallInner orUpdate = azureResourceManager.networks().manager().serviceClient()
+            AzureFirewallInner create = azureResourceManager.networks().manager().serviceClient()
                     .getAzureFirewalls().createOrUpdate(requestBody.getResourceGroup(), requestBody.getFirewallName(), azureFirewallUpdateInner);
-            List<AzureFirewallIpConfiguration> azureFirewallIpConfigurations = orUpdate.ipConfigurations();
+            List<AzureFirewallIpConfiguration> azureFirewallIpConfigurations = create.ipConfigurations();
             String privateIpAddress = azureFirewallIpConfigurations.get(0).privateIpAddress();
-            responseBody.setFirewallStaticIp(privateIpAddress);
+            responseBody.getFirewallBuildResult().setFirewallStaticIp(privateIpAddress);
             System.out.println("创建防火墙和绑定防火墙策略成功！");
         } catch (Exception e) {
             System.err.println("创建防火墙失败：" + e.getMessage());
             e.printStackTrace();
-            responseBody.setResult(false);
-            responseBody.setErrorMessage("创建防火墙失败：" + e.getMessage());
+            responseBody.getFirewallBuildResult().setResult(false);
+            responseBody.getFirewallBuildResult().setErrorMessage("创建防火墙失败：" + e.getMessage());
             return responseBody;
         }
-        responseBody.setResult(true);
+        responseBody.getFirewallBuildResult().setResult(true);
+        //创建路由表
+        RouteTableCreateRequestBody body = new RouteTableCreateRequestBody();
+        body.setName(UUID.randomUUID().toString());
+        body.setRegion(requestBody.getRegion());
+        body.setFirewallPrivateAddress(responseBody.getFirewallBuildResult().getFirewallStaticIp());
+        body.setVirtualNetwork(requestBody.getVirtualNetwork());
+        body.setResourceGroup(requestBody.getResourceGroup());
+        routeTableFunction.createRouteTable(responseBody,cloudType, body);
         return responseBody;
-    }
-
-    // 该策略新增规则集合
-    public Boolean updateFireWallPolicy(Integer cloudType, FirewallBuildRequestBody requestBody) {
-        // 获取默认订阅Id的资源管理器
-        AzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(cloudType).getManager();
-        try {
-            /**
-             *  防火墙策略创建
-             */
-            if (requestBody.getFirewallPolicy() != null) {
-
-                // 根据防火墙策略名称拿到相对应的FirewallPolicyInner
-                FirewallPolicyInner createdFirewallPolicy = azureResourceManager.networks().manager().serviceClient()
-                        .getFirewallPolicies().getByResourceGroup(requestBody.getResourceGroup(), requestBody.getFirewallPolicyName());
-
-                // 创建防火墙策略的规则集合
-                List<FirewallPolicyRuleCollection> ruleCollectionInner = getPolicyRuleCollection(requestBody);
-
-                // 创建规则集合组inner
-                FirewallPolicyRuleCollectionGroupInner ruleCollectionGroupInner = new FirewallPolicyRuleCollectionGroupInner()
-                        .withName("MyRuleCollectionGroup" + UUID.randomUUID())
-                        .withPriority(100)
-                        .withRuleCollections(ruleCollectionInner);
-                System.out.println("创建规则集合组成功！");
-
-                // 提交创建规则集合组的操作
-                FirewallPolicyRuleCollectionGroupInner createdRuleCollectionGroup = azureResourceManager.networks().manager().serviceClient()
-                        .getFirewallPolicyRuleCollectionGroups()
-                        .createOrUpdate(requestBody.getResourceGroup(), createdFirewallPolicy.name(), ruleCollectionGroupInner.name(), ruleCollectionGroupInner);
-
-                // 提交更新防火墙策略的操作
-                azureResourceManager.networks().manager().serviceClient()
-                        .getFirewallPolicies()
-                        .createOrUpdate(requestBody.getResourceGroup(), createdFirewallPolicy.name(), createdFirewallPolicy);
-                System.out.println("更新防火墙策略成功！");
-            }
-
-            // 查找刚才创建的防火墙策略的id
-            AtomicReference<SubResource> firewallPolicySubResource = new AtomicReference<>();
-            if (requestBody.getFirewallPolicy() != null) {
-                // 遍历防火墙策略列表
-                azureResourceManager.networks().manager().serviceClient().getFirewallPolicies().list().forEach(firewallPolicy -> {
-                    if (firewallPolicy.name().equals(requestBody.getFirewallPolicyName())) {
-                        firewallPolicySubResource.set(new SubResource().withId(firewallPolicy.id()));
-                    }
-                });
-            }
-        } catch (Exception e) {
-            System.err.println("变更防火墙策略失败：" + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-        return true;
     }
 
     // 创建防火墙策略的规则集合

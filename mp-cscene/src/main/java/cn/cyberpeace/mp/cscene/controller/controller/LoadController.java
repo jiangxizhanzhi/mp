@@ -393,6 +393,7 @@ public class LoadController {
     }
 
 
+
     /**
      * 创建防火墙
      */
@@ -403,13 +404,6 @@ public class LoadController {
         return new ServiceResult(fireWall, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
-    /**
-     * 防火墙策略修改测试
-     */
-    @ApiOperation(value = "防火墙策略修改测试", notes = "")
-    @PostMapping("/updateFireWall")
-    public ServiceResult updateFireWallPolicy(@RequestBody FirewallBuildRequestBody fireWallBuildRequestBody) {
-        firewallFunction.updateFireWallPolicy(1, fireWallBuildRequestBody);
-        return new ServiceResult(log, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-    }
+
+
 }
