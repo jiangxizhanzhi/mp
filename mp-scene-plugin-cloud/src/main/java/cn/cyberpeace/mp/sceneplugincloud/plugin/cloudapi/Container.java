@@ -11,7 +11,6 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -374,10 +373,16 @@ public class Container extends CloudClient {
     }
 
     public ContainerFileGetResult retrieveFile(ContainerFileGetData data) {
-        CloudResponse<ContainerFileGetResult> result = cloudPost(CloudUrlConstant.DOWNLOAD_CONTAINER_FILE, data, null,
-                new TypeReference<CloudResponse<ContainerFileGetResult>>() {
-                }, true);
-        return result.getData();
+        StringBuilder cmd = new StringBuilder();
+        cmd.append("curl --location --request POST 'http://" + "10.4.1.58" + ":8001/api/mp/cscene/file/attachment_upload' \\")
+                .append("--header 'clientSecret: 2112f4b855264ad7b1a4209737fc7836' \\")
+                .append("--header 'clientId: 84261d495c414e' \\")
+                .append("--form 'file=@\"" + data.getFilePath() + "\"'");
+
+        var result = this.executeCommand(data.getZunContainerId(),cmd.toString());
+        ContainerFileGetResult r = new ContainerFileGetResult();
+        r.setUrl(result.getResult());
+        return r;
     }
 
     public void addRoute(String containerId) {

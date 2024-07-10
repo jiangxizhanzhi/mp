@@ -96,8 +96,8 @@ mp:
       monitor-business-restart-restrict: ${MP_MONITOR_BIZ_SRV_RESTART_RESTRICT_LIST:}
   common: #公用配置
     ext-var:
-      mp-ip: ${MP_API_IP:10.100.25.1}          # MP中台地址
-      mp-port: ${MP_API_PORT:8002}
+      mp-ip: ${MP_API_IP:10.4.1.58}          # MP中台地址
+      mp-port: ${MP_API_PORT:8001}
       cp-ip: ${CP_IP:10.4.1.57}                # 云平台适配层接口地址
       cp-port: ${CP_PORT:9999}
       bas-ip: ${BAS_IP:10.4.1.58}
