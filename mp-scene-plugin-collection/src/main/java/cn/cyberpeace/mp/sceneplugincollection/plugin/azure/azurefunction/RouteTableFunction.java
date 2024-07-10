@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction;
 
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.functionrequest.RouteTableCreateRequestBody;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionrequest.RouteTableCreateRequestBody;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.network.models.Network;
 import com.azure.resourcemanager.network.models.RouteNextHopType;

@@ -13,8 +13,10 @@ import cn.cyberpeace.mp.cscene.request.load.LoadResultSearchRequest;
 import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
 import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.FirewallFunction;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.functionrequest.FirewallCreateRequestBody;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionrequest.FirewallBuildRequestBody;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionresponse.FirewallBuildResponseBody;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -396,10 +398,18 @@ public class LoadController {
      */
     @ApiOperation(value = "创建防火墙", notes = "")
     @PostMapping("/createFireWall")
-    public ServiceResult createFireWall(@RequestBody FirewallCreateRequestBody fireWallCreateRequestBody) {
-        firewallFunction.createFireWall(1, fireWallCreateRequestBody);
-        return new ServiceResult(log, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+    public ServiceResult createFireWall(@RequestBody FirewallBuildRequestBody fireWallBuildRequestBody) {
+        FirewallBuildResponseBody fireWall = firewallFunction.createFireWall(1, fireWallBuildRequestBody);
+        return new ServiceResult(fireWall, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
-
+    /**
+     * 防火墙策略修改测试
+     */
+    @ApiOperation(value = "防火墙策略修改测试", notes = "")
+    @PostMapping("/updateFireWall")
+    public ServiceResult updateFireWallPolicy(@RequestBody FirewallBuildRequestBody fireWallBuildRequestBody) {
+        firewallFunction.updateFireWallPolicy(1, fireWallBuildRequestBody);
+        return new ServiceResult(log, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+    }
 }

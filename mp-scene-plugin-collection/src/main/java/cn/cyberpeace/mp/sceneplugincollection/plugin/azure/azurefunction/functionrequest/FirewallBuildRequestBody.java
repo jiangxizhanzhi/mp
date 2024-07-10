@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.sceneplugincollection.plugin.azure.functionrequest;
+package cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionrequest;
 
 import com.azure.resourcemanager.network.models.Network;
 import lombok.AllArgsConstructor;
@@ -12,22 +12,22 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FirewallCreateRequestBody {
+public class FirewallBuildRequestBody {
 
     //资源组名称
     private String resourceGroup;
 
     //防火墙名称
-    private String name;
+    private String firewallName;
+
+    //防火墙策略名称
+    private String firewallPolicyName;
 
     //创建区域
     private String region;
 
-    //防火墙SKU
-    private String sku;
-
     //防火墙策略
-    private FirewallPolicy firewallPolicy;
+    private FirewallPolicyRequestBody firewallPolicy;
 
     //虚拟网络
     private Network virtualNetwork;

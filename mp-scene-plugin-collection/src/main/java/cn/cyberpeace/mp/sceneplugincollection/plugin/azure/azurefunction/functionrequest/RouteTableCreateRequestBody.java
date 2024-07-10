@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.sceneplugincollection.plugin.azure.functionrequest;
+package cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionrequest;
 
 import com.azure.resourcemanager.network.models.Network;
 import lombok.AllArgsConstructor;
