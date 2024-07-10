@@ -713,7 +713,7 @@ public class CsceneDataModifier {
                 });
                 e.getValue().put("upgrade_result", false);
                 for (String soft : defaultSoftVersions.keySet()) {
-                    if (!StringUtils.equals(defaultSoftVersions.get(soft), softVersion.get(soft))) {
+                    if (softVersion.containsKey(soft) && !StringUtils.equals(defaultSoftVersions.get(soft), softVersion.get(soft))) {
                         e.getValue().put("upgrade_result", true);
                         break;
                     }
