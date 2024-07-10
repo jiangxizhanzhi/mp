@@ -147,7 +147,7 @@ mp:
       storage-tidb-port: ${STORAGE_TIDB_PORT:4000}
       storage-tidb-user: ${STORAGE_TIDB_USER:root}
       storage-tidb-password: ${STORAGE_TIDB_PASSWORD:password}
-      storage-tidb-name: ${STORAGE_TIDB_NAME:data}
+      storage-tidb-name: ${STORAGE_TIDB_NAME:mp_data}
 
   # mp-log 模块
   log:
