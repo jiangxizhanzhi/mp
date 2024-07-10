@@ -2091,6 +2091,7 @@ public class CreateHandler extends HandlerCommon {
         Set<String> supportProtocols = new HashSet<>();
         supportProtocols.add(CloudElementAccessMode.Protocol.VNC);
         supportProtocols.add(CloudElementAccessMode.Protocol.SPICE);
+        supportProtocols.add(CloudElementAccessMode.Protocol.CONSOLE);
 
         boolean existsSupportProtocols = false;
         for (CloudPluginSceneElementPortBO port : cloudPorts) {
@@ -2139,6 +2140,15 @@ public class CreateHandler extends HandlerCommon {
                 vncAccessMode.setAvailable(true);
                 vncAccessMode.setId(TextUtils.uuid());
                 cloudAccessModes.add(vncAccessMode);
+            }
+        }
+
+        // 给所有接入协议先设置联通 使页面显示正常
+        for (CloudPluginSceneElementPortBO port : cloudPorts) {
+            if (port.getAccessModes() != null) {
+                for (CloudAccessMode accessMode : port.getAccessModes()) {
+                    accessMode.setAvailable(true);
+                }
             }
         }
     }
