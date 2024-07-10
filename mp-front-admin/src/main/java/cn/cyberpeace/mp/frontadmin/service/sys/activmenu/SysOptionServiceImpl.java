@@ -112,14 +112,15 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
 
     @Override
     public ServiceResult<List<OptionBO>> getIntOptions(String type) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual(OptionModel::getType, type);
-        String[] codes = new String[]{"236", "310"};
-        condition.filterIn(OptionModel::getCode, codes);
-        condition.orderBy(OptionModel::getSort);
-        List<OptionModel> optionModels = getModelMapper().list(condition);
-        List<OptionBO> optionBOS = flatModels2NestedBos(optionModels, Integer::parseInt);
-        return new ServiceResult<>(optionBOS).asResult();
+        return new ServiceResult<>(getOptionsByType(type, true, true)).asResult();
+       // HumanCondition condition = new HumanCondition();
+       // condition.filterEqual(OptionModel::getType, type);
+       // String[] codes = new String[]{"236", "310"};
+       // condition.filterIn(OptionModel::getCode, codes);
+       // condition.orderBy(OptionModel::getSort);
+       // List<OptionModel> optionModels = getModelMapper().list(condition);
+       // List<OptionBO> optionBOS = flatModels2NestedBos(optionModels, Integer::parseInt);
+       // return new ServiceResult<>(optionBOS).asResult();
     }
 
     /**
