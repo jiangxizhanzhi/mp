@@ -30,6 +30,15 @@ public class CheckUtil {
         return matcher.matches();
     }
 
+    // 校验字符串是否是IP地址
+    public static boolean checkStringIsIpAddress(String address) {
+        String ipPattern = "\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\b";
+        String combinedPattern = String.format("^(%s)$|^(%s)$|^(%s)$|^(%s)$",ipPattern);
+        Pattern pattern = Pattern.compile(combinedPattern);
+        Matcher matcher = pattern.matcher(address);
+        return matcher.matches();
+    }
+
 //    //比较两个地址空间案例
 //    public static void main(String[] args) {
 //        String largeAddress = "10.0.0.0";

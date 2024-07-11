@@ -13,7 +13,6 @@ import cn.cyberpeace.mp.cscene.request.load.LoadResultSearchRequest;
 import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
 import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.FirewallFunction;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionrequest.FirewallBuildRequestBody;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionresponse.FirewallBuildResponseBody;
@@ -404,6 +403,14 @@ public class LoadController {
         return new ServiceResult(fireWall, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
-
+    /**
+     * 测试防火墙策略是否符合格式
+     */
+    @ApiOperation(value = "测试防火墙策略是否符合格式", notes = "")
+    @PostMapping("/checkPolicy")
+    public ServiceResult checkPolicy(@RequestBody FirewallBuildRequestBody fireWallBuildRequestBody) {
+        List<String> strings = firewallFunction.checkPolicy(fireWallBuildRequestBody.getFirewallPolicy().getRules());
+        return new ServiceResult(strings, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+    }
 
 }
