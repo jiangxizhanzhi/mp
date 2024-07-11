@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
 
 
@@ -192,7 +193,15 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                         throw new MpRuntimeException(CloudErrorCode.INVALID_PASSWORD.format(element.getPassword()));
                     }
                 }
+                if (BaseCloudPluginSceneElementModel.ImageType.VNET.equals(element.getImageType())) {
+                    List<String> cidrPools = element.getCidrPools();
+                    List<String> validateCidrPools = IpUtils.validateCidrPools(cidrPools);
+                    if (validateCidrPools.size() > 0) {
+                        throw new MpRuntimeException(CloudErrorCode.INVALID_CIDR_POOLS.format(validateCidrPools.toString()));
+                    }
+                }
             });
+
         }
 
         for (var srcPort : getSceneHandler().getElementPortMap().values()) {
@@ -215,7 +224,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                 }
 //                公有云场景需要验证ip是否在保留ip段内
                 if (null != getSceneHandler().getScene().getCloudType() && BaseSceneModel.CloudType.DEFAULT != getSceneHandler().getScene().getCloudType()) {
-                     if (IpUtils.isLastOctetInReservedRange(ip)) {
+                    if (IpUtils.isLastOctetInReservedRange(ip)) {
                         throw new MpRuntimeException(CloudErrorCode.IP_CONFLICT_WITH_RESERVED_IP.format(ip));
                     }
                 }

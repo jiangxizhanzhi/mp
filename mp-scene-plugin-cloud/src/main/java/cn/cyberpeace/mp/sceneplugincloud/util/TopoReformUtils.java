@@ -36,6 +36,7 @@ public class TopoReformUtils {
 
     /**
      * 为实现某些功能(比如核心路由器配置下发),增加辅助交换机节点
+     *
      * @return
      */
     public ElementWrapper addAuxiliarySwitchNode() {
@@ -49,6 +50,7 @@ public class TopoReformUtils {
 
     /**
      * 为实现某些功能(比如核心路由器配置下发),增加辅助端口
+     *
      * @param element
      * @return
      */
@@ -64,6 +66,7 @@ public class TopoReformUtils {
 
     /**
      * 增加一个接入协议
+     *
      * @param port
      * @param protocol
      */
@@ -89,6 +92,7 @@ public class TopoReformUtils {
 
     /**
      * 增加连线关系
+     *
      * @param from
      * @param to
      */
@@ -113,21 +117,25 @@ public class TopoReformUtils {
         sceneElementBO.setProcessStatus(ProcessStatus.INITIAL);
         sceneElementBO.setIsAuxiliary(true);
         CloudPluginSceneElementBO cloudPluginSceneElementBO = new CloudPluginSceneElementBO();
-        cloudPluginSceneElementBO.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH);
+        cloudPluginSceneElementBO.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER_VNET);
         cloudPluginSceneElementBO.setDhcp(true);
         cloudPluginSceneElementBO.setSrcElement(sceneElementBO);
         cloudPluginSceneElementBO.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH);
 
         sceneElementBO.setType(BaseSceneElementModel.Type.SWITCH);
         // azure todo 把两个字段补充
-        sceneElementBO.setName("VNet");
-        sceneElementBO.setIcon2("/api/mp/file/710/017/93dde93031be465c3a7bb20381f4cd6e.png");
+        sceneElementBO.setName("default VNet");
+        sceneElementBO.setIcon2("/api/mp/file/177/108/39ae20d4c7de4ab7a9aa9de270c1d143.png");
+
 
         cloudPluginSceneElementBO.setImageType(CloudPluginSceneElementModel.ImageType.VNET);
         cloudPluginSceneElementBO.setElectricPortNumber(1);
         cloudPluginSceneElementBO.setLanPortNumber(1);
         cloudPluginSceneElementBO.setWanPortNumber(1);
         cloudPluginSceneElementBO.setOpticalPortNumber(1);
+
+        cloudPluginSceneElementBO.setServiceType("basicNetwork");
+        cloudPluginSceneElementBO.setCloudServiceType("1");
 
         return new ElementWrapper(sceneElementBO, cloudPluginSceneElementBO);
     }

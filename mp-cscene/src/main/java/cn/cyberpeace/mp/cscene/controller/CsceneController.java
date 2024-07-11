@@ -317,6 +317,7 @@ public class CsceneController implements BaseModelListControllerBase {
         SceneConfigDataBO returnData = newConfigHandler.toData();
         returnData.getTopology().setScene(csceneBO.getSceneConfig().getTopology().getScene());
         csceneBO.setSceneConfig(newConfigHandler.toData());
+        CsceneDataModifier.correctReturnCsceneData(csceneBO);
         return new ServiceResult<>(csceneBO).asResult();
     }
 

@@ -22,7 +22,8 @@ public enum CloudErrorCode implements ErrorCode {
     USERNAME_NOT_ALLOWED("MP-110714", "username_not_allowed"),
     PASSWORD_NOT_ALLOWED("MP-110715", "password_not_allowed"),
     INVALID_USERNAME("MP-110716", "invalid_username"),
-    INVALID_PASSWORD("MP-110717", "invalid_password");
+    INVALID_PASSWORD("MP-110717", "invalid_password"),
+    INVALID_CIDR_POOLS("MP-110717", "invalid_cidr_pools");
 
     CloudErrorCode(String code, String message) {
         setCode(code, "sceneplugincloud.error_code." + message);

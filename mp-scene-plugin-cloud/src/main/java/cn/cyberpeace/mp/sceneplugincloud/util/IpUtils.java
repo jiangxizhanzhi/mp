@@ -719,40 +719,22 @@ public class IpUtils {
         return cidr;
     }
 
-    /**
-     * Validates a list of CIDRs against a specific rule: the IP part must be between 0 and 255 for each octet,
-     * and the CIDR notation must end with "/24".
-     *
-     * @param cidrPools The list of CIDRs to validate.
-     * @return A list of CIDRs that do not conform to the rule.
-     */
+    // 正则表达式用于匹配符合规则的CIDR
+    private static final Pattern CIDR_PATTERN = Pattern.compile(
+            "^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\."
+                    + "(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\."
+                    + "(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\.0/24$"
+    );
+
     public static List<String> validateCidrPools(List<String> cidrPools) {
-        List<String> invalidCidrs = new ArrayList<>();
-        Pattern pattern = Pattern.compile("^(\\d{1,3}\\.){3}\\d{1,3}/24$");
+        List<String> invalidCIDRs = new ArrayList<>();
 
         for (String cidr : cidrPools) {
-            if (!pattern.matcher(cidr).matches()) {
-                // Check if all numbers are between 0 and 255
-                String ipPart = cidr.split("/")[0];
-                String[] octets = ipPart.split("\\.");
-                boolean isValid = true;
-                for (String octet : octets) {
-                    try {
-                        int value = Integer.parseInt(octet);
-                        if (value < 0 || value > 255) {
-                            isValid = false;
-                            break;
-                        }
-                    } catch (NumberFormatException e) {
-                        isValid = false;
-                        break;
-                    }
-                }
-                if (!isValid) {
-                    invalidCidrs.add(cidr);
-                }
+            if (StringUtils.isNotEmpty(cidr) && !CIDR_PATTERN.matcher(cidr).matches()) {
+                invalidCIDRs.add(cidr);
             }
         }
-        return invalidCidrs;
+
+        return invalidCIDRs;
     }
 }
