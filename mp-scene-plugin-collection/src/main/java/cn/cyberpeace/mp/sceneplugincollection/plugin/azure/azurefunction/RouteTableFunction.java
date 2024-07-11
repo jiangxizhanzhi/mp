@@ -40,7 +40,7 @@ public class RouteTableFunction {
             Network network = azureResourceManager.networks().getByResourceGroup(resourceGroupName, body.getVirtualNetwork().name());
             Map<String, Subnet> subnets = network.subnets();
             for (Map.Entry<String, Subnet> entry : subnets.entrySet()) {
-                if (!entry.getKey().equals("AzureFirewallSubnet")) {
+                if (!entry.getKey().equals("AzureFirewallSubnet") && !entry.getKey().equals("AzureFirewallManagementSubnet")) {
                     // 获取子网关联的现有路由表
                     Subnet subnet = entry.getValue();
                     RouteTable subnetRouteTable = subnet.getRouteTable();

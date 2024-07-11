@@ -16,7 +16,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -26,7 +29,7 @@ public class FirewallFunction {
     @Autowired
     private RouteTableFunction routeTableFunction;
 
-    // 防火墙创建(防火墙和防火墙策略的SKU用标准,如果需要变动，需要保持一致)
+    // 防火墙创建(防火墙和防火墙策略的SKU用基本,如果需要变动，需要保持一致)
     // 创建前需要将虚拟网络和专有的防火墙子网创建好(防火墙子网名称必须为AzureFirewallSubnet且地址空间后缀必须为/26)
     public FirewallBuildResponseBody createFireWall(Integer cloudType, FirewallBuildRequestBody requestBody) {
         FirewallBuildResponseBody responseBody = new FirewallBuildResponseBody();
@@ -34,49 +37,40 @@ public class FirewallFunction {
         // 获取默认订阅Id的资源管理器
         AzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(cloudType).getManager();
         try {
-            Network firewallNet = null;
+            Network vnet = null;
             if (requestBody.getVirtualNetwork() == null) {
                 // 创建虚拟网络及防火墙子网
-                firewallNet = azureResourceManager.networks().define(UUID.randomUUID().toString())
+                vnet = azureResourceManager.networks().define(UUID.randomUUID().toString())
                         .withRegion(requestBody.getRegion())
                         .withExistingResourceGroup(requestBody.getResourceGroup())
                         .withAddressSpace("10.0.0.0/16")  // 设置虚拟网络的地址空间
                         .defineSubnet("default")
                             .withAddressPrefix("10.0.1.0/24")  // 设置子网的地址前缀
                             .attach()
+                        .defineSubnet("AzureFirewallManagementSubnet")
+                            .withAddressPrefix("10.0.2.0/24")  // 设置子网的地址前缀 
+                            .attach()
                         .defineSubnet("AzureFirewallSubnet")
-                            .withAddressPrefix("10.0.2.0/26")  // 设置子网的地址前缀
+                            .withAddressPrefix("10.0.3.0/26")  // 设置子网的地址前缀
                             .attach()
                         .create();
-                responseBody.getFirewallBuildResult().setFirewallSubnetAddressSpace("10.0.2.0/26");
+                responseBody.getFirewallBuildResult().setFirewallSubnetAddressSpace("10.0.3.0/26");
                 responseBody.getFirewallBuildResult().setFirewallSubnetName("AzureFirewallSubnet");
-                requestBody.setVirtualNetwork(firewallNet);
+                requestBody.setVirtualNetwork(vnet);
                 System.out.println("创建虚拟网络及防火墙子网成功!");
             } else {
-                firewallNet = requestBody.getVirtualNetwork();
+                vnet = requestBody.getVirtualNetwork();
                 // 判断防火墙子网是否存在
-                if (firewallNet.subnets().get("AzureFirewallSubnet") == null) {
-                    // 生成一个新的地址空间
-                    String randomNewAddressSpace = getRandomNewAddressSpace(firewallNet);
-                    // 创建防火墙子网
-                    firewallNet = azureResourceManager.networks().define(firewallNet.name())
-                            .withRegion(requestBody.getRegion())
-                            .withExistingResourceGroup(requestBody.getResourceGroup())
-                            .withAddressSpace(randomNewAddressSpace)  // 设置虚拟网络的地址空间
-                            .defineSubnet("AzureFirewallSubnet")
-                                .withAddressPrefix(randomNewAddressSpace)  // 设置子网的地址前缀
-                                .attach()
-                            .create();
-                    responseBody.getFirewallBuildResult().setFirewallSubnetAddressSpace(randomNewAddressSpace);
-                    responseBody.getFirewallBuildResult().setFirewallSubnetName("AzureFirewallSubnet");
-
-                    System.out.println("该虚拟网络创建防火墙子网成功!");
+                if (vnet.subnets().get("AzureFirewallSubnet") == null || vnet.subnets().get("AzureFirewallManagementSubnet") == null) {
+                    responseBody.getFirewallBuildResult().setResult(false);
+                    responseBody.getFirewallBuildResult().setErrorMessage("创建防火墙失败：" + "该虚拟网络没有创建专属于防火墙的子网");
+                    return responseBody;
                 }
             }
 
             //防火墙子网id
             AtomicReference<SubResource> subnetResource = new AtomicReference<>();
-            Map<String, Subnet> subnets = firewallNet.subnets();
+            Map<String, Subnet> subnets = vnet.subnets();
             for (Map.Entry<String, Subnet> entry : subnets.entrySet()) {
                 if (entry.getKey().equals("AzureFirewallSubnet")) {
                     Subnet value = entry.getValue();
@@ -99,7 +93,7 @@ public class FirewallFunction {
 
             // 创建 AzureFirewallIPConfiguration 对象，用于定义防火墙的 IP 配置
             AzureFirewallIpConfiguration firewallIPConfig = new AzureFirewallIpConfiguration()
-                    .withName("firewallIpConfig")
+                    .withName("firewallIpConfig"+UUID.randomUUID())
                     .withPublicIpAddress(publicIpResource.get())
                     .withSubnet(subnetResource.get()); // 根据防火墙子网，分配对应的静态 IP 地址
 
@@ -114,7 +108,7 @@ public class FirewallFunction {
                 // 创建防火墙策略
                 FirewallPolicyInner firewallPolicyInner = new FirewallPolicyInner()
                         .withLocation(requestBody.getRegion())
-                        .withSku(new FirewallPolicySku().withTier(FirewallPolicySkuTier.STANDARD));
+                        .withSku(new FirewallPolicySku().withTier(FirewallPolicySkuTier.BASIC));
 
                 // 提交创建防火墙策略的操作
                 FirewallPolicyInner createdFirewallPolicy = azureResourceManager.networks().manager().serviceClient()
@@ -154,14 +148,44 @@ public class FirewallFunction {
                 });
             }
 
+            //当防火墙SKU为基本时，需要配置管理公共IP地址，且改公共IP的SKU必须为标准
+            AtomicReference<SubResource> managePublicIpResource = new AtomicReference<>();
+            PublicIpAddress managePublicIp = azureResourceManager.publicIpAddresses().define(UUID.randomUUID().toString())
+                    .withRegion(requestBody.getRegion())
+                    .withExistingResourceGroup(requestBody.getResourceGroup())
+                    .withSku(PublicIPSkuType.STANDARD)
+                    .withStaticIP()
+                    .create();
+            managePublicIpResource.set(new SubResource().withId(managePublicIp.id()));
+            System.out.println("管理公共IP地址名称: " + managePublicIp.name() + " 管理公共IP地址id: " + managePublicIp.id());
+
+            //防火墙管理Ip配置子网id
+            AtomicReference<SubResource> managerSubnetResource = new AtomicReference<>();
+            Map<String, Subnet> managerSubnets = vnet.subnets();
+            for (Map.Entry<String, Subnet> entry : managerSubnets.entrySet()) {
+                if (entry.getKey().equals("AzureFirewallManagementSubnet")) {
+                    Subnet value = entry.getValue();
+                    managerSubnetResource.set(new SubResource().withId(value.id()));
+                    System.out.println("防火墙管理Ip配置子网名称: " + entry.getKey() + " ;防火墙管理Ip配置子网id: " + entry.getValue());
+                    break;
+                }
+            }
+
+            // 创建 AzureFirewallIPConfiguration 对象，用于定义防火墙的管理公共IP地址配置
+            AzureFirewallIpConfiguration managePublicIpConfig = new AzureFirewallIpConfiguration()
+                    .withName("managePublicIpResource"+UUID.randomUUID())
+                    .withPublicIpAddress(managePublicIpResource.get())
+                    .withSubnet(managerSubnetResource.get());
+
             // 创建防火墙实例
             AzureFirewallInner azureFirewallUpdateInner = new AzureFirewallInner()
                     .withLocation(requestBody.getRegion())
                     .withSku(new AzureFirewallSku()
                             .withName(AzureFirewallSkuName.AZFW_VNET)
-                            .withTier(AzureFirewallSkuTier.STANDARD))
+                            .withTier(AzureFirewallSkuTier.BASIC))
                     .withFirewallPolicy(firewallPolicySubResource.get())
-                    .withIpConfigurations(firewallIPConfigs);
+                    .withIpConfigurations(firewallIPConfigs)
+                    .withManagementIpConfiguration(managePublicIpConfig);
 
             // 提交创建防火墙实例的操作
             AzureFirewallInner create = azureResourceManager.networks().manager().serviceClient()
@@ -276,55 +300,4 @@ public class FirewallFunction {
         }
         return valueList;
     }
-
-    // 生成不同于addressSpaces的新地址空间作为虚拟网络的新地址空间和防火墙子网
-    private static String getRandomNewAddressSpace(Network firewallNet) {
-        List<String> addressSpaces = firewallNet.addressSpaces();
-        String addressSpace = null;
-        if (addressSpaces == null || addressSpaces.size() == 0) {
-            Random random = new Random();
-            // 生成前三部分地址
-            int part1 = random.nextInt(256);
-            int part2 = random.nextInt(256);
-            int part3 = random.nextInt(256);
-            // 最后一部分固定为 0/26
-            addressSpace = part1 + "." + part2 + "." + part3 + ".0/26";
-            return addressSpace;
-        }
-
-        List<Integer> partOne = new ArrayList<>();
-        List<Integer> partTwo = new ArrayList<>();
-        List<Integer> partThree = new ArrayList<>();
-        for (String address : addressSpaces) {
-            String[] parts = address.split("\\.");
-            if (parts.length == 4) {
-                int part1 = Integer.parseInt(parts[0]);
-                int part2 = Integer.parseInt(parts[1]);
-                int part3 = Integer.parseInt(parts[2]);
-                partOne.add(part1);
-                partTwo.add(part2);
-                partThree.add(part3);
-            }
-        }
-        //生成一个不在partOne、partTwo、partThree中的地址空间，且后缀为/26
-        addressSpace = generateUniqueAddressSpace(partOne, partTwo, partThree);
-        return addressSpace;
-    }
-
-    //生成一个不在partOne、partTwo、partThree中的地址空间，且后缀为/26
-    private static String generateUniqueAddressSpace(List<Integer> partOne, List<Integer> partTwo, List<Integer> partThree) {
-        Random random = new Random();
-        int part1, part2, part3;
-        do {
-            part1 = random.nextInt(256);
-        } while (partOne.contains(part1));
-        do {
-            part2 = random.nextInt(256);
-        } while (partTwo.contains(part2));
-        do {
-            part3 = random.nextInt(256);
-        } while (partThree.contains(part3));
-        return part1 + "." + part2 + "." + part3 + ".0/26";
-    }
-
 }
