@@ -63,34 +63,73 @@ public class HandlerUtils {
      * @return
      */
     public List<String> getDnsIpAndDomains() {
-        if (this.dnsIpAndDomain == null) {
-            synchronized (this) {
-                if (this.dnsIpAndDomain == null) {
-                    List<String> result = new ArrayList<>();
-                    if (CollectionUtils.isNotEmpty(getPluginHandler().getScene().getDnsNameservers())) {
-                        for (DnsPool dns : getPluginHandler().getScene().getDnsNameservers()) {
-                            CloudPluginSceneElementBO dnsCloudElement = getPluginHandler().getElement(dns.getNodeId());
-                            String dnsIp = null;
-                            if (dnsCloudElement != null) {
-                                SceneElementBO e = dnsCloudElement.getSrcElement();
-                                if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(e.getPorts())) {
-                                    for (SceneElementPortBO p : e.getPorts()) {
-                                        if (StringUtils.isNotEmpty(p.getIp())) {
-                                            dnsIp = p.getIp();
-                                            break;
-                                        }
-                                    }
+        if (DnsIpAndDomainHolder.INSTANCE == null) {
+            initializeDnsIpAndDomains();
+        }
+        return DnsIpAndDomainHolder.INSTANCE;
+    }
+
+    private static class DnsIpAndDomainHolder {
+        private static volatile List<String> INSTANCE;
+    }
+
+    private synchronized void initializeDnsIpAndDomains() {
+        if (DnsIpAndDomainHolder.INSTANCE == null) {
+            List<String> result = new ArrayList<>();
+            List<DnsPool> dnsNameservers = getPluginHandler().getScene().getDnsNameservers();
+
+            if (CollectionUtils.isNotEmpty(dnsNameservers)) {
+                for (DnsPool dns : dnsNameservers) {
+                    CloudPluginSceneElementBO dnsCloudElement = getPluginHandler().getElement(dns.getNodeId());
+                    String dnsIp = null;
+
+                    if (dnsCloudElement != null) {
+                        SceneElementBO e = dnsCloudElement.getSrcElement();
+
+                        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(e.getPorts())) {
+                            for (SceneElementPortBO p : e.getPorts()) {
+                                if (StringUtils.isNotEmpty(p.getIp())) {
+                                    dnsIp = p.getIp();
+                                    break;
                                 }
                             }
-                            result.add(dnsIp + " " + dns.getDomain());
                         }
                     }
-                    this.dnsIpAndDomain = result;
+                    result.add((dnsIp != null ? dnsIp : "null") + " " + dns.getDomain());
                 }
             }
+            DnsIpAndDomainHolder.INSTANCE = result;
         }
-        return this.dnsIpAndDomain;
     }
+    //public List<String> getDnsIpAndDomains() {
+    //    if (this.dnsIpAndDomain == null) {
+    //        synchronized (this) {
+    //            if (this.dnsIpAndDomain == null) {
+    //                List<String> result = new ArrayList<>();
+    //                if (CollectionUtils.isNotEmpty(getPluginHandler().getScene().getDnsNameservers())) {
+    //                    for (DnsPool dns : getPluginHandler().getScene().getDnsNameservers()) {
+    //                        CloudPluginSceneElementBO dnsCloudElement = getPluginHandler().getElement(dns.getNodeId());
+    //                        String dnsIp = null;
+    //                        if (dnsCloudElement != null) {
+    //                            SceneElementBO e = dnsCloudElement.getSrcElement();
+    //                            if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(e.getPorts())) {
+    //                                for (SceneElementPortBO p : e.getPorts()) {
+    //                                    if (StringUtils.isNotEmpty(p.getIp())) {
+    //                                        dnsIp = p.getIp();
+    //                                        break;
+    //                                    }
+    //                                }
+    //                            }
+    //                        }
+    //                        result.add(dnsIp + " " + dns.getDomain());
+    //                    }
+    //                }
+    //                this.dnsIpAndDomain = result;
+    //            }
+    //        }
+    //    }
+    //    return this.dnsIpAndDomain;
+    //}
 
     /**
      * addFwdnsInterfaceIp

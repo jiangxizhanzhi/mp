@@ -29,7 +29,7 @@ public class RouterPageDTO extends BasePageDTO {
 
     public RouterPageDTO(RouterPageRequest request){
         this.name = request.getName();
-        super.setLimit(request.getLimit());
-        super.setOffset(request.getOffset());
+        super.setLimit(request.getPerPage());
+        super.setOffset(request.getPage());
     }
 }

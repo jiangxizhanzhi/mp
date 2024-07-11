@@ -635,16 +635,15 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 addRequest.setFileName(fileName);
             }
 
-            InputStream is = null;
-            try {
-                is = new ByteArrayInputStream(addRequest.getCode().getBytes());
+            try ( InputStream is = new ByteArrayInputStream(addRequest.getCode().getBytes())) {
                 String filePath = FsCommon.upload(is, suffix);
                 addRequest.setFilePath(filePath);
             } catch (MpRuntimeException e) {
                 log.error("add attack flow error, {}", ExceptionUtils.getStackTrace(e));
                 return ResultCommon.fail(FlowErrorCode.ADD_ATTACK_FLOW_ERROR);
-            } finally {
-                IOUtils.closeQuietly(is);
+            } catch (Exception e) {
+                log.error("IO error while processing attack flow", e);
+                return ResultCommon.fail(FlowErrorCode.ADD_ATTACK_FLOW_ERROR);
             }
 
             // 请求对象转换
@@ -828,16 +827,12 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 if (StringUtils.isBlank(modifyRequest.getCode())) {
                     // 下载攻击脚本，更改后缀重新上传
                     String code = FsCommon.downloadContent(oldServiceResult.getSource().getObj().getScriptFile());
-                    InputStream is = null;
-                    try {
-                        is = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+                    try (InputStream is = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8))){
                         String filePath = FsCommon.upload(is, suffix);
                         modifyRequest.setFilePath(filePath);
-                    } catch (MpRuntimeException e) {
+                    } catch (MpRuntimeException | IOException e) {
                         log.error("modify attack flow error, {}", ExceptionUtils.getStackTrace(e));
                         return ResultCommon.fail(FlowErrorCode.MODIFY_ATTACK_FLOW_ERROR);
-                    } finally {
-                        IOUtils.closeQuietly(is);
                     }
                 }
             }
@@ -855,16 +850,13 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                     modifyRequest.setFileName(fileName);
                 }
 
-                InputStream is = null;
-                try {
-                    is = new ByteArrayInputStream(modifyRequest.getCode().getBytes(StandardCharsets.UTF_8));
+
+                try (InputStream is = new ByteArrayInputStream(modifyRequest.getCode().getBytes(StandardCharsets.UTF_8))){
                     String filePath = FsCommon.upload(is, suffix);
                     modifyRequest.setFilePath(filePath);
-                } catch (MpRuntimeException e) {
+                } catch (MpRuntimeException | IOException e) {
                     log.error("modify attack flow error, {}", ExceptionUtils.getStackTrace(e));
                     return ResultCommon.fail(FlowErrorCode.MODIFY_ATTACK_FLOW_ERROR);
-                } finally {
-                    IOUtils.closeQuietly(is);
                 }
             }
 
@@ -1215,11 +1207,8 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                     if (flowFile.getName().contains("README.md")) {
                         // 解析README.md
                         File readmeFile = flowFile;
-                        FileReader fileReader = null;
-                        BufferedReader bufferedReader = null;
-                        try {
-                            fileReader = new FileReader(readmeFile);
-                            bufferedReader  = new BufferedReader(fileReader);
+                        try (FileReader fileReader = new FileReader(readmeFile);
+                             BufferedReader bufferedReader  = new BufferedReader(fileReader)) {
                             String s;
                             while ((s = bufferedReader.readLine()) != null) {
                                 readmeList.add(s);
@@ -1238,9 +1227,6 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                         } catch (IOException e) {
                             log.error("flow info import error for IOException, {}", ExceptionUtils.getStackTrace(e));
                             return ResultCommon.fail("flow file import error");
-                        } finally {
-                            IOUtils.closeQuietly(fileReader);
-                            IOUtils.closeQuietly(bufferedReader);
                         }
                     }
                 }
@@ -1399,18 +1385,16 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         String strProtocols;
         String scriptPath = PRE_PATH.concat("/protocol_analyse.py");
         String pcapPath = "";
-        OutputStream out = null;
-        BufferedReader input = null;
-        File tmpFile = null;
-
+        File tmpFile = new File(pcapPath);
         try {
             String fileName = System.currentTimeMillis() + BaseConstants.SHORT_DASH + TextUtils.uuid() + ".pcap";
             pcapPath = PRE_PATH.concat("/" + System.currentTimeMillis() + "_" + fileName);
-            tmpFile = new File(pcapPath);
-            out = new FileOutputStream(tmpFile);
-            byte[] ss = multipartFile.getBytes();
-            for (byte s : ss) {
-                out.write(s);
+
+            try (OutputStream out = new FileOutputStream(tmpFile)){
+                byte[] ss = multipartFile.getBytes();
+                for (byte s : ss) {
+                    out.write(s);
+                }
             }
 
             String pythonCmd = String.format("python3 %s %s", scriptPath, pcapPath);
@@ -1419,13 +1403,15 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             Process process = Runtime.getRuntime().exec(pythonCmd);
             process.waitFor();
             strProtocols = "";
-            input = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line = "";
-            while ((line = input.readLine()) != null) {
-                strProtocols = line;
-            }
-            log.info("============pcapRead result: {}", strProtocols);
 
+            try (BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()))){
+                String line = "";
+                while ((line = input.readLine()) != null) {
+                    strProtocols = line;
+                }
+            }
+
+            log.info("============pcapRead result: {}", strProtocols);
             if (org.apache.commons.lang3.StringUtils.isNotBlank(strProtocols)) {
                 if (org.apache.commons.lang3.StringUtils.isNotBlank(fileMd5)) {
                     FlowCacheUtil.pcapAnalyseCache.put(fileMd5, strProtocols);
@@ -1448,14 +1434,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         } catch (Exception e) {
             log.error("exec error:", e);
         } finally {
-            org.apache.poi.util.IOUtils.closeQuietly(out);
-            org.apache.poi.util.IOUtils.closeQuietly(input);
-
-            if (Objects.nonNull(tmpFile) && tmpFile.exists()) {
-                try {
-                    tmpFile.delete();
-                } catch (Exception e) {
-                    log.error(pcapPath + "delete error");
+            if (tmpFile != null && tmpFile.exists()) {
+                if (!tmpFile.delete()) {
+                    log.error(pcapPath + " delete error");
                 }
             }
         }
@@ -1709,7 +1690,6 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         }
         String outPcapPath = "";
         String scriptPath = PRE_PATH.concat("/protocol_filter.py");
-        BufferedReader input = null;
         File srcFile = null;
         File dstFile = null;
         String strProtocols = org.apache.commons.lang3.StringUtils.join(protocolList, BaseConstants.COMMA);
@@ -1729,63 +1709,62 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             log.info("============python filter cmd: {}", pythonCmd);
             Process process = Runtime.getRuntime().exec(pythonCmd);
             process.waitFor();
-            input = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line = "";
-            String filterResult = "";
-            while ((line = input.readLine()) != null) {
-                filterResult = line;
-            }
 
-            // {'duration': 9.08, 'count': 998, 'dstPath': '/root/.mp/resources/flows/QQ影像1682298574.pcap', 'fileSize': 717504}
-            log.info("============pcap filter result: {}", filterResult);
-
-            if (StringUtils.isBlank(filterResult)) {
-                StringBuilder errorBuilder = new StringBuilder();
-                try (InputStream errorStream = process.getErrorStream();
-                     InputStreamReader isr = new InputStreamReader(errorStream);
-                     BufferedReader br = new BufferedReader(isr)) {
-                    String errorResult;
-                    while ((errorResult = br.readLine()) != null) {
-                        errorBuilder.append(errorResult + " ");
+            try (BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));){
+                String line = "";
+                String filterResult = "";
+                while ((line = input.readLine()) != null) {
+                    filterResult = line;
+                }
+                log.info("============pcap filter result: {}", filterResult);
+                // {'duration': 9.08, 'count': 998, 'dstPath': '/root/.mp/resources/flows/QQ影像1682298574.pcap', 'fileSize': 717504}
+                if (StringUtils.isBlank(filterResult)) {
+                    StringBuilder errorBuilder = new StringBuilder();
+                    try (InputStream errorStream = process.getErrorStream();
+                         InputStreamReader isr = new InputStreamReader(errorStream);
+                         BufferedReader br = new BufferedReader(isr)) {
+                        String errorResult;
+                        while ((errorResult = br.readLine()) != null) {
+                            errorBuilder.append(errorResult + " ");
+                        }
+                        log.error("pcap file filter failed: {}", errorBuilder);
+                        return;
                     }
-                    log.error("pcap file filter failed: {}", errorBuilder);
-                    return;
+                }
+
+                // 保存mp_flow_pcap表数据
+                JSONObject filterObj = JSONObject.parseObject(filterResult);
+                Double duration = filterObj.getDoubleValue("duration");
+                Integer pktNum = filterObj.getInteger("count");
+                String dstPcapPath = filterObj.getString("dstPath");
+                Long pcapSize = filterObj.getLongValue("fileSize");
+
+                dstFile = new File(dstPcapPath);
+                // 上传新pcap包
+                outPcapPath = FsCommon.upload(dstPcapPath);
+
+                FlowPcapModel pcapModel = flowPcapService.getByFlowId(flowId);
+                if (Objects.nonNull(pcapModel)) {
+                    pcapModel.setPcapFile(outPcapPath);
+                    pcapModel.setPcapSize(pcapSize);
+                    pcapModel.setPktNum(pktNum.longValue());
+                    pcapModel.setDuration(Math.round(Math.abs(duration) * 1000));
+                    pcapModel.setProtocols(String.join(BaseConstants.COMMA, protocolList));
+                    pcapModel.setUpdateTime(LocalDateTime.now());
+                    flowPcapService.update(pcapModel);
+                } else {
+                    // 新增流量包数据
+                    FlowPcapModel flowPcapModel = FlowPcapModel.builder()
+                            .flowId(flowId)
+                            .pcapFile(outPcapPath)
+                            .pcapSize(pcapSize)
+                            .pktNum(pktNum.longValue())
+                            .duration(Math.round(duration * 1000))
+                            .protocols(String.join(BaseConstants.COMMA, protocolList))
+                            .build();
+                    flowPcapService.create(flowPcapModel);
                 }
             }
-
-            // 保存mp_flow_pcap表数据
-            JSONObject filterObj = JSONObject.parseObject(filterResult);
-            Double duration = filterObj.getDoubleValue("duration");
-            Integer pktNum = filterObj.getInteger("count");
-            String dstPcapPath = filterObj.getString("dstPath");
-            Long pcapSize = filterObj.getLongValue("fileSize");
-
-            dstFile = new File(dstPcapPath);
-            // 上传新pcap包
-            outPcapPath = FsCommon.upload(dstPcapPath);
-
-            FlowPcapModel pcapModel = flowPcapService.getByFlowId(flowId);
-            if (Objects.nonNull(pcapModel)) {
-                pcapModel.setPcapFile(outPcapPath);
-                pcapModel.setPcapSize(pcapSize);
-                pcapModel.setPktNum(pktNum.longValue());
-                pcapModel.setDuration(Math.round(Math.abs(duration) * 1000));
-                pcapModel.setProtocols(String.join(BaseConstants.COMMA, protocolList));
-                pcapModel.setUpdateTime(LocalDateTime.now());
-                flowPcapService.update(pcapModel);
-            } else {
-                // 新增流量包数据
-                FlowPcapModel flowPcapModel = FlowPcapModel.builder()
-                        .flowId(flowId)
-                        .pcapFile(outPcapPath)
-                        .pcapSize(pcapSize)
-                        .pktNum(pktNum.longValue())
-                        .duration(Math.round(duration * 1000))
-                        .protocols(String.join(BaseConstants.COMMA, protocolList))
-                        .build();
-                flowPcapService.create(flowPcapModel);
-            }
-
         } catch (Exception e) {
             log.error("pcap file filter error", e);
         } finally {

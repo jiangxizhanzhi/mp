@@ -133,16 +133,13 @@ public class FileUtil {
         path = getAbsolutePath(path);
         // jar文件中的路径
         index = index + FileUtil.JAR_FILE_EXT.length();
-        JarFile jarFile = null;
-        try {
-            jarFile = new JarFile(path.substring(0, index));
+
+        try(JarFile jarFile = new JarFile(path.substring(0, index))) {
             // 防止出现jar!/cn/hutool/这类路径导致文件找不到
             return ZipUtil.listFileNames(jarFile, StrUtil.removePrefix(path.substring(index + 1), "/"));
         } catch (IOException e) {
             log.error(e.getMessage());
             return null;
-        } finally {
-            IoUtil.close(jarFile);
         }
     }
 
@@ -602,10 +599,9 @@ public class FileUtil {
      */
     public static void setResponse(File file, Boolean delete, HttpServletResponse response) {
         // 以流的形式下载文件。
-        InputStream fis = null;
-        OutputStream outputStream = null;
-        try {
-            fis = new FileInputStream(file);
+        try (InputStream fis = new FileInputStream(file);
+             OutputStream outputStream = response.getOutputStream()) {
+
             byte[] buffer = new byte[fis.available()];
             fis.read(buffer);
 
@@ -615,26 +611,16 @@ public class FileUtil {
             // 设置返回
             response.setContentType("application/octet-stream;charset=UTF-8");
             response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(file.getName(),"UTF-8").replaceAll("\\+","%20"));
-            outputStream = response.getOutputStream();
+
             outputStream.write(buffer);
             outputStream.flush();
         } catch (IOException e) {
             log.error("setResponse error:", e);
-        } finally {
-            try {
-                if (null != fis) {
-                    fis.close();
-                }
-                if (outputStream != null) {
-                    outputStream.close();
-                }
-            } catch (IOException e) {
-                log.error("setResponse error:", e);
-            }
+        }
 
-            if (delete.equals(Boolean.TRUE) && null != file && file.exists()) {
-                file.delete();
-            }
+        // Optionally delete the file after download
+        if (delete.equals(Boolean.TRUE) && file != null && file.exists()) {
+            file.delete();
         }
     }
 

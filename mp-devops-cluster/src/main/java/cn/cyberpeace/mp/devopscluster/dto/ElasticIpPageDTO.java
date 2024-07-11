@@ -29,7 +29,7 @@ public class ElasticIpPageDTO extends BasePageDTO{
 
     public ElasticIpPageDTO(ElasticIpPageRequest request){
         this.name = request.getName();
-        super.setLimit(request.getLimit());
-        super.setOffset(request.getOffset());
+        super.setLimit(request.getPerPage());
+        super.setOffset(request.getPage());
     }
 }

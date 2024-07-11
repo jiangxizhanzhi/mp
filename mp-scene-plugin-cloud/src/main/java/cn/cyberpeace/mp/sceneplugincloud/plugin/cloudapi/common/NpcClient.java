@@ -46,9 +46,11 @@ public abstract class NpcClient {
     protected void heavyConcurrentWait() {
         synchronized (syncObj) {
             try {
-                Thread.sleep(CloudSingleton.cloudAppConfig.getCloudHeavyConcurrentDelay());
+                wait(CloudSingleton.cloudAppConfig.getCloudHeavyConcurrentDelay());
             } catch (InterruptedException e) {
                 log.error("Cloud heavy concurrent wait interrupted: ", e);
+                Thread.currentThread().interrupt();
+                Thread.interrupted();
             }
         }
     }

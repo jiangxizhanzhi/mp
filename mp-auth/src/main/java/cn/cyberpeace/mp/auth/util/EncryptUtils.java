@@ -33,10 +33,9 @@ public class EncryptUtils {
      */
     public static String desEncrypt(String password) {
         try {
-            Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
-
+            Cipher cipher = Cipher.getInstance(AuthConstant.ENCRYPT_METHOD.replace(AuthConstant.ENCRYPT_PREFIX, ""));
             DESKeySpec desKeySpec = new DESKeySpec(DES_KEY.getBytes(StandardCharsets.UTF_8));
-            SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
+            SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(AuthConstant.ENCRYPT_TYPE.replace(AuthConstant.ENCRYPT_PREFIX, ""));
             SecretKey key = keyFactory.generateSecret(desKeySpec);
 
             cipher.init(Cipher.ENCRYPT_MODE, key);
@@ -57,10 +56,9 @@ public class EncryptUtils {
      */
     public static String desDecrypt(String encryptHex) {
         try {
-            Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
-
+            Cipher cipher = Cipher.getInstance(AuthConstant.ENCRYPT_METHOD.replace(AuthConstant.ENCRYPT_PREFIX, ""));
             DESKeySpec desKeySpec = new DESKeySpec(DES_KEY.getBytes(StandardCharsets.UTF_8));
-            SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES");
+            SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(AuthConstant.ENCRYPT_TYPE.replace(AuthConstant.ENCRYPT_PREFIX, ""));
             SecretKey key = keyFactory.generateSecret(desKeySpec);
 
             cipher.init(Cipher.DECRYPT_MODE, key);

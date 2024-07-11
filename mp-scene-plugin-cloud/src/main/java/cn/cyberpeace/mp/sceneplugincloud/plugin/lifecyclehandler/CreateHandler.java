@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
+import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneBO;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.util.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
@@ -1872,7 +1873,71 @@ public class CreateHandler extends HandlerCommon {
     protected void createEntityElementProcess() {
         if (!entityCreateData.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_ENTITIES, () -> createEntityElements(new ArrayList<>(entityCreateData)));
+            // todo cxz 创建策略下发虚拟机
+            //createStrategy();
         }
+    }
+
+    /**
+     * createStrategy
+     */
+    protected void createStrategy() {
+
+        // 获取实体设备网卡信息列表
+        List<VirtualNic> virtualNicList = new ArrayList<>();
+        getPluginHandler().getElementMap().values().stream().filter(e ->
+                        BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE == e.getVirtualType())
+                .forEach(e -> e.getDeriveNetworks().forEach(n -> {
+                    VirtualNic nic = new VirtualNic();
+                    nic.setNetworkId(n.getNetwork().getResourceId());
+                    nic.setCidr(n.getNetwork().getCidr());
+                    virtualNicList.add(nic);
+                }));
+
+        // 需要接外部网络，以及上面配置NAT，30s暂时不支持
+        VirtualNic externalVirtualNic = new VirtualNic();
+        externalVirtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
+        externalVirtualNic.setCidr(CloudSingleton.cloudAppConfig.getExternalNetCidr());
+        externalVirtualNic.setFixedIp(IpUtils.newRandomIps(externalVirtualNic.getCidr(), 1, Collections.emptyList(),
+                null, true).get(0));
+        virtualNicList.add(externalVirtualNic);
+
+        // 创建虚拟机
+        createStrategyVirtualMachine(virtualNicList);
+    }
+
+    /**
+     * createStrategyVirtualMachine
+     */
+    private void createStrategyVirtualMachine(List<VirtualNic> virtualNicList) {
+
+        // 准备创建虚机参数
+        VirtualMachineCreateData createData = new VirtualMachineCreateData();
+        createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
+        createData.setName("StrategyVM-" + getPluginHandler().getScene().getSrcScene().getEid());
+
+        // todo cxz 配置项
+        //createData.setTemplateId(templateId);
+        //createData.setCpu(IntUtils.zeroNull(cpu));
+        //createData.setRam(IntUtils.zeroNull(ram));
+        //createData.setDisk(IntUtils.zeroNull(disk));
+        createData.setDisplayType(ElementAccessModeConstant.SPICE_AND_VNC);
+        createData.setVirtioConsole(true);
+        createData.setExtremeSpeed(true);
+        createData.setMainCloud(false);
+        createData.setOsType(SystemTypeCommandUtils.OS_TYPE_LINUX);
+        createData.setCustomScript(null);
+        // 虚机的网卡信息，都设置为非special口，设置上ip信息。
+        createData.setNetwork(CollectionUtils.emptyNull(virtualNicList));
+
+        // 创建虚拟机
+        VirtualMachineCreateData virtualMachine =  vmClient.create(createData);
+
+        // todo cxz 保存虚拟机信息
+        CloudPluginSceneBO scene = getPluginHandler().getScene();
+        scene.setStrategyIp(virtualMachine.getRunHost());
+        scene.setStrategyInstance(virtualMachine.getId());
+        getPluginHandler().saveScene();
     }
 
     /**

@@ -432,7 +432,7 @@ public class DevopsTargetController {
     public ServiceResult multiAsync(TargetMultiAsyncRequest request){
         int deleteNum = devopsTargetService.deleteAllTarget();
         log.info("删除靶标数量：{}",deleteNum);
-        List<Device> deviceList = targetConverter.multiAsync(request.getOffset(), request.getLimit());
+        List<Device> deviceList = targetConverter.multiAsync(request.getPage(), request.getPerPage());
         MultiThreadUtils multiThreadUtils = MultiThreadUtils.newInstance(request.getThreadCount());
 
         ServiceResult serviceResult = multiThreadUtils.execute(deviceList, new HashMap<>(), asyncTargetTask);

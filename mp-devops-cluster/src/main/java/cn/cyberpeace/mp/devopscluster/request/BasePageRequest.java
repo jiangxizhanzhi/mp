@@ -49,11 +49,11 @@ public class BasePageRequest extends BaseRequest implements Serializable {
     @ApiModelProperty(value = "每页条数")
     private Integer perPage = 10;
 
-    public Integer getLimit() {
+    public Integer getPerPage() {
         return perPage;
     }
 
-    public Integer getOffset() {
+    public Integer getPage() {
         return page;
     }
 

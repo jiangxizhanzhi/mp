@@ -27,7 +27,7 @@ public interface BaseConverter {
      * @return
      */
     default String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getOffset,
+        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,
                 BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 }

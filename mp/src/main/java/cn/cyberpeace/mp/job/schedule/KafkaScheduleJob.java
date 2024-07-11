@@ -49,27 +49,32 @@ public class KafkaScheduleJob {
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 		props.put(ConsumerConfig.GROUP_ID_CONFIG, "my_group");
-		KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
-		consumer.subscribe(Collections.singletonList("common_collect_data"));
 
-		var loadJobTime = new Date(System.currentTimeMillis() + 2 * 1000);
-		taskScheduler.schedule(() -> {
-			while (true) {
-				// 拉取消息
-				ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100)); // 100ms轮询一次
+		try (KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);){
+			consumer.subscribe(Collections.singletonList("common_collect_data"));
 
-				for (ConsumerRecord<String, String> record : records) {
-					try	{
-						JSONObject data = JSONObject.parseObject(record.value());
-						String ip = data.getString("ip");
-						String content = data.getString("content");
-						realEquipmentConverter.report(ip, content, RealEquipmentConverter.KAFKA);
-					}catch (JSONException e) {
-						log.error("message = {}, e = {}", record.value(), ExceptionUtils.getStackTrace(e));
+			var loadJobTime = new Date(System.currentTimeMillis() + 2 * 1000);
+			taskScheduler.schedule(() -> {
+				while (true) {
+					// 拉取消息
+					ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100)); // 100ms轮询一次
+
+					for (ConsumerRecord<String, String> record : records) {
+						try	{
+							JSONObject data = JSONObject.parseObject(record.value());
+							String ip = data.getString("ip");
+							String content = data.getString("content");
+							realEquipmentConverter.report(ip, content, RealEquipmentConverter.KAFKA);
+						}catch (JSONException e) {
+							log.error("message = {}, e = {}", record.value(), ExceptionUtils.getStackTrace(e));
+						}
+
 					}
-
 				}
-			}
-		}, loadJobTime);
+			}, loadJobTime);
+		} catch (Exception e) {
+			log.error("KafkaScheduleJob error, e = {}", ExceptionUtils.getStackTrace(e));
+		}
+
 	}
 }

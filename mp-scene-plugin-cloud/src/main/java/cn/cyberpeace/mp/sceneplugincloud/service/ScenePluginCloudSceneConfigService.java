@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigMapper;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConfigStatCommon;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +39,8 @@ public class ScenePluginCloudSceneConfigService {
                     BaseCloudPluginSceneElementModel::getVirtualType
             )
     );
+
+    private CloudPluginSceneMapper cloudPluginSceneMapper;
 
     private CloudSceneConfigStatCommon cloudSceneConfigStatCommon;
 
@@ -129,5 +132,13 @@ public class ScenePluginCloudSceneConfigService {
                 .filterEqual(CloudPluginSceneConfigElementModel::getSceneElement, nodeId)
         );
         return new ServiceResult<>(result > 0);
+    }
+
+    public void updateStrategy(String sceneId, String strategyInstance, String strategyIp) {
+        CloudPluginSceneModel sceneModel = new CloudPluginSceneModel();
+        sceneModel.setScene(sceneId);
+        sceneModel.setStrategyIp(strategyIp);
+        sceneModel.setStrategyInstance(strategyInstance);
+        cloudPluginSceneMapper.update(sceneModel);
     }
 }

@@ -65,11 +65,11 @@ public class BasePageRequest extends BaseRequest implements Serializable {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endDate;
 
-    public Integer getLimit() {
+    public Integer getPerPage() {
         return perPage;
     }
 
-    public Integer getOffset() {
+    public Integer getPage() {
         return page;
     }
 

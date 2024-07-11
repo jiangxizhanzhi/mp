@@ -277,9 +277,8 @@ public class SshClient implements Closeable {
         log.info("Ssh client local port forwarding {}:{} to {}:{} on {}@{}:{}",
                 localHost, localPort, remoteHost, remotePort, username, host, port);
         Parameters params = new Parameters(localHost, localPort, remoteHost, remotePort);
-        ServerSocket serverSocket = null;
-        try {
-            serverSocket = new ServerSocket();
+
+        try (ServerSocket serverSocket = new ServerSocket()) {
             serverSocket.setReuseAddress(true);
             serverSocket.bind(new InetSocketAddress(params.getLocalHost(), params.getLocalPort()));
             localPortForwardingSockets.add(serverSocket);
@@ -290,10 +289,6 @@ public class SshClient implements Closeable {
                     localHost, localPort, remoteHost, remotePort, username, host, port, e.getMessage());
             log.error(msg);
             throw new MpRuntimeException(msg);
-        } finally {
-            if (serverSocket != null) {
-                closeServerSocket(serverSocket);
-            }
         }
     }
 

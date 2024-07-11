@@ -319,8 +319,6 @@ public class ScreenrecordService extends BaseCpService {
             throw new MpRuntimeException(DevopsClusterErrorCode.SCREEN_RECORD_ERROR);
         }
 
-        BufferedInputStream bin = null;
-        OutputStream byteArrayOutputStream = null;
         ScreenRecordData data = null;
         try {
             URL url = new URL(devopsClusterConfig.getCpUrl() + BaseCloudPlatformConstant.SCREENRECORD_METHOD + "/download_record_file?recordfilename=" + fileName);
@@ -332,20 +330,20 @@ public class ScreenrecordService extends BaseCpService {
             httpURLConnection.setRequestProperty("Charset", "UTF-8");
             // 打开到此 URL引用的资源的通信链接
             httpURLConnection.connect();
-            bin = new BufferedInputStream(httpURLConnection.getInputStream());
-            byteArrayOutputStream = new ByteArrayOutputStream();
-            int len = 0;
-            byte[] buffer = new byte[1024 * 5];
-            while ((len = bin.read(buffer)) > 0) {
-                byteArrayOutputStream.write(buffer, 0, len);
+
+            try (BufferedInputStream in = new BufferedInputStream(httpURLConnection.getInputStream());
+                 OutputStream out  = new ByteArrayOutputStream()){
+
+                byte[] buffer = new byte[1024 * 5];
+                int len;
+                while ((len = in.read(buffer)) > 0) {
+                    out.write(buffer, 0, len);
+                }
+                String resStr = out.toString();
+                data = JsonCommon.snakeParse(resStr, ScreenRecordData.class);
             }
-            String resStr = byteArrayOutputStream.toString();
-            data = JsonCommon.snakeParse(resStr, ScreenRecordData.class);
         } catch (Exception e) {
             log.error("download screenrecord error for fileName:{}", fileName, e);
-        } finally {
-            IOUtils.closeQuietly(bin);
-            IOUtils.closeQuietly(byteArrayOutputStream);
         }
         if (Objects.isNull(data) || !data.isSuccess()) {
             log.error("failed to get screen record file url,{}", data);

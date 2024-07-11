@@ -47,10 +47,9 @@ class FilePathYmlParser<T> implements YmlParse<T> {
      */
     @Override
     public T parse() {
-        InputStream inputStream = null;
-        try {
-            File file = new File(filePath);
-            inputStream = new FileInputStream(file);
+        File file = new File(filePath);
+
+        try (InputStream inputStream = new FileInputStream(file)){
             BaseConstructor constructor = new Constructor();
             constructor.setPropertyUtils(new YamlPropertyParseUtils());
             Yaml yaml = new Yaml(constructor);
@@ -58,17 +57,12 @@ class FilePathYmlParser<T> implements YmlParse<T> {
         } catch (FileNotFoundException e) {
             log.error("yml file not exists , file path is {}, {}", filePath, ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
-        } catch (Exception e) {
+        }  catch (IOException e) {
+            log.error("Failed to close the input stream for yml file, {}", ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
+        }catch (Exception e) {
             log.error("failed to parse yml , file path is {}, {}", filePath, ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR);
-        } finally {
-            try {
-                if (inputStream != null) {
-                    IOUtils.close(inputStream);
-                }
-            } catch (IOException e) {
-                log.error("failed to close the inputStream");
-            }
         }
     }
 }

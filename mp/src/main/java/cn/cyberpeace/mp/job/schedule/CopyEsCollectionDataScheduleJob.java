@@ -28,6 +28,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -130,62 +131,135 @@ public class CopyEsCollectionDataScheduleJob {
 
         // 存储
         boolean result = true;
-        try {
-            // 连接tidb
-            MysqlDataSource mysqlDataSource = new MysqlDataSource();
-            mysqlDataSource.setServerName(situationAwareConfig.getStorageTidbIp());
-            mysqlDataSource.setPortNumber(situationAwareConfig.getStorageTidbPort());
-            mysqlDataSource.setUser(situationAwareConfig.getStorageTidbUser());
-            mysqlDataSource.setPassword(situationAwareConfig.getStorageTidbPassword());
-            mysqlDataSource.setDatabaseName(situationAwareConfig.getStorageTidbName());
 
-            // 先进行一次标识数据删除，避免重复存储
-            Connection connection = mysqlDataSource.getConnection();
-            // 设置为不自动提交数据
+        try (Connection connection = createConnection()) {
             connection.setAutoCommit(false);
-            PreparedStatement deleteStatement = connection.prepareStatement(
-                    "DELETE FROM collection_data WHERE `key` LIKE ? ");
+
+            deleteExistingData(connection, esIndexName);
+            insertData(connection, esIndexName, messageArray);
+
+            connection.commit();
+        } catch (Exception e) {
+            // 记录异常信息
+            log.error("CopyEsCollectionDataScheduleJob error for tidb", e);
+            result = false;
+        }
+
+        updateStorageStatus(result, date, EsDataStorageConstant.CHANNEL_TIDB);
+
+        return result;
+    }
+
+    private Connection createConnection() throws SQLException {
+        MysqlDataSource mysqlDataSource = new MysqlDataSource();
+        mysqlDataSource.setServerName(situationAwareConfig.getStorageTidbIp());
+        mysqlDataSource.setPortNumber(situationAwareConfig.getStorageTidbPort());
+        mysqlDataSource.setUser(situationAwareConfig.getStorageTidbUser());
+        mysqlDataSource.setPassword(situationAwareConfig.getStorageTidbPassword());
+        mysqlDataSource.setDatabaseName(situationAwareConfig.getStorageTidbName());
+
+        return mysqlDataSource.getConnection();
+    }
+
+    private void deleteExistingData(Connection connection, String esIndexName) throws SQLException {
+        String deleteSql = "DELETE FROM collection_data WHERE `key` LIKE ? ";
+        try (PreparedStatement deleteStatement = connection.prepareStatement(deleteSql)) {
             deleteStatement.setString(1, esIndexName + "%");
             deleteStatement.execute();
+        }
+    }
 
-            // 循环批量插入数据
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    "INSERT INTO collection_data (`key`, content) VALUES (?, ?)");
+    private void insertData(Connection connection, String esIndexName, JSONArray messageArray) throws SQLException {
+        String insertSql = "INSERT INTO collection_data (`key`, content) VALUES (?, ?)";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(insertSql)) {
             boolean existedData = false;
             for (int i = 1; i <= messageArray.size(); i++) {
                 preparedStatement.setString(1, esIndexName + "_" + i);
-                preparedStatement.setString(2, messageArray.get(i - 1).toString());
+                preparedStatement.setString(2, messageArray.getString(i - 1));
 
-                // ”攒“sql
+                // 添加批处理
                 preparedStatement.addBatch();
                 existedData = true;
 
                 // 每1000条提交一次
                 if (i % 1000 == 0) {
-                    // 执行
                     preparedStatement.executeBatch();
-                    // 清空
                     preparedStatement.clearBatch();
                     existedData = false;
                 }
             }
-            // 执行
+
+            // 执行剩余的批处理
             if (existedData) {
                 preparedStatement.executeBatch();
             }
-            // 提交数据、关闭连接
-            connection.commit();
-            connection.close();
-
-            updateStorageStatus(result, date, EsDataStorageConstant.CHANNEL_TIDB);
-        } catch (Exception e) {
-            // 异常信息不记录，但是需要捕获不影响后续逻辑
-            log.error("CopyEsCollectionDataScheduleJob error for tidb", e);
-            return false;
         }
-
-        return result;
     }
+
+    //private boolean saveTidb(String date, String esIndexName, JSONArray messageArray) {
+    //    // 不需要进行存储
+    //    if (!tidbNeed) {
+    //        return true;
+    //    }
+    //
+    //    // 存储
+    //    boolean result = true;
+    //    try {
+    //        // 连接tidb
+    //        MysqlDataSource mysqlDataSource = new MysqlDataSource();
+    //        mysqlDataSource.setServerName(situationAwareConfig.getStorageTidbIp());
+    //        mysqlDataSource.setPortNumber(situationAwareConfig.getStorageTidbPort());
+    //        mysqlDataSource.setUser(situationAwareConfig.getStorageTidbUser());
+    //        mysqlDataSource.setPassword(situationAwareConfig.getStorageTidbPassword());
+    //        mysqlDataSource.setDatabaseName(situationAwareConfig.getStorageTidbName());
+    //
+    //        // 先进行一次标识数据删除，避免重复存储
+    //        Connection connection = mysqlDataSource.getConnection();
+    //        // 设置为不自动提交数据
+    //        connection.setAutoCommit(false);
+    //        PreparedStatement deleteStatement = connection.prepareStatement(
+    //                "DELETE FROM collection_data WHERE `key` LIKE ? ");
+    //        deleteStatement.setString(1, esIndexName + "%");
+    //        deleteStatement.execute();
+    //
+    //        // 循环批量插入数据
+    //        PreparedStatement preparedStatement = connection.prepareStatement(
+    //                "INSERT INTO collection_data (`key`, content) VALUES (?, ?)");
+    //        boolean existedData = false;
+    //        for (int i = 1; i <= messageArray.size(); i++) {
+    //            preparedStatement.setString(1, esIndexName + "_" + i);
+    //            preparedStatement.setString(2, messageArray.get(i - 1).toString());
+    //
+    //            // ”攒“sql
+    //            preparedStatement.addBatch();
+    //            existedData = true;
+    //
+    //            // 每1000条提交一次
+    //            if (i % 1000 == 0) {
+    //                // 执行
+    //                preparedStatement.executeBatch();
+    //                // 清空
+    //                preparedStatement.clearBatch();
+    //                existedData = false;
+    //            }
+    //        }
+    //        // 执行
+    //        if (existedData) {
+    //            preparedStatement.executeBatch();
+    //        }
+    //        // 提交数据、关闭连接
+    //        connection.commit();
+    //        connection.close();
+    //
+    //        updateStorageStatus(result, date, EsDataStorageConstant.CHANNEL_TIDB);
+    //    } catch (Exception e) {
+    //        // 异常信息不记录，但是需要捕获不影响后续逻辑
+    //        log.error("CopyEsCollectionDataScheduleJob error for tidb", e);
+    //        return false;
+    //    }
+    //
+    //    return result;
+    //}
 
     /**
      * 存储到kafka
@@ -198,12 +272,11 @@ public class CopyEsCollectionDataScheduleJob {
 
         // 存储
         boolean result = true;
-        try {
-            Properties prop = new Properties();
-            prop.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, situationAwareConfig.getStorageKafkaAddress());
-            prop.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.IntegerSerializer");
-            prop.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
-            KafkaProducer<Integer, String> producer = new KafkaProducer<>(prop);
+        Properties prop = new Properties();
+        prop.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, situationAwareConfig.getStorageKafkaAddress());
+        prop.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.IntegerSerializer");
+        prop.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
+        try (KafkaProducer<Integer, String> producer = new KafkaProducer<>(prop)){
             // 发送信息
             for (int i = 1; i <= messageArray.size(); i++) {
                 JSONObject message = new JSONObject();
@@ -231,9 +304,9 @@ public class CopyEsCollectionDataScheduleJob {
         }
 
         // 存储
-        try {
-            // 连接Redis服务器
-            Jedis jedis = new Jedis(situationAwareConfig.getStorageRedisIp(), situationAwareConfig.getStorageRedisPort());
+        // 连接Redis服务器
+        try (Jedis jedis = new Jedis(situationAwareConfig.getStorageRedisIp(), situationAwareConfig.getStorageRedisPort())){
+
             jedis.auth(situationAwareConfig.getStorageRedisPassword());
 
             // 先进行一次标识数据删除，避免重复存储
@@ -241,7 +314,6 @@ public class CopyEsCollectionDataScheduleJob {
 
             // 存储数据
             jedis.set(esIndexName, messageArray.toJSONString());
-            jedis.close();
 
             updateStorageStatus(true, date, EsDataStorageConstant.CHANNEL_REDIS);
         } catch (Exception e) {

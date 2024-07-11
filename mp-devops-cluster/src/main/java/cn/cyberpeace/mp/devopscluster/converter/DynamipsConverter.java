@@ -40,8 +40,8 @@ public class DynamipsConverter implements BaseConverter {
         VirtualDynamips virtualDynamips = new VirtualDynamips();
         VirtualDynamipsListParam param = new VirtualDynamipsListParam();
         param.setIp(request.getAddr());
-        param.setLimit(request.getLimit());
-        param.setOffset(request.getOffset());
+        param.setLimit(request.getPerPage());
+        param.setOffset(request.getPage());
         param.setSortKey(request.getOrder());
         param.setSortDir(request.getSort());
         VirtualDynamipsListResult result = new VirtualDynamipsListResult();

@@ -298,25 +298,17 @@ public class SuricataService {
      * @return List<String>
      */
     public List<String> queryRulesString(MultipartFile file){
-        BufferedReader bufferedReader = null;
-        try {
-            bufferedReader = new BufferedReader(new InputStreamReader(file.getInputStream(),StandardCharsets.UTF_8));
+
+        List<String> rules = new ArrayList<>();
+
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(file.getInputStream(),StandardCharsets.UTF_8))){
             String rule;
-            List<String> rules = new ArrayList<>();
             while ((rule = bufferedReader.readLine()) != null) {
                 rules.add(rule);
             }
             return rules;
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
-            if(!Objects.isNull(bufferedReader)){
-                try {
-                    bufferedReader.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
         }
     }
 

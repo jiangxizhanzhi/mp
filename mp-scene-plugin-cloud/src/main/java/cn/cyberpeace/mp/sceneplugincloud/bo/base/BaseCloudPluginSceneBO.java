@@ -31,6 +31,10 @@ public abstract class BaseCloudPluginSceneBO<M extends BaseCloudPluginSceneModel
     private Boolean enableRate;
     @ApiModelProperty(value = "dnsNameservers")
     private List<DnsPool> dnsNameservers;
+    @ApiModelProperty(value = "策略下发id")
+    private String strategyInstance;
+    @ApiModelProperty(value = "策略下发ip")
+    private String strategyIp;
 
     /**
      * fromModel

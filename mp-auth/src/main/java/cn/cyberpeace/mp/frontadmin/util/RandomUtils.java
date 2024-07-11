@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.frontadmin.util;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @ClassName RandomUtils
@@ -11,19 +12,23 @@ import java.util.Random;
  */
 public class RandomUtils {
 
+    // 字符集合
+    private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyz0123456789";
+    private static final int CHARACTERS_LENGTH = CHARACTERS.length();
+    private static final ThreadLocalRandom RANDOM = ThreadLocalRandom.current();
+
+
     /**
      * 获取随机字母和数字组合
      * @param length
      * @return
      */
     public static String randomString(int length) {
-        String characters = "abcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder sb = new StringBuilder(length);
-        Random random = new Random();
 
         for (int i = 0; i < length; i++) {
-            int randomIndex = random.nextInt(characters.length());
-            char randomChar = characters.charAt(randomIndex);
+            int randomIndex = RANDOM.nextInt(CHARACTERS_LENGTH);
+            char randomChar = CHARACTERS.charAt(randomIndex);
             sb.append(randomChar);
         }
 

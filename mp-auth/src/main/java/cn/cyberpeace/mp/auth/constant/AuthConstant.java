@@ -22,6 +22,12 @@ public class AuthConstant {
 
     public static final String PASSWORD_DES_KEY = "B13H089Y";
 
+    public static final String ENCRYPT_PREFIX = "9527";
+
+    public static final String ENCRYPT_METHOD = "9527DES/ECB/PKCS5Padding";
+
+    public static final String ENCRYPT_TYPE = "9527DES";
+
     public static final String JWT_SECRET = PASSWORD_SECRET;
 
     public static final String JWT_SECRET_KEY = JWT_SECRET;

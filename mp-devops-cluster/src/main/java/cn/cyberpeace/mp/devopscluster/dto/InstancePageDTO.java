@@ -40,7 +40,7 @@ public class InstancePageDTO extends BasePageDTO {
     public InstancePageDTO(InstancePageRequest request){
         this.host = request.getHost();
         this.addr = request.getAddr();
-        super.setLimit(request.getLimit());
-        super.setOffset(request.getOffset());
+        super.setLimit(request.getPerPage());
+        super.setOffset(request.getPage());
     }
 }

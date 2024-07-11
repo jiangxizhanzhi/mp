@@ -487,12 +487,11 @@ public class MenuSetService {
     private String readJsonStrFromMultipartFile(MultipartFile file) {
         String jsonStr = "";
         try (Reader reader = new InputStreamReader(file.getInputStream(), "utf-8")) {
-            int ch = 0;
+            int ch;
             StringBuffer sb = new StringBuffer();
             while ((ch = reader.read()) != -1) {
                 sb.append((char) ch);
             }
-            reader.close();
             jsonStr = sb.toString();
             return jsonStr;
         } catch (IOException e) {

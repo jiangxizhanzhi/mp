@@ -28,21 +28,44 @@ public class EsHttpUtil {
      * @param total
      */
     public static void updateDataMaxQueryNum(String indexPrefix, int total) {
-        if (client == null) {
-            synchronized (EsHttpUtil.class) {
-                if (client == null) {
-                    SituationAwareConfig config = BeanCommon.getBean(SituationAwareConfig.class);
-                    String protocol = StringUtils.isEmpty(config.getArkimeEsProtocol()) ? "http" : config.getArkimeEsProtocol();
-                    client = HttpClient.builder().configServer(protocol + "://" + config.getArkimeEsHost() + ":" + config.getArkimeEsPort()).build();
-                }
-            }
+        if (EsHttpUtilHolder.CLIENT == null) {
+            initializeClient();
         }
+
         IndexParams indexParams = new IndexParams();
         indexParams.setMaxResultWindow(total < 1000000 ? 1000000 : total);
         Params params = new Params();
         params.setIndex(indexParams);
-        client.put("/" + indexPrefix + "_sessions3-*/_settings", params, null, new HashMap<>(), null);
+        EsHttpUtilHolder.CLIENT.put("/" + indexPrefix + "_sessions3-*/_settings", params, null, new HashMap<>(), null);
     }
+
+    private static class EsHttpUtilHolder {
+        private static volatile HttpClient CLIENT;
+    }
+
+    private static synchronized void initializeClient() {
+        if (EsHttpUtilHolder.CLIENT == null) {
+            SituationAwareConfig config = BeanCommon.getBean(SituationAwareConfig.class);
+            String protocol = StringUtils.isEmpty(config.getArkimeEsProtocol()) ? "http" : config.getArkimeEsProtocol();
+            EsHttpUtilHolder.CLIENT = HttpClient.builder().configServer(protocol + "://" + config.getArkimeEsHost() + ":" + config.getArkimeEsPort()).build();
+        }
+    }
+    //public static void updateDataMaxQueryNum(String indexPrefix, int total) {
+    //    if (client == null) {
+    //        synchronized (EsHttpUtil.class) {
+    //            if (client == null) {
+    //                SituationAwareConfig config = BeanCommon.getBean(SituationAwareConfig.class);
+    //                String protocol = StringUtils.isEmpty(config.getArkimeEsProtocol()) ? "http" : config.getArkimeEsProtocol();
+    //                client = HttpClient.builder().configServer(protocol + "://" + config.getArkimeEsHost() + ":" + config.getArkimeEsPort()).build();
+    //            }
+    //        }
+    //    }
+    //    IndexParams indexParams = new IndexParams();
+    //    indexParams.setMaxResultWindow(total < 1000000 ? 1000000 : total);
+    //    Params params = new Params();
+    //    params.setIndex(indexParams);
+    //    client.put("/" + indexPrefix + "_sessions3-*/_settings", params, null, new HashMap<>(), null);
+    //}
 
     @Getter
     @Setter

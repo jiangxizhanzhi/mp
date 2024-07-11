@@ -52,28 +52,25 @@ public class FileClient {
      * @throws MpRuntimeException
      */
     public static void downloadFile(String filePath, HttpServletResponse response) throws MpRuntimeException {
-        InputStream is = null;
-        OutputStream os = null;
         try {
             byte[] fileByte = FsCommon.downloadRawContent(filePath);
             if (ArrayUtils.isEmpty(fileByte)) {
                 log.error("downloadFile not exist");
                 throw new MpRuntimeException(CommonErrorCode.FILE_DOWNLOAD_FAILED);
             }
-            is = new ByteArrayInputStream(fileByte);
-            os = response.getOutputStream();
-            byte[] buffer = new byte[1024 * 5];
-            int len = 0;
-            while ((len = is.read(buffer)) > 0) {
-                os.write(buffer, 0, len);
+
+            try (InputStream is = new ByteArrayInputStream(fileByte);
+                 OutputStream os = response.getOutputStream();) {
+                byte[] buffer = new byte[1024 * 5];
+                int len = 0;
+                while ((len = is.read(buffer)) > 0) {
+                    os.write(buffer, 0, len);
+                }
+                os.flush();
             }
-            os.flush();
         } catch (Exception e) {
             log.error("downloadFile error", e);
             throw new MpRuntimeException(CommonErrorCode.FILE_DOWNLOAD_FAILED);
-        } finally {
-            IOUtils.closeQuietly(is);
-            IOUtils.closeQuietly(os);
         }
     }
 

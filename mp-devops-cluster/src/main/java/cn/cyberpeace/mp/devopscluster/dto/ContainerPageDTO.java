@@ -40,7 +40,7 @@ public class ContainerPageDTO extends BasePageDTO {
     public ContainerPageDTO(ContainerPageRequest request){
         this.host = request.getHost();
         this.addr = request.getAddr();
-        super.setLimit(request.getLimit());
-        super.setOffset(request.getOffset());
+        super.setLimit(request.getPerPage());
+        super.setOffset(request.getPage());
     }
 }

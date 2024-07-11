@@ -721,39 +721,34 @@ public class CsceneController implements BaseModelListControllerBase {
             file = new File(id);
         }
 
-        InputStream fis = null;
-        OutputStream outputStream = null;
         if (!file.exists()) {
             try {
                 String filename = file.getName();
                 file.createNewFile();
-                FileWriter fileWriter = new FileWriter(file);
-                fileWriter.write(JsonCommon.snakeStringify(csceneBO));
-                fileWriter.close();
+                try (FileWriter fileWriter = new FileWriter(file);
+                     FileInputStream fis = new FileInputStream(file);
+                     BufferedInputStream bis = new BufferedInputStream(fis);
+                     OutputStream outputStream = new BufferedOutputStream(response.getOutputStream())) {
 
-                FileInputStream fileInputStream = new FileInputStream(file);
-                fis = new BufferedInputStream(fileInputStream);
-                byte[] buffer = new byte[fis.available()];
-                fis.read(buffer);
+                    fileWriter.write(JsonCommon.snakeStringify(csceneBO));
 
-                response.reset();
-                response.setCharacterEncoding("UTF-8");
-                response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("scene.json", StandardCharsets.UTF_8));
-                response.addHeader("Content-Length", "" + file.length());
-                outputStream = new BufferedOutputStream(response.getOutputStream());
-                response.setContentType("application/octet-stream");
-                outputStream.write(buffer);
-                outputStream.flush();
+                    byte[] buffer = new byte[1024]; // Adjust buffer size as necessary
+                    int bytesRead;
+                    while ((bytesRead = bis.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, bytesRead);
+                    }
+
+                    response.reset();
+                    response.setCharacterEncoding("UTF-8");
+                    response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("scene.json", StandardCharsets.UTF_8));
+                    response.addHeader("Content-Length", "" + file.length());
+                    response.setContentType("application/octet-stream");
+                    outputStream.flush();
+                } finally {
+                    file.delete();
+                }
             } catch (Exception e) {
                 log.error("create file error", e);
-            } finally {
-                try {
-                    outputStream.close();
-                    fis.close();
-                    file.delete();
-                } catch (Exception e) {
-
-                }
             }
         }
     }
