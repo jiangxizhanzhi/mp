@@ -35,6 +35,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.device.Device;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.device.DeviceClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.res.ExternalNetworkInfoRes;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementLogicalSwitchMapper;
@@ -1873,8 +1874,9 @@ public class CreateHandler extends HandlerCommon {
     protected void createEntityElementProcess() {
         if (!entityCreateData.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_ENTITIES, () -> createEntityElements(new ArrayList<>(entityCreateData)));
-            // todo cxz 创建策略下发虚拟机
-            //createStrategy();
+            // 创建策略下发虚拟机
+            // todo cxz 待测试，先注释掉
+            // createStrategy();
         }
     }
 
@@ -1916,11 +1918,16 @@ public class CreateHandler extends HandlerCommon {
         createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
         createData.setName("StrategyVM-" + getPluginHandler().getScene().getSrcScene().getEid());
 
-        // todo cxz 配置项
-        //createData.setTemplateId(templateId);
-        //createData.setCpu(IntUtils.zeroNull(cpu));
-        //createData.setRam(IntUtils.zeroNull(ram));
-        //createData.setDisk(IntUtils.zeroNull(disk));
+        // 根据镜像名称获取templateId
+        Template templateClient = new Template();
+        String templateId = templateClient.getTemplateIdByDeviceName(
+                CloudSingleton.cloudAppConfig.getStrategyImageName());
+
+        //  配置项
+        createData.setTemplateId(templateId);
+        createData.setCpu(IntUtils.zeroNull(CloudSingleton.cloudAppConfig.getStrategyCpu()));
+        createData.setRam(IntUtils.zeroNull(CloudSingleton.cloudAppConfig.getStrategyRam()));
+        createData.setDisk(IntUtils.zeroNull(CloudSingleton.cloudAppConfig.getStrategyDisk()));
         createData.setDisplayType(ElementAccessModeConstant.SPICE_AND_VNC);
         createData.setVirtioConsole(true);
         createData.setExtremeSpeed(true);
@@ -1933,7 +1940,7 @@ public class CreateHandler extends HandlerCommon {
         // 创建虚拟机
         VirtualMachineCreateData virtualMachine =  vmClient.create(createData);
 
-        // todo cxz 保存虚拟机信息
+        // 保存虚拟机信息
         CloudPluginSceneBO scene = getPluginHandler().getScene();
         scene.setStrategyIp(virtualMachine.getRunHost());
         scene.setStrategyInstance(virtualMachine.getId());

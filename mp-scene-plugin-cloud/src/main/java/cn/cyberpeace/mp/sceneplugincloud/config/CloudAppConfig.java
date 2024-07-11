@@ -193,6 +193,18 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.dhcp_ip_allocate:true}")
     private Boolean dhcpIpAllocate;
 
+    @Value("${mp.sceneplugincloud.strategy_image_name:strategy-server}")
+    private String strategyImageName;
+
+    @Value("${mp.sceneplugincloud.strategy_cpu:2}")
+    private Integer strategyCpu;
+
+    @Value("${mp.sceneplugincloud.strategy_ram:2048}")
+    private Integer strategyRam;
+
+    @Value("${mp.sceneplugincloud.strategy_disk:40}")
+    private Integer strategyDisk;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 
