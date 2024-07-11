@@ -12,6 +12,8 @@ import com.azure.resourcemanager.network.models.Subnet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -39,8 +41,17 @@ public class RouteTableFunction {
             // 将子网关联到路由表
             Network network = azureResourceManager.networks().getByResourceGroup(resourceGroupName, body.getVirtualNetwork().name());
             Map<String, Subnet> subnets = network.subnets();
+
+            // 需要绑定到路由表的子网名称
+            List<String> needRouteTableAddressNames = new ArrayList<>();
+            List<String> routeTableAddressNames = body.getNeedRouteTableAddressName();
+            if (routeTableAddressNames != null) {
+                needRouteTableAddressNames.addAll(routeTableAddressNames);
+            }
+            needRouteTableAddressNames.add("AzureFirewallSubnet");
+            needRouteTableAddressNames.add("AzureFirewallManagementSubnet");
             for (Map.Entry<String, Subnet> entry : subnets.entrySet()) {
-                if (!entry.getKey().equals("AzureFirewallSubnet") && !entry.getKey().equals("AzureFirewallManagementSubnet")) {
+                if (!needRouteTableAddressNames.contains(entry.getKey())){
                     // 获取子网关联的现有路由表
                     Subnet subnet = entry.getValue();
                     RouteTable subnetRouteTable = subnet.getRouteTable();

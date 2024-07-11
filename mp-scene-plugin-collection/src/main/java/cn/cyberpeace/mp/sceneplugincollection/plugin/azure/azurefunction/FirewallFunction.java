@@ -126,7 +126,7 @@ public class FirewallFunction {
                 System.out.println("创建规则集合组成功！");
 
                 // 提交创建规则集合组的操作
-                FirewallPolicyRuleCollectionGroupInner createdRuleCollectionGroup = azureResourceManager.networks().manager().serviceClient()
+                azureResourceManager.networks().manager().serviceClient()
                         .getFirewallPolicyRuleCollectionGroups()
                         .createOrUpdate(requestBody.getResourceGroup(), createdFirewallPolicy.name(), ruleCollectionGroupInner.name(), ruleCollectionGroupInner);
 

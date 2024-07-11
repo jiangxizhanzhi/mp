@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * 路由表创建请求体
  */
@@ -28,4 +30,7 @@ public class RouteTableCreateRequestBody {
 
     //防火墙私有地址
     private String firewallPrivateAddress;
+
+    //需要绑定到路由表的子网名称
+    private List<String> needRouteTableAddressName;
 }
