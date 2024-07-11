@@ -56,12 +56,12 @@ public class ConnectionJob {
 
     @Scheduled(cron = "*/5 * * * * ?")
     public void execute() {
-        log.info("ConnectionJob.execute begin.");
+        log.debug("ConnectionJob.execute begin.");
         HumanCondition humanCondition = new HumanCondition();
         humanCondition.filterEqual(SceneModel::getDeleted, false);
         List<SceneModel> sceneModelList = sceneMapper.list(humanCondition);
         if (CollectionUtils.isEmpty(sceneModelList)) {
-            log.info("No scene should send connection info.");
+            log.debug("No scene should send connection info.");
             return;
         }
         List<String> idList = sceneModelList.stream().map(SceneModel::getId).collect(Collectors.toList());

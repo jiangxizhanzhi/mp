@@ -55,7 +55,7 @@ public class SystemAlarmTask {
     /**
      * 生成告警信息
      */
-    @Scheduled(initialDelay = 1000 * 60, fixedRate = 1000 * 60 * 5)
+//    @Scheduled(initialDelay = 1000 * 60, fixedRate = 1000 * 60 * 5)
     private void getSystemAlarm() {
         List<SystemAlarmModel> alarmModels = new ArrayList<>();
         SystemAlarmVO systemAlarmVO = serviceMonitorService.getSystemAlarm();

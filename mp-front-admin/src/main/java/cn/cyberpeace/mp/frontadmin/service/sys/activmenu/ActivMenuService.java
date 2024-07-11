@@ -399,7 +399,7 @@ public class ActivMenuService {
                 editionMatch = editions.contains(edition);
 
                 if (editionMatch) {
-                    log.info("edition matched!");
+                    log.debug("edition matched!");
                 }
             }
 
@@ -425,11 +425,11 @@ public class ActivMenuService {
                 }
 
                 if (itemMatch) {
-                    log.info("item matched!");
+                    log.debug("item matched!");
                 }
             }
 
-            log.info("final result... editionMatch:{}, itemMatch:{}, menuId:{}", editionMatch, itemMatch, mi.getMenu());
+            log.debug("final result... editionMatch:{}, itemMatch:{}, menuId:{}", editionMatch, itemMatch, mi.getMenu());
             TargetModel targetModel = targetModelOptional.get();
 
             // 版本匹配，激活项匹配，则最终的visible=1

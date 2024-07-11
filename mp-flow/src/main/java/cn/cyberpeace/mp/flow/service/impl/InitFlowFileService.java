@@ -39,6 +39,11 @@ public class InitFlowFileService implements CommandLineRunner {
                 flowInfoModel = flowInfoService.selectByTitle("wechat_kZQXz70");
             }
 
+            if (Objects.isNull(flowInfoModel)) {
+                log.info("=========== flow file not found ===========");
+                return;
+            }
+
 //            int pcapCount = flowPcapService.countAll();
 //            if (pcapCount > 135) {
 //                log.info("=========== no need to init pcap analyse ===========");
