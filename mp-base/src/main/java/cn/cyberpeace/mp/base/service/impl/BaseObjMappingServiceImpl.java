@@ -53,7 +53,7 @@ public abstract class BaseObjMappingServiceImpl<M extends BaseObjMappingModel, P
 
     protected void saveDiffObjMappings(DiffTargets<M> diff) {
         try {
-            log.info("save diff : {}" + JsonCommon.stringify(diff));
+            log.debug("save diff : {}" + JsonCommon.stringify(diff));
             modelMapper.bulkDelete(diff.getRemovingTargets().stream()
                     .map(BaseModel::getId).toArray(String[]::new));
             modelMapper.bulkCreate(diff.getAddingTargets());
