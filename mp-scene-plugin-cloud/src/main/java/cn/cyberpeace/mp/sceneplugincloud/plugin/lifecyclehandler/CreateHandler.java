@@ -1909,14 +1909,13 @@ public class CreateHandler extends HandlerCommon {
         }
 
         // 判断节点是否存在实体设备节点
-        //for (CloudPluginSceneElementBO connectedNetworkBO : getPluginHandler().getElementMap().values()){
-        //    if (BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE == connectedNetworkBO.getVirtualType()){
-        //        // 创建策略下发虚拟机
-        //        // todo cxz 待测试，先注释掉
-        //        createStrategy();
-        //        break;
-        //    }
-        //}
+        for (CloudPluginSceneElementBO connectedNetworkBO : getPluginHandler().getElementMap().values()){
+            if (BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE == connectedNetworkBO.getVirtualType()){
+                // 创建策略下发虚拟机
+                createStrategy();
+                break;
+            }
+        }
     }
 
     /**
@@ -1926,22 +1925,15 @@ public class CreateHandler extends HandlerCommon {
 
         // 获取实体设备网卡信息列表
         List<VirtualNic> virtualNicList = new ArrayList<>();
-        getPluginHandler().getElementMap().values().forEach(e -> {
-            e.getDeriveNetworks().forEach(n ->{
-                VirtualNic nic = new VirtualNic();
-                nic.setNetworkId(n.getNetwork().getResourceId());
-                nic.setCidr(n.getNetwork().getCidr());
-                virtualNicList.add(nic);
-            });
-        });
-        //getPluginHandler().getElementMap().values().stream().filter(e ->
-        //                BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE == e.getVirtualType())
-        //        .forEach(e -> e.getDeriveNetworks().forEach(n -> {
-        //            VirtualNic nic = new VirtualNic();
-        //            nic.setNetworkId(n.getNetwork().getResourceId());
-        //            nic.setCidr(n.getNetwork().getCidr());
-        //            virtualNicList.add(nic);
-        //        }));
+
+        //getPluginHandler().getElementMap().values().forEach(e -> {
+        //    e.getDeriveNetworks().forEach(n ->{
+        //        VirtualNic nic = new VirtualNic();
+        //        nic.setNetworkId(n.getNetwork().getResourceId());
+        //        nic.setCidr(n.getNetwork().getCidr());
+        //        virtualNicList.add(nic);
+        //    });
+        //});
 
         // 需要接外部网络，以及上面配置NAT，30s暂时不支持
         VirtualNic externalVirtualNic = new VirtualNic();
@@ -1986,10 +1978,13 @@ public class CreateHandler extends HandlerCommon {
 
         // 创建虚拟机
         VirtualMachineCreateData virtualMachine =  vmClient.create(createData);
+        // 读取虚机ip地址
+        VirtualNic virtualNic = virtualMachine.getNetwork().get(0);
+        String ip = virtualNic.getFixedIp();
 
         // 保存虚拟机信息
         CloudPluginSceneBO scene = getPluginHandler().getScene();
-        scene.setStrategyIp(virtualMachine.getRunHost());
+        scene.setStrategyIp(ip);
         scene.setStrategyInstance(virtualMachine.getId());
         getPluginHandler().saveScene();
     }

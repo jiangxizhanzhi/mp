@@ -20,7 +20,7 @@ spring:
 
   rabbitmq:
     ext-var:
-      host: ${RABBITMQ_IP:10.4.1.58}
+      host: ${RABBITMQ_IP:10.100.25.1}
       port: ${RABBITMQ_PORT:9672}
       username: ${RABBITMQ_USERNAME:cpcloud}
       password: ${RABBITMQ_PASSWORD:MzhhMzU4NDQzNzU}
