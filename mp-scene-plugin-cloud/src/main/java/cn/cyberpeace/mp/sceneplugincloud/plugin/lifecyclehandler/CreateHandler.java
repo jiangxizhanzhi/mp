@@ -869,6 +869,9 @@ public class CreateHandler extends HandlerCommon {
 
         if (Boolean.TRUE.equals(sceneElementBO.getAttackMockDeviceFlag())) {
             String standardSystemType = SystemTypeUtils.getStandardSystemType(sceneElementBO.getSystemType());
+            // 虚拟机本身ip，随机选一个
+            String clientIp = sceneElementBO.getPorts().get(0).getIp();
+
             if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
                 basDeviceInitCommand.add("@echo off");
                 basDeviceInitCommand.add("setlocal enabledelayedexpansion");
@@ -876,6 +879,7 @@ public class CreateHandler extends HandlerCommon {
                 basDeviceInitCommand.add(String.format("set \"replace_ip=%s\"", BeanCommon.getBean(CommonAppConfig.class).getBasIp()));
                 basDeviceInitCommand.add("set \"search_port=server_port\"");
                 basDeviceInitCommand.add(String.format("set \"replace_port=%s\"", BeanCommon.getBean(CommonAppConfig.class).getBasPort()));
+                basDeviceInitCommand.add(String.format("set \"simulator_ip=%s\"", clientIp));
 
                 basDeviceInitCommand.add("set \"search_template_id=mp_scene_template_id\"");
                 basDeviceInitCommand.add(String.format("set \"replace_template_id=%s\"", SceneContextHolder.getCsceneInstanceId()));
@@ -887,6 +891,7 @@ public class CreateHandler extends HandlerCommon {
                 basDeviceInitCommand.add("    set \"line=!line:%search_ip%=%replace_ip%!\"");
                 basDeviceInitCommand.add("    set \"line=!line:%search_port%=%replace_port%!\"");
                 basDeviceInitCommand.add("    set \"line=!line:%search_template_id%=%replace_template_id%!\"");
+                basDeviceInitCommand.add("    set \"line=!line:%client_ip%=%simulator_ip%!\"");
 
                 basDeviceInitCommand.add("    echo(!line!");
                 basDeviceInitCommand.add(")) > \"%output%\"");
@@ -900,6 +905,9 @@ public class CreateHandler extends HandlerCommon {
                         BeanCommon.getBean(CommonAppConfig.class).getBasPort()));
                 basDeviceInitCommand.add(String.format("sed -i \"/template_id:/s/mp_scene_template_id/%s/\" /opt/cpbas/client/application.yml",
                         SceneContextHolder.getCsceneInstanceId()));
+                basDeviceInitCommand.add(String.format("sed -i \"/client_ip:/s/simulator_ip/%s/\" /opt/cpbas/client/application.yml",
+                        clientIp));
+                        
 
             } else {
                 log.error("bas device system not support {}", sceneElementBO);
