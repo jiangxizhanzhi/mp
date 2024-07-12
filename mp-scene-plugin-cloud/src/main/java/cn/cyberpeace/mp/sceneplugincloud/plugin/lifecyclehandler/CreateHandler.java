@@ -1926,14 +1926,14 @@ public class CreateHandler extends HandlerCommon {
         // 获取实体设备网卡信息列表
         List<VirtualNic> virtualNicList = new ArrayList<>();
 
-        //getPluginHandler().getElementMap().values().forEach(e -> {
-        //    e.getDeriveNetworks().forEach(n ->{
-        //        VirtualNic nic = new VirtualNic();
-        //        nic.setNetworkId(n.getNetwork().getResourceId());
-        //        nic.setCidr(n.getNetwork().getCidr());
-        //        virtualNicList.add(nic);
-        //    });
-        //});
+        getPluginHandler().getElementMap().values().forEach(e -> {
+            e.getDeriveNetworks().forEach(n ->{
+                VirtualNic nic = new VirtualNic();
+                nic.setNetworkId(n.getNetwork().getResourceId());
+                nic.setCidr(n.getNetwork().getCidr());
+                virtualNicList.add(nic);
+            });
+        });
 
         // 需要接外部网络，以及上面配置NAT，30s暂时不支持
         VirtualNic externalVirtualNic = new VirtualNic();
