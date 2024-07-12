@@ -78,13 +78,13 @@ public class SdnSwitchController {
     }
 
     /**
-     * 修改物理交换机名称
+     * 修改物理交换机信息
      *
      * @param name
      * @param modifySdnSwitchCommand
      * @return
      */
-    @ApiOperation("修改物理交换机名称")
+    @ApiOperation("修改物理交换机信息")
     @PostMapping("/modify/{name}")
     public ServiceResult<Boolean> modifySdnSwitch(@PathVariable(name = "name") String name, @Validated @RequestBody ModifySdnSwitchCommand modifySdnSwitchCommand) {
         switchConverter.modifySdnSwitch(modifySdnSwitchCommand, name);
