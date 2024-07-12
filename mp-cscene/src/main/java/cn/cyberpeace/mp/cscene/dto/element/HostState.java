@@ -35,8 +35,8 @@ public class HostState {
     private String agentName;
 
     @ApiModelProperty("时间")
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)		// 反序列化
-    @JsonSerialize(using = LocalDateTimeSerializer.class)		// 序列化
+//    @JsonDeserialize(using = LocalDateTimeDeserializer.class)		// 反序列化
+//    @JsonSerialize(using = LocalDateTimeSerializer.class)		// 序列化
     private LocalDateTime time;
 
     @ApiModelProperty("总内存(MB)")
