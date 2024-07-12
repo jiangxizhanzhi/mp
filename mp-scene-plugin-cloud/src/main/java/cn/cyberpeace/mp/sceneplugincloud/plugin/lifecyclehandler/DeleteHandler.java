@@ -409,6 +409,11 @@ public class DeleteHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.DELETE_ENTITIES, () -> runTasks(deleteEntities));
         }
 
+        // 删除配置下发虚拟机
+        VirtualMachineDeleteData deleteData = new VirtualMachineDeleteData();
+        deleteData.setVms(List.of(getPluginHandler().getScene().getStrategyInstance()));
+        vmClient.delete(deleteData);
+
         // 删除终端
         List<CloudPluginSceneElementBO> terminals = new ArrayList<>();
         for (CloudPluginSceneElementBO t : getPluginHandler().getTerminalElementMap().values()) {
