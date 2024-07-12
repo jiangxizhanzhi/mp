@@ -142,7 +142,7 @@ public class CsceneHandler extends BaseCsceneHandler<
             // 非测试模式,核心路由器需要加上console登录协议
             CsceneDataModifier.supplyProtocolForCoreRouter(csceneInstance, AccessMode.Protocol.CONSOLE);
         }
-        var user = BeanCommon.getBean(UserService.class).getByIdent(getContext().getAccessUserId());
+        var user = UserUtils.getUser(getContext().getAccessUserId());
         log.info("user {} , vlan id is {}", user.getId(), user.getVlanId());
         if (csceneInstance.getReferenceType() == BaseCsceneModel.ReferenceType.PRACTICE) {
             // 实操题 给网络加入vlanId
