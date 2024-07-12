@@ -64,4 +64,6 @@ public class LogConstant {
      */
     public static final List<Integer> OPERATE_LOG_CODES = new ArrayList<>(Arrays.asList(1,13,14,15));
 
+    public static final List<Integer> SCENE_TYPE_CODES = new ArrayList<>(Arrays.asList(236, 310));
+
 }

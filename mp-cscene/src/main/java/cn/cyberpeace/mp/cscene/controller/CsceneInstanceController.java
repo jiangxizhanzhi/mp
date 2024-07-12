@@ -44,6 +44,7 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
+import cn.cyberpeace.mp.log.constant.LogConstant;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
@@ -65,6 +66,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,6 +85,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Api(value = "场景实例", tags = "CSCENE-场景实例")
 @Slf4j
@@ -896,6 +899,12 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @GetMapping("/types")
     @ApiOperation(value = "查询靶场监控的场景实例类型")
     public ServiceResult<List<OptionBO>> getSceneType() {
-        return optionService.getIntOptions(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_TYPE);
+//        return optionService.getIntOptions(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_TYPE);
+        var intOptions = optionService.getIntOptions(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_TYPE);
+        List<Integer> list1 = LogConstant.SCENE_TYPE_CODES;
+
+        val boList = intOptions.getSource().stream().filter(s ->list1.contains(s.getCode())).collect(Collectors.toList());
+        intOptions.setData(boList);
+        return intOptions;
     }
 }
