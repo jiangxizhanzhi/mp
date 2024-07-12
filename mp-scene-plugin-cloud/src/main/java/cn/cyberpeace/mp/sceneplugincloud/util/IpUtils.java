@@ -677,6 +677,9 @@ public class IpUtils {
      * @return 子网内且不在排除列表中的随机IP地址。
      */
     public static String generateRandomIpNotInList(String cidr, Set<String> excludedIps) {
+        excludedIps = excludedIps == null ? new HashSet<>() : excludedIps;
+        String[] specificIPsFromCIDR = IpUtils.getSpecificIPsFromCIDR(cidr);
+        excludedIps.addAll(Arrays.asList(specificIPsFromCIDR));
         SubnetUtils subnetUtils = new SubnetUtils(cidr);
         SubnetUtils.SubnetInfo subnetInfo = subnetUtils.getInfo();
         String[] allIps = subnetInfo.getAllAddresses();
@@ -736,5 +739,23 @@ public class IpUtils {
         }
 
         return invalidCIDRs;
+    }
+
+    /**
+     * 返回一个不在给定CIDR集合内的新CIDR地址。
+     * 从"192.168.1.0/24"开始递增查找。
+     *
+     * @param existingCidrs 已存在的CIDR集合
+     * @return 不在集合内的新CIDR地址
+     */
+    public static String getNextDefaultCIDR(Set<String> existingCidrs) {
+        int subnetNumber = 1;
+        while (true) {
+            String nextCIDR = "192.168." + subnetNumber + ".0/24";
+            if (!existingCidrs.contains(nextCIDR)) {
+                return nextCIDR;
+            }
+            subnetNumber++;
+        }
     }
 }

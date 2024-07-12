@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -32,16 +31,49 @@ public class ElementNetworkUtils {
             List<CloudPluginSceneElementBO> allElements,
             CloudPluginSceneElementBO cloudElement,
             HashMap<String, List<VirtualNic>> virtualNicsMap) {
+        Map<String, List<String>> elementIpMap = pluginHandler.getScene().getSrcScene().getElementIpMap();
+
+//        查目前所有cidr（包括ip所属cidr）
+        Set<String> cidrListByVEnt = allElements
+                .stream()
+                .map(CloudPluginSceneElementBO::getCidrPools)
+                .flatMap(cidrPools -> cidrPools.stream())
+                .collect(Collectors.toSet());
+        List<String> cidrListByIp = virtualNicsMap
+                .values()
+                .stream()
+                .flatMap(virtualNics -> virtualNics.stream())
+                .map(VirtualNic::getFixedIp)
+                .filter(Objects::nonNull)
+                .map(IpUtils::ip2Cidr24)
+                .collect(Collectors.toList());
+        cidrListByVEnt.addAll(cidrListByIp);
+        String defultCidr = IpUtils.getNextDefaultCIDR(cidrListByVEnt);
+        HashSet<String> ips = new HashSet<>();
+
+//          处理默认子网
+        virtualNicsMap.forEach((id, virtualNics) -> {
+            List<String> elementIps = elementIpMap.get(id);
+            virtualNics.forEach(virtualNic -> {
+                String fixedIp = virtualNic.getFixedIp();
+//                    自动分配ip需更换为默认子网内ip
+                if (elementIps == null || !elementIps.contains(fixedIp)) {
+                    String ip = IpUtils.generateRandomIpNotInList(defultCidr, null);
+                    ips.add(ip);
+                    virtualNic.setFixedIp(ip);
+                }
+            });
+        });
+
 //        VNet创建所有子网
         if (BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudElement.getImageType())) {
-
-            List<String> cidrPools = cloudElement.getCidrPools();
             List<String> nodeIds = cloudElement.getDeriveNetworks().stream()
                     .flatMap(connectedNetworkBO -> connectedNetworkBO.getToPorts().stream())
                     .map(SceneElementPortBO::getElement)
                     .map(SceneElementBO::getId)
                     .distinct()
                     .collect(Collectors.toList());
+            List<String> cidrPools = cloudElement.getCidrPools();
 //            先处理VM cidr
             Set<String> vmFixedIps = nodeIds.stream()
                     .filter(id -> !BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(pluginHandler.getElement(id).getImageType()))
@@ -67,7 +99,7 @@ public class ElementNetworkUtils {
 //              处理容器cidr 筛选容器cidr是否会冲突VM 冲突则更新容器cidr+ip
                                 if (finalCidrPools.contains(cidr)) {
                                     cidr = IpUtils.generateRandomCidrNotIn(finalCidrPools);
-                                    virtualNic.setFixedIp(IpUtils.generateRandomIpNotInList(cidr, new HashSet<>(Arrays.asList(IpUtils.getSpecificIPsFromCIDR(cidr)))));
+                                    virtualNic.setFixedIp(IpUtils.generateRandomIpNotInList(cidr, null));
                                 }
                                 finalCidrPools.add(cidr);
                                 containerCidrs.add(cidr);
@@ -87,8 +119,19 @@ public class ElementNetworkUtils {
             return new ConcurrentHashMap<>(cidrContainerMap);
         }
 
-        AtomicReference<Boolean> isContainer = new AtomicReference<>(false);
         ConcurrentHashMap<String, Boolean> cidrContainerMap = new ConcurrentHashMap<>();
+//        未连VNet节点直接判断节点类型
+        if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(cloudElement.getImageType())) {
+            for (VirtualNic virtualNic : virtualNicsMap.get(cloudElement.getSrcElement().getId())) {
+                cidrContainerMap.put(IpUtils.ip2Cidr24(virtualNic.getFixedIp()), true);
+            }
+        } else {
+            for (VirtualNic virtualNic : virtualNicsMap.get(cloudElement.getSrcElement().getId())) {
+                cidrContainerMap.put(IpUtils.ip2Cidr24(virtualNic.getFixedIp()), false);
+            }
+        }
+
+        /*AtomicReference<Boolean> isContainer = new AtomicReference<>(false);
         cloudElement.getDeriveNetworks().
                 forEach(connectedNetworkBO -> {
                     isContainer.set(false);
@@ -110,7 +153,7 @@ public class ElementNetworkUtils {
                                 checkIfElementIsContainerById(allElements, isContainer, id);
                             });
                     cidrContainerMap.put(cidr, isContainer.get());
-                });
+                });*/
         return cidrContainerMap;
     }
 
@@ -128,4 +171,5 @@ public class ElementNetworkUtils {
             }
         }
     }
+
 }

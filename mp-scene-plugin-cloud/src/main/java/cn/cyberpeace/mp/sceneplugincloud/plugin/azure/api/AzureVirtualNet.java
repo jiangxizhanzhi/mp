@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
@@ -13,10 +14,7 @@ import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.network.models.Network;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -99,13 +97,19 @@ public class AzureVirtualNet {
             CloudPluginSceneElementNetworkBO net = networkBO.getNetwork();
             net.setResourceId(network.id());
         });
+        List<String> nodeIds = null;
+        if (BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudElement.getImageType())) {
+            nodeIds = cloudElement.getDeriveNetworks().stream()
+                    .flatMap(connectedNetworkBO -> connectedNetworkBO.getToPorts().stream())
+                    .map(SceneElementPortBO::getElement)
+                    .map(SceneElementBO::getId)
+                    .distinct()
+                    .collect(Collectors.toList());
+        } else {
+            nodeIds = new ArrayList<>();
+            nodeIds.add(cloudElement.getSrcElement().getId());
+        }
 
-        List<String> nodeIds = cloudElement.getDeriveNetworks().stream()
-                .flatMap(connectedNetworkBO -> connectedNetworkBO.getToPorts().stream())
-                .map(SceneElementPortBO::getElement)
-                .map(SceneElementBO::getId)
-                .distinct()
-                .collect(Collectors.toList());
         nodeIds.stream().forEach(nodeId -> {
             List<VirtualNic> virtualNics = virtualNicsMap.get(nodeId);
             virtualNics.forEach(virtualNic -> {

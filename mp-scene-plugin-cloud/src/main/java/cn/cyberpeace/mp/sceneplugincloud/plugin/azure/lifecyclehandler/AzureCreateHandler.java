@@ -3,8 +3,6 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -21,13 +19,14 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementNetworkUtils;
-import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class AzureCreateHandler extends CreateHandler {
@@ -97,7 +96,8 @@ public class AzureCreateHandler extends CreateHandler {
 
             List<CloudPluginSceneElementBO> filteredAuxiliaryNetworkElements = this.filterAuxiliaryNetworkElements(allElements);
             List<Runnable> createAuxiliaryNetworkTasks = new ArrayList<>();
-            for (CloudPluginSceneElementBO element : filteredAuxiliaryNetworkElements) {
+            for (int i = 0; i < filteredAuxiliaryNetworkElements.size(); i++) {
+                CloudPluginSceneElementBO element = filteredAuxiliaryNetworkElements.get(i);
                 //筛选出所有cidr是否连接容器
                 CloudScenePluginHandler pluginHandler = getPluginHandler();
                 ConcurrentHashMap<String, Boolean> cidrContainerMap = ElementNetworkUtils.getCidrToContainerMap(pluginHandler, allElements, element, virtualNicsMap);
@@ -119,40 +119,9 @@ public class AzureCreateHandler extends CreateHandler {
             getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_GATEWAY);
             getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_GATEWAY);
 
-            /*
-            // 先创建辅助网络(包含虚拟交换机)
-            // 先创建辅助网络
-            List<CloudPluginSceneElementBO> filteredAuxiliaryNetworkElements = this.filterAuxiliaryNetworkElements(allElements);
-            List<Runnable> createAuxiliaryNetworkTasks = new ArrayList<>();
-            //筛选出所有cidr是否连接容器
-            ConcurrentHashMap<String, Boolean> cidrContainerMap = ElementNetworkUtils.getCidrContainerMap(allElements);
-
-            if (!filteredAuxiliaryNetworkElements.isEmpty()) {
-                String nodeIdd = filteredAuxiliaryNetworkElements.get(0).getSrcElement().getId();
-                // 封装创建网络的任务
-                AzureVirtualNetCreateTask taskk = new AzureVirtualNetCreateTask(resourceService, getPluginHandler(), filteredAuxiliaryNetworkElements.get(0), cidrContainerMap);
-                // 格式化任务执行过程，添加 runElementProgress
-                Runnable formatTaskk = this.formatElementTask(nodeIdd, stepPercentage, CreateHandler.ElementProcess.CREATE_AUXILIARY_NETWORK, taskk);
-                // 添加格式化后的任务到列表
-                createAuxiliaryNetworkTasks.add(formatTaskk);
-
-                if (!createAuxiliaryNetworkTasks.isEmpty()) {
-                    // 执行 创建所有网络
-                    runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> runTasks(createAuxiliaryNetworkTasks));
-                }
-
-//        保存网络id
-                String azureNetworkId = filteredAuxiliaryNetworkElements.get(0).getDeriveNetworks().get(0).getNetwork().getResourceId();
-                filteredAuxiliaryNetworkElements.stream()
-                        .flatMap(cloudElement -> cloudElement.getDeriveNetworks().stream())
-                        .forEach(cloudElement -> cloudElement.getNetwork().setResourceId(azureNetworkId));
-            }*/
-
-
-            getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_INSTANCE);
 
             // 再创建终端 终端分虚拟机、容器、和web服务
-
+            getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_INSTANCE);
 
             List<Runnable> createTerminalTasks = new ArrayList<>();
             // 虚拟机
@@ -161,7 +130,7 @@ public class AzureCreateHandler extends CreateHandler {
                 String nodeId = element.getSrcElement().getId();
                 List<VirtualNic> virtualNics = virtualNicsMap.get(nodeId);
 //                获取节点对应VNet
-                List<ConnectedNetworkBO> accessNetworks = element.getAccessNetworks();
+                /*List<ConnectedNetworkBO> accessNetworks = element.getAccessNetworks();
                 SceneElementBO vNetElement;
                 if (accessNetworks.size() > 0) {
                     vNetElement = accessNetworks.get(0).getConnectPorts().get(0).getTo().getElement();
@@ -189,8 +158,6 @@ public class AzureCreateHandler extends CreateHandler {
                                             .map(VirtualNic::getFixedIp)
                                             .collect(Collectors.toSet());
 
-                                    String[] specificIPsFromCIDR = IpUtils.getSpecificIPsFromCIDR(cidrPools.get(0));
-                                    allFixedIps.addAll(Arrays.asList(specificIPsFromCIDR));
                                     String ip = IpUtils.generateRandomIpNotInList(cidrPools.get(0), allFixedIps);
 //                                更新ip
                                     virtualNic.setFixedIp(ip);
@@ -198,7 +165,7 @@ public class AzureCreateHandler extends CreateHandler {
                             });
                         }
                     }
-                }
+                }*/
                 //            创建虚拟机时不允许扩容
                 element.getSrcElement().setExpansionDisk(null);
                 element.setVmExpansionDiskType(null);
@@ -207,17 +174,6 @@ public class AzureCreateHandler extends CreateHandler {
                 AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics, combineInitCommand(element));
                 Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_VIRTUAL_MACHINE, task);
                 createVirtualMachineTasks.add(formatTask);
-
-                /* 修改前
-                String nodeId = element.getSrcElement().getId();
-                List<VirtualNic> virtualNics = this.genVirutalNics(element);
-//            创建虚拟机时不允许扩容
-                element.getSrcElement().setExpansionDisk(null);
-                element.setVmExpansionDiskType(null);
-                receiveVirtualPortInfo(element, virtualNics);
-                AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics, combineInitCommand(element));
-                Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_VIRTUAL_MACHINE, task);
-                createVirtualMachineTasks.add(formatTask);*/
             }
             createTerminalTasks.addAll(createVirtualMachineTasks);
             // 容器
@@ -256,12 +212,12 @@ public class AzureCreateHandler extends CreateHandler {
                 runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
             }
 
-
             getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_INSTANCE);
             getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CONFIG);
             getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CONFIG);
 
         } catch (Exception e) {
+            e.printStackTrace();
 //            云场景启动失败立即删除云资源
             resourceService.getManager().resourceGroups().deleteByName(groupName);
             throw new MpRuntimeException(BaseErrorCode.ERROR, e);
@@ -372,62 +328,69 @@ public class AzureCreateHandler extends CreateHandler {
             });
             networkIdCloudPortsMap.put(auxiliaryNetworkId, networkIdCloudPorts);
         }
+        VirtualNic virtualNic = virtualNics.get(0);
+        var networkId = virtualNic.getNetworkId();
+        // 管理网卡判断
+        if (Boolean.TRUE.equals(cloudElement.getEnableMgmt())
+                && CloudSingleton.cloudAppConfig.getMgmtNetId().equals(networkId)) {
+            cloudElement.setMgmtPortResourceId(virtualNic.getPortId());
+            cloudElement.setMgmtIp(virtualNic.getFixedIp());
+            cloudElement.setMgmtMacAddr(virtualNic.getMacAddress());
+            return;
+        }
 
-        virtualNics.forEach(virtualNic -> {
-            var networkId = virtualNic.getNetworkId();
-            // 管理网卡判断
-            if (Boolean.TRUE.equals(cloudElement.getEnableMgmt())
-                    && CloudSingleton.cloudAppConfig.getMgmtNetId().equals(networkId)) {
-                cloudElement.setMgmtPortResourceId(virtualNic.getPortId());
-                cloudElement.setMgmtIp(virtualNic.getFixedIp());
-                cloudElement.setMgmtMacAddr(virtualNic.getMacAddress());
-                return;
+        var networkCloudPorts = networkIdCloudPortsMap.getOrDefault(virtualNics.get(0).getNetworkId(), null);
+        if (networkCloudPorts == null) {
+            return;
+        }
+
+        // 多个端口连到同一个网络上的时候暂时当做一个端口处理
+        networkCloudPorts.forEach(cloudPort -> {
+            var srcPort = cloudPort.getSrcPort();
+            VirtualNic virtualNic1;
+            if (virtualNics.size() == 1) {
+                virtualNic1 = virtualNics.get(0);
+                srcPort.setIp(virtualNic.getFixedIp());
+                srcPort.setMacAddr(virtualNic.getMacAddress());
+            } else {
+                virtualNic1 = virtualNics
+                        .stream()
+                        .filter(v -> v.getFixedIp().equals(srcPort.getIp()))
+                        .findFirst()
+                        .get();
             }
 
-            var networkCloudPorts = networkIdCloudPortsMap.getOrDefault(networkId, null);
-            if (networkCloudPorts == null) {
-                return;
-            }
 
-            // 多个端口连到同一个网络上的时候暂时当做一个端口处理
-            networkCloudPorts.forEach(cloudPort -> {
-                var srcPort = cloudPort.getSrcPort();
-                if (srcPort.isUsing()) {
-                    srcPort.setIp(virtualNic.getFixedIp());
-                    srcPort.setMacAddr(virtualNic.getMacAddress());
-                }
+            cloudPort.setResourceId(virtualNic1.getPortId());
+            cloudPort.setQosId(virtualNic1.getQosId());
+            cloudPort.setFloatingIp(virtualNic1.getFloatingip());
+            cloudPort.setFloatingIpId(virtualNic1.getFloatingipId());
+            cloudPort.setAuxiliaryNetworkId(virtualNic1.getNetworkId());
 
-                cloudPort.setResourceId(virtualNic.getPortId());
-                cloudPort.setQosId(virtualNic.getQosId());
-                cloudPort.setFloatingIp(virtualNic.getFloatingip());
-                cloudPort.setFloatingIpId(virtualNic.getFloatingipId());
-                cloudPort.setAuxiliaryNetworkId(virtualNic.getNetworkId());
-
-                if (null != virtualNic.getAccessModes() && null != virtualNic.getAccessModes().get(0)) {
-                    VirtualNic.AccessMode accessMode = virtualNic.getAccessModes().get(0);
-                    String protocol = accessMode.getProtocol();
-                    String[] protoclos = protocol.split(";");
-                    List<CloudAccessMode> accessModes = cloudPort.getAccessModes();
-                    accessModes.clear();
-                    for (int j = 0; j < protoclos.length; j++) {
-                        CloudAccessMode cloudAccessMode = new CloudAccessMode();
+            if (null != virtualNic1.getAccessModes() && null != virtualNic1.getAccessModes().get(0)) {
+                VirtualNic.AccessMode accessMode = virtualNic1.getAccessModes().get(0);
+                String protocol = accessMode.getProtocol();
+                String[] protoclos = protocol.split(";");
+                List<CloudAccessMode> accessModes = cloudPort.getAccessModes();
+                accessModes.clear();
+                for (int j = 0; j < protoclos.length; j++) {
+                    CloudAccessMode cloudAccessMode = new CloudAccessMode();
 //                        TODO 管理网络ip port
-                        cloudAccessMode.setAccessIp(virtualNic.getFixedIp());
-                        cloudAccessMode.setProtocol(protoclos[j]);
-                        cloudAccessMode.setAccessPort(AccessMode.Protocol.DEFAULT_PORT_MAP.get(protoclos[j].toLowerCase()));
-                        cloudAccessMode.setUsername(cloudElement.getUsername());
-                        cloudAccessMode.setPassword(cloudElement.getPassword());
-                        cloudAccessMode.setAvailable(true);
-                        cloudAccessMode.setProxy(true);
-                        cloudAccessMode.setId(TextUtils.uuid());
+                    cloudAccessMode.setAccessIp(virtualNic1.getFixedIp());
+                    cloudAccessMode.setProtocol(protoclos[j]);
+                    cloudAccessMode.setAccessPort(AccessMode.Protocol.DEFAULT_PORT_MAP.get(protoclos[j].toLowerCase()));
+                    cloudAccessMode.setUsername(cloudElement.getUsername());
+                    cloudAccessMode.setPassword(cloudElement.getPassword());
+                    cloudAccessMode.setAvailable(true);
+                    cloudAccessMode.setProxy(true);
+                    cloudAccessMode.setId(TextUtils.uuid());
 
-                        if (StringUtils.isEmpty(cloudAccessMode.getAccessIp()) && cloudPort.getSrcPort() != null) {
-                            cloudAccessMode.setAccessIp(cloudPort.getSrcPort().getIp());
-                        }
-                        accessModes.add(cloudAccessMode);
+                    if (StringUtils.isEmpty(cloudAccessMode.getAccessIp()) && cloudPort.getSrcPort() != null) {
+                        cloudAccessMode.setAccessIp(cloudPort.getSrcPort().getIp());
                     }
+                    accessModes.add(cloudAccessMode);
                 }
-            });
+            }
         });
     }
 }

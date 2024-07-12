@@ -12,11 +12,13 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
 /**
  * 场景实例插件基础类，场景实例的插件通过继承本类拓展插件功能
+ *
  * @param <S> 插件对应配置类
  * @param <E> 网元节点的插件对应配置类
  * @param <P> 网元端口的插件对应配置类
@@ -136,11 +138,11 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
 
     }
 
-    public void completionTopo(Set<String> existingIpSet) {
+    public void completionTopo(Map<String, Set<String>> existingIpSetMap) {
 
     }
 
-    public void recreateElement(String nodeId,String image) {
+    public void recreateElement(String nodeId, String image) {
 
     }
 
@@ -160,7 +162,7 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
 
     }
 
-    public void stopElement(String nodeId){
+    public void stopElement(String nodeId) {
 
     }
 
