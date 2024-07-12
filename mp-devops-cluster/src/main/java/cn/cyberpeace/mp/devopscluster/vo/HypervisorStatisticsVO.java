@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name HypervisorStatisticsVO.java.
+ // File size 5852.
+ // File create date Fri Jul 12 12:55:34 CST 2024.
+ // File update date Fri Jul 12 12:55:34 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;

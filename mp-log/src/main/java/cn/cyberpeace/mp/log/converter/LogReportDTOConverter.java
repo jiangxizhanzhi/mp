@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name LogReportDTOConverter.java.
+ // File size 732.
+ // File create date Fri Jul 12 12:55:24 CST 2024.
+ // File update date Fri Jul 12 12:55:24 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.log.converter;
 
 import cn.cyberpeace.mp.log.dto.LogReportDTO;

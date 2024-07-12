@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name AbstractBaseService.java.
+ // File size 5204.
+ // File create date Fri Jul 12 12:55:27 CST 2024.
+ // File update date Fri Jul 12 12:55:27 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.situationaware.utils.LocalDateUtils;

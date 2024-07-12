@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name ClassUtil.java.
+ // File size 1031.
+ // File create date Fri Jul 12 12:55:22 CST 2024.
+ // File update date Fri Jul 12 12:55:22 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.base.util.mptool;
 
 import lombok.extern.slf4j.Slf4j;

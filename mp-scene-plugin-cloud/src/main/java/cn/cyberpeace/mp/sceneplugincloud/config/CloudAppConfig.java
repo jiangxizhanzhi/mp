@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name CloudAppConfig.java.
+ // File size 11244.
+ // File create date Fri Jul 12 12:55:24 CST 2024.
+ // File update date Fri Jul 12 12:55:24 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.sceneplugincloud.config;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
