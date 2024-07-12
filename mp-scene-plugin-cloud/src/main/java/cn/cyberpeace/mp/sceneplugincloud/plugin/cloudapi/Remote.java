@@ -10,9 +10,11 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
@@ -27,6 +29,9 @@ import org.apache.tomcat.util.http.fileupload.IOUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -123,8 +128,7 @@ public class Remote extends CloudClient {
      * @param param
      * @param response
      */
-    public void getConnectionFile(GetConnectionUrlParam param, HttpServletResponse response) {
-//        BufferedInputStream bin = null;
+    public GetConnectionUrlResult getConnectionFile(GetConnectionUrlParam param, HttpServletResponse response) {
         OutputStream os = null;
         try {
             URL url = new URL(CloudSingleton.cloudAppConfig.getCpcloudServer() + CloudUrlConstant.VIRTUAL_MACHINE_ACCESS_URL +
@@ -137,23 +141,29 @@ public class Remote extends CloudClient {
             httpURLConnection.setRequestProperty("Charset", "UTF-8");
             // 打开到此 URL引用的资源的通信链接
             httpURLConnection.connect();
-//            bin = new BufferedInputStream(httpURLConnection.getInputStream());
-            os = response.getOutputStream();
             int len = 0;
             byte[] buffer = new byte[1024 * 5];
 
+            File file = new File(TextUtils.uuid()+".vv");
+            os = new FileOutputStream(file);
             try (BufferedInputStream bin = new BufferedInputStream(httpURLConnection.getInputStream())) {
                 while ((len = bin.read(buffer)) > 0) {
                     os.write(buffer, 0, len);
                 }
                 os.flush();
             }
+
+            GetConnectionUrlResult result = new GetConnectionUrlResult();
+            var res = FsCommon.upload(new FileInputStream(file));
+            result.setData(FsCommon.genInnerHttpUrl(res));
+            return result;
         } catch (Exception e) {
             log.error("download connection file error", e);
         } finally {
 //            IOUtils.closeQuietly(bin);
             IOUtils.closeQuietly(os);
         }
+        return new GetConnectionUrlResult();
     }
 
     /**

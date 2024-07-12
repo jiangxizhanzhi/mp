@@ -120,11 +120,10 @@ public class CloudSceneConnectionCommon {
         } else if (CloudElementAccessMode.Protocol.CONSOLE.equals(param.getConsoleType())) {
             return remoteClient.getContainerConnectionUrl(param);
         } else if (CloudElementAccessMode.Protocol.SPICE.equals(param.getConsoleType())) {
-            remoteClient.getConnectionFile(param, response);
+            return remoteClient.getConnectionFile(param, response);
         } else {
             return remoteClient.getNoVncConnectionUrl(param);
         }
-        return new GetConnectionUrlResult();
     }
 
     /**
