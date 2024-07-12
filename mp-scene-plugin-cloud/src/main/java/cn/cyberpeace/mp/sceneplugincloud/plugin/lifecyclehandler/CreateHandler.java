@@ -140,6 +140,8 @@ public class CreateHandler extends HandlerCommon {
     private final Random random = new Random();
 
     private VirtualRouterCreateData probeRouteInfo = null;
+
+    private Map<CloudPluginSceneElementNetworkBO, VirtualRouterCreateData> auxiliaryNetworkRouters = new ConcurrentHashMap<>();
     /**
      * 场景处理相关的静态常量类。
      * 提供了场景中各种元素创建和配置过程的枚举常量。
@@ -427,10 +429,7 @@ public class CreateHandler extends HandlerCommon {
         virtualRouterNic.setFixedIp(TextUtils.emptyNull(network.getAuxiliaryNetworkRouterIp()));
         virtualRouterNic.setCidr(network.getCidr());
         createData.setNetworks(List.of(virtualRouterNic));
-        var virtualRouter = vrClient.create(createData);
-
-        // 将网络和虚拟路由关联
-        network.setAuxiliaryNetworkRouterResourceId(virtualRouter.getId());
+        auxiliaryNetworkRouters.put(network, createData);
     }
 
     /**
@@ -1699,6 +1698,31 @@ public class CreateHandler extends HandlerCommon {
         }
 
         runSceneProgress(SceneProcess.CREATE_NODE_TO_EXTERNAL_ROUTER, this::createNodeToExternalRouter);
+        if (!this.auxiliaryNetworkRouters.isEmpty()) {
+            for (Map.Entry<CloudPluginSceneElementNetworkBO, VirtualRouterCreateData> a : this.auxiliaryNetworkRouters.entrySet()) {
+                var net = a.getKey();
+                var createData = a.getValue();
+                // 设定各路由的路由表：网络中的网关，如果遇到发往外部网络的流量时，将流量转发到 ProbeRouter 上的端口
+                if (probeRouteInfo != null) {
+                    for (var probeRouteNet : probeRouteInfo.getNetworks()) {
+                        if (StringUtils.equals(net.getResourceId(), probeRouteNet.getId())) {
+                            String nextHop = probeRouteNet.getFixedIp();
+                            String externalNetCidr = CloudSingleton.cloudAppConfig.getExternalNetCidr();
+                            if (createData.getRouteStatics() == null) {
+                                createData.setRouteStatics(new ArrayList<>());
+                            }
+                            createData.getRouteStatics()
+                                    .add(new VirtualRouterCreateData.StaticRoute(externalNetCidr, nextHop));
+                            // 只需要设置一条路由即可
+                            break;
+                        }
+                    }
+                }
+                var virtualRouter = vrClient.create(createData);
+                // 将网络和虚拟路由关联
+                net.setAuxiliaryNetworkRouterResourceId(virtualRouter.getId());
+            }
+        }
 
         getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_NETWORK);
 
