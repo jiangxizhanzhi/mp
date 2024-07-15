@@ -100,6 +100,7 @@ public class FlowCollectClient {
         arkimeCreateResBo.setIp(fixedIp);
         arkimeCreateResBo.setResourceId(arkimePrefixId);
         arkimeCreateResBo.setArkimeContainerId(createData.getId());
+        arkimeCreateResBo.setNicId(createData.getNetwork().get(0).getVnicId());
         return arkimeCreateResBo;
 
     }

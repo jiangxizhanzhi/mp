@@ -24,4 +24,5 @@ public class ArkimeCreateResBo {
     private String resourceId;
     private String ip;
     private String arkimeContainerId;
+    private String nicId ;
 }
