@@ -33,8 +33,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
-/**
+ /**
  * @ClassName Container
  * @Description
  * @Author maojun
@@ -391,7 +392,10 @@ public class Container extends CloudClient {
 
         var result = this.executeCommand(data.getZunContainerId(),cmd.toString());
         ContainerFileGetResult r = new ContainerFileGetResult();
-        r.setUrl(result.getResult());
+
+        var matcher = Pattern.compile("\"inner_http_url\"\\s*:\\s*\"([^\"]+)\"").matcher(result.getOutput());
+        matcher.find();
+        r.setUrl(matcher.group(1));
         return r;
     }
 
