@@ -97,7 +97,8 @@ public class SysActivationController {
     @ApiOperation("查询机器序列号")
     @GetMapping("/machinecode")
     public ServiceResult getMachineCode() {
-        String code = activationService.querySysUUID();
+//        String code = activationService.querySysUUID();
+        String code = "";
         return ResultCommon.success(code);
     }
 
