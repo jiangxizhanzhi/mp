@@ -1921,6 +1921,10 @@ public class CreateHandler extends HandlerCommon {
             if (BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE == connectedNetworkBO.getVirtualType()){
                 // 创建策略下发虚拟机
                 createStrategy();
+
+                // todo cxz 安全策略下发，具体信息等设备厂商给出MIB文件和YANG模型文件
+                // 获取场景实例
+
                 break;
             }
         }
@@ -1939,6 +1943,8 @@ public class CreateHandler extends HandlerCommon {
                 VirtualNic nic = new VirtualNic();
                 nic.setNetworkId(n.getNetwork().getResourceId());
                 nic.setCidr(n.getNetwork().getCidr());
+                nic.setFixedIp(IpUtils.newRandomIps(CloudSingleton.cloudAppConfig.getExternalNetCidr(), 1,
+                        Collections.emptyList(), Collections.emptyList(), false).get(0));
                 virtualNicList.add(nic);
             });
         });
@@ -1948,7 +1954,7 @@ public class CreateHandler extends HandlerCommon {
         externalVirtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
         externalVirtualNic.setCidr(CloudSingleton.cloudAppConfig.getExternalNetCidr());
         externalVirtualNic.setFixedIp(IpUtils.newRandomIps(externalVirtualNic.getCidr(), 1, Collections.emptyList(),
-                null, true).get(0));
+                null, false).get(0));
         virtualNicList.add(externalVirtualNic);
 
         // 创建虚拟机

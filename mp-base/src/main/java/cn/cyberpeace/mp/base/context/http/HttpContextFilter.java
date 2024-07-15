@@ -42,6 +42,11 @@ public class HttpContextFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
+            // 开启跨域
+            //response.setHeader("Access-Control-Allow-Origin", "*");
+            //response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            //response.setHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization");
+
             String requestId = request.getHeader(X_REQUEST_ID);
             if (!StringUtils.isEmpty(requestId)) {
                 SysContextHolder.setCallChainId(requestId);
