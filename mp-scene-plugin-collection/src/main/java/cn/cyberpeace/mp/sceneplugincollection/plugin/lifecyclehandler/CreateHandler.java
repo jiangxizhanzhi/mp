@@ -146,8 +146,8 @@ public class CreateHandler extends HandlerCommon {
                 getPluginHandler().getScene().setFlowCollector(arkimeCreateResBo.getResourceId());
                 getPluginHandler().getScene().setFlowCollectorContainerId(arkimeCreateResBo.getArkimeContainerId());
 
-                FlowMirrorCreateRes flowMirrorCreateRes = getFlowCollector().createFlowMirror(arkimeCreateResBo.getArkimeContainerId(),
-                        getPluginHandler().getSceneHandler().getSceneId(), totalMirrorParams);
+                FlowMirrorCreateRes flowMirrorCreateRes = getFlowCollector().createFlowMirror(arkimeCreateResBo.getArkimeContainerId(), arkimeCreateResBo.getIp(), getPluginHandler().getSceneHandler()
+                        .getSceneId(), totalMirrorParams);
 
                 getPluginHandler().getScene().setFlowMirrorId(flowMirrorCreateRes.getFlowMirrorId());
                 getPluginHandler().getScene().setOptionKey(Collections.singletonList(flowMirrorCreateRes.getOptionKey()));
