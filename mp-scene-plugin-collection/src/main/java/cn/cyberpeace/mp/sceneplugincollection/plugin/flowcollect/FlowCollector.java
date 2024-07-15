@@ -67,7 +67,7 @@ public class FlowCollector {
         CreateMirrorData.Param destParam = new CreateMirrorData.Param();
         destParam.setId(arkimeContainerId);
         destParam.setDesId(arkimeNicId);
-        destParam.setType(CreateMirrorData.Type.NETWORK);
+        destParam.setType(CreateMirrorData.Type.DOCKER);
         createData.setDestParam(destParam);
 
         CollectionPluginSceneOptionKeyMapper optionKeyMapper = BeanCommon.getBean(CollectionPluginSceneOptionKeyMapper.class);
