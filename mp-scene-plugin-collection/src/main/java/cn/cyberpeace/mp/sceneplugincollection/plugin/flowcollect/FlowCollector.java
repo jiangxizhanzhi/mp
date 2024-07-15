@@ -55,17 +55,17 @@ public class FlowCollector {
     /**
      * createFlowMirror
      *
-     * @param arkimeIp
+     * @param arkimeContainerId
      * @param sceneId
      * @param totalMirrorParams
      * @return
      */
-    public FlowMirrorCreateRes createFlowMirror(String arkimeIp, String sceneId, List<CreateMirrorData.Param> totalMirrorParams) {
+    public FlowMirrorCreateRes createFlowMirror(String arkimeContainerId, String sceneId, List<CreateMirrorData.Param> totalMirrorParams) {
         CreateMirrorData createData = new CreateMirrorData();
         createData.setSrcParam(totalMirrorParams);
 
         CreateMirrorData.Param destParam = new CreateMirrorData.Param();
-        destParam.setDesId((arkimeIp));
+        destParam.setDesId((arkimeContainerId));
         destParam.setType(CreateMirrorData.Type.NETWORK);
         createData.setDestParam(destParam);
 
