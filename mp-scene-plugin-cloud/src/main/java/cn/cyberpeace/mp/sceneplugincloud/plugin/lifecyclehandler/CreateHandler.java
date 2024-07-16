@@ -745,6 +745,9 @@ public class CreateHandler extends HandlerCommon {
             commands.add("echo \"169.254.169.254     res.cr.com\" >>/etc/hosts");
         }
 
+        String versionImage = SceneSingleton.sceneAppConfig.getVersionImage();
+        String cloudElementImage = cloudElement.getImage();
+        log.info("version image is `{}` , cloud element image is `{}`", versionImage, cloudElementImage);
         if (SceneSingleton.sceneAppConfig.getVersionImage().equals(cloudElement.getImage())) {
             List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings("wazuh_agent_installer");
             Map<String, String> nameFileMap = new HashMap<>();
