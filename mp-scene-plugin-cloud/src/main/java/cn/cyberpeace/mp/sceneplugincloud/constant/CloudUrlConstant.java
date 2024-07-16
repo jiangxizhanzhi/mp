@@ -150,10 +150,8 @@ public class CloudUrlConstant {
     public static final String VIRTUAL_MACHINE_COM_EXEC_CMD = "/cloud/v1/vm/{vm_id}/com_exec";
     public static final String VIRTUAL_MACHINE_MODIFY_URL = "/cloud/v1/vm/{vm_id}";
 
-
-
-
-
+    public static final String GUACAMOLE_CONNECTION_CREATE = "/guacamole/connection";
+    public static final String GUACAMOLE_CONNECTION_DELETE = "/guacamole/connection";
 
     /*****************获取模板id******************/
     public static final String VIRTUAL_DEVICE_GET = "/cloud/v1/device/template_by_device";
@@ -215,7 +213,7 @@ public class CloudUrlConstant {
     public static final String GET_RECORDING_URL = "/cpcloud/guacamole/v1/recordfile";
     public static final String RECORDING_DOWNLOAD_URL = "/cpcloud/guacamole/v1/downloadfile?recordfilename=%s";
     public static final String RECORDING_PLAY_URL = "/cpcloud/guacamole/v1/video?recordfilename=%s";
-    public static final String ENABLE_RECORDING_URL = "/cpcloud/guacamole/v1/enable_record";
+    public static final String ENABLE_RECORDING_URL = "/cloud/v1/guacamole/enable_record";
     public static final String DISABLE_RECORDING_URL = "/cpcloud/guacamole/v1/disable_record";
     public static final String CONVERT_RECORDING_URL = "/cpcloud/guacamole/v1/convert_record";
     public static final String DELETE_RECORDING_URL = "/cpcloud/guacamole/v1/filemanager";

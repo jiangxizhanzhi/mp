@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudElementAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Connection;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetConnectionUrlParam;
@@ -115,8 +116,21 @@ public class CloudSceneConnectionCommon {
     public static GetConnectionUrlResult getConnectionUrl(GetConnectionUrlParam param, HttpServletResponse response) {
         var remoteClient = new Remote();
         if (CloudElementAccessMode.Protocol.VNC.equals(param.getConsoleType())) {
-            param.setConsoleType(CloudElementAccessMode.Protocol.NO_VNC);
-            return remoteClient.getNoVncConnectionUrl(param);
+            var connection = new Connection();
+            var vncFileContentParseResult = connection.getVncFileContent(param.getVmId());
+            Connection.ConnectionCreateData createData = new Connection.ConnectionCreateData();
+            createData.setUsername("mj");
+            Connection.ConnectionCreateParamsData params = new Connection.ConnectionCreateParamsData();
+            params.setPort(vncFileContentParseResult.getPort());
+            params.setPassword(vncFileContentParseResult.getPassword());
+            params.setHostname(vncFileContentParseResult.getHost());
+            params.setProtocol(CloudElementAccessMode.Protocol.VNC);
+            createData.setConnectionParams(params);
+            var connectionCreateResult = connection.createConnection(createData);
+
+            GetConnectionUrlResult result = new GetConnectionUrlResult();
+            result.setData(connectionCreateResult.getUrl());
+            return result;
         } else if (CloudElementAccessMode.Protocol.CONSOLE.equals(param.getConsoleType())) {
             return remoteClient.getContainerConnectionUrl(param);
         } else if (CloudElementAccessMode.Protocol.SPICE.equals(param.getConsoleType())) {
@@ -136,60 +150,35 @@ public class CloudSceneConnectionCommon {
         var sceneId = param.getSceneId();
         var sceneElementId = param.getSceneElementId();
         var userId = param.getUserId();
-
-        CloudPluginSceneConnectionModel sceneConnection = cloudPluginSceneConnectionMapper.first(new HumanCondition()
-                .filterEqual(CloudPluginSceneConnectionModel::getScene, sceneId)
-                .filterEqual(CloudPluginSceneConnectionModel::getSceneElement, sceneElementId)
-                .filterEqual(CloudPluginSceneConnectionModel::getAccessUser, userId)
-                .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
-                .reverseOrderBy(CloudPluginSceneConnectionModel::getCreateTime));
-
-        // com信息可能会变，获取最新的com信息
         var resourceId = param.getResourceId();
-        var vmClient = new VirtualMachine();
-        var comInfo = vmClient.getComInfo(resourceId);
-        if (sceneConnection == null || !sceneConnection.getAccessIp().equals(comInfo.getAddress())) {
-            sceneConnection = new CloudPluginSceneConnectionModel();
+        var protocol = param.getCloudAccessMode().getProtocol();
+        if (CloudElementAccessMode.Protocol.VNC.equals(protocol)) {
+            var connection = new Connection();
+
+            // 创建vnc连接的文件 从文件中获取 ip、端口、密码 信息
+            var fileContent = connection.getVncFileContent(resourceId);
+            Connection.ConnectionCreateData createData = new Connection.ConnectionCreateData();
+            createData.setUsername(userId);
+            Connection.ConnectionCreateParamsData params = new Connection.ConnectionCreateParamsData();
+            params.setProtocol(CloudElementAccessMode.Protocol.VNC);
+            params.setHostname(fileContent.getHost());
+            params.setPassword(fileContent.getPassword());
+            params.setPort(fileContent.getPort());
+            createData.setConnectionParams(params);
+
+            // 创建连接
+            var connectionCreateResult = connection.createConnection(createData);
+
+            var sceneConnection = new CloudPluginSceneConnectionModel();
             sceneConnection.setScene(sceneId);
             sceneConnection.setSceneElement(sceneElementId);
             sceneConnection.setAccessUser(userId);
-            sceneConnection.setAccessIp(comInfo.getAddress());
-            sceneConnection.setAccessPort(Integer.parseInt(comInfo.getPort()));
-        }
-        var dataUpdateFlag = false;
-        var remoteClient = new Remote();
-        if (StringUtils.isEmpty(sceneConnection.getConnectionId())) {
-            var guacamoleCreateConnectionData = new GuacamoleCreateConnectionData();
-            guacamoleCreateConnectionData.setUsername(userId);
-            guacamoleCreateConnectionData.setVmId(resourceId);
-            GuacamoleCreateConnectionData.ConnectionParams params = new GuacamoleCreateConnectionData.ConnectionParams();
-            params.setUsername(comInfo.getUser());
-            params.setHostname(comInfo.getAddress());
-            params.setPort(comInfo.getPort());
-            params.setNeedPrivateKey(true);
-            params.setCommand("connect --vm-id=" + resourceId);
-            guacamoleCreateConnectionData.setConnectionParams(params);
-            var result = remoteClient.createConnection(guacamoleCreateConnectionData);
-            if (result == null || StringUtils.isEmpty(result.getConnectionId())) {
-                log.error("Create scene connection[{}] with empty result: {}", guacamoleCreateConnectionData, result);
-                return null;
-            } else {
-                sceneConnection.setConnectionId(result.getConnectionId());
-                sceneConnection.setConnectionUrl(result.getUrl());
-                sceneConnection.setConnectionRecordingName(result.getConnectionName());
-                dataUpdateFlag = true;
-            }
-        }
-
-        if (StringUtils.isEmpty(sceneConnection.getConnectionUrl())) {
-            log.error("Get scene connection[{}] url with empty result: {}", sceneConnection.getConnectionId(), JsonCommon.stringify(sceneConnection));
-        }
-
-        if (dataUpdateFlag) {
+            sceneConnection.setConnectionId(connectionCreateResult.getConnectionId());
+            sceneConnection.setConnectionUrl(connectionCreateResult.getUrl());
             cloudPluginSceneConnectionMapper.save(sceneConnection);
+            return sceneConnection;
         }
-
-        return sceneConnection;
+        return null;
     }
 
 

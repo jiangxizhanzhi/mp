@@ -577,7 +577,7 @@ public class ScenePluginCloudSceneService {
                                                                     String accessModeId, String userId,
                                                                     CloudScenePluginContext context) {
         var accessModeInfoMap = collectAccessModeLinkInfo(sceneId, List.of(nodeId));
-        var accessModeInfo = accessModeInfoMap.getOrDefault(nodeId, null);
+        var accessModeInfo = accessModeInfoMap.getOrDefault(accessModeId, null);
         if (accessModeInfo == null) {
             return new ServiceResult<>(null);
         }
@@ -590,7 +590,25 @@ public class ScenePluginCloudSceneService {
         sceneConnectionParam.setSceneElementId(nodeId);
         sceneConnectionParam.setResourceId(cloudElement.getResourceId());
         sceneConnectionParam.setUserId(userId);
+        sceneConnectionParam.setCloudAccessMode(accessModeInfo.accessMode);
         var sceneConnection = CloudSceneConnectionCommon.getOrCreateSceneConnection(sceneConnectionParam);
+
+        var cloudScene = accessModeInfo.getCloudScene();
+        if (cloudScene != null && Boolean.TRUE.equals(cloudScene.getEnableRecording())) {
+            var extraParam = new CloudSceneConnectionCommon.SceneConnectionEnableRecordingExtraParam();
+            extraParam.setSceneName(accessModeInfo.getSrcScene().getName());
+            extraParam.setNodeName(accessModeInfo.getCloudElement().getSrcElement().getName());
+            extraParam.setUsername(userId);
+            extraParam.setDepartment(context == null ? StringUtils.EMPTY : context.getRequestUserOrg());
+            extraParam.setSceneId(sceneId);
+            extraParam.setNodeId(nodeId);
+            var enableRecordingFlag = CloudSceneConnectionCommon.enableRecording(sceneConnection, extraParam);
+            if (enableRecordingFlag) {
+                nodeConnection.setConnectionEnableRecording(sceneConnection.getConnectionEnableRecording());
+                nodeConnection.setConnectionRecordingName(sceneConnection.getConnectionRecordingName());
+            }
+        }
+
         if (sceneConnection == null) {
             return new ServiceResult<>(null);
         }

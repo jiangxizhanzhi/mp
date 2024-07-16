@@ -34,7 +34,9 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudElementAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.model.CsceneElementSoftVersionModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetConnectionUrlParam;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CsceneElementSoftVersionMapper;
 import cn.cyberpeace.mp.cscene.response.CommonCollectRes;
 import cn.cyberpeace.mp.cscene.response.SoftVersionInfo;
@@ -58,6 +60,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConnectionCommon;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventTypeBO;
@@ -759,15 +762,22 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                 if (pluginPort != null && CollectionUtils.isNotEmpty(pluginPort.getAccessModes())) {
                     for (var a : pluginPort.getAccessModes()) {
                         if (StringUtils.equals(a.getId(), accessModeId)) {
-                            NodeConnectionBO nodeConnectionBO = new NodeConnectionBO();
-                            nodeConnectionBO.setConnectionUrl(a.getConnectionUrl());
-                            nodeConnectionBO.setNodeName(element.getName());
-                            nodeConnectionBO.setNodeId(nodeId);
-                            nodeConnectionBO.setProtocol(a.getProtocol());
-                            String url = modelService.getConnectionUrl(id, nodeId, a.getProtocol(), response)
-                                    .getSource();
-                            nodeConnectionBO.setConnectionUrl(url);
-                            return new ServiceResult<>(nodeConnectionBO).asResult();
+                            if (CloudElementAccessMode.Protocol.VNC.equals(a.getProtocol())) {
+                                return modelService.getRemoteConnection(request.getId(), request.getNodeId(), request.getAccessModeId(), request.getContext())
+                                        .asResult();
+                            } else {
+                                NodeConnectionBO nodeConnectionBO = new NodeConnectionBO();
+                                nodeConnectionBO.setConnectionUrl(a.getConnectionUrl());
+                                nodeConnectionBO.setNodeName(element.getName());
+                                nodeConnectionBO.setNodeId(nodeId);
+                                nodeConnectionBO.setProtocol(a.getProtocol());
+                                GetConnectionUrlParam param = new GetConnectionUrlParam();
+                                param.setVmId(pluginHandler.getElement(element.getId()).getResourceId());
+                                param.setConsoleType(a.getProtocol());
+                                String url = CloudSceneConnectionCommon.getConnectionUrl(param, response).getData();
+                                nodeConnectionBO.setConnectionUrl(url);
+                                return new ServiceResult<>(nodeConnectionBO).asResult();
+                            }
                         }
                     }
                 }

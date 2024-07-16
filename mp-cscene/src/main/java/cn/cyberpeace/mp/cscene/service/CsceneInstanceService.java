@@ -1560,7 +1560,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         GetConnectionUrlParam param = new GetConnectionUrlParam();
         param.setVmId(cloudElement.getResourceId());
         param.setConsoleType(protocol);
-        return new ServiceResult<>(CloudSceneConnectionCommon.getConnectionUrl(param, response).getData());
+        String url = CloudSceneConnectionCommon.getConnectionUrl(param, response).getData();
+        return new ServiceResult<>(url).asResult();
     }
 
     /**
