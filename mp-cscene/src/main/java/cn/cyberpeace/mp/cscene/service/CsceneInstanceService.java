@@ -1645,7 +1645,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         sceneLinkStatusInfo.setCsceneId(csceneId);
         sceneLinkStatusInfo.getNodeLinkStatusList().stream().forEach(nodeLinkStatusBO -> {
             nodeLinkStatusBO.setStatus(1);
-            if(BaseSceneModel.CloudType.DEFAULT!=cloudType){
+            if(cloudType != null && BaseSceneModel.CloudType.DEFAULT!=cloudType){
                 nodeLinkStatusBO.getConnectionStatusList().stream().forEach(connectionStatusBO -> {
                     connectionStatusBO.setStatus(1);
                 });
