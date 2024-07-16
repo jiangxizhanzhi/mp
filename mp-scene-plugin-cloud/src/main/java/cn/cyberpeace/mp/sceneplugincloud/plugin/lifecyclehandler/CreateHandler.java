@@ -749,6 +749,7 @@ public class CreateHandler extends HandlerCommon {
         String cloudElementImage = cloudElement.getImage();
         log.info("version image is `{}` , cloud element image is `{}`", versionImage, cloudElementImage);
         if (SceneSingleton.sceneAppConfig.getVersionImage().equals(cloudElement.getImage())) {
+            log.info("add upgrade soft check script start");
             List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings("wazuh_agent_installer");
             Map<String, String> nameFileMap = new HashMap<>();
             for (LocalFileMappingModel localFileMappingModel : mappings) {
@@ -777,6 +778,7 @@ public class CreateHandler extends HandlerCommon {
 
             commands.add("nohup sh /tmp/get_version.sh " + reportUrl + " " + softs + " " + cloudElement.getSrcElement()
                     .getEid() + "  > out.log 2>&1 &");
+            log.info("add upgrade soft check script end");
         }
 
         // TODO: 快速创建安装
