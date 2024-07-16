@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.BaseStatusEnum;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
@@ -95,7 +96,7 @@ public class SceneMonitorController {
                                                                             @RequestParam(required = false) Boolean realTimeHostState,
                                                                             SceneAllElementsQueryRequest request) {
         ServiceResult<List<ElementMonitorBasicInfo>> sceneAllElements = getSceneAllElements(sceneId, realTimeHostState, request);
-        if(sceneAllElements.getCode()!=null && sceneAllElements.getCode().equals(BaseStatusEnum.SUCCESS.getCode())){
+        if(sceneAllElements.getCode()!=null && sceneAllElements.getCode().equals(BaseErrorCode.SUCCESS.getCode())){
             List<ElementMonitorBasicInfo> data = sceneAllElements.getData();
             List<ElementMonitorBasicInfo> result = new ArrayList<>();
             for (var e: data) {
