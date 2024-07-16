@@ -17,6 +17,7 @@ public class CloudTargetConverter {
          * ext_net
          */
         device.setRole(24);
+        device.setCategory(1);
         device.setImageType("VNet");
         ExtNet extNet = new ExtNet();
         List<AddressPool> addressPools = new ArrayList<>();
@@ -50,6 +51,7 @@ public class CloudTargetConverter {
          * ext_net
          */
         device.setRole(21);
+        device.setCategory(3);
         device.setImageType("fireWall");
         ExtFireWall extFireWall = new ExtFireWall();
         extFireWall.setIsPublicIp(true);
@@ -100,6 +102,7 @@ public class CloudTargetConverter {
          * ext_vm
          */
         device.setImageType("laasVm");
+        device.setCategory(2);
         device.setRole(4);
         ExtVm extVm = new ExtVm();
         extVm.setFlavor("1CPU/1G内存/30G磁盘/2网卡");
@@ -172,6 +175,7 @@ public class CloudTargetConverter {
          * ext_docker
          */
         device.setImageType("containerRegistry");
+        device.setCategory(4);
         device.setRole(4);
         ExtDocker extDocker = new ExtDocker();
         extDocker.setFlavor("1vcpu/1GiB内存");

@@ -233,6 +233,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 device.setDefaultLaunchImageName(target.getName());
                 device.setCreatedAt(String.valueOf(target.getCreateTime()));
                 device.setCloudServiceType(target.getCloudServiceType());
+//                //1:网络设备 2:操作系统 3:安防设备 4:应用系统
+//                device.setCategory(null);
                 //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储)
                 switch (target.getCloudServiceType()) {
                     case "1":
