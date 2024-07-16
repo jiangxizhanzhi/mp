@@ -167,6 +167,19 @@ public class ImagesController {
     public ServiceResult add(@RequestBody ImageRequest request){
         request.setLogo(FsCommon.getFileKey(request.getLogo()));
         validImageRequest(request);
+        // role值处理
+        // 网络设备/路由器 -> role = 21
+        // 网络设备/交换机 -> role = 22
+        // 网络设备/防火墙 -> role = 23
+        if (request.getCategory() != null && request.getSecondCategory() != null) {
+            if (request.getCategory() == 3 && request.getSecondCategory() == 52) {
+                request.setRole(23);
+            } else if (request.getCategory() == 3 && request.getSecondCategory() == 50) {
+                request.setRole(22);
+            } else if (request.getCategory() == 3 && request.getSecondCategory() == 51) {
+                request.setRole(21);
+            }
+        }
         imagesConverter.add(request);
         return ResultCommon.success();
     }
@@ -201,6 +214,19 @@ public class ImagesController {
         validImageRequest(request);
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        // role值处理
+        // 网络设备/路由器 -> role = 21
+        // 网络设备/交换机 -> role = 22
+        // 网络设备/防火墙 -> role = 23
+        if (request.getCategory() != null && request.getSecondCategory() != null) {
+            if (request.getCategory() == 3 && request.getSecondCategory() == 52) {
+                request.setRole(23);
+            } else if (request.getCategory() == 3 && request.getSecondCategory() == 50) {
+                request.setRole(22);
+            } else if (request.getCategory() == 3 && request.getSecondCategory() == 51) {
+                request.setRole(21);
+            }
         }
         imagesConverter.update(request);
         return ResultCommon.success();
