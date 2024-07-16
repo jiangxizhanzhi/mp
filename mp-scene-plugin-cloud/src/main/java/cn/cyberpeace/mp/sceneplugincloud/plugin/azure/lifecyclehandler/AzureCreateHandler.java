@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -19,14 +20,13 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementNetworkUtils;
+import com.azure.resourcemanager.network.models.Network;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class AzureCreateHandler extends CreateHandler {
@@ -95,6 +95,13 @@ public class AzureCreateHandler extends CreateHandler {
             });
 
             List<CloudPluginSceneElementBO> filteredAuxiliaryNetworkElements = this.filterAuxiliaryNetworkElements(allElements);
+            Map<String, CloudPluginSceneElementBO> vnetElementById = filteredAuxiliaryNetworkElements.stream()
+                    .collect(Collectors.toMap(
+                            element -> element.getSrcElement().getId(),
+                            element -> element,
+                            (existing, replacement) -> existing
+                    ));
+
             List<Runnable> createAuxiliaryNetworkTasks = new ArrayList<>();
             for (int i = 0; i < filteredAuxiliaryNetworkElements.size(); i++) {
                 CloudPluginSceneElementBO element = filteredAuxiliaryNetworkElements.get(i);
@@ -112,6 +119,27 @@ public class AzureCreateHandler extends CreateHandler {
             if (!createAuxiliaryNetworkTasks.isEmpty()) {
                 // 执行 创建所有网络
                 runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> runTasks(createAuxiliaryNetworkTasks));
+            }
+//            对等互联
+            Set<String> calledPairs = new HashSet<>();
+            filteredAuxiliaryNetworkElements.stream().collect(Collectors.groupingBy(e -> e.getSrcElement().getId()));
+            for (int i = 0; i < filteredAuxiliaryNetworkElements.size(); i++) {
+//                找出连接VNet的VNet节点
+                CloudPluginSceneElementBO element = filteredAuxiliaryNetworkElements.get(i);
+                element.getSrcElement().getPorts().forEach(port -> {
+                    SceneElementPortBO portConnectedPort = this.getPluginHandler().getSceneHandler().getPortConnectedPort(port.getId());
+                    if (null != portConnectedPort) {
+                        String id = portConnectedPort.getElement().getId();
+                        CloudPluginSceneElementBO elementBO = vnetElementById.get(id);
+                        if (elementBO != null) {
+                            String resourceId = element.getResourceId();
+                            String resourceId1 = elementBO.getResourceId();
+
+                            createVNetPeering(resourceId, resourceId1, calledPairs);
+
+                        }
+                    }
+                });
             }
             getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_NETWORK);
 
@@ -219,8 +247,33 @@ public class AzureCreateHandler extends CreateHandler {
         } catch (Exception e) {
             e.printStackTrace();
 //            云场景启动失败立即删除云资源
-            resourceService.getManager().resourceGroups().deleteByName(groupName);
+//            resourceService.getManager().resourceGroups().deleteByName(groupName);
             throw new MpRuntimeException(BaseErrorCode.ERROR, e);
+        }
+    }
+
+    /**
+     * 创建虚拟网络之间的对等互连。
+     * 该方法用于检查两个虚拟网络是否已经建立了对等互连，如果没有，则建立对等互连。
+     * 对等互连的标识通过两个资源ID的哈希值最小值和最大值组合而成，以确保唯一性。
+     *
+     * @param resourceId  第一个虚拟网络的资源ID。
+     * @param resourceId1 第二个虚拟网络的资源ID。
+     * @param calledPairs 已经建立对等互连的虚拟网络对的集合，用于避免重复建立互连。
+     */
+    private void createVNetPeering(String resourceId, String resourceId1, Set<String> calledPairs) {
+        // 创建一个基于参数对的唯一标识符
+        String pairId = Math.min(resourceId.hashCode(), resourceId1.hashCode()) + ":" + Math.max(resourceId.hashCode(), resourceId1.hashCode());
+
+        if (!calledPairs.contains(pairId)) {
+            Network network = resourceService.getManager().networks().getById(resourceId);
+            Network network1 = resourceService.getManager().networks().getById(resourceId1);
+
+            // 对 vNet1 创建到 vNet2 的对等互联
+            network.peerings().define(resourceId.substring(resourceId1.length() - 10) + "To" + resourceId1.substring(resourceId1.length() - 10) + "VNet2Peering")
+                    .withRemoteNetwork(network1)
+                    .create();
+            calledPairs.add(pairId);
         }
     }
 

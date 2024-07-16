@@ -56,9 +56,6 @@ public class AzureVirtualNet {
     public void create(
             CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement,
             ConcurrentHashMap<String, Boolean> cidrContainerMap, HashMap<String, List<VirtualNic>> virtualNicsMap) {
-//        for (int i = 0; i < cloudElement.getDeriveNetworks().size(); i++) {
-//        var net = cloudElement.getDeriveNetworks().get(0).getNetwork();
-
         // azure todo 网络名称用节点 eid+序号
         String netName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid(), 0);
         // azure todo 不需要设置网关么?
@@ -91,6 +88,7 @@ public class AzureVirtualNet {
             }
         }
         Network network = createdNet.create();
+        cloudElement.setResourceId(network.id());
 
         // azure 回写网络id
         cloudElement.getDeriveNetworks().stream().forEach(networkBO -> {
@@ -112,25 +110,15 @@ public class AzureVirtualNet {
 
         nodeIds.stream().forEach(nodeId -> {
             List<VirtualNic> virtualNics = virtualNicsMap.get(nodeId);
-            virtualNics.forEach(virtualNic -> {
-                virtualNic.setNetworkId(network.id());
-            });
+            if (virtualNics != null) {
+                virtualNics.forEach(virtualNic -> {
+                    virtualNic.setNetworkId(network.id());
+                });
+            }
             virtualNicsMap.put(nodeId, virtualNics);
         });
 
 
-    }
-
-    public static String findUnused192Cidr(ConcurrentHashMap<String, Boolean> cidrContainerMap) {
-        for (int i = 1; i <= 255; i++) {
-            for (int j = 0; j <= 255; j++) {
-                String cidr = "192.168." + i + "." + j + "/24";
-                if (!cidrContainerMap.containsKey(cidr)) {
-                    return cidr;
-                }
-            }
-        }
-        return null; // 如果没有找到符合条件的CIDR
     }
 
     public void delete(CloudPluginSceneElementBO cloudElement) {

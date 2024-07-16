@@ -148,63 +148,6 @@ public class AzureVirtualMachine {
 
 //        TODO 资源不浪费
 
-        /*String groupName = pluginHandler.getSourceSceneId();
-
-        // 调用微软云api 创建虚拟机 回写虚拟机id
-        VirtualMachine vm = createVirtualMachine(cloudElement, virtualNics, userData, groupName);
-        cloudElement.setResourceId(vm.id());
-        if (cloudElement.getIsPublicIp()) {
-            cloudElement.setPublicIpAddress(vm.getPrimaryPublicIPAddress().ipAddress());
-        }
-
-//        创建网络安全组
-//        绑定网络接口
-//        设置入站规则
-//        更新网络安全组
-
-        SceneElementBO srcElement = cloudElement.getSrcElement();
-
-        for (SceneElementPortBO port : srcElement.getPorts()) {
-            List<AccessMode> accessModes = port.getAccessModes();
-            String ip = port.getIp();
-//            匹配网络接口
-            if (StringUtils.isNotBlank(ip)) {
-                PagedIterable<NetworkInterface> networkInterfaces = azureResourceManager.networkInterfaces().list();
-
-                Optional<NetworkInterface> first = networkInterfaces.stream().filter(networkInterface -> ip.equals(networkInterface.primaryPrivateIP())).findFirst();
-                if (first.isPresent()) {
-                    NetworkInterface networkInterface = first.get();
-                    //            创建nsg
-                    NetworkSecurityGroup nsg = azureResourceManager.networkSecurityGroups()
-                            .define("ssh-nsg-" + networkInterface.name())
-                            .withRegion(this.region)
-                            .withExistingResourceGroup(groupName)
-                            .create();
-                    NetworkSecurityGroup.Update nsgUpdate = nsg.update();
-                    for (int i = 0; i < accessModes.size(); i++) {
-                        AccessMode accessMode = accessModes.get(i);
-                        String protocol = accessMode.getProtocol();
-                        if (null == protocol) continue;
-                        String[] protoclos = protocol.split(";");
-                        for (int j = 0; j < protoclos.length; j++) {
-                            NetworkSecurityGroupUtils.addInRule(accessMode.getProtocol().toLowerCase(), nsgUpdate, 3100 + i * 200 + j * 10);
-                        }
-                    }
-                    nsgUpdate.apply();
-                    networkInterface.update().withExistingNetworkSecurityGroup(nsg).apply();
-                }
-            }
-
-        }*/
-
-    }
-
-    public void create1(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData) {
-//        cloudElement.setResourceId("1233");
-//        cloudElement.setPublicIpAddress("20.30.40.5");
-
-//        TODO 资源不浪费
-
         String groupName = pluginHandler.getSourceSceneId();
 
         // 调用微软云api 创建虚拟机 回写虚拟机id

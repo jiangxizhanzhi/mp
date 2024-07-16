@@ -31,6 +31,8 @@ public class ElementNetworkUtils {
             List<CloudPluginSceneElementBO> allElements,
             CloudPluginSceneElementBO cloudElement,
             HashMap<String, List<VirtualNic>> virtualNicsMap) {
+        if (virtualNicsMap.size() == 0) return new ConcurrentHashMap<>();
+
         Map<String, List<String>> elementIpMap = pluginHandler.getScene().getSrcScene().getElementIpMap();
 
 //        查目前所有cidr（包括ip所属cidr）
@@ -51,20 +53,6 @@ public class ElementNetworkUtils {
         String defultCidr = IpUtils.getNextDefaultCIDR(cidrListByVEnt);
         HashSet<String> ips = new HashSet<>();
 
-//          处理默认子网
-        virtualNicsMap.forEach((id, virtualNics) -> {
-            List<String> elementIps = elementIpMap.get(id);
-            virtualNics.forEach(virtualNic -> {
-                String fixedIp = virtualNic.getFixedIp();
-//                    自动分配ip需更换为默认子网内ip
-                if (elementIps == null || !elementIps.contains(fixedIp)) {
-                    String ip = IpUtils.generateRandomIpNotInList(defultCidr, null);
-                    ips.add(ip);
-                    virtualNic.setFixedIp(ip);
-                }
-            });
-        });
-
 //        VNet创建所有子网
         if (BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudElement.getImageType())) {
             List<String> nodeIds = cloudElement.getDeriveNetworks().stream()
@@ -73,10 +61,25 @@ public class ElementNetworkUtils {
                     .map(SceneElementBO::getId)
                     .distinct()
                     .collect(Collectors.toList());
+
+            boolean present = nodeIds.stream()
+                    .filter(id -> BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(pluginHandler.getElement(id).getImageType()))
+                    .findFirst()
+                    .isPresent();
+            String defultContainerCidr = null;
+            ArrayList<String> containerCidrs = new ArrayList<>();
+            if (present) {
+                cidrListByVEnt.add(defultCidr);
+                defultContainerCidr = IpUtils.getNextDefaultCIDR(cidrListByVEnt);
+                containerCidrs.add(defultContainerCidr);
+            }
+
+            autoAssignVirtualNicIps(virtualNicsMap, elementIpMap, nodeIds, defultCidr, ips);
+
             List<String> cidrPools = cloudElement.getCidrPools();
 //            先处理VM cidr
             Set<String> vmFixedIps = nodeIds.stream()
-                    .filter(id -> !BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(pluginHandler.getElement(id).getImageType()))
+                    .filter(id -> BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(pluginHandler.getElement(id).getImageType()))
                     .map(virtualNicsMap::get)
                     .flatMap(List::stream)
                     .map(VirtualNic::getFixedIp)
@@ -86,29 +89,20 @@ public class ElementNetworkUtils {
             List<String> cidrList = vmFixedIps.stream().map(ip -> IpUtils.ip2Cidr24(ip)).collect(Collectors.toList());
             cidrPools.addAll(cidrList);
 
-            List<String> finalCidrPools = new ArrayList<>(cidrPools);
-            ArrayList<String> containerCidrs = new ArrayList<>();
-            nodeIds.stream()
-                    .filter(id -> BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(pluginHandler.getElement(id).getImageType()))
-                    .forEach(id -> {
-                        List<VirtualNic> virtualNics = virtualNicsMap.get(id);
-                        for (VirtualNic virtualNic : virtualNics) {
-                            String fixedIp = virtualNic.getFixedIp();
-                            if (StringUtils.isNotEmpty(fixedIp)) {
-                                String cidr = IpUtils.ip2Cidr24(fixedIp);
-//              处理容器cidr 筛选容器cidr是否会冲突VM 冲突则更新容器cidr+ip
-                                if (finalCidrPools.contains(cidr)) {
-                                    cidr = IpUtils.generateRandomCidrNotIn(finalCidrPools);
-                                    virtualNic.setFixedIp(IpUtils.generateRandomIpNotInList(cidr, null));
-                                }
-                                finalCidrPools.add(cidr);
-                                containerCidrs.add(cidr);
-                            }
-                        }
-                        virtualNicsMap.put(id, virtualNics);
 
-                        pluginHandler.getElement(id).setIsPublicIp(false);
-                    });
+            for (String id : nodeIds) {
+                if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(pluginHandler.getElement(id).getImageType())) {
+                    List<VirtualNic> virtualNics = virtualNicsMap.get(id);
+                    for (VirtualNic virtualNic : virtualNics) {
+                        String ip = IpUtils.generateRandomIpNotInList(defultContainerCidr, ips);
+                        ips.add(ip);
+                        virtualNic.setFixedIp(ip);
+                    }
+                    virtualNicsMap.put(id, virtualNics);
+
+                    pluginHandler.getElement(id).setIsPublicIp(false);
+                }
+            }
 
             cidrPools = cidrPools.stream().filter(cidr -> StringUtils.isNotEmpty(cidr)).distinct().collect(Collectors.toList());
             Map<String, Boolean> cidrContainerMap = cidrPools.stream().collect(Collectors.toMap(cidr -> cidr, cidr -> false));
@@ -118,6 +112,10 @@ public class ElementNetworkUtils {
             cloudElement.setCidrPools(cidrPools);
             return new ConcurrentHashMap<>(cidrContainerMap);
         }
+        cloudElement.getSrcElement().getId();
+        List<String> nodeIds = Arrays.asList(cloudElement.getSrcElement().getId());
+
+        autoAssignVirtualNicIps(virtualNicsMap, elementIpMap, nodeIds, defultCidr, ips);
 
         ConcurrentHashMap<String, Boolean> cidrContainerMap = new ConcurrentHashMap<>();
 //        未连VNet节点直接判断节点类型
@@ -155,6 +153,33 @@ public class ElementNetworkUtils {
                     cidrContainerMap.put(cidr, isContainer.get());
                 });*/
         return cidrContainerMap;
+    }
+
+    /**
+     * 为指定节点的虚拟网卡自动分配默认子网内的IP地址。
+     * <p>
+     * 此方法遍历虚拟网卡映射表，针对特定节点列表中的节点，如果其虚拟网卡的固定IP不在元素IP映射表中或元素IP映射表不存在，
+     * 则生成一个新的、未被使用的IP地址，并将其设置为虚拟网卡的固定IP。
+     *
+     * @param virtualNicsMap 节点ID与虚拟网卡列表的映射关系。
+     * @param elementIpMap   节点ID与已分配IP地址列表的映射关系。
+     * @param nodeIds        需要自动分配IP地址的节点ID列表。
+     * @param defultCidr     默认的子网CIDR，用于生成新的IP地址。
+     * @param ips            已分配的IP地址集合，用于记录新分配的IP地址。
+     */
+    private static void autoAssignVirtualNicIps(HashMap<String, List<VirtualNic>> virtualNicsMap, Map<String, List<String>> elementIpMap, List<String> nodeIds, String defultCidr, HashSet<String> ips) {
+        virtualNicsMap.forEach((id, virtualNics) -> {
+            List<String> elementIps = elementIpMap.get(id);
+            virtualNics.forEach(virtualNic -> {
+                String fixedIp = virtualNic.getFixedIp();
+//                    自动分配ip需更换为默认子网内ip
+                if (nodeIds.contains(id) && (elementIps == null || !elementIps.contains(fixedIp))) {
+                    String ip = IpUtils.generateRandomIpNotInList(defultCidr, ips);
+                    ips.add(ip);
+                    virtualNic.setFixedIp(ip);
+                }
+            });
+        });
     }
 
     private static void checkIfElementIsContainerById(List<CloudPluginSceneElementBO> allElements, AtomicReference<Boolean> isContainer, String id) {

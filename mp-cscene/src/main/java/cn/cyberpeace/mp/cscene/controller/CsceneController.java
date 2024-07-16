@@ -301,7 +301,6 @@ public class CsceneController implements BaseModelListControllerBase {
         SceneHandler instanceHandler = new SceneHandler(sceneDataBO, null);
         instanceHandler.save();
         instanceHandler.initiate();
-        instanceHandler.completionTopo(existingIpSetMap);
         instanceHandler.save();
 
         // 把实例转回成模板
