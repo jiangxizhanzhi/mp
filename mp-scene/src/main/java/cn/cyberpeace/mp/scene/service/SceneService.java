@@ -215,75 +215,83 @@ public class SceneService {
      * @param runner
      * @return
      */
-    public ServiceResult<SceneDataBO> modify(String sceneId, SceneDataBO updatedSceneData, SceneContextBO context, Runnable runner) {
+    public ServiceResult<SceneDataBO> modify(String sceneId, SceneDataBO updatedSceneData, SceneContextBO context,SceneHandler originSceneHandler, Runnable runner) {
         SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(sceneId, null, null, SceneModel.Event.MODIFY);
         SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(sceneId, newEventInfo);
         if (originLockInfo != null) {
-            // 更新只能有一个请求成功
+            // 更新请求只能有一个请求成功
             throw this.createOperateException(originLockInfo);
         }
 
-        SceneHandler originSceneHandler = new SceneHandler(sceneId, null, false, context);
-        // 场景信息目前只更新显示参数
-        String newDisplayContext = updatedSceneData.getTopology().getScene().getDisplayContext();
-        updatedSceneData.getTopology().setScene(originSceneHandler.getScene());
-        updatedSceneData.getTopology().getScene().setDisplayContext(newDisplayContext);
-        SceneHandler updatedSceneHandler = new SceneHandler(updatedSceneData, context);
+        try {
+            // 场景信息目前只更新显示参数
+            String newDisplayContext = updatedSceneData.getTopology().getScene().getDisplayContext();
+            updatedSceneData.getTopology().setScene(originSceneHandler.getScene());
+            updatedSceneData.getTopology().getScene().setDisplayContext(newDisplayContext);
+            SceneHandler updatedSceneHandler = new SceneHandler(updatedSceneData, context);
 
-        Queue<SceneElementBO> allElements = new ArrayDeque<>(updatedSceneHandler.getElementMap().values());
-        while (!allElements.isEmpty()) {
-            SceneElementBO element = allElements.poll();
-            if (element != null) {
-                List<SceneElementPortBO> connectPorts = updatedSceneHandler.getElementConnectedPorts(element.getId());
-                if (CollectionUtils.isNotEmpty(connectPorts)) {
-                    Set<String> ips = new HashSet<>();
-                    for (SceneElementPortBO p : connectPorts) {
-                        if (StringUtils.isNotEmpty(p.getIp())) {
-                            if (ips.contains(p.getIp())) {
-                                throw new MpRuntimeException(SceneErrorCode.IP_DUPLICATE.format(p.getIp()));
-                            } else {
-                                ips.add(p.getIp());
+            Queue<SceneElementBO> allElements = new ArrayDeque<>(updatedSceneHandler.getElementMap().values());
+            while (!allElements.isEmpty()) {
+                SceneElementBO element = allElements.poll();
+                if (element != null) {
+                    List<SceneElementPortBO> connectPorts = updatedSceneHandler.getElementConnectedPorts(element.getId());
+                    if (CollectionUtils.isNotEmpty(connectPorts)) {
+                        Set<String> ips = new HashSet<>();
+                        for (SceneElementPortBO p : connectPorts) {
+                            if (StringUtils.isNotEmpty(p.getIp())) {
+                                if (ips.contains(p.getIp())) {
+                                    throw new MpRuntimeException(SceneErrorCode.IP_DUPLICATE.format(p.getIp()));
+                                } else {
+                                    ips.add(p.getIp());
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        updatedSceneHandler.setRealTimeUpdate(true);
-        if (updatedSceneHandler.getScene() != null) {
-            updatedSceneHandler.getScene().setCreateTime(null);
-        }
-        updatedSceneHandler.save();
-        // 获取配置更新的节点
-        List<String> updateElementIds = new ArrayList<>();
-        originSceneHandler.getElementMap().values().forEach(e -> {
-            if (e.getEvent() == SceneModel.Event.MODIFY && e.getEventStatus() == EventStatus.ABNORMAL) {
-                updateElementIds.add(e.getId());
+            updatedSceneHandler.setRealTimeUpdate(true);
+            if (updatedSceneHandler.getScene() != null) {
+                updatedSceneHandler.getScene().setCreateTime(null);
             }
-        });
-        SceneTaskPool.getInstance().executeTask(() -> {
+            updatedSceneHandler.save();
+            // 获取配置更新的节点
+            List<String> updateElementIds = new ArrayList<>();
             originSceneHandler.getElementMap().values().forEach(e -> {
-                if (e.getEvent() == SceneElementModel.Event.DEFAULT) {
-                    updatedSceneHandler.addExcludeHandleNode(e.getId());
-                    originSceneHandler.addExcludeHandleNode(e.getId());
-                } else {
-                    e.setEvent(SceneElementModel.Event.DEFAULT);
-                    e.setEventStatus(EventStatus.INITIAL);
+                if (e.getEvent() == SceneModel.Event.MODIFY && e.getEventStatus() == EventStatus.ABNORMAL) {
+                    updateElementIds.add(e.getId());
                 }
             });
+            SceneTaskPool.getInstance().executeTask(() -> {
+                try {
+                    originSceneHandler.getElementMap().values().forEach(e -> {
+                        if (e.getEvent() == SceneElementModel.Event.DEFAULT) {
+                            updatedSceneHandler.addExcludeHandleNode(e.getId());
+                            originSceneHandler.addExcludeHandleNode(e.getId());
+                        } else {
+                            e.setEvent(SceneElementModel.Event.DEFAULT);
+                            e.setEventStatus(EventStatus.INITIAL);
+                        }
+                    });
 
-            for (SceneElementBO e : updatedSceneHandler.getElementMap().values()) {
-                if (updatedSceneHandler.isHandleNode(e.getId())) {
-                    e.setEvent(SceneElementModel.Event.DEFAULT);
-                    e.setEventStatus(EventStatus.INITIAL);
+                    for (SceneElementBO e : updatedSceneHandler.getElementMap().values()) {
+                        if (updatedSceneHandler.isHandleNode(e.getId())) {
+                            e.setEvent(SceneElementModel.Event.DEFAULT);
+                            e.setEventStatus(EventStatus.INITIAL);
+                        }
+                    }
+                    updatedSceneHandler.modify(originSceneHandler, updateElementIds);
+                    //W:Refresh scene after updating
+                    runner.run();
+                } finally {
+                    SceneEventUtils.unLock(sceneId);
                 }
-            }
-            updatedSceneHandler.modify(originSceneHandler, updateElementIds);
-            //W:Refresh scene after updating
-            runner.run();
-        });
-        return new ServiceResult<>(updatedSceneHandler.toData());
+            });
+            return new ServiceResult<>(updatedSceneHandler.toData());
+        } catch (Exception e) {
+            SceneEventUtils.unLock(sceneId);
+            throw e;
+        }
     }
 
     /**

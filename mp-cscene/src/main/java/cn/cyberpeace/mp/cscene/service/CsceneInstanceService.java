@@ -2359,7 +2359,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
 
         BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(instance, csceneBO.getContext());
-        instanceHandler.update();
+        instanceHandler.update(originSceneHandler);
         return new ServiceResult<>(instanceHandler.toData());
     }
 
