@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.util.BaseStatusEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
@@ -82,6 +83,29 @@ public class SceneMonitorController {
         }
         return ResultCommon.success(result);
 
+    }
+
+    @ApiOperation(value = "查询场景所有云节点列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "sceneId", value = "场景ID", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "realTimeHostState", value = "是否获取实时节点主机信息", dataTypeClass = Boolean.class)
+    })
+    @GetMapping("/all_cloud_elements/{sceneId}")
+    public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllCloudElements(@PathVariable String sceneId,
+                                                                            @RequestParam(required = false) Boolean realTimeHostState,
+                                                                            SceneAllElementsQueryRequest request) {
+        ServiceResult<List<ElementMonitorBasicInfo>> sceneAllElements = getSceneAllElements(sceneId, realTimeHostState, request);
+        if(sceneAllElements.getCode()!=null && sceneAllElements.getCode().equals(BaseStatusEnum.SUCCESS.getCode())){
+            List<ElementMonitorBasicInfo> data = sceneAllElements.getData();
+            List<ElementMonitorBasicInfo> result = new ArrayList<>();
+            for (var e: data) {
+                if(e.getImageType()!=null && !e.getImageType().equals("load") && !e.getImageType().equals("networkEquipment")){
+                    result.add(e);
+                }
+            }
+            return ResultCommon.success(result);
+        }
+        return sceneAllElements;
     }
 
     @ApiOperation(value = "按需查询场景节点列表")
