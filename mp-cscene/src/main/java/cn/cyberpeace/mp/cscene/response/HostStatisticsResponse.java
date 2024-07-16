@@ -69,8 +69,8 @@ public class HostStatisticsResponse extends BaseModel {
 
     @Data
     public static class ResourceUseInfo {
-        private int total;
-        private int used;
+        private long total;
+        private long used;
         private double percent;
     }
 

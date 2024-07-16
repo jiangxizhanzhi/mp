@@ -103,6 +103,7 @@ public class RealEquipmentService extends BaseCpService {
         result.setOpenKafka(device.getOpenKafka());
         result.setOpenRestapi(device.getOpenRestapi());
         result.setOpenSoap(device.getOpenSoap());
+        result.setOpenSnmp(device.getOpenSnmp());
         return result;
     }
 
