@@ -1637,12 +1637,20 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public ServiceResult<SceneLinkStatusInfo> linkStatus(String csceneId) {
         String sceneId = getSceneId(csceneId);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+        Integer cloudType = sceneHandler.getScene().getCloudType();
         var result = scenePluginCloudSceneService.linkStatus(sceneId).getSource();
         SceneLinkStatusInfo sceneLinkStatusInfo = new SceneLinkStatusInfo();
         sceneLinkStatusInfo.setNodeLinkStatusList(result);
         sceneLinkStatusInfo.setCsceneId(csceneId);
         sceneLinkStatusInfo.getNodeLinkStatusList().stream().forEach(nodeLinkStatusBO -> {
             nodeLinkStatusBO.setStatus(1);
+            if(BaseSceneModel.CloudType.DEFAULT!=cloudType){
+                nodeLinkStatusBO.getConnectionStatusList().stream().forEach(connectionStatusBO -> {
+                    connectionStatusBO.setStatus(1);
+                });
+            }
+
         });
         return new ServiceResult<>(sceneLinkStatusInfo);
     }
