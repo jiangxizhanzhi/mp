@@ -168,18 +168,7 @@ public class ImagesController {
         request.setLogo(FsCommon.getFileKey(request.getLogo()));
         validImageRequest(request);
         // role值处理
-        // 网络设备/路由器 -> role = 21
-        // 网络设备/交换机 -> role = 22
-        // 网络设备/防火墙 -> role = 23
-        if (request.getCategory() != null && request.getSecondCategory() != null) {
-            if (request.getCategory() == 3 && request.getSecondCategory() == 52) {
-                request.setRole(23);
-            } else if (request.getCategory() == 3 && request.getSecondCategory() == 50) {
-                request.setRole(22);
-            } else if (request.getCategory() == 3 && request.getSecondCategory() == 51) {
-                request.setRole(21);
-            }
-        }
+        this.convertRole(request);
         imagesConverter.add(request);
         return ResultCommon.success();
     }
@@ -216,6 +205,12 @@ public class ImagesController {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         // role值处理
+        this.convertRole(request);
+        imagesConverter.update(request);
+        return ResultCommon.success();
+    }
+
+    private void convertRole(ImageRequest request){
         // 网络设备/路由器 -> role = 21
         // 网络设备/交换机 -> role = 22
         // 网络设备/防火墙 -> role = 23
@@ -224,12 +219,14 @@ public class ImagesController {
                 request.setRole(23);
             } else if (request.getCategory() == 3 && request.getSecondCategory() == 50) {
                 request.setRole(22);
+            } else if (request.getCategory() == 3 && request.getSecondCategory() == 55) {
+                request.setRole(22);
+            } else if (request.getCategory() == 3 && request.getSecondCategory() == 56) {
+                request.setRole(22);
             } else if (request.getCategory() == 3 && request.getSecondCategory() == 51) {
                 request.setRole(21);
             }
         }
-        imagesConverter.update(request);
-        return ResultCommon.success();
     }
 
     /**
