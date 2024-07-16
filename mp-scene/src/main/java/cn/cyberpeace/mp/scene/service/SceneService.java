@@ -219,7 +219,7 @@ public class SceneService {
         SceneEventUtils.SceneEventInfo newEventInfo = this.createSceneEventInfo(sceneId, null, null, SceneModel.Event.MODIFY);
         SceneEventUtils.SceneEventInfo originLockInfo = SceneEventUtils.tryLockAndGetInfoIfLockFailed(sceneId, newEventInfo);
         if (originLockInfo != null) {
-            // 更新曹邹只能有一个请求成功
+            // 更新只能有一个请求成功
             throw this.createOperateException(originLockInfo);
         }
 

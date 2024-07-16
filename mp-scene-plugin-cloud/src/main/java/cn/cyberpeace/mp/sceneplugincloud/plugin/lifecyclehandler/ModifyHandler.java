@@ -422,6 +422,14 @@ public class ModifyHandler extends HandlerCommon {
             }
             super.recordNpcNode(cloudElement);
         }
+
+        /**
+         * 更新时不需要加采集路由，所以用空方法覆写父类方法
+         */
+        @Override
+        protected void createNodeToExternalRouter() {
+
+        }
     }
 
     private static class ModifyDeleteHandler extends DeleteHandler {
