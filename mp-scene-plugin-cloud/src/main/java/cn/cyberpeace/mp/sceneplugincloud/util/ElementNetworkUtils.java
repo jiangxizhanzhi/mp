@@ -123,7 +123,7 @@ public class ElementNetworkUtils {
             for (VirtualNic virtualNic : virtualNicsMap.get(cloudElement.getSrcElement().getId())) {
                 cidrContainerMap.put(IpUtils.ip2Cidr24(virtualNic.getFixedIp()), true);
             }
-        } else {
+        } else if(BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(cloudElement.getImageType())){
             for (VirtualNic virtualNic : virtualNicsMap.get(cloudElement.getSrcElement().getId())) {
                 cidrContainerMap.put(IpUtils.ip2Cidr24(virtualNic.getFixedIp()), false);
             }
