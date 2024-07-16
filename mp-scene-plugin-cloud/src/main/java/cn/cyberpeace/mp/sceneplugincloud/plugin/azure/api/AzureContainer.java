@@ -183,7 +183,7 @@ public class AzureContainer {
                 .attach();
         ContainerGroup container;
         if (isPublicIp) {
-            container = attach.withDnsPrefix("yourDNSPrefix") // 这里指定DNS前缀
+            container = attach.withDnsPrefix("yourDNSPrefix-"+groupName) // 这里指定DNS前缀
                     .withRestartPolicy(ContainerGroupRestartPolicy.NEVER)
                     .create();
         } else {
