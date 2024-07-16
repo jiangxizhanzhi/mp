@@ -13,11 +13,29 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FirewallBuildResult {
 
-    //防火墙子网地址空间
-    private String firewallSubnetAddressSpace;
+    //防火墙SKU
+    private String firewallSku;
+
+    //防火墙策略SKU
+    private String firewallPolicySku;
+
+    //防火墙名称
+    private String firewallName;
+
+    //防火墙策略名称
+    private String firewallPolicyName;
 
     //防火墙子网名称
     private String firewallSubnetName;
+
+    //防火墙子网地址空间
+    private String firewallSubnetAddressSpace;
+
+    //防火墙管理子网名称
+    private String azureFirewallManagementSubnetName;
+
+    //防火墙管理子网地址空间
+    private String azureFirewallManagementSubnetAddressSpace;
 
     //防火墙静态ip
     private String firewallStaticIp;

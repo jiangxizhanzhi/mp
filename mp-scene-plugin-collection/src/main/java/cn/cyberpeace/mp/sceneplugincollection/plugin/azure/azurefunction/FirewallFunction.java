@@ -32,64 +32,63 @@ public class FirewallFunction {
     @Autowired
     private RouteTableFunction routeTableFunction;
 
-    public List<String> checkPolicy(List<FirewallPolicyRuleRequestBody> rules){
+    public List<String> checkPolicy(List<FirewallPolicyRuleRequestBody> rules) {
         List<String> errorMessages = new ArrayList<>();
-        for(FirewallPolicyRuleRequestBody rule : rules){
+        for (FirewallPolicyRuleRequestBody rule : rules) {
             String sourceIpAddress = rule.getSourceIpAddress();
             String protocol = rule.getProtocol();
             String destinationIpAddress = rule.getDestinationIpAddress();
             String destinationPort = rule.getDestinationPort();
 
-            if(protocol == null || protocol.isEmpty()){
+            if (protocol == null || protocol.isEmpty()) {
                 errorMessages.add("防火墙策略的协议不能为空");
-            }else if(protocol.contains(",,") || protocol.startsWith(",") || protocol.endsWith(",")){
+            } else if (protocol.contains(",,") || protocol.startsWith(",") || protocol.endsWith(",")) {
                 errorMessages.add("防火墙策略的协议不能包含尾随逗号、尾随空格或空格");
-            } else{
+            } else {
                 String[] split = protocol.split(",");
-
-                for(String s : split){
-                    if(s.equals("UDP") || s.equals("TCP") || s.equals("ICMP") || s.equals("ANY")){
-                    }else{
+                for (String s : split) {
+                    if (s.equals("UDP") || s.equals("TCP") || s.equals("ICMP") || s.equals("ANY")) {
+                    } else {
                         errorMessages.add("防火墙策略的协议添加有误");
                     }
                 }
             }
 
-            if(destinationIpAddress == null || destinationIpAddress.isEmpty()){
+            if (destinationIpAddress == null || destinationIpAddress.isEmpty()) {
                 errorMessages.add("防火墙策略的目标IP地址不能为空");
-            }else if(destinationIpAddress.contains(",,") || destinationIpAddress.startsWith(",") || destinationIpAddress.endsWith(",")){
+            } else if (destinationIpAddress.contains(",,") || destinationIpAddress.startsWith(",") || destinationIpAddress.endsWith(",")) {
                 errorMessages.add("防火墙策略的目标IP地址不能包含尾随逗号、尾随空格或空格");
-            }else{
+            } else {
                 String[] split = destinationIpAddress.split(",");
-                for(String s : split){
-                    if(s.equals("*") || checkStringIsIpAddressOrIpPool(s)){
-                    }else{
+                for (String s : split) {
+                    if (s.equals("*") || checkStringIsIpAddressOrIpPool(s)) {
+                    } else {
                         errorMessages.add("防火墙策略的目标IP地址添加有误!");
                     }
                 }
             }
 
-            if(destinationPort == null || destinationPort.isEmpty()){
+            if (destinationPort == null || destinationPort.isEmpty()) {
                 errorMessages.add("防火墙策略的目标端口不能为空");
-            }else if(destinationPort.contains(",,") || destinationPort.startsWith(",") || destinationPort.endsWith(",")){
+            } else if (destinationPort.contains(",,") || destinationPort.startsWith(",") || destinationPort.endsWith(",")) {
                 errorMessages.add("防火墙策略的目标端口不能包含尾随逗号、尾随空格或空格");
-            }else{
+            } else {
                 String[] split = destinationPort.split(",");
-                for(String s : split){
-                    if(checkStringIsPortStyle(s) || checkStringIsPortParagraphsStyle(s)){
-                    }else{
+                for (String s : split) {
+                    if (checkStringIsPortStyle(s) || checkStringIsPortParagraphsStyle(s)) {
+                    } else {
                         errorMessages.add("防火墙策略的目标端口添加有误!");
                     }
                 }
             }
-            if(sourceIpAddress != null){
-                if(sourceIpAddress.contains(",,") || sourceIpAddress.startsWith(",") || sourceIpAddress.endsWith(",")){
+            if (sourceIpAddress != null) {
+                if (sourceIpAddress.contains(",,") || sourceIpAddress.startsWith(",") || sourceIpAddress.endsWith(",")) {
                     errorMessages.add("防火墙策略的源ip地址不能包含尾随逗号、尾随空格或空格");
                 }
                 String[] sourceIpAddressSplit = sourceIpAddress.split(",");
-                for(String s : sourceIpAddressSplit){
-                    if(s.equals("*") || checkStringIsIpAddressOrIpPool(s)){
-                    }else{
+                for (String s : sourceIpAddressSplit) {
+                    if (s.equals("*") || checkStringIsIpAddressOrIpPool(s)) {
+                    } else {
                         errorMessages.add("防火墙策略的源ip地址添加有误!");
                     }
                 }
@@ -164,6 +163,8 @@ public class FirewallFunction {
                         .create();
                 responseBody.getFirewallBuildResult().setFirewallSubnetAddressSpace("10.0.3.0/26");
                 responseBody.getFirewallBuildResult().setFirewallSubnetName("AzureFirewallSubnet");
+                responseBody.getFirewallBuildResult().setAzureFirewallManagementSubnetAddressSpace("10.0.2.0/24");
+                responseBody.getFirewallBuildResult().setAzureFirewallManagementSubnetName("AzureFirewallManagementSubnet");
                 requestBody.setVirtualNetwork(vnet);
                 System.out.println("创建虚拟网络及防火墙子网成功!");
             } else {
@@ -188,7 +189,7 @@ public class FirewallFunction {
                 }
             }
 
-            //防火墙公网id
+            //防火墙公网id,该公网Ip的SKU必须为标准
             AtomicReference<SubResource> publicIpResource = new AtomicReference<>();
             PublicIpAddress publicIpAddress = azureResourceManager.publicIpAddresses().define(UUID.randomUUID().toString())
                     .withRegion(requestBody.getRegion())
@@ -201,7 +202,7 @@ public class FirewallFunction {
 
             // 创建 AzureFirewallIPConfiguration 对象，用于定义防火墙的 IP 配置
             AzureFirewallIpConfiguration firewallIPConfig = new AzureFirewallIpConfiguration()
-                    .withName("firewallIpConfig"+UUID.randomUUID())
+                    .withName("firewallIpConfig" + UUID.randomUUID())
                     .withPublicIpAddress(publicIpResource.get())
                     .withSubnet(subnetResource.get()); // 根据防火墙子网，分配对应的静态 IP 地址
 
@@ -217,10 +218,12 @@ public class FirewallFunction {
                 FirewallPolicyInner firewallPolicyInner = new FirewallPolicyInner()
                         .withLocation(requestBody.getRegion())
                         .withSku(new FirewallPolicySku().withTier(FirewallPolicySkuTier.BASIC));
+                responseBody.getFirewallBuildResult().setFirewallPolicySku("Basic");
 
                 // 提交创建防火墙策略的操作
                 FirewallPolicyInner createdFirewallPolicy = azureResourceManager.networks().manager().serviceClient()
                         .getFirewallPolicies().createOrUpdate(requestBody.getResourceGroup(), requestBody.getFirewallPolicyName(), firewallPolicyInner);
+                responseBody.getFirewallBuildResult().setFirewallPolicyName(createdFirewallPolicy.name());
                 System.out.println("创建防火墙策略成功！");
 
                 // 创建防火墙策略的规则集合
@@ -256,7 +259,7 @@ public class FirewallFunction {
                 });
             }
 
-            //当防火墙SKU为基本时，需要配置管理公共IP地址，且改公共IP的SKU必须为标准
+            //当防火墙SKU为基本时，需要配置管理公共IP地址，且该公共IP的SKU必须为标准
             AtomicReference<SubResource> managePublicIpResource = new AtomicReference<>();
             PublicIpAddress managePublicIp = azureResourceManager.publicIpAddresses().define(UUID.randomUUID().toString())
                     .withRegion(requestBody.getRegion())
@@ -281,7 +284,7 @@ public class FirewallFunction {
 
             // 创建 AzureFirewallIPConfiguration 对象，用于定义防火墙的管理公共IP地址配置
             AzureFirewallIpConfiguration managePublicIpConfig = new AzureFirewallIpConfiguration()
-                    .withName("managePublicIpResource"+UUID.randomUUID())
+                    .withName("managePublicIpResource" + UUID.randomUUID())
                     .withPublicIpAddress(managePublicIpResource.get())
                     .withSubnet(managerSubnetResource.get());
 
@@ -294,6 +297,7 @@ public class FirewallFunction {
                     .withFirewallPolicy(firewallPolicySubResource.get())
                     .withIpConfigurations(firewallIPConfigs)
                     .withManagementIpConfiguration(managePublicIpConfig);
+            responseBody.getFirewallBuildResult().setFirewallSku("Basic");
 
             // 提交创建防火墙实例的操作
             AzureFirewallInner create = azureResourceManager.networks().manager().serviceClient()
@@ -301,6 +305,7 @@ public class FirewallFunction {
             List<AzureFirewallIpConfiguration> azureFirewallIpConfigurations = create.ipConfigurations();
             String privateIpAddress = azureFirewallIpConfigurations.get(0).privateIpAddress();
             responseBody.getFirewallBuildResult().setFirewallStaticIp(privateIpAddress);
+            responseBody.getFirewallBuildResult().setFirewallName(create.name());
             System.out.println("创建防火墙和绑定防火墙策略成功！");
         } catch (Exception e) {
             System.err.println("创建防火墙失败：" + e.getMessage());
@@ -317,7 +322,7 @@ public class FirewallFunction {
         body.setFirewallPrivateAddress(responseBody.getFirewallBuildResult().getFirewallStaticIp());
         body.setVirtualNetwork(requestBody.getVirtualNetwork());
         body.setResourceGroup(requestBody.getResourceGroup());
-        routeTableFunction.createRouteTable(responseBody,cloudType, body);
+        routeTableFunction.createRouteTable(responseBody, cloudType, body);
         return responseBody;
     }
 
@@ -333,7 +338,7 @@ public class FirewallFunction {
             //根据允许和拒绝分组创建防火墙规则集合
             if (rule.getAction().equals("allow")) {
                 allowRequestRules.add(rule);
-            } else if(rule.getAction().equals("reject")) {
+            } else if (rule.getAction().equals("reject")) {
                 rejectRequestRules.add(rule);
             }
         });
@@ -348,10 +353,10 @@ public class FirewallFunction {
 
     // 创建防火墙规则集合
     private void collectRuleCollection(FirewallPolicyFilterRuleCollectionActionType allow, List<FirewallPolicyRuleRequestBody> allowRequestRules,
-                                       Integer ruleGroupPriority, List<FirewallPolicyRuleCollection> filterRuleCollections){
-        if(allowRequestRules != null && allowRequestRules.size() > 0){
+                                       Integer ruleGroupPriority, List<FirewallPolicyRuleCollection> filterRuleCollections) {
+        if (allowRequestRules != null && allowRequestRules.size() > 0) {
             List<FirewallPolicyRule> allowRules = new ArrayList<>();
-            for(FirewallPolicyRuleRequestBody allowRule : allowRequestRules){
+            for (FirewallPolicyRuleRequestBody allowRule : allowRequestRules) {
                 List<String> destinationIpAddresses = getFilterValueList(allowRule.getDestinationIpAddress(), "normal");
                 List<String> destinationPorts = getFilterValueList(allowRule.getDestinationPort(), "normal");
                 List<String> sourceIpAddresses = getFilterValueList(allowRule.getSourceIpAddress(), "normal");
@@ -378,7 +383,7 @@ public class FirewallFunction {
         }
     }
 
-    private List getFilterValueList(String value, String type){
+    private List getFilterValueList(String value, String type) {
         List<Object> valueList = new ArrayList<>();
         if (value == null || value.isEmpty()) {
             return valueList;

@@ -412,5 +412,4 @@ public class LoadController {
         List<String> strings = firewallFunction.checkPolicy(fireWallBuildRequestBody.getFirewallPolicy().getRules());
         return new ServiceResult(strings, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
-
 }
