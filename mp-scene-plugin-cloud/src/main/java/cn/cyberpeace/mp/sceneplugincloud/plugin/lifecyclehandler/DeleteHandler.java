@@ -605,13 +605,22 @@ public class DeleteHandler extends HandlerCommon {
      */
     protected void disableConnectUrl(String scene, String sceneElement) {
         CloudPluginSceneConnectionMapper mapper = BeanCommon.getBean(CloudPluginSceneConnectionMapper.class);
+        var connections = mapper.list(new HumanCondition().filterEqual(CloudPluginSceneConnectionModel::getScene, scene)
+                                              .filterEqual(CloudPluginSceneConnectionModel::getSceneElement, sceneElement)
+                                              .filterEqual(CloudPluginSceneConnectionModel::getDisable, false));
+        Remote remote = new Remote();
+        for (var conn : connections) {
+            try {
+                remote.deleteConnection(conn.getConnectionId());
+            } catch (Exception e) {
+                log.error("failed to delete connection , conn id is " + conn.getConnectionId(), e);
+            }
+        }
         CloudPluginSceneConnectionModel updateModel = new CloudPluginSceneConnectionModel();
         updateModel.setDisable(true);
-        mapper.filterUpdate(updateModel, new HumanCondition()
-                .filterEqual(CloudPluginSceneConnectionModel::getScene, scene)
+        mapper.filterUpdate(updateModel, new HumanCondition().filterEqual(CloudPluginSceneConnectionModel::getScene, scene)
                 .filterEqual(CloudPluginSceneConnectionModel::getSceneElement, sceneElement)
-                .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
-        );
+                .filterEqual(CloudPluginSceneConnectionModel::getDisable, false));
     }
 
     /**
