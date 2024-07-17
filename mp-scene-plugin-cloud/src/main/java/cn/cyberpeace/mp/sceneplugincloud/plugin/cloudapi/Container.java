@@ -64,6 +64,12 @@ public class Container extends CloudClient {
 
         cloudPost(CloudUrlConstant.CONTAINER_DELETE_PORT_URL, deletePortData, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
+        // 云平台卸载端口是异步的，等待一下
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            log.info("sleet wait delete port interrupted {}", e.getMessage());
+        }
         cloudDelete(CloudUrlConstant.DELETE_PORTS.replace("{port_id}", deletePortData.getPortId()), null, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
         if (cloudPluginSceneElementPortBO != null && CollectionUtils.isNotEmpty(cloudPluginSceneElementPortBO.getAccessModes())) {
