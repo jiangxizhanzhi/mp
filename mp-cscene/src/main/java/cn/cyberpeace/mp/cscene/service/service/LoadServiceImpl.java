@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
-import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonConvertStatusEnum;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonFunctionCodeEnum;
@@ -18,6 +17,7 @@ import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
+import cn.cyberpeace.mp.cscene.request.load.LoadResultExportRequest;
 import cn.cyberpeace.mp.cscene.request.load.LoadResultSearchRequest;
 import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
 import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
@@ -28,9 +28,13 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,12 +44,10 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.websocket.Session;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -97,9 +99,9 @@ public class LoadServiceImpl {
             item.setActionTypeName(nextLevelMapsByCodes.get(item.getActionType()));
             item.setControlTypeName(nextLevelMapsByCodes.get(item.getControlType()));
             String source = item.getSource();
-            if(source != null && source.equals("1")){
+            if (source != null && source.equals("1")) {
                 item.setSource("外部同步");
-            }else if(source != null && source.equals("2")){
+            } else if (source != null && source.equals("2")) {
                 item.setSource("本地创建");
             }
         });
@@ -120,9 +122,9 @@ public class LoadServiceImpl {
         load.setActionTypeName(nextLevelMapsByCodes.get(load.getActionType()));
         load.setControlTypeName(nextLevelMapsByCodes.get(load.getControlType()));
         String source = load.getSource();
-        if(source != null && source.equals("1")){
+        if (source != null && source.equals("1")) {
             load.setSource("外部同步");
-        }else if(source != null && source.equals("2")){
+        } else if (source != null && source.equals("2")) {
             load.setSource("本地创建");
         }
         return load;
@@ -626,79 +628,94 @@ public class LoadServiceImpl {
     public ServiceResult importLoadExecutionResult(MultipartFile multipartFile) throws IOException {
         if (multipartFile == null || multipartFile.getName() == null || multipartFile.getName().equals("")) {
             return new ServiceResult(null, BaseErrorCode.ERROR, "文件无名称").asResult();
+        } else if (multipartFile != null && !multipartFile.getOriginalFilename().endsWith("xlsx")){
+            return new ServiceResult(null, BaseErrorCode.ERROR, "文件格式错误,请上传xlsx表格文件").asResult();
         }
-        FileInputStream fis = null;
-        if (multipartFile.getOriginalFilename().endsWith("xlsx") || multipartFile.getOriginalFilename().endsWith("xls")) {
-            // 创建临时文件对象（使用UUID作为文件名以避免冲突）
-            File excelFile = File.createTempFile("temp_excel_" + TextUtils.uuid(), ".xlsx");
-            // 将MultipartFile的内容转移到临时文件
-            multipartFile.transferTo(excelFile);
-            fis = new FileInputStream(excelFile);
-        } else {
-            return new ServiceResult(null, BaseErrorCode.ERROR, "文件格式错误,请上传xlsx、xls表格文件").asResult();
-        }
+        //当前时间
+        String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         if (multipartFile.getOriginalFilename().endsWith("xlsx")) {
-            Workbook workbook = new XSSFWorkbook(fis);
+            // 创建临时文件
+            File outputFile = new File(UUID.randomUUID().toString()+"temp.xlsx");
+            try (InputStream inputStream = multipartFile.getInputStream()) {
+                Files.copy(inputStream, outputFile.toPath());
+            }
+            FileInputStream fis = new FileInputStream(outputFile);
+            Workbook workbook = WorkbookFactory.create(fis);
             Sheet sheet = workbook.getSheetAt(0); // 获取第一个工作表
             //数据集初始化
-            List<List<Object>> data = new ArrayList<>();
+            List<MpDevopsLoadSceneLog> data = new ArrayList<>();
+            //读取第一行
+            LinkedHashMap<Integer, String> map =new LinkedHashMap<>();
             //当前行数
             int rowTime = 0;
             for (Row row : sheet) {
                 if (rowTime == 0) {
-                    //读取第一行
-                    List<Object> rowData = new ArrayList<>();
-                    //"工具名称", "记录时间", "阶段", "作用类型", "执行类型", "结果类型", "结果状态"
+                    int cellNum = 0;
                     for (Cell cell : row) {
-                        String cellValue = Objects.requireNonNull(getCellValue(cell)).toString();
-                        rowData.add(cellValue);
+                        map.put(cellNum,Objects.requireNonNull(getCellValue(cell)).toString());
+                        cellNum++;
                     }
-                    data.add(rowData);
                 } else {
-                    //读取第一行标题
-                    List<Object> rowData = new ArrayList<>();
+                    MpDevopsLoadSceneLog log = new MpDevopsLoadSceneLog();
+                    int cellNum = 0;
                     for (Cell cell : row) {
-                        rowData.add(getCellValue(cell));
+                        getCellValueToSetBody(cellNum, map,cell,log,formattedDate);
+                        cellNum++;
                     }
-                    data.add(rowData);
+                    data.add(log);
                 }
                 rowTime++;
             }
-            //打印
-            for (List<Object> row : data) {
-                for (Object cellValue : row) {
-                    System.out.print(cellValue + "\t");
+            if (data.size() > 0) {
+                Boolean success = loadMapper.addLoads(data);
+                if (!success) {
+                    return new ServiceResult(null, BaseErrorCode.ERROR, "导入失败").asResult();
                 }
-                System.out.println();
-            }
-            workbook.close();
-        } else if (multipartFile.getOriginalFilename().endsWith("xls")) {
-            Workbook workbook = new HSSFWorkbook(fis); // 使用HSSFWorkbook处理.xls文件
-            Sheet datatypeSheet = workbook.getSheetAt(0); // 获取第一个工作表
-            Iterator<Row> iterator = datatypeSheet.iterator();
-            //数据集初始化
-            List<List<Object>> data = new ArrayList<>();
-            while (iterator.hasNext()) {
-                Row currentRow = iterator.next();
-                Iterator<Cell> cellIterator = currentRow.iterator();
-                List<String> cellData = new ArrayList();
-                while (cellIterator.hasNext()) {
-                    Cell currentCell = cellIterator.next();
-                    String cellValue = Objects.requireNonNull(getCellValue(currentCell)).toString();
-                    cellData.add(cellValue);
-                }
-                data.add(Collections.singletonList(cellData));
-            }
-            //打印
-            for (List<Object> row : data) {
-                for (Object cellValue : row) {
-                    System.out.print(cellValue + "\t");
-                }
-                System.out.println();
             }
             workbook.close();
         }
         return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+    }
+
+    private void getCellValueToSetBody(int cellNum,LinkedHashMap<Integer, String> map,Cell cell, MpDevopsLoadSceneLog log,String formattedDate){
+        String cellValue = Objects.requireNonNull(getCellValue(cell)).toString();
+        switch (map.get(cellNum)) {
+            case "工具id":
+                log.setId(cellValue);
+                break;
+            case "工具名称":
+                break;
+            case "工具实例id":
+                log.setInstanceId(cellValue);
+                break;
+            case "场景id":
+                log.setSceneId(cellValue);
+                break;
+            case "阶段id":
+                log.setStageId(cellValue);
+                break;
+            case "任务id":
+                log.setTaskId(cellValue);
+                break;
+            case "作用类型":
+                break;
+            case "执行类型":
+                break;
+            case "结果类型":
+                log.setResultType(cellValue);
+                break;
+            case "结果状态":
+                log.setResultStatus(cellValue);
+                break;
+            case "结果日志":
+                log.setResultLog(cellValue);
+                break;
+            case "记录时间":
+                log.setResultLog(formattedDate);
+                break;
+            default:
+                break;
+        }
     }
 
     private static Object getCellValue(Cell cell) {
@@ -724,64 +741,174 @@ public class LoadServiceImpl {
      * 载荷执行结果导出
      * */
     public Boolean exportLoadExecutionResult(HttpServletRequest request, HttpServletResponse response,
-                                             LoadResultSearchRequest requestData) throws IOException {
-        //导出文件xlsx
-        try {
-            List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResult(requestData);
-            Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes(CommonStatusCodeEnum.CODE.getCode());
-            Date date = new Date();
-            //格式化当前时间格式
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss");
-            //创建日期对象，用于生成Excel表格名称，时间截止到秒，避免Excel名称重复
-            String day = sdf.format(date);
-            //***********************************数据写入Excel***********************************
-            String[] title = {"工具名称", "记录时间", "阶段", "作用类型", "执行类型", "结果类型", "结果状态"};
-            String fileName = "载荷执行结果" + day + ".xls";
-            String sheetName = "载荷执行结果";
-            int ol = list.size() + 1;
-            String[][] content = new String[ol][];
-            String tool_name = "";
-            String create_time = "";
-            String stage_id = "";
-            String action_type = "";
-            String control_type = "";
-            String result_type = "";
-            String result_status = "";
-            for (int i = 0; i < ol; i++) {
-                content[i] = new String[title.length];
-                if (i == list.size()) {
-                    content[i][0] = tool_name;
-                    content[i][1] = create_time;
-                    content[i][2] = stage_id;
-                    content[i][3] = action_type;
-                    content[i][4] = control_type;
-                    content[i][5] = result_type;
-                    content[i][6] = result_status;
-                } else {
-                    MpDevopsLoadSceneLog obj = list.get(i);
-                    content[i][0] = obj.getToolName() != null ? obj.getToolName() : "";
-                    content[i][1] = obj.getCreateTime() != null ? obj.getCreateTime().toString() : "";
-                    content[i][2] = obj.getStageId() != null ? obj.getStageId() : "";
-                    content[i][3] = nextLevelMapsByCodes.get(obj.getActionType());
-                    content[i][4] = nextLevelMapsByCodes.get(obj.getControlType());
-                    content[i][5] = obj.getResultType() != null ? obj.getResultType() : "";
-                    content[i][6] = nextLevelMapsByCodes.get(obj.getResultStatus());
-                }
-            }
-            //创建HSSFWorkbook
-            HSSFWorkbook wb = getHSSFWorkbook(sheetName, title, content, null);
-            Boolean setResponseHeader = this.setResponseHeader(response, fileName);
-            if (!setResponseHeader) {
-                return false;
-            }
-            OutputStream os = response.getOutputStream();
-            wb.write(os);
-            os.flush();
-            os.close();
-        } catch (Exception e) {
+                                             LoadResultExportRequest requestData) throws IOException {
+        if (requestData.getExportType() == null || (requestData.getExportType() != 1 && requestData.getExportType() != 2 && requestData.getExportType() != 3)) {
             return false;
         }
+        Date date = new Date();
+        //格式化当前时间格式
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss");
+        //创建日期对象，用于生成Excel表格名称，时间截止到秒，避免Excel名称重复
+        String day = sdf.format(date);
+        String fileTempName = "resultLog_" + day;
+        String sheetTempName = "resultLog";
+        // 获取当前时间
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date currentDate = new Date();
+        String formattedDate = formatter.format(currentDate);
+        //数据
+        LoadResultSearchRequest requestParam = new LoadResultSearchRequest();
+        BeanUtils.copyProperties(requestData, requestParam);
+        List<MpDevopsLoadSceneLog> list = loadMapper.getLoadExecutionResult(requestParam);
+        //导出文件xlsx
+        if (requestData.getExportType() != null && requestData.getExportType() == 1) {
+            try {
+//                String[] codes = {CommonStatusCodeEnum.RESULT_STATUS.getCode(), CommonStatusCodeEnum.ACTION_TYPE.getCode(),
+//                        CommonStatusCodeEnum.RESULT_TYPE.getCode(), CommonStatusCodeEnum.CONTROL_TYPE.getCode()};
+//                //code对应值
+//                Map<String, String> nextLevelMapsByCodes = commonCodeService.convertNextLevelDatasByCodes(codes);
+                //***********************************数据写入Excel***********************************
+                String[] title = {"工具id", "工具名称", "工具实例id", "场景id", "阶段id", "任务id",
+                        "作用类型", "执行类型", "结果类型", "结果状态", "结果日志", "记录时间"};
+                int ol = list.size() + 1;
+                String[][] content = new String[ol][];
+                String tool_id = "";
+                String tool_name = "";
+                String instance_id = "";
+                String scene_id = "";
+                String stage_id = "";
+                String task_id = "";
+                String action_type = "";
+                String control_type = "";
+                String result_type = "";
+                String result_status = "";
+                String result_log = "";
+                String create_time = "";
+                for (int i = 0; i < ol; i++) {
+                    content[i] = new String[title.length];
+                    if (i == list.size()) {
+                        content[i][0] = tool_id;
+                        content[i][1] = tool_name;
+                        content[i][2] = instance_id;
+                        content[i][3] = scene_id;
+                        content[i][4] = stage_id;
+                        content[i][5] = task_id;
+                        content[i][6] = action_type;
+                        content[i][7] = control_type;
+                        content[i][8] = result_type;
+                        content[i][9] = result_status;
+                        content[i][10] = result_log;
+                        content[i][11] = create_time;
+                    } else {
+                        MpDevopsLoadSceneLog obj = list.get(i);
+                        content[i][0] = obj.getId() != null ? obj.getId() : "";
+                        content[i][1] = obj.getToolName() != null ? obj.getToolName() : "";
+                        content[i][2] = obj.getInstanceId() != null ? obj.getInstanceId() : "";
+                        content[i][3] = obj.getSceneId() != null ? obj.getSceneId() : "";
+                        content[i][4] = obj.getStageId() != null ? obj.getStageId() : "";
+                        content[i][5] = obj.getTaskId() != null ? obj.getTaskId() : "";
+                        content[i][6] = obj.getActionType() != null ? obj.getActionType() : "";
+                        content[i][7] = obj.getControlType() != null ? obj.getControlType() : "";
+                        content[i][8] = obj.getResultType() != null ? obj.getResultType() : "";
+                        content[i][9] = obj.getResultStatus() != null ? obj.getResultStatus() : "";
+                        content[i][10] = obj.getResultLog() != null ? obj.getResultLog() : "";
+                        content[i][11] = formattedDate;
+                    }
+                }
+                //创建HSSFWorkbook
+                HSSFWorkbook wb = getHSSFWorkbook(sheetTempName, title, content, null);
+                Boolean setResponseHeader = this.setResponseHeader(response, fileTempName + ".xlsx");
+                if (!setResponseHeader) {
+                    return false;
+                }
+                OutputStream os = response.getOutputStream();
+                wb.write(os);
+                os.flush();
+                os.close();
+            } catch (Exception e) {
+                return false;
+            }
+        } else if (requestData.getExportType() != null && requestData.getExportType() == 2) {
+            List<JSONObject> jsonList = new ArrayList<>();
+            for (MpDevopsLoadSceneLog obj : list) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("id", obj.getId());
+                jsonObject.put("tool_name", obj.getToolName());
+                jsonObject.put("instance_id", obj.getInstanceId());
+                jsonObject.put("scene_id", obj.getSceneId());
+                jsonObject.put("stage_id", obj.getStageId());
+                jsonObject.put("task_id", obj.getTaskId());
+                jsonObject.put("action_type", obj.getActionType());
+                jsonObject.put("control_type", obj.getControlType());
+                jsonObject.put("result_type", obj.getResultType());
+                jsonObject.put("result_status", obj.getResultStatus());
+                jsonObject.put("result_log", obj.getResultLog());
+                jsonObject.put("create_time", obj.getCreateTime().toString());
+                jsonList.add(jsonObject);
+            }
+            // 将jsonList导出为json文件并通过HttpServletResponse响应
+            exportJsonToResponse(response, jsonList);
+        } else if (requestData.getExportType() != null && requestData.getExportType() == 3) {
+            // 将list导出为xml文件并通过HttpServletResponse响应
+            exportXml(response, list);
+        }
         return true;
+    }
+
+    private void exportXml(HttpServletResponse response, List<MpDevopsLoadSceneLog> list) {
+        StringBuffer xmlnodes = new StringBuffer();
+        if (list != null && list.size() > 0) {
+            xmlnodes.append("<?" + "xml version=\"1.0\" encoding=\"UTF-8\" " + "?>");
+            xmlnodes.append("<mpDevopsLoadSceneLogs>");
+            for (int i = 0; i < list.size(); i++) {
+                MpDevopsLoadSceneLog log = list.get(i);
+                xmlnodes.append("<mpDevopsLoadSceneLog id='" + log.getId()
+                        + "' resultType='" + log.getResultType()
+                        + "' instanceId='" + log.getInstanceId()
+                        + "' createTime='" + log.getCreateTime().toString()
+                        + "' actionType='" + log.getActionType()
+                        + "' resultStatus='" + log.getResultStatus()
+                        + "' stageId='" + log.getStageId()
+                        + "' sceneId='" + log.getSceneId()
+                        + "' taskId='" + log.getTaskId()
+                        + "' resultLog='" + log.getResultLog()
+                        + "' controlType='" + log.getControlType()
+                        + "'>" + log.getToolName() + "</mpDevopsLoadSceneLog>");
+            }
+            xmlnodes.append("</mpDevopsLoadSceneLogs>");
+        }
+
+        // 创建Jackson的XmlMapper实例
+        XmlMapper xmlMapper = new XmlMapper();
+
+        response.setContentType("application/xml");
+        response.setHeader("Content-Disposition", "attachment; filename=export.xml");
+
+        try {
+            // 将list转换为XML并写入HttpServletResponse的输出流
+            xmlMapper.writeValue(response.getOutputStream(), xmlnodes);
+            response.flushBuffer();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void exportJsonToResponse(HttpServletResponse response, List<JSONObject> jsonList) {
+        // 创建Jackson的ObjectMapper实例
+        ObjectMapper mapper = new ObjectMapper();
+        // 格式化输出
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+        response.setContentType("application/json");
+        response.setHeader("Content-Disposition", "attachment; filename=export.json");
+
+        try {
+            // 将jsonList转换为JSON并写入HttpServletResponse的输出流
+            mapper.writeValue(response.getOutputStream(), jsonList);
+            response.flushBuffer();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     //发送响应流方法

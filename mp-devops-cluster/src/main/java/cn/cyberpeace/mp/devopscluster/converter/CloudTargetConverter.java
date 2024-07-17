@@ -109,7 +109,17 @@ public class CloudTargetConverter {
         extVm.setFlavor("1CPU/1G内存/30G磁盘/2网卡");
         extVm.setCpu(1);
         extVm.setRam(1);
-        extVm.setDisk(30);
+        if (operatingSystem!= null && "Linux".equals(operatingSystem)) {
+            extVm.setFlavor("1CPU/1G内存/30G磁盘/2网卡");
+            extVm.setCpu(1);
+            extVm.setRam(1);
+            extVm.setDisk(30);
+        } else {
+            extVm.setFlavor("1CPU/1G内存/127G磁盘/2网卡");
+            extVm.setCpu(1);
+            extVm.setRam(1);
+            extVm.setDisk(127);
+        }
         extVm.setVmSizeType("Standard_B1s");
         extVm.setVmOsDiskType("StandardSSD_LRS");
         extVm.setInitSupport(true);

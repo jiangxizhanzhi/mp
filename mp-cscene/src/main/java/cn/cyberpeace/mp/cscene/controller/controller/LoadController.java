@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
+import cn.cyberpeace.mp.cscene.request.load.LoadResultExportRequest;
 import cn.cyberpeace.mp.cscene.request.load.LoadResultSearchRequest;
 import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
 import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
@@ -307,7 +308,7 @@ public class LoadController {
     }
 
     /*
-     * 载荷执行结果导入
+     * 载荷执行结果导入(xlsx格式文件导入)
      * */
     @ApiOperation(value = "载荷执行结果导入", notes = "")
     @PostMapping("/importLoadExecutionResult")
@@ -317,12 +318,12 @@ public class LoadController {
     }
 
     /*
-     * 载荷执行结果导出
+     * 载荷执行结果导出(xml,json,xlsx格式文件导出)
      * */
     @ApiOperation(value = "载荷执行结果导出", notes = "")
     @PostMapping("/exportLoadExecutionResult")
     public ServiceResult exportLoadExecutionResult(HttpServletRequest request, HttpServletResponse response,
-                                                   @RequestBody(required = false) LoadResultSearchRequest requestData) throws IOException {
+                                                   @RequestBody(required = false) LoadResultExportRequest requestData) throws IOException {
         Boolean exportLoadExecutionResult = loadService.exportLoadExecutionResult(request, response, requestData);
         if (exportLoadExecutionResult) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();

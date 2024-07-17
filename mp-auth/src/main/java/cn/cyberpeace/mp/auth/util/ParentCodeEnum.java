@@ -2,8 +2,6 @@ package cn.cyberpeace.mp.auth.util;
 
 public enum ParentCodeEnum {
 
-    PARENT_SYSTEM_TYPE("1001", "操作系统"),
-
     PARENT_MIXCLOUD_CATEGORY_TYPE("1002", "混合云配置项菜单"),
 
     PARENT_PRIVATECLOUD_CATEGORY_TYPE("1003", "私有云配置项菜单"),
