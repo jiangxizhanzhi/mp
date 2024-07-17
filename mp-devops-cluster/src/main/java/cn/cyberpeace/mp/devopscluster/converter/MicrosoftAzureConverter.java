@@ -8,7 +8,6 @@ import cn.cyberpeace.mp.common.constant.codeEnum.CommonStatusCodeEnum;
 import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
 import cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
-import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.CloudDevice;
 import cn.cyberpeace.mp.devopscluster.po.*;
 import cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper;
@@ -57,9 +56,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
     @Autowired
     private CommonCodeServiceImpl commonCodeService;
-
-    @Autowired
-    private LoadMapper loadMapper;
 
     /**
      * 云镜像管理页面分页查询
@@ -179,9 +175,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
         //根据convert中subType分类收集成returnDate,list在收集returnDate
         List<JSONObject> list = new ArrayList<>();
-        JSONObject returnDate = new JSONObject();
-        returnDate.put("sub_type", null);
-        returnDate.put("data", new ArrayList<CloudDevice>());
 
         // 使用Map分组
         Map<String, List<CloudDevice>> groupedDevices = new HashMap<>();
@@ -233,7 +226,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 device.setDefaultLaunchImageName(target.getName());
                 device.setCreatedAt(String.valueOf(target.getCreateTime()));
                 device.setCloudServiceType(target.getCloudServiceType());
-//                //1:网络设备 2:操作系统 3:安防设备 4:应用系统
+//                //1:操作系统 2:应用系统 3:网络设备 4:安全设备
 //                device.setCategory(null);
                 //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储)
                 switch (target.getCloudServiceType()) {
@@ -674,9 +667,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
     public List getImageCategories(String cloudCode) {
         if (cloudCode == null || cloudCode.equals("")) {
             cloudCode = ParentCodeEnum.PARENT_MIXCLOUD_CATEGORY_TYPE.getCode();
-//        PARENT_MIXCLOUD_CATEGORY_TYPE("1002", "混合云配置项菜单"),
-//        PARENT_PRIVATECLOUD_CATEGORY_TYPE("1003", "私有云配置项菜单"),
-//        PARENT_PUBLICCLOUD_CATEGORY_TYPE("1004", "公有云配置项菜单");
         }
 
         //查询所有数据

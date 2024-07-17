@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
-import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.MicrosoftAzureConverter;
 import cn.cyberpeace.mp.devopscluster.vo.EquipmentRequestVO;
@@ -35,8 +34,8 @@ public class CloudDevopsTargetController {
     @Autowired
     private MicrosoftAzureConverter microsoftAzureConverter;
 
-    @Autowired
-    private LoadServiceImpl LoadService;
+    //公有云code
+    private static final String CLOUD_TYPE_CODE = "100401";
 
     /**
      * 查询所有镜像管理分类-拓扑编辑器
@@ -44,7 +43,7 @@ public class CloudDevopsTargetController {
     @ApiOperation("查询所有镜像管理分类")
     @GetMapping("/imageCategories")
     @Cacheable(key = "'getImageCategories' + #code", value = "getImageCategories")
-    public ServiceResult imageCategories(@RequestParam(value = "code", defaultValue = "100201") String code) {
+    public ServiceResult imageCategories(@RequestParam(value = "code", defaultValue = CLOUD_TYPE_CODE) String code) {
         List list = microsoftAzureConverter.getImageCategories(code);
         return new ServiceResult(list, BaseErrorCode.SUCCESS).asResult();
     }
