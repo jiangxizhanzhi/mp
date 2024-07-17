@@ -896,7 +896,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 //        判断系统类型 linux查 30G~2T windows 查127G~2T
 //        过滤出max_size_unit=TB且max_size<=2或max_size_unit=GB且max_size>=30
         int maxSize = 30;
-        if (BaseSceneElementModel.SystemType.WINDOWS.equals(queryParams.getVmType())) {
+        if (BaseSceneElementModel.SystemType.WINDOWS.equals(queryParams.getVmType().toLowerCase())) {
             maxSize = 127;
         }
         int finalMaxSize = maxSize;

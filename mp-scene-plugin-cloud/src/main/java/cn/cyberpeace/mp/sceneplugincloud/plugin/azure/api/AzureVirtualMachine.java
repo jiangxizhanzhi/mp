@@ -298,7 +298,7 @@ public class AzureVirtualMachine {
         // azure todo 调整 root name
         VirtualNic virtualNic = virtualNics.get(0);
         String netId = virtualNic.getNetworkId();
-        if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudElement.getVmType())) {
+        if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudElement.getVmType().toLowerCase())) {
             creator = createWindowsVM(cloudElement, userData, groupName, azureResourceManager, region, vmName, netId, virtualNic, disk, expansionDisk, vmExpansionDiskType, storageAccountTypes, flavor);
         } else {
             creator = createLinuxVM(cloudElement, userData, groupName, azureResourceManager, region, vmName, netId, virtualNic, disk, expansionDisk, vmExpansionDiskType, storageAccountTypes, flavor);
@@ -316,60 +316,6 @@ public class AzureVirtualMachine {
         // 创建虚拟机
         return creator.create();
     }
-
-    /**
-     * 创建虚拟机的方法
-     *
-     * @param cloudElement 云插件场景元素
-     * @param virtualNics  虚拟网卡列表
-     * @param userData     用户数据
-     * @param groupName    资源组名称
-     * @return 创建的虚拟机对象
-     */
-    private VirtualMachine createVirtualMachine1(CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData, String groupName) {
-        // 生成虚拟机名称
-        String vmName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
-
-        // 获取网络ID
-        String netId = virtualNics.stream()
-                .filter(v -> StringUtils.isNotBlank(v.getNetworkId()))
-                .map(VirtualNic::getNetworkId)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Network ID is required"));
-
-        // 获取第一块网卡
-        VirtualNic virtualNic = virtualNics.get(0);
-
-        // 获取磁盘信息
-        Integer disk = cloudElement.getSrcElement().getDisk();
-        Integer expansionDisk = cloudElement.getSrcElement().getExpansionDisk();
-        String vmExpansionDiskType = cloudElement.getVmExpansionDiskType();
-
-        // 定义虚拟机大小和存储账户类型
-        VirtualMachineSizeTypes flavor = StringUtils.isNotBlank(cloudElement.getVmSizeType()) ? VirtualMachineSizeTypes.fromString(cloudElement.getVmSizeType()) : VirtualMachineSizeTypes.STANDARD_B1S;
-        StorageAccountTypes storageAccountTypes = StringUtils.isNotBlank(cloudElement.getVmOsDiskType()) ? StorageAccountTypes.fromString(cloudElement.getVmOsDiskType()) : StorageAccountTypes.STANDARD_SSD_LRS;
-
-        VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged creator;
-
-        if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudElement.getVmType())) {
-            creator = createWindowsVM(cloudElement, userData, groupName, azureResourceManager, region, vmName, netId, virtualNic, disk, expansionDisk, vmExpansionDiskType, storageAccountTypes, flavor);
-        } else {
-            creator = createLinuxVM(cloudElement, userData, groupName, azureResourceManager, region, vmName, netId, virtualNic, disk, expansionDisk, vmExpansionDiskType, storageAccountTypes, flavor);
-        }
-//        TODO 绑定管理网络 回写管理网络信息
-//        element.getMgmtIp()
-
-        // 添加其他网卡
-        for (int i = 1; i < virtualNics.size(); i++) {
-            VirtualNic nic = virtualNics.get(i);
-            NetworkInterface ni = createNetworkInterface(azureResourceManager, region, groupName, nic, netId);
-            creator.withExistingSecondaryNetworkInterface(ni);
-        }
-
-        // 创建虚拟机
-        return creator.create();
-    }
-
 
     /**
      * 创建Windows虚拟机
