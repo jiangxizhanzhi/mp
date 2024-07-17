@@ -667,7 +667,8 @@ public class LoadServiceImpl {
                 rowTime++;
             }
             if (data.size() > 0) {
-                Boolean success = loadMapper.addLoads(data);
+                // todo 会有空的脏数据，不影响查询，后续需要更改
+                Boolean success = loadMapper.addLoadLogs(data);
                 if (!success) {
                     return new ServiceResult(null, BaseErrorCode.ERROR, "导入失败").asResult();
                 }
@@ -711,7 +712,7 @@ public class LoadServiceImpl {
                 log.setResultLog(cellValue);
                 break;
             case "记录时间":
-                log.setResultLog(formattedDate);
+                // 新增时会自动加上目前时间
                 break;
             default:
                 break;

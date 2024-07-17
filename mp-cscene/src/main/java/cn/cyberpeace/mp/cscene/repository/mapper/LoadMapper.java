@@ -50,6 +50,8 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     Boolean addLoads(@Param("param") List<MpDevopsLoadSceneLog> list);
 
+    Boolean addLoadLogs(@Param("param") List<MpDevopsLoadSceneLog> list);
+
     Boolean deleteData(@Param("param") List<String> ids);
 
     List<MpDevopsLoad> getToolListByloadIds(@Param("param") List<String> ids);
