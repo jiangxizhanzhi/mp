@@ -75,7 +75,8 @@ public class HostStateController {
     public ServiceResult<List<HostState>> getClusterHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
         hostStateTrendRequest.setSceneId(null);
         hostStateTrendRequest.setElementIds(null);
-        List<HostState> hostStates = hostStateService.getClusterHostStateTrend(hostStateTrendRequest);
+//        List<HostState> hostStates = hostStateService.getClusterHostStateTrend(hostStateTrendRequest);
+        List<HostState> hostStates = new ArrayList<>();
 
         return ResultCommon.success(hostStates);
     }
