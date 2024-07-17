@@ -214,7 +214,7 @@ public class ScenePluginCloudSceneService {
      */
     private Map<String, ConnectionLinkInfo> collectConnectionLinkInfo(String sceneId, List<String> nodeIds,
                                                                       List<String> userIds) {
-        Map<String, AccessModeLinkInfo> accessModeLinkInfoMap = collectAccessModeLinkInfo(sceneId, nodeIds);
+         Map<String, AccessModeLinkInfo> accessModeLinkInfoMap = collectAccessModeLinkInfo(sceneId, nodeIds);
         Map<String, ConnectionLinkInfo> connectionLinkInfoMap = new HashMap<>();
         if (accessModeLinkInfoMap.isEmpty()) {
             return connectionLinkInfoMap;

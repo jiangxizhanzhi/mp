@@ -30,6 +30,7 @@ import cn.cyberpeace.mp.devopscluster.request.ScreenrecordConfigRequest;
 import cn.cyberpeace.mp.devopscluster.request.ScreenrecordDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.queryparam.ScreenrecordQueryParams;
 import cn.cyberpeace.mp.devopscluster.vo.*;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.RecordRestoreLimitConfigData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.RecordRestoreLimitConfigResult;
@@ -137,8 +138,7 @@ public class ScreenrecordService extends BaseCpService {
             }
         }
 
-        ScreenrecordPageVO pageResponse = super.sendGet(BaseCloudPlatformConstant.SCREENRECORD_METHOD +
-                "/recordfile_list" + getParams, ScreenrecordPageVO.class);
+        ScreenrecordPageVO pageResponse = super.sendGet(CloudUrlConstant.GET_RECORDING_LIST_URL + getParams, ScreenrecordPageVO.class);
         log.info("page screenrecord response: {}", pageResponse);
 
         // 获取该场景的所有节点id，因为可能已经删除了一部分节点

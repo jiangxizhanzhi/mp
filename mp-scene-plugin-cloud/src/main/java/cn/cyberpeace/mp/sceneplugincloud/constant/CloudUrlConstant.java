@@ -211,6 +211,7 @@ public class CloudUrlConstant {
     public static final String GET_MONITOR_URL = "/cpcloud/guacamole/v1/monitor";
     public static final String GET_ASSISTANCE_URL = "/cpcloud/guacamole/v1/assistance";
     public static final String GET_RECORDING_URL = "/cloud/v1/guacamole/recordfile";
+    public static final String GET_RECORDING_LIST_URL = "/cloud/v1/guacamole/recordfile_list";
     public static final String RECORDING_DOWNLOAD_URL = "/cpcloud/guacamole/v1/downloadfile?recordfilename=%s";
     public static final String RECORDING_PLAY_URL = "/cpcloud/guacamole/v1/video?recordfilename=%s";
     public static final String ENABLE_RECORDING_URL = "/cloud/v1/guacamole/enable_record";

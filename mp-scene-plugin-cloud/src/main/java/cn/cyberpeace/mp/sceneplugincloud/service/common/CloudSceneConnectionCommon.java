@@ -175,6 +175,7 @@ public class CloudSceneConnectionCommon {
             sceneConnection.setAccessUser(userId);
             sceneConnection.setConnectionId(connectionCreateResult.getConnectionId());
             sceneConnection.setConnectionUrl(connectionCreateResult.getUrl());
+            sceneConnection.setAccessModeId(param.getCloudAccessMode().getId());
             cloudPluginSceneConnectionMapper.save(sceneConnection);
             return sceneConnection;
         }
