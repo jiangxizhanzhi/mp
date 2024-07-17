@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.mptool.URLUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
@@ -27,9 +28,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -171,9 +172,19 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
     public void validate() {
         Integer cloudType = getSceneHandler().getScene().getCloudType();
 
+//        存进过递归方法的Vent节点 避免重复校验
+        List<String> elementIdBycollectCidrPools = new ArrayList<>();
+
+
+        Map<String, CloudPluginSceneConfigElementBO> elementMap = getElementMap();
         //            根据微软云创建虚拟机规则验证用户名、密码
         if (cloudType != null && cloudType != BaseSceneModel.CloudType.DEFAULT) {
-            getElementMap().forEach((nodeId, element) -> {
+            Map<String, List<SceneConfigElementPortBO>> elementPortMap = getSceneHandler().getElementPortMap().values().stream()
+                    .collect(Collectors.groupingBy(
+                            element -> element.getElement().getId()
+                    ));
+
+            elementMap.forEach((nodeId, element) -> {
                 if (StringUtils.isNotBlank(element.getUsername())) {
                     boolean isUsernameAllowed = Arrays.stream(disallowedUsernames)
                             .noneMatch(element.getUsername()::equalsIgnoreCase);
@@ -194,16 +205,41 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                     }
                 }
                 if (BaseCloudPluginSceneElementModel.ImageType.VNET.equals(element.getImageType())) {
+//                VNet节点子网格式校验
                     List<String> cidrPools = element.getCidrPools();
                     List<String> validateCidrPools = IpUtils.validateCidrPools(cidrPools);
                     if (validateCidrPools.size() > 0) {
                         throw new MpRuntimeException(CloudErrorCode.INVALID_CIDR_POOLS.format(validateCidrPools.toString()));
                     }
+//                对等互联子网冲突验证
+//                查Vent子网+连接节点的子网
+//                查连接连接Vent节点下 Vent子网+连接节点的子网
+//                判断是否有冲突
+                    if (!elementIdBycollectCidrPools.contains(element.getSrcElement().getId())) {
+                        HashMap<String, Set<String>> nodeCidrPools = new HashMap<>();
+                        HashSet<String> cidrPoolSet = new HashSet<>();
+                        cidrPoolSet.addAll(cidrPools);
+                        nodeCidrPools.put(element.getSrcElement().getId(), cidrPoolSet);
+//                    连接的VNet 需递归查询所有相连的VNet
+                        collectCidrPools(element, elementMap, elementPortMap, nodeCidrPools, elementIdBycollectCidrPools);
+
+                        Set<String> allCidrs = new HashSet<>();
+                        Set<String> duplicates = new HashSet<>();
+                        for (Map.Entry<String, Set<String>> nodeCidrPoolList : nodeCidrPools.entrySet()) {
+                            for (String cidr : nodeCidrPoolList.getValue()) {
+                                if (!allCidrs.add(cidr) && StringUtils.isNotEmpty(cidr)) {
+                                    duplicates.add(cidr);
+                                }
+                            }
+                        }
+                        if (duplicates.size() > 0) {
+                            throw new MpRuntimeException(CloudErrorCode.CONFLICT_CIDR_POOLS.format(duplicates.toString()));
+                        }
+                    }
                 }
             });
-
         }
-
+        Map<String, SceneConfigElementPortBO> elementPortMap = getSceneHandler().getElementPortMap();
         for (var srcPort : getSceneHandler().getElementPortMap().values()) {
             // 验证ip是否在cidr内
             var ip = srcPort.getIp();
@@ -252,6 +288,33 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private void collectCidrPools(CloudPluginSceneConfigElementBO element, Map<String, CloudPluginSceneConfigElementBO> elementMap,
+                                  Map<String, List<SceneConfigElementPortBO>> elementPortMap, HashMap<String, Set<String>> nodeCidrPools,
+                                  List<String> elementIdBycollectCidrPools) {
+        elementIdBycollectCidrPools.add(element.getSrcElement().getId());
+        for (SceneConfigElementPortBO port : element.getSrcElement().getPorts()) {
+            SceneConfigElementPortBO portConnectedPort = getSceneHandler().getPortConnectedPort(port.getId());
+            if (null != portConnectedPort) {
+                String id = portConnectedPort.getElement().getId();
+                CloudPluginSceneConfigElementBO cloudPluginSceneConfigElementBO = elementMap.get(id);
+                if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(cloudPluginSceneConfigElementBO.getImageType())) {
+                    List<SceneConfigElementPortBO> sceneConfigElementPortBOList = elementPortMap.get(id);
+                    List<String> cidrs = sceneConfigElementPortBOList.stream()
+                            .flatMap(element1 -> element1.getElement().getPorts().stream().map(port1 -> IpUtils.formatIpAddressWithDefaultMask(port1.getIp())))
+                            .collect(Collectors.toList());
+                    nodeCidrPools.get(element.getSrcElement().getId()).addAll(cidrs);
+                } else if (BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudPluginSceneConfigElementBO.getImageType())) {
+                    Set set = nodeCidrPools.get(cloudPluginSceneConfigElementBO.getSrcElement().getId());
+                    if (set != null) continue;
+                    set = new HashSet<>();
+                    set.addAll(cloudPluginSceneConfigElementBO.getCidrPools());
+                    nodeCidrPools.put(cloudPluginSceneConfigElementBO.getSrcElement().getId(), set);
+                    collectCidrPools(cloudPluginSceneConfigElementBO, elementMap, elementPortMap, nodeCidrPools, elementIdBycollectCidrPools);
                 }
             }
         }
@@ -337,5 +400,18 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
     protected void validateData(BaseScenePluginDataBO validateData) {
         var validateResult = CloudScenePluginValidation.validate(validateData);
         CloudScenePluginValidation.handleValidateResult(validateResult);
+    }
+
+    private static List<String> findDuplicates(List<String> cidrs, Set<String> uniqueCidrs) {
+        List<String> duplicates = new ArrayList<>();
+        for (String cidr : cidrs) {
+            if (!uniqueCidrs.add(cidr)) {
+                duplicates.add(cidr);
+            }
+        }
+        // Remove the first occurrence of each duplicate as it was already added to the set.
+        Set<String> toRemove = new HashSet<>(duplicates);
+        duplicates.retainAll(toRemove);
+        return duplicates;
     }
 }

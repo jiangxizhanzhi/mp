@@ -241,6 +241,8 @@ public class AzureVirtualMachine {
 
     public void restart(String instanceId) {
         VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(instanceId);
+//        关机无法重启 先开机
+        virtualMachine.start();
         virtualMachine.restart();
     }
 

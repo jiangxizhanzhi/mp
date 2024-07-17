@@ -31,16 +31,27 @@ public class ElementNetworkUtils {
             List<CloudPluginSceneElementBO> allElements,
             CloudPluginSceneElementBO cloudElement,
             HashMap<String, List<VirtualNic>> virtualNicsMap) {
-        if (virtualNicsMap.size() == 0) return new ConcurrentHashMap<>();
-
-        Map<String, List<String>> elementIpMap = pluginHandler.getScene().getSrcScene().getElementIpMap();
-
-//        查目前所有cidr（包括ip所属cidr）
         Set<String> cidrListByVEnt = allElements
                 .stream()
                 .map(CloudPluginSceneElementBO::getCidrPools)
                 .flatMap(cidrPools -> cidrPools.stream())
                 .collect(Collectors.toSet());
+
+        if (virtualNicsMap.size() == 0) {
+            List<String> cidrPools = cloudElement.getCidrPools();
+            Map<String, Boolean> cidrContainerMap = cidrPools.stream().filter(StringUtils::isNotEmpty).collect(Collectors.toMap(cidr -> cidr, cidr -> false));
+            if (cidrContainerMap.size() == 0) {
+                String defultCidr = IpUtils.getNextDefaultCIDR(cidrListByVEnt);
+                cidrPools.add(defultCidr);
+                cidrContainerMap.put(defultCidr, false);
+            }
+            return new ConcurrentHashMap<>(cidrContainerMap);
+        }
+        ;
+
+        Map<String, List<String>> elementIpMap = pluginHandler.getScene().getSrcScene().getElementIpMap();
+
+//        查目前所有cidr（包括ip所属cidr）
         List<String> cidrListByIp = virtualNicsMap
                 .values()
                 .stream()
@@ -112,7 +123,7 @@ public class ElementNetworkUtils {
             cloudElement.setCidrPools(cidrPools);
             return new ConcurrentHashMap<>(cidrContainerMap);
         }
-        cloudElement.getSrcElement().getId();
+
         List<String> nodeIds = Arrays.asList(cloudElement.getSrcElement().getId());
 
         autoAssignVirtualNicIps(virtualNicsMap, elementIpMap, nodeIds, defultCidr, ips);
@@ -123,7 +134,7 @@ public class ElementNetworkUtils {
             for (VirtualNic virtualNic : virtualNicsMap.get(cloudElement.getSrcElement().getId())) {
                 cidrContainerMap.put(IpUtils.ip2Cidr24(virtualNic.getFixedIp()), true);
             }
-        } else if(BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(cloudElement.getImageType())){
+        } else if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(cloudElement.getImageType())) {
             for (VirtualNic virtualNic : virtualNicsMap.get(cloudElement.getSrcElement().getId())) {
                 cidrContainerMap.put(IpUtils.ip2Cidr24(virtualNic.getFixedIp()), false);
             }
