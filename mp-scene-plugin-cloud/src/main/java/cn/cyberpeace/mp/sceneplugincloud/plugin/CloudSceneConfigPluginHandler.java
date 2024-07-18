@@ -305,7 +305,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                 if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(cloudPluginSceneConfigElementBO.getImageType())) {
                     List<SceneConfigElementPortBO> sceneConfigElementPortBOList = elementPortMap.get(id);
                     List<String> cidrs = sceneConfigElementPortBOList.stream()
-                            .flatMap(element1 -> element1.getElement().getPorts().stream().map(port1 -> IpUtils.formatIpAddressWithDefaultMask(port1.getIp())))
+                            .flatMap(element1 -> element1.getElement().getPorts().stream().filter(port1->StringUtils.isNotEmpty(port1.getIp())).map(port1 -> IpUtils.formatIpAddressWithDefaultMask(port1.getIp())))
                             .collect(Collectors.toList());
                     nodeCidrPools.get(element.getSrcElement().getId()).addAll(cidrs);
                 } else if (BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudPluginSceneConfigElementBO.getImageType())) {
