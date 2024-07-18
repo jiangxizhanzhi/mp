@@ -33,7 +33,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -833,33 +832,49 @@ public class LoadServiceImpl {
                 return false;
             }
         } else if (requestData.getExportType() != null && requestData.getExportType() == 2) {
-            List<JSONObject> jsonList = new ArrayList<>();
-            for (MpDevopsLoadSceneLog obj : list) {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("id", obj.getId());
-                jsonObject.put("tool_name", obj.getToolName());
-                jsonObject.put("instance_id", obj.getInstanceId());
-                jsonObject.put("scene_id", obj.getSceneId());
-                jsonObject.put("stage_id", obj.getStageId());
-                jsonObject.put("task_id", obj.getTaskId());
-                jsonObject.put("action_type", obj.getActionType());
-                jsonObject.put("control_type", obj.getControlType());
-                jsonObject.put("result_type", obj.getResultType());
-                jsonObject.put("result_status", obj.getResultStatus());
-                jsonObject.put("result_log", obj.getResultLog());
-                jsonObject.put("create_time", obj.getCreateTime().toString());
-                jsonList.add(jsonObject);
-            }
             // 将jsonList导出为json文件并通过HttpServletResponse响应
-            exportJsonToResponse(response, jsonList);
+            exportJsonToResponse(response, list);
         } else if (requestData.getExportType() != null && requestData.getExportType() == 3) {
             // 将list导出为xml文件并通过HttpServletResponse响应
-            exportXml(response, list);
+            exportXmlToResponse(response, list);
         }
         return true;
     }
 
-    private void exportXml(HttpServletResponse response, List<MpDevopsLoadSceneLog> list) {
+    private void exportJsonToResponse(HttpServletResponse response, List<MpDevopsLoadSceneLog> list) {
+        List<JSONObject> jsonList = new ArrayList<>();
+        for (MpDevopsLoadSceneLog obj : list) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("id", obj.getId());
+            jsonObject.put("tool_name", obj.getToolName());
+            jsonObject.put("instance_id", obj.getInstanceId());
+            jsonObject.put("scene_id", obj.getSceneId());
+            jsonObject.put("stage_id", obj.getStageId());
+            jsonObject.put("task_id", obj.getTaskId());
+            jsonObject.put("action_type", obj.getActionType());
+            jsonObject.put("control_type", obj.getControlType());
+            jsonObject.put("result_type", obj.getResultType());
+            jsonObject.put("result_status", obj.getResultStatus());
+            jsonObject.put("result_log", obj.getResultLog());
+            jsonObject.put("create_time", obj.getCreateTime().toString());
+            jsonList.add(jsonObject);
+        }
+        // 创建Jackson的ObjectMapper实例
+        ObjectMapper mapper = new ObjectMapper();
+        // 格式化输出
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        response.setContentType("application/json");
+        response.setHeader("Content-Disposition", "attachment; filename=export.json");
+        try {
+            // 将jsonList转换为JSON并写入HttpServletResponse的输出流
+            mapper.writeValue(response.getOutputStream(), jsonList);
+            response.flushBuffer();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void exportXmlToResponse(HttpServletResponse response, List<MpDevopsLoadSceneLog> list) {
         StringBuffer xmlnodes = new StringBuffer();
         if (list != null && list.size() > 0) {
             xmlnodes.append("<?" + "xml version=\"1.0\" encoding=\"UTF-8\" " + "?>");
@@ -881,34 +896,13 @@ public class LoadServiceImpl {
             }
             xmlnodes.append("</mpDevopsLoadSceneLogs>");
         }
-
         // 创建Jackson的XmlMapper实例
         XmlMapper xmlMapper = new XmlMapper();
-
         response.setContentType("application/xml");
         response.setHeader("Content-Disposition", "attachment; filename=export.xml");
-
         try {
             // 将list转换为XML并写入HttpServletResponse的输出流
             xmlMapper.writeValue(response.getOutputStream(), xmlnodes);
-            response.flushBuffer();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void exportJsonToResponse(HttpServletResponse response, List<JSONObject> jsonList) {
-        // 创建Jackson的ObjectMapper实例
-        ObjectMapper mapper = new ObjectMapper();
-        // 格式化输出
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-        response.setContentType("application/json");
-        response.setHeader("Content-Disposition", "attachment; filename=export.json");
-
-        try {
-            // 将jsonList转换为JSON并写入HttpServletResponse的输出流
-            mapper.writeValue(response.getOutputStream(), jsonList);
             response.flushBuffer();
         } catch (IOException e) {
             e.printStackTrace();

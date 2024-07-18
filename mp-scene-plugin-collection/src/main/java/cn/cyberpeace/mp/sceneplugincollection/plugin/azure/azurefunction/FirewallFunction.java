@@ -343,10 +343,11 @@ public class FirewallFunction {
             }
         });
 
+        //暂定 拒绝规则组的优先级为100，允许规则组的优先级为200
         FirewallPolicyFilterRuleCollectionActionType allow = FirewallPolicyFilterRuleCollectionActionType.ALLOW;
-        collectRuleCollection(allow, allowRequestRules, 100, filterRuleCollections);
+        collectRuleCollection(allow, allowRequestRules, 200, filterRuleCollections);
         FirewallPolicyFilterRuleCollectionActionType reject = FirewallPolicyFilterRuleCollectionActionType.DENY;
-        collectRuleCollection(reject, rejectRequestRules, 200, filterRuleCollections);
+        collectRuleCollection(reject, rejectRequestRules, 100, filterRuleCollections);
 
         return filterRuleCollections;
     }
