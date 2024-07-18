@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
-import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
@@ -180,5 +179,18 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
 //        } else {
 //            return null;
 //        }
+    }
+
+    public void openAccessModes(CloudPluginSceneElementBO element) {
+        var cloudPorts = getPluginHandler().getPorts(element);
+        for (var cloudPort : cloudPorts) {
+            var accessModes = cloudPort.getAccessModes();
+            if (accessModes == null) {
+                return;
+            }
+            for (var accessMode : accessModes) {
+                accessMode.setAvailable(true);
+            }
+        }
     }
 }

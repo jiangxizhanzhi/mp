@@ -57,36 +57,6 @@ public class AzureVirtualMachine {
 
     }
 
-    public List<Map<String, String>> listsAllAvailableResourceSKUsForTheSpecifiedRegion() throws IOException {
-        ArrayList<Map<String, String>> dataMaps = new ArrayList<>();
-        PagedIterable<ResourceSkuInner> list = azureResourceManager
-                .virtualMachines()
-                .manager()
-                .serviceClient()
-                .getResourceSkus()
-                .list();
-
-        // 使用 Set 来存储已经出现过的 sku.name()，保证不重复
-        Set<String> uniqueNames = new HashSet<>();
-        for (ResourceSkuInner sku : list) {
-            if (ComputeResourceType.VIRTUALMACHINES.toString().equals(sku.resourceType())) {
-                String name = sku.name();
-                List<String> locations = sku.locations();
-                if (!uniqueNames.contains(sku.name()) && (locations.contains(Region.ASIA_EAST.label()) || locations.contains(Region.ASIA_EAST.name()))) {
-                    // 如果当前 sku.name() 没有出现过，则添加到 uniqueNames 集合中，并保留这个 sku 作为第一个唯一的 sku
-                    uniqueNames.add(sku.name());
-                    // 将 capabilities 转换为一个 Map，并直接添加到 dataMap 中
-                    Map<String, String> capabilityMap = sku.capabilities().stream()
-                            .collect(Collectors.toMap(ResourceSkuCapabilities::name, ResourceSkuCapabilities::value));
-                    // 添加 name 和 capabilityMap 到 dataMap
-                    capabilityMap.put("name", name);
-                    dataMaps.add(capabilityMap);
-                }
-            }
-        }
-        return dataMaps;
-    }
-
     public List<Map<String, String>> listsAllSkusWithCapabilities(ComputeResourceType type) throws IOException {
         ArrayList<Map<String, String>> dataMaps = new ArrayList<>();
         PagedIterable<ResourceSkuInner> list = azureResourceManager
@@ -246,9 +216,10 @@ public class AzureVirtualMachine {
         virtualMachine.restart();
     }
 
-    public void start(String instanceId) {
-        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(instanceId);
+    public void start(CloudPluginSceneElementBO element) {
+        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(element.getResourceId());
         virtualMachine.start();
+        element.setPublicIpAddress(virtualMachine.getPrimaryPublicIPAddress().ipAddress());
     }
 
     public void unpause(String instanceId) {

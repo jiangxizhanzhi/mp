@@ -63,6 +63,10 @@ public class RestartHandler extends HandlerCommon {
                     closeAccessModes(element);
                     AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
                     azureVirtualMachine.restart(instanceId);
+//                    TODO 云场景连接用的公网ip 这里用私有ip测不通 暂去
+//                    checkAccessModes(element);
+
+                    openAccessModes(element);
                 });
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
                 getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RESTART, Arrays.asList(ElementProcess.RESTART_CONTAINER));
@@ -70,6 +74,7 @@ public class RestartHandler extends HandlerCommon {
                     closeAccessModes(element);
                     AzureContainer azureContainer = new AzureContainer(IAzureResourceManager.getInstance(cloudType));
                     azureContainer.restart(instanceId);
+                    openAccessModes(element);
 //                    container.addRoute(instanceId);
 //                    container.executeCommand(instanceId, "cd /opt/wazuha && sh start.sh");
 //                    checkAccessModes(element);
@@ -77,7 +82,6 @@ public class RestartHandler extends HandlerCommon {
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
                 getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RESTART, Arrays.asList(ElementProcess.RESTART_LOAD));
                 runElementProgress(nodeId, SceneElementModel.Event.RESTART, ElementProcess.RESTART_LOAD, () -> {
-                    closeAccessModes(element);
                     DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
                     DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
                     Load load = new Load(synchronousDataSource);
