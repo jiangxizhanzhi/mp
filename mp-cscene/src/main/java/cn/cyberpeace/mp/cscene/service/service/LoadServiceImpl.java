@@ -667,13 +667,16 @@ public class LoadServiceImpl {
                 rowTime++;
             }
             if (data.size() > 0) {
-                // todo 会有空的脏数据，不影响查询，后续需要更改
+                // 读取表格数据最后一行的时候会有空的脏数据，不删不影响查询
+                data.remove(data.size() - 1);
                 Boolean success = loadMapper.addLoadLogs(data);
                 if (!success) {
                     return new ServiceResult(null, BaseErrorCode.ERROR, "导入失败").asResult();
                 }
             }
             workbook.close();
+            //outputFile临时文件删除
+            outputFile.delete();
         }
         return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
