@@ -13,7 +13,10 @@ package cn.cyberpeace.mp.sceneplugincloud.bo;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
+import java.net.URL;
 
 /**
  * @ClassName NodeConnectionBO
@@ -22,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
  * @Date 2024/07/02
  * @Version 1.0.0
  */
+@Slf4j
 @ApiModel(description = "场景接入连接数据")
 @Data
 public class NodeConnectionBO {
@@ -52,7 +56,6 @@ public class NodeConnectionBO {
      * 获取URL前缀。
      * 该方法用于提取连接URL的前缀部分，直到最后一个斜杠为止。如果URL为空，则返回空字符串。
      * 这对于处理与特定URL相关的操作非常有用，例如构建相对路径或提取服务器地址。
-     *
      * @return String 返回URL的前缀部分。如果URL为空，则返回空字符串。
      */
     public String getUrlPrefix() {
@@ -60,8 +63,19 @@ public class NodeConnectionBO {
         if (StringUtils.isEmpty(connectionUrl)) {
             return "";
         } else {
-            // 返回URL的前缀，即直到最后一个斜杠为止的字符串
-            return connectionUrl.substring(0, connectionUrl.lastIndexOf("/"));
+            URL url = null;
+            try {
+                url = new URL(connectionUrl);
+                String protocol = url.getProtocol();
+                String host = url.getHost();
+                int port = url.getPort();
+
+                // 将这些部分组合成一个字符串
+                return protocol + "://" + host + ":" + port;
+            } catch (Exception e) {
+                log.error("wrong url " + connectionUrl, e);
+                return "";
+            }
         }
     }
 
