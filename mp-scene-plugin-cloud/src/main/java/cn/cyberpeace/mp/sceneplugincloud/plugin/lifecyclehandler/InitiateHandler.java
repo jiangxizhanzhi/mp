@@ -405,6 +405,7 @@ public class InitiateHandler extends HandlerCommon {
             network.setExternal(true);
             network.setCidr(CloudSingleton.cloudAppConfig.getExternalNetCidr());
             network.setResourceId(CloudSingleton.cloudAppConfig.getExternalNetId());
+            network.setGateway(CloudSingleton.cloudAppConfig.getExternalNetGateway());
             ConnectedNetworkBO connectNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
             List<SceneElementPortBO> ports = Optional
                     .ofNullable(cloudElement.getSrcElement().getPorts())

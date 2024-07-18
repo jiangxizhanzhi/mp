@@ -134,6 +134,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.external_net_cidr:}")
     private String externalNetCidr;
 
+    @Value("${mp.sceneplugincloud.external_net_gateway:}")
+    private String externalNetGateway;
+
     @Value("${mp.sceneplugincloud.external_net_pool:}")
     private String externalNetPool;
 
@@ -214,6 +217,18 @@ public class CloudAppConfig {
 
     @Value("${mp.sceneplugincloud.strategy_disk:40}")
     private Integer strategyDisk;
+
+    @Value("${mp.sceneplugincloud.port_map_template_id:40}")
+    private String portMapTemplateId;
+
+    @Value("${mp.sceneplugincloud.port_map_cpu:2}")
+    private Integer portMapCpu;
+
+    @Value("${mp.sceneplugincloud.port_map_ram:2}")
+    private Integer portMapRam;
+
+    @Value("${mp.sceneplugincloud.port_map_disk:40}")
+    private Integer portMapDisk;
 
     @Autowired
     private BaseAppConfig baseAppConfig;
@@ -311,6 +326,31 @@ public class CloudAppConfig {
         }
 
         return externalNetCidr;
+    }
+
+    /**
+     * getExternalNetGateway
+     *
+     * @return
+     */
+    public String getExternalNetGateway() {
+        if (!StringUtils.isEmpty(externalNetGateway)) {
+            return externalNetGateway;
+        }
+
+        String netId = getExternalNetId();
+        if (StringUtils.isEmpty(netId)) {
+            return null;
+        }
+
+        try {
+            externalNetGateway = new Network().get(netId).getSubnet().getGatewayIp();
+        } catch (Exception e) {
+            log.error("Try to get external net cidr failed: ", e);
+            throw e;
+        }
+
+        return externalNetGateway;
     }
 
     /**
