@@ -137,7 +137,9 @@ public class FirewallFunction {
     }
 
     // 防火墙创建(防火墙和防火墙策略的SKU用基本,如果需要变动，需要保持一致)
-    // 创建前需要将虚拟网络和专有的防火墙子网创建好(防火墙子网名称必须为AzureFirewallSubnet且地址空间后缀必须为/26)
+    // 创建前需要将虚拟网络和专有的防火墙子网创建好
+    // (防火墙子网名称必须为AzureFirewallSubnet且地址空间后缀必须为/26)
+    // (防火墙管理子网名称必须为AzureFirewallManagementSubnet,地址空间后缀大于等于26)
     public FirewallBuildResponseBody createFireWall(Integer cloudType, FirewallBuildRequestBody requestBody) {
         FirewallBuildResponseBody responseBody = new FirewallBuildResponseBody();
         responseBody.setFirewallBuildResult(new FirewallBuildResult());
@@ -189,21 +191,21 @@ public class FirewallFunction {
                 }
             }
 
-            //防火墙公网id,该公网Ip的SKU必须为标准
-            AtomicReference<SubResource> publicIpResource = new AtomicReference<>();
-            PublicIpAddress publicIpAddress = azureResourceManager.publicIpAddresses().define(UUID.randomUUID().toString())
-                    .withRegion(requestBody.getRegion())
-                    .withExistingResourceGroup(requestBody.getResourceGroup())
-                    .withSku(PublicIPSkuType.STANDARD)
-                    .withStaticIP()
-                    .create();
-            publicIpResource.set(new SubResource().withId(publicIpAddress.id()));
-            System.out.println("防火墙公网名称: " + publicIpAddress.name() + " 防火墙公网id: " + publicIpAddress.id());
+//            //防火墙为basic时,该公网ip不是必须创建;如果需要创建(该防火墙SKU不为basic时),该公网Ip的SKU必须为标准
+//            AtomicReference<SubResource> publicIpResource = new AtomicReference<>();
+//            PublicIpAddress publicIpAddress = azureResourceManager.publicIpAddresses().define(UUID.randomUUID().toString())
+//                    .withRegion(requestBody.getRegion())
+//                    .withExistingResourceGroup(requestBody.getResourceGroup())
+//                    .withSku(PublicIPSkuType.STANDARD)
+//                    .withStaticIP()
+//                    .create();
+//            publicIpResource.set(new SubResource().withId(publicIpAddress.id()));
+//            System.out.println("防火墙公网名称: " + publicIpAddress.name() + " 防火墙公网id: " + publicIpAddress.id());
 
             // 创建 AzureFirewallIPConfiguration 对象，用于定义防火墙的 IP 配置
             AzureFirewallIpConfiguration firewallIPConfig = new AzureFirewallIpConfiguration()
                     .withName("firewallIpConfig" + UUID.randomUUID())
-                    .withPublicIpAddress(publicIpResource.get())
+//                    .withPublicIpAddress(publicIpResource.get())
                     .withSubnet(subnetResource.get()); // 根据防火墙子网，分配对应的静态 IP 地址
 
             List<AzureFirewallIpConfiguration> firewallIPConfigs = new ArrayList<>();
@@ -259,7 +261,7 @@ public class FirewallFunction {
                 });
             }
 
-            //当防火墙SKU为基本时，需要配置管理公共IP地址，且该公共IP的SKU必须为标准
+            //当防火墙SKU为基本时，必须配置管理公共IP地址，且该公共IP的SKU必须为标准
             AtomicReference<SubResource> managePublicIpResource = new AtomicReference<>();
             PublicIpAddress managePublicIp = azureResourceManager.publicIpAddresses().define(UUID.randomUUID().toString())
                     .withRegion(requestBody.getRegion())
