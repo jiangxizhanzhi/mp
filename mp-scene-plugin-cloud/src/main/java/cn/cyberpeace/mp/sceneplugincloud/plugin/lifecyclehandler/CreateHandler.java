@@ -1534,9 +1534,18 @@ public class CreateHandler extends HandlerCommon {
         // 容器参数
         if (cloudElement.getDockerParams() != null) {
             DockerParams dockerParams = cloudElement.getDockerParams();
-//            createData.setEnvironment(dockerParams.getEnvironment());
+
+            if (dockerParams.getEnvironment() != null && !dockerParams.getEnvironment().isEmpty()) {
+                List<String> envs = new ArrayList<>();
+                for (var e : dockerParams.getEnvironment().entrySet()) {
+                    envs.add(e.getKey() + "=" + e.getValue());
+                }
+                createData.setEnvs(envs);
+            }
+
             createData.setInteractive(dockerParams.getInteractive());
             createData.setPrivileged(dockerParams.getPrivileged());
+            createData.setTty(dockerParams.getTty());
             createData.setRun(dockerParams.getRun());
         }
 
