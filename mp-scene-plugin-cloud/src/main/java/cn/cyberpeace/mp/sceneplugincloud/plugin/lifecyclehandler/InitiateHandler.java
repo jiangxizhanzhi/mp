@@ -668,6 +668,9 @@ public class InitiateHandler extends HandlerCommon {
      * @param element 辅助网络节点
      */
     private void initIpPool(CloudPluginSceneElementBO element) {
+//        边界设备不做处理
+        if (BaseCloudPluginSceneElementModel.ImageType.NETWORK_EQUIPMENT.equals(element.getImageType())) return;
+
         element.getDeriveNetworks().forEach(connectedNetwork -> {
             CloudPluginSceneElementNetworkBO network = connectedNetwork.network;
             String cidr = network.getCidr();

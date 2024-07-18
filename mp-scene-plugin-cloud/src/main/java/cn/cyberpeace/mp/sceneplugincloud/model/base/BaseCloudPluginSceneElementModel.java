@@ -167,6 +167,14 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String cidrPools;
 
+    //    边界设备
+    @DefaultStr
+    private String address;
+    @DefaultStr
+    private String protocol;
+    @DefaultStr
+    private String port;
+
     // 靶标属性
     @DefaultInt
     private Integer role;
@@ -275,6 +283,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final String VNET = "VNet";
         public static final String LAAS_VM = "laasVm";
         public static final String CONTAINER_REGISTRY = "containerRegistry";
+        public static final String NETWORK_EQUIPMENT = "networkEquipment";
+
 
         private ImageType() {
         }

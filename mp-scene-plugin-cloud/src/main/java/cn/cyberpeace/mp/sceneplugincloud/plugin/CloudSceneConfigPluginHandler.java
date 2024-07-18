@@ -185,25 +185,27 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                     ));
 
             elementMap.forEach((nodeId, element) -> {
-                if (StringUtils.isNotBlank(element.getUsername())) {
-                    boolean isUsernameAllowed = Arrays.stream(disallowedUsernames)
-                            .noneMatch(element.getUsername()::equalsIgnoreCase);
-                    boolean matches = !validUsernamePattern.matcher(element.getUsername()).matches();
-                    if (!isUsernameAllowed) {
-                        throw new MpRuntimeException(CloudErrorCode.USERNAME_NOT_ALLOWED.format(element.getUsername()));
-                    } else if (!validUsernamePattern.matcher(element.getUsername()).matches()) {
-                        throw new MpRuntimeException(CloudErrorCode.INVALID_USERNAME.format(element.getUsername()));
+                if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(element.getImageType())) {
+                    if (StringUtils.isNotBlank(element.getUsername())) {
+                        boolean isUsernameAllowed = Arrays.stream(disallowedUsernames)
+                                .noneMatch(element.getUsername()::equalsIgnoreCase);
+                        if (!isUsernameAllowed) {
+                            throw new MpRuntimeException(CloudErrorCode.USERNAME_NOT_ALLOWED.format(element.getUsername()));
+                        } else if (!validUsernamePattern.matcher(element.getUsername()).matches()) {
+                            throw new MpRuntimeException(CloudErrorCode.INVALID_USERNAME.format(element.getUsername()));
+                        }
+                    }
+                    if (StringUtils.isNotBlank(element.getPassword())) {
+                        boolean isPasswordAllowed = Arrays.stream(disallowedPasswords)
+                                .noneMatch(element.getPassword()::equalsIgnoreCase);
+                        if (!isPasswordAllowed) {
+                            throw new MpRuntimeException(CloudErrorCode.PASSWORD_NOT_ALLOWED.format(element.getPassword()));
+                        } else if (!validPasswordPattern.matcher(element.getPassword()).matches()) {
+                            throw new MpRuntimeException(CloudErrorCode.INVALID_PASSWORD.format(element.getPassword()));
+                        }
                     }
                 }
-                if (StringUtils.isNotBlank(element.getPassword())) {
-                    boolean isPasswordAllowed = Arrays.stream(disallowedPasswords)
-                            .noneMatch(element.getPassword()::equalsIgnoreCase);
-                    if (!isPasswordAllowed) {
-                        throw new MpRuntimeException(CloudErrorCode.PASSWORD_NOT_ALLOWED.format(element.getPassword()));
-                    } else if (!validPasswordPattern.matcher(element.getPassword()).matches()) {
-                        throw new MpRuntimeException(CloudErrorCode.INVALID_PASSWORD.format(element.getPassword()));
-                    }
-                }
+
                 if (BaseCloudPluginSceneElementModel.ImageType.VNET.equals(element.getImageType())) {
 //                VNet节点子网格式校验
                     List<String> cidrPools = element.getCidrPools();
@@ -305,7 +307,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                 if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(cloudPluginSceneConfigElementBO.getImageType())) {
                     List<SceneConfigElementPortBO> sceneConfigElementPortBOList = elementPortMap.get(id);
                     List<String> cidrs = sceneConfigElementPortBOList.stream()
-                            .flatMap(element1 -> element1.getElement().getPorts().stream().filter(port1->StringUtils.isNotEmpty(port1.getIp())).map(port1 -> IpUtils.formatIpAddressWithDefaultMask(port1.getIp())))
+                            .flatMap(element1 -> element1.getElement().getPorts().stream().filter(port1 -> StringUtils.isNotEmpty(port1.getIp())).map(port1 -> IpUtils.formatIpAddressWithDefaultMask(port1.getIp())))
                             .collect(Collectors.toList());
                     nodeCidrPools.get(element.getSrcElement().getId()).addAll(cidrs);
                 } else if (BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudPluginSceneConfigElementBO.getImageType())) {
