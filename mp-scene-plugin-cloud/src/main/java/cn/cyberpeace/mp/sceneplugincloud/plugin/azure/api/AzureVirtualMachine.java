@@ -20,6 +20,7 @@ import com.azure.resourcemanager.network.models.Network;
 import com.azure.resourcemanager.network.models.NetworkInterface;
 import com.azure.resourcemanager.network.models.NetworkSecurityGroup;
 import com.azure.resourcemanager.network.models.PublicIpAddress;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileWriter;
@@ -29,6 +30,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class AzureVirtualMachine {
     private IAzureResourceManager resourceService;
 
@@ -170,29 +172,22 @@ public class AzureVirtualMachine {
     }
 
     public void delete(CloudPluginSceneElementBO cloudElement) {
-        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(cloudElement.getResourceId());
-        virtualMachine.deallocate();//停机，释放资源
-//        删除虚拟机
-        azureResourceManager.virtualMachines().deleteById(cloudElement.getResourceId());
-//        删除存储账户 无法从virtualMachine直接找到存储账户name stg472874959defb
-//        virtualMachine.storageProfile().osDisk().vhd().uri() https://stg472874959defb.blob.core.windows.net/vhds/MP_SCENE_ac5a089e081147e6af2406942cdd44bf-os-disk-b6e312ca-9d10-485a-a9f7-136bee35135a.vhd
-        String uri = virtualMachine.storageProfile().osDisk().vhd().uri();
-        String storageName = extractStorageAccountNameFromVhdUri(uri);
-        String groupName = virtualMachine.resourceGroupName();
-        azureResourceManager.storageAccounts().deleteByResourceGroup(groupName, storageName);
-//        删除网络接口
-        azureResourceManager.networkInterfaces().deleteById(virtualMachine.getPrimaryNetworkInterface().id());
-    }
+        try {
+            VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(cloudElement.getResourceId());
 
-    // 从 VHD URI 中提取存储账户 ID
-    private static String extractStorageAccountNameFromVhdUri(String vhdUri) {
-        // 假设 VHD URI 的格式为：https://<storage-account-name>.blob.core.windows.net/<container-name>/<vhd-name>.vhd
-        // 根据该格式，可以提取存储账户
-        String[] parts = vhdUri.split("/");
-        if (parts.length >= 4) {
-            return parts[2].substring(0, parts[2].indexOf('.'));
+            String osDiskId = virtualMachine.osDiskId();
+            String networkInterfaceId = virtualMachine.getPrimaryNetworkInterface().id();
+            PublicIpAddress primaryPublicIPAddress = virtualMachine.getPrimaryPublicIPAddress();
+            //        删除虚拟机及绑定资源
+            azureResourceManager.virtualMachines().deleteById(cloudElement.getResourceId());
+            azureResourceManager.disks().deleteById(osDiskId);
+            azureResourceManager.networkInterfaces().deleteById(networkInterfaceId);
+            if (null != primaryPublicIPAddress) {
+                azureResourceManager.publicIpAddresses().deleteById(primaryPublicIPAddress.id());
+            }
+        } catch (Exception e) {
+            log.error("The VM failed to be deleted.", e);
         }
-        return null;
     }
 
     public void execCommand(String group, String vmName, List<String> commands) {
