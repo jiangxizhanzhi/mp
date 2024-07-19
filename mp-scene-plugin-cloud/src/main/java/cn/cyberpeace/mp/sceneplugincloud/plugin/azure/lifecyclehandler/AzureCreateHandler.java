@@ -35,6 +35,7 @@ public class AzureCreateHandler extends CreateHandler {
 
     public static class ElementProcess {
         public static final EventProcess CREATE_WEBAPP = new EventProcess("create_webapp", "sceneplugincloud.event" + ".CREATE_WEBAPP");
+        public static final EventProcess CREATE_FIRE_WALL = new EventProcess("create_fire_wall", "sceneplugincloud.event.create_fire_wall");
     }
 
     private IAzureResourceManager resourceService;
@@ -107,7 +108,7 @@ public class AzureCreateHandler extends CreateHandler {
                 CloudPluginSceneElementBO element = filteredAuxiliaryNetworkElements.get(i);
                 //筛选出所有cidr是否连接容器
                 CloudScenePluginHandler pluginHandler = getPluginHandler();
-                ConcurrentHashMap<String, Boolean> cidrContainerMap = ElementNetworkUtils.getCidrToContainerMap(pluginHandler, allElements, element, virtualNicsMap);
+                ConcurrentHashMap<String, Integer> cidrContainerMap = ElementNetworkUtils.getCidrToContainerMap(pluginHandler, allElements, element, virtualNicsMap);
                 String nodeId = element.getSrcElement().getId();
                 // 封装创建网络的任务
                 AzureVirtualNetCreateTask task = new AzureVirtualNetCreateTask(resourceService, getPluginHandler(), element, cidrContainerMap, virtualNicsMap);
@@ -134,9 +135,7 @@ public class AzureCreateHandler extends CreateHandler {
                         if (elementBO != null) {
                             String resourceId = element.getResourceId();
                             String resourceId1 = elementBO.getResourceId();
-
                             createVNetPeering(resourceId, resourceId1, calledPairs);
-
                         }
                     }
                 });
@@ -157,43 +156,6 @@ public class AzureCreateHandler extends CreateHandler {
             for (CloudPluginSceneElementBO element : filteredVirtualMachineElements) {
                 String nodeId = element.getSrcElement().getId();
                 List<VirtualNic> virtualNics = virtualNicsMap.get(nodeId);
-//                获取节点对应VNet
-                /*List<ConnectedNetworkBO> accessNetworks = element.getAccessNetworks();
-                SceneElementBO vNetElement;
-                if (accessNetworks.size() > 0) {
-                    vNetElement = accessNetworks.get(0).getConnectPorts().get(0).getTo().getElement();
-                    if (null != vNetElement) {
-                        CloudPluginSceneElementBO vNetPluginElement = getPluginHandler().getElement(vNetElement.getId());
-                        List<String> cidrPools = vNetPluginElement.getCidrPools();
-                        if (cidrPools.size() > 0) {
-                            virtualNics.forEach(virtualNic -> {
-                                String fixedIp = virtualNic.getFixedIp();
-                                String cidr = IpUtils.ip2Cidr24(fixedIp);
-//                  判断网络是否在VNet子网内
-                                boolean contains = cidrPools.contains(cidr);
-                                if (!contains) {
-//                    不在则更新网络ip 需校验ip未使用+非Azure保留ip
-                                    List<String> nodeIds = vNetPluginElement.getDeriveNetworks().stream()
-                                            .flatMap(connectedNetworkBO -> connectedNetworkBO.getToPorts().stream())
-                                            .map(SceneElementPortBO::getElement)
-                                            .map(SceneElementBO::getId)
-                                            .distinct()
-                                            .collect(Collectors.toList());
-
-                                    Set<String> allFixedIps = nodeIds.stream()
-                                            .map(virtualNicsMap::get)
-                                            .flatMap(List::stream)
-                                            .map(VirtualNic::getFixedIp)
-                                            .collect(Collectors.toSet());
-
-                                    String ip = IpUtils.generateRandomIpNotInList(cidrPools.get(0), allFixedIps);
-//                                更新ip
-                                    virtualNic.setFixedIp(ip);
-                                }
-                            });
-                        }
-                    }
-                }*/
                 //            创建虚拟机时不允许扩容
                 element.getSrcElement().setExpansionDisk(null);
                 element.setVmExpansionDiskType(null);
@@ -235,6 +197,18 @@ public class AzureCreateHandler extends CreateHandler {
                 createWebAppTasks.add(formatTask);
             }
             createTerminalTasks.addAll(createWebAppTasks);
+
+            // 防火墙
+            List<CloudPluginSceneElementBO> filteredFireWallAppElements = this.filterFireWallElements(allElements);
+            List<Runnable> createFireWallTasks = new ArrayList<>();
+            for (CloudPluginSceneElementBO element : filteredFireWallAppElements) {
+                String nodeId = element.getSrcElement().getId();
+                List<VirtualNic> virtualNics = this.genVirutalNics(element);
+                AzureFireWallCreateTask task = new AzureFireWallCreateTask(resourceService, getPluginHandler(), element, virtualNics);
+                Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, ElementProcess.CREATE_FIRE_WALL, task);
+                createFireWallTasks.add(formatTask);
+            }
+            createTerminalTasks.addAll(createFireWallTasks);
 
             if (!createTerminalTasks.isEmpty()) {
                 runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
@@ -336,6 +310,16 @@ public class AzureCreateHandler extends CreateHandler {
         List<CloudPluginSceneElementBO> filterElements = new ArrayList<>();
         for (var c : allElements) {
             if (BaseCloudPluginSceneElementModel.ImageType.VNET.equals(c.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.WEBAPP == c.getVirtualType()) {
+                filterElements.add(c);
+            }
+        }
+        return filterElements;
+    }
+
+    private List<CloudPluginSceneElementBO> filterFireWallElements(List<CloudPluginSceneElementBO> allElements) {
+        List<CloudPluginSceneElementBO> filterElements = new ArrayList<>();
+        for (var c : allElements) {
+            if (BaseCloudPluginSceneElementModel.ImageType.FIRE_WALL.equals(c.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER == c.getVirtualType()) {
                 filterElements.add(c);
             }
         }

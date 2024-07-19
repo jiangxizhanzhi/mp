@@ -751,9 +751,14 @@ public class IpUtils {
     public static String getNextDefaultCIDR(Set<String> existingCidrs) {
         int subnetNumber = 1;
         while (true) {
-            String nextCIDR = "192.168." + subnetNumber + ".0/24";
-            if (!existingCidrs.contains(nextCIDR)) {
-                return nextCIDR;
+            // Generate the next CIDR with /24 mask
+            String nextCIDR24 = "192.168." + subnetNumber + ".0/24";
+            // Generate the next CIDR with /26 mask for checking
+            String nextCIDR26 = "192.168." + subnetNumber + ".0/26";
+
+            // Check if neither of the CIDRs exist in the set
+            if (!existingCidrs.contains(nextCIDR24) && !existingCidrs.contains(nextCIDR26)) {
+                return nextCIDR24;
             }
             subnetNumber++;
         }
