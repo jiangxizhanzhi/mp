@@ -410,9 +410,11 @@ public class DeleteHandler extends HandlerCommon {
         }
 
         // 删除配置下发虚拟机
-        VirtualMachineDeleteData deleteData = new VirtualMachineDeleteData();
-        deleteData.setVms(List.of(getPluginHandler().getScene().getStrategyInstance()));
-        vmClient.delete(deleteData);
+        if (StringUtils.isNotEmpty(getPluginHandler().getScene().getStrategyInstance())) {
+            VirtualMachineDeleteData deleteData = new VirtualMachineDeleteData();
+            deleteData.setVms(List.of(getPluginHandler().getScene().getStrategyInstance()));
+            vmClient.delete(deleteData);
+        }
 
         // 删除终端
         List<CloudPluginSceneElementBO> terminals = new ArrayList<>();

@@ -98,8 +98,9 @@ public class FlowCollector {
      * @param deleteFlowCollectBo
      */
     public void deleteCollector(DeleteFlowCollectBo deleteFlowCollectBo) {
-
-        flowCollectClient.delArkimeInstance(deleteFlowCollectBo.getCollectorInstanceId());
+        if (StringUtils.isNotEmpty(deleteFlowCollectBo.getCollectorInstanceId())) {
+            flowCollectClient.delArkimeInstance(deleteFlowCollectBo.getCollectorInstanceId());
+        }
         if (StringUtils.isNotEmpty(deleteFlowCollectBo.getFlowMirrorId())) {
             flowCollectClient.delFlowMirror(deleteFlowCollectBo.getFlowMirrorId());
         }
