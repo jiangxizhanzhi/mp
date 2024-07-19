@@ -136,13 +136,54 @@ public class FirewallFunction {
         }
     }
 
+    private FirewallBuildResponseBody checkParam(FirewallBuildResponseBody responseBody, FirewallBuildRequestBody requestBody){
+        // 参数校验
+        if(requestBody == null){
+            responseBody.getFirewallBuildResult().setResult(false);
+            responseBody.getFirewallBuildResult().setErrorMessage("参数校验,FirewallBuildRequestBody参数为空");
+            return responseBody;
+        } else {
+            if(requestBody.getFirewallName() == null || requestBody.getFirewallName().isEmpty()){
+                responseBody.getFirewallBuildResult().setResult(false);
+                responseBody.getFirewallBuildResult().setErrorMessage("参数校验,FirewallBuildRequestBody.FirewallName参数为空");
+                return responseBody;
+            }
+            if(requestBody.getResourceGroup() == null || requestBody.getResourceGroup().isEmpty()){
+                responseBody.getFirewallBuildResult().setResult(false);
+                responseBody.getFirewallBuildResult().setErrorMessage("参数校验,FirewallBuildRequestBody.ResourceGroup参数为空");
+            }
+            if(requestBody.getFirewallPolicyName() == null || requestBody.getFirewallPolicyName().isEmpty()){
+                responseBody.getFirewallBuildResult().setResult(false);
+                responseBody.getFirewallBuildResult().setErrorMessage("参数校验,FirewallBuildRequestBody.FirewallPolicyName参数为空");
+            }
+            if(requestBody.getRegion() == null || requestBody.getRegion().isEmpty()){
+                responseBody.getFirewallBuildResult().setResult(false);
+                responseBody.getFirewallBuildResult().setErrorMessage("参数校验,FirewallBuildRequestBody.Region参数为空");
+            }
+            if(requestBody.getSku() == null){
+                responseBody.getFirewallBuildResult().setResult(false);
+                responseBody.getFirewallBuildResult().setErrorMessage("参数校验,FirewallBuildRequestBody.Sku参数为空");
+            }
+            if(requestBody.getPolicySku() == null){
+                responseBody.getFirewallBuildResult().setResult(false);
+                responseBody.getFirewallBuildResult().setErrorMessage("参数校验,FirewallBuildRequestBody.PolicySku参数为空");
+            }
+        }
+        return responseBody;
+    }
+
     // 防火墙创建(防火墙和防火墙策略的SKU用基本,如果需要变动，需要保持一致)
-    // 创建前需要将虚拟网络和专有的防火墙子网创建好
-    // (防火墙子网名称必须为AzureFirewallSubnet且地址空间后缀必须为/26)
-    // (防火墙管理子网名称必须为AzureFirewallManagementSubnet,地址空间后缀大于等于26)
+    // 创建前需要将虚拟网络和专有的防火墙子网创建好(防火墙子网名称必须为AzureFirewallSubnet且地址空间后缀必须为/26)
+    // 当防火墙SKU为basic时,必须创建防火墙管理子网(防火墙管理子网名称必须为AzureFirewallManagementSubnet,地址空间后缀大于等于26)
     public FirewallBuildResponseBody createFireWall(Integer cloudType, FirewallBuildRequestBody requestBody) {
+        // 返回结果
         FirewallBuildResponseBody responseBody = new FirewallBuildResponseBody();
         responseBody.setFirewallBuildResult(new FirewallBuildResult());
+        // 参数校验
+        FirewallBuildResponseBody checkParam = checkParam(responseBody, requestBody);
+        if(checkParam.getFirewallBuildResult().getResult() != null && checkParam.getFirewallBuildResult().getResult() == false){
+            return checkParam;
+        }
         // 获取默认订阅Id的资源管理器
         AzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(cloudType).getManager();
         try {
@@ -172,10 +213,18 @@ public class FirewallFunction {
             } else {
                 vnet = requestBody.getVirtualNetwork();
                 // 判断防火墙子网是否存在
-                if (vnet.subnets().get("AzureFirewallSubnet") == null || vnet.subnets().get("AzureFirewallManagementSubnet") == null) {
+                if (vnet.subnets().get("AzureFirewallSubnet") == null) {
                     responseBody.getFirewallBuildResult().setResult(false);
                     responseBody.getFirewallBuildResult().setErrorMessage("创建防火墙失败：" + "该虚拟网络没有创建专属于防火墙的子网");
                     return responseBody;
+                }
+                // 当防火墙SKU为basic时,判断防火墙管理子网是否存在
+                if (requestBody.getSku() == AzureFirewallSkuTier.BASIC) {
+                    if(vnet.subnets().get("AzureFirewallManagementSubnet") == null){
+                        responseBody.getFirewallBuildResult().setResult(false);
+                        responseBody.getFirewallBuildResult().setErrorMessage("创建防火墙失败：" + "该虚拟网络没有创建专属于防火墙管理子网");
+                        return responseBody;
+                    }
                 }
             }
 
@@ -191,23 +240,25 @@ public class FirewallFunction {
                 }
             }
 
-//            //防火墙为basic时,该公网ip不是必须创建;如果需要创建(该防火墙SKU不为basic时),该公网Ip的SKU必须为标准
-//            AtomicReference<SubResource> publicIpResource = new AtomicReference<>();
-//            PublicIpAddress publicIpAddress = azureResourceManager.publicIpAddresses().define(UUID.randomUUID().toString())
-//                    .withRegion(requestBody.getRegion())
-//                    .withExistingResourceGroup(requestBody.getResourceGroup())
-//                    .withSku(PublicIPSkuType.STANDARD)
-//                    .withStaticIP()
-//                    .create();
-//            publicIpResource.set(new SubResource().withId(publicIpAddress.id()));
-//            System.out.println("防火墙公网名称: " + publicIpAddress.name() + " 防火墙公网id: " + publicIpAddress.id());
+            //防火墙sku为basic时,该公网ip不是必须创建;该防火墙SKU不为basic时,该公网Ip必须创建,且SKU必须为标准以上
+            AtomicReference<SubResource> publicIpResource = null;
+            if (requestBody.getSku() != AzureFirewallSkuTier.BASIC) {
+                publicIpResource = new AtomicReference<>();
+                PublicIpAddress publicIpAddress = azureResourceManager.publicIpAddresses().define(UUID.randomUUID().toString())
+                        .withRegion(requestBody.getRegion())
+                        .withExistingResourceGroup(requestBody.getResourceGroup())
+                        .withSku(PublicIPSkuType.STANDARD)
+                        .withStaticIP()
+                        .create();
+                publicIpResource.set(new SubResource().withId(publicIpAddress.id()));
+                System.out.println("防火墙公网名称: " + publicIpAddress.name() + " 防火墙公网id: " + publicIpAddress.id());
+            }
 
             // 创建 AzureFirewallIPConfiguration 对象，用于定义防火墙的 IP 配置
             AzureFirewallIpConfiguration firewallIPConfig = new AzureFirewallIpConfiguration()
                     .withName("firewallIpConfig" + UUID.randomUUID())
-//                    .withPublicIpAddress(publicIpResource.get())
+                    .withPublicIpAddress(publicIpResource != null ? publicIpResource.get() : null)
                     .withSubnet(subnetResource.get()); // 根据防火墙子网，分配对应的静态 IP 地址
-
             List<AzureFirewallIpConfiguration> firewallIPConfigs = new ArrayList<>();
             firewallIPConfigs.add(firewallIPConfig);
             System.out.println("防火墙的IP配置完成!");
@@ -219,8 +270,9 @@ public class FirewallFunction {
                 // 创建防火墙策略
                 FirewallPolicyInner firewallPolicyInner = new FirewallPolicyInner()
                         .withLocation(requestBody.getRegion())
-                        .withSku(new FirewallPolicySku().withTier(FirewallPolicySkuTier.BASIC));
-                responseBody.getFirewallBuildResult().setFirewallPolicySku("Basic");
+                        .withSku(new FirewallPolicySku().withTier(requestBody.getPolicySku()));
+                responseBody.getFirewallBuildResult().setFirewallPolicySku(requestBody.getPolicySku().toString());
+                System.out.println("创建防火墙成功！");
 
                 // 提交创建防火墙策略的操作
                 FirewallPolicyInner createdFirewallPolicy = azureResourceManager.networks().manager().serviceClient()
@@ -228,20 +280,22 @@ public class FirewallFunction {
                 responseBody.getFirewallBuildResult().setFirewallPolicyName(createdFirewallPolicy.name());
                 System.out.println("创建防火墙策略成功！");
 
-                // 创建防火墙策略的规则集合
+                // 创建防火墙规则变更项
                 List<FirewallPolicyRuleCollection> ruleCollectionInner = getPolicyRuleCollection(requestBody);
+                System.out.println("创建防火墙规则变更项！");
 
-                // 创建规则集合组inner
+                // 创建规则集合组变更项
                 FirewallPolicyRuleCollectionGroupInner ruleCollectionGroupInner = new FirewallPolicyRuleCollectionGroupInner()
                         .withName("MyRuleCollectionGroup" + UUID.randomUUID())
                         .withPriority(100)
-                        .withRuleCollections(ruleCollectionInner);
-                System.out.println("创建规则集合组成功！");
+                        .withRuleCollections(ruleCollectionInner); // 绑定防火墙规则变更项
+                System.out.println("创建规则集合组变更项！");
 
                 // 提交创建规则集合组的操作
                 azureResourceManager.networks().manager().serviceClient()
                         .getFirewallPolicyRuleCollectionGroups()
                         .createOrUpdate(requestBody.getResourceGroup(), createdFirewallPolicy.name(), ruleCollectionGroupInner.name(), ruleCollectionGroupInner);
+                System.out.println("提交规则集合组变更项,创建规则集合组成功！");
 
                 // 提交更新防火墙策略的操作
                 azureResourceManager.networks().manager().serviceClient()
@@ -262,44 +316,48 @@ public class FirewallFunction {
             }
 
             //当防火墙SKU为基本时，必须配置管理公共IP地址，且该公共IP的SKU必须为标准
-            AtomicReference<SubResource> managePublicIpResource = new AtomicReference<>();
-            PublicIpAddress managePublicIp = azureResourceManager.publicIpAddresses().define(UUID.randomUUID().toString())
-                    .withRegion(requestBody.getRegion())
-                    .withExistingResourceGroup(requestBody.getResourceGroup())
-                    .withSku(PublicIPSkuType.STANDARD)
-                    .withStaticIP()
-                    .create();
-            managePublicIpResource.set(new SubResource().withId(managePublicIp.id()));
-            System.out.println("管理公共IP地址名称: " + managePublicIp.name() + " 管理公共IP地址id: " + managePublicIp.id());
+            AzureFirewallIpConfiguration managePublicIpConfig = null;
+            if (requestBody.getSku() == AzureFirewallSkuTier.BASIC) {
+                // 创建管理公共IP地址
+                AtomicReference<SubResource> managePublicIpResource = new AtomicReference<>();
+                PublicIpAddress managePublicIp = azureResourceManager.publicIpAddresses().define(UUID.randomUUID().toString())
+                        .withRegion(requestBody.getRegion())
+                        .withExistingResourceGroup(requestBody.getResourceGroup())
+                        .withSku(PublicIPSkuType.STANDARD)
+                        .withStaticIP()
+                        .create();
+                managePublicIpResource.set(new SubResource().withId(managePublicIp.id()));
+                System.out.println("管理公共IP地址名称: " + managePublicIp.name() + " 管理公共IP地址id: " + managePublicIp.id());
 
-            //防火墙管理Ip配置子网id
-            AtomicReference<SubResource> managerSubnetResource = new AtomicReference<>();
-            Map<String, Subnet> managerSubnets = vnet.subnets();
-            for (Map.Entry<String, Subnet> entry : managerSubnets.entrySet()) {
-                if (entry.getKey().equals("AzureFirewallManagementSubnet")) {
-                    Subnet value = entry.getValue();
-                    managerSubnetResource.set(new SubResource().withId(value.id()));
-                    System.out.println("防火墙管理Ip配置子网名称: " + entry.getKey() + " ;防火墙管理Ip配置子网id: " + entry.getValue());
-                    break;
+                //防火墙管理Ip配置子网id
+                AtomicReference<SubResource> managerSubnetResource = new AtomicReference<>();
+                Map<String, Subnet> managerSubnets = vnet.subnets();
+                for (Map.Entry<String, Subnet> entry : managerSubnets.entrySet()) {
+                    if (entry.getKey().equals("AzureFirewallManagementSubnet")) {
+                        Subnet value = entry.getValue();
+                        managerSubnetResource.set(new SubResource().withId(value.id()));
+                        System.out.println("防火墙管理Ip配置子网名称: " + entry.getKey() + " ;防火墙管理Ip配置子网id: " + entry.getValue());
+                        break;
+                    }
                 }
-            }
 
-            // 创建 AzureFirewallIPConfiguration 对象，用于定义防火墙的管理公共IP地址配置
-            AzureFirewallIpConfiguration managePublicIpConfig = new AzureFirewallIpConfiguration()
-                    .withName("managePublicIpResource" + UUID.randomUUID())
-                    .withPublicIpAddress(managePublicIpResource.get())
-                    .withSubnet(managerSubnetResource.get());
+                // 创建 AzureFirewallIPConfiguration 对象，用于定义防火墙的管理公共IP地址配置
+                managePublicIpConfig = new AzureFirewallIpConfiguration()
+                        .withName("managePublicIpResource" + UUID.randomUUID())
+                        .withPublicIpAddress(managePublicIpResource.get())
+                        .withSubnet(managerSubnetResource.get());
+            }
 
             // 创建防火墙实例
             AzureFirewallInner azureFirewallUpdateInner = new AzureFirewallInner()
                     .withLocation(requestBody.getRegion())
                     .withSku(new AzureFirewallSku()
                             .withName(AzureFirewallSkuName.AZFW_VNET)
-                            .withTier(AzureFirewallSkuTier.BASIC))
+                            .withTier(requestBody.getSku()))
                     .withFirewallPolicy(firewallPolicySubResource.get())
                     .withIpConfigurations(firewallIPConfigs)
                     .withManagementIpConfiguration(managePublicIpConfig);
-            responseBody.getFirewallBuildResult().setFirewallSku("Basic");
+            responseBody.getFirewallBuildResult().setFirewallSku(requestBody.getSku().toString());
 
             // 提交创建防火墙实例的操作
             AzureFirewallInner create = azureResourceManager.networks().manager().serviceClient()
@@ -376,7 +434,7 @@ public class FirewallFunction {
                 allowRules.add(networkRule);
             }
 
-            // 创建防火墙规则集合(规则集合类型 根据withRules方法内传的参数决定 分为三类 网络,应用程序,DNAT,皆继承FirewallPolicyRule类)
+            // 创建防火墙规则集合(规则集合类型 根据withRules方法内传的参数决定 分为三类 网络,应用程序,DNAT,皆继承FirewallPolicyRuleCollection类)
             FirewallPolicyFilterRuleCollection ruleCollectionInner = new FirewallPolicyFilterRuleCollection()
                     .withName("MyRuleCollection" + UUID.randomUUID())
                     .withPriority(ruleGroupPriority)

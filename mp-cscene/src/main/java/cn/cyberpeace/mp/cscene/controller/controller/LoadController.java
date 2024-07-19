@@ -18,6 +18,8 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.Firewal
 import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionrequest.FirewallBuildRequestBody;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionresponse.FirewallBuildResponseBody;
 import com.alibaba.fastjson.JSONObject;
+import com.azure.resourcemanager.network.models.AzureFirewallSkuTier;
+import com.azure.resourcemanager.network.models.FirewallPolicySkuTier;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -400,6 +402,8 @@ public class LoadController {
     @ApiOperation(value = "创建防火墙", notes = "")
     @PostMapping("/createFireWall")
     public ServiceResult createFireWall(@RequestBody FirewallBuildRequestBody fireWallBuildRequestBody) {
+        fireWallBuildRequestBody.setSku(AzureFirewallSkuTier.BASIC);
+        fireWallBuildRequestBody.setPolicySku(FirewallPolicySkuTier.BASIC);
         FirewallBuildResponseBody fireWall = firewallFunction.createFireWall(1, fireWallBuildRequestBody);
         return new ServiceResult(fireWall, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }

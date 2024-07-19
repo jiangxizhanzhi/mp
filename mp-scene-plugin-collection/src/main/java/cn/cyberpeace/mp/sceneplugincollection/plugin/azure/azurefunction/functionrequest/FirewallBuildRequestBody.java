@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionrequest;
 
+import com.azure.resourcemanager.network.models.AzureFirewallSkuTier;
+import com.azure.resourcemanager.network.models.FirewallPolicySkuTier;
 import com.azure.resourcemanager.network.models.Network;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,4 +33,10 @@ public class FirewallBuildRequestBody {
 
     //虚拟网络
     private Network virtualNetwork;
+
+    // 防火墙SKU
+    private AzureFirewallSkuTier sku;
+
+    // 防火墙策略SKU
+    private FirewallPolicySkuTier policySku;
 }
