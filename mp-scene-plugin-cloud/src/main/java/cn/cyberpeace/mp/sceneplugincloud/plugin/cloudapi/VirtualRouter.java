@@ -10,13 +10,20 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.RouteNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.repository.RouterNetworkMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,6 +34,7 @@ import java.util.List;
  * @Version 1.0.0
  * @see CloudClient
  */
+@Slf4j
 public class VirtualRouter extends CloudClient {
 
     private static final String ROUTER_ID = "{router_id}";
@@ -44,6 +52,20 @@ public class VirtualRouter extends CloudClient {
         CloudResponse<VirtualRouterCreateData> result = cloudPost(CloudUrlConstant.VIRTUAL_ROUTER_CREATE_URL, createData,
                 null, new TypeReference<CloudResponse<VirtualRouterCreateData>>() {
                 }, true);
+
+        // 保存下路由和网络的关系，方便后面的路由删除
+        if (!createData.getNetworks().isEmpty()) {
+            List<RouteNetworkModel> models = new ArrayList<>();
+            for (var n : createData.getNetworks()) {
+                RouteNetworkModel model = new RouteNetworkModel();
+                model.setNetworkId(n.getId());
+                model.setRouterId(result.getData().getId());
+                models.add(model);
+            }
+            BeanCommon.getBean(RouterNetworkMapper.class).bulkCreate(models);
+        }
+
+
         return result.getData();
     }
 
@@ -55,6 +77,23 @@ public class VirtualRouter extends CloudClient {
      */
     public boolean delete(VirtualRouterDeleteData deleteData) {
         heavyConcurrentWait();
+
+        // 先解绑路由上的网络
+        var conditions = new HumanCondition().filterIn(RouteNetworkModel::getRouterId, deleteData.getIds()
+                .toArray(new String[]{}));
+        var models = BeanCommon.getBean(RouterNetworkMapper.class).list(conditions);
+        if (CollectionUtils.isNotEmpty(models)) {
+            for (var m : models) {
+                VirtualRouterUnbindNetworkData data = new VirtualRouterUnbindNetworkData();
+                data.setNetworkId(m.getNetworkId());
+                try {
+                    this.unbindNetwork(m.getRouterId(), data);
+                } catch (Exception e) {
+                    log.error("unbind network error,router is " + m.getRouterId() + " ,net is" + m.getNetworkId(), e);
+                }
+            }
+        }
+
 
         CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_ROUTER_DELETE_URL, deleteData, null,
                 new TypeReference<CloudResponse<Object>>() {
