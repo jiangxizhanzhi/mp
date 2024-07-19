@@ -55,7 +55,7 @@ public class AzureVirtualNet {
 
     public void create(
             CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement,
-            ConcurrentHashMap<String, Boolean> cidrContainerMap, HashMap<String, List<VirtualNic>> virtualNicsMap) {
+            ConcurrentHashMap<String, Integer> cidrContainerMap, HashMap<String, List<VirtualNic>> virtualNicsMap) {
         // azure todo 网络名称用节点 eid+序号
         String netName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid(), 0);
         // azure todo 不需要设置网关么?
@@ -68,10 +68,10 @@ public class AzureVirtualNet {
                 .define(netName)
                 .withRegion(this.region)
                 .withExistingResourceGroup(groupName);
-        Set<Map.Entry<String, Boolean>> entrySet = cidrContainerMap.entrySet();
-        for (Map.Entry<String, Boolean> entry : entrySet) {
-            Boolean value = entry.getValue();
-            if (value) {
+        Set<Map.Entry<String, Integer>> entrySet = cidrContainerMap.entrySet();
+        for (Map.Entry<String, Integer> entry : entrySet) {
+            Integer value = entry.getValue();
+            if (value == 1) {
 //                连接容器的子网需要加子网委托
                 createdNet
                         .withAddressSpace(entry.getKey())
@@ -79,14 +79,27 @@ public class AzureVirtualNet {
                         .withAddressPrefix(entry.getKey())
                         .withDelegation("Microsoft.ContainerInstance/containerGroups")
                         .attach();
-            } else {
+            } else if (value == 0) {
                 createdNet
                         .withAddressSpace(entry.getKey())
                         .defineSubnet(IpUtils.extractNetworkPart(entry.getKey()))
                         .withAddressPrefix(entry.getKey())
                         .attach();
+            } else if (value == 2) {
+                createdNet
+                        .withAddressSpace(entry.getKey())
+                        .defineSubnet("AzureFirewallManagementSubnet")
+                        .withAddressPrefix(entry.getKey())
+                        .attach();
+            } else if (value == 3) {
+                createdNet
+                        .withAddressSpace(entry.getKey())
+                        .defineSubnet("AzureFirewallSubnet")
+                        .withAddressPrefix(entry.getKey())
+                        .attach();
             }
         }
+
         Network network = createdNet.create();
         cloudElement.setResourceId(network.id());
 
@@ -103,6 +116,8 @@ public class AzureVirtualNet {
                     .map(SceneElementBO::getId)
                     .distinct()
                     .collect(Collectors.toList());
+
+
         } else {
             nodeIds = new ArrayList<>();
             nodeIds.add(cloudElement.getSrcElement().getId());

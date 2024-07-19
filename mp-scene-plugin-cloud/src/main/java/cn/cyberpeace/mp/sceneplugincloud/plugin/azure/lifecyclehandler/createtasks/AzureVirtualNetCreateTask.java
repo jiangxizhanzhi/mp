@@ -21,14 +21,14 @@ public class AzureVirtualNetCreateTask implements Runnable {
 
     private CloudPluginSceneElementBO element;
 
-    private ConcurrentHashMap<String, Boolean> cidrContainerMap;
+    private ConcurrentHashMap<String, Integer> cidrContainerMap;
 
     private HashMap<String, List<VirtualNic>> virtualNicsMap;
 
     public AzureVirtualNetCreateTask(IAzureResourceManager resourceService,
                                      CloudScenePluginHandler pluginHandler,
                                      CloudPluginSceneElementBO element,
-                                     ConcurrentHashMap<String, Boolean> cidrContainerMap,
+                                     ConcurrentHashMap<String, Integer> cidrContainerMap,
                                      HashMap<String, List<VirtualNic>> virtualNicsMap) {
         this.azureVirtualNet = new AzureVirtualNet(resourceService);
         this.pluginHandler = pluginHandler;
