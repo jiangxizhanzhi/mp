@@ -40,7 +40,7 @@ public class AzureFireWall {
         String networkId = virtualNics.get(0).getNetworkId();
         Network vnet = azureResourceManager.networks().getById(networkId);
         //防火墙公网id,该公网Ip的SKU必须为标准
-        AtomicReference<SubResource> publicIpResource = new AtomicReference<>();
+/*        AtomicReference<SubResource> publicIpResource = new AtomicReference<>();
         PublicIpAddress publicIpAddress = azureResourceManager
                 .publicIpAddresses()
                 .define("fireWall-publicIp" + fwName)
@@ -50,14 +50,14 @@ public class AzureFireWall {
                 .withStaticIP()
                 .create();
         publicIpResource.set(new SubResource().withId(publicIpAddress.id()));
-        System.out.println("防火墙公网名称: " + publicIpAddress.name() + " 防火墙公网id: " + publicIpAddress.id());
+        System.out.println("防火墙公网名称: " + publicIpAddress.name() + " 防火墙公网id: " + publicIpAddress.id());*/
 
         Subnet azureFirewallSubnet = vnet.subnets().get("AzureFirewallSubnet");
         SubResource subResource = new SubResource().withId(azureFirewallSubnet.id());
         // 创建 AzureFirewallIPConfiguration 对象，用于定义防火墙的 IP 配置
         AzureFirewallIpConfiguration firewallIPConfig = new AzureFirewallIpConfiguration()
-                .withName("firewallIpConfig" + UUID.randomUUID())
-                .withPublicIpAddress(publicIpResource.get())
+                .withName("firewallIpConfig-" + fwName)
+//                .withPublicIpAddress(publicIpResource.get())
                 .withSubnet(subResource); // 根据防火墙子网，分配对应的静态 IP 地址
 
         List<AzureFirewallIpConfiguration> firewallIPConfigs = new ArrayList<>();
