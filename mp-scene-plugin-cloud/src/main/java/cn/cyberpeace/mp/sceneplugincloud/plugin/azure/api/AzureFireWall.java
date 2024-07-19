@@ -265,7 +265,7 @@ public class AzureFireWall {
             FirewallPolicyFilterRuleCollection ruleCollectionInner = new FirewallPolicyFilterRuleCollection()
                     .withName("MyRuleCollection" + UUID.randomUUID())
                     .withPriority(ruleGroupPriority)
-                    .withAction(new FirewallPolicyFilterRuleCollectionAction().withType(FirewallPolicyFilterRuleCollectionActionType.ALLOW))
+                    .withAction(new FirewallPolicyFilterRuleCollectionAction().withType(allow))
                     .withRules(allowRules);
             filterRuleCollections.add(ruleCollectionInner);
         }

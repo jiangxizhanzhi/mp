@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.FirewallRule;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
@@ -29,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -238,10 +240,91 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                             throw new MpRuntimeException(CloudErrorCode.CONFLICT_CIDR_POOLS.format(duplicates.toString()));
                         }
                     }
+
+//                    增加校验 一个VNet只能连接一个防火墙
+                    long count = element.getSrcElement().getPorts().stream()
+                            .map(port -> elementMap.get(getSceneHandler().getPortConnectedPort(port.getId()).getElement().getId()))
+                            .filter(element1 -> BaseCloudPluginSceneElementModel.ImageType.FIRE_WALL.equals(element1.getImageType()))
+                            .count();
+                    if (count > 1) {
+                        throw new MpRuntimeException(CloudErrorCode.MULTIPLE_FIREWALLS.format(count + ""));
+                    }
+
                 }
+
+//                增加校验 防火墙接入配置校验
+                if (BaseCloudPluginSceneElementModel.ImageType.FIRE_WALL.equals(element.getImageType())) {
+                    List<String> errorMessages = new ArrayList<>();
+                    List<FirewallRule> firewallRules = element.getFirewallRules();
+                    for (FirewallRule rule : firewallRules) {
+                        String sourceIpAddress = rule.getSourceIpAddress();
+                        String protocol = rule.getProtocol();
+                        String destinationIpAddress = rule.getDestinationIpAddress();
+                        String destinationPort = rule.getDestinationPort();
+
+                        if (protocol == null || protocol.isEmpty()) {
+                            errorMessages.add("防火墙策略的协议不能为空");
+                        } else if (protocol.contains(",,") || protocol.startsWith(",") || protocol.endsWith(",")) {
+                            errorMessages.add("防火墙策略的协议不能包含尾随逗号、尾随空格或空格");
+                        } else {
+                            String[] split = protocol.split(",");
+                            for (String s : split) {
+                                if (s.equals("UDP") || s.equals("TCP") || s.equals("ICMP") || s.equals("ANY")) {
+                                } else {
+                                    errorMessages.add("防火墙策略的协议添加有误");
+                                }
+                            }
+                        }
+
+                        if (destinationIpAddress == null || destinationIpAddress.isEmpty()) {
+                            errorMessages.add("防火墙策略的目标IP地址不能为空");
+                        } else if (destinationIpAddress.contains(",,") || destinationIpAddress.startsWith(",") || destinationIpAddress.endsWith(",")) {
+                            errorMessages.add("防火墙策略的目标IP地址不能包含尾随逗号、尾随空格或空格");
+                        } else {
+                            String[] split = destinationIpAddress.split(",");
+                            for (String s : split) {
+                                if (s.equals("*") || checkStringIsIpAddressOrIpPool(s)) {
+                                } else {
+                                    errorMessages.add("防火墙策略的目标IP地址添加有误!");
+                                }
+                            }
+                        }
+
+                        if (destinationPort == null || destinationPort.isEmpty()) {
+                            errorMessages.add("防火墙策略的目标端口不能为空");
+                        } else if (destinationPort.contains(",,") || destinationPort.startsWith(",") || destinationPort.endsWith(",")) {
+                            errorMessages.add("防火墙策略的目标端口不能包含尾随逗号、尾随空格或空格");
+                        } else {
+                            String[] split = destinationPort.split(",");
+                            for (String s : split) {
+                                if (checkStringIsPortStyle(s) || checkStringIsPortParagraphsStyle(s)) {
+                                } else {
+                                    errorMessages.add("防火墙策略的目标端口添加有误!");
+                                }
+                            }
+                        }
+                        if (sourceIpAddress != null) {
+                            if (sourceIpAddress.contains(",,") || sourceIpAddress.startsWith(",") || sourceIpAddress.endsWith(",")) {
+                                errorMessages.add("防火墙策略的源ip地址不能包含尾随逗号、尾随空格或空格");
+                            }
+                            String[] sourceIpAddressSplit = sourceIpAddress.split(",");
+                            for (String s : sourceIpAddressSplit) {
+                                if (s.equals("*") || checkStringIsIpAddressOrIpPool(s)) {
+                                } else {
+                                    errorMessages.add("防火墙策略的源ip地址添加有误!");
+                                }
+                            }
+                        }
+                    }
+                    List<String> collect = errorMessages.stream().distinct().collect(Collectors.toList());
+                    if (collect.size() > 0) {
+                        throw new MpRuntimeException(CloudErrorCode.INVALID_FIREWALL_RULES.format(collect.toString()));
+                    }
+                }
+
             });
         }
-        Map<String, SceneConfigElementPortBO> elementPortMap = getSceneHandler().getElementPortMap();
+
         for (var srcPort : getSceneHandler().getElementPortMap().values()) {
             // 验证ip是否在cidr内
             var ip = srcPort.getIp();
@@ -415,5 +498,43 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         Set<String> toRemove = new HashSet<>(duplicates);
         duplicates.retainAll(toRemove);
         return duplicates;
+    }
+
+    // 校验字符串是否是IP地址
+    public static boolean checkStringIsIpAddressOrIpPool(String address) {
+        String ipPattern = "\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\b";
+        String ipPoolPattern = String.format("^(%s)-(%s)$", ipPattern, ipPattern);
+        String combinedPattern = String.format("^(%s)$|^(%s)$", ipPattern, ipPoolPattern);
+        Pattern pattern = Pattern.compile(combinedPattern);
+        Matcher matcher = pattern.matcher(address);
+        return matcher.matches();
+    }
+
+    // 校验字符串是否符合目标端口格式
+    public static boolean checkStringIsPortStyle(String portString) {
+        try {
+            int port = Integer.parseInt(portString);
+            return port >= 1 && port <= 65535;
+        } catch (NumberFormatException e) {
+            return false; // 如果无法解析为整数，返回 false
+        }
+    }
+
+    // 校验字符串是否符合目标端口段格式
+    public static boolean checkStringIsPortParagraphsStyle(String portString) {
+        String[] parts = portString.split("-");
+        if (parts.length != 2) {
+            return false; // 不是有效的格式（不包含且仅包含一个“-”）
+        }
+
+        try {
+            int start = Integer.parseInt(parts[0].trim());
+            int end = Integer.parseInt(parts[1].trim());
+
+            // 检查范围是否在 1 到 65535 之间，并且 start 小于等于 end
+            return start >= 1 && start <= 65535 && end >= 1 && end <= 65535 && start <= end;
+        } catch (NumberFormatException e) {
+            return false; // 解析整数失败
+        }
     }
 }
