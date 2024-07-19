@@ -170,15 +170,6 @@ public class AzureFireWall {
         String privateIpAddress = azureFirewallIpConfigurations.get(0).privateIpAddress();
         System.out.println("创建防火墙和绑定防火墙策略成功！");
 
-//            创建路由表
-        RouteTable routeTable = azureResourceManager.routeTables().define("routeTable-" + fwName)
-                .withRegion(region)
-                .withExistingResourceGroup(groupName)
-                .defineRoute("defaultRoute")
-                .withDestinationAddressPrefix("0.0.0.0/0")
-                .withNextHopToVirtualAppliance(privateIpAddress).attach()
-                .create();
-
         // 将子网关联到路由表
 
         Map<String, Subnet> subnets = vnet.subnets();
@@ -192,23 +183,31 @@ public class AzureFireWall {
                 // 获取子网关联的现有路由表
                 Subnet subnet = entry.getValue();
                 RouteTable subnetRouteTable = subnet.getRouteTable();
-                // 如果子网没有关联路由表，或者关联的路由表不是指定的 routeTable，则更新子网的路由表
-                if (subnetRouteTable == null || !subnetRouteTable.id().equalsIgnoreCase(routeTable.id())) {
-                    if (subnetRouteTable == null) {
-                        // 如果子网没有关联路由表，则创建新的路由表
-                        SubnetInner subnetInner = subnet.innerModel().withRouteTable(routeTable.innerModel());
-                        azureResourceManager
-                                .networks()
-                                .manager()
-                                .serviceClient()
-                                .getSubnets()
-                                .createOrUpdate(groupName, vnet.name(), subnet.name(), subnetInner);
-                    } else {
-                        subnetRouteTable.update().defineRoute("defaultRoute")
-                                .withDestinationAddressPrefix("0.0.0.0/0")
-                                .withNextHopToVirtualAppliance(privateIpAddress)
-                                .attach();
-                    }
+                // 如果子网没有关联路由表
+                if (subnetRouteTable == null) {
+                    // 根据该子网的地址空间创建路由表
+                    RouteTable routeTable = azureResourceManager.routeTables().define("routeTable-" + fwName)
+                            .withRegion(region)
+                            .withExistingResourceGroup(groupName)
+                            .defineRoute("defaultRoute-" + UUID.randomUUID())
+                            .withDestinationAddressPrefix(subnet.addressPrefix())
+                            .withNextHopToVirtualAppliance(privateIpAddress).attach()
+                            .create();
+
+                    // 如果子网没有关联路由表，则创建新的路由表
+                    SubnetInner subnetInner = subnet.innerModel().withRouteTable(routeTable.innerModel());
+                    azureResourceManager
+                            .networks()
+                            .manager()
+                            .serviceClient()
+                            .getSubnets()
+                            .createOrUpdate(groupName, vnet.name(), subnet.name(), subnetInner);
+                } else {
+                    // todo 修改路由表，DestinationAddressPrefix修改为各个子网的地址空间
+                    subnetRouteTable.update().defineRoute("defaultRoute")
+                            .withDestinationAddressPrefix("0.0.0.0/0")
+                            .withNextHopToVirtualAppliance(privateIpAddress)
+                            .attach();
                 }
             }
         }
@@ -250,7 +249,7 @@ public class AzureFireWall {
                 List<String> sourceIpAddresses = getFilterValueList(allowRule.getSourceIpAddress(), "normal");
                 List<FirewallPolicyRuleNetworkProtocol> protocols = getFilterValueList(allowRule.getProtocol(), "protocol");
 
-                // 创建规则(目标类型和源类型默认为IP地址)
+                // 创建网络规则(目标类型和源类型默认为IP地址)
                 FirewallPolicyRule networkRule = new NetworkRule()
                         .withName("AllowHTTP" + UUID.randomUUID())
                         .withDescription("Allow HTTP traffic" + UUID.randomUUID())
@@ -261,6 +260,8 @@ public class AzureFireWall {
                 allowRules.add(networkRule);
             }
 
+            // 应用程序规则，用于定义可从子网访问的完全限定域名 (FQDN)。
+            // 网络规则，用于定义源地址、协议、目标端口和目标地址。
             // 创建防火墙规则集合(规则集合类型 根据withRules方法内传的参数决定 分为三类 网络,应用程序,DNAT,皆继承FirewallPolicyRule类)
             FirewallPolicyFilterRuleCollection ruleCollectionInner = new FirewallPolicyFilterRuleCollection()
                     .withName("MyRuleCollection" + UUID.randomUUID())

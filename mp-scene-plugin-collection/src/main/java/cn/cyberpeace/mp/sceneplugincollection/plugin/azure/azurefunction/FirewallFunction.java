@@ -423,7 +423,7 @@ public class FirewallFunction {
                 List<String> sourceIpAddresses = getFilterValueList(allowRule.getSourceIpAddress(), "normal");
                 List<FirewallPolicyRuleNetworkProtocol> protocols = getFilterValueList(allowRule.getProtocol(), "protocol");
 
-                // 创建规则(目标类型和源类型默认为IP地址)
+                // 创建网络规则(目标类型和源类型默认为IP地址)
                 FirewallPolicyRule networkRule = new NetworkRule()
                         .withName(allowRule.getName() != null ? allowRule.getName() : "AllowHTTP" + UUID.randomUUID())
                         .withDescription(allowRule.getDescription() != null ? allowRule.getDescription() : "Allow HTTP traffic" + UUID.randomUUID())
@@ -434,6 +434,8 @@ public class FirewallFunction {
                 allowRules.add(networkRule);
             }
 
+            // 应用程序规则，用于定义可从子网访问的完全限定域名 (FQDN)。
+            // 网络规则，用于定义源地址、协议、目标端口和目标地址。
             // 创建防火墙规则集合(规则集合类型 根据withRules方法内传的参数决定 分为三类 网络,应用程序,DNAT,皆继承FirewallPolicyRuleCollection类)
             FirewallPolicyFilterRuleCollection ruleCollectionInner = new FirewallPolicyFilterRuleCollection()
                     .withName("MyRuleCollection" + UUID.randomUUID())
