@@ -430,6 +430,14 @@ public class ModifyHandler extends HandlerCommon {
         protected void createNodeToExternalRouter() {
 
         }
+
+        /**
+         * 更新时不需要加端口映射虚拟机，所以用空方法覆写父类方法
+         */
+        @Override
+        protected void createPortMappingProxy() {
+
+        }
     }
 
     private static class ModifyDeleteHandler extends DeleteHandler {
