@@ -300,7 +300,8 @@ public class CloudPlatformMonitorController {
     @ApiOperation("云平台服务状态监控")
     @GetMapping("/cp_page")
     public ServiceResult<ListObjResult<ServiceMonitorDto>> page(CloudPlatformPageRequest request) {
-        ListObjResult<ServiceMonitorDto> result = serviceMonitorService.cpPage(request);
+//        ListObjResult<ServiceMonitorDto> result = serviceMonitorService.cpPage(request);
+        ListObjResult<ServiceMonitorDto> result = new ListObjResult<>();
         return ResultCommon.success(result);
     }
 
@@ -327,67 +328,67 @@ public class CloudPlatformMonitorController {
     public ServiceResult<List<HypervisorPageVO>> page(AgentNameBasedRequest request){
         request.setPage(1);
         request.setPageSize(1);
-        List<HostState> hostStates = hostStateService.listHostStatesByAgentName(request);
+//        List<HostState> hostStates = hostStateService.listHostStatesByAgentName(request);
         List<HypervisorPageVO> hypervisorPageVOList = new ArrayList<>();
-        hostStates.forEach(hostState -> {
-
-            // todo 上下行带宽占比
-            Double downloadPercent = 0.00;
-            Double uploadPercent = 0.00;
-            Long maxNetSpeed = hostState.getMaxNetSpeed();
-            if (Objects.isNull(maxNetSpeed) || maxNetSpeed.intValue() == 0) {
-                maxNetSpeed = Long.valueOf(10000);
-            }
-
-            if (StringUtils.isNotBlank(hostState.getMaxDownloadSpeed())) {
-                String downloadSpeed = hostState.getMaxDownloadSpeed();
-                downloadSpeed = downloadSpeed.replace("KB/s", "");
-                double ds = Double.parseDouble(downloadSpeed);
-                BigDecimal decimal = formatNumber(ds * 8 / (maxNetSpeed * 1024));
-
-                if (ds > 0 && decimal.doubleValue() == 0.00) {
-                    downloadPercent = 0.01;
-                } else {
-                    downloadPercent = decimal.doubleValue() * 100;
-                    downloadPercent = downloadPercent > 100 ? 100.00 : formatNumber(downloadPercent).doubleValue();
-                }
-            }
-
-            if (StringUtils.isNotBlank(hostState.getMaxUploadSpeed())) {
-                String uploadSpeed = hostState.getMaxUploadSpeed();
-                uploadSpeed = uploadSpeed.replace("KB/s", "");
-                double us = Double.parseDouble(uploadSpeed);
-                BigDecimal decimal =  formatNumber(us * 8 / (maxNetSpeed * 1024));
-
-                if (us > 0 && decimal.doubleValue() == 0.00) {
-                    uploadPercent = 0.01;
-                } else {
-                    uploadPercent = decimal.doubleValue() * 100;
-                    uploadPercent = uploadPercent > 100 ? 100.00 : formatNumber(uploadPercent).doubleValue();
-                }
-            }
-
-            HypervisorPageVO hypervisorPageVO = HypervisorPageVO.builder()
-                    .name(hostState.getAgentName())
-                    .cpu(hostState.getCpuCount())
-                    .cpuPercent(Objects.isNull(hostState.getCpuPercent()) ? BigDecimal.ZERO : BigDecimal.valueOf(hostState.getCpuPercent()))
-                    .ram(hostState.getMemoryTotal())
-                    .ramPercent(Objects.isNull(hostState.getMemoryPercent()) ? BigDecimal.ZERO : BigDecimal.valueOf(hostState.getMemoryPercent()))
-                    .disk(hostState.getDiskSpace())
-                    .diskPercent(Objects.isNull(hostState.getDiskPercent()) ? BigDecimal.ZERO : BigDecimal.valueOf(hostState.getDiskPercent()))
-                    .downloadSpeed(hostState.getDownloadSpeed())
-                    .maxDownloadSpeed(hostState.getMaxDownloadSpeed())
-                    .uploadSpeed(hostState.getUploadSpeed())
-                    .maxUploadSpeed(hostState.getMaxUploadSpeed())
-                    .diskReadBytes(hostState.getDiskReadBytes())
-                    .diskWriteBytes(hostState.getDiskWriteBytes())
-                    .diskIoPercent(hostState.getDiskIoPercent())
-                    .downloadPercent(downloadPercent)
-                    .uploadPercent(uploadPercent)
-                    .build();
-
-            hypervisorPageVOList.add(hypervisorPageVO);
-        });
+//        hostStates.forEach(hostState -> {
+//
+//            // todo 上下行带宽占比
+//            Double downloadPercent = 0.00;
+//            Double uploadPercent = 0.00;
+//            Long maxNetSpeed = hostState.getMaxNetSpeed();
+//            if (Objects.isNull(maxNetSpeed) || maxNetSpeed.intValue() == 0) {
+//                maxNetSpeed = Long.valueOf(10000);
+//            }
+//
+//            if (StringUtils.isNotBlank(hostState.getMaxDownloadSpeed())) {
+//                String downloadSpeed = hostState.getMaxDownloadSpeed();
+//                downloadSpeed = downloadSpeed.replace("KB/s", "");
+//                double ds = Double.parseDouble(downloadSpeed);
+//                BigDecimal decimal = formatNumber(ds * 8 / (maxNetSpeed * 1024));
+//
+//                if (ds > 0 && decimal.doubleValue() == 0.00) {
+//                    downloadPercent = 0.01;
+//                } else {
+//                    downloadPercent = decimal.doubleValue() * 100;
+//                    downloadPercent = downloadPercent > 100 ? 100.00 : formatNumber(downloadPercent).doubleValue();
+//                }
+//            }
+//
+//            if (StringUtils.isNotBlank(hostState.getMaxUploadSpeed())) {
+//                String uploadSpeed = hostState.getMaxUploadSpeed();
+//                uploadSpeed = uploadSpeed.replace("KB/s", "");
+//                double us = Double.parseDouble(uploadSpeed);
+//                BigDecimal decimal =  formatNumber(us * 8 / (maxNetSpeed * 1024));
+//
+//                if (us > 0 && decimal.doubleValue() == 0.00) {
+//                    uploadPercent = 0.01;
+//                } else {
+//                    uploadPercent = decimal.doubleValue() * 100;
+//                    uploadPercent = uploadPercent > 100 ? 100.00 : formatNumber(uploadPercent).doubleValue();
+//                }
+//            }
+//
+//            HypervisorPageVO hypervisorPageVO = HypervisorPageVO.builder()
+//                    .name(hostState.getAgentName())
+//                    .cpu(hostState.getCpuCount())
+//                    .cpuPercent(Objects.isNull(hostState.getCpuPercent()) ? BigDecimal.ZERO : BigDecimal.valueOf(hostState.getCpuPercent()))
+//                    .ram(hostState.getMemoryTotal())
+//                    .ramPercent(Objects.isNull(hostState.getMemoryPercent()) ? BigDecimal.ZERO : BigDecimal.valueOf(hostState.getMemoryPercent()))
+//                    .disk(hostState.getDiskSpace())
+//                    .diskPercent(Objects.isNull(hostState.getDiskPercent()) ? BigDecimal.ZERO : BigDecimal.valueOf(hostState.getDiskPercent()))
+//                    .downloadSpeed(hostState.getDownloadSpeed())
+//                    .maxDownloadSpeed(hostState.getMaxDownloadSpeed())
+//                    .uploadSpeed(hostState.getUploadSpeed())
+//                    .maxUploadSpeed(hostState.getMaxUploadSpeed())
+//                    .diskReadBytes(hostState.getDiskReadBytes())
+//                    .diskWriteBytes(hostState.getDiskWriteBytes())
+//                    .diskIoPercent(hostState.getDiskIoPercent())
+//                    .downloadPercent(downloadPercent)
+//                    .uploadPercent(uploadPercent)
+//                    .build();
+//
+//            hypervisorPageVOList.add(hypervisorPageVO);
+//        });
         return ResultCommon.success(hypervisorPageVOList);
     }
 

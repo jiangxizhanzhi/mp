@@ -109,23 +109,24 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
     @ApiOperation("系统告警统计信息")
     @GetMapping("/statistics")
     public ServiceResult<SystemAlarmVO> getSystemAlarm(@RequestParam(required = false) Integer days) {
-        SystemAlarmVO systemAlarm = serviceMonitorService.getSystemAlarm();
-
-        if (Objects.isNull(days) || days < 1) {
-            days = 30;
-        }
-
-        // 服务告警
-        List<AlarmStatisticsVO> serviceAlarmList = alarmStatisticsService.serviceAlarmStatistics(days);
-        if (CollectionUtils.isNotEmpty(serviceAlarmList)) {
-            systemAlarm.setServiceAlarmList(serviceAlarmList);
-        }
-
-        // 设备告警
-        List<AlarmStatisticsVO> serverAlarmList = alarmStatisticsService.serverAlarmStatistics(days);
-        if (CollectionUtils.isNotEmpty(serverAlarmList)) {
-            systemAlarm.setServerAlarmList(serverAlarmList);
-        }
+        SystemAlarmVO systemAlarm = new SystemAlarmVO();
+//        SystemAlarmVO systemAlarm = serviceMonitorService.getSystemAlarm();
+//
+//        if (Objects.isNull(days) || days < 1) {
+//            days = 30;
+//        }
+//
+//        // 服务告警
+//        List<AlarmStatisticsVO> serviceAlarmList = alarmStatisticsService.serviceAlarmStatistics(days);
+//        if (CollectionUtils.isNotEmpty(serviceAlarmList)) {
+//            systemAlarm.setServiceAlarmList(serviceAlarmList);
+//        }
+//
+//        // 设备告警
+//        List<AlarmStatisticsVO> serverAlarmList = alarmStatisticsService.serverAlarmStatistics(days);
+//        if (CollectionUtils.isNotEmpty(serverAlarmList)) {
+//            systemAlarm.setServerAlarmList(serverAlarmList);
+//        }
         return ResultCommon.success(systemAlarm);
     }
 

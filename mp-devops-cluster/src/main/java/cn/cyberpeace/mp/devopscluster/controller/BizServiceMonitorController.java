@@ -36,7 +36,8 @@ public class BizServiceMonitorController {
     @ApiOperation("业务服务监控")
     @GetMapping("/page")
     public ServiceResult<ListObjResult<ServiceMonitorDto>> page(BizServicePageRequest request){
-        ListObjResult<ServiceMonitorDto> result = serviceMonitorService.bizServicePage(request);
+        ListObjResult<ServiceMonitorDto> result = new ListObjResult<>();
+//        ListObjResult<ServiceMonitorDto> result = serviceMonitorService.bizServicePage(request);
         return ResultCommon.success(result);
     }
 
