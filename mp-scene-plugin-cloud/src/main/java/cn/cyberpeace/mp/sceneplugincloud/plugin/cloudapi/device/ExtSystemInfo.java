@@ -10,6 +10,10 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.device;
 
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * @ClassName ExtSystemInfo
  * @Description
@@ -17,5 +21,49 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.device;
  * @Date 2024/07/02
  * @Version 1.0.0
  */
+@Getter
+@Setter
 public class ExtSystemInfo {
+
+    /**
+     * 操作系统
+     */
+    @ApiModelProperty("二级系统类型")
+    private Integer parentSystemType;
+
+    /**
+     * 操作系统
+     */
+    @ApiModelProperty("三级系统类型")
+    private Integer systemType;
+
+    /**
+     * 系统架构
+     */
+    @ApiModelProperty("系统架构")
+    private String systemArchitecture;
+
+    /**
+     * 语言
+     */
+    @ApiModelProperty("语言")
+    private String language;
+
+    /**
+     * 系统类型名称
+     */
+    @ApiModelProperty("系统类型名称")
+    private String systemTypeName;
+
+    /**
+     * 系统架构名称
+     */
+    @ApiModelProperty("系统架构名称")
+    private String systemArchitectureName;
+
+    /**
+     * 语言名称
+     */
+    @ApiModelProperty("语言名称")
+    private String languageName;
 }

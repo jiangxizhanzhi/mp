@@ -284,6 +284,10 @@ mp:
     strategy-cpu: ${mp.sceneplugincloud.ext-var.strategy-cpu}
     strategy-ram: ${mp.sceneplugincloud.ext-var.strategy-ram}
     strategy-disk: ${mp.sceneplugincloud.ext-var.strategy-disk}
+    port-map-template-id: ${mp.sceneplugincloud.ext-var.port-map-template-id}
+    port-map-cpu: ${mp.sceneplugincloud.ext-var.port-map-cpu}
+    port-map-ram: ${mp.sceneplugincloud.ext-var.port-map-ram}
+    port-map-disk: ${mp.sceneplugincloud.ext-var.port-map-disk}
 
   sceneplugincollection:
     wazuh-server-host: ${mp.situationaware.ext-var.wazuh-ip}

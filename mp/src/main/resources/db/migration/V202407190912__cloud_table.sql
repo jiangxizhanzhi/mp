@@ -1,0 +1,1 @@
+alter table mp_sceneplugincloud_scene add column port_mapping_instance_id varchar(128) not null default '' comment '端口映射代理虚拟机id' ;

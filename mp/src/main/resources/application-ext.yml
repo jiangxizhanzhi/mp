@@ -90,6 +90,10 @@ mp:
       strategy-cpu: ${MP_STRATEGY_CPU:2}
       strategy-ram: ${MP_STRATEGY_RAM:2048}
       strategy-disk: ${MP_STRATEGY_DISK:40}
+      port-map-template-id: ${MP_PORT_MAP_TEMPLATE_ID:}
+      port-map-cpu: ${MP_PORT_MAP_CPU:2}
+      port-map-ram: ${MP_PORT_MAP_RAM:2048}
+      port-map-disk: ${MP_PORT_MAP_DISK:40}
   monitor:
     ext-var:
       monitor-cp-cloud-interval: ${MP_MONITOR_CP_SRV_INTERVAL:}

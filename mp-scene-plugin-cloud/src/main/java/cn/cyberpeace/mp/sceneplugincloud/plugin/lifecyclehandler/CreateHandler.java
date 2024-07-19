@@ -35,6 +35,7 @@ import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.util.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.*;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.*;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementLogicalSwitchModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CsceneElementSoftVersionModel;
@@ -57,10 +58,11 @@ import org.apache.commons.lang3.StringUtils;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-/**
+import static cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils.OS_TYPE_LINUX;
+
+ /**
  * @ClassName CreateHandler
  * @Description
  * @Author maojun
@@ -1428,7 +1430,7 @@ public class CreateHandler extends HandlerCommon {
         createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
         // 待查询出templateId
         Device device = deviceClient.findByUuid(cloudElement.getImageUuid());
-
+        createData.setArch(device.getExtSystemInfo().getSystemArchitecture());
         createData.setTemplateId(device.getExtVm().getTemplateId());
         createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
         createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
@@ -1792,6 +1794,9 @@ public class CreateHandler extends HandlerCommon {
                 if (npcNodes.isEmpty()) {
                     getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_INSTANCE);
                 }
+
+                // 如果存在终端需要做端口映射 则需要新建一个端口映射的代理机器
+                this.createPortMappingProxy();
             });
         }
         // 批量创建NPC节点
@@ -1941,6 +1946,65 @@ public class CreateHandler extends HandlerCommon {
 
                 break;
             }
+        }
+    }
+
+    protected void createPortMappingProxy() {
+        var cloudAppConfig = BeanCommon.getBean(CloudAppConfig.class);
+        String portMapTemplateId = cloudAppConfig.getPortMapTemplateId();
+        if (StringUtils.isEmpty(portMapTemplateId)) {
+            return;
+        }
+        // 收集场景里的网络
+        List<ConnectedNetworkBO> allNetworks = new ArrayList<>();
+        for (CloudPluginSceneElementBO e : getPluginHandler().getElementMap().values()) {
+            allNetworks.addAll(e.getDeriveNetworks());
+        }
+        // 将网络关联到端口映射代理上
+        if (!allNetworks.isEmpty()) {
+            VirtualMachineCreateData createData = new VirtualMachineCreateData();
+            createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
+            createData.setName(HandlerUtils.genResourceName(getPluginHandler().getSrcScene().getEid()));
+            createData.setTemplateId(portMapTemplateId);
+            createData.setCpu(IntUtils.zeroNull(cloudAppConfig.getPortMapCpu()));
+            createData.setRam(IntUtils.zeroNull(cloudAppConfig.getPortMapRam()));
+            createData.setDisk(IntUtils.zeroNull(cloudAppConfig.getPortMapDisk()));
+            if (StringUtils.isBlank(createData.getDisplayType())) {
+                createData.setDisplayType(ElementAccessModeConstant.SPICE_AND_VNC);
+            }
+
+            // 3. 和场景中除外部网络外的所有网络相连
+            List<VirtualNic> virtualNics = new ArrayList<>();
+            for (ConnectedNetworkBO connectedNetwork : allNetworks) {
+                if (HandlerUtils.isExternalNetwork(connectedNetwork.getNetwork().getResourceId())) {
+                    // 外部网络跳过
+                    continue;
+                } else {
+                    // 将代理虚拟机连接到其他网络上
+                    VirtualNic virtualNic = new VirtualNic();
+                    virtualNic.setNetworkId(connectedNetwork.getNetwork().getResourceId());
+                    virtualNic.setCidr(connectedNetwork.getNetwork().getCidr());
+                    virtualNic.setSpecial(false);
+                    virtualNics.add(virtualNic);
+                }
+            }
+            // 加上一个外网
+            VirtualNic externalNet = new VirtualNic();
+            externalNet.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
+            externalNet.setCidr(CloudSingleton.cloudAppConfig.getExternalNetCidr());
+            externalNet.setFixedIp(IpUtils.newRandomIps(externalNet.getCidr(), 1, Collections.emptyList(), null, true)
+                                           .get(0));
+            // 有外网时需要加上main_cloud = true参数
+            createData.setMainCloud(true);
+            virtualNics.add(externalNet);
+
+            createData.setNetwork(virtualNics);
+            //临时加参数
+            createData.setOsType(OS_TYPE_LINUX);
+            createData.setExtremeSpeed(true);
+
+            VirtualMachineCreateData virtualMachine = vmClient.create(createData);
+            getPluginHandler().getScene().setPortMappingInstanceId(virtualMachine.getId());
         }
     }
 

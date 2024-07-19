@@ -39,4 +39,8 @@ public class CloudPluginSceneModel extends BaseCloudPluginSceneModel {
     @ApiModelProperty(value = "策略下发客户端虚拟机实例id")
     @DefaultStr
     private String strategyInstance;
+
+    @ApiModelProperty(value = "端口映射代理虚拟机id")
+    @DefaultStr
+    private String portMappingInstanceId;
 }

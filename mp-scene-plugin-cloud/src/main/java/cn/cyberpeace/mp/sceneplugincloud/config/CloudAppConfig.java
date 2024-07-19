@@ -224,7 +224,7 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.port_map_cpu:2}")
     private Integer portMapCpu;
 
-    @Value("${mp.sceneplugincloud.port_map_ram:2}")
+    @Value("${mp.sceneplugincloud.port_map_ram:2048}")
     private Integer portMapRam;
 
     @Value("${mp.sceneplugincloud.port_map_disk:40}")

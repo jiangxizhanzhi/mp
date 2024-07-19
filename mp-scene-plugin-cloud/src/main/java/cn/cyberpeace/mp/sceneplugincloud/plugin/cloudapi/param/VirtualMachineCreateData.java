@@ -30,6 +30,7 @@ import java.util.List;
 @NoArgsConstructor
 public class VirtualMachineCreateData implements CloudHttpData {
     private String name;
+    private String arch;
     private String templateId;
     private String osType;
     private String rootPassword;
