@@ -271,6 +271,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final int ENTITY_TERMINAL = 51;
 
         public static final int LOAD = 60;
+        public static final int EQUIPMENT = 61;
     }
 
     public static class ImageType {

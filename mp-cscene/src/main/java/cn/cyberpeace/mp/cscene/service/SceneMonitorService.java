@@ -362,22 +362,6 @@ public class SceneMonitorService {
             basicInfos.forEach(basicInfo -> {
                 basicInfo.setAccessUsers(nodeId2Users.getOrDefault(basicInfo.getId(), new ArrayList<>())
                         .stream().distinct().collect(Collectors.toList()));
-//                    TODO 录屏暂改
-                /*for (ElementPort port : basicInfo.getPorts()) {
-                    for (AccessMode accessMode : port.getAccessModes()) {
-                        accessMode.setAvailable(true);
-                        accessMode.setUsername("admin123");
-                        accessMode.setPassword("NHiOJiZTD4K1");
-                        accessMode.setPort(22);
-                        accessMode.setProtocol("ssh");
-                        accessMode.setAccessIp("20.2.10.118");
-                        accessMode.setProxy(true);
-                        accessMode.setAccessPort(22);
-                        accessMode.setProxyId("1");
-                    }
-
-                }*/
-
 
             });
 
