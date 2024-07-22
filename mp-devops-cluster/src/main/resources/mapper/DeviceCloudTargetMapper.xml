@@ -555,6 +555,9 @@
             *
         from
             mp_devops_boundary_network_equipment
+        <if test="offset != null and pageSize != null">
+            limit #{offset}, #{pageSize}
+        </if>
     </select>
 
     <select id="getCommonTargetNum" resultType="java.lang.Integer">

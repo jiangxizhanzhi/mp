@@ -377,27 +377,24 @@ public class MicrosoftAzureConverter implements BaseConverter {
         return allSuccess.get();
     }
 
+    // 虚拟节点
+    private static JSONObject createElement(String name, String netType, String subType) {
+        JSONObject element = new JSONObject();
+        element.put("name", name);
+        element.put("netType", netType);
+        element.put("subType", subType);
+        return element;
+    }
+
     /**
      * 获取网络服务
      */
     public List getCloudInternetServices(IAzureResourceManager instance) {
         //收集元素
         List<JSONObject> jsonList = new ArrayList<>();
-        JSONObject VNet = new JSONObject();
-        VNet.put("name", "VNet");
-        VNet.put("netType", "basicNetwork");
-        VNet.put("subType", "VNet");
-        jsonList.add(VNet);
-        JSONObject fireWall = new JSONObject();
-        fireWall.put("name", "fireWall");
-        fireWall.put("netType", "networkSecurity");
-        fireWall.put("subType", "fireWall");
-        jsonList.add(fireWall);
-        JSONObject WAF = new JSONObject();
-        WAF.put("name", "WAF");
-        WAF.put("netType", "networkSecurity");
-        WAF.put("subType", "WAF");
-        jsonList.add(WAF);
+        jsonList.add(createElement("VNet", "basicNetwork", "VNet"));
+        jsonList.add(createElement("fireWall", "networkSecurity", "fireWall"));
+        jsonList.add(createElement("WAF", "networkSecurity", "WAF"));
         return jsonList;
     }
 
@@ -411,9 +408,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
         instance.getManager().containerRegistries().list().forEach(registry -> {
             if (registry != null) {
                 // 获取并打印容器注册表的endpoint
-                String endpoint = registry.loginServerUrl();
-                System.out.println("Container Registry Endpoint: " + endpoint);
-                endpoint = "https://" + endpoint;
+                String serverUrl = registry.loginServerUrl();
+                String endpoint = "https://" + serverUrl;
                 // 初始化ContainerRegistryClient
                 ContainerRegistryClient containerRegistryClient = new ContainerRegistryClientBuilder()
                         .endpoint(endpoint)
@@ -430,19 +426,17 @@ public class MicrosoftAzureConverter implements BaseConverter {
                             .collect(Collectors.toList());
                     // 打印镜像列表
                     for (ArtifactManifestProperties imageTag : imageTags) {
-                        JSONObject jsonObject = new JSONObject();
-
-                        System.out.println("repositoryName:" + name);
-                        jsonObject.put("repositoryName", name);
-
-                        System.out.println("Image Digest: " + imageTag.getDigest());
-                        jsonObject.put("Image Digest", imageTag.getDigest());
-
-                        System.out.println("Image Tags: " + imageTag.getTags());
-                        jsonObject.put("Image Tags", imageTag.getTags());
-
-                        System.out.println("--------------");
-                        jsonList.add(jsonObject);
+                        List<String> tags = imageTag.getTags();
+                        for(String tag : tags){
+                            JSONObject jsonObject = new JSONObject();
+                            System.out.println("serverUrl" + serverUrl);
+                            jsonObject.put("serverUrl", serverUrl);
+                            System.out.println("tag:" + tag);
+                            jsonObject.put("tag", tag);
+                            System.out.println("repositoryName:" + name);
+                            jsonObject.put("repositoryName", name);
+                            jsonList.add(jsonObject);
+                        }
                     }
                 }
             } else {
@@ -495,7 +489,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
     public List getImages(IAzureResourceManager instance) {
         AzureResourceManager azureResourceManager = instance.getManager();
         // 指定要查询的区域
-        Region region = Region.ASIA_EAST; // 替换为您的实际区域
+        Region region = instance.getRegin();
         //只分地区的所有镜像
 //        PagedIterable<VirtualMachineImage> virtualMachineImages = azureResourceManager.virtualMachineImages().listByRegion(region);
 
@@ -527,7 +521,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         for (VirtualMachinePublisher publisher : virtualMachinePublishers) {
             //todo 筛选出需要的VM镜像
             System.out.println("PublisherName: " + publisher.name());
-            if (publisher.name() != null && (publisher.name().contains("Canonical") || publisher.name().contains("canonical"))) {
+            if (publisher.name() != null && (publisher.name().contains("Canonical") || publisher.name().contains("MicrosoftWindowsDesktop"))) {
                 // 获取发布者的所有产品(offer)
                 VirtualMachineOffers offers = publisher.offers();
                 PagedIterable<VirtualMachineOffer> list = offers.list();
@@ -752,6 +746,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
         list.forEach(item -> {
             item.setImageType("networkEquipment");
+            item.setRole(61);
         });
         Integer num = microsoftAzureMapper.getCommonTargetNum(request, offset, pageSize);
         return new ListObjServiceResult(list, num).asResult();

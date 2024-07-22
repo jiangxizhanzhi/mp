@@ -286,14 +286,17 @@ public class CloudTargetConverter {
         }
     }
 
-    public void cloudContainerRegistryConvert(String cloudType, List<DeviceCloudTargetPO> list, List<DeviceCloudTargetContainer> containerList, List dockerImages) {
+    public void cloudContainerRegistryConvert(String cloudType, List<DeviceCloudTargetPO> list, List<DeviceCloudTargetContainer> containerList, List<JSONObject> dockerImages) {
         if (dockerImages != null && dockerImages.size() > 0) {
             //docker镜像
             for (int i = 0; i < dockerImages.size(); i++) {
                 //主表元素
                 DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
-                deviceCloudTarget.setName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
-                deviceCloudTarget.setOtherName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
+                String serverUrl = dockerImages.get(i).get("serverUrl") != null ? dockerImages.get(i).get("serverUrl").toString() : "";
+                String repositoryName =  dockerImages.get(i).get("repositoryName") != null ?  dockerImages.get(i).get("repositoryName").toString() : "";
+                String tag =  dockerImages.get(i).get("tag") != null ? dockerImages.get(i).get("tag").toString() : "";
+                deviceCloudTarget.setName(repositoryName + ":" + tag);
+                deviceCloudTarget.setOtherName(repositoryName + ":" + tag);
                 String id = String.valueOf(UUID.randomUUID());
                 deviceCloudTarget.setId(id);
                 deviceCloudTarget.setCloudType(cloudType);
@@ -308,12 +311,12 @@ public class CloudTargetConverter {
                 //容器副表元素
                 DeviceCloudTargetContainer deviceCloudTargetContainer = new DeviceCloudTargetContainer();
                 deviceCloudTargetContainer.setLinkId(id);
-                deviceCloudTargetContainer.setName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
+                deviceCloudTargetContainer.setName(repositoryName + ":" + tag);
                 deviceCloudTargetContainer.setSourceType(2);
                 deviceCloudTargetContainer.setCloudType(cloudType);
                 deviceCloudTargetContainer.setContainerType("containerInfrastructure");
                 deviceCloudTargetContainer.setSubType("containerRegistry");
-                deviceCloudTargetContainer.setUploadTargetName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
+                deviceCloudTargetContainer.setUploadTargetName(serverUrl + "/" + repositoryName + ":" + tag);
                 deviceCloudTargetContainer.setOperatingSystem("Linux");
                 deviceCloudTargetContainer.setOperatingSystemStatus("专业化");
                 deviceCloudTargetContainer.setIsPublic(2);
