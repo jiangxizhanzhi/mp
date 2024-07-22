@@ -112,8 +112,9 @@ public class SceneMonitorController {
             for (var e: data) {
                 if(e.getImageType()!=null && !e.getImageType().equals("load") && !e.getImageType().equals("networkEquipment")){
                     CloudPluginSceneElementBO element = cloudPlugin.getElement(e.getId());
-                    String vmType = element.getVmType();
-                    e.setVmType(vmType);
+                    e.setCloudServiceType(element.getCloudServiceType());
+                    e.setServiceType(element.getServiceType());
+                    e.setVmType(element.getVmType());
                     result.add(e);
                 }
             }

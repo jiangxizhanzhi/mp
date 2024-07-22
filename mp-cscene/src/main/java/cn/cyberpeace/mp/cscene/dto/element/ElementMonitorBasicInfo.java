@@ -58,6 +58,12 @@ public class ElementMonitorBasicInfo {
     @ApiModelProperty(value = "节点基本信息-镜像类型")
     private String imageType;
 
+    @ApiModelProperty(value = "服务类型")
+    private String serviceType;
+
+    @ApiModelProperty(value = "云服务类型")
+    private String cloudServiceType;
+
     @ApiModelProperty(value = "镜像类型")
     private String vmType;
 
