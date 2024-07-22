@@ -23,6 +23,8 @@ import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.common.PluginSceneEventHandlerCommon;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.scene.repository.SceneElementPluginMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
@@ -59,6 +61,9 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
     @Getter
     private HandlerUtils handlerUtils;
 
+    @Getter
+    private SceneElementMapper sceneElementMapper;
+
     private final Remote remote = new Remote();
     private final VirtualMachine virtualMachine = new VirtualMachine();
 
@@ -73,6 +78,7 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
     public HandlerCommon(CloudScenePluginHandler pluginHandler, TaskPool taskPool, int event) {
         super(pluginHandler, taskPool, event);
         handlerUtils = pluginHandler.getHandlerUtils();
+        sceneElementMapper = BeanCommon.getBean(SceneElementMapper.class);
     }
 
     /**

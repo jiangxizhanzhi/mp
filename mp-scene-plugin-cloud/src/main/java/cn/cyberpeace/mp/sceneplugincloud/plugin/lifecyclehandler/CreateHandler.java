@@ -1,13 +1,13 @@
- // Copyright (C) 2024
- // All rights reserved.
- // Project name mp
- // Description:
- // Author:
- // File name CreateHandler.java.
- // File size 111789.
- // File create date Fri Jul 12 12:55:27 CST 2024.
- // File update date Fri Jul 12 12:55:27 CST 2024.
- // Version 1.0.0
+// Copyright (C) 2024
+// All rights reserved.
+// Project name mp
+// Description:
+// Author:
+// File name CreateHandler.java.
+// File size 111789.
+// File create date Fri Jul 12 12:55:27 CST 2024.
+// File update date Fri Jul 12 12:55:27 CST 2024.
+// Version 1.0.0
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
@@ -31,6 +31,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.util.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
@@ -42,6 +43,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CsceneElementSoftVersionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.device.Device;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.device.DeviceClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
@@ -51,8 +53,16 @@ import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementLogic
 import cn.cyberpeace.mp.sceneplugincloud.repository.CsceneElementSoftVersionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.StrategyHttpUtil;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
@@ -914,7 +924,7 @@ public class CreateHandler extends HandlerCommon {
                         SceneContextHolder.getCsceneInstanceId()));
                 basDeviceInitCommand.add(String.format("sed -i \"/client_ip:/s/simulator_ip/%s/\" /opt/cpbas/client/application.yml",
                         clientIp));
-                        
+
 
             } else {
                 log.error("bas device system not support {}", sceneElementBO);
@@ -1430,7 +1440,7 @@ public class CreateHandler extends HandlerCommon {
         createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
         // 待查询出templateId
         Device device = deviceClient.findByUuid(cloudElement.getImageUuid());
-        createData.setArch(device.getExtSystemInfo().getSystemArchitecture());
+
         createData.setTemplateId(device.getExtVm().getTemplateId());
         createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
         createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
@@ -1794,9 +1804,6 @@ public class CreateHandler extends HandlerCommon {
                 if (npcNodes.isEmpty()) {
                     getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_INSTANCE);
                 }
-
-                // 如果存在终端需要做端口映射 则需要新建一个端口映射的代理机器
-                this.createPortMappingProxy();
             });
         }
         // 批量创建NPC节点
@@ -1939,11 +1946,19 @@ public class CreateHandler extends HandlerCommon {
         for (CloudPluginSceneElementBO connectedNetworkBO : getPluginHandler().getElementMap().values()){
             if (BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE == connectedNetworkBO.getVirtualType()){
                 // 创建策略下发虚拟机
-                createStrategy();
+                String strategyIp = createStrategy();
 
-                // todo cxz 安全策略下发，具体信息等设备厂商给出MIB文件和YANG模型文件
                 // 获取场景实例
+                String sceneId = getPluginHandler().getSourceSceneId();
 
+                // 获取节点配置信息
+                HumanCondition condition = new HumanCondition().filterEqual(SceneElementModel::getScene, sceneId);
+                List<SceneElementModel> sceneElementModels = getSceneElementMapper().list(condition);
+
+                // 调用接口下发配置
+                for (SceneElementModel sceneElementModel : sceneElementModels){
+                    strategySend(strategyIp, sceneElementModel.getConfigCommand());
+                }
                 break;
             }
         }
@@ -2008,16 +2023,172 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    private void strategySend(String sourceIp, String configCommand) {
+
+        JSONObject configCommandJSON = JSONObject.parseObject(configCommand);
+        Integer protocol = configCommandJSON.getInteger("protocol");
+        if (StringUtils.isBlank(sourceIp) || null == protocol){
+            return;
+        }
+
+        // 请求参数
+        String ip = configCommandJSON.getString("ip");
+        String port = configCommandJSON.getString("port");
+        // 具体命令按照查到的顺序进行插入
+        List<ConfigCommand> commands = getConfigCommand(configCommandJSON.getString("commands"));
+        if (StringUtils.isBlank(ip) || StringUtils.isBlank(port)
+                || org.apache.commons.collections4.CollectionUtils.isEmpty(commands)){
+            return;
+        }
+
+        // 具体的网段+IP配置信息
+        Map<String, String> commandMap = new HashMap<>();
+        String nowDestination = null;
+        String nowNexthop = null;
+        for(ConfigCommand command : commands){
+            // 以防存入的destination和nexthop信息顺序变化，所以先将信息存到对象，两个都存入则转移到map中
+            if (StringUtils.isBlank(nowDestination) && "destination".equals(command.getKey())){
+                nowDestination = command.getKey();
+            }
+            if (StringUtils.isBlank(nowNexthop) && "nexthop".equals(command.getKey())){
+                nowNexthop = command.getKey();
+            }
+            if (StringUtils.isNotBlank(nowDestination) && StringUtils.isNotBlank(nowNexthop)){
+                commandMap.put(nowDestination, nowNexthop);
+                nowDestination = null;
+                nowNexthop = null;
+            }
+        }
+
+        // 请求地址
+        String urlRoot = "http://" + sourceIp + ":8080/api/v1/";
+        String url;
+
+        // 请求数据
+        JSONObject message = new JSONObject();
+        // 下面俩配置项目中没用上，先随便传一个
+        message.put("task_id", "00000");
+        message.put("report_url", "https://www.baidu.com");
+
+        // 安全策略下发
+        // 0-SNMP、1-NETCONF、2-RESTCONF
+        if (0 == protocol){
+            url = urlRoot + "snmp/receiveTask";
+            JSONObject accessInfoJSON = new JSONObject();
+            accessInfoJSON.put("port", port);
+            accessInfoJSON.put("host_ip", ip);
+            accessInfoJSON.put("version", "v1");
+            accessInfoJSON.put("community", "private");
+            message.put("access_info", accessInfoJSON.toJSONString());
+            JSONObject configJSON = new JSONObject();
+            JSONArray commandsArray = new JSONArray();
+            JSONObject commandJSON = new JSONObject();
+            JSONArray paramsArray = new JSONArray();
+            JSONObject paramsJSON = new JSONObject();
+            // todo 具体信息等设备厂商给出MIB文件和YANG模型文件，根据commandMap中的信息配置
+            commandJSON.put("command", null); // GET ${aaa}
+            paramsJSON.put("code", null); // aaa
+            paramsJSON.put("value", null); // .1.3.6.1.2.1.1.1.0
+            paramsArray.add(paramsJSON);
+            commandJSON.put("params", paramsArray.toJSONString());
+            commandsArray.add(commandJSON);
+            configJSON.put("commands", commandsArray.toJSONString());
+            message.put("config", configJSON.toJSONString());
+        }else if (1 == protocol){
+            String username = configCommandJSON.getString("username");
+            String password = configCommandJSON.getString("password");
+            if (StringUtils.isBlank(username) || StringUtils.isBlank(password)){
+                return;
+            }
+
+            url = urlRoot + "netconf/receiveTask";
+            JSONObject accessInfoJSON = new JSONObject();
+            accessInfoJSON.put("port", port);
+            accessInfoJSON.put("host_ip", ip);
+            accessInfoJSON.put("username", username);
+            accessInfoJSON.put("password", password);
+            message.put("access_info", accessInfoJSON.toJSONString());
+            JSONObject configJSON = new JSONObject();
+            JSONArray commandsArray = new JSONArray();
+            JSONObject commandJSON = new JSONObject();
+            JSONArray paramsArray = new JSONArray();
+            JSONObject paramsJSON = new JSONObject();
+            // todo 具体信息等设备厂商给出MIB文件和YANG模型文件，根据commandMap中的信息配置
+            commandJSON.put("command", null); // <get xmlns=${aaa}/>
+            paramsJSON.put("code", null); // aaa
+            paramsJSON.put("value", null); // urn:ietf:params:xml:ns:netconf:base:1.0
+            paramsArray.add(paramsJSON);
+            commandJSON.put("params", paramsArray.toJSONString());
+            commandsArray.add(commandJSON);
+            configJSON.put("commands", commandsArray.toJSONString());
+            message.put("config", configJSON.toJSONString());
+        }else if (2 == protocol){
+            String username = configCommandJSON.getString("username");
+            String password = configCommandJSON.getString("password");
+            if (StringUtils.isBlank(username) || StringUtils.isBlank(password)){
+                return;
+            }
+
+            url = urlRoot + "restconf/receiveTask";
+            JSONObject accessInfoJSON = new JSONObject();
+            accessInfoJSON.put("port", port);
+            accessInfoJSON.put("host_ip", ip);
+            accessInfoJSON.put("username", username);
+            accessInfoJSON.put("password", password);
+            // todo 具体信息等设备厂商给出MIB文件和YANG模型文件，根据commandMap中的信息配置
+            accessInfoJSON.put("request_type", null);
+            accessInfoJSON.put("request_method", null);
+            accessInfoJSON.put("url_suffix", null);
+            message.put("access_info", accessInfoJSON.toJSONString());
+            JSONObject configJSON = new JSONObject();
+            JSONArray commandsArray = new JSONArray();
+            JSONObject commandJSON = new JSONObject();
+            JSONArray paramsArray = new JSONArray();
+            JSONObject paramsJSON = new JSONObject();
+            // todo 具体信息等设备厂商给出MIB文件和YANG模型文件，根据commandMap中的信息配置
+            commandJSON.put("command", null); // <get xmlns=${aaa}/>
+            paramsJSON.put("code", null); // aaa
+            paramsJSON.put("value", null); // urn:ietf:params:xml:ns:netconf:base:1.0
+            paramsArray.add(paramsJSON);
+            commandJSON.put("params", paramsArray.toJSONString());
+            commandsArray.add(commandJSON);
+            configJSON.put("commands", commandsArray.toJSONString());
+            message.put("config", configJSON.toJSONString());
+        }else {
+            return;
+        }
+
+        boolean result = StrategyHttpUtil.post(url, StringEscapeUtils.unescapeJava(
+                StringEscapeUtils.unescapeJava(message.toJSONString())));
+        if (!result){
+            log.error("strategySend error, sourceIp=[{}], configCommand=[{}]", sourceIp, configCommand);
+        }
+    }
+
+    private List<ConfigCommand> getConfigCommand(String commandsStr) {
+        List<ConfigCommand> result = new ArrayList<>();
+        if (StringUtils.isBlank(commandsStr)){
+            return result;
+        }
+        JSONArray array = JSONObject.parseArray(commandsStr);
+        for (Object o : array) {
+            JSONObject commandJSON = JSONObject.parseObject(o.toString());
+            List<ConfigCommand> commands = JSONObject.parseArray(commandJSON.getString("params"), ConfigCommand.class);
+            result.addAll(commands);
+        }
+        return result;
+    }
+
     /**
      * createStrategy
      */
-    protected void createStrategy() {
+    protected String createStrategy() {
 
         // 获取实体设备网卡信息列表
         List<VirtualNic> virtualNicList = new ArrayList<>();
 
         getPluginHandler().getElementMap().values().forEach(e -> {
-            e.getDeriveNetworks().forEach(n ->{
+            e.getDeriveNetworks().forEach(n -> {
                 VirtualNic nic = new VirtualNic();
                 nic.setNetworkId(n.getNetwork().getResourceId());
                 nic.setCidr(n.getNetwork().getCidr());
@@ -2036,13 +2207,13 @@ public class CreateHandler extends HandlerCommon {
         virtualNicList.add(externalVirtualNic);
 
         // 创建虚拟机
-        createStrategyVirtualMachine(virtualNicList);
+        return createStrategyVirtualMachine(virtualNicList);
     }
 
     /**
      * createStrategyVirtualMachine
      */
-    private void createStrategyVirtualMachine(List<VirtualNic> virtualNicList) {
+    private String createStrategyVirtualMachine(List<VirtualNic> virtualNicList) {
 
         // 准备创建虚机参数
         VirtualMachineCreateData createData = new VirtualMachineCreateData();
@@ -2069,7 +2240,7 @@ public class CreateHandler extends HandlerCommon {
         createData.setNetwork(CollectionUtils.emptyNull(virtualNicList));
 
         // 创建虚拟机
-        VirtualMachineCreateData virtualMachine =  vmClient.create(createData);
+        VirtualMachineCreateData virtualMachine = vmClient.create(createData);
         // 读取虚机ip地址
         VirtualNic virtualNic = virtualMachine.getNetwork().get(0);
         String ip = virtualNic.getFixedIp();
@@ -2079,6 +2250,8 @@ public class CreateHandler extends HandlerCommon {
         scene.setStrategyIp(ip);
         scene.setStrategyInstance(virtualMachine.getId());
         getPluginHandler().saveScene();
+
+        return scene.getStrategyIp();
     }
 
     /**
@@ -2162,7 +2335,6 @@ public class CreateHandler extends HandlerCommon {
             runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_NPC, () -> recordNpcNode(cloudElement));
         }
     }
-
 
     /**
      * 配置vyos网络
@@ -2323,8 +2495,8 @@ public class CreateHandler extends HandlerCommon {
                 cloudAccessMode.setAccessIp(ip);
                 cloudAccessMode.setAvailable(true);
                 cloudAccessMode.setConnectionUrl(remoteClient.getContainerConnectionUrl(new GetConnectionUrlParam().setConsoleType(CloudElementAccessMode.Protocol.CONSOLE)
-                                                                                                .setVmId(cloudElement.getResourceId()))
-                                                         .getData());
+                                .setVmId(cloudElement.getResourceId()))
+                        .getData());
                 cloudAccessMode.setProtocol(CloudElementAccessMode.Protocol.CONSOLE);
                 cloudAccessMode.setId(TextUtils.uuid());
                 cloudAccessModes.add(cloudAccessMode);
@@ -2340,8 +2512,8 @@ public class CreateHandler extends HandlerCommon {
                 CloudAccessMode vncAccessMode = new CloudAccessMode();
                 vncAccessMode.setAccessIp(ip);
                 vncAccessMode.setConnectionUrl(remoteClient.getNoVncConnectionUrl(new GetConnectionUrlParam().setConsoleType(CloudElementAccessMode.Protocol.NO_VNC)
-                                                                                          .setVmId(cloudElement.getResourceId()))
-                                                       .getData());
+                                .setVmId(cloudElement.getResourceId()))
+                        .getData());
                 vncAccessMode.setProtocol(CloudElementAccessMode.Protocol.VNC);
                 vncAccessMode.setAvailable(true);
                 vncAccessMode.setId(TextUtils.uuid());
@@ -2357,5 +2529,13 @@ public class CreateHandler extends HandlerCommon {
                 }
             }
         }
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    private static class ConfigCommand {
+        String key;
+        String value;
     }
 }
