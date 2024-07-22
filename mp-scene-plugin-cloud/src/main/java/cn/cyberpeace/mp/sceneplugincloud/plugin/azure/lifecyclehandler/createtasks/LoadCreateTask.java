@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.createta
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.DevopsLoadSourceModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.Load;
 import cn.cyberpeace.mp.sceneplugincloud.repository.DevopsLoadSourceMapper;
 
@@ -15,8 +16,11 @@ public class LoadCreateTask implements Runnable {
 
     private CloudPluginSceneElementBO element;
 
+    private CloudScenePluginHandler pluginHandler;
+
     public LoadCreateTask(
-            CloudPluginSceneElementBO element) {
+            CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO element) {
+        this.pluginHandler = pluginHandler;
         DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
         DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
         this.load = new Load(synchronousDataSource);
@@ -25,7 +29,7 @@ public class LoadCreateTask implements Runnable {
 
     @Override
     public void run() {
-        load.create(element);
+        load.create(pluginHandler,element);
     }
 
 }

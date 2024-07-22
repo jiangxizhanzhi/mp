@@ -38,7 +38,7 @@ public class AzureFlowCollector extends FlowCollector {
 
 //        创建akime容器
         String groupName = pluginHandler.getSourceSceneId();
-        String imageName = "samples/arkime:1.0.0";
+        String imageName = "registry0530.azurecr.io/samples/arkime:1.0.0";
 
         //设置环境变量
         //获取环境变量

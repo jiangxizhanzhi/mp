@@ -15,7 +15,7 @@ public class NetworkSecurityGroupUtils {
                     .fromAnyAddress()
                     .fromAnyPort()
                     .toAnyAddress()
-                    .toPort(AccessMode.Protocol.DEFAULT_PORT_MAP.get(protocol))
+                    .toPort(AccessMode.Protocol.DEFAULT_PORT_MAP.get(protocol.toLowerCase()))
                     .withProtocol(SecurityRuleProtocol.TCP)
                     .withPriority(i)
                     .attach();

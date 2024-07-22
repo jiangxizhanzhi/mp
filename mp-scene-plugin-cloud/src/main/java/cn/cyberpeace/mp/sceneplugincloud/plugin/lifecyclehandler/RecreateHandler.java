@@ -295,7 +295,7 @@ public class RecreateHandler extends HandlerCommon {
                                 }
                                 DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
                                 DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
-                                new Load(synchronousDataSource).create(cloudElement);
+                                new Load(synchronousDataSource).create(getPluginHandler(),cloudElement);
 
                             });
                 }

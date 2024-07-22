@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.LoadUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.DevopsLoadSourceModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,8 +31,12 @@ public class Load {
     }
 
 
-    public void create(CloudPluginSceneElementBO cloudElement) {
+    public void create(CloudScenePluginHandler pluginHandler,CloudPluginSceneElementBO cloudElement) {
 
+        String groupName = pluginHandler.getSourceSceneId();
+        String nodeId = cloudElement.getSrcElement().getId();
+        cloudElement.setLoadTaskName(groupName+"_"+nodeId);
+        cloudElement.setLoadTaskDescribe(groupName+"_"+nodeId);
         Map data = create(cloudElement.getLoadTaskName(),
                 cloudElement.getLoadTaskDescribe(),
                 cloudElement.getLoadToolId(),

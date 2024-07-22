@@ -159,7 +159,7 @@ public class AzureVirtualMachine {
                         if (null == protocol) continue;
                         String[] protoclos = protocol.split(";");
                         for (int j = 0; j < protoclos.length; j++) {
-                            NetworkSecurityGroupUtils.addInRule(accessMode.getProtocol().toLowerCase(), nsgUpdate, 3100 + i * 200 + j * 10);
+                            NetworkSecurityGroupUtils.addInRule(protoclos[j], nsgUpdate, 3100 + i * 200 + j * 10);
                         }
                     }
                     nsgUpdate.apply();

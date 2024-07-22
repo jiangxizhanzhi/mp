@@ -181,7 +181,7 @@ public class AzureCreateHandler extends CreateHandler {
             List<Runnable> createLoadTasks = new ArrayList<>();
             for (CloudPluginSceneElementBO element : filteredLoadElements) {
                 String nodeId = element.getSrcElement().getId();
-                LoadCreateTask task = new LoadCreateTask(element);
+                LoadCreateTask task = new LoadCreateTask(getPluginHandler(), element);
                 Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_LOAD, task);
                 createLoadTasks.add(formatTask);
             }
@@ -404,7 +404,7 @@ public class AzureCreateHandler extends CreateHandler {
             cloudPort.setFloatingIpId(virtualNic1.getFloatingipId());
             cloudPort.setAuxiliaryNetworkId(virtualNic1.getNetworkId());
 
-            if (null != virtualNic1.getAccessModes() && null != virtualNic1.getAccessModes().get(0)) {
+            if (null != virtualNic1.getAccessModes() && virtualNic1.getAccessModes().size() > 0 && null != virtualNic1.getAccessModes().get(0)) {
                 VirtualNic.AccessMode accessMode = virtualNic1.getAccessModes().get(0);
                 String protocol = accessMode.getProtocol();
                 String[] protoclos = protocol.split(";");

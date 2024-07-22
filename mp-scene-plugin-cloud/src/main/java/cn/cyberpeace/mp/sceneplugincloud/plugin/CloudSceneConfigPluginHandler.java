@@ -243,6 +243,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
 
 //                    增加校验 一个VNet只能连接一个防火墙
                     long count = element.getSrcElement().getPorts().stream()
+                            .filter(port -> null != getSceneHandler().getPortConnectedPort(port.getId()))
                             .map(port -> elementMap.get(getSceneHandler().getPortConnectedPort(port.getId()).getElement().getId()))
                             .filter(element1 -> BaseCloudPluginSceneElementModel.ImageType.FIRE_WALL.equals(element1.getImageType()))
                             .count();
