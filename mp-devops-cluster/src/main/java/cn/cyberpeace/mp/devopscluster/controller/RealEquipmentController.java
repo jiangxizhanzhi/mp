@@ -36,6 +36,7 @@ import cn.cyberpeace.mp.devopscluster.model.*;
 import cn.cyberpeace.mp.devopscluster.model.common.Hypervisor;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
+import cn.cyberpeace.mp.devopscluster.request.ImageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentNetworkCardPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
@@ -308,6 +309,7 @@ public class RealEquipmentController {
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增实装", target = OpTargetEnums.REALEQUIPMENT)
     public ServiceResult add(@RequestBody RealEquipmentRequest request){
+        this.convertRole(request);
         realEquipmentConverter.add(request);
         return ResultCommon.success();
     }
@@ -326,6 +328,7 @@ public class RealEquipmentController {
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
+        this.convertRole(request);
         realEquipmentConverter.update(request);
         return ResultCommon.success();
     }
@@ -624,5 +627,22 @@ public class RealEquipmentController {
         return result;
     }
 
-
+    private void convertRole(RealEquipmentRequest request) {
+        // 网络设备/路由器 -> role = 21
+        // 网络设备/交换机 -> role = 22
+        // 网络设备/防火墙 -> role = 23
+        if (request.getMainCategory() != null && request.getSubCategory() != null) {
+            if (request.getMainCategory() == 3 && request.getSubCategory() == 52) {
+                request.setRole(23);
+            } else if (request.getMainCategory() == 3 && request.getSubCategory() == 50) {
+                request.setRole(22);
+            } else if (request.getMainCategory() == 3 && request.getSubCategory() == 55) {
+                request.setRole(22);
+            } else if (request.getMainCategory() == 3 && request.getSubCategory() == 56) {
+                request.setRole(22);
+            } else if (request.getMainCategory() == 3 && request.getSubCategory() == 51) {
+                request.setRole(21);
+            }
+        }
+    }
 }
