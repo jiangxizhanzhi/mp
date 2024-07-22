@@ -121,13 +121,13 @@ public class FlowExecutor {
 
         List<VirtualNic> networks = new ArrayList<>();
 
-        VirtualNic externalNetwork = new VirtualNic();
-        externalNetwork.setNetworkId(externalNetworkInfoRes.getId());
-        externalNetwork.setGateway(externalNetworkInfoRes.getGatewayIp());
-        externalNetwork.setCidr(externalNetworkInfoRes.getCidr());
-        //todo 排除已经分配的
-        externalNetwork.setFixedIp(IpUtils.newRandomIps(externalNetwork.getCidr(), 1, Collections.emptyList(), Collections.emptyList(), false).get(0));
-        networks.add(externalNetwork);
+//        VirtualNic externalNetwork = new VirtualNic();
+//        externalNetwork.setNetworkId(externalNetworkInfoRes.getId());
+//        externalNetwork.setGateway(externalNetworkInfoRes.getGatewayIp());
+//        externalNetwork.setCidr(externalNetworkInfoRes.getCidr());
+//        //todo 排除已经分配的
+//        externalNetwork.setFixedIp(IpUtils.newRandomIps(externalNetwork.getCidr(), 1, Collections.emptyList(), Collections.emptyList(), false).get(0));
+//        networks.add(externalNetwork);
         createData.setNetwork(networks);
         VirtualMachineCreateData trex = vmClient.create(createData);
 
