@@ -1601,10 +1601,10 @@ public class CreateHandler extends HandlerCommon {
                 getPluginHandler().addPort(port.getId(), cloudPort);
             }
             String networkId = connectNetwork.getNetwork().getResourceId();
-            String physicalSwitchName = cloudPort.getEntityPhysicalSwitchName();
+            String physicalSwitchName = cloudPort.getEntitySwitchName();
             log.info("physicalSwitchName:{}", physicalSwitchName);
             log.info("entitySwitchPort:{}", cloudPort.getEntitySwitchPort());
-            log.info("cloudPort.getEntityPhysicalSwitchName():{}", cloudPort.getEntityPhysicalSwitchName());
+            log.info("cloudPort.getEntityPhysicalSwitchName():{}", cloudPort.getEntitySwitchName());
             log.info("cloudPort.getEntitySwitchPort():{}", cloudPort.getEntitySwitchPort());
             String key = StringUtils.joinWith(":", networkId, physicalSwitchName);
             LogicalSwitchCreateData data;
@@ -1613,9 +1613,9 @@ public class CreateHandler extends HandlerCommon {
                 if (Objects.isNull(data)) {
                     data = new LogicalSwitchCreateData();
                     data.setLogicalSwitchName(convertFirstAlphaToNumber(TextUtils.uuid()));
-                    data.setPhysicalSwitchName(cloudPort.getEntityPhysicalSwitchName());
+                    data.setPhysicalSwitchName(cloudPort.getEntitySwitchName());
                     data.setPhysicalPorts(new ArrayList<>());
-                    if (StringUtils.isBlank(cloudPort.getEntityPhysicalSwitchName())) {
+                    if (StringUtils.isBlank(cloudPort.getEntitySwitchName())) {
                         log.error("实体设备没有配置物理交换机名称");
                     } else {
                         network2LogicalSwitch.put(key, data);
@@ -1632,12 +1632,12 @@ public class CreateHandler extends HandlerCommon {
 
             cloudPort.setAuxiliaryNetworkId(networkId);
             createData.setPsPortName(cloudPort.getEntitySwitchPort());
-            createData.setPhysicalSwitch(cloudPort.getEntityPhysicalSwitchName());
+            createData.setPhysicalSwitch(cloudPort.getEntitySwitchName());
             createData.setNetworkId(networkId);
             createData.setName(TextUtils.uuid());
             createData.setMac(port.getMacAddr());
             createData.setIpAddr(port.getIp());
-            if (StringUtils.isNotBlank(cloudPort.getEntityPhysicalSwitchName())) {
+            if (StringUtils.isNotBlank(cloudPort.getEntitySwitchName())) {
                 synchronized (entityCreateData) {
                     entityCreateData.add(createData);
                 }
