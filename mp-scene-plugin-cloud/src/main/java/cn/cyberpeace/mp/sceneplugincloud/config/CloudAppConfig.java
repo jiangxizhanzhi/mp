@@ -140,6 +140,15 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.external_net_pool:}")
     private String externalNetPool;
 
+    @Value("${mp.sceneplugincloud.config_net_id:}")
+    private String configNetId;
+
+    @Value("${mp.sceneplugincloud.config_net_cidr:}")
+    private String configNetCidr;
+
+    @Value("${mp.sceneplugincloud.config_net_pool:}")
+    private String configNetPool;
+
     @Value("${mp.sceneplugincloud.mgmt_name:mgmt}")
     private String mgmtName;
 
@@ -253,6 +262,20 @@ public class CloudAppConfig {
             log.info("externalNetPool select first from pool is {}", externalNetPool);
             final String[] ipPools = externalNetPool.split(",");
             for(String ipPool: ipPools ){
+                final String[] ips = ipPool.split("-");
+                final AllocationPool allocationPool = new AllocationPool(ips[0], ips[1]);
+                allocationPools.add(allocationPool);
+            }
+        }
+        return allocationPools;
+    }
+
+    public List<AllocationPool> getConfigNetPool() {
+        final ArrayList<AllocationPool> allocationPools = new ArrayList<>();
+        if (!StringUtils.isEmpty(configNetPool)) {
+            log.info("externalNetPool select first from pool is {}", configNetPool);
+            final String[] ipPools = configNetPool.split(",");
+            for (String ipPool : ipPools) {
                 final String[] ips = ipPool.split("-");
                 final AllocationPool allocationPool = new AllocationPool(ips[0], ips[1]);
                 allocationPools.add(allocationPool);

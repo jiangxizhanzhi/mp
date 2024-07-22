@@ -74,6 +74,15 @@ public class IpUtils {
                 allocationPools = externalNetPool;
             }
         }
+
+        if(cidr.equals(CloudSingleton.cloudAppConfig.getConfigNetCidr())){
+            // 需要从固定的地址池里面获取
+            final List<AllocationPool> externalNetPool = CloudSingleton.cloudAppConfig.getConfigNetPool();
+            if (!CollectionUtil.isEmpty(externalNetPool)){
+                allocationPools = externalNetPool;
+            }
+        }
+
         List<String> ips = new ArrayList<>();
         String beginIp = null;
         String lastIp = null;

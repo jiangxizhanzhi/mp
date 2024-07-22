@@ -15,9 +15,11 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -31,6 +33,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -63,6 +66,14 @@ public class Container extends CloudClient {
      */
     public ContainerCreateData create(ContainerCreateData createData) {
         heavyConcurrentWait();
+
+        // 每个容器都要 加一个网卡
+        VirtualNic virtualNic = new VirtualNic();
+        virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getConfigNetId());
+        virtualNic.setCidr(CloudSingleton.cloudAppConfig.getConfigNetCidr());
+        virtualNic.setFixedIp(IpUtils.newRandomIps(CloudSingleton.cloudAppConfig.getConfigNetCidr(), 1, Collections.emptyList(), Collections.emptyList(), false)
+                                      .get(0));
+        createData.getNetwork().add(virtualNic);
 
         CloudResponse<ContainerCreateData> result = cloudPost(CloudUrlConstant.CONTAINER_CREATE_URL, createData, null,
                 new TypeReference<CloudResponse<ContainerCreateData>>() {

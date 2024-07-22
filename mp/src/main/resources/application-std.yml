@@ -280,6 +280,9 @@ mp:
     external_net_id: ${mp.sceneplugincloud.ext-var.external_net_id}
     external_net_cidr: ${mp.sceneplugincloud.ext-var.external_net_cidr}
     external_net_pool: ${mp.sceneplugincloud.ext-var.external_net_pool}
+    config_net_id: ${mp.sceneplugincloud.ext-var.config_net_id}
+    config_net_cidr: ${mp.sceneplugincloud.ext-var.config_net_cidr}
+    config_net_pool: ${mp.sceneplugincloud.ext-var.config_net_pool}
     strategy-image-name: ${mp.sceneplugincloud.ext-var.strategy-image-name}
     strategy-cpu: ${mp.sceneplugincloud.ext-var.strategy-cpu}
     strategy-ram: ${mp.sceneplugincloud.ext-var.strategy-ram}

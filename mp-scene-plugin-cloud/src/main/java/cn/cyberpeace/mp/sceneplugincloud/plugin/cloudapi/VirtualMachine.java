@@ -12,9 +12,11 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -22,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +51,14 @@ public class VirtualMachine extends CloudClient {
      */
     public VirtualMachineCreateData create(VirtualMachineCreateData createData) {
         heavyConcurrentWait();
+
+        // 每个虚拟机都要 加一个网卡虚拟
+        VirtualNic virtualNic = new VirtualNic();
+        virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getConfigNetId());
+        virtualNic.setCidr(CloudSingleton.cloudAppConfig.getConfigNetCidr());
+        virtualNic.setFixedIp(IpUtils.newRandomIps(CloudSingleton.cloudAppConfig.getConfigNetCidr(), 1, Collections.emptyList(), Collections.emptyList(), false)
+                                      .get(0));
+        createData.getNetwork().add(virtualNic);
 
         CloudResponse<VirtualMachineCreateData> result = cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_CREATE_URL, createData,
                 null, new TypeReference<CloudResponse<VirtualMachineCreateData>>() {
