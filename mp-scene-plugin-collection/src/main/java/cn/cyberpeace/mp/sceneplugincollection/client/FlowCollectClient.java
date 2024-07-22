@@ -74,11 +74,12 @@ public class FlowCollectClient {
         arkimeCreateData.setCpu(4);
         arkimeCreateData.setRam(4096);
         arkimeCreateData.setDisk(situationAwareConfig.getArkimeDisk());
-        VirtualNic virtualNic = new VirtualNic();
-        virtualNic.setFixedIp(fixedIp);
-        virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
-        virtualNic.setCidr(CloudSingleton.cloudAppConfig.getExternalNetCidr());
-        arkimeCreateData.setNetwork(Collections.singletonList(virtualNic));
+//        VirtualNic virtualNic = new VirtualNic();
+//        virtualNic.setFixedIp(fixedIp);
+//        virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
+//        virtualNic.setCidr(CloudSingleton.cloudAppConfig.getExternalNetCidr());
+//        arkimeCreateData.setNetwork(Collections.singletonList(virtualNic));
+        arkimeCreateData.setNetwork(new ArrayList<>());
 
         Map<String, String> env = new HashMap<>(8);
         env.put("SIC_ARKIME_ELASTICSEARCH", "http://" + situationAwareConfig.getArkimeEsHost() + ":" + situationAwareConfig.getArkimeEsPort());
