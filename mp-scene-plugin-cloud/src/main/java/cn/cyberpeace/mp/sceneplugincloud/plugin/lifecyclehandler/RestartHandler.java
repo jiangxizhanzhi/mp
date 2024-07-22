@@ -62,7 +62,7 @@ public class RestartHandler extends HandlerCommon {
                 runElementProgress(nodeId, SceneElementModel.Event.RESTART, ElementProcess.RESTART_VIRTUAL_MACHINE, () -> {
                     closeAccessModes(element);
                     AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
-                    azureVirtualMachine.restart(instanceId);
+                    azureVirtualMachine.restart(element);
 //                    TODO 云场景连接用的公网ip 这里用私有ip测不通 暂去
 //                    checkAccessModes(element);
 

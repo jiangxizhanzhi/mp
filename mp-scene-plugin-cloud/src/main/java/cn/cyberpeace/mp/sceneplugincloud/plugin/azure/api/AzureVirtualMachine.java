@@ -204,11 +204,15 @@ public class AzureVirtualMachine {
         virtualMachine.powerOff();
     }
 
-    public void restart(String instanceId) {
-        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(instanceId);
+    public void restart(CloudPluginSceneElementBO element) {
+        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(element.getResourceId());
 //        关机无法重启 先开机
-        virtualMachine.start();
+        PowerState powerState = virtualMachine.powerState();
+        if(PowerState.RUNNING != powerState){
+            virtualMachine.start();
+        }
         virtualMachine.restart();
+        element.setPublicIpAddress(virtualMachine.getPrimaryPublicIPAddress().ipAddress());
     }
 
     public void start(CloudPluginSceneElementBO element) {

@@ -135,6 +135,10 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.NPC);
         } else if (role.equals(BaseCloudPluginSceneElementModel.Role.LOAD)) {
             srcElement.setType(BaseSceneElementModel.Type.LOAD);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.EQUIPMENT)) {
+            srcElement.setType(BaseSceneElementModel.Type.EQUIPMENT);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER_VNET)) {
+            srcElement.setType(BaseSceneElementModel.Type.VENT);
         }
     }
 
