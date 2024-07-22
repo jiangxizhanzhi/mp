@@ -58,6 +58,9 @@ public class ElementMonitorBasicInfo {
     @ApiModelProperty(value = "节点基本信息-镜像类型")
     private String imageType;
 
+    @ApiModelProperty(value = "镜像类型")
+    private String vmType;
+
     @ApiModelProperty(value = "节点基本信息-角色")
     private Integer role;
 

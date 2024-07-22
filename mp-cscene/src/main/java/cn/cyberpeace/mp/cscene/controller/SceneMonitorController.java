@@ -10,10 +10,15 @@ import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.SceneMonitorService;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -40,6 +45,9 @@ public class SceneMonitorController {
 
     @Autowired
     private CsceneInstanceService csceneInstanceService;
+
+    @Autowired
+    private CsceneCommonService csceneCommonService;
 
     @Autowired
     private SceneMonitorService sceneMonitorService;
@@ -99,8 +107,13 @@ public class SceneMonitorController {
         if(sceneAllElements.getCode()!=null && sceneAllElements.getCode().equals(BaseErrorCode.SUCCESS.getCode())){
             List<ElementMonitorBasicInfo> data = sceneAllElements.getData();
             List<ElementMonitorBasicInfo> result = new ArrayList<>();
+            SceneHandler sceneHandler = new SceneHandler(csceneCommonService.translateSceneId(sceneId), null, null);
+            CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
             for (var e: data) {
                 if(e.getImageType()!=null && !e.getImageType().equals("load") && !e.getImageType().equals("networkEquipment")){
+                    CloudPluginSceneElementBO element = cloudPlugin.getElement(e.getId());
+                    String vmType = element.getVmType();
+                    e.setVmType(vmType);
                     result.add(e);
                 }
             }
