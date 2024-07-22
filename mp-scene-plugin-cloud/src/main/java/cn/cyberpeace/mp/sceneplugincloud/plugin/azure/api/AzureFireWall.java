@@ -34,12 +34,17 @@ public class AzureFireWall {
         this.region = resourceService.getRegin();
     }
 
+    /**
+     * 防火墙创建(防火墙和防火墙策略的SKU用基本,如果需要变动，需要保持一致)
+     * 创建前需要将虚拟网络和专有的防火墙子网创建好(防火墙子网名称必须为AzureFirewallSubnet且地址空间后缀必须为/26)
+     * 当防火墙SKU为basic时,必须创建防火墙管理子网(防火墙管理子网名称必须为AzureFirewallManagementSubnet,地址空间后缀大于等于26)
+     */
     public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics) {
         String fwName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
         String groupName = pluginHandler.getSourceSceneId();
         String networkId = virtualNics.get(0).getNetworkId();
         Network vnet = azureResourceManager.networks().getById(networkId);
-        //防火墙公网id,该公网Ip的SKU必须为标准
+        //当防火墙SKU不为basic时,必须创建该公网ip(SKU为标准)
 /*        AtomicReference<SubResource> publicIpResource = new AtomicReference<>();
         PublicIpAddress publicIpAddress = azureResourceManager
                 .publicIpAddresses()
@@ -194,7 +199,7 @@ public class AzureFireWall {
                             .withNextHopToVirtualAppliance(privateIpAddress).attach()
                             .create();
 
-                    // 如果子网没有关联路由表，则创建新的路由表
+                    // 绑定新建的路由
                     SubnetInner subnetInner = subnet.innerModel().withRouteTable(routeTable.innerModel());
                     azureResourceManager
                             .networks()
