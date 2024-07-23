@@ -49,8 +49,8 @@ public class FlowCollector {
      *
      * @return
      */
-    public ArkimeCreateResBo createCollector() {
-        return flowCollectClient.createArkimeInstance();
+    public ArkimeCreateResBo createCollector(String sceneEid) {
+        return flowCollectClient.createArkimeInstance(sceneEid);
     }
 
     /**

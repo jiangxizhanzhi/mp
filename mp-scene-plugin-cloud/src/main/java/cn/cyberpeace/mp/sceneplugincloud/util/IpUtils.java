@@ -10,13 +10,18 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.sceneplugincloud.util;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.RandomUtils;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.base.util.mptool.Ipv4Util;
 import cn.cyberpeace.mp.base.util.mptool.StrUtil;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
+import cn.cyberpeace.mp.sceneplugincloud.model.ConfigNetworkModel;
+import cn.cyberpeace.mp.sceneplugincloud.repository.ConfigNetworkMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -614,5 +619,23 @@ public class IpUtils {
             String maskBit = info[1];
             return netIp + "/" + maskBit;
         }
+    }
+
+    public static String getConfigIp() {
+        String cidr = CloudSingleton.cloudAppConfig.getConfigNetCidr();
+        // 需要从固定的地址池里面获取
+        List<AllocationPool> externalNetPool = CloudSingleton.cloudAppConfig.getConfigNetPool();
+
+        // 从数据库中查询正在使用的配置网络ip 避免重复
+        var mapper = BeanCommon.getBean(ConfigNetworkMapper.class);
+        var condition = new HumanCondition().filterEqual(ConfigNetworkModel::getNetworkId, CloudSingleton.cloudAppConfig.getConfigNetId())
+                .filterEqual(ConfigNetworkModel::getStatus, 1);
+        var models = mapper.list(condition);
+        List<String> ips = new ArrayList<>();
+        for (ConfigNetworkModel i : models) {
+            ips.add(i.getIp());
+        }
+        log.debug("分配config ip，已存在地址：{}", JsonCommon.stringify(ips));
+        return newRandomIps(cidr, 1, ips, externalNetPool, false).get(0);
     }
 }

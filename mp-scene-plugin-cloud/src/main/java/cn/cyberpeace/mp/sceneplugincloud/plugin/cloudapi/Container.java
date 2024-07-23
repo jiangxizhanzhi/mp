@@ -71,8 +71,7 @@ public class Container extends CloudClient {
         VirtualNic virtualNic = new VirtualNic();
         virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getConfigNetId());
         virtualNic.setCidr(CloudSingleton.cloudAppConfig.getConfigNetCidr());
-        virtualNic.setFixedIp(IpUtils.newRandomIps(CloudSingleton.cloudAppConfig.getConfigNetCidr(), 1, Collections.emptyList(), Collections.emptyList(), false)
-                                      .get(0));
+        virtualNic.setFixedIp(IpUtils.getConfigIp());
         createData.getNetwork().add(virtualNic);
 
         CloudResponse<ContainerCreateData> result = cloudPost(CloudUrlConstant.CONTAINER_CREATE_URL, createData, null,

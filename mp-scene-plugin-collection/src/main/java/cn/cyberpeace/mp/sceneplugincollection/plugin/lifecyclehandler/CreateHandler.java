@@ -142,7 +142,8 @@ public class CreateHandler extends HandlerCommon {
         // 2. 创建arkime 和流量镜像
         runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
             try {
-                ArkimeCreateResBo arkimeCreateResBo = getFlowCollector().createCollector();
+                String sceneEid = getPluginHandler().getSrcScene().getEid();
+                ArkimeCreateResBo arkimeCreateResBo = getFlowCollector().createCollector(sceneEid);
                 getPluginHandler().getScene().setFlowCollector(arkimeCreateResBo.getResourceId());
                 getPluginHandler().getScene().setFlowCollectorContainerId(arkimeCreateResBo.getArkimeContainerId());
                 getPluginHandler().getScene().setFlowCollectorNetId(arkimeCreateResBo.getCollectNetId());

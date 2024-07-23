@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerDeleteDa
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerGetData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.util.ConfigNetworkUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.ArkimeCreateResBo;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
@@ -30,6 +31,7 @@ import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,7 +63,7 @@ public class FlowCollectClient {
      *
      * @return
      */
-    public ArkimeCreateResBo createArkimeInstance() {
+    public ArkimeCreateResBo createArkimeInstance(String sceneEid) {
         //arkime在es上创建索引的开头唯一标识
         String arkimePrefixId = indexPrefix + String.valueOf(System.currentTimeMillis());
         log.info("index prefix generated {}", arkimePrefixId);
@@ -69,7 +71,7 @@ public class FlowCollectClient {
             throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR, "arkime 连接的外部网络networkId 为空");
         }
         SituationAwareConfig situationAwareConfig = BeanCommon.getBean(SituationAwareConfig.class);
-        String fixedIp = IpUtils.newRandomIps(CloudSingleton.cloudAppConfig.getExternalNetCidr(), 1, Collections.emptyList(), Collections.emptyList(), false).get(0);
+//        String fixedIp = IpUtils.newRandomIps(CloudSingleton.cloudAppConfig.getExternalNetCidr(), 1, Collections.emptyList(), Collections.emptyList(), false).get(0);
 
         ContainerCreateData arkimeCreateData = new ContainerCreateData();
         arkimeCreateData.setName(arkimePrefixId);
@@ -119,7 +121,15 @@ public class FlowCollectClient {
         ContainerCreateData createData = containerClient.create(arkimeCreateData);
         log.info("create arkime success , result is {}", JsonCommon.stringify(createData));
         ArkimeCreateResBo arkimeCreateResBo = new ArkimeCreateResBo();
-        arkimeCreateResBo.setIp(fixedIp);
+
+        for (var n : createData.getNetwork()) {
+            if (StringUtils.equals(n.getNetworkId(), CloudSingleton.cloudAppConfig.getConfigNetId())) {
+                arkimeCreateResBo.setIp(n.getFixedIp());
+                ConfigNetworkUtils.save(n.getFixedIp(), sceneEid);
+                break;
+            }
+        }
+
         arkimeCreateResBo.setResourceId(arkimePrefixId);
         arkimeCreateResBo.setArkimeContainerId(createData.getId());
         arkimeCreateResBo.setCollectNetId(collectNet.getId());

@@ -51,6 +51,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementLogicalSwitchMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CsceneElementSoftVersionMapper;
+import cn.cyberpeace.mp.sceneplugincloud.util.ConfigNetworkUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.StrategyHttpUtil;
@@ -1090,6 +1091,7 @@ public class CreateHandler extends HandlerCommon {
             for (var n : virtualNics) {
                 if (StringUtils.equals(n.getNetworkId(), CloudSingleton.cloudAppConfig.getConfigNetId())) {
                     cloudElement.setConfigIp(n.getFixedIp());
+                    ConfigNetworkUtils.save(n.getFixedIp(), getPluginHandler().getSrcScene().getEid());
                     break;
                 }
             }
@@ -1742,7 +1744,7 @@ public class CreateHandler extends HandlerCommon {
             });
         }
 
-        runSceneProgress(SceneProcess.CREATE_NODE_TO_EXTERNAL_ROUTER, this::createNodeToExternalRouter);
+//        runSceneProgress(SceneProcess.CREATE_NODE_TO_EXTERNAL_ROUTER, this::createNodeToExternalRouter);
         if (!this.auxiliaryNetworkRouters.isEmpty()) {
             for (Map.Entry<CloudPluginSceneElementNetworkBO, VirtualRouterCreateData> a : this.auxiliaryNetworkRouters.entrySet()) {
                 var net = a.getKey();
