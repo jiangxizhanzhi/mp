@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
+import cn.cyberpeace.mp.cscene.dto.element.CloudElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
@@ -112,9 +113,15 @@ public class SceneMonitorController {
             for (var e: data) {
                 if(e.getImageType()!=null && !e.getImageType().equals("load") && !e.getImageType().equals("networkEquipment")){
                     CloudPluginSceneElementBO element = cloudPlugin.getElement(e.getId());
-                    e.setCloudServiceType(element.getCloudServiceType());
-                    e.setServiceType(element.getServiceType());
-                    e.setVmType(element.getVmType());
+                    CloudElementMonitorBasicInfo cloudElement = new CloudElementMonitorBasicInfo();
+                    cloudElement.setCloudServiceType(element.getCloudServiceType());
+                    cloudElement.setServiceType(element.getServiceType());
+                    cloudElement.setVmType(element.getVmType());
+                    cloudElement.setCpu(element.getSrcElement().getCpu());
+                    cloudElement.setDisk(element.getSrcElement().getDisk());
+                    cloudElement.setVmSizeType(element.getVmSizeType());
+                    cloudElement.setVmOsDiskType(element.getVmOsDiskType());
+                    e.setCloudElementMonitorBasicInfo(cloudElement);
                     result.add(e);
                 }
             }
