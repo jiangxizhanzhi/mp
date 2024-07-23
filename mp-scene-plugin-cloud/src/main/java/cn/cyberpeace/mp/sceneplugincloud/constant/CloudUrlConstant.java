@@ -208,12 +208,12 @@ public class CloudUrlConstant {
 
     public static final String EXPIRE_ALL_CONNECT = "/cpcloud/guacamole/v1/logout";
     public static final String GET_CONNECTION_URL = "/cpcloud/guacamole/v1/connection";
-    public static final String GET_MONITOR_URL = "/cpcloud/guacamole/v1/monitor";
+    public static final String GET_MONITOR_URL = "/cloud/v1/guacamole/monitor";
     public static final String GET_ASSISTANCE_URL = "/cpcloud/guacamole/v1/assistance";
     public static final String GET_RECORDING_URL = "/cloud/v1/guacamole/recordfile";
     public static final String GET_RECORDING_LIST_URL = "/cloud/v1/guacamole/recordfile_list";
     public static final String RECORDING_DOWNLOAD_URL = "/cpcloud/guacamole/v1/downloadfile?recordfilename=%s";
-    public static final String RECORDING_PLAY_URL = "/cpcloud/guacamole/v1/video?recordfilename=%s";
+    public static final String RECORDING_PLAY_URL = "/cloud/v1/guacamole/video?recordfilename=%s";
     public static final String ENABLE_RECORDING_URL = "/cloud/v1/guacamole/enable_record";
     public static final String DISABLE_RECORDING_URL = "/cpcloud/guacamole/v1/disable_record";
     public static final String CONVERT_RECORDING_URL = "/cloud/v1/guacamole/convert_record";

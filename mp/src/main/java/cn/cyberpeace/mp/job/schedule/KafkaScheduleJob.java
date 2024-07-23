@@ -11,6 +11,7 @@
 package cn.cyberpeace.mp.job.schedule;
 
 import cn.cyberpeace.mp.devopscluster.converter.RealEquipmentConverter;
+import cn.cyberpeace.mp.job.base.init.MpInitiate;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
@@ -52,15 +53,16 @@ public class KafkaScheduleJob {
 	@Autowired
 	private TaskScheduler taskScheduler;
 
-	@PostConstruct
+	@MpInitiate(description = "kafka 连接",id = "init_read_kafka")
 	public void action() {
 		Properties props = new Properties();
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, situationAwareConfig.getStorageKafkaAddress());
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 		props.put(ConsumerConfig.GROUP_ID_CONFIG, "my_group");
+		KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
 
-		try (KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);){
+		try {
 			consumer.subscribe(Collections.singletonList("common_collect_data"));
 
 			var loadJobTime = new Date(System.currentTimeMillis() + 2 * 1000);

@@ -16,4 +16,4 @@ INSERT INTO mp.mp_sys_model_version
 VALUES(5, 'f9f32c9661b659c0a3308db743f6d976', 'CR', 'v5.4.1', 1, '2023-08-23 16:07:37.000', '2023-08-23 16:07:40.000');
 INSERT INTO mp.mp_sys_model_version
 (pk, id, model_name, model_version, visible, create_time, update_time)
-VALUES(6, '906cfd183dda725189b48699c1718413', 'SYS', 'v5.4.1', 1, '2023-09-15 15:19:19.000', '2023-09-15 15:19:26.000');
+VALUES(6, '906cfd183dda725189b48699c1718413', 'SYS', 'v0.0.1', 1, '2023-09-15 15:19:19.000', '2023-09-15 15:19:26.000');

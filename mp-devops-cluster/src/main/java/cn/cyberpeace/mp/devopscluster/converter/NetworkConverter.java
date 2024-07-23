@@ -59,8 +59,8 @@ public class NetworkConverter implements BaseConverter{
      */
     public ListObjServiceResult<Network> page(NetworkPageDTO dto) {
         NetworkPageParam param = new NetworkPageParam();
-        param.setPage(dto.getPage());
-        param.setPerPage(dto.getPerPage());
+        param.setPage(dto.getOffset());
+        param.setPerPage(dto.getLimit());
         param.setName(dto.getName());
         var result = client.networkPage(param);
         if (CollectionUtils.isEmpty(result.getObjs())) {

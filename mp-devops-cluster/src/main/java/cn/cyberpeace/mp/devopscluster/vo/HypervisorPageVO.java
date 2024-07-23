@@ -219,7 +219,7 @@ public class HypervisorPageVO extends BaseVO {
 
     public BigDecimal getDiskPercent() {
         if (Objects.isNull(diskPercent)) {
-            return Objects.isNull(this.disk) || Objects.isNull(this.diskUsed) ?
+            return Objects.isNull(this.disk) || Objects.isNull(this.diskUsed) || this.disk == 0 ?
                     BigDecimal.ZERO : BigDecimal.valueOf(this.diskUsed).divide(BigDecimal.valueOf(this.disk),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
         } else {
             return diskPercent;

@@ -527,8 +527,9 @@
     </select>
 
     <select id="selectBoById" resultType="cn.cyberpeace.mp.devopscluster.converter.bo.SceneRealEquipmentBo">
-        select scene scene_id, name, element.scene_element node_id, open_syslog, open_kafka, open_restapi, open_soap from mp_devops_target target
+        select instance.id scene_id, target.name name, element.scene_element node_id, open_syslog, open_kafka, open_restapi, open_soap from mp_devops_target target
         left join mp_sceneplugincloud_scene_element element on target.uuid = element.image_uuid
+        left join mp_cscene_cscene_instance instance on element.scene = instance.scene
         where target.id = #{id}
         limit 1
     </select>

@@ -114,7 +114,7 @@ public class RealEquipmentService extends BaseCpService {
      * @return
      */
     public Device update(String uuid,Device device){
-        Device result = super.sendPut(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/" + uuid,JsonUtils.snakeStringify(device),Device.class);
+        Device result = super.sendPut(CPCLOUD_URL + URL_VERSION + ENTITY + "/" + uuid,JsonUtils.snakeStringify(device),Device.class);
         super.checkResult(result);
         return result;
     }
