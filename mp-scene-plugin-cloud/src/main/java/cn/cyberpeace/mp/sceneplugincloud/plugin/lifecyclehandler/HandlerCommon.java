@@ -182,6 +182,7 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
     }
 
     public void openAccessModes(CloudPluginSceneElementBO element) {
+        var closeFlag = false;
         var cloudPorts = getPluginHandler().getPorts(element);
         for (var cloudPort : cloudPorts) {
             var accessModes = cloudPort.getAccessModes();
@@ -190,6 +191,19 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
             }
             for (var accessMode : accessModes) {
                 accessMode.setAvailable(true);
+                closeFlag = true;
+            }
+        }
+
+        if (closeFlag) {
+            var nodeId = element.getSrcElement().getId();
+            try {
+                getPluginHandler().asyncAckElementChanged(nodeId, true);
+                if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+                    getPluginHandler().getSceneHandler().updateSceneElementWithPlugins(nodeId);
+                }
+            } catch (Exception e) {
+                log.error("Close access mode ack element changed error: ", e);
             }
         }
     }

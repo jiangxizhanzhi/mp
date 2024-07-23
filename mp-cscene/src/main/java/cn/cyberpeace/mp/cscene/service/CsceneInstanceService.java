@@ -2144,14 +2144,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         Integer cloudType = sceneHandler.getScene().getCloudType();
-        if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
-            return new ServiceResult<>(false);
+        if (cloudType == BaseSceneModel.CloudType.DEFAULT) {
+            throw new MpRuntimeException("传统场景，不支持扩容");
         }
 
         CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         CloudPluginSceneElementBO element = cloudPlugin.getElement(request.getNodeId());
         String imageType = element.getImageType();
-        if (!BaseCloudPluginSceneElementModel.ImageType.VM.equals(imageType)) {
+        if (!BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(imageType)) {
             throw new MpRuntimeException("非虚拟机节点，不支持扩容");
         }
 
@@ -2163,7 +2163,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         element.setVmExpansionDiskType(request.getExpansionDiskType());
         element.getSrcElement().setExpansionDisk(request.getExpansionDisk());
-        if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(element.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == element.getVirtualType()) {
+        if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(element.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == element.getVirtualType()) {
             SceneTaskPool.getInstance().executeTask(() -> {
                 AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
                 azureVirtualMachine.expansion(element);

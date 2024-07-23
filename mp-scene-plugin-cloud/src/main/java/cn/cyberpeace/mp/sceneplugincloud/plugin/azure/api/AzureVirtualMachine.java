@@ -212,13 +212,17 @@ public class AzureVirtualMachine {
             virtualMachine.start();
         }
         virtualMachine.restart();
-        element.setPublicIpAddress(virtualMachine.getPrimaryPublicIPAddress().ipAddress());
+        if(element.getIsPublicIp()){
+            element.setPublicIpAddress(virtualMachine.getPrimaryPublicIPAddress().ipAddress());
+        }
     }
 
     public void start(CloudPluginSceneElementBO element) {
         VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(element.getResourceId());
         virtualMachine.start();
-        element.setPublicIpAddress(virtualMachine.getPrimaryPublicIPAddress().ipAddress());
+        if(element.getIsPublicIp()){
+            element.setPublicIpAddress(virtualMachine.getPrimaryPublicIPAddress().ipAddress());
+        }
     }
 
     public void unpause(String instanceId) {
@@ -233,7 +237,8 @@ public class AzureVirtualMachine {
 
     public void expansion(CloudPluginSceneElementBO cloudElement) {
         VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(cloudElement.getResourceId());
-        VirtualMachine.Update update = virtualMachine.update().withSize(cloudElement.getVmSizeType());
+//        VirtualMachine.Update update = virtualMachine.update().withSize(cloudElement.getVmSizeType());
+        VirtualMachine.Update update = virtualMachine.update();
         Integer expansionDisk = cloudElement.getSrcElement().getExpansionDisk();
         if (expansionDisk != null && expansionDisk > 0 && StringUtils.isNotBlank(cloudElement.getVmExpansionDiskType())) {
             update.withDataDiskDefaultStorageAccountType(StorageAccountTypes.fromString(cloudElement.getVmExpansionDiskType()))

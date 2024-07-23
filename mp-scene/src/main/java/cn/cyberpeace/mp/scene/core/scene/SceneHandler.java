@@ -306,7 +306,6 @@ public class SceneHandler extends BaseSceneHandler<
             return;
         }
         var collectedSceneElement = getCollectedSceneElementBO(nodeId);
-
         reporters.forEach(reporter -> reportTaskPool.executeTask(() -> reporter.reportElement(collectedSceneElement)));
     }
 
