@@ -116,6 +116,9 @@ public class SceneMonitorController {
                     cloudElement.setCloudServiceType(element.getCloudServiceType());
                     cloudElement.setServiceType(element.getServiceType());
                     cloudElement.setVmType(element.getVmType());
+                    cloudElement.setVmSizeType(element.getVmSizeType());
+                    cloudElement.setVmOsDiskType(element.getVmOsDiskType());
+
                     // 是否扩容过
                     cloudElement.setExpansion(element.getExpansion());
                     cloudElement.setVmExpansionDiskType(element.getVmExpansionDiskType());// (根据expansion判断)只能拓展一次

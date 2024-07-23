@@ -30,14 +30,20 @@ public class CloudElementMonitorBasicInfo {
     @ApiModelProperty(value = "虚拟机系统拓展磁盘类型")
     private String vmExpansionDiskType;
 
-    @ApiModelProperty(value = "cpu数量")
-    private Integer cpu;
-
     @ApiModelProperty(value = "拓展磁盘大小")
     private Integer expansionDisk;
 
+    @ApiModelProperty(value = "虚拟机系统磁盘类型")
+    private String vmOsDiskType;
+
+    @ApiModelProperty(value = "磁盘大小")
+    private Integer disk;
+
     @ApiModelProperty(value = "内存大小")
     private Integer ram;
+
+    @ApiModelProperty(value = "cpu数量")
+    private Integer cpu;
 
     @ApiModelProperty(value = "是否扩容过")
     private Boolean expansion;
