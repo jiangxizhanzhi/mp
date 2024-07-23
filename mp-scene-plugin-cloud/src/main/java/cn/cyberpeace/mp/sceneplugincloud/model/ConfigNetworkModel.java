@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 
  @Data
  @NoArgsConstructor
- @Table("mp_router_network")
+ @Table("mp_config_network")
  /**
   * CsceneElementSoftVersionModel 类继承自 BaseModel，用于表示场景元素的软件版本信息。
   * 该类包含了场景元素的唯一标识、软件名称和版本号等基本信息。
