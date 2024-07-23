@@ -12,6 +12,7 @@ package cn.cyberpeace.mp.sceneplugincollection.client;
 
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
@@ -116,6 +117,7 @@ public class FlowCollectClient {
         arkimeCreateData.setPrivileged(true);
 
         ContainerCreateData createData = containerClient.create(arkimeCreateData);
+        log.info("create arkime success , result is {}", JsonCommon.stringify(createData));
         ArkimeCreateResBo arkimeCreateResBo = new ArkimeCreateResBo();
         arkimeCreateResBo.setIp(fixedIp);
         arkimeCreateResBo.setResourceId(arkimePrefixId);
