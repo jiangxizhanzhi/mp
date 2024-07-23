@@ -2081,7 +2081,7 @@ public class CreateHandler extends HandlerCommon {
             accessInfoJSON.put("host_ip", ip);
             accessInfoJSON.put("version", "v1");
             accessInfoJSON.put("community", "private");
-            message.put("access_info", accessInfoJSON.toJSONString());
+            message.put("access_info", accessInfoJSON);
             JSONObject configJSON = new JSONObject();
             JSONArray commandsArray = new JSONArray();
             JSONObject commandJSON = new JSONObject();
@@ -2092,10 +2092,10 @@ public class CreateHandler extends HandlerCommon {
             paramsJSON.put("code", null); // aaa
             paramsJSON.put("value", null); // .1.3.6.1.2.1.1.1.0
             paramsArray.add(paramsJSON);
-            commandJSON.put("params", paramsArray.toJSONString());
+            commandJSON.put("params", paramsArray);
             commandsArray.add(commandJSON);
-            configJSON.put("commands", commandsArray.toJSONString());
-            message.put("config", configJSON.toJSONString());
+            configJSON.put("commands", commandsArray);
+            message.put("config", configJSON);
         }else if (1 == protocol){
             String username = configCommandJSON.getString("username");
             String password = configCommandJSON.getString("password");
@@ -2109,7 +2109,7 @@ public class CreateHandler extends HandlerCommon {
             accessInfoJSON.put("host_ip", ip);
             accessInfoJSON.put("username", username);
             accessInfoJSON.put("password", password);
-            message.put("access_info", accessInfoJSON.toJSONString());
+            message.put("access_info", accessInfoJSON);
             JSONObject configJSON = new JSONObject();
             JSONArray commandsArray = new JSONArray();
             JSONObject commandJSON = new JSONObject();
@@ -2120,10 +2120,10 @@ public class CreateHandler extends HandlerCommon {
             paramsJSON.put("code", null); // aaa
             paramsJSON.put("value", null); // urn:ietf:params:xml:ns:netconf:base:1.0
             paramsArray.add(paramsJSON);
-            commandJSON.put("params", paramsArray.toJSONString());
+            commandJSON.put("params", paramsArray);
             commandsArray.add(commandJSON);
-            configJSON.put("commands", commandsArray.toJSONString());
-            message.put("config", configJSON.toJSONString());
+            configJSON.put("commands", commandsArray);
+            message.put("config", configJSON);
         }else if (2 == protocol){
             String username = configCommandJSON.getString("username");
             String password = configCommandJSON.getString("password");
@@ -2141,7 +2141,7 @@ public class CreateHandler extends HandlerCommon {
             accessInfoJSON.put("request_type", null);
             accessInfoJSON.put("request_method", null);
             accessInfoJSON.put("url_suffix", null);
-            message.put("access_info", accessInfoJSON.toJSONString());
+            message.put("access_info", accessInfoJSON);
             JSONObject configJSON = new JSONObject();
             JSONArray commandsArray = new JSONArray();
             JSONObject commandJSON = new JSONObject();
@@ -2152,16 +2152,15 @@ public class CreateHandler extends HandlerCommon {
             paramsJSON.put("code", null); // aaa
             paramsJSON.put("value", null); // urn:ietf:params:xml:ns:netconf:base:1.0
             paramsArray.add(paramsJSON);
-            commandJSON.put("params", paramsArray.toJSONString());
+            commandJSON.put("params", paramsArray);
             commandsArray.add(commandJSON);
-            configJSON.put("commands", commandsArray.toJSONString());
-            message.put("config", configJSON.toJSONString());
+            configJSON.put("commands", commandsArray);
+            message.put("config", configJSON);
         }else {
             return;
         }
 
-        boolean result = StrategyHttpUtil.post(url, StringEscapeUtils.unescapeJava(
-                StringEscapeUtils.unescapeJava(message.toJSONString())));
+        boolean result = StrategyHttpUtil.post(url, message.toJSONString());
         if (!result){
             log.error("strategySend error, sourceIp=[{}], configCommand=[{}]", sourceIp, configCommand);
         }
