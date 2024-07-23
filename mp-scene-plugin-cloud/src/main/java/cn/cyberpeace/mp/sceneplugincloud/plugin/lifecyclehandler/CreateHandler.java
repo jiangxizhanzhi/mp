@@ -1086,6 +1086,15 @@ public class CreateHandler extends HandlerCommon {
             return;
         }
 
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(virtualNics)) {
+            for (var n : virtualNics) {
+                if (StringUtils.equals(n.getNetworkId(), CloudSingleton.cloudAppConfig.getConfigNetId())) {
+                    cloudElement.setConfigIp(n.getFixedIp());
+                    break;
+                }
+            }
+        }
+
         List<CloudPluginSceneElementPortBO> cloudPorts = getPluginHandler().getPorts(cloudElement);
         if (cloudPorts.isEmpty()) {
             return;

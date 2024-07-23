@@ -41,6 +41,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CloudPluginSceneElementBO extends BaseCloudPluginSceneElementBO<CloudPluginSceneElementModel,
         CloudPluginSceneElementBO, SceneElementBO> {
 
+    @ApiModelProperty(value = "靶标在配置网络上分到的ip")
+    private String configIp;
+
     @JsonIgnore
     private CoreType coreType;
 

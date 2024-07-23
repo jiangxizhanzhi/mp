@@ -756,13 +756,20 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         var element = pluginHandler.getElement(nodeId).getSrcElement();
+
+        // 需要使用 Guacamole 生成链接的协议
+        Set<String> guacamoleProtocol = new HashSet<>();
+        guacamoleProtocol.add(CloudElementAccessMode.Protocol.SSH);
+        guacamoleProtocol.add(CloudElementAccessMode.Protocol.RDP);
+        guacamoleProtocol.add(CloudElementAccessMode.Protocol.VNC);
+
         if (element != null && CollectionUtils.isNotEmpty(element.getPorts())) {
             for (var p : element.getPorts()) {
                 var pluginPort = pluginHandler.getPort(p.getId());
                 if (pluginPort != null && CollectionUtils.isNotEmpty(pluginPort.getAccessModes())) {
                     for (var a : pluginPort.getAccessModes()) {
                         if (StringUtils.equals(a.getId(), accessModeId)) {
-                            if (CloudElementAccessMode.Protocol.VNC.equals(a.getProtocol())) {
+                            if (guacamoleProtocol.contains(a.getProtocol())) {
                                 return modelService.getRemoteConnection(request.getId(), request.getNodeId(), request.getAccessModeId(), request.getContext())
                                         .asResult();
                             } else {

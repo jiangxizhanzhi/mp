@@ -1,0 +1,1 @@
+alter table mp_sceneplugincloud_scene add column config_ip varchar(128) not null default '' comment '靶标在配置网络上分到的ip' ;

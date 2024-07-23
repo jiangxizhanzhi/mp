@@ -591,6 +591,7 @@ public class ScenePluginCloudSceneService {
         sceneConnectionParam.setResourceId(cloudElement.getResourceId());
         sceneConnectionParam.setUserId(userId);
         sceneConnectionParam.setCloudAccessMode(accessModeInfo.accessMode);
+        sceneConnectionParam.setConfigIp(cloudElement.getConfigIp());
         var sceneConnection = CloudSceneConnectionCommon.getOrCreateSceneConnection(sceneConnectionParam);
 
         var cloudScene = accessModeInfo.getCloudScene();

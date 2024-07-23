@@ -40,6 +40,9 @@ public class CloudElementAccessMode {
         public static final String NO_VNC = "novnc";
         public static final String SPICE = "spice";
         public static final String COM = "com";
+        public static final String SSH = "ssh";
+        public static final String RDP = "rdp";
+        public static final String TELNET = "telnet";
 
         /**
          * Protocol
