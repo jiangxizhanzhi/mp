@@ -16,10 +16,12 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Mirror;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerGetData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.ArkimeCreateResBo;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
@@ -79,7 +81,24 @@ public class FlowCollectClient {
 //        virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
 //        virtualNic.setCidr(CloudSingleton.cloudAppConfig.getExternalNetCidr());
 //        arkimeCreateData.setNetwork(Collections.singletonList(virtualNic));
-        arkimeCreateData.setNetwork(new ArrayList<>());
+
+        // 30所流量采集，需要新建一个端口，专门用来做采集
+        var collectNetCreateData = new VirtualSwitchCreateData();
+        collectNetCreateData.setName(arkimePrefixId);
+        collectNetCreateData.setCidr("192.168.1.0/24");
+        collectNetCreateData.setGateway("192.168.1.254");
+        collectNetCreateData.setMtu("1500");
+        collectNetCreateData.setSubnetName(arkimePrefixId + "_1");
+        collectNetCreateData.setSubnetDns(null);
+        var collectNet = new VirtualSwitch().create(collectNetCreateData);
+        VirtualNic virtualNic = new VirtualNic();
+        virtualNic.setCidr("192.168.1.0/24");
+        virtualNic.setGateway("192.168.1.254");
+        virtualNic.setFixedIp("192.168.1.10");
+        virtualNic.setNetworkId(collectNet.getId());
+        List<VirtualNic> nics = new ArrayList<>();
+        nics.add(virtualNic);
+        arkimeCreateData.setNetwork(nics);
 
         Map<String, String> env = new HashMap<>(8);
         env.put("SIC_ARKIME_ELASTICSEARCH", "http://" + situationAwareConfig.getArkimeEsHost() + ":" + situationAwareConfig.getArkimeEsPort());
@@ -101,9 +120,13 @@ public class FlowCollectClient {
         arkimeCreateResBo.setIp(fixedIp);
         arkimeCreateResBo.setResourceId(arkimePrefixId);
         arkimeCreateResBo.setArkimeContainerId(createData.getId());
-        arkimeCreateResBo.setNicId(createData.getNetwork().get(0).getVnicId());
+        arkimeCreateResBo.setCollectNetId(collectNet.getId());
+        for (var n : createData.getNetwork()) {
+            if (n.getFixedIp().equals("192.168.1.10")) {
+                arkimeCreateResBo.setNicId(n.getVnicId());
+            }
+        }
         return arkimeCreateResBo;
-
     }
 
     /**

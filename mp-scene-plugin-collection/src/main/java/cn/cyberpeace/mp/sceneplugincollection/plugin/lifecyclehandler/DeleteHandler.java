@@ -84,10 +84,12 @@ public class DeleteHandler extends HandlerCommon {
 //            BeanCommon.getBean(ScenePluginCollectionSceneService.class).saveFlowPcap(getPluginHandler().getSourceSceneId(), flowCollectorId);
 
             runSceneProgress(SceneProcess.DELETE_FLOW_COLLECTOR, () -> {
-                getFlowCollector().deleteCollector(new DeleteFlowCollectBo()
-                        .setFlowMirrorId(scene.getFlowMirrorId())
-                        .setSceneId(getPluginHandler().getSceneHandler().getSceneId())
-                        .setCollectorInstanceId(scene.getFlowCollectorContainerId()));
+                var deleteBo = new DeleteFlowCollectBo();
+                deleteBo.setFlowMirrorId(scene.getFlowMirrorId());
+                deleteBo.setSceneId(getPluginHandler().getSceneHandler().getSceneId());
+                deleteBo.setCollectorInstanceId(scene.getFlowCollectorContainerId());
+                deleteBo.setCollectorNetId(scene.getFlowCollectorNetId());
+                getFlowCollector().deleteCollector(deleteBo);
             });
         }
 

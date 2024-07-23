@@ -1,5 +1,7 @@
 alter table mp_sceneplugincloud_scene add column port_mapping_instance_id varchar(128) not null default '' comment '端口映射代理虚拟机id' ;
 
+alter table mp_sceneplugincollection_scene add column flow_collector_net_id VARCHAR(128)  NOT NULL default '' COMMENT '流量采集器使用的流量镜像专用网络的网络id';
+
 CREATE TABLE `mp_router_network`
 (
     `pk`          int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',

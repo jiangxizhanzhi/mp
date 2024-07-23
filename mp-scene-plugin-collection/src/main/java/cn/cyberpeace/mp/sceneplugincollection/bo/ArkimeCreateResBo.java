@@ -25,4 +25,5 @@ public class ArkimeCreateResBo {
     private String ip;
     private String arkimeContainerId;
     private String nicId ;
+    private String collectNetId;
 }

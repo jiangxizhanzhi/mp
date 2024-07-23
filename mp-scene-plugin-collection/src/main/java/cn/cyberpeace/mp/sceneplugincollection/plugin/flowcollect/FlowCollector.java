@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Mirror;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CreateMirrorData;
 import cn.cyberpeace.mp.sceneplugincollection.bo.ArkimeCreateResBo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.DeleteFlowCollectBo;
@@ -98,6 +99,9 @@ public class FlowCollector {
      * @param deleteFlowCollectBo
      */
     public void deleteCollector(DeleteFlowCollectBo deleteFlowCollectBo) {
+        if (StringUtils.isNotEmpty(deleteFlowCollectBo.getCollectorNetId())) {
+            new VirtualSwitch().deleteById(deleteFlowCollectBo.getCollectorNetId());
+        }
         if (StringUtils.isNotEmpty(deleteFlowCollectBo.getCollectorInstanceId())) {
             flowCollectClient.delArkimeInstance(deleteFlowCollectBo.getCollectorInstanceId());
         }

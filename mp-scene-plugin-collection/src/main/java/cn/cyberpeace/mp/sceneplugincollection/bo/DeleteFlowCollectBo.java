@@ -29,4 +29,6 @@ public class DeleteFlowCollectBo {
     private String collectorInstanceId;
     //删除流量镜像
     private String flowMirrorId;
+    //删除镜像用的网络
+    private String collectorNetId;
 }
