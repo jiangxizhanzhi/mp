@@ -1,13 +1,10 @@
 package cn.cyberpeace.mp.cscene.dto.element;
 
-import cn.cyberpeace.mp.sceneplugincloud.bo.AccessUserBO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * 云节点监控统计信息
@@ -30,12 +27,18 @@ public class CloudElementMonitorBasicInfo {
     @ApiModelProperty(value = "虚拟机大小")
     private String vmSizeType;
 
-    @ApiModelProperty(value = "虚拟机系统磁盘类型")//vm_os_disk_type
-    private String vmOsDiskType;
+    @ApiModelProperty(value = "虚拟机系统拓展磁盘类型")
+    private String vmExpansionDiskType;
 
     @ApiModelProperty(value = "cpu数量")
     private Integer cpu;
 
-    @ApiModelProperty(value = "磁盘大小")
-    private Integer disk;
+    @ApiModelProperty(value = "拓展磁盘大小")
+    private Integer expansionDisk;
+
+    @ApiModelProperty(value = "内存大小")
+    private Integer ram;
+
+    @ApiModelProperty(value = "是否扩容过")
+    private Boolean expansion;
 }

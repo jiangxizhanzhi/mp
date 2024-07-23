@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.util.BaseStatusEnum;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -117,10 +116,14 @@ public class SceneMonitorController {
                     cloudElement.setCloudServiceType(element.getCloudServiceType());
                     cloudElement.setServiceType(element.getServiceType());
                     cloudElement.setVmType(element.getVmType());
-                    cloudElement.setCpu(element.getSrcElement().getCpu());
-                    cloudElement.setDisk(element.getSrcElement().getDisk());
+                    // 是否扩容过
+                    cloudElement.setExpansion(element.getExpansion());
+                    cloudElement.setVmExpansionDiskType(element.getVmExpansionDiskType());// (根据expansion判断)只能拓展一次
+                    cloudElement.setExpansionDisk(element.getSrcElement().getExpansionDisk());// (根据expansion判断)只能拓展一次
                     cloudElement.setVmSizeType(element.getVmSizeType());
-                    cloudElement.setVmOsDiskType(element.getVmOsDiskType());
+
+                    cloudElement.setCpu(element.getSrcElement().getCpu());
+                    cloudElement.setRam(element.getSrcElement().getRam());
                     e.setCloudElementMonitorBasicInfo(cloudElement);
                     result.add(e);
                 }
