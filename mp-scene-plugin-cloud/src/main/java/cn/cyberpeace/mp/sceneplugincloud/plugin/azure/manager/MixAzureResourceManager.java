@@ -22,6 +22,9 @@ import java.util.List;
 @Component
 public class MixAzureResourceManager implements IAzureResourceManager {
 
+    // 订阅
+    private static final String subscription = "c87ba926-f7c2-4d53-8b8e-89245dc92e26";
+
     //当前云环境资源管理器
     private static AzureResourceManager AZURE_RESOURCE_MANAGER;
 
@@ -94,7 +97,7 @@ public class MixAzureResourceManager implements IAzureResourceManager {
                     AZURE_RESOURCE_MANAGER = AzureResourceManager.configure()
                             .withLogLevel(HttpLogDetailLevel.BASIC)
                             .authenticate(credential, profile)
-                            .withSubscription("c87ba926-f7c2-4d53-8b8e-89245dc92e26");//订阅id
+                            .withSubscription(subscription);//订阅id
                 }
             }
         }
@@ -128,7 +131,7 @@ public class MixAzureResourceManager implements IAzureResourceManager {
         AZURE_RESOURCE_MANAGER = AzureResourceManager.configure()
                 .withLogLevel(HttpLogDetailLevel.BASIC)
                 .authenticate(credential, profile)
-                .withSubscription("c87ba926-f7c2-4d53-8b8e-89245dc92e26");
+                .withSubscription(subscription);
     }
 
     @Override

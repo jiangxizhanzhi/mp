@@ -125,6 +125,7 @@ public class SceneMonitorController {
                     cloudElement.setExpansionDisk(element.getSrcElement().getExpansionDisk());// (根据expansion判断)只能拓展一次
                     cloudElement.setVmSizeType(element.getVmSizeType());
 
+                    cloudElement.setDisk(element.getSrcElement().getDisk());
                     cloudElement.setCpu(element.getSrcElement().getCpu());
                     cloudElement.setRam(element.getSrcElement().getRam());
                     e.setCloudElementMonitorBasicInfo(cloudElement);
