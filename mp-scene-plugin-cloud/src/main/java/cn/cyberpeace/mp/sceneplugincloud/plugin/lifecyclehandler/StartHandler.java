@@ -84,18 +84,6 @@ public class StartHandler extends HandlerCommon {
                 //启动
                 AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
                 azureVirtualMachine.start(element);
-//                TODO 挂载ISO USB
-                /*if (StringUtils.isNotEmpty(element.getIsoAttachFilename()) && StringUtils.isNotEmpty(element.getIsoTmpdirUuid())) {
-                    this.attachISO(element);
-                }
-                //挂载一下usb
-                if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(element.getVirtualUsbs())) {
-                    this.attachVirtualUsbs(element);
-                }
-                if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(element.getEntityUsbs())) {
-                    this.attachEntityUsbs(element);
-                }*/
-                //检查接入方式是否可用
                 //                    TODO 云场景连接用的公网ip 这里用私有ip测不通 暂去
 //                checkAccessModes(element);
                 openAccessModes(element);

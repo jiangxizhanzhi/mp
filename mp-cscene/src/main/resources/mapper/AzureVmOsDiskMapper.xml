@@ -50,14 +50,21 @@
         SELECT pk,
                id,
                name, size, max_size_gi_b, max_size, max_size_unit, iops, iops_performance_plus, bandwidth_mbps, bandwidth_mbps_performance_plus, max_burst_iops, max_burst_bandwidth_mbps, max_burst_duration_in_min
-        FROM (
-            SELECT
-            pk, id, name, size, max_size_gi_b, max_size, max_size_unit, iops, iops_performance_plus, bandwidth_mbps, bandwidth_mbps_performance_plus, max_burst_iops, max_burst_bandwidth_mbps, max_burst_duration_in_min, ROW_NUMBER() OVER (PARTITION BY name ORDER BY CAST (SUBSTRING (size, 2, LENGTH (size) - 1) AS INT) ASC) AS rn
-            FROM
-            mp_azure_vm_os_disk
-            ) AS subquery
-        WHERE
-            rn = 1;
+        FROM (SELECT *,
+                ROW_NUMBER() OVER (PARTITION BY name ORDER BY CAST(SUBSTRING(size, 2, LENGTH(size) - 1) AS INT) ASC) AS rn,
+                CASE
+                    WHEN name LIKE '%Standard_LRS%' THEN 1
+                    WHEN name LIKE '%StandardSSD_LRS%' THEN 2
+                    WHEN name LIKE '%Premium_LRS%' THEN 3
+                    WHEN name LIKE '%PremiumV2_LRS%' THEN 4
+                    WHEN name LIKE '%UltraSSD_LRS%' THEN 5
+                    WHEN name LIKE '%StandardSSD_ZRS%' THEN 6
+                    WHEN name LIKE '%Premium_ZRS%' THEN 7
+                    ELSE 8
+                    END AS storage_type_weight
+                FROM mp_azure_vm_os_disk) AS subquery
+        WHERE rn = 1
+        ORDER BY storage_type_weight;
     </select>
 
     <select id="list" resultType="cn.cyberpeace.mp.cscene.model.AzureVmOsDisk">

@@ -2158,9 +2158,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (null != request.getVmSizeType()) {
             element.setVmSizeType(request.getVmSizeType());
         }
-        if (element.getExpansion()) {
-            throw new MpRuntimeException("不允许二次扩容");
-        }
         element.setVmExpansionDiskType(request.getExpansionDiskType());
         element.getSrcElement().setExpansionDisk(request.getExpansionDisk());
         if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(element.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == element.getVirtualType()) {
@@ -2168,17 +2165,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
                 azureVirtualMachine.expansion(element);
             });
-            element.setExpansion(true);
             CloudPluginSceneElementModel cloudPluginSceneElementModel = element.toModel();
-
             HumanCondition humanCondition = new HumanCondition()
                     .filterEqual(CloudPluginSceneElementModel::getScene, sceneHandler.getSceneId())
                     .filterEqual(CloudPluginSceneElementModel::getSceneElement, request.getNodeId());
             cloudPluginSceneElementMapper.filterUpdate(cloudPluginSceneElementModel, humanCondition);
             SceneElementModel sceneElementModel = element.getSrcElement().toModel();
             sceneElementMapper.update(sceneElementModel);
-
-
             return new ServiceResult<>(true);
         }
         return new ServiceResult<>(false);

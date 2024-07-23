@@ -208,11 +208,11 @@ public class AzureVirtualMachine {
         VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(element.getResourceId());
 //        关机无法重启 先开机
         PowerState powerState = virtualMachine.powerState();
-        if(PowerState.RUNNING != powerState){
+        if (PowerState.RUNNING != powerState) {
             virtualMachine.start();
         }
         virtualMachine.restart();
-        if(element.getIsPublicIp()){
+        if (element.getIsPublicIp()) {
             element.setPublicIpAddress(virtualMachine.getPrimaryPublicIPAddress().ipAddress());
         }
     }
@@ -220,7 +220,7 @@ public class AzureVirtualMachine {
     public void start(CloudPluginSceneElementBO element) {
         VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(element.getResourceId());
         virtualMachine.start();
-        if(element.getIsPublicIp()){
+        if (element.getIsPublicIp()) {
             element.setPublicIpAddress(virtualMachine.getPrimaryPublicIPAddress().ipAddress());
         }
     }
@@ -237,12 +237,15 @@ public class AzureVirtualMachine {
 
     public void expansion(CloudPluginSceneElementBO cloudElement) {
         VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(cloudElement.getResourceId());
-//        VirtualMachine.Update update = virtualMachine.update().withSize(cloudElement.getVmSizeType());
-        VirtualMachine.Update update = virtualMachine.update();
+        VirtualMachine.Update update = virtualMachine.update().withSize(cloudElement.getVmSizeType());
         Integer expansionDisk = cloudElement.getSrcElement().getExpansionDisk();
-        if (expansionDisk != null && expansionDisk > 0 && StringUtils.isNotBlank(cloudElement.getVmExpansionDiskType())) {
+        if (!cloudElement.getExpansion() &&
+                expansionDisk != null &&
+                expansionDisk > 0 &&
+                StringUtils.isNotBlank(cloudElement.getVmExpansionDiskType())) {
             update.withDataDiskDefaultStorageAccountType(StorageAccountTypes.fromString(cloudElement.getVmExpansionDiskType()))
                     .withNewDataDisk(expansionDisk);
+            cloudElement.setExpansion(true);
         }
         update.apply();
     }
