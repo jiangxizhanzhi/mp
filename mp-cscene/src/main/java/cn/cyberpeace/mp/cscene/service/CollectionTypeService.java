@@ -255,13 +255,13 @@ public class CollectionTypeService {
 
         CollectionType windows = CollectionType.builder().name("Windows").code(code + "01").type(type).build();
         CollectionType linux = CollectionType.builder().name("Linux").code(code + "02").type(type).build();
-        CollectionType cisco = CollectionType.builder().name("Cisco-ios").code(code + "03").type(type).build();
-        CollectionType hp = CollectionType.builder().name("HP").code(code + "04").type(type).build();
-        CollectionType freebsd = CollectionType.builder().name("BSD").code(code + "05").type(type).build();
-        CollectionType junos = CollectionType.builder().name("Junos").code(code + "06").type(type).build();
-        CollectionType solaris = CollectionType.builder().name("solaris").code(code + "07").type(type).build();
+//        CollectionType cisco = CollectionType.builder().name("Cisco-ios").code(code + "03").type(type).build();
+//        CollectionType hp = CollectionType.builder().name("HP").code(code + "04").type(type).build();
+//        CollectionType freebsd = CollectionType.builder().name("BSD").code(code + "05").type(type).build();
+//        CollectionType junos = CollectionType.builder().name("Junos").code(code + "06").type(type).build();
+//        CollectionType solaris = CollectionType.builder().name("solaris").code(code + "07").type(type).build();
 //        CollectionType common = CollectionType.builder().name("common").code(code + "08").type(type).build();
-        List<CollectionType> osSubTypes = Arrays.asList(windows, linux, cisco, hp, freebsd, junos, solaris);
+        List<CollectionType> osSubTypes = Arrays.asList(windows, linux);
         osType.setChildren(osSubTypes);
 
         return osType;
@@ -283,8 +283,8 @@ public class CollectionTypeService {
         CollectionType database = CollectionType.builder().name("数据库").code(code + "03").type(type).build();
         CollectionType networkServer = CollectionType.builder().name("网络服务").code(code + "04").type(type).build();
         CollectionType app = CollectionType.builder().name("应用软件").code(code + "05").type(type).build();
-        CollectionType cloud = CollectionType.builder().name("云").code(code + "06").type(type).build();
-        CollectionType loadbalancer = CollectionType.builder().name("负载均衡").code(code + "07").type(type).build();
+//        CollectionType cloud = CollectionType.builder().name("云").code(code + "06").type(type).build();
+//        CollectionType loadbalancer = CollectionType.builder().name("负载均衡").code(code + "07").type(type).build();
         CollectionType appFramework = CollectionType.builder().name("应用框架").code(code + "08").type(type).build();
 
 //        CollectionType cron = CollectionType.builder().name("定时任务").code(code + "09").type(type).build();
@@ -292,7 +292,7 @@ public class CollectionTypeService {
 //        CollectionType vmware = CollectionType.builder().name("虚拟机").code(code + "11").type(type).build();
 
         List<CollectionType> appSubTypes = Arrays.asList(mailServer, webserver, database, networkServer,
-                app, cloud, loadbalancer, appFramework, ftp);
+                app, appFramework, ftp);
         appType.setChildren(appSubTypes);
 
         return appType;

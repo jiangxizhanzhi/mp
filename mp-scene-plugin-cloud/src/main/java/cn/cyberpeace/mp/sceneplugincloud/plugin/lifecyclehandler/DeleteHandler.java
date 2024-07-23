@@ -31,6 +31,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.Delete
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementLogicalSwitchMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
+import cn.cyberpeace.mp.sceneplugincloud.util.ConfigNetworkUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 import lombok.AllArgsConstructor;
@@ -503,6 +504,8 @@ public class DeleteHandler extends HandlerCommon {
         if (!deleteAuxiliaryNetworkTasks.isEmpty()) {
             runSceneProgress(SceneProcess.DELETE_AUXILIARY_NETWORKS, () -> runTasks(deleteAuxiliaryNetworkTasks));
         }
+
+        ConfigNetworkUtils.releaseIps(getPluginHandler().getSrcScene().getEid());
 
 //        SceneInstanceLinkCacheUtil.clear(getPluginHandler().getSourceSceneId());
     }

@@ -121,6 +121,9 @@ public class TargetConverter{
                     d.getExtDocker().setInitSupport(supportExports.get(d.getUuid()).getInitSupport());
                 }
             }
+            if (d.getExtVm() != null) {
+                d.setBehaveSupport(d.getExtVm().getBehaveSupport());
+            }
         }
         POLogoUtils.changeLogoPathToUrl(deviceList);
         sceneConvertModel.setList(deviceList);
