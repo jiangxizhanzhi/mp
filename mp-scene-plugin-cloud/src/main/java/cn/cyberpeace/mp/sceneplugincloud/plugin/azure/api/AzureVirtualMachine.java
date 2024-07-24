@@ -114,6 +114,33 @@ public class AzureVirtualMachine {
         return dataMaps;
     }
 
+    public VirtualMachine createManagementVM(String groupName,String vmName,Network network,String subName) {
+        PublicIpAddress publicIpAddress = azureResourceManager.publicIpAddresses().define("PublicIP" + vmName)
+                .withRegion(region)
+                .withExistingResourceGroup(groupName)
+                .withDynamicIP()
+                .create();
+
+        VirtualMachine virtualMachine = azureResourceManager.virtualMachines()
+                .define(vmName)
+                .withRegion(region)
+                .withNewResourceGroup(groupName)
+                .withExistingPrimaryNetwork(network)
+                .withSubnet(subName)
+                .withPrimaryPrivateIPAddressDynamic()
+                .withExistingPrimaryPublicIPAddress(publicIpAddress)
+                .withGeneralizedLinuxCustomImage("自定义镜像id")
+                .withRootUsername("admin123")
+                .withRootPassword("NHiOJiZTD4K1")
+                .withOSDiskStorageAccountType(StorageAccountTypes.STANDARD_LRS)
+                .withOSDiskSizeInGB(30)
+                .withSize(VirtualMachineSizeTypes.STANDARD_B1S)
+                .create();
+
+
+        return virtualMachine;
+    }
+
     public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData) {
 //        cloudElement.setResourceId("1233");
 //        cloudElement.setPublicIpAddress("20.30.40.5");
@@ -166,9 +193,7 @@ public class AzureVirtualMachine {
                     networkInterface.update().withExistingNetworkSecurityGroup(nsg).apply();
                 }
             }
-
         }
-
     }
 
     public void delete(CloudPluginSceneElementBO cloudElement) {
@@ -245,7 +270,6 @@ public class AzureVirtualMachine {
                 StringUtils.isNotBlank(cloudElement.getVmExpansionDiskType())) {
             update.withDataDiskDefaultStorageAccountType(StorageAccountTypes.fromString(cloudElement.getVmExpansionDiskType()))
                     .withNewDataDisk(expansionDisk);
-            cloudElement.setExpansion(true);
         }
         update.apply();
     }
@@ -359,7 +383,7 @@ public class AzureVirtualMachine {
      * @param flavor               虚拟机规格
      * @return 虚拟机定义阶段对象
      */
-    private VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged createLinuxVM(
+    private VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged  createLinuxVM(
             CloudPluginSceneElementBO cloudElement, String userData, String groupName, AzureResourceManager azureResourceManager,
             Region region, String vmName, String netId, VirtualNic virtualNic, Integer disk, Integer expansionDisk, String vmExpansionDiskType,
             StorageAccountTypes storageAccountTypes, VirtualMachineSizeTypes flavor) {

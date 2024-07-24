@@ -2165,6 +2165,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
                 azureVirtualMachine.expansion(element);
             });
+            Integer expansionDisk = element.getSrcElement().getExpansionDisk();
+            if (!element.getExpansion() &&
+                    expansionDisk != null &&
+                    expansionDisk > 0 &&
+                    StringUtils.isNotBlank(element.getVmExpansionDiskType())) {
+                element.setExpansion(true);
+            }
             CloudPluginSceneElementModel cloudPluginSceneElementModel = element.toModel();
             HumanCondition humanCondition = new HumanCondition()
                     .filterEqual(CloudPluginSceneElementModel::getScene, sceneHandler.getSceneId())

@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
@@ -104,11 +106,16 @@ public class AzureCreateHandler extends CreateHandler {
                     ));
 
             List<Runnable> createAuxiliaryNetworkTasks = new ArrayList<>();
+
+//            集合存已加管理网络节点id 用于判断互联节点是否已加过管理网络
             for (int i = 0; i < filteredAuxiliaryNetworkElements.size(); i++) {
+                Boolean isManage = false;
                 CloudPluginSceneElementBO element = filteredAuxiliaryNetworkElements.get(i);
+
                 //筛选出所有cidr是否连接容器
                 CloudScenePluginHandler pluginHandler = getPluginHandler();
-                ConcurrentHashMap<String, Integer> cidrContainerMap = ElementNetworkUtils.getCidrToContainerMap(pluginHandler, allElements, element, virtualNicsMap);
+                ConcurrentHashMap<String, ElementNetworkUtils.CidrType> cidrContainerMap = ElementNetworkUtils.getCidrToContainerMap(pluginHandler, allElements, element, virtualNicsMap,isManage);
+
                 String nodeId = element.getSrcElement().getId();
                 // 封装创建网络的任务
                 AzureVirtualNetCreateTask task = new AzureVirtualNetCreateTask(resourceService, getPluginHandler(), element, cidrContainerMap, virtualNicsMap);

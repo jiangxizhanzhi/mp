@@ -24,13 +24,14 @@ public class ElementNetworkUtils {
      * @param allElements
      * @param cloudElement
      * @param virtualNicsMap
+     * @param elementCidrContainerMap
      * @return
      */
-    public static ConcurrentHashMap<String, Integer> getCidrToContainerMap(
+    public static ConcurrentHashMap<String, CidrType> getCidrToContainerMap(
             CloudScenePluginHandler pluginHandler,
             List<CloudPluginSceneElementBO> allElements,
             CloudPluginSceneElementBO cloudElement,
-            HashMap<String, List<VirtualNic>> virtualNicsMap) {
+            HashMap<String, List<VirtualNic>> virtualNicsMap, Boolean isManage) {
         //        判断是否有防火墙节点
         boolean isFireWall = cloudElement.getDeriveNetworks().stream()
                 .flatMap(connectedNetworkBO -> connectedNetworkBO.getToPorts().stream())
@@ -47,16 +48,18 @@ public class ElementNetworkUtils {
 
         if (virtualNicsMap.size() == 0) {
             List<String> cidrPools = cloudElement.getCidrPools();
-            Map<String, Integer> cidrContainerMap = cidrPools.stream().filter(StringUtils::isNotEmpty).collect(Collectors.toMap(cidr -> cidr, cidr -> 0));
+            Map<String, CidrType> cidrContainerMap =
+                    cidrPools.stream()
+                            .filter(StringUtils::isNotEmpty)
+                            .collect(Collectors.toMap(cidr -> cidr, cidr -> CidrType.VM));
             if (cidrContainerMap.size() == 0) {
-                String defultCidr = IpUtils.getNextDefaultCIDR(cidrListByVEnt);
-                cidrPools.add(defultCidr);
-                cidrContainerMap.put(defultCidr, 0);
+                addCidrToResources(cidrListByVEnt, cidrPools, cidrContainerMap, CidrType.VM);
             }
             addFirewallDefaultCIDRs(isFireWall, cidrPools, cidrContainerMap, cidrListByVEnt);
+
+            addManagementCidrsToResources(cidrListByVEnt, cidrPools, cidrContainerMap,isManage);
             return new ConcurrentHashMap<>(cidrContainerMap);
         }
-        ;
 
         Map<String, List<String>> elementIpMap = pluginHandler.getScene().getSrcScene().getElementIpMap();
 
@@ -84,9 +87,7 @@ public class ElementNetworkUtils {
                     .collect(Collectors.toList());
 
             boolean present = nodeIds.stream()
-                    .filter(id -> BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(pluginHandler.getElement(id).getImageType()))
-                    .findFirst()
-                    .isPresent();
+                    .anyMatch(id -> BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(pluginHandler.getElement(id).getImageType()));
             String defultContainerCidr = null;
             ArrayList<String> containerCidrs = new ArrayList<>();
             if (present) {
@@ -126,13 +127,13 @@ public class ElementNetworkUtils {
             }
 
             cidrPools = cidrPools.stream().filter(cidr -> StringUtils.isNotEmpty(cidr)).distinct().collect(Collectors.toList());
-            Map<String, Integer> cidrContainerMap = cidrPools.stream().collect(Collectors.toMap(cidr -> cidr, cidr -> 0));
+            Map<String, CidrType> cidrContainerMap = cidrPools.stream().collect(Collectors.toMap(cidr -> cidr, cidr -> CidrType.VM));
 //          处理子网容器委托
-            cidrContainerMap.putAll(containerCidrs.stream().collect(Collectors.toMap(cidr -> cidr, cidr -> 1)));
+            cidrContainerMap.putAll(containerCidrs.stream().collect(Collectors.toMap(cidr -> cidr, cidr -> CidrType.CONTAINER)));
             cidrPools.addAll(containerCidrs);
 
             addFirewallDefaultCIDRs(isFireWall, cidrPools, cidrContainerMap, cidrListByVEnt);
-
+            addManagementCidrsToResources(cidrListByVEnt, cidrPools, cidrContainerMap, isManage);
 
             cloudElement.setCidrPools(cidrPools);
             return new ConcurrentHashMap<>(cidrContainerMap);
@@ -142,18 +143,52 @@ public class ElementNetworkUtils {
 
         autoAssignVirtualNicIps(virtualNicsMap, elementIpMap, nodeIds, defultCidr, ips);
 
-        ConcurrentHashMap<String, Integer> cidrContainerMap = new ConcurrentHashMap<>();
+        ConcurrentHashMap<String, CidrType> cidrContainerMap = new ConcurrentHashMap<>();
 //        未连VNet节点直接判断节点类型
         if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(cloudElement.getImageType())) {
             for (VirtualNic virtualNic : virtualNicsMap.get(cloudElement.getSrcElement().getId())) {
-                cidrContainerMap.put(IpUtils.ip2Cidr24(virtualNic.getFixedIp()), 1);
+                cidrContainerMap.put(IpUtils.ip2Cidr24(virtualNic.getFixedIp()), CidrType.VM);
             }
         } else if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(cloudElement.getImageType())) {
             for (VirtualNic virtualNic : virtualNicsMap.get(cloudElement.getSrcElement().getId())) {
-                cidrContainerMap.put(IpUtils.ip2Cidr24(virtualNic.getFixedIp()), 0);
+                cidrContainerMap.put(IpUtils.ip2Cidr24(virtualNic.getFixedIp()), CidrType.CONTAINER);
             }
         }
+        addManagementCidrsToResources(cidrListByVEnt, null, cidrContainerMap, isManage);
         return cidrContainerMap;
+    }
+
+    /**
+     * 将指定的CIDR列表作为管理类型CIDR资源添加到CIDR池和容器映射中。
+     *
+     * @param cidrListByVEnt   包含待添加的CIDR条目的集合。
+     * @param cidrPools        CIDR池列表，将从cidrListByVEnt中添加CIDR条目。
+     * @param cidrContainerMap CIDR容器映射，用于跟踪已分配的CIDR资源及其类型。
+     * @param isManage 是否需要建管理网
+     */
+    private static void addManagementCidrsToResources(Set<String> cidrListByVEnt, List<String> cidrPools,
+                                                      Map<String, CidrType> cidrContainerMap, Boolean isManage) {
+        if(isManage){
+            addCidrToResources(cidrListByVEnt, cidrPools, cidrContainerMap, CidrType.MANAGEMENT);
+        }
+    }
+
+    /**
+     * 提取CIDR信息并添加到相应的集合和映射中。
+     * 此方法用于处理CIDR集合，通过获取下一个默认CIDR，将其添加到CIDR池和CIDR列表中，并在映射中记录其类型。
+     *
+     * @param cidrListByVEnt   CIDR列表，用于存储和管理CIDR信息。
+     * @param cidrPools        CIDR池，用于存储可用的CIDR。
+     * @param cidrContainerMap CIDR映射，用于映射CIDR字符串到其对应的CIDR类型。
+     * @param cidrType         CIDR的类型，用于标记和区分不同的CIDR。
+     */
+    private static void addCidrToResources(Set<String> cidrListByVEnt, List<String> cidrPools, Map<String, CidrType> cidrContainerMap, CidrType cidrType) {
+        String defultCidr = IpUtils.getNextDefaultCIDR(cidrListByVEnt);
+        if (null != cidrPools) {
+            cidrPools.add(defultCidr);
+        }
+        cidrListByVEnt.add(defultCidr);
+        cidrContainerMap.put(defultCidr, cidrType);
     }
 
     /**
@@ -167,21 +202,19 @@ public class ElementNetworkUtils {
      * @param cidrListByVEnt
      */
     private static void addFirewallDefaultCIDRs(boolean isFireWall, List<String> cidrPools,
-                                                Map<String, Integer> cidrContainerMap, Set<String> cidrListByVEnt) {
+                                                Map<String, CidrType> cidrContainerMap, Set<String> cidrListByVEnt) {
 
         if (isFireWall) {
 //                防火墙需要两个子网 其中一个子网掩码/26
-            String defultCidr = IpUtils.getNextDefaultCIDR(cidrListByVEnt);
-            cidrPools.add(defultCidr);
-            cidrListByVEnt.add(defultCidr);
-            cidrContainerMap.put(defultCidr, 2);
+            addCidrToResources(cidrListByVEnt, cidrPools, cidrContainerMap, CidrType.FIRE_WALL_MANAGEMENT);
+            String defultCidr;
 
 
             defultCidr = IpUtils.getNextDefaultCIDR(cidrListByVEnt);
             defultCidr = defultCidr.substring(0, defultCidr.length() - 1) + "6";
             cidrPools.add(defultCidr);
             cidrListByVEnt.add(defultCidr);
-            cidrContainerMap.put(defultCidr, 3);
+            cidrContainerMap.put(defultCidr, CidrType.FIRE_WALL);
 
         }
     }
@@ -227,5 +260,30 @@ public class ElementNetworkUtils {
             }
         }
     }
+
+    //    创建枚举类区分子网用途
+    public enum CidrType {
+        /**
+         * 虚拟机
+         */
+        VM,
+        /**
+         * 容器
+         */
+        CONTAINER,
+        /**
+         * 虚拟防火墙
+         */
+        FIRE_WALL,
+        /**
+         * 虚拟防火墙管理网
+         */
+        FIRE_WALL_MANAGEMENT,
+        /**
+         * 管理网
+         */
+        MANAGEMENT;
+    }
+
 
 }

@@ -81,12 +81,16 @@ public class StartHandler extends HandlerCommon {
         Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
         if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
             if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
-                //启动
-                AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
-                azureVirtualMachine.start(element);
-                //                    TODO 云场景连接用的公网ip 这里用私有ip测不通 暂去
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.START, Arrays.asList(
+                        StartHandler.ElementProcess.START_VIRTUAL_MACHINE));
+                runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_VIRTUAL_MACHINE, () -> {
+                    //启动
+                    AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+                    azureVirtualMachine.start(element);
+                    //                    TODO 云场景连接用的公网ip 这里用私有ip测不通 暂去
 //                checkAccessModes(element);
-                openAccessModes(element);
+                    openAccessModes(element);
+                });
 
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
                 getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.START, Arrays.asList(
