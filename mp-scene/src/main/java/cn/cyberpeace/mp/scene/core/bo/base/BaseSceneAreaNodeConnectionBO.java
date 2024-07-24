@@ -25,6 +25,9 @@ import java.util.regex.Pattern;
 @Data
 public abstract class BaseSceneAreaNodeConnectionBO<M extends BaseSceneAreaNodeConnectionModel,
         T extends BaseSceneAreaNodeConnectionBO<M, T>> extends EidBO<M, T> {
+
+    private static final String regex = "port_(.+)_(layer_[0-9]+)";
+    private static final Pattern pattern = Pattern.compile(regex);
     /**
      * 连接id
      */
@@ -56,6 +59,8 @@ public abstract class BaseSceneAreaNodeConnectionBO<M extends BaseSceneAreaNodeC
 
     @ApiModelProperty(value = "路径点")
     private List<Map<String, Object>> vertices;
+
+    public abstract <C extends BaseSceneElementPortConnectionBO<?, ?>> C convertAreaNodeConnectToConnection();
 
     /**
      * 从模型加载
@@ -99,9 +104,10 @@ public abstract class BaseSceneAreaNodeConnectionBO<M extends BaseSceneAreaNodeC
         return parseNodeId(target);
     }
 
+    public String getSourceNodeConnectPortName() { return parseNodeConnectPortName(source); }
+    public String getTargetNodeConnectPortName() { return parseNodeConnectPortName(target); }
+
     private String parseNodeId(String input){
-        String regex = "port_(.+)_layer_[0-9]+";
-        Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);
         if (matcher.find()) {
             String extracted = matcher.group(1);
@@ -109,4 +115,14 @@ public abstract class BaseSceneAreaNodeConnectionBO<M extends BaseSceneAreaNodeC
         }
         return input;
     }
+
+    private String parseNodeConnectPortName(String input) {
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            String extracted = matcher.group(2);
+            return extracted;
+        }
+        return input;
+    }
+
 }

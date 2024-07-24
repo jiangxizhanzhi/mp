@@ -2,26 +2,20 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
-import cn.cyberpeace.mp.cscene.bo.CsceneBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
-import cn.cyberpeace.mp.cscene.bo.CsceneUpdateBO;
-import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
-import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
-import cn.cyberpeace.mp.cscene.bo.SceneAreaTreeBO;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -41,6 +35,8 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.cscene.model.base.BaseCsceneRoleModel;
+import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -330,6 +326,28 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         String sceneId = this.modelService.get(id).getSource().getObj().getScene();
         var csceneBO = getByAreaId(sceneId, areaId);
         return new ServiceResult<>(csceneBO).asResult();
+    }
+
+
+    @ApiOperation("根据区域获取指定id场景模板，同时针对3d态势特制，额外将层节点放到elements处")
+    @GetMapping("/get_by_area/3d")
+    public ServiceResult<CsceneInstanceBO> getByAreaFor3D(@RequestParam String id, @RequestParam(required = false, name = "area_id") String areaId) {
+        if (areaId == null) {
+            areaId = StringUtils.EMPTY;
+        }
+        String sceneId = this.modelService.get(id).getSource().getObj().getScene();
+        var csceneBO = getByAreaIdFor3D(sceneId, areaId);
+        return new ServiceResult<>(csceneBO).asResult();
+
+    }
+
+    private CsceneInstanceBO getByAreaIdFor3D(String sceneId, String areaId) {
+        SceneHandler sceneHandler = new SceneHandler(sceneId, areaId, true, null);
+        SceneDataBO dataBO = sceneHandler.toDataFor3D();
+        CsceneInstanceBO csceneBO = new CsceneInstanceBO();
+        csceneBO.setScene(dataBO);
+        CsceneDataModifier.correctReturnCsceneData(csceneBO);
+        return csceneBO;
     }
 
     private CsceneInstanceBO getByAreaId(String sceneId, String areaId) {

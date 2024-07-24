@@ -8,57 +8,27 @@ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.MapUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.define.ListTreeNode;
 import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
-import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneAreaBO;
-import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneAreaNodeConnectionBO;
-import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
-import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneContextBO;
-import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneDataBO;
-import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
-import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortConnectionBO;
-import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneNodeBO;
-import cn.cyberpeace.mp.scene.core.bo.base.BaseScenePieceBO;
-import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneTopologyBO;
-import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.scene.core.bo.base.*;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.exception.SceneUpdateException;
 import cn.cyberpeace.mp.scene.core.plugin.base.BasePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.scene.model.SceneConfigElementPortConnectionModel;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaNodeConnectionModel;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPluginModel;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortConnectionModel;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortModel;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
-import cn.cyberpeace.mp.scene.model.base.BaseScenePieceModel;
-import cn.cyberpeace.mp.scene.repository.base.BaseSceneAreaMapper;
-import cn.cyberpeace.mp.scene.repository.base.BaseSceneElementMapper;
-import cn.cyberpeace.mp.scene.repository.base.BaseSceneElementPluginMapper;
-import cn.cyberpeace.mp.scene.repository.base.BaseSceneElementPortConnectionMapper;
-import cn.cyberpeace.mp.scene.repository.base.BaseSceneElementPortMapper;
-import cn.cyberpeace.mp.scene.repository.base.BaseSceneMapper;
-import cn.cyberpeace.mp.scene.repository.base.BaseSceneNodeConnectionMapper;
-import cn.cyberpeace.mp.scene.repository.base.BaseScenePieceMapper;
+import cn.cyberpeace.mp.scene.model.base.*;
+import cn.cyberpeace.mp.scene.repository.base.*;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.ConstraintViolation;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -94,6 +64,7 @@ import java.util.stream.Collectors;
  * @param <TSceneHandler> 场景处理实现类
  */
 @Getter
+@Slf4j
 public abstract class BaseSceneHandler<
         TSceneModel extends BaseSceneModel,
         TSceneAreaModel extends BaseSceneAreaModel,
@@ -1405,6 +1376,78 @@ public abstract class BaseSceneHandler<
         TSceneDataBO dataBO = ClassUtils.createInstance(sceneDataBOClass);
         dataBO.setTopology(topologyBO);
         dataBO.setPlugins(scenePluginData);
+        return dataBO;
+    }
+
+    public TSceneDataBO toDataFor3D() {
+        TSceneDataBO dataBO = this.toData();
+        TSceneTopologyBO topologyBO = dataBO.getTopology();
+
+        //将node connect转为connect
+        List<TSceneAreaNodeConnectionBO> tSceneAreaNodeConnectionBOS = topologyBO.getNodeConnections();
+        if (CollectionUtils.isNotEmpty(tSceneAreaNodeConnectionBOS)) {
+            tSceneAreaNodeConnectionBOS.forEach(nodeConnection -> {
+                if (Objects.isNull(topologyBO.getConnections())) {
+                    topologyBO.setConnections(new ArrayList<>());
+
+                }
+                topologyBO.getConnections().add(nodeConnection.convertAreaNodeConnectToConnection());
+            });
+        }
+
+        List<BaseSceneAreaNodeConnectionBO> nodeConnections = new ArrayList<>(tSceneAreaNodeConnectionBOS);
+
+
+        topologyBO.getElements().forEach(element -> {
+            try {
+                if (CollectionUtils.isNotEmpty(nodeConnections)) {
+                    for (BaseSceneAreaNodeConnectionBO nodeConnection : nodeConnections) {
+                        if (nodeConnection.getSourceNodeId().equals(element.getId())) {
+                            TSceneElementPortBO sceneElementPortBO = sceneElementPortBOClass.getDeclaredConstructor().newInstance();
+                            sceneElementPortBO.setElement(element);
+                            sceneElementPortBO.setEid(TextUtils.uuid());
+                            sceneElementPortBO.setId(nodeConnection.getSource());
+                            sceneElementPortBO.setName(nodeConnection.getSourceNodeConnectPortName());
+                            if (Objects.isNull(element.getPorts())) {
+                                element.setPorts(new ArrayList<>());
+                            }
+                            element.getPorts().add(sceneElementPortBO);
+                        } else if (nodeConnection.getTargetNodeId().equals(element.getId())) {
+                            TSceneElementPortBO sceneElementPortBO = sceneElementPortBOClass.getDeclaredConstructor().newInstance();
+                            sceneElementPortBO.setElement(element);
+                            sceneElementPortBO.setEid(TextUtils.uuid());
+                            sceneElementPortBO.setId(nodeConnection.getTarget());
+                            sceneElementPortBO.setName(nodeConnection.getTargetNodeConnectPortName());
+                            if (Objects.isNull(element.getPorts())) {
+                                element.setPorts(new ArrayList<>());
+                            }
+                            element.getPorts().add(sceneElementPortBO);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+        });
+
+        //将layer area转为element
+        List<TSceneAreaBO> tSceneAreaBOS = topologyBO.getAreas();
+        List<TSceneAreaBO> sceneAreaWithoutLayerAreas = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(tSceneAreaBOS)) {
+            tSceneAreaBOS.forEach(area -> {
+                if (BaseSceneAreaModel.Type.LAYER == area.getType()) {
+                    if (Objects.isNull(topologyBO.getElements())) {
+                        topologyBO.setElements(new ArrayList<>());
+                    }
+                    topologyBO.getElements().add(area.convertSceneAreaToElement(nodeConnections));
+                } else {
+                    sceneAreaWithoutLayerAreas.add(area);
+                }
+            });
+        }
+        topologyBO.setAreas(sceneAreaWithoutLayerAreas);
+
+
         return dataBO;
     }
 

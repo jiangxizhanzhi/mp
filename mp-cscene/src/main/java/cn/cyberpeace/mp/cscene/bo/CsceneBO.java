@@ -17,6 +17,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @ApiModel(description = "场景模板数据")
 @Data
@@ -92,6 +93,9 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
         Map<String, Map<String, Object>> pluginElements = this.sceneConfig.getPlugins().get("cpcloud").getElements();
         for (BaseSceneElementBO e : this.sceneConfig.getTopology().getElements()) {
             var node = pluginElements.get(e.getId());
+            if (Objects.isNull(node)) {
+                continue;
+            }
             int nodeCpu = e.getCpu() == null ? 0 : e.getCpu();
             int nodeDisk = e.getDisk() == null ? 0 : e.getDisk();
             int nodeRam = e.getRam() == null ? 0 : e.getRam();

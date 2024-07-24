@@ -19,4 +19,15 @@ public class SceneConfigAreaNodeConnectionBO
         return new SceneConfigAreaNodeConnectionModel();
     }
 
+    @Override
+    public SceneConfigElementPortConnectionBO convertAreaNodeConnectToConnection() {
+        SceneConfigElementPortConnectionBO sceneConfigElementPortConnectionBO = new SceneConfigElementPortConnectionBO();
+        sceneConfigElementPortConnectionBO.setId(this.getId());
+        sceneConfigElementPortConnectionBO.setSource(this.getSource());
+        sceneConfigElementPortConnectionBO.setTarget(this.getTarget());
+        sceneConfigElementPortConnectionBO.setEid(this.getEid());
+        sceneConfigElementPortConnectionBO.setName(this.getName());
+        sceneConfigElementPortConnectionBO.setDisplayContext(this.getDisplayContext());
+        sceneConfigElementPortConnectionBO.setVertices(this.getVertices());
+        return sceneConfigElementPortConnectionBO;    }
 }
