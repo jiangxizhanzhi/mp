@@ -10,17 +10,17 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.flow.request;
 
-import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
+ import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
+ import io.swagger.annotations.ApiModel;
+ import io.swagger.annotations.ApiModelProperty;
+ import lombok.AllArgsConstructor;
+ import lombok.Data;
+ import lombok.NoArgsConstructor;
+ import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.util.List;
+ import javax.validation.constraints.NotBlank;
+ import javax.validation.constraints.NotNull;
+ import java.util.List;
 
 /**
  * @ClassName AddAttackFlowRequest
@@ -124,5 +124,8 @@ public class AddAttackFlowRequest {
      */
     @ApiModelProperty("流量协议字符串")
     private String protocols;
+
+    @ApiModelProperty(value = "攻击流量的类型")
+    private Integer attackFlowType;
 
 }

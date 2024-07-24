@@ -10,23 +10,24 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.flow.response;
 
-import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.flow.bo.ProtocolBO;
-import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
-import cn.cyberpeace.mp.flow.model.FlowInfoModel;
-import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import java.io.File;
-import java.util.List;
-import java.util.Objects;
+ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+ import cn.cyberpeace.mp.flow.bo.ProtocolBO;
+ import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
+ import cn.cyberpeace.mp.flow.model.FlowInfoModel;
+ import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
+ import com.alibaba.fastjson.JSONArray;
+ import com.alibaba.fastjson.JSONObject;
+ import io.swagger.annotations.ApiModel;
+ import io.swagger.annotations.ApiModelProperty;
+ import lombok.AllArgsConstructor;
+ import lombok.Data;
+ import lombok.NoArgsConstructor;
+ import org.apache.commons.collections4.CollectionUtils;
+ import org.apache.commons.lang3.StringUtils;
+
+ import java.io.File;
+ import java.util.List;
+ import java.util.Objects;
 
 /**
  * @ClassName AttackFlowResponse
@@ -102,12 +103,16 @@ public class AttackFlowResponse extends FlowInfoResponse {
     @ApiModelProperty(value = "pcap包含协议集合")
     private List<ProtocolBO> protocolList;
 
+    @ApiModelProperty(value = "攻击流量的类型")
+    private Integer attackFlowType;
+
     public AttackFlowResponse(FlowInfoModel flowInfoModel, String prefixUrl, List<FlowScriptParamModel> scriptParamModels) {
         setResourceId(flowInfoModel.getId());
         setTitle(flowInfoModel.getTitle());
         setIntroduction(flowInfoModel.getFlowDesc());
         setCategory(flowInfoModel.getCategory());
         setFlowDesc(flowInfoModel.getFlowDesc());
+        setAttackFlowType(flowInfoModel.getAttackFlowType());
         if (Objects.nonNull(flowInfoModel.getCreateTime())) {
             setCreateTime(TimeUtils.localDateTimeToString(flowInfoModel.getCreateTime()));
         }

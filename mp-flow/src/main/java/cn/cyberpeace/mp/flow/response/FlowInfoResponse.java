@@ -80,6 +80,9 @@ public class FlowInfoResponse {
     @ApiModelProperty(value = "交互类型：0 背景流量，1 攻击流量，2 全流量")
     private Integer interactiveType;
 
+    @ApiModelProperty(value = "攻击流量类型: 1 DDoS, 2 蠕虫，3 垃圾邮件，4 DNS污染， 5 BGP劫持， 6 缓冲区溢出， 7 SQL注入, 8 XSS, 9 勒索病毒")
+    private Integer attackFlowType;
+
     /**
      * 攻击脚本参数列表
      */
@@ -91,6 +94,7 @@ public class FlowInfoResponse {
         setTitle(flowInfoModel.getTitle());
         setIntroduction(flowInfoModel.getFlowDesc());
         setCategory(flowInfoModel.getCategory());
+        setAttackFlowType(flowInfoModel.getAttackFlowType());
         setFlowDesc(flowInfoModel.getFlowDesc());
         if (Objects.nonNull(flowInfoModel.getCreateTime())) {
             setCreateTime(TimeUtils.localDateTimeToString(flowInfoModel.getCreateTime()));

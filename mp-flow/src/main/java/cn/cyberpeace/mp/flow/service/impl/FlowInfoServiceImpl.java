@@ -10,65 +10,64 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.flow.service.impl;
 
-import cn.cyberpeace.mp.base.common.FsCommon;
-import cn.cyberpeace.mp.base.common.MessageCommon;
-import cn.cyberpeace.mp.base.common.TaskCommon;
-import cn.cyberpeace.mp.base.config.BaseAppConfig;
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.controller.common.ResultCommon;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
-import cn.cyberpeace.mp.base.service.result.*;
-import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.flow.bo.ProtocolBO;
-import cn.cyberpeace.mp.flow.constant.BaseConstants;
-import cn.cyberpeace.mp.flow.constant.FlowCategory;
-import cn.cyberpeace.mp.flow.constant.FlowConstant;
-import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
-import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
-import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
-import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
-import cn.cyberpeace.mp.flow.model.*;
-import cn.cyberpeace.mp.flow.repository.FlowCollectionMapper;
-import cn.cyberpeace.mp.flow.repository.FlowCollectionRelMapper;
-import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
-import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
-import cn.cyberpeace.mp.flow.request.*;
-import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
-import cn.cyberpeace.mp.flow.response.AttackFlowResponse;
-import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
-import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
-import cn.cyberpeace.mp.flow.service.FlowInfoService;
-import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
-import cn.cyberpeace.mp.flow.util.CommonUtil;
-import cn.cyberpeace.mp.flow.util.FileUtil;
-import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
-import cn.cyberpeace.mp.flow.util.FlowTaskPool;
-import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import io.micrometer.core.instrument.util.StringUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
+ import cn.cyberpeace.mp.base.common.FsCommon;
+ import cn.cyberpeace.mp.base.common.MessageCommon;
+ import cn.cyberpeace.mp.base.common.TaskCommon;
+ import cn.cyberpeace.mp.base.config.BaseAppConfig;
+ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+ import cn.cyberpeace.mp.base.service.result.*;
+ import cn.cyberpeace.mp.base.util.basic.TextUtils;
+ import cn.cyberpeace.mp.flow.bo.ProtocolBO;
+ import cn.cyberpeace.mp.flow.constant.BaseConstants;
+ import cn.cyberpeace.mp.flow.constant.FlowCategory;
+ import cn.cyberpeace.mp.flow.constant.FlowConstant;
+ import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
+ import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
+ import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
+ import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
+ import cn.cyberpeace.mp.flow.model.*;
+ import cn.cyberpeace.mp.flow.repository.FlowCollectionMapper;
+ import cn.cyberpeace.mp.flow.repository.FlowCollectionRelMapper;
+ import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
+ import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
+ import cn.cyberpeace.mp.flow.request.*;
+ import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
+ import cn.cyberpeace.mp.flow.response.AttackFlowResponse;
+ import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
+ import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
+ import cn.cyberpeace.mp.flow.service.FlowInfoService;
+ import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
+ import cn.cyberpeace.mp.flow.util.CommonUtil;
+ import cn.cyberpeace.mp.flow.util.FileUtil;
+ import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
+ import cn.cyberpeace.mp.flow.util.FlowTaskPool;
+ import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
+ import com.alibaba.fastjson.JSON;
+ import com.alibaba.fastjson.JSONArray;
+ import com.alibaba.fastjson.JSONObject;
+ import io.micrometer.core.instrument.util.StringUtils;
+ import lombok.extern.slf4j.Slf4j;
+ import org.apache.commons.codec.digest.DigestUtils;
+ import org.apache.commons.collections4.CollectionUtils;
+ import org.apache.commons.io.FilenameUtils;
+ import org.apache.commons.lang3.ArrayUtils;
+ import org.apache.commons.lang3.exception.ExceptionUtils;
+ import org.springframework.beans.BeanUtils;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.stereotype.Service;
+ import org.springframework.transaction.annotation.Transactional;
+ import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
-import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+ import java.io.*;
+ import java.math.BigDecimal;
+ import java.nio.charset.StandardCharsets;
+ import java.time.LocalDateTime;
+ import java.util.*;
+ import java.util.stream.Collectors;
 
 /**
  * @ClassName FlowInfoServiceImpl
@@ -152,6 +151,14 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         if (Objects.nonNull(queryParams.getInteractiveType())) {
             humanCondition.filterEqual("interactiveType", queryParams.getInteractiveType());
         }
+
+        if (Objects.nonNull(queryParams.getAttackFlowType())) {
+            humanCondition.filterEqual("attack_flow_type", queryParams.getAttackFlowType());
+        }
+
+        if (Objects.nonNull(queryParams.getFlowIds())) {
+            humanCondition.filterIn("id", queryParams.getFlowIds());
+        }
     }
 
     /**
@@ -203,6 +210,10 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         }
 
         return ResultCommon.success(false);
+    }
+
+    public List<String> listFlowProtocols() {
+        return flowProtocolService.listFlowProtocols();
     }
 
     /**
@@ -281,6 +292,14 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * @return
      */
     public ListObjServiceResult<FlowInfoResponse> pageFlowInfo(FlowInfoQueryParams queryParams) {
+        if (StringUtils.isNotBlank(queryParams.getFlowProtocol())) {
+            List<FlowProtocolModel> allProtocolFlows = flowProtocolService.getModelMapper().list(new HumanCondition().select(FlowProtocolModel::getFlowId)
+                    .filterEqual(FlowProtocolModel::getProtocolName, queryParams.getFlowProtocol()));
+            if (CollectionUtils.isNotEmpty(allProtocolFlows)) {
+                queryParams.setFlowIds(allProtocolFlows.stream().map(FlowProtocolModel::getFlowId).collect(Collectors.toSet())
+                        .toArray(new String[0]));
+            }
+        }
         // 查询流量信息
         ListObjServiceResult<FlowInfoModel> listObjServiceResult = list(queryParams);
 
@@ -960,6 +979,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         flowInfoModel.setTitle(modifyRequest.getTitle());
         flowInfoModel.setFlowDesc(modifyRequest.getIntroduction());
         flowInfoModel.setCategory(modifyRequest.getCategory());
+        flowInfoModel.setAttackFlowType(modifyRequest.getAttackFlowType());
         flowInfoModel.setFileName(modifyRequest.getFileName());
         flowInfoModel.setPcapFile(modifyRequest.getPcapFilePath());
 
@@ -976,6 +996,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         flowInfoModel.setTitle(addRequest.getTitle());
         flowInfoModel.setFlowDesc(addRequest.getIntroduction());
         flowInfoModel.setCategory(addRequest.getCategory());
+        flowInfoModel.setAttackFlowType(addRequest.getAttackFlowType());
         flowInfoModel.setFileName(addRequest.getFileName());
         flowInfoModel.setResourceType(addRequest.getResourceType());
         flowInfoModel.setInteractiveType(InteractiveTypeEnum.ATTACK.toValue());

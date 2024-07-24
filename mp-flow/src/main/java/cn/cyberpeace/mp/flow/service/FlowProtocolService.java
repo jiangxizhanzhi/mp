@@ -34,6 +34,8 @@ public interface FlowProtocolService extends BaseModelService<FlowProtocolModel,
      */
     List<FlowProtocolModel> selectByFlowId(String flowId);
 
+    List<String> listFlowProtocols();
+
     /**
      * 根据流量id删除
      *

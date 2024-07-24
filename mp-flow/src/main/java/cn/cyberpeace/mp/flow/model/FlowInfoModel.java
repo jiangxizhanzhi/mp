@@ -99,4 +99,8 @@ public class FlowInfoModel extends BaseModel {
     @DefaultStr
     private String scriptFile;
 
+    @ApiModelProperty(value = "攻击流量的类型")
+    @DefaultInt(1)
+    private Integer attackFlowType;
+
 }

@@ -14,11 +14,11 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.flow.model.FlowProtocolModel;
-import cn.cyberpeace.mp.flow.repository.FlowProtocolMapper;
 import cn.cyberpeace.mp.flow.service.FlowProtocolService;
 import cn.cyberpeace.mp.flow.service.fields.FlowProtocolFields;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import cn.cyberpeace.mp.flow.repository.FlowProtocolMapper;
 
 import java.util.List;
 
@@ -51,6 +51,11 @@ public class FlowProtocolServiceImpl extends BaseModelServiceImpl<FlowProtocolMo
         HumanCondition condition = new HumanCondition();
         condition.filterEqual("flowId", flowId);
         return getModelMapper().list(condition);
+    }
+
+    @Override
+    public List<String> listFlowProtocols() {
+        return getModelMapper().listProtocols();
     }
 
     /**

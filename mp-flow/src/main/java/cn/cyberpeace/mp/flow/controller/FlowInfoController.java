@@ -134,6 +134,18 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return optionService.getIntOptions(FlowConstant.MP_COMMON_OPTION_TYPE_FLOW_CATEGORY);
     }
 
+    @GetMapping("/attack_flow_type")
+    @ApiOperation(value = "攻击流量分类")
+    public ServiceResult<List<OptionBO>> listAttackFlowType() {
+        return optionService.getIntOptions(FlowConstant.MP_COMMON_OPTION_TYPE_ATTACK_FLOW_TYPE);
+    }
+
+
+    @GetMapping("/protocol")
+    @ApiOperation(value = "流量协议列表")
+    public ServiceResult<List<String>> listFlowProtocol() {
+        return new ServiceResult<>(flowServiceImpl.listFlowProtocols()).asResult();
+    }
     /**
      * 分页查询流量信息
      *

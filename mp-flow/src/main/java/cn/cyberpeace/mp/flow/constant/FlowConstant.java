@@ -23,6 +23,8 @@ public class FlowConstant {
      */
     public static final String MP_COMMON_OPTION_TYPE_FLOW_CATEGORY = "flow_category";
 
+    public static final String MP_COMMON_OPTION_TYPE_ATTACK_FLOW_TYPE = "attack_flow_type";
+
     /**
      * 未知协议常量名称
      */

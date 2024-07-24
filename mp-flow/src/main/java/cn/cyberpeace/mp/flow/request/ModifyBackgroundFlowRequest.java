@@ -83,4 +83,7 @@ public class ModifyBackgroundFlowRequest {
     @ApiModelProperty("流量协议字符串")
     private String protocols;
 
+    @ApiModelProperty(value = "攻击流量的类型")
+    private Integer attackFlowType;
+
 }

@@ -10,13 +10,15 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.flow.repository;
 
-import cn.cyberpeace.mp.flow.model.FlowProtocolModel;
-import cn.cyberpeace.mp.base.repository.BaseModelMapper;
-import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
-import org.apache.ibatis.annotations.Mapper;
-import org.springframework.stereotype.Repository;
+ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
+ import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
+ import cn.cyberpeace.mp.flow.model.FlowProtocolModel;
+ import org.apache.ibatis.annotations.Mapper;
+ import org.springframework.stereotype.Repository;
 
-/**
+ import java.util.List;
+
+ /**
  * @ClassName FlowProtocolMapper
  * @Description 流量协议mapper
  * @Author qiaokang
@@ -28,5 +30,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @ModelClass(FlowProtocolModel.class)
 public interface FlowProtocolMapper extends BaseModelMapper<FlowProtocolModel> {
-	
+
+
+    List<String> listProtocols();
 }
