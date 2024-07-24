@@ -166,6 +166,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String publicIpAddress;
     @DefaultStr
     private String cidrPools;
+    @DefaultStr
+    private String managementIp;
 
     //    边界设备
     @DefaultStr

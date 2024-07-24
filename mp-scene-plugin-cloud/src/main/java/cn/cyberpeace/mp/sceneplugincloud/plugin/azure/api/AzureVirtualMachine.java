@@ -16,10 +16,7 @@ import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.fluent.models.ResourceSkuInner;
 import com.azure.resourcemanager.compute.models.*;
-import com.azure.resourcemanager.network.models.Network;
-import com.azure.resourcemanager.network.models.NetworkInterface;
-import com.azure.resourcemanager.network.models.NetworkSecurityGroup;
-import com.azure.resourcemanager.network.models.PublicIpAddress;
+import com.azure.resourcemanager.network.models.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -114,7 +111,7 @@ public class AzureVirtualMachine {
         return dataMaps;
     }
 
-    public VirtualMachine createManagementVM(String groupName,String vmName,Network network,String subName) {
+    public VirtualMachine createManagementVM(String groupName, String vmName, Network network, String subName) {
         PublicIpAddress publicIpAddress = azureResourceManager.publicIpAddresses().define("PublicIP" + vmName)
                 .withRegion(region)
                 .withExistingResourceGroup(groupName)
@@ -129,14 +126,40 @@ public class AzureVirtualMachine {
                 .withSubnet(subName)
                 .withPrimaryPrivateIPAddressDynamic()
                 .withExistingPrimaryPublicIPAddress(publicIpAddress)
-                .withGeneralizedLinuxCustomImage("自定义镜像id")
+                .withGeneralizedLinuxCustomImage("/subscriptions/c87ba926-f7c2-4d53-8b8e-89245dc92e26/resourceGroups/UPLOAD_RESOURCES/providers/Microsoft.Compute/images/esServiceVM-image-20240529112510")
                 .withRootUsername("admin123")
                 .withRootPassword("NHiOJiZTD4K1")
                 .withOSDiskStorageAccountType(StorageAccountTypes.STANDARD_LRS)
                 .withOSDiskSizeInGB(30)
                 .withSize(VirtualMachineSizeTypes.STANDARD_B1S)
                 .create();
+        NetworkInterface primaryNetworkInterface = virtualMachine.getPrimaryNetworkInterface();
 
+//        开放8080、8200端口
+        NetworkSecurityGroup nsg = azureResourceManager.networkSecurityGroups()
+                .define("nsg-" + vmName)
+                .withRegion(this.region)
+                .withExistingResourceGroup(groupName)
+                .defineRule("allow-8080")
+                .allowInbound()
+                .fromAnyAddress()
+                .fromAnyPort()
+                .toAnyAddress()
+                .toPort(8080)
+                .withProtocol(SecurityRuleProtocol.ASTERISK)
+                .withPriority(3200)
+                .attach()
+                .defineRule("allow-8200")
+                .allowInbound()
+                .fromAnyAddress()
+                .fromAnyPort()
+                .toAnyAddress()
+                .toPort(8200)
+                .withProtocol(SecurityRuleProtocol.ASTERISK)
+                .withPriority(3300)
+                .attach()
+                .create();
+        primaryNetworkInterface.update().withExistingNetworkSecurityGroup(nsg).apply();
 
         return virtualMachine;
     }
@@ -383,7 +406,7 @@ public class AzureVirtualMachine {
      * @param flavor               虚拟机规格
      * @return 虚拟机定义阶段对象
      */
-    private VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged  createLinuxVM(
+    private VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged createLinuxVM(
             CloudPluginSceneElementBO cloudElement, String userData, String groupName, AzureResourceManager azureResourceManager,
             Region region, String vmName, String netId, VirtualNic virtualNic, Integer disk, Integer expansionDisk, String vmExpansionDiskType,
             StorageAccountTypes storageAccountTypes, VirtualMachineSizeTypes flavor) {

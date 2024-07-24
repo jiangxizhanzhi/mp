@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.base.util.mptool.ConcurrentHashSet;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -108,13 +107,26 @@ public class AzureCreateHandler extends CreateHandler {
             List<Runnable> createAuxiliaryNetworkTasks = new ArrayList<>();
 
 //            集合存已加管理网络节点id 用于判断互联节点是否已加过管理网络
+            HashSet<String> manageElementIdSet = new HashSet<>();
             for (int i = 0; i < filteredAuxiliaryNetworkElements.size(); i++) {
                 Boolean isManage = false;
                 CloudPluginSceneElementBO element = filteredAuxiliaryNetworkElements.get(i);
+                List<String> vNetPeeringIdList = element.getSrcElement().getPorts().stream()
+                        .map(port -> this.getPluginHandler().getSceneHandler().getPortConnectedPort(port.getId()))
+                        .filter(Objects::nonNull)
+                        .map(portConnectedPort -> vnetElementById.get(portConnectedPort.getElement().getId()))
+                        .filter(Objects::nonNull)
+                        .map(CloudPluginSceneElementBO::getSrcElement)
+                        .map(SceneElementBO::getId)
+                        .collect(Collectors.toList());
+                if (!vNetPeeringIdList.stream().anyMatch(manageElementIdSet::contains)) {
+                    isManage = true;
+                    manageElementIdSet.add(element.getSrcElement().getId());
+                }
 
                 //筛选出所有cidr是否连接容器
                 CloudScenePluginHandler pluginHandler = getPluginHandler();
-                ConcurrentHashMap<String, ElementNetworkUtils.CidrType> cidrContainerMap = ElementNetworkUtils.getCidrToContainerMap(pluginHandler, allElements, element, virtualNicsMap,isManage);
+                ConcurrentHashMap<String, ElementNetworkUtils.CidrType> cidrContainerMap = ElementNetworkUtils.getCidrToContainerMap(pluginHandler, allElements, element, virtualNicsMap, isManage);
 
                 String nodeId = element.getSrcElement().getId();
                 // 封装创建网络的任务

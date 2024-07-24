@@ -522,11 +522,6 @@ public class ScenePluginCloudSceneService {
             }
         }
         return new ServiceResult<>(nodeConnection);
-//                    TODO 录屏暂改
-        /*var nodeConnection1 = new NodeConnectionBO();
-        nodeConnection1.setConnectionUrl("http://10.108.1.10:9200/guacamole/#/client/MTE3AGMAbXlzcWw=");
-        nodeConnection1.setConnectionId("1");
-        return new ServiceResult<>(nodeConnection1);*/
     }
 
     private String formatUrl(String inputUrl, AccessModeLinkInfo modeLinkInfo) {

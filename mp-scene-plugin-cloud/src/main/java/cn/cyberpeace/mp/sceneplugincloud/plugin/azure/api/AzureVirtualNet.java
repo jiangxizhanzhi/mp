@@ -50,7 +50,7 @@ public class AzureVirtualNet {
                 .withRegion(this.region)
                 .withExistingResourceGroup(groupName);
         Set<Map.Entry<String, ElementNetworkUtils.CidrType>> entrySet = cidrContainerMap.entrySet();
-        String mangeementSubName = null;
+        String mangementSubName = null;
         for (Map.Entry<String, ElementNetworkUtils.CidrType> entry : entrySet) {
             String addressSpace = entry.getKey();
             ElementNetworkUtils.CidrType value = entry.getValue();
@@ -70,7 +70,7 @@ public class AzureVirtualNet {
                     break;
                 case MANAGEMENT:
                     addStandardSubnet(createdNet, addressSpace);
-                    mangeementSubName = IpUtils.extractNetworkPart(addressSpace);
+                    mangementSubName = IpUtils.extractNetworkPart(addressSpace);
                     break;
             }
 
@@ -106,12 +106,12 @@ public class AzureVirtualNet {
         Network network = createdNet.create();
         cloudElement.setResourceId(network.id());
 
-//        创建管理虚拟机用于远程连接 TODO虚拟机未准备好暂不走此逻辑
-        mangeementSubName = null;
-        if (null != mangeementSubName) {
+//        创建管理虚拟机用于远程连接 TODO 虚拟机未准备好暂不走此逻辑
+        mangementSubName = null;
+        if (null != mangementSubName) {
             AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(resourceService);
-            VirtualMachine mangeementVm = azureVirtualMachine.createManagementVM(groupName, "ManagementVM_" + netName, network, "subName");
-            cloudElement.setMgmtIp(mangeementVm.getPrimaryPublicIPAddress().ipAddress());
+            VirtualMachine mangeementVm = azureVirtualMachine.createManagementVM(groupName, "ManagementVM_" + netName, network, mangementSubName);
+            cloudElement.setManagementIp(mangeementVm.getPrimaryPublicIPAddress().ipAddress());
         }
 
         // azure 回写网络id
@@ -128,7 +128,7 @@ public class AzureVirtualNet {
                     .distinct()
                     .collect(Collectors.toList());
 //            查找连接的节点 管理网络字段赋值
-            if (null != mangeementSubName) {
+            if (null != mangementSubName) {
                 propagateMgmtIpToElements(pluginHandler, cloudElement, null);
             }
 

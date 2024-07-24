@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -17,8 +18,10 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ComInfoGetResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -210,21 +213,31 @@ public class CloudSceneConnectionCommon {
                 connectionParams.setUsername(sceneConnection.getUsername());
                 connectionParams.setPassword(sceneConnection.getPassword());
             }
-
+            CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+            CloudPluginSceneElementBO element = pluginHandler.getElement(sceneElementId);
             if (BaseSceneModel.CloudType.DEFAULT != cloudType) {
-                CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-                CloudPluginSceneElementBO element = pluginHandler.getElement(sceneElementId);
-                if(element.getIsPublicIp()){
+                if (element.getIsPublicIp()) {
                     connectionParams.setHostname(element.getPublicIpAddress());
-                }else {
-//                    TODO 后期换成管理网络
+                } else if (StringUtils.isNotBlank(element.getManagementIp())) {
                     connectionParams.setHostname(sceneConnection.getAccessIp());
                 }
             } else {
                 connectionParams.setHostname(sceneConnection.getAccessIp());
             }
             guacamoleCreateConnectionData.setConnectionParams(connectionParams);
-            var result = remoteClient.createConnection(guacamoleCreateConnectionData);
+            GuacamoleCreateConnectionResult result = null;
+            if (StringUtils.isNotBlank(element.getManagementIp())) {
+                String server = "http://%s:11111";
+
+                result = new CloudHttpClient(String.format(server, element.getManagementIp()),
+                        CloudSingleton.cloudAppConfig.getCpcloudServerTimeout(),
+                        CloudSingleton.cloudAppConfig.getCpcloudHttpPoolSize())
+                        .post(CloudUrlConstant.CREATE_CONNECTION_URL,
+                                guacamoleCreateConnectionData, null, GuacamoleCreateConnectionResult.class);
+
+            } else {
+                result = remoteClient.createConnection(guacamoleCreateConnectionData);
+            }
             if (result == null || StringUtils.isEmpty(result.getConnectionId())) {
                 log.error("Create scene connection[{}] with empty result: {}", guacamoleCreateConnectionData, result);
                 return null;

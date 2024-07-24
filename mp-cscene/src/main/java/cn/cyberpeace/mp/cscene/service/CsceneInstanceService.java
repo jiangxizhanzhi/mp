@@ -107,7 +107,6 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
-import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhProbeDataModel;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
@@ -683,22 +682,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (recorder != null) {
             recorder.refreshSceneBO(scene);
         }
-        //                    TODO 录屏暂改
-        /*data.getScene().getPlugins().get("cpcloud").getElementPorts().forEach((nodeId, element) -> {
-            CloudAccessMode accessMode = new CloudAccessMode();
-            accessMode.setAvailable(true);
-            accessMode.setUsername("admin123");
-            accessMode.setPassword("NHiOJiZTD4K1");
-            accessMode.setPort(22);
-            accessMode.setProtocol("ssh");
-            accessMode.setAccessIp("20.2.10.118");
-            accessMode.setProxy(true);
-            accessMode.setAccessPort(22);
-            accessMode.setProxyId("1");
-            ArrayList<CloudAccessMode> cloudAccessModes = new ArrayList<>();
-            cloudAccessModes.add(accessMode);
-            element.put("access_modes", cloudAccessModes);
-        });*/
 
         return new ServiceResult<>(data);
     }
@@ -1367,11 +1350,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         } finally {
             CsceneContextHolder.resetContext();
         }
-//                    TODO 录屏暂改
-        /*var nodeConnection1 = new NodeConnectionBO();
-        nodeConnection1.setConnectionUrl("http://10.108.1.10:9200/guacamole/#/client/MTE3AGMAbXlzcWw=");
-        nodeConnection1.setConnectionId("1");
-        return new ServiceResult<>(nodeConnection1);*/
     }
 
     public ServiceResult<NodeConnectionBO> getRemoteTtyConnection(String id, String nodeId) {
@@ -1645,7 +1623,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         sceneLinkStatusInfo.setCsceneId(csceneId);
         sceneLinkStatusInfo.getNodeLinkStatusList().stream().forEach(nodeLinkStatusBO -> {
             nodeLinkStatusBO.setStatus(1);
-            if(cloudType != null && BaseSceneModel.CloudType.DEFAULT!=cloudType){
+            if (cloudType != null && BaseSceneModel.CloudType.DEFAULT != cloudType) {
                 nodeLinkStatusBO.getConnectionStatusList().stream().forEach(connectionStatusBO -> {
                     connectionStatusBO.setStatus(1);
                 });

@@ -24,7 +24,6 @@ public class ElementNetworkUtils {
      * @param allElements
      * @param cloudElement
      * @param virtualNicsMap
-     * @param elementCidrContainerMap
      * @return
      */
     public static ConcurrentHashMap<String, CidrType> getCidrToContainerMap(
@@ -36,9 +35,7 @@ public class ElementNetworkUtils {
         boolean isFireWall = cloudElement.getDeriveNetworks().stream()
                 .flatMap(connectedNetworkBO -> connectedNetworkBO.getToPorts().stream())
                 .map(SceneElementPortBO::getElement)
-                .filter(element -> BaseCloudPluginSceneElementModel.ImageType.FIRE_WALL.equals(pluginHandler.getElement(element.getId()).getImageType()))
-                .findAny()
-                .isPresent();
+                .anyMatch(element -> BaseCloudPluginSceneElementModel.ImageType.FIRE_WALL.equals(pluginHandler.getElement(element.getId()).getImageType()));
 
         Set<String> cidrListByVEnt = allElements
                 .stream()
@@ -57,7 +54,7 @@ public class ElementNetworkUtils {
             }
             addFirewallDefaultCIDRs(isFireWall, cidrPools, cidrContainerMap, cidrListByVEnt);
 
-            addManagementCidrsToResources(cidrListByVEnt, cidrPools, cidrContainerMap,isManage);
+            addManagementCidrsToResources(cidrListByVEnt, cidrPools, cidrContainerMap, isManage);
             return new ConcurrentHashMap<>(cidrContainerMap);
         }
 
@@ -147,11 +144,11 @@ public class ElementNetworkUtils {
 //        未连VNet节点直接判断节点类型
         if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(cloudElement.getImageType())) {
             for (VirtualNic virtualNic : virtualNicsMap.get(cloudElement.getSrcElement().getId())) {
-                cidrContainerMap.put(IpUtils.ip2Cidr24(virtualNic.getFixedIp()), CidrType.VM);
+                cidrContainerMap.put(IpUtils.ip2Cidr24(virtualNic.getFixedIp()), CidrType.CONTAINER);
             }
         } else if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(cloudElement.getImageType())) {
             for (VirtualNic virtualNic : virtualNicsMap.get(cloudElement.getSrcElement().getId())) {
-                cidrContainerMap.put(IpUtils.ip2Cidr24(virtualNic.getFixedIp()), CidrType.CONTAINER);
+                cidrContainerMap.put(IpUtils.ip2Cidr24(virtualNic.getFixedIp()), CidrType.VM);
             }
         }
         addManagementCidrsToResources(cidrListByVEnt, null, cidrContainerMap, isManage);
@@ -164,11 +161,11 @@ public class ElementNetworkUtils {
      * @param cidrListByVEnt   包含待添加的CIDR条目的集合。
      * @param cidrPools        CIDR池列表，将从cidrListByVEnt中添加CIDR条目。
      * @param cidrContainerMap CIDR容器映射，用于跟踪已分配的CIDR资源及其类型。
-     * @param isManage 是否需要建管理网
+     * @param isManage         是否需要建管理网
      */
     private static void addManagementCidrsToResources(Set<String> cidrListByVEnt, List<String> cidrPools,
                                                       Map<String, CidrType> cidrContainerMap, Boolean isManage) {
-        if(isManage){
+        if (isManage) {
             addCidrToResources(cidrListByVEnt, cidrPools, cidrContainerMap, CidrType.MANAGEMENT);
         }
     }

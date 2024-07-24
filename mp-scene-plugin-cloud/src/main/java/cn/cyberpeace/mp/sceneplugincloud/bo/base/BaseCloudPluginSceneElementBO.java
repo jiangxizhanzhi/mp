@@ -155,6 +155,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private String publicIpAddress;
     @ApiModelProperty(value = "VNet网段信息")
     private List<String> cidrPools;
+    @ApiModelProperty(value = "management_ip")
+    private String managementIp;
 
     //    边界设备
     @ApiModelProperty(value = "边界设备-ip地址")
