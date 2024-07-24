@@ -40,6 +40,7 @@ public enum CsceneErrorCode implements ErrorCode {
     SCENE_INSTANCE_STILL_NEED_CLEAR("MP-110293", "scene_instance_still_need_clear"),
     PARAMS_FIELD_ERROR("MP-110300", "params_field_error"),
     EXPORT_ERROR("MP-110301", "export_error"),
+    SCENE_EDIT_LIMIT("MP-110305", "scene_edit_limit"),
     ;
 
     CsceneErrorCode(String code, String message) {
