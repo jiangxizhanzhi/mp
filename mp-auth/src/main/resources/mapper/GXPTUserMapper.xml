@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.auth.repository.GXPTUserMapper">
+
+    <update id="updateUser">
+        update mp_auth_user
+        <set>
+            <if test="resultMap != null and resultMap.isSychronized != null">
+                is_sychronized = #{resultMap.isSychronized},
+            </if>
+            <if test="resultMap != null and resultMap.returnData != null">
+                return_data = #{resultMap.returnData},
+            </if>
+            <if test="resultMap != null and resultMap.returnInfo != null">
+                return_info = #{resultMap.returnInfo},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id="getInfoById" resultType="java.lang.String">
+        select return_info
+            from mp_auth_user
+        where id = #{id}
+    </select>
+
+</mapper>

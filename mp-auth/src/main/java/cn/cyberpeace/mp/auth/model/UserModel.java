@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
+import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
@@ -135,6 +136,15 @@ public class UserModel extends BaseModel implements Serializable {
     @ApiModelProperty(value = "最后登录时间")
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime lastLogin;
+
+    @ApiModelProperty(value = "是否已同步共性平台")
+    private Boolean isSychronized;
+
+    @ApiModelProperty(value = "同步共性平台返回data")
+    private JSONObject returnData;
+
+    @ApiModelProperty(value = "同步共性平台返回info")
+    private JSONObject returnInfo;
 
     @Builder
     public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin) {
