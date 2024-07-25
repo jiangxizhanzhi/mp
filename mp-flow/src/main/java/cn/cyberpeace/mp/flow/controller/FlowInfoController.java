@@ -143,8 +143,16 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     @GetMapping("/protocol")
     @ApiOperation(value = "流量协议列表")
-    public ServiceResult<List<String>> listFlowProtocol() {
-        return new ServiceResult<>(flowServiceImpl.listFlowProtocols()).asResult();
+    public ServiceResult<List<OptionBO<Integer>>> listFlowProtocol() {
+        List<String> protocols = flowServiceImpl.listFlowProtocols();
+        List<OptionBO<Integer>> optionBOS = new ArrayList<>();
+        for (int i = 0; i < protocols.size(); i++) {
+            OptionBO<Integer> optionBO = new OptionBO<>();
+            optionBO.setCode(i);
+            optionBO.setName(protocols.get(i));
+            optionBOS.add(optionBO);
+        }
+        return new ServiceResult<>(optionBOS).asResult();
     }
     /**
      * 分页查询流量信息
