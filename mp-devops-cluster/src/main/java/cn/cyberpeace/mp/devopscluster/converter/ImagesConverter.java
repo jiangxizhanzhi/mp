@@ -48,8 +48,11 @@ import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudElementAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetConnectionUrlParam;
 import com.alibaba.fastjson.JSONArray;
@@ -321,6 +324,22 @@ public class ImagesConverter implements BaseConverter {
         device.setCreatedAt(null);
         device.setUpdatedAt(null);
         device.setInstanceUuid(device.getExtVm().getInstanceUuid());
+        Device result =imagesService.copy(device);
+    }
+
+    public void copy(CopySceneImageRequest request) {
+        SceneHandler sceneHandler = new SceneHandler(request.getId(), null, false, null);
+        CloudScenePluginHandler handler = sceneHandler.getPluginHandler("cpcloud");
+        String uuid = handler.getElement(request.getNodeId()).getImageUuid();
+        String instanceId = handler.getElement(request.getNodeId()).getResourceId();
+
+        var device = deviceService.findByUuid(uuid);
+        device.setName(request.getName());
+        device.setUuid(null);
+        device.setId(null);
+        device.setCreatedAt(null);
+        device.setUpdatedAt(null);
+        device.setInstanceUuid(instanceId);
         Device result =imagesService.copy(device);
     }
 

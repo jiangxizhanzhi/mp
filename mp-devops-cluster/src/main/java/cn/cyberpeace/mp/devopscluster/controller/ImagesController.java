@@ -188,6 +188,22 @@ public class ImagesController {
         return new ServiceResult(true).asResult();
     }
 
+
+    /**
+     * 新增
+     *
+     * @param request
+     * @return 统一服务返回结果
+     */
+    @ApiOperation("新增")
+    @ApiImplicitParam(name = "request", value = "查询信息请求体", dataTypeClass = CopySceneImageRequest.class)
+    @PostMapping("/copy_scene")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增镜像", target = OpTargetEnums.IMAGE)
+    public ServiceResult copySceneImage(@RequestBody CopySceneImageRequest request) {
+        imagesConverter.copy(request);
+        return new ServiceResult(true).asResult();
+    }
+
     /**
      * 更新
      *
