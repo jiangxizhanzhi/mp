@@ -1383,6 +1383,20 @@ public abstract class BaseSceneHandler<
         TSceneDataBO dataBO = this.toData();
         TSceneTopologyBO topologyBO = dataBO.getTopology();
 
+        //处理topo connection异常多的问题
+        if (CollectionUtils.isNotEmpty(topologyBO.getConnections())) {
+            Set<String> allPorts = topologyBO.getElements().stream().flatMap(element -> Optional.of(element).map(BaseSceneElementBO::getPorts).orElse(new ArrayList<>())
+                    .stream()).map(BaseSceneElementPortBO::getId).collect(Collectors.toSet());
+            Iterator<TSceneElementPortConnectionBO> connectionBOIterator = topologyBO.getConnections().iterator();
+            if (connectionBOIterator.hasNext()) {
+                TSceneElementPortConnectionBO connection = connectionBOIterator.next();
+                boolean connectPortsExistFlag = allPorts.contains(connection.getSource()) && allPorts.contains(connection.getTarget());
+                if (!connectPortsExistFlag) {
+                    connectionBOIterator.remove();
+                }
+            }
+        }
+
         //将node connect转为connect
         List<TSceneAreaNodeConnectionBO> tSceneAreaNodeConnectionBOS = topologyBO.getNodeConnections();
         if (CollectionUtils.isNotEmpty(tSceneAreaNodeConnectionBOS)) {
@@ -1411,7 +1425,11 @@ public abstract class BaseSceneHandler<
                             if (Objects.isNull(element.getPorts())) {
                                 element.setPorts(new ArrayList<>());
                             }
-                            element.getPorts().add(sceneElementPortBO);
+                            Set<String> existPorts = element.getPorts().stream().map(port -> port.getId()).collect(Collectors.toSet());
+                            if (!existPorts.contains(sceneElementPortBO.getId())) {
+                                element.getPorts().add(sceneElementPortBO);
+                            }
+
                         } else if (nodeConnection.getTargetNodeId().equals(element.getId())) {
                             TSceneElementPortBO sceneElementPortBO = sceneElementPortBOClass.getDeclaredConstructor().newInstance();
                             sceneElementPortBO.setElement(element);
@@ -1421,7 +1439,10 @@ public abstract class BaseSceneHandler<
                             if (Objects.isNull(element.getPorts())) {
                                 element.setPorts(new ArrayList<>());
                             }
-                            element.getPorts().add(sceneElementPortBO);
+                            Set<String> existPorts = element.getPorts().stream().map(port -> port.getId()).collect(Collectors.toSet());
+                            if (!existPorts.contains(sceneElementPortBO.getId())) {
+                                element.getPorts().add(sceneElementPortBO);
+                            }
                         }
                     }
                 }
