@@ -31,4 +31,8 @@ public class BaseCloudPluginSceneModel extends BasePluginSceneModel {
     private Boolean enableRate;
     @DefaultStr
     private String dnsNameservers;
+    @DefaultStr
+    private String flowMirrorIp;
+    @DefaultStr
+    private String flowMirrorId;
 }

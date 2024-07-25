@@ -1645,8 +1645,8 @@ public class CreateHandler extends HandlerCommon {
                 }
             }
             LogicalSwitchCreateData.PhysicalPort physicalPort = new LogicalSwitchCreateData.PhysicalPort();
-//            physicalPort.setPort(cloudPort.getEntitySwitchPort());
-            physicalPort.setPort(cloudPort.getEntityPort());
+            physicalPort.setPort(cloudPort.getEntitySwitchPort());
+//            physicalPort.setPort(cloudPort.getEntityPort());
             physicalPort.setVlan(port.getVlanNumber());
             data.getPhysicalPorts().add(physicalPort);
 
@@ -1654,8 +1654,8 @@ public class CreateHandler extends HandlerCommon {
             createData.setLogicalSwitch(data.getLogicalSwitchName());
 
             cloudPort.setAuxiliaryNetworkId(networkId);
-//            createData.setPsPortName(cloudPort.getEntitySwitchPort());
-            createData.setPsPortName(cloudPort.getEntityPort());
+            createData.setPsPortName(cloudPort.getEntitySwitchPort());
+//            createData.setPsPortName(cloudPort.getEntityPort());
             createData.setPhysicalSwitch(cloudPort.getEntitySwitchName());
             createData.setNetworkId(networkId);
             createData.setName(TextUtils.uuid());

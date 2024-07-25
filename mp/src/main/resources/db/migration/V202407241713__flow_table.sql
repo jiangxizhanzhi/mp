@@ -19,3 +19,7 @@ VALUES ('er3fa9ef0f0411ed996d0242ac110002', '1', '', 'DDoS', 'Distributed Denial
         '{"activKeys":"no_auth","visible":1}', '2023-04-20 19:17:37', '2024-05-08 15:30:14');
 
 alter table mp_flow_flow_info add column attack_flow_type int default 1 comment '攻击流量攻击类别,对应common_option中attack_flow_type';
+alter table mp_sceneplugincloud_scene add column flow_mirror_ip varchar(128) not null default '' comment '流量镜像的ip' ;
+alter table mp_sceneplugincloud_scene add column flow_mirror_id varchar(128) not null default '' comment '流量镜像的id' ;
+alter table mp_sceneplugincloud_scene_config add column flow_mirror_ip varchar(128) not null default '' comment '流量镜像的ip' ;
+alter table mp_sceneplugincloud_scene_config add column flow_mirror_id varchar(128) not null default '' comment '流量镜像的id' ;

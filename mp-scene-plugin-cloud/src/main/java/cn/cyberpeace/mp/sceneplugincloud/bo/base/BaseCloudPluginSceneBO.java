@@ -47,6 +47,10 @@ public abstract class BaseCloudPluginSceneBO<M extends BaseCloudPluginSceneModel
     private String strategyIp;
     @ApiModelProperty(value = "端口映射代理虚拟机id")
     private String portMappingInstanceId;
+    @ApiModelProperty(value = "流量镜像的ip")
+    private String flowMirrorIp;
+    @ApiModelProperty(value = "流量镜像的id")
+    private String flowMirrorId;
 
     /**
      * fromModel

@@ -506,6 +506,9 @@ public class DeleteHandler extends HandlerCommon {
         }
 
         ConfigNetworkUtils.releaseIps(getPluginHandler().getSrcScene().getEid());
+        if (StringUtils.isNotEmpty(getPluginHandler().getScene().getFlowMirrorId())) {
+            new Mirror().delete(getPluginHandler().getScene().getFlowMirrorId());
+        }
 
 //        SceneInstanceLinkCacheUtil.clear(getPluginHandler().getSourceSceneId());
     }

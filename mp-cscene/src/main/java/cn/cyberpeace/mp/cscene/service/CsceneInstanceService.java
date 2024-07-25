@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -28,6 +29,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.base.util.mptool.CacheUtil;
@@ -73,11 +75,17 @@ import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginContext;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Mirror;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CreateMirrorData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetConnectionUrlParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneMapper;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneOptionKeyModel;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
@@ -94,6 +102,7 @@ import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneOptionKeyMapper;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
@@ -126,8 +135,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
-/**
+ /**
  * @ClassName CsceneInstanceService
  * @Description
  * @Author maojun
@@ -2061,6 +2071,84 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         result.setOutput(execBO.getOutput());
         result.setStatus(execBO.getStatus());
         return new ServiceResult<>(result);
+    }
+
+    public Boolean deleteFlowMirror(String csceneId) {
+        String sceneId = this.getSceneId(csceneId);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+        CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler("cpcloud");
+        if (StringUtils.isEmpty(cloudPluginHandler.getScene().getFlowMirrorId())) {
+            return true;
+        }
+        String mirrorId = cloudPluginHandler.getScene().getFlowMirrorId();
+        new Mirror().delete(mirrorId);
+        return true;
+    }
+
+    public Boolean createFlowMirror(String csceneId, String ip) {
+        String sceneId = this.getSceneId(csceneId);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+        CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler("cpcloud");
+        String targetIp = ip;
+        if (StringUtils.isEmpty(targetIp)) {
+            targetIp = cloudPluginHandler.getScene().getFlowMirrorIp();
+        }
+        if (StringUtils.isEmpty(targetIp)) {
+            log.error("未指定需要镜像的 目的ip , no target ip");
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
+        }
+
+        CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getPluginHandler("cpcollection");
+        var createHandler = new CreateHandler(sceneHandler.getPluginHandler("cpcollection"));
+
+        // 统计需要流量镜像的节点
+        List<CreateMirrorData.Param> totalMirrorParams = new ArrayList<>();
+        for (String nodeId : cloudPluginHandler.getElementMap().keySet()) {
+            List<CreateMirrorData.Param> params = createHandler.getNodeFlowMirrorParam(nodeId);
+            totalMirrorParams.addAll(params);
+        }
+
+        // 设置流量镜像源头
+        CreateMirrorData createData = new CreateMirrorData();
+        createData.setSrcParam(totalMirrorParams);
+
+        // 设置流量镜像目的
+        CreateMirrorData.Param destParam = new CreateMirrorData.Param();
+        // 这里需要根据现场接口 调整下参数 ， 把流量镜像到某个固定的ip上
+        destParam.setDesId(targetIp);
+        createData.setDestParam(destParam);
+
+        CollectionPluginSceneOptionKeyMapper optionKeyMapper = BeanCommon.getBean(CollectionPluginSceneOptionKeyMapper.class);
+        List<Integer> excludeOptionKey = optionKeyMapper.list(new HumanCondition()).stream()
+                .map(CollectionPluginSceneOptionKeyModel::getOptionKey).collect(Collectors.toList());
+        int optionKey = this.randomOptionKey(excludeOptionKey);
+
+        CollectionPluginSceneOptionKeyModel optionKeyModel = new CollectionPluginSceneOptionKeyModel();
+        optionKeyModel.setScene(sceneId);
+        optionKeyModel.setOptionKey(optionKey);
+        optionKeyMapper.create(optionKeyModel);
+
+        createData.setName(TextUtils.uuid().substring(0, 10));
+        createData.setOptionKey(optionKey);
+
+        Mirror mirror = new Mirror();
+        var result = mirror.create(createData);
+        CloudPluginSceneModel model = new CloudPluginSceneModel();
+        model.setFlowMirrorId(result.getName());
+        var condition = new HumanCondition().filterEqual(BaseCloudPluginSceneElementModel::getScene, sceneId);
+        BeanCommon.getBean(CloudPluginSceneMapper.class).filterUpdate(model, condition);
+        return true;
+    }
+
+    private int randomOptionKey(List<Integer> excludeOptionKey) {
+        int optionKey = 1;
+        for (int i = 0; i < 1; i++) {
+            optionKey = new Random().nextInt(65535);
+            if (excludeOptionKey.contains(optionKey)) {
+                i--;
+            }
+        }
+        return optionKey;
     }
 
     /**

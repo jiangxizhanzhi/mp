@@ -1613,6 +1613,22 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return new ServiceResult<>(softVersionInfoData).asResult();
     }
 
+    @ApiOperation("创建流量镜像")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceFlowMirrorRequest.class)
+    @PostMapping("/create_flow_mirror")
+    public ServiceResult<Boolean> createFlowMirror(@RequestBody CsceneInstanceFlowMirrorRequest request) {
+        var result = modelService.createFlowMirror(request.getId(), request.getIp());
+        return new ServiceResult<>(result).asResult();
+    }
+
+    @ApiOperation("删除流量镜像")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceFlowMirrorRequest.class)
+    @PostMapping("/delete_flow_mirror")
+    public ServiceResult<Boolean> deleteFlowMirror(@RequestBody CsceneInstanceFlowMirrorRequest request) {
+        var result = modelService.deleteFlowMirror(request.getId());
+        return new ServiceResult<>(result).asResult();
+    }
+
     @Getter
     @Setter
     private static class SoftVersionInfoData {
