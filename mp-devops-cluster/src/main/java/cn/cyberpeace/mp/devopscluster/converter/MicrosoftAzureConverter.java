@@ -747,6 +747,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         list.forEach(item -> {
             item.setImageType("networkEquipment");
             item.setRole(61);
+            item.setCategory(5);
         });
         Integer num = microsoftAzureMapper.getCommonTargetNum(request, offset, pageSize);
         return new ListObjServiceResult(list, num).asResult();

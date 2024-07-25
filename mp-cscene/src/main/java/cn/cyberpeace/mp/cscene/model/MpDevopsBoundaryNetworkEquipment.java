@@ -78,4 +78,8 @@ public class MpDevopsBoundaryNetworkEquipment extends BaseModel {
      * 角色
      */
     private Integer role;
+    /**
+     * 设备分类
+     */
+    private Integer category;
 }
