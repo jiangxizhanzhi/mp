@@ -30,6 +30,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ContainerCreateData implements CloudHttpData {
+    private String arch ;
     private String name;
     private String image;
     private Integer cpu;

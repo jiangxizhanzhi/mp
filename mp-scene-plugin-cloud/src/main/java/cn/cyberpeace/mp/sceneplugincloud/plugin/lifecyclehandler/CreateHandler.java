@@ -1540,6 +1540,7 @@ public class CreateHandler extends HandlerCommon {
         String image = device.getExtImageInfo().getBaseImageName();
         String version = device.getExtImageInfo().getVersion();
         createData.setImage(image + ":" + version);
+        createData.setArch(device.getExtSystemInfo().getSystemArchitecture());
 
         if (srcElement.getCpu() != null && srcElement.getCpu() > 0) {
             createData.setCpu(srcElement.getCpu());
