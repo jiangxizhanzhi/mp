@@ -1018,6 +1018,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         flowInfoModel.setTitle(modifyRequest.getTitle());
         flowInfoModel.setFlowDesc(modifyRequest.getIntroduction());
         flowInfoModel.setCategory(modifyRequest.getCategory());
+        flowInfoModel.setAttackFlowType(modifyRequest.getAttackFlowType());
         flowInfoModel.setFileName(modifyRequest.getFileName());
         flowInfoModel.setScriptFile(modifyRequest.getFilePath());
         flowInfoModel.setRunCmd(modifyRequest.getRunCmd());
