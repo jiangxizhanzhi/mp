@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
@@ -11,6 +13,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.NetworkSecurityGroupUtils;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
@@ -35,10 +38,13 @@ public class AzureVirtualMachine {
 
     private Region region;
 
+    private SituationAwareConfig situationAwareConfig;
+
     public AzureVirtualMachine(IAzureResourceManager resourceService) {
         this.resourceService = resourceService;
         this.azureResourceManager = resourceService.getManager();
         this.region = resourceService.getRegin();
+        this.situationAwareConfig = BeanCommon.getBean(SituationAwareConfig.class);
     }
 
     public void VirtualMachinelist() throws IOException {
@@ -111,7 +117,19 @@ public class AzureVirtualMachine {
         return dataMaps;
     }
 
-    public VirtualMachine createManagementVM(String groupName, String vmName, Network network, String subName) {
+    public VirtualMachine createManagementVM(Integer cloudType, String groupName, String vmName, Network network, String subName) {
+        String customImageId = null;
+        switch (cloudType){
+            case BaseSceneModel.CloudType.PUBLIC:
+                customImageId = situationAwareConfig.getPublicManagementImageId();
+                break;
+            case BaseSceneModel.CloudType.PRIVATE:
+                customImageId = situationAwareConfig.getPrivateManagementImageId();
+                break;
+            case BaseSceneModel.CloudType.MIX:
+                customImageId = situationAwareConfig.getMixManagementImageId();
+                break;
+        }
         PublicIpAddress publicIpAddress = azureResourceManager.publicIpAddresses().define("PublicIP" + vmName)
                 .withRegion(region)
                 .withExistingResourceGroup(groupName)
@@ -126,9 +144,9 @@ public class AzureVirtualMachine {
                 .withSubnet(subName)
                 .withPrimaryPrivateIPAddressDynamic()
                 .withExistingPrimaryPublicIPAddress(publicIpAddress)
-                .withGeneralizedLinuxCustomImage("/subscriptions/c87ba926-f7c2-4d53-8b8e-89245dc92e26/resourceGroups/UPLOAD_RESOURCES/providers/Microsoft.Compute/images/esServiceVM-image-20240529112510")
-                .withRootUsername("admin123")
-                .withRootPassword("NHiOJiZTD4K1")
+                .withGeneralizedLinuxCustomImage(customImageId)
+                .withRootUsername(situationAwareConfig.getManagementUsername())
+                .withRootPassword(situationAwareConfig.getManagementPassword())
                 .withOSDiskStorageAccountType(StorageAccountTypes.STANDARD_LRS)
                 .withOSDiskSizeInGB(30)
                 .withSize(VirtualMachineSizeTypes.STANDARD_B1S)

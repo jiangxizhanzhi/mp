@@ -92,6 +92,16 @@ public class SituationAwareConfig {
     private String mixWazuhUsername;
     private String mixWazuhPassword;
     /**
+     * management-image
+     */
+    private String publicManagementImageId;
+    private String privateManagementImageId;
+    private String mixManagementImageId;
+    private String managementUsername;
+    private String managementPassword;
+
+
+    /**
      * wazuh-probe-manager
      */
     private String probeMgrUrl;

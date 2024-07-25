@@ -50,7 +50,7 @@ public class AzureVirtualNet {
                 .withRegion(this.region)
                 .withExistingResourceGroup(groupName);
         Set<Map.Entry<String, ElementNetworkUtils.CidrType>> entrySet = cidrContainerMap.entrySet();
-        String mangementSubName = null;
+        String manageamentSubName = null;
         for (Map.Entry<String, ElementNetworkUtils.CidrType> entry : entrySet) {
             String addressSpace = entry.getKey();
             ElementNetworkUtils.CidrType value = entry.getValue();
@@ -70,52 +70,25 @@ public class AzureVirtualNet {
                     break;
                 case MANAGEMENT:
                     addStandardSubnet(createdNet, addressSpace);
-                    mangementSubName = IpUtils.extractNetworkPart(addressSpace);
+                    manageamentSubName = IpUtils.extractNetworkPart(addressSpace);
                     break;
             }
-
-            /*if (value == ElementNetworkUtils.CidrType.CONTAINER) {
-//                连接容器的子网需要加子网委托
-                createdNet
-                        .withAddressSpace(entry.getKey())
-                        .defineSubnet(IpUtils.extractNetworkPart(entry.getKey()))
-                        .withAddressPrefix(entry.getKey())
-                        .withDelegation("Microsoft.ContainerInstance/containerGroups")
-                        .attach();
-            } else if (value == ElementNetworkUtils.CidrType.VM) {
-                createdNet
-                        .withAddressSpace(entry.getKey())
-                        .defineSubnet(IpUtils.extractNetworkPart(entry.getKey()))
-                        .withAddressPrefix(entry.getKey())
-                        .attach();
-            } else if (value == ElementNetworkUtils.CidrType.FIRE_WALL_MANAGEMENT) {
-                createdNet
-                        .withAddressSpace(entry.getKey())
-                        .defineSubnet("AzureFirewallManagementSubnet")
-                        .withAddressPrefix(entry.getKey())
-                        .attach();
-            } else if (value == ElementNetworkUtils.CidrType.FIRE_WALL) {
-                createdNet
-                        .withAddressSpace(entry.getKey())
-                        .defineSubnet("AzureFirewallSubnet")
-                        .withAddressPrefix(entry.getKey())
-                        .attach();
-            }*/
         }
 
         Network network = createdNet.create();
         cloudElement.setResourceId(network.id());
 
 //        创建管理虚拟机用于远程连接 TODO 虚拟机未准备好暂不走此逻辑
-        mangementSubName = null;
-        if (null != mangementSubName) {
+        manageamentSubName = null;
+        if (null != manageamentSubName) {
+            Integer cloudType = pluginHandler.getSrcScene().getCloudType();
             AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(resourceService);
-            VirtualMachine mangeementVm = azureVirtualMachine.createManagementVM(groupName, "ManagementVM_" + netName, network, mangementSubName);
-            cloudElement.setManagementIp(mangeementVm.getPrimaryPublicIPAddress().ipAddress());
+            VirtualMachine managementVm = azureVirtualMachine.createManagementVM(cloudType,groupName, "ManagementVM_" + netName, network, manageamentSubName);
+            cloudElement.setManagementIp(managementVm.getPrimaryPublicIPAddress().ipAddress());
         }
 
         // azure 回写网络id
-        cloudElement.getDeriveNetworks().stream().forEach(networkBO -> {
+        cloudElement.getDeriveNetworks().forEach(networkBO -> {
             CloudPluginSceneElementNetworkBO net = networkBO.getNetwork();
             net.setResourceId(network.id());
         });
@@ -128,7 +101,7 @@ public class AzureVirtualNet {
                     .distinct()
                     .collect(Collectors.toList());
 //            查找连接的节点 管理网络字段赋值
-            if (null != mangementSubName) {
+            if (null != manageamentSubName) {
                 propagateMgmtIpToElements(pluginHandler, cloudElement, null);
             }
 
@@ -242,11 +215,11 @@ public class AzureVirtualNet {
             if (null != portConnectedPort) {
                 String id = portConnectedPort.getElement().getId();
                 CloudPluginSceneElementBO cloudPluginSceneConfigElementBO = pluginHandler.getElement(id);
-                if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(cloudPluginSceneConfigElementBO.getImageType())) {
-                    cloudPluginSceneConfigElementBO.setMgmtIp(element.getMgmtIp());
-                } else if (BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudPluginSceneConfigElementBO.getImageType())) {
-                    if (processedElementIds.contains(cloudPluginSceneConfigElementBO.getSrcElement().getId()))
-                        continue;
+                if (!BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudPluginSceneConfigElementBO.getImageType())) {
+                    cloudPluginSceneConfigElementBO.setManagementIp(element.getManagementIp());
+                } else {
+                    if (processedElementIds.contains(cloudPluginSceneConfigElementBO.getSrcElement().getId())) continue;
+                    cloudPluginSceneConfigElementBO.setManagementIp(element.getManagementIp());
                     propagateMgmtIpToElements(pluginHandler, cloudPluginSceneConfigElementBO, processedElementIds);
                 }
             }

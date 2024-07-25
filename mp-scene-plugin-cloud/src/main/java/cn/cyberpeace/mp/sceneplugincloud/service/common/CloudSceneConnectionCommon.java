@@ -226,7 +226,7 @@ public class CloudSceneConnectionCommon {
             }
             guacamoleCreateConnectionData.setConnectionParams(connectionParams);
             GuacamoleCreateConnectionResult result = null;
-            if (StringUtils.isNotBlank(element.getManagementIp())) {
+            if (!element.getIsPublicIp() && StringUtils.isNotBlank(element.getManagementIp())) {
                 String server = "http://%s:11111";
 
                 result = new CloudHttpClient(String.format(server, element.getManagementIp()),
