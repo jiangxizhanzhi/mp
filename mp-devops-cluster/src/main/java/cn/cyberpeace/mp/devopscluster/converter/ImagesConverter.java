@@ -29,6 +29,7 @@ import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
+import cn.cyberpeace.mp.devopscluster.service.GXPTTargetServiceImpl;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import com.google.common.collect.Lists;
@@ -37,6 +38,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,6 +72,9 @@ public class ImagesConverter implements BaseConverter{
     private final TargetConverter targetConverter;
 
     private final SnapshotConverter snapshotConverter;
+
+    @Autowired
+    private GXPTTargetServiceImpl gxptTargetServiceImpl;
 
     /**
      * 分页查询镜像列表
@@ -237,6 +242,8 @@ public class ImagesConverter implements BaseConverter{
         if (CollectionUtils.isNotEmpty(request.getImageIds()) && result.isSuccess()){
             ImageDeleteDTO dto = new ImageDeleteDTO();
             dto.setIds(request.getImageIds());
+            // 共性平台删除靶标
+            gxptTargetServiceImpl.deleteTarget(request.getImageIds());
             deviceTargetMapper.delete(dto);
             devopsTargetAuthService.deleteByTargets(request.getImageIds());
         }
