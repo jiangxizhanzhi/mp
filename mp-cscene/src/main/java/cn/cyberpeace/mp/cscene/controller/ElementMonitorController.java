@@ -357,7 +357,7 @@ public class ElementMonitorController {
                 model.setPid(processModel.getPid());
                 model.setData(JsonCommon.stringify(processModel));
                 model.setAgentName(element);
-                model.setStatus(1);
+                model.setStatus(0);
                 models.add(model);
             }
         }
@@ -382,7 +382,7 @@ public class ElementMonitorController {
                 model.setPid(processModel.getPid());
                 model.setData(JsonCommon.stringify(processModel));
                 model.setAgentName(element);
-                model.setStatus(0);
+                model.setStatus(1);
                 models.add(model);
             }
         }
