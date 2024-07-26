@@ -95,9 +95,11 @@ public class SwitchConverter {
      * @return
      */
     public List<SwitchConvertModel> treeList() {
-        SearchSdnSwitchRequest searchSdnSwitchRequest = new SearchSdnSwitchRequest();
-        searchSdnSwitchRequest.setPerPage(Integer.MAX_VALUE);
-        List<SdnSwitch> switches = switchService.pageSdnSwitch(new SearchSdnSwitchRequest()).getList();
+//        SearchSdnSwitchRequest searchSdnSwitchRequest = new SearchSdnSwitchRequest();
+//        searchSdnSwitchRequest.setPerPage(Integer.MAX_VALUE);
+//        List<SdnSwitch> switches = switchService.pageSdnSwitch(new SearchSdnSwitchRequest()).getList();
+
+        List<Switches> switches = this.list();
 
         if (CollectionUtils.isEmpty(switches)) {
             return Collections.emptyList();
@@ -108,10 +110,13 @@ public class SwitchConverter {
                 switchConvertModel.setValue(sdnSwitch.getPhysicalSwitchName());
 
                 List<SwitchConvertModel.Children> children = new ArrayList<>();
-                for (int i = 0; i < sdnSwitch.getPortNum(); i++) {
+                for (var inf: sdnSwitch.getInterfaceDetails()) {
                     SwitchConvertModel.Children child = new SwitchConvertModel.Children();
-                    child.setLabel(getFormatSdnSwitchPortName(i+1));
-                    child.setValue(String.valueOf(i+1));
+                    if (inf.getStatus() == null || inf.getStatus().equals("DOWN")) {
+                        continue;
+                    }
+                    child.setLabel(inf.getName());
+                    child.setValue(inf.getPsPortName());
                     children.add(child);
                 }
 

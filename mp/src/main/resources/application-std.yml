@@ -122,6 +122,7 @@ mp:
     file-server: ${mp.base.ext-var.file-server}
     lfs-inner-http-url-template: ${mp.base.ext-var.lfs-inner-http-url}
     lfs-outer-http-url-template: ${mp.base.ext-var.lfs-outer-http-url}
+    lfs-outer-spice-url-template: ${mp.base.ext-var.lfs-outer-spice-url}
   #    run-init: true
   # mp-devops-cluster模块
   devopscluster:

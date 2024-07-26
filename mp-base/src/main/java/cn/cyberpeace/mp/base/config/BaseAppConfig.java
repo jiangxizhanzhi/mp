@@ -98,6 +98,9 @@ public class BaseAppConfig {
     @Value("${mp.base.lfs-outer-http-url-template:/api/mp/file/%s}")
     private String lfsOuterHttpUrlTemplate;
 
+    @Value("${mp.base.lfs-outer-spice-url-template:/api/mp/file/%s}")
+    private String lfsOuterSpiceUrlTemplate;
+
     @Value("${mp.base.home-dir:}")
     private String homeDir;
 

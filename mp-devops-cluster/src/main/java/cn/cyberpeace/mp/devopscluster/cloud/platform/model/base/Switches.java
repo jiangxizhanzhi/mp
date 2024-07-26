@@ -34,6 +34,9 @@ public class Switches implements Serializable {
     @ApiModelProperty("交换机名称")
     private String name;
 
+    @ApiModelProperty("物理交换机名称")
+    private String physicalSwitchName;
+
     @ApiModelProperty("管理IP")
     private String managementIp;
 

@@ -63,6 +63,17 @@ public class FsCommon {
         FsCommon.unique = true;
     }
 
+    public static String genSpiceUrl(String fileKey) {
+        if (StringUtils.isEmpty(fileKey)) {
+            return fileKey;
+        }
+        if (fileKey.startsWith(String.format(FsCommon.baseAppConfig.getLfsOuterSpiceUrlTemplate(), StringUtils.EMPTY))) {
+            return fileKey;
+        } else {
+            return String.format(FsCommon.baseAppConfig.getLfsOuterSpiceUrlTemplate(), fileKey);
+        }
+    }
+
     /**
      * genHttpUrl
      *

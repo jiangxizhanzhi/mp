@@ -671,7 +671,7 @@ public class ScenePluginCollectionSceneService {
         result.getObjs().forEach(srcHostEvent -> {
             CollectionHostEventBO hostEvent = new CollectionHostEventBO();
             hostEvent.setSceneId(sceneId);
-            hostEvent.setType(srcHostEvent.getFileEventType().name());
+            hostEvent.setType(srcHostEvent.getFileEventType().getDesc());
             if (StringUtils.isEmpty(srcHostEvent.getAction())) {
                 hostEvent.setEventDesc(srcHostEvent.getMessage());
             } else {

@@ -115,6 +115,9 @@ public class UserBehaviorService {
 		}
 
 		List<UserBehaviorModel> userModelList = userBehaviorMapper.list(humanCondition);
+		if (CollectionUtils.isEmpty(userModelList)) {
+			return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<UserBehaviorDetail>(), 0).asResult());
+		}
 		int total = userBehaviorMapper.total(humanCondition);
 
 		List<String> networkIds = new ArrayList<>();
