@@ -40,4 +40,4 @@ CREATE TABLE `mp_sceneplugincollection_scene_process_data`
 ) COMMENT ='场景节点已关闭进程列表';
 
 update mp_sceneplugincollection_wazuh_rule_type_relation set type_id = 1 where rule_id = 60106 ;
-update mp_sceneplugincollection_wazuh_rule_type_relation set type_id = 1 where rule_id = 5502 ;
+update mp_sceneplugincollection_wazuh_rule_type_relation set type_id = 2 where rule_id = 5502 ;
