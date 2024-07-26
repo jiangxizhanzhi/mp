@@ -11,19 +11,24 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.CloudApiProxyBuilder;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDeleteData;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.DeleteFlowCollectBo;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionElementProcessDataModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.DeleteTaskPool;
+import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionElementProcessDataMapper;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -105,6 +110,15 @@ public class DeleteHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.DELETE_PROBE_ROUTER, () -> {
                 deleteProbeRouter(probeRouterId);
             });
+        }
+
+        List<String> agentNames = new ArrayList<>();
+        for (CollectionPluginSceneElementBO e : getPluginHandler().getElementMap().values()) {
+            agentNames.add(e.getSrcElement().getEid());
+        }
+        if (!agentNames.isEmpty()) {
+            var condition = new HumanCondition().filterIn(CollectionElementProcessDataModel::getAgentName, agentNames.toArray(new String[]{}));
+            BeanCommon.getBean(CollectionElementProcessDataMapper.class).filterDelete(condition);
         }
 
     }

@@ -192,20 +192,19 @@ public class HostStateController {
             var model = sceneElementMapper.first(condition);
             String agentName = model.getId();
             CollectionElementProcessDataMapper dataMapper = BeanCommon.getBean(CollectionElementProcessDataMapper.class);
+            int page = listPageInfoQueryParams.getPage();
+            int pageSize = listPageInfoQueryParams.getPerPage();
+
+            var countCondition = new HumanCondition().filterEqual(CollectionElementProcessDataModel::getAgentName, agentName);
+            var count = dataMapper.total(countCondition);
+
             var dataCondition = new HumanCondition().filterEqual(CollectionElementProcessDataModel::getAgentName, agentName)
+                    .pagination(page,pageSize)
                     .orderBy(CollectionElementProcessDataModel::getCreateTime,true);
             var listData = dataMapper.list(dataCondition);
 
-            int page = listPageInfoQueryParams.getPage();
-            int pageSize = listPageInfoQueryParams.getPerPage();
-            int skip = (page - 1) * pageSize;
-            log.info("skip:{}, limit:{}", skip, pageSize);
-            List<CollectionElementProcessDataModel> resultList = listData.stream()
-                    .filter(wazuhProcessModel -> Objects.nonNull(wazuhProcessModel)).skip(skip).limit(pageSize)
-                    .collect(Collectors.toList());
-
             List<Process> processes = new ArrayList<>();
-            for (CollectionElementProcessDataModel p : resultList) {
+            for (CollectionElementProcessDataModel p : listData) {
                 WazuhProcessModel processModel = JsonCommon.parse(p.getData(), WazuhProcessModel.class);
                 Process process = convertWazuhProcess2Process(processModel);
                 if (p.getStatus() == 0) {
@@ -214,7 +213,7 @@ public class HostStateController {
                 }
                 processes.add(process);
             }
-            return new ListObjServiceResult<>(new ListObjResult<>(processes, listData.size())).asResult();
+            return new ListObjServiceResult<>(new ListObjResult<>(processes, count)).asResult();
         }
     }
 

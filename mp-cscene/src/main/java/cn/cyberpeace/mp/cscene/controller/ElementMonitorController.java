@@ -11,11 +11,9 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -36,7 +34,6 @@ import cn.cyberpeace.mp.cscene.service.CsceneHostCollectQueryService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionElementProcessDataModel;
-import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionElementProcessDataMapper;
 import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
 import com.alibaba.fastjson.JSONArray;
@@ -387,13 +384,6 @@ public class ElementMonitorController {
             }
         }
 
-        var mapper = BeanCommon.getBean(CollectionElementProcessDataMapper.class);
-
-        var condition = new HumanCondition();
-        condition.filterEqual(CollectionElementProcessDataModel::getAgentName, element)
-                .filterEqual(CollectionElementProcessDataModel::getStatus, 1);
-        mapper.filterDelete(condition);
-
-        mapper.bulkCreate(models);
+        sceneElementMonitorService.saveElementProcessData(element, models);
     }
 }

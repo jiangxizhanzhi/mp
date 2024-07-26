@@ -12,8 +12,6 @@ package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -52,6 +50,8 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionElementProcessDataModel;
+import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionElementProcessDataMapper;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
@@ -73,6 +73,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -81,7 +82,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -90,9 +90,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-/**
+ /**
  * @ClassName SceneElementMonitorService
  * @Description 场景节点监控Service
  * @Author zhouxinghuai
@@ -1207,5 +1206,16 @@ public class SceneElementMonitorService {
         return wazuhEventRequest;
     }
 
+    @Transactional
+    public void saveElementProcessData(String element, List<CollectionElementProcessDataModel> models){
+        var mapper = BeanCommon.getBean(CollectionElementProcessDataMapper.class);
+
+        var condition = new HumanCondition();
+        condition.filterEqual(CollectionElementProcessDataModel::getAgentName, element)
+                .filterEqual(CollectionElementProcessDataModel::getStatus, 1);
+        mapper.filterDelete(condition);
+
+        mapper.bulkCreate(models);
+    }
 
 }
