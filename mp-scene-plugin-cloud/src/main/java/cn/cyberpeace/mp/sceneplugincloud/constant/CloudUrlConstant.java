@@ -174,6 +174,8 @@ public class CloudUrlConstant {
     /*****************mirror************************/
     public static final String CREATE_MIRROR_URL = "/cloud/v1/mirror";
     public static final String DELETE_MIRROR_URL = "/cloud/v1/mirror/{mirror_id}";
+    public static final String CREATE_BRIDGE_MIRROR_URL = "/cloud/v1/mirror/bridgeMirror";
+    public static final String DELETE_BRIDGE_MIRROR_URL = "/cloud/v1/mirror/bridgeMirror";
 
 
 

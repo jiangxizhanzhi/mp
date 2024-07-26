@@ -131,7 +131,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         HumanCondition condition = new HumanCondition()
                 .filterEqual(SysConfigModel::getKeyName, keyName);
         SysConfigModel model = getModelMapper().first(condition);
-        if ("copyright".equals(model.getKeyName())) {
+        if (model != null && "copyright".equals(model.getKeyName())) {
             String year = "@2021-" + LocalDate.now().getYear();
             String split = MessageCommon.get("admim.front.split");
             model.setValue(year + split + model.getValue());

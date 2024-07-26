@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -49,6 +50,10 @@ import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
+import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
+import cn.cyberpeace.mp.frontadmin.repository.SysConfigMapper;
+import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
+import cn.cyberpeace.mp.frontadminbusiness.bo.MirrorBO;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaNodeConnectionBO;
@@ -61,6 +66,7 @@ import cn.cyberpeace.mp.scene.model.SceneConfigAreaModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.scene.repository.SceneConfigAreaMapper;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Mirror;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -76,6 +82,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
@@ -120,6 +127,8 @@ public class CsceneController implements BaseModelListControllerBase {
     private CsceneSpecialService csceneSpecialService;
 
     private BaseAppConfig baseAppConfig;
+
+    private SysConfigService sysConfigService;
 
     /**
      * formatActionRequest
@@ -201,11 +210,13 @@ public class CsceneController implements BaseModelListControllerBase {
      * @param csceneService
      * @param csceneSpecialService
      * @param baseAppConfig
+     * @param sysConfigService
      */
     @Autowired
-    public CsceneController(CsceneService csceneService, CsceneSpecialService csceneSpecialService, BaseAppConfig baseAppConfig) {
+    public CsceneController(CsceneService csceneService, CsceneSpecialService csceneSpecialService, SysConfigService sysConfigService , BaseAppConfig baseAppConfig) {
         setModelService(csceneService);
         setCsceneSpecialService(csceneSpecialService);
+        setSysConfigService(sysConfigService);
         this.baseAppConfig = baseAppConfig;
     }
 
@@ -1121,4 +1132,117 @@ public class CsceneController implements BaseModelListControllerBase {
         }
         return input;
     }
+
+    @ApiOperation("设定全局流量镜像的ip")
+    @PostMapping(value = "/flow/set_mirror_ip")
+    @ResponseBody
+    public ServiceResult<Boolean> setMirrorIp(@RequestBody MirrorBO mirrorBO) {
+        var mirrorEnableModel = sysConfigService.getByKeyName(MirrorConstant.MIRROR_ENABLE);
+        if (mirrorEnableModel != null && MirrorConstant.ON.equals(mirrorEnableModel.getValue())) {
+            log.error("开启流量镜像时不允许调整ip");
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
+        }
+        var mirrorIp = sysConfigService.getByKeyName(MirrorConstant.MIRROR_IP);
+        if (mirrorIp != null) {
+            mirrorIp.setValue(mirrorBO.getIp());
+            sysConfigService.update(mirrorIp);
+        } else {
+            mirrorIp = new SysConfigModel();
+            mirrorIp.setTenant("default");
+            mirrorIp.setKeyName(MirrorConstant.MIRROR_IP);
+            mirrorIp.setValue(mirrorBO.getIp());
+            mirrorIp.setInitValue(mirrorBO.getIp());
+            BeanCommon.getBean(SysConfigMapper.class).save(mirrorIp);
+        }
+        return new ServiceResult<>(true).asResult();
+    }
+
+    @ApiOperation("开启全局流量镜像")
+    @PostMapping(value = "/flow/create_mirror")
+    @ResponseBody
+    public ServiceResult<Boolean> createMirror() {
+        var mirrorEnableModel = sysConfigService.getByKeyName(MirrorConstant.MIRROR_ENABLE);
+        // 已经打开的，直接返回调用成功
+        if (mirrorEnableModel != null && MirrorConstant.ON.equals(mirrorEnableModel.getValue())) {
+            return new ServiceResult<>(true).asResult();
+        }
+
+        // 查询镜像的ip
+        var mirrorIpModel = sysConfigService.getByKeyName(MirrorConstant.MIRROR_IP);
+        if (mirrorIpModel == null) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+
+        String ip = mirrorIpModel.getValue();
+        new Mirror().createBridge("mp_mirror_" + ip, ip);
+
+        if (mirrorEnableModel != null) {
+            mirrorEnableModel.setValue(MirrorConstant.ON);
+            sysConfigService.update(mirrorEnableModel);
+        } else {
+            mirrorEnableModel = new SysConfigModel();
+            mirrorEnableModel.setTenant("default");
+            mirrorEnableModel.setKeyName(MirrorConstant.MIRROR_ENABLE);
+            mirrorEnableModel.setValue(MirrorConstant.ON);
+            mirrorEnableModel.setInitValue(MirrorConstant.ON);
+            BeanCommon.getBean(SysConfigMapper.class).save(mirrorEnableModel);
+        }
+
+        return new ServiceResult<>(true).asResult();
+    }
+
+    @ApiOperation("关闭全局流量镜像")
+    @PostMapping(value = "/flow/delete_mirror")
+    @ResponseBody
+    public ServiceResult<Boolean> deleteMirror() {
+        var mirrorEnableModel = sysConfigService.getByKeyName(MirrorConstant.MIRROR_ENABLE);
+        // 已经关闭的，直接返回调用成功
+        if (mirrorEnableModel != null && MirrorConstant.OFF.equals(mirrorEnableModel.getValue())) {
+            return new ServiceResult<>(true).asResult();
+        }
+
+        // 查询镜像的ip
+        var mirrorIpModel = sysConfigService.getByKeyName(MirrorConstant.MIRROR_IP);
+        if (mirrorIpModel != null) {
+            String ip = mirrorIpModel.getValue();
+            new Mirror().deleteBridge("mp_mirror_" + ip, ip);
+        }
+
+        String value = MirrorConstant.OFF;
+        if (mirrorEnableModel != null) {
+            mirrorEnableModel.setValue(value);
+            sysConfigService.update(mirrorEnableModel);
+        } else {
+            mirrorEnableModel = new SysConfigModel();
+            mirrorEnableModel.setTenant("default");
+            mirrorEnableModel.setKeyName(MirrorConstant.MIRROR_ENABLE);
+            mirrorEnableModel.setValue(value);
+            mirrorEnableModel.setInitValue(value);
+            BeanCommon.getBean(SysConfigMapper.class).save(mirrorEnableModel);
+        }
+
+        return new ServiceResult<>(true).asResult();
+    }
+
+    @ApiOperation("查询全局流量镜像")
+    @PostMapping(value = "/flow/get_mirror")
+    @ResponseBody
+    public ServiceResult<MirrorBO> getMirror() {
+        var mirrorEnableModel = sysConfigService.getByKeyName(MirrorConstant.MIRROR_ENABLE);
+        var mirrorIpModel = sysConfigService.getByKeyName(MirrorConstant.MIRROR_IP);
+
+        MirrorBO result = new MirrorBO();
+        result.setIp(mirrorIpModel == null ? "" : mirrorIpModel.getValue());
+        result.setMirrorStatus(mirrorEnableModel == null ? MirrorConstant.OFF : mirrorEnableModel.getValue());
+
+        return new ServiceResult<>(result).asResult();
+    }
+
+    private static class MirrorConstant {
+        public static String MIRROR_IP = "mirror_ip";
+        public static String MIRROR_ENABLE = "mirror_enable";
+        public static String ON = "on";
+        public static String OFF = "off";
+    }
 }
+
