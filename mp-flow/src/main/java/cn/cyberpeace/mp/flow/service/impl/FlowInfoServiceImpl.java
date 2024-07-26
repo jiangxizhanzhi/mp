@@ -1421,6 +1421,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         try {
             String fileName = System.currentTimeMillis() + BaseConstants.SHORT_DASH + TextUtils.uuid() + ".pcap";
             pcapPath = PRE_PATH.concat("/" + System.currentTimeMillis() + "_" + fileName);
+            tmpFile = new File(pcapPath);
 
             try (OutputStream out = new FileOutputStream(tmpFile)){
                 byte[] ss = multipartFile.getBytes();
