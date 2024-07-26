@@ -336,7 +336,7 @@ public class ElementMonitorController {
         String output = TextUtils.decompress(raw);
         JSONObject jsonObject = JSONObject.parseObject(output);
 
-        JSONArray arr = jsonObject.getJSONArray("values");
+        JSONArray arr = jsonObject.getJSONArray("deleted_prev");
         List<CollectionElementProcessDataModel> models = new ArrayList<>();
         if (!Objects.isNull(arr)) {
             for (int i = 0; i < arr.size(); i++) {
@@ -354,6 +354,7 @@ public class ElementMonitorController {
                     processModel.setDescription("PROCESS");
                 }
                 CollectionElementProcessDataModel model = new CollectionElementProcessDataModel();
+                model.setPid(processModel.getPid());
                 model.setData(JsonCommon.stringify(processModel));
                 model.setAgentName(element);
                 model.setStatus(1);
@@ -361,7 +362,7 @@ public class ElementMonitorController {
             }
         }
 
-        arr = jsonObject.getJSONArray("deleted_prev");
+        arr = jsonObject.getJSONArray("values");
         if (!Objects.isNull(arr)) {
             for (int i = 0; i < arr.size(); i++) {
                 JSONObject data1 = arr.getJSONObject(i);
@@ -378,6 +379,7 @@ public class ElementMonitorController {
                     processModel.setDescription("PROCESS");
                 }
                 CollectionElementProcessDataModel model = new CollectionElementProcessDataModel();
+                model.setPid(processModel.getPid());
                 model.setData(JsonCommon.stringify(processModel));
                 model.setAgentName(element);
                 model.setStatus(0);

@@ -38,4 +38,6 @@ public class CollectionElementProcessDataModel extends BaseModel {
     private String data;
     @DefaultInt
     private int status;
+    @DefaultStr
+    private String pid ;
 }

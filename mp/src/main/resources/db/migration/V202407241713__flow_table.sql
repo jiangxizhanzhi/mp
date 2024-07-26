@@ -24,14 +24,14 @@ alter table mp_sceneplugincloud_scene add column flow_mirror_id varchar(128) not
 alter table mp_sceneplugincloud_scene_config add column flow_mirror_ip varchar(128) not null default '' comment '流量镜像的ip' ;
 alter table mp_sceneplugincloud_scene_config add column flow_mirror_id varchar(128) not null default '' comment '流量镜像的id' ;
 
-
 CREATE TABLE `mp_sceneplugincollection_scene_process_data`
 (
     `pk`          int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
     `id`          varchar(64)  NOT NULL COMMENT 'ID',
     `agent_name`  varchar(128) NOT NULL COMMENT '场景 agent_name',
     `status`      int(11) NOT NULL COMMENT '进程状态 , running:1 , stopped:0',
-    `data`        text NOT NULL COMMENT '进程内容',
+    `pid`         varchar(128) NOT NULL default '' COMMENT '进程状态id',
+    `data`        text         NOT NULL COMMENT '进程内容',
     `create_time` datetime(6) NOT NULL COMMENT '创建时间',
     `update_time` datetime(6) NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`pk`),
