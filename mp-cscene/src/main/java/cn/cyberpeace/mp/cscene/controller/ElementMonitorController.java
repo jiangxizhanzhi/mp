@@ -1,25 +1,27 @@
- // Copyright (C) 2024
- // All rights reserved.
- // Project name mp
- // Description:
- // Author:
- // File name ElementMonitorController.java.
- // File size 12990.
- // File create date Fri Jul 12 12:55:22 CST 2024.
- // File update date Fri Jul 12 12:55:22 CST 2024.
- // Version 1.0.0
+// Copyright (C) 2024
+// All rights reserved.
+// Project name mp
+// Description:
+// Author:
+// File name ElementMonitorController.java.
+// File size 12990.
+// File create date Fri Jul 12 12:55:22 CST 2024.
+// File update date Fri Jul 12 12:55:22 CST 2024.
+// Version 1.0.0
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.element.ElementHistogramInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
@@ -31,11 +33,14 @@ import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneHostCollectQueryService;
-import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
-import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionElementProcessDataModel;
+import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionElementProcessDataMapper;
+import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -52,6 +57,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -321,7 +327,71 @@ public class ElementMonitorController {
     }
 
     @PostMapping("/save_process_data")
-    public void saveElementProcessData(@RequestBody Map<String, Object> data) {
-        log.info(JsonCommon.stringify(data));
+    public void saveElementProcessData(@RequestBody Map<String, Object> data, @RequestParam String element) {
+        log.debug("save_process_data:" + element);
+        log.debug("save_process_data:" + JsonCommon.stringify(data));
+
+        String value = data.containsKey("data") ? data.get("data").toString() : "";
+        byte[] raw = TextUtils.rawDecodeBase64(StringUtils.strip(value.trim(), "\""));
+        String output = TextUtils.decompress(raw);
+        JSONObject jsonObject = JSONObject.parseObject(output);
+
+        JSONArray arr = jsonObject.getJSONArray("values");
+        List<CollectionElementProcessDataModel> models = new ArrayList<>();
+        if (!Objects.isNull(arr)) {
+            for (int i = 0; i < arr.size(); i++) {
+                JSONObject data1 = arr.getJSONObject(i);
+                WazuhProcessModel processModel = JSONObject.toJavaObject(data1, WazuhProcessModel.class);
+                if (Objects.nonNull(jsonObject.get("time"))) {
+                    processModel.setTime(TimeUtils.stringToLocalDateTime(jsonObject.get("time").toString(), TimeUtils.dateTimeFormatter));
+                }
+                if (Objects.nonNull(jsonObject.get("level"))) {
+                    processModel.setLevel(jsonObject.getIntValue("level"));
+                }
+                if (Objects.nonNull(jsonObject.get("description"))) {
+                    processModel.setDescription(jsonObject.getString("description"));
+                } else {
+                    processModel.setDescription("PROCESS");
+                }
+                CollectionElementProcessDataModel model = new CollectionElementProcessDataModel();
+                model.setData(JsonCommon.stringify(processModel));
+                model.setAgentName(element);
+                model.setStatus(1);
+                models.add(model);
+            }
+        }
+
+        arr = jsonObject.getJSONArray("deleted_prev");
+        if (!Objects.isNull(arr)) {
+            for (int i = 0; i < arr.size(); i++) {
+                JSONObject data1 = arr.getJSONObject(i);
+                WazuhProcessModel processModel = JSONObject.toJavaObject(data1, WazuhProcessModel.class);
+                if (Objects.nonNull(jsonObject.get("time"))) {
+                    processModel.setTime(TimeUtils.stringToLocalDateTime(jsonObject.get("time").toString(), TimeUtils.dateTimeFormatter));
+                }
+                if (Objects.nonNull(jsonObject.get("level"))) {
+                    processModel.setLevel(jsonObject.getIntValue("level"));
+                }
+                if (Objects.nonNull(jsonObject.get("description"))) {
+                    processModel.setDescription(jsonObject.getString("description"));
+                } else {
+                    processModel.setDescription("PROCESS");
+                }
+                CollectionElementProcessDataModel model = new CollectionElementProcessDataModel();
+                model.setData(JsonCommon.stringify(processModel));
+                model.setAgentName(element);
+                model.setStatus(0);
+                models.add(model);
+            }
+        }
+
+        var mapper = BeanCommon.getBean(CollectionElementProcessDataMapper.class);
+
+        var condition = new HumanCondition();
+        condition.filterEqual(CollectionElementProcessDataModel::getAgentName, element)
+                .filterEqual(CollectionElementProcessDataModel::getStatus, 1);
+        mapper.filterDelete(condition);
+
+        mapper.bulkCreate(models);
     }
 }

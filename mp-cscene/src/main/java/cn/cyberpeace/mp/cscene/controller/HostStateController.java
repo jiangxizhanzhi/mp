@@ -11,10 +11,15 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.mptool.DatePattern;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneAttCkTypeCountInfo;
@@ -22,8 +27,15 @@ import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
+import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionElementProcessDataModel;
+import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionElementProcessDataMapper;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.util.DatetimeUtil;
+import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
@@ -37,10 +49,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
-/**
+ /**
  * @ClassName HostStateController
  * @Description
  * @Author zhouxinghuai
@@ -163,7 +178,74 @@ public class HostStateController {
     @ApiOperation(value = "节点进程信息")
     @GetMapping("/element_process")
     public ListObjServiceResult<Process> pageProcesses(TimeListPageInfoQueryParams listPageInfoQueryParams) {
-        return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
+        if (listPageInfoQueryParams.getStartTime() != null) {
+            return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
+        } else {
+            CsceneInstanceService instanceService = BeanCommon.getBean(CsceneInstanceService.class);
+            var intance = instanceService.getSceneId(listPageInfoQueryParams.getSceneIds().get(0));
+            if (intance == null) {
+                return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<Process>(), 0)).asResult();
+            }
+            SceneElementMapper sceneElementMapper = BeanCommon.getBean(SceneElementMapper.class);
+            var condition = new HumanCondition().filterEqual(SceneElementModel::getScene, intance)
+                    .filterEqual(SceneElementModel::getNodeId, listPageInfoQueryParams.getNodeIds().get(0));
+            var model = sceneElementMapper.first(condition);
+            String agentName = model.getId();
+            CollectionElementProcessDataMapper dataMapper = BeanCommon.getBean(CollectionElementProcessDataMapper.class);
+            var dataCondition = new HumanCondition().filterEqual(CollectionElementProcessDataModel::getAgentName, agentName)
+                    .orderBy(CollectionElementProcessDataModel::getCreateTime,true);
+            var listData = dataMapper.list(dataCondition);
+
+            int page = listPageInfoQueryParams.getPage();
+            int pageSize = listPageInfoQueryParams.getPerPage();
+            int skip = (page - 1) * pageSize;
+            log.info("skip:{}, limit:{}", skip, pageSize);
+            List<CollectionElementProcessDataModel> resultList = listData.stream()
+                    .filter(wazuhProcessModel -> Objects.nonNull(wazuhProcessModel)).skip(skip).limit(pageSize)
+                    .collect(Collectors.toList());
+
+            List<Process> processes = new ArrayList<>();
+            for (CollectionElementProcessDataModel p : resultList) {
+                WazuhProcessModel processModel = JsonCommon.parse(p.getData(), WazuhProcessModel.class);
+                Process process = convertWazuhProcess2Process(processModel);
+                if (p.getStatus() == 0) {
+                    process.setState("stoped");
+                    process.setTime(processModel.getTime());
+                }
+                processes.add(process);
+            }
+            return new ListObjServiceResult<>(new ListObjResult<>(processes, listData.size())).asResult();
+        }
+    }
+
+    private Process convertWazuhProcess2Process(WazuhProcessModel wazuhProcess) {
+        if (Objects.isNull(wazuhProcess)) {
+             return null;
+        }
+        Process process = new Process();
+        process.setState(wazuhProcess.getStatus());
+        process.setPid(StringUtils.isNotBlank(wazuhProcess.getPid()) ? Integer.valueOf(wazuhProcess.getPid()) : null);
+        process.setPpid(StringUtils.isNotBlank(wazuhProcess.getParentId()) ? Integer.valueOf(wazuhProcess.getParentId()) : null);
+        process.setStartTime(getProcessStartTime(wazuhProcess.getCreateTime()));
+        process.setVmSize(StringUtils.isNotBlank(wazuhProcess.getVms()) ? Long.valueOf(wazuhProcess.getVms()) : 0);
+        process.setSize(StringUtils.isNotBlank(wazuhProcess.getVms()) ? Long.valueOf(wazuhProcess.getVms()) : 0);
+        process.setPriority(wazuhProcess.getPriority());
+        process.setCmd(wazuhProcess.getCommand());
+        process.setEuser(wazuhProcess.getUsername());
+        process.setName(wazuhProcess.getName());
+        process.setDescription(wazuhProcess.getDescription());
+        process.setTime(wazuhProcess.getTime());
+        process.setLevel(wazuhProcess.getLevel());
+        return process;
+    }
+
+    private String getProcessStartTime(String startTime) {
+        if (StringUtils.isBlank(startTime)) {
+            return null;
+        }
+        LocalDateTime localDateTime = DatetimeUtil.parseDateTimeFronLacunchOutput(startTime);
+        String dateTime = DatePattern.NORM_DATETIME_FORMAT.format(localDateTime);
+        return dateTime;
     }
 
     /**
