@@ -92,4 +92,7 @@ public class ElementMonitorBasicInfo {
     @ApiModelProperty(value = "接入用户集合")
     private List<AccessUserBO> accessUsers;
 
+    @ApiModelProperty(value = "操作系统类型")
+    private String osType;
+
 }

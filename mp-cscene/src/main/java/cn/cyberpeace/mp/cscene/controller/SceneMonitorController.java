@@ -137,6 +137,37 @@ public class SceneMonitorController {
         return sceneAllElements;
     }
 
+    @ApiOperation(value = "查询场景所有节点列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "sceneId", value = "场景ID", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "realTimeHostState", value = "是否获取实时节点主机信息", dataTypeClass = Boolean.class)
+    })
+    @GetMapping("/non_container_cloud_elements/{sceneId}")
+    public ServiceResult<List<ElementMonitorBasicInfo>> getNonContainerCloudElements(@PathVariable String sceneId,
+                                                                            @RequestParam(required = false) Boolean realTimeHostState,
+                                                                            SceneAllElementsQueryRequest request) {
+        List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getNonContainerCloudElements(sceneId, realTimeHostState, request);
+        if (Boolean.TRUE.equals(request.getIncludeDeleting())) {
+            return ResultCommon.success(basicInfoList);
+        }
+        List<ElementMonitorBasicInfo> result = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(basicInfoList)) {
+            for (var e : basicInfoList) {
+                if (e.getEvent() != null) {
+                    if (e.getEvent() != SceneElementModel.Event.DELETE) {
+                        result.add(e);
+                    } else if (e.getEvent() == SceneElementModel.Event.DELETE && e.getEventStatus() == EventStatus.OVER) {
+                        result.add(e);
+                    }
+                } else {
+                    result.add(e);
+                }
+            }
+        }
+        return ResultCommon.success(result);
+
+    }
+
     @ApiOperation(value = "按需查询场景节点列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "sceneId", value = "场景ID", dataTypeClass = String.class),
