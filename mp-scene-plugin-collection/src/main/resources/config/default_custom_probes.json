@@ -22,7 +22,7 @@
     {
       "probe_name": "get_processes.py",
       "id": "38949dcf3829489d8dd9e0e63cc66541",
-      "interval": "5s",
+      "interval": "30s",
       "output_format": "json"
     },
     {
