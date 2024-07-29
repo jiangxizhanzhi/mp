@@ -10,6 +10,7 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.flow.service.impl;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -19,10 +20,12 @@ import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
+import cn.cyberpeace.mp.flow.enums.TaskStatusEnum;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
+import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowActuatorQueryParams;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.response.FlowActuatorResponse;
@@ -109,6 +112,36 @@ public class FlowActuatorServiceImpl extends BaseModelServiceImpl<FlowActuatorMo
 
         // 获取分页数据
         List<FlowActuatorResponse> responses = getModelMapper().page(queryParams);
+
+        // 设定流量执行器的状态
+        for (var f : responses) {
+            var list = BeanCommon.getBean(FlowTaskTaskMapper.class)
+                    .list(new HumanCondition().filterEqual(FlowTaskTaskModel::getActuatorId, f.getId()));
+            int init = 0;
+            int running = 0;
+            int stoped = 0;
+            int stopping = 0;
+            for (var t : list) {
+                if (t.getTaskStatus() == TaskStatusEnum.INIT.toValue()) {
+                    init++;
+                } else if (t.getTaskStatus() == TaskStatusEnum.RUNNING.toValue()) {
+                    running++;
+                } else if (t.getTaskStatus() == TaskStatusEnum.STOPING.toValue()) {
+                    stopping++;
+                } else if (t.getTaskStatus() == TaskStatusEnum.STOPED.toValue()) {
+                    stoped++;
+                }
+            }
+            if (running > 0) {
+                f.setStatus(TaskStatusEnum.RUNNING.toValue());
+            } else if (stopping > 0) {
+                f.setStatus(TaskStatusEnum.STOPING.toValue());
+            } else if (stoped > 0) {
+                f.setStatus(TaskStatusEnum.STOPING.toValue());
+            } else {
+                f.setStatus(TaskStatusEnum.INIT.toValue());
+            }
+        }
 
         return new ListObjServiceResult<>(new ListObjResult<>(responses,total)).asResult();
     }
