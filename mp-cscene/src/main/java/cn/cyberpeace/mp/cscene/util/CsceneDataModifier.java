@@ -504,6 +504,7 @@ public class CsceneDataModifier {
         addFilePathPrefix(csceneBO.getSceneConfig());
         handlerNodeCommand(csceneBO.getSceneConfig());
         correctVlanId(csceneBO);
+        handlerReturnPosition(csceneBO.getSceneConfig());
         csceneBO.setEnableRecording(getOutputEnableRecording(csceneBO.getSceneConfig()));
     }
 
@@ -1036,6 +1037,56 @@ public class CsceneDataModifier {
                 if (csceneBO.getSceneConfig().getPlugins() != null) {
                     csceneBO.getSceneConfig().getPlugins().remove("cpflow");
                     csceneBO.getSceneConfig().getPlugins().remove("cpcollection");
+                }
+            }
+        }
+    }
+
+    public static void handlerPosition(BaseSceneDataBO sceneDataBO) {
+        if (sceneDataBO == null || sceneDataBO.getTopology() == null) {
+            return;
+        }
+        BaseSceneTopologyBO topologyBO = sceneDataBO.getTopology();
+        if (topologyBO.getAreaId() != null) {
+            List<BaseSceneElementBO> elements = topologyBO.getElements();
+            if (elements == null) {
+                return;
+            }
+            String areaId = topologyBO.getAreaId();
+            for (BaseSceneElementBO e : elements) {
+                Map<String, String> outPosition = e.getOuterPosition2();
+                if (outPosition == null) {
+                    outPosition = new HashMap<>();
+                }
+                String pos = e.getPosition2();
+                outPosition.put(areaId, pos);
+                e.setOuterPosition2(outPosition);
+                e.setPosition2(outPosition.getOrDefault(e.getArea(), ""));
+            }
+        }
+    }
+
+    public static void handlerReturnPosition(BaseSceneDataBO csceneBO) {
+        if (csceneBO == null || csceneBO.getTopology() == null) {
+            return;
+        }
+        var topo = csceneBO.getTopology();
+        if (topo.getAreaId() != null) {
+            List<BaseSceneElementBO> elements = topo.getElements();
+            if (elements == null) {
+                return;
+            }
+            String areaId = topo.getAreaId();
+            for (BaseSceneElementBO e : elements) {
+                Map<String, String> outPosition = e.getOuterPosition2();
+                if (outPosition == null) {
+                    outPosition = new HashMap<>();
+                }
+                if (outPosition.containsKey(areaId)) {
+                    e.setPosition2(outPosition.get(areaId));
+                } else {
+                    // 如果未存需要查询的层位置 那么返回节点所在层的位置 否则前端会居中
+                    e.setPosition2(outPosition.getOrDefault(e.getArea(), e.getPosition2()));
                 }
             }
         }

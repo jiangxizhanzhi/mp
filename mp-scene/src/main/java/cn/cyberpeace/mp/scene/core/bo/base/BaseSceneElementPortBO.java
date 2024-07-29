@@ -50,6 +50,8 @@ public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel
     private Boolean isAuxiliary;
     @ApiModelProperty(value = "接入协议")
     private String protocols;
+    @ApiModelProperty(value = "是否可用")
+    private Boolean usable;
 
     @JsonIgnore
     private E element;

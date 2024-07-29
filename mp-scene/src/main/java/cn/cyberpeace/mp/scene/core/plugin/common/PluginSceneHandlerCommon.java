@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaNodeConnectionModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementPortConnectionModel;
 
 import java.util.List;
@@ -16,9 +17,9 @@ import java.util.List;
  */
 public interface PluginSceneHandlerCommon<S extends BaseSceneBO<?, S>, E extends BaseSceneElementBO<?, P, E>,
         P extends BaseSceneElementPortBO<?, P, E>,
-        H extends BaseSceneHandler<?, ?, ?, ?, ? extends BaseSceneElementPortConnectionModel, ?, ?,
-                S, ?, P, E, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, ?, ?, ?, H>> {
+        H extends BaseSceneHandler<?, ?, ?, ?, ? extends BaseSceneElementPortConnectionModel,? extends BaseSceneAreaNodeConnectionModel, ?, ?,
+                S, ?, P, E, ?, ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, H>> {
 
     H getSceneHandler();
 

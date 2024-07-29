@@ -11,12 +11,14 @@ public class SceneDataBO extends BaseSceneDataBO<
         SceneElementModel,
         SceneElementPortModel,
         SceneElementPortConnectionModel,
+        SceneNodeConnectionModel,
         ScenePieceModel,
         SceneBO,
         SceneAreaBO,
         SceneElementPortBO,
         SceneElementBO,
         SceneElementPortConnectionBO,
+        SceneAreaNodeConnectionBO,
         ScenePieceBO,
         SceneTopologyBO,
         SceneDataBO> {
@@ -24,6 +26,6 @@ public class SceneDataBO extends BaseSceneDataBO<
     public SceneConfigDataBO exportToSceneConfig() {
         return export(SceneConfigDataBO.class, SceneConfigTopologyBO.class, SceneConfigBO.class,
                 SceneConfigAreaBO.class, SceneConfigElementBO.class, SceneConfigElementPortBO.class,
-                SceneConfigElementPortConnectionBO.class, SceneConfigPieceBO.class);
+                SceneConfigElementPortConnectionBO.class, SceneConfigAreaNodeConnectionBO.class, SceneConfigPieceBO.class);
     }
 }
