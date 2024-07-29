@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -46,7 +47,11 @@ public class CloudSceneConnectionCommon {
     @Autowired
     private CloudSceneConnectionCommon(CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper) {
         CloudSceneConnectionCommon.cloudPluginSceneConnectionMapper = cloudPluginSceneConnectionMapper;
-        CloudSceneConnectionCommon.situationAwareConfig = BeanCommon.getBean(SituationAwareConfig.class);
+    }
+
+    @PostConstruct
+    private static void init() {
+        situationAwareConfig = BeanCommon.getBean(SituationAwareConfig.class);
     }
 
     @Data
