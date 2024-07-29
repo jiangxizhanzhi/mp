@@ -29,6 +29,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -36,6 +37,7 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @Component
+@DependsOn("situationAwareConfig")
 public class CloudSceneConnectionCommon {
 
     private static CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper;
