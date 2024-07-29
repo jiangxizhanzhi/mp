@@ -32,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -41,15 +40,11 @@ import java.time.LocalDateTime;
 public class CloudSceneConnectionCommon {
 
     private static CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper;
-
-    private static SituationAwareConfig situationAwareConfig;
-
     private final static String CONTAINER_EXEC_COMMAND_TEMPLATE = "az login --service-principal -u %s -p %s --tenant %s > /dev/null 2>&1 && az container exec --resource-group %s --name %s --exec-command '%s'";
 
     @Autowired
     private CloudSceneConnectionCommon(CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper) {
         CloudSceneConnectionCommon.cloudPluginSceneConnectionMapper = cloudPluginSceneConnectionMapper;
-        situationAwareConfig = BeanCommon.getBean(SituationAwareConfig.class);
     }
 
 
@@ -82,7 +77,7 @@ public class CloudSceneConnectionCommon {
         private String department;
     }
 
-    public static CloudPluginSceneConnectionModel getOrCreateSceneConnection(SceneConnectionParam param) {
+    public static CloudPluginSceneConnectionModel getOrCreateSceneConnection(SceneConnectionParam param, SituationAwareConfig situationAwareConfig) {
         var sceneId = param.getSceneId();
         var sceneElementId = param.getSceneElementId();
         var sceneElementPortId = param.getSceneElementPortId();
