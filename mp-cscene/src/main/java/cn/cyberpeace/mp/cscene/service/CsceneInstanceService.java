@@ -91,9 +91,11 @@ import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.SnapshotAddressUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincollection.model.ElementLogListModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
@@ -101,6 +103,7 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.PublicWazuhControlCommon;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
+import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincollection.repository.ElementLogListMapper;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
@@ -242,6 +245,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private CsceneCommonService csceneCommonService;
+
+    @Autowired
+    private CollectionPluginSceneElementMapper collectionPluginSceneElementMapper;
 
 
     // expires in 10 minutes
@@ -592,7 +598,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 agentNames.add(element.getEid());
             }
             e.getProbes().forEach(probe -> {
-                if (Boolean.FALSE.equals(probe.getCommon()) && !probeIds.contains(probe.getId())) {
+                if (!Boolean.TRUE.equals(probe.getCommon()) && !probeIds.contains(probe.getId())) {
                     probeIds.add(probe.getId());
                     probeId2ProbeName.put(probe.getId(), probe.getName());
                 }
@@ -2036,6 +2042,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Transactional(rollbackFor = Exception.class)
     public void modifyProbes(String id, String nodeId, List<Probe> probeList, int status, Boolean isDelete, SceneElementSituationProbeModel.ProbeType probeType) {
         SceneHandler sceneHandler = new SceneHandler(id, null, null);
+        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        Map<String, CollectionPluginSceneElementBO> elementMap = pluginHandler.getElementMap();
+        CollectionPluginSceneElementBO collectionPluginSceneElementBO = elementMap.get(nodeId);
 //        先删除
         HumanCondition probeListHumanCondition = new HumanCondition()
                 .filterEqual(SceneElementSituationProbeModel::getScene, id)
@@ -2045,7 +2054,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
 //        更新探针
         probeList.forEach(probe -> {
-            modifyProbe(sceneHandler, nodeId, probe, probeType);
+            modifyProbe(sceneHandler, nodeId, probe, probeType, collectionPluginSceneElementBO);
         });
 //            默认执行完成
         List<SceneElementSituationProbeModel> sceneElementSituationProbeModels =
@@ -2061,6 +2070,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                             return sceneElementSituationProbeModel;
                         }).collect(Collectors.toList());
         sceneElementSituationProbeMapper.bulkCreate(sceneElementSituationProbeModels);
+        HumanCondition humanCondition = new HumanCondition()
+                .currentLink(CollectionPluginSceneElementModel.class)
+                .filterEqual(CollectionPluginSceneElementModel::getScene, id)
+                .filterEqual(CollectionPluginSceneElementModel::getSceneElement, nodeId);
+        CollectionPluginSceneElementModel collectionPluginSceneElementModel = collectionPluginSceneElementMapper.first(humanCondition);
+        if (null != collectionPluginSceneElementModel) {
+            collectionPluginSceneElementModel.setProbes(JsonCommon.stringify(collectionPluginSceneElementBO.getProbes()));
+            collectionPluginSceneElementMapper.update(collectionPluginSceneElementModel);
+        }
 
     }
 
@@ -2228,9 +2246,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
      * @param elementId
      * @param probe
      * @param probeType
+     * @param collectionPluginSceneElementBO
      */
-    public void modifyProbe(SceneHandler sceneHandler, String elementId, Probe probe, SceneElementSituationProbeModel.ProbeType probeType) {
+    public void modifyProbe(SceneHandler sceneHandler, String elementId, Probe probe, SceneElementSituationProbeModel.ProbeType probeType, CollectionPluginSceneElementBO collectionPluginSceneElementBO) {
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+
         var collectionElement = pluginHandler.getElement(elementId);
         var srcElement = collectionElement.getSrcElement();
         String agentName = srcElement.getEid();
@@ -2250,6 +2270,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             removeParams.setScriptUrl(StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, probe.getScriptUrl().replaceFirst("/api/mp/file/", "")));
             removeParams.setAction(WazuhControl.CONTROL_ACTION_REMOVE);
             controlConfigParam.getProbeParams().add(removeParams);
+            List<Probe> probes = collectionPluginSceneElementBO.getProbes();
+            probes = probes.stream()
+                    .filter(p -> !p.getId().equals(probe.getId()))
+                    .collect(Collectors.toList());
+            collectionPluginSceneElementBO.setProbes(probes);
         }
         // 新增操作
         if (SceneElementSituationProbeModel.ProbeType.ADD == probeType || SceneElementSituationProbeModel.ProbeType.UPDATE == probeType) {
@@ -2259,6 +2284,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             addParams.setGroup(groupId);
             addParams.setAction(WazuhControl.CONTROL_ACTION_ADD);
             controlConfigParam.getProbeParams().add(addParams);
+            List<Probe> probes = collectionPluginSceneElementBO.getProbes();
+            probes.add(probe);
+            collectionPluginSceneElementBO.setProbes(probes);
         }
 
         var osType = SystemTypeCommandUtils.getOsType(systemType);
