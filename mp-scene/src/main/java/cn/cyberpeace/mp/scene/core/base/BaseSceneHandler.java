@@ -1088,10 +1088,10 @@ public abstract class BaseSceneHandler<
         Map<String, P0> outerElementPortMap = new HashMap<>();
         if (!outerConnectionPortIds.isEmpty()) {
             sceneElementPortMapper.list(new HumanCondition()
-                            .select(BaseSceneElementPortModel::getId, BaseSceneElementPortModel::getSceneElement,
-                                    BaseSceneElementPortModel::getPortId)
-                            .filterEqual(BaseSceneElementPortModel::getScene, sceneId)
-                            .filterIn(BaseSceneElementPortModel::getPortId, outerConnectionPortIds.toArray(new String[0])))
+                                                .select(BaseSceneElementPortModel::getId, BaseSceneElementPortModel::getSceneElement,
+                                                        BaseSceneElementPortModel::getPortId)
+                                                .filterEqual(BaseSceneElementPortModel::getScene, sceneId)
+                                                .filterIn(BaseSceneElementPortModel::getPortId, outerConnectionPortIds.toArray(new String[0])))
                     .forEach(elementPort -> outerElementPortMap.put(elementPort.getPortId(), elementPort));
         }
 
@@ -1100,7 +1100,7 @@ public abstract class BaseSceneHandler<
         elementPortConnectionMap.forEach((key, elementPortConnectionBO) -> {
             C0 elementPortConnection = elementPortConnectionBO.toModel();
             elementPortConnection.setScene(sceneId);
-            var sourcePortBO = elementPortMap.getOrDefault(elementPortConnection.getSourcePortId(), null);
+            P sourcePortBO = elementPortMap.getOrDefault(elementPortConnection.getSourcePortId(), null);
             String sourcePortId;
             String sourceElementId;
             if (sourcePortBO == null) {
@@ -1109,10 +1109,10 @@ public abstract class BaseSceneHandler<
                 sourceElementId = sourcePort == null ? null : sourcePort.getSceneElement();
             } else {
                 sourcePortId = sourcePortBO.getEid();
-                var sourceElement = portIdElementMap.getOrDefault(sourcePortBO.getId(), null);
+                E sourceElement = portIdElementMap.getOrDefault(sourcePortBO.getId(), null);
                 sourceElementId = sourceElement == null ? null : sourceElement.getEid();
             }
-            var targetPortBO = elementPortMap.getOrDefault(elementPortConnection.getTargetPortId(), null);
+            P targetPortBO = elementPortMap.getOrDefault(elementPortConnection.getTargetPortId(), null);
             String targetPortId;
             String targetElementId;
             if (targetPortBO == null) {
@@ -1121,11 +1121,21 @@ public abstract class BaseSceneHandler<
                 targetElementId = targetPort == null ? null : targetPort.getSceneElement();
             } else {
                 targetPortId = targetPortBO.getEid();
-                var targetElement = portIdElementMap.getOrDefault(targetPortBO.getId(), null);
+                E targetElement = portIdElementMap.getOrDefault(targetPortBO.getId(), null);
                 targetElementId = targetElement == null ? null : targetElement.getEid();
             }
-            if (sourcePortId == null || targetPortId == null) {
-                return;
+            if (sourcePortId == null) {
+                var a = sceneElementPortMapper.first(new HumanCondition().filterEqual(BaseSceneElementPortModel::getScene, sceneId)
+                                                             .filterEqual(BaseSceneElementPortModel::getPortId, elementPortConnection.getSourcePortId()));
+                sourceElementId = a.getSceneElement();
+                sourcePortId = a.getId();
+            }
+
+            if(targetPortId == null){
+                var a = sceneElementPortMapper.first(new HumanCondition().filterEqual(BaseSceneElementPortModel::getScene, sceneId)
+                                                             .filterEqual(BaseSceneElementPortModel::getPortId, elementPortConnection.getTargetPortId()));
+                targetElementId = a.getSceneElement();
+                targetPortId = a.getId();
             }
             elementPortConnection.setSourceElement(sourceElementId);
             elementPortConnection.setTargetElement(targetElementId);
@@ -1136,7 +1146,11 @@ public abstract class BaseSceneHandler<
         });
 
         DiffTargets<C0> diff = diffTargets(savingElementPortConnectionMap, existElementPortConnectionMap);
-        saveDiff(sceneElementPortConnectionMapper, diff);
+        try {
+            saveDiff(sceneElementPortConnectionMapper, diff);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         ListUtils.union(diff.getAddingTargets(), diff.getUpdatingTargets())
                 .forEach(elementPortConnection -> elementPortConnectionMap
                         .get(elementPortConnectionKey(elementPortConnection)).fromModel(elementPortConnection));
