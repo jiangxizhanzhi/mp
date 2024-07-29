@@ -47,12 +47,9 @@ public class CloudSceneConnectionCommon {
     @Autowired
     private CloudSceneConnectionCommon(CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper) {
         CloudSceneConnectionCommon.cloudPluginSceneConnectionMapper = cloudPluginSceneConnectionMapper;
-    }
-
-    @PostConstruct
-    private static void init() {
         situationAwareConfig = BeanCommon.getBean(SituationAwareConfig.class);
     }
+
 
     @Data
     @NoArgsConstructor

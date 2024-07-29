@@ -26,7 +26,8 @@ public enum CloudErrorCode implements ErrorCode {
     INVALID_CIDR_POOLS("MP-110718", "invalid_cidr_pools"),
     CONFLICT_CIDR_POOLS("MP-110719", "conflict_cidr_pools"),
     MULTIPLE_FIREWALLS("MP-110720", "multiple_firewalls"),
-    INVALID_FIREWALL_RULES("MP-110721", "invalid_firewall_rules"),;
+    INVALID_FIREWALL_RULES("MP-110721", "invalid_firewall_rules"),
+    INVALID_CONNECTION("MP-110722", "invalid_connection");
 
     CloudErrorCode(String code, String message) {
         setCode(code, "sceneplugincloud.error_code." + message);

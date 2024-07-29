@@ -178,7 +178,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
     public void validate() {
         Integer cloudType = getSceneHandler().getScene().getCloudType();
 
-//        存进过递归方法的Vent节点 避免重复校验
+//        避免重复校验
         List<String> elementIdBycollectCidrPools = new ArrayList<>();
 
 
@@ -255,6 +255,18 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                         throw new MpRuntimeException(CloudErrorCode.MULTIPLE_FIREWALLS.format(count + ""));
                     }
 
+                }else {
+//                    节点互联校验 非网络节点不可互联
+                    for (SceneConfigElementPortBO port : element.getSrcElement().getPorts()) {
+                        SceneConfigElementPortBO portConnectedPort = getSceneHandler().getPortConnectedPort(port.getId());
+                        if (null != portConnectedPort) {
+                            String id = portConnectedPort.getElement().getId();
+                            CloudPluginSceneConfigElementBO cloudPluginSceneConfigElementBO = elementMap.get(id);
+                            if (!BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudPluginSceneConfigElementBO.getImageType())) {
+                                throw new MpRuntimeException(CloudErrorCode.INVALID_CONNECTION.format());
+                            }
+                        }
+                    }
                 }
 
 //                增加校验 防火墙接入配置校验
