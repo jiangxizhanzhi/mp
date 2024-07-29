@@ -109,7 +109,7 @@ public class AzureCreateHandler extends CreateHandler {
 //            集合存已加管理网络节点id 用于判断互联节点是否已加过管理网络
             HashSet<String> manageElementIdSet = new HashSet<>();
             for (int i = 0; i < filteredAuxiliaryNetworkElements.size(); i++) {
-                Boolean isManage = false;
+                boolean isManage = false;
                 CloudPluginSceneElementBO element = filteredAuxiliaryNetworkElements.get(i);
                 List<String> vNetPeeringIdList = element.getSrcElement().getPorts().stream()
                         .map(port -> this.getPluginHandler().getSceneHandler().getPortConnectedPort(port.getId()))
@@ -119,7 +119,7 @@ public class AzureCreateHandler extends CreateHandler {
                         .map(CloudPluginSceneElementBO::getSrcElement)
                         .map(SceneElementBO::getId)
                         .collect(Collectors.toList());
-                if (!vNetPeeringIdList.stream().anyMatch(manageElementIdSet::contains)) {
+                if (vNetPeeringIdList.stream().noneMatch(manageElementIdSet::contains)) {
                     isManage = true;
                     manageElementIdSet.add(element.getSrcElement().getId());
                 }
