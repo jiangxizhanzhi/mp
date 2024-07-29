@@ -515,7 +515,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
 //            ex.printStackTrace();
 //        }
 
-
 //        // 获取所有虚拟机发布者
         PagedIterable<VirtualMachinePublisher> virtualMachinePublishers = azureResourceManager.virtualMachineImages().publishers().listByRegion(region);
         for (VirtualMachinePublisher publisher : virtualMachinePublishers) {
@@ -552,7 +551,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-
                         System.out.println("skuName: " + sku.name());
                         // 获取每个SKU的所有版本（image versions）
                         PagedIterable<VirtualMachineImage> imageList = sku.images().list();
@@ -567,6 +565,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
+
+//                                ImageReference imageReference = image.imageReference();
 
                                 JSONObject forth = new JSONObject();
                                 forth.put("imageName", offer.name());

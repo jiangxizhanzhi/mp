@@ -339,8 +339,10 @@ public class CloudTargetConverter {
             for (int i = 0; i < images.size(); i++) {
                 //主表元素
                 DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
-                deviceCloudTarget.setName(((JSONObject) images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "");
-                deviceCloudTarget.setOtherName(((JSONObject) images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "");
+                String imageName = ((JSONObject) images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "";
+                String imageVersion = ((JSONObject) images.get(i)).get("imageVersion") != null ? ((JSONObject) images.get(i)).get("imageVersion").toString() : "";
+                deviceCloudTarget.setName(imageName + "_" + imageVersion);
+                deviceCloudTarget.setOtherName(imageName + "_" + imageVersion);
                 String id = String.valueOf(UUID.randomUUID());
                 deviceCloudTarget.setId(id);
                 //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
@@ -349,13 +351,13 @@ public class CloudTargetConverter {
                 deviceCloudTarget.setOperatingSystem(((JSONObject) images.get(i)).get("operatingSystem") != null ? ((JSONObject) images.get(i)).get("operatingSystem").toString() : "");
                 deviceCloudTarget.setOperatingSystemStatus("专业化");
                 deviceCloudTarget.setGeneration("第一代");
-                deviceCloudTarget.setVersion(((JSONObject) images.get(i)).get("imageVersion") != null ? ((JSONObject) images.get(i)).get("imageVersion").toString() : "");
+                deviceCloudTarget.setVersion(imageVersion);
                 list.add(deviceCloudTarget);
 
                 //计算副表元素
                 DeviceCloudTargetCalculate deviceCloudTargetCalculate = new DeviceCloudTargetCalculate();
                 deviceCloudTargetCalculate.setLinkId(id);
-                deviceCloudTargetCalculate.setName(((JSONObject) images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "");
+                deviceCloudTargetCalculate.setName(imageName + "_" + imageVersion);
                 deviceCloudTargetCalculate.setSourceType(1);
                 deviceCloudTargetCalculate.setCloudType(cloudType);
                 deviceCloudTargetCalculate.setPublisher(((JSONObject) images.get(i)).get("PublisherName") != null ? ((JSONObject) images.get(i)).get("PublisherName").toString() : "");
@@ -373,7 +375,7 @@ public class CloudTargetConverter {
                 deviceCloudTargetCalculate.setIsPublic(2);
                 deviceCloudTargetCalculate.setLogo("/api/mp/file/247/911/4691e31013c189bd4c63360326497e25.png");
                 deviceCloudTargetCalculate.setGeneration("第一代");
-                deviceCloudTargetCalculate.setVersion(((JSONObject) images.get(i)).get("imageVersion") != null ? ((JSONObject) images.get(i)).get("imageVersion").toString() : "");
+                deviceCloudTargetCalculate.setVersion(imageVersion);
                 calculateList.add(deviceCloudTargetCalculate);
             }
         }
