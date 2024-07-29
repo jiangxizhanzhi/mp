@@ -6,6 +6,11 @@ server:
     threads:
       min-spare: 10
       max: 200
+    max-connections: 8192
+    accept-count: 100
+    keep-alive-timeout: 60000
+    max-keep-alive-requests: 100
+    connection-timeout: 60000
 
 mybatis:
   mapper-locations: classpath*:mapper/*.xml

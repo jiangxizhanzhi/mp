@@ -6,6 +6,11 @@ server:
     threads:
       min-spare: ${spring.tomcat.ext-var.min-spare}
       max: ${spring.tomcat.ext-var.max}
+    max-connections: ${spring.tomcat.ext-var.max-connections}
+    accept-count: ${spring.tomcat.ext-var.accept-count}
+    keep-alive-timeout: ${spring.tomcat.ext-var.keep-alive-timeout}
+    max-keep-alive-requests: ${spring.tomcat.ext-var.max-keep-alive-requests}
+    connection-timeout: ${spring.tomcat.ext-var.connection-timeout}
 
 spring:
   datasource:
