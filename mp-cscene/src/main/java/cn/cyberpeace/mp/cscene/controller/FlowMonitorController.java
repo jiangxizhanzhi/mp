@@ -338,20 +338,26 @@ public class FlowMonitorController {
             List<CategoryGroupBO> networkList = categoryGroups.stream().filter(group -> group.getCategory() == 3).collect(Collectors.toList());
             // 安全设备
             List<CategoryGroupBO> ssList = categoryGroups.stream().filter(group -> group.getCategory() == 4).collect(Collectors.toList());
-//            虚拟机、容器分类1 边界设备分类3
+//            虚拟机分类1、容器分类2 边界设备分类3
             SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
             CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             // 虚拟机
             List<SceneElementBO> vmList = categoryGroups.stream()
                     .filter(group -> group.getCategory() == 1)
                     .flatMap(group -> group.getElements().stream())
-                    .filter(element -> BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudPlugin.getElement(element.getId()).getImageType()))
+                    .filter(element -> BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(cloudPlugin.getElement(element.getId()).getImageType()))
                     .collect(Collectors.toList());
             // 容器
             List<SceneElementBO> containerList = categoryGroups.stream()
-                    .filter(group -> group.getCategory() == 1)
+                    .filter(group -> group.getCategory() == 2)
                     .flatMap(group -> group.getElements().stream())
-                    .filter(element -> BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(cloudPlugin.getElement(element.getId()).getImageType()))
+                    .filter(element -> BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(cloudPlugin.getElement(element.getId()).getImageType()))
+                    .collect(Collectors.toList());
+            // 边界设备
+            List<SceneElementBO> peripheryList = categoryGroups.stream()
+                    .filter(group -> group.getCategory() == 5)
+                    .flatMap(group -> group.getElements().stream())
+                    .filter(element -> BaseCloudPluginSceneElementModel.ImageType.NETWORK_EQUIPMENT.equals(cloudPlugin.getElement(element.getId()).getImageType()))
                     .collect(Collectors.toList());
             AssetsStatisticsResponse response =
                     AssetsStatisticsResponse.builder().sceneId(id)
@@ -366,7 +372,7 @@ public class FlowMonitorController {
 //                            TODO 目前没有做Azure web
                             .webCount(0)
 //                            暂定 可能不准确
-                            .peripheryCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0)
+                            .peripheryCount(CollectionUtils.isNotEmpty(peripheryList) ? peripheryList.size() : 0)
                             .build();
             responseList.add(response);
         });

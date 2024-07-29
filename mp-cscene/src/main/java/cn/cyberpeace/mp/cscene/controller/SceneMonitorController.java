@@ -1,17 +1,24 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
+import cn.cyberpeace.mp.cscene.dto.element.CloudElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.SceneMonitorService;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -40,6 +47,9 @@ public class SceneMonitorController {
     private CsceneInstanceService csceneInstanceService;
 
     @Autowired
+    private CsceneCommonService csceneCommonService;
+
+    @Autowired
     private SceneMonitorService sceneMonitorService;
 
     @ApiOperation(value = "查询场景监控信息")
@@ -63,6 +73,80 @@ public class SceneMonitorController {
                                                                             @RequestParam(required = false) Boolean realTimeHostState,
                                                                             SceneAllElementsQueryRequest request) {
         List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId, realTimeHostState, request);
+        if (Boolean.TRUE.equals(request.getIncludeDeleting())) {
+            return ResultCommon.success(basicInfoList);
+        }
+        List<ElementMonitorBasicInfo> result = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(basicInfoList)) {
+            for (var e : basicInfoList) {
+                if (e.getEvent() != null) {
+                    if (e.getEvent() != SceneElementModel.Event.DELETE) {
+                        result.add(e);
+                    } else if (e.getEvent() == SceneElementModel.Event.DELETE && e.getEventStatus() == EventStatus.OVER) {
+                        result.add(e);
+                    }
+                } else {
+                    result.add(e);
+                }
+            }
+        }
+        return ResultCommon.success(result);
+
+    }
+
+    @ApiOperation(value = "查询场景所有云节点列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "sceneId", value = "场景ID", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "realTimeHostState", value = "是否获取实时节点主机信息", dataTypeClass = Boolean.class)
+    })
+    @GetMapping("/all_cloud_elements/{sceneId}")
+    public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllCloudElements(@PathVariable String sceneId,
+                                                                            @RequestParam(required = false) Boolean realTimeHostState,
+                                                                            SceneAllElementsQueryRequest request) {
+        ServiceResult<List<ElementMonitorBasicInfo>> sceneAllElements = getSceneAllElements(sceneId, realTimeHostState, request);
+        if(sceneAllElements.getCode()!=null && sceneAllElements.getCode().equals(BaseErrorCode.SUCCESS.getCode())){
+            List<ElementMonitorBasicInfo> data = sceneAllElements.getData();
+            List<ElementMonitorBasicInfo> result = new ArrayList<>();
+            SceneHandler sceneHandler = new SceneHandler(csceneCommonService.translateSceneId(sceneId), null, null);
+            CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+            for (var e: data) {
+                if(e.getImageType()!=null && !e.getImageType().equals("load") && !e.getImageType().equals("networkEquipment")){
+                    CloudPluginSceneElementBO element = cloudPlugin.getElement(e.getId());
+                    CloudElementMonitorBasicInfo cloudElement = new CloudElementMonitorBasicInfo();
+                    cloudElement.setCloudServiceType(element.getCloudServiceType());
+                    cloudElement.setServiceType(element.getServiceType());
+                    cloudElement.setVmType(element.getVmType());
+                    cloudElement.setVmSizeType(element.getVmSizeType());
+                    cloudElement.setVmOsDiskType(element.getVmOsDiskType());
+
+                    // 是否扩容过
+                    cloudElement.setExpansion(element.getExpansion());
+                    cloudElement.setVmExpansionDiskType(element.getVmExpansionDiskType());// (根据expansion判断)只能拓展一次
+                    cloudElement.setExpansionDisk(element.getSrcElement().getExpansionDisk());// (根据expansion判断)只能拓展一次
+                    cloudElement.setVmSizeType(element.getVmSizeType());
+
+                    cloudElement.setDisk(element.getSrcElement().getDisk());
+                    cloudElement.setCpu(element.getSrcElement().getCpu());
+                    cloudElement.setRam(element.getSrcElement().getRam());
+                    e.setCloudElementMonitorBasicInfo(cloudElement);
+                    result.add(e);
+                }
+            }
+            return ResultCommon.success(result);
+        }
+        return sceneAllElements;
+    }
+
+    @ApiOperation(value = "查询场景所有节点列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "sceneId", value = "场景ID", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "realTimeHostState", value = "是否获取实时节点主机信息", dataTypeClass = Boolean.class)
+    })
+    @GetMapping("/non_container_cloud_elements/{sceneId}")
+    public ServiceResult<List<ElementMonitorBasicInfo>> getNonContainerCloudElements(@PathVariable String sceneId,
+                                                                            @RequestParam(required = false) Boolean realTimeHostState,
+                                                                            SceneAllElementsQueryRequest request) {
+        List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getNonContainerCloudElements(sceneId, realTimeHostState, request);
         if (Boolean.TRUE.equals(request.getIncludeDeleting())) {
             return ResultCommon.success(basicInfoList);
         }

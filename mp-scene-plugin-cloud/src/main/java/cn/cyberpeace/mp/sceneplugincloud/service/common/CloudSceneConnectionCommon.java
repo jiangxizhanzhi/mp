@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.service.common;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -11,33 +12,41 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ComInfoGetResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
 @Slf4j
 @Component
+@DependsOn("situationAwareConfig")
 public class CloudSceneConnectionCommon {
 
     private static CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper;
+    private final static String CONTAINER_EXEC_COMMAND_TEMPLATE = "az login --service-principal -u %s -p %s --tenant %s > /dev/null 2>&1 && az container exec --resource-group %s --name %s --exec-command '%s'";
 
     @Autowired
     private CloudSceneConnectionCommon(CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper) {
         CloudSceneConnectionCommon.cloudPluginSceneConnectionMapper = cloudPluginSceneConnectionMapper;
     }
+
 
     @Data
     @NoArgsConstructor
@@ -68,7 +77,7 @@ public class CloudSceneConnectionCommon {
         private String department;
     }
 
-    public static CloudPluginSceneConnectionModel getOrCreateSceneConnection(SceneConnectionParam param) {
+    public static CloudPluginSceneConnectionModel getOrCreateSceneConnection(SceneConnectionParam param, SituationAwareConfig situationAwareConfig) {
         var sceneId = param.getSceneId();
         var sceneElementId = param.getSceneElementId();
         var sceneElementPortId = param.getSceneElementPortId();
@@ -214,11 +223,21 @@ public class CloudSceneConnectionCommon {
             if (BaseSceneModel.CloudType.DEFAULT != cloudType) {
                 CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
                 CloudPluginSceneElementBO element = pluginHandler.getElement(sceneElementId);
-                if(element.getIsPublicIp()){
-                    connectionParams.setHostname(element.getPublicIpAddress());
-                }else {
-//                    TODO 后期换成管理网络
-                    connectionParams.setHostname(sceneConnection.getAccessIp());
+                if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(element.getImageType())) {
+                    if (element.getIsPublicIp()) {
+                        connectionParams.setHostname(element.getPublicIpAddress());
+                    } else if (StringUtils.isNotBlank(element.getManagementIp())) {
+                        connectionParams.setHostname(sceneConnection.getAccessIp());
+                        guacamoleCreateConnectionData.setHost(element.getManagementIp());
+                    }
+                } else if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(element.getImageType())) {
+                    guacamoleCreateConnectionData.setHost(element.getManagementIp());
+                    connectionParams.setHostname(element.getManagementIp());
+                    connectionParams.setProtocol("container");
+                    connectionParams.setPort(AccessMode.Protocol.SSH);
+                    connectionParams.setUsername(situationAwareConfig.getManagementUsername());
+                    connectionParams.setPassword(situationAwareConfig.getManagementPassword());
+                    connectionParams.setCmd(getContainerCmd(pluginHandler, cloudType, element));
                 }
             } else {
                 connectionParams.setHostname(sceneConnection.getAccessIp());
@@ -314,6 +333,26 @@ public class CloudSceneConnectionCommon {
             log.error("failed to get container console url , containId is {}", resourceId);
         }
         return url;
+    }
+
+    /**
+     * 根据插件处理器、云类型和云插件场景元素生成容器启动命令。
+     * 此方法专门用于构建针对Azure容器实例的启动命令，命令中包含了Azure AD客户端的凭证信息，
+     * 以及容器所属的资源组和容器名称。
+     *
+     * @param pluginHandler 云场景插件处理器，用于获取场景ID。
+     * @param cloudType     云类型，用于获取特定云服务商的资源管理器实例。
+     * @param cloudElement  云插件场景元素，用于生成容器名称。
+     * @return 返回格式化后的容器启动命令字符串。
+     */
+    private static String getContainerCmd(CloudScenePluginHandler pluginHandler, Integer cloudType, CloudPluginSceneElementBO cloudElement) {
+        IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(cloudType);
+        String azureClientId = azureResourceManager.getUser().getAzureClientId();
+        String azureClientSecret = azureResourceManager.getUser().getAzureClientSecret();
+        String azureTenantId = azureResourceManager.getUser().getAzureTenantId();
+        String groupName = pluginHandler.getSourceSceneId();
+        String containerName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
+        return String.format(CONTAINER_EXEC_COMMAND_TEMPLATE, azureClientId, azureClientSecret, azureTenantId, groupName, containerName, "/bin/bash");
     }
 
 }

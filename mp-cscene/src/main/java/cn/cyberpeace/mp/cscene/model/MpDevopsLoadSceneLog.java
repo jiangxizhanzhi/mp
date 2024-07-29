@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 载荷同步表(MpDevopsLoad)实体类
+ * 载荷执行结果
  *
  * @since 2024-03-28 16:41:10
  */

@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.BoolUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
-import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -23,7 +22,6 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
-import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.AzureCreateHandler;
@@ -40,6 +38,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -522,44 +521,31 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
     @Override
-    public void completionTopo(Set<String> existingIpSet) {
+    public void completionTopo(Map<String, Set<String>> existingIpSetMap) {
         TopoReformUtils topoReformUtils = new TopoReformUtils(this);
+        TopoReformUtils.ElementWrapper nodeWrapper1 = null;
 
         // 如果节点没有连线的 把交换机补充上
         for (CloudPluginSceneElementBO element : getElementMap().values()) {
-            List<SceneElementPortBO> notIpPortsByNotConnectedPorts = getNotIpPortsByNotConnectedPorts(element.getSrcElement().getId(), existingIpSet);
-            List<SceneElementBO> connectedElements = getElementConnectedSrcElements(element.getSrcElement().getId());
-//             下方if逻辑要换 要所有ip都有交换机连线
-//                     ports为空||ports的ip为空||ports的ip在ip池中不存在 走第一个
-            if (CollectionUtils.isEmpty(connectedElements) && notIpPortsByNotConnectedPorts.isEmpty()) {
-                if (!element.getDeriveNetworks().isEmpty()) {
-//                    List<SceneElementPortBO> ports = element.getSrcElement().getPorts();
-                    TopoReformUtils.ElementWrapper nodeWrapper = topoReformUtils.addAuxiliarySwitchNode();
-                    SceneElementBO sceneElement = nodeWrapper.getSceneElement();
-                    sceneElement.setIsAuxiliary(false);
-//                    云场景网络节点类型更改
-                    CloudPluginSceneElementBO pluginElement = nodeWrapper.getPluginElement();
-                    pluginElement.setImageType(CloudPluginSceneElementModel.ImageType.VNET);
+            Set<String> existingIpSet = existingIpSetMap.get(element.getSrcElement().getId());
 
-                    TopoReformUtils.PortWrapper port1Wrapper = topoReformUtils.addAuxiliaryPort(element);
-                    TopoReformUtils.PortWrapper port2Wrapper = topoReformUtils.addAuxiliaryPort(pluginElement);
-                    port1Wrapper.getScenePort().setIsAuxiliary(false);
-                    port2Wrapper.getScenePort().setIsAuxiliary(false);
-                    topoReformUtils.addConnect(port1Wrapper.getScenePort(), port2Wrapper.getScenePort());
+            if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(element.getImageType())
+                    || BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(element.getImageType())) {
 
-                    updatePosition2(element.getSrcElement(), sceneElement);
+                List<SceneElementPortBO> notIpPortsByNotConnectedPorts = getElementNotConnectedPorts(element.getSrcElement().getId());
+//                只连接有ip的端口 若都无ip连接一条即可
+                List<SceneElementPortBO> sceneElementPortBOS = notIpPortsByNotConnectedPorts
+                        .stream()
+                        .filter(p -> existingIpSet.contains(p.getIp()))
+                        .collect(Collectors.toList());
+                if (sceneElementPortBOS.size() == 0 && notIpPortsByNotConnectedPorts.size() > 0) {
+                    sceneElementPortBOS.add(notIpPortsByNotConnectedPorts.get(0));
                 }
-//                n个未连线ip节点需要n交换机
-            } else if (CollectionUtils.isNotEmpty(notIpPortsByNotConnectedPorts)) {
-                notIpPortsByNotConnectedPorts.forEach(p -> {
-                    //                    加交换机节点
-                    TopoReformUtils.ElementWrapper nodeWrapper = topoReformUtils.addAuxiliarySwitchNode();
-                    SceneElementBO sceneElement = nodeWrapper.getSceneElement();
-                    sceneElement.setIsAuxiliary(false);
+                for (SceneElementPortBO p : sceneElementPortBOS) {
+                    nodeWrapper1 = getElementWrapper(element, nodeWrapper1, topoReformUtils);
 
                     //                    云场景网络节点类型更改
-                    CloudPluginSceneElementBO pluginElement = nodeWrapper.getPluginElement();
-                    pluginElement.setImageType(CloudPluginSceneElementModel.ImageType.VNET);
+                    CloudPluginSceneElementBO pluginElement = nodeWrapper1.getPluginElement();
 
                     //                    加交换机端口 不创建element端口
                     TopoReformUtils.PortWrapper port2Wrapper = topoReformUtils.addAuxiliaryPort(pluginElement);
@@ -569,21 +555,43 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                     topoReformUtils.addConnect(p, port2Wrapper.getScenePort());
                     //                    如果端口有ip需要反向推cidr和geteway
                     //                    cidr抹零+.0/24 geteway 抹零+.254
-                    if (StringUtils.isNotEmpty(p.getIp())) {
+                    if (StringUtils.isNotEmpty(p.getIp()) && existingIpSet.contains(p.getIp())) {
                         String ip = p.getIp();
                         String cidr = ip.substring(0, ip.lastIndexOf(".")) + ".0/24";
-                        String gateway = ip.substring(0, ip.lastIndexOf(".")) + ".254";
                         Map<String, Map<String, Object>> elements = this.getSceneHandler().getScenePluginData().get(PluginConstant.PLUGIN_KEY).getElements();
-                        Map<String, Object> stringObjectMap = elements.get(nodeWrapper.getSceneElement().getId());
-                        stringObjectMap.put("gateway", gateway);
-                        stringObjectMap.put("cidr", cidr);
+                        Map<String, Object> stringObjectMap = elements.get(nodeWrapper1.getSceneElement().getId());
+                        List<String> cidrPools = (List<String>) stringObjectMap.get("cidr_pools");
+                        if (null == cidrPools) {
+                            cidrPools = new ArrayList<String>();
+                        }
+                        if (!cidrPools.contains(cidr)) {
+                            cidrPools.add(cidr);
+                            stringObjectMap.put("cidr_pools", cidrPools);
+                        }
                         this.getSceneHandler().getScenePluginData().get(PluginConstant.PLUGIN_KEY).setElements(elements);
+                    } else if (StringUtils.isNotEmpty(p.getIp()) && !existingIpSet.contains(p.getIp())) {
+                        p.setIp(null);
                     }
-
-                    updatePosition2(p.getElement(), sceneElement);
-                });
+                }
+            }
+            SceneElementBO srcElement = element.getSrcElement();
+            for (SceneElementPortBO port : srcElement.getPorts()) {
+                if (null != port.getIp() && !existingIpSet.contains(port.getIp())) {
+                    port.setIp(null);
+                }
             }
         }
+    }
+
+    @NotNull
+    private static TopoReformUtils.ElementWrapper getElementWrapper(CloudPluginSceneElementBO element, TopoReformUtils.ElementWrapper nodeWrapper, TopoReformUtils topoReformUtils) {
+        if (null == nodeWrapper) {
+            nodeWrapper = topoReformUtils.addAuxiliarySwitchNode();
+            SceneElementBO sceneElement = nodeWrapper.getSceneElement();
+            sceneElement.setIsAuxiliary(false);
+            updatePosition2(element.getSrcElement(), sceneElement);
+        }
+        return nodeWrapper;
     }
 
     private static void updatePosition2(SceneElementBO element, SceneElementBO sceneElement) {
@@ -594,7 +602,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         if (StringUtils.isNotEmpty(position2)) {
             Origin origin = JsonCommon.parse(position2, Origin.class);
 //                        2.保存网络节点位置
-            origin.setY(origin.getY() + 20);
+            origin.setY(origin.getY() - 200);
             String sceneElementPosition2 = JsonCommon.stringify(origin);
             sceneElement.setPosition2(sceneElementPosition2);
             sceneElement.setArea(area);
@@ -935,12 +943,15 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             return new ArrayList<>();
         }
         List<SceneElementPortBO> notConnectedPorts = new ArrayList<>();
-        ports.forEach(port -> {
+        for (SceneElementPortBO port : ports) {
             var connectedPort = this.getSceneHandler().getPortConnectedPort(port.getId());
             if (connectedPort == null) {
                 notConnectedPorts.add(port);
+            } else {
+                notConnectedPorts.clear();
+                break;
             }
-        });
+        }
         return notConnectedPorts;
     }
 }

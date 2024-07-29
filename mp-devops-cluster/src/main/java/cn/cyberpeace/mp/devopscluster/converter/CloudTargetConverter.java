@@ -17,6 +17,7 @@ public class CloudTargetConverter {
          * ext_net
          */
         device.setRole(24);
+        device.setCategory(3);
         device.setImageType("VNet");
         ExtNet extNet = new ExtNet();
         List<AddressPool> addressPools = new ArrayList<>();
@@ -50,6 +51,7 @@ public class CloudTargetConverter {
          * ext_net
          */
         device.setRole(21);
+        device.setCategory(4);
         device.setImageType("fireWall");
         ExtFireWall extFireWall = new ExtFireWall();
         extFireWall.setIsPublicIp(true);
@@ -86,6 +88,7 @@ public class CloudTargetConverter {
          * ext_net
          */
         device.setRole(21);
+        device.setCategory(4);
         device.setImageType("WAF");
 
         /**
@@ -100,12 +103,23 @@ public class CloudTargetConverter {
          * ext_vm
          */
         device.setImageType("laasVm");
+        device.setCategory(1);
         device.setRole(4);
         ExtVm extVm = new ExtVm();
         extVm.setFlavor("1CPU/1G内存/30G磁盘/2网卡");
         extVm.setCpu(1);
         extVm.setRam(1);
-        extVm.setDisk(30);
+        if (operatingSystem!= null && "Linux".equals(operatingSystem)) {
+            extVm.setFlavor("1CPU/1G内存/30G磁盘/2网卡");
+            extVm.setCpu(1);
+            extVm.setRam(1);
+            extVm.setDisk(30);
+        } else {
+            extVm.setFlavor("1CPU/1G内存/127G磁盘/2网卡");
+            extVm.setCpu(1);
+            extVm.setRam(1);
+            extVm.setDisk(127);
+        }
         extVm.setVmSizeType("Standard_B1s");
         extVm.setVmOsDiskType("StandardSSD_LRS");
         extVm.setInitSupport(true);
@@ -172,6 +186,7 @@ public class CloudTargetConverter {
          * ext_docker
          */
         device.setImageType("containerRegistry");
+        device.setCategory(2);
         device.setRole(4);
         ExtDocker extDocker = new ExtDocker();
         extDocker.setFlavor("1vcpu/1GiB内存");
@@ -271,14 +286,17 @@ public class CloudTargetConverter {
         }
     }
 
-    public void cloudContainerRegistryConvert(String cloudType, List<DeviceCloudTargetPO> list, List<DeviceCloudTargetContainer> containerList, List dockerImages) {
+    public void cloudContainerRegistryConvert(String cloudType, List<DeviceCloudTargetPO> list, List<DeviceCloudTargetContainer> containerList, List<JSONObject> dockerImages) {
         if (dockerImages != null && dockerImages.size() > 0) {
             //docker镜像
             for (int i = 0; i < dockerImages.size(); i++) {
                 //主表元素
                 DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
-                deviceCloudTarget.setName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
-                deviceCloudTarget.setOtherName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
+                String serverUrl = dockerImages.get(i).get("serverUrl") != null ? dockerImages.get(i).get("serverUrl").toString() : "";
+                String repositoryName =  dockerImages.get(i).get("repositoryName") != null ?  dockerImages.get(i).get("repositoryName").toString() : "";
+                String tag =  dockerImages.get(i).get("tag") != null ? dockerImages.get(i).get("tag").toString() : "";
+                deviceCloudTarget.setName(repositoryName + ":" + tag);
+                deviceCloudTarget.setOtherName(repositoryName + ":" + tag);
                 String id = String.valueOf(UUID.randomUUID());
                 deviceCloudTarget.setId(id);
                 deviceCloudTarget.setCloudType(cloudType);
@@ -293,12 +311,12 @@ public class CloudTargetConverter {
                 //容器副表元素
                 DeviceCloudTargetContainer deviceCloudTargetContainer = new DeviceCloudTargetContainer();
                 deviceCloudTargetContainer.setLinkId(id);
-                deviceCloudTargetContainer.setName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
+                deviceCloudTargetContainer.setName(repositoryName + ":" + tag);
                 deviceCloudTargetContainer.setSourceType(2);
                 deviceCloudTargetContainer.setCloudType(cloudType);
                 deviceCloudTargetContainer.setContainerType("containerInfrastructure");
                 deviceCloudTargetContainer.setSubType("containerRegistry");
-                deviceCloudTargetContainer.setUploadTargetName(((JSONObject) dockerImages.get(i)).get("repositoryName") != null ? ((JSONObject) dockerImages.get(i)).get("repositoryName").toString() : "");
+                deviceCloudTargetContainer.setUploadTargetName(serverUrl + "/" + repositoryName + ":" + tag);
                 deviceCloudTargetContainer.setOperatingSystem("Linux");
                 deviceCloudTargetContainer.setOperatingSystemStatus("专业化");
                 deviceCloudTargetContainer.setIsPublic(2);
@@ -321,8 +339,10 @@ public class CloudTargetConverter {
             for (int i = 0; i < images.size(); i++) {
                 //主表元素
                 DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
-                deviceCloudTarget.setName(((JSONObject) images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "");
-                deviceCloudTarget.setOtherName(((JSONObject) images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "");
+                String imageName = ((JSONObject) images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "";
+                String imageVersion = ((JSONObject) images.get(i)).get("imageVersion") != null ? ((JSONObject) images.get(i)).get("imageVersion").toString() : "";
+                deviceCloudTarget.setName(imageName + "_" + imageVersion);
+                deviceCloudTarget.setOtherName(imageName + "_" + imageVersion);
                 String id = String.valueOf(UUID.randomUUID());
                 deviceCloudTarget.setId(id);
                 //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
@@ -331,13 +351,13 @@ public class CloudTargetConverter {
                 deviceCloudTarget.setOperatingSystem(((JSONObject) images.get(i)).get("operatingSystem") != null ? ((JSONObject) images.get(i)).get("operatingSystem").toString() : "");
                 deviceCloudTarget.setOperatingSystemStatus("专业化");
                 deviceCloudTarget.setGeneration("第一代");
-                deviceCloudTarget.setVersion(((JSONObject) images.get(i)).get("imageVersion") != null ? ((JSONObject) images.get(i)).get("imageVersion").toString() : "");
+                deviceCloudTarget.setVersion(imageVersion);
                 list.add(deviceCloudTarget);
 
                 //计算副表元素
                 DeviceCloudTargetCalculate deviceCloudTargetCalculate = new DeviceCloudTargetCalculate();
                 deviceCloudTargetCalculate.setLinkId(id);
-                deviceCloudTargetCalculate.setName(((JSONObject) images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "");
+                deviceCloudTargetCalculate.setName(imageName + "_" + imageVersion);
                 deviceCloudTargetCalculate.setSourceType(1);
                 deviceCloudTargetCalculate.setCloudType(cloudType);
                 deviceCloudTargetCalculate.setPublisher(((JSONObject) images.get(i)).get("PublisherName") != null ? ((JSONObject) images.get(i)).get("PublisherName").toString() : "");
@@ -355,7 +375,7 @@ public class CloudTargetConverter {
                 deviceCloudTargetCalculate.setIsPublic(2);
                 deviceCloudTargetCalculate.setLogo("/api/mp/file/247/911/4691e31013c189bd4c63360326497e25.png");
                 deviceCloudTargetCalculate.setGeneration("第一代");
-                deviceCloudTargetCalculate.setVersion(((JSONObject) images.get(i)).get("imageVersion") != null ? ((JSONObject) images.get(i)).get("imageVersion").toString() : "");
+                deviceCloudTargetCalculate.setVersion(imageVersion);
                 calculateList.add(deviceCloudTargetCalculate);
             }
         }

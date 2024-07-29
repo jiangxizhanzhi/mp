@@ -133,7 +133,7 @@ public class CsceneSpecialService {
 
         Map<String, CsceneStat> statMap = new HashMap<>();
         for (String id : ids) {
-            var csceneStat = new CsceneStat(id, 0, 0, 0, 0, 0, 0, 0,0);
+            var csceneStat = new CsceneStat(id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
             statMap.put(id, csceneStat);
         }
 
@@ -163,8 +163,12 @@ public class CsceneSpecialService {
                 stat.setTerminalCount(elementStat.getElementTypeCount());
             } else if (elementType.equals(BaseSceneElementModel.Type.NPC)) {
                 stat.setNpcCount(elementStat.getElementTypeCount());
+            } else if (elementType.equals(BaseSceneElementModel.Type.VENT)) {
+                stat.setVentCount(elementStat.getElementTypeCount());
             } else if (elementType.equals(BaseSceneElementModel.Type.LOAD)) {
                 stat.setLoadCount(elementStat.getElementTypeCount());
+            } else if (elementType.equals(BaseSceneElementModel.Type.EQUIPMENT)) {
+                stat.setEquipmentCount(elementStat.getElementTypeCount());
             }
         });
 
@@ -214,6 +218,7 @@ public class CsceneSpecialService {
 
     /**
      * 场景实例数据
+     *
      * @param queryParams 查询参数
      * @return 统计结果
      */
@@ -489,6 +494,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计靶标名称 对应 引用了靶标的场景模板
+     *
      * @param imageNames 靶标名称
      * @return 靶标名称 对应 引用了靶标的场景模板
      */
@@ -549,9 +555,9 @@ public class CsceneSpecialService {
     }
 
 
-
     /**
      * 统计靶标快照 对应 引用了靶标的场景模板
+     *
      * @param snapUuids 靶标名称
      * @return 靶标名称 对应 引用了靶标的场景模板
      */
@@ -729,6 +735,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计iso文件 对应 引用了iso文件的场景模板
+     *
      * @param isoTmpdirUuid iso文件地址uuid
      * @return iso文件uuid 对应 引用了iso文件的场景模板
      */
@@ -758,6 +765,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计靶标名称 对应 引用了靶标的场景实例
+     *
      * @param imageNames 靶标名称
      * @return 靶标名称 对应 引用了靶标的场景实例
      */
@@ -827,11 +835,9 @@ public class CsceneSpecialService {
     }
 
 
-
-
-
     /**
      * 统计靶标快照 对应 引用了靶标的场景实例
+     *
      * @param snapUuids 靶标名称
      * @return 靶标名称 对应 引用了靶标的场景实例
      */
@@ -878,6 +884,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计活动场景总数和场景总数
+     *
      * @return
      */
     public CsceneInstanceCountActivitySceneBO countActivityScene() {
@@ -891,6 +898,7 @@ public class CsceneSpecialService {
 
     /**
      * 统计一段时间区间内活跃过的场景数(活跃数 = 区间内启动过的(不管有没有关闭) + 之前启动的而且未关闭的)
+     *
      * @param startTime
      * @param endTime
      * @return
@@ -919,6 +927,7 @@ public class CsceneSpecialService {
 
     /**
      * 根据场景模板查询启动的实例数量
+     *
      * @param csceneIds
      * @param includeFailedScene 是否包括启动失败的场景
      * @param includeDeleteScene 是否包括已删除的场景
@@ -958,18 +967,20 @@ public class CsceneSpecialService {
 
     /**
      * 根据场景模板查询启动的实例数量
+     *
      * @param csceneId
      * @param includeFailedScene 是否包括启动失败的场景
      * @param includeDeleteScene 是否包括已删除的场景
      * @return
      */
     public ServiceResult<Integer> statSceneInstanceCount(String csceneId, boolean includeFailedScene, boolean includeDeleteScene) {
-        Map<String, Integer> result = this.statSceneInstanceCount(new String[]{ csceneId }, includeFailedScene, includeDeleteScene).getSource();
+        Map<String, Integer> result = this.statSceneInstanceCount(new String[]{csceneId}, includeFailedScene, includeDeleteScene).getSource();
         return new ServiceResult<>(result.get(csceneId));
     }
 
     /**
      * 获取实例运行的状态信息
+     *
      * @param csceneId
      * @return
      */
@@ -985,6 +996,7 @@ public class CsceneSpecialService {
 
     /**
      * 根据资源名称反查节点和场景信息
+     *
      * @param resourceNames
      * @return
      */

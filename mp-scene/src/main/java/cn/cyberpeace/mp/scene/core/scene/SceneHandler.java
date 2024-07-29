@@ -266,28 +266,6 @@ public class SceneHandler extends BaseSceneHandler<
                     var portId = sceneElementPort.getId();
                     var pluginPort = plugin.getPort(portId);
                     if (pluginPort != null) {
-//                    TODO 录屏暂改
-                        /*List<AccessMode> accessModes = pluginPort.getSrcPort().getAccessModes();
-                        accessModes.forEach(accessMode -> {
-                            accessMode.setAvailable(true);
-                            accessMode.setUsername("admin123");
-                            accessMode.setPassword("NHiOJiZTD4K1");
-                            accessMode.setPort(22);
-                            accessMode.setProtocol("ssh");
-                            accessMode.setAccessIp("20.2.10.118");
-                            accessMode.setProxy(true);
-                            accessMode.setAccessPort(22);
-                            accessMode.setProxyId("1");
-                            // 创建一个ObjectMapper实例
-                            ObjectMapper mapper = new ObjectMapper();
-
-                            // 设置属性命名策略为下划线风格
-                            mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
-                            // 将对象转换为Map，同时将属性名转为下划线形式
-                            Map<String, Object> map = mapper.convertValue(pluginPorts, Map.class);
-                            map.put("access_modes", accessModes);
-                            pluginPorts.put(portId, map);
-                        });*/
                         pluginPorts.put(portId, pluginPort);
                     }
                 });
@@ -310,7 +288,6 @@ public class SceneHandler extends BaseSceneHandler<
             return;
         }
         var collectedSceneElement = getCollectedSceneElementBO(nodeId);
-
         reporters.forEach(reporter -> reportTaskPool.executeTask(() -> reporter.reportElement(collectedSceneElement)));
     }
 
@@ -413,9 +390,9 @@ public class SceneHandler extends BaseSceneHandler<
         }
     }
 
-    public void completionTopo(Set<String> existingIpSet) {
+    public void completionTopo(Map<String, Set<String>> existingIpSetMap) {
         for (var plugin : getPlugins()) {
-            plugin.completionTopo(existingIpSet);
+            plugin.completionTopo(existingIpSetMap);
         }
     }
 

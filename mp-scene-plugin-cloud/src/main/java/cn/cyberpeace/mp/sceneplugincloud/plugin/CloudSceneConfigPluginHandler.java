@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.mptool.URLUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
@@ -14,6 +15,7 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.FirewallRule;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
@@ -27,8 +29,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
+import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -131,6 +135,10 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.NPC);
         } else if (role.equals(BaseCloudPluginSceneElementModel.Role.LOAD)) {
             srcElement.setType(BaseSceneElementModel.Type.LOAD);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.EQUIPMENT)) {
+            srcElement.setType(BaseSceneElementModel.Type.EQUIPMENT);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER_VNET)) {
+            srcElement.setType(BaseSceneElementModel.Type.VENT);
         }
     }
 
@@ -170,28 +178,167 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
     public void validate() {
         Integer cloudType = getSceneHandler().getScene().getCloudType();
 
+//        避免重复校验
+        List<String> elementIdBycollectCidrPools = new ArrayList<>();
+
+
+        Map<String, CloudPluginSceneConfigElementBO> elementMap = getElementMap();
         //            根据微软云创建虚拟机规则验证用户名、密码
         if (cloudType != null && cloudType != BaseSceneModel.CloudType.DEFAULT) {
-            getElementMap().forEach((nodeId, element) -> {
-                if (StringUtils.isNotBlank(element.getUsername())) {
-                    boolean isUsernameAllowed = Arrays.stream(disallowedUsernames)
-                            .noneMatch(element.getUsername()::equalsIgnoreCase);
-                    boolean matches = !validUsernamePattern.matcher(element.getUsername()).matches();
-                    if (!isUsernameAllowed) {
-                        throw new MpRuntimeException(CloudErrorCode.USERNAME_NOT_ALLOWED.format(element.getUsername()));
-                    } else if (!validUsernamePattern.matcher(element.getUsername()).matches()) {
-                        throw new MpRuntimeException(CloudErrorCode.INVALID_USERNAME.format(element.getUsername()));
+            Map<String, List<SceneConfigElementPortBO>> elementPortMap = getSceneHandler().getElementPortMap().values().stream()
+                    .collect(Collectors.groupingBy(
+                            element -> element.getElement().getId()
+                    ));
+
+            elementMap.forEach((nodeId, element) -> {
+                if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(element.getImageType())) {
+                    if (StringUtils.isNotBlank(element.getUsername())) {
+                        boolean isUsernameAllowed = Arrays.stream(disallowedUsernames)
+                                .noneMatch(element.getUsername()::equalsIgnoreCase);
+                        if (!isUsernameAllowed) {
+                            throw new MpRuntimeException(CloudErrorCode.USERNAME_NOT_ALLOWED.format(element.getUsername()));
+                        } else if (!validUsernamePattern.matcher(element.getUsername()).matches()) {
+                            throw new MpRuntimeException(CloudErrorCode.INVALID_USERNAME.format(element.getUsername()));
+                        }
+                    }
+                    if (StringUtils.isNotBlank(element.getPassword())) {
+                        boolean isPasswordAllowed = Arrays.stream(disallowedPasswords)
+                                .noneMatch(element.getPassword()::equalsIgnoreCase);
+                        if (!isPasswordAllowed) {
+                            throw new MpRuntimeException(CloudErrorCode.PASSWORD_NOT_ALLOWED.format(element.getPassword()));
+                        } else if (!validPasswordPattern.matcher(element.getPassword()).matches()) {
+                            throw new MpRuntimeException(CloudErrorCode.INVALID_PASSWORD.format(element.getPassword()));
+                        }
                     }
                 }
-                if (StringUtils.isNotBlank(element.getPassword())) {
-                    boolean isPasswordAllowed = Arrays.stream(disallowedPasswords)
-                            .noneMatch(element.getPassword()::equalsIgnoreCase);
-                    if (!isPasswordAllowed) {
-                        throw new MpRuntimeException(CloudErrorCode.PASSWORD_NOT_ALLOWED.format(element.getPassword()));
-                    } else if (!validPasswordPattern.matcher(element.getPassword()).matches()) {
-                        throw new MpRuntimeException(CloudErrorCode.INVALID_PASSWORD.format(element.getPassword()));
+
+                if (BaseCloudPluginSceneElementModel.ImageType.VNET.equals(element.getImageType())) {
+//                VNet节点子网格式校验
+                    List<String> cidrPools = element.getCidrPools();
+                    List<String> validateCidrPools = IpUtils.validateCidrPools(cidrPools);
+                    if (validateCidrPools.size() > 0) {
+                        throw new MpRuntimeException(CloudErrorCode.INVALID_CIDR_POOLS.format(validateCidrPools.toString()));
+                    }
+//                对等互联子网冲突验证
+//                查Vent子网+连接节点的子网
+//                查连接连接Vent节点下 Vent子网+连接节点的子网
+//                判断是否有冲突
+                    if (!elementIdBycollectCidrPools.contains(element.getSrcElement().getId())) {
+                        HashMap<String, Set<String>> nodeCidrPools = new HashMap<>();
+                        HashSet<String> cidrPoolSet = new HashSet<>();
+                        cidrPoolSet.addAll(cidrPools);
+                        nodeCidrPools.put(element.getSrcElement().getId(), cidrPoolSet);
+//                    连接的VNet 需递归查询所有相连的VNet
+                        collectCidrPools(element, elementMap, elementPortMap, nodeCidrPools, elementIdBycollectCidrPools);
+
+                        Set<String> allCidrs = new HashSet<>();
+                        Set<String> duplicates = new HashSet<>();
+                        for (Map.Entry<String, Set<String>> nodeCidrPoolList : nodeCidrPools.entrySet()) {
+                            for (String cidr : nodeCidrPoolList.getValue()) {
+                                if (!allCidrs.add(cidr) && StringUtils.isNotEmpty(cidr)) {
+                                    duplicates.add(cidr);
+                                }
+                            }
+                        }
+                        if (duplicates.size() > 0) {
+                            throw new MpRuntimeException(CloudErrorCode.CONFLICT_CIDR_POOLS.format(duplicates.toString()));
+                        }
+                    }
+
+//                    增加校验 一个VNet只能连接一个防火墙
+                    long count = element.getSrcElement().getPorts().stream()
+                            .filter(port -> null != getSceneHandler().getPortConnectedPort(port.getId()))
+                            .map(port -> elementMap.get(getSceneHandler().getPortConnectedPort(port.getId()).getElement().getId()))
+                            .filter(element1 -> BaseCloudPluginSceneElementModel.ImageType.FIRE_WALL.equals(element1.getImageType()))
+                            .count();
+                    if (count > 1) {
+                        throw new MpRuntimeException(CloudErrorCode.MULTIPLE_FIREWALLS.format(count + ""));
+                    }
+
+                }else {
+//                    节点互联校验 非网络节点不可互联
+                    for (SceneConfigElementPortBO port : element.getSrcElement().getPorts()) {
+                        SceneConfigElementPortBO portConnectedPort = getSceneHandler().getPortConnectedPort(port.getId());
+                        if (null != portConnectedPort) {
+                            String id = portConnectedPort.getElement().getId();
+                            CloudPluginSceneConfigElementBO cloudPluginSceneConfigElementBO = elementMap.get(id);
+                            if (!BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudPluginSceneConfigElementBO.getImageType())) {
+                                throw new MpRuntimeException(CloudErrorCode.INVALID_CONNECTION.format());
+                            }
+                        }
                     }
                 }
+
+//                增加校验 防火墙接入配置校验
+                if (BaseCloudPluginSceneElementModel.ImageType.FIRE_WALL.equals(element.getImageType())) {
+                    List<String> errorMessages = new ArrayList<>();
+                    List<FirewallRule> firewallRules = element.getFirewallRules();
+                    for (FirewallRule rule : firewallRules) {
+                        String sourceIpAddress = rule.getSourceIpAddress();
+                        String protocol = rule.getProtocol();
+                        String destinationIpAddress = rule.getDestinationIpAddress();
+                        String destinationPort = rule.getDestinationPort();
+
+                        if (protocol == null || protocol.isEmpty()) {
+                            errorMessages.add("防火墙策略的协议不能为空");
+                        } else if (protocol.contains(",,") || protocol.startsWith(",") || protocol.endsWith(",")) {
+                            errorMessages.add("防火墙策略的协议不能包含尾随逗号、尾随空格或空格");
+                        } else {
+                            String[] split = protocol.split(",");
+                            for (String s : split) {
+                                if (s.equals("UDP") || s.equals("TCP") || s.equals("ICMP") || s.equals("ANY")) {
+                                } else {
+                                    errorMessages.add("防火墙策略的协议添加有误");
+                                }
+                            }
+                        }
+
+                        if (destinationIpAddress == null || destinationIpAddress.isEmpty()) {
+                            errorMessages.add("防火墙策略的目标IP地址不能为空");
+                        } else if (destinationIpAddress.contains(",,") || destinationIpAddress.startsWith(",") || destinationIpAddress.endsWith(",")) {
+                            errorMessages.add("防火墙策略的目标IP地址不能包含尾随逗号、尾随空格或空格");
+                        } else {
+                            String[] split = destinationIpAddress.split(",");
+                            for (String s : split) {
+                                if (s.equals("*") || checkStringIsIpAddressOrIpPool(s)) {
+                                } else {
+                                    errorMessages.add("防火墙策略的目标IP地址添加有误!");
+                                }
+                            }
+                        }
+
+                        if (destinationPort == null || destinationPort.isEmpty()) {
+                            errorMessages.add("防火墙策略的目标端口不能为空");
+                        } else if (destinationPort.contains(",,") || destinationPort.startsWith(",") || destinationPort.endsWith(",")) {
+                            errorMessages.add("防火墙策略的目标端口不能包含尾随逗号、尾随空格或空格");
+                        } else {
+                            String[] split = destinationPort.split(",");
+                            for (String s : split) {
+                                if (checkStringIsPortStyle(s) || checkStringIsPortParagraphsStyle(s)) {
+                                } else {
+                                    errorMessages.add("防火墙策略的目标端口添加有误!");
+                                }
+                            }
+                        }
+                        if (sourceIpAddress != null) {
+                            if (sourceIpAddress.contains(",,") || sourceIpAddress.startsWith(",") || sourceIpAddress.endsWith(",")) {
+                                errorMessages.add("防火墙策略的源ip地址不能包含尾随逗号、尾随空格或空格");
+                            }
+                            String[] sourceIpAddressSplit = sourceIpAddress.split(",");
+                            for (String s : sourceIpAddressSplit) {
+                                if (s.equals("*") || checkStringIsIpAddressOrIpPool(s)) {
+                                } else {
+                                    errorMessages.add("防火墙策略的源ip地址添加有误!");
+                                }
+                            }
+                        }
+                    }
+                    List<String> collect = errorMessages.stream().distinct().collect(Collectors.toList());
+                    if (collect.size() > 0) {
+                        throw new MpRuntimeException(CloudErrorCode.INVALID_FIREWALL_RULES.format(collect.toString()));
+                    }
+                }
+
             });
         }
 
@@ -215,7 +362,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                 }
 //                公有云场景需要验证ip是否在保留ip段内
                 if (null != getSceneHandler().getScene().getCloudType() && BaseSceneModel.CloudType.DEFAULT != getSceneHandler().getScene().getCloudType()) {
-                     if (IpUtils.isLastOctetInReservedRange(ip)) {
+                    if (IpUtils.isLastOctetInReservedRange(ip)) {
                         throw new MpRuntimeException(CloudErrorCode.IP_CONFLICT_WITH_RESERVED_IP.format(ip));
                     }
                 }
@@ -243,6 +390,33 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private void collectCidrPools(CloudPluginSceneConfigElementBO element, Map<String, CloudPluginSceneConfigElementBO> elementMap,
+                                  Map<String, List<SceneConfigElementPortBO>> elementPortMap, HashMap<String, Set<String>> nodeCidrPools,
+                                  List<String> elementIdBycollectCidrPools) {
+        elementIdBycollectCidrPools.add(element.getSrcElement().getId());
+        for (SceneConfigElementPortBO port : element.getSrcElement().getPorts()) {
+            SceneConfigElementPortBO portConnectedPort = getSceneHandler().getPortConnectedPort(port.getId());
+            if (null != portConnectedPort) {
+                String id = portConnectedPort.getElement().getId();
+                CloudPluginSceneConfigElementBO cloudPluginSceneConfigElementBO = elementMap.get(id);
+                if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(cloudPluginSceneConfigElementBO.getImageType())) {
+                    List<SceneConfigElementPortBO> sceneConfigElementPortBOList = elementPortMap.get(id);
+                    List<String> cidrs = sceneConfigElementPortBOList.stream()
+                            .flatMap(element1 -> element1.getElement().getPorts().stream().filter(port1 -> StringUtils.isNotEmpty(port1.getIp())).map(port1 -> IpUtils.formatIpAddressWithDefaultMask(port1.getIp())))
+                            .collect(Collectors.toList());
+                    nodeCidrPools.get(element.getSrcElement().getId()).addAll(cidrs);
+                } else if (BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudPluginSceneConfigElementBO.getImageType())) {
+                    Set set = nodeCidrPools.get(cloudPluginSceneConfigElementBO.getSrcElement().getId());
+                    if (set != null) continue;
+                    set = new HashSet<>();
+                    set.addAll(cloudPluginSceneConfigElementBO.getCidrPools());
+                    nodeCidrPools.put(cloudPluginSceneConfigElementBO.getSrcElement().getId(), set);
+                    collectCidrPools(cloudPluginSceneConfigElementBO, elementMap, elementPortMap, nodeCidrPools, elementIdBycollectCidrPools);
                 }
             }
         }
@@ -328,5 +502,56 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
     protected void validateData(BaseScenePluginDataBO validateData) {
         var validateResult = CloudScenePluginValidation.validate(validateData);
         CloudScenePluginValidation.handleValidateResult(validateResult);
+    }
+
+    private static List<String> findDuplicates(List<String> cidrs, Set<String> uniqueCidrs) {
+        List<String> duplicates = new ArrayList<>();
+        for (String cidr : cidrs) {
+            if (!uniqueCidrs.add(cidr)) {
+                duplicates.add(cidr);
+            }
+        }
+        // Remove the first occurrence of each duplicate as it was already added to the set.
+        Set<String> toRemove = new HashSet<>(duplicates);
+        duplicates.retainAll(toRemove);
+        return duplicates;
+    }
+
+    // 校验字符串是否是IP地址
+    public static boolean checkStringIsIpAddressOrIpPool(String address) {
+        String ipPattern = "\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\b";
+        String ipPoolPattern = String.format("^(%s)-(%s)$", ipPattern, ipPattern);
+        String combinedPattern = String.format("^(%s)$|^(%s)$", ipPattern, ipPoolPattern);
+        Pattern pattern = Pattern.compile(combinedPattern);
+        Matcher matcher = pattern.matcher(address);
+        return matcher.matches();
+    }
+
+    // 校验字符串是否符合目标端口格式
+    public static boolean checkStringIsPortStyle(String portString) {
+        try {
+            int port = Integer.parseInt(portString);
+            return port >= 1 && port <= 65535;
+        } catch (NumberFormatException e) {
+            return false; // 如果无法解析为整数，返回 false
+        }
+    }
+
+    // 校验字符串是否符合目标端口段格式
+    public static boolean checkStringIsPortParagraphsStyle(String portString) {
+        String[] parts = portString.split("-");
+        if (parts.length != 2) {
+            return false; // 不是有效的格式（不包含且仅包含一个“-”）
+        }
+
+        try {
+            int start = Integer.parseInt(parts[0].trim());
+            int end = Integer.parseInt(parts[1].trim());
+
+            // 检查范围是否在 1 到 65535 之间，并且 start 小于等于 end
+            return start >= 1 && start <= 65535 && end >= 1 && end <= 65535 && start <= end;
+        } catch (NumberFormatException e) {
+            return false; // 解析整数失败
+        }
     }
 }

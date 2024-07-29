@@ -85,7 +85,6 @@ public class PauseHandler extends HandlerCommon {
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
                 getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.PAUSE, Arrays.asList(ElementProcess.PAUSE_LOAD));
                 runElementProgress(nodeId, SceneElementModel.Event.PAUSE, ElementProcess.PAUSE_LOAD, () -> {
-                    closeAccessModes(element);
                     DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
                     DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
                     Load load = new Load(synchronousDataSource);

@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.sceneplugincollection.plugin.azure.functionrequest;
+package cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionrequest;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class FirewallPolicy implements Serializable {
+public class FirewallPolicyRequestBody implements Serializable {
 
     /**
      * ID
@@ -30,5 +30,5 @@ public class FirewallPolicy implements Serializable {
     /**
      * 防火墙策略规则列表
      */
-    private List<FirewallPolicyRule> rules;
+    private List<FirewallPolicyRuleRequestBody> rules;
 }

@@ -9,13 +9,17 @@ import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
+import cn.cyberpeace.mp.cscene.request.load.LoadResultExportRequest;
 import cn.cyberpeace.mp.cscene.request.load.LoadResultSearchRequest;
 import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
 import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.FirewallFunction;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.functionrequest.FirewallCreateRequestBody;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionrequest.FirewallBuildRequestBody;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionresponse.FirewallBuildResponseBody;
 import com.alibaba.fastjson.JSONObject;
+import com.azure.resourcemanager.network.models.AzureFirewallSkuTier;
+import com.azure.resourcemanager.network.models.FirewallPolicySkuTier;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -306,7 +310,7 @@ public class LoadController {
     }
 
     /*
-     * 载荷执行结果导入
+     * 载荷执行结果导入(xlsx格式文件导入)
      * */
     @ApiOperation(value = "载荷执行结果导入", notes = "")
     @PostMapping("/importLoadExecutionResult")
@@ -316,12 +320,12 @@ public class LoadController {
     }
 
     /*
-     * 载荷执行结果导出
+     * 载荷执行结果导出(xml,json,xlsx格式文件导出)
      * */
     @ApiOperation(value = "载荷执行结果导出", notes = "")
     @PostMapping("/exportLoadExecutionResult")
     public ServiceResult exportLoadExecutionResult(HttpServletRequest request, HttpServletResponse response,
-                                                   @RequestBody(required = false) LoadResultSearchRequest requestData) throws IOException {
+                                                   @RequestBody(required = false) LoadResultExportRequest requestData) throws IOException {
         Boolean exportLoadExecutionResult = loadService.exportLoadExecutionResult(request, response, requestData);
         if (exportLoadExecutionResult) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
@@ -391,15 +395,26 @@ public class LoadController {
     }
 
 
+
     /**
      * 创建防火墙
      */
     @ApiOperation(value = "创建防火墙", notes = "")
     @PostMapping("/createFireWall")
-    public ServiceResult createFireWall(@RequestBody FirewallCreateRequestBody fireWallCreateRequestBody) {
-        firewallFunction.createFireWall(1, fireWallCreateRequestBody);
-        return new ServiceResult(log, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+    public ServiceResult createFireWall(@RequestBody FirewallBuildRequestBody fireWallBuildRequestBody) {
+        fireWallBuildRequestBody.setSku(AzureFirewallSkuTier.BASIC);
+        fireWallBuildRequestBody.setPolicySku(FirewallPolicySkuTier.BASIC);
+        FirewallBuildResponseBody fireWall = firewallFunction.createFireWall(1, fireWallBuildRequestBody);
+        return new ServiceResult(fireWall, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
-
+    /**
+     * 测试防火墙策略是否符合格式
+     */
+    @ApiOperation(value = "测试防火墙策略是否符合格式", notes = "")
+    @PostMapping("/checkPolicy")
+    public ServiceResult checkPolicy(@RequestBody FirewallBuildRequestBody fireWallBuildRequestBody) {
+        List<String> strings = firewallFunction.checkPolicy(fireWallBuildRequestBody.getFirewallPolicy().getRules());
+        return new ServiceResult(strings, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+    }
 }

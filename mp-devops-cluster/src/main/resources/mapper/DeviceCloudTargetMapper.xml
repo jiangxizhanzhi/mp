@@ -325,6 +325,7 @@
             <if test="param != null and param.operatingSystem != null and param.operatingSystem != ''">
                 and operating_system = #{param.operatingSystem}
             </if>
+            and cloud_service_type != 1
         </where>
         <if test="param != null and param.offset != null and param.pageSize != null">
             limit #{param.offset}, #{param.pageSize}
@@ -340,9 +341,13 @@
             <if test="param != null and param.name != null and param.name != ''">
                 and name like concat('%', #{param.name}, '%')
             </if>
+            <if test="param != null and param.cloudServiceType != null and param.cloudServiceType != ''">
+                and cloud_service_type = #{param.cloudServiceType}
+            </if>
             <if test="param != null and param.operatingSystem != null and param.operatingSystem != ''">
                 and operating_system = #{param.operatingSystem}
             </if>
+            and cloud_service_type != 1
         </where>
     </select>
 
@@ -555,6 +560,9 @@
             *
         from
             mp_devops_boundary_network_equipment
+        <if test="offset != null and pageSize != null">
+            limit #{offset}, #{pageSize}
+        </if>
     </select>
 
     <select id="getCommonTargetNum" resultType="java.lang.Integer">

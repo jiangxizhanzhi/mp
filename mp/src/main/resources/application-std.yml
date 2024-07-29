@@ -168,6 +168,13 @@ mp:
     public-wazuh-base-url: http://${mp.situationaware.ext-var.public-wazuh-ip}:${mp.situationaware.ext-var.public-wazuh-port}
     public-wazuh-username: ${mp.situationaware.ext-var.public-wazuh-username}
     public-wazuh-password: ${mp.situationaware.ext-var.public-wazuh-password}
+    #managemnet 管理节点镜像用户名密码
+    public-management-image-id: ${mp.situationaware.ext-var.public-management-image-id}
+    private-management-image-id: ${mp.situationaware.ext-var.private-management-image-id}
+    mix-management-image-id: ${mp.situationaware.ext-var.mix-management-image-id}
+    management-username: ${mp.situationaware.ext-var.management-username}
+    management-password: ${mp.situationaware.ext-var.management-password}
+
     # wazuh-probe-manager
     probe-mgr-url: http://${mp.situationaware.ext-var.wazuh-ip}:${mp.situationaware.ext-var.wazuh-port}
     probe-mgr-agent-script-linux-path: ${mp.situationaware.ext-var.linux-path}

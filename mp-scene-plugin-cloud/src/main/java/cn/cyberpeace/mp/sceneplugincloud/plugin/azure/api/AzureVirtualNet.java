@@ -4,19 +4,19 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.ElementNetworkUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
+import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.azure.resourcemanager.network.models.Network;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -33,34 +33,10 @@ public class AzureVirtualNet {
         this.region = resourceService.getRegin();
     }
 
-    public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement) {
-        for (int i = 0; i < cloudElement.getDeriveNetworks().size(); i++) {
-            var net = cloudElement.getDeriveNetworks().get(i).getNetwork();
-            // azure todo 网络名称用节点 eid+序号
-            String netName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid(), i);
-            // azure todo 不需要设置网关么?
-            String gateway = net.getGateway();
-            String cidr = net.getCidr();
-            String groupName = pluginHandler.getSourceSceneId();
-            //  azure todo 调用微软云api 创建网络
-            var createdNet = azureResourceManager.networks()
-                    .define(netName)
-                    .withRegion(this.region)
-                    .withExistingResourceGroup(groupName)
-                    .withAddressSpace(cidr)
-                    .withSubnet("sub", cidr)
-                    .create();
-            // azure todo 回写网络id
-            net.setResourceId(createdNet.id());
-        }
-    }
-
     public void create(
             CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement,
-            ConcurrentHashMap<String, Boolean> cidrContainerMap, HashMap<String, List<VirtualNic>> virtualNicsMap) {
-//        for (int i = 0; i < cloudElement.getDeriveNetworks().size(); i++) {
-//        var net = cloudElement.getDeriveNetworks().get(0).getNetwork();
-
+            ConcurrentHashMap<String, ElementNetworkUtils.CidrType> cidrContainerMap,
+            HashMap<String, List<VirtualNic>> virtualNicsMap) {
         // azure todo 网络名称用节点 eid+序号
         String netName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid(), 0);
         // azure todo 不需要设置网关么?
@@ -69,67 +45,184 @@ public class AzureVirtualNet {
         String groupName = pluginHandler.getSourceSceneId();
 
         //  azure 调用微软云api 创建网络
-        var createdNet = azureResourceManager.networks()
+        Network.DefinitionStages.WithCreate createdNet = azureResourceManager.networks()
                 .define(netName)
                 .withRegion(this.region)
                 .withExistingResourceGroup(groupName);
-        Set<Map.Entry<String, Boolean>> entrySet = cidrContainerMap.entrySet();
-        for (Map.Entry<String, Boolean> entry : entrySet) {
-            Boolean value = entry.getValue();
-            if (value) {
-//                连接容器的子网需要加子网委托
-                createdNet
-                        .withAddressSpace(entry.getKey())
-                        .defineSubnet(IpUtils.extractNetworkPart(entry.getKey()))
-                        .withAddressPrefix(entry.getKey())
-                        .withDelegation("Microsoft.ContainerInstance/containerGroups")
-                        .attach();
-            } else {
-                createdNet
-                        .withAddressSpace(entry.getKey())
-                        .defineSubnet(IpUtils.extractNetworkPart(entry.getKey()))
-                        .withAddressPrefix(entry.getKey())
-                        .attach();
+        Set<Map.Entry<String, ElementNetworkUtils.CidrType>> entrySet = cidrContainerMap.entrySet();
+        String manageamentSubName = null;
+        for (Map.Entry<String, ElementNetworkUtils.CidrType> entry : entrySet) {
+            String addressSpace = entry.getKey();
+            ElementNetworkUtils.CidrType value = entry.getValue();
+
+            switch (value) {
+                case CONTAINER:
+                    addSubnetWithDelegation(createdNet, addressSpace);
+                    break;
+                case VM:
+                    addStandardSubnet(createdNet, addressSpace);
+                    break;
+                case FIRE_WALL_MANAGEMENT:
+                    addFirewallManagementSubnet(createdNet, addressSpace);
+                    break;
+                case FIRE_WALL:
+                    addFirewallSubnet(createdNet, addressSpace);
+                    break;
+                case MANAGEMENT:
+                    addStandardSubnet(createdNet, addressSpace);
+                    manageamentSubName = IpUtils.extractNetworkPart(addressSpace);
+                    break;
             }
         }
+
         Network network = createdNet.create();
+        cloudElement.setResourceId(network.id());
+
+//        创建管理虚拟机用于远程连接 TODO 虚拟机未准备好暂不走此逻辑
+        manageamentSubName = null;
+        if (null != manageamentSubName) {
+            Integer cloudType = pluginHandler.getSrcScene().getCloudType();
+            AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(resourceService);
+            VirtualMachine managementVm = azureVirtualMachine.createManagementVM(cloudType,groupName, "ManagementVM_" + netName, network, manageamentSubName);
+            cloudElement.setManagementIp(managementVm.getPrimaryPublicIPAddress().ipAddress());
+        }
 
         // azure 回写网络id
-        cloudElement.getDeriveNetworks().stream().forEach(networkBO -> {
+        cloudElement.getDeriveNetworks().forEach(networkBO -> {
             CloudPluginSceneElementNetworkBO net = networkBO.getNetwork();
             net.setResourceId(network.id());
         });
+        List<String> nodeIds = null;
+        if (BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudElement.getImageType())) {
+            nodeIds = cloudElement.getDeriveNetworks().stream()
+                    .flatMap(connectedNetworkBO -> connectedNetworkBO.getToPorts().stream())
+                    .map(SceneElementPortBO::getElement)
+                    .map(SceneElementBO::getId)
+                    .distinct()
+                    .collect(Collectors.toList());
+//            查找连接的节点 管理网络字段赋值
+            if (null != manageamentSubName) {
+                propagateMgmtIpToElements(pluginHandler, cloudElement, null);
+            }
 
-        List<String> nodeIds = cloudElement.getDeriveNetworks().stream()
-                .flatMap(connectedNetworkBO -> connectedNetworkBO.getToPorts().stream())
-                .map(SceneElementPortBO::getElement)
-                .map(SceneElementBO::getId)
-                .distinct()
-                .collect(Collectors.toList());
+
+        } else {
+            nodeIds = new ArrayList<>();
+            nodeIds.add(cloudElement.getSrcElement().getId());
+        }
+
         nodeIds.stream().forEach(nodeId -> {
             List<VirtualNic> virtualNics = virtualNicsMap.get(nodeId);
-            virtualNics.forEach(virtualNic -> {
-                virtualNic.setNetworkId(network.id());
-            });
+            if (virtualNics != null) {
+                virtualNics.forEach(virtualNic -> {
+                    virtualNic.setNetworkId(network.id());
+                });
+            }
             virtualNicsMap.put(nodeId, virtualNics);
         });
 
 
     }
 
-    public static String findUnused192Cidr(ConcurrentHashMap<String, Boolean> cidrContainerMap) {
-        for (int i = 1; i <= 255; i++) {
-            for (int j = 0; j <= 255; j++) {
-                String cidr = "192.168." + i + "." + j + "/24";
-                if (!cidrContainerMap.containsKey(cidr)) {
-                    return cidr;
+    public void delete(CloudPluginSceneElementBO cloudElement) {
+        azureResourceManager.containerGroups().deleteById(cloudElement.getResourceId());
+    }
+
+    /**
+     * 添加具有委派的子网到网络资源创建阶段。
+     * <p>
+     * 该方法在给定的网络创建阶段中定义并添加一个子网，该子网具有特定的地址空间和委派给容器实例的权限。
+     * 使用提供的地址空间来定义子网的地址前缀，并为子网配置特定的委派，允许在该子网中创建容器实例。
+     *
+     * @param createdNet   网络资源的创建阶段，用于定义和配置子网。
+     * @param addressSpace 子网的地址空间，用于定义子网的地址范围。
+     */
+    private void addSubnetWithDelegation(Network.DefinitionStages.WithCreate createdNet, String addressSpace) {
+        createdNet
+                .withAddressSpace(addressSpace)
+                .defineSubnet(IpUtils.extractNetworkPart(addressSpace))
+                .withAddressPrefix(addressSpace)
+                .withDelegation("Microsoft.ContainerInstance/containerGroups")
+                .attach();
+    }
+
+    /**
+     * 添加标准子网到网络创建阶段。
+     * <p>
+     * 此方法用于在创建网络的过程中，根据给定的地址空间添加一个标准子网。
+     * 它首先定义了网络的地址空间，然后根据地址空间提取网络部分，用于定义子网的名称，
+     * 最后将该子网附加到正在创建的网络上。
+     *
+     * @param createdNet   网络的创建阶段接口，用于链式调用定义网络属性。
+     * @param addressSpace 网络的地址空间，用于定义子网的地址前缀。
+     */
+    private void addStandardSubnet(Network.DefinitionStages.WithCreate createdNet, String addressSpace) {
+        createdNet
+                .withAddressSpace(addressSpace)
+                .defineSubnet(IpUtils.extractNetworkPart(addressSpace))
+                .withAddressPrefix(addressSpace)
+                .attach();
+    }
+
+    /**
+     * 添加防火墙管理子网。
+     * <p>
+     * 该方法用于在创建网络时添加一个特定于Azure防火墙管理的子网。防火墙管理子网是一个专用的子网，
+     * 用于承载Azure防火墙实例及其相关的管理通信。通过指定地址空间，确保防火墙管理子网在虚拟网络中独占一席之地。
+     *
+     * @param createdNet   网络创建阶段的实例，用于定义和配置新网络。
+     * @param addressSpace 防火墙管理子网的地址空间。这个地址空间应该在虚拟网络的地址空间内，并且应该是唯一的。
+     */
+    private void addFirewallManagementSubnet(Network.DefinitionStages.WithCreate createdNet, String addressSpace) {
+        createdNet
+                .withAddressSpace(addressSpace)
+                .defineSubnet("AzureFirewallManagementSubnet")
+                .withAddressPrefix(addressSpace)
+                .attach();
+    }
+
+    /**
+     * 添加防火墙子网到网络配置中。
+     * <p>
+     * 该方法用于在创建新网络时定义并添加一个名为“AzureFirewallSubnet”的子网。
+     * 子网的地址前缀与传入的地址空间相同，这是为了确保防火墙设备能够正常工作在指定的地址空间内。
+     *
+     * @param createdNet   网络创建阶段的实例，用于配置新网络。
+     * @param addressSpace 新网络的地址空间，同时也是防火墙子网的地址前缀。
+     */
+    private void addFirewallSubnet(Network.DefinitionStages.WithCreate createdNet, String addressSpace) {
+        createdNet
+                .withAddressSpace(addressSpace)
+                .defineSubnet("AzureFirewallSubnet")
+                .withAddressPrefix(addressSpace)
+                .attach();
+    }
+
+    /**
+     * 在场景中的元素间传播管理IP。
+     * 此方法递归调用，用于将管理IP从VNet元素传播至与其相连的LAAS_VM或VNet元素。
+     * 它检查端口连接的元素类型，如果连接的是LAAS_VM，则直接设置管理IP；如果是VNET，则递归调用此方法。
+     *
+     * @param pluginHandler       插件处理器，用于获取场景元素和其他相关信息。
+     * @param element             当前处理的场景元素，其源元素是VNet类型。
+     * @param processedElementIds 已处理元素的ID列表，用于避免重复处理。
+     */
+    private void propagateMgmtIpToElements(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO element, List<String> processedElementIds) {
+        processedElementIds = processedElementIds == null ? new ArrayList<>() : processedElementIds;
+        processedElementIds.add(element.getSrcElement().getId());
+        for (SceneElementPortBO port : element.getSrcElement().getPorts()) {
+            SceneElementPortBO portConnectedPort = pluginHandler.getSceneHandler().getPortConnectedPort(port.getId());
+            if (null != portConnectedPort) {
+                String id = portConnectedPort.getElement().getId();
+                CloudPluginSceneElementBO cloudPluginSceneConfigElementBO = pluginHandler.getElement(id);
+                if (!BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudPluginSceneConfigElementBO.getImageType())) {
+                    cloudPluginSceneConfigElementBO.setManagementIp(element.getManagementIp());
+                } else {
+                    if (processedElementIds.contains(cloudPluginSceneConfigElementBO.getSrcElement().getId())) continue;
+                    cloudPluginSceneConfigElementBO.setManagementIp(element.getManagementIp());
+                    propagateMgmtIpToElements(pluginHandler, cloudPluginSceneConfigElementBO, processedElementIds);
                 }
             }
         }
-        return null; // 如果没有找到符合条件的CIDR
-    }
-
-    public void delete(CloudPluginSceneElementBO cloudElement) {
-        azureResourceManager.containerGroups().deleteById(cloudElement.getResourceId());
     }
 }

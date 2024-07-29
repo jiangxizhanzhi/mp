@@ -164,7 +164,7 @@ public class AzureContainer {
                                          double cpu, double ram) {
         Registry registrytest0407 = azureResourceManager.containerRegistries().getByResourceGroup("upload_resources", "registry0530");
         RegistryCredentials acrCredentials = registrytest0407.getCredentials();
-        String imageName = registrytest0407.loginServerUrl() + "/" + image;
+//        String imageName = registrytest0407.loginServerUrl() + "/" + image;
 
         ContainerGroup.DefinitionStages.WithNextContainerInstance attach = (ContainerGroup.DefinitionStages.WithNextContainerInstance) azureResourceManager
                 .containerGroups()
@@ -175,7 +175,7 @@ public class AzureContainer {
                 .withPrivateImageRegistry(registrytest0407.loginServerUrl(), acrCredentials.username(), acrCredentials.accessKeys().get(AccessKeyType.PRIMARY))
                 .withoutVolume()
                 .defineContainerInstance(containerGroupName)
-                .withImage(imageName)
+                .withImage(image)
                 .withExternalTcpPort(80)
                 .withCpuCoreCount(cpu)
                 .withMemorySizeInGB(ram)
@@ -183,7 +183,7 @@ public class AzureContainer {
                 .attach();
         ContainerGroup container;
         if (isPublicIp) {
-            container = attach.withDnsPrefix("yourDNSPrefix") // 这里指定DNS前缀
+            container = attach.withDnsPrefix("yourDNSPrefix-" + containerName.replaceAll("_", "")) // 这里指定DNS前缀
                     .withRestartPolicy(ContainerGroupRestartPolicy.NEVER)
                     .create();
         } else {

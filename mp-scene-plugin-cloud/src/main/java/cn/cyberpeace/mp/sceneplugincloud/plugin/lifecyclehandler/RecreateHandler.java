@@ -133,14 +133,15 @@ public class RecreateHandler extends HandlerCommon {
                 if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
                     runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_VIRTUAL_MACHINE,
                             () -> {
+                                closeAccessModes(cloudElement);
                                 AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
                                 azureVirtualMachine.delete(cloudElement);
-                                closeAccessModes(cloudElement);
                                 this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                             });
                 } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
                     runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_CONTAINER,
                             () -> {
+                                closeAccessModes(cloudElement);
                                 AzureContainer azureContainer = new AzureContainer(IAzureResourceManager.getInstance(cloudType));
                                 azureContainer.delete(cloudElement.getResourceId());
                                 super.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
@@ -167,11 +168,11 @@ public class RecreateHandler extends HandlerCommon {
                 } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
                     runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_LOAD,
                             () -> {
+                                closeAccessModes(cloudElement);
                                 DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
                                 DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
                                 Load load = new Load(synchronousDataSource);
                                 load.delete(cloudElement);
-                                closeAccessModes(cloudElement);
                                 this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                             });
                 }
@@ -265,6 +266,7 @@ public class RecreateHandler extends HandlerCommon {
                                 List<VirtualNic> virtualNics = this.genVirutalNics(cloudElement);
                                 AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
                                 azureVirtualMachine.create(getPluginHandler(), cloudElement, virtualNics, combineInitCommand(cloudElement));
+                                openAccessModes(cloudElement);
                             });
                 } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
                     runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_CONTAINER,
@@ -280,6 +282,7 @@ public class RecreateHandler extends HandlerCommon {
                                 }
                                 new AzureContainer(IAzureResourceManager.getInstance(cloudType))
                                         .create(getPluginHandler(), cloudElement, this.genVirutalNics(cloudElement));
+                                openAccessModes(cloudElement);
                             });
                 } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
                     runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_LOAD,
@@ -295,7 +298,7 @@ public class RecreateHandler extends HandlerCommon {
                                 }
                                 DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
                                 DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
-                                new Load(synchronousDataSource).create(cloudElement);
+                                new Load(synchronousDataSource).create(getPluginHandler(),cloudElement);
 
                             });
                 }

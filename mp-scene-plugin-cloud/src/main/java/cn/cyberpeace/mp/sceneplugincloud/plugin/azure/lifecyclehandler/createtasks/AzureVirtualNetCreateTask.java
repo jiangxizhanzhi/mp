@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualNet;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
+import cn.cyberpeace.mp.sceneplugincloud.util.ElementNetworkUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,14 +22,15 @@ public class AzureVirtualNetCreateTask implements Runnable {
 
     private CloudPluginSceneElementBO element;
 
-    private ConcurrentHashMap<String, Boolean> cidrContainerMap;
+    private ConcurrentHashMap<String, ElementNetworkUtils.CidrType> cidrContainerMap;
 
     private HashMap<String, List<VirtualNic>> virtualNicsMap;
+
 
     public AzureVirtualNetCreateTask(IAzureResourceManager resourceService,
                                      CloudScenePluginHandler pluginHandler,
                                      CloudPluginSceneElementBO element,
-                                     ConcurrentHashMap<String, Boolean> cidrContainerMap,
+                                     ConcurrentHashMap<String, ElementNetworkUtils.CidrType> cidrContainerMap,
                                      HashMap<String, List<VirtualNic>> virtualNicsMap) {
         this.azureVirtualNet = new AzureVirtualNet(resourceService);
         this.pluginHandler = pluginHandler;

@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
+import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;

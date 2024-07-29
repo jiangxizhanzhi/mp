@@ -215,7 +215,7 @@ public class InitiateHandler extends HandlerCommon {
                                             sceneElementSituationProbeModel.setScene(eid);
                                             sceneElementSituationProbeModel.setSceneElement(srcElement.getId());
                                             sceneElementSituationProbeModel.setProbeId(probe.getId());
-                                            sceneElementSituationProbeModel.setStatus(SceneElementSituationProbeModel.ProbeStatus.UPDATING.getValue());
+                                            sceneElementSituationProbeModel.setStatus(SceneElementSituationProbeModel.ProbeStatus.RUNNING.getValue());
                                             sceneElementSituationProbeModel.setDeleted(false);
                                             return sceneElementSituationProbeModel;
                                         }).collect(Collectors.toList());

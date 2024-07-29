@@ -1,21 +1,28 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction;
 
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.functionrequest.RouteTableCreateRequestBody;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionrequest.RouteTableCreateRequestBody;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionresponse.FirewallBuildResponseBody;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionresponse.RouteTableBuildResult;
 import com.azure.resourcemanager.AzureResourceManager;
+import com.azure.resourcemanager.network.fluent.models.SubnetInner;
 import com.azure.resourcemanager.network.models.Network;
-import com.azure.resourcemanager.network.models.RouteNextHopType;
 import com.azure.resourcemanager.network.models.RouteTable;
 import com.azure.resourcemanager.network.models.Subnet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class RouteTableFunction {
 
     // 路由表创建
-    public Boolean createRouteTable(Integer cloudType, RouteTableCreateRequestBody body) {
+    public FirewallBuildResponseBody createRouteTable(FirewallBuildResponseBody responseBody, Integer cloudType, RouteTableCreateRequestBody body) {
+        responseBody.setRouteTableBuildResult(new RouteTableBuildResult());
         try {
             // 获取默认订阅Id的资源管理器
             AzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(cloudType).getManager();
@@ -24,37 +31,58 @@ public class RouteTableFunction {
             String routeTableName = body.getName();
             String region = body.getRegion();
 
-            // 创建路由表并添加默认路由
+            // 创建路由表
             RouteTable routeTable = azureResourceManager.routeTables().define(routeTableName)
                     .withRegion(region)
                     .withExistingResourceGroup(resourceGroupName)
-                    .defineRoute("default-route")
-                        .withDestinationAddressPrefix("0.0.0.0/0")
-                        .withNextHop(RouteNextHopType.VIRTUAL_APPLIANCE)
-                        .attach()
+                    .defineRoute("defaultRoute").withDestinationAddressPrefix("0.0.0.0/0").withNextHopToVirtualAppliance(body.getFirewallPrivateAddress()).attach()
                     .create();
 
-            // 将路由表关联到防火墙所在的子网
+            // 将子网关联到路由表
             Network network = azureResourceManager.networks().getByResourceGroup(resourceGroupName, body.getVirtualNetwork().name());
-            Subnet subnet = network.subnets().get("AzureFirewallSubnet");
-            subnet.listAvailablePrivateIPAddresses().forEach(ip -> {
+            Map<String, Subnet> subnets = network.subnets();
 
-            });
-            subnet.getRouteTable().update().updateRoute(routeTableName)
-                    .withDestinationAddressPrefix("0.0.0.0/0")
-                    .withNextHopToVirtualAppliance(body.getFirewallPrivateAddress())
-                    .parent()
-                    .apply();
-
+            // 需要绑定到路由表的子网名称
+            List<String> needRouteTableAddressNames = new ArrayList<>();
+            List<String> routeTableAddressNames = body.getNeedRouteTableAddressName();
+            if (routeTableAddressNames != null) {
+                needRouteTableAddressNames.addAll(routeTableAddressNames);
+            }
+            needRouteTableAddressNames.add("AzureFirewallSubnet");
+            needRouteTableAddressNames.add("AzureFirewallManagementSubnet");
+            for (Map.Entry<String, Subnet> entry : subnets.entrySet()) {
+                if (!needRouteTableAddressNames.contains(entry.getKey())){
+                    // 获取子网关联的现有路由表
+                    Subnet subnet = entry.getValue();
+                    RouteTable subnetRouteTable = subnet.getRouteTable();
+                    // 如果子网没有关联路由表，或者关联的路由表不是指定的 routeTable，则更新子网的路由表
+                    if (subnetRouteTable == null || !subnetRouteTable.id().equalsIgnoreCase(routeTable.id())) {
+                        if(subnetRouteTable == null){
+                            // 如果子网没有关联路由表，则创建新的路由表
+                            SubnetInner subnetInner = subnet.innerModel().withRouteTable(routeTable.innerModel());
+                            azureResourceManager.networks().manager().serviceClient().getSubnets().createOrUpdate(resourceGroupName, network.name(), subnet.name(), subnetInner);
+                        }else{
+                            subnetRouteTable.update().defineRoute("defaultRoute")
+                                    .withDestinationAddressPrefix("0.0.0.0/0")
+                                    .withNextHopToVirtualAppliance(body.getFirewallPrivateAddress())
+                                    .attach();
+                            System.out.println("子网 " + entry.getKey() + " 已成功关联到路由表 " + routeTableName);
+                        }
+                    } else {
+                        System.out.println("子网 " + entry.getKey() + " 已经关联到路由表 " + routeTableName);
+                    }
+                }
+            }
         } catch (Exception e) {
-            System.err.println("创建防火墙失败：" + e.getMessage());
+            System.err.println("创建路由表失败：" + e.getMessage());
+            responseBody.getRouteTableBuildResult().setResult(false);
+            responseBody.getRouteTableBuildResult().setErrorMessage("创建路由表失败：" + e.getMessage());
             e.printStackTrace();
-            return false;
+            return responseBody;
         }
-        return true;
+        responseBody.getRouteTableBuildResult().setResult(true);
+        return responseBody;
     }
-
-
 
 
 }

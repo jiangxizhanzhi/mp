@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
+import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
@@ -15,7 +16,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureContainer;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.Load;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.deletetasks.AzureVirtualMachineDeleteTask;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.deletetasks.LoadDeleteTask;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
@@ -447,10 +448,11 @@ public class DeleteHandler extends HandlerCommon {
             if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_VIRTUAL_MACHINE,
                         () -> {
-                            AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
-                            azureVirtualMachine.delete(cloudElement);
-                            closeAccessModes(cloudElement);
-                            this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                            SceneTaskPool.getInstance().executeTask(() -> {
+                                AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+                                azureVirtualMachine.delete(cloudElement);
+                                this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                            });
                         });
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_CONTAINER,

@@ -3,12 +3,7 @@ package cn.cyberpeace.mp.devopscluster.service;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntity;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.converter.SupportExportConvert;
 import cn.cyberpeace.mp.devopscluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
@@ -23,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +30,7 @@ import java.util.stream.Collectors;
 
 /**
  * 靶标管理
+ *
  * @author wanggang
  */
 @Service
@@ -44,8 +41,13 @@ public class DevopsTargetService {
 
     private final SupportExportConvert supportExportConvert;
 
+    @Autowired
+    private GXPTTargetServiceImpl gxptTargetServiceImpl;
+
+
     /**
      * 分页
+     *
      * @param dto
      * @return
      */
@@ -57,6 +59,7 @@ public class DevopsTargetService {
 
     /**
      * 统计总数
+     *
      * @param dto
      * @return
      */
@@ -66,6 +69,7 @@ public class DevopsTargetService {
 
     /**
      * 更新
+     *
      * @param device
      * @return
      */
@@ -82,6 +86,7 @@ public class DevopsTargetService {
 
     /**
      * 新增
+     *
      * @param deviceList
      * @return
      */
@@ -94,12 +99,23 @@ public class DevopsTargetService {
             d.setSupportExport(this.getSupportExport(d));
         }
         List<DeviceTargetPO> deviceTargetPOS = deviceList.stream().map(this::convertToTargetModel)
-                                                       .collect(Collectors.toList());
+                .collect(Collectors.toList());
         var user = UserCommon.getCurrentUser();
         deviceTargetPOS.forEach(d -> {
             d.setCreateUser(user != null ? user.getId() : StringUtils.EMPTY);
             d.setCreateUserName(user != null ? user.getName() : StringUtils.EMPTY);
         });
+        for (DeviceTargetPO target : deviceTargetPOS) {
+            // 共性平台同步新增靶标
+            Map<String, Object> resultMap = gxptTargetServiceImpl.addTarget(target);
+            if (resultMap != null && resultMap.get("code") != null && resultMap.get("code").equals("200")) {
+                target.setIsSychronized("true");
+                target.setReturnData(resultMap.toString());
+                target.setReturnId(resultMap.get("data").toString());
+            } else {
+                target.setIsSychronized("false");
+            }
+        }
         return deviceTargetMapper.batchInsert(deviceTargetPOS);
     }
 
@@ -123,6 +139,7 @@ public class DevopsTargetService {
 
     /**
      * 靶标类型统计
+     *
      * @return
      */
     public Map<String, Object> countTarget() {
@@ -131,6 +148,7 @@ public class DevopsTargetService {
 
     /**
      * 虚拟靶标统计
+     *
      * @return
      */
     public Map<String, Object> countVmTarget() {
@@ -139,6 +157,7 @@ public class DevopsTargetService {
 
     /**
      * 实体靶标统计
+     *
      * @return
      */
     public Map<String, Object> countEntityTarget() {
@@ -147,6 +166,7 @@ public class DevopsTargetService {
 
     /**
      * 删除所有靶标数据
+     *
      * @return
      */
     @Transactional
@@ -156,6 +176,7 @@ public class DevopsTargetService {
 
     /**
      * 删除指定靶标
+     *
      * @param dto
      * @return
      */
@@ -174,6 +195,7 @@ public class DevopsTargetService {
 
     /**
      * 转换Device
+     *
      * @param device
      * @return
      */

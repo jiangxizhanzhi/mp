@@ -165,4 +165,13 @@ public class DeviceTargetPO extends BaseModel {
      */
     @DefaultStr
     private String createUserName;
+
+    //是否已同步共性平台
+    private String isSychronized;
+
+    //同步共性平台返回data
+    private String returnData;
+
+    //同步共性平台返回id
+    private String returnId;
 }

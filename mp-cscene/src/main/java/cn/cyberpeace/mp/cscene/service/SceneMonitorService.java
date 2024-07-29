@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
@@ -21,6 +22,7 @@ import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.AccessUserBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
@@ -31,6 +33,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
+import cn.cyberpeace.mp.sceneplugincloud.service.CloudCommonConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
@@ -78,6 +81,9 @@ public class SceneMonitorService {
 
     @Resource
     private CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper;
+
+    @Resource
+    private CloudCommonConfigService cloudCommonConfigService;
 
     /**
      * CsceneInstanceBO转为SceneMonitorInfo
@@ -359,25 +365,11 @@ public class SceneMonitorService {
                     }
                 });
             }
+            ServiceResult<Map<String, Object>> systemTypeToAgentSupport = cloudCommonConfigService.getSystemTypeToAgentSupport();
             basicInfos.forEach(basicInfo -> {
                 basicInfo.setAccessUsers(nodeId2Users.getOrDefault(basicInfo.getId(), new ArrayList<>())
                         .stream().distinct().collect(Collectors.toList()));
-//                    TODO 录屏暂改
-                /*for (ElementPort port : basicInfo.getPorts()) {
-                    for (AccessMode accessMode : port.getAccessModes()) {
-                        accessMode.setAvailable(true);
-                        accessMode.setUsername("admin123");
-                        accessMode.setPassword("NHiOJiZTD4K1");
-                        accessMode.setPort(22);
-                        accessMode.setProtocol("ssh");
-                        accessMode.setAccessIp("20.2.10.118");
-                        accessMode.setProxy(true);
-                        accessMode.setAccessPort(22);
-                        accessMode.setProxyId("1");
-                    }
-
-                }*/
-
+                basicInfo.setOsType(systemTypeToAgentSupport.getSource().get(basicInfo.getSystemType()).toString());
 
             });
 
@@ -570,4 +562,21 @@ public class SceneMonitorService {
     }
 
 
+    public List<ElementMonitorBasicInfo> getNonContainerCloudElements(String sceneId, Boolean realTimeHostState, SceneAllElementsQueryRequest request) {
+        List<ElementMonitorBasicInfo> allSceneElements = getAllSceneElements(sceneId, realTimeHostState, request);
+        var sceneInstanceId = csceneCommonService.translateSceneId(sceneId);
+        SceneHandler sceneHandler = new SceneHandler(sceneInstanceId, null, null);
+
+        // 根据名称模糊筛选
+        var stream = sceneHandler.getElementMap().values().stream();
+        //        云场景容器无探针信息 去除
+        Integer cloudType = sceneHandler.getScene().getCloudType();
+        if (null != cloudType && BaseSceneModel.CloudType.DEFAULT != cloudType) {
+            return allSceneElements.stream()
+                    .filter(basicInfo -> !BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(basicInfo.getImageType()))
+                    .collect(Collectors.toList());
+
+        }
+        return allSceneElements;
+    }
 }

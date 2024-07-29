@@ -11,8 +11,10 @@ import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
@@ -22,22 +24,11 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CoreType;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.InitiateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -437,7 +428,6 @@ public class InitiateHandler extends HandlerCommon {
                     continue;
                 }
             }
-//           TODO 需要修改此处代码 VNet 只填cidr 此处判断是否是VNet且cidr不为空
             // 需要自己处理网络的端口
             String cidrDivideIp = null;
             if (StringUtils.isNotEmpty(port.getIp())) {
@@ -476,7 +466,6 @@ public class InitiateHandler extends HandlerCommon {
                 } else if (this.isInCidr(defaultConnectedNetwork.getNetwork().getCidr(), cidrDivideIp)) {
                     defaultConnectedNetwork.addPort(port, connectPort, true);
                 } else {
-//                    TODO 未连线路由器在此处创建网络 VNet照做
                     // 和默认网段不同,构建网络
                     ConnectedNetworkBO connectedNetwork = cidr2ConnectedNetwork.get(cidr);
                     if (connectedNetwork == null) {
@@ -491,7 +480,6 @@ public class InitiateHandler extends HandlerCommon {
         }
         if (this.isCoreRouter(cloudElement)) {
             // 核心路由 每个端口都接网络
-//            TODO VNet每个端口都需要网络
             if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
                 if (defaultNetwordIsDerive) {
                     cloudElement.getDeriveNetworks().add(defaultConnectedNetwork);
@@ -508,7 +496,10 @@ public class InitiateHandler extends HandlerCommon {
                 }
             }
             for (ConnectedNetworkBO n : cidr2ConnectedNetwork.values()) {
+                Integer cloudType = getPluginHandler().getScene().getSrcScene().getCloudType();
                 if (CollectionUtils.isNotEmpty(n.getToPorts())) {
+                    deriveNetworks.add(n);
+                } else if (null != cloudType && cloudType != BaseSceneModel.CloudType.DEFAULT) {
                     deriveNetworks.add(n);
                 }
             }
@@ -677,6 +668,9 @@ public class InitiateHandler extends HandlerCommon {
      * @param element 辅助网络节点
      */
     private void initIpPool(CloudPluginSceneElementBO element) {
+//        边界设备不做处理
+        if (BaseCloudPluginSceneElementModel.ImageType.NETWORK_EQUIPMENT.equals(element.getImageType())) return;
+
         element.getDeriveNetworks().forEach(connectedNetwork -> {
             CloudPluginSceneElementNetworkBO network = connectedNetwork.network;
             String cidr = network.getCidr();
@@ -1254,11 +1248,22 @@ public class InitiateHandler extends HandlerCommon {
 
     private void markIpSetedPorts() {
         if (getPluginHandler().getElementPortMap() != null) {
-            getPluginHandler().getElementPortMap().values().forEach(p -> {
+            Collection<CloudPluginSceneElementPortBO> values = getPluginHandler().getElementPortMap().values();
+            values.forEach(p -> {
                 if (p.getSrcPort() != null && StringUtils.isNotEmpty(p.getSrcPort().getIp())) {
                     getHandlerUtils().addManualConfigIpPort(p.getSrcPort());
                 }
             });
+            Map<String, List<String>> elementIpMap = values.stream()
+                    .filter(p -> p.getSrcPort() != null && StringUtils.isNotEmpty(p.getSrcPort().getIp()))
+                    .collect(Collectors.groupingBy(
+                            p -> p.getSrcPort().getElement().getId(),
+                            Collectors.mapping(
+                                    p -> p.getSrcPort().getIp(),
+                                    Collectors.toList()
+                            )
+                    ));
+            getPluginHandler().getScene().getSrcScene().setElementIpMap(elementIpMap);
         }
     }
 }

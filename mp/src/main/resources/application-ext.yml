@@ -138,6 +138,12 @@ mp:
       windows-path: ${WAZUH_AGENT_SCRIPT_WINDOWS_PATH:C:\ossec-agent\shared\scripts\}
       es-date-pattern: ${ES_DATE_PATTERN:yyyy-MM-dd'T'HH:mm:ss.SSSZ}
       self-port: ${MP_SELF_PORT:8001}
+      public-management-image-id: ${PUBLIC_MANAGEMENT_IMAGE_ID:0}
+      private-management-image-id: ${PRIVATE_MANAGEMENT_IMAGE_ID:0}
+      mix-management-image-id: ${MIX_MANAGEMENT_IMAGE_ID:0}
+      management-username: ${MANAGEMENT_USERNAME:admin123}
+      management-password: ${MANAGEMENT_PASSWORD:NHiOJiZTD4K1}
+
   # mp-log 模块
   log:
     ext-var:

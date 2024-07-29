@@ -43,6 +43,7 @@ import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneStatCommon;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -63,6 +64,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class ScenePluginCloudSceneService {
+    @Resource
+    private SituationAwareConfig situationAwareConfig;
 
     public static final List<String> COUNT_ELEMENT_FIELDS = Arrays.asList(
             BeanUtils.getBeanGetterFieldNames(
@@ -496,7 +499,7 @@ public class ScenePluginCloudSceneService {
         sceneConnectionParam.setSystemType(cloudElement.getSrcElement() == null ? StringUtils.EMPTY : cloudElement.getSrcElement().getSystemType());
         sceneConnectionParam.setDepartment(context == null ? StringUtils.EMPTY : context.getRequestUserOrg());
         sceneConnectionParam.setEntity(cloudElement.getVirtualType() != null && cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
-        var sceneConnection = CloudSceneConnectionCommon.getOrCreateSceneConnection(sceneConnectionParam);
+        var sceneConnection = CloudSceneConnectionCommon.getOrCreateSceneConnection(sceneConnectionParam,situationAwareConfig);
         if (sceneConnection == null) {
             return new ServiceResult<>(null);
         }
@@ -522,11 +525,6 @@ public class ScenePluginCloudSceneService {
             }
         }
         return new ServiceResult<>(nodeConnection);
-//                    TODO 录屏暂改
-        /*var nodeConnection1 = new NodeConnectionBO();
-        nodeConnection1.setConnectionUrl("http://10.108.1.10:9200/guacamole/#/client/MTE3AGMAbXlzcWw=");
-        nodeConnection1.setConnectionId("1");
-        return new ServiceResult<>(nodeConnection1);*/
     }
 
     private String formatUrl(String inputUrl, AccessModeLinkInfo modeLinkInfo) {

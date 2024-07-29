@@ -81,22 +81,17 @@ public class StartHandler extends HandlerCommon {
         Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
         if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
             if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
-                //启动
-                AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
-                azureVirtualMachine.start(instanceId);
-//                TODO 挂载ISO USB
-                /*if (StringUtils.isNotEmpty(element.getIsoAttachFilename()) && StringUtils.isNotEmpty(element.getIsoTmpdirUuid())) {
-                    this.attachISO(element);
-                }
-                //挂载一下usb
-                if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(element.getVirtualUsbs())) {
-                    this.attachVirtualUsbs(element);
-                }
-                if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(element.getEntityUsbs())) {
-                    this.attachEntityUsbs(element);
-                }*/
-                //检查接入方式是否可用
-                checkAccessModes(element);
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.START, Arrays.asList(
+                        StartHandler.ElementProcess.START_VIRTUAL_MACHINE));
+                runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_VIRTUAL_MACHINE, () -> {
+                    //启动
+                    AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+                    azureVirtualMachine.start(element);
+                    //                    TODO 云场景连接用的公网ip 这里用私有ip测不通 暂去
+//                checkAccessModes(element);
+                    openAccessModes(element);
+                });
+
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
                 getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.START, Arrays.asList(
                         StartHandler.ElementProcess.START_CONTAINER));
@@ -105,7 +100,8 @@ public class StartHandler extends HandlerCommon {
                     AzureContainer azureContainer = new AzureContainer(IAzureResourceManager.getInstance(cloudType));
                     azureContainer.start(instanceId);
                     //检查接入方式是否可用
-                    checkAccessModes(element);
+//                    checkAccessModes(element);
+                    openAccessModes(element);
                 });
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
                 getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.START, Arrays.asList(
@@ -117,8 +113,6 @@ public class StartHandler extends HandlerCommon {
                     Load load = new Load(synchronousDataSource);
 
                     load.start(element.getLoadResourceInstanceId());
-                    //检查接入方式是否可用
-                    checkAccessModes(element);
                 });
             }
         } else {

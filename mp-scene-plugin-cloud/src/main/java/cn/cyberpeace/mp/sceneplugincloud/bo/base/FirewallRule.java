@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class FirewallRule {
     @ApiModelProperty(value = "源ip")
@@ -21,4 +23,7 @@ public class FirewallRule {
     private String action;
     @ApiModelProperty(value = "方向")
     private String direction;
+
+    @ApiModelProperty(value = "协议")
+    private List<String> protocols;
 }

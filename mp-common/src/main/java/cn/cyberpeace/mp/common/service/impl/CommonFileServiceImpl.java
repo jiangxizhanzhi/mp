@@ -18,6 +18,11 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 public class CommonFileServiceImpl extends BaseRemoteFileServiceImpl {
 
+    private static final String IMAGE = "image";
+    private static final String ATTACHMENT = "attachment";
+    private static final String README = "readMe";
+
+
     @Autowired
     public CommonFileServiceImpl(FdfsCommon fdfsCommon) {
         setFileClient(LfsCommon.lfsClient);
@@ -26,17 +31,17 @@ public class CommonFileServiceImpl extends BaseRemoteFileServiceImpl {
     public ServiceResult uploadFile(InputStream inputStream, String fileName, String fileSuffix, String uploadType) {
         //检验文件格式
         switch (uploadType) {
-            case "image":
+            case IMAGE:
                 if (!SuffixCheckUtil.checkBySuffix(fileSuffix, FileSuffixConstant.LOAD_UPLOAD_IMAGE_LIST)) {
                     return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID, "不符合所需格式的文件").asResult();
                 }
                 break;
-            case "attachment":
+            case ATTACHMENT:
                 if (!SuffixCheckUtil.checkBySuffix(fileSuffix, FileSuffixConstant.LOAD_UPLOAD_FILE_LIST)) {
                     return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID, "不符合所需格式的文件").asResult();
                 }
                 break;
-            case "readMe":
+            case README:
                 if (!SuffixCheckUtil.checkBySuffix(fileSuffix, FileSuffixConstant.LOAD_UPLOAD_FILE_README_LIST)) {
                     return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID, "不符合所需格式的文件").asResult();
                 }

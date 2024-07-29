@@ -166,6 +166,16 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String publicIpAddress;
     @DefaultStr
     private String cidrPools;
+    @DefaultStr
+    private String managementIp;
+
+    //    边界设备
+    @DefaultStr
+    private String address;
+    @DefaultStr
+    private String protocol;
+    @DefaultStr
+    private String port;
 
     // 靶标属性
     @DefaultInt
@@ -263,6 +273,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final int ENTITY_TERMINAL = 51;
 
         public static final int LOAD = 60;
+        public static final int EQUIPMENT = 61;
     }
 
     public static class ImageType {
@@ -275,6 +286,9 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final String VNET = "VNet";
         public static final String LAAS_VM = "laasVm";
         public static final String CONTAINER_REGISTRY = "containerRegistry";
+        public static final String NETWORK_EQUIPMENT = "networkEquipment";
+        public static final String FIRE_WALL = "fireWall";
+
 
         private ImageType() {
         }

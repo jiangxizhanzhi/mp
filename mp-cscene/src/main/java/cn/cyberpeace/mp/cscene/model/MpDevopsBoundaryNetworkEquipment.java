@@ -74,4 +74,12 @@ public class MpDevopsBoundaryNetworkEquipment extends BaseModel {
      * 镜像类型
      */
     private String imageType;
+    /**
+     * 角色
+     */
+    private Integer role;
+    /**
+     * 设备分类
+     */
+    private Integer category;
 }

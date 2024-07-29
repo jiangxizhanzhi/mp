@@ -58,6 +58,9 @@ public class ElementMonitorBasicInfo {
     @ApiModelProperty(value = "节点基本信息-镜像类型")
     private String imageType;
 
+    @ApiModelProperty(value = "云节点额外信息")
+    private CloudElementMonitorBasicInfo cloudElementMonitorBasicInfo;
+
     @ApiModelProperty(value = "节点基本信息-角色")
     private Integer role;
 
@@ -88,5 +91,8 @@ public class ElementMonitorBasicInfo {
 
     @ApiModelProperty(value = "接入用户集合")
     private List<AccessUserBO> accessUsers;
+
+    @ApiModelProperty(value = "操作系统类型")
+    private String osType;
 
 }

@@ -12,7 +12,10 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
-import cn.cyberpeace.mp.auth.model.*;
+import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.TenantUserModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
@@ -25,6 +28,7 @@ import cn.cyberpeace.mp.auth.util.*;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
@@ -39,6 +43,7 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -118,6 +123,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Autowired
     private UserRoleMapper userRoleMapper;
 
+    @Autowired
+    GXPTUserServiceImpl gxptUserServiceImpl;
+
 
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
@@ -167,6 +175,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     /**
      * 判断是否有头像，没有则设置为默认头像
+     *
      * @param userModel
      */
     @Override
@@ -182,6 +191,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     /**
      * 判断是否有头像，没有则设置为默认头像
+     *
      * @param userModels
      */
     @Override
@@ -208,6 +218,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     /**
      * 批量转换头像路径为fdfs地址
+     *
      * @param userBos
      */
     public void batchSetDefaultIfNoAvatar(List<UserBo> userBos) {
@@ -307,7 +318,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public ServiceResult<Boolean>  delete(String userId) {
+    public ServiceResult<Boolean> delete(String userId) {
+        // 共性平台同步删除
+        gxptUserServiceImpl.delete(userId);
         if (opUserPermCheckService.isOperateSelf(Collections.singletonList(userId))) {
             throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_DELETE_SELF);
         }
@@ -326,6 +339,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Integer> bulkDelete(String[] userIds) {
+        // 共性平台同步删除
+        gxptUserServiceImpl.bulkDelete(userIds);
         if (opUserPermCheckService.isOperateSelf(Arrays.asList(userIds))) {
             throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_DELETE_SELF);
         }
@@ -375,6 +390,23 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel userCreated = result.getSource().getObj();
         String userId = userCreated.getId();
         log.info("user create success id:{}", userId);
+
+        //在创建用户成功后,将数据同步到共性平台
+        Map<String, Object> resultMap = gxptUserServiceImpl.addUser(userCreated);
+        if (resultMap != null && resultMap.get("code") != null && (Integer) resultMap.get("code") == 200) {
+            log.error("同步用户到共性平台成功");
+            //根据id修改数据库中相关数据为gxpt返回的信息
+            JSONObject json = new JSONObject();
+            json.put("isSychronized", true);
+            json.put("returnData", resultMap.toString());
+            json.put("returnInfo", resultMap.get("returnInfo") != null ? resultMap.get("returnInfo").toString() : "");
+            gxptUserServiceImpl.updateUser(userCreated, json);
+        } else {
+            log.error("同步用户到共性平台失败");
+            JSONObject json = new JSONObject();
+            json.put("isSychronized", false);
+            gxptUserServiceImpl.updateUser(userCreated, json);
+        }
 
         // 保存组织-用户关系
         if (CollectionUtils.isNotEmpty(createRequest.getOrgIds())) {
@@ -889,12 +921,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         Map<String, OrgBO> orgMap = allOrgs.stream().collect(Collectors.toMap(OrgBO::getId, org -> org));
         Set<String> roleIds = new HashSet<>();
         userOrgRoleBos.forEach(user -> {
-            if(StringUtils.isNotBlank(user.getRoles())){
+            if (StringUtils.isNotBlank(user.getRoles())) {
                 roleIds.addAll(Arrays.asList(user.getRoles().split(",")));
             }
         });
         List<RoleModel> allRoles = roleService.listByIds(roleIds);
-        Map<String,RoleModel> roleMap = allRoles.stream().collect(Collectors.toMap(RoleModel::getId, role->role));
+        Map<String, RoleModel> roleMap = allRoles.stream().collect(Collectors.toMap(RoleModel::getId, role -> role));
 
         List<UserBo> userBos = new ArrayList<>();
         for (UserOrgRoleBo userOrgRoleBo : userOrgRoleBos) {
@@ -958,7 +990,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
 
-        if(needRole) {
+        if (needRole) {
             List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
             userBo.setRoles(roles);
 
@@ -970,7 +1002,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         return userBo;
     }
-
 
 
 //    @Override
@@ -1117,7 +1148,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         boolean cleanUserTargetsSuccess = userPermissionService.deleteByUserId(userId);
         boolean cleanUserTenantsSuccess = tenantUserService.deleteByUserId(userId);
 
-        if(!cleanUserRolesSuccess || !cleanUserOrgsSuccess || !cleanUserTargetsSuccess || !cleanUserTenantsSuccess) {
+        if (!cleanUserRolesSuccess || !cleanUserOrgsSuccess || !cleanUserTargetsSuccess || !cleanUserTenantsSuccess) {
             log.info("cleanUserRolesSuccess:{}, cleanUserOrgsSuccess:{}, cleanUserTargetsSuccess:{}, cleanUserTenantsSuccess:{}", cleanUserRolesSuccess, cleanUserOrgsSuccess, cleanUserTargetsSuccess, cleanUserTenantsSuccess);
             throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
         }

@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
@@ -11,15 +13,14 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.NetworkSecurityGroupUtils;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.fluent.models.ResourceSkuInner;
 import com.azure.resourcemanager.compute.models.*;
-import com.azure.resourcemanager.network.models.Network;
-import com.azure.resourcemanager.network.models.NetworkInterface;
-import com.azure.resourcemanager.network.models.NetworkSecurityGroup;
-import com.azure.resourcemanager.network.models.PublicIpAddress;
+import com.azure.resourcemanager.network.models.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileWriter;
@@ -29,6 +30,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class AzureVirtualMachine {
     private IAzureResourceManager resourceService;
 
@@ -36,10 +38,13 @@ public class AzureVirtualMachine {
 
     private Region region;
 
+    private SituationAwareConfig situationAwareConfig;
+
     public AzureVirtualMachine(IAzureResourceManager resourceService) {
         this.resourceService = resourceService;
         this.azureResourceManager = resourceService.getManager();
         this.region = resourceService.getRegin();
+        this.situationAwareConfig = BeanCommon.getBean(SituationAwareConfig.class);
     }
 
     public void VirtualMachinelist() throws IOException {
@@ -55,36 +60,6 @@ public class AzureVirtualMachine {
         writer.close();
         System.out.println("end------------------------------------------------");
 
-    }
-
-    public List<Map<String, String>> listsAllAvailableResourceSKUsForTheSpecifiedRegion() throws IOException {
-        ArrayList<Map<String, String>> dataMaps = new ArrayList<>();
-        PagedIterable<ResourceSkuInner> list = azureResourceManager
-                .virtualMachines()
-                .manager()
-                .serviceClient()
-                .getResourceSkus()
-                .list();
-
-        // 使用 Set 来存储已经出现过的 sku.name()，保证不重复
-        Set<String> uniqueNames = new HashSet<>();
-        for (ResourceSkuInner sku : list) {
-            if (ComputeResourceType.VIRTUALMACHINES.toString().equals(sku.resourceType())) {
-                String name = sku.name();
-                List<String> locations = sku.locations();
-                if (!uniqueNames.contains(sku.name()) && (locations.contains(Region.ASIA_EAST.label()) || locations.contains(Region.ASIA_EAST.name()))) {
-                    // 如果当前 sku.name() 没有出现过，则添加到 uniqueNames 集合中，并保留这个 sku 作为第一个唯一的 sku
-                    uniqueNames.add(sku.name());
-                    // 将 capabilities 转换为一个 Map，并直接添加到 dataMap 中
-                    Map<String, String> capabilityMap = sku.capabilities().stream()
-                            .collect(Collectors.toMap(ResourceSkuCapabilities::name, ResourceSkuCapabilities::value));
-                    // 添加 name 和 capabilityMap 到 dataMap
-                    capabilityMap.put("name", name);
-                    dataMaps.add(capabilityMap);
-                }
-            }
-        }
-        return dataMaps;
     }
 
     public List<Map<String, String>> listsAllSkusWithCapabilities(ComputeResourceType type) throws IOException {
@@ -142,6 +117,71 @@ public class AzureVirtualMachine {
         return dataMaps;
     }
 
+    public VirtualMachine createManagementVM(Integer cloudType, String groupName, String vmName, Network network, String subName) {
+        String customImageId = null;
+        switch (cloudType){
+            case BaseSceneModel.CloudType.PUBLIC:
+                customImageId = situationAwareConfig.getPublicManagementImageId();
+                break;
+            case BaseSceneModel.CloudType.PRIVATE:
+                customImageId = situationAwareConfig.getPrivateManagementImageId();
+                break;
+            case BaseSceneModel.CloudType.MIX:
+                customImageId = situationAwareConfig.getMixManagementImageId();
+                break;
+        }
+        PublicIpAddress publicIpAddress = azureResourceManager.publicIpAddresses().define("PublicIP" + vmName)
+                .withRegion(region)
+                .withExistingResourceGroup(groupName)
+                .withDynamicIP()
+                .create();
+
+        VirtualMachine virtualMachine = azureResourceManager.virtualMachines()
+                .define(vmName)
+                .withRegion(region)
+                .withNewResourceGroup(groupName)
+                .withExistingPrimaryNetwork(network)
+                .withSubnet(subName)
+                .withPrimaryPrivateIPAddressDynamic()
+                .withExistingPrimaryPublicIPAddress(publicIpAddress)
+                .withGeneralizedLinuxCustomImage(customImageId)
+                .withRootUsername(situationAwareConfig.getManagementUsername())
+                .withRootPassword(situationAwareConfig.getManagementPassword())
+                .withOSDiskStorageAccountType(StorageAccountTypes.STANDARD_LRS)
+                .withOSDiskSizeInGB(30)
+                .withSize(VirtualMachineSizeTypes.STANDARD_B1S)
+                .create();
+        NetworkInterface primaryNetworkInterface = virtualMachine.getPrimaryNetworkInterface();
+
+//        开放8080、8200端口
+        NetworkSecurityGroup nsg = azureResourceManager.networkSecurityGroups()
+                .define("nsg-" + vmName)
+                .withRegion(this.region)
+                .withExistingResourceGroup(groupName)
+                .defineRule("allow-8080")
+                .allowInbound()
+                .fromAnyAddress()
+                .fromAnyPort()
+                .toAnyAddress()
+                .toPort(8080)
+                .withProtocol(SecurityRuleProtocol.ASTERISK)
+                .withPriority(3200)
+                .attach()
+                .defineRule("allow-8200")
+                .allowInbound()
+                .fromAnyAddress()
+                .fromAnyPort()
+                .toAnyAddress()
+                .toPort(8200)
+                .withProtocol(SecurityRuleProtocol.ASTERISK)
+                .withPriority(3300)
+                .attach()
+                .create();
+        primaryNetworkInterface.update().withExistingNetworkSecurityGroup(nsg).apply();
+
+        return virtualMachine;
+    }
+
     public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData) {
 //        cloudElement.setResourceId("1233");
 //        cloudElement.setPublicIpAddress("20.30.40.5");
@@ -187,99 +227,33 @@ public class AzureVirtualMachine {
                         if (null == protocol) continue;
                         String[] protoclos = protocol.split(";");
                         for (int j = 0; j < protoclos.length; j++) {
-                            NetworkSecurityGroupUtils.addInRule(accessMode.getProtocol().toLowerCase(), nsgUpdate, 3100 + i * 200 + j * 10);
+                            NetworkSecurityGroupUtils.addInRule(protoclos[j], nsgUpdate, 3100 + i * 200 + j * 10);
                         }
                     }
                     nsgUpdate.apply();
                     networkInterface.update().withExistingNetworkSecurityGroup(nsg).apply();
                 }
             }
-
         }
-
-    }
-
-    public void create1(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData) {
-//        cloudElement.setResourceId("1233");
-//        cloudElement.setPublicIpAddress("20.30.40.5");
-
-//        TODO 资源不浪费
-
-        String groupName = pluginHandler.getSourceSceneId();
-
-        // 调用微软云api 创建虚拟机 回写虚拟机id
-        VirtualMachine vm = createVirtualMachine(cloudElement, virtualNics, userData, groupName);
-        cloudElement.setResourceId(vm.id());
-        if (cloudElement.getIsPublicIp()) {
-            cloudElement.setPublicIpAddress(vm.getPrimaryPublicIPAddress().ipAddress());
-        }
-
-//        创建网络安全组
-//        绑定网络接口
-//        设置入站规则
-//        更新网络安全组
-
-        SceneElementBO srcElement = cloudElement.getSrcElement();
-
-        for (SceneElementPortBO port : srcElement.getPorts()) {
-            List<AccessMode> accessModes = port.getAccessModes();
-            String ip = port.getIp();
-//            匹配网络接口
-            if (StringUtils.isNotBlank(ip)) {
-                PagedIterable<NetworkInterface> networkInterfaces = azureResourceManager.networkInterfaces().list();
-
-                Optional<NetworkInterface> first = networkInterfaces.stream().filter(networkInterface -> ip.equals(networkInterface.primaryPrivateIP())).findFirst();
-                if (first.isPresent()) {
-                    NetworkInterface networkInterface = first.get();
-                    //            创建nsg
-                    NetworkSecurityGroup nsg = azureResourceManager.networkSecurityGroups()
-                            .define("ssh-nsg-" + networkInterface.name())
-                            .withRegion(this.region)
-                            .withExistingResourceGroup(groupName)
-                            .create();
-                    NetworkSecurityGroup.Update nsgUpdate = nsg.update();
-                    for (int i = 0; i < accessModes.size(); i++) {
-                        AccessMode accessMode = accessModes.get(i);
-                        String protocol = accessMode.getProtocol();
-                        if (null == protocol) continue;
-                        String[] protoclos = protocol.split(";");
-                        for (int j = 0; j < protoclos.length; j++) {
-                            NetworkSecurityGroupUtils.addInRule(accessMode.getProtocol().toLowerCase(), nsgUpdate, 3100 + i * 200 + j * 10);
-                        }
-                    }
-                    nsgUpdate.apply();
-                    networkInterface.update().withExistingNetworkSecurityGroup(nsg).apply();
-                }
-            }
-
-        }
-
     }
 
     public void delete(CloudPluginSceneElementBO cloudElement) {
-        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(cloudElement.getResourceId());
-        virtualMachine.deallocate();//停机，释放资源
-//        删除虚拟机
-        azureResourceManager.virtualMachines().deleteById(cloudElement.getResourceId());
-//        删除存储账户 无法从virtualMachine直接找到存储账户name stg472874959defb
-//        virtualMachine.storageProfile().osDisk().vhd().uri() https://stg472874959defb.blob.core.windows.net/vhds/MP_SCENE_ac5a089e081147e6af2406942cdd44bf-os-disk-b6e312ca-9d10-485a-a9f7-136bee35135a.vhd
-        String uri = virtualMachine.storageProfile().osDisk().vhd().uri();
-        String storageName = extractStorageAccountNameFromVhdUri(uri);
-        String groupName = virtualMachine.resourceGroupName();
-        azureResourceManager.storageAccounts().deleteByResourceGroup(groupName, storageName);
-//        删除网络接口
-        azureResourceManager.networkInterfaces().deleteById(virtualMachine.getPrimaryNetworkInterface().id());
-    }
+        try {
+            VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(cloudElement.getResourceId());
 
-    // 从 VHD URI 中提取存储账户 ID
-    private static String extractStorageAccountNameFromVhdUri(String vhdUri) {
-        // 假设 VHD URI 的格式为：https://<storage-account-name>.blob.core.windows.net/<container-name>/<vhd-name>.vhd
-        // 根据该格式，可以提取存储账户
-        String[] parts = vhdUri.split("/");
-        if (parts.length >= 4) {
-            return parts[2].substring(0, parts[2].indexOf('.'));
+            String osDiskId = virtualMachine.osDiskId();
+            String networkInterfaceId = virtualMachine.getPrimaryNetworkInterface().id();
+            PublicIpAddress primaryPublicIPAddress = virtualMachine.getPrimaryPublicIPAddress();
+            //        删除虚拟机及绑定资源
+            azureResourceManager.virtualMachines().deleteById(cloudElement.getResourceId());
+            azureResourceManager.disks().deleteById(osDiskId);
+            azureResourceManager.networkInterfaces().deleteById(networkInterfaceId);
+            if (null != primaryPublicIPAddress) {
+                azureResourceManager.publicIpAddresses().deleteById(primaryPublicIPAddress.id());
+            }
+        } catch (Exception e) {
+            log.error("The VM failed to be deleted.", e);
         }
-        return null;
     }
 
     public void execCommand(String group, String vmName, List<String> commands) {
@@ -296,14 +270,25 @@ public class AzureVirtualMachine {
         virtualMachine.powerOff();
     }
 
-    public void restart(String instanceId) {
-        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(instanceId);
+    public void restart(CloudPluginSceneElementBO element) {
+        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(element.getResourceId());
+//        关机无法重启 先开机
+        PowerState powerState = virtualMachine.powerState();
+        if (PowerState.RUNNING != powerState) {
+            virtualMachine.start();
+        }
         virtualMachine.restart();
+        if (element.getIsPublicIp()) {
+            element.setPublicIpAddress(virtualMachine.getPrimaryPublicIPAddress().ipAddress());
+        }
     }
 
-    public void start(String instanceId) {
-        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(instanceId);
+    public void start(CloudPluginSceneElementBO element) {
+        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(element.getResourceId());
         virtualMachine.start();
+        if (element.getIsPublicIp()) {
+            element.setPublicIpAddress(virtualMachine.getPrimaryPublicIPAddress().ipAddress());
+        }
     }
 
     public void unpause(String instanceId) {
@@ -320,7 +305,10 @@ public class AzureVirtualMachine {
         VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(cloudElement.getResourceId());
         VirtualMachine.Update update = virtualMachine.update().withSize(cloudElement.getVmSizeType());
         Integer expansionDisk = cloudElement.getSrcElement().getExpansionDisk();
-        if (expansionDisk != null && expansionDisk > 0 && StringUtils.isNotBlank(cloudElement.getVmExpansionDiskType())) {
+        if (!cloudElement.getExpansion() &&
+                expansionDisk != null &&
+                expansionDisk > 0 &&
+                StringUtils.isNotBlank(cloudElement.getVmExpansionDiskType())) {
             update.withDataDiskDefaultStorageAccountType(StorageAccountTypes.fromString(cloudElement.getVmExpansionDiskType()))
                     .withNewDataDisk(expansionDisk);
         }
@@ -353,7 +341,7 @@ public class AzureVirtualMachine {
         // azure todo 调整 root name
         VirtualNic virtualNic = virtualNics.get(0);
         String netId = virtualNic.getNetworkId();
-        if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudElement.getVmType())) {
+        if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudElement.getVmType().toLowerCase())) {
             creator = createWindowsVM(cloudElement, userData, groupName, azureResourceManager, region, vmName, netId, virtualNic, disk, expansionDisk, vmExpansionDiskType, storageAccountTypes, flavor);
         } else {
             creator = createLinuxVM(cloudElement, userData, groupName, azureResourceManager, region, vmName, netId, virtualNic, disk, expansionDisk, vmExpansionDiskType, storageAccountTypes, flavor);
@@ -371,60 +359,6 @@ public class AzureVirtualMachine {
         // 创建虚拟机
         return creator.create();
     }
-
-    /**
-     * 创建虚拟机的方法
-     *
-     * @param cloudElement 云插件场景元素
-     * @param virtualNics  虚拟网卡列表
-     * @param userData     用户数据
-     * @param groupName    资源组名称
-     * @return 创建的虚拟机对象
-     */
-    private VirtualMachine createVirtualMachine1(CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData, String groupName) {
-        // 生成虚拟机名称
-        String vmName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
-
-        // 获取网络ID
-        String netId = virtualNics.stream()
-                .filter(v -> StringUtils.isNotBlank(v.getNetworkId()))
-                .map(VirtualNic::getNetworkId)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Network ID is required"));
-
-        // 获取第一块网卡
-        VirtualNic virtualNic = virtualNics.get(0);
-
-        // 获取磁盘信息
-        Integer disk = cloudElement.getSrcElement().getDisk();
-        Integer expansionDisk = cloudElement.getSrcElement().getExpansionDisk();
-        String vmExpansionDiskType = cloudElement.getVmExpansionDiskType();
-
-        // 定义虚拟机大小和存储账户类型
-        VirtualMachineSizeTypes flavor = StringUtils.isNotBlank(cloudElement.getVmSizeType()) ? VirtualMachineSizeTypes.fromString(cloudElement.getVmSizeType()) : VirtualMachineSizeTypes.STANDARD_B1S;
-        StorageAccountTypes storageAccountTypes = StringUtils.isNotBlank(cloudElement.getVmOsDiskType()) ? StorageAccountTypes.fromString(cloudElement.getVmOsDiskType()) : StorageAccountTypes.STANDARD_SSD_LRS;
-
-        VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged creator;
-
-        if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudElement.getVmType())) {
-            creator = createWindowsVM(cloudElement, userData, groupName, azureResourceManager, region, vmName, netId, virtualNic, disk, expansionDisk, vmExpansionDiskType, storageAccountTypes, flavor);
-        } else {
-            creator = createLinuxVM(cloudElement, userData, groupName, azureResourceManager, region, vmName, netId, virtualNic, disk, expansionDisk, vmExpansionDiskType, storageAccountTypes, flavor);
-        }
-//        TODO 绑定管理网络 回写管理网络信息
-//        element.getMgmtIp()
-
-        // 添加其他网卡
-        for (int i = 1; i < virtualNics.size(); i++) {
-            VirtualNic nic = virtualNics.get(i);
-            NetworkInterface ni = createNetworkInterface(azureResourceManager, region, groupName, nic, netId);
-            creator.withExistingSecondaryNetworkInterface(ni);
-        }
-
-        // 创建虚拟机
-        return creator.create();
-    }
-
 
     /**
      * 创建Windows虚拟机

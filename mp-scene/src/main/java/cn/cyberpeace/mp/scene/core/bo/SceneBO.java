@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class SceneBO extends BaseSceneBO<SceneModel, SceneBO> implements BaseSceneEventModel {
@@ -39,6 +40,8 @@ public class SceneBO extends BaseSceneBO<SceneModel, SceneBO> implements BaseSce
     private Integer stagePercentage;
     @ApiModelProperty(value = "阶段列表")
     private List<SceneStageRecorder.SceneStageRecord> stageList;
+    @ApiModelProperty(value = "节点初始ip")
+    private Map<String, List<String>> elementIpMap;
 
     @Override
     public SceneModel createModel() {

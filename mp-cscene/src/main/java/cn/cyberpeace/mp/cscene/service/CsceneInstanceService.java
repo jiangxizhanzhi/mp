@@ -91,9 +91,11 @@ import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.SnapshotAddressUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincollection.model.ElementLogListModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
@@ -101,13 +103,13 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.PublicWazuhControlCommon;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
+import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincollection.repository.ElementLogListMapper;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
-import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhProbeDataModel;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
@@ -243,6 +245,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private CsceneCommonService csceneCommonService;
+
+    @Autowired
+    private CollectionPluginSceneElementMapper collectionPluginSceneElementMapper;
 
 
     // expires in 10 minutes
@@ -593,7 +598,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 agentNames.add(element.getEid());
             }
             e.getProbes().forEach(probe -> {
-                if (Boolean.FALSE.equals(probe.getCommon()) && !probeIds.contains(probe.getId())) {
+                if (!Boolean.TRUE.equals(probe.getCommon()) && !probeIds.contains(probe.getId())) {
                     probeIds.add(probe.getId());
                     probeId2ProbeName.put(probe.getId(), probe.getName());
                 }
@@ -683,22 +688,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (recorder != null) {
             recorder.refreshSceneBO(scene);
         }
-        //                    TODO 录屏暂改
-        /*data.getScene().getPlugins().get("cpcloud").getElementPorts().forEach((nodeId, element) -> {
-            CloudAccessMode accessMode = new CloudAccessMode();
-            accessMode.setAvailable(true);
-            accessMode.setUsername("admin123");
-            accessMode.setPassword("NHiOJiZTD4K1");
-            accessMode.setPort(22);
-            accessMode.setProtocol("ssh");
-            accessMode.setAccessIp("20.2.10.118");
-            accessMode.setProxy(true);
-            accessMode.setAccessPort(22);
-            accessMode.setProxyId("1");
-            ArrayList<CloudAccessMode> cloudAccessModes = new ArrayList<>();
-            cloudAccessModes.add(accessMode);
-            element.put("access_modes", cloudAccessModes);
-        });*/
 
         return new ServiceResult<>(data);
     }
@@ -1367,11 +1356,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         } finally {
             CsceneContextHolder.resetContext();
         }
-//                    TODO 录屏暂改
-        /*var nodeConnection1 = new NodeConnectionBO();
-        nodeConnection1.setConnectionUrl("http://10.108.1.10:9200/guacamole/#/client/MTE3AGMAbXlzcWw=");
-        nodeConnection1.setConnectionId("1");
-        return new ServiceResult<>(nodeConnection1);*/
     }
 
     public ServiceResult<NodeConnectionBO> getRemoteTtyConnection(String id, String nodeId) {
@@ -1637,12 +1621,20 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public ServiceResult<SceneLinkStatusInfo> linkStatus(String csceneId) {
         String sceneId = getSceneId(csceneId);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+        Integer cloudType = sceneHandler.getScene().getCloudType();
         var result = scenePluginCloudSceneService.linkStatus(sceneId).getSource();
         SceneLinkStatusInfo sceneLinkStatusInfo = new SceneLinkStatusInfo();
         sceneLinkStatusInfo.setNodeLinkStatusList(result);
         sceneLinkStatusInfo.setCsceneId(csceneId);
         sceneLinkStatusInfo.getNodeLinkStatusList().stream().forEach(nodeLinkStatusBO -> {
             nodeLinkStatusBO.setStatus(1);
+            if (cloudType != null && BaseSceneModel.CloudType.DEFAULT != cloudType) {
+                nodeLinkStatusBO.getConnectionStatusList().stream().forEach(connectionStatusBO -> {
+                    connectionStatusBO.setStatus(1);
+                });
+            }
+
         });
         return new ServiceResult<>(sceneLinkStatusInfo);
     }
@@ -2050,6 +2042,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Transactional(rollbackFor = Exception.class)
     public void modifyProbes(String id, String nodeId, List<Probe> probeList, int status, Boolean isDelete, SceneElementSituationProbeModel.ProbeType probeType) {
         SceneHandler sceneHandler = new SceneHandler(id, null, null);
+        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        Map<String, CollectionPluginSceneElementBO> elementMap = pluginHandler.getElementMap();
+        CollectionPluginSceneElementBO collectionPluginSceneElementBO = elementMap.get(nodeId);
 //        先删除
         HumanCondition probeListHumanCondition = new HumanCondition()
                 .filterEqual(SceneElementSituationProbeModel::getScene, id)
@@ -2059,7 +2054,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
 //        更新探针
         probeList.forEach(probe -> {
-            modifyProbe(sceneHandler, nodeId, probe, probeType);
+            modifyProbe(sceneHandler, nodeId, probe, probeType, collectionPluginSceneElementBO);
         });
 //            默认执行完成
         List<SceneElementSituationProbeModel> sceneElementSituationProbeModels =
@@ -2075,6 +2070,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                             return sceneElementSituationProbeModel;
                         }).collect(Collectors.toList());
         sceneElementSituationProbeMapper.bulkCreate(sceneElementSituationProbeModels);
+        HumanCondition humanCondition = new HumanCondition()
+                .currentLink(CollectionPluginSceneElementModel.class)
+                .filterEqual(CollectionPluginSceneElementModel::getScene, id)
+                .filterEqual(CollectionPluginSceneElementModel::getSceneElement, nodeId);
+        CollectionPluginSceneElementModel collectionPluginSceneElementModel = collectionPluginSceneElementMapper.first(humanCondition);
+        if (null != collectionPluginSceneElementModel) {
+            collectionPluginSceneElementModel.setProbes(JsonCommon.stringify(collectionPluginSceneElementBO.getProbes()));
+            collectionPluginSceneElementMapper.update(collectionPluginSceneElementModel);
+        }
 
     }
 
@@ -2136,41 +2140,41 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         Integer cloudType = sceneHandler.getScene().getCloudType();
-        if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
-            return new ServiceResult<>(false);
+        if (cloudType == BaseSceneModel.CloudType.DEFAULT) {
+            throw new MpRuntimeException("传统场景，不支持扩容");
         }
 
         CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         CloudPluginSceneElementBO element = cloudPlugin.getElement(request.getNodeId());
         String imageType = element.getImageType();
-        if (!BaseCloudPluginSceneElementModel.ImageType.VM.equals(imageType)) {
+        if (!BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(imageType)) {
             throw new MpRuntimeException("非虚拟机节点，不支持扩容");
         }
 
         if (null != request.getVmSizeType()) {
             element.setVmSizeType(request.getVmSizeType());
         }
-        if (element.getExpansion()) {
-            throw new MpRuntimeException("不允许二次扩容");
-        }
         element.setVmExpansionDiskType(request.getExpansionDiskType());
         element.getSrcElement().setExpansionDisk(request.getExpansionDisk());
-        if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(element.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == element.getVirtualType()) {
+        if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(element.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == element.getVirtualType()) {
             SceneTaskPool.getInstance().executeTask(() -> {
                 AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
                 azureVirtualMachine.expansion(element);
             });
-            element.setExpansion(true);
+            Integer expansionDisk = element.getSrcElement().getExpansionDisk();
+            if (!element.getExpansion() &&
+                    expansionDisk != null &&
+                    expansionDisk > 0 &&
+                    StringUtils.isNotBlank(element.getVmExpansionDiskType())) {
+                element.setExpansion(true);
+            }
             CloudPluginSceneElementModel cloudPluginSceneElementModel = element.toModel();
-
             HumanCondition humanCondition = new HumanCondition()
                     .filterEqual(CloudPluginSceneElementModel::getScene, sceneHandler.getSceneId())
                     .filterEqual(CloudPluginSceneElementModel::getSceneElement, request.getNodeId());
             cloudPluginSceneElementMapper.filterUpdate(cloudPluginSceneElementModel, humanCondition);
             SceneElementModel sceneElementModel = element.getSrcElement().toModel();
             sceneElementMapper.update(sceneElementModel);
-
-
             return new ServiceResult<>(true);
         }
         return new ServiceResult<>(false);
@@ -2242,9 +2246,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
      * @param elementId
      * @param probe
      * @param probeType
+     * @param collectionPluginSceneElementBO
      */
-    public void modifyProbe(SceneHandler sceneHandler, String elementId, Probe probe, SceneElementSituationProbeModel.ProbeType probeType) {
+    public void modifyProbe(SceneHandler sceneHandler, String elementId, Probe probe, SceneElementSituationProbeModel.ProbeType probeType, CollectionPluginSceneElementBO collectionPluginSceneElementBO) {
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+
         var collectionElement = pluginHandler.getElement(elementId);
         var srcElement = collectionElement.getSrcElement();
         String agentName = srcElement.getEid();
@@ -2264,6 +2270,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             removeParams.setScriptUrl(StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, probe.getScriptUrl().replaceFirst("/api/mp/file/", "")));
             removeParams.setAction(WazuhControl.CONTROL_ACTION_REMOVE);
             controlConfigParam.getProbeParams().add(removeParams);
+            List<Probe> probes = collectionPluginSceneElementBO.getProbes();
+            probes = probes.stream()
+                    .filter(p -> !p.getId().equals(probe.getId()))
+                    .collect(Collectors.toList());
+            collectionPluginSceneElementBO.setProbes(probes);
         }
         // 新增操作
         if (SceneElementSituationProbeModel.ProbeType.ADD == probeType || SceneElementSituationProbeModel.ProbeType.UPDATE == probeType) {
@@ -2273,6 +2284,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             addParams.setGroup(groupId);
             addParams.setAction(WazuhControl.CONTROL_ACTION_ADD);
             controlConfigParam.getProbeParams().add(addParams);
+            List<Probe> probes = collectionPluginSceneElementBO.getProbes();
+            probes.add(probe);
+            collectionPluginSceneElementBO.setProbes(probes);
         }
 
         var osType = SystemTypeCommandUtils.getOsType(systemType);

@@ -1,12 +1,6 @@
 package cn.cyberpeace.mp.auth.util;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public enum ParentCodeEnum {
-
-    UNKNOWN_ERROR("0000", "发生未知错误"),
-    PARENT_SYSTEM_TYPE("1001", "操作系统"),
 
     PARENT_MIXCLOUD_CATEGORY_TYPE("1002", "混合云配置项菜单"),
 
@@ -20,22 +14,6 @@ public enum ParentCodeEnum {
     ParentCodeEnum(String code, String message) {
         this.code = code;
         this.message = message;
-    }
-
-    private static final Map<String, ParentCodeEnum> intToEnum = new HashMap<>();
-
-    static {
-        for (ParentCodeEnum p : values()) {
-            intToEnum.put(p.getCode(), p);
-        }
-    }
-
-    public static ParentCodeEnum fromInt(Integer type) {
-        try {
-            return intToEnum.get(type);
-        } catch (Exception e) {
-            return UNKNOWN_ERROR;
-        }
     }
 
     public String getCode() {
