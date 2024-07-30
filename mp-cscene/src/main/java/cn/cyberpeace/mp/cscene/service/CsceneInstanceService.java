@@ -50,6 +50,7 @@ import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
+import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -681,14 +682,24 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<CsceneInstanceBO> getById(String id, CsceneContextBO context) {
-        var instanceHandler = new CsceneInstanceHandler(id, context);
-        var data = instanceHandler.toData();
-        var scene = data.getScene().getTopology().getScene();
-        var recorder = SceneStageRecorder.getRecorder(scene.getEid());
+        var instanceHandler = new CsceneInstanceHandler(id, null, context);
+        CsceneInstanceBO data = instanceHandler.toData();
+        SceneBO scene = data.getScene().getTopology().getScene();
+        SceneStageRecorder recorder = SceneStageRecorder.getRecorder(scene.getEid());
         if (recorder != null) {
             recorder.refreshSceneBO(scene);
         }
+        return new ServiceResult<>(data);
+    }
 
+    public ServiceResult<CsceneInstanceBO> getById(String id, String areaId, CsceneContextBO context) {
+        var instanceHandler = new CsceneInstanceHandler(id, areaId, context);
+        CsceneInstanceBO data = instanceHandler.toData();
+        SceneBO scene = data.getScene().getTopology().getScene();
+        SceneStageRecorder recorder = SceneStageRecorder.getRecorder(scene.getEid());
+        if (recorder != null) {
+            recorder.refreshSceneBO(scene);
+        }
         return new ServiceResult<>(data);
     }
 
