@@ -4,6 +4,9 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Data;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -23,6 +26,9 @@ public class UserOnlineRecordSummaryDto {
     private String name;
 
     @ApiModelProperty(value = "累计在线时长（小时）")
-    private Double totalOnlineHours;
+    private int totalOnlineHours;
 
+    public Double getTotalOnlineHours() {
+        return new BigDecimal(this.totalOnlineHours).divide(new BigDecimal(60), 2, RoundingMode.UP).doubleValue();
+    }
 }
