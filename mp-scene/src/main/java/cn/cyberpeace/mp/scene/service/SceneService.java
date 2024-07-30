@@ -153,8 +153,7 @@ public class SceneService {
         }
     }
 
-    public ServiceResult<SceneDataBO> modify(String sceneId, SceneDataBO updatedSceneData, SceneContextBO context, Runnable runner) {
-        SceneHandler originSceneHandler = new SceneHandler(sceneId, null, false, context);
+    public ServiceResult<SceneDataBO> modify(String sceneId, SceneDataBO updatedSceneData, SceneContextBO context, SceneHandler originSceneHandler,  Runnable runner) {
         // 场景信息目前只更新显示参数
         String newDisplayContext = updatedSceneData.getTopology().getScene().getDisplayContext();
         updatedSceneData.getTopology().setScene(originSceneHandler.getScene());

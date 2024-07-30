@@ -1723,12 +1723,17 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<CsceneInstanceBO> instanceModify(CsceneUpdateBO csceneBO) {
+        var originHandler = new CsceneInstanceHandler(csceneBO.getId(), null);
+        // 更新区域
+        csceneBO.getUpdateScene().getTopology().getScene().setEid(originHandler.getSceneId());
+        SceneHandler sceneHandler = new SceneHandler(csceneBO.getUpdateScene(), null);
+        sceneHandler.save();
+
         CsceneInstanceBO instance = new CsceneInstanceBO();
         instance.setId(csceneBO.getId());
         instance.setPassThrough(csceneBO.getContext() != null ? csceneBO.getContext().getPassThrough() : new HashMap<>());
         instance.setScene(csceneBO.getUpdateScene());
 
-        CsceneInstanceHandler originHandler = new CsceneInstanceHandler(csceneBO.getId(), null);
         // 保留隐藏节点和隐藏端口
         var originData = originHandler.toDataWithHidden().getScene();
         Set<String> hiddenElementIds = new HashSet<>();
@@ -1852,7 +1857,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
 
         var instanceHandler = new CsceneInstanceHandler(instance, csceneBO.getContext());
-        instanceHandler.update();
+        instanceHandler.update(originSceneHandler);
         return new ServiceResult<>(instanceHandler.toData());
     }
 
