@@ -137,7 +137,7 @@ public class FlowActuatorServiceImpl extends BaseModelServiceImpl<FlowActuatorMo
             } else if (stopping > 0) {
                 f.setStatus(TaskStatusEnum.STOPING.toValue());
             } else if (stoped > 0) {
-                f.setStatus(TaskStatusEnum.STOPING.toValue());
+                f.setStatus(TaskStatusEnum.STOPED.toValue());
             } else {
                 f.setStatus(TaskStatusEnum.INIT.toValue());
             }
