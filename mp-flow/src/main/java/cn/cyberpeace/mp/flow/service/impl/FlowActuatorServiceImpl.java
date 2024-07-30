@@ -184,9 +184,9 @@ public class FlowActuatorServiceImpl extends BaseModelServiceImpl<FlowActuatorMo
         if (CollectionUtils.isNotEmpty(taskIds)) {
             log.debug("FlowActuatorService.batchReboot begin. taskIds:{}", taskIds);
             // 先停止
-            asyncPlatFlowTaskService.batchStartTasks(taskIds, null);
-            // 再启动
             asyncPlatFlowTaskService.batchStopTasks(taskIds);
+            // 再启动
+            asyncPlatFlowTaskService.batchStartTasks(taskIds, null);
             log.debug("FlowActuatorService.batchReboot end.");
         }
     }
