@@ -461,8 +461,8 @@ public class ScenePluginCloudSceneService {
     }
 
     public ServiceResult<NodeConnectionBO> getSceneRemoteConnection(String sceneId, String nodeId,
-                                                                    String accessModeId, String userId,
-                                                                    CloudScenePluginContext context) {
+                                                                    String accessModeId, String interpreter,
+                                                                    String userId, CloudScenePluginContext context) {
         var accessModeInfoMap = collectAccessModeLinkInfo(sceneId, List.of(nodeId));
         var accessModeInfo = accessModeInfoMap.getOrDefault(accessModeId, null);
         if (accessModeInfo == null) {
@@ -499,7 +499,7 @@ public class ScenePluginCloudSceneService {
         sceneConnectionParam.setSystemType(cloudElement.getSrcElement() == null ? StringUtils.EMPTY : cloudElement.getSrcElement().getSystemType());
         sceneConnectionParam.setDepartment(context == null ? StringUtils.EMPTY : context.getRequestUserOrg());
         sceneConnectionParam.setEntity(cloudElement.getVirtualType() != null && cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
-        var sceneConnection = CloudSceneConnectionCommon.getOrCreateSceneConnection(sceneConnectionParam,situationAwareConfig);
+        var sceneConnection = CloudSceneConnectionCommon.getOrCreateSceneConnection(sceneConnectionParam, situationAwareConfig, interpreter);
         if (sceneConnection == null) {
             return new ServiceResult<>(null);
         }

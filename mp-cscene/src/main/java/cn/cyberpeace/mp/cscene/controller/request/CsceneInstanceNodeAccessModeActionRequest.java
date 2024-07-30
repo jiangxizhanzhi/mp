@@ -7,4 +7,7 @@ import lombok.Data;
 public class CsceneInstanceNodeAccessModeActionRequest extends CsceneInstanceNodeActionRequest {
     @ApiModelProperty(value = "接入方式id")
     private String accessModeId;
+
+    @ApiModelProperty(value = "命令解释器")
+    private String interpreter;
 }

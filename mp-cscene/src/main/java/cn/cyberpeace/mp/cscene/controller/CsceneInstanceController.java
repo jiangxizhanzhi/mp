@@ -63,11 +63,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Api(value = "场景实例", tags = "CSCENE-场景实例")
 @Slf4j
@@ -187,13 +183,16 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     private CsceneInstanceNodeAccessModeActionRequest formatNodeAccessModeActionRequest(
             CsceneInstanceNodeAccessModeActionRequest request, String paramId, String paramNodeId,
-            String paramAccessModeId) {
+            String paramAccessModeId, String interpreter) {
         if (request == null) {
             request = new CsceneInstanceNodeAccessModeActionRequest();
         }
         request = (CsceneInstanceNodeAccessModeActionRequest) formatNodeActionRequest(request, paramId, paramNodeId);
         if (!StringUtils.isEmpty(paramAccessModeId)) {
             request.setAccessModeId(paramAccessModeId);
+        }
+        if (!StringUtils.isEmpty(interpreter)) {
+            request.setInterpreter(interpreter);
         }
         if (StringUtils.isBlank(request.getId())) {
             throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format("id"));
@@ -402,15 +401,17 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "accessModeId", value = "接入方式id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "interpreter", value = "命令解释器", dataTypeClass = String.class),
             @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeAccessModeActionRequest.class),
     })
     @PostMapping(value = "/get_connection")
     public ServiceResult<NodeConnectionBO> getRemoteConnection(@RequestParam(required = false) String id,
                                                                @RequestParam(required = false) String nodeId,
                                                                @RequestParam(required = false) String accessModeId,
+                                                               @RequestParam(required = false) String interpreter,
                                                                @RequestBody(required = false) CsceneInstanceNodeAccessModeActionRequest request) {
-        request = formatNodeAccessModeActionRequest(request, id, nodeId, accessModeId);
-        return modelService.getRemoteConnection(request.getId(), request.getNodeId(), request.getAccessModeId(),
+        request = formatNodeAccessModeActionRequest(request, id, nodeId, accessModeId, interpreter);
+        return modelService.getRemoteConnection(request.getId(), request.getNodeId(), request.getAccessModeId(), request.getInterpreter(),
                 request.getContext()).asResult();
     }
 
@@ -1051,7 +1052,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "area_id", value = "场景实例区域id", dataTypeClass = String.class)
     })
     @GetMapping("get_by_area")
-    public ServiceResult<CsceneInstanceBO> getByArea(@RequestParam String id, @RequestParam(required = false,name = "area_id") String areaId) {
+    public ServiceResult<CsceneInstanceBO> getByArea(@RequestParam String id, @RequestParam(required = false, name = "area_id") String areaId) {
         if (areaId == null) {
             areaId = StringUtils.EMPTY;
         }

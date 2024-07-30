@@ -1329,7 +1329,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(null);
     }
 
-    public ServiceResult<NodeConnectionBO> getRemoteConnection(String id, String nodeId, String accessModeId, CsceneContextBO context) {
+    public ServiceResult<NodeConnectionBO> getRemoteConnection(String id, String nodeId, String accessModeId, String interpreter, CsceneContextBO context) {
         try {
             CsceneContextHolder.setCsceneInstanceId(id);
             CsceneContextHolder.setCallAction(CsceneCallAction.NODE_ACCESS_USER);
@@ -1348,7 +1348,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 return new ServiceResult<>(null);
             }
             var cloudScenePluginContext = context.toCloudScenePluginContext();
-            var result = scenePluginCloudSceneService.getSceneRemoteConnection(sceneId, nodeId, accessModeId,
+            var result = scenePluginCloudSceneService.getSceneRemoteConnection(sceneId, nodeId, accessModeId, interpreter,
                     context.getAccessUserId(), cloudScenePluginContext);
 
             this.reportElementAccessUser(sceneId, nodeId);

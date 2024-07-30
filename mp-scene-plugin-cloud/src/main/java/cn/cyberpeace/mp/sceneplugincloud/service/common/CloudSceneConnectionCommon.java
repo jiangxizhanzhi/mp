@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincloud.service.common;
 
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -77,7 +76,7 @@ public class CloudSceneConnectionCommon {
         private String department;
     }
 
-    public static CloudPluginSceneConnectionModel getOrCreateSceneConnection(SceneConnectionParam param, SituationAwareConfig situationAwareConfig) {
+    public static CloudPluginSceneConnectionModel getOrCreateSceneConnection(SceneConnectionParam param, SituationAwareConfig situationAwareConfig, String interpreter) {
         var sceneId = param.getSceneId();
         var sceneElementId = param.getSceneElementId();
         var sceneElementPortId = param.getSceneElementPortId();
@@ -237,7 +236,7 @@ public class CloudSceneConnectionCommon {
                     connectionParams.setPort(AccessMode.Protocol.SSH);
                     connectionParams.setUsername(situationAwareConfig.getManagementUsername());
                     connectionParams.setPassword(situationAwareConfig.getManagementPassword());
-                    connectionParams.setCmd(getContainerCmd(pluginHandler, cloudType, element));
+                    connectionParams.setCmd(getContainerCmd(pluginHandler, cloudType, element,interpreter));
                 }
             } else {
                 connectionParams.setHostname(sceneConnection.getAccessIp());
@@ -343,16 +342,17 @@ public class CloudSceneConnectionCommon {
      * @param pluginHandler 云场景插件处理器，用于获取场景ID。
      * @param cloudType     云类型，用于获取特定云服务商的资源管理器实例。
      * @param cloudElement  云插件场景元素，用于生成容器名称。
+     * @param interpreter
      * @return 返回格式化后的容器启动命令字符串。
      */
-    private static String getContainerCmd(CloudScenePluginHandler pluginHandler, Integer cloudType, CloudPluginSceneElementBO cloudElement) {
+    private static String getContainerCmd(CloudScenePluginHandler pluginHandler, Integer cloudType, CloudPluginSceneElementBO cloudElement, String interpreter) {
         IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(cloudType);
         String azureClientId = azureResourceManager.getUser().getAzureClientId();
         String azureClientSecret = azureResourceManager.getUser().getAzureClientSecret();
         String azureTenantId = azureResourceManager.getUser().getAzureTenantId();
         String groupName = pluginHandler.getSourceSceneId();
         String containerName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
-        return String.format(CONTAINER_EXEC_COMMAND_TEMPLATE, azureClientId, azureClientSecret, azureTenantId, groupName, containerName, "/bin/bash");
+        return String.format(CONTAINER_EXEC_COMMAND_TEMPLATE, azureClientId, azureClientSecret, azureTenantId, groupName, containerName, interpreter);
     }
 
 }
