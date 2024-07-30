@@ -30,4 +30,6 @@ public class BaseSceneElementPortConnectionModel extends BaseModel {
     private String type;
     @DefaultStr
     private String vertices;
+    @DefaultStr
+    private String info;
 }
