@@ -453,7 +453,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
         // 后处理，刷新场景缓存
         String sceneId = getSceneHandler().getSceneId();
-        SceneInstanceLinkCacheUtil.refresh(sceneId);
+//        SceneInstanceLinkCacheUtil.refresh(sceneId);
     }
 
     /**

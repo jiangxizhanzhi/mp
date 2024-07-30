@@ -276,7 +276,7 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
         final String sid = sceneId;
         cscene.setScene(sceneService.modify(sid, cscene.getScene(), generateSceneContext(), originSceneHandler, () -> {
             //W:Refresh scene after running
-            SceneInstanceLinkCacheUtil.refresh(sid);
+//            SceneInstanceLinkCacheUtil.refresh(sid);
         }).getSource());
 
         CsceneInstanceModel csceneObj = cscene.toModel();

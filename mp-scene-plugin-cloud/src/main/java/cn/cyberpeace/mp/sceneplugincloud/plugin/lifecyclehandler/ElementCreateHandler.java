@@ -93,7 +93,7 @@ public class ElementCreateHandler extends HandlerCommon {
         getPluginHandler().updateElementNetworks(element.getSrcElement().getId());
         this.createHandler.createElementProcess(element);
         getPluginHandler().updateElements(element.getSrcElement().getId());
-        SceneInstanceLinkCacheUtil.refresh(getPluginHandler().getSourceSceneId());
+//        SceneInstanceLinkCacheUtil.refresh(getPluginHandler().getSourceSceneId());
     }
 
     /**
