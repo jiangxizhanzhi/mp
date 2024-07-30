@@ -129,7 +129,7 @@ public class SnapshotConverter {
             } else {
                 return containerSnapshots.stream().map(containerSnapshot -> {
                     SnapshotConvertModel snapshotConvertModel = new SnapshotConvertModel();
-                    snapshotConvertModel.setUuid(containerSnapshot.getId());
+                    snapshotConvertModel.setUuid(containerSnapshot.getImageId());
                     snapshotConvertModel.setDescription(containerSnapshot.getDescription());
                     snapshotConvertModel.setName(containerSnapshot.getName());
                     snapshotConvertModel.setCreatedAt(LocalDateTime.parse(containerSnapshot.getCreateAt(), DatePattern.NORM_WITH_MISE_DATETIME_FORMAT));
@@ -233,10 +233,11 @@ public class SnapshotConverter {
      * @return
      */
     public void delete(SnapshotDeleteRequest request) {
-        if (CONTAINER.equals(request.getImageType())) {
-            cloudClient.deleteContainerSnapshot(request.getInstanceId(), request.getSnapshotId());
+        Device device = deviceService.findByUuid(request.getDeviceUuid());
+        if (CONTAINER.equals(device.getImageType())) {
+            cloudClient.deleteContainerSnapshot(device.getExtDocker().getInstanceUuid(), request.getSnapshotUuid());
         } else {
-            cloudClient.deleteVmSnapshot(request.getInstanceId(), request.getSnapshotId());
+            cloudClient.deleteVmSnapshot(device.getExtVm().getInstanceUuid(), request.getSnapshotUuid());
         }
         snapshotMapper.delete(request.getSnapshotId());
     }

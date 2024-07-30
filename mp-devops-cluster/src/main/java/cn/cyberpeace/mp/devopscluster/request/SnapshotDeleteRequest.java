@@ -53,6 +53,7 @@ public class SnapshotDeleteRequest {
     @ApiModelProperty(value = "实例id")
     private String instanceId;
 
+    @Deprecated
     @ApiModelProperty(value = "快照id")
     private String snapshotId;
 
