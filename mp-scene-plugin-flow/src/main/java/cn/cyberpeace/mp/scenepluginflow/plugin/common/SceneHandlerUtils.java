@@ -17,7 +17,9 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskTaskInfo;
 import cn.cyberpeace.mp.flow.bo.BatchStartTaskBO;
 import cn.cyberpeace.mp.flow.bo.TaskSipBO;
+import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
+import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
 import cn.cyberpeace.mp.flow.service.FlowTaskTaskService;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
@@ -205,8 +207,8 @@ public class SceneHandlerUtils {
     public void deleteExecutor(String executorId) {
         flowExecutor.deleteExecutor(executorId);
 
-        BeanCommon.getBean(FlowTaskTaskMapper.class)
-                .filterDelete(new HumanCondition().filterEqual(FlowTaskTaskModel::getActuatorId, executorId));
+        BeanCommon.getBean(FlowActuatorMapper.class)
+                .filterDelete(new HumanCondition().filterEqual(FlowActuatorModel::getId, executorId));
     }
 
     /**
