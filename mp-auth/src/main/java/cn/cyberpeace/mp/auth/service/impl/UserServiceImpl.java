@@ -580,6 +580,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             // 若identifier为空，则设置identifier为null @See http://10.10.10.10/biz/bug-view-2390.html
             userModel.setIdentifier("");
         }
+
+        if (userModel.getExpiredTime() == null) {
+            userModel.initDefaultExpiredTime();
+        }
+
         // udpate中会对密码加密，外层不需要再次加密
         ObjServiceResult<UserModel> result = update(userModel);
 
