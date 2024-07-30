@@ -196,6 +196,7 @@ public class FlowActuatorServiceImpl extends BaseModelServiceImpl<FlowActuatorMo
 
         // 获取场景实例信息
         HumanCondition condition = new HumanCondition();
+        condition.filterEqual(SceneModel::getDeleted,false);
         if (StringUtils.isNotBlank(name)){
             condition.filterStartsWith(SceneModel::getName, name);
         }

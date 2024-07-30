@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.*;
@@ -35,6 +36,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -57,7 +60,6 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
 
     /**
      * listSceneByFuzzy
-     *
      * @param request
      * @return
      */
@@ -65,12 +67,33 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
     @ApiOperation("模糊搜索场景信息")
     @PostMapping("/list_scene")
     public ListObjServiceResult<SceneInstanceResponse> listSceneByFuzzy(@RequestBody ListSceneRequest request) {
-        // 默认查询20条信息上线
-        int limit = 20;
-        if (null != request && null != request.getLimit() && request.getLimit() > 0) {
-            limit = request.getLimit();
+        // 创建FlowActuatorQueryParams实例，用于设置分页查询参数
+        FlowActuatorQueryParams params = new FlowActuatorQueryParams();
+        // 设置查询的页码
+        params.setPage(1);
+        // 设置每页显示的条数
+        params.setPerPage(50);
+        // 调用flowActuatorService的page方法，根据设置的参数进行分页查询
+        var result = flowActuatorService.page(params);
+
+        // 初始化一个空列表，用于存储转换后的场景实例响应对象
+        List<SceneInstanceResponse> responseList = new ArrayList<>();
+        // 遍历查询结果中的每个对象
+        for (FlowActuatorResponse response : result.getSource().getObjs()) {
+            if (StringUtils.isNotEmpty(response.getSceneName())) {
+                // 创建一个新的SceneInstanceResponse实例
+                SceneInstanceResponse r = new SceneInstanceResponse();
+                // 将查询结果中的ID赋值给新的实例
+                r.setId(response.getId());
+                // 将查询结果中的场景名称赋值给新的实例
+                r.setName(response.getSceneName());
+                // 将新的实例添加到列表中
+                responseList.add(r);
+            }
         }
-        return flowActuatorService.listSceneByFuzzy(null == request? null : request.getName(), limit);
+        // 创建并返回一个服务结果对象，其中包含转换后的场景实例列表及其总数
+        return new ListObjServiceResult<>(new ListObjResult<>(responseList, responseList.size())).asResult();
+
     }
 
     /**
