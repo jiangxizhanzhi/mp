@@ -11,6 +11,7 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -20,6 +21,7 @@ import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
+import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.TaskStatusEnum;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
@@ -184,7 +186,13 @@ public class FlowActuatorServiceImpl extends BaseModelServiceImpl<FlowActuatorMo
         if (CollectionUtils.isNotEmpty(taskIds)) {
             log.debug("FlowActuatorService.batchReboot begin. taskIds:{}", taskIds);
             // 先停止
-            asyncPlatFlowTaskService.batchStopTasks(taskIds);
+            try {
+                asyncPlatFlowTaskService.batchStopTasks(taskIds);
+            } catch (MpRuntimeException exception) {
+                if (exception.getServiceCode() != FlowErrorCode.NO_RUNNING_TASK_TO_STOP) {
+                    throw exception;
+                }
+            }
             // 再启动
             asyncPlatFlowTaskService.batchStartTasks(taskIds, null);
             log.debug("FlowActuatorService.batchReboot end.");
