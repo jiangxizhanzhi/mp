@@ -698,7 +698,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
 
         CsceneModel model = new CsceneModel();
-        model.setDeleted(false);
+        model.setDeleted(true);
         var condition = new HumanCondition().filterEqual(CsceneModel::getCloneFrom, id);
         getModelMapper().filterUpdate(model, condition);
 
