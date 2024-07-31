@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.service.common;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -13,14 +14,20 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetRes
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
+import cn.hutool.core.io.FileUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -246,7 +253,29 @@ public class CloudSceneConnectionCommon {
         if (StringUtils.isEmpty(url)) {
             log.error("failed to get container console url , containId is {}", resourceId);
         }
+
+        // 处理下单ip 映射到多个计算节点的情况
+        File file = new File("/root/.mp/resources/tty.conf");
+        if (file.exists()) {
+            String content = FileUtil.readString(file, "utf-8");
+            var ttyInfos = JsonCommon.parse(content, new TypeReference<List<TtyInfo>>() {
+            });
+            for (var info : ttyInfos) {
+                if (StringUtils.contains(url, info.getSource())) {
+                    url = url.replace(info.getSource(), info.getTarget());
+                    break;
+                }
+            }
+        }
         return url;
+    }
+
+
+    @Getter
+    @Setter
+    public static class TtyInfo {
+        private String source;
+        private String target;
     }
 
 }
