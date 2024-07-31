@@ -785,7 +785,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
     @PostMapping("/sync")
     public ServiceResult<CsceneBO> sync(@RequestBody CsceneBO csceneBO) {
-        log.info("scene sync,params is {}", JsonCommon.stringify(csceneBO));
+        log.info("scene sync,params is {}", JsonCommon.snakeStringify(csceneBO));
         boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
         correctRequestCsceneParamsForSync(csceneBO);
         ServiceResult<CsceneBO> result = modelService.sync(csceneBO, null, true).asResult();
@@ -1052,7 +1052,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @PostMapping(value = "/app_instance")
     public ServiceResult<CsceneInstanceBO> createAppInstance(
             @RequestParam(required = false) String id, @RequestBody(required = false) CsceneCreateInstanceRequest request) {
-        log.info("app_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
+        log.info("app_instance params,id:{},request:{}", id, JsonCommon.snakeStringify(request));
         request = formatCreateInstanceRequest(request, id);
         correctRequestCsceneParamsForAppInstance(request.getCscene());
         ServiceResult<CsceneInstanceBO> result = modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
