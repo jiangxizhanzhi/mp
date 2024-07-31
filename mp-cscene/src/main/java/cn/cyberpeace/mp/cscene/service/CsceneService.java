@@ -536,8 +536,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     @Transactional
     public ServiceResult<CsceneBO> clone(String id, CsceneContextBO context) {
         BcSceneConfigHandler bcSceneConfigHandler = new BcSceneConfigHandler(id, context);
-        return sync(bcSceneConfigHandler
-                            .toDataWithoutCorrectCsceneData(false).export(), context, false);
+        var data = bcSceneConfigHandler.toDataWithoutCorrectCsceneData(false).export();
+        data.setCloneFrom(id);
+        return sync(data, context, false);
     }
 
     /**
@@ -695,6 +696,12 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 csceneSnapshotService.deleteSceneSnapshots(id);
             });
         }
+
+        CsceneModel model = new CsceneModel();
+        model.setDeleted(false);
+        var condition = new HumanCondition().filterEqual(CsceneModel::getCloneFrom, id);
+        getModelMapper().filterUpdate(model, condition);
+
         return new ServiceResult<>(flag);
     }
 

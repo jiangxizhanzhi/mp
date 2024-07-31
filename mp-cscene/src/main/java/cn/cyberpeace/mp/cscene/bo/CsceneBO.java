@@ -51,6 +51,8 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     private String referenceMetaData;
     @ApiModelProperty(value = "场景模板logo")
     private String logo;
+    @ApiModelProperty(value = "场景模板拷贝的源")
+    private String cloneFrom;
     @ApiModelProperty(value = "场景模板拓扑配置")
     private SceneConfigDataBO sceneConfig;
     @ApiModelProperty(value = "场景模板测试实例", hidden = true)

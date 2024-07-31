@@ -39,6 +39,8 @@ public class CsceneModel extends BaseCsceneModel {
     private String logo;
     @DefaultStr
     private String sceneConfig;
+    @DefaultStr
+    private String cloneFrom;
 
     public static class Type {
         public static final int TEMPLATE = 1;
