@@ -47,8 +47,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-/**
+ /**
  * @ClassName FlowActuatorServiceImpl
  * @Description
  * @Author qiaokang
@@ -106,16 +107,43 @@ public class FlowActuatorServiceImpl extends BaseModelServiceImpl<FlowActuatorMo
     @Override
     public ListObjServiceResult<FlowActuatorResponse> page(FlowActuatorQueryParams queryParams) {
 
-        // 获取总数
-        int total = getModelMapper().countForPage(queryParams);
-        // 计算分页偏差值
-        int pageFrontIndex = (queryParams.getPage() - 1) * queryParams.getPerPage();
-        queryParams.setPageFrontIndex(pageFrontIndex);
+        // 未使用状态进行查询时，可以直接使用mysql进行分页
+        if(queryParams.getStatus() ==  null){
+            // 获取总数
+            int total = getModelMapper().countForPage(queryParams);
+            // 计算分页偏差值
+            int pageFrontIndex = (queryParams.getPage() - 1) * queryParams.getPerPage();
+            queryParams.setPageFrontIndex(pageFrontIndex);
 
-        // 获取分页数据
-        List<FlowActuatorResponse> responses = getModelMapper().page(queryParams);
+            // 获取分页数据
+            List<FlowActuatorResponse> responses = getModelMapper().page(queryParams);
 
-        // 设定流量执行器的状态
+            // 设定流量执行器的状态
+            this.loadStatus(responses);
+
+            return new ListObjServiceResult<>(new ListObjResult<>(responses,total)).asResult();
+        } else {
+            int page = queryParams.getPage();
+            int perPage = queryParams.getPerPage();
+            queryParams.setPage(1);
+            queryParams.setPerPage(100);
+            int pageFrontIndex = (queryParams.getPage() - 1) * queryParams.getPerPage();
+            queryParams.setPageFrontIndex(pageFrontIndex);
+
+            List<FlowActuatorResponse> responses = getModelMapper().page(queryParams);
+            this.loadStatus(responses);
+            responses = responses.stream().filter(r -> r.getStatus() == queryParams.getStatus())
+                    .collect(Collectors.toList());
+
+            var result = responses.stream()
+                    .skip((page - 1) * perPage)
+                    .limit(perPage)
+                    .collect(Collectors.toList());
+            return new ListObjServiceResult<>(new ListObjResult<>(result, responses.size())).asResult();
+        }
+    }
+
+    private void loadStatus(List<FlowActuatorResponse> responses){
         for (var f : responses) {
             var list = BeanCommon.getBean(FlowTaskTaskMapper.class)
                     .list(new HumanCondition().filterEqual(FlowTaskTaskModel::getActuatorId, f.getId()));
@@ -144,8 +172,6 @@ public class FlowActuatorServiceImpl extends BaseModelServiceImpl<FlowActuatorMo
                 f.setStatus(TaskStatusEnum.INIT.toValue());
             }
         }
-
-        return new ListObjServiceResult<>(new ListObjResult<>(responses,total)).asResult();
     }
 
     @Override
