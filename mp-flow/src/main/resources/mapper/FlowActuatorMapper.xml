@@ -38,6 +38,6 @@
             and ss.name = #{instanceId}
         </if>
         group by fa.id
-        ORDER BY fa.create_time, fa.title desc limit #{pageFrontIndex}, #{perPage}
+        ORDER BY fa.create_time desc, fa.title desc limit #{pageFrontIndex}, #{perPage}
     </select>
 </mapper>
