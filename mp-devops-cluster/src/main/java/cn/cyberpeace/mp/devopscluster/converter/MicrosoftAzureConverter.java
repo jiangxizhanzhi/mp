@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devopscluster.converter;
 import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonStatusCodeEnum;
 import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
@@ -273,8 +274,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
     public void executeSequentially() {
         //1: 微软公有云 2:微软私有云 3:微软混合云
         JSONObject publicTargetResult = synchronousCloudData(1);
-        JSONObject privateTargetResult = synchronousCloudData(2);
-        JSONObject mixTargetResult = synchronousCloudData(3);
+//        JSONObject privateTargetResult = synchronousCloudData(2);
+//        JSONObject mixTargetResult = synchronousCloudData(3);
     }
 
     /**
@@ -340,7 +341,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("result", result);
         jsonObject.put("data", mainTargetList);
-        jsonObject.put("code", "200");
+        jsonObject.put("code", BaseErrorCode.SUCCESS);
 
         microsoftAzureMapper.deleteCloudTarget(null, cloudTypeStr);
         microsoftAzureMapper.deleteCloudTargetNet(null, cloudTypeStr);
@@ -354,7 +355,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
         if (!batchInsertCloudTarget || !batchInsertCloudTargetNet || !batchInsertCloudTargetCalculate || !batchInsertCloudTargetContainer) {
             jsonObject.put("message", "同步数据批量保存有错误插入");
-            jsonObject.put("code", "201");
+            jsonObject.put("code", BaseErrorCode.ERROR);
         }
         return jsonObject;
     }
@@ -487,40 +488,35 @@ public class MicrosoftAzureConverter implements BaseConverter {
      * 虚拟机市场镜像
      */
     public List getImages(IAzureResourceManager instance) {
+        //收集的结果集
+        List<JSONObject> result = new ArrayList<>();
         AzureResourceManager azureResourceManager = instance.getManager();
         // 指定要查询的区域
         Region region = instance.getRegin();
-        //只分地区的所有镜像
+//        //只分地区的所有镜像
 //        PagedIterable<VirtualMachineImage> virtualMachineImages = azureResourceManager.virtualMachineImages().listByRegion(region);
-
-        List<JSONObject> result = new ArrayList<>();
-//        try {
-//            virtualMachineImages.forEach(image -> {
-//                String publisherName = image.publisherName();
-//                String offerName = image.offer();
-//                String skuName = image.sku();
-//                OperatingSystemTypes operatingSystemTypes = image.osDiskImage().operatingSystem();
-//
-//                JSONObject third = new JSONObject();
-//                third.put("imageName", offerName);
-//                third.put("imageVersion", image.version());
-//                third.put("PublisherName", publisherName);
-//                third.put("offerName", offerName);
-//                third.put("skuName", skuName);
-//                third.put("operatingSystem", operatingSystemTypes);
-//
-//                result.add(third);
-//            });
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
+//        virtualMachineImages.forEach(image -> {
+//            String publisherName = image.publisherName();
+//            String offerName = image.offer();
+//            String skuName = image.sku();
+//            OperatingSystemTypes operatingSystemTypes = image.osDiskImage().operatingSystem();
+//            JSONObject third = new JSONObject();
+//            third.put("imageName", offerName);
+//            third.put("imageVersion", image.version());
+//            third.put("PublisherName", publisherName);
+//            third.put("offerName", offerName);
+//            third.put("skuName", skuName);
+//            third.put("operatingSystem", operatingSystemTypes);
+//            result.add(third);
+//        });
 
 //        // 获取所有虚拟机发布者
-        PagedIterable<VirtualMachinePublisher> virtualMachinePublishers = azureResourceManager.virtualMachineImages().publishers().listByRegion(region);
+        PagedIterable<VirtualMachinePublisher> virtualMachinePublishers = azureResourceManager.virtualMachineImages()
+                .publishers().listByRegion(region);
         for (VirtualMachinePublisher publisher : virtualMachinePublishers) {
-            //todo 筛选出需要的VM镜像
+            //todo 根据需求列表筛选出需要的VM镜像
             System.out.println("PublisherName: " + publisher.name());
-            if (publisher.name() != null && (publisher.name().contains("Canonical") || publisher.name().contains("MicrosoftWindowsDesktop"))) {
+            if (publisher.name().contains("Canonical") || publisher.name().contains("MicrosoftWindowsDesktop")) {
                 // 获取发布者的所有产品(offer)
                 VirtualMachineOffers offers = publisher.offers();
                 PagedIterable<VirtualMachineOffer> list = offers.list();
@@ -544,7 +540,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
                     for (VirtualMachineSku sku : skuList) {
 //                            if (secondTime < 10) {
 //                                secondTime++;
-
                         //休眠0.5秒,请求速度过快会导致请求微软云的连接中断
                         try {
                             Thread.sleep(500);
@@ -565,8 +560,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
-
-//                                ImageReference imageReference = image.imageReference();
 
                                 JSONObject forth = new JSONObject();
                                 forth.put("imageName", offer.name());
