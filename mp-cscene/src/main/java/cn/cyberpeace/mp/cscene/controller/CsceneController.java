@@ -1053,11 +1053,11 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<CsceneInstanceBO> createAppInstance(
             @RequestParam(required = false) String id, @RequestBody(required = false) CsceneCreateInstanceRequest request) {
         log.info("app_instance params,id:{},request:{}", id, JsonCommon.snakeStringify(request));
-        request = formatCreateInstanceRequest(request, id);
-        correctRequestCsceneParamsForAppInstance(request.getCscene());
-        ServiceResult<CsceneInstanceBO> result = modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
-        CsceneLogUtils.recordSceneInstanceLog(result == null ? null : result.getData(), OpTypeEnums.START, CsceneLogUtils.START_SCENE, request.getContext());
-        return result;
+//        request = formatCreateInstanceRequest(request, id);
+//        correctRequestCsceneParamsForAppInstance(request.getCscene());
+//        ServiceResult<CsceneInstanceBO> result = modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
+//        CsceneLogUtils.recordSceneInstanceLog(result == null ? null : result.getData(), OpTypeEnums.START, CsceneLogUtils.START_SCENE, request.getContext());
+        return null;
     }
 
     /**
