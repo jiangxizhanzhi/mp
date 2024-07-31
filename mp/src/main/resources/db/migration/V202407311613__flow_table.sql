@@ -1,1 +1,1 @@
-alter table
+alter table mp_cscene_cscene add column clone_from VARCHAR(128) NOT NULL default '' COMMENT '场景模板拷贝的源';

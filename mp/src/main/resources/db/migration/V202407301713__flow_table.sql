@@ -1,1 +1,1 @@
-alter table mp_cscene_cscene add column clone_from VARCHAR(128) NOT NULL default '' COMMENT '场景模板拷贝的源';
+alter table mp_scene_scene_element_snapshot modify column id VARCHAR(128) NOT NULL COMMENT 'ID' ;
