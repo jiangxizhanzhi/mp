@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.common.config.CommonCacheConfig;
 import cn.cyberpeace.mp.frontadmin.constant.AdminBasei18nCode;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.constant.SysConfigConstant;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,6 +76,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
     }
 
     @Override
+    @Cacheable(value = "sysConfigListAll", cacheManager = CommonCacheConfig.CM_300S)
     public List<SysConfigModel> listAll() {
         return getModelMapper().list(new HumanCondition());
     }

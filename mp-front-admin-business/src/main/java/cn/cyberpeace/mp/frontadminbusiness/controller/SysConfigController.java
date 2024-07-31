@@ -94,13 +94,16 @@ public class SysConfigController {
 
     @ApiOperation(value = "查询系统名称", notes = "")
     @GetMapping("/public")
-    public ServiceResult<List<SysConfigModel>> getSystemName() {
-        List<SysConfigModel> configs = new ArrayList<>();
-        for (String key : AdminBusinessConstant.UNAUTH_SYS_INFO_KEYS) {
-            SysConfigModel model = sysConfigService.getByKeyName(key);
-            configs.add(model);
-        }
-        return ResultCommon.success(configs);
+    public ServiceResult<List<SysConfigBO>> getSystemName() {
+        List<SysConfigModel> configs = sysConfigService.listAll();
+        List<SysConfigBO> result = configs.stream()
+                .filter(sysConfigModel -> AdminBusinessConstant.UNAUTH_SYS_INFO_KEYS.contains(sysConfigModel.getKeyName()))
+                .map(sysConfigModel -> {
+                    SysConfigBO sysConfigBO = new SysConfigBO();
+                    sysConfigBO.fromModel(sysConfigModel);
+                    return sysConfigBO;
+                }).collect(Collectors.toList());
+        return ResultCommon.success(result);
     }
 
     @ApiOperation(value = "根据keyname更新单条sysconfig", notes = "")

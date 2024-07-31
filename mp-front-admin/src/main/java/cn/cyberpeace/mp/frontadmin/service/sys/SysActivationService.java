@@ -307,7 +307,7 @@ public class SysActivationService {
         }
 
         log.debug("before processActived status: {}", ACTIVATION_CONTENT);
-        processActivedStatus();
+//        processActivedStatus();
         ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_ACTIVITED);
 
         return ACTIVATION_CONTENT;

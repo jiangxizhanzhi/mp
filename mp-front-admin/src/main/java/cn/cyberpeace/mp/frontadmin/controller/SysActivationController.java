@@ -77,9 +77,9 @@ public class SysActivationController {
     @ApiOperation("查询激活状态")
     @GetMapping("/license_status")
     public ServiceResult<ActivationStatus> licenseStatus() {
-        ActivationResponse content = getActivationResponse();
+//        ActivationResponse content = getActivationResponse();
         ActivationStatus status = new ActivationStatus();
-        status.setIsActived(content.getIsActived());
+        status.setIsActived(AdminConstant.STATUS_ACTIVITED);
         return ResultCommon.success(status);
     }
 

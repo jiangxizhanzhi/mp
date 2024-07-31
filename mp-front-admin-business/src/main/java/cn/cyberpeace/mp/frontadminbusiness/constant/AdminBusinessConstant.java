@@ -13,7 +13,7 @@ public class AdminBusinessConstant {
 
     public static final String ERROR_CODE_PREFIX = "admin.business.error_code.";
 
-    public static final String[] UNAUTH_SYS_INFO_KEYS = {"system_name", "system_lang", "copyright", "public_register"};
+    public static final List<String> UNAUTH_SYS_INFO_KEYS = List.of("system_name", "system_lang", "copyright", "public_register");
 
     /**
      * 前端常用的系统配置key_name

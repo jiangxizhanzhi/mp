@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.frontbusiness.dto.UrlAccessCtlDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class UrlACWrapperService {
 
 
 
+    @Cacheable(value = "UrlACWrapperService.getUrlTargetsMap")
     public Map<String, List<String>> getUrlTargetsMap() {
         List<UrlAccessCtlDto> dtos = urlACService.listAllUrlAccessCtlDtos();
         Map<String, List<String>> urlTargetsMap = new HashMap<>();
@@ -39,14 +41,14 @@ public class UrlACWrapperService {
             if (CollectionUtils.isNotEmpty(d.getTargetIds())) {
                 urlTargetsMap.get(d.getUrl()).addAll(d.getTargetIds());
             } else {
-                log.warn("No targets url detected! {}", d.getUrl());
+                log.debug("No targets url detected! {}", d.getUrl());
             }
         });
 
         return urlTargetsMap;
     }
 
-
+    @Cacheable(value = "UrlACWrapperService.getUrlPatternTargetsMap")
     public Map<String, List<String>> getUrlPatternTargetsMap() {
         List<UrlAccessCtlDto> dtos = urlACService.listAllUrlACPatternDtos();
         Map<String, List<String>> urlTargetsMap = new HashMap<>();
