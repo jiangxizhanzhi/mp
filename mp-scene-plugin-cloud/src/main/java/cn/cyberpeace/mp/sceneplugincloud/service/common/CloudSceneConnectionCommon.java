@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.service.common;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -220,6 +221,9 @@ public class CloudSceneConnectionCommon {
             }
 
             if (BaseSceneModel.CloudType.DEFAULT != cloudType) {
+                userId = userId+"_"+sceneId;
+                guacamoleCreateConnectionData.setUsername(userId);
+
                 CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
                 CloudPluginSceneElementBO element = pluginHandler.getElement(sceneElementId);
                 if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(element.getImageType())) {
@@ -233,7 +237,7 @@ public class CloudSceneConnectionCommon {
                     guacamoleCreateConnectionData.setHost(element.getManagementIp());
                     connectionParams.setHostname(element.getManagementIp());
                     connectionParams.setProtocol("container");
-                    connectionParams.setPort(AccessMode.Protocol.SSH);
+                    connectionParams.setPort("22");
                     connectionParams.setUsername(situationAwareConfig.getManagementUsername());
                     connectionParams.setPassword(situationAwareConfig.getManagementPassword());
                     connectionParams.setCmd(getContainerCmd(pluginHandler, cloudType, element,interpreter));
