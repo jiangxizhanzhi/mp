@@ -24,7 +24,7 @@
                 and fa.status = #{status}
             </if>
             <if test="instanceId!=null and !instanceId.trim().isEmpty()">
-                and ftt.scene_id = #{instanceId}
+                and fa.id = #{instanceId}
             </if>
         )temp
     </select>
