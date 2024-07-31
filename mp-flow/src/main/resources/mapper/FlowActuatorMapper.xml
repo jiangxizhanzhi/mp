@@ -24,7 +24,7 @@
                 and fa.status = #{status}
             </if>
             <if test="instanceId!=null and !instanceId.trim().isEmpty()">
-                and fa.id = #{instanceId}
+                and ss.name = #{instanceId}
             </if>
         )temp
     </select>
@@ -41,7 +41,7 @@
             and fa.status = #{status}
         </if>
         <if test="instanceId!=null and !instanceId.trim().isEmpty()">
-            and fa.id = #{instanceId}
+            and ss.name = #{instanceId}
         </if>
         group by fa.id
         ORDER BY fa.create_time, fa.title desc limit #{pageFrontIndex}, #{perPage}

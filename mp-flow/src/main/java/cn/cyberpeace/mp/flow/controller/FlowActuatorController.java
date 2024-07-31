@@ -37,10 +37,12 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
-/**
+ /**
  * @ClassName FlowActuatorController
  * @Description 流量发生器管理
  * @Author maojun
@@ -79,16 +81,18 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
         // 初始化一个空列表，用于存储转换后的场景实例响应对象
         List<SceneInstanceResponse> responseList = new ArrayList<>();
         // 遍历查询结果中的每个对象
+        Set<String> names = new HashSet<>();
         for (FlowActuatorResponse response : result.getSource().getObjs()) {
-            if (StringUtils.isNotEmpty(response.getSceneName())) {
+            if (StringUtils.isNotEmpty(response.getSceneName()) && !names.contains(response.getSceneName())) {
                 // 创建一个新的SceneInstanceResponse实例
                 SceneInstanceResponse r = new SceneInstanceResponse();
-                // 将查询结果中的ID赋值给新的实例
-                r.setId(response.getId());
+                // 将name赋值给id ， 后面前端用id来查询的时候实际上是使用name的值进行查询
+                r.setId(response.getSceneName());
                 // 将查询结果中的场景名称赋值给新的实例
                 r.setName(response.getSceneName());
                 // 将新的实例添加到列表中
                 responseList.add(r);
+                names.add(response.getSceneName());
             }
         }
         // 创建并返回一个服务结果对象，其中包含转换后的场景实例列表及其总数
