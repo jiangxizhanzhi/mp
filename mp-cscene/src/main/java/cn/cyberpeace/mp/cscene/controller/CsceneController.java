@@ -786,17 +786,17 @@ public class CsceneController implements BaseModelListControllerBase {
     @PostMapping("/sync")
     public ServiceResult<CsceneBO> sync(@RequestBody CsceneBO csceneBO) {
         log.info("scene sync,params is {}", JsonCommon.snakeStringify(csceneBO));
-        boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
-        correctRequestCsceneParamsForSync(csceneBO);
-        ServiceResult<CsceneBO> result = modelService.sync(csceneBO, null, true).asResult();
-        if (csceneBO.getType() != null && csceneBO.getType() == CsceneModel.Type.TEMPLATE) {
-            if (isUpdate) {
-                CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
-            } else {
-                CsceneLogUtils.recordSceneConfigLog(result.getData(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());
-            }
-        }
-        return result;
+//        boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
+//        correctRequestCsceneParamsForSync(csceneBO);
+//        ServiceResult<CsceneBO> result = modelService.sync(csceneBO, null, true).asResult();
+//        if (csceneBO.getType() != null && csceneBO.getType() == CsceneModel.Type.TEMPLATE) {
+//            if (isUpdate) {
+//                CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
+//            } else {
+//                CsceneLogUtils.recordSceneConfigLog(result.getData(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());
+//            }
+//        }
+        return null;
     }
 
     /**
