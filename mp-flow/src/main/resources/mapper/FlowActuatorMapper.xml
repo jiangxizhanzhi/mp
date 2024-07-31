@@ -36,13 +36,7 @@
         FROM `mp_flow_actuator` fa
         LEFT JOIN mp_flow_task_task ftt ON fa.id = ftt.actuator_id
         LEFT JOIN mp.mp_scene_scene ss ON ftt.scene_id = ss.id
-        where 1=1
-        <if test="status!=null">
-            and fa.status = #{status}
-        </if>
-        <if test="instanceId!=null and !instanceId.trim().isEmpty()">
-            and fa.id = #{instanceId}
-        </if>
+        where 1=1 group by fa.id
         ORDER BY fa.create_time, fa.title desc limit #{pageFrontIndex}, #{perPage}
     </select>
 </mapper>
