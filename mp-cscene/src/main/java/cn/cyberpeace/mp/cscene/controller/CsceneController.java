@@ -1140,7 +1140,7 @@ public class CsceneController implements BaseModelListControllerBase {
         var mirrorEnableModel = sysConfigService.getByKeyName(MirrorConstant.MIRROR_ENABLE);
         if (mirrorEnableModel != null && MirrorConstant.ON.equals(mirrorEnableModel.getValue())) {
             log.error("开启流量镜像时不允许调整ip");
-            throw new MpRuntimeException(BaseErrorCode.ERROR);
+            throw new MpRuntimeException("开启流量镜像时不允许调整ip");
         }
         var mirrorIp = sysConfigService.getByKeyName(MirrorConstant.MIRROR_IP);
         if (mirrorIp != null) {

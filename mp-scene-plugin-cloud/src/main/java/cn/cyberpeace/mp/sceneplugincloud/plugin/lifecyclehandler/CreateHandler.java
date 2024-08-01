@@ -43,7 +43,6 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CsceneElementSoftVersionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.device.Device;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.device.DeviceClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
@@ -55,15 +54,12 @@ import cn.cyberpeace.mp.sceneplugincloud.util.ConfigNetworkUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.StrategyHttpUtil;
-import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
@@ -891,30 +887,46 @@ public class CreateHandler extends HandlerCommon {
             String clientIp = sceneElementBO.getPorts().get(0).getIp();
 
             if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
-                basDeviceInitCommand.add("@echo off");
-                basDeviceInitCommand.add("setlocal enabledelayedexpansion");
-                basDeviceInitCommand.add("set \"search_ip=server_ip\"");
-                basDeviceInitCommand.add(String.format("set \"replace_ip=%s\"", BeanCommon.getBean(CommonAppConfig.class).getBasIp()));
-                basDeviceInitCommand.add("set \"search_port=server_port\"");
-                basDeviceInitCommand.add(String.format("set \"replace_port=%s\"", BeanCommon.getBean(CommonAppConfig.class).getBasPort()));
-                basDeviceInitCommand.add(String.format("set \"simulator_ip=%s\"", clientIp));
+//                basDeviceInitCommand.add("@echo off");
+//                basDeviceInitCommand.add("setlocal enabledelayedexpansion");
+//                basDeviceInitCommand.add("set \"search_ip=server_ip\"");
+//                basDeviceInitCommand.add(String.format("set \"replace_ip=%s\"", BeanCommon.getBean(CommonAppConfig.class).getBasIp()));
+//                basDeviceInitCommand.add("set \"search_port=server_port\"");
+//                basDeviceInitCommand.add(String.format("set \"replace_port=%s\"", BeanCommon.getBean(CommonAppConfig.class).getBasPort()));
+//                basDeviceInitCommand.add(String.format("set \"simulator_ip=%s\"", clientIp));
+//
+//                basDeviceInitCommand.add("set \"search_template_id=mp_scene_template_id\"");
+//                basDeviceInitCommand.add(String.format("set \"replace_template_id=%s\"", SceneContextHolder.getCsceneInstanceId()));
+//                basDeviceInitCommand.add("set \"input=C:\\cpbas\\client\\application.yml\"");
+//
+//                basDeviceInitCommand.add("set \"output=C:\\cpbas\\client\\application.yml.tmp\"");
+//                basDeviceInitCommand.add("(for /f \"tokens=* delims=\" %%i in ('type \"%input%\"') do (");
+//                basDeviceInitCommand.add("    set \"line=%%i\"");
+//                basDeviceInitCommand.add("    set \"line=!line:%search_ip%=%replace_ip%!\"");
+//                basDeviceInitCommand.add("    set \"line=!line:%search_port%=%replace_port%!\"");
+//                basDeviceInitCommand.add("    set \"line=!line:%search_template_id%=%replace_template_id%!\"");
+//                basDeviceInitCommand.add("    set \"line=!line:%client_ip%=%simulator_ip%!\"");
+//
+//                basDeviceInitCommand.add("    echo(!line!");
+//                basDeviceInitCommand.add(")) > \"%output%\"");
+//                basDeviceInitCommand.add("move /Y \"%output%\" \"%input%\"");
+//                basDeviceInitCommand.add("endlocal");
 
-                basDeviceInitCommand.add("set \"search_template_id=mp_scene_template_id\"");
-                basDeviceInitCommand.add(String.format("set \"replace_template_id=%s\"", SceneContextHolder.getCsceneInstanceId()));
-                basDeviceInitCommand.add("set \"input=C:\\cpbas\\client\\application.yml\"");
-
-                basDeviceInitCommand.add("set \"output=C:\\cpbas\\client\\application.yml.tmp\"");
-                basDeviceInitCommand.add("(for /f \"tokens=* delims=\" %%i in ('type \"%input%\"') do (");
-                basDeviceInitCommand.add("    set \"line=%%i\"");
-                basDeviceInitCommand.add("    set \"line=!line:%search_ip%=%replace_ip%!\"");
-                basDeviceInitCommand.add("    set \"line=!line:%search_port%=%replace_port%!\"");
-                basDeviceInitCommand.add("    set \"line=!line:%search_template_id%=%replace_template_id%!\"");
-                basDeviceInitCommand.add("    set \"line=!line:%client_ip%=%simulator_ip%!\"");
-
-                basDeviceInitCommand.add("    echo(!line!");
-                basDeviceInitCommand.add(")) > \"%output%\"");
-                basDeviceInitCommand.add("move /Y \"%output%\" \"%input%\"");
-                basDeviceInitCommand.add("endlocal");
+                basDeviceInitCommand.add("echo conf:> C:\\cpbas\\client\\application.yml");
+                basDeviceInitCommand.add(String.format("echo   platform_address: %s>> C:\\cpbas\\client\\application.yml",
+                        BeanCommon.getBean(CommonAppConfig.class).getBasIp()));
+                basDeviceInitCommand.add(String.format("echo   platform_port: %s>> C:\\cpbas\\client\\application.yml",
+                        BeanCommon.getBean(CommonAppConfig.class).getBasPort()));
+                basDeviceInitCommand.add(String.format("echo   template_id: %s>> C:\\cpbas\\client\\application.yml",
+                        SceneContextHolder.getCsceneInstanceId()));
+                basDeviceInitCommand.add(String.format("echo   client_ip: %s>> C:\\cpbas\\client\\application.yml", clientIp));
+                basDeviceInitCommand.add("echo   heartbeat_interval: 5>> C:\\cpbas\\client\\application.yml");
+                basDeviceInitCommand.add("echo   tcp_port: 10080>> C:\\cpbas\\client\\application.yml");
+                basDeviceInitCommand.add("echo   switch_proxy: false>> C:\\cpbas\\client\\application.yml");
+                basDeviceInitCommand.add("echo   is_save_apt_file: false>> C:\\cpbas\\client\\application.yml");
+                basDeviceInitCommand.add("echo   version: 2.2.2>> C:\\cpbas\\client\\application.yml");
+                basDeviceInitCommand.add("echo system: windows>> C:\\cpbas\\client\\application.yml");
+                basDeviceInitCommand.add("echo timeout: 600>> C:\\cpbas\\client\\application.yml");
 
             } else if (SystemTypeCommandUtils.isLinux(standardSystemType)) {
                 basDeviceInitCommand.add(String.format("sed -i \"/platform_address:/s/bas-server/%s/\" /opt/cpbas/client/application.yml",

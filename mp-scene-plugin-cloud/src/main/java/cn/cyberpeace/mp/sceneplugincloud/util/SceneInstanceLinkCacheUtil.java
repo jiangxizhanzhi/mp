@@ -129,7 +129,7 @@ public class SceneInstanceLinkCacheUtil {
      * @param sceneId
      */
     public static void refresh(String sceneId) {
-        cache.refresh(sceneId);
+//        cache.refresh(sceneId);
         // 10s之后再刷一次缓存 避免并发刷新时刷到旧的数据
         refreshExecutor.schedule(() -> {
             cache.refresh(sceneId);
