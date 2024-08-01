@@ -10,9 +10,12 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.sceneplugincollection.config;
 
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.sceneplugincollection.util.CollectionCommonConfigUtil;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -48,6 +51,13 @@ public class WazuhProbeConfig {
      * @return
      */
     public DefaultProbe getDefaultProbe() {
+        var list = LocalFileMappingCommon.getMappings("wazuh_agent_installer");
+        for (var l : list) {
+            if (StringUtils.equals(l.getName(), "default_custom_probes.json")) {
+                String content = FsCommon.downloadContent(l.getRemoteFile());
+                return JsonCommon.snakeParse(content, DefaultProbe.class);
+            }
+        }
         return defaultProbe;
     }
 
