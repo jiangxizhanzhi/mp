@@ -32,4 +32,6 @@ public class StartFlowTaskRequest {
      */
     private FlowTaskStart task;
 
+    private String callbackUrl;
+
 }

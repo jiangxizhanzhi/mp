@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.controller;
 
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
@@ -9,7 +10,9 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.model.FlowScriptDemoModel;
 import cn.cyberpeace.mp.flow.service.FlowScriptDemoService;
+import cn.cyberpeace.mp.flow.service.FlowTaskRecordService;
 import cn.cyberpeace.mp.flow.service.impl.FlowScriptDemoServiceImpl;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +46,8 @@ public class FlowTaskStatusRefreshController extends BaseModelController<FlowScr
     @PostMapping("/refresh_status")
     public ServiceResult<Boolean> listFlowScriptDemos(@RequestBody Map<String, Object> data) {
         log.info("refresh_status , params is {}", JsonCommon.snakeStringify(data));
+        JSONObject jsonMessage = JSONObject.parseObject(JsonCommon.stringify(data));
+        BeanCommon.getBean(FlowTaskRecordService.class).syncRecord(jsonMessage);
         return new ServiceResult<>(true).asResult();
     }
 

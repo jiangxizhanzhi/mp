@@ -786,6 +786,7 @@ public class AsyncPlatFlowTaskService {
                 .action(TaskActionEnum.START.toValue())
                 .time(TimeUtils.localDateTimeToString(LocalDateTime.now()))
                 .task(flowTaskStart)
+                .callbackUrl("http://10.4.8.12:8001/api/mp/flow/task/refresh_status")
                 .build();
 
         try {
