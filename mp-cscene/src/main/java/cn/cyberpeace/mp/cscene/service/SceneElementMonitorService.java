@@ -698,9 +698,10 @@ public class SceneElementMonitorService {
     private List<ElementHistogramInfo> mergeFileCount(List<ElementHistogramInfo> histogramInfos,
                                                       String sceneId, List<String> group) {
         List<String> timeList = histogramInfos.stream().map(ElementHistogramInfo::getTime).collect(Collectors.toList());
+//        TODO timeList可能是空 导致下方查询报错
         HumanCondition humanCondition = new HumanCondition().currentLink(ElementFileCountModel.class)
                 .filterEqual(ElementFileCountModel::getSceneId, sceneId)
-                .filterIn(ElementFileCountModel::getTime, timeList.toArray())
+//                .filterIn(ElementFileCountModel::getTime, timeList.toArray())
                 .filterNotEqual(ElementFileCountModel::getCount, 0)
                 .filterIn(ElementFileCountModel::getGroup, group.toArray());
         List<ElementFileCountModel> countModels = elementFileCountMapper.list(humanCondition);
@@ -1098,7 +1099,7 @@ public class SceneElementMonitorService {
 
         HostEventQueryParams hostEventQueryParams = new HostEventQueryParams();
         // 不传节点id默认查询全部节点
-        if (elementId == null) {
+        if (StringUtils.isBlank(elementId)) {
             hostEventQueryParams.setNodeIds(new ArrayList<>(sceneHandler.getElementMap().keySet()));
         } else {
             hostEventQueryParams.setNodeIds(Collections.singletonList(elementId));
