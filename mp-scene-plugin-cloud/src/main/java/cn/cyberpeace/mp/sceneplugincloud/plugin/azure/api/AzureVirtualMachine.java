@@ -153,28 +153,26 @@ public class AzureVirtualMachine {
                 .create();
         NetworkInterface primaryNetworkInterface = virtualMachine.getPrimaryNetworkInterface();
 
-//        开放8080、8200端口
+//        开放9200、8200端口
         NetworkSecurityGroup nsg = azureResourceManager.networkSecurityGroups()
                 .define("nsg-" + vmName)
                 .withRegion(this.region)
                 .withExistingResourceGroup(groupName)
-                .defineRule("allow-8080")
+                .defineRule("allow-8200")
                 .allowInbound()
                 .fromAnyAddress()
                 .fromAnyPort()
                 .toAnyAddress()
-                .toPort(8080)
+                .toPort(9200)
                 .withProtocol(SecurityRuleProtocol.ASTERISK)
-                .withPriority(3200)
                 .attach()
-                .defineRule("allow-8200")
+                .defineRule("allow-9200")
                 .allowInbound()
                 .fromAnyAddress()
                 .fromAnyPort()
                 .toAnyAddress()
                 .toPort(8200)
                 .withProtocol(SecurityRuleProtocol.ASTERISK)
-                .withPriority(3300)
                 .attach()
                 .create();
         primaryNetworkInterface.update().withExistingNetworkSecurityGroup(nsg).apply();
