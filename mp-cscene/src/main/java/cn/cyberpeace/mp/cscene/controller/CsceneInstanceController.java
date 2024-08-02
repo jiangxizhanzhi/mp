@@ -1629,6 +1629,20 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return new ServiceResult<>(result).asResult();
     }
 
+    @ApiOperation("安全策略统配")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceFlowMirrorRequest.class)
+    @PostMapping("/send_strategy")
+    public ServiceResult<SendStrategyResult> sendStrategy(@RequestBody CsceneStrategyRequest request) {
+        return new ServiceResult<>(new SendStrategyResult()).asResult();
+    }
+
+    @Getter
+    @Setter
+    private static class SendStrategyResult {
+        private boolean success;
+        private String output;
+    }
+
     @Getter
     @Setter
     private static class SoftVersionInfoData {
