@@ -165,6 +165,7 @@ public class AzureVirtualMachine {
                 .toAnyAddress()
                 .toPort(9200)
                 .withProtocol(SecurityRuleProtocol.ASTERISK)
+                .withPriority(3200)
                 .attach()
                 .defineRule("allow-9200")
                 .allowInbound()
@@ -173,6 +174,7 @@ public class AzureVirtualMachine {
                 .toAnyAddress()
                 .toPort(8200)
                 .withProtocol(SecurityRuleProtocol.ASTERISK)
+                .withPriority(3300)
                 .attach()
                 .create();
         primaryNetworkInterface.update().withExistingNetworkSecurityGroup(nsg).apply();
