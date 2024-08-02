@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -11,6 +12,7 @@ import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
+import cn.cyberpeace.mp.common.config.CommonAppConfig;
 import cn.cyberpeace.mp.flow.bo.BatchStartTaskBO;
 import cn.cyberpeace.mp.flow.bo.FlowTaskCommonConf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
@@ -782,11 +784,13 @@ public class AsyncPlatFlowTaskService {
                 .flowConf(flowTaskConf.getFlowConf())
                 .attackConfs(flowTaskConf.getAttackConfs())
                 .build();
+        String mpIp = BeanCommon.getBean(CommonAppConfig.class).getMpIp();
+        String mpPort = BeanCommon.getBean(CommonAppConfig.class).getMpPort();
         StartFlowTaskRequest startFlowTaskRequest = StartFlowTaskRequest.builder()
                 .action(TaskActionEnum.START.toValue())
                 .time(TimeUtils.localDateTimeToString(LocalDateTime.now()))
                 .task(flowTaskStart)
-                .callbackUrl("http://10.4.8.12:8001/api/mp/flow/task/refresh_status")
+                .callbackUrl("http://" + mpIp + ":" + mpPort + "/api/mp/flow/task/refresh_status")
                 .build();
 
         try {
@@ -951,10 +955,13 @@ public class AsyncPlatFlowTaskService {
             flowTaskStartList.add(flowTaskStart);
         }
 
+        String mpIp = BeanCommon.getBean(CommonAppConfig.class).getMpIp();
+        String mpPort = BeanCommon.getBean(CommonAppConfig.class).getMpPort();
         BatchStartFlowTaskRequest batchStartFlowTaskRequest = BatchStartFlowTaskRequest.builder()
                 .action(TaskActionEnum.START.toValue())
                 .time(TimeUtils.localDateTimeToString(LocalDateTime.now()))
                 .tasks(flowTaskStartList)
+                .callbackUrl("http://" + mpIp + ":" + mpPort + "/api/mp/flow/task/refresh_status")
                 .runType(runType)
                 .build();
 

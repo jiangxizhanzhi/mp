@@ -39,4 +39,6 @@ public class BatchStartFlowTaskRequest {
      */
     private Integer runType;
 
+    private String callbackUrl;
+
 }
