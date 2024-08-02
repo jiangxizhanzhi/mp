@@ -797,10 +797,6 @@ public class AsyncPlatFlowTaskService {
             if (ResponseUtils.checkResponse(startTaskObj)) {
                 log.info("start task success for {}", taskId);
 
-                // 跟流量执行器建立ws连接，用于接收任务状态信息
-                FlowWebSocketClientUtil wsClient = FlowWebSocketClientUtil.getWebSocketClient(flowActuatorModel.getIp().split(BaseConstants.COLON)[0]);
-                wsClient.sendMessage(taskId);
-
                 // 更新任务状态为运行中
                 flowTaskTaskService.updateTaskStatus(taskId, TaskStatusEnum.RUNNING.toValue());
                 return ResultCommon.success(true);
@@ -969,10 +965,6 @@ public class AsyncPlatFlowTaskService {
             log.info("batch start task response:{}", batchStartTaskObj.toJSONString());
             if (ResponseUtils.checkResponse(batchStartTaskObj)) {
                 log.info("batch start task success");
-
-                // 跟流量执行器建立ws连接，用于接收任务状态信息
-                FlowWebSocketClientUtil wsClient = FlowWebSocketClientUtil.getWebSocketClient(flowActuatorModel.getIp().split(BaseConstants.COLON)[0]);
-                wsClient.sendMessage(String.join(BaseConstants.COMMA, notRunningTaskIds));
 
                 // 批量更新任务状态为运行中
                 flowTaskTaskService.batchUpdateTaskStatus(notRunningTaskIds, TaskStatusEnum.RUNNING.toValue());
