@@ -12,7 +12,8 @@ gradle.ext {
         'mp-situation-aware',
         'mp-log',
         'mp-flow',
-        'mp-behavior'
+        'mp-behavior',
+        'mp-agent-snmp'
     ]
 
     flyway = [
