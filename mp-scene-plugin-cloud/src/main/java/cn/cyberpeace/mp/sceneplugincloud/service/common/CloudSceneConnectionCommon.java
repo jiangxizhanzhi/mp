@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincloud.service.common;
 
-import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -221,8 +220,6 @@ public class CloudSceneConnectionCommon {
             }
 
             if (BaseSceneModel.CloudType.DEFAULT != cloudType) {
-                userId = userId+"_"+sceneId;
-                guacamoleCreateConnectionData.setUsername(userId);
 
                 CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
                 CloudPluginSceneElementBO element = pluginHandler.getElement(sceneElementId);
@@ -230,21 +227,24 @@ public class CloudSceneConnectionCommon {
                     if (element.getIsPublicIp()) {
                         connectionParams.setHostname(element.getPublicIpAddress());
                     } else if (StringUtils.isNotBlank(element.getManagementIp())) {
+                        userId = userId + "_" + sceneId;
                         connectionParams.setHostname(sceneConnection.getAccessIp());
                         guacamoleCreateConnectionData.setHost(element.getManagementIp());
                     }
                 } else if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(element.getImageType())) {
+                    userId = userId + "_" + sceneId;
                     guacamoleCreateConnectionData.setHost(element.getManagementIp());
                     connectionParams.setHostname(element.getManagementIp());
                     connectionParams.setProtocol("container");
                     connectionParams.setPort("22");
                     connectionParams.setUsername(situationAwareConfig.getManagementUsername());
                     connectionParams.setPassword(situationAwareConfig.getManagementPassword());
-                    connectionParams.setCmd(getContainerCmd(pluginHandler, cloudType, element,interpreter));
+                    connectionParams.setCmd(getContainerCmd(pluginHandler, cloudType, element, interpreter));
                 }
             } else {
                 connectionParams.setHostname(sceneConnection.getAccessIp());
             }
+            guacamoleCreateConnectionData.setUsername(userId);
             guacamoleCreateConnectionData.setConnectionParams(connectionParams);
             var result = remoteClient.createConnection(guacamoleCreateConnectionData);
             if (result == null || StringUtils.isEmpty(result.getConnectionId())) {
