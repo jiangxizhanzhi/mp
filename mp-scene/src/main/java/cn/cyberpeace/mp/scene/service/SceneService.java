@@ -742,7 +742,11 @@ public class SceneService {
         }
 
         ElementTaskPool.getInstance().executeTask(ThreadUtils.format(() -> {
-            updateHandler.modifyElement(nodeId, originHandler);
+            try {
+                updateHandler.modifyElement(nodeId, originHandler);
+            } finally {
+                SceneEventUtils.unLock(id);
+            }
         }));
         return new ServiceResult<>(true);
     }
