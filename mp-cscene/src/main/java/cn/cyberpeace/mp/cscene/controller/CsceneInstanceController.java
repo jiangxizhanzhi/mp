@@ -10,6 +10,8 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.agent.netconf.controller.request.NetConfAccessInfo;
+import cn.cyberpeace.mp.agent.netconf.service.impl.NetconfTaskServiceImpl;
 import cn.cyberpeace.mp.agent.snmp.controller.request.SnmpAccessInfo;
 import cn.cyberpeace.mp.agent.snmp.service.Command;
 import cn.cyberpeace.mp.agent.snmp.service.CommandConfig;
@@ -1641,7 +1643,6 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @PostMapping("/send_strategy")
     public ServiceResult<SendStrategyResult> sendStrategy(@RequestBody CsceneStrategyRequest request) {
         if (request.getConfigCommand().getProtocol() == 0) {
-            TaskRequest<SnmpAccessInfo> taskRequest = new TaskRequest<>();
             SnmpAccessInfo accessInfo = new SnmpAccessInfo();
             accessInfo.setCommunity(request.getConfigCommand().getCommunity());
             accessInfo.setVersion("v2c");
@@ -1653,12 +1654,23 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             command.setParams(new ArrayList<>());
             command.setCommand(request.getConfigCommand().getContent());
             config.setCommands(Arrays.asList(command));
-            taskRequest.setConfig(config);
-            taskRequest.setAccessInfo(accessInfo);
 
             BeanCommon.getBean(SnmpTaskServiceImpl.class).execTask(accessInfo, config);
         } else if (request.getConfigCommand().getProtocol() == 1) {
             // netconf
+            NetConfAccessInfo accessInfo = new NetConfAccessInfo();
+            accessInfo.setUsername(request.getConfigCommand().getUser());
+            accessInfo.setPassword(request.getConfigCommand().getPassword());
+            accessInfo.setPort(request.getConfigCommand().getPort());
+            accessInfo.setHostIp(request.getConfigCommand().getIp());
+
+            var conf = new CommandConfig();
+            var command = new Command();
+            command.setParams(new ArrayList<>());
+            command.setCommand(request.getConfigCommand().getContent());
+            conf.setCommands(Arrays.asList(command));
+            BeanCommon.getBean(NetconfTaskServiceImpl.class).execTask(accessInfo, conf);
+
         } else if (request.getConfigCommand().getProtocol() == 2) {
             // restconf
             String ip = request.getConfigCommand().getIp();
