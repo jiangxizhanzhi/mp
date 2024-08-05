@@ -28,6 +28,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
@@ -1656,14 +1657,27 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             taskRequest.setAccessInfo(accessInfo);
 
             BeanCommon.getBean(SnmpTaskServiceImpl.class).execTask(accessInfo, config);
-
-            var m = this.getModelService().get(request.getId()).getSource().getObj();
-            String sceneId = m.getScene();
-            SceneHandler handler = new SceneHandler(sceneId, null, null);
-            handler.getElement(request.getNodeId())
-                    .setConfigCommand(JsonCommon.beanToSnakeMap(request.getConfigCommand()));
-            handler.save();
+        } else if (request.getConfigCommand().getProtocol() == 1) {
+            // netconf
+        } else if (request.getConfigCommand().getProtocol() == 2) {
+            // restconf
+            String ip = request.getConfigCommand().getIp();
+            String port = request.getConfigCommand().getPort();
+            Map<String, Object> content = JsonCommon.parse(request.getConfigCommand().getContent(), Map.class);
+            try {
+                HttpUtils.sendPatch("http://" + ip + ":" + port + "/restconf/data/car", JsonCommon.stringify(content));
+            } catch (IOException e) {
+                log.error("restconf连接错误", e);
+            }
         }
+
+        var m = this.getModelService().get(request.getId()).getSource().getObj();
+        String sceneId = m.getScene();
+        SceneHandler handler = new SceneHandler(sceneId, null, null);
+        handler.getElement(request.getNodeId())
+                .setConfigCommand(JsonCommon.beanToSnakeMap(request.getConfigCommand()));
+        handler.save();
+
         return new ServiceResult<>(new SendStrategyResult()).asResult();
     }
 
