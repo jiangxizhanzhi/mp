@@ -134,11 +134,11 @@ public class SceneElementMonitorService {
 
     private static final String REGISTRY_COUNT = "registry_count";
 
-    private static final String LOG = "log";
+    public static final String LOG = "log";
 
     private static final String PROBE = "probe";
 
-    private static final String ALARM = "alarm";
+    public static final String ALARM = "alarm";
 
 
     private Integer getWazuhVulnerabilityScanInterval() {
@@ -586,6 +586,13 @@ public class SceneElementMonitorService {
         if (CollectionUtils.isNotEmpty(pageRequest.getLevels())) {
             humanCondition.filterIn(ElementFileListModel::getLevel, pageRequest.getLevels().toArray());
         }
+//        增加事件筛选
+        if (StringUtils.isNotEmpty(pageRequest.getStartTime())) {
+            humanCondition.filterGreaterThan(WazuhProbeDataModel::getTime, pageRequest.getStartTime());
+        }
+        if (StringUtils.isNotEmpty(pageRequest.getEndTime())) {
+            humanCondition.filterLessThan(WazuhProbeDataModel::getTime, pageRequest.getEndTime());
+        }
         var fileList = elementFileListMapper.list(humanCondition);
 
         // 设置total
@@ -986,6 +993,7 @@ public class SceneElementMonitorService {
 
         queryParams.setCatagories(Arrays.asList("020301", "020302", "020303", "020304", "020305", "020306", "020307", "020308", "020309", "020310", "020311", "020312"));
         //告警信息
+        queryParams.setCatagories(new ArrayList<>());
         List<ElementLogListModel> alarmList = csceneInstanceService.listHostEvents(sceneId, queryParams)
                 .asResult().sourceList().stream()
                 .map(this::collectionHostEventBO2ElementLogListModel)
@@ -1080,6 +1088,9 @@ public class SceneElementMonitorService {
         model.setLevel(bo.getLevel());
         model.setDescription(bo.getDescription());
         model.setCatagory(bo.getCatagory());
+        Map rule = (Map) bo.getContent().get("rule");
+        Object id = rule.get("id");
+        model.setRuleId(id.toString());
         return model;
     }
 
@@ -1087,9 +1098,22 @@ public class SceneElementMonitorService {
         WazuhProbeDataModel model = new WazuhProbeDataModel();
         model.setProbeName(bo.getProbeName());
         model.setEventDesc(bo.getEventDesc());
+        model.setContent(mapToString(bo.getContent()));
         model.setTime(bo.getTime());
         model.setNodeName(bo.getNodeName());
         return model;
+    }
+
+    public String mapToString(Map<String, Object> map) {
+        if (map == null) return "";
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            if (sb.length() > 0) {
+                sb.append(";");
+            }
+            sb.append("\"").append(entry.getKey()).append("\":\"").append(entry.getValue()).append("\"");
+        }
+        return sb.toString();
     }
 
     private HostEventQueryParams getExportDataParams(String csceneId, String elementId) {
@@ -1282,16 +1306,22 @@ public class SceneElementMonitorService {
                 registryListModels.forEach(list -> list.setSceneId(sceneId));
             } else if (2 == type) {
                 String logList = jsonObject.getString(LOG);
-                logListModels = JSON.parseArray(logList, ElementLogListModel.class);
-                logListModels.forEach(log -> log.setSceneId(sceneId));
+                logListModels = getElementLogListModels(jsonObject, sceneId, LOG);
             } else if (3 == type) {
                 String probeList = jsonObject.getString(PROBE);
                 wazuhProbeDataModels = JSON.parseArray(probeList, WazuhProbeDataModel.class);
-                wazuhProbeDataModels.forEach(dataModel -> dataModel.setSceneId(sceneId));
+                wazuhProbeDataModels.forEach(dataModel -> {
+                    dataModel.setSceneId(sceneId);
+                    if (dataModel.getContent() == null) {
+                        dataModel.setContent("");
+                    }
+                    if (dataModel.getEventDesc() == null) {
+                        dataModel.setEventDesc("");
+                    }
+                });
             } else if (4 == type) {
-                String logList = jsonObject.getString(ALARM);
-                logListModels = JSON.parseArray(logList, ElementLogListModel.class);
-                logListModels.forEach(log -> log.setSceneId(sceneId));
+
+                logListModels = getElementLogListModels(jsonObject, sceneId, ALARM);
             }
         }
         file.delete();
@@ -1301,6 +1331,30 @@ public class SceneElementMonitorService {
         elementFileListMapper.bulkCreate(registryListModels);
         elementLogListMapper.bulkCreate(logListModels);
         wazuhProbeDataMapper.bulkCreate(wazuhProbeDataModels);
+    }
+
+    private static List<ElementLogListModel> getElementLogListModels(JSONObject jsonObject, String sceneId, String type) {
+        String logList = jsonObject.getString(type);
+
+        List<ElementLogListModel> logListModels;
+        logListModels = JSON.parseArray(logList, ElementLogListModel.class);
+        logListModels.forEach(log -> {
+            String eventDesc = log.getEventDesc();
+            log.setSceneId(sceneId);
+            log.setLogType(type);
+            if (log.getAppName() == null) {
+                log.setAppName("");
+            }
+            if (log.getEventDesc() == null) {
+                log.setEventDesc("");
+            } else if (eventDesc.length() > 500) {
+                log.setEventDesc(eventDesc.substring(0, 500));
+            }
+            if (log.getCatagory() == null) {
+                log.setCatagory("");
+            }
+        });
+        return logListModels;
     }
 
     private void object2array(JSONObject jsonObject, String key) {

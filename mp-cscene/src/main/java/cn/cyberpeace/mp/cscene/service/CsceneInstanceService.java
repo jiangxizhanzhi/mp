@@ -1039,16 +1039,21 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     private void mergeFileData(ListObjServiceResult<CollectionHostEventBO> hostEventsBos, HostEventQueryParams queryParams,
                                String sceneId) {
-
-        if (CollectionUtils.isEmpty(queryParams.getCatagories())) {
-            return;
-        }
-
         List<CollectionHostEventBO> bos = hostEventsBos.getSource().getObjs();
         HumanCondition humanCondition = new HumanCondition().currentLink(ElementLogListModel.class)
-                .filterEqual(ElementLogListModel::getSceneId, sceneId)
-                .filterIn(ElementLogListModel::getCatagory, queryParams.getCatagories().toArray());
-
+                .filterEqual(ElementLogListModel::getSceneId, sceneId);
+        /*if (CollectionUtils.isEmpty(queryParams.getCatagories())) {
+            humanCondition.filterEqual(ElementLogListModel::getCatagory, "");
+        }else {
+            humanCondition.filterIn(ElementLogListModel::getCatagory, queryParams.getCatagories().toArray());
+        }*/
+//        区分日志类型(日志/告警)
+        if (null != queryParams.getRuleIds() && CollectionUtils.isNotEmpty(queryParams.getRuleIds())) {
+            humanCondition.filterIn(ElementLogListModel::getRuleId, queryParams.getRuleIds().toArray());
+            humanCondition.filterEqual(ElementLogListModel::getLogType, SceneElementMonitorService.LOG);
+        } else {
+            humanCondition.filterEqual(ElementLogListModel::getLogType, SceneElementMonitorService.ALARM);
+        }
         if (StringUtils.isNotEmpty(queryParams.getStartTime())) {
             humanCondition.filterGreaterThan(ElementLogListModel::getTime, queryParams.getStartTime());
         }
@@ -1219,12 +1224,32 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             bo.setNodeName(model.getNodeName());
             bo.setProbeName(model.getProbeName());
             bo.setEventDesc(model.getEventDesc());
+            bo.setContent(stringToMap(model.getContent()));
             bo.setTime(model.getTime());
             bos.add(bo);
             if (bos.size() == queryParams.getPageSize()) {
                 return;
             }
         }
+    }
+
+    public Map<String, Object> stringToMap(String str) {
+        if (str == null) return new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
+        String[] pairs = str.split(";");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split("\":\"");
+            if (keyValue.length == 2) {
+                if (keyValue[0].startsWith("\"")) {
+                    keyValue[0] = keyValue[0].substring(1);
+                }
+                if (keyValue[1].endsWith("\"")) {
+                    keyValue[1] = keyValue[1].substring(0, keyValue[1].length() - 1);
+                }
+                map.put(keyValue[0], keyValue[1]);
+            }
+        }
+        return map;
     }
 
     public ServiceResult<Boolean> startFlow(String id, String toNodeId, String flowId, String sourceIp, CsceneContextBO context) {

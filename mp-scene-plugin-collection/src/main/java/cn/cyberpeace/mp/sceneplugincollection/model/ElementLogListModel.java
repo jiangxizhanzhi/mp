@@ -39,4 +39,10 @@ public class ElementLogListModel extends BaseModel {
 	@ApiModelProperty("分类")
 	private String catagory;
 
+	@ApiModelProperty("日志类型用于区分日志/告警信息")
+	private String logType;
+
+	@ApiModelProperty("规则id")
+	private String ruleId;
+
 }
