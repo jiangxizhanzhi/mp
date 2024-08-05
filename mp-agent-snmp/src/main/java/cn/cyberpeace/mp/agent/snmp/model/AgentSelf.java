@@ -1,14 +1,16 @@
 package cn.cyberpeace.mp.agent.snmp.model;
 
-import com.google.common.collect.Maps;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.UUID;
 
 @Slf4j
 @Data
@@ -113,9 +115,5 @@ public class AgentSelf implements Serializable {
                 }
             }
         }
-    }
-
-    public static AgentSelf getInstance(String version) {
-        return agentMap.get(version);
     }
 }

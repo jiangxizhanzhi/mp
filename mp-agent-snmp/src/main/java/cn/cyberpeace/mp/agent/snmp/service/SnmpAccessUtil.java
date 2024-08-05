@@ -99,34 +99,33 @@ public class SnmpAccessUtil {
         this.init(host, port, version, null, snmpV3Bo);
     }
 
-    public static SnmpAccessUtil initSnmpAccessUtilFromTaskRequest(TaskRequest<SnmpAccessInfo> snmpTaskRequest) {
-        SnmpAccessInfo targetHostInfo = snmpTaskRequest.getAccessInfo();
+    public static SnmpAccessUtil initSnmpAccessUtilFromTaskRequest(SnmpAccessInfo snmpAccessInfo) {
         boolean flag = false;
         int maxRetry = 1;
         SnmpAccessUtil snmpAccessUtil = null;
         while (!flag && maxRetry > 0) {
             try {
-                if (VERSION_MAP.get(targetHostInfo.getVersion()).equals(SnmpConstants.version3)) {
+                if (VERSION_MAP.get(snmpAccessInfo.getVersion()).equals(SnmpConstants.version3)) {
                     SnmpV3Bo snmpV3Bo = new SnmpV3Bo();
-                    snmpV3Bo.setUsername(targetHostInfo.getUsername());
-                    snmpV3Bo.setSecurityLevel(SEC_LEVEL_MAP.get(targetHostInfo.getSecLevel()));
-                    snmpV3Bo.setAuthProtocol(AUTH_PROTOCOL_MAP.get(targetHostInfo.getAuthProtocol().toUpperCase()));
-                    snmpV3Bo.setAuthPassPhrase(targetHostInfo.getAuthPassPhrase());
-                    snmpV3Bo.setPrivacyProtocol(PRIVACY_PROTOCOL_MAP.get(targetHostInfo.getPrivacyProtocol().toUpperCase()));
-                    snmpV3Bo.setPrivacyPassPhrase(targetHostInfo.getPrivacyPassPhrase());
+                    snmpV3Bo.setUsername(snmpAccessInfo.getUsername());
+                    snmpV3Bo.setSecurityLevel(SEC_LEVEL_MAP.get(snmpAccessInfo.getSecLevel()));
+                    snmpV3Bo.setAuthProtocol(AUTH_PROTOCOL_MAP.get(snmpAccessInfo.getAuthProtocol().toUpperCase()));
+                    snmpV3Bo.setAuthPassPhrase(snmpAccessInfo.getAuthPassPhrase());
+                    snmpV3Bo.setPrivacyProtocol(PRIVACY_PROTOCOL_MAP.get(snmpAccessInfo.getPrivacyProtocol().toUpperCase()));
+                    snmpV3Bo.setPrivacyPassPhrase(snmpAccessInfo.getPrivacyPassPhrase());
 
                     snmpAccessUtil = new SnmpAccessUtil(
-                            targetHostInfo.getHostIp(),
-                            targetHostInfo.getPort() != null ? Integer.parseInt(targetHostInfo.getPort()) : 161,
-                            VERSION_MAP.get(targetHostInfo.getVersion()),
+                            snmpAccessInfo.getHostIp(),
+                            snmpAccessInfo.getPort() != null ? Integer.parseInt(snmpAccessInfo.getPort()) : 161,
+                            VERSION_MAP.get(snmpAccessInfo.getVersion()),
                             snmpV3Bo
                     );
                 } else {
                     snmpAccessUtil = new SnmpAccessUtil(
-                            targetHostInfo.getHostIp(),
-                            targetHostInfo.getPort() != null ? Integer.parseInt(targetHostInfo.getPort()) : 161,
-                            VERSION_MAP.get(targetHostInfo.getVersion()),
-                            targetHostInfo.getCommunity()
+                            snmpAccessInfo.getHostIp(),
+                            snmpAccessInfo.getPort() != null ? Integer.parseInt(snmpAccessInfo.getPort()) : 161,
+                            VERSION_MAP.get(snmpAccessInfo.getVersion()),
+                            snmpAccessInfo.getCommunity()
                     );
                 }
                 log.info(String.format("Snmp %s 连接尝试...", snmpAccessUtil.getAddress()));

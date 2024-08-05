@@ -1655,7 +1655,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             taskRequest.setConfig(config);
             taskRequest.setAccessInfo(accessInfo);
 
-            BeanCommon.getBean(SnmpTaskServiceImpl.class).execTask(taskRequest);
+            BeanCommon.getBean(SnmpTaskServiceImpl.class).execTask(accessInfo, config);
         }
         return new ServiceResult<>(new SendStrategyResult()).asResult();
     }

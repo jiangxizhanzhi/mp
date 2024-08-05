@@ -2,10 +2,9 @@ package cn.cyberpeace.mp.agent.snmp.service.impl;
 
 import cn.cyberpeace.mp.agent.snmp.controller.request.SnmpAccessInfo;
 import cn.cyberpeace.mp.agent.snmp.service.Command;
+import cn.cyberpeace.mp.agent.snmp.service.CommandConfig;
 import cn.cyberpeace.mp.agent.snmp.service.Param;
 import cn.cyberpeace.mp.agent.snmp.service.SnmpAccessUtil;
-import cn.cyberpeace.mp.agent.snmp.service.TaskRequest;
-import cn.cyberpeace.mp.agent.snmp.service.TaskService;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
@@ -20,16 +19,14 @@ import static cn.cyberpeace.mp.base.constant.BaseErrorCode.CUSTOM_ERROR;
 
 @Slf4j
 @Service("snmpTaskService")
-public class SnmpTaskServiceImpl implements TaskService<SnmpAccessInfo> {
+public class SnmpTaskServiceImpl {
 
-
-    @Override
-    public Boolean execTask(TaskRequest<SnmpAccessInfo> snmpTaskRequest) {
+    public Boolean execTask(SnmpAccessInfo accessInfo, CommandConfig config) {
         SnmpAccessUtil snmpAccessUtil;
 
         // 1. connect
         try {
-            snmpAccessUtil = SnmpAccessUtil.initSnmpAccessUtilFromTaskRequest(snmpTaskRequest);
+            snmpAccessUtil = SnmpAccessUtil.initSnmpAccessUtilFromTaskRequest(accessInfo);
         } catch (Exception e) {
             log.error("snmp连接失败", e);
             return false;
@@ -39,7 +36,7 @@ public class SnmpTaskServiceImpl implements TaskService<SnmpAccessInfo> {
         List<String> inputAndOutput = new ArrayList<>();
 
         try {
-            List<Command> commands = snmpTaskRequest.getConfig().getCommands();
+            List<Command> commands = config.getCommands();
             for (Command command : commands) {
                 List<JSONObject> execResult = new ArrayList<>();
                 for (String finalCommand : formatConfig(command).lines().collect(Collectors.toList())) {
@@ -65,7 +62,7 @@ public class SnmpTaskServiceImpl implements TaskService<SnmpAccessInfo> {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return false;
-        }finally {
+        } finally {
             if (snmpAccessUtil != null) {
                 snmpAccessUtil.close();
             }
