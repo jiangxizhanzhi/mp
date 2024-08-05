@@ -1656,6 +1656,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             taskRequest.setAccessInfo(accessInfo);
 
             BeanCommon.getBean(SnmpTaskServiceImpl.class).execTask(accessInfo, config);
+
+            var m = this.getModelService().get(request.getId()).getSource().getObj();
+            String sceneId = m.getScene();
+            SceneHandler handler = new SceneHandler(sceneId, null, null);
+            handler.getElement(request.getNodeId())
+                    .setConfigCommand(JsonCommon.beanToSnakeMap(request.getConfigCommand()));
+            handler.save();
         }
         return new ServiceResult<>(new SendStrategyResult()).asResult();
     }
