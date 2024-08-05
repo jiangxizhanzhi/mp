@@ -1968,26 +1968,27 @@ public class CreateHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.CREATE_ENTITIES, () -> createEntityElements(new ArrayList<>(entityCreateData)));
         }
 
-        // 判断节点是否存在实体设备节点
-        for (CloudPluginSceneElementBO connectedNetworkBO : getPluginHandler().getElementMap().values()){
-            if (BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE == connectedNetworkBO.getVirtualType()){
-                // 创建策略下发虚拟机
-                String strategyIp = createStrategy();
-
-                // 获取场景实例
-                String sceneId = getPluginHandler().getSourceSceneId();
-
-                // 获取节点配置信息
-                HumanCondition condition = new HumanCondition().filterEqual(SceneElementModel::getScene, sceneId);
-                List<SceneElementModel> sceneElementModels = getSceneElementMapper().list(condition);
-
-                // 调用接口下发配置
-                for (SceneElementModel sceneElementModel : sceneElementModels){
-                    strategySend(strategyIp, sceneElementModel.getConfigCommand());
-                }
-                break;
-            }
-        }
+        // snmp\netconfig等命令下发的代码直接迁移到mp里面，所以可以不用建立strategy虚拟机
+//        // 判断节点是否存在实体设备节点
+//        for (CloudPluginSceneElementBO connectedNetworkBO : getPluginHandler().getElementMap().values()){
+//            if (BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE == connectedNetworkBO.getVirtualType()){
+//                // 创建策略下发虚拟机
+//                String strategyIp = createStrategy();
+//
+//                // 获取场景实例
+//                String sceneId = getPluginHandler().getSourceSceneId();
+//
+//                // 获取节点配置信息
+//                HumanCondition condition = new HumanCondition().filterEqual(SceneElementModel::getScene, sceneId);
+//                List<SceneElementModel> sceneElementModels = getSceneElementMapper().list(condition);
+//
+//                // 调用接口下发配置
+//                for (SceneElementModel sceneElementModel : sceneElementModels){
+//                    strategySend(strategyIp, sceneElementModel.getConfigCommand());
+//                }
+//                break;
+//            }
+//        }
     }
 
     protected void createPortMappingProxy() {
