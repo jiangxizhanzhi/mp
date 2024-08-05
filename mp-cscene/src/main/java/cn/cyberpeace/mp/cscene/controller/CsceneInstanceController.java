@@ -10,6 +10,12 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.agent.snmp.controller.request.SnmpAccessInfo;
+import cn.cyberpeace.mp.agent.snmp.service.Command;
+import cn.cyberpeace.mp.agent.snmp.service.CommandConfig;
+import cn.cyberpeace.mp.agent.snmp.service.SnmpAccessUtil;
+import cn.cyberpeace.mp.agent.snmp.service.TaskRequest;
+import cn.cyberpeace.mp.agent.snmp.service.impl.SnmpTaskServiceImpl;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.BeanCommon;
@@ -1633,6 +1639,24 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneStrategyRequest.class)
     @PostMapping("/send_strategy")
     public ServiceResult<SendStrategyResult> sendStrategy(@RequestBody CsceneStrategyRequest request) {
+        if (request.getConfigCommand().getProtocol() == 0) {
+            TaskRequest<SnmpAccessInfo> taskRequest = new TaskRequest<>();
+            SnmpAccessInfo accessInfo = new SnmpAccessInfo();
+            accessInfo.setCommunity(request.getConfigCommand().getCommunity());
+            accessInfo.setVersion("v2c");
+            accessInfo.setPort(request.getConfigCommand().getPort());
+            accessInfo.setHostIp(request.getConfigCommand().getIp());
+
+            var config = new CommandConfig();
+            var command = new Command();
+            command.setParams(new ArrayList<>());
+            command.setCommand(request.getConfigCommand().getContent());
+            config.setCommands(Arrays.asList(command));
+            taskRequest.setConfig(config);
+            taskRequest.setAccessInfo(accessInfo);
+
+            BeanCommon.getBean(SnmpTaskServiceImpl.class).execTask(taskRequest);
+        }
         return new ServiceResult<>(new SendStrategyResult()).asResult();
     }
 

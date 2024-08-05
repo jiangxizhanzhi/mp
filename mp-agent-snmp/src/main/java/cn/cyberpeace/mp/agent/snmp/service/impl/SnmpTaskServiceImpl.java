@@ -25,21 +25,18 @@ public class SnmpTaskServiceImpl implements TaskService<SnmpAccessInfo> {
 
     @Override
     public Boolean execTask(TaskRequest<SnmpAccessInfo> snmpTaskRequest) {
-        //ReportAction.report(snmpTaskRequest.getReportUrl(), AgentResultBo.enterExecSuccess(snmpTaskRequest));
         SnmpAccessUtil snmpAccessUtil;
 
         // 1. connect
         try {
             snmpAccessUtil = SnmpAccessUtil.initSnmpAccessUtilFromTaskRequest(snmpTaskRequest);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            //ReportAction.report(snmpTaskRequest.getReportUrl(), AgentResultBo.connectTargetFailed(snmpTaskRequest, e.getMessage()));
+            log.error("snmp连接失败", e);
             return false;
         }
 
         // 2. exec command
         List<String> inputAndOutput = new ArrayList<>();
-        //ReportAction.report(snmpTaskRequest.getReportUrl(), AgentResultBo.connectTargetSuccess(snmpTaskRequest));
 
         try {
             List<Command> commands = snmpTaskRequest.getConfig().getCommands();
@@ -65,14 +62,13 @@ public class SnmpTaskServiceImpl implements TaskService<SnmpAccessInfo> {
                     log.info("Snmp请求成功，请求信息[{}]，返回信息{}", finalCommand, JsonUtils.stringify(execResult));
                 }
             }
-
-            //ReportAction.report(snmpTaskRequest.getReportUrl(), AgentResultBo.execCommandSuccess(snmpTaskRequest, inputAndOutput));
-
-            snmpAccessUtil.close();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            //ReportAction.report(snmpTaskRequest.getReportUrl(), AgentResultBo.execCommandFailed(snmpTaskRequest, inputAndOutput, e.getMessage()));
             return false;
+        }finally {
+            if (snmpAccessUtil != null) {
+                snmpAccessUtil.close();
+            }
         }
 
         return Boolean.TRUE;
