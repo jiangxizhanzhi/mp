@@ -1048,7 +1048,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             humanCondition.filterIn(ElementLogListModel::getCatagory, queryParams.getCatagories().toArray());
         }*/
 //        区分日志类型(日志/告警)
-        if (null != queryParams.getRuleIds() && CollectionUtils.isNotEmpty(queryParams.getRuleIds())) {
+        if(null != queryParams.getRuleGroups() && queryParams.getRuleGroups().size()>0){
+            humanCondition.filterEqual(ElementLogListModel::getLogType, "");
+        }else if (null != queryParams.getRuleIds() && CollectionUtils.isNotEmpty(queryParams.getRuleIds())) {
             humanCondition.filterIn(ElementLogListModel::getRuleId, queryParams.getRuleIds().toArray());
             humanCondition.filterEqual(ElementLogListModel::getLogType, SceneElementMonitorService.LOG);
         } else {
@@ -2298,11 +2300,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
 
 
+
         String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer(sceneHandler.getScene().getCloudType());
 
         var controlConfigParam = new WazuhControl.ControlConfigParam();
         controlConfigParam.setProbeParams(new ArrayList<>());
-        ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName);
+        ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName,pluginHandler.getScene().getSrcScene().getCloudType());
 
         // 删除操作
         if (SceneElementSituationProbeModel.ProbeType.REMOVE == probeType || SceneElementSituationProbeModel.ProbeType.UPDATE == probeType) {

@@ -83,6 +83,8 @@ public class SceneAppConfig {
     }
 
     public String getMetadataFileServer(Integer cloudType) {
+        if(null == cloudType) return this.metadataFileServer;
+
         String metadataFileServer;
         switch (cloudType) {
             case 0:

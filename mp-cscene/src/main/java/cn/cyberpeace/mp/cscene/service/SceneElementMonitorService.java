@@ -1037,13 +1037,13 @@ public class SceneElementMonitorService {
                     Arrays.asList("sceneId", "group", "fileSize", "log"), ExcelHeader.REGISTRY_LIST);
 
             ExcelDataHandler.exportExcel(logList, filePath, "日志事件",
-                    Arrays.asList("sceneId", "log"), ExcelHeader.LOG_LIST);
+                    Arrays.asList("sceneId", "log", "logType"), ExcelHeader.LOG_LIST);
 
             ExcelDataHandler.exportExcel(probeList, filePath, "自定义采集",
-                    Arrays.asList("sceneId", "log"), ExcelHeader.PROBE_LIST);
+                    Arrays.asList("sceneId", "log", "eventDesc"), ExcelHeader.PROBE_LIST);
 
-            ExcelDataHandler.exportExcel(logList, filePath, "告警事件",
-                    Arrays.asList("sceneId", "log"), ExcelHeader.LOG_LIST);
+            ExcelDataHandler.exportExcel(alarmList, filePath, "告警事件",
+                    Arrays.asList("sceneId", "log", "logType"), ExcelHeader.LOG_LIST);
 
             FileUtil.setResponse(new File(fileName + ".xlsx"), true, response);
         }
@@ -1088,9 +1088,13 @@ public class SceneElementMonitorService {
         model.setLevel(bo.getLevel());
         model.setDescription(bo.getDescription());
         model.setCatagory(bo.getCatagory());
-        Map rule = (Map) bo.getContent().get("rule");
-        Object id = rule.get("id");
-        model.setRuleId(id.toString());
+        if (null != bo.getContent()) {
+            Map rule = (Map) bo.getContent().get("rule");
+            Object id = rule.get("id");
+            model.setRuleId(id.toString());
+        } else {
+            System.out.println("bo.getContent() is null");
+        }
         return model;
     }
 
@@ -1233,6 +1237,9 @@ public class SceneElementMonitorService {
                     logListModel.setLevel(Integer.parseInt(logData.get(4)));
                     logListModel.setDescription(logData.get(5));
                     logListModel.setCatagory(logData.get(6));
+                    logListModel.setLogType(LOG);
+                    logListModel.setRuleId(logData.get(7));
+                    sanitizeEventDescription(logListModel);
                     logListModels.add(logListModel);
                 }
             } else if (3 == type) {
@@ -1244,7 +1251,7 @@ public class SceneElementMonitorService {
                     dataModel.setSceneId(sceneId);
                     dataModel.setNodeName(probeData.get(0));
                     dataModel.setProbeName(probeData.get(1));
-                    dataModel.setEventDesc(probeData.get(2));
+                    dataModel.setContent(probeData.get(2));
                     dataModel.setTime(LocalDateTime.parse(probeData.get(3)));
                     wazuhProbeDataModels.add(dataModel);
                 }
@@ -1262,6 +1269,9 @@ public class SceneElementMonitorService {
                     logListModel.setLevel(Integer.parseInt(logData.get(4)));
                     logListModel.setDescription(logData.get(5));
                     logListModel.setCatagory(logData.get(6));
+                    logListModel.setLogType(ALARM);
+                    logListModel.setRuleId(logData.get(7));
+                    sanitizeEventDescription(logListModel);
                     logListModels.add(logListModel);
                 }
             }
@@ -1305,7 +1315,6 @@ public class SceneElementMonitorService {
                 registryListModels = JSON.parseArray(registryList, ElementFileListModel.class);
                 registryListModels.forEach(list -> list.setSceneId(sceneId));
             } else if (2 == type) {
-                String logList = jsonObject.getString(LOG);
                 logListModels = getElementLogListModels(jsonObject, sceneId, LOG);
             } else if (3 == type) {
                 String probeList = jsonObject.getString(PROBE);
@@ -1333,7 +1342,7 @@ public class SceneElementMonitorService {
         wazuhProbeDataMapper.bulkCreate(wazuhProbeDataModels);
     }
 
-    private static List<ElementLogListModel> getElementLogListModels(JSONObject jsonObject, String sceneId, String type) {
+    private List<ElementLogListModel> getElementLogListModels(JSONObject jsonObject, String sceneId, String type) {
         String logList = jsonObject.getString(type);
 
         List<ElementLogListModel> logListModels;
@@ -1345,16 +1354,21 @@ public class SceneElementMonitorService {
             if (log.getAppName() == null) {
                 log.setAppName("");
             }
-            if (log.getEventDesc() == null) {
-                log.setEventDesc("");
-            } else if (eventDesc.length() > 500) {
-                log.setEventDesc(eventDesc.substring(0, 500));
-            }
+            sanitizeEventDescription(log);
             if (log.getCatagory() == null) {
                 log.setCatagory("");
             }
         });
         return logListModels;
+    }
+
+    private void sanitizeEventDescription(ElementLogListModel log) {
+        String eventDesc = log.getEventDesc();
+        if (eventDesc == null) {
+            log.setEventDesc("");
+        } else if (eventDesc.length() > 500) {
+            log.setEventDesc(eventDesc.substring(0, 500));
+        }
     }
 
     private void object2array(JSONObject jsonObject, String key) {
