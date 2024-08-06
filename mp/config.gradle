@@ -13,7 +13,7 @@ gradle.ext {
         'mp-log',
         'mp-flow',
         'mp-behavior',
-        'mp-agent-snmp'
+        'mp-agent'
     ]
 
     flyway = [
