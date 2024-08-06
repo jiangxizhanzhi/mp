@@ -665,6 +665,8 @@ public class LoadServiceImpl {
                 }
                 rowTime++;
             }
+            //outputFile临时文件删除
+            outputFile.delete();
             if (data.size() > 0) {
                 // 读取表格数据最后一行的时候会有空的脏数据，不删不影响查询
                 data.remove(data.size() - 1);
@@ -674,8 +676,6 @@ public class LoadServiceImpl {
                 }
             }
             workbook.close();
-            //outputFile临时文件删除
-            outputFile.delete();
         }
         return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
