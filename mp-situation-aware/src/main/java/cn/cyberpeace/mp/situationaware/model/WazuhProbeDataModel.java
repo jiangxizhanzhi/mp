@@ -15,18 +15,21 @@ import java.time.LocalDateTime;
 @Table("mp_wazuh_probe_data")
 public class WazuhProbeDataModel extends BaseModel {
 
-	@ApiModelProperty("场景id")
-	private String sceneId;
+    @ApiModelProperty("场景id")
+    private String sceneId;
 
-	@ApiModelProperty("主机名称")
-	private String nodeName;
+    @ApiModelProperty("主机名称")
+    private String nodeName;
 
-	@ApiModelProperty("探针名称")
-	private String probeName;
+    @ApiModelProperty("探针名称")
+    private String probeName;
 
-	@ApiModelProperty("详情")
-	private String eventDesc;
+    @ApiModelProperty("底层信息")
+    private String content;
 
-	@ApiModelProperty("时间")
-	private LocalDateTime time;
+    @ApiModelProperty("详情")
+    private String eventDesc;
+
+    @ApiModelProperty("时间")
+    private LocalDateTime time;
 }

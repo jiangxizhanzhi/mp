@@ -205,7 +205,7 @@ public class InitiateHandler extends HandlerCommon {
                         List<Probe> probes = collectionElement.getProbes();
 
                         controlParam = this.getControlConfigParam(probes, srcElement.getEid(),
-                                systemType, this.getLocationMap());
+                                systemType, this.getLocationMap(),cloudType);
 
 //                        增加节点探针关联表数据
                         List<SceneElementSituationProbeModel> sceneElementSituationProbeModels =
@@ -247,10 +247,11 @@ public class InitiateHandler extends HandlerCommon {
      * @param agentName
      * @param systemType  系统类型
      * @param locationMap 日志采集探针参数Map
+     * @param cloudType
      * @return 探针采集参数
      */
     private WazuhControl.ControlConfigParam getControlConfigParam(List<Probe> probes, String agentName, String systemType
-            , Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> locationMap) {
+            , Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> locationMap, Integer cloudType) {
         List<WazuhControl.ControlProbeParam> customProbeParams = new ArrayList<>();
         List<WazuhControl.ControlRegistryModifyParam> registryParams = new ArrayList<>();
         List<WazuhControl.ControlFileModifyParam> fileParams = new ArrayList<>();
@@ -259,7 +260,7 @@ public class InitiateHandler extends HandlerCommon {
         for (Probe probe : probes) {
             // 脚本驱动类型，新增脚本参数
             if (null != probe.getExecType() && probe.getExecType() == Probe.ExecType.SCRIPT_PROBE) {
-                ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName);
+                ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName,cloudType);
                 customProbeParams.addAll(convertScript.convertParams());
             } else if (null != probe.getExecType() && probe.getExecType() == Probe.ExecType.REGISTRY_PROBE) {
                 // 注册表变更类型，新增注册表参数

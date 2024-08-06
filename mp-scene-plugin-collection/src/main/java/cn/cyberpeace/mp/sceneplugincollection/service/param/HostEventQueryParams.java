@@ -50,4 +50,6 @@ public class HostEventQueryParams extends QueryParams {
      */
     @ApiModelProperty(value = "是否是滚动分页请求")
     private Boolean scroll;
+
+    private List<String> ruleIds;
 }

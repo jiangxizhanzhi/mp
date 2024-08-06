@@ -220,27 +220,31 @@ public class CloudSceneConnectionCommon {
             }
 
             if (BaseSceneModel.CloudType.DEFAULT != cloudType) {
+
                 CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
                 CloudPluginSceneElementBO element = pluginHandler.getElement(sceneElementId);
                 if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(element.getImageType())) {
                     if (element.getIsPublicIp()) {
                         connectionParams.setHostname(element.getPublicIpAddress());
                     } else if (StringUtils.isNotBlank(element.getManagementIp())) {
+                        userId = userId + "_" + sceneId;
                         connectionParams.setHostname(sceneConnection.getAccessIp());
                         guacamoleCreateConnectionData.setHost(element.getManagementIp());
                     }
                 } else if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(element.getImageType())) {
+                    userId = userId + "_" + sceneId;
                     guacamoleCreateConnectionData.setHost(element.getManagementIp());
                     connectionParams.setHostname(element.getManagementIp());
                     connectionParams.setProtocol("container");
-                    connectionParams.setPort(AccessMode.Protocol.SSH);
+                    connectionParams.setPort("22");
                     connectionParams.setUsername(situationAwareConfig.getManagementUsername());
                     connectionParams.setPassword(situationAwareConfig.getManagementPassword());
-                    connectionParams.setCmd(getContainerCmd(pluginHandler, cloudType, element,interpreter));
+                    connectionParams.setCmd(getContainerCmd(pluginHandler, cloudType, element, interpreter));
                 }
             } else {
                 connectionParams.setHostname(sceneConnection.getAccessIp());
             }
+            guacamoleCreateConnectionData.setUsername(userId);
             guacamoleCreateConnectionData.setConnectionParams(connectionParams);
             var result = remoteClient.createConnection(guacamoleCreateConnectionData);
             if (result == null || StringUtils.isEmpty(result.getConnectionId())) {

@@ -24,6 +24,8 @@ public class ConvertScriptParams implements WazuhParamsConvert<WazuhControl.Cont
 
     private String agentName;
 
+    private Integer cloudType;
+
 
     private static String getCollectInterval() {
         return CollectionSingleton.collectionAppConfig.getCollectInterval();
@@ -34,9 +36,15 @@ public class ConvertScriptParams implements WazuhParamsConvert<WazuhControl.Cont
         this.agentName = agentName;
     }
 
+    public ConvertScriptParams(Probe probe, String agentName,Integer cloudType) {
+        this.probe = probe;
+        this.agentName = agentName;
+        this.cloudType = cloudType;
+    }
+
     @Override
     public List<WazuhControl.ControlProbeParam> convertParams() {
-        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer(cloudType);
         WazuhControl.ControlProbeParam scriptProbeParam = new WazuhControl.ControlProbeParam();
         scriptProbeParam.setId(probe.getId());
         scriptProbeParam.setGroup(agentName);

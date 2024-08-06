@@ -78,12 +78,12 @@ public class AzureVirtualNet {
         Network network = createdNet.create();
         cloudElement.setResourceId(network.id());
 
-//        创建管理虚拟机用于远程连接 TODO 虚拟机未准备好暂不走此逻辑
-        manageamentSubName = null;
+//        创建管理虚拟机用于远程连接
+//        manageamentSubName = null;
         if (null != manageamentSubName) {
             Integer cloudType = pluginHandler.getSrcScene().getCloudType();
             AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(resourceService);
-            VirtualMachine managementVm = azureVirtualMachine.createManagementVM(cloudType,groupName, "ManagementVM_" + netName, network, manageamentSubName);
+            VirtualMachine managementVm = azureVirtualMachine.createManagementVM(cloudType, groupName, "ManagementVM_" + netName, network, manageamentSubName);
             cloudElement.setManagementIp(managementVm.getPrimaryPublicIPAddress().ipAddress());
         }
 
