@@ -1,17 +1,9 @@
 package cn.cyberpeace.mp.agent.netconf.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.ssh.SshClient;
 import lombok.extern.slf4j.Slf4j;
 import net.juniper.netconf.Device;
 import net.juniper.netconf.XML;
-import net.juniper.netconf.XMLBuilder;
-import net.schmizz.sshj.SSHClient;
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 @Slf4j
 public class NetconfOperator {
@@ -38,17 +30,6 @@ public class NetconfOperator {
 	public XML send(String xmlContent) {
 		try {
 			XML xmlReply = device.executeRPC(xmlContent);
-			return xmlReply;
-		} catch (Exception e) {
-			log.error("Send xml failed! catch error:", e);
-			throw new MpRuntimeException(e.getMessage());
-		}
-	}
-
-	public XML sendAndClose(String xmlContent) {
-		try {
-			XML xmlReply = device.executeRPC(xmlContent);
-			close();
 			return xmlReply;
 		} catch (Exception e) {
 			log.error("Send xml failed! catch error:", e);

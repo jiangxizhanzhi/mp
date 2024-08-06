@@ -152,7 +152,6 @@ public class SnmpAccessUtil {
         }
         
         return snmpAccessUtil;
-        //throw new MpRuntimeException(CUSTOM_ERROR.format("创建到目标配置主机的连接失败"));
     }
 
     /**
