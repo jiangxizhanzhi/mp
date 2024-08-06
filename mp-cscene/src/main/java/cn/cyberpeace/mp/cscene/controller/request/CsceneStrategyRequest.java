@@ -48,5 +48,11 @@ public class CsceneStrategyRequest {
         private String user;
         @ApiModelProperty(value = "密码")
         private String password;
+        @ApiModelProperty(value = "命令，用于兼容前端组件的显示，实际上用不到")
+        private Object commands ;
+
+        public String getUsername() {
+            return user;
+        }
     }
 }
