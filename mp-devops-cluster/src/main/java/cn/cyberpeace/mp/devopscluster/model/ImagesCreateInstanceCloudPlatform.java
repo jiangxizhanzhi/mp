@@ -11,12 +11,15 @@
 package cn.cyberpeace.mp.devopscluster.model;
 
 import cn.cyberpeace.mp.devopscluster.request.BaseRequest;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-/**
+import java.util.List;
+
+ /**
  * @ClassName ImagesCreateInstanceCloudPlatform
  * @Description 镜像构建请求信息
  * @Author maojun
@@ -41,4 +44,6 @@ public class ImagesCreateInstanceCloudPlatform extends BaseRequest {
      */
     private String requestUser;
 
+
+    private List<VirtualNic> network;
 }

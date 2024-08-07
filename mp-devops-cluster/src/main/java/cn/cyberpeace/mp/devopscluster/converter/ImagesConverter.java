@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -50,11 +51,16 @@ import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudElementAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetConnectionUrlParam;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
+import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConnectionCommon;
+import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -114,33 +120,26 @@ public class ImagesConverter implements BaseConverter {
      * @return
      */
     public List<TargetConnection> getConnections(String deviceUuid) {
-        Remote remoteClient = new Remote();
         Device device = deviceService.findByUuid(deviceUuid);
-        String imageType = device.getImageType();
+        var f = deviceTargetMapper.findByUuid(deviceUuid);
+        String ip = f.getInstanceIp();
         String vmId;
-        if (ImageTypeEnum.CONTAINER.toValue().equals(imageType)) {
-            vmId = device.getExtDocker().getInstanceUuid();
-            GetConnectionUrlParam getConnectionUrlParam = new GetConnectionUrlParam();
-            getConnectionUrlParam.setVmId(vmId);
-            getConnectionUrlParam.setConsoleType(CloudElementAccessMode.Protocol.CONSOLE);
-            String url = remoteClient.getContainerConnectionUrl(getConnectionUrlParam)
-                    .getData();
-            return Collections.singletonList(new TargetConnection()
-                    .setUrl(url).setProtocol(CloudElementAccessMode.Protocol.CONSOLE));
-
-        } else if (ImageTypeEnum.VM.toValue().equals(imageType)) {
-            vmId = device.getExtVm().getInstanceUuid();
-            GetConnectionUrlParam getConnectionUrlParam = new GetConnectionUrlParam();
-            getConnectionUrlParam.setVmId(vmId);
-            getConnectionUrlParam.setConsoleType(CloudElementAccessMode.Protocol.NO_VNC);
-            String url = remoteClient.getNoVncConnectionUrl(getConnectionUrlParam).getData();
-
-            return Collections.singletonList(new TargetConnection()
-                    .setUrl(url).setProtocol(CloudElementAccessMode.Protocol.VNC));
-        } else {
-            return Collections.emptyList();
+        vmId = device.getExtVm().getInstanceUuid();
+        List<TargetConnection> result = new ArrayList<>();
+        for (var protocol : device.getExtVm().getAccessProtocols()) {
+            TargetConnection c = new TargetConnection();
+            c.setProtocol(protocol.getProtocol());
+            c.setUsername(protocol.getUsername());
+            c.setPassword(protocol.getPassword());
+            c.setIpAddress(ip);
+            var r = CloudSceneConnectionCommon.getOrCreateSceneConnectionV2(device.getImageType(), c.getProtocol(), vmId, c.getUsername(), c.getPassword(), String.valueOf(c.getPort()), c.getIpAddress());
+            if (r.getConnectionId() != null) {
+                c.setConnectionId(Integer.valueOf(r.getConnectionId()));
+            }
+            c.setUrl(r.getConnectionUrl());
+            result.add(c);
         }
-
+        return result;
     }
 
     /**
@@ -603,7 +602,15 @@ public class ImagesConverter implements BaseConverter {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         String instanceCreateUser = Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : StringUtils.EMPTY;
-        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, instanceCreateUser));
+
+        List<VirtualNic> network = new ArrayList<>();
+        VirtualNic virtualNic = new VirtualNic();
+        virtualNic.setNetworkId(BeanCommon.getBean(CloudAppConfig.class).getConfigNetId());
+        virtualNic.setCidr(BeanCommon.getBean(CloudAppConfig.class).getConfigNetCidr());
+        virtualNic.setFixedIp(IpUtils.getConfigIp());
+        network.add(virtualNic);
+
+        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, instanceCreateUser, network));
         DeviceTargetPO updateTargetModel = new DeviceTargetPO();
         updateTargetModel.setUuid(uuid);
         updateTargetModel.setInstanceCreateUser(instanceCreateUser);

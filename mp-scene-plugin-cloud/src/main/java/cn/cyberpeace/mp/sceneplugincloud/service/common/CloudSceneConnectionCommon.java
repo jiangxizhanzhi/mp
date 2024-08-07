@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudElementAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Connection;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
@@ -204,6 +205,73 @@ public class CloudSceneConnectionCommon {
             sceneConnection.setConnectionUrl(connectionCreateResult.getUrl());
             sceneConnection.setAccessModeId(param.getCloudAccessMode().getId());
             cloudPluginSceneConnectionMapper.save(sceneConnection);
+            return sceneConnection;
+        }
+    }
+
+    public static CloudPluginSceneConnectionModel getOrCreateSceneConnectionV2(String imageType, String protocol, String resourceId, String username, String password, String port, String ip) {
+        var connection = new Connection();
+        if (CloudElementAccessMode.Protocol.VNC.equals(protocol)) {
+            // 创建vnc连接的文件 从文件中获取 ip、端口、密码 信息
+            var fileContent = connection.getVncFileContent(resourceId);
+            Connection.ConnectionCreateData createData = new Connection.ConnectionCreateData();
+            createData.setUsername("");
+            Connection.ConnectionCreateParamsData params = new Connection.ConnectionCreateParamsData();
+            params.setProtocol(CloudElementAccessMode.Protocol.VNC);
+            params.setHostname(fileContent.getHost());
+            params.setPassword(fileContent.getPassword());
+            params.setPort(fileContent.getPort());
+            createData.setConnectionParams(params);
+
+            // 创建连接
+            var connectionCreateResult = connection.createConnection(createData);
+
+            var sceneConnection = new CloudPluginSceneConnectionModel();
+            sceneConnection.setConnectionId(connectionCreateResult.getConnectionId());
+            sceneConnection.setConnectionUrl(connectionCreateResult.getUrl());
+            return sceneConnection;
+        } else if (CloudElementAccessMode.Protocol.SPICE.equals(protocol)) {
+            var remoteClient = new Remote();
+            GetConnectionUrlParam param = new GetConnectionUrlParam();
+            param.setVmId(resourceId);
+            param.setConsoleType(protocol);
+            var res = remoteClient.getConnectionFile(param, null);
+            var sceneConnection = new CloudPluginSceneConnectionModel();
+            sceneConnection.setConnectionUrl(res.getData());
+            return sceneConnection;
+        } else if (CloudElementAccessMode.Protocol.CONSOLE.equals(protocol) || CloudElementAccessMode.Protocol.COM.equals(protocol)) {
+            if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.CONTAINER)) {
+                String url = new Remote().getContainerConsoleUrl(resourceId);
+                var sceneConnection = new CloudPluginSceneConnectionModel();
+                sceneConnection.setConnectionUrl(url);
+                return sceneConnection;
+            } else {
+                var remoteClient = new Remote();
+                GetConnectionUrlParam param = new GetConnectionUrlParam();
+                param.setVmId(resourceId);
+                param.setConsoleType(CloudElementAccessMode.Protocol.NO_VNC);
+                var res = remoteClient.getNoVncConnectionUrl(param);
+                var sceneConnection = new CloudPluginSceneConnectionModel();
+                sceneConnection.setConnectionUrl(res.getData());
+                return sceneConnection;
+            }
+        } else {
+            // 其他协议直接从节点的配置中获取用户名密码等
+            Connection.ConnectionCreateData createData = new Connection.ConnectionCreateData();
+            Connection.ConnectionCreateParamsData params = new Connection.ConnectionCreateParamsData();
+            params.setProtocol(protocol);
+            params.setUsername(username);
+            params.setPassword(password);
+            params.setPort(port);
+            params.setHostname(ip);
+            params.setNeedPrivateKey(false);
+            createData.setConnectionParams(params);
+
+            // 创建连接
+            var connectionCreateResult = connection.createConnection(createData);
+            var sceneConnection = new CloudPluginSceneConnectionModel();
+            sceneConnection.setConnectionId(connectionCreateResult.getConnectionId());
+            sceneConnection.setConnectionUrl(connectionCreateResult.getUrl());
             return sceneConnection;
         }
     }

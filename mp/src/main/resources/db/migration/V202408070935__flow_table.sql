@@ -1,0 +1,1 @@
+alter table mp_devops_target add column `instance_ip` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '靶标实例ip' ;

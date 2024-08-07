@@ -222,4 +222,7 @@ public class DeviceTargetPO extends BaseModel {
 
     @DefaultStr
     private String templateName;
+
+    @DefaultStr
+    private String instanceIp;
 }
