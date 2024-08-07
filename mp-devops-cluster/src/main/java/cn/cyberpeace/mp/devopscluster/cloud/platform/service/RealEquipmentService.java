@@ -231,9 +231,9 @@ public class RealEquipmentService extends BaseCpService {
                     if (key.startsWith(unitOid)) {
                         unitResult.put(key.replace(unitOid, ""), new BigDecimal(value));
                     } else if (key.startsWith(totalOid)) {
-                        totalResult.put(key.replace(unitOid, ""), new BigDecimal(value));
+                        totalResult.put(key.replace(totalOid, ""), new BigDecimal(value));
                     } else if (key.startsWith(usedOid)) {
-                        usedResult.put(key.replace(unitOid, ""), new BigDecimal(value));
+                        usedResult.put(key.replace(usedOid, ""), new BigDecimal(value));
                     }
                 }
                 log.info("unitResult : {}", JsonCommon.stringify(unitResult));
