@@ -63,8 +63,9 @@ public class SnmpTaskServiceImpl {
         Map<String,String> result = new HashMap<>();
         for (String oid : oids) {
             var execResult = snmpAccessUtil.exec(SnmpAccessUtil.WALK, oid);
-            var snmpResult = JsonCommon.parseList(JsonCommon.stringify(execResult), SnmpResult.class);
-            result.put(snmpResult.get(0).getOID(), String.valueOf(snmpResult.get(0).getValue()));
+            for (var r : execResult) {
+                result.put(r.getString("OID"), String.valueOf(r.get("value")));
+            }
         }
         log.info("查询结果汇总为:{}",JsonCommon.stringify(result));
         return result;

@@ -13,6 +13,7 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 import cn.cyberpeace.mp.agent.snmp.model.SnmpAccessInfo;
 import cn.cyberpeace.mp.agent.snmp.service.SnmpTaskServiceImpl;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
@@ -43,6 +44,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -189,7 +191,7 @@ public class RealEquipmentService extends BaseCpService {
                 BigDecimal totalMem = new BigDecimal(result.get(totalMemOid));
                 BigDecimal freeMem = new BigDecimal(result.get(freeMemOid));
                 BigDecimal usedMem = totalMem.subtract(freeMem);
-                return usedMem.divide(totalMem, 2, RoundingMode.DOWN);
+                return usedMem.divide(totalMem, 2, RoundingMode.DOWN).multiply(new BigDecimal(100));
             } else {
                 Map<String, String> result = snmpTaskService.getSnmpData(snmpAccessInfo, Arrays.asList(snmp.getOid()));
                 BigDecimal res = new BigDecimal(result.get(snmp.getOid()));
@@ -216,7 +218,41 @@ public class RealEquipmentService extends BaseCpService {
 
             SnmpTaskServiceImpl snmpTaskService = BeanCommon.getBean(SnmpTaskServiceImpl.class);
             if (StringUtils.isEmpty(snmp.getOid())) {
-                return BigDecimal.ZERO;
+                String unitOid = ".1.3.6.1.2.1.25.2.3.1.4";
+                String totalOid = ".1.3.6.1.2.1.25.2.3.1.5";
+                String usedOid = ".1.3.6.1.2.1.25.2.3.1.6";
+                Map<String, String> result = snmpTaskService.walkSnmpData(snmpAccessInfo, Arrays.asList(unitOid, totalOid, usedOid));
+                Map<String, BigDecimal> unitResult = new HashMap<>();
+                Map<String, BigDecimal> totalResult = new HashMap<>();
+                Map<String, BigDecimal> usedResult = new HashMap<>();
+                for (Map.Entry<String, String> entry : result.entrySet()) {
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+                    if (key.startsWith(unitOid)) {
+                        unitResult.put(key.replace(unitOid, ""), new BigDecimal(value));
+                    } else if (key.startsWith(totalOid)) {
+                        totalResult.put(key.replace(unitOid, ""), new BigDecimal(value));
+                    } else if (key.startsWith(usedOid)) {
+                        usedResult.put(key.replace(unitOid, ""), new BigDecimal(value));
+                    }
+                }
+                log.info("unitResult : {}", JsonCommon.stringify(unitResult));
+                log.info("totalResult : {}", JsonCommon.stringify(totalResult));
+                log.info("usedResult : {}", JsonCommon.stringify(usedResult));
+
+                BigDecimal total = new BigDecimal(0);
+                BigDecimal used = new BigDecimal(0);
+                for (String key : unitResult.keySet()) {
+                    var unit = unitResult.get(key);
+                    var totalTmp = totalResult.get(key);
+                    var usedTmp = usedResult.get(key);
+                    if (totalTmp != null && usedTmp != null) {
+                        total = total.add(totalTmp.multiply(unit));
+                        used = used.add(usedTmp.multiply(unit));
+                    }
+                }
+
+                return used.divide(total);
             } else {
                 Map<String, String> result = snmpTaskService.getSnmpData(snmpAccessInfo, Arrays.asList(snmp.getOid()));
                 BigDecimal res = new BigDecimal(result.get(snmp.getOid()));
