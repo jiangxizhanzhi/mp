@@ -111,7 +111,7 @@ public class Connection extends CloudClient {
         private String password;
         private String port;
         private boolean needPrivateKey;
-        private String privateKeyPath;
-        private String command;
+        private String privateKeyPath = "";
+        private String command = "";
     }
 }

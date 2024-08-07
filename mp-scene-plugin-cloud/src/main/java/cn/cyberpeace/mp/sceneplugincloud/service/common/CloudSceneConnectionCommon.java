@@ -209,7 +209,7 @@ public class CloudSceneConnectionCommon {
         }
     }
 
-    public static CloudPluginSceneConnectionModel getOrCreateSceneConnectionV2(String imageType, String protocol, String resourceId, String username, String password, String port, String ip) {
+    public static CloudPluginSceneConnectionModel getOrCreateSceneConnectionV2(String userId , String imageType, String protocol, String resourceId, String username, String password, String port, String ip) {
         var connection = new Connection();
         if (CloudElementAccessMode.Protocol.VNC.equals(protocol)) {
             // 创建vnc连接的文件 从文件中获取 ip、端口、密码 信息
@@ -266,6 +266,7 @@ public class CloudSceneConnectionCommon {
             params.setHostname(ip);
             params.setNeedPrivateKey(false);
             createData.setConnectionParams(params);
+            createData.setUsername(userId.substring(0,10));
 
             // 创建连接
             var connectionCreateResult = connection.createConnection(createData);

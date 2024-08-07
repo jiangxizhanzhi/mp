@@ -126,14 +126,16 @@ public class ImagesConverter implements BaseConverter {
         String vmId;
         vmId = device.getExtVm().getInstanceUuid();
         List<TargetConnection> result = new ArrayList<>();
+        String userId = UserUtils.getLoginUser().getId() ;
         for (var protocol : device.getExtVm().getAccessProtocols()) {
             TargetConnection c = new TargetConnection();
+            c.setPort(protocol.getPort());
             c.setProtocol(protocol.getProtocol());
             c.setUsername(protocol.getUsername());
             c.setPassword(protocol.getPassword());
             c.setIpAddress(ip);
             c.setConnectionState(1);
-            var r = CloudSceneConnectionCommon.getOrCreateSceneConnectionV2(device.getImageType(), c.getProtocol(), vmId, c.getUsername(), c.getPassword(), String.valueOf(c.getPort()), c.getIpAddress());
+            var r = CloudSceneConnectionCommon.getOrCreateSceneConnectionV2(userId, device.getImageType(), c.getProtocol(), vmId, c.getUsername(), c.getPassword(), String.valueOf(c.getPort()), c.getIpAddress());
             if (r.getConnectionId() != null) {
                 c.setConnectionId(Integer.valueOf(r.getConnectionId()));
             }
