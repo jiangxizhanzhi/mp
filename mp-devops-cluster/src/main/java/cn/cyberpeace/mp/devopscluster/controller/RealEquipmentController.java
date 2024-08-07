@@ -491,42 +491,47 @@ public class RealEquipmentController {
         if (Objects.isNull(extEntity) || StringUtils.isBlank(extEntity.getSnmpVersion()) || Objects.isNull(extEntity.getSnmpConfig())){
             return new PageResult<>(Lists.newArrayList(),0);
         }
-        SnmpParams snmpParams = new SnmpParams();
-        SnmpConfig snmpConfig = extEntity.getSnmpConfig();
-        if (extEntity.getSnmpVersion().equals("V1") || extEntity.getSnmpVersion().equals("V2")) {
-            snmpParams.setVersion(2);
-            if (Objects.nonNull(snmpConfig)) {
-                SnmpBaseAuth snmpAuth = new SnmpBaseAuth();
-                snmpAuth.setCommunityName(snmpConfig.getCommunityName());
-                snmpParams.setAuth(snmpAuth);
+        try {
+            SnmpParams snmpParams = new SnmpParams();
+            SnmpConfig snmpConfig = extEntity.getSnmpConfig();
+            if (extEntity.getSnmpVersion().equals("V1") || extEntity.getSnmpVersion().equals("V2")) {
+                snmpParams.setVersion(2);
+                if (Objects.nonNull(snmpConfig)) {
+                    SnmpBaseAuth snmpAuth = new SnmpBaseAuth();
+                    snmpAuth.setCommunityName(snmpConfig.getCommunityName());
+                    snmpParams.setAuth(snmpAuth);
+                }
+            } else if (extEntity.getSnmpVersion().equals("V3")) {
+                snmpParams.setVersion(3);
+                if (Objects.nonNull(snmpConfig)) {
+                    SnmpAuth snmpAuth = new SnmpAuth();
+                    snmpAuth.setAuthKey(snmpConfig.getAuthKey());
+                    snmpAuth.setUsername(snmpConfig.getUsername());
+                    snmpAuth.setPrivKey(snmpConfig.getPrivKey());
+                    snmpParams.setAuth(snmpAuth);
+                }
             }
-        } else if (extEntity.getSnmpVersion().equals("V3")) {
-            snmpParams.setVersion(3);
-            if (Objects.nonNull(snmpConfig)) {
-                SnmpAuth snmpAuth = new SnmpAuth();
-                snmpAuth.setAuthKey(snmpConfig.getAuthKey());
-                snmpAuth.setUsername(snmpConfig.getUsername());
-                snmpAuth.setPrivKey(snmpConfig.getPrivKey());
-                snmpParams.setAuth(snmpAuth);
+            snmpParams.setIp(extEntity.getSnmpConfig().getIp());
+            snmpParams.setOid(extEntity.getSnmpCpuOid());
+            SnmpInterfaceResourceCloudPlatform model = realEquipmentService.interfacesResource(snmpParams);
+            if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getResult())){
+                return new PageResult<>(Lists.newArrayList(),0);
             }
-        }
-        snmpParams.setIp(extEntity.getSnmpConfig().getIp());
-        snmpParams.setOid(extEntity.getSnmpCpuOid());
-        SnmpInterfaceResourceCloudPlatform model = realEquipmentService.interfacesResource(snmpParams);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getResult())){
-            return new PageResult<>(Lists.newArrayList(),0);
-        }
 
-        Integer page = request.getPage();
-        Integer perPage = request.getPerPage();
-        Integer to = Math.min((page * perPage), model.getResult().size());
-        List<SnmpInterfaceResourceCloudPlatform.Interfaces> interfaces = model.getResult().subList((page - 1) * perPage, to);
-        List<RealEquipmentNetworkCardPageVO> list = new ArrayList<>();
-        for (SnmpInterfaceResourceCloudPlatform.Interfaces v : interfaces) {
-            RealEquipmentNetworkCardPageVO build = RealEquipmentNetworkCardPageVO.builder().name(v.getInterfaceName()).inflow(v.getInTraffic()).outflow(v.getOutTraffic()).build();
-            list.add(build);
+            Integer page = request.getPage();
+            Integer perPage = request.getPerPage();
+            Integer to = Math.min((page * perPage), model.getResult().size());
+            List<SnmpInterfaceResourceCloudPlatform.Interfaces> interfaces = model.getResult().subList((page - 1) * perPage, to);
+            List<RealEquipmentNetworkCardPageVO> list = new ArrayList<>();
+            for (SnmpInterfaceResourceCloudPlatform.Interfaces v : interfaces) {
+                RealEquipmentNetworkCardPageVO build = RealEquipmentNetworkCardPageVO.builder().name(v.getInterfaceName()).inflow(v.getInTraffic()).outflow(v.getOutTraffic()).build();
+                list.add(build);
+            }
+            return new PageResult<>(list,model.getResult().size());
+        } catch (Exception e) {
+            log.error("query snmp error ", e);
+            return new PageResult<>(Lists.newArrayList(), 0);
         }
-        return new PageResult<>(list,model.getResult().size());
     }
 
     /**
