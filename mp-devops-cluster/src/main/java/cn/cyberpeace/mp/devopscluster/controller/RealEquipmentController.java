@@ -442,12 +442,13 @@ public class RealEquipmentController {
                         snmpParams.setAuth(snmpAuth);
                     }
                 }
+                // 先在参数里加入ip 后面 snmpForDisk snmpForCpu snmpForMem 都要用到
+                snmpParams.setIp(extEntity.getSnmpConfig().getIp());
 
                 snmpParams.setOid(extEntity.getSnmpDiskOid());
                 BigDecimal disk = realEquipmentService.snmpForDisk(snmpParams);
                 response.setDiskPercent(disk);
 
-                snmpParams.setIp(extEntity.getSnmpConfig().getIp());
                 snmpParams.setOid(extEntity.getSnmpCpuOid());
                 BigDecimal cpu = realEquipmentService.snmpForCpu(snmpParams);
                 response.setCpuPercent(cpu);
