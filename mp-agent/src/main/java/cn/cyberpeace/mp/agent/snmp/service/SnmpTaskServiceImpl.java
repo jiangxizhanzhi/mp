@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -37,12 +38,12 @@ public class SnmpTaskServiceImpl {
             return null;
         }
 
-        Map<String,String> result = new HashMap<>();
+        Map<String, String> result = new HashMap<>();
         for (String oid : oids) {
             var execResult = snmpAccessUtil.exec(SnmpAccessUtil.GET, oid);
-            log.info(JsonCommon.stringify(execResult));
-            var snmpResult = JsonCommon.parseList(JsonCommon.stringify(execResult), SnmpResult.class);
-            result.put(snmpResult.get(0).getOID(), String.valueOf(snmpResult.get(0).getValue()));
+            // 返回结构类似,OID均为大写字母  [{"OID":"1.3.6.1.4.1.2021.4.11.0","value":"118268"}]
+            Object value = execResult.get(0).get("value");
+            result.put(oid, String.valueOf(value));
         }
         log.info("查询结果汇总为:{}",JsonCommon.stringify(result));
         return result;
@@ -133,7 +134,7 @@ public class SnmpTaskServiceImpl {
     @Getter
     @Setter
     public static class SnmpResult {
-        private String OID;
+        private String oID;
         private Object value;
     }
 }
