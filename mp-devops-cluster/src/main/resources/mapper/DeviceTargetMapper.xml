@@ -400,7 +400,7 @@
                 is_init = #{isInit},
             </if>
             <if test="instanceCreateUser != null">
-                instance_create_user = #{instanceCreateUser}
+                instance_create_user = #{instanceCreateUser},
             </if>
             <if test="behaveSupport != null">
                 behave_support = #{behaveSupport},
@@ -410,6 +410,9 @@
             </if>
             <if test="templateName != null">
                 template_name = #{templateName},
+            </if>
+            <if test="instanceIp != null">
+                instance_ip = #{instanceIp},
             </if>
         </set>
         where uuid = #{uuid}

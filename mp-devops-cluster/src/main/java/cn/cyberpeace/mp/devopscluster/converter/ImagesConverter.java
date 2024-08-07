@@ -615,6 +615,7 @@ public class ImagesConverter implements BaseConverter {
         DeviceTargetPO updateTargetModel = new DeviceTargetPO();
         updateTargetModel.setUuid(uuid);
         updateTargetModel.setInstanceCreateUser(instanceCreateUser);
+        updateTargetModel.setInstanceIp(virtualNic.getFixedIp());
         deviceTargetMapper.updateById(updateTargetModel);
     }
 
