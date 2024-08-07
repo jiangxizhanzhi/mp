@@ -43,6 +43,7 @@ public class SnmpTaskServiceImpl {
             var snmpResult = JsonCommon.parseList(JsonCommon.stringify(execResult), SnmpResult.class);
             result.put(snmpResult.get(0).getOID(), String.valueOf(snmpResult.get(0).getValue()));
         }
+        log.info("查询结果汇总为:{}",JsonCommon.stringify(result));
         return result;
     }
 
@@ -63,6 +64,7 @@ public class SnmpTaskServiceImpl {
             var snmpResult = JsonCommon.parseList(JsonCommon.stringify(execResult), SnmpResult.class);
             result.put(snmpResult.get(0).getOID(), String.valueOf(snmpResult.get(0).getValue()));
         }
+        log.info("查询结果汇总为:{}",JsonCommon.stringify(result));
         return result;
     }
 
