@@ -40,6 +40,7 @@ public class SnmpTaskServiceImpl {
         Map<String,String> result = new HashMap<>();
         for (String oid : oids) {
             var execResult = snmpAccessUtil.exec(SnmpAccessUtil.GET, oid);
+            log.info(JsonCommon.stringify(execResult));
             var snmpResult = JsonCommon.parseList(JsonCommon.stringify(execResult), SnmpResult.class);
             result.put(snmpResult.get(0).getOID(), String.valueOf(snmpResult.get(0).getValue()));
         }
