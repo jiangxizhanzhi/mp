@@ -206,9 +206,26 @@ public class RealEquipmentService extends BaseCpService {
      * @param snmp
      * @return
      */
-    public SnmpCloudPlatform snmpForDisk(SnmpParams snmp){
-        snmp.setDataType("disk");
-        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + SNMP, JsonUtils.snakeStringify(snmp), SnmpCloudPlatform.class);
+    public BigDecimal snmpForDisk(SnmpParams snmp) {
+        try {
+            SnmpAccessInfo snmpAccessInfo = new SnmpAccessInfo();
+            snmpAccessInfo.setCommunity(snmp.getCommunityName());
+            snmpAccessInfo.setVersion("v2c");
+            snmpAccessInfo.setHostIp(snmp.getIp());
+            snmpAccessInfo.setPort("161");
+
+            SnmpTaskServiceImpl snmpTaskService = BeanCommon.getBean(SnmpTaskServiceImpl.class);
+            if (StringUtils.isEmpty(snmp.getOid())) {
+                return BigDecimal.ZERO;
+            } else {
+                Map<String, String> result = snmpTaskService.getSnmpData(snmpAccessInfo, Arrays.asList(snmp.getOid()));
+                BigDecimal res = new BigDecimal(result.get(snmp.getOid()));
+                return res;
+            }
+        } catch (Exception e) {
+            log.error("使用snmp计算cpu使用率失败", e);
+            return BigDecimal.ZERO;
+        }
     }
 
     /**

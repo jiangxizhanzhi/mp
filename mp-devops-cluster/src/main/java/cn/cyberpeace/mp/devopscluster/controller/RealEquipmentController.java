@@ -452,10 +452,8 @@ public class RealEquipmentController {
                 response.setRamPercent(mem);
 
                 snmpParams.setOid(extEntity.getSnmpDiskOid());
-                SnmpCloudPlatform disk = realEquipmentService.snmpForDisk(snmpParams);
-                if (Objects.nonNull(disk) &&  Objects.nonNull(disk.getStatus()) && disk.getStatus()){
-                    response.setDiskPercent(disk.getResult().get(extEntity.getSnmpDiskOid()));
-                }
+                BigDecimal disk = realEquipmentService.snmpForDisk(snmpParams);
+                response.setDiskPercent(disk);
             }
         }
         CloudPlatformPageResult<TargetConnection> connection = realEquipmentService.connection(id);
