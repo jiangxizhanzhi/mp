@@ -31,7 +31,7 @@ public class SnmpTaskServiceImpl {
         SnmpAccessUtil snmpAccessUtil;
 
         try {
-            log.info("尝试建立snmp链接, 参数为 {}",JsonCommon.stringify(accessInfo));
+            log.info("尝试建立snmp链接, 参数为 {} , oid为 {}", JsonCommon.stringify(accessInfo), JsonCommon.stringify(oids));
             snmpAccessUtil = SnmpAccessUtil.initSnmpAccessUtilFromTaskRequest(accessInfo);
         } catch (Exception e) {
             log.error("snmp连接失败", e);
@@ -53,7 +53,7 @@ public class SnmpTaskServiceImpl {
         SnmpAccessUtil snmpAccessUtil;
 
         try {
-            log.info("尝试建立snmp链接, 参数为 {}",JsonCommon.stringify(accessInfo));
+            log.info("尝试建立snmp链接, 参数为 {} , oid为 {}", JsonCommon.stringify(accessInfo), JsonCommon.stringify(oids));
             snmpAccessUtil = SnmpAccessUtil.initSnmpAccessUtilFromTaskRequest(accessInfo);
         } catch (Exception e) {
             log.error("snmp连接失败", e);
