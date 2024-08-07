@@ -442,6 +442,11 @@ public class RealEquipmentController {
                         snmpParams.setAuth(snmpAuth);
                     }
                 }
+
+                snmpParams.setOid(extEntity.getSnmpDiskOid());
+                BigDecimal disk = realEquipmentService.snmpForDisk(snmpParams);
+                response.setDiskPercent(disk);
+
                 snmpParams.setIp(extEntity.getSnmpConfig().getIp());
                 snmpParams.setOid(extEntity.getSnmpCpuOid());
                 BigDecimal cpu = realEquipmentService.snmpForCpu(snmpParams);
@@ -450,10 +455,6 @@ public class RealEquipmentController {
                 snmpParams.setOid(extEntity.getSnmpMemOid());
                 BigDecimal mem = realEquipmentService.snmpForMem(snmpParams);
                 response.setRamPercent(mem);
-
-                snmpParams.setOid(extEntity.getSnmpDiskOid());
-                BigDecimal disk = realEquipmentService.snmpForDisk(snmpParams);
-                response.setDiskPercent(disk);
             }
         }
         CloudPlatformPageResult<TargetConnection> connection = realEquipmentService.connection(id);

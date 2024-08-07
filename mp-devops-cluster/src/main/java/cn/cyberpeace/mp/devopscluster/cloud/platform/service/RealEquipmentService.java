@@ -252,7 +252,7 @@ public class RealEquipmentService extends BaseCpService {
                     }
                 }
 
-                return used.divide(total);
+                return used.divide(total,2,RoundingMode.DOWN).multiply(new BigDecimal(100));
             } else {
                 Map<String, String> result = snmpTaskService.getSnmpData(snmpAccessInfo, Arrays.asList(snmp.getOid()));
                 BigDecimal res = new BigDecimal(result.get(snmp.getOid()));
