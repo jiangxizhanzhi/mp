@@ -7,6 +7,7 @@ dependencies {
     implementation project(':mp-scene-plugin-cloud')
     implementation project(':mp-situation-aware')
     implementation project(':mp-scene')
+    implementation project(':mp-agent')
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
 }
 

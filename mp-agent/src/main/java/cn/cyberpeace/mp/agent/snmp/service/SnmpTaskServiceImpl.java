@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.agent.snmp.model.Command;
 import cn.cyberpeace.mp.agent.snmp.model.CommandConfig;
 import cn.cyberpeace.mp.agent.snmp.model.Param;
 import cn.cyberpeace.mp.agent.snmp.model.SnmpAccessInfo;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
@@ -19,6 +20,21 @@ import static cn.cyberpeace.mp.base.constant.BaseErrorCode.CUSTOM_ERROR;
 @Slf4j
 @Service("snmpTaskService")
 public class SnmpTaskServiceImpl {
+
+    public String getSnmpData(SnmpAccessInfo accessInfo, String oid) {
+        SnmpAccessUtil snmpAccessUtil;
+
+        try {
+            snmpAccessUtil = SnmpAccessUtil.initSnmpAccessUtilFromTaskRequest(accessInfo);
+        } catch (Exception e) {
+            log.error("snmp连接失败", e);
+            return null;
+        }
+
+        var execResult = snmpAccessUtil.exec(SnmpAccessUtil.GET, oid);
+        log.info("Snmp请求成功，请求信息[{}]，返回信息{}", JsonCommon.stringify(accessInfo), JsonCommon.stringify(execResult));
+        return "";
+    }
 
     public Boolean execTask(SnmpAccessInfo accessInfo, CommandConfig config) {
         SnmpAccessUtil snmpAccessUtil;

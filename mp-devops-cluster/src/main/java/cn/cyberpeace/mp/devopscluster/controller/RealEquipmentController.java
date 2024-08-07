@@ -429,6 +429,7 @@ public class RealEquipmentController {
                         SnmpBaseAuth snmpAuth = new SnmpBaseAuth();
                         snmpAuth.setCommunityName(snmpConfigs.getCommunityName());
                         snmpParams.setAuth(snmpAuth);
+                        snmpParams.setCommunityName(snmpConfigs.getCommunityName());
                     }
                 } else if (extEntity.getSnmpVersion().equals("V3")) {
                     snmpParams.setVersion(3);
@@ -500,6 +501,7 @@ public class RealEquipmentController {
                     SnmpBaseAuth snmpAuth = new SnmpBaseAuth();
                     snmpAuth.setCommunityName(snmpConfig.getCommunityName());
                     snmpParams.setAuth(snmpAuth);
+                    snmpParams.setCommunityName(snmpConfig.getCommunityName());
                 }
             } else if (extEntity.getSnmpVersion().equals("V3")) {
                 snmpParams.setVersion(3);

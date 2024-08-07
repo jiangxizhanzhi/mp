@@ -10,6 +10,9 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
+import cn.cyberpeace.mp.agent.snmp.model.SnmpAccessInfo;
+import cn.cyberpeace.mp.agent.snmp.service.SnmpTaskServiceImpl;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
@@ -137,7 +140,15 @@ public class RealEquipmentService extends BaseCpService {
      */
     public SnmpCloudPlatform snmpForCpu(SnmpParams snmp){
         snmp.setDataType("cpu");
-        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + SNMP, JsonUtils.snakeStringify(snmp), SnmpCloudPlatform.class);
+        SnmpAccessInfo snmpAccessInfo = new SnmpAccessInfo();
+        snmpAccessInfo.setCommunity(snmp.getCommunityName());
+        snmpAccessInfo.setVersion("v2c");
+        snmpAccessInfo.setHostIp(snmp.getIp());
+        snmpAccessInfo.setPort("161");
+
+        SnmpTaskServiceImpl snmpTaskService = BeanCommon.getBean(SnmpTaskServiceImpl.class);
+        String s = snmpTaskService.getSnmpData(snmpAccessInfo, "1.3.6.1.4.1.2021.4.5.0");
+        return null;
     }
 
     /**

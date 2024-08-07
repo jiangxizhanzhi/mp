@@ -10,6 +10,7 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.cloud.platform.model.base;
 
+import cn.cyberpeace.mp.devopscluster.model.SnmpBaseAuth;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,6 +36,8 @@ public class SnmpParams {
     private String oid;
 
     private Object auth;
+
+    private String communityName;
 
     private String dataType;
 }
