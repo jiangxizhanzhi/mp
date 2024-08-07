@@ -152,7 +152,7 @@ public class RealEquipmentService extends BaseCpService {
         Map<String, BigDecimal> outResult = new HashMap<>();
 
         for (Map.Entry<String, String> entry : result.entrySet()) {
-            String key = "." + entry.getKey();
+            String key = entry.getKey();
             String value = entry.getValue();
             if (key.startsWith(interfaceNameOid)) {
                 nameResult.put(key.replace(interfaceNameOid, ""), value);
@@ -264,15 +264,15 @@ public class RealEquipmentService extends BaseCpService {
 
             SnmpTaskServiceImpl snmpTaskService = BeanCommon.getBean(SnmpTaskServiceImpl.class);
             if (StringUtils.isEmpty(snmp.getOid())) {
-                String unitOid = ".1.3.6.1.2.1.25.2.3.1.4";
-                String totalOid = ".1.3.6.1.2.1.25.2.3.1.5";
-                String usedOid = ".1.3.6.1.2.1.25.2.3.1.6";
+                String unitOid = "1.3.6.1.2.1.25.2.3.1.4";
+                String totalOid = "1.3.6.1.2.1.25.2.3.1.5";
+                String usedOid = "1.3.6.1.2.1.25.2.3.1.6";
                 Map<String, String> result = snmpTaskService.walkSnmpData(snmpAccessInfo, Arrays.asList(unitOid, totalOid, usedOid));
                 Map<String, BigDecimal> unitResult = new HashMap<>();
                 Map<String, BigDecimal> totalResult = new HashMap<>();
                 Map<String, BigDecimal> usedResult = new HashMap<>();
                 for (Map.Entry<String, String> entry : result.entrySet()) {
-                    String key = "." + entry.getKey();
+                    String key = entry.getKey();
                     String value = entry.getValue();
                     if (key.startsWith(unitOid)) {
                         unitResult.put(key.replace(unitOid, ""), new BigDecimal(value));
