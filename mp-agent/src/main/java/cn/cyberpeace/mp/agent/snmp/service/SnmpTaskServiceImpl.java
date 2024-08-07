@@ -8,32 +8,62 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.base.constant.BaseErrorCode.CUSTOM_ERROR;
+import static cn.cyberpeace.mp.base.service.code.ErrorCode.codeMap;
 
 @Slf4j
 @Service("snmpTaskService")
 public class SnmpTaskServiceImpl {
 
-    public String getSnmpData(SnmpAccessInfo accessInfo, String oid) {
+    public Map<String,String> getSnmpData(SnmpAccessInfo accessInfo, List<String> oids) {
         SnmpAccessUtil snmpAccessUtil;
 
         try {
+            log.info("尝试建立snmp链接, 参数为 {}",JsonCommon.stringify(accessInfo));
             snmpAccessUtil = SnmpAccessUtil.initSnmpAccessUtilFromTaskRequest(accessInfo);
         } catch (Exception e) {
             log.error("snmp连接失败", e);
             return null;
         }
 
-        var execResult = snmpAccessUtil.exec(SnmpAccessUtil.GET, oid);
-        log.info("Snmp请求成功，请求信息[{}]，返回信息{}", JsonCommon.stringify(accessInfo), JsonCommon.stringify(execResult));
-        return "";
+        Map<String,String> result = new HashMap<>();
+        for (String oid : oids) {
+            var execResult = snmpAccessUtil.exec(SnmpAccessUtil.GET, oid);
+            var snmpResult = JsonCommon.parse(JsonCommon.stringify(execResult), SnmpResult.class);
+            result.put(snmpResult.getOID(), String.valueOf(snmpResult.getValue()));
+        }
+        return result;
+    }
+
+    public Map<String,String> walkSnmpData(SnmpAccessInfo accessInfo, List<String> oids) {
+        SnmpAccessUtil snmpAccessUtil;
+
+        try {
+            log.info("尝试建立snmp链接, 参数为 {}",JsonCommon.stringify(accessInfo));
+            snmpAccessUtil = SnmpAccessUtil.initSnmpAccessUtilFromTaskRequest(accessInfo);
+        } catch (Exception e) {
+            log.error("snmp连接失败", e);
+            return null;
+        }
+
+        Map<String,String> result = new HashMap<>();
+        for (String oid : oids) {
+            var execResult = snmpAccessUtil.exec(SnmpAccessUtil.WALK, oid);
+            var snmpResult = JsonCommon.parse(JsonCommon.stringify(execResult), SnmpResult.class);
+            result.put(snmpResult.getOID(), String.valueOf(snmpResult.getValue()));
+        }
+        return result;
     }
 
     public Boolean execTask(SnmpAccessInfo accessInfo, CommandConfig config) {
@@ -95,6 +125,13 @@ public class SnmpTaskServiceImpl {
         }
 
         return finalCommand;
+    }
+
+    @Getter
+    @Setter
+    public static class SnmpResult {
+        private String OID;
+        private Object value;
     }
 }
 

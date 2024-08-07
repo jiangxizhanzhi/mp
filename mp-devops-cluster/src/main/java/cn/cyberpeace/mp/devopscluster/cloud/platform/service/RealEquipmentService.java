@@ -34,12 +34,17 @@ import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant.*;
@@ -138,17 +143,29 @@ public class RealEquipmentService extends BaseCpService {
      * @param snmp
      * @return
      */
-    public SnmpCloudPlatform snmpForCpu(SnmpParams snmp){
-        snmp.setDataType("cpu");
-        SnmpAccessInfo snmpAccessInfo = new SnmpAccessInfo();
-        snmpAccessInfo.setCommunity(snmp.getCommunityName());
-        snmpAccessInfo.setVersion("v2c");
-        snmpAccessInfo.setHostIp(snmp.getIp());
-        snmpAccessInfo.setPort("161");
+    public BigDecimal snmpForCpu(SnmpParams snmp){
+        try {
+            SnmpAccessInfo snmpAccessInfo = new SnmpAccessInfo();
+            snmpAccessInfo.setCommunity(snmp.getCommunityName());
+            snmpAccessInfo.setVersion("v2c");
+            snmpAccessInfo.setHostIp(snmp.getIp());
+            snmpAccessInfo.setPort("161");
 
-        SnmpTaskServiceImpl snmpTaskService = BeanCommon.getBean(SnmpTaskServiceImpl.class);
-        String s = snmpTaskService.getSnmpData(snmpAccessInfo, "1.3.6.1.4.1.2021.4.5.0");
-        return null;
+            SnmpTaskServiceImpl snmpTaskService = BeanCommon.getBean(SnmpTaskServiceImpl.class);
+            if (StringUtils.isEmpty(snmp.getOid())) {
+                String freeCpu = ".1.3.6.1.4.1.2021.11.11.0";
+                Map<String, String> result = snmpTaskService.getSnmpData(snmpAccessInfo, Arrays.asList(freeCpu));
+                BigDecimal totalMem = new BigDecimal(result.get(freeCpu));
+                return new BigDecimal(100).subtract(totalMem);
+            } else {
+                Map<String, String> result = snmpTaskService.getSnmpData(snmpAccessInfo, Arrays.asList(snmp.getOid()));
+                BigDecimal res = new BigDecimal(result.get(snmp.getOid()));
+                return res;
+            }
+        } catch (Exception e) {
+            log.error("使用snmp计算cpu使用率失败", e);
+            return BigDecimal.ZERO;
+        }
     }
 
     /**
@@ -156,9 +173,32 @@ public class RealEquipmentService extends BaseCpService {
      * @param snmp
      * @return
      */
-    public SnmpCloudPlatform snmpForMem(SnmpParams snmp){
-        snmp.setDataType("mem");
-        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + SNMP, JsonUtils.snakeStringify(snmp), SnmpCloudPlatform.class);
+    public BigDecimal snmpForMem(SnmpParams snmp) {
+        try {
+            SnmpAccessInfo snmpAccessInfo = new SnmpAccessInfo();
+            snmpAccessInfo.setCommunity(snmp.getCommunityName());
+            snmpAccessInfo.setVersion("v2c");
+            snmpAccessInfo.setHostIp(snmp.getIp());
+            snmpAccessInfo.setPort("161");
+
+            SnmpTaskServiceImpl snmpTaskService = BeanCommon.getBean(SnmpTaskServiceImpl.class);
+            if (StringUtils.isEmpty(snmp.getOid())) {
+                String totalMemOid = "1.3.6.1.4.1.2021.4.5.0";
+                String freeMemOid = "1.3.6.1.4.1.2021.4.11.0";
+                Map<String, String> result = snmpTaskService.getSnmpData(snmpAccessInfo, Arrays.asList(totalMemOid, freeMemOid));
+                BigDecimal totalMem = new BigDecimal(result.get(totalMemOid));
+                BigDecimal freeMem = new BigDecimal(result.get(freeMemOid));
+                BigDecimal usedMem = totalMem.subtract(freeMem);
+                return usedMem.divide(totalMem, 2, RoundingMode.DOWN);
+            } else {
+                Map<String, String> result = snmpTaskService.getSnmpData(snmpAccessInfo, Arrays.asList(snmp.getOid()));
+                BigDecimal res = new BigDecimal(result.get(snmp.getOid()));
+                return res;
+            }
+        } catch (Exception e) {
+            log.error("使用snmp计算cpu使用率失败", e);
+            return BigDecimal.ZERO;
+        }
     }
 
     /**

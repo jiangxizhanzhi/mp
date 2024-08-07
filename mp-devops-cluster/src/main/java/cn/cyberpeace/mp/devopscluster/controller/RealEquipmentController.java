@@ -65,6 +65,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -443,15 +444,13 @@ public class RealEquipmentController {
                 }
                 snmpParams.setIp(extEntity.getSnmpConfig().getIp());
                 snmpParams.setOid(extEntity.getSnmpCpuOid());
-                SnmpCloudPlatform cpu = realEquipmentService.snmpForCpu(snmpParams);
-                if (Objects.nonNull(cpu) && Objects.nonNull(cpu.getStatus()) && cpu.getStatus()){
-                    response.setCpuPercent(cpu.getResult().get(extEntity.getSnmpCpuOid()));
-                }
+                BigDecimal cpu = realEquipmentService.snmpForCpu(snmpParams);
+                response.setCpuPercent(cpu);
+
                 snmpParams.setOid(extEntity.getSnmpMemOid());
-                SnmpCloudPlatform mem = realEquipmentService.snmpForMem(snmpParams);
-                if (Objects.nonNull(mem) &&  Objects.nonNull(mem.getStatus()) && mem.getStatus()){
-                    response.setRamPercent(mem.getResult().get(extEntity.getSnmpMemOid()));
-                }
+                BigDecimal mem = realEquipmentService.snmpForMem(snmpParams);
+                response.setRamPercent(mem);
+
                 snmpParams.setOid(extEntity.getSnmpDiskOid());
                 SnmpCloudPlatform disk = realEquipmentService.snmpForDisk(snmpParams);
                 if (Objects.nonNull(disk) &&  Objects.nonNull(disk.getStatus()) && disk.getStatus()){
