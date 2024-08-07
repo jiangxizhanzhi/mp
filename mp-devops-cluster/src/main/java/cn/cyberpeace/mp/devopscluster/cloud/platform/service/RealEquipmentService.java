@@ -226,7 +226,7 @@ public class RealEquipmentService extends BaseCpService {
                 Map<String, BigDecimal> totalResult = new HashMap<>();
                 Map<String, BigDecimal> usedResult = new HashMap<>();
                 for (Map.Entry<String, String> entry : result.entrySet()) {
-                    String key = entry.getKey();
+                    String key = "." + entry.getKey();
                     String value = entry.getValue();
                     if (key.startsWith(unitOid)) {
                         unitResult.put(key.replace(unitOid, ""), new BigDecimal(value));
