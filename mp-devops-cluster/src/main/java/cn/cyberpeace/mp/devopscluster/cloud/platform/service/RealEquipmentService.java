@@ -135,8 +135,54 @@ public class RealEquipmentService extends BaseCpService {
      * @return
      */
     public SnmpInterfaceResourceCloudPlatform interfacesResource(SnmpParams snmp){
-        snmp.setDataType("interfaces");
-        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + SNMP, JsonUtils.snakeStringify(snmp), SnmpInterfaceResourceCloudPlatform.class);
+        SnmpAccessInfo snmpAccessInfo = new SnmpAccessInfo();
+        snmpAccessInfo.setCommunity(snmp.getCommunityName());
+        snmpAccessInfo.setVersion("v2c");
+        snmpAccessInfo.setHostIp(snmp.getIp());
+        snmpAccessInfo.setPort("161");
+        SnmpTaskServiceImpl snmpTaskService = BeanCommon.getBean(SnmpTaskServiceImpl.class);
+
+        String interfaceNameOid = "1.3.6.1.2.1.2.2.1.2";
+        String inOid = "1.3.6.1.2.1.2.2.1.10";
+        String outOid = "1.3.6.1.2.1.2.2.1.16";
+
+        var result = snmpTaskService.walkSnmpData(snmpAccessInfo, Arrays.asList(interfaceNameOid, inOid, outOid));
+        Map<String, String> nameResult = new HashMap<>();
+        Map<String, BigDecimal> inResult = new HashMap<>();
+        Map<String, BigDecimal> outResult = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : result.entrySet()) {
+            String key = "." + entry.getKey();
+            String value = entry.getValue();
+            if (key.startsWith(interfaceNameOid)) {
+                nameResult.put(key.replace(interfaceNameOid, ""), value);
+            } else if (key.startsWith(inOid)) {
+                inResult.put(key.replace(inOid, ""), new BigDecimal(value));
+            } else if (key.startsWith(outOid)) {
+                outResult.put(key.replace(outOid, ""), new BigDecimal(value));
+            }
+        }
+
+        SnmpInterfaceResourceCloudPlatform cloudPlatform = new SnmpInterfaceResourceCloudPlatform();
+        cloudPlatform.setStatus(true);
+        List<SnmpInterfaceResourceCloudPlatform.Interfaces> list = new ArrayList<>();
+        cloudPlatform.setResult(list);
+        for (String key : nameResult.keySet()) {
+            String name = nameResult.get(key);
+            BigDecimal in = inResult.get(key);
+            BigDecimal out = outResult.get(key);
+            if (name != null && in != null && out != null) {
+                var i = new SnmpInterfaceResourceCloudPlatform.Interfaces();
+                i.setInterfaceName(name);
+                i.setInTraffic(in.longValue());
+                i.setOutTraffic(out.longValue());
+                list.add(i);
+            }
+        }
+        return cloudPlatform;
+
+//        snmp.setDataType("interfaces");
+//        return super.sendPost(CPCLOUD_INFO_URL + URL_VERSION + SNMP, JsonUtils.snakeStringify(snmp), SnmpInterfaceResourceCloudPlatform.class);
     }
 
 
