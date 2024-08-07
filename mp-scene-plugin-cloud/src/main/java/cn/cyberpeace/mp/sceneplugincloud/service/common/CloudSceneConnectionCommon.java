@@ -215,12 +215,12 @@ public class CloudSceneConnectionCommon {
             // 创建vnc连接的文件 从文件中获取 ip、端口、密码 信息
             var fileContent = connection.getVncFileContent(resourceId);
             Connection.ConnectionCreateData createData = new Connection.ConnectionCreateData();
-            createData.setUsername("");
             Connection.ConnectionCreateParamsData params = new Connection.ConnectionCreateParamsData();
             params.setProtocol(CloudElementAccessMode.Protocol.VNC);
             params.setHostname(fileContent.getHost());
             params.setPassword(fileContent.getPassword());
             params.setPort(fileContent.getPort());
+            createData.setUsername(userId.substring(0,10));
             createData.setConnectionParams(params);
 
             // 创建连接
