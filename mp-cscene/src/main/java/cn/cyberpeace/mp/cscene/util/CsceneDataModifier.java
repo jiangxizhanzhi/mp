@@ -694,52 +694,8 @@ public class CsceneDataModifier {
             }
         }
     }
-
-    public static void handlerSoftVersion(CsceneInstanceBO csceneInstanceBO){
-        Map<String,String> idMap = new HashMap<>();
-        for (SceneElementBO elementBO : csceneInstanceBO.getScene().getTopology().getElements()) {
-            idMap.put(elementBO.getId(), elementBO.getEid());
-        }
-
-        Map<String, String> defaultSoftVersions = null;
-        var mapper = BeanCommon.getBean(CsceneElementSoftVersionMapper.class);
-        for (var e : csceneInstanceBO.getScene().getPlugins().get("cpcloud").getElements().entrySet()) {
-            if (Boolean.TRUE.equals(e.getValue().get("support_soft_version"))) {
-                if (defaultSoftVersions == null) {
-                    defaultSoftVersions = new HashMap<>();
-                    var defaultModels = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, "default"));
-                    if (CollectionUtils.isNotEmpty(defaultModels)) {
-                        for (CsceneElementSoftVersionModel d : defaultModels) {
-                            defaultSoftVersions.put(d.getSoft(), d.getVersion());
-                        }
-                    }
-                }
-
-                String eid = idMap.get(e.getKey());
-                // 搜索关键字: upgrade_result upgradeResult  , 在这里直接处理下节点的 upgradeResult/upgrade_result 字段
-                e.getValue().put("upgrade_result", false);
-                var flag = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, eid + "_flag"));
-                if (CollectionUtils.isNotEmpty(flag)) {
-                    var models = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, eid));
-                    Map<String, String> softVersion = new HashMap<>();
-                    models.forEach(m -> {
-                        softVersion.put(m.getSoft(), m.getVersion());
-                    });
-                    for (String soft : defaultSoftVersions.keySet()) {
-                        if (softVersion.containsKey(soft) && !StringUtils.equals(defaultSoftVersions.get(soft), softVersion.get(soft))) {
-                            e.getValue().put("upgrade_result", true);
-                            break;
-                        }
-                    }
-                }
-
-            }
-        }
-    }
-
     public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO) {
         correctReturnCsceneData(csceneInstanceBO, true);
-        handlerSoftVersion(csceneInstanceBO);
 
         Set<String> portIds = new HashSet<>();
         csceneInstanceBO.getScene().getTopology().getElements().forEach(e -> {
