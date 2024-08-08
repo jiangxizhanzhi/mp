@@ -774,9 +774,15 @@ public class CreateHandler extends HandlerCommon {
                     SceneSingleton.sceneAppConfig.getMetadataFileServer(),
                     nameFileMap.getOrDefault("pcre3.deb", StringUtils.EMPTY)
             );
+            String uselessPcreDownloadUrl = StringUtils.joinWith(
+                    InstallerUtils.FILE_URL_SEPARATOR,
+                    SceneSingleton.sceneAppConfig.getMetadataFileServer(),
+                    nameFileMap.getOrDefault("useless_pcre3.deb", StringUtils.EMPTY)
+            );
             commands.add("cd /tmp");
             commands.add("curl -o /tmp/get_version.sh " + downloadUrl);
             commands.add("curl -o /tmp/pcre3.deb " + pcreDownloadUrl);
+            commands.add("curl -o /tmp/useless_pcre3.deb " + uselessPcreDownloadUrl);
             String reportUrl = SceneSingleton.sceneAppConfig.getVersionReportUrl();
 
             var mapper = BeanCommon.getBean(CsceneElementSoftVersionMapper.class);
