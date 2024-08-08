@@ -40,6 +40,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -219,11 +221,24 @@ public class HostStateController {
 
 
 
+//    @ApiOperation(value = "流量采集数据json导出")
+//    @GetMapping("/export/flow/acquisition")
+//    public void exportFlowAcquisition(HttpServletResponse response, HostStateTrendRequest hostStateTrendRequest) throws JsonProcessingException {
+//        List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        String fileName = "/home/mp/flow.json";
+//        exportData(response, objectMapper, fileName, objectMapper.writeValueAsString(hostStates));
+//    }
+
+
     @ApiOperation(value = "流量采集数据json导出")
     @GetMapping("/export/flow/acquisition")
     public void exportFlowAcquisition(HttpServletResponse response, HostStateTrendRequest hostStateTrendRequest) throws JsonProcessingException {
         List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
+
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());  // 注册 JavaTimeModule
+
         String fileName = "/home/mp/flow.json";
         exportData(response, objectMapper, fileName, objectMapper.writeValueAsString(hostStates));
     }
