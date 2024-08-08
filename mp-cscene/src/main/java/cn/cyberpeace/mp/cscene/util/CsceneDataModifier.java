@@ -716,16 +716,20 @@ public class CsceneDataModifier {
                 }
 
                 String eid = idMap.get(e.getKey());
-                var models = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, eid));
-                Map<String, String> softVersion = new HashMap<>();
-                models.forEach(m -> {
-                    softVersion.put(m.getSoft(), m.getVersion());
-                });
+                // 搜索关键字: upgrade_result upgradeResult  , 在这里直接处理下节点的 upgradeResult/upgrade_result 字段
                 e.getValue().put("upgrade_result", false);
-                for (String soft : defaultSoftVersions.keySet()) {
-                    if (softVersion.containsKey(soft) && !StringUtils.equals(defaultSoftVersions.get(soft), softVersion.get(soft))) {
-                        e.getValue().put("upgrade_result", true);
-                        break;
+                var flag = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, eid + "_flag"));
+                if (CollectionUtils.isNotEmpty(flag)) {
+                    var models = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, eid));
+                    Map<String, String> softVersion = new HashMap<>();
+                    models.forEach(m -> {
+                        softVersion.put(m.getSoft(), m.getVersion());
+                    });
+                    for (String soft : defaultSoftVersions.keySet()) {
+                        if (softVersion.containsKey(soft) && !StringUtils.equals(defaultSoftVersions.get(soft), softVersion.get(soft))) {
+                            e.getValue().put("upgrade_result", true);
+                            break;
+                        }
                     }
                 }
 
