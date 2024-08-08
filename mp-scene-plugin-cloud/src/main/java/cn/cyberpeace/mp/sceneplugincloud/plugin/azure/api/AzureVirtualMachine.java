@@ -197,7 +197,7 @@ public class AzureVirtualMachine {
 
 //        TODO 资源不浪费
 
-        /*String groupName = pluginHandler.getSourceSceneId();
+        String groupName = pluginHandler.getSourceSceneId();
 
         // 调用微软云api 创建虚拟机 回写虚拟机id
         VirtualMachine vm = createVirtualMachine(cloudElement, virtualNics, userData, groupName);
@@ -243,7 +243,7 @@ public class AzureVirtualMachine {
                     networkInterface.update().withExistingNetworkSecurityGroup(nsg).apply();
                 }
             }
-        }*/
+        }
     }
 
     public void delete(CloudPluginSceneElementBO cloudElement) {
