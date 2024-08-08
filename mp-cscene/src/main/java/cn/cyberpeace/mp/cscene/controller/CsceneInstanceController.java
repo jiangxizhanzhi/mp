@@ -1588,6 +1588,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         List<SoftVersionInfo> result = new ArrayList<>();
         SoftVersionInfoData softVersionInfoData = new SoftVersionInfoData();
         softVersionInfoData.setSofts(result);
+        softVersionInfoData.setUpgradeResult(false);
         var mapper = BeanCommon.getBean(CsceneElementSoftVersionMapper.class);
         var defaultModels = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, "default"));
         if (defaultModels.isEmpty()) {
@@ -1616,6 +1617,64 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             r.setNewVersion(softVersion.getOrDefault(r.getSoft(), r.getOriginVersion()));
             r.setUpgradeResult(!StringUtils.equals(r.getNewVersion(), r.getOriginVersion()));
         }
+        for (var s : result) {
+            if (!StringUtils.equals(s.getOriginVersion(), s.getNewVersion())) {
+                softVersionInfoData.setUpgradeResult(true);
+            }
+        }
+        Collections.sort(result, Comparator.comparing(SoftVersionInfo::getSoft));
+
+        // 点击过 `检测软件版本` 按钮之后，需要加个标记
+        CsceneElementSoftVersionModel flag = new CsceneElementSoftVersionModel();
+        flag.setSoft("");
+        flag.setVersion("");
+        flag.setEid(element.getId() + "_flag");
+        mapper.save(flag);
+
+        return new ServiceResult<>(softVersionInfoData).asResult();
+    }
+
+    @GetMapping("/get_soft_version_info_v2")
+    @ApiOperation(value = "查看节点软件版本信息v2")
+    public ServiceResult<SoftVersionInfoData> getSoftVersionInfoV2(@RequestParam("id") String id, @RequestParam("node_id") String nodeId) {
+        List<SoftVersionInfo> result = new ArrayList<>();
+        SoftVersionInfoData softVersionInfoData = new SoftVersionInfoData();
+        softVersionInfoData.setSofts(result);
+        softVersionInfoData.setUpgradeResult(false);
+        var mapper = BeanCommon.getBean(CsceneElementSoftVersionMapper.class);
+        var defaultModels = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, "default"));
+        if (defaultModels.isEmpty()) {
+            return new ServiceResult<>(softVersionInfoData).asResult();
+        }
+
+        for (CsceneElementSoftVersionModel d : defaultModels) {
+            SoftVersionInfo softVersionInfo = new SoftVersionInfo();
+            softVersionInfo.setSoft(d.getSoft());
+            softVersionInfo.setOriginVersion(d.getVersion());
+            softVersionInfo.setNewVersion("");
+            softVersionInfo.setUpgradeResult(null);
+            result.add(softVersionInfo);
+        }
+
+        String sceneId = getModelService().getSceneId(id);
+        var elementMapper = BeanCommon.getBean(SceneElementMapper.class);
+        var element = elementMapper.first(new HumanCondition().filterEqual(BaseSceneElementModel::getScene, sceneId)
+                                                  .filterEqual(BaseSceneElementModel::getNodeId, nodeId));
+        // 查询下是否有点击过 `检测软件版本` 按钮的标记 , 有的话，则需要和机器中的软件版本做对比
+        var flags = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, element.getId() + "_flag"));
+        if (CollectionUtils.isNotEmpty(flags)) {
+            var models = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, element.getId()));
+            Map<String, String> softVersion = new HashMap<>();
+            models.forEach(m -> {
+                softVersion.put(m.getSoft(), m.getVersion());
+            });
+
+            for (var r : result) {
+                r.setNewVersion(softVersion.getOrDefault(r.getSoft(), r.getOriginVersion()));
+                r.setUpgradeResult(!StringUtils.equals(r.getNewVersion(), r.getOriginVersion()));
+            }
+        }
+
         Collections.sort(result, Comparator.comparing(SoftVersionInfo::getSoft));
         return new ServiceResult<>(softVersionInfoData).asResult();
     }
@@ -1703,17 +1762,5 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     private static class SoftVersionInfoData {
         private List<SoftVersionInfo> softs;
         private Boolean upgradeResult;
-
-        public Boolean getUpgradeResult() {
-            if (CollectionUtils.isEmpty(softs)) {
-                return false;
-            }
-            for (var s : softs) {
-                if (!StringUtils.equals(s.getOriginVersion(), s.getNewVersion())) {
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 }
