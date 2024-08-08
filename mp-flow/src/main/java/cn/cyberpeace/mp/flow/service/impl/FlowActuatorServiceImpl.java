@@ -157,7 +157,9 @@ public class FlowActuatorServiceImpl extends BaseModelServiceImpl<FlowActuatorMo
                 } else if (t.getTaskStatus() == TaskStatusEnum.RUNNING.toValue()) {
                     running++;
                 } else if (t.getTaskStatus() == TaskStatusEnum.STOPING.toValue()) {
-                    stopping++;
+                    // 流量发生任务回传的状态和这边不一致，当 t.getTaskStatus() == 2 时，表示任务执行失败，在这里
+                    // 设置流量发生器的状态为 stoped
+                    stoped++;
                 } else if (t.getTaskStatus() == TaskStatusEnum.STOPED.toValue()) {
                     stoped++;
                 }
