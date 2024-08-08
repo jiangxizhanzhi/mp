@@ -156,6 +156,7 @@ public class Remote extends CloudClient {
             GetConnectionUrlResult result = new GetConnectionUrlResult();
             var res = FsCommon.upload(new FileInputStream(file),"vv");
             result.setData(FsCommon.genSpiceUrl(res));
+            file.delete();
             return result;
         } catch (Exception e) {
             log.error("download connection file error", e);

@@ -1625,12 +1625,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         Collections.sort(result, Comparator.comparing(SoftVersionInfo::getSoft));
 
         // 点击过 `检测软件版本` 按钮之后，需要加个标记
-        CsceneElementSoftVersionModel flag = new CsceneElementSoftVersionModel();
-        flag.setSoft("");
-        flag.setVersion("");
-        flag.setEid(element.getId() + "_flag");
-        mapper.save(flag);
-
+        var flags = mapper.list(new HumanCondition().filterEqual(CsceneElementSoftVersionModel::getEid, element.getId() + "_flag"));
+        if (CollectionUtils.isEmpty(flags)) {
+            CsceneElementSoftVersionModel flag = new CsceneElementSoftVersionModel();
+            flag.setSoft("");
+            flag.setVersion("");
+            flag.setEid(element.getId() + "_flag");
+            mapper.save(flag);
+        }
         return new ServiceResult<>(softVersionInfoData).asResult();
     }
 
