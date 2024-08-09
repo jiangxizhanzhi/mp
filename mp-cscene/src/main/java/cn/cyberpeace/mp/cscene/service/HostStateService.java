@@ -91,6 +91,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -330,6 +331,7 @@ public class HostStateService {
                 hostState.setTime(TimeUtils.dateToLocalDateTime(launchWazuhMonitorRoot.getTimestamp()));
                 hostStates.add(hostState);
             }
+            Collections.reverse(hostStates);
             return hostStates;
         }
     }
