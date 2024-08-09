@@ -2006,7 +2006,7 @@ public class DataCollectionService extends CollectionBaseService {
      * @param output
      * @return
      */
-    private WazuhHostStateModel convertHostStateOutput2WazuhModel(HostStateOutput output) {
+    public WazuhHostStateModel convertHostStateOutput2WazuhModel(HostStateOutput output) {
         WazuhHostStateModel wazuhHostStateModel = new WazuhHostStateModel();
         if (StringUtils.isNotBlank(output.getDiskTotal())) {
             wazuhHostStateModel.setDiskTotal(string2Long(output.getDiskTotal()));

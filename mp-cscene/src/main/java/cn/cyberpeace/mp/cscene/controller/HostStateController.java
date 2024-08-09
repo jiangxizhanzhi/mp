@@ -121,7 +121,7 @@ public class HostStateController {
     @ApiOperation(value = "节点主机状态趋势图")
     @GetMapping("/element_trend")
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
-        List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
+        List<HostState> hostStates = hostStateService.getElementHostStateTrendV2(hostStateTrendRequest);
 
         return ResultCommon.success(hostStates);
     }
