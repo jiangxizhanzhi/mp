@@ -329,7 +329,6 @@ public class HostStateService {
                                                  .doubleValue());
                 hostState.setTime(TimeUtils.dateToLocalDateTime(launchWazuhMonitorRoot.getTimestamp()));
                 hostStates.add(hostState);
-                break;
             }
             return hostStates;
         }
