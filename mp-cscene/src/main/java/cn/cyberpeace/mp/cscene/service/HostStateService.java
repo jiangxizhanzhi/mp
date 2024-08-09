@@ -287,7 +287,7 @@ public class HostStateService {
         if (pluginHandler == null || pluginHandler.getElement(nodeId) == null || Boolean.FALSE.equals(pluginHandler.getElement(nodeId)
                                                                                                               .getEnableProbeCollect())) {
             // 没有采集插件 使用以前逻辑返回即可
-            return this.getClusterHostStateTrend(trendRequest);
+            return this.getElementHostStateTrend(trendRequest);
         } else {
             // 有采集插件 直接从es里取最近的10条数据即可
             String agentName = batchSceneHandler.getNodeByNodeId(nodeId).getEid();
