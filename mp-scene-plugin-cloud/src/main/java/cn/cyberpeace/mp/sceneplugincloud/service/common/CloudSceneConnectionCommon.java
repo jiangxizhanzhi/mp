@@ -184,7 +184,7 @@ public class CloudSceneConnectionCommon {
         } else {
             // 其他协议直接从节点的配置中获取用户名密码等
             Connection.ConnectionCreateData createData = new Connection.ConnectionCreateData();
-            createData.setUsername(userId);
+            createData.setUsername(userId.substring(0,10));
             Connection.ConnectionCreateParamsData params = new Connection.ConnectionCreateParamsData();
             params.setProtocol(protocol);
             params.setUsername(param.getCloudAccessMode().getUsername());
