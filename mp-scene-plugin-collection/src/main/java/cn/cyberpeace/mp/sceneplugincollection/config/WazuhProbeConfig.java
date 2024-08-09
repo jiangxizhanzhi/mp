@@ -54,18 +54,15 @@ public class WazuhProbeConfig {
      * @return
      */
     public DefaultProbe getDefaultProbe() {
-        var list = LocalFileMappingCommon.getMappings("wazuh_agent_installer");
-        for (var l : list) {
-            if (StringUtils.equals(l.getName(), "default_custom_probes.json")) {
-                String content = null;
-                try {
-                    content = FileUtils.readFileToString(new File(l.getLocalFile()), "utf8");
-                    return JsonCommon.snakeParse(content, DefaultProbe.class);
-                } catch (Exception e) {
-                    // 如果报错，则使用默认值
-                    log.error("failed to get probes config , file path is " + l.getLocalFile(), e);
-                    break;
-                }
+        File file = new File("/root/.mp/resources/scene_plugin_collection/host_freq");
+        if (file.exists()) {
+            String content = null;
+            try {
+                content = FileUtils.readFileToString(file, "utf8");
+                return JsonCommon.snakeParse(content, DefaultProbe.class);
+            } catch (Exception e) {
+                // 如果报错，则使用默认值
+                log.error("failed to get probes config , file path is /root/.mp/resources/scene_plugin_collection/host_freq ", e);
             }
         }
         return defaultProbe;
