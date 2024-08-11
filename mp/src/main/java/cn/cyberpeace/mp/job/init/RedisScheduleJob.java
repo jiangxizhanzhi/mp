@@ -10,11 +10,10 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.job.init;
 
+ import cn.cyberpeace.mp.base.util.mptool.Validator;
 import cn.cyberpeace.mp.devopscluster.converter.RealEquipmentConverter;
 import cn.cyberpeace.mp.job.base.init.MpInitiate;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +21,6 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
-
-import java.util.Date;
 
 /**
  * @ClassName RedisScheduleJob
@@ -50,29 +47,19 @@ public class RedisScheduleJob {
     @MpInitiate(description = "redis 连接", id = "init_read_redis")
     public void readRedis() {
         // 连接到Redis服务器
-        try (Jedis jedis = new Jedis(situationAwareConfig.getStorageRedisIp(), situationAwareConfig.getStorageRedisPort())) {
+        Jedis jedis = new Jedis(situationAwareConfig.getStorageRedisIp(), situationAwareConfig.getStorageRedisPort());
+        try{
             jedis.auth(situationAwareConfig.getStorageRedisPassword());
-
-            var loadJobTime = new Date(System.currentTimeMillis() + 2 * 1000);
-            taskScheduler.schedule(() -> {
-
-                jedis.subscribe(new JedisPubSub() {
-                    @Override
-                    public void onMessage(String channel, String message) {
-                        log.info("redis schedule job , combat_log:{}", message);
-                        try {
-                            message = message.substring(message.indexOf("{"));
-                            JSONObject data = JSONObject.parseObject(message);
-                            String ip = data.getString("ip");
-                            String content = data.getString("content");
-                            realEquipmentConverter.report(ip, content, RealEquipmentConverter.SYSLOG);
-                        } catch (JSONException e) {
-                            log.error("message = {}, e = {}", message, ExceptionUtils.getStackTrace(e));
-                        }
+            jedis.subscribe(new JedisPubSub() {
+                @Override
+                public void onMessage(String channel, String message) {
+                    log.info("redis schedule job , combat_log:{}", message);
+                    String[] content = message.split(" ", 3);
+                    if (content.length == 3 && Validator.IPV4.matcher(content[1]).matches()) {
+                        realEquipmentConverter.report(content[1], content[2], RealEquipmentConverter.SYSLOG);
                     }
-                }, CHANNEL);
-
-            }, loadJobTime);
+                }
+            }, CHANNEL);
         } catch (Exception e) {
             log.error("RedisScheduleJob error, e = {}", ExceptionUtils.getStackTrace(e));
         }

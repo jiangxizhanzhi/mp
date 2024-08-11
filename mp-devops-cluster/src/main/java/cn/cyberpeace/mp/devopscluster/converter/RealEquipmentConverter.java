@@ -43,6 +43,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -63,6 +64,7 @@ import java.util.stream.Collectors;
  * @Version 1.0.0
  * @see BaseConverter
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RealEquipmentConverter implements BaseConverter{
@@ -265,6 +267,9 @@ public class RealEquipmentConverter implements BaseConverter{
         }
 
         SceneRealEquipmentBo realEquipmentBo = getRealEquipmentId(ip);
+        if (realEquipmentBo == null) {
+            return;
+        }
 
         switch (agreement) {
             case SYSLOG:
@@ -460,6 +465,7 @@ public class RealEquipmentConverter implements BaseConverter{
                 }
             }
         }
-        throw new MpRuntimeException("找不到对应的实体设备");
+        log.error("找不到对应的实体设备");
+        return null;
     }
 }

@@ -116,7 +116,7 @@ public class SnapshotConverter {
                     SnapshotConvertModel snapshotConvertModel = new SnapshotConvertModel();
                     snapshotConvertModel.setUuid(snapshot.getId());
                     snapshotConvertModel.setDescription(snapshot.getDescription());
-                    snapshotConvertModel.setName(snapshot.getName());
+                    snapshotConvertModel.setName(StringUtils.isNotEmpty(snapshot.getName()) ? snapshot.getName() : snapshot.getDescription());
                     snapshotConvertModel.setCreatedAt(LocalDateTime.parse(snapshot.getCreatedAt(), DatePattern.NORM_WITH_MISE_DATETIME_FORMAT));
                     return snapshotConvertModel;
                 }).collect(Collectors.toList());
@@ -131,7 +131,7 @@ public class SnapshotConverter {
                     SnapshotConvertModel snapshotConvertModel = new SnapshotConvertModel();
                     snapshotConvertModel.setUuid(containerSnapshot.getImageId());
                     snapshotConvertModel.setDescription(containerSnapshot.getDescription());
-                    snapshotConvertModel.setName(containerSnapshot.getName());
+                    snapshotConvertModel.setName(StringUtils.isNotEmpty(containerSnapshot.getName()) ? containerSnapshot.getName() : containerSnapshot.getDescription());
                     snapshotConvertModel.setCreatedAt(LocalDateTime.parse(containerSnapshot.getCreateAt(), DatePattern.NORM_WITH_MISE_DATETIME_FORMAT));
                     return snapshotConvertModel;
                 }).collect(Collectors.toList());
