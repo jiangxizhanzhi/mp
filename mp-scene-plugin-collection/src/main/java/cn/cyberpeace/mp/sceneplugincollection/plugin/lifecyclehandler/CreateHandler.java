@@ -125,7 +125,7 @@ public class CreateHandler extends HandlerCommon {
     public void create() {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
 
-        getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
+//        getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
 
         // TODO 流量镜像应该是基于网络端口的, 这里是基于节点的
 
@@ -161,16 +161,16 @@ public class CreateHandler extends HandlerCommon {
 
 
 
-        getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
+//        getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
 
         // 绑定探针agent到探针采集器
         String probeCollectorId = getPluginHandler().getScene().getProbeCollector();
         if (!StringUtils.isEmpty(probeCollectorId)) {
-            getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CollectionSceneStage.CREATE_DATA_COLLECT);
+//            getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CollectionSceneStage.CREATE_DATA_COLLECT);
 
             runSceneProgress(SceneProcess.CREATE_PROBE_ROUTER, this::updateProbeRouterPort);
 
-            getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_DATA_COLLECT);
+//            getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_DATA_COLLECT);
 
         }
         getPluginHandler().getScene().setProbeRouter(getPluginHandler().getSceneHandler().getProbeRouter());

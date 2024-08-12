@@ -56,8 +56,8 @@ public class PrepareHandler extends HandlerCommon {
         List<EventProcess> sceneEventProcesses = new ArrayList<>(ClassUtils.getClassConstantFieldMap(InitiateHandler.SceneProcess.class, EventProcess.class).values());
         stageRecorder.submitProcess(sceneEventProcesses);
 
-        stageRecorder.addStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
-        stageRecorder.addStage(CollectionSceneStage.CREATE_DATA_COLLECT);
+//        stageRecorder.addStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
+//        stageRecorder.addStage(CollectionSceneStage.CREATE_DATA_COLLECT);
         sceneEventProcesses = new ArrayList<>(ClassUtils.getClassConstantFieldMap(CreateHandler.SceneProcess.class, EventProcess.class).values());
         stageRecorder.submitProcess(sceneEventProcesses);
     }
