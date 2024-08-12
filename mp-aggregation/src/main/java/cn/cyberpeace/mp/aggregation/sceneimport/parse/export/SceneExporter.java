@@ -99,6 +99,7 @@ public class SceneExporter {
     private void createImageAndServiceYml(String imagePath, String singleImagePath, List<SceneParseResourceCenterV2.Device> devices,String sceneNumber) {
         if (CollectionUtils.isNotEmpty(devices)) {
             for (var device : devices) {
+                log.info("start to export device , device info is {}", JsonCommon.snakeStringify(device));
                 String currentImageDir = null;
                 if (StringUtils.isNotEmpty(singleImagePath)) {
                     currentImageDir = singleImagePath;
