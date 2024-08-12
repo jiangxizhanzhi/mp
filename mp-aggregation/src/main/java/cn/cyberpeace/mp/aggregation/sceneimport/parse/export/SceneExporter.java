@@ -156,6 +156,22 @@ public class SceneExporter {
                         this.createFile(content, currentImageDir + "/logo.jpg");
                         image.setLOGO("logo.jpg");
                     }
+                } else {
+                    byte[] content = null;
+                    try {
+                        File logo = new File(device.getLogo());
+                        content = FileUtils.readFileToByteArray(logo);
+                    } catch (Exception e) {
+                        log.error("failed to export logo {} , {}", device.getLogo(), ExceptionUtils.getStackTrace(e));
+                        throw new MpRuntimeException(BaseErrorCode.ERROR);
+                    }
+                    if (this.isPng(content)) {
+                        this.createFile(content, currentImageDir + "/logo.png");
+                        image.setLOGO("logo.png");
+                    } else {
+                        this.createFile(content, currentImageDir + "/logo.jpg");
+                        image.setLOGO("logo.jpg");
+                    }
                 }
                 // 生成service.yml
                 if (CollectionUtils.isNotEmpty(device.getAccessModes())) {
