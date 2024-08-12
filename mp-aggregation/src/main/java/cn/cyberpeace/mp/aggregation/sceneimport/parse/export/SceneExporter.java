@@ -157,14 +157,8 @@ public class SceneExporter {
                         image.setLOGO("logo.jpg");
                     }
                 } else {
-                    byte[] content = null;
-                    try {
-                        File logo = new File(device.getLogo());
-                        content = FileUtils.readFileToByteArray(logo);
-                    } catch (Exception e) {
-                        log.error("failed to export logo {} , {}", device.getLogo(), ExceptionUtils.getStackTrace(e));
-                        throw new MpRuntimeException(BaseErrorCode.ERROR);
-                    }
+                    byte[] content = FsCommon.downloadRawContent(device.getLogo());
+                    // 判断图片文件类型
                     if (this.isPng(content)) {
                         this.createFile(content, currentImageDir + "/logo.png");
                         image.setLOGO("logo.png");
