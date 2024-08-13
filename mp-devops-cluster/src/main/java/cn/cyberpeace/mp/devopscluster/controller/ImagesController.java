@@ -12,6 +12,7 @@ package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
@@ -44,6 +45,7 @@ import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.DeviceInjectFileCreate;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
+import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.devopscluster.service.upload.CustomImageUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.ISOUploadService;
@@ -195,7 +197,10 @@ public class ImagesController {
         request.setName(request.getName() + "_" + TextUtils.uuid().substring(0, 3));
         this.convertRole(request);
         imagesConverter.add(request);
-        return ResultCommon.success();
+        var req = new ImagePageDTO();
+        req.setName(request.getName());
+        var m = BeanCommon.getBean(DeviceTargetMapper.class).page(req).get(0);
+        return new ServiceResult(m.getUuid()).asResult();
     }
 
     /**
