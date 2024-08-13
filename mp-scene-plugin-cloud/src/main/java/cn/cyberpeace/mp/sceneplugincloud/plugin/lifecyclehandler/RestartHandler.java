@@ -75,12 +75,16 @@ public class RestartHandler extends HandlerCommon {
             runElementProgress(nodeId, SceneElementModel.Event.RESTART, ElementProcess.RESTART_VIRTUAL_MACHINE, () -> {
                 closeAccessModes(element);
                 // 先判断下虚拟机的真实状态
-                ConsoleInfoGetResult info = virtualMachine.getConsoleInfo(instanceId, element.getHost());
-                if (StringUtils.isNotEmpty(info.getPort()) && Integer.parseInt(info.getPort()) < 0) {
-                    virtualMachine.stop(instanceId);
+                var info = virtualMachine.getVmInfo(instanceId);
+                if ("UP".equals(info.getStatus())) {
+                    // 启动状态下的机器 执行重启
+                    virtualMachine.restart(instanceId);
+                } else if ("DOWN".equals(info.getStatus())) {
+                    // 已关机状态下的机器 执行启动
                     virtualMachine.start(instanceId);
                 } else {
-                    virtualMachine.restart(instanceId);
+                    // 其他状态下机器 跳过操作
+                    return;
                 }
                 if (StringUtils.isNotEmpty(element.getIsoAttachFilename()) && StringUtils.isNotEmpty(element.getIsoTmpdirUuid())) {
                     this.attachISO(element);
@@ -92,7 +96,7 @@ public class RestartHandler extends HandlerCommon {
             runElementProgress(nodeId, SceneElementModel.Event.RESTART, ElementProcess.RESTART_CONTAINER, () -> {
                 closeAccessModes(element);
                 container.restart(instanceId);
-                container.addRoute(instanceId);
+//                container.addRoute(instanceId);
                 container.executeCommand(instanceId, "cd /opt/wazuha && sh start.sh");
                 checkAccessModes(element);
             });

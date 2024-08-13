@@ -141,6 +141,7 @@ public class CloudUrlConstant {
     public static final String VIRTUAL_MACHINE_CREATE_URL = "/cloud/v1/scenarios/vm";
     public static final String VIRTUAL_MACHINE_DELETE_URL = "/cloud/v1/scenarios/vm";
     public static final String GET_VM_LIST_URL = "/cloud/v1/vm";
+    public static final String GET_VM_INFO = "/cloud/v1/vm/{vm_id}";
     public static final String VIRTUAL_MACHINE_SNAPSHOT_URL = "/cloud/v1/vm/{vm_id}/snapshot";
     public static final String VIRTUAL_MACHINE_DELETE_SNAPSHOT_URL = "/cloud/v1/vm/{vm_id}/snapshot/{snapshot_id}";
     public static final String VIRTUAL_MACHINE_SNAPSHOT_LIST = "/cloud/v1/vm/{vm_id}/snapshot";

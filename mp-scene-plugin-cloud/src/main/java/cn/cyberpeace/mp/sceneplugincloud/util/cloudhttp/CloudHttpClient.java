@@ -76,7 +76,11 @@ public class CloudHttpClient {
             return response;
         }
 
-        if (!response.isSuccess()) {
+        if (response == null) {
+            response = new CloudResponse<>();
+        }
+
+        if (response != null && !response.isSuccess()) {
             log.error("Cloud {}[url - {}?{}, data - {}] status error: {}, {}", method, url,
                     param == null ? StringUtils.EMPTY : param.toPathString(),
                     data == null ? StringUtils.EMPTY : data.toContent(), response.getMessage(), response.getDetail());

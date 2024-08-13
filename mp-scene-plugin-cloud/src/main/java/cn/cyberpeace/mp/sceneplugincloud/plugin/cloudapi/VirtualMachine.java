@@ -280,6 +280,13 @@ public class VirtualMachine extends CloudClient {
                 ConsoleInfoGetResult.class);
     }
 
+
+    public GetVmInfoResult getVmInfo(String instanceId) {
+        var result = cloudGet(CloudUrlConstant.GET_VM_INFO.replace("{vm_id}", instanceId), null, new TypeReference<CloudResponse<GetVmInfoResult>>() {
+        }, true);
+        return result.getData();
+    }
+
     /**
      * getComInfo
      *
