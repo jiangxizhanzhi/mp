@@ -134,8 +134,16 @@ public class ImagesController {
     @ApiOperation("分页查询")
     @GetMapping("/list_template")
     public PageResult<TemplateVO> page() {
-        var res = imagesService.listTemplate();
-        return new PageResult<>(res, res.size());
+        List<TemplateVO> vos = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            TemplateVO vo = new TemplateVO();
+            vo.setName("A" + i);
+            vo.setResourceId("A" + i);
+            vos.add(vo);
+        }
+        return new PageResult<>(vos,vos.size());
+//        var res = imagesService.listTemplate();
+//        return new PageResult<>(res, res.size());
     }
 
     /**
