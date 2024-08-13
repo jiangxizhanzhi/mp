@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.common.util.FileClient;
@@ -55,6 +56,7 @@ import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -183,6 +185,11 @@ public class ImagesController {
     @PostMapping("/add_from_entity")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增实装", target = OpTargetEnums.REALEQUIPMENT)
     public ServiceResult addFromEntity(@RequestBody ImageRequest request) {
+        request.setExtImageInfo(new ExtImageInfo());
+        request.setImageType(BaseCloudPluginSceneElementModel.ImageType.VM);
+        request.setExtVm(new ExtVm());
+        request.getExtVm().setFlavor("2C/2048M/40G");
+        request.setName(request.getName() + "_" + TextUtils.uuid().substring(0, 3));
         this.convertRole(request);
         imagesConverter.add(request);
         return ResultCommon.success();
