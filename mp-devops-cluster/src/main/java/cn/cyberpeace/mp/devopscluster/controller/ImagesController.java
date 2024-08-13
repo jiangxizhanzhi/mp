@@ -189,6 +189,9 @@ public class ImagesController {
         request.setImageType(BaseCloudPluginSceneElementModel.ImageType.VM);
         request.setExtVm(new ExtVm());
         request.getExtVm().setFlavor("2C/2048M/40G");
+        request.getExtVm().setCpu(2);
+        request.getExtVm().setRam(2048);
+        request.getExtVm().setDisk(40);
         request.setName(request.getName() + "_" + TextUtils.uuid().substring(0, 3));
         this.convertRole(request);
         imagesConverter.add(request);
