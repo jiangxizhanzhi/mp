@@ -175,6 +175,21 @@ public class ImagesController {
 
     /**
      * 新增
+     * @param request
+     * @return 统一服务返回结果
+     */
+    @ApiOperation("从实体设备新增")
+    @ApiImplicitParam(name = "request", value = "新增实装设备请求体", dataTypeClass = RealEquipmentRequest.class)
+    @PostMapping("/add_from_entity")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增实装", target = OpTargetEnums.REALEQUIPMENT)
+    public ServiceResult addFromEntity(@RequestBody ImageRequest request) {
+        this.convertRole(request);
+        imagesConverter.add(request);
+        return ResultCommon.success();
+    }
+
+    /**
+     * 新增
      *
      * @param request
      * @return 统一服务返回结果
