@@ -177,8 +177,13 @@ public class InitiateHandler extends HandlerCommon {
                         hostRoute.setDestination(externalNetCidr);
                         hostRoute.setNexthop(ip);
                         hostRoutes.add(hostRoute);
-                        network.getNetwork().setHostRoutes(hostRoutes);
 
+                        HostRoute hostRoute2 = new HostRoute();
+                        hostRoute2.setDestination(CloudSingleton.cloudAppConfig.getInternalServerNetCidr());
+                        hostRoute2.setNexthop(ip);
+                        hostRoutes.add(hostRoute2);
+
+                        network.getNetwork().setHostRoutes(hostRoutes);
                         CollectionPluginSceneProbeRouterPortModel routerPort = new CollectionPluginSceneProbeRouterPortModel();
                         routerPort.setScene(getPluginHandler().getSrcScene().getEid());
                         routerPort.setSceneElement(nodeId);

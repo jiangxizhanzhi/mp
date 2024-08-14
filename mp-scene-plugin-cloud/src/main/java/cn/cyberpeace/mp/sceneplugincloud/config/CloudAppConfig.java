@@ -182,6 +182,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.dhcp_ip_allocate:true}")
     private Boolean dhcpIpAllocate;
 
+    @Value("${mp.sceneplugincloud.internal_server_net_cidr:172.190.190.0/24}")
+    private String internalServerNetCidr;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 
