@@ -104,7 +104,11 @@ public abstract class BaseEventHandler<TEventModelInterface extends BaseEventMod
     }
 
     private String formatProcessMessage(String processMessage) {
-        return StringUtils.joinWith(" ", getTargetName(), processMessage);
+        String message = StringUtils.joinWith(" ", getTargetName(), processMessage);
+        if (StringUtils.contains(message, "暂停 结束")) {
+            return message.replace("暂停 结束", "已暂停");
+        }
+        return message;
     }
 
     /**
