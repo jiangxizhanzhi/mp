@@ -361,6 +361,14 @@ public class DeleteHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.DELETE_ENTITIES, () -> runTasks(deleteEntities));
         }
 
+        // 删除内部服务的虚拟机
+        if (StringUtils.isNotEmpty(getPluginHandler().getScene().getInternalVmId())) {
+            log.info("删除提供内部服务的虚拟机, id 为 {}", getPluginHandler().getScene().getInternalVmId());
+            VirtualMachineDeleteData deleteData = new VirtualMachineDeleteData();
+            deleteData.setVms(Arrays.asList(getPluginHandler().getScene().getInternalVmId()));
+            vmClient.delete(deleteData);
+        }
+
         // 删除终端
         List<CloudPluginSceneElementBO> terminals = new ArrayList<>();
         for (CloudPluginSceneElementBO t : getPluginHandler().getTerminalElementMap().values()) {

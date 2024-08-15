@@ -71,6 +71,7 @@ mp:
       public-net-proxy: ${MP_PUBLIC_NET_PROXY:false}
       public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:}
       public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:}
+      internal-server-image: ${INTERNAL_SERVER_IMAGE:}
       gateway-types: ${GATEWAY_TYPES:2,3}
       cpcloud-server-timeout: ${MP_CPCLOUD_SERVER_TIMEOUT:600000}
       cpcloud-http-pool-size: ${MP_CPLOUD_HTTP_POOL_SIZE:200}

@@ -185,6 +185,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.internal_server_net_cidr:172.190.190.0/24}")
     private String internalServerNetCidr;
 
+    @Value("${mp.sceneplugincloud.internal_server_image:server_image}")
+    private String internalServerImage;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 

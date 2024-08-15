@@ -39,6 +39,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -1387,6 +1388,45 @@ public class CreateHandler extends HandlerCommon {
             });
             vpClient.syncFlowPortInfo(portIds, "add");
         }
+
+        // 最后需要创建一个场景内部服务虚拟机 提供ntp、rsyslog收集等功能
+        this.createInternalServiceVm();
+
+    }
+
+    private void createInternalServiceVm() {
+        VirtualMachineCreateData createData = new VirtualMachineCreateData();
+        createData.setCpu(2);
+        createData.setDisk(40);
+        createData.setRam(2048);
+        createData.setName("MP_SCENE_SPEC" + getPluginHandler().getScene().getSrcScene().getEid());
+        createData.setImage(CloudSingleton.cloudAppConfig.getInternalServerImage());
+
+        List<VirtualNic> nics = new ArrayList<>();
+        List<ConnectedNetworkBO> networkBOS = new ArrayList<>();
+        for (var e : getPluginHandler().getElementMap().values()) {
+            networkBOS.addAll(e.getDeriveNetworks());
+        }
+        for (var net : networkBOS) {
+            String cidr = net.getNetwork().getCidr();
+            List<String> excludeIps = new ArrayList<>(net.getNetwork().getExcloudIps());
+            String fixedIp = IpUtils.newRandomIps(cidr, 1, excludeIps, null, false).get(0);
+
+            VirtualNic nic = new VirtualNic();
+            nic.setNetworkId(net.getNetwork().getResourceId());
+            nic.setFixedIp(fixedIp);
+            nics.add(nic);
+        }
+
+        // 加一个外部网络
+        VirtualNic nic = new VirtualNic();
+        nic.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
+        nics.add(nic);
+        createData.setNetworks(nics);
+
+        createData.setUserData("");
+        var vm = vmClient.create(createData);
+        getPluginHandler().getScene().setInternalVmId(vm.getId());
     }
 
     protected void prepareEventProcess() {
