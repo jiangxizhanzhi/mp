@@ -123,7 +123,8 @@ public class TopoReformUtils {
         cloudPluginSceneElementBO.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH);
 
         sceneElementBO.setType(BaseSceneElementModel.Type.SWITCH);
-        // azure todo 把两个字段补充
+        // azure
+        sceneElementBO.setArea("cloudUUID");
         sceneElementBO.setName("default VNet");
         sceneElementBO.setIcon2("/api/mp/file/177/108/39ae20d4c7de4ab7a9aa9de270c1d143.png");
 
