@@ -1,0 +1,2 @@
+alter table `mp_sceneplugincloud_scene` add column internal_vm_id varchar(128) NOT NULL DEFAULT '' COMMENT "内部服务的虚拟机id";
+alter table `mp_sceneplugincloud_scene_config` add column internal_vm_id varchar(128) NOT NULL DEFAULT '' COMMENT "内部服务的虚拟机id";
