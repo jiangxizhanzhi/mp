@@ -121,6 +121,27 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneDataModifier.handlerPosition(csceneBO.getSceneConfig());
     }
 
+    private void correctRequestCsceneParamsForSyncCompletionTopo(CsceneBO csceneBO) {
+        if (csceneBO == null) {
+            return;
+        }
+        CsceneDataModifier.removeEidWhenCreate(csceneBO);
+        CsceneDataModifier.removeFilePathPrefix(csceneBO);
+        CsceneDataModifier.assembleInitCommands(csceneBO);
+        CsceneDataModifier.handlerInputEnableRecording(csceneBO);
+        CsceneDataModifier.handlerEnableRate(csceneBO);
+        CsceneDataModifier.checkFlowNum(csceneBO);
+        //check cidr not same when enable collection
+        CsceneDataModifier.checkSameCidrForCpcollection(csceneBO);
+        CsceneDataModifier.checkVlanId(csceneBO);
+        CsceneDataModifier.check(csceneBO);
+        CsceneDataModifier.checkIngressAndEgress(csceneBO);
+        CsceneDataModifier.correctQuickCreateSupport(csceneBO);
+        CsceneDataModifier.checkFirewallRules(csceneBO);
+        CsceneDataModifier.handleAccessModePath(csceneBO);
+        CsceneDataModifier.checkCloudElement(csceneBO);
+    }
+
     private void correctRequestCsceneParamsForAppInstance(CsceneBO csceneBO) {
         if (csceneBO == null) {
             return;
@@ -317,7 +338,8 @@ public class CsceneController implements BaseModelListControllerBase {
     @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
     @PostMapping("/completion_topo")
     public ServiceResult<CsceneBO> completionTopo(@RequestBody CsceneBO csceneBO) {
-        correctRequestCsceneParamsForSync(csceneBO);
+        correctRequestCsceneParamsForSyncCompletionTopo(csceneBO);
+
         // 场景模板对象 转成 场景实例对象
         String configContent = JsonCommon.snakeStringify(csceneBO.getSceneConfig());
         SceneDataBO sceneDataBO = JsonCommon.snakeParse(configContent, SceneDataBO.class);
