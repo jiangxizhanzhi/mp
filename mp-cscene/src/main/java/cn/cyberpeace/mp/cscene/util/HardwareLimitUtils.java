@@ -47,13 +47,13 @@ public class HardwareLimitUtils {
         freeRam = totalRam - usedRam;
         freeDisk = totalDisk - usedDisk;
 
-        // cpu可以超分 暂时不校验
-        if (ram > freeRam) {
-            throw new MpRuntimeException(CsceneErrorCode.RAM_LIMIT.format(String.valueOf(totalRam), String.valueOf(usedRam), String.valueOf(ram)));
-        }
-        if (disk > freeDisk) {
-            throw new MpRuntimeException(CsceneErrorCode.DISK_LIMIT.format(String.valueOf(totalDisk), String.valueOf(usedDisk), String.valueOf(disk)));
-        }
+//        // cpu可以超分 暂时不校验
+//        if (ram > freeRam) {
+//            throw new MpRuntimeException(CsceneErrorCode.RAM_LIMIT.format(String.valueOf(totalRam), String.valueOf(usedRam), String.valueOf(ram)));
+//        }
+//        if (disk > freeDisk) {
+//            throw new MpRuntimeException(CsceneErrorCode.DISK_LIMIT.format(String.valueOf(totalDisk), String.valueOf(usedDisk), String.valueOf(disk)));
+//        }
     }
 
     @Getter
