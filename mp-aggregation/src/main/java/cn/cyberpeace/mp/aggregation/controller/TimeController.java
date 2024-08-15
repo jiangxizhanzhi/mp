@@ -29,6 +29,6 @@ public class TimeController {
     @ApiOperation("埋点记录")
     @GetMapping("/get")
     public ServiceResult<String> page(@RequestParam(required = false) EventTrackRequest request) {
-        return new ServiceResult<>("2024-08-15T10:10:10Z");
+        return new ServiceResult<>("2024-08-15T10:10:10Z").asResult();
     }
 }
