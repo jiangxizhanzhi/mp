@@ -2,11 +2,13 @@ package cn.cyberpeace.mp.auth.extensions.security;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
+import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.response.login.LoginResp;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
@@ -27,6 +29,7 @@ import cn.cyberpeace.mp.log.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.core.Authentication;
@@ -50,6 +53,12 @@ import java.util.Objects;
 @Component
 public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
     private final ObjectMapper mapper;
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
+    private AuthConfig authConfig;
 
     @Autowired
     private UserRoleService userRoleService;
@@ -94,6 +103,14 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 response.setStatus(HttpServletResponse.SC_OK);
                 result = new ServiceResult<>(null, errorCode);
             } else {
+                if (Objects.nonNull(authConfig.getLoginResetSecret()) && authConfig.getLoginResetSecret()) {
+                    if (!StringUtils.equals(user.getId(), authConfig.getLoginKeepSecretUser())) {
+                        // 使其它登录的token失效
+                        user.initDefault("tokenSecret");
+                        userMapper.update(user);
+                    }
+                }
+
                 String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
                 ObjResult<UserModel> userResult = new ObjResult(user, new UserFields().getAvailableFields());
                 UserBo userBo = userService.userModel2UserDto(userResult.getObj());

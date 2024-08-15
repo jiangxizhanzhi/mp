@@ -15,6 +15,8 @@ import java.util.List;
 @Configuration
 @ConfigurationProperties(prefix = "mp.auth")
 public class AuthConfig {
+    private Boolean loginResetSecret = true;
+    private String loginKeepSecretUser;
     /**
      * biz
      * 退出登录后是否重置tokenSecret

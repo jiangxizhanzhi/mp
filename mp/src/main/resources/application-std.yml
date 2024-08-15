@@ -204,6 +204,8 @@ mp:
     #      authenticate-jwt-secret: ${MP_AUTH_JWT_SECRET:a668b6fec22144f38a6f72f8a5aa7326}
     #      authenticate-encoder-iterations: ${MP_AUTH_ENCODER_ITERATIONS:10000}
     max-import-user-size: ${mp.auth.ext-var.max-import-user-size}
+    login-reset-secret: ${mp.auth.ext-var.login-reset-secret}
+    login-keep-secret-user: ${mp.auth.ext-var.login-keep-secret-user}
     logout-reset-secret: ${mp.auth.ext-var.logout-reset-secret}
     logout-keep-secret-user: ${mp.auth.ext-var.logout-keep-secret-user}
     default-user-avatar: ${mp.auth.ext-var.default-user-avatar}
