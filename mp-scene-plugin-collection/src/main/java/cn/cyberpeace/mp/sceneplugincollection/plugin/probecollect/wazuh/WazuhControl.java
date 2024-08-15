@@ -17,6 +17,7 @@ import java.util.Map;
 
 @Slf4j
 public class WazuhControl {
+    // todo 是不是agent提前安装好的？
     public static final String WINDOWS_CONTROL_SCRIPT_PATH = "C:\\ossec-agent\\probe-control.bat";
     public static final String LINUX_CONTROL_SCRIPT_PATH = "/var/ossec/bin/probe-control.py";
 
@@ -159,6 +160,7 @@ public class WazuhControl {
             scriptParams.add(JsonCommon.beanToSnakeMap(controlConfigParam.getSyscollectorParam()));
         }
         if (scriptParams.isEmpty()) {
+            log.info("scriptParams is empty, please check controlConfigParam");
             return StringUtils.EMPTY;
         }
         // 把参数上传到文件服务器

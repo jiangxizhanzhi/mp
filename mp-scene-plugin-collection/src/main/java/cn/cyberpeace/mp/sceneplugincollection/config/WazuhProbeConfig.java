@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincollection.config;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.sceneplugincollection.util.CollectionCommonConfigUtil;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +41,9 @@ public class WazuhProbeConfig {
         public static class NewProbe {
             private String probeName;
             private String id;
+            @ApiModelProperty(value = "上报间隔")
             private String interval;
+            @ApiModelProperty(value = "输出格式json、文本")
             private String outputFormat;
         }
     }

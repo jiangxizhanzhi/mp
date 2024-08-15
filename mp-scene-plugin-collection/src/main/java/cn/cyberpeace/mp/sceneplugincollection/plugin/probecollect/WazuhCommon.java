@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
 import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -21,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class WazuhCommon {
 
     private static WazuhProbeConfig wazuhProbeConfig;
@@ -75,6 +77,7 @@ public class WazuhCommon {
             wazuhProbeConfig = BeanCommon.getBean(WazuhProbeConfig.class);
         }
         agentName = StringUtils.isEmpty(agentName) ? TextUtils.uuid() : agentName;
+        // 获取安装agent需要的静态资源路径
         List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings(WAZUH_AGENT_GROUP);
         Map<String, String> nameFileMap = new HashMap<>();
         for (LocalFileMappingModel localFileMappingModel : mappings) {
@@ -91,6 +94,7 @@ public class WazuhCommon {
         controlProbeParams.addAll(defaultProbeParams);
         controlParam.setProbeParams(controlProbeParams);
         String probeCommand = WazuhControl.genControlConfigCommand(osType, controlParam);
+        log.info("probeCommand is {}", probeCommand);
 
         String windowsInstallDir = SceneSingleton.sceneAppConfig.getWindowsInstallerDir();
         String linuxInstallDir = SceneSingleton.sceneAppConfig.getLinuxInstallerDir();
@@ -111,7 +115,7 @@ public class WazuhCommon {
                             "call install.bat",
                             String.format("cd %s", windowsInstallDir),
                             "rd/s/q agent-installer",
-                            "del/f/s/q " + InstallerUtils.INSTALLER_REPLACEMENT,
+                            "del/f/s/q " + InstallerUtils.INSTALLER_REPLACEMENT,  // todo 有问题
                             "cd C:\\wazuha",
                             "call config.bat",
                             "call " + probeCommand,
@@ -141,8 +145,10 @@ public class WazuhCommon {
                             "sh start.sh"
                     ));
         }
-        List<String> result = resource == null ? new ArrayList<>() :
-                InstallerUtils.generateInstallerInstallCommand(systemType, List.of(resource));
+        List<String> result = new ArrayList<>();
+        if(resource != null) {
+            result = InstallerUtils.generateInstallerInstallCommand(systemType, List.of(resource));
+        }
         if (SystemTypeCommandUtils.isLinux(systemType)) {
             String addCommand;
             if (isContainer) {
@@ -232,6 +238,7 @@ public class WazuhCommon {
                                                                               String metadataFileServer, String agentName,
                                                                               WazuhProbeConfig wazuhProbeConfig) {
         if (wazuhProbeConfig == null || wazuhProbeConfig.getDefaultProbe() == null || CollectionUtils.isEmpty(wazuhProbeConfig.getDefaultProbe().getProbes())) {
+            log.info("wazuhProbeConfig is null or defaultProbe is null or defaultProbe.probes is empty");
             return new ArrayList<>();
         }
         List<WazuhControl.ControlProbeParam> defaultProbeParams = new ArrayList<>();

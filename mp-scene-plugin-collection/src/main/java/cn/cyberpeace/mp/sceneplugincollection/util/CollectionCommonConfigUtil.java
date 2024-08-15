@@ -18,12 +18,16 @@ public class CollectionCommonConfigUtil {
 
     private static final String CONFIG_PATH_SUFFIX = ".json";
 
+    // 默认自定义探针
     public static final String DEFAULT_CUSTOM_PROBES = "default_custom_probes";
 
+    // 默认通用探针
     public static final String DEFAULT_BIZ_PROBES = "default_biz_probes";
 
+    // 日志文件采集探针
     public static final String LOG_PROBE_LOCATIONS = "log_probe_locations";
 
+    // 文件修改探针
     public static final String MODIFY_PROBES = "modify_probes";
 
     private static final String[] CONFIGS = new String[]{DEFAULT_CUSTOM_PROBES, LOG_PROBE_LOCATIONS, MODIFY_PROBES, DEFAULT_BIZ_PROBES};
