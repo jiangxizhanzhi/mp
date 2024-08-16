@@ -181,6 +181,34 @@ public class CloudSceneConnectionCommon {
             sceneConnection.setAccessModeId(param.getCloudAccessMode().getId());
             cloudPluginSceneConnectionMapper.save(sceneConnection);
             return sceneConnection;
+        } else if (CloudElementAccessMode.Protocol.COM.equals(protocol) || CloudElementAccessMode.Protocol.COM.toUpperCase().equals(protocol)) {
+            // 创建com链接 先从接口取host、username
+            var comInfo = new VirtualMachine().getComInfo(resourceId);
+
+            Connection.ConnectionCreateData createData = new Connection.ConnectionCreateData();
+            createData.setUsername(userId);
+            Connection.ConnectionCreateParamsData params = new Connection.ConnectionCreateParamsData();
+            // com协议最终是以ssh形式接入
+            params.setProtocol(CloudElementAccessMode.Protocol.SSH);
+            params.setHostname(comInfo.getAddress());
+            params.setUsername(comInfo.getUser());
+            params.setPort(comInfo.getPort());
+            params.setNeedPrivateKey(true);
+            params.setPrivateKeyPath("/root/.ssh/id_rsa");
+            createData.setConnectionParams(params);
+
+            var connectionCreateResult = connection.createConnection(createData);
+
+            // 创建连接
+            var sceneConnection = new CloudPluginSceneConnectionModel();
+            sceneConnection.setScene(sceneId);
+            sceneConnection.setSceneElement(sceneElementId);
+            sceneConnection.setAccessUser(userId);
+            sceneConnection.setConnectionId(connectionCreateResult.getConnectionId());
+            sceneConnection.setConnectionUrl(connectionCreateResult.getUrl());
+            sceneConnection.setAccessModeId(param.getCloudAccessMode().getId());
+            cloudPluginSceneConnectionMapper.save(sceneConnection);
+            return sceneConnection;
         } else {
             // 其他协议直接从节点的配置中获取用户名密码等
             Connection.ConnectionCreateData createData = new Connection.ConnectionCreateData();

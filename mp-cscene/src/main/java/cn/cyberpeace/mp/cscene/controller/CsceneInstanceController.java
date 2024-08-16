@@ -769,6 +769,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         guacamoleProtocol.add(CloudElementAccessMode.Protocol.SSH);
         guacamoleProtocol.add(CloudElementAccessMode.Protocol.RDP);
         guacamoleProtocol.add(CloudElementAccessMode.Protocol.VNC);
+        guacamoleProtocol.add(CloudElementAccessMode.Protocol.COM);
+        guacamoleProtocol.add(CloudElementAccessMode.Protocol.COM.toUpperCase());
 
         if (element != null && CollectionUtils.isNotEmpty(element.getPorts())) {
             for (var p : element.getPorts()) {
