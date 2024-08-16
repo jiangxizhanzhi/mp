@@ -152,6 +152,7 @@
                 <version>2.5.2</version>
                 <configuration>
                     <mainClass>cn.cyberpeace.mp.Application</mainClass>
+                    <includeSystemScope>true</includeSystemScope> <!-- 加载本地引入的jar文件 -->
                 </configuration>
             </plugin>
             <plugin>
