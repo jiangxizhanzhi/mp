@@ -32,6 +32,12 @@ spring:
     #      enabled: ${MP_FLYWAY_ENABLED_VALUE:false}
     clean-disabled: true
     enabled: ${spring.flyway.ext-var.enabled}
+    locations: classpath:db/migration
+    table: flyway_schema_history
+    baseline-on-migrate: true
+    out-of-order: false
+    validate-on-migrate: true
+    encoding: UTF-8
   application:
     name: mp
   servlet:
