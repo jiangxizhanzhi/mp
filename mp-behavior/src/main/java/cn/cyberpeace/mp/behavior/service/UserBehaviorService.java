@@ -124,8 +124,11 @@ public class UserBehaviorService {
 		for (UserBehaviorModel userModel : userModelList) {
 			networkIds.addAll(JSON.parseArray(userModel.getNetworkIds(), String.class));
 		}
-		humanCondition = new HumanCondition().filterIn(NetworkBehaviorModel::getId, networkIds.toArray(new String[0]));
-		List<NetworkBehaviorModel> networkModelList = networkBehaviorMapper.list(humanCondition);
+		List<NetworkBehaviorModel> networkModelList = new ArrayList<>();
+		if (CollectionUtils.isNotEmpty(networkIds)) {
+			humanCondition = new HumanCondition().filterIn(NetworkBehaviorModel::getId, networkIds.toArray(new String[0]));
+			networkModelList = networkBehaviorMapper.list(humanCondition);
+		}
 		Map<String, NetworkBehaviorModel> networkModelMap = networkModelList.stream().collect(Collectors.toMap(NetworkBehaviorModel::getId, n -> n));
 		List<UserBehaviorDetail> details = userModelList.stream().map(userModel -> {
 			UserBehaviorDetail detail = new UserBehaviorDetail();
