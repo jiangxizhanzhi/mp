@@ -426,6 +426,10 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     public ServiceResult<CsceneBO> getById(String id, boolean withInstance, CsceneContextBO context) {
         var csceneHandler = new CsceneHandler(id, context);
         var cscene = csceneHandler.toData(withInstance);
+//        for (SceneConfigElementBO s : cscene.getSceneConfig().getTopology().getElements()) {
+//            s.getPlace();
+//                s.getId();
+//        }
         cscene.setResourceOccupiedNums(NodeLimitUtils.calLimitedNodesNum(cscene));
         return new ServiceResult<>(cscene);
     }

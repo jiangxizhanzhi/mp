@@ -369,7 +369,11 @@ public class ImagesConverter implements BaseConverter {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         String insctanceCreateUser = Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : StringUtils.EMPTY;
-        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser));
+        try {
+            scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser));
+        } catch (Exception e) {
+            throw new RuntimeException("启动时创建镜像机器失败");
+        }
         var updateTargetModel = new DeviceTargetPO();
         updateTargetModel.setUuid(uuid);
         updateTargetModel.setInstanceCreateUser(insctanceCreateUser);
@@ -387,6 +391,9 @@ public class ImagesConverter implements BaseConverter {
         }
         scenariosService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(), request.getImageType()));
         var device = deviceTargetMapper.findByUuid(request.getUuid());
+        if (Objects.isNull(device.getLastCreateTime())) {
+            device.setLastCreateTime(device.getUpdateTime());
+        }
         var use = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) - device.getLastCreateTime().toEpochSecond(ZoneOffset.UTC);
         var updateTargetModel = new DeviceTargetPO();
         updateTargetModel.setUuid(request.getUuid());

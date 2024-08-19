@@ -62,6 +62,7 @@ public class WebSocketNoticeController {
     @ApiImplicitParam(name = "uuid", value = "靶标id", dataTypeClass = String.class)
     @GetMapping("/device/get-by-uuid")
     public ServiceResult getByUuid(@RequestParam String uuid){
+        log.info("websocketNoticeController.getByUuid.uuid:{}",uuid);
         ImageConvertModel convertModel = imagesConverter.findByUuid(uuid);
         ExtSystemInfo extSystemInfo = convertModel.getExtSystemInfo();
         ExtVm extVm = convertModel.getExtVm();
