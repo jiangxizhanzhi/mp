@@ -166,10 +166,15 @@ public class UserBehaviorService {
 	 */
 	public UserBehaviorDetail getDetail(String id) {
 		UserBehaviorModel userBehaviorModel = userBehaviorMapper.get(id);
+		List<NetworkBehaviorModel> networkBehaviorModelList = new ArrayList<>();
+
 		String networkIds = userBehaviorModel.getNetworkIds();
 		List<String> networkIdList = JSON.parseArray(networkIds, String.class);
-		HumanCondition humanCondition = new HumanCondition().filterIn(NetworkBehaviorModel::getId, networkIdList.toArray(new String[0]));
-		List<NetworkBehaviorModel> networkBehaviorModelList = networkBehaviorMapper.list(humanCondition);
+		if (CollectionUtils.isNotEmpty(networkIdList)) {
+			HumanCondition humanCondition = new HumanCondition().filterIn(NetworkBehaviorModel::getId, networkIdList.toArray(new String[0]));
+			networkBehaviorModelList = networkBehaviorMapper.list(humanCondition);
+		}
+
 		UserBehaviorDetail detail = new UserBehaviorDetail();
 		BeanUtils.copyProperties(userBehaviorModel, detail);
 		detail.setNetworkBehaviorModelList(networkBehaviorModelList);
