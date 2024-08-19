@@ -123,11 +123,18 @@ public class ImagesConverter implements BaseConverter {
         Device device = deviceService.findByUuid(deviceUuid);
         var f = deviceTargetMapper.findByUuid(deviceUuid);
         String ip = f.getInstanceIp();
-        String vmId;
-        vmId = device.getExtVm().getInstanceUuid();
+        String vmId = null;
+        List<AccessProtocol> ps = null ;
+        if (StringUtils.equals(device.getImageType(), ImageTypeEnum.VM.toValue())) {
+            vmId = device.getExtVm().getInstanceUuid();
+            ps = device.getExtVm().getAccessProtocols();
+        } else {
+            vmId = device.getExtDocker().getInstanceUuid();
+            ps = device.getExtDocker().getAccessProtocols();
+        }
         List<TargetConnection> result = new ArrayList<>();
         String userId = UserUtils.getLoginUser().getId() ;
-        for (var protocol : device.getExtVm().getAccessProtocols()) {
+        for (var protocol : ps) {
             TargetConnection c = new TargetConnection();
             c.setPort(protocol.getPort());
             c.setProtocol(protocol.getProtocol());
