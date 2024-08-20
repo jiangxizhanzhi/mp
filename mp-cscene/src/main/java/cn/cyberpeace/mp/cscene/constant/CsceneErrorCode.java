@@ -62,6 +62,7 @@ public enum CsceneErrorCode implements ErrorCode {
     RAM_LIMIT("MP-110302", "ram_limit"),
     DISK_LIMIT("MP-110303", "disk_limit"),
     SCENE_EDIT_LIMIT("MP-110305", "scene_edit_limit"),
+    SNAP_SHOT_DELETE("MP-110306", "snap_shot_delete"),
     ;
 
     /**

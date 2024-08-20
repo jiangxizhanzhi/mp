@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.mptool.DatePattern;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.CloudClient;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ContainerSnapshot;
@@ -234,10 +235,14 @@ public class SnapshotConverter {
      */
     public void delete(SnapshotDeleteRequest request) {
         Device device = deviceService.findByUuid(request.getDeviceUuid());
-        if (CONTAINER.equals(device.getImageType())) {
-            cloudClient.deleteContainerSnapshot(device.getExtDocker().getInstanceUuid(), request.getSnapshotUuid());
-        } else {
-            cloudClient.deleteVmSnapshot(device.getExtVm().getInstanceUuid(), request.getSnapshotUuid());
+        try {
+            if (CONTAINER.equals(device.getImageType())) {
+                cloudClient.deleteContainerSnapshot(device.getExtDocker().getInstanceUuid(), request.getSnapshotUuid());
+            } else {
+                cloudClient.deleteVmSnapshot(device.getExtVm().getInstanceUuid(), request.getSnapshotUuid());
+            }
+        } catch (Exception e) {
+            throw new MpRuntimeException(CsceneErrorCode.SNAP_SHOT_DELETE);
         }
         snapshotMapper.delete(request.getSnapshotId());
     }
