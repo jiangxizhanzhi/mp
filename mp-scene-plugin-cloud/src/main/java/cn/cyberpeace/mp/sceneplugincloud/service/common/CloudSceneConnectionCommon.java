@@ -195,6 +195,7 @@ public class CloudSceneConnectionCommon {
             params.setPort(comInfo.getPort());
             params.setNeedPrivateKey(true);
             params.setPrivateKeyPath("/root/.ssh/id_rsa");
+            params.setCommand("connect --vm-id=" + resourceId);
             createData.setConnectionParams(params);
 
             var connectionCreateResult = connection.createConnection(createData);
