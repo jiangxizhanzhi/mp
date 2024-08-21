@@ -979,7 +979,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             nodeRecording.setSceneId(csceneInstance.getId());
 
             if (StringUtils.isNotEmpty(nodeRecording.getUser())) {
-                nodeRecording.setUsername(UserUtils.getUser(nodeRecording.getUser()).getUsername());
+                log.info("recording user id is :{}", nodeRecording.getUser());
+                var user = UserUtils.getUser(nodeRecording.getUser());
+                if (user != null) {
+                    nodeRecording.setUsername(user.getUsername());
+                } else {
+                    nodeRecording.setUsername("");
+                }
             }
         }
         return nodeRecordingResult;
