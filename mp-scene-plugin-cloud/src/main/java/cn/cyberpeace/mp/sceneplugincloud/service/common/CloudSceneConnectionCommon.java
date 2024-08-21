@@ -268,7 +268,7 @@ public class CloudSceneConnectionCommon {
             var sceneConnection = new CloudPluginSceneConnectionModel();
             sceneConnection.setConnectionUrl(res.getData());
             return sceneConnection;
-        } else if (CloudElementAccessMode.Protocol.CONSOLE.equals(protocol) || CloudElementAccessMode.Protocol.COM.equals(protocol)) {
+        } else if (CloudElementAccessMode.Protocol.CONSOLE.equals(protocol)) {
             if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.CONTAINER)) {
                 String url = new Remote().getContainerConsoleUrl(resourceId);
                 var sceneConnection = new CloudPluginSceneConnectionModel();
@@ -284,6 +284,31 @@ public class CloudSceneConnectionCommon {
                 sceneConnection.setConnectionUrl(res.getData());
                 return sceneConnection;
             }
+        } else if (CloudElementAccessMode.Protocol.COM.equals(protocol) || CloudElementAccessMode.Protocol.COM.toUpperCase()
+                .equals(protocol)) {
+            // 创建com链接 先从接口取host、username
+            var comInfo = new VirtualMachine().getComInfo(resourceId);
+
+            Connection.ConnectionCreateData createData = new Connection.ConnectionCreateData();
+            createData.setUsername(userId);
+            Connection.ConnectionCreateParamsData params = new Connection.ConnectionCreateParamsData();
+            // com协议最终是以ssh形式接入
+            params.setProtocol(CloudElementAccessMode.Protocol.SSH);
+            params.setHostname(comInfo.getAddress());
+            params.setUsername(comInfo.getUser());
+            params.setPort(comInfo.getPort());
+            params.setNeedPrivateKey(true);
+            params.setPrivateKeyPath("/root/.ssh/id_rsa");
+            params.setCommand("connect --vm-id=" + resourceId);
+            createData.setConnectionParams(params);
+
+            var connectionCreateResult = connection.createConnection(createData);
+
+            // 创建连接
+            var sceneConnection = new CloudPluginSceneConnectionModel();
+            sceneConnection.setConnectionId(connectionCreateResult.getConnectionId());
+            sceneConnection.setConnectionUrl(connectionCreateResult.getUrl());
+            return sceneConnection;
         } else {
             // 其他协议直接从节点的配置中获取用户名密码等
             Connection.ConnectionCreateData createData = new Connection.ConnectionCreateData();
