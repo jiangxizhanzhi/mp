@@ -80,7 +80,38 @@ public class DefaultImgController {
         if (StringUtils.isBlank(AggregationSingleton.aggregationConfig.getStaticLocation())){
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
         }
-        for (DefaultImgStyleEnum styleEnum : DefaultImgStyleEnum.values()) {
+        var values = Arrays.asList(DefaultImgStyleEnum.DEFAULT, DefaultImgStyleEnum.FLAT, DefaultImgStyleEnum.LINE, DefaultImgStyleEnum.REALISTIC);
+        for (DefaultImgStyleEnum styleEnum : values) {
+            List<String> groupList = Collections.singletonList(styleEnum.getGroup());
+            List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
+            DefaultImgTarget defaultImgTarget = new DefaultImgTarget();
+            List<String> urlList = new ArrayList<>();
+            for (LocalFileMappingModel model : modelList) {
+                String s = FsCommon.genHttpUrl(model.getRemoteFile());
+                urlList.add(s);
+            }
+            defaultImgTarget.setImgs(urlList);
+            defaultImgTarget.setStyle(styleEnum.getStyle());
+            defaultImgTarget.setName(styleEnum.getName());
+            rtnList.add(defaultImgTarget);
+        }
+        return ResultCommon.success(rtnList);
+    }
+
+    /**
+     * 获取靶标图集
+     *
+     * @return
+     */
+    @ApiOperation("获取靶标图集")
+    @GetMapping("/get-iov-img-target")
+    public ServiceResult<List<DefaultImgTarget>> getIovImgTarget(){
+        List<DefaultImgTarget> rtnList = new ArrayList<>();
+        if (StringUtils.isBlank(AggregationSingleton.aggregationConfig.getStaticLocation())){
+            throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
+        }
+        var values = Arrays.asList(DefaultImgStyleEnum.IOV);
+        for (DefaultImgStyleEnum styleEnum : values) {
             List<String> groupList = Collections.singletonList(styleEnum.getGroup());
             List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
             DefaultImgTarget defaultImgTarget = new DefaultImgTarget();

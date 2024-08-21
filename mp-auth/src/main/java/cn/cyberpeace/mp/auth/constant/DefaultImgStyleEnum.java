@@ -13,7 +13,9 @@ public enum DefaultImgStyleEnum {
 
     LINE("line", "线性", DefaultImgDirEnum.DEFAULT_IMG_TARGET_LINE.getGroup()),
 
-    REALISTIC("realistic", "写实", DefaultImgDirEnum.DEFAULT_IMG_TARGET_REALISTIC.getGroup());
+    REALISTIC("realistic", "写实", DefaultImgDirEnum.DEFAULT_IMG_TARGET_REALISTIC.getGroup()),
+
+    IOV("iov", "车联网", DefaultImgDirEnum.DEFAULT_IMG_TARGET_IOV.getGroup());
 
     private final String style;
 

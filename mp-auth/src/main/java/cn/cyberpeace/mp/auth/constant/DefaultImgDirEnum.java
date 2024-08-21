@@ -32,6 +32,8 @@ public enum DefaultImgDirEnum  {
 
     DEFAULT_IMG_TARGET_REALISTIC("/default_img_target_realistic", "default_img_target_realistic"),
 
+    DEFAULT_IMG_TARGET_IOV("/default_img_target_iov", "default_img_target_iov"),
+
     OTHER("/other", "other");
 
     private final String endPathName;
