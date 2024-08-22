@@ -170,6 +170,16 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult add(@RequestBody ImageRequest request){
         request.setLogo(FsCommon.getFileKey(request.getLogo()));
+        if (CollectionUtils.isNotEmpty(request.getAccessProtocolList()) && BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(request.getImageType())) {
+            // 容器不支持vnc、spice和com
+            Set<String> unsupporteedProtocols = new HashSet<>(Arrays.asList("vnc", "spice", "com"));
+            for (var a : request.getAccessProtocolList()) {
+                String protocol = a.getProtocol();
+                if (StringUtils.isNotEmpty(protocol) && unsupporteedProtocols.contains(protocol)) {
+                    throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("容器不支持配置vnc、spice和com"));
+                }
+            }
+        }
         validImageRequest(request);
         // role值处理
         this.convertRole(request);
@@ -249,6 +259,16 @@ public class ImagesController {
         validImageRequest(request);
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        if (CollectionUtils.isNotEmpty(request.getAccessProtocolList()) && BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(request.getImageType())) {
+            // 容器不支持vnc、spice和com
+            Set<String> unsupporteedProtocols = new HashSet<>(Arrays.asList("vnc", "spice", "com"));
+            for (var a : request.getAccessProtocolList()) {
+                String protocol = a.getProtocol();
+                if (StringUtils.isNotEmpty(protocol) && unsupporteedProtocols.contains(protocol)) {
+                    throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("容器不支持配置vnc、spice和com"));
+                }
+            }
         }
         // role值处理
         this.convertRole(request);

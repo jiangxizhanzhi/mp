@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.agent.netconf.model.NetConfAccessInfo;
 import cn.cyberpeace.mp.agent.snmp.model.Command;
 import cn.cyberpeace.mp.agent.snmp.model.CommandConfig;
 import cn.cyberpeace.mp.agent.snmp.model.Param;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import net.juniper.netconf.XML;
 import org.dom4j.Document;
@@ -11,14 +13,17 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.springframework.stereotype.Service;
 
+import java.net.NoRouteToHostException;
+
 @Slf4j
 @Service("netconfTaskService")
 public class NetconfTaskServiceImpl {
 
     public Boolean execTask(NetConfAccessInfo netConfAccessInfo, CommandConfig config) {
-        NetconfOperator operator = new NetconfOperator(netConfAccessInfo.getHostIp(), netConfAccessInfo.getUsername(), netConfAccessInfo.getPassword(), Integer.parseInt(netConfAccessInfo.getPort()));
-        String message = formatConfig(config.getCommands().get(0));
+        NetconfOperator operator = null;
         try {
+            operator = new NetconfOperator(netConfAccessInfo.getHostIp(), netConfAccessInfo.getUsername(), netConfAccessInfo.getPassword(), Integer.parseInt(netConfAccessInfo.getPort()));
+            String message = formatConfig(config.getCommands().get(0));
             XML send = operator.send(message);
             Document document = DocumentHelper.parseText(send.toString());
             // 获取根节点rpc-reply
@@ -36,6 +41,9 @@ public class NetconfTaskServiceImpl {
             }
         } catch (Exception e) {
             log.error("代理执行失败", e);
+            if (e instanceof NoRouteToHostException) {
+                throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("目标节点的网络不通"));
+            }
         } finally {
             operator.close();
         }
