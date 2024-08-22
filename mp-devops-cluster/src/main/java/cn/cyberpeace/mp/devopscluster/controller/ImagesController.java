@@ -172,7 +172,7 @@ public class ImagesController {
         request.setLogo(FsCommon.getFileKey(request.getLogo()));
         if (CollectionUtils.isNotEmpty(request.getAccessProtocolList()) && BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(request.getImageType())) {
             // 容器不支持vnc、spice和com
-            Set<String> unsupporteedProtocols = new HashSet<>(Arrays.asList("vnc", "spice", "com"));
+            Set<String> unsupporteedProtocols = new HashSet<>(Arrays.asList("vnc", "spice", "com", "COM"));
             for (var a : request.getAccessProtocolList()) {
                 String protocol = a.getProtocol();
                 if (StringUtils.isNotEmpty(protocol) && unsupporteedProtocols.contains(protocol)) {
@@ -262,7 +262,7 @@ public class ImagesController {
         }
         if (CollectionUtils.isNotEmpty(request.getAccessProtocolList()) && BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(request.getImageType())) {
             // 容器不支持vnc、spice和com
-            Set<String> unsupporteedProtocols = new HashSet<>(Arrays.asList("vnc", "spice", "com"));
+            Set<String> unsupporteedProtocols = new HashSet<>(Arrays.asList("vnc", "spice", "com", "COM"));
             for (var a : request.getAccessProtocolList()) {
                 String protocol = a.getProtocol();
                 if (StringUtils.isNotEmpty(protocol) && unsupporteedProtocols.contains(protocol)) {
