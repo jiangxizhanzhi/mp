@@ -790,7 +790,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                 GetConnectionUrlParam param = new GetConnectionUrlParam();
                                 param.setVmId(pluginHandler.getElement(element.getId()).getResourceId());
                                 param.setConsoleType(a.getProtocol());
-                                String url = CloudSceneConnectionCommon.getConnectionUrl(param, response).getData();
+                                String url = CloudSceneConnectionCommon.getConnectionUrl(pluginHandler.getElement(element.getId()).getImageType(),param, response).getData();
                                 nodeConnectionBO.setConnectionUrl(url);
                                 return new ServiceResult<>(nodeConnectionBO).asResult();
                             }

@@ -116,7 +116,7 @@ public class CloudSceneConnectionCommon {
      * @param response
      * @return
      */
-    public static GetConnectionUrlResult getConnectionUrl(GetConnectionUrlParam param, HttpServletResponse response) {
+    public static GetConnectionUrlResult getConnectionUrl(String imageType, GetConnectionUrlParam param, HttpServletResponse response) {
         var remoteClient = new Remote();
         if (CloudElementAccessMode.Protocol.VNC.equals(param.getConsoleType())) {
             var connection = new Connection();
@@ -135,7 +135,16 @@ public class CloudSceneConnectionCommon {
             result.setData(connectionCreateResult.getUrl());
             return result;
         } else if (CloudElementAccessMode.Protocol.CONSOLE.equals(param.getConsoleType())) {
-            return remoteClient.getContainerConnectionUrl(param);
+            if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(imageType)) {
+                return remoteClient.getContainerConnectionUrl(param);
+            } else {
+                // 虚拟机的console接入就是no_vnc
+                param.setConsoleType(CloudElementAccessMode.Protocol.NO_VNC);
+                var res = remoteClient.getNoVncConnectionUrl(param);
+                GetConnectionUrlResult urlResult = new GetConnectionUrlResult();
+                urlResult.setData(res.getData());
+                return urlResult;
+            }
         } else if (CloudElementAccessMode.Protocol.SPICE.equals(param.getConsoleType())) {
             return remoteClient.getConnectionFile(param, response);
         } else {
