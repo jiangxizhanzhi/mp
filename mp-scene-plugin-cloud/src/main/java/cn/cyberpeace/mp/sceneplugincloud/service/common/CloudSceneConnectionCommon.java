@@ -270,9 +270,12 @@ public class CloudSceneConnectionCommon {
             return sceneConnection;
         } else if (CloudElementAccessMode.Protocol.CONSOLE.equals(protocol)) {
             if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.CONTAINER)) {
-                String url = new Remote().getContainerConsoleUrl(resourceId);
+                var params = new GetConnectionUrlParam();
+                params.setConsoleType("console");
+                params.setVmId(resourceId);
+                var res = new Remote().getContainerConnectionUrl(params);
                 var sceneConnection = new CloudPluginSceneConnectionModel();
-                sceneConnection.setConnectionUrl(url);
+                sceneConnection.setConnectionUrl(res.getData());
                 return sceneConnection;
             } else {
                 var remoteClient = new Remote();
