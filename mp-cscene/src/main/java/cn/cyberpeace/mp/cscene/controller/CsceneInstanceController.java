@@ -1732,7 +1732,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             conf.setCommands(Arrays.asList(command));
             BeanCommon.getBean(NetconfTaskServiceImpl.class).execTask(accessInfo, conf);
 
-        } else if (request.getConfigCommand().getProtocol() == 2) {
+        } else if (request.getConfigCommand().getProtocol() == 2  || request.getConfigCommand().getProtocol() == 3) {
             // restconf
             String ip = request.getConfigCommand().getIp();
             String port = request.getConfigCommand().getPort();

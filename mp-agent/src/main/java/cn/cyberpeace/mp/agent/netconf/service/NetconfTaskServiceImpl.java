@@ -45,7 +45,9 @@ public class NetconfTaskServiceImpl {
                 throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("目标节点的网络不通"));
             }
         } finally {
-            operator.close();
+            if (operator != null) {
+                operator.close();
+            }
         }
 
         return Boolean.TRUE;
