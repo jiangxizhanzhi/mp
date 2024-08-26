@@ -63,6 +63,7 @@ public class BlacklistFilter extends OncePerRequestFilter {
     }
 
     private void denyAccess(HttpServletResponse response, String uri) throws IOException {
+        response.setContentType("application/json; charset=UTF-8");
         log.error("access to {} was forbidden！", uri);
         response.setStatus(HttpServletResponse.SC_OK);
         ServiceResult serviceResult = ResultCommon.fail(AuthErrorCode.DEMO_ACCESS_ERROR);
