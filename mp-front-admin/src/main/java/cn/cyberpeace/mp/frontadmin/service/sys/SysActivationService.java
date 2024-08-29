@@ -832,13 +832,13 @@ public class SysActivationService {
 
         ActivationItem item10 = new ActivationItem();
         item10.setKey("LCS-RES-CR-ACTIVENODES");
-        item10.setValue("1000");
+        item10.setValue("999999999");
         item10.setType(2);
         list.add(item10);
 
         ActivationItem item11 = new ActivationItem();
         item11.setKey("LCS-RES-CR-EDITNODES");
-        item11.setValue("100");
+        item11.setValue("999999999");
         item11.setType(2);
         list.add(item11);
 
