@@ -43,7 +43,8 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, info, metrics
+        include: health, info
+    enabled-by-default: false
 
 knife4j:
   production: true # 开启屏蔽文档资源
