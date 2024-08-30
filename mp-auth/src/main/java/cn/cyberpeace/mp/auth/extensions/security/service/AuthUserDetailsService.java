@@ -41,6 +41,9 @@ public class AuthUserDetailsService implements UserDetailsService {
     private UserRoleService userRoleService;
 
     @Autowired
+    private AuthUserDetailsService selfService;
+
+    @Autowired
     private UserPermissionService userPermissionService;
 
     @Autowired
@@ -64,8 +67,7 @@ public class AuthUserDetailsService implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException(StringUtils.EMPTY);
         }
-
-        Set<GrantedAuthority> authoritySet = loadAuthorities(user.getId());
+        Set<GrantedAuthority> authoritySet = selfService.loadAuthorities(user.getId());
 
         return new AuthUserDetails(user, authoritySet);
     }
@@ -87,7 +89,7 @@ public class AuthUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException(StringUtils.EMPTY);
         }
 
-        Set<GrantedAuthority> authoritySet = loadAuthorities(user.getId());
+        Set<GrantedAuthority> authoritySet = selfService.loadAuthorities(user.getId());
 
         return new AuthUserDetails(user, authoritySet);
     }

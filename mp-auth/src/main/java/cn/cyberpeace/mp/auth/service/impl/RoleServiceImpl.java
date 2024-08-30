@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.auth.service.sender.AuthStatusRabbitmqSender;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.SQLUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Count;
@@ -428,7 +429,8 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     private void createCheck(RoleModel roleModel) {
         if (StringUtils.isNotBlank(roleModel.getName())) {
-            if (getByName(roleModel.getName()) != null) {
+            final RoleService roleService = BeanCommon.getBean(RoleService.class);
+            if (roleService.getByName(roleModel.getName()) != null) {
                 log.error("role name {} already existed!", roleModel.getName());
                 throw new MpRuntimeException(AuthErrorCode.ROLE_NAME_EXISTED);
             }

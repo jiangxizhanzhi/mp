@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.auth.service.fields.TenantUserFields;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.SQLUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
@@ -294,8 +295,8 @@ public class TenantUserServiceImpl
     @Override
     public String getAllOrgPathByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
-
-        List<OrgBO> orgBOS = listOrgsByUserId(userId);
+        final TenantUserService tenantUserService = BeanCommon.getBean(TenantUserService.class);
+        List<OrgBO> orgBOS = tenantUserService.listOrgsByUserId(userId);
         //String allorgpath = orgService.getBatchPath(orgs);
         StringJoiner joiner = new StringJoiner(",");
         for (OrgBO orgBO : orgBOS) {

@@ -560,8 +560,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
-
-        ObjResult<UserModel> source = get(userId).getSource();
+        final UserService userService = BeanCommon.getBean(UserService.class);
+        ObjResult<UserModel> source = userService.get(userId).getSource();
         UserModel user = Objects.isNull(source) ? null : source.getObj();
         if (Objects.isNull(user)) {
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);

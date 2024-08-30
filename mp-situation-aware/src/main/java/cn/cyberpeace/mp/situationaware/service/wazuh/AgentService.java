@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.service.wazuh;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
@@ -44,7 +45,7 @@ public class AgentService extends RequestProcessor {
      *
      * @return
      */
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_AGENTS)
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_AGENTS, key = "#agentRequest.name + ':' + #agentRequest.status + ':' + #agentRequest.ip")
     public PageInfo<Agent> pageAgents(AgentRequest agentRequest) {
         agentRequest.ensure();
         String requestUri = "/agents";
@@ -63,7 +64,8 @@ public class AgentService extends RequestProcessor {
     }
 
     public List<Agent> listAgents(AgentRequest agentRequest) {
-        PageInfo<Agent> agentPageInfo = pageAgents(agentRequest);
+        final AgentService agentService =  BeanCommon.getBean(AgentService.class);
+        PageInfo<Agent> agentPageInfo = agentService.pageAgents(agentRequest);
         return agentPageInfo.getList();
     }
 

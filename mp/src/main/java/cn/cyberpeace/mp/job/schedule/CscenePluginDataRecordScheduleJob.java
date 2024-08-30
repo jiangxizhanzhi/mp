@@ -46,6 +46,7 @@ public class CscenePluginDataRecordScheduleJob {
 
     @MpScheduled(cron = "0 0/2 * * * ?", description = "定时获取主机端口网络连接等信息并记录到表,给回放使用", id = "record_scene_host_net_and_port", initialDelaySeconds = 120)
     public void action() {
+        log.info("record_scene_host_net_and_port action start");
         List<CsceneInstanceModel> instances = csceneService.getRunningCscenes();
         for (CsceneInstanceModel instance : instances) {
             if (instance.getReferenceType() == null || (BaseCsceneModel.ReferenceType.READ_VS_BLUE != instance.getReferenceType() && BaseCsceneModel.ReferenceType.TEAM_TRAINING != instance.getReferenceType())) {
@@ -106,6 +107,7 @@ public class CscenePluginDataRecordScheduleJob {
                 log.error(e.getMessage(), e);
             }
         }
+        log.info("record_scene_host_net_and_port action end");
     }
 
     private static CollectionPluginSceneDataModel getCollectionPluginSceneDataModel(int LOGFile, CsceneInstanceModel instance, CollectionPluginSceneElementBO element, String n) {

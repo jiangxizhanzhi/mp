@@ -26,6 +26,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,6 +56,10 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
 
     @Autowired
     private RolePermissionModelService rolePermissionService;
+
+    @Qualifier("targetServiceImpl")
+    @Autowired
+    private TargetService targetService;
 
     @Autowired
     public TargetServiceImpl(TargetMapper modelMapper, TargetFields modelFields) {
@@ -118,7 +123,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
 
         if (StringUtils.isBlank(parentId)) {
             // parent为空，则查询所有权限
-            List<TargetModel> targets = listAll(AuthConstant.DEFAULT_TENANT, type);
+            List<TargetModel> targets = targetService.listAll(AuthConstant.DEFAULT_TENANT, type);
             if (CollectionUtils.isEmpty(targets)) {
                 return new ArrayList<>();
             }

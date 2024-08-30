@@ -67,6 +67,9 @@ public class UserPermissionServiceImpl
     private OrgPermissionService orgPermissionService;
 
     @Autowired
+    private UserPermissionService userPermissionService;
+
+    @Autowired
     public UserPermissionServiceImpl(UserPermissionMapper modelMapper, UserPermissionFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
@@ -140,7 +143,7 @@ public class UserPermissionServiceImpl
 
 
     public List<TargetBo> getTreeByUserId(String userId) {
-        List<TargetModel> targets = listTargetsByUserId(userId);
+        List<TargetModel> targets = userPermissionService.listTargetsByUserId(userId);
         if (CollectionUtils.isEmpty(targets)) {
             return new ArrayList<>();
         }
@@ -260,7 +263,7 @@ public class UserPermissionServiceImpl
         if (Objects.isNull(user)) {
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_LOGIN);
         }
-        List<TargetModel> menus = listMenusByUserId(user.getId());
+        List<TargetModel> menus = userPermissionService.listMenusByUserId(user.getId());
         return menus;
     }
 
