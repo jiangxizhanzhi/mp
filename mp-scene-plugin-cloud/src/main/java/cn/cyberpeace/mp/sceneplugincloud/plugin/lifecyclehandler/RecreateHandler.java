@@ -2,9 +2,16 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.scene.bo.AlertRuleBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
+import cn.cyberpeace.mp.scene.model.AlertRuleModel;
+import cn.cyberpeace.mp.scene.model.InstanceModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
+import cn.cyberpeace.mp.scene.repository.AlertRuleMapper;
+import cn.cyberpeace.mp.scene.repository.InstanceMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.DevopsLoadSourceModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -25,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description
@@ -243,6 +251,26 @@ public class RecreateHandler extends HandlerCommon {
                 return;
             }
 
+            AlertRuleMapper alertRuleMapper = BeanCommon.getBean(AlertRuleMapper.class);
+            String eid = getPluginHandler().getSrcScene().getEid();
+            InstanceMapper instanceMapper = BeanCommon.getBean(InstanceMapper.class);
+            HumanCondition instanceHumanCondition = new HumanCondition()
+                    .filterEqual(InstanceModel::getScene, eid);
+            InstanceModel instanceModel = instanceMapper.first(instanceHumanCondition);
+//            TODO debug id是否一致
+            HumanCondition alertRuleHumanCondition = new HumanCondition()
+                    .filterEqual(AlertRuleModel::getSceneId, instanceModel.getCscene())
+                    .filterContains(AlertRuleModel::getAlarmConditions, cloudElement.getSrcElement().getId());
+            List<AlertRuleModel> alertRuleModelList = alertRuleMapper.list(alertRuleHumanCondition);
+            List<AlertRuleBO> alertRuleBOList = alertRuleModelList.stream().map(alertRuleModel -> {
+                        AlertRuleBO alertRuleBO = new AlertRuleBO();
+                        BeanUtils.copyProperties(alertRuleModel, alertRuleBO);
+                        alertRuleBO.parseHosts();
+                        alertRuleBO.parseAlertConditions();
+                        return alertRuleBO;
+                    })
+                    .collect(Collectors.toList());
+
             Integer virtualType = cloudElement.getVirtualType();
             if (virtualType == null) {
                 log.warn("Element({}) {} has no virtual type", cloudElement.getSrcElement().getEid(),
@@ -263,9 +291,10 @@ public class RecreateHandler extends HandlerCommon {
                                         }
                                     });
                                 }
+
                                 List<VirtualNic> virtualNics = this.genVirutalNics(cloudElement);
                                 AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
-                                azureVirtualMachine.create(getPluginHandler(), cloudElement, virtualNics, combineInitCommand(cloudElement),new ArrayList<>());
+                                azureVirtualMachine.create(getPluginHandler(), cloudElement, virtualNics, combineInitCommand(cloudElement),alertRuleBOList);
                                 openAccessModes(cloudElement);
                             });
                 } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
