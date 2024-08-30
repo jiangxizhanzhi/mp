@@ -1,12 +1,20 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.scene.bo.AlertRuleBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
+import cn.cyberpeace.mp.scene.model.AlertRuleModel;
+import cn.cyberpeace.mp.scene.model.InstanceModel;
+import cn.cyberpeace.mp.scene.repository.AlertRuleMapper;
+import cn.cyberpeace.mp.scene.repository.InstanceMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
@@ -171,16 +179,41 @@ public class AzureCreateHandler extends CreateHandler {
 
             List<Runnable> createTerminalTasks = new ArrayList<>();
             // 虚拟机
+            String eid = getPluginHandler().getSrcScene().getEid();
+
+            InstanceMapper instanceMapper = BeanCommon.getBean(InstanceMapper.class);
+            HumanCondition instanceHumanCondition = new HumanCondition()
+                    .filterEqual(InstanceModel::getScene, eid);
+            InstanceModel instanceModel = instanceMapper.first(instanceHumanCondition);
+
+
+            AlertRuleMapper alertRuleMapper = BeanCommon.getBean(AlertRuleMapper.class);
+            HumanCondition alertRuleHumanCondition = new HumanCondition()
+                    .filterEqual(AlertRuleModel::getSceneId, instanceModel.getCscene());
+            List<AlertRuleModel> list = alertRuleMapper.list(alertRuleHumanCondition);
+            List<AlertRuleBO> alertRuleBOList = list.stream().map(alertRuleModel -> {
+                        AlertRuleBO alertRuleBO = new AlertRuleBO();
+                        BeanUtils.copyProperties(alertRuleModel, alertRuleBO);
+                        alertRuleBO.parseHosts();
+                        alertRuleBO.parseAlertConditions();
+                        return alertRuleBO;
+                    })
+                    .collect(Collectors.toList());
             List<Runnable> createVirtualMachineTasks = new ArrayList<>();
             for (CloudPluginSceneElementBO element : filteredVirtualMachineElements) {
                 String nodeId = element.getSrcElement().getId();
+                List<AlertRuleBO> alertRuleBOListByNodeId = alertRuleBOList
+                        .stream()
+                        .filter(alertRuleBO -> alertRuleBO.getAlarmConditionList().contains(nodeId))
+                        .collect(Collectors.toList());
+
                 List<VirtualNic> virtualNics = virtualNicsMap.get(nodeId);
                 //            创建虚拟机时不允许扩容
                 element.getSrcElement().setExpansionDisk(null);
                 element.setVmExpansionDiskType(null);
 //                处理云场景无登录按钮、接收虚拟端口信息
                 receiveVirtualPortInfo(element, virtualNics);
-                AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics, combineInitCommand(element));
+                AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics, combineInitCommand(element),alertRuleBOListByNodeId);
                 Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_VIRTUAL_MACHINE, task);
                 createVirtualMachineTasks.add(formatTask);
             }

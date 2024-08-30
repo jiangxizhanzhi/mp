@@ -1,19 +1,13 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.scene.bo.AlertRuleBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
-import cn.cyberpeace.mp.scene.model.AlertRuleModel;
-import cn.cyberpeace.mp.scene.model.InstanceModel;
+import cn.cyberpeace.mp.scene.model.AlarmConditionModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
-import cn.cyberpeace.mp.scene.repository.AlertRuleMapper;
-import cn.cyberpeace.mp.scene.repository.InstanceMapper;
-import cn.cyberpeace.mp.scene.service.AlertRuleService;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
@@ -27,6 +21,9 @@ import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.fluent.models.ResourceSkuInner;
 import com.azure.resourcemanager.compute.models.*;
+import com.azure.resourcemanager.monitor.models.MetricAlert;
+import com.azure.resourcemanager.monitor.models.MetricAlertRuleCondition;
+import com.azure.resourcemanager.monitor.models.MetricAlertRuleTimeAggregation;
 import com.azure.resourcemanager.network.models.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.Duration;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -127,7 +125,7 @@ public class AzureVirtualMachine {
 
     public VirtualMachine createManagementVM(Integer cloudType, String groupName, String vmName, Network network, String subName) {
         String customImageId = null;
-        switch (cloudType){
+        switch (cloudType) {
             case BaseSceneModel.CloudType.PUBLIC:
                 customImageId = situationAwareConfig.getPublicManagementImageId();
                 break;
@@ -199,30 +197,11 @@ public class AzureVirtualMachine {
         return virtualMachine;
     }
 
-    public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData) {
+    public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement,
+                       List<VirtualNic> virtualNics, String userData, List<AlertRuleBO> alertRuleBOList) {
 //        cloudElement.setResourceId("1233");
 //        cloudElement.setPublicIpAddress("20.30.40.5");
 
-        String eid = pluginHandler.getSrcScene().getEid();
-
-        InstanceMapper instanceMapper = BeanCommon.getBean(InstanceMapper.class);
-        HumanCondition instanceHumanCondition = new HumanCondition()
-                .filterEqual(InstanceModel::getScene, eid);
-        InstanceModel instanceModel = instanceMapper.first(instanceHumanCondition);
-
-
-        AlertRuleMapper alertRuleMapper = BeanCommon.getBean(AlertRuleMapper.class);
-        HumanCondition alertRuleHumanCondition = new HumanCondition()
-                .filterEqual(AlertRuleModel::getSceneId, instanceModel.getCscene());
-        List<AlertRuleModel> list = alertRuleMapper.list(alertRuleHumanCondition);
-        List<AlertRuleBO> alertRuleBOList = list.stream().map(alertRuleModel -> {
-                    AlertRuleBO alertRuleBO = new AlertRuleBO();
-                    BeanUtils.copyProperties(alertRuleModel, alertRuleBO);
-                    alertRuleBO.parseHosts();
-                    alertRuleBO.parseAlertConditions();
-                    return alertRuleBO;
-                })
-                .collect(Collectors.toList());
 
 //        TODO 资源不浪费
 
@@ -273,6 +252,56 @@ public class AzureVirtualMachine {
                 }
             }
         }
+
+//        设置报警规则
+        if (alertRuleBOList.size() > 0) {
+            for (AlertRuleBO alertRuleBO : alertRuleBOList) {
+                // 创建监视警报
+                MetricAlert.DefinitionStages.WithCriteriaDefinition withCriteriaDefinition = azureResourceManager.alertRules().metricAlerts()
+//                预警规则名称
+                        .define(alertRuleBO.getName())
+//                资源组
+                        .withExistingResourceGroup(groupName)
+//                虚拟机id
+                        .withTargetResource(vm.id())
+//                回溯期 5分钟
+                        .withPeriod(Duration.ofMinutes(15))
+//                检查间隔
+                        .withFrequency(Duration.ofMinutes(5))
+//                严重性，预警规则说明
+                        .withAlertDetails(alertRuleBO.getAlarmLevel(), alertRuleBO.getAlarmDescription())
+//                选择操作组
+//                .withActionGroups("/subscriptions/C87BA926-F7C2-4D53-8B8E-89245DC92E26/resourceGroups/6b987034b1f8490abc635ccdf9753c02/providers/microsoft.insights/actionGroups/RecommendedAlertRules-AG-1")
+                        .withActionGroups();
+                List<AlarmConditionModel> alarmConditionList = alertRuleBO.getAlarmConditionList();
+                AlarmConditionModel alarmConditionModel = alarmConditionList.get(0);
+                MetricAlert.DefinitionStages.WithCreate attach = withCriteriaDefinition
+//                定义预警条件
+                        .defineAlertCriteria(alarmConditionModel.getType())
+//                设置要监控的度量标准名称，即 "Available Memory Bytes"（可用内存字节）
+                        .withMetricName(alarmConditionModel.getType())
+//                设置预警条件：
+//                - 使用的时间聚合类型为 "MINIMUM"（最小值）
+//                - 条件是小于293,601,280字节（约280MB）的内存
+                        .withCondition(MetricAlertRuleTimeAggregation.fromString(alarmConditionModel.getAggregationType()),
+                                MetricAlertRuleCondition.fromString(alarmConditionModel.getOperator()),
+                                alarmConditionModel.getThreshold())
+                        .attach();
+                if (alarmConditionList.size() > 1) {
+                    for (int i = 1; i < alarmConditionList.size(); i++) {
+                        attach
+                                .defineAlertCriteria(alarmConditionModel.getType())
+                                .withMetricName(alarmConditionModel.getType())
+                                .withCondition(MetricAlertRuleTimeAggregation.fromString(alarmConditionModel.getAggregationType()),
+                                        MetricAlertRuleCondition.fromString(alarmConditionModel.getOperator()),
+                                        alarmConditionModel.getThreshold())
+                                .attach();
+                    }
+                }
+                attach.create();
+            }
+        }
+
     }
 
     public void delete(CloudPluginSceneElementBO cloudElement) {

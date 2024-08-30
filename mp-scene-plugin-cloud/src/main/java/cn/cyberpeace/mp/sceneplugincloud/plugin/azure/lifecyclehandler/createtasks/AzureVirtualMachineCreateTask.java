@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.createtasks;
 
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.scene.bo.AlertRuleBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
@@ -24,21 +25,25 @@ public class AzureVirtualMachineCreateTask implements Runnable {
 
     private String userData;
 
+    private List<AlertRuleBO> alertRuleBOList;
+
     public AzureVirtualMachineCreateTask(IAzureResourceManager resourceService,
                                          CloudScenePluginHandler pluginHandler,
                                          CloudPluginSceneElementBO element,
                                          List<VirtualNic> virtualNics,
-                                         String userData) {
+                                         String userData,
+                                         List<AlertRuleBO> alertRuleBOList) {
         this.azureVirtualMachine = new AzureVirtualMachine(resourceService);
         this.pluginHandler = pluginHandler;
         this.element = element;
         this.virtualNics = virtualNics;
         this.userData = TextUtils.emptyNull(userData);
+        this.alertRuleBOList = alertRuleBOList;
     }
 
     @Override
     public void run() {
-        this.azureVirtualMachine.create(this.pluginHandler, element, virtualNics, userData);
+        this.azureVirtualMachine.create(this.pluginHandler, element, virtualNics, userData, alertRuleBOList);
     }
 
 }
