@@ -48,6 +48,7 @@ import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneConfigAreaModel;
 import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneConfigAreaMapper;
@@ -702,8 +703,13 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     public List<CsceneInstanceModel> getRunningCscenes() {
         HumanCondition humanCondition = new HumanCondition()
-                .filterEqual(CsceneInstanceModel::getDeleted, false);
-        List<CsceneInstanceModel> models = csceneInstanceMapper.list(humanCondition);
+                .link(CsceneInstanceModel.class, SceneModel.class)
+                .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getScene, SceneModel.class,
+                        SceneModel::getId)
+                .currentLink(SceneModel.class)
+                .filterNotEqual(SceneModel::getEvent, SceneModel.Event.DELETE);
+
+        List<CsceneInstanceModel> models = csceneInstanceMapper.list(humanCondition, CsceneInstanceModel.class);
         return models;
     }
 
