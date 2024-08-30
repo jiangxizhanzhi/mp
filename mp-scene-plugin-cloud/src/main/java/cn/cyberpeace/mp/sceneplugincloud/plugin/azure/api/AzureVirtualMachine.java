@@ -1,11 +1,19 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.scene.bo.AlertRuleBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
+import cn.cyberpeace.mp.scene.model.AlertRuleModel;
+import cn.cyberpeace.mp.scene.model.InstanceModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
+import cn.cyberpeace.mp.scene.repository.AlertRuleMapper;
+import cn.cyberpeace.mp.scene.repository.InstanceMapper;
+import cn.cyberpeace.mp.scene.service.AlertRuleService;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
@@ -194,6 +202,27 @@ public class AzureVirtualMachine {
     public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String userData) {
 //        cloudElement.setResourceId("1233");
 //        cloudElement.setPublicIpAddress("20.30.40.5");
+
+        String eid = pluginHandler.getSrcScene().getEid();
+
+        InstanceMapper instanceMapper = BeanCommon.getBean(InstanceMapper.class);
+        HumanCondition instanceHumanCondition = new HumanCondition()
+                .filterEqual(InstanceModel::getScene, eid);
+        InstanceModel instanceModel = instanceMapper.first(instanceHumanCondition);
+
+
+        AlertRuleMapper alertRuleMapper = BeanCommon.getBean(AlertRuleMapper.class);
+        HumanCondition alertRuleHumanCondition = new HumanCondition()
+                .filterEqual(AlertRuleModel::getSceneId, instanceModel.getCscene());
+        List<AlertRuleModel> list = alertRuleMapper.list(alertRuleHumanCondition);
+        List<AlertRuleBO> alertRuleBOList = list.stream().map(alertRuleModel -> {
+                    AlertRuleBO alertRuleBO = new AlertRuleBO();
+                    BeanUtils.copyProperties(alertRuleModel, alertRuleBO);
+                    alertRuleBO.parseHosts();
+                    alertRuleBO.parseAlertConditions();
+                    return alertRuleBO;
+                })
+                .collect(Collectors.toList());
 
 //        TODO 资源不浪费
 

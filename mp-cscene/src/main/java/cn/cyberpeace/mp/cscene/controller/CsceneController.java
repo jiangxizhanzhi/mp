@@ -21,11 +21,14 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneSyncRequest;
 import cn.cyberpeace.mp.cscene.dto.scene.CsceneLoadDto;
+import cn.cyberpeace.mp.scene.bo.AlertRuleBO;
+import cn.cyberpeace.mp.scene.model.AlertRuleModel;
 import cn.cyberpeace.mp.cscene.model.AzureVmOsDisk;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
+import cn.cyberpeace.mp.scene.service.AlertRuleService;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.AzureVmOsDiskQueryParams;
@@ -80,6 +83,9 @@ public class CsceneController implements BaseModelListControllerBase {
     private CsceneSpecialService csceneSpecialService;
 
     private BaseAppConfig baseAppConfig;
+
+    @Autowired
+    private AlertRuleService alertRuleService;
 
     private CsceneActionRequest formatActionRequest(CsceneActionRequest request, String paramId) {
         if (request == null) {
@@ -622,6 +628,14 @@ public class CsceneController implements BaseModelListControllerBase {
         res.getTopology().setOutAreaElementNum(this.modelService.getOutAreaElementNum(id, request.getAreaId(), res));
         CsceneDataModifier.correctReturnCsceneData(csceneBO);
         return new ServiceResult<>(csceneBO).asResult();
+    }
+
+    @ApiOperation("保存报警规则")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = AlertRuleBO.class)
+    @PostMapping("/save_alert_rule")
+    public ServiceResult<Boolean> saveAlertRule(@RequestBody List<AlertRuleModel> alertRuleModels) {
+        alertRuleService.saveAlertRule(alertRuleModels);
+        return new ServiceResult<>(true).asResult();
     }
 
     private CsceneBO getByAreaId(String sceneId, String areaId) {
