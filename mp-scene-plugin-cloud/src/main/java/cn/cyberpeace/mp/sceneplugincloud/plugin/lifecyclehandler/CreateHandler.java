@@ -1028,6 +1028,7 @@ public class CreateHandler extends HandlerCommon {
         createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
         createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
         createData.setDisk(IntUtils.zeroNull(srcElement.getDisk()));
+        createData.setDataDisk(srcElement.getDisk());
         if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getEntityUsbs()) && StringUtils.isNotEmpty(cloudElement.getEntityUsbs().get(0).getHost())) {
             createData.setHost(cloudElement.getEntityUsbs().get(0).getHost());
         }
