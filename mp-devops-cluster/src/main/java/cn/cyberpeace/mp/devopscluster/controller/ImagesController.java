@@ -199,7 +199,7 @@ public class ImagesController {
      */
     @ApiOperation("查询第二块磁盘可配置大小，单位G")
     @GetMapping("/get_data_disk")
-    public ServiceResult<List<Integer>> add() {
+    public ServiceResult<List<Integer>> getDataDisk() {
         List<Integer> dataDisk = Arrays.asList(10, 20, 30, 40, 50, 70, 100, 150, 250, 500);
         return new ServiceResult<>(dataDisk).asResult();
     }
