@@ -45,6 +45,8 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     private String nodeCommand;
     @ApiModelProperty(value = "是否辅助节点")
     private Boolean isAuxiliary;
+    @ApiModelProperty("第二块磁盘大小")
+    private Integer dataDisk;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
