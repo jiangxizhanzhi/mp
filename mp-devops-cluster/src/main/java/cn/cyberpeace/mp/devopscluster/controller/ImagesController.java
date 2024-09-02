@@ -102,6 +102,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -191,6 +192,16 @@ public class ImagesController {
         validImageRequest(request);
         imagesConverter.add(request);
         return ResultCommon.success();
+    }
+
+    /**
+     * 新增
+     */
+    @ApiOperation("查询第二块磁盘可配置大小，单位G")
+    @GetMapping("/get_data_disk")
+    public ServiceResult<List<Integer>> add() {
+        List<Integer> dataDisk = Arrays.asList(10, 20, 30, 40, 50, 70, 100, 150, 250, 500);
+        return new ServiceResult<>(dataDisk).asResult();
     }
 
     /**
