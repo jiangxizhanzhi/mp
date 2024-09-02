@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
@@ -26,15 +27,18 @@ import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementPluginMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudElementAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeviceSnapshotParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeviceSnapshotResultData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetConnectionUrlParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotResultData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.SnapshotAddressUtils;
@@ -88,72 +92,66 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
      */
     public void checkAccessModes(CloudPluginSceneElementBO cloudElement) {
         List<CloudPluginSceneElementPortBO> cloudPorts = getPluginHandler().getPorts(cloudElement);
-        // 同样ip、端口可能对应多个接入方式
-        Map<String, List<CloudAccessMode>> ipAccessModesMap = new HashMap<>();
-        cloudPorts.forEach(cloudPort -> {
-            if (Boolean.TRUE.equals(cloudPort.getSrcPort().getIsAuxiliary())) {
-                return;
-            }
-            List<CloudAccessMode> accessModes = cloudPort.getAccessModes();
-            if (accessModes == null) {
-                return;
-            }
-            accessModes.forEach(accessMode -> {
-                String protocol = accessMode.getProtocol();
-                // console特殊模式可直接接入，不用检查
-                if (AccessMode.Protocol.CONSOLE.equals(protocol)) {
-                    accessMode.setAvailable(true);
-                    return;
-                }
-                if (AccessMode.Protocol.COM.equals(protocol)) {
-                    accessMode.setAvailable(true);
-                    return;
-                }
-                if (!Boolean.TRUE.equals(accessMode.getProxy())) {
-                    accessMode.setAvailable(true);
-                    return;
-                }
+        if (cloudPorts == null || cloudPorts.size() == 0) {
+            return;
+        }
+        Set<String> supportProtocols = new HashSet<>();
+        supportProtocols.add(CloudElementAccessMode.Protocol.VNC);
+        supportProtocols.add(CloudElementAccessMode.Protocol.SPICE);
+        supportProtocols.add(CloudElementAccessMode.Protocol.CONSOLE);
 
-                String ip = accessMode.getAccessIp();
-                if (StringUtils.isEmpty(ip)) {
-                    return;
-                }
-
-                Integer port = accessMode.getAccessPort();
-                String portStr = StringUtils.EMPTY;
-                if (port != null && port.compareTo(0) > 0) {
-                    portStr = port.toString();
-                }
-                String ipPortKey = String.format("%s:%s", ip, portStr);
-                List<CloudAccessMode> ipAccessModes = ipAccessModesMap.getOrDefault(ipPortKey, new ArrayList<>());
-                ipAccessModes.add(accessMode);
-                ipAccessModesMap.put(ipPortKey, ipAccessModes);
-            });
-        });
-
-        // 检查接入连通性
-        String nodeId = cloudElement.getSrcElement().getId();
-        ipAccessModesMap.forEach((ipPortKey, accessModes) -> {
-            String ip = accessModes.get(0).getAccessIp();
-            Integer port = accessModes.get(0).getAccessPort();
-            String protocol = accessModes.get(0).getProtocol();
-
-            if (port == null || port.compareTo(0) <= 0) {
-                TaskCommon.executeTask(() -> {
-                    NetworkUtils.probeHost(ip);
-                    this.checkSuccessCallback(ipAccessModesMap, nodeId);
-                });
-            } else {
-                TaskCommon.executeTask(() -> {
-                    boolean flag = NetworkUtils.probePort(protocol, ip, port);
-                    if (flag) {
-                        this.checkSuccessCallback(ipAccessModesMap, nodeId);
-                    } else {
-                        this.checkTimeoutCallback(ipAccessModesMap, nodeId);
+        boolean existsSupportProtocols = false;
+        for (CloudPluginSceneElementPortBO port : cloudPorts) {
+            if (port.getAccessModes() != null) {
+                for (CloudAccessMode accessMode : port.getAccessModes()) {
+                    String protocol = accessMode.getProtocol();
+                    if (supportProtocols.contains(protocol)) {
+                        existsSupportProtocols = true;
                     }
-                });
+                }
             }
-        });
+        }
+        // 不存在 VNC/SPICE ，则给虚拟机自动加上 VNC和SPICE  ， 给容器自动加上console
+        if (!existsSupportProtocols) {
+            CloudPluginSceneElementPortBO cloudPort = cloudPorts.get(0);
+            if (cloudPort.getAccessModes() == null) {
+                cloudPort.setAccessModes(new ArrayList<>());
+            }
+            List<CloudAccessMode> cloudAccessModes = cloudPort.getAccessModes();
+            String ip = cloudPort.getSrcPort().getIp();
+            if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(cloudElement.getImageType())) {
+                CloudAccessMode cloudAccessMode = new CloudAccessMode();
+                cloudAccessMode.setAccessIp(ip);
+                cloudAccessMode.setAvailable(true);
+                cloudAccessMode.setProtocol(CloudElementAccessMode.Protocol.CONSOLE);
+                cloudAccessMode.setId(TextUtils.uuid());
+                cloudAccessModes.add(cloudAccessMode);
+            } else if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType())) {
+                CloudAccessMode spiceAccessMode = new CloudAccessMode();
+                spiceAccessMode.setAccessIp(ip);
+                spiceAccessMode.setConnectionUrl("");
+                spiceAccessMode.setProtocol(CloudElementAccessMode.Protocol.SPICE);
+                spiceAccessMode.setId(TextUtils.uuid());
+                spiceAccessMode.setAvailable(true);
+                cloudAccessModes.add(spiceAccessMode);
+
+                CloudAccessMode vncAccessMode = new CloudAccessMode();
+                vncAccessMode.setAccessIp(ip);
+                vncAccessMode.setProtocol(CloudElementAccessMode.Protocol.VNC);
+                vncAccessMode.setAvailable(true);
+                vncAccessMode.setId(TextUtils.uuid());
+                cloudAccessModes.add(vncAccessMode);
+            }
+        }
+
+        // 给所有接入协议先设置联通 使页面显示正常
+        for (CloudPluginSceneElementPortBO port : cloudPorts) {
+            if (port.getAccessModes() != null) {
+                for (CloudAccessMode accessMode : port.getAccessModes()) {
+                    accessMode.setAvailable(true);
+                }
+            }
+        }
     }
 
     /**
