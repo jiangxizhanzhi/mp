@@ -84,4 +84,8 @@ public class ExtVm implements Serializable {
     private String isoAttachFilename;
     @ApiModelProperty("ISO临时文件地址")
     private String isoTmpdirUuid;
+    @ApiModelProperty("第二块磁盘大小")
+    private Integer dataDisk;
+    @ApiModelProperty("网卡数量")
+    private Integer netIfCnt;
 }
