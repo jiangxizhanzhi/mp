@@ -67,7 +67,6 @@ import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
-import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
 import cn.hutool.core.util.URLUtil;
 import io.swagger.annotations.Api;
@@ -620,7 +619,7 @@ public class ImagesController {
                     .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null)
                     .authTotal(v.getAuthTotal()).isPublic(v.getIsPublic()).extSystemInfo(v.getExtSystemInfo())
                     .extGateway(v.getExtGateway()).extVm(v.getExtVm()).extImageInfo(v.getExtImageInfo()).extDocker(v.getExtDocker()).build();
-            if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(v.getImageType()) && v.getExtDocker() != null) {
+            if ("container".equals(v.getImageType()) && v.getExtDocker() != null) {
                 vo.setFlavor(v.getExtDocker().getFlavor());
             }
             if (vo.getExtDocker() != null && vo.getExtDocker().getExtInfo() != null && vo.getExtDocker().getExtInfo() instanceof Map) {
