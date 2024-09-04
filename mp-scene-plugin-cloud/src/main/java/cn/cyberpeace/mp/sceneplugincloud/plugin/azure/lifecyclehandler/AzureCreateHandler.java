@@ -204,7 +204,7 @@ public class AzureCreateHandler extends CreateHandler {
                 String nodeId = element.getSrcElement().getId();
                 List<AlertRuleBO> alertRuleBOListByNodeId = alertRuleBOList
                         .stream()
-                        .filter(alertRuleBO -> alertRuleBO.getAlarmConditionList().contains(nodeId))
+                        .filter(alertRuleBO -> alertRuleBO.getHostList().contains(nodeId))
                         .collect(Collectors.toList());
 
                 List<VirtualNic> virtualNics = virtualNicsMap.get(nodeId);

@@ -30,4 +30,10 @@ public class AlarmConditionModel {
     // 阈值，当聚合后的数据与该阈值的关系满足运算符定义时触发报警
     @DefaultInt
     private double threshold;
+
+    @DefaultStr
+    private String condition;
+
+    @DefaultStr
+    private String frequency;
 }

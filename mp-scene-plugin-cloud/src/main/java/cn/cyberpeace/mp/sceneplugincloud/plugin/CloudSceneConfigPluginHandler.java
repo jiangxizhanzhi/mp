@@ -257,13 +257,16 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
 
                 }else {
 //                    节点互联校验 非网络节点不可互联
-                    for (SceneConfigElementPortBO port : element.getSrcElement().getPorts()) {
-                        SceneConfigElementPortBO portConnectedPort = getSceneHandler().getPortConnectedPort(port.getId());
-                        if (null != portConnectedPort) {
-                            String id = portConnectedPort.getElement().getId();
-                            CloudPluginSceneConfigElementBO cloudPluginSceneConfigElementBO = elementMap.get(id);
-                            if (!BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudPluginSceneConfigElementBO.getImageType())) {
-                                throw new MpRuntimeException(CloudErrorCode.INVALID_CONNECTION.format());
+                    List<SceneConfigElementPortBO> ports = element.getSrcElement().getPorts();
+                    if(null != ports) {
+                        for (SceneConfigElementPortBO port : element.getSrcElement().getPorts()) {
+                            SceneConfigElementPortBO portConnectedPort = getSceneHandler().getPortConnectedPort(port.getId());
+                            if (null != portConnectedPort) {
+                                String id = portConnectedPort.getElement().getId();
+                                CloudPluginSceneConfigElementBO cloudPluginSceneConfigElementBO = elementMap.get(id);
+                                if (!BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudPluginSceneConfigElementBO.getImageType())) {
+                                    throw new MpRuntimeException(CloudErrorCode.INVALID_CONNECTION.format());
+                                }
                             }
                         }
                     }
