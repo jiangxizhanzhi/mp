@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.http.HttpResult;
+import cn.cyberpeace.mp.common.constant.CommonSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
@@ -395,7 +396,7 @@ public class Container extends CloudClient {
 
     public ContainerFileGetResult retrieveFile(ContainerFileGetData data) {
         StringBuilder cmd = new StringBuilder();
-        cmd.append("curl --location --request POST 'http://" + "10.4.1.58" + ":8001/api/mp/cscene/file/attachment_upload' \\")
+        cmd.append("curl --location --request POST 'http://" + CommonSingleton.commonAppConfig.getMpIp() + ":8001/api/mp/cscene/file/attachment_upload' \\")
                 .append("--header 'clientSecret: 2112f4b855264ad7b1a4209737fc7836' \\")
                 .append("--header 'clientId: 84261d495c414e' \\")
                 .append("--form 'file=@\"" + data.getFilePath() + "\"'");
