@@ -606,7 +606,16 @@ public class CreateHandler extends HandlerCommon {
         if (StringUtils.isNotEmpty(sampleCloudPort.getConnectMode())) {
             virtualNic.setVlanMode(sampleCloudPort.getConnectMode());
         }
-        virtualNic.setFixedIp(TextUtils.emptyNull(samplePort.getIp()));
+        if (StringUtils.isEmpty(virtualNic.getFixedIp())) {
+            synchronized (this) {
+                List<String> excloudIps = new ArrayList<>();
+                excloudIps.addAll(network.getExcloudIps());
+                String ip = IpUtils.newRandomIps(network.getCidr(), 1, excloudIps, new ArrayList<>(), false).get(0);
+                log.info("get new fixed ip");
+                network.getExcloudIps().add(ip);
+                virtualNic.setFixedIp(ip);
+            }
+        }
         virtualNic.setMacAddress(TextUtils.emptyNull(samplePort.getMacAddr()));
         int egress;
         if (samplePort.getEgress() != null && portConnection != null && portConnection.getBandwidth() != null &&
