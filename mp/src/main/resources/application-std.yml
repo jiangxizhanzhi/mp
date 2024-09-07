@@ -284,7 +284,7 @@ mp:
     wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
     wazuh-run-command-http-callback-url: http://${mp.situationaware.ext-var.wazuh-ip}:${mp.situationaware.ext-var.self-port}/api/mp/scene_plugin_collection/wazuh_run_command_result
     azurePublic:
-      wazuh-server-host: 20.2.80.26
+      wazuh-server-host: ${mp.situationaware.ext-var.public-wazuh-es-ip}
       wazuh-remote-port: 9200
       wazuh-auth-port: 9200
     azurePrivate:

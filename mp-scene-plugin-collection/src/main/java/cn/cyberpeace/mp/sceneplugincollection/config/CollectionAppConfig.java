@@ -37,7 +37,7 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.wazuh_server_host:127.0.0.1}")
     private String wazuhServerHost;
 
-    @Value("20.205.18.81")
+    @Value("${mp.sceneplugincollection.azurePublic.wazuh-server-host:127.0.0.1}")
     private String wazuhPublicServerHost;
 
     @Value("${mp.sceneplugincollection.azurePrivate.wazuh-server-host:127.0.0.1}")
