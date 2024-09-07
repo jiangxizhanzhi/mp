@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.bo.AlertRuleBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
@@ -119,18 +118,45 @@ public class AzureCreateHandler extends CreateHandler {
             for (int i = 0; i < filteredAuxiliaryNetworkElements.size(); i++) {
                 boolean isManage = false;
                 CloudPluginSceneElementBO element = filteredAuxiliaryNetworkElements.get(i);
-                List<String> vNetPeeringIdList = element.getSrcElement().getPorts().stream()
+/*                List<String> vNetPeeringIdList = element.getSrcElement().getPorts().stream()
                         .map(port -> this.getPluginHandler().getSceneHandler().getPortConnectedPort(port.getId()))
                         .filter(Objects::nonNull)
                         .map(portConnectedPort -> vnetElementById.get(portConnectedPort.getElement().getId()))
                         .filter(Objects::nonNull)
+                        .filter(pluginSceneElementBO -> !pluginSceneElementBO.getIsPublicIp() || pluginSceneElementBO.getImageType().equals(BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY))
                         .map(CloudPluginSceneElementBO::getSrcElement)
                         .map(SceneElementBO::getId)
-                        .collect(Collectors.toList());
-                if (vNetPeeringIdList.stream().noneMatch(manageElementIdSet::contains)) {
+                        .collect(Collectors.toList());*/
+
+                /*Optional<CloudPluginSceneElementBO> any = element.getSrcElement().getPorts().stream()
+                        .map(port -> this.getPluginHandler().getSceneHandler().getPortConnectedPort(port.getId()))
+                        .filter(Objects::nonNull)
+                        .map(portConnectedPort -> vnetElementById.get(portConnectedPort.getElement().getId()))
+                        .filter(Objects::nonNull)
+                        .filter(pluginSceneElementBO -> !pluginSceneElementBO.getIsPublicIp() || pluginSceneElementBO.getImageType().equals(BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY))
+                        .findAny();*/
+                Optional<CloudPluginSceneElementBO> any = element.getSrcElement().getPorts().stream()
+                        .filter(port -> null != this.getPluginHandler().getSceneHandler().getPortConnectedPort(port.getId()))
+                        .map(port ->
+                                allElements.stream()
+                                        .filter(element1 -> element1.getSrcElement().getId().equals(this.getPluginHandler().getSceneHandler().getPortConnectedPort(port.getId()).getElement().getId()))
+                                        .findAny()
+                                        .get()
+                        )
+                        .filter(Objects::nonNull)
+                        .filter(pluginSceneElementBO -> !pluginSceneElementBO.getIsPublicIp() || pluginSceneElementBO.getImageType().equals(BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY))
+                        .findAny();
+                if (any.isPresent()) {
+                    isManage = true;
+                }
+                if (!BaseCloudPluginSceneElementModel.ImageType.VNET.equals(element.getImageType()) && !element.getIsPublicIp()) {
+//                    vNetPeeringIdList.add(element.getSrcElement().getId());
+                    isManage = true;
+                }
+                /*if (vNetPeeringIdList.size() > 0 && vNetPeeringIdList.stream().noneMatch(manageElementIdSet::contains)) {
                     isManage = true;
                     manageElementIdSet.add(element.getSrcElement().getId());
-                }
+                }*/
 
                 //筛选出所有cidr是否连接容器
                 CloudScenePluginHandler pluginHandler = getPluginHandler();
@@ -204,7 +230,7 @@ public class AzureCreateHandler extends CreateHandler {
                 String nodeId = element.getSrcElement().getId();
                 List<AlertRuleBO> alertRuleBOListByNodeId = alertRuleBOList
                         .stream()
-                        .filter(alertRuleBO -> alertRuleBO.getHostList().contains(nodeId))
+                        .filter(alertRuleBO -> null != alertRuleBO.getHosts() && alertRuleBO.getHostList().contains(nodeId))
                         .collect(Collectors.toList());
 
                 List<VirtualNic> virtualNics = virtualNicsMap.get(nodeId);
@@ -213,7 +239,8 @@ public class AzureCreateHandler extends CreateHandler {
                 element.setVmExpansionDiskType(null);
 //                处理云场景无登录按钮、接收虚拟端口信息
                 receiveVirtualPortInfo(element, virtualNics);
-                AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics, combineInitCommand(element),alertRuleBOListByNodeId);
+                String s = combineInitCommand(element);
+                AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics, combineInitCommand(element), alertRuleBOListByNodeId);
                 Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_VIRTUAL_MACHINE, task);
                 createVirtualMachineTasks.add(formatTask);
             }
@@ -326,7 +353,11 @@ public class AzureCreateHandler extends CreateHandler {
         List<CloudPluginSceneElementBO> filterElements = new ArrayList<>();
         var sceneHandler = this.getPluginHandler().getSceneHandler();
         for (var c : allElements) {
-            if (sceneHandler.isHandleNode(c.getSrcElement().getId()) && !c.getDeriveNetworks().isEmpty()) {
+            if (StringUtils.isNotEmpty(c.getImageType()) && (BaseCloudPluginSceneElementModel.ImageType.LOAD.equals(c.getImageType()) ||
+                    BaseCloudPluginSceneElementModel.ImageType.NETWORK_EQUIPMENT.equals(c.getImageType()) ||
+                    BaseCloudPluginSceneElementModel.ImageType.FIRE_WALL.equals(c.getImageType()))) {
+
+            } else if (sceneHandler.isHandleNode(c.getSrcElement().getId()) && !c.getDeriveNetworks().isEmpty()) {
                 filterElements.add(c);
             } else if (StringUtils.isNotEmpty(c.getImageType()) && BaseCloudPluginSceneElementModel.ImageType.VNET.equals(c.getImageType())) {
 //    筛选出所有VNet节点

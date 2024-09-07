@@ -43,7 +43,7 @@ public class SceneAppConfig {
     private String metadataFileServer;
 
     //公有云
-    @Value("${mp.scene.metadata_public_file_server:http://20.205.18.81/api/mp/file}")
+    @Value("${mp.scene.metadata_public_file_server:http://169.254.169.254/file}")
     private String metadataPublicFileServer;
 
     //私有云

@@ -49,24 +49,17 @@ import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
+import cn.cyberpeace.mp.scene.bo.AlertRuleBO;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
-import cn.cyberpeace.mp.scene.core.bo.SceneBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
+import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
-import cn.cyberpeace.mp.scene.model.SceneElementModel;
-import cn.cyberpeace.mp.scene.model.SceneElementSituationProbeModel;
-import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.*;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
-import cn.cyberpeace.mp.scene.repository.SceneConfigElementMapper;
-import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
-import cn.cyberpeace.mp.scene.repository.SceneElementSituationProbeMapper;
+import cn.cyberpeace.mp.scene.repository.*;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
@@ -249,6 +242,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private CollectionPluginSceneElementMapper collectionPluginSceneElementMapper;
+
+    @Autowired
+    private AlertRuleMapper alertRuleMapper;
+
+    @Autowired
+    private InstanceMapper instanceMapper;
 
 
     // expires in 10 minutes
@@ -1048,9 +1047,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             humanCondition.filterIn(ElementLogListModel::getCatagory, queryParams.getCatagories().toArray());
         }*/
 //        区分日志类型(日志/告警)
-        if(null != queryParams.getRuleGroups() && queryParams.getRuleGroups().size()>0){
+        if (null != queryParams.getRuleGroups() && queryParams.getRuleGroups().size() > 0) {
             humanCondition.filterEqual(ElementLogListModel::getLogType, "");
-        }else if (null != queryParams.getRuleIds() && CollectionUtils.isNotEmpty(queryParams.getRuleIds())) {
+        } else if (null != queryParams.getRuleIds() && CollectionUtils.isNotEmpty(queryParams.getRuleIds())) {
             humanCondition.filterIn(ElementLogListModel::getRuleId, queryParams.getRuleIds().toArray());
             humanCondition.filterEqual(ElementLogListModel::getLogType, SceneElementMonitorService.LOG);
         } else {
@@ -1069,6 +1068,32 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             humanCondition.filterContains(ElementLogListModel::getDescription, queryParams.getKeyword().get(0));
         }
         var logList = elementLogListMapper.list(humanCondition);
+
+//        处理云场景警告
+        var scene = getSceneId(sceneId);
+        var sceneHandler = new SceneHandler(scene, null, false, null);
+        Integer cloudType = sceneHandler.getScene().getCloudType();
+        if (cloudType != null && BaseSceneModel.CloudType.DEFAULT != cloudType) {
+//            查询报警规则
+            HumanCondition instanceHumanCondition = new HumanCondition()
+                    .filterEqual(InstanceModel::getScene, scene);
+            InstanceModel instanceModel = instanceMapper.first(instanceHumanCondition);
+
+            HumanCondition alertRuleHumanCondition = new HumanCondition()
+                    .filterEqual(AlertRuleModel::getSceneId, instanceModel.getCscene());
+            List<AlertRuleModel> list = alertRuleMapper.list(alertRuleHumanCondition);
+            List<AlertRuleBO> alertRuleBOList = list.stream().map(alertRuleModel -> {
+                        AlertRuleBO alertRuleBO = new AlertRuleBO();
+                        cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(alertRuleModel, alertRuleBO);
+                        alertRuleBO.parseHosts();
+                        alertRuleBO.parseAlertConditions();
+                        return alertRuleBO;
+                    })
+                    .collect(Collectors.toList());
+//            查询报警
+
+//            组装数据
+        }
 
         // 设置total
         int alreadyHasNum = hostEventsBos.getSource().getTotal();
@@ -2300,12 +2325,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
 
 
-
         String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer(sceneHandler.getScene().getCloudType());
 
         var controlConfigParam = new WazuhControl.ControlConfigParam();
         controlConfigParam.setProbeParams(new ArrayList<>());
-        ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName,pluginHandler.getScene().getSrcScene().getCloudType());
+        ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName, pluginHandler.getScene().getSrcScene().getCloudType());
 
         // 删除操作
         if (SceneElementSituationProbeModel.ProbeType.REMOVE == probeType || SceneElementSituationProbeModel.ProbeType.UPDATE == probeType) {

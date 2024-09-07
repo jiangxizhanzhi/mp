@@ -207,9 +207,10 @@ public class AzureVirtualNet {
      * @param element             当前处理的场景元素，其源元素是VNet类型。
      * @param processedElementIds 已处理元素的ID列表，用于避免重复处理。
      */
+
     private void propagateMgmtIpToElements(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO element, List<String> processedElementIds) {
-        processedElementIds = processedElementIds == null ? new ArrayList<>() : processedElementIds;
-        processedElementIds.add(element.getSrcElement().getId());
+//        processedElementIds = processedElementIds == null ? new ArrayList<>() : processedElementIds;
+//        processedElementIds.add(element.getSrcElement().getId());
         for (SceneElementPortBO port : element.getSrcElement().getPorts()) {
             SceneElementPortBO portConnectedPort = pluginHandler.getSceneHandler().getPortConnectedPort(port.getId());
             if (null != portConnectedPort) {
@@ -217,11 +218,12 @@ public class AzureVirtualNet {
                 CloudPluginSceneElementBO cloudPluginSceneConfigElementBO = pluginHandler.getElement(id);
                 if (!BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudPluginSceneConfigElementBO.getImageType())) {
                     cloudPluginSceneConfigElementBO.setManagementIp(element.getManagementIp());
-                } else {
+                }
+                /*else {
                     if (processedElementIds.contains(cloudPluginSceneConfigElementBO.getSrcElement().getId())) continue;
                     cloudPluginSceneConfigElementBO.setManagementIp(element.getManagementIp());
                     propagateMgmtIpToElements(pluginHandler, cloudPluginSceneConfigElementBO, processedElementIds);
-                }
+                }*/
             }
         }
     }

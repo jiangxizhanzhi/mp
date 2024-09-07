@@ -21,9 +21,11 @@ import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.fluent.models.ResourceSkuInner;
 import com.azure.resourcemanager.compute.models.*;
-import com.azure.resourcemanager.monitor.models.MetricAlert;
-import com.azure.resourcemanager.monitor.models.MetricAlertRuleCondition;
-import com.azure.resourcemanager.monitor.models.MetricAlertRuleTimeAggregation;
+import com.azure.resourcemanager.monitor.MonitorManager;
+import com.azure.resourcemanager.monitor.fluent.MonitorClient;
+import com.azure.resourcemanager.monitor.fluent.ScheduledQueryRulesClient;
+import com.azure.resourcemanager.monitor.fluent.models.ScheduledQueryRuleResourceInner;
+import com.azure.resourcemanager.monitor.models.*;
 import com.azure.resourcemanager.network.models.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +44,8 @@ public class AzureVirtualMachine {
 
     private AzureResourceManager azureResourceManager;
 
+    private MonitorManager monitorManager;
+
     private Region region;
 
     private SituationAwareConfig situationAwareConfig;
@@ -49,6 +53,7 @@ public class AzureVirtualMachine {
     public AzureVirtualMachine(IAzureResourceManager resourceService) {
         this.resourceService = resourceService;
         this.azureResourceManager = resourceService.getManager();
+        this.monitorManager = resourceService.getMonitorManager();
         this.region = resourceService.getRegin();
         this.situationAwareConfig = BeanCommon.getBean(SituationAwareConfig.class);
     }
@@ -252,53 +257,95 @@ public class AzureVirtualMachine {
                 }
             }
         }
+        Optional<AlarmConditionModel> customLogSearch = alertRuleBOList.stream().flatMap(alertRuleBO -> alertRuleBO.getAlarmConditionList().stream())
+                .filter(alarmConditionModel -> alarmConditionModel.getType().equals("Custom Log Search"))
+                .findAny();
+        if (customLogSearch.isPresent()) {
+//            设置诊断设置
+            azureResourceManager
+                    .diagnosticSettings()
+                    .define("vm-diagnostic-settings")
+                    .withResource(vm.id())
+                    .withStorageAccount("/subscriptions/c87ba926-f7c2-4d53-8b8e-89245dc92e26/resourceGroups/upload_resources/providers/Microsoft.Storage/storageAccounts/storage06004")
+                    .create();
+        }
 
 //        设置报警规则
         if (alertRuleBOList.size() > 0) {
             for (AlertRuleBO alertRuleBO : alertRuleBOList) {
-                // 创建监视警报
-                MetricAlert.DefinitionStages.WithCriteriaDefinition withCriteriaDefinition = azureResourceManager.alertRules().metricAlerts()
-//                预警规则名称
-                        .define(alertRuleBO.getName())
-//                资源组
-                        .withExistingResourceGroup(groupName)
-//                虚拟机id
-                        .withTargetResource(vm.id())
-//                回溯期 5分钟
-                        .withPeriod(Duration.ofMinutes(15))
-//                检查间隔
-                        .withFrequency(Duration.ofMinutes(5))
-//                严重性，预警规则说明
-                        .withAlertDetails(alertRuleBO.getAlarmLevel(), alertRuleBO.getAlarmDescription())
-//                选择操作组
-//                .withActionGroups("/subscriptions/C87BA926-F7C2-4D53-8B8E-89245DC92E26/resourceGroups/6b987034b1f8490abc635ccdf9753c02/providers/microsoft.insights/actionGroups/RecommendedAlertRules-AG-1")
-                        .withActionGroups();
                 List<AlarmConditionModel> alarmConditionList = alertRuleBO.getAlarmConditionList();
                 AlarmConditionModel alarmConditionModel = alarmConditionList.get(0);
-                MetricAlert.DefinitionStages.WithCreate attach = withCriteriaDefinition
+                if (alarmConditionModel != null && alarmConditionModel.getType().equals("Custom Log Search")) {
+                    ArrayList<Condition> conditions = new ArrayList<>();
+                    Condition condition = new Condition()
+                            .withQuery(alarmConditionModel.getCondition())
+//                默认计数
+                            .withTimeAggregation(TimeAggregation.COUNT)
+                            .withOperator(ConditionOperator.fromString(alarmConditionModel.getOperator()))
+                            .withThreshold(alarmConditionModel.getThreshold());
+                    conditions.add(condition);
+
+                    ScheduledQueryRuleCriteria criteria = new ScheduledQueryRuleCriteria();
+                    criteria.withAllOf(conditions);
+
+                    ScheduledQueryRuleResourceInner rule = new ScheduledQueryRuleResourceInner();
+                    rule.withCriteria(criteria);
+                    rule.withSeverity(AlertSeverity.fromLong(alertRuleBO.getAlarmLevel()));
+//        聚合粒度  TODO 暂默认30分钟
+                    rule.withWindowSize(Duration.ofMinutes(30));
+//        评估频率
+                    rule.withEvaluationFrequency(Duration.parse(alarmConditionModel.getFrequency()));
+                    rule.withLocation(Region.ASIA_EAST.name());
+                    rule.withScopes(Arrays.asList(vm.id()));
+                    MonitorClient monitorClient = monitorManager.serviceClient();
+                    ScheduledQueryRulesClient scheduledQueryRules = monitorClient.getScheduledQueryRules();
+                    scheduledQueryRules.createOrUpdate(groupName, alertRuleBO.getName(), rule);
+
+                } else if (alarmConditionModel != null) {
+
+                    // 创建监视警报
+                    MetricAlert.DefinitionStages.WithCriteriaDefinition withCriteriaDefinition = azureResourceManager.alertRules().metricAlerts()
+//                预警规则名称
+                            .define(alertRuleBO.getName())
+//                资源组
+                            .withExistingResourceGroup(groupName)
+//                虚拟机id
+                            .withTargetResource(vm.id())
+//                回溯期 5分钟
+                            .withPeriod(Duration.ofMinutes(15))
+//                检查间隔
+                            .withFrequency(Duration.ofMinutes(5))
+//                严重性，预警规则说明
+                            .withAlertDetails(alertRuleBO.getAlarmLevel(), alertRuleBO.getAlarmDescription())
+//                选择操作组
+//                .withActionGroups("/subscriptions/C87BA926-F7C2-4D53-8B8E-89245DC92E26/resourceGroups/6b987034b1f8490abc635ccdf9753c02/providers/microsoft.insights/actionGroups/RecommendedAlertRules-AG-1")
+                            .withActionGroups();
+                    MetricAlert.DefinitionStages.WithCreate attach = withCriteriaDefinition
 //                定义预警条件
-                        .defineAlertCriteria(alarmConditionModel.getType())
+                            .defineAlertCriteria(alarmConditionModel.getType())
 //                设置要监控的度量标准名称，即 "Available Memory Bytes"（可用内存字节）
-                        .withMetricName(alarmConditionModel.getType())
+                            .withMetricName(alarmConditionModel.getType())
 //                设置预警条件：
 //                - 使用的时间聚合类型为 "MINIMUM"（最小值）
 //                - 条件是小于293,601,280字节（约280MB）的内存
-                        .withCondition(MetricAlertRuleTimeAggregation.fromString(alarmConditionModel.getAggregationType()),
-                                MetricAlertRuleCondition.fromString(alarmConditionModel.getOperator()),
-                                alarmConditionModel.getThreshold())
-                        .attach();
-                if (alarmConditionList.size() > 1) {
-                    for (int i = 1; i < alarmConditionList.size(); i++) {
-                        attach
-                                .defineAlertCriteria(alarmConditionModel.getType())
-                                .withMetricName(alarmConditionModel.getType())
-                                .withCondition(MetricAlertRuleTimeAggregation.fromString(alarmConditionModel.getAggregationType()),
-                                        MetricAlertRuleCondition.fromString(alarmConditionModel.getOperator()),
-                                        alarmConditionModel.getThreshold())
-                                .attach();
+                            .withCondition(MetricAlertRuleTimeAggregation.fromString(alarmConditionModel.getAggregationType()),
+                                    MetricAlertRuleCondition.fromString(alarmConditionModel.getOperator()),
+                                    alarmConditionModel.getThreshold())
+                            .attach();
+                    if (alarmConditionList.size() > 1) {
+                        for (int i = 1; i < alarmConditionList.size(); i++) {
+                            alarmConditionModel = alarmConditionList.get(i);
+                            attach
+                                    .defineAlertCriteria(alarmConditionModel.getType())
+                                    .withMetricName(alarmConditionModel.getType())
+                                    .withCondition(MetricAlertRuleTimeAggregation.fromString(alarmConditionModel.getAggregationType()),
+                                            MetricAlertRuleCondition.fromString(alarmConditionModel.getOperator()),
+                                            alarmConditionModel.getThreshold())
+                                    .attach();
+                        }
                     }
+                    attach.create();
                 }
-                attach.create();
             }
         }
 

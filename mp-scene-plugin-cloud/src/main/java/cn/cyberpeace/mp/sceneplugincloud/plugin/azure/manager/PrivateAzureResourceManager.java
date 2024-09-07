@@ -13,6 +13,7 @@ import com.azure.identity.ClientSecretCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.resourcemanager.AzureResourceManager;
+import com.azure.resourcemanager.monitor.MonitorManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,8 @@ public class PrivateAzureResourceManager implements IAzureResourceManager {
 
     //当前云环境资源管理器
     private static AzureResourceManager AZURE_RESOURCE_MANAGER;
+    //当前云环境监控管理器
+    private static MonitorManager AZURE_MONITOR_MANAGER;
 
     //当前云环境账号
     private static MicrosoftAzureUserModel user;
@@ -98,6 +101,30 @@ public class PrivateAzureResourceManager implements IAzureResourceManager {
             }
         }
         return AZURE_RESOURCE_MANAGER;
+    }
+
+    @Override
+    public MonitorManager getMonitorManager() {
+        if (AZURE_MONITOR_MANAGER == null) {
+            synchronized (this) {
+                if (AZURE_MONITOR_MANAGER == null) {
+                    TokenCredential credential = getTokenCredential();
+                    MicrosoftAzureUserModel localAzurer = null;
+                    if (user == null) {
+                        localAzurer = getUser();
+                    }else{
+                        localAzurer = user;
+                    }
+                    AzureProfile profile = new AzureProfile(localAzurer.getAzureTenantId(),
+                            subscription,
+                            AzureEnvironment.AZURE);
+                    AZURE_MONITOR_MANAGER = MonitorManager.configure()
+                            .withLogLevel(HttpLogDetailLevel.BASIC)
+                            .authenticate(credential, profile);
+                }
+            }
+        }
+        return AZURE_MONITOR_MANAGER;
     }
 
     @Override

@@ -182,6 +182,7 @@ mp:
       scene-process-save-realtime: ${MP_SCENE_PROCESS_SAVE_REALTIME:true}
       element-process-save-realtime: ${MP_ELEMENT_PROCESS_SAVE_REALTIME:true}
       dhcp-control: ${MP_SCENE_DHCP_CONTROL:false}
+      metadata_public_file_server: ${MP_METADATA_PUBLIC_FILE_SERVER:10.100.7.1}
 
 # for kaptcha
 #kaptcha:

@@ -6,9 +6,12 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
+import com.azure.resourcemanager.monitor.MonitorManager;
 
 public interface IAzureResourceManager {
     AzureResourceManager getManager();
+
+    MonitorManager getMonitorManager();
 
     TokenCredential getTokenCredential();
 

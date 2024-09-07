@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincloud.service.common;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
@@ -223,16 +224,17 @@ public class CloudSceneConnectionCommon {
 
                 CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
                 CloudPluginSceneElementBO element = pluginHandler.getElement(sceneElementId);
+                String halfString = halfString(sceneId) + halfString(element.getSrcElement().getEid());
                 if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(element.getImageType())) {
                     if (element.getIsPublicIp()) {
                         connectionParams.setHostname(element.getPublicIpAddress());
                     } else if (StringUtils.isNotBlank(element.getManagementIp())) {
-                        userId = userId + "_" + sceneId;
+                        userId = userId + "_" + halfString;
                         connectionParams.setHostname(sceneConnection.getAccessIp());
                         guacamoleCreateConnectionData.setHost(element.getManagementIp());
                     }
                 } else if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(element.getImageType())) {
-                    userId = userId + "_" + sceneId;
+                    userId = userId + "_" + halfString;
                     guacamoleCreateConnectionData.setHost(element.getManagementIp());
                     connectionParams.setHostname(element.getManagementIp());
                     connectionParams.setProtocol("container");
@@ -247,6 +249,7 @@ public class CloudSceneConnectionCommon {
             guacamoleCreateConnectionData.setUsername(userId);
             guacamoleCreateConnectionData.setConnectionParams(connectionParams);
             var result = remoteClient.createConnection(guacamoleCreateConnectionData);
+            String s = JsonUtils.snakeStringify(guacamoleCreateConnectionData);
             if (result == null || StringUtils.isEmpty(result.getConnectionId())) {
                 log.error("Create scene connection[{}] with empty result: {}", guacamoleCreateConnectionData, result);
                 return null;
@@ -359,4 +362,17 @@ public class CloudSceneConnectionCommon {
         return String.format(CONTAINER_EXEC_COMMAND_TEMPLATE, azureClientId, azureClientSecret, azureTenantId, groupName, containerName, interpreter);
     }
 
+
+    /**
+     * 截取一半的字符
+     */
+    public static String halfString(String str) {
+        int length = str.length();
+        if (length % 2 == 0) {
+            str = str.substring(0, length / 2);
+        } else {
+            str = str.substring(0, length / 2 - 1);
+        }
+        return str;
+    }
 }
