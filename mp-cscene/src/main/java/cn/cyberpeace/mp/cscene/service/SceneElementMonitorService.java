@@ -707,9 +707,11 @@ public class SceneElementMonitorService {
         List<String> timeList = histogramInfos.stream().map(ElementHistogramInfo::getTime).collect(Collectors.toList());
         HumanCondition humanCondition = new HumanCondition().currentLink(ElementFileCountModel.class)
                 .filterEqual(ElementFileCountModel::getSceneId, sceneId)
-                .filterIn(ElementFileCountModel::getTime, timeList.toArray())
                 .filterNotEqual(ElementFileCountModel::getCount, 0)
                 .filterIn(ElementFileCountModel::getGroup, group.toArray());
+        if(timeList.size()>0){
+            humanCondition.filterIn(ElementFileCountModel::getTime, timeList.toArray());
+        }
         List<ElementFileCountModel> countModels = elementFileCountMapper.list(humanCondition);
         Map<String, ElementHistogramInfo> histogramInfoMap = histogramInfos.stream().collect(Collectors.toMap(ElementHistogramInfo::getTime, e -> e));
         for (ElementFileCountModel model : countModels) {

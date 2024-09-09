@@ -1093,26 +1093,27 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         var logList = elementLogListMapper.list(humanCondition);
 
 //        处理云场景警告
-        var scene = getSceneId(sceneId);
-        var sceneHandler = new SceneHandler(scene, null, false, null);
-        Integer cloudType = sceneHandler.getScene().getCloudType();
-        if (cloudType != null && BaseSceneModel.CloudType.DEFAULT != cloudType) {
+        if (queryParams.getIsAlert() != null && queryParams.getIsAlert()) {
+            var scene = getSceneId(sceneId);
+            var sceneHandler = new SceneHandler(scene, null, false, null);
+            Integer cloudType = sceneHandler.getScene().getCloudType();
+            if (cloudType != null && BaseSceneModel.CloudType.DEFAULT != cloudType) {
 //            查询报警规则
-            HumanCondition instanceHumanCondition = new HumanCondition()
-                    .filterEqual(InstanceModel::getScene, scene);
-            InstanceModel instanceModel = instanceMapper.first(instanceHumanCondition);
+                HumanCondition instanceHumanCondition = new HumanCondition()
+                        .filterEqual(InstanceModel::getScene, scene);
+                InstanceModel instanceModel = instanceMapper.first(instanceHumanCondition);
 
-            HumanCondition alertRuleHumanCondition = new HumanCondition()
-                    .filterEqual(AlertRuleModel::getSceneId, instanceModel.getCscene());
-            List<AlertRuleModel> list = alertRuleMapper.list(alertRuleHumanCondition);
-            List<AlertRuleBO> alertRuleBOList = list.stream().map(alertRuleModel -> {
-                        AlertRuleBO alertRuleBO = new AlertRuleBO();
-                        cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(alertRuleModel, alertRuleBO);
-                        alertRuleBO.parseHosts();
-                        alertRuleBO.parseAlertConditions();
-                        return alertRuleBO;
-                    })
-                    .collect(Collectors.toList());
+                HumanCondition alertRuleHumanCondition = new HumanCondition()
+                        .filterEqual(AlertRuleModel::getSceneId, instanceModel.getCscene());
+                List<AlertRuleModel> list = alertRuleMapper.list(alertRuleHumanCondition);
+                List<AlertRuleBO> alertRuleBOList = list.stream().map(alertRuleModel -> {
+                            AlertRuleBO alertRuleBO = new AlertRuleBO();
+                            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(alertRuleModel, alertRuleBO);
+                            alertRuleBO.parseHosts();
+                            alertRuleBO.parseAlertConditions();
+                            return alertRuleBO;
+                        })
+                        .collect(Collectors.toList());
 
             /*List<AlertRuleBO> alertRuleBOListByNodeId = alertRuleBOList
                     .stream()
@@ -1120,51 +1121,52 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     .collect(Collectors.toList());*/
 //            查询报警
 
-            CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-            List<CloudPluginSceneElementBO> allElements = new ArrayList<>(pluginHandler.getElementMap().values());
+                CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+                List<CloudPluginSceneElementBO> allElements = new ArrayList<>(pluginHandler.getElementMap().values());
 
-            for (AlertRuleBO alertRuleBO : alertRuleBOList) {
-                List<String> hostList = alertRuleBO.getHostList();
-                List<String> collect = allElements.stream().filter(element -> hostList.contains(element.getSrcElement().getId()))
-                        .filter(element -> StringUtils.isNotBlank(element.getResourceId()))
-                        .map(CloudPluginSceneElementBO::getResourceId)
-                        .collect(Collectors.toList());
-                alertRuleBO.setVmResourceIdList(collect);
-            }
+                for (AlertRuleBO alertRuleBO : alertRuleBOList) {
+                    List<String> hostList = alertRuleBO.getHostList();
+                    List<String> collect = allElements.stream().filter(element -> hostList.contains(element.getSrcElement().getId()))
+                            .filter(element -> StringUtils.isNotBlank(element.getResourceId()))
+                            .map(CloudPluginSceneElementBO::getResourceId)
+                            .collect(Collectors.toList());
+                    alertRuleBO.setVmResourceIdList(collect);
+                }
 
-            IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(cloudType);
-            ResourceGraphManager resourceGraphManager = azureResourceManager.getResourceGraphManager();
+                IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(cloudType);
+                ResourceGraphManager resourceGraphManager = azureResourceManager.getResourceGraphManager();
 
-            String resourceGroupId = sceneHandler.getScene().getResourceGroupId();
+                String resourceGroupId = sceneHandler.getScene().getResourceGroupId();
 
-            String kql = String.format(KQL, resourceGroupId);
-            QueryRequest queryRequest = new QueryRequest();
-            queryRequest.withQuery(kql);
-            QueryResponse resources = resourceGraphManager.resourceProviders().resources(queryRequest);
+                String kql = String.format(KQL, resourceGroupId);
+                QueryRequest queryRequest = new QueryRequest();
+                queryRequest.withQuery(kql);
+                QueryResponse resources = resourceGraphManager.resourceProviders().resources(queryRequest);
 //            组装数据
-            if(resources.data()!=null) {
-                List<Map> dataList = (List<Map>) resources.data();
-                for (Map map : dataList) {
-                    String targetResourceName = map.get("targetResourceName").toString();
-                    String severity = map.get("severity").toString();
-                    String startDateTime = map.get("startDateTime").toString();
-                    String description = map.get("description").toString();
+                if (resources.data() != null) {
+                    List<Map> dataList = (List<Map>) resources.data();
+                    for (Map map : dataList) {
+                        String targetResourceName = map.get("targetResourceName").toString();
+                        String severity = map.get("severity").toString();
+                        String startDateTime = map.get("startDateTime").toString();
+                        String description = map.get("description").toString();
 
-                    // 将UTC时间字符串转换为ZonedDateTime
+                        // 将UTC时间字符串转换为ZonedDateTime
                         DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
-                    ZonedDateTime zonedDateTime = ZonedDateTime.parse(startDateTime, formatter);
+                        ZonedDateTime zonedDateTime = ZonedDateTime.parse(startDateTime, formatter);
 
-                    // 将ZonedDateTime转换为LocalDateTime
+                        // 将ZonedDateTime转换为LocalDateTime
                         ZoneId localZoneId = ZoneId.systemDefault(); // 获取本地时区
-                    LocalDateTime localDateTime1 = zonedDateTime.withZoneSameInstant(localZoneId).toLocalDateTime();
+                        LocalDateTime localDateTime1 = zonedDateTime.withZoneSameInstant(localZoneId).toLocalDateTime();
 
-                    ElementLogListModel elementLogListModel = new ElementLogListModel();
-                    elementLogListModel.setNodeName(targetResourceName);
-                    elementLogListModel.setLevel(Integer.valueOf(severity.substring(severity.length()-1)));
-                    elementLogListModel.setTime(localDateTime1);
-                    elementLogListModel.setDescription(description);
-                    elementLogListModel.setLogType("alert");
-                    logList.add(elementLogListModel);
+                        ElementLogListModel elementLogListModel = new ElementLogListModel();
+                        elementLogListModel.setNodeName(targetResourceName);
+                        elementLogListModel.setLevel(Integer.valueOf(severity.substring(severity.length() - 1)));
+                        elementLogListModel.setTime(localDateTime1);
+                        elementLogListModel.setDescription(description);
+                        elementLogListModel.setLogType("alert");
+                        logList.add(elementLogListModel);
+                    }
                 }
             }
         }

@@ -52,4 +52,7 @@ public class HostEventQueryParams extends QueryParams {
     private Boolean scroll;
 
     private List<String> ruleIds;
+
+    @ApiModelProperty(value = "是否查询规则告警")
+    private Boolean isAlert;
 }
