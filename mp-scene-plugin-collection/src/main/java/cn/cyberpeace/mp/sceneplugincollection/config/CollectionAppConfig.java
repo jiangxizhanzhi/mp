@@ -82,7 +82,7 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.wazuh_api_server:http://127.0.0.1:55000}")
     private String wazuhApiServer;
 
-    @Value("${mp.sceneplugincollection.public_wazuh_api_server:http://20.205.18.81:15500}")
+    @Value("${mp.sceneplugincollection.public_wazuh_api_server:http://127.0.0.1:55000}")
     private String publicWazuhApiServer;
 
     @Value("${mp.sceneplugincollection.wazuh_api_user:wazuh}")

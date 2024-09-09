@@ -295,6 +295,7 @@ mp:
       wazuh-server-host: 20.2.80.26
       wazuh-remote-port: 9200
       wazuh-auth-port: 9200
+    public_wazuh_api_server: http://${mp.situationaware.ext-var.public-wazuh-es-ip}:${mp.situationaware.ext-var.public-wazuh-port}
   cscene:
     has-own-recording-set: ${mp.cscene.ext-var.has-own-recording-set}
     scene-error-creating-seconds: ${mp.cscene.ext-var.scene-error-creating-seconds}
