@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.bo.AlertRuleBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
@@ -88,7 +89,10 @@ public class AzureCreateHandler extends CreateHandler {
         // 创建微软云的资源组
         String groupName = getPluginHandler().getSourceSceneId();
         try {
-            new AzureResourceGroup(resourceService).create(groupName);
+            SceneBO scene = getPluginHandler().getSceneHandler().getScene();
+            String grouoId = new AzureResourceGroup(resourceService).create(groupName);
+            scene.setResourceGroupId(grouoId);
+
             // 先创建辅助网络
             List<CloudPluginSceneElementBO> allFilteredElements = new ArrayList<>();
             List<CloudPluginSceneElementBO> filteredVirtualMachineElements = this.filterVirtualMachineElements(allElements);

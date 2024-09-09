@@ -7,11 +7,14 @@ import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.monitor.MonitorManager;
+import com.azure.resourcemanager.resourcegraph.ResourceGraphManager;
 
 public interface IAzureResourceManager {
     AzureResourceManager getManager();
 
     MonitorManager getMonitorManager();
+
+    ResourceGraphManager getResourceGraphManager();
 
     TokenCredential getTokenCredential();
 

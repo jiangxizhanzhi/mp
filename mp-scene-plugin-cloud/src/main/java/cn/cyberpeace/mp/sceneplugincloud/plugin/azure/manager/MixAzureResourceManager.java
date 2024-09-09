@@ -13,6 +13,7 @@ import com.azure.identity.ClientSecretCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.monitor.MonitorManager;
+import com.azure.resourcemanager.resourcegraph.ResourceGraphManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +29,7 @@ public class MixAzureResourceManager implements IAzureResourceManager {
     private static AzureResourceManager AZURE_RESOURCE_MANAGER;
     //当前云环境监控管理器
     private static MonitorManager AZURE_MONITOR_MANAGER;
+    private static ResourceGraphManager AZURE_RESOURCE_GRAPH_MANAGER;
 
     //当前云环境账号
     private static MicrosoftAzureUserModel user;
@@ -127,6 +129,29 @@ public class MixAzureResourceManager implements IAzureResourceManager {
             }
         }
         return AZURE_MONITOR_MANAGER;
+    }
+
+    @Override
+    public ResourceGraphManager getResourceGraphManager() {
+        if (AZURE_RESOURCE_GRAPH_MANAGER == null) {
+            synchronized (this) {
+                if (AZURE_RESOURCE_GRAPH_MANAGER == null) {
+                    TokenCredential credential = getTokenCredential();
+                    MicrosoftAzureUserModel localAzurer = null;
+                    if (user == null) {
+                        localAzurer = getUser();
+                    }else{
+                        localAzurer = user;
+                    }
+                    AzureProfile profile = new AzureProfile(localAzurer.getAzureTenantId(),
+                            subscription,
+                            AzureEnvironment.AZURE);
+                    AZURE_RESOURCE_GRAPH_MANAGER = ResourceGraphManager.configure()
+                            .authenticate(credential, profile);
+                }
+            }
+        }
+        return AZURE_RESOURCE_GRAPH_MANAGER;
     }
 
     @Override

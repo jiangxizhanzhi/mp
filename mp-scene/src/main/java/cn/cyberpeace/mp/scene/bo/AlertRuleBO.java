@@ -16,6 +16,9 @@ public class AlertRuleBO extends AlertRuleModel {
     @ApiModelProperty("主机对象集合")
     private List<String> hostList;
 
+//    虚拟机资源id集合
+    private List<String> vmResourceIdList;
+
     // 解析方法
     public void parseAlertConditions() {
         ObjectMapper objectMapper = new ObjectMapper();

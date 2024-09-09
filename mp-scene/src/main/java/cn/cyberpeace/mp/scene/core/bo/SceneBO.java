@@ -42,6 +42,8 @@ public class SceneBO extends BaseSceneBO<SceneModel, SceneBO> implements BaseSce
     private List<SceneStageRecorder.SceneStageRecord> stageList;
     @ApiModelProperty(value = "节点初始ip")
     private Map<String, List<String>> elementIpMap;
+    @ApiModelProperty(value = "资源组id")
+    private String resourceGroupId;
 
     @Override
     public SceneModel createModel() {

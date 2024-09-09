@@ -115,6 +115,9 @@ import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import com.azure.resourcemanager.compute.models.ComputeResourceType;
+import com.azure.resourcemanager.resourcegraph.ResourceGraphManager;
+import com.azure.resourcemanager.resourcegraph.models.QueryRequest;
+import com.azure.resourcemanager.resourcegraph.models.QueryResponse;
 import com.google.common.cache.Cache;
 import com.google.common.collect.Lists;
 import lombok.Data;
@@ -130,6 +133,9 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -261,6 +267,23 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     private static final String MONITOR = "monitor";
 
     private static final String ALL = "all";
+
+    private static final String KQL = "alertsmanagementresources\n" +
+            "// 只查报警\n" +
+            "| where type == 'microsoft.alertsmanagement/alerts'\n" +
+            "// 资源组\n" +
+            "| where properties[\"essentials\"][\"targetResource\"] startswith '%s'\n" +
+            "// 报警状态 Fired:已触发 Resolved:已解决\n" +
+            "| where properties[\"essentials\"][\"monitorCondition\"] in~ ('Fired')\n" +
+            "// 时间范围\n" +
+            "//| where properties[\"essentials\"][\"startDateTime\"] >= datetime(Fri, 06 Sep 2024 02:49:02 GMT) and \n" +
+            "//        properties[\"essentials\"][\"startDateTime\"] <= datetime(Sat, 07 Sep 2024 02:49:02 GMT)\n" +
+            "// 查询字段\n" +
+            "| project name,severity = properties[\"essentials\"][\"severity\"],targetResource = properties[\"essentials\"][\"targetResourceName\"],\n" +
+            "                            monitorCondition = properties[\"essentials\"][\"monitorCondition\"],targetResourceName = properties[\"essentials\"][\"targetResourceName\"],\n" +
+            "                            description = properties[\"essentials\"][\"description\"],\n" +
+            "                            startDateTime = datetime_add('hour',8,todatetime(properties[\"essentials\"][\"startDateTime\"])),essentials = properties[\"essentials\"]\n" +
+            "| order by todatetime(essentials[\"startDateTime\"]) desc";
 
     private List<CsceneInstanceRoleModel> readCsceneInstanceRoles(String[] csceneInstanceIds) {
         if (csceneInstanceIds == null || csceneInstanceIds.length == 0) {
@@ -1090,9 +1113,60 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                         return alertRuleBO;
                     })
                     .collect(Collectors.toList());
+
+            /*List<AlertRuleBO> alertRuleBOListByNodeId = alertRuleBOList
+                    .stream()
+                    .filter(alertRuleBO -> null != alertRuleBO.getHosts() && alertRuleBO.getHostList().contains(nodeId))
+                    .collect(Collectors.toList());*/
 //            查询报警
 
+            CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+            List<CloudPluginSceneElementBO> allElements = new ArrayList<>(pluginHandler.getElementMap().values());
+
+            for (AlertRuleBO alertRuleBO : alertRuleBOList) {
+                List<String> hostList = alertRuleBO.getHostList();
+                List<String> collect = allElements.stream().filter(element -> hostList.contains(element.getSrcElement().getId()))
+                        .filter(element -> StringUtils.isNotBlank(element.getResourceId()))
+                        .map(CloudPluginSceneElementBO::getResourceId)
+                        .collect(Collectors.toList());
+                alertRuleBO.setVmResourceIdList(collect);
+            }
+
+            IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(cloudType);
+            ResourceGraphManager resourceGraphManager = azureResourceManager.getResourceGraphManager();
+
+            String resourceGroupId = sceneHandler.getScene().getResourceGroupId();
+
+            String kql = String.format(KQL, resourceGroupId);
+            QueryRequest queryRequest = new QueryRequest();
+            queryRequest.withQuery(kql);
+            QueryResponse resources = resourceGraphManager.resourceProviders().resources(queryRequest);
 //            组装数据
+            if(resources.data()!=null) {
+                List<Map> dataList = (List<Map>) resources.data();
+                for (Map map : dataList) {
+                    String targetResourceName = map.get("targetResourceName").toString();
+                    String severity = map.get("severity").toString();
+                    String startDateTime = map.get("startDateTime").toString();
+                    String description = map.get("description").toString();
+
+                    // 将UTC时间字符串转换为ZonedDateTime
+                        DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+                    ZonedDateTime zonedDateTime = ZonedDateTime.parse(startDateTime, formatter);
+
+                    // 将ZonedDateTime转换为LocalDateTime
+                        ZoneId localZoneId = ZoneId.systemDefault(); // 获取本地时区
+                    LocalDateTime localDateTime1 = zonedDateTime.withZoneSameInstant(localZoneId).toLocalDateTime();
+
+                    ElementLogListModel elementLogListModel = new ElementLogListModel();
+                    elementLogListModel.setNodeName(targetResourceName);
+                    elementLogListModel.setLevel(Integer.valueOf(severity.substring(severity.length()-1)));
+                    elementLogListModel.setTime(localDateTime1);
+                    elementLogListModel.setDescription(description);
+                    elementLogListModel.setLogType("alert");
+                    logList.add(elementLogListModel);
+                }
+            }
         }
 
         // 设置total

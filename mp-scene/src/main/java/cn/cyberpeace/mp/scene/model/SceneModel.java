@@ -39,6 +39,8 @@ public class SceneModel extends BaseSceneModel implements BaseEventModel {
     private Integer stagePercentage;
     @DefaultStr
     private String stageList;
+    @DefaultStr
+    private String resourceGroupId;
 
     @Override
     public String genTarget() {
