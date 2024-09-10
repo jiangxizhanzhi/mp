@@ -139,6 +139,19 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
         int routerIndex = 1;
         int firewallIndex = 1;
         for (SceneConfigElementBO e : sceneHandler.getElementMap().values()) {
+
+            String areaId = sceneHandler.getAreaId() == null ? "" : sceneHandler.getAreaId();
+            Map<String, String> outPosition = e.getOuterPosition2();
+            if (outPosition == null) {
+                outPosition = new HashMap<>();
+            }
+            if (outPosition.containsKey(areaId)) {
+                e.setPosition2(outPosition.get(areaId));
+            } else {
+                // 如果未存需要查询的层位置 那么返回节点所在层的位置 否则前端会居中
+                e.setPosition2(outPosition.getOrDefault(e.getArea(), e.getPosition2()));
+            }
+
             CloudPluginSceneConfigElementBO pluginElement = pluginHandler.getElement(e.getId());
             Integer role = pluginElement.getRole();
             if (role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK || role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY) {

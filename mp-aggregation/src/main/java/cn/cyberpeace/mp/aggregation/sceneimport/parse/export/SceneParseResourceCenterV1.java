@@ -157,13 +157,13 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
                 } else if (pluginElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE
                         || pluginElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER
                         || pluginElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
-                    NodeElementParseResult nodeElementParseResult = this.buildNodeElementParseResult(element, pluginElement);
+                    NodeElementParseResult nodeElementParseResult = this.buildNodeElementParseResult(sceneHandler, element, pluginElement);
                     nodeElementParseResult.setId("server-" + serverIndex++);
                     id2Node.put(element.getId(), nodeElementParseResult);
                     nodes.add(nodeElementParseResult);
                 }
             } else {
-                NodeElementParseResult nodeElementParseResult = this.buildNodeElementParseResult(element, pluginElement);
+                NodeElementParseResult nodeElementParseResult = this.buildNodeElementParseResult(sceneHandler, element, pluginElement);
                 if (element.getType() == BaseSceneElementModel.Type.ROUTER) {
                     nodeElementParseResult.setId("router-" + routerIndex++);
                 } else if (element.getType() == BaseSceneElementModel.Type.FIREWALL) {
@@ -259,7 +259,20 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
         return networkElementParseResult;
     }
 
-    private NodeElementParseResult buildNodeElementParseResult(SceneElementBO e, CloudPluginSceneElementBO pluginElement) {
+    private NodeElementParseResult buildNodeElementParseResult(SceneHandler sceneHandler , SceneElementBO e, CloudPluginSceneElementBO pluginElement) {
+
+        String areaId = sceneHandler.getAreaId() == null ? "" : sceneHandler.getAreaId();
+        Map<String, String> outPosition = e.getOuterPosition2();
+        if (outPosition == null) {
+            outPosition = new HashMap<>();
+        }
+        if (outPosition.containsKey(areaId)) {
+            e.setPosition2(outPosition.get(areaId));
+        } else {
+            // 如果未存需要查询的层位置 那么返回节点所在层的位置 否则前端会居中
+            e.setPosition2(outPosition.getOrDefault(e.getArea(), e.getPosition2()));
+        }
+
         NodeElementParseResult nodeElementParseResult = new NodeElementParseResult();
         nodeElementParseResult.setFile(e.getFile());
         nodeElementParseResult.setImage(pluginElement.getImage());
