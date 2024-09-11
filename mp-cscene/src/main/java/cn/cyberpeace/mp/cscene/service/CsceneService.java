@@ -1,7 +1,21 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.impl.TenantUserServiceImpl;
 import cn.cyberpeace.mp.authbase.model.BasePermissionModel;
 import cn.cyberpeace.mp.base.common.BeanCommon;
@@ -50,17 +64,8 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigElem
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneConfigModel;
 import cn.cyberpeace.mp.sceneplugincollection.util.CollectionCommonConfigUtil;
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -85,6 +90,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     private CsceneSnapshotService csceneSnapshotService;
 
     private TenantUserServiceImpl tenantUserService;
+    
+    private UserService userService;
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
         if (csceneIds == null || csceneIds.length == 0) {
@@ -320,7 +327,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         ListObjServiceResult<CsceneModel> listResult = null;
         // 查询场景模板的授权信息
         if (Objects.nonNull(queryParams.getType()) && queryParams.getType() == CsceneModel.Type.TEMPLATE) {
-            List<String> ids = getCsceneIds();
+            List<String> ids = getCsceneIds(queryParams);
             if (CollectionUtils.isEmpty(ids)) {
                 return new ListObjServiceResult<>(new ArrayList<>(), 0);
             }
@@ -690,6 +697,37 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 scenePluginDataBO.setScene(cpcloudPluginScene);
             }
         }
+    }
+
+    private List<String> getCsceneIds(CsceneQueryParams queryParams) {
+        List<String> csceneIds = Lists.newArrayList();
+		if (Boolean.TRUE.equals(queryParams.getUser())) {
+            var currentUser = UserCommon.getCurrentUser();
+            String currentUserId = currentUser == null ? StringUtils.EMPTY : currentUser.getId();
+            HumanCondition humanCondition = new HumanCondition()
+                    .filterEqual(CsceneAuthModel::getOwner, currentUserId);
+            List<String> myCsceneIds = csceneAuthMapper.list(humanCondition).stream()
+                    .map(BasePermissionModel::getTarget).collect(Collectors.toList());
+            csceneIds.addAll(myCsceneIds);
+		}
+        if (Boolean.TRUE.equals(queryParams.getSystem())) {
+            HumanCondition humanCondition = new HumanCondition()
+                    .filterEqual(CsceneAuthModel::getOwner, AuthConstant.ROOT_USER_ID);
+            List<String> sysCsceneIds = csceneAuthMapper.list(humanCondition).stream()
+                    .map(BasePermissionModel::getTarget).collect(Collectors.toList());
+            csceneIds.addAll(sysCsceneIds);
+        }
+		if (Boolean.TRUE.equals(queryParams.getTeacher())) {
+			List<String> teacherIds = userService.getUserIdsByRoleId(AuthConstant.ROLE_TEACHER_ID);
+			if (!teacherIds.isEmpty()) {
+				HumanCondition humanCondition = new HumanCondition()
+						.filterIn(CsceneAuthModel::getOwner, teacherIds.toArray());
+				List<String> teacherCsceneIds = csceneAuthMapper.list(humanCondition).stream()
+						.map(BasePermissionModel::getTarget).collect(Collectors.toList());
+				csceneIds.addAll(teacherCsceneIds);
+			}
+		}
+        return csceneIds;
     }
 
     private List<String> getCsceneIds() {

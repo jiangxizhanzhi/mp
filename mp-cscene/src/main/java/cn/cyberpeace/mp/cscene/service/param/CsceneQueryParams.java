@@ -17,4 +17,13 @@ import lombok.NoArgsConstructor;
 public class CsceneQueryParams extends QueryParams {
     @ApiModelProperty(value = "模板类型")
     private Integer type;
+
+    @ApiModelProperty(value = "是否查看系统拓扑")
+    private Boolean system;
+
+    @ApiModelProperty(value = "是否查看教师拓扑")
+    private Boolean teacher;
+
+    @ApiModelProperty(value = "是否查看我的拓扑")
+    private Boolean user;
 }
