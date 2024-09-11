@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.service.impl.TenantUserServiceImpl;
 import cn.cyberpeace.mp.authbase.model.BasePermissionModel;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -35,6 +36,7 @@ import cn.cyberpeace.mp.cscene.service.taskpool.CsceneSnapshotDeleteTaskPool;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
@@ -44,6 +46,11 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigElementBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneConfigModel;
+import cn.cyberpeace.mp.sceneplugincollection.util.CollectionCommonConfigUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -464,6 +471,33 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         var csceneHandler = new CsceneHandler(csceneBO, context);
         csceneHandler.save();
         return new ServiceResult<>(csceneHandler.toData());
+    }
+
+    public void addCollectionPlugin(CsceneBO csceneBO) {
+        CollectionPluginSceneConfigModel scene = new CollectionPluginSceneConfigModel();
+        scene.setEnableProbeCollect(true);
+        scene.setEnableFlowCollect(false);
+        scene.setEnableFlowMirror(false);
+
+        String defaultBizProbesContent = CollectionCommonConfigUtil.getConfigString(CollectionCommonConfigUtil.DEFAULT_BIZ_PROBES);
+        List<Probe> defaultBizProbes = JsonCommon.snakeParse(defaultBizProbesContent, new TypeReference<List<Probe>>() {
+        });
+        Map<String, Map<String, Object>> pluginElements = new HashMap<>();
+        for (SceneConfigElementBO e : csceneBO.getSceneConfig().getTopology().getElements()) {
+            CollectionPluginSceneConfigElementBO elementModel = new CollectionPluginSceneConfigElementBO();
+            elementModel.setEnableProbeCollect(true);
+            elementModel.setProbes(defaultBizProbes);
+            pluginElements.put(e.getId(), JsonCommon.beanToSnakeMap(elementModel));
+        }
+
+        ScenePluginDataBO pluginData = new ScenePluginDataBO();
+        pluginData.setScene(JsonCommon.beanToSnakeMap(scene));
+        pluginData.setElements(pluginElements);
+        pluginData.setElementPorts(new HashMap<>());
+
+
+        csceneBO.getSceneConfig().getPlugins()
+                .put(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY, pluginData);
     }
 
     public ServiceResult<Boolean> deleteById(String id, boolean logic, boolean withInstance, CsceneContextBO context) {

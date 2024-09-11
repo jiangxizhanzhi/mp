@@ -86,6 +86,8 @@ public class ResourceCenterService {
         // 转换bo
         CsceneBO csceneBO = cSceneBoConverter.convert(ymlParseResult, imageInfos, fdfsSceneFilePath);
         csceneBO.setLogo(fdfsLogoFilePath);
+
+        csceneService.addCollectionPlugin(csceneBO);
         // 保存
         return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
     }

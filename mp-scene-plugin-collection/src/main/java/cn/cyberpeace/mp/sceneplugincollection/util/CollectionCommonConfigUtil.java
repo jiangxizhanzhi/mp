@@ -15,7 +15,7 @@ public class CollectionCommonConfigUtil {
     private CollectionCommonConfigUtil() {
 
     }
-
+    public static final String DEFAULT_BIZ_PROBES = "default_biz_probes";
     private static final String CONFIG_PATH_SUFFIX = ".json";
 
     public static final String DEFAULT_CUSTOM_PROBES = "default_custom_probes";
