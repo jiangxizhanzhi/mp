@@ -480,7 +480,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         scene.setEnableFlowMirror(false);
 
         String defaultBizProbesContent = CollectionCommonConfigUtil.getConfigString(CollectionCommonConfigUtil.DEFAULT_BIZ_PROBES);
-        List<Probe> defaultBizProbes = JsonCommon.snakeParse(defaultBizProbesContent, new TypeReference<List<Probe>>() {
+        List<Probe> defaultBizProbes = JsonCommon.snakeParse(defaultBizProbesContent, new TypeReference<>() {
         });
         Map<String, Map<String, Object>> pluginElements = new HashMap<>();
         for (SceneConfigElementBO e : csceneBO.getSceneConfig().getTopology().getElements()) {
@@ -497,7 +497,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
 
         csceneBO.getSceneConfig().getPlugins()
-                .put(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY, pluginData);
+                .put(PluginConstant.PLUGIN_KEY, pluginData);
     }
 
     public ServiceResult<Boolean> deleteById(String id, boolean logic, boolean withInstance, CsceneContextBO context) {
