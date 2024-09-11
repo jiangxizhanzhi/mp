@@ -1,5 +1,22 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.google.common.collect.Lists;
+
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
@@ -90,22 +107,8 @@ import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.collection.CollUtil;
-import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.Resource;
-import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -1754,4 +1757,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         csceneElementCommon.setData(accessUsers);
         CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportElementCommon(csceneElementCommon));
     }
+
+	public void switchRecording(List<String> csceneIds, Boolean button) {
+		for (String csceneId : csceneIds) {
+			String sceneId = this.getSceneId(csceneId);
+			var s = new SceneHandler(sceneId, null, null);
+			CloudScenePluginHandler pluginHandler = s.getPluginHandler("cpcloud");
+			pluginHandler.getScene().setEnableRecording(button);
+			s.save();
+		}
+	}
 }
