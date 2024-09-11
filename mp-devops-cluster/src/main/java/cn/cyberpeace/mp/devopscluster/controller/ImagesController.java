@@ -102,6 +102,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -184,10 +185,23 @@ public class ImagesController {
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult add(@RequestBody ImageRequest request){
+        if (request.getExtVm() != null && request.getExtVm().getDataDisk() != null) {
+            request.getExtVm().setNetIfCnt(2);
+        }
         request.setLogo(FsCommon.getFileKey(request.getLogo()));
         validImageRequest(request);
         imagesConverter.add(request);
         return ResultCommon.success();
+    }
+
+    /**
+     * 新增
+     */
+    @ApiOperation("查询第二块磁盘可配置大小，单位G")
+    @GetMapping("/get_data_disk")
+    public ServiceResult<List<Integer>> getDataDisk() {
+        List<Integer> dataDisk = Arrays.asList(10, 20, 30, 40, 50, 70, 100, 150, 250, 500);
+        return new ServiceResult<>(dataDisk).asResult();
     }
 
     /**
@@ -198,6 +212,9 @@ public class ImagesController {
     @PostMapping("/update")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "修改镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult update(@RequestBody ImageRequest request){
+        if (request.getExtVm() != null && request.getExtVm().getDataDisk() != null) {
+            request.getExtVm().setNetIfCnt(2);
+        }
         request.setLogo(FsCommon.getFileKey(request.getLogo()));
         validImageRequest(request);
         if (StringUtils.isBlank(request.getUuid())){

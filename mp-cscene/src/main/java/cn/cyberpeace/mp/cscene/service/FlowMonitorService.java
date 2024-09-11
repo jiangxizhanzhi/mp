@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
+import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
@@ -472,12 +473,11 @@ public class FlowMonitorService {
         }
 
         if (Objects.isNull(startTime)) {
-            // todo 默认时间间隔8小时
-            startTime = endTime.minusHours(4);
+            startTime = endTime.minusSeconds(BeanCommon.getBean(CsceneAppConfig.class).getFlowSeconds());
         }
 
         if (Objects.isNull(segmentCount)) {
-            segmentCount = 40;
+            segmentCount = BeanCommon.getBean(CsceneAppConfig.class).getFlowSegment();
         }
 
         // todo 转好
