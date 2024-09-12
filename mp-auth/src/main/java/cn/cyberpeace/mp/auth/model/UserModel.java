@@ -136,6 +136,10 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime lastLogin;
 
+    @ApiModelProperty(value = "离线/在线状态, 0-离线, 1-在线")
+    @DefaultInt
+    private Integer onlineStatus;
+
     @Builder
     public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin) {
         super(id, createTime, updateTime);
@@ -160,6 +164,13 @@ public class UserModel extends BaseModel implements Serializable {
         this.mobile = mobile;
         this.address = address;
     }
+
+
+    public static class OnlineStatus {
+        public static final Integer OFFLINE = 0;
+        public static final Integer ONLINE = 1;
+    }
+
 
     public static class Status {
         // 启用与否

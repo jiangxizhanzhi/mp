@@ -155,7 +155,12 @@ public class JwtUtils {
 
     public static UserInfo validateToken(String token) {
         UserInfo user = getUserInfo(token);
+        String oldSecret = user.getTokenSecret();
         String jwtSecret = generateJwtSecret(user);
+        String newSecret = user.getTokenSecret();
+        if (Objects.nonNull(oldSecret) && !oldSecret.equals(newSecret)) {
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_REPEAT_LOGIN);
+        }
         try {
             Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
             JWTVerifier verifier = JWT.require(algorithm).build();

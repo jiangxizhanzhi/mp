@@ -64,29 +64,34 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
             throws IOException {
         UserModel user = null;
         try {
+            //如果重复登录，这边会报错。然后不会走下面的逻辑了。
             user = JwtCommon.verifyToken(request);
+            String userName = null;
+            if (Objects.nonNull(user)) {
+                // 这个版本默认logout不刷新secret字段，因为登录时候，就刷新了。不能登出的时候再刷新。
+                if (Objects.nonNull(authConfig.getLogoutResetSecret()) && authConfig.getLogoutResetSecret()) {
+                    if (!StringUtils.equals(user.getId(), authConfig.getLogoutKeepSecretUser())) {
+                        // 退出是否重置秘钥
+                        UserModel updateUser = new UserModel();
+                        updateUser.setId(user.getId());
+                        updateUser.initDefault("tokenSecret");
+                        userService.update(updateUser);
+                    }
+                }
+                userName = user.getName();
+                recordLogoutLog(user, request);
+                userEventPublisher.publishEvent(new UserLogoutEvent(JsonCommon.beanToMap(user)));
+                //用户状态变成下线
+                userService.userAccountOffline(user);
+            }
+
+            if (StringUtils.isNotBlank(userName)) {
+                log.info("user:{} has logout!", userName);
+            }
         } catch (Exception e) {
             log.error("logout verify token error for {}", e.getMessage());
         }
-        String userName = null;
-        if (Objects.nonNull(user)) {
-            if (Objects.nonNull(authConfig.getLogoutResetSecret()) && authConfig.getLogoutResetSecret()) {
-                if (!StringUtils.equals(user.getId(), authConfig.getLogoutKeepSecretUser())) {
-                    // 退出是否重置秘钥
-                    UserModel updateUser = new UserModel();
-                    updateUser.setId(user.getId());
-                    updateUser.initDefault("tokenSecret");
-                    userService.update(updateUser);
-                }
-            }
-            userName = user.getName();
-            recordLogoutLog(user, request);
-            userEventPublisher.publishEvent(new UserLogoutEvent(JsonCommon.beanToMap(user)));
-        }
 
-        if (StringUtils.isNotBlank(userName)) {
-            log.info("user:{} has logout!", userName);
-        }
 
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);

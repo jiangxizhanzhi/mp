@@ -21,6 +21,7 @@ public enum AuthErrorCode implements ErrorCode {
     INVALID_CLAIM("MP-110113", "token_invalid_claim"),
     JWT_DECODE("MP-110114", "token_jwt_decode"),
     ILLEGAL_ARGUMENT("MP-110115", "token_illegal_argument"),
+    ACCOUNT_REPEAT_LOGIN("MP-110116", "account_repeat_login"),
 
     NEED_UPDATE_CREDENTIALS("MP-110005", "need_update_credentials"),
     ACCOUNT_NOT_LOGIN("MP-110006", "account_not_login"),

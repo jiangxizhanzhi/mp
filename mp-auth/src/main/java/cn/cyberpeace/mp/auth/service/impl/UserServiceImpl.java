@@ -28,6 +28,7 @@ import cn.cyberpeace.mp.auth.util.*;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -1284,6 +1285,34 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             return result;
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    public void userAccountOnline(UserModel userModel) {
+        if (Objects.isNull(userModel) || StringUtils.isBlank(userModel.getId())) {
+            return;
+        }
+        userModel.setOnlineStatus(UserModel.OnlineStatus.ONLINE);
+        this.getModelMapper().filterUpdate(userModel, new HumanCondition().filterEqual(UserModel::getId, userModel.getId()));
+    }
+
+    @Override
+    public void userAccountOffline(UserModel userModel) {
+        if (Objects.isNull(userModel) || StringUtils.isBlank(userModel.getId())) {
+            return;
+        }
+        userModel.setOnlineStatus(UserModel.OnlineStatus.OFFLINE);
+        this.getModelMapper().filterUpdate(userModel, new HumanCondition().filterEqual(UserModel::getId, userModel.getId()));
+    }
+
+    @Override
+    public void initUserSecret(UserModel userModel) {
+        if (StringUtils.isBlank(userModel.getId())) {
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
+        } else {
+            userModel.setTokenSecret(TextUtils.uuid());
+            this.getModelMapper().filterUpdate(userModel, new HumanCondition().filterEqual(UserModel::getId, userModel.getId()));
+        }
     }
 }
 

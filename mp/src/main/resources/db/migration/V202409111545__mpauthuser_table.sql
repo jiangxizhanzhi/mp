@@ -1,0 +1,1 @@
+alter table mp_auth_user add column `online_status` int(2) default 0 comment '用户账号在线状态,0-离线，1-在线';
