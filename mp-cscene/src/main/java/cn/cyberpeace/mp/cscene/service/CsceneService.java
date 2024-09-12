@@ -328,7 +328,13 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         ListObjServiceResult<CsceneModel> listResult = null;
         // 查询场景模板的授权信息
         if (Objects.nonNull(queryParams.getType()) && queryParams.getType() == CsceneModel.Type.TEMPLATE) {
-            List<String> ids = getCsceneIds(queryParams);
+			List<String> ids;
+			if (null == queryParams.getSystem()
+					&& null == queryParams.getTeacher() & null == queryParams.getUser()) {
+				ids = getCsceneIds();
+			} else {
+				ids = getCsceneIds(queryParams);
+			}
             if (CollectionUtils.isEmpty(ids)) {
                 return new ListObjServiceResult<>(new ArrayList<>(), 0);
             }
