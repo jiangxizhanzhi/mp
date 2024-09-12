@@ -24,7 +24,7 @@ public class CollectionCommonConfigUtil {
 
     public static final String MODIFY_PROBES = "modify_probes";
 
-    private static final String[] CONFIGS = new String[]{DEFAULT_CUSTOM_PROBES, LOG_PROBE_LOCATIONS, MODIFY_PROBES};
+    private static final String[] CONFIGS = new String[]{DEFAULT_CUSTOM_PROBES, LOG_PROBE_LOCATIONS, MODIFY_PROBES, DEFAULT_BIZ_PROBES};
 
     private static volatile boolean LOADED = false;
 

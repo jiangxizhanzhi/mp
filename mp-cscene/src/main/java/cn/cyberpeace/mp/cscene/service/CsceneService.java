@@ -90,7 +90,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     private CsceneSnapshotService csceneSnapshotService;
 
     private TenantUserServiceImpl tenantUserService;
-    
+
+    @Autowired
     private UserService userService;
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
@@ -487,8 +488,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         scene.setEnableFlowMirror(false);
 
         String defaultBizProbesContent = CollectionCommonConfigUtil.getConfigString(CollectionCommonConfigUtil.DEFAULT_BIZ_PROBES);
-        List<Probe> defaultBizProbes = JsonCommon.snakeParse(defaultBizProbesContent, new TypeReference<>() {
-        });
+        List<Probe> defaultBizProbes = JsonCommon.snakeParse(defaultBizProbesContent, new TypeReference<>() {});
         Map<String, Map<String, Object>> pluginElements = new HashMap<>();
         for (SceneConfigElementBO e : csceneBO.getSceneConfig().getTopology().getElements()) {
             CollectionPluginSceneConfigElementBO elementModel = new CollectionPluginSceneConfigElementBO();
@@ -705,25 +705,25 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             var currentUser = UserCommon.getCurrentUser();
             String currentUserId = currentUser == null ? StringUtils.EMPTY : currentUser.getId();
             HumanCondition humanCondition = new HumanCondition()
-                    .filterEqual(CsceneAuthModel::getOwner, currentUserId);
-            List<String> myCsceneIds = csceneAuthMapper.list(humanCondition).stream()
-                    .map(BasePermissionModel::getTarget).collect(Collectors.toList());
+                    .filterEqual(CsceneModel::getCreateUser, currentUserId);
+            List<String> myCsceneIds = getModelMapper().list(humanCondition).stream()
+                    .map(CsceneModel::getId).collect(Collectors.toList());
             csceneIds.addAll(myCsceneIds);
 		}
         if (Boolean.TRUE.equals(queryParams.getSystem())) {
             HumanCondition humanCondition = new HumanCondition()
-                    .filterEqual(CsceneAuthModel::getOwner, AuthConstant.ROOT_USER_ID);
-            List<String> sysCsceneIds = csceneAuthMapper.list(humanCondition).stream()
-                    .map(BasePermissionModel::getTarget).collect(Collectors.toList());
+                    .filterEqual(CsceneModel::getCreateUser, AuthConstant.ROOT_USER_ID);
+            List<String> sysCsceneIds = getModelMapper().list(humanCondition).stream()
+                    .map(CsceneModel::getId).collect(Collectors.toList());
             csceneIds.addAll(sysCsceneIds);
         }
 		if (Boolean.TRUE.equals(queryParams.getTeacher())) {
 			List<String> teacherIds = userService.getUserIdsByRoleId(AuthConstant.ROLE_TEACHER_ID);
 			if (!teacherIds.isEmpty()) {
 				HumanCondition humanCondition = new HumanCondition()
-						.filterIn(CsceneAuthModel::getOwner, teacherIds.toArray());
-				List<String> teacherCsceneIds = csceneAuthMapper.list(humanCondition).stream()
-						.map(BasePermissionModel::getTarget).collect(Collectors.toList());
+						.filterIn(CsceneModel::getCreateUser, teacherIds.toArray());
+				List<String> teacherCsceneIds = getModelMapper().list(humanCondition).stream()
+						.map(CsceneModel::getId).collect(Collectors.toList());
 				csceneIds.addAll(teacherCsceneIds);
 			}
 		}

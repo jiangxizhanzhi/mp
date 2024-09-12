@@ -48,8 +48,6 @@ public class CsceneController implements BaseModelListControllerBase {
 
     private CsceneSpecialService csceneSpecialService;
 
-    private CsceneService csceneService;
-
     private BaseAppConfig baseAppConfig;
 
     private CsceneActionRequest formatActionRequest(CsceneActionRequest request, String paramId) {
@@ -164,7 +162,7 @@ public class CsceneController implements BaseModelListControllerBase {
                 CsceneLogUtils.recordSceneConfigLog(result.getData(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());
             }
         }
-        csceneService.addCollectionPlugin(csceneBO);
+        getModelService().addCollectionPlugin(csceneBO);
         return result;
     }
 
