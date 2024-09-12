@@ -13,6 +13,7 @@ import com.azure.identity.ClientSecretCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.resourcemanager.AzureResourceManager;
+import com.azure.resourcemanager.loganalytics.LogAnalyticsManager;
 import com.azure.resourcemanager.monitor.MonitorManager;
 import com.azure.resourcemanager.resourcegraph.ResourceGraphManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,7 @@ public class PrivateAzureResourceManager implements IAzureResourceManager {
     //当前云环境监控管理器
     private static MonitorManager AZURE_MONITOR_MANAGER;
     private static ResourceGraphManager AZURE_RESOURCE_GRAPH_MANAGER;
+    private static LogAnalyticsManager AZURE_LOG_ANALYTICS_MANAGER;
 
     //当前云环境账号
     private static MicrosoftAzureUserModel user;
@@ -150,6 +152,29 @@ public class PrivateAzureResourceManager implements IAzureResourceManager {
             }
         }
         return AZURE_RESOURCE_GRAPH_MANAGER;
+    }
+
+    @Override
+    public LogAnalyticsManager getLogAnalyticsManager() {
+        if (AZURE_LOG_ANALYTICS_MANAGER == null) {
+            synchronized (this) {
+                if (AZURE_LOG_ANALYTICS_MANAGER == null) {
+                    TokenCredential credential = getTokenCredential();
+                    MicrosoftAzureUserModel localAzurer = null;
+                    if (user == null) {
+                        localAzurer = getUser();
+                    }else{
+                        localAzurer = user;
+                    }
+                    AzureProfile profile = new AzureProfile(localAzurer.getAzureTenantId(),
+                            subscription,
+                            AzureEnvironment.AZURE);
+                    AZURE_LOG_ANALYTICS_MANAGER = LogAnalyticsManager.configure()
+                            .authenticate(credential, profile);
+                }
+            }
+        }
+        return AZURE_LOG_ANALYTICS_MANAGER;
     }
 
     @Override

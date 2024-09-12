@@ -18,12 +18,15 @@ import cn.cyberpeace.mp.sceneplugincloud.util.NetworkSecurityGroupUtils;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.Region;
+import com.azure.core.util.Context;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.fluent.models.ResourceSkuInner;
 import com.azure.resourcemanager.compute.models.*;
 import com.azure.resourcemanager.monitor.MonitorManager;
+import com.azure.resourcemanager.monitor.fluent.DataCollectionRuleAssociationsClient;
 import com.azure.resourcemanager.monitor.fluent.MonitorClient;
 import com.azure.resourcemanager.monitor.fluent.ScheduledQueryRulesClient;
+import com.azure.resourcemanager.monitor.fluent.models.DataCollectionRuleAssociationProxyOnlyResourceInner;
 import com.azure.resourcemanager.monitor.fluent.models.ScheduledQueryRuleResourceInner;
 import com.azure.resourcemanager.monitor.models.*;
 import com.azure.resourcemanager.network.models.*;
@@ -203,10 +206,9 @@ public class AzureVirtualMachine {
     }
 
     public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement,
-                       List<VirtualNic> virtualNics, String userData, List<AlertRuleBO> alertRuleBOList) {
+                       List<VirtualNic> virtualNics, String userData, List<AlertRuleBO> alertRuleBOList, String dataCollectionRulesId) {
 //        cloudElement.setResourceId("1233");
 //        cloudElement.setPublicIpAddress("20.30.40.5");
-
 
 //        TODO 资源不浪费
 
@@ -224,8 +226,36 @@ public class AzureVirtualMachine {
 //        设置入站规则
 //        更新网络安全组
 
-        SceneElementBO srcElement = cloudElement.getSrcElement();
+        createNsg(cloudElement, groupName);
 
+        configureMonitoringForVirtualMachine(cloudElement, dataCollectionRulesId, vm, groupName);
+
+/*
+        Optional<AlarmConditionModel> customLogSearch = alertRuleBOList.stream().flatMap(alertRuleBO -> alertRuleBO.getAlarmConditionList().stream())
+                .filter(alarmConditionModel -> alarmConditionModel.getType().equals("Custom Log Search"))
+                .findAny();
+        if (customLogSearch.isPresent()) {
+//            设置诊断设置
+            azureResourceManager
+                    .diagnosticSettings()
+                    .define("vm-diagnostic-settings")
+                    .withResource(vm.id())
+                    .withStorageAccount("/subscriptions/c87ba926-f7c2-4d53-8b8e-89245dc92e26/resourceGroups/upload_resources/providers/Microsoft.Storage/storageAccounts/storage06004")
+                    .create();
+        }*/
+
+        createAlertRules(alertRuleBOList, vm, groupName);
+
+    }
+
+    /**
+     * 创建网络安全组
+     *
+     * @param cloudElement
+     * @param groupName
+     */
+    private void createNsg(CloudPluginSceneElementBO cloudElement, String groupName) {
+        SceneElementBO srcElement = cloudElement.getSrcElement();
         for (SceneElementPortBO port : srcElement.getPorts()) {
             List<AccessMode> accessModes = port.getAccessModes();
             String ip = port.getIp();
@@ -257,20 +287,16 @@ public class AzureVirtualMachine {
                 }
             }
         }
-        Optional<AlarmConditionModel> customLogSearch = alertRuleBOList.stream().flatMap(alertRuleBO -> alertRuleBO.getAlarmConditionList().stream())
-                .filter(alarmConditionModel -> alarmConditionModel.getType().equals("Custom Log Search"))
-                .findAny();
-        if (customLogSearch.isPresent()) {
-//            设置诊断设置
-            azureResourceManager
-                    .diagnosticSettings()
-                    .define("vm-diagnostic-settings")
-                    .withResource(vm.id())
-                    .withStorageAccount("/subscriptions/c87ba926-f7c2-4d53-8b8e-89245dc92e26/resourceGroups/upload_resources/providers/Microsoft.Storage/storageAccounts/storage06004")
-                    .create();
-        }
+    }
 
-//        设置报警规则
+    /**
+     * 创建报警规则
+     *
+     * @param alertRuleBOList
+     * @param vm
+     * @param groupName
+     */
+    private void createAlertRules(List<AlertRuleBO> alertRuleBOList, VirtualMachine vm, String groupName) {
         if (alertRuleBOList.size() > 0) {
             for (AlertRuleBO alertRuleBO : alertRuleBOList) {
                 List<AlarmConditionModel> alarmConditionList = alertRuleBO.getAlarmConditionList();
@@ -288,25 +314,37 @@ public class AzureVirtualMachine {
                     ScheduledQueryRuleCriteria criteria = new ScheduledQueryRuleCriteria();
                     criteria.withAllOf(conditions);
 
+//                      TODO 暂默认30分钟
+                    long windowSize = 1800;
+                    Duration frequency = Duration.parse(alarmConditionModel.getFrequency());
+                    long frequencyMin = frequency.getSeconds();
+                    if (frequencyMin > windowSize) {
+                        windowSize = frequencyMin;
+                    }
+
                     ScheduledQueryRuleResourceInner rule = new ScheduledQueryRuleResourceInner();
                     rule.withCriteria(criteria);
                     rule.withSeverity(AlertSeverity.fromLong(alertRuleBO.getAlarmLevel()));
-//        聚合粒度  TODO 暂默认30分钟
-                    rule.withWindowSize(Duration.ofMinutes(30));
+//        聚合粒度
+                    rule.withWindowSize(Duration.ofSeconds(windowSize));
 //        评估频率
                     rule.withEvaluationFrequency(Duration.parse(alarmConditionModel.getFrequency()));
                     rule.withLocation(Region.ASIA_EAST.name());
                     rule.withScopes(Arrays.asList(vm.id()));
                     MonitorClient monitorClient = monitorManager.serviceClient();
                     ScheduledQueryRulesClient scheduledQueryRules = monitorClient.getScheduledQueryRules();
-                    scheduledQueryRules.createOrUpdate(groupName, alertRuleBO.getName(), rule);
+                    try {
+                        scheduledQueryRules.createOrUpdate(groupName, alertRuleBO.getName()+"-"+vm.name(), rule);
+                    } catch (Exception e) {
+                        log.error(" ScheduledQueryAlert create erro,ScheduledQueryAlertName: {}", alertRuleBO.getName());
+                    }
 
                 } else if (alarmConditionModel != null) {
 
                     // 创建监视警报
                     MetricAlert.DefinitionStages.WithCriteriaDefinition withCriteriaDefinition = azureResourceManager.alertRules().metricAlerts()
 //                预警规则名称
-                            .define(alertRuleBO.getName())
+                            .define(alertRuleBO.getName()+"-"+vm.name())
 //                资源组
                             .withExistingResourceGroup(groupName)
 //                虚拟机id
@@ -344,11 +382,73 @@ public class AzureVirtualMachine {
                                     .attach();
                         }
                     }
-                    attach.create();
+                    try {
+                        attach.create();
+                    } catch (Exception e) {
+                        log.error(" MetricAlert create erro,MetricAlertName: {}", alertRuleBO.getName());
+                    }
                 }
             }
         }
+    }
 
+    /**
+     * 配置虚拟机的监控
+     *
+     * @param cloudElement
+     * @param dataCollectionRulesId
+     * @param vm
+     * @param groupName
+     */
+    private void configureMonitoringForVirtualMachine(CloudPluginSceneElementBO cloudElement, String dataCollectionRulesId, VirtualMachine vm, String groupName) {
+        if (StringUtils.isNotBlank(dataCollectionRulesId)) {
+
+            //        数据收集规则与虚拟机绑定
+            DataCollectionRuleAssociationProxyOnlyResourceInner inner = new DataCollectionRuleAssociationProxyOnlyResourceInner();
+            inner.withDataCollectionRuleId(dataCollectionRulesId);
+
+            DataCollectionRuleAssociationsClient dataCollectionRuleAssociations = monitorManager.serviceClient().getDataCollectionRuleAssociations();
+            dataCollectionRuleAssociations
+                    .createWithResponse(vm.id(),
+                            vm.name(),
+                            inner,
+                            Context.NONE);
+
+//        虚拟机启用系统分配的托管标识
+            azureResourceManager
+                    .virtualMachines()
+                    .getByResourceGroup(groupName, vm.name())
+                    .update()
+                    .withSystemAssignedManagedServiceIdentity()
+                    .apply();
+
+//        安装监视器扩展
+            if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudElement.getVmType().toLowerCase())) {
+                azureResourceManager
+                        .virtualMachines()
+                        .getByResourceGroup(groupName, vm.name())
+                        .update()
+                        .defineNewExtension("AzureMonitorWindowsAgent")
+                        .withPublisher("Microsoft.Azure.Monitor")
+                        .withType("AzureMonitorWindowsAgent")
+                        .withVersion("1.0")
+                        .withMinorVersionAutoUpgrade()
+                        .attach()
+                        .apply();
+            } else {
+                azureResourceManager
+                        .virtualMachines()
+                        .getByResourceGroup(groupName, vm.name())
+                        .update()
+                        .defineNewExtension("AzureMonitorLinuxAgent")
+                        .withPublisher("Microsoft.Azure.Monitor")
+                        .withType("AzureMonitorLinuxAgent")
+                        .withVersion("1.0")
+                        .withMinorVersionAutoUpgrade()
+                        .attach()
+                        .apply();
+            }
+        }
     }
 
     public void delete(CloudPluginSceneElementBO cloudElement) {

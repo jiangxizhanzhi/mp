@@ -29,6 +29,15 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementNetworkUtils;
+import com.azure.core.http.rest.Response;
+import com.azure.core.management.Region;
+import com.azure.core.util.Context;
+import com.azure.resourcemanager.loganalytics.LogAnalyticsManager;
+import com.azure.resourcemanager.loganalytics.models.Workspace;
+import com.azure.resourcemanager.loganalytics.models.WorkspaceSku;
+import com.azure.resourcemanager.loganalytics.models.WorkspaceSkuNameEnum;
+import com.azure.resourcemanager.monitor.fluent.models.DataCollectionRuleResourceInner;
+import com.azure.resourcemanager.monitor.models.*;
 import com.azure.resourcemanager.network.models.Network;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -199,6 +208,10 @@ public class AzureCreateHandler extends CreateHandler {
             }
             getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_NETWORK);
 
+
+            Response<DataCollectionRuleResourceInner> workspaceAndDataCollectionRules = createWorkspaceAndDataCollectionRules(groupName);
+            String dataCollectionRulesId = workspaceAndDataCollectionRules.getValue().id();
+
             // 再创建网关 和 防火墙
             getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_GATEWAY);
             getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_GATEWAY);
@@ -244,7 +257,7 @@ public class AzureCreateHandler extends CreateHandler {
 //                处理云场景无登录按钮、接收虚拟端口信息
                 receiveVirtualPortInfo(element, virtualNics);
                 String s = combineInitCommand(element);
-                AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics, combineInitCommand(element), alertRuleBOListByNodeId);
+                AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics, combineInitCommand(element), alertRuleBOListByNodeId,dataCollectionRulesId);
                 Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_VIRTUAL_MACHINE, task);
                 createVirtualMachineTasks.add(formatTask);
             }
@@ -307,6 +320,57 @@ public class AzureCreateHandler extends CreateHandler {
 //            resourceService.getManager().resourceGroups().deleteByName(groupName);
             throw new MpRuntimeException(BaseErrorCode.ERROR, e);
         }
+    }
+
+    /**
+     * 创建workspace / data collection rules
+     * @param groupName
+     */
+    private Response<DataCollectionRuleResourceInner> createWorkspaceAndDataCollectionRules(String groupName) {
+        Workspace workspace = resourceService
+                .getLogAnalyticsManager()
+                .workspaces().define("Workspace-"+ groupName)
+                .withRegion(Region.ASIA_EAST)
+                .withExistingResourceGroup(groupName)
+                .withSku(new WorkspaceSku().withName(WorkspaceSkuNameEnum.PER_GB2018))
+                .create();
+
+//        设置数据收集规则
+        DataCollectionRuleResourceInner dataCollectionRuleResourceInner = new DataCollectionRuleResourceInner();
+        DataCollectionRuleDataSources dataCollectionRuleDataSources = new DataCollectionRuleDataSources();
+        PerfCounterDataSource perfSource1 = new PerfCounterDataSource()
+                .withName("perfCounterDataSource")
+                .withCounterSpecifiers(Arrays.asList( "\\VmInsights\\DetailedMetrics"))
+                .withStreams(Arrays.asList( KnownPerfCounterDataSourceStreams.MICROSOFT_INSIGHTS_METRICS))
+                .withSamplingFrequencyInSeconds(60);// 性能计数器源
+
+        dataCollectionRuleDataSources.withPerformanceCounters(Arrays.asList(perfSource1));
+
+        DataCollectionRuleDestinations dataCollectionRuleDestinations = new DataCollectionRuleDestinations();
+        LogAnalyticsDestination logAnalyticsDestination = new LogAnalyticsDestination()
+                .withWorkspaceResourceId(workspace.id())
+                .withName("LogAnalyticsDestination");// 将数据发送到 Log Analytics
+        dataCollectionRuleDestinations.withLogAnalytics(Arrays.asList(logAnalyticsDestination));
+
+        dataCollectionRuleResourceInner.withLocation(Region.ASIA_EAST.name())  // 设置数据收集规则的位置
+                .withDataSources(dataCollectionRuleDataSources)
+                .withDestinations(dataCollectionRuleDestinations)
+                .withDataFlows(
+                        Arrays.asList(
+                                new DataFlow()
+                                        .withStreams(Arrays.asList(KnownDataFlowStreams.MICROSOFT_INSIGHTS_METRICS,KnownDataFlowStreams.MICROSOFT_PERF))
+                                        .withDestinations(Arrays.asList("LogAnalyticsDestination"))
+                        )
+                );
+
+        return resourceService
+                .getMonitorManager()
+                .serviceClient()
+                .getDataCollectionRules()
+                .createWithResponse(groupName,
+                        "MSVMI-"+ groupName,
+                        dataCollectionRuleResourceInner,
+                        Context.NONE);
     }
 
     /**

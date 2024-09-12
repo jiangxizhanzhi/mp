@@ -275,9 +275,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             "| where properties[\"essentials\"][\"targetResource\"] startswith '%s'\n" +
             "// 报警状态 Fired:已触发 Resolved:已解决\n" +
             "| where properties[\"essentials\"][\"monitorCondition\"] in~ ('Fired')\n" +
-            "// 时间范围\n" +
-            "//| where properties[\"essentials\"][\"startDateTime\"] >= datetime(Fri, 06 Sep 2024 02:49:02 GMT) and \n" +
-            "//        properties[\"essentials\"][\"startDateTime\"] <= datetime(Sat, 07 Sep 2024 02:49:02 GMT)\n" +
             "// 查询字段\n" +
             "| project name,severity = properties[\"essentials\"][\"severity\"],targetResource = properties[\"essentials\"][\"targetResourceName\"],\n" +
             "                            monitorCondition = properties[\"essentials\"][\"monitorCondition\"],targetResourceName = properties[\"essentials\"][\"targetResourceName\"],\n" +
@@ -1122,11 +1119,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 //            查询报警
 
                 CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-                List<CloudPluginSceneElementBO> allElements = new ArrayList<>(pluginHandler.getElementMap().values());
+                List<CloudPluginSceneElementBO> allElements = new ArrayList<>(pluginHandler.getElementMap().values())
+                        .stream()
+                        .filter(element -> queryParams.getNodeIds() != null ? queryParams.getNodeIds().contains(element.getSrcElement().getId()) : true)
+                        .collect(Collectors.toList());
 
                 for (AlertRuleBO alertRuleBO : alertRuleBOList) {
                     List<String> hostList = alertRuleBO.getHostList();
-                    List<String> collect = allElements.stream().filter(element -> hostList.contains(element.getSrcElement().getId()))
+                    List<String> collect = allElements
+                            .stream()
+                            .filter(element -> hostList.contains(element.getSrcElement().getId()))
                             .filter(element -> StringUtils.isNotBlank(element.getResourceId()))
                             .map(CloudPluginSceneElementBO::getResourceId)
                             .collect(Collectors.toList());
@@ -1149,23 +1151,35 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                         String targetResourceName = map.get("targetResourceName").toString();
                         String severity = map.get("severity").toString();
                         String startDateTime = map.get("startDateTime").toString();
-                        String description = map.get("description").toString();
+                        String description = map.get("description") != null ? map.get("description").toString() : "";
 
-                        // 将UTC时间字符串转换为ZonedDateTime
-                        DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
-                        ZonedDateTime zonedDateTime = ZonedDateTime.parse(startDateTime, formatter);
+                        String finalTargetResourceName = targetResourceName;
+                        Optional<CloudPluginSceneElementBO> first = allElements.stream()
+                                .filter(element -> element.getResourceId().toLowerCase().contains(finalTargetResourceName))
+                                .findFirst();
 
-                        // 将ZonedDateTime转换为LocalDateTime
-                        ZoneId localZoneId = ZoneId.systemDefault(); // 获取本地时区
-                        LocalDateTime localDateTime1 = zonedDateTime.withZoneSameInstant(localZoneId).toLocalDateTime();
 
-                        ElementLogListModel elementLogListModel = new ElementLogListModel();
-                        elementLogListModel.setNodeName(targetResourceName);
-                        elementLogListModel.setLevel(Integer.valueOf(severity.substring(severity.length() - 1)));
-                        elementLogListModel.setTime(localDateTime1);
-                        elementLogListModel.setDescription(description);
-                        elementLogListModel.setLogType("alert");
-                        logList.add(elementLogListModel);
+                        if (first.isPresent()) {
+                            CloudPluginSceneElementBO cloudPluginSceneElementBO = first.get();
+                            targetResourceName = cloudPluginSceneElementBO.getDefaultLaunchImageName();
+
+
+                            // 将UTC时间字符串转换为ZonedDateTime
+                            DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+                            ZonedDateTime zonedDateTime = ZonedDateTime.parse(startDateTime, formatter);
+
+                            // 将ZonedDateTime转换为LocalDateTime
+                            ZoneId localZoneId = ZoneId.systemDefault(); // 获取本地时区
+                            LocalDateTime localDateTime1 = zonedDateTime.withZoneSameInstant(localZoneId).toLocalDateTime();
+
+                            ElementLogListModel elementLogListModel = new ElementLogListModel();
+                            elementLogListModel.setNodeName(targetResourceName);
+                            elementLogListModel.setLevel(Integer.valueOf(severity.substring(severity.length() - 1)));
+                            elementLogListModel.setTime(localDateTime1);
+                            elementLogListModel.setDescription(description);
+                            elementLogListModel.setLogType("alert");
+                            logList.add(elementLogListModel);
+                        }
                     }
                 }
             }

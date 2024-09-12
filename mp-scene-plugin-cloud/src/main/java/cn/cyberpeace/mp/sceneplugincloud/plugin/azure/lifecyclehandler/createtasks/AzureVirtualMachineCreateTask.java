@@ -27,23 +27,27 @@ public class AzureVirtualMachineCreateTask implements Runnable {
 
     private List<AlertRuleBO> alertRuleBOList;
 
+    private String dataCollectionRulesId;
+
     public AzureVirtualMachineCreateTask(IAzureResourceManager resourceService,
                                          CloudScenePluginHandler pluginHandler,
                                          CloudPluginSceneElementBO element,
                                          List<VirtualNic> virtualNics,
                                          String userData,
-                                         List<AlertRuleBO> alertRuleBOList) {
+                                         List<AlertRuleBO> alertRuleBOList,
+                                         String dataCollectionRulesId) {
         this.azureVirtualMachine = new AzureVirtualMachine(resourceService);
         this.pluginHandler = pluginHandler;
         this.element = element;
         this.virtualNics = virtualNics;
         this.userData = TextUtils.emptyNull(userData);
         this.alertRuleBOList = alertRuleBOList;
+        this.dataCollectionRulesId = dataCollectionRulesId;
     }
 
     @Override
     public void run() {
-        this.azureVirtualMachine.create(this.pluginHandler, element, virtualNics, userData, alertRuleBOList);
+        this.azureVirtualMachine.create(this.pluginHandler, element, virtualNics, userData, alertRuleBOList,dataCollectionRulesId);
     }
 
 }
