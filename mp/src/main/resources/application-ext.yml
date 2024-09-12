@@ -16,7 +16,7 @@ spring:
 
   flyway:
     ext-var:
-      enabled: ${MP_FLYWAY_ENABLED_VALUE:false}
+      enabled: ${MP_FLYWAY_ENABLED_VALUE:true}
 
   rabbitmq:
     ext-var:

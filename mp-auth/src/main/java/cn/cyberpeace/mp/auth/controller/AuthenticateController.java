@@ -42,6 +42,7 @@ public class AuthenticateController {
     @ApiImplicitParam(name = "token", value = "token", dataTypeClass = String.class)
     @GetMapping
     public ServiceResult<UserModel> authenticate(@RequestParam String token) {
+        log.info("validate token");
         JwtUtils.UserInfo user = verifyToken(token);
         UserModel userModel = UserUtils.getUser(user.getId());
         UserBo userBo = userService.userModel2UserDtoWithoutOrg(userModel);

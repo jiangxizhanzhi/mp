@@ -19,7 +19,7 @@ public class AuthConfig {
      * biz
      * 退出登录后是否重置tokenSecret
      */
-    private Boolean logoutResetSecret = true;
+    private Boolean logoutResetSecret = false;
 
     private String logoutKeepSecretUser;
 

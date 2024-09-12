@@ -94,6 +94,12 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 response.setStatus(HttpServletResponse.SC_OK);
                 result = new ServiceResult<>(null, errorCode);
             } else {
+                // 每次登录前都需要变更tokenSecret, 这样账号只能有一个登录
+                user.setTokenSecret(userService.initUserSecret(user.getId()));
+                user = userService.get(user.getId()).getSource().getObj();
+                log.info("new user secret {}", user.getTokenSecret());
+
+
                 String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
                 ObjResult<UserModel> userResult = new ObjResult(user, new UserFields().getAvailableFields());
                 UserBo userBo = userService.userModel2UserDto(userResult.getObj());
@@ -133,6 +139,9 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 String pwdErrorCountCacheKey = AuthConstant.PASSWORD_ERROR_COUNT_KEY + ":" + user.getUsername();
                 loginFailureCache.invalidate(pwdErrorCountCacheKey);
                 log.info("Login success! {}", user.getUsername());
+
+                //将用户账号状态修改为在线
+                userService.userAccountOnline(user.getId());
 
             }
         }

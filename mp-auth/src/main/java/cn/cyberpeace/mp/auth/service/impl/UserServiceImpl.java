@@ -34,6 +34,7 @@ import cn.cyberpeace.mp.auth.service.sender.AuthStatusRabbitmqSender;
 import cn.cyberpeace.mp.auth.util.*;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
@@ -56,6 +57,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
@@ -1162,6 +1164,45 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             return list.stream().map(UserModel::getUsername).collect(Collectors.toList());
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    @CacheEvict(value = CACHE_VAL_USERMODEL_BY_ID)
+    public void userAccountOnline(String userId) {
+        if (StringUtils.isBlank(userId)) {
+            return;
+        }
+        UserModel userModel = new UserModel();
+        userModel.setId(userId);
+        userModel.setOnlineStatus(UserModel.OnlineStatus.ONLINE);
+        this.getModelMapper().filterUpdate(userModel, new HumanCondition().filterEqual(UserModel::getId, userModel.getId()));
+    }
+
+    @Override
+    @CacheEvict(value = CACHE_VAL_USERMODEL_BY_ID)
+    public void userAccountOffline(String userId) {
+        if (StringUtils.isBlank(userId)) {
+            return;
+        }
+        UserModel userModel = new UserModel();
+        userModel.setOnlineStatus(UserModel.OnlineStatus.OFFLINE);
+        userModel.setId(userId);
+        this.getModelMapper().filterUpdate(userModel, new HumanCondition().filterEqual(UserModel::getId, userModel.getId()));
+    }
+
+    @Override
+    @CacheEvict(value = CACHE_VAL_USERMODEL_BY_ID)
+    public String initUserSecret(String userId) {
+        if (StringUtils.isBlank(userId)) {
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
+        } else {
+            UserModel userModel = new UserModel();
+            userModel.setId(userId);
+            userModel.setTokenSecret(TextUtils.uuid());
+            log.info("update secret {}", userModel.getTokenSecret());
+            getModelMapper().update(userModel);
+            return userModel.getTokenSecret();
+        }
     }
 }
 

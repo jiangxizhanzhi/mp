@@ -67,6 +67,7 @@ public class JwtUtils {
         String secret = "";
         if (jwtUtils.authConfig.getAuthenticateUseIndividualTokenSecret()) {
             secret = user.getLatestTokenSecret();
+            log.info("get user {} latest token {}", user.getId(), secret);
         }
         if (StringUtils.isBlank(secret)) {
             //secret = AuthConstant.JWT_SECRET;
@@ -87,6 +88,7 @@ public class JwtUtils {
             return jwtUtils.authConfig.getAuthenticateJwtSecret();
         }
 
+        log.info("user token secret = {}", secret);
         mac.update(secret.getBytes(StandardCharsets.UTF_8));
         return new String(mac.doFinal());
     }
@@ -102,6 +104,7 @@ public class JwtUtils {
         public String getLatestTokenSecret() {
             String latestTokenSecret;
             UserModel user = UserUtils.getUser(id);
+            log.info("find user = {}", user);
             if (user != null) {
                 latestTokenSecret = user.getTokenSecret();
             } else {
@@ -120,12 +123,12 @@ public class JwtUtils {
         if (Objects.isNull(expireSeconds)) {
             expireSeconds = AuthConstant.TOKEN_EXPIRE_TIME;
         }
-        var expireDate = new Date(System.currentTimeMillis() + expireSeconds * AuthConstant.MILLI_TO_SECOND);
-        String secret = getSecret(user);
+        Date expireDate = new Date(System.currentTimeMillis() + expireSeconds * AuthConstant.MILLI_TO_SECOND);
         try {
-            var algorithm = Algorithm.HMAC256(jwtSecret);
+            Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
+            log.info("user token secret = {}", user.getTokenSecret());
             return JWT.create().withExpiresAt(expireDate).withClaim(AuthConstant.JWT_CLAIM_ID, user.getId())
-                    .withClaim(AuthConstant.JWT_CLAIM_USERNAME, user.getUsername()).withClaim(AuthConstant.JWT_CLAIM_KEY, secret).sign(algorithm);
+                    .withClaim(AuthConstant.JWT_CLAIM_USERNAME, user.getUsername()).withClaim(AuthConstant.JWT_CLAIM_KEY, user.getTokenSecret()).sign(algorithm);
         } catch (JWTCreationException e) {
             log.error(AuthConstant.FAIL_CREATE_JWT_TOKEN, e.getMessage());
             return null;
@@ -154,8 +157,14 @@ public class JwtUtils {
     }
 
     public static UserInfo validateToken(String token) {
-        var user = getUserInfo(token);
+        UserInfo user = getUserInfo(token);
+        String oldSecret = user.getTokenSecret();
         String jwtSecret = generateJwtSecret(user);
+        String newSecret = user.getTokenSecret();
+        log.info("old secret is {}, new secret is {}", oldSecret, newSecret);
+        if (Objects.nonNull(oldSecret) && !oldSecret.equals(newSecret)) {
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_REPEAT_LOGIN);
+        }
         try {
             var algorithm = Algorithm.HMAC256(jwtSecret);
             JWTVerifier verifier = JWT.require(algorithm).build();

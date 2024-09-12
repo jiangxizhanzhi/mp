@@ -71,10 +71,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         log.info(e.getMessage());
                         response.setContentType("application/json;charset=UTF-8");
                         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                        ServiceResult<Object> result = ServiceResult.builder().serviceCode(e.getServiceCode()).build().asResult();
-                        PrintWriter writer = response.getWriter();
-                        mapper.writeValue(writer, result);
-                        writer.flush();
+                        ServiceResult<Object> result = ServiceResult.builder().serviceCode(e.getServiceCode())
+                                .detail(e.getServiceCode().transMessage()).build().asResult();
+                        try (PrintWriter writer = response.getWriter()) {  // 使用 try-with-resources 自动关闭 writer
+                            mapper.writeValue(writer, result);  // 确保内容被正确写入
+                            writer.flush();  // 确保输出流被刷新
+                        } catch (IOException ex) {
+                            log.error("Error writing response", ex);  // 捕获并记录异常
+                        }
                         return;
                     }
                     if (Objects.nonNull(user)) {
