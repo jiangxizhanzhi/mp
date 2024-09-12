@@ -158,6 +158,7 @@ public class JwtUtils {
         String oldSecret = user.getTokenSecret();
         String jwtSecret = generateJwtSecret(user);
         String newSecret = user.getTokenSecret();
+        log.info("old secret is {}, new secret is {}", oldSecret, newSecret);
         if (Objects.nonNull(oldSecret) && !oldSecret.equals(newSecret)) {
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_REPEAT_LOGIN);
         }
