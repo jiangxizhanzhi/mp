@@ -204,11 +204,11 @@ public class WazuhCommon {
                         addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK, "yum install unzip", addCommand);
                     } else if (BaseSceneElementModel.SystemType.UBUNTU.equals(systemType)
                             || BaseSceneElementModel.SystemType.KALI.equals(systemInfo.toLowerCase())) {
-                        addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK, "apt-get update", addCommand);
                         addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK, "apt-get install unzip", addCommand);
+                        addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK, "apt-get update", addCommand);
                     } else {
-                        addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK, "apt-get update", addCommand);
                         addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK, "apt-get install unzip", addCommand);
+                        addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK, "apt-get update", addCommand);
                     }
                 }
 
