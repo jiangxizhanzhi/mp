@@ -16,8 +16,6 @@ import cn.cyberpeace.mp.scene.core.bo.base.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -702,6 +700,18 @@ public class CsceneDataModifier {
     }
 
     /**
+     * 清除模板中initCommands
+     */
+    public static void removeInitCommands(CsceneBO csceneBO) {
+        if (CollectionUtils.isNotEmpty(csceneBO.getSceneConfig().getTopology().getElements())) {
+            csceneBO.getSceneConfig().getTopology().getElements().forEach(e -> {
+                BaseSceneElementBO sceneElement = (BaseSceneElementBO) e;
+                sceneElement.setInitCommands(Arrays.asList());
+            });
+        }
+    }
+
+    /**
      * 纠正返回场景模板时文件的地址,增加前缀
      *
      * @param baseSceneDataBO
@@ -795,10 +805,10 @@ public class CsceneDataModifier {
             ScenePluginDataBO collctionPluginDataBO = csceneBO.getSceneConfig().getPlugins().get(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY);
             var sceneSwitchMap = collctionPluginDataBO.getScene();
             boolean checkCidr = sceneSwitchMap.get(ENABLE_PROBE_COLLECT) != null && Boolean.TRUE.toString().equals(sceneSwitchMap.get(ENABLE_PROBE_COLLECT).toString());
-            if(!checkCidr){
+            if (!checkCidr) {
                 var elements = collctionPluginDataBO.getElements();
                 if (elements != null && !elements.isEmpty()) {
-                    for(Map<String, Object> map : elements.values()){
+                    for (Map<String, Object> map : elements.values()) {
                         if (map.get(ENABLE_PROBE_COLLECT) != null && Boolean.TRUE.toString().equals(map.get(ENABLE_PROBE_COLLECT).toString())) {
                             checkCidr = true;
                             break;
@@ -806,7 +816,7 @@ public class CsceneDataModifier {
                     }
                 }
             }
-            if(!checkCidr){
+            if (!checkCidr) {
                 return;
             }
             //检查cpcloud下是否有相同cidr
@@ -814,15 +824,15 @@ public class CsceneDataModifier {
             var elements = cloudPluginDataBO.getElements();
             Set<String> cidrSet = new HashSet();
             if (elements != null && !elements.isEmpty()) {
-                for(Map<String, Object> map : elements.values()){
+                for (Map<String, Object> map : elements.values()) {
                     if (!ObjectUtils.isEmpty(map.get(CIDR))) {
-                       String cidr = String.valueOf(map.get(CIDR));
-                       if(cidrSet.contains(cidr)){
-                           MpRuntimeException ex = new MpRuntimeException(CsceneErrorCode.PARAMS_SAME_CIDR_FOR_COLLECTION);
-                           ex.setDetail("conflict cidr: ".concat(map.get(CIDR).toString()));
-                           throw ex;
-                       }
-                       cidrSet.add(cidr);
+                        String cidr = String.valueOf(map.get(CIDR));
+                        if (cidrSet.contains(cidr)) {
+                            MpRuntimeException ex = new MpRuntimeException(CsceneErrorCode.PARAMS_SAME_CIDR_FOR_COLLECTION);
+                            ex.setDetail("conflict cidr: ".concat(map.get(CIDR).toString()));
+                            throw ex;
+                        }
+                        cidrSet.add(cidr);
                     }
                 }
             }

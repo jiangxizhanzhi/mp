@@ -16,8 +16,9 @@ public class SceneFileUtils {
 
     /**
      * 生成场景文件目录
+     *
      * @param systemType 网元系统类型
-     * @param sceneId 场景id
+     * @param sceneId    场景id
      * @return 场景文件目录
      */
     public static String getSceneFileDir(String systemType, String sceneId) {
@@ -32,8 +33,9 @@ public class SceneFileUtils {
 
     /**
      * 生成场景文件解压目录
+     *
      * @param systemType 网元系统类型
-     * @param sceneId 场景id
+     * @param sceneId    场景id
      * @return 场景文件目录
      */
     public static String getSceneFileUnzipDir(String systemType, String sceneId) {
@@ -48,9 +50,10 @@ public class SceneFileUtils {
 
     /**
      * 生成节点文件解压目录
+     *
      * @param systemType 网元系统类型
-     * @param sceneId 场景id
-     * @param elementId 节点id
+     * @param sceneId    场景id
+     * @param elementId  节点id
      * @return 场景文件目录
      */
     public static String getElementFileUnzipDir(String systemType, String sceneId, String elementId) {
@@ -65,13 +68,15 @@ public class SceneFileUtils {
 
     /**
      * 生成场景zip文件初始化命令
+     *
      * @param systemType 网元系统类型
-     * @param fileUrl 文件url
-     * @param toPath 目的路径
+     * @param fileUrl    文件url
+     * @param toPath     目的路径
      * @return 初始化命令
      */
-    public static List<String> genZipFileInitCommand(String systemType, String fileUrl, String toPath, String unzipDir) {
-        var metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+    public static List<String> genZipFileInitCommand(String systemType, String fileUrl, String toPath, String unzipDir, Integer cloudType) {
+//        var metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+        var metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer(cloudType);
         var absoluteFileUrl = StringUtils.joinWith(FILE_URL_SEPARATOR, metadataFileServer, fileUrl);
         var filename = FileUtil.getName(toPath);
         var toPathDir = toPath.substring(0, toPath.length() - filename.length());
@@ -95,16 +100,16 @@ public class SceneFileUtils {
         return commands;
     }
 
-    public static List<String> genSceneFileInitCommand(String systemType, String fileUrl, String sceneId) {
+    public static List<String> genSceneFileInitCommand(String systemType, String fileUrl, String sceneId, Integer cloudType) {
         var unzipDir = getSceneFileUnzipDir(systemType, sceneId);
         var toPath = StringUtils.join(unzipDir, ZIP_FILE_SUFFIX);
-        return genZipFileInitCommand(systemType, fileUrl, toPath, unzipDir);
+        return genZipFileInitCommand(systemType, fileUrl, toPath, unzipDir, cloudType);
     }
 
-    public static List<String> genElementFileInitCommand(String systemType, String fileUrl, String sceneId, String elementId) {
+    public static List<String> genElementFileInitCommand(String systemType, String fileUrl, String sceneId, String elementId, Integer cloudType) {
         var unzipDir = getElementFileUnzipDir(systemType, sceneId, elementId);
         var toPath = StringUtils.join(unzipDir, ZIP_FILE_SUFFIX);
-        return genZipFileInitCommand(systemType, fileUrl, toPath, unzipDir);
+        return genZipFileInitCommand(systemType, fileUrl, toPath, unzipDir, cloudType);
     }
 
 }

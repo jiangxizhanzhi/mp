@@ -43,7 +43,7 @@ public class SceneAppConfig {
     private String metadataFileServer;
 
     //公有云
-    @Value("${mp.scene.metadata_public_file_server:http://169.254.169.254/file}")
+    @Value("${mp.scene.metadata_public_file_server:http://20.205.18.81/file}")
     private String metadataPublicFileServer;
 
     //私有云
@@ -83,7 +83,7 @@ public class SceneAppConfig {
     }
 
     public String getMetadataFileServer(Integer cloudType) {
-        if(null == cloudType) return this.metadataFileServer;
+        if (null == cloudType) return this.metadataFileServer;
 
         String metadataFileServer;
         switch (cloudType) {

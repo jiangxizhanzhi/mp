@@ -15,20 +15,13 @@ import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
-import cn.cyberpeace.mp.cscene.controller.request.AreaUpdateRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneSyncRequest;
+import cn.cyberpeace.mp.cscene.controller.request.*;
 import cn.cyberpeace.mp.cscene.dto.scene.CsceneLoadDto;
-import cn.cyberpeace.mp.scene.bo.AlertRuleBO;
-import cn.cyberpeace.mp.scene.model.AlertRuleModel;
 import cn.cyberpeace.mp.cscene.model.AzureVmOsDisk;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneRoleModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
-import cn.cyberpeace.mp.scene.service.AlertRuleService;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.AzureVmOsDiskQueryParams;
@@ -37,14 +30,17 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.scene.bo.AlertRuleBO;
 import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.scene.model.AlertRuleModel;
 import cn.cyberpeace.mp.scene.model.SceneConfigAreaModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.scene.repository.SceneConfigAreaMapper;
+import cn.cyberpeace.mp.scene.service.AlertRuleService;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -60,13 +56,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -379,6 +369,7 @@ public class CsceneController implements BaseModelListControllerBase {
         sceneConfigDataBO.getTopology().setScene(new SceneConfigBO());
         tmp.setSceneConfig(sceneConfigDataBO);
         correctRequestCsceneParamsForSync(tmp);
+        CsceneDataModifier.removeInitCommands(tmp);
         SceneConfigHandler newConfigHandler = new SceneConfigHandler(sceneConfigDataBO, null);
         newConfigHandler.save();
 
@@ -436,7 +427,7 @@ public class CsceneController implements BaseModelListControllerBase {
         var csceneBO = getByAreaId(sceneId, areaId);
         var roleMapper = BeanCommon.getBean(CsceneRoleMapper.class);
         var list = roleMapper.list(new HumanCondition().filterEqual(BaseCsceneRoleModel::getCscene, id)
-                                           .orderBy(BaseCsceneRoleModel::getPk));
+                .orderBy(BaseCsceneRoleModel::getPk));
         if (list != null) {
             csceneBO.setRoles(convertToRoleBOs(list, CsceneRoleBO.class));
         } else {
@@ -587,8 +578,8 @@ public class CsceneController implements BaseModelListControllerBase {
 
         var sceneConfigAreaMapper = BeanCommon.getBean(SceneConfigAreaMapper.class);
         SceneConfigAreaModel sceneConfigAreaModel = sceneConfigAreaMapper.first(new HumanCondition().select(SceneConfigAreaModel::getId)
-                                                                                        .filterEqual(SceneConfigAreaModel::getScene, id)
-                                                                                        .filterEqual(SceneConfigAreaModel::getNodeId, request.getAreaId()));
+                .filterEqual(SceneConfigAreaModel::getScene, id)
+                .filterEqual(SceneConfigAreaModel::getNodeId, request.getAreaId()));
         if (sceneConfigAreaModel == null) {
             log.error("scene {} ,  area {} not find , ", request.getSceneId(), request.getAreaId());
             return new ServiceResult<>(true).asResult();
@@ -765,7 +756,7 @@ public class CsceneController implements BaseModelListControllerBase {
             var topology = sceneConfigDataBO.getTopology();
             // 构建area的新老id映射
             Map<String, String> idMap = new HashMap<>();
-            idMap.put("","");
+            idMap.put("", "");
             for (SceneConfigAreaBO sceneConfigAreaBO : topology.getAreas()) {
                 if (StringUtils.isNotEmpty(sceneConfigAreaBO.getId())) {
                     String nodeId = TextUtils.uuid();
@@ -826,7 +817,7 @@ public class CsceneController implements BaseModelListControllerBase {
                 c.setTarget(idMap.get(c.getTarget()));
             }
 
-            Map<String,String> nodeConnectionIdMap = new HashMap<>();
+            Map<String, String> nodeConnectionIdMap = new HashMap<>();
             for (SceneConfigAreaNodeConnectionBO nc : topology.getNodeConnections()) {
                 String nodeId = TextUtils.uuid();
                 nodeConnectionIdMap.put(nc.getId(), nodeId);
@@ -872,7 +863,7 @@ public class CsceneController implements BaseModelListControllerBase {
         }
     }
 
-    private String parseNodeId(String input){
+    private String parseNodeId(String input) {
         String regex = "port_(.+)_layer_[0-9]+";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(input);

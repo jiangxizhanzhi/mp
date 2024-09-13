@@ -180,7 +180,7 @@ public class WazuhCommon {
                     ));
         }
         List<String> result = resource == null ? new ArrayList<>() :
-                InstallerUtils.generateInstallerInstallCommand(systemType, List.of(resource));
+                InstallerUtils.generateInstallerInstallCommand(systemType, List.of(resource), cloudType);
         if (SystemTypeCommandUtils.isLinux(systemType)) {
             String addCommand;
             if (isContainer) {

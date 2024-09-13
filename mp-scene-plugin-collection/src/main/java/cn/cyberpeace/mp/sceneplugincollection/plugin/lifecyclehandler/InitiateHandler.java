@@ -205,7 +205,7 @@ public class InitiateHandler extends HandlerCommon {
                         List<Probe> probes = collectionElement.getProbes();
 
                         controlParam = this.getControlConfigParam(probes, srcElement.getEid(),
-                                systemType, this.getLocationMap(),cloudType);
+                                systemType, this.getLocationMap(), cloudType);
 
 //                        增加节点探针关联表数据
                         List<SceneElementSituationProbeModel> sceneElementSituationProbeModels =
@@ -260,7 +260,7 @@ public class InitiateHandler extends HandlerCommon {
         for (Probe probe : probes) {
             // 脚本驱动类型，新增脚本参数
             if (null != probe.getExecType() && probe.getExecType() == Probe.ExecType.SCRIPT_PROBE) {
-                ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName,cloudType);
+                ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName, cloudType);
                 customProbeParams.addAll(convertScript.convertParams());
             } else if (null != probe.getExecType() && probe.getExecType() == Probe.ExecType.REGISTRY_PROBE) {
                 // 注册表变更类型，新增注册表参数
@@ -268,7 +268,7 @@ public class InitiateHandler extends HandlerCommon {
                 registryParams.addAll(convertRegistry.convertParams());
                 List<String> collectPath = probe.getCollectPath().stream().filter(StringUtils::isNotEmpty).collect(Collectors.toList());
                 if (Boolean.FALSE.equals(probe.getDisabled()) && CollectionUtils.isNotEmpty(collectPath)) {
-                    customProbeParams.add(getModifyProbeParam(agentName, collectPath, REGISTRY));
+                    customProbeParams.add(getModifyProbeParam(agentName, collectPath, REGISTRY, cloudType));
                 }
             } else if (null != probe.getExecType() && probe.getExecType() == Probe.ExecType.FILE_PROBE) {
                 // 文件变更类型，新增文件参数
@@ -276,7 +276,7 @@ public class InitiateHandler extends HandlerCommon {
                 fileParams.addAll(convertFile.convertParams());
                 List<String> collectPath = probe.getCollectPath().stream().filter(StringUtils::isNotEmpty).collect(Collectors.toList());
                 if (Boolean.FALSE.equals(probe.getDisabled()) && CollectionUtils.isNotEmpty(collectPath)) {
-                    customProbeParams.add(getModifyProbeParam(agentName, collectPath, FILE));
+                    customProbeParams.add(getModifyProbeParam(agentName, collectPath, FILE, cloudType));
                 }
             } else if (null != probe.getExecType() && probe.getExecType() == Probe.ExecType.LOG_PROBE) {
                 // 日志采集类型，新增日志参数
@@ -336,7 +336,7 @@ public class InitiateHandler extends HandlerCommon {
      * @param type
      * @return
      */
-    private WazuhControl.ControlProbeParam getModifyProbeParam(String agentName, List<String> collectPath, Integer type) {
+    private WazuhControl.ControlProbeParam getModifyProbeParam(String agentName, List<String> collectPath, Integer type, Integer cloudType) {
         if (wazuhModifyEventConfig == null) {
             wazuhModifyEventConfig = BeanCommon.getBean(WazuhModifyEventConfig.class);
         }
@@ -348,7 +348,8 @@ public class InitiateHandler extends HandlerCommon {
         List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings(WazuhCommon.WAZUH_AGENT_GROUP);
         Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
                 LocalFileMappingModel::getRemoteFile));
-        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+//        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer(cloudType);
         WazuhProbeConfig.DefaultProbe.NewProbe probe;
         if (type == FILE) {
             probe = modifyProbe.getFileProbe();

@@ -230,20 +230,6 @@ public class AzureVirtualMachine {
 
         configureMonitoringForVirtualMachine(cloudElement, dataCollectionRulesId, vm, groupName);
 
-/*
-        Optional<AlarmConditionModel> customLogSearch = alertRuleBOList.stream().flatMap(alertRuleBO -> alertRuleBO.getAlarmConditionList().stream())
-                .filter(alarmConditionModel -> alarmConditionModel.getType().equals("Custom Log Search"))
-                .findAny();
-        if (customLogSearch.isPresent()) {
-//            设置诊断设置
-            azureResourceManager
-                    .diagnosticSettings()
-                    .define("vm-diagnostic-settings")
-                    .withResource(vm.id())
-                    .withStorageAccount("/subscriptions/c87ba926-f7c2-4d53-8b8e-89245dc92e26/resourceGroups/upload_resources/providers/Microsoft.Storage/storageAccounts/storage06004")
-                    .create();
-        }*/
-
         createAlertRules(alertRuleBOList, vm, groupName);
 
     }
@@ -334,7 +320,7 @@ public class AzureVirtualMachine {
                     MonitorClient monitorClient = monitorManager.serviceClient();
                     ScheduledQueryRulesClient scheduledQueryRules = monitorClient.getScheduledQueryRules();
                     try {
-                        scheduledQueryRules.createOrUpdate(groupName, alertRuleBO.getName()+"-"+vm.name(), rule);
+                        scheduledQueryRules.createOrUpdate(groupName, alertRuleBO.getName() + "-" + vm.name(), rule);
                     } catch (Exception e) {
                         log.error(" ScheduledQueryAlert create erro,ScheduledQueryAlertName: {}", alertRuleBO.getName());
                     }
@@ -344,7 +330,7 @@ public class AzureVirtualMachine {
                     // 创建监视警报
                     MetricAlert.DefinitionStages.WithCriteriaDefinition withCriteriaDefinition = azureResourceManager.alertRules().metricAlerts()
 //                预警规则名称
-                            .define(alertRuleBO.getName()+"-"+vm.name())
+                            .define(alertRuleBO.getName() + "-" + vm.name())
 //                资源组
                             .withExistingResourceGroup(groupName)
 //                虚拟机id

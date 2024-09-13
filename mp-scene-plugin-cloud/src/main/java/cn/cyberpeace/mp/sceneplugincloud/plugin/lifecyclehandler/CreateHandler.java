@@ -562,13 +562,13 @@ public class CreateHandler extends HandlerCommon {
         var sceneId = srcScene.getEid();
         var sceneFileUrl = srcScene.getFile();
         if (!StringUtils.isEmpty(sceneFileUrl)) {
-            commands.addAll(SceneFileUtils.genSceneFileInitCommand(standardSystemType, sceneFileUrl, sceneId));
+            commands.addAll(SceneFileUtils.genSceneFileInitCommand(standardSystemType, sceneFileUrl, sceneId, srcScene.getCloudType()));
         }
 
         var elementFileUrl = srcElement.getFile();
         if (!StringUtils.isEmpty(elementFileUrl)) {
             commands.addAll(SceneFileUtils.genElementFileInitCommand(standardSystemType, elementFileUrl, sceneId,
-                    srcElement.getEid()));
+                    srcElement.getEid(), srcScene.getCloudType()));
         }
 
         List<String> initCommands = srcElement.getInitCommands();
@@ -600,7 +600,7 @@ public class CreateHandler extends HandlerCommon {
                             installer.setInstallCommand(r.getCommand());
                             return installer;
                         }).collect(Collectors.toList());
-                        commands.addAll(InstallerUtils.generateInstallerInstallCommand(standardSystemType, installers));
+                        commands.addAll(InstallerUtils.generateInstallerInstallCommand(standardSystemType, installers, cloudType));
                     }
                     if (p.getDockerInstallerData() != null && StringUtils.isNotEmpty(p.getDockerInstallerData().getDockerUrl())) {
                         var installer = new InstallerUtils.Installer();
@@ -612,7 +612,7 @@ public class CreateHandler extends HandlerCommon {
                             installer.setName(FileNameUtil.getName(installer.getFile()));
                         }
                         installer.setInstallCommand(DockerInstallCommandUtils.genDockerRunDefaultCmd(p.getDockerInstallerData().getStartUpParameterList()));
-                        commands.addAll(InstallerUtils.generateInstallerInstallCommand(standardSystemType, List.of(installer)));
+                        commands.addAll(InstallerUtils.generateInstallerInstallCommand(standardSystemType, List.of(installer), cloudType));
                     }
                 });
             }

@@ -150,7 +150,8 @@ public class InstallerUtils {
     public static final String FILE_URL_SEPARATOR = "/";
 
     @SuppressWarnings({"java:S1144", "java:S3010"})
-    private InstallerUtils() {}
+    private InstallerUtils() {
+    }
 
     public static boolean isNewerWindows(String systemType) {
         systemType = systemType.toLowerCase();
@@ -188,6 +189,7 @@ public class InstallerUtils {
 
     /**
      * 生成基础目录创建命令
+     *
      * @param systemType 系统类型
      * @return 基础目录创建命令
      */
@@ -204,9 +206,10 @@ public class InstallerUtils {
 
     /**
      * 生成文件下载命令
+     *
      * @param systemType 系统类型
-     * @param fileUrl 文件url
-     * @param fileName 文件名称
+     * @param fileUrl    文件url
+     * @param fileName   文件名称
      * @return 文件下载命令
      */
     public static FileDownloadInfo generateFileDownloadCommand(String systemType, String fileUrl, String fileName) {
@@ -229,8 +232,9 @@ public class InstallerUtils {
 
     /**
      * 生成默认的安装脚本
+     *
      * @param systemType 系统详细类型
-     * @param filePath 文件路径
+     * @param filePath   文件路径
      * @return 默认的安装脚本
      */
     public static String generateDefaultInstallCommand(String systemType, String filePath) {
@@ -252,8 +256,9 @@ public class InstallerUtils {
 
     /**
      * 生成默认自定义安装命令
-     * @param systemType 系统类型
-     * @param filePath 文件路径
+     *
+     * @param systemType     系统类型
+     * @param filePath       文件路径
      * @param installCommand 安装命令
      * @return 默认自定义安装命令
      */
@@ -293,8 +298,9 @@ public class InstallerUtils {
 
     /**
      * 生成docker服务安装命令
-     * @param systemType 系统类型
-     * @param filePath 文件路径
+     *
+     * @param systemType     系统类型
+     * @param filePath       文件路径
      * @param installCommand 安装命令
      * @return 默认自定义安装命令
      */
@@ -327,6 +333,7 @@ public class InstallerUtils {
 
     /**
      * 获取windows安装工具
+     *
      * @return windows安装工具
      */
     private static List<Installer> getWindowsInstallerTools() {
@@ -341,10 +348,11 @@ public class InstallerUtils {
 
     /**
      * 生成安装命令
+     *
      * @param systemType 系统类型
      * @return 安装命令
      */
-    public static List<String> generateInstallerInstallCommand(String systemType, List<Installer> installers) {
+    public static List<String> generateInstallerInstallCommand(String systemType, List<Installer> installers, Integer cloudType) {
         List<String> installCommands = new ArrayList<>();
         installCommands.add(generateBaseDirCreateCommand(systemType));
 
@@ -356,7 +364,8 @@ public class InstallerUtils {
             }
         }
 
-        var metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+//        var metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer(cloudType);
         List<String> subInstallCommands = new ArrayList<>();
         if (hasDefaultInstaller && isNewerWindows(systemType)) {
             var windowsInstallerTools = getWindowsInstallerTools();
