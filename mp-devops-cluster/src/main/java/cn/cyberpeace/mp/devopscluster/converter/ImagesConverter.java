@@ -1,5 +1,18 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
@@ -7,6 +20,7 @@ import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.*;
@@ -25,23 +39,16 @@ import cn.cyberpeace.mp.devopscluster.model.*;
 import cn.cyberpeace.mp.devopscluster.model.common.ServiceStatus;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetAuthPO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
+import cn.cyberpeace.mp.devopscluster.po.VulnTaskTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
+import cn.cyberpeace.mp.devopscluster.repository.VulnTaskTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
+import cn.cyberpeace.mp.devopscluster.vo.VulnBindRecordVO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
-import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -70,6 +77,8 @@ public class ImagesConverter implements BaseConverter{
     private final TargetConverter targetConverter;
 
     private final SnapshotConverter snapshotConverter;
+
+    private final VulnTaskTargetMapper vulnTaskTargetMapper;
 
     /**
      * 分页查询镜像列表
@@ -504,4 +513,175 @@ public class ImagesConverter implements BaseConverter{
         }
     }
 
+
+
+    /**
+     * 分页查询镜像列表
+     * @param dto
+     * @return
+     */
+    public BasePageBO<ImageConvertModel> vulnpage(ImagePageDTO dto) {
+        Integer total = devopsTargetService.vulnTotalCount(dto);
+
+        BasePageBO<ImageConvertModel> imageConvertPageModel = new BasePageBO<>();
+        imageConvertPageModel.setTotal(total);
+        if (total == 0){
+            imageConvertPageModel.setList(Lists.newArrayList());
+            return imageConvertPageModel;
+        }
+        List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
+        Map<String,DeviceTargetPO> supportExports = new HashMap<>();
+        deviceTargetPOS.stream().forEach(d -> {
+            supportExports.put(d.getUuid(), d);
+        });
+        Map<String, Integer> orderMap = new HashMap<String, Integer>();
+        if (CollectionUtils.isNotEmpty(deviceTargetPOS)) {
+            for (int i=0; i<deviceTargetPOS.size(); i++) {
+                orderMap.put(deviceTargetPOS.get(i).getUuid(), i);
+            }
+        }
+
+        List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(ids)){
+            imageConvertPageModel.setList(Lists.newArrayList());
+            return imageConvertPageModel;
+        }
+        List<Device> deviceList = this.findByIds(ids);
+        if (CollectionUtils.isNotEmpty(deviceList)) {
+            deviceList = deviceList.stream().sorted((o1, o2) -> {
+                if (orderMap.get(o1.getUuid()) > orderMap.get(o2.getUuid())) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            }).collect(Collectors.toList());
+        }
+        POLogoUtils.changeLogoPathToUrl(deviceList);
+
+        if (CollectionUtils.isEmpty(deviceList)){
+            imageConvertPageModel.setList(Lists.newArrayList());
+            return imageConvertPageModel;
+        }
+
+        List<String> targetUuids = deviceTargetPOS.stream().map(DeviceTargetPO::getUuid).collect(Collectors.toList());
+
+        List<ImageAuthTotalCount> imageAuthTotalCounts = devopsTargetAuthService.totalCount(targetUuids);
+
+        Map<String, Integer> imageAuthTotalCountsMap = imageAuthTotalCounts.stream().collect(Collectors.toMap(ImageAuthTotalCount::getTarget, ImageAuthTotalCount::getTotal));
+
+        Map<String, PublicEnum> targetMap = deviceTargetPOS.stream().collect(Collectors.toMap(DeviceTargetPO::getUuid, DeviceTargetPO::getIsPublic));
+
+        Map<String, DeviceTargetPO> deviceTargetPOMap = deviceTargetPOS.stream().collect(Collectors.toMap(DeviceTargetPO::getUuid, (d) -> d));
+
+        List<ImageConvertModel> modelList = deviceList.stream().map(this::wrapperImageConvertModel).collect(Collectors.toList());
+
+        if (CollectionUtils.isNotEmpty(modelList)) {
+            for (ImageConvertModel imageConvertModel : modelList) {
+                if (MapUtils.isNotEmpty(targetMap)) {
+                    imageConvertModel.setIsPublic(targetMap.get(imageConvertModel.getUuid()));
+                }
+                if (MapUtils.isNotEmpty(deviceTargetPOMap) && deviceTargetPOMap.containsKey(imageConvertModel.getUuid())) {
+                    imageConvertModel.setCreateUserName(deviceTargetPOMap.get(imageConvertModel.getUuid()).getCreateUserName());
+                }
+                imageConvertModel.setAuthTotal(imageAuthTotalCountsMap.get(imageConvertModel.getUuid()));
+                if (supportExports.containsKey(imageConvertModel.getUuid())) {
+                    imageConvertModel.setSupportExport(supportExports.get(imageConvertModel.getUuid()).getSupportExport());
+                    if (ImageTypeEnum.CONTAINER.toValue().equals(imageConvertModel.getImageType())) {
+                        if (imageConvertModel.getExtDocker() != null) {
+                            imageConvertModel.getExtDocker().setInitSupport(supportExports.get(imageConvertModel.getUuid()).getInitSupport());
+                        }
+                    }
+                }
+            }
+        }
+
+        imageConvertPageModel.setList(modelList);
+        return imageConvertPageModel;
+    }
+
+
+    public void bindImages(String node, String recordId, String recordName, List<String> images)  {
+        List<String> notExistList = Lists.newArrayList();
+        for (String uuid : images) {
+            DeviceTargetPO device = deviceTargetMapper.findByUuid(uuid);
+            if (device == null) {
+                notExistList.add(uuid);
+            }
+        }
+        if (CollectionUtils.isEmpty(notExistList)) {
+            throw new MpRuntimeException("存在错误的镜像id: " + StringUtils.join(notExistList, ","));
+        }
+
+        VulnTaskTargetPO old = vulnTaskTargetMapper.findByTaskIdAndNode(recordId, node);
+
+        VulnTaskTargetPO vttPO = new VulnTaskTargetPO();
+        vttPO.setRecordId(recordId);
+        vttPO.setRecordName(recordName);
+        vttPO.setNode(node);
+        vttPO.setImages(StringUtils.join(images));
+        if (old != null) {
+            vttPO.setId(old.getId());
+        }
+        vulnTaskTargetMapper.save(vttPO);
+    }
+
+    public void unbindImages(String recordId, String node, String id) {
+        vulnTaskTargetMapper.deleteByParam(id, recordId, node);
+    }
+
+
+    public List<VulnBindRecordVO> getAllvulnTasks() {
+
+        List<VulnTaskTargetPO> bindRecordList = vulnTaskTargetMapper.getAllTaskBind();
+        List<VulnBindRecordVO> bindRecordVOs = Lists.newArrayList();
+        bindRecordList.stream().peek(e -> {
+            VulnBindRecordVO vo = new VulnBindRecordVO();
+            BeanUtils.copyProperties(e, vo);
+            bindRecordVOs.add(vo);
+        });
+
+        return bindRecordVOs;
+    }
+
+    public List<Device> getVulnTaskImages(String recordId) {
+
+        List<VulnTaskTargetPO> bindList = vulnTaskTargetMapper.getTaskBindByRecordId(recordId);
+
+        if (CollectionUtils.isEmpty(bindList)) {
+            throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
+        }
+
+        Set<String> images = Sets.newHashSet();
+
+        bindList.stream().peek(e -> {
+            Arrays.stream(e.getImages().split(",")).peek(images::add);
+        });
+
+        List<Integer> ids = images.stream().map(Integer::parseInt).collect(Collectors.toList());
+
+        List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.getImagesByIds(images);
+        POLogoUtils.changeLogoPathToUrl(deviceTargetPOS);
+
+        Map<String,DeviceTargetPO> supportExports = new HashMap<>();
+        deviceTargetPOS.stream().forEach(d -> {
+            supportExports.put(d.getUuid(), d);
+        });
+
+
+        CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
+
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
+            throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
+        }
+        for (var d : model.getList()) {
+            if (ImageTypeEnum.CONTAINER.toValue().equals(d.getImageType()) && supportExports.containsKey(d.getUuid())) {
+                if (d.getExtDocker() != null) {
+                    d.getExtDocker().setInitSupport(supportExports.get(d.getUuid()).getInitSupport());
+                }
+            }
+        }
+        POLogoUtils.changeLogoPathToUrl(model.getList());
+
+        return model.getList();
+    }
 }

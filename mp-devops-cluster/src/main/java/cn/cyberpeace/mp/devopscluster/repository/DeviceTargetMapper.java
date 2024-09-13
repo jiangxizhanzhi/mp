@@ -1,16 +1,18 @@
 package cn.cyberpeace.mp.devopscluster.repository;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
+
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * 镜像管理
@@ -33,6 +35,20 @@ public interface DeviceTargetMapper extends BaseModelMapper<DeviceTargetPO> {
      * @return
      */
     Integer totalCount(ImagePageDTO dto);
+
+    /**
+     * 获取总数
+     * @param dto
+     * @return
+     */
+    Integer vulnTotalCount(ImagePageDTO dto);
+
+    /**
+     * 分页查询
+     * @param dto
+     * @return
+     */
+    List<DeviceTargetPO> vulnPage(ImagePageDTO dto);
 
     /**
      * 查询
@@ -108,4 +124,11 @@ public interface DeviceTargetMapper extends BaseModelMapper<DeviceTargetPO> {
      * @return
      */
     Integer deleteAllTarget();
+
+    /**
+     * 根据uuid查询
+     * @param uuids
+     * @return
+     */
+    List<DeviceTargetPO> getImagesByIds(@Param("list") Set<String> uuids);
 }

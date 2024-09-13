@@ -501,4 +501,193 @@
             sum(case when t.image_type = 'entity' and t.main_category = 4 then 1 else 0 end ) as '4'
         from mp_devops_target t where t.is_hide = 0
     </select>
+
+
+    <select id="vulnTotalCount" parameterType="cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO" resultType="java.lang.Integer">
+        select
+        count(distinct i.pk)
+        from
+        (
+        select
+        <include refid="commonTargetColumn"/>
+        from
+        mp_devops_target i
+        <include refid="vulnTargetWhere"/>
+
+        <if test=" owner != null">
+            UNION
+            SELECT
+            <include refid="commonTargetColumn"/>
+            FROM
+            mp_devops_target_auth a
+            inner join  mp_devops_target i on a.target = i.uuid
+            <include refid="vulnTargetAuthWhere"/>
+        </if>
+        ) as i
+        <where>
+            <if test="vmStarted != null and vmStarted == true">
+                and i.instance_state in (1,2,3)
+            </if>
+        </where>
+    </select>
+
+    <sql id="vulnTargetWhere">
+        <where>
+            <if test="nameList != null and nameList.size > 0">
+                and
+                <foreach collection="nameList" item="item" index="index"  open="(" separator="or" close=")">
+                    i.name like CONCAT('%', #{item}, '%')
+                </foreach>
+            </if>
+
+            <if test=" name != null and name != '' and likeName != false">
+                and i.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test=" name != null and name != '' and likeName == false">
+                and i.name = #{name}
+            </if>
+
+            <if test=" mainCategory != null">
+                and i.main_category = #{mainCategory}
+            </if>
+            <if test=" subCategory != null">
+                and i.sub_category = #{subCategory}
+            </if>
+            <if test="subCategories != null and subCategories.size > 0">
+                and i.sub_category in
+                <foreach collection="subCategories" item="item" index="index" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test=" thirdCategory != null">
+                and i.third_category = #{thirdCategory}
+            </if>
+            <if test=" imageType != null and imageType != '' ">
+                and i.image_type = #{imageType}
+            </if>
+            <if test=" searchType != null and searchType == 1 ">
+                and i.image_type in ('vm','container','simple','dynamips')
+            </if>
+            <if test=" searchType != null and searchType == 2 ">
+                and i.image_type = 'entity'
+            </if>
+            <if test=" owner != null and searchPublicEnum == 1">
+                and  i.is_public in (2)
+            </if>
+            <if test="imageStatus != null and searchType == 0">
+                and ((i.image_status = #{imageStatus} and i.image_type in ('vm','container','simple','dynamips') ) or
+                i.image_type = 'entity')
+            </if>
+            <if test="isHide != null and isHide == 0">
+                and i.is_hide = 0
+            </if>
+            <if test="imageTypeList != null">
+                and image_type in
+                <foreach collection="imageTypeList" item="item" index="index"  open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
+    <sql id="vulnTargetAuthWhere">
+        <where>
+            <if test="nameList != null and nameList.size > 0">
+                and
+                <foreach collection="nameList" item="item" index="index"  open="(" separator="or" close=")">
+                    i.name like CONCAT('%', #{item}, '%')
+                </foreach>
+            </if>
+
+            <if test=" name != null and name != '' and likeName != false">
+                and i.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test=" name != null and name != '' and likeName == false">
+                and i.name = #{name}
+            </if>
+
+            <if test=" mainCategory != null">
+                and i.main_category = #{mainCategory}
+            </if>
+            <if test=" subCategory != null">
+                and i.sub_category = #{subCategory}
+            </if>
+            <if test=" thirdCategory != null">
+                and i.third_category = #{thirdCategory}
+            </if>
+            <if test=" imageType != null and imageType != '' ">
+                and i.image_type = #{imageType}
+            </if>
+            <if test=" searchType != null and searchType == 1 ">
+                and i.image_type in ('vm','container','simple','dynamips')
+            </if>
+            <if test=" searchType != null and searchType == 2 ">
+                and i.image_type = 'entity'
+            </if>
+            <if test=" owner != null and searchPublicEnum == 1">
+                and  a.owner = #{owner}
+            </if>
+            <if test="imageStatus != null and searchType == 0">
+                and ((i.image_status = #{imageStatus} and i.image_type in ('vm','container','simple','dynamips') ) or
+                i.image_type = 'entity')
+            </if>
+            <if test="imageStatus != null and searchType != 0">
+                and i.image_status = #{imageStatus}
+            </if>
+        </where>
+    </sql>
+
+    <select id="vulnPage" parameterType="cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO" resultMap="BaseResultMap">
+        select
+        <include refid="commonTargetColumn"/>
+        from
+        (
+        select
+        <include refid="commonTargetColumn"/>
+        from
+        mp_devops_target i
+        <include refid="vulnTargetWhere"/>
+
+        <if test=" owner != null">
+            UNION
+
+            SELECT
+            <include refid="commonTargetColumn"/>
+            FROM
+            mp_devops_target_auth a
+            inner join  mp_devops_target i on a.target = i.uuid
+            <include refid="vulnTargetAuthWhere"/>
+        </if>
+        ) as i
+        <where>
+            <if test="vmStarted != null and vmStarted == true">
+                and i.instance_state in (1,2,3)
+            </if>
+        </where>
+        <if test="orders != null and orders != ''">
+            ORDER BY i.${orders}
+            <if test="ordersType != null and ordersType != ''">
+                ${ordersType}
+            </if>
+        </if>
+        <if test="orders == null or orders == ''">
+            ORDER BY i.create_time desc,i.pk desc
+        </if>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+
+    <select id="getImagesByIds" parameterType="cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO" resultMap="BaseResultMap">
+        select
+        <include refid="commonTargetColumn"/>
+        from
+        mp_devops_target
+        where uuid in
+        <foreach collection="list" item="item" index="index"  open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
 </mapper>

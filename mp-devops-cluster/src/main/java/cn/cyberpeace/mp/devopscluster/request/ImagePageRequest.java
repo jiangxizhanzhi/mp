@@ -105,6 +105,12 @@ public class ImagePageRequest extends BasePageRequest {
     @ApiModelProperty(value = "排序字段")
     private String orders;
 
+    /**
+     * 	关键字，多个关键字以,分隔
+     */
+    @ApiModelProperty(value = "关键字")
+    private String key;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }

@@ -65,6 +65,15 @@ public class DevopsTargetService {
     }
 
     /**
+     * 统计总数
+     * @param dto
+     * @return
+     */
+    public Integer vulnTotalCount(ImagePageDTO dto) {
+        return deviceTargetMapper.vulnTotalCount(dto);
+    }
+
+    /**
      * 更新
      * @param device
      * @return

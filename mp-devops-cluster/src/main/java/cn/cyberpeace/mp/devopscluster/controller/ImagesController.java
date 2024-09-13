@@ -1,5 +1,20 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
@@ -42,30 +57,10 @@ import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * 镜像管理
@@ -691,4 +686,76 @@ public class ImagesController {
                     .format(StringUtils.joinWith(",", result.toArray())));
         }
     }
+
+
+    /**
+     * 分页查询
+     */
+    @ApiOperation("通过靶标类型、模糊匹配获取镜像列表")
+    @GetMapping("/vuln/page")
+    public PageResult<ImagesPageVO> vulnpage(ImagePageRequest request){
+        ImagePageDTO imagePageDTO = new ImagePageDTO(request);
+        if (StringUtils.isEmpty(request.getKey())) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        String[] splits = request.getKey().split(",");
+        imagePageDTO.setNameList(Arrays.asList(splits));
+        BasePageBO<ImageConvertModel> model = imagesConverter.vulnpage(imagePageDTO);
+
+        List<ImagesPageVO> list = convertBOToPageVO(model);
+
+        return new PageResult<>(list,model.getTotal());
+    }
+
+    @ApiOperation("绑定漏洞报告和镜像")
+    @PostMapping(value = "/vuln/bind")
+    public ServiceResult vulnBind(@ApiParam(value = "record_id") @RequestParam(value = "record_id") String recordId,
+                                  @ApiParam(value = "record_name") @RequestParam(value = "record_name") String recordName,
+                                  @ApiParam(value = "node") @RequestParam(value = "node") String node,
+                                  @ApiParam(value = "images") @RequestParam(value = "images") List<String> images) {
+
+        if (StringUtils.isEmpty(recordId) || StringUtils.isEmpty(node) || CollectionUtils.isEmpty(images)) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        imagesConverter.bindImages(node, recordId, recordName, images);
+        return ResultCommon.success();
+    }
+
+    @ApiOperation("删除漏洞报告和镜像绑定")
+    @DeleteMapping(value = "/vuln/unbind")
+    public ServiceResult vulnUnbind(@ApiParam(value = "record_id") @RequestParam(value = "record_id", required = false) String recordId,
+                                    @ApiParam(value = "node") @RequestParam(value = "node", required = false) String node,
+                                    @ApiParam(value = "id") @RequestParam(value = "id", required = false) String id) {
+
+        if ((StringUtils.isEmpty(recordId) || StringUtils.isEmpty(node)) && StringUtils.isEmpty(id)) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        imagesConverter.unbindImages(recordId, node, id);
+        return ResultCommon.success();
+    }
+
+
+    @ApiOperation("查询绑定任务")
+    @GetMapping(value = "/vuln/tasks")
+    public ServiceResult<VulnBindRecordVO> getAllvulnTasks(){
+
+        List<VulnBindRecordVO> data = imagesConverter.getAllvulnTasks();
+        return new Result(new ListResult<>(data));
+    }
+
+
+    @ApiOperation("查询任务镜像")
+    @GetMapping(value = "/vuln/tasks/images")
+    public ServiceResult<Device> getAllvulnTasks(@ApiParam(value = "record_id") @RequestParam(value = "record_id", required = false) String recordId){
+
+        if (StringUtils.isEmpty(recordId)) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+
+        List<Device> deviceList = imagesConverter.getVulnTaskImages(recordId);
+
+        return new Result(new ListResult<>(deviceList));
+    }
+
+
 }
