@@ -71,10 +71,10 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
                 // 这个版本默认logout不刷新secret字段，因为登录时候，就刷新了。不能登出的时候再刷新。
                 userName = user.getName();
                 recordLogoutLog(user, request);
-                user.setTokenSecret(null);
+
                 userEventPublisher.publishEvent(new UserLogoutEvent(JsonCommon.beanToMap(user)));
                 //用户状态变成下线
-                userService.userAccountOffline(user);
+                userService.userAccountOffline(user.getId());
             }
 
             if (StringUtils.isNotBlank(userName)) {

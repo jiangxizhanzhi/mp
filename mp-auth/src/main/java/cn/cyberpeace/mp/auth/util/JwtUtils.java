@@ -67,6 +67,7 @@ public class JwtUtils {
         String secret = "";
         if (jwtUtils.authConfig.getAuthenticateUseIndividualTokenSecret()) {
             secret = user.getLatestTokenSecret();
+            log.info("get user {} latest token {}", user.getId(), secret);
         }
         if (StringUtils.isBlank(secret)) {
             //secret = AuthConstant.JWT_SECRET;
@@ -87,6 +88,7 @@ public class JwtUtils {
             return jwtUtils.authConfig.getAuthenticateJwtSecret();
         }
 
+        log.info("user token secret = {}", secret);
         mac.update(secret.getBytes(StandardCharsets.UTF_8));
         return new String(mac.doFinal());
     }
@@ -102,6 +104,7 @@ public class JwtUtils {
         public String getLatestTokenSecret() {
             String latestTokenSecret;
             UserModel user = UserUtils.getUser(id);
+            log.info("find user = {}", user);
             if (user != null) {
                 latestTokenSecret = user.getTokenSecret();
             } else {
@@ -121,11 +124,11 @@ public class JwtUtils {
             expireSeconds = AuthConstant.TOKEN_EXPIRE_TIME;
         }
         Date expireDate = new Date(System.currentTimeMillis() + expireSeconds * AuthConstant.MILLI_TO_SECOND);
-        String secret = getSecret(user);
         try {
             Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
+            log.info("user token secret = {}", user.getTokenSecret());
             return JWT.create().withExpiresAt(expireDate).withClaim(AuthConstant.JWT_CLAIM_ID, user.getId())
-                    .withClaim(AuthConstant.JWT_CLAIM_USERNAME, user.getUsername()).withClaim(AuthConstant.JWT_CLAIM_KEY, secret).sign(algorithm);
+                    .withClaim(AuthConstant.JWT_CLAIM_USERNAME, user.getUsername()).withClaim(AuthConstant.JWT_CLAIM_KEY, user.getTokenSecret()).sign(algorithm);
         } catch (JWTCreationException e) {
             log.error(AuthConstant.FAIL_CREATE_JWT_TOKEN, e.getMessage());
             return null;

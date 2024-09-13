@@ -95,7 +95,10 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 result = new ServiceResult<>(null, errorCode);
             } else {
                 // 每次登录前都需要变更tokenSecret, 这样账号只能有一个登录
-                userService.initUserSecret(user);
+                user.setTokenSecret(userService.initUserSecret(user.getId()));
+                user = userService.get(user.getId()).getSource().getObj();
+                log.info("new user secret {}", user.getTokenSecret());
+
 
                 String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
                 ObjResult<UserModel> userResult = new ObjResult(user, new UserFields().getAvailableFields());
@@ -138,7 +141,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 log.info("Login success! {}", user.getUsername());
 
                 //将用户账号状态修改为在线
-                userService.userAccountOnline(user);
+                userService.userAccountOnline(user.getId());
 
             }
         }

@@ -48,6 +48,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
@@ -1288,30 +1289,41 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    public void userAccountOnline(UserModel userModel) {
-        if (Objects.isNull(userModel) || StringUtils.isBlank(userModel.getId())) {
+    @CacheEvict(value = CACHE_VAL_USERMODEL_BY_ID)
+    public void userAccountOnline(String userId) {
+        if (StringUtils.isBlank(userId)) {
             return;
         }
+        UserModel userModel = new UserModel();
+        userModel.setId(userId);
         userModel.setOnlineStatus(UserModel.OnlineStatus.ONLINE);
         this.getModelMapper().filterUpdate(userModel, new HumanCondition().filterEqual(UserModel::getId, userModel.getId()));
     }
 
     @Override
-    public void userAccountOffline(UserModel userModel) {
-        if (Objects.isNull(userModel) || StringUtils.isBlank(userModel.getId())) {
+    @CacheEvict(value = CACHE_VAL_USERMODEL_BY_ID)
+    public void userAccountOffline(String userId) {
+        if (StringUtils.isBlank(userId)) {
             return;
         }
+        UserModel userModel = new UserModel();
         userModel.setOnlineStatus(UserModel.OnlineStatus.OFFLINE);
+        userModel.setId(userId);
         this.getModelMapper().filterUpdate(userModel, new HumanCondition().filterEqual(UserModel::getId, userModel.getId()));
     }
 
     @Override
-    public void initUserSecret(UserModel userModel) {
-        if (StringUtils.isBlank(userModel.getId())) {
+    @CacheEvict(value = CACHE_VAL_USERMODEL_BY_ID)
+    public String initUserSecret(String userId) {
+        if (StringUtils.isBlank(userId)) {
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         } else {
+            UserModel userModel = new UserModel();
+            userModel.setId(userId);
             userModel.setTokenSecret(TextUtils.uuid());
-            this.getModelMapper().filterUpdate(userModel, new HumanCondition().filterEqual(UserModel::getId, userModel.getId()));
+            log.info("update secret {}", userModel.getTokenSecret());
+            getModelMapper().update(userModel);
+            return userModel.getTokenSecret();
         }
     }
 }

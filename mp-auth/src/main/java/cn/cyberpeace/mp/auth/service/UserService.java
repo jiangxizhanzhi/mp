@@ -112,10 +112,10 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
    List<String> listExistedUserNames(List<String> userNames, Integer limit);
 
-   void userAccountOnline(UserModel userModel);
+   void userAccountOnline(String userId);
 
-   void userAccountOffline(UserModel userModel);
+   void userAccountOffline(String userId);
 
-   void initUserSecret(UserModel userModel);
+   String initUserSecret(String id);
 
 }
