@@ -1,5 +1,9 @@
 package cn.cyberpeace.mp.devopscluster.vo;
 
+
+import lombok.Data;
+
+@Data
 public class VulnBindRecordVO {
 
     /**

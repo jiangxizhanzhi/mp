@@ -683,8 +683,8 @@
         select
         <include refid="commonTargetColumn"/>
         from
-        mp_devops_target
-        where uuid in
+        mp_devops_target i
+        where i.uuid in
         <foreach collection="list" item="item" index="index"  open="(" separator="," close=")">
             #{item}
         </foreach>

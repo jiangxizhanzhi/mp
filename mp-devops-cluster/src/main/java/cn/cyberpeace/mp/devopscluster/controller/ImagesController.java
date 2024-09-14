@@ -704,7 +704,7 @@ public class ImagesController {
 
         List<ImagesPageVO> list = convertBOToPageVO(model);
 
-        return new PageResult<>(list,model.getTotal());
+        return new PageResult<>(list, model.getTotal());
     }
 
     @ApiOperation("绑定漏洞报告和镜像")

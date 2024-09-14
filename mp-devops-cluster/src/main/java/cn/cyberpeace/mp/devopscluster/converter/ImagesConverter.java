@@ -529,7 +529,7 @@ public class ImagesConverter implements BaseConverter{
             imageConvertPageModel.setList(Lists.newArrayList());
             return imageConvertPageModel;
         }
-        List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
+        List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.vulnPage(dto);
         Map<String,DeviceTargetPO> supportExports = new HashMap<>();
         deviceTargetPOS.stream().forEach(d -> {
             supportExports.put(d.getUuid(), d);
@@ -608,7 +608,7 @@ public class ImagesConverter implements BaseConverter{
                 notExistList.add(uuid);
             }
         }
-        if (CollectionUtils.isEmpty(notExistList)) {
+        if (CollectionUtils.isNotEmpty(notExistList)) {
             throw new MpRuntimeException("存在错误的镜像id: " + StringUtils.join(notExistList, ","));
         }
 
@@ -618,7 +618,7 @@ public class ImagesConverter implements BaseConverter{
         vttPO.setRecordId(recordId);
         vttPO.setRecordName(recordName);
         vttPO.setNode(node);
-        vttPO.setImages(StringUtils.join(images));
+        vttPO.setImages(StringUtils.join(images, ","));
         if (old != null) {
             vttPO.setId(old.getId());
         }
@@ -633,12 +633,11 @@ public class ImagesConverter implements BaseConverter{
     public List<VulnBindRecordVO> getAllvulnTasks() {
 
         List<VulnTaskTargetPO> bindRecordList = vulnTaskTargetMapper.getAllTaskBind();
-        List<VulnBindRecordVO> bindRecordVOs = Lists.newArrayList();
-        bindRecordList.stream().peek(e -> {
+        List<VulnBindRecordVO> bindRecordVOs = bindRecordList.stream().map(e -> {
             VulnBindRecordVO vo = new VulnBindRecordVO();
             BeanUtils.copyProperties(e, vo);
-            bindRecordVOs.add(vo);
-        });
+            return vo;
+        }).collect(Collectors.toList());
 
         return bindRecordVOs;
     }
@@ -651,16 +650,17 @@ public class ImagesConverter implements BaseConverter{
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
         }
 
-        Set<String> images = Sets.newHashSet();
+        Set<String> uuids = Sets.newHashSet();
 
-        bindList.stream().peek(e -> {
-            Arrays.stream(e.getImages().split(",")).peek(images::add);
-        });
+        for (VulnTaskTargetPO po : bindList) {
+            List images = Arrays.asList(po.getImages().split(","));
+            uuids.addAll(images);
+        }
 
-        List<Integer> ids = images.stream().map(Integer::parseInt).collect(Collectors.toList());
+        List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.getImagesByIds(uuids);
+//        POLogoUtils.changeLogoPathToUrl(deviceTargetPOS);
 
-        List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.getImagesByIds(images);
-        POLogoUtils.changeLogoPathToUrl(deviceTargetPOS);
+        List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
 
         Map<String,DeviceTargetPO> supportExports = new HashMap<>();
         deviceTargetPOS.stream().forEach(d -> {
