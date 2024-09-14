@@ -68,6 +68,15 @@ public class AlertRuleBO extends AlertRuleModel {
             return LOW.azureCode;
         }
 
+        public static Integer getAzureCodeByCodes(List<Integer> codes) {
+            for (Grade grade : values()) {
+                if (codes.contains(grade.getCode())) {
+                    return grade.getAzureCode();
+                }
+            }
+            return LOW.azureCode;
+        }
+
         public static Integer getCodeByAzureCode(Integer azureCode) {
             for (Grade grade : values()) {
                 if (grade.getAzureCode().equals(azureCode)) {

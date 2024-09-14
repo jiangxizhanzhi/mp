@@ -548,6 +548,21 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return new ServiceResult<>(result).asResult();
     }
 
+    @ApiOperation("查询场景实例事件类型")
+    @GetMapping(value = "/list_alert_events_type")
+    public ServiceResult<List<CollectionHostEventTypeBO>> listAlertEvents() {
+        List<CollectionHostEventTypeBO> result = new ArrayList<>();
+        result.add(new CollectionHostEventTypeBO(FileEventType.PROCESS.name(), 1));
+        result.add(new CollectionHostEventTypeBO(FileEventType.PORT.name(), 2));
+        result.add(new CollectionHostEventTypeBO(FileEventType.FILE.name(), 4));
+        result.add(new CollectionHostEventTypeBO(FileEventType.USERS.name(), 5));
+        result.add(new CollectionHostEventTypeBO(FileEventType.REGISTRY.name(), 6));
+        result.add(new CollectionHostEventTypeBO("SYSTEM", 7));
+        result.add(new CollectionHostEventTypeBO("OTHER", 8));
+        return new ServiceResult<>(result).asResult();
+    }
+
+
 
     @ApiOperation("查询场景实例事件列表（滚动分页）")
     @ApiImplicitParams({

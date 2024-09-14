@@ -104,6 +104,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhProbeDataModel;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
@@ -1050,6 +1051,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 return getProbeCollectionData(null, id, ProbeConstant.ProbeId.REGISTRY_MODIFY, queryParams,
                         FileEventType.REGISTRY.name());
             }
+
+            if (queryParams.getType().equals(7) || queryParams.getType().equals(8)) {
+                //        处理云场景警告
+                ListObjServiceResult<CollectionHostEventBO> listObjServiceResult = new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+                List<ElementLogListModel> logList = new ArrayList<>();
+                processAndFillHostEvents(listObjServiceResult,queryParams,id, logList);
+                return listObjServiceResult;
+            }
         }
         ListObjServiceResult<CollectionHostEventBO> hostEvents = scenePluginCollectionSceneService.listHostEvents(sceneId, queryParams);
         mergeFileData(hostEvents, queryParams, id);
@@ -1058,14 +1067,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     private void mergeFileData(ListObjServiceResult<CollectionHostEventBO> hostEventsBos, HostEventQueryParams queryParams,
                                String sceneId) {
-        List<CollectionHostEventBO> bos = hostEventsBos.getSource().getObjs();
         HumanCondition humanCondition = new HumanCondition().currentLink(ElementLogListModel.class)
                 .filterEqual(ElementLogListModel::getSceneId, sceneId);
-        /*if (CollectionUtils.isEmpty(queryParams.getCatagories())) {
-            humanCondition.filterEqual(ElementLogListModel::getCatagory, "");
-        }else {
-            humanCondition.filterIn(ElementLogListModel::getCatagory, queryParams.getCatagories().toArray());
-        }*/
 //        区分日志类型(日志/告警)
         if (null != queryParams.getRuleGroups() && queryParams.getRuleGroups().size() > 0) {
             humanCondition.filterEqual(ElementLogListModel::getLogType, "");
@@ -1085,106 +1088,27 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             humanCondition.filterIn(ElementLogListModel::getLevel, queryParams.getLevels().toArray());
         }
         if (CollectionUtils.isNotEmpty(queryParams.getKeyword())) {
+
             humanCondition.filterContains(ElementLogListModel::getDescription, queryParams.getKeyword().get(0));
         }
         var logList = elementLogListMapper.list(humanCondition);
 
-//        处理云场景警告
-        if (queryParams.getIsAlert() != null && queryParams.getIsAlert()) {
-            var scene = getSceneId(sceneId);
-            var sceneHandler = new SceneHandler(scene, null, false, null);
-            Integer cloudType = sceneHandler.getScene().getCloudType();
-            if (cloudType != null && BaseSceneModel.CloudType.DEFAULT != cloudType) {
-//            查询报警规则
-                HumanCondition instanceHumanCondition = new HumanCondition()
-                        .filterEqual(InstanceModel::getScene, scene);
-                InstanceModel instanceModel = instanceMapper.first(instanceHumanCondition);
-
-                HumanCondition alertRuleHumanCondition = new HumanCondition()
-                        .filterEqual(AlertRuleModel::getSceneId, instanceModel.getCscene());
-                List<AlertRuleModel> list = alertRuleMapper.list(alertRuleHumanCondition);
-                List<AlertRuleBO> alertRuleBOList = list.stream().map(alertRuleModel -> {
-                            AlertRuleBO alertRuleBO = new AlertRuleBO();
-                            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(alertRuleModel, alertRuleBO);
-                            alertRuleBO.parseHosts();
-                            alertRuleBO.parseAlertConditions();
-                            return alertRuleBO;
-                        })
-                        .collect(Collectors.toList());
-
-            /*List<AlertRuleBO> alertRuleBOListByNodeId = alertRuleBOList
-                    .stream()
-                    .filter(alertRuleBO -> null != alertRuleBO.getHosts() && alertRuleBO.getHostList().contains(nodeId))
-                    .collect(Collectors.toList());*/
-//            查询报警
-
-                CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-                List<CloudPluginSceneElementBO> allElements = new ArrayList<>(pluginHandler.getElementMap().values())
-                        .stream()
-                        .filter(element -> queryParams.getNodeIds() != null ? queryParams.getNodeIds().contains(element.getSrcElement().getId()) : true)
-                        .collect(Collectors.toList());
-
-                for (AlertRuleBO alertRuleBO : alertRuleBOList) {
-                    List<String> hostList = alertRuleBO.getHostList();
-                    List<String> collect = allElements
-                            .stream()
-                            .filter(element -> hostList.contains(element.getSrcElement().getId()))
-                            .filter(element -> StringUtils.isNotBlank(element.getResourceId()))
-                            .map(CloudPluginSceneElementBO::getResourceId)
-                            .collect(Collectors.toList());
-                    alertRuleBO.setVmResourceIdList(collect);
-                }
-
-                IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(cloudType);
-                ResourceGraphManager resourceGraphManager = azureResourceManager.getResourceGraphManager();
-
-                String resourceGroupId = sceneHandler.getScene().getResourceGroupId();
-
-                String kql = String.format(KQL, resourceGroupId);
-                QueryRequest queryRequest = new QueryRequest();
-                queryRequest.withQuery(kql);
-                QueryResponse resources = resourceGraphManager.resourceProviders().resources(queryRequest);
-//            组装数据
-                if (resources.data() != null) {
-                    List<Map> dataList = (List<Map>) resources.data();
-                    for (Map map : dataList) {
-                        String targetResourceName = map.get("targetResourceName").toString();
-                        String severity = map.get("severity").toString();
-                        String startDateTime = map.get("startDateTime").toString();
-                        String description = map.get("description") != null ? map.get("description").toString() : "";
-
-                        String finalTargetResourceName = targetResourceName;
-                        Optional<CloudPluginSceneElementBO> first = allElements.stream()
-                                .filter(element -> element.getResourceId().toLowerCase().contains(finalTargetResourceName))
-                                .findFirst();
 
 
-                        if (first.isPresent()) {
-                            CloudPluginSceneElementBO cloudPluginSceneElementBO = first.get();
-                            targetResourceName = cloudPluginSceneElementBO.getDefaultLaunchImageName();
+        processAndFillHostEvents(hostEventsBos, queryParams, sceneId, logList);
+    }
 
-
-                            // 将UTC时间字符串转换为ZonedDateTime
-                            DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
-                            ZonedDateTime zonedDateTime = ZonedDateTime.parse(startDateTime, formatter);
-
-                            // 将ZonedDateTime转换为LocalDateTime
-                            ZoneId localZoneId = ZoneId.systemDefault(); // 获取本地时区
-                            LocalDateTime localDateTime1 = zonedDateTime.withZoneSameInstant(localZoneId).toLocalDateTime();
-
-                            ElementLogListModel elementLogListModel = new ElementLogListModel();
-                            elementLogListModel.setNodeName(targetResourceName);
-                            elementLogListModel.setLevel(AlertRuleBO.Grade.getCodeByAzureCode(Integer.valueOf(severity.substring(severity.length() - 1))));
-                            elementLogListModel.setTime(localDateTime1);
-                            elementLogListModel.setDescription(description);
-                            elementLogListModel.setLogType("alert");
-                            logList.add(elementLogListModel);
-                        }
-                    }
-                }
-            }
-        }
-
+    /**
+     * 处理和填充主机事件列表
+     * @param hostEventsBos
+     * @param queryParams
+     * @param sceneId
+     * @param logList
+     */
+    private void processAndFillHostEvents(ListObjServiceResult<CollectionHostEventBO> hostEventsBos, HostEventQueryParams queryParams, String sceneId, List<ElementLogListModel> logList) {
+        //        处理云场景警告
+        getCloudAlerts(queryParams, sceneId, logList);
+        List<CollectionHostEventBO> bos = hostEventsBos.getSource().getObjs();
         // 设置total
         int alreadyHasNum = hostEventsBos.getSource().getTotal();
         hostEventsBos.getSource().setTotal(alreadyHasNum + logList.size());
@@ -1218,9 +1142,158 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             bo.setEventDesc(model.getEventDesc());
             bo.setLevel(model.getLevel());
             bo.setCatagory(model.getCatagory());
+            bo.setType(model.getLogType());
             bos.add(bo);
             if (bos.size() == queryParams.getPageSize()) {
                 return;
+            }
+        }
+    }
+
+    /**
+     * 处理云场景告警
+     *
+     * @param queryParams
+     * @param sceneId
+     * @param logList
+     */
+    private void getCloudAlerts(HostEventQueryParams queryParams, String sceneId, List<ElementLogListModel> logList) {
+        if (queryParams.getIsAlert() != null && queryParams.getIsAlert()) {
+            var scene = getSceneId(sceneId);
+            var sceneHandler = new SceneHandler(scene, null, false, null);
+            Integer cloudType = sceneHandler.getScene().getCloudType();
+            if (cloudType != null && BaseSceneModel.CloudType.DEFAULT != cloudType) {
+//            查询报警规则
+                HumanCondition instanceHumanCondition = new HumanCondition()
+                        .filterEqual(InstanceModel::getScene, scene);
+                InstanceModel instanceModel = instanceMapper.first(instanceHumanCondition);
+
+                HumanCondition alertRuleHumanCondition = new HumanCondition()
+                        .filterEqual(AlertRuleModel::getSceneId, instanceModel.getCscene());
+                List<AlertRuleModel> list = alertRuleMapper.list(alertRuleHumanCondition);
+                List<AlertRuleBO> alertRuleBOList = list.stream().map(alertRuleModel -> {
+                            AlertRuleBO alertRuleBO = new AlertRuleBO();
+                            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(alertRuleModel, alertRuleBO);
+                            alertRuleBO.parseHosts();
+                            alertRuleBO.parseAlertConditions();
+                            return alertRuleBO;
+                        })
+                        .collect(Collectors.toList());
+
+//            查询报警
+
+                CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+                List<CloudPluginSceneElementBO> allElements = new ArrayList<>(pluginHandler.getElementMap().values())
+                        .stream()
+                        .filter(element -> queryParams.getNodeIds() != null ? queryParams.getNodeIds().contains(element.getSrcElement().getId()) : true)
+                        .collect(Collectors.toList());
+
+                for (AlertRuleBO alertRuleBO : alertRuleBOList) {
+                    List<String> hostList = alertRuleBO.getHostList();
+                    List<String> collect = allElements
+                            .stream()
+                            .filter(element -> hostList.contains(element.getSrcElement().getId()))
+                            .filter(element -> StringUtils.isNotBlank(element.getResourceId()))
+                            .map(CloudPluginSceneElementBO::getResourceId)
+                            .collect(Collectors.toList());
+                    alertRuleBO.setVmResourceIdList(collect);
+                }
+
+                IAzureResourceManager azureResourceManager = IAzureResourceManager.getInstance(cloudType);
+                ResourceGraphManager resourceGraphManager = azureResourceManager.getResourceGraphManager();
+
+                String resourceGroupId = sceneHandler.getScene().getResourceGroupId();
+
+//                String kql = String.format(KQL, resourceGroupId);
+                StringBuilder kql = new StringBuilder("alertsmanagementresources\n" +
+                        "| where type == 'microsoft.alertsmanagement/alerts'\n");
+                kql.append("| where properties[\"essentials\"][\"targetResource\"] startswith '").append(resourceGroupId).append("'\n");
+                kql.append("| where properties[\"essentials\"][\"monitorCondition\"] in~ ('Fired')\n");
+                if (null != queryParams.getNodeIds() && queryParams.getNodeIds().size() > 0) {
+                    List<String> vmIds = allElements.stream()
+                            .filter(element -> queryParams.getNodeIds().contains(element.getSrcElement().getId()))
+                            .map(CloudPluginSceneElementBO::getResourceId)
+                            .collect(Collectors.toList());
+                    for (int i = 0; i < vmIds.size(); i++) {
+                        if (i == 0) {
+                            kql.append("| where properties[\"essentials\"][\"targetResource\"] == '").append(vmIds.get(i).toLowerCase()).append("'");
+                        } else {
+                            kql.append(" or properties[\"essentials\"][\"targetResource\"] == '").append(vmIds.get(i).toLowerCase()).append("'");
+                        }
+                    }
+                    kql.append("\n");
+                }
+                if (queryParams.getType() != null) {
+                    if (queryParams.getType().equals(7)) {
+                        kql.append("| where properties[\"essentials\"][\"signalType\"] == 'Metric'\n");
+                    }
+                    if (queryParams.getType().equals(8)) {
+                        kql.append("| where properties[\"essentials\"][\"signalType\"] == 'Log'\n");
+                    }
+                }
+                if (queryParams.getLevels() != null) {
+                    Integer azureCodeByCode = AlertRuleBO.Grade.getAzureCodeByCodes(queryParams.getLevels());
+                    kql.append("| where properties[\"essentials\"][\"severity\"] matches regex '.*").append(azureCodeByCode).append("'\n");
+                }
+
+                if (StringUtils.isNotBlank(queryParams.getStartTime())) {
+                    String startTime = TimeUtils.stringToLocalDateTime(queryParams.getStartTime()).atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter);
+                    kql.append("| where properties['essentials']['startDateTime'] >= datetime('").append(startTime).append("') \n");
+                }
+                if (StringUtils.isNotBlank(queryParams.getEndTime())) {
+                    String endTime = TimeUtils.stringToLocalDateTime(queryParams.getEndTime()).atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter);
+                    kql.append("| where properties['essentials']['startDateTime'] <= datetime('").append(endTime).append("') \n");
+                }
+
+                if (queryParams.getKeyword() != null && queryParams.getKeyword().size() > 0) {
+                    kql.append("| where properties[\"essentials\"][\"description\"] contains '").append(queryParams.getKeyword().get(0)).append("'\n");
+                }
+                kql.append("| project name,severity = properties[\"essentials\"][\"severity\"],targetResource = properties[\"essentials\"][\"targetResource\"],\n" +
+                        "                            monitorCondition = properties[\"essentials\"][\"monitorCondition\"],targetResourceName = properties[\"essentials\"][\"targetResourceName\"],\n" +
+                        "                            description = properties[\"essentials\"][\"description\"],startDateTime = todatetime(properties[\"essentials\"][\"startDateTime\"]),\n" +
+                        "                            essentials = properties[\"essentials\"],signalType = properties[\"essentials\"][\"signalType\"]\n" +
+                        "| order by todatetime(essentials[\"startDateTime\"]) desc");
+
+                QueryRequest queryRequest = new QueryRequest();
+                queryRequest.withQuery(kql.toString());
+                QueryResponse resources = resourceGraphManager.resourceProviders().resources(queryRequest);
+//            组装数据
+                if (resources.data() != null) {
+                    List<Map> dataList = (List<Map>) resources.data();
+                    for (Map map : dataList) {
+                        String targetResourceName = map.get("targetResourceName").toString();
+                        String severity = map.get("severity").toString();
+                        String startDateTime = map.get("startDateTime").toString();
+                        String description = map.get("description") != null ? map.get("description").toString() : "";
+                        String signalType = map.get("signalType") != null ? map.get("signalType").toString() : "";
+
+                        String finalTargetResourceName = targetResourceName;
+                        Optional<CloudPluginSceneElementBO> first = allElements.stream()
+                                .filter(element -> element.getResourceId().toLowerCase().contains(finalTargetResourceName))
+                                .findFirst();
+
+
+                        if (first.isPresent()) {
+                            CloudPluginSceneElementBO cloudPluginSceneElementBO = first.get();
+
+                            // 将UTC时间字符串转换为ZonedDateTime
+                            DateTimeFormatter formatter = DateTimeFormatter.ISO_ZONED_DATE_TIME;
+                            ZonedDateTime zonedDateTime = ZonedDateTime.parse(startDateTime, formatter);
+
+                            // 将ZonedDateTime转换为LocalDateTime
+                            ZoneId localZoneId = ZoneId.systemDefault(); // 获取本地时区
+                            LocalDateTime localDateTime1 = zonedDateTime.withZoneSameInstant(localZoneId).toLocalDateTime();
+
+                            ElementLogListModel elementLogListModel = new ElementLogListModel();
+                            elementLogListModel.setNodeName(cloudPluginSceneElementBO.getSrcElement().getName());
+                            elementLogListModel.setLevel(AlertRuleBO.Grade.getCodeByAzureCode(Integer.valueOf(severity.substring(severity.length() - 1))));
+                            elementLogListModel.setTime(localDateTime1);
+                            elementLogListModel.setDescription(description);
+                            elementLogListModel.setLogType(signalType.equals("Metric") ? "SYSTEM" : "OTHER");
+                            logList.add(elementLogListModel);
+                        }
+                    }
+                }
             }
         }
     }
