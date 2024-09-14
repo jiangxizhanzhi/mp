@@ -1174,7 +1174,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
                             ElementLogListModel elementLogListModel = new ElementLogListModel();
                             elementLogListModel.setNodeName(targetResourceName);
-                            elementLogListModel.setLevel(Integer.valueOf(severity.substring(severity.length() - 1)));
+                            elementLogListModel.setLevel(AlertRuleBO.Grade.getCodeByAzureCode(Integer.valueOf(severity.substring(severity.length() - 1))));
                             elementLogListModel.setTime(localDateTime1);
                             elementLogListModel.setDescription(description);
                             elementLogListModel.setLogType("alert");

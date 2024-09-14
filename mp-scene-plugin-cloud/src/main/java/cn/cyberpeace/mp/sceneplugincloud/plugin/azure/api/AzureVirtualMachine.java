@@ -310,7 +310,7 @@ public class AzureVirtualMachine {
 
                     ScheduledQueryRuleResourceInner rule = new ScheduledQueryRuleResourceInner();
                     rule.withCriteria(criteria);
-                    rule.withSeverity(AlertSeverity.fromLong(alertRuleBO.getAlarmLevel()));
+                    rule.withSeverity(AlertSeverity.fromLong(AlertRuleBO.Grade.getAzureCodeByCode(alertRuleBO.getAlarmLevel())));
 //        聚合粒度
                     rule.withWindowSize(Duration.ofSeconds(windowSize));
 //        评估频率
@@ -340,7 +340,7 @@ public class AzureVirtualMachine {
 //                检查间隔
                             .withFrequency(Duration.ofMinutes(5))
 //                严重性，预警规则说明
-                            .withAlertDetails(alertRuleBO.getAlarmLevel(), alertRuleBO.getAlarmDescription())
+                            .withAlertDetails(AlertRuleBO.Grade.getAzureCodeByCode(alertRuleBO.getAlarmLevel()), alertRuleBO.getAlarmDescription())
 //                选择操作组
 //                .withActionGroups("/subscriptions/C87BA926-F7C2-4D53-8B8E-89245DC92E26/resourceGroups/6b987034b1f8490abc635ccdf9753c02/providers/microsoft.insights/actionGroups/RecommendedAlertRules-AG-1")
                             .withActionGroups();
