@@ -1,7 +1,7 @@
 server:
   servlet:
     context-path: /api/mp
-  port: 8082
+  port: 8080
   tomcat:
     threads:
       min-spare: ${spring.tomcat.ext-var.min-spare}
