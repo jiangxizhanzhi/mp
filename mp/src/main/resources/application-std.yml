@@ -1,7 +1,7 @@
 server:
   servlet:
     context-path: /api/mp
-  port: 8080
+  port: 8082
   tomcat:
     threads:
       min-spare: ${spring.tomcat.ext-var.min-spare}
@@ -10,11 +10,11 @@ server:
 spring:
   datasource:
     #    ext-var:
-    #      db-ip: ${MP_DB_IP:10.100.7.1}
-    #      db-port: ${MP_DB_PORT:9306}
+    #      db-ip: ${MP_DB_IP:10.100.13.1}
+    #      db-port: ${MP_DB_PORT:9308}
     #      db-database: ${MP_DB_DATABASE:mp}
-    #      username: ${MP_DB_USERNAME:root}
-    #      password: ${MP_DB_PASSWORD:cyberpeace@2020}
+    #      username: ${MP_DB_USERNAME:mp}
+    #      password: ${MP_DB_PASSWORD:N2QzY2I5Mjc0ODg2}
     url: jdbc:mysql://${spring.datasource.ext-var.db-ip}:${spring.datasource.ext-var.db-port}/${spring.datasource.ext-var.db-database}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
     username: ${spring.datasource.ext-var.username}
     password: ${spring.datasource.ext-var.password}
@@ -37,7 +37,7 @@ spring:
       max-request-size: 10000MB
   rabbitmq:
     #    ext-var:
-    #      host: ${RABBITMQ_IP:10.100.7.1}
+    #      host: ${RABBITMQ_IP:10.100.13.1}
     #      port: ${RABBITMQ_PORT:9672}
     #      username: ${RABBITMQ_USERNAME:cpcloud}
     #      password: ${RABBITMQ_PASSWORD:MzhhMzU4NDQzNzU}
@@ -95,17 +95,17 @@ mp:
   #    ext-var:
   #      mp-ip: ${MP_API_IP:10.100.1.12}          # MP中台地址
   #      mp-port: ${MP_API_PORT:8001}
-  #      cp-ip: ${CP_IP:10.100.7.1}                # 云平台适配层接口地址
+  #      cp-ip: ${CP_IP:10.100.13.1}                # 云平台适配层接口地址
   #      cp-port: ${CP_PORT:11111}
   base:
     #    ext-var:
-    #      fdfs-ip: ${FDFS_IP:10.100.7.1}
+    #      fdfs-ip: ${FDFS_IP:10.100.13.1}
     #      fdfs-tracker-port: ${FDFS_TRACKER_SERVERS_PORT:22122}
     #      fdfs-inner-file-port: ${FDFS_INNER_FILE_SERVER_PORT:8888}
     #      fdfs-outer-http-server: ${FDFS_FILE_SERVER_ADDR:/fdfs}
     #      file-server: ${FILE_SERVER:lfs}
-    #      lfs-inner-http-url: ${LFS_INNER_HTTP_URL:http://10.100.7.1:8001/api/mp/file/%s}
-    #      lfs-outer-http-url: ${LFS_OUTER_HTTP_URL:http://10.100.7.1:8001/api/mp/file/%s}
+    #      lfs-inner-http-url: ${LFS_INNER_HTTP_URL:http://10.100.13.1:8001/api/mp/file/%s}
+    #      lfs-outer-http-url: ${LFS_OUTER_HTTP_URL:http://10.100.13.1:8001/api/mp/file/%s}
     fdfs-tracker-servers:
       - ${mp.base.ext-var.fdfs-ip}:${mp.base.ext-var.fdfs-tracker-port}
     fdfs-inner-http-server: http://${mp.base.ext-var.fdfs-ip}:${mp.base.ext-var.fdfs-inner-file-port}
@@ -133,14 +133,14 @@ mp:
   # mp-situationaware 模块配置
   situationaware:
     #    ext-var:
-    #      wazuh-ip: ${WAZUH_IP:10.100.7.1}
+    #      wazuh-ip: ${WAZUH_IP:10.100.13.1}
     #      wazuh-port: ${WAZUH_PORT:15500}
     #      wazuh-username: ${WAZUH_USERNAME:wazuh}
     #      wazuh-password: ${WAZUH_PASSWORD:Abcd123#}
-    #      wazuh-es-ip: ${WAZUH_ES_IP:10.100.7.1}
+    #      wazuh-es-ip: ${WAZUH_ES_IP:10.100.13.1}
     #      wazuh-es-port: ${WAZUH_ES_PORT:9205}
     #      wazuh-es-max-page-size: ${ES_MAX_PAGESIZE:10000}
-    #      arkime-es-host: ${ARKIME_ES_IP:10.100.7.1}
+    #      arkime-es-host: ${ARKIME_ES_IP:10.100.13.1}
     #      arkime-es-port: ${ARKIME_ES_PORT:9205}
     #      arkime-disk: ${ARKIME_DISK:50}
     # monitor
@@ -179,7 +179,7 @@ mp:
   # mp-log 模块
   log:
     ext-var:
-      #      es-ip: ${LOG_ES_IP:10.100.7.1}
+      #      es-ip: ${LOG_ES_IP:10.100.13.1}
       #      es-port: ${LOG_ES_PORT:9205}
       #      es-max-page-size: ${ES_MAX_PAGESIZE:10000}
       #      log-db: ${MP_DEVOPS_LOG_DB:sql} #日志存储数据库可以配置：es、sql

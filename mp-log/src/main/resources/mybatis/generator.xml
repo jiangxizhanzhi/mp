@@ -15,9 +15,9 @@
 
         <!--数据库基本信息-->
         <jdbcConnection driverClass="org.mariadb.jdbc.Driver"
-                        connectionURL="jdbc:mysql://10.100.7.1:9306/mp"
-                        userId="root"
-                        password="cyberpeace@2020">
+                        connectionURL="jdbc:mysql://${MP_DB_IP}:${MP_DB_PORT}/mp"
+                        userId="${MP_DB_USERNAME}"
+                        password="${MP_DB_PASSWORD}">
         </jdbcConnection>
 
         <!--生成实体类的位置以及包的名字-->
