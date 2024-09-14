@@ -1,5 +1,13 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
@@ -23,19 +31,6 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 @Api(value = "场景模板", tags = "CSCENE-场景模板")
 @Slf4j
@@ -154,6 +149,9 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("scene sync,params is {}", JsonCommon.stringify(csceneBO));
         boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
         correctRequestCsceneParamsForSync(csceneBO);
+		if (null != csceneBO && null != csceneBO.getSceneConfig()) {
+			getModelService().addCollectionPlugin(csceneBO);
+		}
         var result = modelService.sync(csceneBO, null, true).asResult();
         if (csceneBO.getType() != null && csceneBO.getType() == CsceneModel.Type.TEMPLATE) {
             if (isUpdate) {
@@ -162,7 +160,6 @@ public class CsceneController implements BaseModelListControllerBase {
                 CsceneLogUtils.recordSceneConfigLog(result.getData(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());
             }
         }
-        getModelService().addCollectionPlugin(csceneBO);
         return result;
     }
 
