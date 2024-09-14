@@ -149,7 +149,8 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("scene sync,params is {}", JsonCommon.stringify(csceneBO));
         boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
         correctRequestCsceneParamsForSync(csceneBO);
-		if (null != csceneBO && null != csceneBO.getSceneConfig()) {
+        // 新建拓扑时开启采集
+		if (null != csceneBO && null != csceneBO.getSceneConfig() && !isUpdate) {
 			getModelService().addCollectionPlugin(csceneBO);
 		}
         var result = modelService.sync(csceneBO, null, true).asResult();
