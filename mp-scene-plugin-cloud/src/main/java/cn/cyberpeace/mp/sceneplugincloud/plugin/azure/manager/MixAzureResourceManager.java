@@ -23,8 +23,8 @@ import javax.annotation.PostConstruct;
 @Component
 public class MixAzureResourceManager implements IAzureResourceManager {
 
-    // 订阅
-    private static final String subscription = "c87ba926-f7c2-4d53-8b8e-89245dc92e26";
+    // 订阅(默认,当获取user时,覆盖)
+    private static String subscription = "0e622fd7-ba3d-4631-8192-63ce54b2d275";
 
     //当前云环境资源管理器
     private static AzureResourceManager AZURE_RESOURCE_MANAGER;
@@ -53,6 +53,9 @@ public class MixAzureResourceManager implements IAzureResourceManager {
                     jsonObject.put("cloudType", 3);
                     MicrosoftAzureUserModel localAzurer = microsoftAzureLoginService.getLocalAzurer(jsonObject);
                     this.user = localAzurer;
+                    if(null != localAzurer && null != localAzurer.getAzureSubscriptionId()){
+                        this.subscription = localAzurer.getAzureSubscriptionId();
+                    }
                 }
             }
         }
@@ -186,6 +189,9 @@ public class MixAzureResourceManager implements IAzureResourceManager {
         jsonObject.put("cloudType", 3);
         MicrosoftAzureUserModel localAzurer = microsoftAzureLoginService.getLocalAzurer(jsonObject);
         this.user = localAzurer;
+        if(null != localAzurer && null != localAzurer.getAzureSubscriptionId()){
+            this.subscription = localAzurer.getAzureSubscriptionId();
+        }
         //优先使用配置的环境变量
 //        TokenCredential credential = new DefaultAzureCredentialBuilder()
 //                .authorityHost(AzureAuthorityHosts.AZURE_PUBLIC_CLOUD)
