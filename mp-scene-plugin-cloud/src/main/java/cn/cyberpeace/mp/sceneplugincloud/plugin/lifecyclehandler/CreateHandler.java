@@ -899,7 +899,16 @@ public class CreateHandler extends HandlerCommon {
         if (Boolean.TRUE.equals(sceneElementBO.getAttackMockDeviceFlag())) {
             String standardSystemType = SystemTypeUtils.getStandardSystemType(sceneElementBO.getSystemType());
             // 虚拟机本身ip，随机选一个
-            String clientIp = sceneElementBO.getPorts().get(0).getIp();
+            String clientIp = "";
+            for (var port : sceneElementBO.getPorts()) {
+                if (StringUtils.isNotEmpty(port.getIp())) {
+                    clientIp = port.getIp();
+                    break;
+                }
+            }
+            if (StringUtils.isEmpty(clientIp)) {
+                log.info("set client ip failed, port ip is empty");
+            }
 
             if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
 //                basDeviceInitCommand.add("@echo off");
