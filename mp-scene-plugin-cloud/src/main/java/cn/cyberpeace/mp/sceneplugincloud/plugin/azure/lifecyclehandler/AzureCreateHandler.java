@@ -75,25 +75,6 @@ public class AzureCreateHandler extends CreateHandler {
         int stepPercentage = this.getStepPercentage();
         List<CloudPluginSceneElementBO> allElements = new ArrayList<>(getPluginHandler().getElementMap().values());
 
-        //  TODO 测试载荷用 start
-        // 再创建终端 终端分虚拟机、容器、和web服务
-        /*List<Runnable> createTerminalTasks = new ArrayList<>();
-        // 载荷
-       List<CloudPluginSceneElementBO> filteredLoadElements = this.filterLoadElements(allElements);
-        List<Runnable> createLoadTasks = new ArrayList<>();
-        for (CloudPluginSceneElementBO element : filteredLoadElements) {
-            String nodeId = element.getSrcElement().getId();
-            LoadCreateTask task = new LoadCreateTask(element);
-            Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_LOAD, task);
-            createLoadTasks.add(formatTask);
-        }
-
-        createTerminalTasks.addAll(createLoadTasks);
-
-        if (!createTerminalTasks.isEmpty()) {
-            runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
-        }*/
-        //  TODO 测试载荷用 end
         getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_NETWORK);
         // 创建微软云的资源组
         String groupName = getPluginHandler().getSourceSceneId();
@@ -131,23 +112,6 @@ public class AzureCreateHandler extends CreateHandler {
             for (int i = 0; i < filteredAuxiliaryNetworkElements.size(); i++) {
                 boolean isManage = false;
                 CloudPluginSceneElementBO element = filteredAuxiliaryNetworkElements.get(i);
-/*                List<String> vNetPeeringIdList = element.getSrcElement().getPorts().stream()
-                        .map(port -> this.getPluginHandler().getSceneHandler().getPortConnectedPort(port.getId()))
-                        .filter(Objects::nonNull)
-                        .map(portConnectedPort -> vnetElementById.get(portConnectedPort.getElement().getId()))
-                        .filter(Objects::nonNull)
-                        .filter(pluginSceneElementBO -> !pluginSceneElementBO.getIsPublicIp() || pluginSceneElementBO.getImageType().equals(BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY))
-                        .map(CloudPluginSceneElementBO::getSrcElement)
-                        .map(SceneElementBO::getId)
-                        .collect(Collectors.toList());*/
-
-                /*Optional<CloudPluginSceneElementBO> any = element.getSrcElement().getPorts().stream()
-                        .map(port -> this.getPluginHandler().getSceneHandler().getPortConnectedPort(port.getId()))
-                        .filter(Objects::nonNull)
-                        .map(portConnectedPort -> vnetElementById.get(portConnectedPort.getElement().getId()))
-                        .filter(Objects::nonNull)
-                        .filter(pluginSceneElementBO -> !pluginSceneElementBO.getIsPublicIp() || pluginSceneElementBO.getImageType().equals(BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY))
-                        .findAny();*/
                 Optional<CloudPluginSceneElementBO> any = element.getSrcElement().getPorts().stream()
                         .filter(port -> null != this.getPluginHandler().getSceneHandler().getPortConnectedPort(port.getId()))
                         .map(port ->
@@ -163,13 +127,8 @@ public class AzureCreateHandler extends CreateHandler {
                     isManage = true;
                 }
                 if (!BaseCloudPluginSceneElementModel.ImageType.VNET.equals(element.getImageType()) && !element.getIsPublicIp()) {
-//                    vNetPeeringIdList.add(element.getSrcElement().getId());
                     isManage = true;
                 }
-                /*if (vNetPeeringIdList.size() > 0 && vNetPeeringIdList.stream().noneMatch(manageElementIdSet::contains)) {
-                    isManage = true;
-                    manageElementIdSet.add(element.getSrcElement().getId());
-                }*/
 
                 //筛选出所有cidr是否连接容器
                 CloudScenePluginHandler pluginHandler = getPluginHandler();
@@ -256,7 +215,6 @@ public class AzureCreateHandler extends CreateHandler {
                 element.setVmExpansionDiskType(null);
 //                处理云场景无登录按钮、接收虚拟端口信息
                 receiveVirtualPortInfo(element, virtualNics);
-                String s = combineInitCommand(element);
                 AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics, combineInitCommand(element), alertRuleBOListByNodeId,dataCollectionRulesId);
                 Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_VIRTUAL_MACHINE, task);
                 createVirtualMachineTasks.add(formatTask);
@@ -266,8 +224,12 @@ public class AzureCreateHandler extends CreateHandler {
             List<Runnable> createContainerTasks = new ArrayList<>();
             for (CloudPluginSceneElementBO element : filteredContainerElements) {
                 String nodeId = element.getSrcElement().getId();
+                List<AlertRuleBO> alertRuleBOListByNodeId = alertRuleBOList
+                        .stream()
+                        .filter(alertRuleBO -> null != alertRuleBO.getHosts() && alertRuleBO.getHostList().contains(nodeId))
+                        .collect(Collectors.toList());
                 List<VirtualNic> virtualNics = virtualNicsMap.get(nodeId);
-                AzureContainerCreateTask task = new AzureContainerCreateTask(resourceService, getPluginHandler(), element, virtualNics);
+                AzureContainerCreateTask task = new AzureContainerCreateTask(resourceService, getPluginHandler(), element, virtualNics, alertRuleBOListByNodeId,dataCollectionRulesId);
                 Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_CONTAINER, task);
                 createContainerTasks.add(formatTask);
             }

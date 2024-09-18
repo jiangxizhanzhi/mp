@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.repository.DevopsLoadSourceMapper;
+import com.azure.resourcemanager.monitor.fluent.models.DataCollectionRuleResourceInner;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -279,6 +280,15 @@ public class RecreateHandler extends HandlerCommon {
             }
             Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
             if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
+                IAzureResourceManager resourceService = IAzureResourceManager.getInstance(cloudType);
+                AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(resourceService);
+                String groupName = getPluginHandler().getSourceSceneId();
+                DataCollectionRuleResourceInner byResourceGroup = resourceService
+                        .getMonitorManager()
+                        .serviceClient()
+                        .getDataCollectionRules()
+                        .getByResourceGroup(groupName, "MSVMI-" + groupName);
+                String dataCollectionRulesId = byResourceGroup != null ? byResourceGroup.id() : "";
                 if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
                     runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_MACHINE,
                             () -> {
@@ -293,9 +303,7 @@ public class RecreateHandler extends HandlerCommon {
                                 }
 
                                 List<VirtualNic> virtualNics = this.genVirutalNics(cloudElement);
-                                AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
-//                              TODO  dataCollectionRulesId
-                                azureVirtualMachine.create(getPluginHandler(), cloudElement, virtualNics, combineInitCommand(cloudElement),alertRuleBOList, "");
+                                azureVirtualMachine.create(getPluginHandler(), cloudElement, virtualNics, combineInitCommand(cloudElement), alertRuleBOList, dataCollectionRulesId);
                                 openAccessModes(cloudElement);
                             });
                 } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
@@ -311,7 +319,7 @@ public class RecreateHandler extends HandlerCommon {
                                     });
                                 }
                                 new AzureContainer(IAzureResourceManager.getInstance(cloudType))
-                                        .create(getPluginHandler(), cloudElement, this.genVirutalNics(cloudElement));
+                                        .create(getPluginHandler(), cloudElement, this.genVirutalNics(cloudElement),alertRuleBOList,dataCollectionRulesId);
                                 openAccessModes(cloudElement);
                             });
                 } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
@@ -328,7 +336,7 @@ public class RecreateHandler extends HandlerCommon {
                                 }
                                 DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
                                 DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
-                                new Load(synchronousDataSource).create(getPluginHandler(),cloudElement);
+                                new Load(synchronousDataSource).create(getPluginHandler(), cloudElement);
 
                             });
                 }

@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.AzureAlertRuleUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.NetworkSecurityGroupUtils;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
@@ -230,7 +231,9 @@ public class AzureVirtualMachine {
 
         configureMonitoringForVirtualMachine(cloudElement, dataCollectionRulesId, vm, groupName);
 
-        createAlertRules(alertRuleBOList, vm, groupName);
+//        createAlertRules(alertRuleBOList, vm.id(), vm.name(), groupName);
+
+        AzureAlertRuleUtils.createAlertRules(resourceService, alertRuleBOList, groupName, vm.id(), vm.name());
 
     }
 
@@ -279,10 +282,11 @@ public class AzureVirtualMachine {
      * 创建报警规则
      *
      * @param alertRuleBOList
-     * @param vm
+     * @param resourceId
+     * @param resourceName
      * @param groupName
      */
-    private void createAlertRules(List<AlertRuleBO> alertRuleBOList, VirtualMachine vm, String groupName) {
+    private void createAlertRules(List<AlertRuleBO> alertRuleBOList, String resourceId, String resourceName, String groupName) {
         if (alertRuleBOList.size() > 0) {
             for (AlertRuleBO alertRuleBO : alertRuleBOList) {
                 List<AlarmConditionModel> alarmConditionList = alertRuleBO.getAlarmConditionList();
@@ -316,11 +320,11 @@ public class AzureVirtualMachine {
 //        评估频率
                     rule.withEvaluationFrequency(Duration.parse(alarmConditionModel.getFrequency()));
                     rule.withLocation(Region.ASIA_EAST.name());
-                    rule.withScopes(Arrays.asList(vm.id()));
+                    rule.withScopes(Arrays.asList(resourceId));
                     MonitorClient monitorClient = monitorManager.serviceClient();
                     ScheduledQueryRulesClient scheduledQueryRules = monitorClient.getScheduledQueryRules();
                     try {
-                        scheduledQueryRules.createOrUpdate(groupName, alertRuleBO.getName() + "-" + vm.name(), rule);
+                        scheduledQueryRules.createOrUpdate(groupName, alertRuleBO.getName() + "-" + resourceName, rule);
                     } catch (Exception e) {
                         log.error(" ScheduledQueryAlert create erro,ScheduledQueryAlertName: {}", alertRuleBO.getName());
                     }
@@ -330,11 +334,11 @@ public class AzureVirtualMachine {
                     // 创建监视警报
                     MetricAlert.DefinitionStages.WithCriteriaDefinition withCriteriaDefinition = azureResourceManager.alertRules().metricAlerts()
 //                预警规则名称
-                            .define(alertRuleBO.getName() + "-" + vm.name())
+                            .define(alertRuleBO.getName() + "-" + resourceName)
 //                资源组
                             .withExistingResourceGroup(groupName)
 //                虚拟机id
-                            .withTargetResource(vm.id())
+                            .withTargetResource(resourceId)
 //                回溯期 5分钟
                             .withPeriod(Duration.ofMinutes(15))
 //                检查间隔

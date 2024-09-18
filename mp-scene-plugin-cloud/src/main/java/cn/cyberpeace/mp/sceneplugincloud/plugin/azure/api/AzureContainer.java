@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api;
 
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.scene.bo.AlertRuleBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
@@ -11,6 +12,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceMana
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
+import cn.cyberpeace.mp.sceneplugincloud.util.AzureAlertRuleUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
@@ -36,7 +38,8 @@ public class AzureContainer {
         this.region = resourceService.getRegin();
     }
 
-    public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics) {
+    public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics,
+                       List<AlertRuleBO> alertRuleBOList, String dataCollectionRulesId) {
         VirtualNic virtualNic = virtualNics.get(0);
         String networkId = virtualNic.getNetworkId();
         String fixedIp = virtualNic.getFixedIp();
@@ -67,6 +70,8 @@ public class AzureContainer {
             virtualNic.setFixedIp(container.ipAddress());
         }
         receiveVirtualPortInfo(pluginHandler, cloudElement, virtualNics);
+
+        AzureAlertRuleUtils.createAlertRules(resourceService, alertRuleBOList, groupName, container.id(), container.name());
     }
 
     /**
