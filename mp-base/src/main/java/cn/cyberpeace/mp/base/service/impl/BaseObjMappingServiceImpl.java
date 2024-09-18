@@ -33,6 +33,7 @@ public abstract class BaseObjMappingServiceImpl<M extends BaseObjMappingModel, P
         Map<String, M> existNameMapping = new HashMap<>();
         for (M m : existMappings) {
             if (existNameMapping.put(m.getName(), m) != null) {
+                log.error("diffObjMappings group is [{}]  name is [{}] Duplicate key", group, m.getName());
                 throw new IllegalStateException("Duplicate key");
             }
         }
