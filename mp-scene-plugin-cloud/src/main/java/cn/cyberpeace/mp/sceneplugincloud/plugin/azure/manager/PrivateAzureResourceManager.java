@@ -93,21 +93,25 @@ public class PrivateAzureResourceManager implements IAzureResourceManager {
 
     @Override
     public AzureResourceManager getManager() {
-        if (AZURE_RESOURCE_MANAGER == null) {
-            synchronized (this) {
-                if (AZURE_RESOURCE_MANAGER == null) {
-                    TokenCredential credential = getTokenCredential();
-                    // If you don't set the tenant ID and subscription ID via environment variables,
-                    // change to create the Azure profile with tenantId, subscriptionId, and Azure environment.
-                    AzureProfile profile = new AzureProfile(AzureEnvironment.AZURE);
-                    AZURE_RESOURCE_MANAGER = AzureResourceManager.configure()
-                            .withLogLevel(HttpLogDetailLevel.BASIC)
-                            .authenticate(credential, profile)
-                            .withSubscription(subscription);
+        try {
+            if (AZURE_RESOURCE_MANAGER == null) {
+                synchronized (this) {
+                    if (AZURE_RESOURCE_MANAGER == null) {
+                        TokenCredential credential = getTokenCredential();
+                        // If you don't set the tenant ID and subscription ID via environment variables,
+                        // change to create the Azure profile with tenantId, subscriptionId, and Azure environment.
+                        AzureProfile profile = new AzureProfile(AzureEnvironment.AZURE);
+                        AZURE_RESOURCE_MANAGER = AzureResourceManager.configure()
+                                .withLogLevel(HttpLogDetailLevel.BASIC)
+                                .authenticate(credential, profile)
+                                .withSubscription(subscription);
+                    }
                 }
             }
+            return AZURE_RESOURCE_MANAGER;
+        } catch (Exception e) {
+            return null;
         }
-        return AZURE_RESOURCE_MANAGER;
     }
 
     @Override

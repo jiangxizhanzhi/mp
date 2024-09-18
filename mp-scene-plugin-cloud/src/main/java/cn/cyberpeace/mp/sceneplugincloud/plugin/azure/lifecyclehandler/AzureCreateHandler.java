@@ -49,8 +49,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AzureCreateHandler extends CreateHandler {
 
-    public Integer cloudType;
-
     public static class ElementProcess {
         public static final EventProcess CREATE_WEBAPP = new EventProcess("create_webapp", "sceneplugincloud.event" + ".CREATE_WEBAPP");
         public static final EventProcess CREATE_FIRE_WALL = new EventProcess("create_fire_wall", "sceneplugincloud.event.create_fire_wall");
@@ -60,12 +58,7 @@ public class AzureCreateHandler extends CreateHandler {
 
     public AzureCreateHandler(int cloudType, CloudScenePluginHandler pluginHandler) {
         super(pluginHandler);
-        this.cloudType = cloudType;
         this.resourceService = IAzureResourceManager.getInstance(cloudType);
-    }
-
-    public void reCreateHandler() {
-
     }
 
     @Override
