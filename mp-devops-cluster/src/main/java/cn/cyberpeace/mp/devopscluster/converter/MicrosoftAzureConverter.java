@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.CloudDevice;
 import cn.cyberpeace.mp.devopscluster.po.*;
 import cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper;
+import cn.cyberpeace.mp.devopscluster.utils.ExcelUtils;
 import cn.cyberpeace.mp.devopscluster.vo.EquipmentRequestVO;
 import cn.cyberpeace.mp.devopscluster.vo.LoadRequestVO;
 import cn.cyberpeace.mp.devopscluster.vo.MpSysCodeMenuVO;
@@ -31,7 +32,9 @@ import com.azure.resourcemanager.compute.models.*;
 import com.azure.resourcemanager.containerinstance.ContainerInstanceManager;
 import com.azure.resourcemanager.containerinstance.models.Container;
 import com.azure.resourcemanager.containerinstance.models.ContainerGroup;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -39,7 +42,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
+import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -48,6 +53,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MicrosoftAzureConverter implements BaseConverter {
     @Autowired
     private MicrosoftAzureMapper microsoftAzureMapper;
@@ -57,6 +63,9 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
     @Autowired
     private CommonCodeServiceImpl commonCodeService;
+
+    // 镜像同步白名单路径
+    private static final String filePath = "/whitelist/whitelist.xlsx";
 
     /**
      * 云镜像管理页面分页查询
@@ -428,7 +437,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
                     // 打印镜像列表
                     for (ArtifactManifestProperties imageTag : imageTags) {
                         List<String> tags = imageTag.getTags();
-                        for(String tag : tags){
+                        for (String tag : tags) {
                             JSONObject jsonObject = new JSONObject();
                             System.out.println("serverUrl" + serverUrl);
                             jsonObject.put("serverUrl", serverUrl);
@@ -484,6 +493,26 @@ public class MicrosoftAzureConverter implements BaseConverter {
         return jsonList;
     }
 
+    public void sleep(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Data
+    public static class WhiteImageInfo {
+        private String publisherName;
+        private String offerName;
+        private String skuName;
+        private String version;
+
+        // 无参构造函数
+        public WhiteImageInfo() {
+        }
+    }
+
     /**
      * 虚拟机市场镜像
      */
@@ -493,9 +522,37 @@ public class MicrosoftAzureConverter implements BaseConverter {
         AzureResourceManager azureResourceManager = instance.getManager();
         // 指定要查询的区域
         Region region = instance.getRegin();
+
+        // 读取/resource/whitelist路径下的excel需同步靶标清单
+        List<WhiteImageInfo> whiteImageInfos = null;
+        Boolean isExist = Boolean.TRUE;
+        try {
+            // 判断该路径下是否有文件
+            InputStream inputStream = getClass().getResourceAsStream(this.filePath);
+            if (inputStream == null) {
+                isExist = Boolean.FALSE;
+                log.info("白名单文件不存在");
+            } else {
+                whiteImageInfos = ExcelUtils.readExcelList(inputStream, WhiteImageInfo.class);
+            }
+        } catch (Exception e) {
+            isExist = Boolean.FALSE;
+            log.info("读取白名单文件出错", e);
+        }
+        List<String> publisherWhiteList = null;
+        if (null != whiteImageInfos && whiteImageInfos.size() > 0) {
+            publisherWhiteList = whiteImageInfos.stream()
+                    .filter(whiteImageInfo -> !StringUtils.isEmpty(whiteImageInfo.getPublisherName()))
+                    .map(whiteImageInfo -> whiteImageInfo.getPublisherName())
+                    .distinct()
+                    .collect(Collectors.toList());
+        }
+
 //        //只分地区的所有镜像
 //        PagedIterable<VirtualMachineImage> virtualMachineImages = azureResourceManager.virtualMachineImages().listByRegion(region);
-//        virtualMachineImages.forEach(image -> {
+//        AtomicInteger no = new AtomicInteger();
+//        for (VirtualMachineImage image : virtualMachineImages) {
+//            no.addAndGet(1);
 //            String publisherName = image.publisherName();
 //            String offerName = image.offer();
 //            String skuName = image.sku();
@@ -503,49 +560,38 @@ public class MicrosoftAzureConverter implements BaseConverter {
 //            JSONObject third = new JSONObject();
 //            third.put("imageName", offerName);
 //            third.put("imageVersion", image.version());
-//            third.put("PublisherName", publisherName);
+//            third.put("publisherName", publisherName);
 //            third.put("offerName", offerName);
 //            third.put("skuName", skuName);
 //            third.put("operatingSystem", operatingSystemTypes);
 //            result.add(third);
-//        });
+//            // 每20次暂停5秒(暂停失效)
+//            if (no.get() % 20 == 0) {
+//                sleep(5000);
+//            }
+//        }
 
-//        // 获取所有虚拟机发布者
+        // 获取所有虚拟机发布者
         PagedIterable<VirtualMachinePublisher> virtualMachinePublishers = azureResourceManager.virtualMachineImages()
                 .publishers().listByRegion(region);
         for (VirtualMachinePublisher publisher : virtualMachinePublishers) {
             //todo 根据需求列表筛选出需要的VM镜像
-            System.out.println("PublisherName: " + publisher.name());
-            if (publisher.name().contains("Canonical") || publisher.name().contains("MicrosoftWindowsDesktop")) {
+            System.out.println("publisherName: " + publisher.name());
+            if (!isExist || (isExist && publisherWhiteList.contains(publisher.name()))) {
                 // 获取发布者的所有产品(offer)
                 VirtualMachineOffers offers = publisher.offers();
                 PagedIterable<VirtualMachineOffer> list = offers.list();
-                int firstTime = 0;
                 for (VirtualMachineOffer offer : list) {
-//                    if (firstTime < 10) {
-//                        firstTime++;
-
                     //休眠0.5秒,请求速度过快会导致请求微软云的连接中断
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
+                    sleep(500);
                     System.out.println("offerName: " + offer.name());
                     // 获取该产品的所有SKU
                     VirtualMachineSkus skus = offer.skus();
                     PagedIterable<VirtualMachineSku> skuList = skus.list();
                     int secondTime = 0;
                     for (VirtualMachineSku sku : skuList) {
-//                            if (secondTime < 10) {
-//                                secondTime++;
                         //休眠0.5秒,请求速度过快会导致请求微软云的连接中断
-                        try {
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                        sleep(500);
                         System.out.println("skuName: " + sku.name());
                         // 获取每个SKU的所有版本（image versions）
                         PagedIterable<VirtualMachineImage> imageList = sku.images().list();
@@ -553,31 +599,39 @@ public class MicrosoftAzureConverter implements BaseConverter {
                         for (VirtualMachineImage image : imageList) {
                             if (thirdTime < 1) {
                                 thirdTime++;
-
-                                //休眠0.5秒,请求速度过快会导致请求微软云的连接中断
-                                try {
-                                    Thread.sleep(500);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-
                                 JSONObject forth = new JSONObject();
                                 forth.put("imageName", offer.name());
                                 forth.put("imageVersion", image.version());
-                                forth.put("PublisherName", publisher.name());
+                                forth.put("publisherName", publisher.name());
                                 forth.put("offerName", offer.name());
                                 forth.put("skuName", sku.name());
                                 forth.put("operatingSystem", image.osDiskImage().operatingSystem());
                                 result.add(forth);
+                                //休眠0.5秒,请求速度过快会导致请求微软云的连接中断
+                                sleep(500);
                             }
                         }
-//                            }
                     }
-//                    }
                 }
             }
         }
-        return result;
+
+        // 将收集的result跟whiteImageInfos匹配
+        List<JSONObject> collect = new ArrayList<>();
+        for (WhiteImageInfo imageInfo : whiteImageInfos) {
+            result.forEach(item -> {
+                boolean matchesPublisher = StringUtils.isEmpty(imageInfo.getPublisherName()) || item.getString("publisherName").equals(imageInfo.getPublisherName());
+                boolean matchesOffer = StringUtils.isEmpty(imageInfo.getOfferName()) || item.getString("offerName").equals(imageInfo.getOfferName());
+                boolean matchesSku = StringUtils.isEmpty(imageInfo.getSkuName()) || item.getString("skuName").equals(imageInfo.getSkuName());
+                boolean matchesVersion = StringUtils.isEmpty(imageInfo.getVersion()) || item.getString("imageVersion").equals(imageInfo.getVersion());
+
+                // 如果所有条件都匹配，加入到collect列表中
+                if (matchesPublisher && matchesOffer && matchesSku && matchesVersion) {
+                    collect.add(item);
+                }
+            });
+        }
+        return collect;
     }
 
     /**
@@ -749,37 +803,34 @@ public class MicrosoftAzureConverter implements BaseConverter {
     @Cacheable(key = "#root.method.name", value = "getLoadListConditions")
     public List<MpSysCodeEnum> getLoadListConditions() {
         List<MpSysCodeEnum> nextAllTreeDataByCode = commonCodeService.getNextAllTreeDataByCode(CommonStatusCodeEnum.CODE_LOAD.getCode(), false);
+
+        // 移除与ACTION_TYPE匹配的元素
         nextAllTreeDataByCode.removeIf(item -> item.getCode().equals(CommonStatusCodeEnum.ACTION_TYPE.getCode()));
-        for (MpSysCodeEnum item : nextAllTreeDataByCode) {
-            List<MpSysCodeEnum> children = item.getChildren();
-            MpSysCodeEnum sourceSysCodeEnum = new MpSysCodeEnum();
-            sourceSysCodeEnum.setCode("");
-            sourceSysCodeEnum.setCodeName("全部");
-            //将sourceSysCodeEnum放在children中的第一位
-            children.add(0, sourceSysCodeEnum);
-            item.setChildren(children);
-        }
 
-        MpSysCodeEnum mpSysCodeEnum = new MpSysCodeEnum();
-        mpSysCodeEnum.setCode("10050299");
-        mpSysCodeEnum.setCodeName("来源");
+        // 为每个子元素添加"全部"选项
+        nextAllTreeDataByCode.forEach(item -> {
+            MpSysCodeEnum allOption = createSysCodeEnum("", "全部");
+            item.getChildren().add(0, allOption);
+        });
 
-        List<MpSysCodeEnum> sourceChildren = new ArrayList<>();
-        MpSysCodeEnum sourceSysCodeEnum0 = new MpSysCodeEnum();
-        sourceSysCodeEnum0.setCode("");
-        sourceSysCodeEnum0.setCodeName("全部");
-        sourceChildren.add(sourceSysCodeEnum0);
-        MpSysCodeEnum sourceSysCodeEnum1 = new MpSysCodeEnum();
-        sourceSysCodeEnum1.setCode("1");
-        sourceSysCodeEnum1.setCodeName("外部同步");
-        sourceChildren.add(sourceSysCodeEnum1);
-        MpSysCodeEnum sourceSysCodeEnum2 = new MpSysCodeEnum();
-        sourceSysCodeEnum2.setCode("2");
-        sourceSysCodeEnum2.setCodeName("本地创建");
-        sourceChildren.add(sourceSysCodeEnum2);
+        // 创建并添加"来源"选项及其子元素
+        MpSysCodeEnum sourceEnum = createSysCodeEnum("10050299", "来源",
+                createSysCodeEnum("", "全部"),
+                createSysCodeEnum("1", "外部同步"),
+                createSysCodeEnum("2", "本地创建")
+        );
+        nextAllTreeDataByCode.add(sourceEnum);
 
-        mpSysCodeEnum.setChildren(sourceChildren);
-        nextAllTreeDataByCode.add(mpSysCodeEnum);
         return nextAllTreeDataByCode;
+    }
+
+    private MpSysCodeEnum createSysCodeEnum(String code, String codeName, MpSysCodeEnum... children) {
+        MpSysCodeEnum sysCodeEnum = new MpSysCodeEnum();
+        sysCodeEnum.setCode(code);
+        sysCodeEnum.setCodeName(codeName);
+        if (children != null && children.length > 0) {
+            sysCodeEnum.setChildren(Arrays.asList(children));
+        }
+        return sysCodeEnum;
     }
 }

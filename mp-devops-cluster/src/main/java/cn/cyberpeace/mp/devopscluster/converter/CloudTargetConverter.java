@@ -360,7 +360,7 @@ public class CloudTargetConverter {
                 deviceCloudTargetCalculate.setName(imageName + "_" + imageVersion);
                 deviceCloudTargetCalculate.setSourceType(1);
                 deviceCloudTargetCalculate.setCloudType(cloudType);
-                deviceCloudTargetCalculate.setPublisher(((JSONObject) images.get(i)).get("PublisherName") != null ? ((JSONObject) images.get(i)).get("PublisherName").toString() : "");
+                deviceCloudTargetCalculate.setPublisher(((JSONObject) images.get(i)).get("publisherName") != null ? ((JSONObject) images.get(i)).get("publisherName").toString() : "");
                 deviceCloudTargetCalculate.setOffer(((JSONObject) images.get(i)).get("offerName") != null ? ((JSONObject) images.get(i)).get("offerName").toString() : "");
                 deviceCloudTargetCalculate.setSku(((JSONObject) images.get(i)).get("skuName") != null ? ((JSONObject) images.get(i)).get("skuName").toString() : "");
                 deviceCloudTargetCalculate.setOperatingSystem(((JSONObject) images.get(i)).get("operatingSystem") != null ? ((JSONObject) images.get(i)).get("operatingSystem").toString() : "");
@@ -408,7 +408,7 @@ public class CloudTargetConverter {
                 deviceCloudTargetCalculate.setSourceType(2);
                 deviceCloudTargetCalculate.setUploadImageId(((JSONObject) localImages.get(i)).get("uploadImageId") != null ? ((JSONObject) localImages.get(i)).get("uploadImageId").toString() : "");
                 deviceCloudTargetCalculate.setCloudType(cloudType);
-                deviceCloudTargetCalculate.setPublisher(((JSONObject) localImages.get(i)).get("PublisherName") != null ? ((JSONObject) localImages.get(i)).get("PublisherName").toString() : "");
+                deviceCloudTargetCalculate.setPublisher(((JSONObject) localImages.get(i)).get("publisherName") != null ? ((JSONObject) localImages.get(i)).get("publisherName").toString() : "");
                 deviceCloudTargetCalculate.setOffer(((JSONObject) localImages.get(i)).get("offerName") != null ? ((JSONObject) localImages.get(i)).get("offerName").toString() : "");
                 deviceCloudTargetCalculate.setSku(((JSONObject) localImages.get(i)).get("skuName") != null ? ((JSONObject) localImages.get(i)).get("skuName").toString() : "");
                 deviceCloudTargetCalculate.setOperatingSystem(((JSONObject) localImages.get(i)).get("operatingSystem") != null ? ((JSONObject) localImages.get(i)).get("operatingSystem").toString() : "");
