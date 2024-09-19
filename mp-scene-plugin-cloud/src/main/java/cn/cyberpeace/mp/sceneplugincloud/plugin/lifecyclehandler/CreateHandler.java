@@ -606,6 +606,7 @@ public class CreateHandler extends HandlerCommon {
         if (StringUtils.isNotEmpty(sampleCloudPort.getConnectMode())) {
             virtualNic.setVlanMode(sampleCloudPort.getConnectMode());
         }
+        virtualNic.setFixedIp(TextUtils.emptyNull(samplePort.getIp()));
         if (StringUtils.isEmpty(virtualNic.getFixedIp())) {
             synchronized (this) {
                 List<String> excloudIps = new ArrayList<>();
@@ -613,6 +614,7 @@ public class CreateHandler extends HandlerCommon {
                 String ip = IpUtils.newRandomIps(network.getCidr(), 1, excloudIps, new ArrayList<>(), false).get(0);
                 log.info("get new fixed ip");
                 network.getExcloudIps().add(ip);
+                samplePort.setIp(ip);
                 virtualNic.setFixedIp(ip);
             }
         }
@@ -1539,11 +1541,11 @@ public class CreateHandler extends HandlerCommon {
         }
 
 
+        createData.setNetwork(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
         // todo cloud-init不用userdata字段, 用custome_script字段
         if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
             createData.setCustomScript(TextUtils.emptyNull(combineInitCommand(cloudElement)));
         }
-        createData.setNetwork(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
 
         //临时加参数
         createData.setExtremeSpeed(true);
