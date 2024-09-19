@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -90,5 +91,14 @@ public class InstancePageVO extends BaseVO {
 
     @ApiModelProperty(value = "状态信息")
     private String processMessage;
+
+    @ApiModelProperty(value = "cpu使用率")
+    private Double cpuUsePercentage;
+
+    @ApiModelProperty(value = "内存")
+    private Integer ram;
+
+    @ApiModelProperty(value = "最近运行时间")
+    private LocalDateTime lastRunTime;
 
 }

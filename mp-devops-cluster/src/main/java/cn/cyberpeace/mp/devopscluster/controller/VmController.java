@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -20,12 +21,25 @@ import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.devopscluster.vo.InstancePageVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
+import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,6 +47,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -184,6 +199,48 @@ public class VmController {
         }
         List<UserBo> tmpUserBoList = userBoList;
         Map<String, String> uuid2User = uuid2UserId;
+
+        List<String> agentNames = new ArrayList<>();
+        for (var s : source.values()) {
+            if (StringUtils.isNotEmpty(s.getInternalNodeEid())) {
+                agentNames.add(s.getInternalNodeEid());
+            }
+        }
+
+        if (!agentNames.isEmpty()) {
+            // 批量查询探针采集的cpu使用率
+            RestHighLevelClient client = (RestHighLevelClient) BeanCommon.getBean("logRestHighLevelClient");
+            LocalDateTime now = LocalDateTime.now();
+            var indexArray = DataCollectionService.buildRequestIndex(now.minusDays(1), now);
+            var searchRequest = new SearchRequest(indexArray);
+            var boolQueryBuilder = QueryBuilders.boolQuery();
+            boolQueryBuilder.must(QueryBuilders.termQuery("data.sic_launch_id", "eda72998ba654c8d8625f61eaa918eb3"))
+                    .must(QueryBuilders.termsQuery("agent.name", agentNames.toArray(new String[]{})));
+
+            var sourceBuilder = new SearchSourceBuilder();
+            sourceBuilder.sort("timestamp", SortOrder.DESC);
+            sourceBuilder.query(boolQueryBuilder);
+            sourceBuilder.size(agentNames.size() * 3);
+            searchRequest.source(sourceBuilder);
+            try {
+                SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+                long totalHits = response.getHits().getTotalHits().value;
+                if (totalHits > 0) {
+                    for (SearchHit hit : response.getHits().getHits()) {
+                        EsResponseData data = JSONObject.parseObject(hit.getSourceAsString(), EsResponseData.class);
+                        var percent = data.getData().getSicLaunchOutput().getCPUPercent();
+                        var nodeEid = data.getAgent().getName();
+                        String key = "MP_SCENE_" + nodeEid;
+                        if (source.containsKey(key)) {
+                            source.get(key).setCpuPercent(percent);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.error("failed to query elasticsearch", e);
+            }
+        }
+
         return instances.stream().map(instanceModel -> {
             CsceneNodeInfoBO csceneNodeInfoBO = new CsceneNodeInfoBO();
             if (Objects.nonNull(source.get(instanceModel.getName()))) {
@@ -206,12 +263,13 @@ public class VmController {
                 }
             }
 
-            return InstancePageVO.builder().name(instanceModel.getName())
+            var r1 = InstancePageVO.builder().name(instanceModel.getName())
                     .sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName())
                     .id(instanceModel.getId())
                     .node(instanceModel.getNode())
                     .addressList(instanceModel.getAddressList())
                     .userName(userName)
+                    .ram(csceneNodeInfoBO.getRam())
                     .referenceType(csceneNodeInfoBO.getReferenceType())
                     .event(csceneNodeInfoBO.getEvent())
                     .eventStatus(csceneNodeInfoBO.getEventStatus())
@@ -219,7 +277,42 @@ public class VmController {
                     .sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc())
                     .runningTime(instanceModel.getRunningTime())
                     .processMessage(csceneNodeInfoBO.getProcessMessage())
+                    .cpuUsePercentage(csceneNodeInfoBO.getCpuPercent())
                     .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
+            // 暂停结束、挂起结束 的状态时，其最后运行时间为 节点的update time；否则为当前时间
+            if (csceneNodeInfoBO.isPause() || csceneNodeInfoBO.isSuspend()) {
+                r1.setLastRunTime(csceneNodeInfoBO.getNodeUpdateTime());
+            } else {
+                r1.setLastRunTime(LocalDateTime.now());
+            }
+            return r1;
         }).collect(Collectors.toList());
+    }
+
+    @Getter
+    @Setter
+    private static class EsResponseData{
+        private Agent agent ;
+        private Data data ;
+    }
+
+    @Getter
+    @Setter
+    private static class Agent {
+        private String name;
+    }
+
+    @Getter
+    @Setter
+    private static class Data {
+        @JSONField(name = "sic_launch_output")
+        private Sic sicLaunchOutput;
+    }
+
+    @Getter
+    @Setter
+    private static class Sic {
+        @JSONField(name = "CPUPercent")
+        private Double CPUPercent;
     }
 }
