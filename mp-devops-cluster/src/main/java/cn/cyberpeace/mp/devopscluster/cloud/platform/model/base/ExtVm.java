@@ -86,6 +86,16 @@ public class ExtVm implements Serializable {
     private String isoTmpdirUuid;
     @ApiModelProperty("第二块磁盘大小")
     private Integer dataDisk;
+    @ApiModelProperty("磁盘数量")
+    private Integer diskCnt;
     @ApiModelProperty("网卡数量")
     private Integer netIfCnt;
+
+    public Integer getDiskCnt() {
+        if (dataDisk != null && dataDisk > 0) {
+            return 2;
+        } else {
+            return 1;
+        }
+    }
 }
