@@ -185,9 +185,6 @@ public class ImagesController {
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult add(@RequestBody ImageRequest request){
-        if (request.getExtVm() != null && request.getExtVm().getDataDisk() != null) {
-            request.getExtVm().setNetIfCnt(2);
-        }
         request.setLogo(FsCommon.getFileKey(request.getLogo()));
         validImageRequest(request);
         imagesConverter.add(request);
@@ -212,9 +209,6 @@ public class ImagesController {
     @PostMapping("/update")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "修改镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult update(@RequestBody ImageRequest request){
-        if (request.getExtVm() != null && request.getExtVm().getDataDisk() != null) {
-            request.getExtVm().setNetIfCnt(2);
-        }
         request.setLogo(FsCommon.getFileKey(request.getLogo()));
         validImageRequest(request);
         if (StringUtils.isBlank(request.getUuid())){
