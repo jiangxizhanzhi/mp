@@ -510,7 +510,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
 
         csceneBO.getSceneConfig().getPlugins()
-                .put(PluginConstant.PLUGIN_KEY, pluginData);
+                .put(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY, pluginData);
     }
 
     public ServiceResult<Boolean> deleteById(String id, boolean logic, boolean withInstance, CsceneContextBO context) {
