@@ -19,6 +19,8 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
+import cn.cyberpeace.mp.cscene.controller.CsceneInstanceController;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeActionRequest;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.RealEquipmentService;
@@ -631,6 +633,15 @@ public class RealEquipmentController {
     public ListObjServiceResult<EntityUsb> usbList(@RequestParam("hostName") String hostName) {
         ListObjServiceResult<EntityUsb> result = realEquipmentService.physicalUsbListByHost(hostName);
         return result;
+    }
+
+    @ApiOperation("查询配置")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class)
+    @PostMapping("/query_config")
+    public ServiceResult<CsceneInstanceController.SendStrategyResult> queryConfig(@RequestBody CsceneInstanceNodeActionRequest request) {
+        CsceneInstanceController.SendStrategyResult result = new CsceneInstanceController.SendStrategyResult();
+        result.setOutput("line con 0\n" + " password YourConsolePassword\n" + " login\n" + " exit\n" + "\n" + "line vty 0 4\n" + " password YourVTYPassword\n" + " login\n" + " transport input ssh\n" + " exit\n" + "\n" + "! 设置接口\n" + "interface GigabitEthernet0/0\n" + " description WAN Interface\n" + " ip address 192.168.1.1 255.255.255.0\n" + " no shutdown\n" + " exit");
+        return new ServiceResult<>(result).asResult();
     }
 
     private void convertRole(RealEquipmentRequest request) {

@@ -1754,18 +1754,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return new ServiceResult<>(new SendStrategyResult()).asResult();
     }
 
-    @ApiOperation("查询配置")
-    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class)
-    @PostMapping("/query_config")
-    public ServiceResult<SendStrategyResult> queryConfig(@RequestBody CsceneInstanceNodeActionRequest request) {
-        SendStrategyResult result = new SendStrategyResult();
-        result.setOutput("line con 0\n" + " password YourConsolePassword\n" + " login\n" + " exit\n" + "\n" + "line vty 0 4\n" + " password YourVTYPassword\n" + " login\n" + " transport input ssh\n" + " exit\n" + "\n" + "! 设置接口\n" + "interface GigabitEthernet0/0\n" + " description WAN Interface\n" + " ip address 192.168.1.1 255.255.255.0\n" + " no shutdown\n" + " exit");
-        return new ServiceResult<>(result).asResult();
-    }
-
     @Getter
     @Setter
-    private static class SendStrategyResult {
+    public static class SendStrategyResult {
         private boolean success;
         private String output;
     }
