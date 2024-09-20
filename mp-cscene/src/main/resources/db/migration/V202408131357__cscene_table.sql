@@ -288,26 +288,6 @@ CREATE TABLE `mp_auth_cloud_user`
     UNIQUE INDEX `tenant_2`(`cloud_type`, `azure_client_id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 2070 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '微软云账号信息' ROW_FORMAT = Dynamic;
 
--- ----------------------------
--- Records of mp_auth_cloud_user
--- ----------------------------
-INSERT INTO mp_auth_cloud_user (pk, connect_ip, cloud_type, azure_tenant_id, azure_subscription_id, azure_client_id,
-                                azure_client_secret, create_time, creator, version)
-VALUES (1, null, 1, 'e1039762-f748-4410-a19d-eb16ba072acd', 'c87ba926-f7c2-4d53-8b8e-89245dc92e26',
-        'a8982e4d-099d-4ab0-b6c8-178f50d16fb0', '26V8Q~gGDhjyHIJLopU-.mws2agepHucAD~hqb7_', '2024-03-25 11:10:26',
-        '123', 1);
-INSERT INTO mp_auth_cloud_user (pk, connect_ip, cloud_type, azure_tenant_id, azure_subscription_id, azure_client_id,
-                                azure_client_secret, create_time, creator, version)
-VALUES (2, '192.168.0.1:72', 2, 'd054c80a-86e3-40ef-bb9f-17e3e5faca96', 'bae382ff-9946-4991-810f-6cf5598519db',
-        'd7472c2c-7f52-4201-b0e0-8152044ee4c2', 'ukM8Q~uvbIQHCI_NjWOfYFei1vp-A7LJqgvp9cDC', '2024-03-25 11:10:26',
-        '123', 1);
-INSERT INTO mp_auth_cloud_user (pk, connect_ip, cloud_type, azure_tenant_id, azure_subscription_id, azure_client_id,
-                                azure_client_secret, create_time, creator, version)
-VALUES (3, null, 3, 'e1039762-f748-4410-a19d-eb16ba072acd', 'c87ba926-f7c2-4d53-8b8e-89245dc92e26',
-        'a8982e4d-099d-4ab0-b6c8-178f50d16fb0', '26V8Q~gGDhjyHIJLopU-.mws2agepHucAD~hqb7_', '2024-03-25 11:10:26',
-        '123', 1);
-
-
 DROP TABLE IF EXISTS `mp_sys_code_enum`;
 CREATE TABLE `mp_sys_code_enum`
 (
