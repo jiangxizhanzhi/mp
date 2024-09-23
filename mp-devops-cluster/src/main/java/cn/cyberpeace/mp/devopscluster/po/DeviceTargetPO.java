@@ -225,4 +225,7 @@ public class DeviceTargetPO extends BaseModel {
 
     @DefaultStr
     private String instanceIp;
+
+    @DefaultStr
+    private String extEntityAccess;
 }

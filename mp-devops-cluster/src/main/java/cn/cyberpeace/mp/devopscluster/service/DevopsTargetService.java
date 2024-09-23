@@ -12,6 +12,7 @@ package cn.cyberpeace.mp.devopscluster.service;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
@@ -88,6 +89,18 @@ public class DevopsTargetService {
         if (Objects.nonNull(oldDeviceTargetPO)) {
             DeviceTargetPO deviceTargetPO = convertDevice(device);
             deviceTargetPO.setIsPublic(oldDeviceTargetPO.getIsPublic());
+            return deviceTargetMapper.updateById(deviceTargetPO);
+        }
+        return 0;
+    }
+
+    @Transactional
+    public Integer updateById(Device device,List<ExtEntityAccess> list) {
+        DeviceTargetPO oldDeviceTargetPO = deviceTargetMapper.findByUuid(device.getUuid());
+        if (Objects.nonNull(oldDeviceTargetPO)) {
+            DeviceTargetPO deviceTargetPO = convertDevice(device);
+            deviceTargetPO.setIsPublic(oldDeviceTargetPO.getIsPublic());
+            deviceTargetPO.setExtEntityAccess(JsonCommon.snakeStringify(list));
             return deviceTargetMapper.updateById(deviceTargetPO);
         }
         return 0;

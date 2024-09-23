@@ -12,6 +12,7 @@ package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.agent.ssh.SshUtil;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -56,6 +57,7 @@ import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -281,6 +283,10 @@ public class RealEquipmentController {
                 .description(realEquipmentBO.getDescription()).extEntityAccess(extEntityAccess).extEntityUsb(realEquipmentBO.getExtEntityUsb())
                 .openSyslog(targetPO.getOpenSyslog()).openKafka(targetPO.getOpenKafka()).openRestapi(targetPO.getOpenRestapi())
                 .openSoap(targetPO.getOpenSoap()).openSnmp(targetPO.getOpenSnmp()).build();
+        if (StringUtils.isNotEmpty(targetPO.getExtEntityAccess())) {
+            response.setExtEntityAccess(JsonCommon.snakeParse(targetPO.getExtEntityAccess(), new TypeReference<List<ExtEntityAccess>>() {
+            }));
+        }
         return new Result(response);
     }
 

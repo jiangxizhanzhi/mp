@@ -225,7 +225,7 @@ public class RealEquipmentConverter implements BaseConverter{
         validRealEquipmentRequest(request);
         Device device = convertRequest(request);
         Device result = realEquipmentService.update(request.getUuid(),device);
-        devopsTargetService.updateById(result);
+        devopsTargetService.updateById(result, request.getExtEntityAccess());
         return result;
     }
 
