@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.HashMap;
 
 @Component
 public class MixAzureResourceManager implements IAzureResourceManager {
@@ -83,7 +84,7 @@ public class MixAzureResourceManager implements IAzureResourceManager {
                             .clientId(localAzurer.getAzureClientId())
                             .clientSecret(localAzurer.getAzureClientSecret())
                             .tenantId(localAzurer.getAzureTenantId())
-                            .authorityHost(AzureAuthorityHosts.AZURE_PUBLIC_CLOUD)
+                            .authorityHost("https://login.microsoftonline.com/")
                             .build();
                     this.tokenCredential = credential;
                 }
@@ -100,13 +101,28 @@ public class MixAzureResourceManager implements IAzureResourceManager {
                 synchronized (this) {
                     if (AZURE_RESOURCE_MANAGER == null) {
                         TokenCredential credential = getTokenCredential();
+
+                        // 定义自定义的 Azure Stack Hub 环境
+                        AzureEnvironment azureStackHubEnvironment = new AzureEnvironment(new HashMap<String, String>() {{
+                            put("activeDirectoryEndpointUrl", "https://login.microsoftonline.com/");
+                            put("activeDirectoryGraphResourceId", "https://graph.windows.net/");
+                            put("activeDirectoryResourceId", "https://management.huaxishunglobal.com/ffb1c810-14e0-400f-89af-548bbe3772b4");
+                            put("galleryEndpointUrl", "https://providers.pubas01.local:30016/");
+                            put("managementEndpointUrl", "https://management.shpubas.pubas01.huaxishunglobal.com");
+                            put("resourceManagerEndpointUrl", "https://management.shpubas.pubas01.huaxishunglobal.com");
+                            put("microsoftGraphResourceId", "https://graph.microsoft.com/");
+                            put("storageEndpointSuffix", "shpubas");
+                            // 根据需要补充其他属性
+                        }});
+
                         // If you don't set the tenant ID and subscription ID via environment variables,
                         // change to create the Azure profile with tenantId, subscriptionId, and Azure environment.
-                        AzureProfile profile = new AzureProfile(AzureEnvironment.AZURE);
+                        AzureProfile profile = new AzureProfile(this.user.getAzureTenantId(), this.subscription,azureStackHubEnvironment);
+
                         AZURE_RESOURCE_MANAGER = AzureResourceManager.configure()
                                 .withLogLevel(HttpLogDetailLevel.BASIC)
                                 .authenticate(credential, profile)
-                                .withSubscription(subscription);//订阅id
+                                .withSubscription(this.subscription);//订阅id
                     }
                 }
             }
