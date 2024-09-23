@@ -309,76 +309,41 @@ CREATE TABLE `mp_sys_code_enum`
 -- ----------------------------
 -- Records of mp_sys_code_enum
 -- ----------------------------
-INSERT INTO `mp_sys_code_enum`
-VALUES (24, '1005', '状态码', NULL, NULL, NULL, NULL, 1, 1, NULL, '2024-04-11 11:22:51');
-INSERT INTO `mp_sys_code_enum`
-VALUES (25, '100501', '载荷执行结果页面code码', NULL, NULL, NULL, '1005', 2, 1, NULL, '2024-04-11 11:23:16');
-INSERT INTO `mp_sys_code_enum`
-VALUES (26, '10050101', '执行结果', NULL, NULL, 'result_status', '100501', 3, 1, NULL, '2024-04-11 11:24:05');
-INSERT INTO `mp_sys_code_enum`
-VALUES (27, '1005010101', '成功', NULL, NULL, NULL, '10050101', 4, 1, NULL, '2024-04-11 11:24:40');
-INSERT INTO `mp_sys_code_enum`
-VALUES (28, '1005010102', '失败', NULL, NULL, NULL, '10050101', 4, 1, NULL, '2024-04-11 11:24:40');
-INSERT INTO `mp_sys_code_enum`
-VALUES (29, '100502', '载荷页面code码', NULL, NULL, NULL, '1005', 2, 1, NULL, '2024-04-25 17:29:35');
-INSERT INTO `mp_sys_code_enum`
-VALUES (30, '10050201', '作用类型', '', NULL, 'action_type', '100502', 3, 1, NULL, '2024-04-11 11:23:16');
-INSERT INTO `mp_sys_code_enum`
-VALUES (31, '1005020101', '逆向分析', NULL, NULL, NULL, '10050201', 4, 1, NULL, '2024-04-11 11:24:40');
-INSERT INTO `mp_sys_code_enum`
-VALUES (32, '1005020102', '信息探测', NULL, NULL, NULL, '10050201', 4, 1, NULL, '2024-04-11 11:24:40');
-INSERT INTO `mp_sys_code_enum`
-VALUES (33, '1005020103', '漏洞利用', NULL, NULL, NULL, '10050201', 4, 1, NULL, '2024-04-11 11:24:40');
-INSERT INTO `mp_sys_code_enum`
-VALUES (34, '10050202', '运行平台', NULL, NULL, 'run_table', '100502', 3, 1, NULL, '2024-04-11 11:23:16');
-INSERT INTO `mp_sys_code_enum`
-VALUES (35, '1005020201', 'docker', NULL, NULL, NULL, '10050202', 4, 1, NULL, '2024-04-11 11:24:40');
-INSERT INTO `mp_sys_code_enum`
-VALUES (36, '1005020202', 'VMware', NULL, NULL, NULL, '10050202', 4, 1, NULL, '2024-04-11 11:24:40');
-INSERT INTO `mp_sys_code_enum`
-VALUES (37, '1005020203', 'VM', NULL, NULL, NULL, '10050202', 4, 1, NULL, '2024-04-11 11:24:40');
-INSERT INTO `mp_sys_code_enum`
-VALUES (38, '10050203', '控制类型', NULL, NULL, 'control_type', '100502', 3, 1, NULL, '2024-04-11 11:23:16');
-INSERT INTO `mp_sys_code_enum`
-VALUES (39, '1005020301', 'shell', NULL, NULL, NULL, '10050203', 4, 1, NULL, '2024-04-11 11:24:40');
-INSERT INTO `mp_sys_code_enum`
-VALUES (40, '1005020302', 'web', NULL, NULL, NULL, '10050203', 4, 1, NULL, '2024-04-11 11:24:40');
-INSERT INTO `mp_sys_code_enum`
-VALUES (41, '1005020303', '其他', NULL, NULL, NULL, '10050203', 4, 1, NULL, '2024-04-11 11:24:40');
-INSERT INTO `mp_sys_code_enum`
-VALUES (80, '100503', '载荷同步设置code码', NULL, NULL, NULL, '1005', 2, 1, NULL, '2024-04-30 17:56:04');
-INSERT INTO `mp_sys_code_enum`
-VALUES (81, '10050301', '同步协议', NULL, NULL, 'synchronization_protocol', '100503', 3, 1, NULL,
-        '2024-04-30 17:56:36');
-INSERT INTO `mp_sys_code_enum`
-VALUES (82, '1005030101', 'rest', NULL, NULL, NULL, '10050301', 4, 1, NULL, '2024-04-30 17:57:10');
-INSERT INTO `mp_sys_code_enum`
-VALUES (83, '100504', '云靶标镜像页面code码', NULL, NULL, NULL, '1005', 2, 1, NULL, '2024-05-06 10:28:07');
-INSERT INTO `mp_sys_code_enum`
-VALUES (84, '10050401', '操作系统', NULL, NULL, 'operating_system', '100504', 3, 1, NULL, '2024-05-06 10:28:39');
-INSERT INTO `mp_sys_code_enum`
-VALUES (85, '1005040101', 'windows', NULL, NULL, NULL, '10050401', 4, 1, NULL, '2024-05-06 10:29:17');
-INSERT INTO `mp_sys_code_enum`
-VALUES (86, '1005040102', 'linux', NULL, NULL, NULL, '10050401', 4, 1, NULL, '2024-05-06 10:31:25');
-INSERT INTO `mp_sys_code_enum`
-VALUES (87, '10050102', '结果类型', NULL, NULL, 'result_type', '100501', 3, 1, NULL, '2024-05-06 15:32:58');
-INSERT INTO `mp_sys_code_enum`
-VALUES (88, '1005010201', '自动上报', NULL, NULL, NULL, '10050102', 4, 1, NULL, '2024-05-06 15:33:47');
-INSERT INTO `mp_sys_code_enum`
-VALUES (89, '1005010202', '人工填报', NULL, NULL, NULL, '10050102', 4, 1, NULL, '2024-05-06 15:33:47');
-INSERT INTO `mp_sys_code_enum`
-VALUES (90, '100504010101', 'WindowsXP', NULL, NULL, NULL, '1005040101', 5, 1, NULL, '2024-05-08 09:57:59');
-INSERT INTO `mp_sys_code_enum`
-VALUES (91, '100504010102', 'Windows8', NULL, NULL, NULL, '1005040101', 5, 1, NULL, '2024-05-08 09:57:59');
-INSERT INTO `mp_sys_code_enum`
-VALUES (92, '10050402', '操作系统状态', NULL, NULL, 'operating_system_status', '100504', 3, 1, NULL,
-        '2024-05-08 10:38:54');
-INSERT INTO `mp_sys_code_enum`
-VALUES (93, '1005040201', '通用化', NULL, NULL, NULL, '10050402', 4, 1, NULL, '2024-05-08 10:39:51');
-INSERT INTO `mp_sys_code_enum`
-VALUES (94, '1005040202', '专业化', NULL, NULL, NULL, '10050402', 4, 1, NULL, '2024-05-08 10:39:51');
-INSERT INTO `mp_sys_code_enum`
-VALUES (99, '1005010103', '暂无结果', NULL, NULL, NULL, '10050101', 4, 1, NULL, '2024-05-20 08:53:15');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (24, '1005', '状态码', NULL, NULL, NULL, NULL, 1, 1, NULL, '2024-04-11 11:22:51');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (25, '100501', '载荷执行结果页面code码', NULL, NULL, NULL, '1005', 2, 1, NULL, '2024-04-11 11:23:16');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (26, '10050101', '执行结果', NULL, NULL, 'result_status', '100501', 3, 1, NULL, '2024-04-11 11:24:05');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (27, '1005010101', '成功', NULL, NULL, NULL, '10050101', 4, 1, NULL, '2024-04-11 11:24:40');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (28, '1005010102', '失败', NULL, NULL, NULL, '10050101', 4, 1, NULL, '2024-04-11 11:24:40');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (29, '100502', '载荷页面code码', NULL, NULL, NULL, '1005', 2, 1, NULL, '2024-04-25 17:29:35');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (30, '10050201', '作用类型', '', NULL, 'action_type', '100502', 3, 1, NULL, '2024-04-11 11:23:16');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (31, '1005020101', '逆向分析', NULL, NULL, NULL, '10050201', 4, 1, NULL, '2024-04-11 11:24:40');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (32, '1005020102', '信息探测', NULL, NULL, NULL, '10050201', 4, 1, NULL, '2024-04-11 11:24:40');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (33, '1005020103', '漏洞利用', NULL, NULL, NULL, '10050201', 4, 1, NULL, '2024-04-11 11:24:40');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (34, '10050202', '运行平台', NULL, NULL, 'run_table', '100502', 3, 1, NULL, '2024-04-11 11:23:16');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (35, '1005020201', 'docker', NULL, NULL, NULL, '10050202', 4, 1, NULL, '2024-04-11 11:24:40');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (36, '1005020202', 'VMware', NULL, NULL, NULL, '10050202', 4, 1, NULL, '2024-04-11 11:24:40');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (37, '1005020203', 'VM', NULL, NULL, NULL, '10050202', 4, 1, NULL, '2024-04-11 11:24:40');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (38, '10050203', '控制类型', NULL, NULL, 'control_type', '100502', 3, 1, NULL, '2024-04-11 11:23:16');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (39, '1005020301', 'shell', NULL, NULL, NULL, '10050203', 4, 1, NULL, '2024-04-11 11:24:40');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (40, '1005020302', 'web', NULL, NULL, NULL, '10050203', 4, 1, NULL, '2024-04-11 11:24:40');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (41, '1005020303', '其他', NULL, NULL, NULL, '10050203', 4, 1, NULL, '2024-04-11 11:24:40');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (80, '100503', '载荷同步设置code码', NULL, NULL, NULL, '1005', 2, 1, NULL, '2024-04-30 17:56:04');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (81, '10050301', '同步协议', NULL, NULL, 'synchronization_protocol', '100503', 3, 1, NULL, '2024-04-30 17:56:36');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (82, '1005030101', 'rest', NULL, NULL, NULL, '10050301', 4, 1, NULL, '2024-04-30 17:57:10');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (83, '100504', '云靶标镜像页面code码', NULL, NULL, NULL, '1005', 2, 1, NULL, '2024-05-06 10:28:07');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (84, '10050401', '操作系统', NULL, NULL, 'operating_system', '100504', 3, 1, NULL, '2024-05-06 10:28:39');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (85, '1005040101', 'windows', NULL, NULL, NULL, '10050401', 4, 1, NULL, '2024-05-06 10:29:17');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (86, '1005040102', 'linux', NULL, NULL, NULL, '10050401', 4, 1, NULL, '2024-05-06 10:31:25');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (87, '10050102', '结果类型', NULL, NULL, 'result_type', '100501', 3, 1, NULL, '2024-05-06 15:32:58');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (88, '1005010201', '自动上报', NULL, NULL, NULL, '10050102', 4, 1, NULL, '2024-05-06 15:33:47');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (89, '1005010202', '人工填报', NULL, NULL, NULL, '10050102', 4, 1, NULL, '2024-05-06 15:33:47');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (90, '100504010101', 'WindowsXP', NULL, NULL, NULL, '1005040101', 5, 1, NULL, '2024-05-08 09:57:59');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (91, '100504010102', 'Windows8', NULL, NULL, NULL, '1005040101', 5, 1, NULL, '2024-05-08 09:57:59');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (92, '10050402', '操作系统状态', NULL, NULL, 'operating_system_status', '100504', 3, 1, NULL, '2024-05-08 10:38:54');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (93, '1005040201', '通用化', NULL, NULL, NULL, '10050402', 4, 1, NULL, '2024-05-08 10:39:51');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (94, '1005040202', '专业化', NULL, NULL, NULL, '10050402', 4, 1, NULL, '2024-05-08 10:39:51');
+INSERT INTO `mp_sys_code_enum`(`pk`, `code`, `code_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (99, '1005010103', '暂无结果', NULL, NULL, NULL, '10050101', 4, 1, NULL, '2024-05-20 08:53:15');
+
 
 DROP TABLE IF EXISTS `mp_devops_load`;
 CREATE TABLE `mp_devops_load`
@@ -599,16 +564,17 @@ CREATE TABLE `mp_devops_cloud_target_security`
 DROP TABLE IF EXISTS `mp_sys_code_menu`;
 CREATE TABLE `mp_sys_code_menu`
 (
-    `pk`          int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `code`        varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT 'code编码',
-    `code_name`   varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '名称',
-    `type`        varchar(16) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '类型(01:下拉框 02:搜索框)',
-    `supplement`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '补充',
-    `remark`      varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
+    `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `code` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT 'code编码',
+    `code_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '名称',
+    `code_other_name` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '别名',
+    `type` varchar(16) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '类型(01:下拉框 02:搜索框)',
+    `supplement` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '补充',
+    `remark` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
     `parent_code` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '父级code',
-    `level`       int(64) NULL DEFAULT NULL COMMENT '层级',
-    `status`      tinyint(8) NULL DEFAULT NULL COMMENT '状态(1:使用 2:禁用)',
-    `creator`     varchar(24) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '创建人',
+    `level` int(64) NULL DEFAULT NULL COMMENT '层级',
+    `status` tinyint(8) NULL DEFAULT NULL COMMENT '状态(1:使用 2:禁用)',
+    `creator` varchar(24) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '创建人',
     `create_time` datetime(0) NULL DEFAULT NULL COMMENT '创建时间',
     PRIMARY KEY (`pk`) USING BTREE,
     UNIQUE INDEX `code`(`code`) USING BTREE COMMENT 'code值唯一'
@@ -617,177 +583,76 @@ CREATE TABLE `mp_sys_code_menu`
 -- ----------------------------
 -- Records of mp_sys_code_menu
 -- ----------------------------
-INSERT INTO `mp_sys_code_menu`
-VALUES (1, '1002', '混合云配置项菜单', '01', '', '', '', 1, 1, '', '2024-03-28 13:59:49');
-INSERT INTO `mp_sys_code_menu`
-VALUES (2, '100201', '混合云', '01', '', '', '1002', 2, 1, '', '2024-03-28 14:00:09');
-INSERT INTO `mp_sys_code_menu`
-VALUES (3, '100202', '载荷', '01', '', '', '1002', 2, 1, '', '2024-03-28 15:20:26');
-INSERT INTO `mp_sys_code_menu`
-VALUES (4, '100203', '边界网络设备', '01', '', '', '1002', 2, 1, '', '2024-03-28 15:20:24');
-INSERT INTO `mp_sys_code_menu`
-VALUES (5, '10020101', '网络', '01', 'target.cloud_service_type = \'1\'', '1', '100201', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (6, '10020102', '计算', '01', 'target.cloud_service_type = \'2\'', '2', '100201', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (7, '10020103', '容器', '01', 'target.cloud_service_type = \'3\'', '3', '100201', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (8, '10020104', '数据库', '', 'target.cloud_service_type = \'4\'', '4', '100201', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (9, '10020105', '分析', '01', 'target.cloud_service_type = \'5\'', '5', '100201', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (10, '10020106', '安全性', '01', 'target.cloud_service_type = \'6\'', '6', '100201', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (11, '10020107', '存储', '01', 'target.cloud_service_type = \'7\'', '7', '100201', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (12, '1002010201', '关键字搜索', '02', 'name like \' * *\'', '', '10020102', 4, 1, '', '2024-03-29 09:45:43');
-INSERT INTO `mp_sys_code_menu`
-VALUES (13, '1002010202', '类型', '01', '', '', '10020102', 4, 1, '', '2024-03-29 09:45:43');
-INSERT INTO `mp_sys_code_menu`
-VALUES (14, '1002010203', '操作系统', '01', '', '', '10020102', 4, 1, '', '2024-03-29 09:45:43');
-INSERT INTO `mp_sys_code_menu`
-VALUES (15, '100201020201', '全部', '', '', '', '1002010202', 5, 1, '', '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (16, '100201020202', 'paas', '', 'calculate_type = \'paas\'', '', '1002010202', 5, 1, '', '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (17, '100201020301', '全部', '', '', '', '1002010203', 5, 1, '', '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (18, '100201020302', 'windows', '', 'operating_system = \'windows\'', '', '1002010203', 5, 1, '',
-        '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (19, '100201020303', 'linux', '', 'operating_system = \'linux\'', '', '1002010203', 5, 1, '',
-        '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (20, '1002010204', '子类型', '01', '', '', '10020102', 4, 1, '', '2024-03-29 09:45:43');
-INSERT INTO `mp_sys_code_menu`
-VALUES (21, '100201020401', '虚拟机', '', 'sub_type = \'vm\'', '', '1002010204', 5, 1, '', '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (22, '100201020402', 'VM应用程序定义', '', 'sub_type = \'vmApplicationDefinition\'', '', '1002010204', 5, 1, '',
-        '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (23, '100201020403', '应用程序服务', '', 'sub_type = \'applicationService\'', '', '1002010204', 5, 1, '',
-        '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (24, '1003', '私有云云配置项菜单', '01', '', '', '', 1, 1, '', '2024-03-28 13:59:49');
-INSERT INTO `mp_sys_code_menu`
-VALUES (25, '100301', '私有云', '01', '', '', '1003', 2, 1, '', '2024-03-28 14:00:09');
-INSERT INTO `mp_sys_code_menu`
-VALUES (26, '100302', '载荷', '01', '', '', '1003', 2, 1, '', '2024-03-28 15:20:26');
-INSERT INTO `mp_sys_code_menu`
-VALUES (27, '100303', '边界网络设备', '01', '', '', '1003', 2, 1, '', '2024-03-28 15:20:24');
-INSERT INTO `mp_sys_code_menu`
-VALUES (28, '10030101', '网络', '01', 'target.cloud_service_type = \'1\'', '1', '100301', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (29, '10030102', '计算', '01', 'target.cloud_service_type = \'2\'', '2', '100301', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (30, '10030103', '容器', '01', 'target.cloud_service_type = \'3\'', '3', '100301', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (31, '10030104', '数据库', '', 'target.cloud_service_type = \'4\'', '4', '100301', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (32, '10030105', '分析', '01', 'target.cloud_service_type = \'5\'', '5', '100301', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (33, '10030106', '安全性', '01', 'target.cloud_service_type = \'6\'', '6', '100301', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (34, '10030107', '存储', '01', 'target.cloud_service_type = \'7\'', '7', '100301', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (35, '1003010201', '关键字搜索', '02', 'name like \' * *\'', '', '10030102', 4, 1, '', '2024-03-29 09:45:43');
-INSERT INTO `mp_sys_code_menu`
-VALUES (36, '1003010202', '类型', '01', '', '', '10030102', 4, 1, '', '2024-03-29 09:45:43');
-INSERT INTO `mp_sys_code_menu`
-VALUES (37, '1003010203', '操作系统', '01', '', '', '10030102', 4, 1, '', '2024-03-29 09:45:43');
-INSERT INTO `mp_sys_code_menu`
-VALUES (38, '100301020201', '全部', '', '', '', '1003010202', 5, 1, '', '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (39, '100301020202', 'paas', '', 'calculate_type = \'paas\'', '', '1003010202', 5, 1, '', '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (40, '100301020301', '全部', '', '', '', '1003010203', 5, 1, '', '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (41, '100301020302', 'windows', '', 'operating_system = \'windows\'', '', '1003010203', 5, 1, '',
-        '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (42, '100301020303', 'linux', '', 'operating_system = \'linux\'', '', '1003010203', 5, 1, '',
-        '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (43, '1003010204', '子类型', '01', '', '', '10030102', 4, 1, '', '2024-03-29 09:45:43');
-INSERT INTO `mp_sys_code_menu`
-VALUES (44, '100301020401', '虚拟机', '', 'sub_type = \'vm\'', '', '1003010204', 5, 1, '', '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (45, '100301020402', 'VM应用程序定义', '', 'sub_type = \'vmApplicationDefinition\'', '', '1003010204', 5, 1, '',
-        '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (46, '100301020403', '应用程序服务', '', 'sub_type = \'applicationService\'', '', '1003010204', 5, 1, '',
-        '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (47, '1004', '公有云配置项菜单', '01', '', '', '', 1, 1, '', '2024-03-28 13:59:49');
-INSERT INTO `mp_sys_code_menu`
-VALUES (48, '100401', '公有云', '01', '', '', '1004', 2, 1, '', '2024-03-28 14:00:09');
-INSERT INTO `mp_sys_code_menu`
-VALUES (49, '100402', '载荷', '01', '', '', '1004', 2, 1, '', '2024-03-28 15:20:26');
-INSERT INTO `mp_sys_code_menu`
-VALUES (50, '100403', '边界网络设备', '01', '', '', '1004', 2, 1, '', '2024-03-28 15:20:24');
-INSERT INTO `mp_sys_code_menu`
-VALUES (51, '10040101', '网络', '01', 'target.cloud_service_type = \'1\'', '1', '100401', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (52, '10040102', '计算', '01', 'target.cloud_service_type = \'2\'', '2', '100401', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (53, '10040103', '容器', '01', 'target.cloud_service_type = \'3\'', '3', '100401', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (54, '10040104', '数据库', '', 'target.cloud_service_type = \'4\'', '4', '100401', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (55, '10040105', '分析', '01', 'target.cloud_service_type = \'5\'', '5', '100401', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (56, '10040106', '安全性', '01', 'target.cloud_service_type = \'6\'', '6', '100401', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (57, '10040107', '存储', '01', 'target.cloud_service_type = \'7\'', '7', '100401', 3, 1, '',
-        '2024-03-28 15:20:58');
-INSERT INTO `mp_sys_code_menu`
-VALUES (58, '1004010201', '关键字搜索', '02', 'name like \' * *\'', '', '10040102', 4, 1, '', '2024-03-29 09:45:43');
-INSERT INTO `mp_sys_code_menu`
-VALUES (59, '1004010202', '类型', '01', '', '', '10040102', 4, 1, '', '2024-03-29 09:45:43');
-INSERT INTO `mp_sys_code_menu`
-VALUES (60, '1004010203', '操作系统', '01', '', '', '10040102', 4, 1, '', '2024-03-29 09:45:43');
-INSERT INTO `mp_sys_code_menu`
-VALUES (61, '100401020201', '全部', '', '', '', '1004010202', 5, 1, '', '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (62, '100401020202', 'paas', '', 'calculate_type = \'paas\'', '', '1004010202', 5, 1, '', '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (63, '100401020301', '全部', '', '', '', '1004010203', 5, 1, '', '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (64, '100401020302', 'windows', '', 'operating_system = \'windows\'', '', '1004010203', 5, 1, '',
-        '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (65, '100401020303', 'linux', '', 'operating_system = \'linux\'', '', '1004010203', 5, 1, '',
-        '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (66, '1004010204', '子类型', '01', '', '', '10040102', 4, 1, '', '2024-03-29 09:45:43');
-INSERT INTO `mp_sys_code_menu`
-VALUES (67, '100401020401', '虚拟机', '', 'sub_type = \'vm\'', '', '1004010204', 5, 1, '', '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (68, '100401020402', 'VM应用程序定义', '', 'sub_type = \'vmApplicationDefinition\'', '', '1004010204', 5, 1, '',
-        '2024-03-29 10:00:37');
-INSERT INTO `mp_sys_code_menu`
-VALUES (69, '100401020403', '应用程序服务', '', 'sub_type = \'applicationService\'', '', '1004010204', 5, 1, '',
-        '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (1, '1002', '混合云配置项菜单', NULL, '01', '', '', '', 1, 1, '', '2024-03-28 13:59:49');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (2, '100201', '混合云', NULL, '01', '', '', '1002', 2, 1, '', '2024-03-28 14:00:09');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (3, '100202', '载荷', NULL, '01', '', '', '1002', 2, 1, '', '2024-03-28 15:20:26');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (4, '100203', '边界网络设备', NULL, '01', '', '', '1002', 2, 1, '', '2024-03-28 15:20:24');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (5, '10020101', '网络', NULL, '01', 'target.cloud_service_type = \'1\'', '1', '100201', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (6, '10020102', '计算', NULL, '01', 'target.cloud_service_type = \'2\'', '2', '100201', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (7, '10020103', '容器', NULL, '01', 'target.cloud_service_type = \'3\'', '3', '100201', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (8, '10020104', '数据库', NULL, '', 'target.cloud_service_type = \'4\'', '4', '100201', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (9, '10020105', '分析', NULL, '01', 'target.cloud_service_type = \'5\'', '5', '100201', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (10, '10020106', '安全性', NULL, '01', 'target.cloud_service_type = \'6\'', '6', '100201', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (11, '10020107', '存储', NULL, '01', 'target.cloud_service_type = \'7\'', '7', '100201', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (12, '1002010201', '关键字搜索', NULL, '02', 'name like \' * *\'', '', '10020102', 4, 1, '', '2024-03-29 09:45:43');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (13, '1002010202', '类型', NULL, '01', '', '', '10020102', 4, 1, '', '2024-03-29 09:45:43');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (14, '1002010203', '操作系统', NULL, '01', '', '', '10020102', 4, 1, '', '2024-03-29 09:45:43');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (15, '100201020201', '全部', NULL, '', '', '', '1002010202', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (16, '100201020202', 'paas', NULL, '', 'calculate_type = \'paas\'', '', '1002010202', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (17, '100201020301', '全部', NULL, '', '', '', '1002010203', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (18, '100201020302', 'windows', NULL, '', 'operating_system = \'windows\'', '', '1002010203', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (19, '100201020303', 'linux', NULL, '', 'operating_system = \'linux\'', '', '1002010203', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (20, '1002010204', '子类型', NULL, '01', '', '', '10020102', 4, 1, '', '2024-03-29 09:45:43');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (21, '100201020401', '虚拟机', NULL, '', 'sub_type = \'vm\'', '', '1002010204', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (22, '100201020402', 'VM应用程序定义', NULL, '', 'sub_type = \'vmApplicationDefinition\'', '', '1002010204', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (23, '100201020403', '应用程序服务', NULL, '', 'sub_type = \'applicationService\'', '', '1002010204', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (24, '1003', '私有云云配置项菜单', NULL, '01', '', '', '', 1, 1, '', '2024-03-28 13:59:49');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (25, '100301', '私有云', NULL, '01', '', '', '1003', 2, 1, '', '2024-03-28 14:00:09');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (26, '100302', '载荷', NULL, '01', '', '', '1003', 2, 1, '', '2024-03-28 15:20:26');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (27, '100303', '边界网络设备', NULL, '01', '', '', '1003', 2, 1, '', '2024-03-28 15:20:24');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (28, '10030101', '网络', NULL, '01', 'target.cloud_service_type = \'1\'', '1', '100301', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (29, '10030102', '计算', NULL, '01', 'target.cloud_service_type = \'2\'', '2', '100301', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (30, '10030103', '容器', NULL, '01', 'target.cloud_service_type = \'3\'', '3', '100301', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (31, '10030104', '数据库', NULL, '', 'target.cloud_service_type = \'4\'', '4', '100301', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (32, '10030105', '分析', NULL, '01', 'target.cloud_service_type = \'5\'', '5', '100301', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (33, '10030106', '安全性', NULL, '01', 'target.cloud_service_type = \'6\'', '6', '100301', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (34, '10030107', '存储', NULL, '01', 'target.cloud_service_type = \'7\'', '7', '100301', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (35, '1003010201', '关键字搜索', NULL, '02', 'name like \' * *\'', '', '10030102', 4, 1, '', '2024-03-29 09:45:43');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (36, '1003010202', '类型', NULL, '01', '', '', '10030102', 4, 1, '', '2024-03-29 09:45:43');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (37, '1003010203', '操作系统', NULL, '01', '', '', '10030102', 4, 1, '', '2024-03-29 09:45:43');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (38, '100301020201', '全部', NULL, '', '', '', '1003010202', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (39, '100301020202', 'paas', NULL, '', 'calculate_type = \'paas\'', '', '1003010202', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (40, '100301020301', '全部', NULL, '', '', '', '1003010203', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (41, '100301020302', 'windows', NULL, '', 'operating_system = \'windows\'', '', '1003010203', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (42, '100301020303', 'linux', NULL, '', 'operating_system = \'linux\'', '', '1003010203', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (43, '1003010204', '子类型', NULL, '01', '', '', '10030102', 4, 1, '', '2024-03-29 09:45:43');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (44, '100301020401', '虚拟机', NULL, '', 'sub_type = \'vm\'', '', '1003010204', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (45, '100301020402', 'VM应用程序定义', NULL, '', 'sub_type = \'vmApplicationDefinition\'', '', '1003010204', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (46, '100301020403', '应用程序服务', NULL, '', 'sub_type = \'applicationService\'', '', '1003010204', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (47, '1004', '公有云配置项菜单', NULL, '01', '', '', '', 1, 1, '', '2024-03-28 13:59:49');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (48, '100401', '公有云', NULL, '01', '', '', '1004', 2, 1, '', '2024-03-28 14:00:09');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (49, '100402', '载荷', NULL, '01', '', '', '1004', 2, 1, '', '2024-03-28 15:20:26');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (50, '100403', '边界网络设备', NULL, '01', '', '', '1004', 2, 1, '', '2024-03-28 15:20:24');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (51, '10040101', '网络', NULL, '01', 'target.cloud_service_type = \'1\'', '1', '100401', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (52, '10040102', '计算', NULL, '01', 'target.cloud_service_type = \'2\'', '2', '100401', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (53, '10040103', '容器', NULL, '01', 'target.cloud_service_type = \'3\'', '3', '100401', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (54, '10040104', '数据库', NULL, '', 'target.cloud_service_type = \'4\'', '4', '100401', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (55, '10040105', '分析', NULL, '01', 'target.cloud_service_type = \'5\'', '5', '100401', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (56, '10040106', '安全性', NULL, '01', 'target.cloud_service_type = \'6\'', '6', '100401', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (57, '10040107', '存储', NULL, '01', 'target.cloud_service_type = \'7\'', '7', '100401', 3, 1, '', '2024-03-28 15:20:58');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (58, '1004010201', '关键字搜索', NULL, '02', 'name like \' * *\'', '', '10040102', 4, 1, '', '2024-03-29 09:45:43');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (59, '1004010202', '类型', NULL, '01', '', '', '10040102', 4, 1, '', '2024-03-29 09:45:43');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (60, '1004010203', '操作系统', NULL, '01', '', '', '10040102', 4, 1, '', '2024-03-29 09:45:43');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (61, '100401020201', '全部', NULL, '', '', '', '1004010202', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (62, '100401020202', 'paas', NULL, '', 'calculate_type = \'paas\'', '', '1004010202', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (63, '100401020301', '全部', NULL, '', '', '', '1004010203', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (64, '100401020302', 'windows', NULL, '', 'operating_system = \'windows\'', '', '1004010203', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (65, '100401020303', 'linux', NULL, '', 'operating_system = \'linux\'', '', '1004010203', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (66, '1004010204', '子类型', NULL, '01', '', '', '10040102', 4, 1, '', '2024-03-29 09:45:43');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (67, '100401020401', '虚拟机', NULL, '', 'sub_type = \'vm\'', '', '1004010204', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (68, '100401020402', 'VM应用程序定义', NULL, '', 'sub_type = \'vmApplicationDefinition\'', '', '1004010204', 5, 1, '', '2024-03-29 10:00:37');
+INSERT INTO `mp_sys_code_menu`(`pk`, `code`, `code_name`, `code_other_name`, `type`, `supplement`, `remark`, `parent_code`, `level`, `status`, `creator`, `create_time`) VALUES (69, '100401020403', '应用程序服务', NULL, '', 'sub_type = \'applicationService\'', '', '1004010204', 5, 1, '', '2024-03-29 10:00:37');
+
 
 INSERT INTO `mp_auth_url_ac`(`pk`, `id`, `url`, `is_pattern`, `group`, `methods`, `desc`, `create_time`, `update_time`)
 VALUES (706, '33b99e69569711ed91a0000ec67b0395', '/api/mp/load/load/addLoadExecutionOutResult', 0, 'out-load-service',
