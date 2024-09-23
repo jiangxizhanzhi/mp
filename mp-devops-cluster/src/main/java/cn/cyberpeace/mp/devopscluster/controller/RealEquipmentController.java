@@ -649,6 +649,7 @@ public class RealEquipmentController {
         if (realEquipmentBO.getExtEntityAccess() == null || realEquipmentBO.getExtEntityAccess().isEmpty()) {
             CsceneInstanceController.SendStrategyResult r = new CsceneInstanceController.SendStrategyResult();
             r.setOutput("");
+            log.info("entity no access");
             return new ServiceResult<>(r).asResult();
         }
         String host = null;
@@ -671,6 +672,7 @@ public class RealEquipmentController {
         }
 
         if (host == null) {
+            log.info("entity no ssh protocol");
             CsceneInstanceController.SendStrategyResult r = new CsceneInstanceController.SendStrategyResult();
             r.setOutput("");
             return new ServiceResult<>(r).asResult();
