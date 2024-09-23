@@ -44,6 +44,9 @@ public class FlowTaskConfModel extends BaseModel {
 	@ApiModelProperty(value = "是否流量重放：0 否，1 是")
 	private Integer replay;
 
+	@ApiModelProperty(value = "是否开启流量重放和速率配置：0 否，1 是")
+	private Integer config;
+
 	/**
 	 * 配置
 	 */

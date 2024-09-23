@@ -290,12 +290,24 @@ public class CsceneFlowService {
      */
     public void editTaskConf(EditFlowTaskConfRequest request) {
         log.debug("CsceneFlowService.editTaskConf begin. request:{}", request);
+        // 根据 config 字段调整下 replay 和 rate_unlimited
+        if (request.getConfig() == null || request.getConfig() == 0) {
+            // config 配置关闭时 ：
+            //      直接使用pcap重放，所以replay = 1
+            //      速率使用默认配置，所以rate_unlimited = 1
+            request.setReplay(1);
+            request.setRateUnlimited(1);
+        } else {
+            request.setReplay(0);
+            request.setRateUnlimited(0);
+        }
         FlowTaskConf flowTaskConf = request.getFlowTaskConf();
         FlowTaskConfModel flowTaskConfModel = flowTaskConfService.findByTaskId(request.getTaskId());
         flowTaskConfModel.setKeepRunning(request.getKeepRunning());
         flowTaskConfModel.setReplay(request.getReplay());
         flowTaskConfModel.setRateUnlimited(request.getRateUnlimited());
         flowTaskConfModel.setConf(JsonCommon.stringify(flowTaskConf));
+        flowTaskConfModel.setConfig(request.getConfig());
         flowTaskConfService.update(flowTaskConfModel);
         log.debug("CsceneFlowService.editTaskConf end.");
     }
