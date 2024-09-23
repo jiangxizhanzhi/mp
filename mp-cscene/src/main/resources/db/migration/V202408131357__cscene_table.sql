@@ -408,26 +408,6 @@ CREATE TABLE `mp_devops_load`
     PRIMARY KEY (`pk`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 287 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '载荷同步表' ROW_FORMAT = Dynamic;
 
--- ----------------------------
--- Records of mp_devops_load
--- ----------------------------
-INSERT INTO `mp_devops_load`
-VALUES (283, '35', 'testvmware', NULL, 'testvmwarefsajkfsajflasj', 'vmware', '1005020102', '1005020202', '1005020302',
-        '80', '1', '/api/mp/file/370/763/592a8536d5f4eeb0c0f0ff72c5403809.JPG', '场景页面.JPG',
-        '/api/mp/file/762/673/98f8a59b6e7cd07e3597b50c1d8cb9c4.zip', 'ct-web-5.4.1-build0003.zip',
-        '/api/mp/file/878/044/ba02665a50a3a77a2a4bdea39c4beef6.pdf', '系统虚拟化：原理与实现.pdf', '',
-        '2024-05-17 11:42:01', '2023-11-29 10:58:45', '2024-05-17 11:42:01', '0');
-INSERT INTO `mp_devops_load`
-VALUES (284, '28a47231-141f-11ef-b1e4-0242ac1e0018', '11231231231212', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2',
-        NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2024-05-17 15:29:13', '2024-05-17 15:29:13', NULL, NULL);
-INSERT INTO `mp_devops_load`
-VALUES (285, 'f2c2cca6-1432-11ef-b1e4-0242ac1e0018', '1123123123adadw1212', NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-        '2', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2024-05-17 17:53:31', '2024-05-17 17:53:31', NULL, NULL);
-INSERT INTO `mp_devops_load`
-VALUES (286, '31c03939-164a-11ef-b1e4-0242ac1e0018', '测试用载荷', NULL, '测试下描述', '工具平台', '控制类型',
-        '运行平台', '控制类型', '控制端口', '2', '***.jpg', '', '***.zip', '', '***.txt', '', 'cmd',
-        '2024-05-20 09:44:58', '2024-05-20 09:44:58', NULL, NULL);
-
 DROP TABLE IF EXISTS `mp_devops_load_scene_result_log`;
 CREATE TABLE `mp_devops_load_scene_result_log`
 (
@@ -461,28 +441,6 @@ CREATE TABLE `mp_devops_load_source`
     `creator_id`               varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '创建人Id',
     PRIMARY KEY (`pk`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 28 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '载荷同步设置表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of mp_devops_load_source
--- ----------------------------
-INSERT INTO `mp_devops_load_source`
-VALUES (1, 'http://10.108.1.10:5002', 'synchronizationProtocol', '1', 'userName', '1', '123', '2024-05-17 15:04:17',
-        '2024-04-24 10:29:33', '1');
-INSERT INTO `mp_devops_load_source`
-VALUES (21, 'http://10.108.1.10:5002', '0', '2', '', NULL, '1111', NULL, '2024-04-30 17:50:09', '');
-INSERT INTO `mp_devops_load_source`
-VALUES (22, 'http://10.108.1.10:5002', '0', '1', '111', NULL, '', NULL, '2024-04-30 17:50:52', NULL);
-INSERT INTO `mp_devops_load_source`
-VALUES (23, 'http://10.108.1.10:5002', '0', '1', '111', NULL, '', NULL, '2024-04-30 17:51:17', NULL);
-INSERT INTO `mp_devops_load_source`
-VALUES (24, 'http://10.108.1.10:5002', '1005030101', '1', '11', NULL, '', NULL, '2024-04-30 18:04:09', NULL);
-INSERT INTO `mp_devops_load_source`
-VALUES (25, 'http://10.108.1.10:5002', '1005030101', '2', '', NULL, '12321312', NULL, '2024-05-08 09:16:27', NULL);
-INSERT INTO `mp_devops_load_source`
-VALUES (26, 'http://10.108.1.10:5002', '1005030101', '1', '1', NULL, '', NULL, '2024-05-09 10:41:32', NULL);
-INSERT INTO `mp_devops_load_source`
-VALUES (27, 'http://10.108.1.10:5002', 'synchronizationProtocol', '1', 'userName1', 'password1', NULL,
-        '2024-05-20 09:52:49', '2024-05-17 15:06:09', NULL);
 
 DROP TABLE IF EXISTS `mp_sys_url_config`;
 CREATE TABLE `mp_sys_url_config`
