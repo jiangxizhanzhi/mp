@@ -30,7 +30,7 @@ public class MpRuntimeExceptionHandler {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public ServiceResult<Object> b2bRuntimeExceptionHandler(MpRuntimeException ex) {
-        log.error(LOGGER_FORMAT, ex.getMessage(), ex.getDetail());
+        log.error(LOGGER_FORMAT, ex.getMessage(), ex.getDetail(), ex);
         ServiceCode serviceCode = ex.getServiceCode();
         if (serviceCode == null) {
             serviceCode = BaseErrorCode.ERROR;
@@ -43,7 +43,7 @@ public class MpRuntimeExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public ServiceResult<Object> validationExceptionHandle(BindException ex) {
-        log.error(ex.getMessage());
+        log.error("validationExceptionHandle error [{}] detail is:", ex.getMessage(), ex);
         ObjectError objectError = ex.getBindingResult().getAllErrors().get(0);
         BindingResult bindingResult = ex.getBindingResult();
         String detail = objectError.getDefaultMessage();
@@ -62,7 +62,7 @@ public class MpRuntimeExceptionHandler {
     @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
     @ResponseBody
     public ServiceResult handException(Exception ex) {
-        log.error(ex.getMessage());
+        log.error("handException error [{}] detail is:", ex.getMessage(), ex);
         return new ServiceResult(null,BaseErrorCode.GATEWAY_TIME_OUT).asResult();
     }
 
