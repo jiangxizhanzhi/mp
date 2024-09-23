@@ -10,6 +10,7 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.agent.ssh.SshUtil;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
@@ -69,6 +70,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -639,9 +641,47 @@ public class RealEquipmentController {
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeActionRequest.class)
     @PostMapping("/query_config")
     public ServiceResult<CsceneInstanceController.SendStrategyResult> queryConfig(@RequestBody CsceneInstanceNodeActionRequest request) {
-        CsceneInstanceController.SendStrategyResult result = new CsceneInstanceController.SendStrategyResult();
-        result.setOutput("line con 0\n" + " password YourConsolePassword\n" + " login\n" + " exit\n" + "\n" + "line vty 0 4\n" + " password YourVTYPassword\n" + " login\n" + " transport input ssh\n" + " exit\n" + "\n" + "! 设置接口\n" + "interface GigabitEthernet0/0\n" + " description WAN Interface\n" + " ip address 192.168.1.1 255.255.255.0\n" + " no shutdown\n" + " exit");
-        return new ServiceResult<>(result).asResult();
+//        CsceneInstanceController.SendStrategyResult result = new CsceneInstanceController.SendStrategyResult();
+//        result.setOutput("line con 0\n" + " password YourConsolePassword\n" + " login\n" + " exit\n" + "\n" + "line vty 0 4\n" + " password YourVTYPassword\n" + " login\n" + " transport input ssh\n" + " exit\n" + "\n" + "! 设置接口\n" + "interface GigabitEthernet0/0\n" + " description WAN Interface\n" + " ip address 192.168.1.1 255.255.255.0\n" + " no shutdown\n" + " exit");
+//        return new ServiceResult<>(result).asResult();
+
+        RealEquipmentBO realEquipmentBO = realEquipmentConverter.findByUuid(request.getId());
+        if (realEquipmentBO.getExtEntityAccess() == null || realEquipmentBO.getExtEntityAccess().isEmpty()) {
+            CsceneInstanceController.SendStrategyResult r = new CsceneInstanceController.SendStrategyResult();
+            r.setOutput("");
+            return new ServiceResult<>(r).asResult();
+        }
+        String host = null;
+        Integer port = null;
+        String userName = null;
+        String password = null;
+        for (ExtEntityAccess extEntityAccess : realEquipmentBO.getExtEntityAccess()) {
+            if (extEntityAccess.getAccessProtocols() == null) {
+                continue;
+            }
+            for (var protocol : extEntityAccess.getAccessProtocols()) {
+                if ("ssh".equals(protocol.getProtocol())) {
+                    host = protocol.getHostname();
+                    port = protocol.getPort();
+                    userName = protocol.getUsername();
+                    password = protocol.getPassword();
+                    break;
+                }
+            }
+        }
+
+        if (host == null) {
+            CsceneInstanceController.SendStrategyResult r = new CsceneInstanceController.SendStrategyResult();
+            r.setOutput("");
+            return new ServiceResult<>(r).asResult();
+        }
+
+        var result = SshUtil.execListCmds(host, userName, password, port, Arrays.asList("interface show"));
+        String output = StringUtils.join(result, "\n");
+        CsceneInstanceController.SendStrategyResult r = new CsceneInstanceController.SendStrategyResult();
+        r.setOutput(output);
+        r.setSuccess(true);
+        return new ServiceResult<>(r).asResult();
     }
 
     private void convertRole(RealEquipmentRequest request) {
