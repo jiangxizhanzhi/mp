@@ -290,16 +290,6 @@ public class LoadController {
     }
 
     /*
-     * 根据场景获取阶段列表
-     * */
-    @ApiOperation(value = "查询载荷", notes = "")
-    @GetMapping("/getStagesBySceneId")
-    public ServiceResult getStagesBySceneId(@RequestParam(value = "scene_id") String sceneId) {
-        List StageList = loadService.getStagesBySceneId(sceneId);
-        return new ServiceResult(StageList, BaseErrorCode.SUCCESS).asResult();
-    }
-
-    /*
      * 批量新增载荷执行结果
      * */
     @ApiOperation(value = "批量新增载荷执行结果", notes = "")

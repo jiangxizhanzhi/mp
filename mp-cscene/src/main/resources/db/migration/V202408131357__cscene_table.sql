@@ -688,9 +688,6 @@ VALUES (1180, '33b99e69569711ed91a0000ec67b0395', 'out-load-service', 'no_auth',
         '2024-05-20 11:31:56');
 
 INSERT INTO mp_sys_url_config (pk, code, service_url, create_time, update_time)
-VALUES (2, 'getStagesBySceneId', 'http://10.108.1.10:80/api/vuln/admin/vuln/load_code', '2024-07-04 14:58:35',
-        '2024-07-04 14:58:37');
-INSERT INTO mp_sys_url_config (pk, code, service_url, create_time, update_time)
 VALUES (3, 'addUser', 'http://ip:port/v1/gxpt/addUser', '2024-07-25 11:51:02', '2024-07-25 11:51:05');
 INSERT INTO mp_sys_url_config (pk, code, service_url, create_time, update_time)
 VALUES (4, 'deteleUser', 'http://ip:9088/xinan-server/mhUser/deteleUser', '2024-07-25 14:26:31', '2024-07-25 14:26:33');

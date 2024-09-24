@@ -1068,31 +1068,6 @@ public class LoadServiceImpl {
         }
     }
 
-    //调用ojj方法
-    public List getStagesBySceneId(String sceneId) {
-        String url = commonConfigService.getUrlByKey("getStagesBySceneId").getServiceUrl();
-        url = url + "?scene_id=" + sceneId;
-        //请求头设置
-        HashMap<String, String> headersMap = new HashMap<>();
-        String token = JwtCommon.getToken();
-        headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
-        headersMap.put("Authorization", token);
-
-        String result = null;
-        try {
-            result = HttpUtils.sendHttpGet(url, headersMap, 2000);
-        } catch (Exception e) {
-            return null;
-        }
-        List list = new ArrayList();
-        Map<String, Object> dataMap = JsonUtils.parseMap(result);
-        if (dataMap != null && dataMap.get("code") != null &&
-                dataMap.get("code").equals("VULN-000000") && dataMap.get("data") != null) {
-            list = (List) dataMap.get("data");
-        }
-        return list;
-    }
-
     public LinkedList<JSONObject> getTop5Loads(String sceneId) {
         LoadResultSearchRequest requestData = new LoadResultSearchRequest();
         requestData.setSceneId(sceneId);
