@@ -879,10 +879,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 	@ApiImplicitParams({ @ApiImplicitParam(name = "request", value = "请求体",
 			dataTypeClass = CsceneInstanceRecordRequest.class), })
 	@PostMapping(value = "/switch_recording")
-	public ServiceResult<NodeConnectionBO>
+	public ServiceResult<Boolean>
 			disableRecording(@RequestBody(required = false) CsceneInstanceRecordRequest request) {
 		modelService.switchRecording(request.getIds(), request.getButton());
-		return new ServiceResult<>();
+		return new ServiceResult<>(Boolean.TRUE).asResult();
 	}
 
     private void checkBlackList() {
