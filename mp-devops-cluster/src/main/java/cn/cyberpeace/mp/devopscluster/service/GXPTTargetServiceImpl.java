@@ -62,7 +62,7 @@ public class GXPTTargetServiceImpl {
 
         try {
             result = HttpUtils.sendHttpPost(url, formMap, headersMap);
-        } catch (IOException e) {
+        } catch (Exception e) {
             return null;
         }
         Map<String, Object> dataMap;
@@ -83,7 +83,7 @@ public class GXPTTargetServiceImpl {
             headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
             try {
                 String result = HttpUtils.sendHttpPost(url, formMap, headersMap);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }

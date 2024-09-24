@@ -83,7 +83,7 @@ public class GXPTUserServiceImpl {
         String result = null;
         try {
             result = HttpUtils.sendHttpPost(url, formMap, headersMap);
-        } catch (IOException e) {
+        } catch (Exception e) {
             return null;
         }
         Map<String, Object> dataMap;
@@ -111,7 +111,7 @@ public class GXPTUserServiceImpl {
         String result = null;
         try {
             result = HttpUtils.sendHttpGet(url, headersMap, 2000);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         Map<String, Object> dataMap;

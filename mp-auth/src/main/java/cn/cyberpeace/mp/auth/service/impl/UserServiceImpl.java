@@ -394,7 +394,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         //在创建用户成功后,将数据同步到共性平台
         Map<String, Object> resultMap = gxptUserServiceImpl.addUser(userCreated);
         if (resultMap != null && resultMap.get("code") != null && (Integer) resultMap.get("code") == 200) {
-            log.error("同步用户到共性平台成功");
+            log.info("同步用户到共性平台成功");
             //根据id修改数据库中相关数据为gxpt返回的信息
             JSONObject json = new JSONObject();
             json.put("isSychronized", true);
