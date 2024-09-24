@@ -818,5 +818,27 @@ create table mp_devops_boundary_network_equipment
 alter table mp_scene_scene
     add resource_group_id varchar(255) null comment '资源组id';
 
+DROP TABLE IF EXISTS `mp_alert_rule`;
+CREATE TABLE `mp_alert_rule`  (
+                                  `pk` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+                                  `id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'ID',
+                                  `scene_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '场景模板id',
+                                  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '规则名称',
+                                  `create_user_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '创建者id',
+                                  `labels` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '标签',
+                                  `status` int(1) NOT NULL COMMENT '状态',
+                                  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '描述',
+                                  `alarm_conditions` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '条件',
+                                  `hosts` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '主机',
+                                  `alarm_attributes` varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '自定义规则',
+                                  `alarm_description` varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '告警描述',
+                                  `alarm_level` tinyint(2) NULL DEFAULT NULL COMMENT '告警事件级别',
+                                  `alarm_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '事件名称',
+                                  `create_time` datetime(6) NOT NULL COMMENT '创建时间',
+                                  `update_time` datetime(6) NOT NULL COMMENT '更新时间',
+                                  PRIMARY KEY (`pk`) USING BTREE,
+                                  UNIQUE INDEX `id`(`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 340 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '告警规则表' ROW_FORMAT = Dynamic;
+
 
 
