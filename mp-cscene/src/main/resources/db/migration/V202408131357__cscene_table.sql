@@ -815,5 +815,8 @@ create table mp_devops_boundary_network_equipment
     update_time         datetime(6) null comment '更新时间'
 ) comment '边界网络设备' collate = utf8mb4_general_ci;
 
+alter table mp_scene_scene
+    add resource_group_id varchar(255) null comment '资源组id';
+
 
 
