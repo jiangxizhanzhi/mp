@@ -488,6 +488,11 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     public void addCollectionPlugin(CsceneBO csceneBO) {
+        // 已存在采集时 无需处理
+        if (csceneBO.getSceneConfig().getPlugins()
+                .containsKey(cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant.PLUGIN_KEY)) {
+            return;
+        }
         CollectionPluginSceneConfigModel scene = new CollectionPluginSceneConfigModel();
         scene.setEnableProbeCollect(true);
         scene.setEnableFlowCollect(false);
