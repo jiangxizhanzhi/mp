@@ -788,9 +788,6 @@ alter table mp_sceneplugincloud_scene_element_network
 
 alter table mp_sceneplugincollection_scene_probe_router_port modify network_id varchar (255) not null comment '虚拟网络资源id';
 
-alter table mp_sys_code_menu
-    add code_other_name varchar(64) null comment '别名' after code_name;
-
 create table mp_devops_boundary_network_equipment
 (
     pk                  int auto_increment comment '主键' primary key,
