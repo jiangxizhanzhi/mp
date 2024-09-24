@@ -129,31 +129,6 @@ public class LoadServiceImpl {
         return load;
     }
 
-    //调用ojj服务
-    public List getBindLoopholes(String id) {
-        String url = commonConfigService.getUrlByKey("getBindLoopholes").getServiceUrl();
-        url = url + "?load_id=" + id;
-        //请求头设置
-        HashMap<String, String> headersMap = new HashMap<>();
-        String token = JwtCommon.getToken();
-        headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
-        headersMap.put("Authorization", token);
-
-        String result = null;
-        try {
-            result = HttpUtils.sendHttpGet(url, headersMap, 2000);
-        } catch (IOException e) {
-            return null;
-        }
-        List list = new ArrayList();
-        Map<String, Object> dataMap = JsonUtils.parseMap(result);
-        if (dataMap != null && dataMap.get("code") != null &&
-                dataMap.get("code").equals("VULN-000000") && dataMap.get("data") != null) {
-            list = (List) dataMap.get("data");
-        }
-        return list;
-    }
-
     /*
      * 载荷数据同步
      * */
@@ -1106,7 +1081,7 @@ public class LoadServiceImpl {
         String result = null;
         try {
             result = HttpUtils.sendHttpGet(url, headersMap, 2000);
-        } catch (IOException e) {
+        } catch (Exception e) {
             return null;
         }
         List list = new ArrayList();
