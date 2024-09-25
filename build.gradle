@@ -15,6 +15,9 @@ apply from: 'mp/config.gradle'
 allprojects {
     repositories {
         maven {
+            url 'http://10.100.3.3:8081/repository/maven-public/'
+        }
+        maven {
             url 'https://maven.aliyun.com/repository/public/'
         }
         mavenLocal()
@@ -32,17 +35,13 @@ subprojects {
     group = 'cn.cyberpeace.mp'
     version = gradle.ext.version
     sourceCompatibility = '11'
+    targetCompatibility = '11'
     mainClassName = 'cn.cyberpeace.mp.Application'
 
     configurations {
         compileOnly {
             extendsFrom annotationProcessor
         }
-    }
-
-    repositories {
-        maven { url 'https://repo.spring.io/release' }
-        mavenCentral()
     }
 
     ext {
