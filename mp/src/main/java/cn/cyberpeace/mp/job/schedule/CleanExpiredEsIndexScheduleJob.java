@@ -17,15 +17,22 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.admin.indices.forcemerge.ForceMergeRequest;
+import org.elasticsearch.action.admin.indices.forcemerge.ForceMergeResponse;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.client.indices.GetIndexResponse;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.FuzzyQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -51,8 +58,14 @@ public class CleanExpiredEsIndexScheduleJob {
     @Resource
     private CollectionPluginSceneElementMapper elementMapper;
 
+    private static final String  PREFIX = "wazuh-alerts-4.x-";
+
+    private final List<String> CLEAR_INDEX_NAMES = new ArrayList<>();
+
+
     @MpScheduled(cron = "0 10 1 * * ?", id = "clean_expired_es_data", description = "每个活动场景保留15天的ES数据,天数可配")
     public void action() {
+        log.info("clean expired es data start");
         int nDays = 15;
         String key = "clean_expired_es_data_day";
         SysConfigModel sysConfig = sysConfigMapper.first(new HumanCondition().filterEqual(SysConfigModel::getKeyName, key));
@@ -72,7 +85,7 @@ public class CleanExpiredEsIndexScheduleJob {
             page++;
             for (CsceneInstanceModel csceneInstance : csceneInstances) {
                 String sceneId = csceneInstance.getScene();
-                var queryCollectionScene = new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId);
+                HumanCondition queryCollectionScene = new HumanCondition().filterEqual(CollectionPluginSceneModel::getScene, sceneId);
                 CollectionPluginSceneModel scene = collectionPluginSceneMapper.first(queryCollectionScene);
                 if (scene == null) {
                     continue;
@@ -82,6 +95,50 @@ public class CleanExpiredEsIndexScheduleJob {
             }
             humanCondition.pagination(page, pageSize);
             csceneInstances = csceneInstanceMapper.list(humanCondition);
+        }
+
+        cleanWazuhMonitorData();
+        clearWazuhSize();
+        CLEAR_INDEX_NAMES.clear();
+        log.info("clean expired es data end");
+    }
+
+    /**
+     * 清理非当天的wazuh监控数据
+     */
+    private void cleanWazuhMonitorData(){
+        // 清理非当天的数据, 项目中监控数据只使用了一条；
+        LocalDateTime nDaysAgo = LocalDateTime.now();
+        String excludeDeleteDataIndex = TimeUtils.localDateTimeToString(nDaysAgo, DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+        String excludeIndex = PREFIX + excludeDeleteDataIndex;
+        GetIndexRequest getIndexRequest = new GetIndexRequest(PREFIX + "*");
+        try {
+
+            GetIndexResponse result = restHighLevelClient.indices().get(getIndexRequest, RequestOptions.DEFAULT);
+            if (result.getIndices() != null && result.getIndices().length > 0) {
+                final String[] indices = result.getIndices();
+                for (String indexName : indices) {
+                    if (indexName.contains(excludeIndex)) {
+                        continue;
+                    }
+                    FuzzyQueryBuilder controllerQuery = QueryBuilders.fuzzyQuery("agent.name", "controller");
+                    FuzzyQueryBuilder computerQuery = QueryBuilders.fuzzyQuery("agent.name", "computer");
+                    BoolQueryBuilder combinedQuery = QueryBuilders.boolQuery()
+                            .should(controllerQuery)
+                            .should(computerQuery);
+
+                    DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(indexName);
+                    deleteByQueryRequest.setQuery(combinedQuery);
+
+                    BulkByScrollResponse response = restHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+                    log.info("clean wazuh data, indexName is {}, delete {} records", indexName, response.getDeleted());
+                    if (response.getDeleted() > 0) {
+                        CLEAR_INDEX_NAMES.add(indexName);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -104,7 +161,8 @@ public class CleanExpiredEsIndexScheduleJob {
                         if (YYYYMMDD < nDaysAgoYYYYMMDD) {
                             DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest();
                             deleteIndexRequest.indices(index);
-                            restHighLevelClient.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
+                            final AcknowledgedResponse delete = restHighLevelClient.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
+                            log.info("delete index {} result is {}", index, delete.isAcknowledged());
                         }
                     }
                 }
@@ -122,9 +180,8 @@ public class CleanExpiredEsIndexScheduleJob {
             return;
         }
 
-        String prefix = "wazuh-alerts-4.x-";
         String toDeleteDataIndex = TimeUtils.localDateTimeToString(nDaysAgo.minusDays(1), DateTimeFormatter.ofPattern("yyyy.MM.dd"));
-        String index = prefix + toDeleteDataIndex;
+        String index = PREFIX + toDeleteDataIndex;
 
         BatchSceneHandler sceneHandler = new BatchSceneHandler(Arrays.asList(scene.getScene()), new ArrayList<>());
         List<String> agentNames = new ArrayList<>(sceneHandler.getAllEid2ElementMap().keySet());
@@ -133,9 +190,36 @@ public class CleanExpiredEsIndexScheduleJob {
         deleteByQueryRequest.setQuery(QueryBuilders.termsQuery("agent.name", agentNames));
 
         try {
-            restHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+            final BulkByScrollResponse bulkByScrollResponse = restHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+            log.info("clean wazuh data, scene id is {}, delete {} records", scene.getScene(), bulkByScrollResponse.getDeleted());
+            if (bulkByScrollResponse.getDeleted() > 0) {
+                CLEAR_INDEX_NAMES.add(index);
+            }
+
         } catch (Exception e) {
             log.error("failed to clean data , scene id is " + scene.getScene(), e);
+        }
+    }
+
+    /**
+     * 释放删除数据后的空间， 比较消耗es的性能
+     */
+    private void clearWazuhSize() {
+        for (String indexName : CLEAR_INDEX_NAMES) {
+            // 删除数据后空间不会被立马回收，需要执行强制回收命令
+            // Step 1: 创建 ForcemergeRequest 对象
+            ForceMergeRequest request = new ForceMergeRequest(indexName);
+            // Step 2: 设置 max_num_segments 为 1
+            request.maxNumSegments(1);
+            request.onlyExpungeDeletes(true);
+            ForceMergeResponse forceMergeResponse;
+            try {
+                forceMergeResponse = restHighLevelClient.indices().forcemerge(request, RequestOptions.DEFAULT);
+            } catch (IOException e) {
+                log.error("failed to clear wazuh data, index name is {}", indexName, e);
+                return;
+            }
+            log.info("force merge result is {}", forceMergeResponse.getStatus());
         }
     }
 
