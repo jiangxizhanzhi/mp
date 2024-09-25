@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
@@ -45,6 +46,7 @@ public class FlowTaskConfModel extends BaseModel {
 	private Integer replay;
 
 	@ApiModelProperty(value = "是否开启流量重放和速率配置：0 否，1 是")
+	@DefaultInt(value = 0)
 	private Integer config;
 
 	/**
