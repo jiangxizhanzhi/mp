@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.common.util.CheckUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -49,26 +50,46 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
 
     @Override
     public ServiceResult updateLocalAzurer(MicrosoftAzureUserModel requestData) {
-        if(requestData.getConnectIp() != null && !requestData.getConnectIp().equals("")){
-            Boolean aBoolean = CheckUtil.checkPrivateCloudAddress(requestData.getConnectIp());
-            if(!aBoolean){
-                return new ServiceResult<>(null, BaseErrorCode.ERROR,"私有云地址格式错误");
-            }
+        if (requestData == null) {
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, "请求数据为空");
         }
-        if(requestData == null || requestData.getPk() == null || requestData.getPk().equals("")){
+
+        // 验证私有云地址格式
+        String connectIp = requestData.getConnectIp();
+        if (!StringUtils.isEmpty(connectIp) && !CheckUtil.checkPrivateCloudAddress(connectIp)) {
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, "私有云地址格式错误");
+        }
+
+        // 判断是否为新增账号（没有主键表示新增）
+        if (StringUtils.isEmpty(requestData.getPk())) {
+            // 调用新增逻辑
             Boolean addAzurer = microsoftAzureLoginMapper.addAzurer(requestData);
-            if(addAzurer){
-                return new ServiceResult<>(null, BaseErrorCode.SUCCESS,"新增账号信息成功");
-            }else{
-                return new ServiceResult<>(null, BaseErrorCode.ERROR,"新增账号信息失败");
-            }
-        }else{
-            Boolean updateLocalAzurer = microsoftAzureLoginMapper.updateLocalAzurer(requestData.getPk().toString(),requestData);
-            if(updateLocalAzurer){
-                return new ServiceResult<>(null, BaseErrorCode.SUCCESS,"修改账号信息成功");
-            }else{
-                return new ServiceResult<>(null, BaseErrorCode.ERROR,"修改账号信息失败");
+            if (addAzurer) {
+                return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "新增账号信息成功");
+            } else {
+                return new ServiceResult<>(null, BaseErrorCode.ERROR, "新增账号信息失败");
             }
         }
+
+        // 检查是否有需要更新的字段
+        if (isUpdateNeeded(requestData)) {
+            Boolean updateAzurer = microsoftAzureLoginMapper.updateLocalAzurer(requestData.getPk().toString(), requestData);
+            if (updateAzurer) {
+                return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "修改账号信息成功");
+            } else {
+                return new ServiceResult<>(null, BaseErrorCode.ERROR, "修改账号信息失败");
+            }
+        }
+
+        return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "无修改信息，操作成功");
+    }
+
+    // 检查是否有字段需要更新
+    private boolean isUpdateNeeded(MicrosoftAzureUserModel requestData) {
+        return !StringUtils.isEmpty(requestData.getConnectIp()) ||
+                !StringUtils.isEmpty(requestData.getAzureTenantId()) ||
+                !StringUtils.isEmpty(requestData.getAzureSubscriptionId()) ||
+                !StringUtils.isEmpty(requestData.getAzureClientId()) ||
+                !StringUtils.isEmpty(requestData.getAzureClientSecret());
     }
 }
