@@ -56,6 +56,7 @@ public class SystemAlarmScheduleJob {
      */
     @MpScheduled(cron = "0 0/5 * * * ?", description = "生成控制节点和计算节点告警信息", id = "create_system_alarm", initialDelaySeconds = 60)
     public void getSystemAlarm() {
+        log.info("getSystemAlarm is start");
         List<SystemAlarmModel> alarmModels = new ArrayList<>();
         SystemAlarmVO systemAlarmVO = serviceMonitorService.getSystemAlarm();
 
@@ -123,6 +124,7 @@ public class SystemAlarmScheduleJob {
 
         // 生成告警统计信息
         this.genAlarmStatistics();
+        log.info("getSystemAlarm is end");
     }
 
     /**
