@@ -1,12 +1,8 @@
 package cn.cyberpeace.mp.cscene.service.service;
 
-import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.base.util.ServletUtils;
-import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonConvertStatusEnum;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonFunctionCodeEnum;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonStatusCodeEnum;
@@ -37,6 +33,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -55,8 +52,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
 
 @Service
 public class LoadServiceImpl {
@@ -524,12 +519,14 @@ public class LoadServiceImpl {
     }
 
     private boolean validateRequestData(List<LoadRequest> requestData) {
-        for (LoadRequest request : requestData) {
-            if (request.getTaskId() == null || request.getTaskId().isEmpty() || request.getInstanceId() == null || request.getInstanceId().isEmpty()) {
-                return false;
-            }
+        if (requestData == null || requestData.isEmpty()) {
+            return false;
         }
-        return true;
+        return requestData.stream().allMatch(request ->
+                request != null &&
+                        !StringUtils.isEmpty(request.getTaskId()) &&
+                        !StringUtils.isEmpty(request.getInstanceId())
+        );
     }
 
     private String convertStatusToCode(String status) {
