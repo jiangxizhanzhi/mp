@@ -671,7 +671,7 @@ public class CsceneFlowService {
                 for (Long value : networkFlowRateResult.getSumRateList()) {
                     FlowStatisticsDetail flowStatisticsDetail = new FlowStatisticsDetail();
                     flowStatisticsDetail.setOffsetValue(offsetValue);
-                    flowStatisticsDetail.setValue(value);
+                    flowStatisticsDetail.setValue(value * 8);
                     flowStatisticsDetail.setOffsetUnit(networkFlowRateResult.getUnit());
                     result.add(flowStatisticsDetail);
                     offsetValue += networkFlowRateResult.getTimeInt();
