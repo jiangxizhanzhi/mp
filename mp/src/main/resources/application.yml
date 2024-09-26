@@ -44,7 +44,7 @@ management:
     web:
       exposure:
         include: health, info
-    enabled-by-default: false
+    enabled-by-default: ${MP_ENDPOINTS_ENABLE:true}
 
 knife4j:
   production: true # 开启屏蔽文档资源
