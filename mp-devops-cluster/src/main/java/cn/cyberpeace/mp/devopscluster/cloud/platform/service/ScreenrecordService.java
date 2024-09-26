@@ -303,7 +303,7 @@ public class ScreenrecordService extends BaseCpService {
      */
     public ServiceResult<String> getScreenRecordUrl(String fileName) {
         // 录屏文件名称校验
-        if (StringUtils.isBlank(fileName) || !fileName.endsWith(".mp4") || fileName.contains("../")) {
+        if (StringUtils.isBlank(fileName) || fileName.contains("../")) {
             throw new MpRuntimeException(DevopsClusterErrorCode.SCREEN_RECORD_ERROR);
         }
 
