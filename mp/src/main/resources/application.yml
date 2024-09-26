@@ -18,6 +18,7 @@ management:
     web:
       exposure:
         include: health, info
+    enabled-by-default: ${MP_ENDPOINTS_ENABLE:true}
   info:
     git:
       mode: simple
@@ -38,13 +39,6 @@ spring:
   config:
     activate:
       on-profile: std
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health, info
-    enabled-by-default: ${MP_ENDPOINTS_ENABLE:true}
 
 knife4j:
   production: true # 开启屏蔽文档资源
@@ -71,14 +65,6 @@ spring:
   config:
     activate:
       on-profile: local
-
-management:
-  endpoints:
-    health:
-      show-details: always
-    web:
-      exposure:
-        include: "*"
 
 logging:
   file:

@@ -77,18 +77,6 @@ springfox:
     swagger-ui:
       enabled: ${springfox.documentation.ext-var.swagger-ui.enabled}
 
-management:
-  #  endpoints:
-  #    web:
-  #      exposure:
-  #        include: health, info
-  info:
-    git:
-      mode: simple
-  health:
-    elasticsearch:
-      enabled: false
-
 # 中台各模块相关配置
 mp:
   common: #公用配置
