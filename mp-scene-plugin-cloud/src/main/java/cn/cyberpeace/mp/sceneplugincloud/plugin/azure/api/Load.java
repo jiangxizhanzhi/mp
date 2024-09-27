@@ -46,7 +46,7 @@ public class Load {
         cloudElement.setLoadResourceInstanceId(data.get("instanceId").toString());
 
 //        启动实例
-        start(data.get("instanceId").toString());
+        // start(data.get("instanceId").toString());
     }
 
     public Map create(String taskName, String taskDescribe, String toolId, String execCommand) {
