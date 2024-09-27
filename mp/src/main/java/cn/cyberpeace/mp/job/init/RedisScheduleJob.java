@@ -22,7 +22,9 @@ import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
-/**
+ import java.util.Date;
+
+ /**
  * @ClassName RedisScheduleJob
  * @Description
  * @Author maojun
@@ -50,16 +52,22 @@ public class RedisScheduleJob {
         Jedis jedis = new Jedis(situationAwareConfig.getStorageRedisIp(), situationAwareConfig.getStorageRedisPort());
         try{
             jedis.auth(situationAwareConfig.getStorageRedisPassword());
-            jedis.subscribe(new JedisPubSub() {
-                @Override
-                public void onMessage(String channel, String message) {
-                    log.info("redis schedule job , combat_log:{}", message);
-                    String[] content = message.split(" ", 3);
-                    if (content.length == 3 && Validator.IPV4.matcher(content[1]).matches()) {
-                        realEquipmentConverter.report(content[1], content[2], RealEquipmentConverter.SYSLOG);
+
+            var loadJobTime = new Date(System.currentTimeMillis() + 2 * 1000);
+            taskScheduler.schedule(() -> {
+                jedis.subscribe(new JedisPubSub() {
+                    @Override
+                    public void onMessage(String channel, String message) {
+
+                        log.info("redis schedule job , combat_log:{}", message);
+                        String[] content = message.split(" ", 3);
+                        if (content.length == 3 && Validator.IPV4.matcher(content[1]).matches()) {
+                            realEquipmentConverter.report(content[1], content[2], RealEquipmentConverter.SYSLOG);
+                        }
                     }
-                }
-            }, CHANNEL);
+                }, CHANNEL);
+            }, loadJobTime);
+
         } catch (Exception e) {
             log.error("RedisScheduleJob error, e = {}", ExceptionUtils.getStackTrace(e));
         }

@@ -19,7 +19,6 @@ import cn.cyberpeace.mp.cscene.repository.CsceneCommonCollectMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntity;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntityAccess;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
@@ -225,6 +224,11 @@ public class RealEquipmentConverter implements BaseConverter{
         validRealEquipmentRequest(request);
         Device device = convertRequest(request);
         Device result = realEquipmentService.update(request.getUuid(),device);
+        result.setOpenSnmp(request.getOpenSnmp());
+        result.setOpenRestapi(request.getOpenRestapi());
+        result.setOpenKafka(request.getOpenKafka());
+        result.setOpenSoap(request.getOpenSoap());
+        result.setOpenSyslog(request.getOpenSyslog());
         devopsTargetService.updateById(result, request.getExtEntityAccess());
         return result;
     }
@@ -456,12 +460,9 @@ public class RealEquipmentConverter implements BaseConverter{
         List<String> ids = devopsTargetService.getAllRealEquipmentId();
         List<Device> deviceList = deviceService.findByIds(ids.stream().map(Integer::parseInt).collect(Collectors.toList()));
         for (Device device : deviceList) {
-            List<ExtEntityAccess> accesses = device.getExtEntityAccess();
-            if (CollectionUtils.isNotEmpty(accesses)) {
-                for (ExtEntityAccess extEntityAccess : accesses) {
-                    if (ip.equals(extEntityAccess.getIp())) {
-                        return devopsTargetService.getBoById(Integer.toString(device.getId()));
-                    }
+            if (device.getExtEntity().getSnmpConfig() != null) {
+                if (ip.equals(device.getExtEntity().getSnmpConfig().getIp())) {
+                    return devopsTargetService.getBoById(Integer.toString(device.getId()));
                 }
             }
         }

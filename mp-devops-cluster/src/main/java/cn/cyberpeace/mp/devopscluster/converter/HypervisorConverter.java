@@ -111,7 +111,10 @@ public class HypervisorConverter implements BaseConverter {
                     .ramUsed((long) hypervisor.getMemory().getUsed())
                     .totalInstances(hypervisor.getVmCount())
                     .serviceStatus(false)
-                    .diskUsed((long) hypervisor.getDisk().getUsed()).build();
+                    .diskUsed((long) hypervisor.getDisk().getUsed())
+                    .ip(hypervisor.getAddress())
+                    .totalContainers(hypervisor.getContainerCount())
+                    .build();
             list.add(build);
         }
 
