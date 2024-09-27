@@ -147,7 +147,7 @@ public class LoadServiceImpl {
         }
 
         JSONObject request = new JSONObject();
-        request.put("pagenum", 1);
+        request.put("pagenum", 0);
         request.put("pagesize", 1000);
         //通过部署的载荷服务器获取载荷列表
         List<LinkedHashMap> initialToolList = outLoadService.getToolList(request);
