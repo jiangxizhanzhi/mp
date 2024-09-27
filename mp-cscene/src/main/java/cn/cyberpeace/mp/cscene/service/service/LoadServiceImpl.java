@@ -282,7 +282,7 @@ public class LoadServiceImpl {
             mpDevopsLoadSceneLog.setReadMeName(tool.get("readMeName") != null ? tool.get("readMeName").toString() : null);
             mpDevopsLoadSceneLog.setAttachment(tool.get("attachment") != null ? tool.get("attachment").toString() : null);
             mpDevopsLoadSceneLog.setAttachmentName(tool.get("attachmentName") != null ? tool.get("attachmentName").toString() : null);
-            mpDevopsLoadSceneLog.setCover(tool.get("cover").toString() != null ? tool.get("cover").toString() : "/api/mp/file/877/298/b99fc02c34507fb82c5a800bcbe65287.png");
+            mpDevopsLoadSceneLog.setCover(tool.get("cover") != null ? tool.get("cover").toString() : "/api/mp/file/877/298/b99fc02c34507fb82c5a800bcbe65287.png");
             mpDevopsLoadSceneLog.setCoverName(tool.get("coverName") != null ? tool.get("coverName").toString() : null);
 
             Object createTimeObj = tool.get("createTime");
