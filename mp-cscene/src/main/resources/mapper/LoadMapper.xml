@@ -218,43 +218,43 @@
         UPDATE
         mp_devops_load
         <set>
-            <if test="param != null and param.toolName != null and param.toolName != ''">
+            <if test="param != null and param.toolName != null">
                 tool_name = #{param.toolName},
             </if>
-            <if test="param != null and param.toolDescription != null and param.toolDescription != ''">
+            <if test="param != null and param.toolDescription != null">
                 tool_description = #{param.toolDescription},
             </if>
-            <if test="param != null and param.actionType != null and param.actionType != ''">
+            <if test="param != null and param.actionType != null">
                 action_type = #{param.actionType},
             </if>
-            <if test="param != null and param.runTable != null and param.runTable != ''">
+            <if test="param != null and param.runTable != null">
                 run_table = #{param.runTable},
             </if>
-            <if test="param != null and param.source != null and param.source != ''">
+            <if test="param != null and param.source != null">
                 source = #{param.source},
             </if>
-            <if test="param != null and param.cover != null and param.cover != ''">
+            <if test="param != null and param.cover != null">
                 cover = #{param.cover},
             </if>
-            <if test="param != null and param.coverName != null and param.coverName != ''">
+            <if test="param != null and param.coverName != null">
                 cover_name = #{param.coverName},
             </if>
-            <if test="param != null and param.readMe != null and param.readMe != ''">
+            <if test="param != null and param.readMe != null">
                 read_me = #{param.readMe},
             </if>
-            <if test="param != null and param.readMeName != null and param.readMeName != ''">
+            <if test="param != null and param.readMeName != null">
                 read_me_name = #{param.readMeName},
             </if>
-            <if test="param != null and param.attachment != null and param.attachment != ''">
+            <if test="param != null and param.attachment != null">
                 attachment = #{param.attachment},
             </if>
-            <if test="param != null and param.attachmentName != null and param.attachmentName != ''">
+            <if test="param != null and param.attachmentName != null">
                 attachment_name = #{param.attachmentName},
             </if>
-            <if test="param != null and param.controlType != null and param.controlType != ''">
+            <if test="param != null and param.controlType != null">
                 control_type = #{param.controlType},
             </if>
-            <if test="param != null and param.defaultCmd != null and param.defaultCmd != ''">
+            <if test="param != null and param.defaultCmd != null">
                 default_cmd = #{param.defaultCmd},
             </if>
             update_time= now()
