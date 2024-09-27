@@ -23,7 +23,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ApiModel(description = "根据ID查询返回信息")
-public class ImagesByIdVO extends BaseVO {
+public class ImagesByIdVO extends ImageVO {
 
     /**
      * UUID

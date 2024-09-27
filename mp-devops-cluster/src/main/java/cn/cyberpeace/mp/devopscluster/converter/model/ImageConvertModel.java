@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @NoArgsConstructor
@@ -145,5 +146,22 @@ public class ImageConvertModel extends BasePageConvertModel{
      * 靶标创建用户名称
      */
     private String createUserName;
+
+    /**
+     * 业务标签
+     */
+    private Integer businessTag;
+
+    /**
+     * 引用过的次数
+     */
+    private Integer referenceNums;
+
+    /**
+     * 靶标管理中启动过的时长
+     */
+    private Integer useDuration;
+
+    private LocalDateTime updateTime;
 
 }

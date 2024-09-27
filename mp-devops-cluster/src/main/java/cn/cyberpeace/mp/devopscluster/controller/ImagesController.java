@@ -691,4 +691,56 @@ public class ImagesController {
                     .format(StringUtils.joinWith(",", result.toArray())));
         }
     }
+
+    /**
+     * 根据UUID查询
+     */
+    @ApiOperation("根据UUID查询")
+    @ApiImplicitParam(name = "uuid", value = "镜像ID", dataTypeClass = String.class)
+    @PostMapping("/search")
+    public Result<List<ImagesByIdVO>> findByUuids(@RequestBody ImageByUuidsRequest request) {
+        List<ImagesByIdVO> res = new ArrayList<>();
+        List<String> uuids = request.getUuids();
+        for (String uuid : uuids) {
+            ImageConvertModel model = imagesConverter.findByUuid(uuid);
+            ImagesByIdVO imagesByIdVO = getImagesByIdVO(model);
+            res.add(imagesByIdVO);
+        }
+        return new Result<>(res);
+    }
+
+    private ImagesByIdVO getImagesByIdVO(ImageConvertModel model) {
+        ImagesByIdVO imagesByIdVO = new ImagesByIdVO();
+        imagesByIdVO.setUuid(model.getUuid());
+        imagesByIdVO.setName(model.getName());
+        imagesByIdVO.setCategory(model.getMainCategory());
+        imagesByIdVO.setSecondCategory(model.getSubCategory());
+        imagesByIdVO.setThirdCategory(model.getThirdCategory());
+        imagesByIdVO.setRole(model.getRole());
+        imagesByIdVO.setLogo(model.getLogo());
+        imagesByIdVO.setIsInternal(model.getIsInternal());
+        imagesByIdVO.setIsInit(model.getIsInit());
+        imagesByIdVO.setIsImport(model.getIsImport());
+        ExtVm extVm = model.getExtVm();
+        imagesByIdVO.setAccessProtocolList(Objects.nonNull(extVm) ? extVm.getAccessProtocols() : null);
+        ExtDocker extDocker = model.getExtDocker();
+        if (model.getImageType().equals("container")) {
+            imagesByIdVO.setAccessProtocolList(Objects.nonNull(extDocker) ? extDocker.getAccessProtocols() : null);
+        }
+        imagesByIdVO.setImageType(model.getImageType());
+        imagesByIdVO.setDescription(model.getDescription());
+        imagesByIdVO.setExtImageInfo(model.getExtImageInfo());
+        imagesByIdVO.setExtGateway(model.getExtGateway());
+        imagesByIdVO.setExtVm(extVm);
+        imagesByIdVO.setExtSystemInfo(model.getExtSystemInfo());
+        imagesByIdVO.setExtDocker(extDocker);
+        if (Objects.nonNull(extVm) && StringUtils.isNotEmpty(extVm.getIsoTmpdirUuid())) {
+            var res = csceneSpecialService.statISOReferCscenes(extVm.getIsoTmpdirUuid()).getSource();
+            imagesByIdVO.setAllowChangeIso(CollectionUtils.isEmpty(res));
+        } else {
+            imagesByIdVO.setAllowChangeIso(true);
+        }
+        this.imagesConverter.setImageBusinessProperties(imagesByIdVO, model);
+        return imagesByIdVO;
+    }
 }

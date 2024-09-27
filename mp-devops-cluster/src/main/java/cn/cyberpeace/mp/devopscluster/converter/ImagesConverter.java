@@ -31,6 +31,7 @@ import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.service.GXPTTargetServiceImpl;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
+import cn.cyberpeace.mp.devopscluster.vo.ImageVO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -511,4 +512,9 @@ public class ImagesConverter implements BaseConverter{
         }
     }
 
+    public void setImageBusinessProperties(ImageVO target, ImageConvertModel source) {
+        target.setBusinessTag(source.getBusinessTag());
+        target.setReferenceNums(source.getReferenceNums());
+        target.setUseDuration(source.getUseDuration());
+    }
 }
