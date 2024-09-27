@@ -266,45 +266,47 @@ public class LoadServiceImpl {
 
     private MpDevopsLoadSceneLog convertToolToJSONObject(LinkedHashMap tool) {
         MpDevopsLoadSceneLog mpDevopsLoadSceneLog = new MpDevopsLoadSceneLog();
-        mpDevopsLoadSceneLog.setId(tool.get("id").toString());
-        mpDevopsLoadSceneLog.setControlPort(tool.get("controlPort").toString());
-        mpDevopsLoadSceneLog.setControlType(tool.get("controlType").toString());
-        mpDevopsLoadSceneLog.setRunTable(tool.get("runTable").toString());
-        mpDevopsLoadSceneLog.setActionType(tool.get("actionType").toString());
-        mpDevopsLoadSceneLog.setCreatorId(tool.get("creatorId").toString());
-        mpDevopsLoadSceneLog.setDefaultCmd(tool.get("defaultCmd").toString());
-        mpDevopsLoadSceneLog.setToolDescription(tool.get("toolDescribe").toString());
-        mpDevopsLoadSceneLog.setToolName(tool.get("toolName").toString());
-        mpDevopsLoadSceneLog.setSource(tool.get("source").toString());
-        mpDevopsLoadSceneLog.setToolPlatform(tool.get("toolPlatform").toString());
-        mpDevopsLoadSceneLog.setReadMe(tool.get("readMe").toString());
-        mpDevopsLoadSceneLog.setReadMeName(tool.get("readMeName").toString());
-        mpDevopsLoadSceneLog.setAttachment(tool.get("attachment").toString());
-        mpDevopsLoadSceneLog.setAttachmentName(tool.get("attachmentName").toString());
-        mpDevopsLoadSceneLog.setCover(tool.get("cover").toString() != null ? tool.get("cover").toString() : "/api/mp/file/877/298/b99fc02c34507fb82c5a800bcbe65287.png");
-        mpDevopsLoadSceneLog.setCoverName(tool.get("coverName").toString());
+        if(tool != null){
+            mpDevopsLoadSceneLog.setId(tool.get("id") != null ? tool.get("id").toString() : null);
+            mpDevopsLoadSceneLog.setControlPort(tool.get("controlPort") != null ? tool.get("controlPort").toString() : null);
+            mpDevopsLoadSceneLog.setControlType(tool.get("controlType") != null ? tool.get("controlType").toString() : null);
+            mpDevopsLoadSceneLog.setRunTable(tool.get("runTable") != null ? tool.get("runTable").toString() : null);
+            mpDevopsLoadSceneLog.setActionType(tool.get("actionType") != null ? tool.get("actionType").toString() : null);
+            mpDevopsLoadSceneLog.setCreatorId(tool.get("creatorId") != null ? tool.get("creatorId").toString() : null);
+            mpDevopsLoadSceneLog.setDefaultCmd(tool.get("defaultCmd") != null ? tool.get("defaultCmd").toString() : null);
+            mpDevopsLoadSceneLog.setToolDescription(tool.get("toolDescribe") != null ? tool.get("toolDescribe").toString() : null);
+            mpDevopsLoadSceneLog.setToolName(tool.get("toolName") != null ? tool.get("toolName").toString() : null);
+            mpDevopsLoadSceneLog.setSource(tool.get("source") != null ? tool.get("source").toString() : null);
+            mpDevopsLoadSceneLog.setToolPlatform(tool.get("toolPlatform") != null ? tool.get("toolPlatform").toString() : null);
+            mpDevopsLoadSceneLog.setReadMe(tool.get("readMe") != null ? tool.get("readMe").toString() : null);
+            mpDevopsLoadSceneLog.setReadMeName(tool.get("readMeName") != null ? tool.get("readMeName").toString() : null);
+            mpDevopsLoadSceneLog.setAttachment(tool.get("attachment") != null ? tool.get("attachment").toString() : null);
+            mpDevopsLoadSceneLog.setAttachmentName(tool.get("attachmentName") != null ? tool.get("attachmentName").toString() : null);
+            mpDevopsLoadSceneLog.setCover(tool.get("cover").toString() != null ? tool.get("cover").toString() : "/api/mp/file/877/298/b99fc02c34507fb82c5a800bcbe65287.png");
+            mpDevopsLoadSceneLog.setCoverName(tool.get("coverName") != null ? tool.get("coverName").toString() : null);
 
-        Object createTimeObj = tool.get("createTime");
-        if (createTimeObj != null) {
-            try {
-                LocalDateTime createTime = LocalDateTime.parse(createTimeObj.toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                mpDevopsLoadSceneLog.setCreateTime(createTime);
-            } catch (DateTimeParseException e) {
-                // 记录错误日志，跳过此条数据或使用默认值
-                LocalDateTime createTime = LocalDateTime.now();
-                mpDevopsLoadSceneLog.setCreateTime(createTime);
+            Object createTimeObj = tool.get("createTime");
+            if (createTimeObj != null) {
+                try {
+                    LocalDateTime createTime = LocalDateTime.parse(createTimeObj.toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                    mpDevopsLoadSceneLog.setCreateTime(createTime);
+                } catch (DateTimeParseException e) {
+                    // 记录错误日志，跳过此条数据或使用默认值
+                    LocalDateTime createTime = LocalDateTime.now();
+                    mpDevopsLoadSceneLog.setCreateTime(createTime);
+                }
             }
-        }
 
-        Object updateTimeObj = tool.get("updateTime");
-        if (updateTimeObj != null) {
-            try {
-                LocalDateTime updateTime = LocalDateTime.parse(updateTimeObj.toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-                mpDevopsLoadSceneLog.setUpdateTime(updateTime);
-            } catch (DateTimeParseException e) {
-                // 记录错误日志，跳过此条数据或使用默认值
-                LocalDateTime updateTime = LocalDateTime.now();
-                mpDevopsLoadSceneLog.setUpdateTime(updateTime);
+            Object updateTimeObj = tool.get("updateTime");
+            if (updateTimeObj != null) {
+                try {
+                    LocalDateTime updateTime = LocalDateTime.parse(updateTimeObj.toString(), DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+                    mpDevopsLoadSceneLog.setUpdateTime(updateTime);
+                } catch (DateTimeParseException e) {
+                    // 记录错误日志，跳过此条数据或使用默认值
+                    LocalDateTime updateTime = LocalDateTime.now();
+                    mpDevopsLoadSceneLog.setUpdateTime(updateTime);
+                }
             }
         }
         return mpDevopsLoadSceneLog;
