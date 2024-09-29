@@ -125,6 +125,24 @@ public class LoadServiceImpl {
     }
 
     /*
+     * 根据id查询载荷
+     * */
+    public MpDevopsLoad getLoadById(String id) {
+        MpDevopsLoad load = loadMapper.getLoadById(id);
+        Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes(CommonStatusCodeEnum.CODE.getCode());
+        load.setRunTableName(nextLevelMapsByCodes.get(load.getRunTable()));
+        load.setActionTypeName(nextLevelMapsByCodes.get(load.getActionType()));
+        load.setControlTypeName(nextLevelMapsByCodes.get(load.getControlType()));
+        String source = load.getSource();
+        if (source != null && source.equals("1")) {
+            load.setSource("外部同步");
+        } else if (source != null && source.equals("2")) {
+            load.setSource("本地创建");
+        }
+        return load;
+    }
+
+    /*
      * 载荷数据同步
      * */
     @Transactional
@@ -1115,11 +1133,6 @@ public class LoadServiceImpl {
             }
         }
         return returnList;
-    }
-
-    public ServiceResult loadTransform(String file, String transformType) {
-        String newFile = "/api/mp/file/229\\\\882\\\\4fcbb45241f63fb79c3390b24987cc46.zip";
-        return new ServiceResult(newFile, BaseErrorCode.SUCCESS).asResult();
     }
 
     public List<MpDevopsLoadSceneLog> getLoadResultByNodeIds(String[] nodeIds) {

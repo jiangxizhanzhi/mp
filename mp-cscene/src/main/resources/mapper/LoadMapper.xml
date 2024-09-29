@@ -657,4 +657,13 @@
         WHERE
         pk = #{pk}
     </select>
+
+    <select id="getLoadById" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoad">
+        SELECT
+            *
+        FROM
+            mp_devops_load
+        WHERE
+            id = #{id}
+    </select>
 </mapper>

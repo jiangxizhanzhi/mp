@@ -107,6 +107,16 @@ public class LoadController {
     }
 
     /*
+     * 根据id查询载荷
+     * */
+    @ApiOperation(value = "根据id查询载荷", notes = "")
+    @GetMapping("/getLoadById")
+    public ServiceResult getLoadById(@RequestParam(value = "id") String id) {
+        MpDevopsLoad result = loadService.getLoadById(id);
+        return new ServiceResult(result, BaseErrorCode.SUCCESS).asResult();
+    }
+
+    /*
      * 修改载荷
      * */
     @ApiOperation(value = "修改载荷", notes = "")
@@ -181,16 +191,6 @@ public class LoadController {
     public ServiceResult synchronousDataSource(@RequestBody MpDevopsLoadSource requestData) {
         ServiceResult synchronousDataSource = loadService.synchronousDataSource(requestData);
         return synchronousDataSource;
-    }
-
-    /*
-     * 载荷改造
-     * */
-    @ApiOperation(value = "载荷改造", notes = "")
-    @PostMapping("/loadTransform")
-    public ServiceResult loadTransform(@RequestParam(value = "file") String file, @RequestParam(value = "transform_type") String transformType) {
-        ServiceResult loadTransform = loadService.loadTransform(file, transformType);
-        return loadTransform;
     }
 
 //**********************************************************************************************************//

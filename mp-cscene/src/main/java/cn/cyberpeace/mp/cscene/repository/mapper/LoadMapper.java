@@ -75,4 +75,6 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
     List<String> getLoadBySceneId(String sceneId);
 
     MpDevopsLoad getLoadByPk(String pk);
+
+    MpDevopsLoad getLoadById(String id);
 }
