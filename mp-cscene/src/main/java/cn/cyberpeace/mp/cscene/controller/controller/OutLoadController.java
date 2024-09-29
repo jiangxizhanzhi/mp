@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.controller.controller;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskDeleteRequest;
 import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
 import cn.cyberpeace.mp.cscene.service.service.OutLoadServiceImpl;
 import com.alibaba.fastjson.JSONObject;
@@ -88,7 +89,7 @@ public class OutLoadController {
      */
     @ApiOperation(value = "删除任务", notes = "")
     @PostMapping("/deleteTask")
-    public ServiceResult<Boolean> deleteTask(@RequestBody(required = true) JSONObject requestData) {
+    public ServiceResult<Boolean> deleteTask(@RequestBody(required = true) OutLoadTaskDeleteRequest requestData) {
         Boolean deleteTask = outLoadService.deleteTask(requestData);
         if (deleteTask) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
