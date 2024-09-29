@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.common.constant.codeEnum.CommonFunctionCodeEnum;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonStatusCodeEnum;
 import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
 import cn.cyberpeace.mp.common.service.impl.CommonConfigServiceImpl;
+import cn.cyberpeace.mp.cscene.constant.LoadConvertCode;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
@@ -21,8 +22,6 @@ import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.websocket.LoadResultWebSocketServer;
 import cn.cyberpeace.mp.cscene.websocket.WebSocketServer;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
-import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
-import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -36,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.websocket.Session;
@@ -67,14 +65,11 @@ public class LoadServiceImpl {
     @Autowired
     private OutLoadServiceImpl outLoadService;
 
-    @Resource
-    private CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper;
-
-    @Resource
-    private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
-
     @Autowired
     private CsceneInstanceService csceneInstanceService;
+
+    @Autowired
+    private LoadConvertCode loadConvertCode;
 
     /*
      * 载荷页面
@@ -284,7 +279,7 @@ public class LoadServiceImpl {
 
     private MpDevopsLoadSceneLog convertToolToJSONObject(LinkedHashMap tool) {
         MpDevopsLoadSceneLog mpDevopsLoadSceneLog = new MpDevopsLoadSceneLog();
-        if(tool != null){
+        if (tool != null) {
             mpDevopsLoadSceneLog.setId(tool.get("id") != null ? tool.get("id").toString() : null);
             mpDevopsLoadSceneLog.setControlPort(tool.get("controlPort") != null ? tool.get("controlPort").toString() : null);
             mpDevopsLoadSceneLog.setControlType(tool.get("controlType") != null ? tool.get("controlType").toString() : null);
@@ -328,6 +323,10 @@ public class LoadServiceImpl {
             }
         }
         return mpDevopsLoadSceneLog;
+    }
+
+    private String ConvertTypeNameToCode(String type) {
+        return loadConvertCode.getTypeCode(type);
     }
 
     /*
@@ -619,14 +618,14 @@ public class LoadServiceImpl {
     public ServiceResult importLoadExecutionResult(MultipartFile multipartFile) throws IOException {
         if (multipartFile == null || multipartFile.getName() == null || multipartFile.getName().equals("")) {
             return new ServiceResult(null, BaseErrorCode.ERROR, "文件无名称").asResult();
-        } else if (multipartFile != null && !multipartFile.getOriginalFilename().endsWith("xlsx")){
+        } else if (multipartFile != null && !multipartFile.getOriginalFilename().endsWith("xlsx")) {
             return new ServiceResult(null, BaseErrorCode.ERROR, "文件格式错误,请上传xlsx表格文件").asResult();
         }
         //当前时间
         String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         if (multipartFile.getOriginalFilename().endsWith("xlsx")) {
             // 创建临时文件
-            File outputFile = new File(UUID.randomUUID().toString()+"temp.xlsx");
+            File outputFile = new File(UUID.randomUUID().toString() + "temp.xlsx");
             try (InputStream inputStream = multipartFile.getInputStream()) {
                 Files.copy(inputStream, outputFile.toPath());
             }
@@ -636,21 +635,21 @@ public class LoadServiceImpl {
             //数据集初始化
             List<MpDevopsLoadSceneLog> data = new ArrayList<>();
             //读取第一行
-            LinkedHashMap<Integer, String> map =new LinkedHashMap<>();
+            LinkedHashMap<Integer, String> map = new LinkedHashMap<>();
             //当前行数
             int rowTime = 0;
             for (Row row : sheet) {
                 if (rowTime == 0) {
                     int cellNum = 0;
                     for (Cell cell : row) {
-                        map.put(cellNum,Objects.requireNonNull(getCellValue(cell)).toString());
+                        map.put(cellNum, Objects.requireNonNull(getCellValue(cell)).toString());
                         cellNum++;
                     }
                 } else {
                     MpDevopsLoadSceneLog log = new MpDevopsLoadSceneLog();
                     int cellNum = 0;
                     for (Cell cell : row) {
-                        getCellValueToSetBody(cellNum, map,cell,log,formattedDate);
+                        getCellValueToSetBody(cellNum, map, cell, log, formattedDate);
                         cellNum++;
                     }
                     data.add(log);
@@ -672,7 +671,7 @@ public class LoadServiceImpl {
         return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 
-    private void getCellValueToSetBody(int cellNum,LinkedHashMap<Integer, String> map,Cell cell, MpDevopsLoadSceneLog log,String formattedDate){
+    private void getCellValueToSetBody(int cellNum, LinkedHashMap<Integer, String> map, Cell cell, MpDevopsLoadSceneLog log, String formattedDate) {
         String cellValue = Objects.requireNonNull(getCellValue(cell)).toString();
         switch (map.get(cellNum)) {
             case "工具id":
