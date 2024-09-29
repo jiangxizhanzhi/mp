@@ -5,7 +5,9 @@ import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.repository.mapper.OutLoadMapper;
+import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskCreateRequest;
 import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskDeleteRequest;
+import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskResetRequest;
 import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,15 +32,15 @@ public class OutLoadServiceImpl {
         return null;
     }
 
-    public Map<String, Object> createTask(JSONObject requestData) {
+    public Map<String, Object> createTask(OutLoadTaskCreateRequest requestData) {
         MpDevopsLoadSource synchronousDataSource = loadService.getSynchronousDataSource(new JSONObject());
         String ip = synchronousDataSource.getIp() != null ? synchronousDataSource.getIp() : "http://10.108.1.10:5002";
         String url = ip + "/stgj/task/create";
         Map<String, Object> formMap = new HashMap();
-        formMap.put("taskName", requestData.get("taskName") != null ? requestData.get("taskName").toString() : "");
-        formMap.put("taskDescribe", requestData.get("taskDescribe") != null ? requestData.get("taskDescribe").toString() : "");
-        formMap.put("toolId", requestData.get("toolId") != null ? requestData.get("toolId").toString() : "");
-        formMap.put("execCommand", requestData.get("execCommand") != null ? requestData.get("execCommand").toString() : "");
+        formMap.put("taskName", requestData.getTaskName());
+        formMap.put("taskDescribe", requestData.getTaskDescribe());
+        formMap.put("toolId", requestData.getToolId());
+        formMap.put("execCommand", requestData.getExecCommand());
 
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
@@ -55,10 +57,10 @@ public class OutLoadServiceImpl {
         return dataMap;
     }
 
-    public Map<String, Object> getTaskNet(JSONObject requestData) {
+    public Map<String, Object> getTaskNet(String taskId) {
         MpDevopsLoadSource synchronousDataSource = loadService.getSynchronousDataSource(new JSONObject());
         String ip = synchronousDataSource.getIp() != null ? synchronousDataSource.getIp() : "http://10.108.1.10:5002";
-        String url = ip + "/stgj/task/enter?taskId=" + (requestData.get("taskId") != null ? requestData.get("taskId").toString() : "");
+        String url = ip + "/stgj/task/enter?taskId=" + taskId;
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
         headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
@@ -94,9 +96,9 @@ public class OutLoadServiceImpl {
             return null;
         }
         Map<String, Object> dataMap = JsonUtils.parseMap(result);
-        if(dataMap.get("code")!=null && dataMap.get("code").equals("0")){
+        if (dataMap.get("code") != null && dataMap.get("code").equals("0")) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
@@ -119,14 +121,14 @@ public class OutLoadServiceImpl {
             return null;
         }
         Map<String, Object> dataMap = JsonUtils.parseMap(result);
-        if(dataMap.get("code")!=null && dataMap.get("code").equals("0")){
+        if (dataMap.get("code") != null && dataMap.get("code").equals("0")) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
 
-    public Boolean resetTask(JSONObject requestData) {
+    public Boolean resetTask(OutLoadTaskResetRequest requestData) {
         return null;
     }
 
@@ -183,7 +185,7 @@ public class OutLoadServiceImpl {
         return null;
     }
 
-    public JSONObject getInstanceById(JSONObject requestData) {
+    public JSONObject getInstanceById(String id) {
         return null;
     }
 

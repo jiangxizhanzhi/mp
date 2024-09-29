@@ -3,7 +3,9 @@ package cn.cyberpeace.mp.cscene.controller.controller;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskCreateRequest;
 import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskDeleteRequest;
+import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskResetRequest;
 import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
 import cn.cyberpeace.mp.cscene.service.service.OutLoadServiceImpl;
 import com.alibaba.fastjson.JSONObject;
@@ -33,13 +35,13 @@ public class OutLoadController {
     @GetMapping("/getTaskList")
     public ServiceResult<List> getTaskList(@RequestParam(value = "pagesize", defaultValue = "10") Integer pageSize,
                                            @RequestParam(value = "pagenum", defaultValue = "1") Integer pageNum,
-                                           @RequestParam(value = "keyword", required = false) String keyWord,
-                                           @RequestParam(value = "sortby", required = false) Boolean sortBy) {
+                                           @RequestParam(value = "keyword", required = false) String keyword,
+                                           @RequestParam(value = "sortby", required = false) Boolean sortby) {
         JSONObject requestData = new JSONObject();
         requestData.put("pageNum", pageNum);
         requestData.put("pageSize", pageSize);
-        requestData.put("keyWord", keyWord);
-        requestData.put("sortBy", sortBy);
+        requestData.put("keyword", keyword);
+        requestData.put("sortby", sortby);
         List<JSONObject> list = outLoadService.getTaskList(requestData);
         return new ServiceResult<List>(list, BaseErrorCode.SUCCESS).asResult();
     }
@@ -49,7 +51,7 @@ public class OutLoadController {
      */
     @ApiOperation(value = "创建任务", notes = "")
     @PostMapping("/createTask")
-    public ServiceResult createTask(@RequestBody(required = true) JSONObject requestData) {
+    public ServiceResult createTask(@RequestBody OutLoadTaskCreateRequest requestData) {
         Map<String, Object> addAzurer = outLoadService.createTask(requestData);
         if (addAzurer != null) {
             return new ServiceResult<>(addAzurer, BaseErrorCode.SUCCESS, "SUCCESS");
@@ -63,10 +65,8 @@ public class OutLoadController {
      */
     @ApiOperation(value = "获取任务访问链接", notes = "")
     @GetMapping("/getTaskNet")
-    public ServiceResult getTaskNet(@RequestParam(value = "task_id", required = true) String taskId) {
-        JSONObject requestData = new JSONObject();
-        requestData.put("taskId", taskId);
-        Map<String, Object> data = outLoadService.getTaskNet(requestData);
+    public ServiceResult getTaskNet(@RequestParam(value = "task_id") String taskId) {
+        Map<String, Object> data = outLoadService.getTaskNet(taskId);
         return new ServiceResult(data, BaseErrorCode.SUCCESS).asResult();
     }
 
@@ -75,7 +75,7 @@ public class OutLoadController {
      */
     @ApiOperation(value = "修改任务信息", notes = "")
     @PostMapping("/updateTaskInfo")
-    public ServiceResult<Boolean> updateTaskInfo(@RequestBody(required = true) OutLoadTaskUpdateRequest requestData) {
+    public ServiceResult<Boolean> updateTaskInfo(@RequestBody OutLoadTaskUpdateRequest requestData) {
         Boolean updateTaskInfo = outLoadService.updateTaskInfo(requestData);
         if (updateTaskInfo) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "修改任务信息成功");
@@ -89,7 +89,7 @@ public class OutLoadController {
      */
     @ApiOperation(value = "删除任务", notes = "")
     @PostMapping("/deleteTask")
-    public ServiceResult<Boolean> deleteTask(@RequestBody(required = true) OutLoadTaskDeleteRequest requestData) {
+    public ServiceResult<Boolean> deleteTask(@RequestBody OutLoadTaskDeleteRequest requestData) {
         Boolean deleteTask = outLoadService.deleteTask(requestData);
         if (deleteTask) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
@@ -103,7 +103,7 @@ public class OutLoadController {
      */
     @ApiOperation(value = "重置任务", notes = "")
     @PostMapping("/resetTask")
-    public ServiceResult<Boolean> resetTask(@RequestBody(required = true) JSONObject requestData) {
+    public ServiceResult<Boolean> resetTask(@RequestBody OutLoadTaskResetRequest requestData) {
         Boolean resetTask = outLoadService.resetTask(requestData);
         if (resetTask) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
@@ -117,7 +117,7 @@ public class OutLoadController {
      */
     @ApiOperation(value = "启动实例", notes = "")
     @PostMapping("/startInstance")
-    public ServiceResult<Boolean> startInstance(@RequestBody(required = true) JSONObject requestData) {
+    public ServiceResult<Boolean> startInstance(@RequestBody JSONObject requestData) {
         Map<String, Object> startInstance = outLoadService.startInstance(requestData);
         if (startInstance != null && startInstance.get("code") != null && startInstance.get("code").toString().equals("0")) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
@@ -131,7 +131,7 @@ public class OutLoadController {
      */
     @ApiOperation(value = "关闭实例", notes = "")
     @PostMapping("/stopInstance")
-    public ServiceResult<Boolean> stopInstance(@RequestBody(required = true) JSONObject requestData) {
+    public ServiceResult<Boolean> stopInstance(@RequestBody JSONObject requestData) {
         Boolean stopInstance = outLoadService.stopInstance(requestData);
         if (stopInstance) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
@@ -145,7 +145,7 @@ public class OutLoadController {
      */
     @ApiOperation(value = "暂停实例", notes = "")
     @PostMapping("/pauseInstance")
-    public ServiceResult<Boolean> pauseInstance(@RequestBody(required = true) JSONObject requestData) {
+    public ServiceResult<Boolean> pauseInstance(@RequestBody JSONObject requestData) {
         Boolean pauseInstance = outLoadService.pauseInstance(requestData);
         if (pauseInstance) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
@@ -159,7 +159,7 @@ public class OutLoadController {
      */
     @ApiOperation(value = "恢复实例", notes = "")
     @PostMapping("/unpauseInstance")
-    public ServiceResult<Boolean> unpauseInstance(@RequestBody(required = true) JSONObject requestData) {
+    public ServiceResult<Boolean> unpauseInstance(@RequestBody JSONObject requestData) {
         Boolean unpauseInstance = outLoadService.unpauseInstance(requestData);
         if (unpauseInstance) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
@@ -173,7 +173,7 @@ public class OutLoadController {
      */
     @ApiOperation(value = "删除实例", notes = "")
     @PostMapping("/deleteInstance")
-    public ServiceResult<Boolean> deleteInstance(@RequestBody(required = true) JSONObject requestData) {
+    public ServiceResult<Boolean> deleteInstance(@RequestBody JSONObject requestData) {
         Boolean deleteInstance = outLoadService.deleteInstance(requestData);
         if (deleteInstance) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
@@ -187,10 +187,8 @@ public class OutLoadController {
      */
     @ApiOperation(value = "查询实例状态", notes = "")
     @GetMapping("/getInstanceById")
-    public ServiceResult getInstanceById(@RequestParam(value = "id", required = true) String id) {
-        JSONObject requestData = new JSONObject();
-        requestData.put("id", id);
-        JSONObject data = outLoadService.getInstanceById(requestData);
+    public ServiceResult getInstanceById(@RequestParam(value = "id") String id) {
+        JSONObject data = outLoadService.getInstanceById(id);
         return new ServiceResult(data, BaseErrorCode.SUCCESS).asResult();
     }
 
@@ -200,14 +198,14 @@ public class OutLoadController {
     @ApiOperation(value = "工具列表", notes = "")
     @GetMapping("/getToolList")
     public ServiceResult getToolList(@RequestParam(value = "pagesize", defaultValue = "10") Integer pageSize,
-                                           @RequestParam(value = "pagenum", defaultValue = "1") Integer pageNum,
-                                           @RequestParam(value = "keyword", required = false) String keyWord,
-                                           @RequestParam(value = "sortby", required = false) Boolean sortBy) {
+                                     @RequestParam(value = "pagenum", defaultValue = "1") Integer pageNum,
+                                     @RequestParam(value = "keyword", required = false) String keyword,
+                                     @RequestParam(value = "sortby", required = false) Boolean sortby) {
         JSONObject requestData = new JSONObject();
         requestData.put("pageNum", pageNum);
         requestData.put("pageSize", pageSize);
-        requestData.put("keyWord", keyWord);
-        requestData.put("sortBy", sortBy);
+        requestData.put("keyword", keyword);
+        requestData.put("sortby", sortby);
         List list = outLoadService.getToolList(requestData);
         return new ServiceResult(list, BaseErrorCode.SUCCESS).asResult();
     }
@@ -217,7 +215,7 @@ public class OutLoadController {
      */
     @ApiOperation(value = "添加工具", notes = "")
     @PostMapping("/addTool")
-    public ServiceResult<Boolean> addTool(@RequestBody(required = true) JSONObject requestData) {
+    public ServiceResult<Boolean> addTool(@RequestBody JSONObject requestData) {
         Boolean addTool = outLoadService.addTool(requestData);
         if (addTool) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
@@ -231,7 +229,7 @@ public class OutLoadController {
      */
     @ApiOperation(value = "修改工具信息", notes = "")
     @PostMapping("/updateToolInfo")
-    public ServiceResult<Boolean> updateToolInfo(@RequestBody(required = true) JSONObject requestData) {
+    public ServiceResult<Boolean> updateToolInfo(@RequestBody JSONObject requestData) {
         Boolean updateToolInfo = outLoadService.updateToolInfo(requestData);
         if (updateToolInfo) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
@@ -245,7 +243,7 @@ public class OutLoadController {
      */
     @ApiOperation(value = "工具上传", notes = "")
     @PostMapping("/uploadTool")
-    public ServiceResult<Boolean> uploadTool(@RequestParam(value = "file", required = true) MultipartFile file) {
+    public ServiceResult<Boolean> uploadTool(@RequestParam(value = "file") MultipartFile file) {
         Boolean uploadTool = outLoadService.uploadTool(file);
         if (uploadTool) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
@@ -259,7 +257,7 @@ public class OutLoadController {
      */
     @ApiOperation(value = "工具删除", notes = "")
     @PostMapping("/deleteTool")
-    public ServiceResult<Boolean> deleteTool(@RequestBody(required = true) JSONObject requestData) {
+    public ServiceResult<Boolean> deleteTool(@RequestBody JSONObject requestData) {
         Boolean deleteTool = outLoadService.deleteTool(requestData);
         if (deleteTool) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
@@ -273,7 +271,7 @@ public class OutLoadController {
      */
     @ApiOperation(value = "检查工具名称是否可用", notes = "")
     @GetMapping("/checkNameVaild")
-    public ServiceResult<JSONObject> checkNameVaild(@RequestParam(value = "name", required = true) String name) {
+    public ServiceResult<JSONObject> checkNameVaild(@RequestParam(value = "name") String name) {
         JSONObject requestData = new JSONObject();
         requestData.put("name", name);
         JSONObject data = outLoadService.checkNameVaild(requestData);
@@ -285,7 +283,7 @@ public class OutLoadController {
      */
     @ApiOperation(value = "获取工具帮助文档", notes = "")
     @GetMapping("/getReadmeByToolId")
-    public ServiceResult<JSONObject> getReadmeByToolId(@RequestParam(value = "id", required = true) String id) {
+    public ServiceResult<JSONObject> getReadmeByToolId(@RequestParam(value = "id") String id) {
         JSONObject requestData = new JSONObject();
         requestData.put("id", id);
         JSONObject data = outLoadService.getReadmeByToolId(requestData);
@@ -297,7 +295,7 @@ public class OutLoadController {
      */
     @ApiOperation(value = "工具帮助文档上传", notes = "")
     @PostMapping("/uploadReadme")
-    public ServiceResult<Boolean> uploadReadme(@RequestParam(value = "file", required = true) MultipartFile file) {
+    public ServiceResult<Boolean> uploadReadme(@RequestParam(value = "file") MultipartFile file) {
         Boolean uploadReadme = outLoadService.uploadReadme(file);
         if (uploadReadme) {
             return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
