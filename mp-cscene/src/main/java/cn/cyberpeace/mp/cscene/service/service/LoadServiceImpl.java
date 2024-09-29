@@ -1040,6 +1040,12 @@ public class LoadServiceImpl {
         if (ids != null && ids.size() > 0) {
             data = loadMapper.getToolListByloadIds(ids);
         }
+        Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes(CommonStatusCodeEnum.CODE.getCode());
+        for (MpDevopsLoad load : data) {
+            load.setRunTableName(nextLevelMapsByCodes.get(load.getRunTable()));
+            load.setActionTypeName(nextLevelMapsByCodes.get(load.getActionType()));
+            load.setControlTypeName(nextLevelMapsByCodes.get(load.getControlType()));
+        }
         return data;
     }
 
