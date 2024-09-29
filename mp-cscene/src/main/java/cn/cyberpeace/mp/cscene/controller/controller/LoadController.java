@@ -11,15 +11,9 @@ import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
 import cn.cyberpeace.mp.cscene.request.load.LoadResultExportRequest;
 import cn.cyberpeace.mp.cscene.request.load.LoadResultSearchRequest;
-import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
 import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.FirewallFunction;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionrequest.FirewallBuildRequestBody;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.azurefunction.functionresponse.FirewallBuildResponseBody;
 import com.alibaba.fastjson.JSONObject;
-import com.azure.resourcemanager.network.models.AzureFirewallSkuTier;
-import com.azure.resourcemanager.network.models.FirewallPolicySkuTier;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -42,9 +36,6 @@ public class LoadController {
 
     @Autowired
     private LoadServiceImpl loadService;
-
-    @Autowired
-    private FirewallFunction firewallFunction;
 
     /*
      * 载荷页面
@@ -324,46 +315,6 @@ public class LoadController {
         }
     }
 
-    /**
-     * 阶段载荷接入(根据taskId获取访问链接)
-     */
-    @ApiOperation(value = "阶段载荷接入", notes = "")
-    @GetMapping("/getTaskNet")
-    public ServiceResult getTaskNet(@RequestParam(value = "scene_id") String sceneId,
-                                    @RequestParam(value = "stage_id") String stageId,
-                                    @RequestParam(value = "id") String id,
-                                    @RequestParam(value = "task_id") String taskId,
-                                    @RequestParam(value = "instance_id") String instanceId) {
-        JSONObject requestData = new JSONObject();
-        requestData.put("sceneId", sceneId);
-        requestData.put("stageId", stageId);
-        requestData.put("id", id);
-        requestData.put("taskId", taskId);
-        requestData.put("instanceId", instanceId);
-        if (requestData != null) {
-            Map<String, Object> getTaskNet = loadService.getTaskNet(requestData);
-            if (getTaskNet != null) {
-                return new ServiceResult(getTaskNet, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-            }
-        }
-        return new ServiceResult(null, BaseErrorCode.ERROR, "阶段载荷接入失败");
-    }
-
-    /**
-     * 阶段载荷参数设置
-     */
-    @ApiOperation(value = "阶段载荷参数设置", notes = "")
-    @PutMapping("/updateLoadParam")
-    public ServiceResult updateLoadParam(@RequestBody OutLoadTaskUpdateRequest requestData) {
-        if (requestData != null) {
-            Boolean updateLoadParam = loadService.updateLoadParam(requestData);
-            if (updateLoadParam) {
-                return new ServiceResult(null, BaseErrorCode.SUCCESS, "阶段载荷参数设置成功").asResult();
-            }
-        }
-        return new ServiceResult(null, BaseErrorCode.ERROR, "阶段载荷参数设置失败");
-    }
-
     /*
      * 查询该场景绑定的载荷及记录
      * */
@@ -382,29 +333,5 @@ public class LoadController {
     public ServiceResult getLoadResultByNodeIds(@RequestParam(value = "node_ids") String[] nodeIds) {
         List<MpDevopsLoadSceneLog> log = loadService.getLoadResultByNodeIds(nodeIds);
         return new ServiceResult(log, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-    }
-
-
-
-    /**
-     * 创建防火墙
-     */
-    @ApiOperation(value = "创建防火墙", notes = "")
-    @PostMapping("/createFireWall")
-    public ServiceResult createFireWall(@RequestBody FirewallBuildRequestBody fireWallBuildRequestBody) {
-        fireWallBuildRequestBody.setSku(AzureFirewallSkuTier.BASIC);
-        fireWallBuildRequestBody.setPolicySku(FirewallPolicySkuTier.BASIC);
-        FirewallBuildResponseBody fireWall = firewallFunction.createFireWall(1, fireWallBuildRequestBody);
-        return new ServiceResult(fireWall, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
-    }
-
-    /**
-     * 测试防火墙策略是否符合格式
-     */
-    @ApiOperation(value = "测试防火墙策略是否符合格式", notes = "")
-    @PostMapping("/checkPolicy")
-    public ServiceResult checkPolicy(@RequestBody FirewallBuildRequestBody fireWallBuildRequestBody) {
-        List<String> strings = firewallFunction.checkPolicy(fireWallBuildRequestBody.getFirewallPolicy().getRules());
-        return new ServiceResult(strings, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 }

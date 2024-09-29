@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.common.constant.codeEnum.CommonConvertStatusEnum;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonFunctionCodeEnum;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonStatusCodeEnum;
 import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
-import cn.cyberpeace.mp.common.service.impl.CommonConfigServiceImpl;
 import cn.cyberpeace.mp.cscene.constant.LoadConvertCode;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
@@ -16,7 +15,6 @@ import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
 import cn.cyberpeace.mp.cscene.request.load.LoadResultExportRequest;
 import cn.cyberpeace.mp.cscene.request.load.LoadResultSearchRequest;
-import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
 import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.websocket.LoadResultWebSocketServer;
@@ -58,9 +56,6 @@ public class LoadServiceImpl {
 
     @Autowired
     private CommonCodeServiceImpl commonCodeService;
-
-    @Autowired
-    private CommonConfigServiceImpl commonConfigService;
 
     @Autowired
     private OutLoadServiceImpl outLoadService;
@@ -389,14 +384,6 @@ public class LoadServiceImpl {
             getLoadByIds = loadMapper.getLoadByIds(loadIds);
         }
         return getLoadByIds;
-
-//        //暂用这个
-//        JSONObject jsonObject = new JSONObject();
-//        jsonObject.put("pageNum", 1);
-//        jsonObject.put("pageSize", 1000);
-//        JSONObject loads = getLoadList(new JSONObject());
-//        List<MpDevopsLoad> getLoadByIds = (List) loads.get("source");
-//        return getLoadByIds;
     }
 
     /*
@@ -1049,33 +1036,12 @@ public class LoadServiceImpl {
         return data;
     }
 
-    /**
-     * 获取阶段载荷访问地址
-     */
-    public Map<String, Object> getTaskNet(JSONObject requestData) {
-        //新增执行结果日志
-        Integer pk = addResultLog(requestData);
-        Map<String, Object> result = outLoadService.getTaskNet(requestData);
-        return result;
-    }
-
     private Integer addResultLog(JSONObject requestData) {
         //log表新增初始数据
         requestData.put("resultStatus", "1005010103");
         requestData.put("resultType", "自动上报");
         Integer pk = loadMapper.addResult(requestData);
         return pk;
-    }
-
-    public Boolean updateLoadParam(OutLoadTaskUpdateRequest requestData) {
-        if (requestData.getTaskId() == null || requestData.getTaskId().equals("")) {
-            return false;
-        }
-        //todo 校验参数列表字段值
-        String taskDescribe = requestData.getTaskDescribe();
-        String execCommand = requestData.getExecCommand();
-        Boolean updateTaskInfo = outLoadService.updateTaskInfo(requestData);
-        return updateTaskInfo;
     }
 
     public List<JSONObject> getLoadResultBySceneId(String sceneId) {
