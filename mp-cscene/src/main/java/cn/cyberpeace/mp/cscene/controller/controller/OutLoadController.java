@@ -62,9 +62,9 @@ public class OutLoadController {
      */
     @ApiOperation(value = "获取任务访问链接", notes = "")
     @GetMapping("/getTaskNet")
-    public ServiceResult getTaskNet(@RequestParam(value = "id", required = true) String id) {
+    public ServiceResult getTaskNet(@RequestParam(value = "task_id", required = true) String taskId) {
         JSONObject requestData = new JSONObject();
-        requestData.put("id", id);
+        requestData.put("taskId", taskId);
         Map<String, Object> data = outLoadService.getTaskNet(requestData);
         return new ServiceResult(data, BaseErrorCode.SUCCESS).asResult();
     }

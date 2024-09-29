@@ -79,6 +79,8 @@ public class OutLoadServiceImpl {
         String url = ip + "/stgj/task/modify";
         Map<String, Object> formMap = new HashMap();
         formMap.put("id", requestData.getTaskId() != null ? requestData.getTaskId() : "");
+        formMap.put("taskDescribe", requestData.getTaskDescribe() != null ? requestData.getTaskDescribe() : "");
+        formMap.put("execCommand", requestData.getExecCommand() != null ? requestData.getExecCommand() : "");
 
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
