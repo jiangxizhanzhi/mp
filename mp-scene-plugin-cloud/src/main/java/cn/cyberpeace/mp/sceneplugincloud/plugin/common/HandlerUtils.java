@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -47,6 +48,18 @@ public class HandlerUtils {
     private Set<String> toDeleteNodes = new HashSet<>();
 
     private List<String> dnsIpAndDomain = null;
+
+    private List<HostRoute> internalServerHostRoutes = null;
+
+    private Map<CloudPluginSceneElementNetworkBO, HostRoute> hostRouteMap = new ConcurrentHashMap<>();
+
+    public Map<CloudPluginSceneElementNetworkBO, HostRoute> getHostRouteMap() {
+        return hostRouteMap;
+    }
+
+    public void setHostRouteMap(Map<CloudPluginSceneElementNetworkBO, HostRoute> hostRouteMap) {
+        this.hostRouteMap = hostRouteMap;
+    }
 
     public List<String> getDnsIpAndDomains() {
         if (this.dnsIpAndDomain == null) {

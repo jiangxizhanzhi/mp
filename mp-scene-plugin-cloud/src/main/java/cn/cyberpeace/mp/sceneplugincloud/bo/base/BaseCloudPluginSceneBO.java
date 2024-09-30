@@ -23,6 +23,11 @@ public abstract class BaseCloudPluginSceneBO<M extends BaseCloudPluginSceneModel
     private Boolean enableRate;
     @ApiModelProperty(value = "dnsNameservers")
     private List<DnsPool> dnsNameservers;
+    private Boolean createInternalVm;
+    private String internalVmId;
+    private String internalVmIp;
+    private String internalRouterId;
+    private String internalNetId;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {

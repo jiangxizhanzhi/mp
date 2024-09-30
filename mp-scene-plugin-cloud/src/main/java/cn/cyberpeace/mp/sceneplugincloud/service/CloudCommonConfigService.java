@@ -11,7 +11,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -19,17 +21,47 @@ import java.util.Map;
 @Data
 public class CloudCommonConfigService {
 
-    private static String CONFIG_PATH_SUFFIX = ".json";
 
-    private static String CLOUD_MESSAGE_CONVERT = "cloud_message_convert";
+    private static String CLOUD_MESSAGE_CONVERT = "cloud_message_convert.json";
 
-    private static String SYSTEM_TYPE_TO_AGENT_SUPPORT = "system_type_to_agent_support";
+    private static String SYSTEM_TYPE_TO_AGENT_SUPPORT = "system_type_to_agent_support.json";
 
-    private static String[] CONFIGS = new String[]{ CLOUD_MESSAGE_CONVERT, SYSTEM_TYPE_TO_AGENT_SUPPORT };
+    private static String LOGSTASH_INSTALL_CMDS = "install_logstash.sh";
+
+    private static String FRAME_INSTALL_CMDS = "install_frame.sh";
+
+    private static String[] CONFIGS = new String[]{ CLOUD_MESSAGE_CONVERT, SYSTEM_TYPE_TO_AGENT_SUPPORT ,LOGSTASH_INSTALL_CMDS, FRAME_INSTALL_CMDS};
 
     private static volatile boolean LOADED = false;
 
     private final static Map<String, String> CONFIG_MAP = new HashMap<>();
+
+    public List<String> getInstallLogstashCmds(String logstashInstallResourceUrl, String serverIpValue,String serverPortValue, String logstashInstallMapYmlUrl) {
+        this.init();
+        String content = CONFIG_MAP.get(LOGSTASH_INSTALL_CMDS);
+        content = content.replace("${logstash_install_resource_url}", logstashInstallResourceUrl);
+        content = content.replace("${server_ip_value}", serverIpValue);
+        content = content.replace("${server_port_value}", serverPortValue);
+        content = content.replace("${logstash_install_map_yml_url}", logstashInstallMapYmlUrl);
+        String[] cmds = content.split("\n");
+        List<String> list = new ArrayList<>();
+        for (var cmd : cmds) {
+            list.add(cmd);
+        }
+        return list;
+    }
+
+    public List<String> getInstallFrameCmds(String frameInstallResourceUrl) {
+        this.init();
+        String content = CONFIG_MAP.get(FRAME_INSTALL_CMDS);
+        content = content.replace("${frame_install_resource_url}", frameInstallResourceUrl);
+        String[] cmds = content.split("\n");
+        List<String> list = new ArrayList<>();
+        for (var cmd : cmds) {
+            list.add(cmd);
+        }
+        return list;
+    }
 
     public ServiceResult<Map<String, Object>> getSystemTypeToAgentSupport() {
         this.init();
@@ -55,7 +87,7 @@ public class CloudCommonConfigService {
         } else {
             for (String config : CONFIGS) {
                 try {
-                    Resource resource = new ClassPathResource("config/" + config + CONFIG_PATH_SUFFIX);
+                    Resource resource = new ClassPathResource("config/" + config);
                     String content = CharStreams.toString(new InputStreamReader(resource.getInputStream()));
                     CONFIG_MAP.put(config, content);
                 } catch (Exception e) {

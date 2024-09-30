@@ -1,24 +1,32 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
+import cn.cyberpeace.mp.base.context.SysContextHolder;
+import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.base.util.mptool.FileNameUtil;
+import cn.cyberpeace.mp.common.constant.CommonSingleton;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.util.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.FirewallRule;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.SnmpConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSceneStage;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
@@ -30,11 +38,16 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.service.CloudCommonConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -1360,6 +1373,211 @@ public class CreateHandler extends HandlerCommon {
                 }
             });
             vpClient.syncFlowPortInfo(portIds, "add");
+        }
+
+        if (Boolean.TRUE.equals(getPluginHandler().getScene().getCreateInternalVm())) {
+            this.createInternalServerVm();
+        }
+
+    }
+
+    /**
+     * 创建一个场景内部的虚拟机，对场景内的虚拟机提供logstash等服务
+     */
+    protected void createInternalServerVm() {
+        log.info("执行创建提供内部服务的虚拟机");
+        var hostRouteMap = getPluginHandler().getHandlerUtils().getHostRouteMap();
+        log.info("已下发的主机路由: {}", JsonCommon.stringify(hostRouteMap));
+        if (hostRouteMap.isEmpty()) {
+            return;
+        }
+        this.createInternalServerVmMode2(hostRouteMap);
+    }
+
+    private void createInternalServerVmMode1(Map<CloudPluginSceneElementNetworkBO, HostRoute> hostRouteMap ){
+        // 创建内部服务使用的 内部服务网络
+        VirtualSwitchCreateData switchCreateData = new VirtualSwitchCreateData();
+        switchCreateData.setName("MP_SCENE_S_" + getPluginHandler().getSrcScene().getEid());
+        VirtualSwitchCreateData.Subnet subnet = new VirtualSwitchCreateData.Subnet();
+        subnet.setCidr(CloudSingleton.cloudAppConfig.getInternalNetCidr());
+        subnet.setGatewayIp(CloudSingleton.cloudAppConfig.getInternalNetGateway());
+        subnet.setEnableDhcp(false);
+        switchCreateData.setSubnet(subnet);
+        switchCreateData.setEntityNetwork(false);
+        var vs = vsClient.create(switchCreateData);
+        getPluginHandler().getScene().setInternalNetId(vs.getId());
+
+        // 创建内部服务使用的内部服务路由  该路由器和场景中所有网络连通
+        List<VirtualNic> virtualNics = new ArrayList<>();
+        for (var entry : hostRouteMap.entrySet()) {
+            var net = entry.getKey();
+            var hostRoute = entry.getValue();
+            VirtualNic virtualNic = new VirtualNic();
+            virtualNic.setNetworkId(net.getResourceId());
+            virtualNic.setFixedIp(hostRoute.getNexthop());
+            virtualNics.add(virtualNic);
+        }
+        VirtualNic internalServerNet = new VirtualNic();
+        internalServerNet.setFixedIp(CloudSingleton.cloudAppConfig.getInternalNetGateway());
+        internalServerNet.setNetworkId(vs.getId());
+        virtualNics.add(internalServerNet);
+        VirtualRouterCreateData routerCreateData = new VirtualRouterCreateData();
+        routerCreateData.setNetworks(virtualNics);
+        routerCreateData.setName("MP_SCENE_SPEC_R_" + getPluginHandler().getSrcScene().getEid());
+        var vr = vrClient.create(routerCreateData);
+        getPluginHandler().getScene().setInternalRouterId(vr.getId());
+
+        // 创建内部服务虚拟机 该虚拟机和内部服务网络联通，用来和场景内部的节点进行通信，同时和外部网络联通，用来和mp服务、es服务等通信
+        virtualNics = new ArrayList<>();
+
+        VirtualNic externalNet = new VirtualNic();
+        externalNet.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
+        virtualNics.add(externalNet);
+        VirtualNic internalServerNic = new VirtualNic();
+        internalServerNic.setNetworkId(vs.getId());
+        internalServerNic.setFixedIp(CloudSingleton.cloudAppConfig.getInternalVmIp());
+        virtualNics.add(internalServerNic);
+
+        VirtualMachineCreateData createData = new VirtualMachineCreateData();
+        createData.setName("MP_SCENE_SPEC_VM_" + getPluginHandler().getSrcScene().getEid());
+        createData.setImage(CloudSingleton.cloudAppConfig.getInternalVmImage());
+        createData.setCpu(2);
+        createData.setRam(2048);
+        createData.setDisk(60);
+        createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
+        createData.setNetworks(virtualNics);
+        CloudInitConfigCommon.Builder builder = CloudInitConfigCommon.builder(BaseSceneElementModel.SystemType.LINUX);
+        builder.setRootPassword("123456");
+        builder.addUser("dev", "123456");
+        List<String> initCommands = new ArrayList<>();
+        initCommands.addAll(this.getLogstashInstallCmds());
+        initCommands.addAll(this.getFrameInstallCmds());
+        builder.setInitCommands(initCommands);
+        var cloudInitCommands = builder.build();
+        String command = SystemTypeCommandUtils.joinCommands(BaseSceneElementModel.SystemType.LINUX, cloudInitCommands.toArray(new String[0]));
+        if (!StringUtils.isEmpty(command)) {
+            command = SystemTypeCommandUtils.appendBeforeCommand(command, "#cloud-config", BaseSceneElementModel.SystemType.LINUX);
+        }
+        createData.setUserData(command);
+
+        var vm = vmClient.create(createData);
+        getPluginHandler().getScene().setInternalVmId(vm.getId());
+    }
+
+    private void createInternalServerVmMode2(Map<CloudPluginSceneElementNetworkBO, HostRoute> hostRouteMap ){
+        List<VirtualNic> virtualNics = new ArrayList<>();
+        for (var entry : hostRouteMap.entrySet()) {
+            var net = entry.getKey();
+            var hostRoute = entry.getValue();
+            VirtualNic virtualNic = new VirtualNic();
+            virtualNic.setNetworkId(net.getResourceId());
+            virtualNic.setFixedIp(hostRoute.getNexthop());
+            virtualNics.add(virtualNic);
+        }
+
+        VirtualNic externalNet = new VirtualNic();
+        externalNet.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
+        virtualNics.add(externalNet);
+
+        VirtualMachineCreateData createData = new VirtualMachineCreateData();
+        createData.setName("MP_SCENE_SPEC_VM_" + getPluginHandler().getSrcScene().getEid());
+        createData.setImage(CloudSingleton.cloudAppConfig.getInternalVmImage());
+        createData.setCpu(2);
+        createData.setRam(2048);
+        createData.setDisk(60);
+        createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
+        createData.setNetworks(virtualNics);
+        CloudInitConfigCommon.Builder builder = CloudInitConfigCommon.builder(BaseSceneElementModel.SystemType.LINUX);
+        builder.setRootPassword("123456");
+        builder.addUser("dev", "123456");
+        List<String> initCommands = new ArrayList<>();
+        initCommands.addAll(this.getLogstashInstallCmds());
+        initCommands.addAll(this.getFrameInstallCmds());
+        builder.setInitCommands(initCommands);
+        var cloudInitCommands = builder.build();
+        String command = SystemTypeCommandUtils.joinCommands(BaseSceneElementModel.SystemType.LINUX, cloudInitCommands.toArray(new String[0]));
+        if (!StringUtils.isEmpty(command)) {
+            command = SystemTypeCommandUtils.appendBeforeCommand(command, "#cloud-config", BaseSceneElementModel.SystemType.LINUX);
+        }
+        createData.setUserData(command);
+
+        var vm = vmClient.create(createData);
+        getPluginHandler().getScene().setInternalVmId(vm.getId());
+        for (var nic : vm.getNetworks()) {
+            if (IpUtils.newIsInCidr(nic.getFixedIp(), CloudSingleton.cloudAppConfig.getInternalNetCidr())) {
+                getPluginHandler().getScene().setInternalVmIp(nic.getFixedIp());
+                break;
+            }
+        }
+    }
+
+    private List<String> getFrameInstallCmds() {
+        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+        List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings("wazuh_agent_installer");
+        Map<String, String> nameFileMap = new HashMap<>();
+        for (LocalFileMappingModel localFileMappingModel : mappings) {
+            nameFileMap.put(localFileMappingModel.getName(), localFileMappingModel.getRemoteFile());
+        }
+        // frame 安装包的下载地址
+        String frameInstallResourceUrl = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, nameFileMap.getOrDefault("frame.tar.gz", StringUtils.EMPTY));
+        var installCommands = BeanCommon.getBean(CloudCommonConfigService.class)
+                .getInstallFrameCmds(frameInstallResourceUrl);
+
+        return installCommands;
+    }
+
+
+    private List<String> getLogstashInstallCmds() {
+        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+        List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings("wazuh_agent_installer");
+        Map<String, String> nameFileMap = new HashMap<>();
+        for (LocalFileMappingModel localFileMappingModel : mappings) {
+            nameFileMap.put(localFileMappingModel.getName(), localFileMappingModel.getRemoteFile());
+        }
+        // logstash 安装包的下载地址
+        String logstashInstallResourceUrl = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, nameFileMap.getOrDefault("logstash.tar.gz", StringUtils.EMPTY));
+        // mp服务的ip地址
+        String serverIpValue = CommonSingleton.commonAppConfig.getMpIp();
+        String serverPortValue = CommonSingleton.commonAppConfig.getMpPort();
+        // map.yml配置文件的地址
+        String logstashInstallMapYmlUrl = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, this.getLogstashInstallMapYml());
+        var installCommands = BeanCommon.getBean(CloudCommonConfigService.class)
+                .getInstallLogstashCmds(logstashInstallResourceUrl, serverIpValue, serverPortValue, logstashInstallMapYmlUrl);
+
+        return installCommands;
+    }
+
+    private String getLogstashInstallMapYml(){
+        // logstash 安装时使用的map.yml配置，得根据场景实时生成
+        File file = new File("tmp_" + TextUtils.uuid() + ".yml");
+        List<String> configs = new ArrayList<>();
+        // 加cscene_id
+        var map = SysContextHolder.getPassThroughMap();
+        configs.add("SCENE_ID: " + map.get("cscene_id").toString());
+
+        // 加 [节点id -> 节点name] 的映射
+        for (CloudPluginSceneElementBO e : getPluginHandler().getElementMap().values()) {
+            var srcElement = e.getSrcElement();
+            configs.add(srcElement.getId() + ": " + srcElement.getName());
+        }
+
+        // 加 [ip -> 节点id] 的映射
+        Set<String> handledIps = new HashSet<>();
+        for (CloudPluginSceneElementBO e : getPluginHandler().getElementMap().values()) {
+            var srcElement = e.getSrcElement();
+            for (var port : srcElement.getPorts()) {
+                if (StringUtils.isNotEmpty(port.getIp()) && !handledIps.contains(port.getIp())) {
+                    configs.add(port.getIp() + ": " + srcElement.getId());
+                    handledIps.add(port.getIp());
+                }
+            }
+        }
+        try {
+            FileUtils.writeLines(file, configs);
+            return FsCommon.upload(new FileInputStream(file), "yml");
+        } catch (Exception e) {
+            log.error("生成logstash安装配置文件失败", e);
+            return "" ;
         }
     }
 

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.core;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
+import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
@@ -15,6 +16,7 @@ import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.base.BaseCsceneHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
+import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceUserCountService;
@@ -102,6 +104,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         var cscene = getCscene();
         // 先保存设置id
         save();
+        SysContextHolder.getPassThroughMap().put("cscene_id", cscene.getId());
         cscene.setScene(sceneService.create(cscene.getScene(), generateSceneContext(), Boolean.TRUE.equals(getCscene().getSupportPartialStart()), () -> {
             LogFileUtil.getLogFile(cscene.getId());
         }).getSource());

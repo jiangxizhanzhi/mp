@@ -255,6 +255,10 @@ mp:
     cloud-heavy-concurrent-delay: ${mp.sceneplugincloud.ext-var.cloud-heavy-concurrent-delay}
     scene-create-install-unzip-apk: ${mp.sceneplugincloud.ext-var.scene-create-install-unzip-apk}
     dhcp-ip-allocate: ${mp.sceneplugincloud.ext-var.dhcp-ip-allocate}
+    internal-vm-ip: ${MP_INTERNAL_VM_IP:113.179.125.10}
+    internal-net-cidr: ${MP_INTERNAL_NET_CIDR:113.179.125.0/24}
+    internal-net-gateway: ${MP_INTERNAL_NET_GATEWAY:113.179.125.254}
+    internal-vm-image: ${MP_INTERNAL_VM_IMAGE:info_center_adk}
   sceneplugincollection:
     wazuh-server-host: ${mp.situationaware.ext-var.wazuh-ip}
     wazuh-api-server: http://${mp.situationaware.ext-var.wazuh-ip}:15500

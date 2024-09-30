@@ -348,6 +348,28 @@ public class DeleteHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.DELETE_ENTITIES, () -> runTasks(deleteEntities));
         }
 
+        // 先删除提供内部服务的虚拟机
+        String internalVmId = getPluginHandler().getScene().getInternalVmId();
+        if (StringUtils.isNotEmpty(internalVmId)) {
+            var deleteData = new VirtualMachineDeleteData();
+            deleteData.setVms(Arrays.asList(internalVmId));
+            vmClient.delete(deleteData);
+        }
+        // 删除提供内部服务的内部路由
+        String internalRouterId = getPluginHandler().getScene().getInternalRouterId();
+        if (StringUtils.isNotEmpty(internalRouterId)) {
+            var deleteData = new VirtualRouterDeleteData();
+            deleteData.setIds(Arrays.asList(internalRouterId));
+            vrClient.delete(deleteData);
+        }
+        // 删除提供内部服务的内部网络
+        String internalNetId = getPluginHandler().getScene().getInternalNetId();
+        if (StringUtils.isNotEmpty(internalNetId)) {
+            var deleteData = new VirtualSwitchDeleteData();
+            deleteData.setIds(Arrays.asList(internalNetId));
+            vsClient.delete(deleteData);
+        }
+
         // 删除终端
         var terminals = getPluginHandler().getTerminalElementMap().values().stream()
                 .filter(t -> !deletedNodeIds.contains(t.getSrcElement().getId()))

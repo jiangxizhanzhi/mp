@@ -13,4 +13,14 @@ public class BaseCloudPluginSceneModel extends BasePluginSceneModel {
     private Boolean enableRate;
     @DefaultStr
     private String dnsNameservers;
+    @DefaultStr
+    private String internalVmId;
+    @DefaultStr
+    private String internalVmIp;
+    @DefaultStr
+    private String internalRouterId;
+    @DefaultStr
+    private String internalNetId;
+    @DefaultBool(value = true)
+    private Boolean createInternalVm;
 }
