@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.job.schedule;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
-import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.job.base.schedule.MpScheduled;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
@@ -21,7 +20,7 @@ public class SceneDeleteScheduleJob {
     private SceneMapper sceneMapper;
 
     @MpScheduled(cron = "0 0/1 * * * ?", description = "长时间处于错误状态的场景及时删除", id = "delete_error_scene")
-    public void scheduleUserOlRecord() {
+    public void sceneDelete() {
         var cond = new HumanCondition()
                 .link(CsceneInstanceModel.class, SceneModel.class)
                 .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getScene, SceneModel.class,SceneModel::getId)
