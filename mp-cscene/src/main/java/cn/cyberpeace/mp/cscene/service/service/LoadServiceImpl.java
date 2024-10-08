@@ -63,9 +63,6 @@ public class LoadServiceImpl {
     @Autowired
     private CsceneInstanceService csceneInstanceService;
 
-    @Autowired
-    private LoadConvertCode loadConvertCode;
-
     /*
      * 载荷页面
      * */
@@ -80,7 +77,9 @@ public class LoadServiceImpl {
         //list每个成员的imageType赋值
         list.forEach(item -> {
             item.setRunTableName(nextLevelMapsByCodes.get(item.getRunTable()));
-            item.setActionTypeName(nextLevelMapsByCodes.get(item.getActionType()));
+            if (StringUtils.hasText(item.getActionType())) {
+                item.setActionTypeConvertName(item.getActionType(),nextLevelMapsByCodes);
+            }
             item.setControlTypeName(nextLevelMapsByCodes.get(item.getControlType()));
             String source = item.getSource();
             if (source != null && source.equals("1")) {
@@ -103,7 +102,9 @@ public class LoadServiceImpl {
         MpDevopsLoad load = loadMapper.getLoadByPk(pk);
         Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes(CommonStatusCodeEnum.CODE.getCode());
         load.setRunTableName(nextLevelMapsByCodes.get(load.getRunTable()));
-        load.setActionTypeName(nextLevelMapsByCodes.get(load.getActionType()));
+        if (StringUtils.hasText(load.getActionType())) {
+            load.setActionTypeConvertName(load.getActionType(),nextLevelMapsByCodes);
+        }
         load.setControlTypeName(nextLevelMapsByCodes.get(load.getControlType()));
         String source = load.getSource();
         if (source != null && source.equals("1")) {
@@ -121,7 +122,9 @@ public class LoadServiceImpl {
         MpDevopsLoad load = loadMapper.getLoadById(id);
         Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes(CommonStatusCodeEnum.CODE.getCode());
         load.setRunTableName(nextLevelMapsByCodes.get(load.getRunTable()));
-        load.setActionTypeName(nextLevelMapsByCodes.get(load.getActionType()));
+        if (StringUtils.hasText(load.getActionType())) {
+            load.setActionTypeConvertName(load.getActionType(),nextLevelMapsByCodes);
+        }
         load.setControlTypeName(nextLevelMapsByCodes.get(load.getControlType()));
         String source = load.getSource();
         if (source != null && source.equals("1")) {
@@ -276,23 +279,17 @@ public class LoadServiceImpl {
         MpDevopsLoadSceneLog mpDevopsLoadSceneLog = new MpDevopsLoadSceneLog();
         if (tool != null) {
             mpDevopsLoadSceneLog.setId(tool.get("id") != null ? tool.get("id").toString() : null);
-            mpDevopsLoadSceneLog.setControlPort(tool.get("controlPort") != null ? tool.get("controlPort").toString() : null);
-            mpDevopsLoadSceneLog.setControlType(tool.get("controlType") != null ? tool.get("controlType").toString() : null);
-            mpDevopsLoadSceneLog.setRunTable(tool.get("runTable") != null ? tool.get("runTable").toString() : null);
-            mpDevopsLoadSceneLog.setActionType(tool.get("actionType") != null ? tool.get("actionType").toString() : null);
-            mpDevopsLoadSceneLog.setCreatorId(tool.get("creatorId") != null ? tool.get("creatorId").toString() : null);
-            mpDevopsLoadSceneLog.setDefaultCmd(tool.get("defaultCmd") != null ? tool.get("defaultCmd").toString() : null);
-            mpDevopsLoadSceneLog.setToolDescription(tool.get("toolDescribe") != null ? tool.get("toolDescribe").toString() : null);
             mpDevopsLoadSceneLog.setToolName(tool.get("toolName") != null ? tool.get("toolName").toString() : null);
-            mpDevopsLoadSceneLog.setSource(tool.get("source") != null ? tool.get("source").toString() : null);
-            mpDevopsLoadSceneLog.setToolPlatform(tool.get("toolPlatform") != null ? tool.get("toolPlatform").toString() : null);
-            mpDevopsLoadSceneLog.setReadMe(tool.get("readMe") != null ? tool.get("readMe").toString() : null);
+            mpDevopsLoadSceneLog.setToolDescription(tool.get("toolDescribe") != null ? tool.get("toolDescribe").toString() : null);
+            mpDevopsLoadSceneLog.setRunTable(tool.get("toolPlatform") != null ? tool.get("toolPlatform").toString() : null);
+            mpDevopsLoadSceneLog.setReadMe(tool.get("toolReadme") != null ? tool.get("toolReadme").toString() : null);
             mpDevopsLoadSceneLog.setReadMeName(tool.get("readMeName") != null ? tool.get("readMeName").toString() : null);
-            mpDevopsLoadSceneLog.setAttachment(tool.get("attachment") != null ? tool.get("attachment").toString() : null);
-            mpDevopsLoadSceneLog.setAttachmentName(tool.get("attachmentName") != null ? tool.get("attachmentName").toString() : null);
-            mpDevopsLoadSceneLog.setCover(tool.get("cover") != null ? tool.get("cover").toString() : "/api/mp/file/877/298/b99fc02c34507fb82c5a800bcbe65287.png");
-            mpDevopsLoadSceneLog.setCoverName(tool.get("coverName") != null ? tool.get("coverName").toString() : null);
-
+            //toolType 工具类型 暂未同步
+            mpDevopsLoadSceneLog.setControlType(tool.get("controlType") != null ? tool.get("controlType").toString() : null);
+            mpDevopsLoadSceneLog.setControlPort(tool.get("controlPort") != null ? tool.get("controlPort").toString() : null);
+            //imageName 镜像名称 暂未同步
+            mpDevopsLoadSceneLog.setDefaultCmd(tool.get("defaultCmd") != null ? tool.get("defaultCmd").toString() : null);
+            mpDevopsLoadSceneLog.setCreatorId(tool.get("creatorId") != null ? tool.get("creatorId").toString() : null);
             Object createTimeObj = tool.get("createTime");
             if (createTimeObj != null) {
                 try {
@@ -316,12 +313,15 @@ public class LoadServiceImpl {
                     mpDevopsLoadSceneLog.setUpdateTime(updateTime);
                 }
             }
+
+            mpDevopsLoadSceneLog.setActionType(tool.get("toolTags") != null ? tool.get("toolTags").toString() : null);
+            mpDevopsLoadSceneLog.setSource(tool.get("source") != null ? tool.get("source").toString() : null);
+            mpDevopsLoadSceneLog.setAttachment(tool.get("attachment") != null ? tool.get("attachment").toString() : null);
+            mpDevopsLoadSceneLog.setAttachmentName(tool.get("attachmentName") != null ? tool.get("attachmentName").toString() : null);
+            mpDevopsLoadSceneLog.setCover(tool.get("cover") != null ? tool.get("cover").toString() : "/api/mp/file/877/298/b99fc02c34507fb82c5a800bcbe65287.png");
+            mpDevopsLoadSceneLog.setCoverName(tool.get("coverName") != null ? tool.get("coverName").toString() : null);
         }
         return mpDevopsLoadSceneLog;
-    }
-
-    private String ConvertTypeNameToCode(String type) {
-        return loadConvertCode.getTypeCode(type);
     }
 
     /*
@@ -458,7 +458,9 @@ public class LoadServiceImpl {
         list = list.stream()
                 .map(log -> {
                     log.setControlTypeName(log.getControlType() != null ? codeMap.get(log.getControlType()) : log.getControlType());
-                    log.setActionTypeName(log.getActionType() != null ? codeMap.get(log.getActionType()) : log.getActionType());
+                    if (StringUtils.hasText(log.getActionType())) {
+                        log.setActionTypeConvertName(log.getActionType(),codeMap);
+                    }
                     log.setResultTypeName(log.getResultType() != null ? codeMap.get(log.getResultType()) : log.getResultType());
                     log.setResultStatusName(log.getResultStatus() != null ? codeMap.get(log.getResultStatus()) : log.getResultStatus());
                     return log;
@@ -1030,7 +1032,9 @@ public class LoadServiceImpl {
         Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes(CommonStatusCodeEnum.CODE.getCode());
         for (MpDevopsLoad load : data) {
             load.setRunTableName(nextLevelMapsByCodes.get(load.getRunTable()));
-            load.setActionTypeName(nextLevelMapsByCodes.get(load.getActionType()));
+            if (StringUtils.hasText(load.getActionType())) {
+                load.setActionTypeConvertName(load.getActionType(),nextLevelMapsByCodes);
+            }
             load.setControlTypeName(nextLevelMapsByCodes.get(load.getControlType()));
         }
         return data;
@@ -1126,7 +1130,9 @@ public class LoadServiceImpl {
             getLoadResultByPks = getLoadResultByPks.stream()
                     .map(log -> {
                         log.setControlTypeName(log.getControlType() != null ? codeMap.get(log.getControlType()) : log.getControlType());
-                        log.setActionTypeName(log.getActionType() != null ? codeMap.get(log.getActionType()) : log.getActionType());
+                        if (StringUtils.hasText(log.getActionType())) {
+                            log.setActionTypeConvertName(log.getActionType(),codeMap);
+                        }
                         log.setResultTypeName(log.getResultType() != null ? codeMap.get(log.getResultType()) : log.getResultType());
                         log.setResultStatusName(log.getResultStatus() != null ? codeMap.get(log.getResultStatus()) : log.getResultStatus());
                         return log;

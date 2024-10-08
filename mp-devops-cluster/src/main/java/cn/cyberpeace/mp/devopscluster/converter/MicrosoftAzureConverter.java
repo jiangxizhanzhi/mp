@@ -772,7 +772,9 @@ public class MicrosoftAzureConverter implements BaseConverter {
             item.setImageType("load");
             item.setRole(60);
             item.setRunTableName(nextLevelMapsByCodes.get(item.getRunTable()));
-            item.setActionTypeName(nextLevelMapsByCodes.get(item.getActionType()));
+            if (StringUtils.hasText(item.getActionType())) {
+                item.setActionTypeConvertName(item.getActionType(),nextLevelMapsByCodes);
+            }
             item.setControlTypeName(nextLevelMapsByCodes.get(item.getControlType()));
         });
         return list;

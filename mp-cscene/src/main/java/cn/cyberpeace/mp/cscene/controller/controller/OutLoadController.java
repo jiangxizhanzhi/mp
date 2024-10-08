@@ -53,11 +53,7 @@ public class OutLoadController {
     @PostMapping("/createTask")
     public ServiceResult createTask(@RequestBody OutLoadTaskCreateRequest requestData) {
         Map<String, Object> addAzurer = outLoadService.createTask(requestData);
-        if (addAzurer != null) {
-            return new ServiceResult<>(addAzurer, BaseErrorCode.SUCCESS, "SUCCESS");
-        } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "创建任务失败");
-        }
+        return new ServiceResult<>(addAzurer, BaseErrorCode.SUCCESS).asResult();
     }
 
     /**
@@ -77,11 +73,7 @@ public class OutLoadController {
     @PostMapping("/updateTaskInfo")
     public ServiceResult<Boolean> updateTaskInfo(@RequestBody OutLoadTaskUpdateRequest requestData) {
         Boolean updateTaskInfo = outLoadService.updateTaskInfo(requestData);
-        if (updateTaskInfo) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "修改任务信息成功");
-        } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "修改任务信息失败");
-        }
+        return new ServiceResult(updateTaskInfo).asResult();
     }
 
     /**
@@ -91,11 +83,7 @@ public class OutLoadController {
     @PostMapping("/deleteTask")
     public ServiceResult<Boolean> deleteTask(@RequestBody OutLoadTaskDeleteRequest requestData) {
         Boolean deleteTask = outLoadService.deleteTask(requestData);
-        if (deleteTask) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
-        } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "删除任务失败");
-        }
+        return new ServiceResult(deleteTask).asResult();
     }
 
     /**
@@ -105,11 +93,7 @@ public class OutLoadController {
     @PostMapping("/resetTask")
     public ServiceResult<Boolean> resetTask(@RequestBody OutLoadTaskResetRequest requestData) {
         Boolean resetTask = outLoadService.resetTask(requestData);
-        if (resetTask) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
-        } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "重置任务失败");
-        }
+        return new ServiceResult(resetTask).asResult();
     }
 
     /**
@@ -117,13 +101,9 @@ public class OutLoadController {
      */
     @ApiOperation(value = "启动实例", notes = "")
     @PostMapping("/startInstance")
-    public ServiceResult<Boolean> startInstance(@RequestBody JSONObject requestData) {
+    public ServiceResult startInstance(@RequestBody JSONObject requestData) {
         Map<String, Object> startInstance = outLoadService.startInstance(requestData);
-        if (startInstance != null && startInstance.get("code") != null && startInstance.get("code").toString().equals("0")) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
-        } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "启动实例失败");
-        }
+        return new ServiceResult(startInstance, BaseErrorCode.SUCCESS).asResult();
     }
 
     /**
@@ -133,11 +113,7 @@ public class OutLoadController {
     @PostMapping("/stopInstance")
     public ServiceResult<Boolean> stopInstance(@RequestBody JSONObject requestData) {
         Boolean stopInstance = outLoadService.stopInstance(requestData);
-        if (stopInstance) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
-        } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "关闭实例失败");
-        }
+        return new ServiceResult(stopInstance).asResult();
     }
 
     /**
@@ -147,11 +123,7 @@ public class OutLoadController {
     @PostMapping("/pauseInstance")
     public ServiceResult<Boolean> pauseInstance(@RequestBody JSONObject requestData) {
         Boolean pauseInstance = outLoadService.pauseInstance(requestData);
-        if (pauseInstance) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
-        } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "暂停实例失败");
-        }
+        return new ServiceResult(pauseInstance).asResult();
     }
 
     /**
@@ -161,11 +133,7 @@ public class OutLoadController {
     @PostMapping("/unpauseInstance")
     public ServiceResult<Boolean> unpauseInstance(@RequestBody JSONObject requestData) {
         Boolean unpauseInstance = outLoadService.unpauseInstance(requestData);
-        if (unpauseInstance) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
-        } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "恢复实例失败");
-        }
+        return new ServiceResult(unpauseInstance).asResult();
     }
 
     /**
@@ -175,11 +143,7 @@ public class OutLoadController {
     @PostMapping("/deleteInstance")
     public ServiceResult<Boolean> deleteInstance(@RequestBody JSONObject requestData) {
         Boolean deleteInstance = outLoadService.deleteInstance(requestData);
-        if (deleteInstance) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
-        } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "删除实例失败");
-        }
+        return new ServiceResult(deleteInstance).asResult();
     }
 
     /**
@@ -217,11 +181,7 @@ public class OutLoadController {
     @PostMapping("/addTool")
     public ServiceResult<Boolean> addTool(@RequestBody JSONObject requestData) {
         Boolean addTool = outLoadService.addTool(requestData);
-        if (addTool) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
-        } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "添加工具失败");
-        }
+        return new ServiceResult(addTool).asResult();
     }
 
     /**
@@ -231,11 +191,7 @@ public class OutLoadController {
     @PostMapping("/updateToolInfo")
     public ServiceResult<Boolean> updateToolInfo(@RequestBody JSONObject requestData) {
         Boolean updateToolInfo = outLoadService.updateToolInfo(requestData);
-        if (updateToolInfo) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
-        } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "修改工具信息失败");
-        }
+        return new ServiceResult(updateToolInfo).asResult();
     }
 
     /**
@@ -245,11 +201,7 @@ public class OutLoadController {
     @PostMapping("/uploadTool")
     public ServiceResult<Boolean> uploadTool(@RequestParam(value = "file") MultipartFile file) {
         Boolean uploadTool = outLoadService.uploadTool(file);
-        if (uploadTool) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
-        } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "工具上传失败");
-        }
+        return new ServiceResult(uploadTool).asResult();
     }
 
     /**
@@ -259,11 +211,7 @@ public class OutLoadController {
     @PostMapping("/deleteTool")
     public ServiceResult<Boolean> deleteTool(@RequestBody JSONObject requestData) {
         Boolean deleteTool = outLoadService.deleteTool(requestData);
-        if (deleteTool) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
-        } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "工具删除失败");
-        }
+        return new ServiceResult(deleteTool).asResult();
     }
 
     /**
@@ -275,7 +223,7 @@ public class OutLoadController {
         JSONObject requestData = new JSONObject();
         requestData.put("name", name);
         JSONObject data = outLoadService.checkNameVaild(requestData);
-        return new ServiceResult<JSONObject>(data, BaseErrorCode.SUCCESS).asResult();
+        return new ServiceResult(data, BaseErrorCode.SUCCESS).asResult();
     }
 
     /**
@@ -287,7 +235,7 @@ public class OutLoadController {
         JSONObject requestData = new JSONObject();
         requestData.put("id", id);
         JSONObject data = outLoadService.getReadmeByToolId(requestData);
-        return new ServiceResult<JSONObject>(data, BaseErrorCode.SUCCESS).asResult();
+        return new ServiceResult(data, BaseErrorCode.SUCCESS).asResult();
     }
 
     /**
@@ -297,10 +245,6 @@ public class OutLoadController {
     @PostMapping("/uploadReadme")
     public ServiceResult<Boolean> uploadReadme(@RequestParam(value = "file") MultipartFile file) {
         Boolean uploadReadme = outLoadService.uploadReadme(file);
-        if (uploadReadme) {
-            return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "SUCCESS");
-        } else {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "工具帮助文档上传失败");
-        }
+        return new ServiceResult(uploadReadme).asResult();
     }
 }

@@ -110,8 +110,6 @@ public class CommonCodeServiceImpl {
         return codeMap;
     }
 
-
-
     @Cacheable(key = "'getNextLevelMapsByCodes' + #code", value = "getNextLevelMapsByCodes")
     public Map<String,String> getNextLevelMapsByCodes(String code) {
         Map<String,String> map = new HashMap<>();

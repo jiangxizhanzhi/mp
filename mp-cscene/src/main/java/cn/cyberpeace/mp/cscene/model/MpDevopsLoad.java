@@ -2,10 +2,15 @@ package cn.cyberpeace.mp.cscene.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
+import cn.cyberpeace.mp.cscene.constant.LoadConvertCode;
 import lombok.Data;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 载荷同步表(MpDevopsLoad)实体类
@@ -15,6 +20,7 @@ import java.util.List;
 @Data
 @Table("mp_devops_load")
 public class MpDevopsLoad extends BaseModel {
+
     /**
      * 主键
      */
@@ -35,10 +41,6 @@ public class MpDevopsLoad extends BaseModel {
      * 工具描述
      */
     private String toolDescription;
-    /**
-     * 工具平台
-     */
-    private String toolPlatform;
     /**
      * 作用类型
      */
@@ -118,4 +120,36 @@ public class MpDevopsLoad extends BaseModel {
      * role
      */
     private Integer role;
+
+    public void setRunTable(String runTable) {
+        String s = LoadConvertCode.getRunTableConvertMap().get(runTable);
+        this.runTable = s != null ? s : LoadConvertCode.RUN_TABLE_OTHER;
+    }
+
+    public void setControlType(String controlType) {
+        String s = LoadConvertCode.getControlTypeConvertMap().get(controlType);
+        this.controlType = s != null ? s : LoadConvertCode.CONTROL_TYPE_OTHER;
+    }
+
+    public void setActionType(String actionType) {
+        String s = LoadConvertCode.getActionTypeConvertMap().get(actionType);
+        this.actionType = s != null ? s : LoadConvertCode.ACTION_TYPE_OTHER;
+    }
+
+    public void setActionTypeConvertName(String actionType, Map<String, String> convertMap) {
+        if (StringUtils.hasText(actionType)) {
+            // 如果 actionType 包含逗号，处理为列表
+            if (actionType.contains(",")) {
+                List<String> actionTypeName = Arrays.stream(actionType.split(","))
+                        .map(convertMap::get)
+                        .filter(StringUtils::hasText) // 过滤空值
+                        .collect(Collectors.toList());
+                // 将列表转换为逗号分隔的字符串
+                this.actionTypeName = String.join(",", actionTypeName);
+            } else {
+                // 单个 actionType 处理
+                this.actionTypeName = convertMap.get(actionType);
+            }
+        }
+    }
 }
