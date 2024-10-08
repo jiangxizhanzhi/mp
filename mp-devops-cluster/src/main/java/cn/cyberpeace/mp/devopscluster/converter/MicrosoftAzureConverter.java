@@ -815,14 +815,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
             item.getChildren().add(0, allOption);
         });
 
-        // 创建并添加"来源"选项及其子元素
-        MpSysCodeEnum sourceEnum = createSysCodeEnum("10050299", "来源",
-                createSysCodeEnum("", "全部"),
-                createSysCodeEnum("1", "外部同步"),
-                createSysCodeEnum("2", "本地创建")
-        );
-        nextAllTreeDataByCode.add(sourceEnum);
-
         return nextAllTreeDataByCode;
     }
 
