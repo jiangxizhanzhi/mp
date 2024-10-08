@@ -1,11 +1,10 @@
-package cn.cyberpeace.mp.cscene.util;
+package cn.cyberpeace.mp.sceneplugincloud.util;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.code.MessageServiceCode;
 import cn.cyberpeace.mp.base.util.http.HttpParam;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
@@ -21,8 +20,8 @@ import java.util.Optional;
 @Slf4j
 public class HardwareLimitUtils {
 
-    public static void check(CsceneInstanceBO instance) {
-        HardwareCount count = getHardwareCount(instance.getScene().getTopology().getElements());
+    public static void check(List<SceneElementBO> elements) {
+        HardwareCount count = getHardwareCount(elements);
         int ram = count.getRam();
         int disk = count.getDisk();
 
@@ -49,10 +48,10 @@ public class HardwareLimitUtils {
 
         // cpu可以超分 暂时不校验
         if (ram > freeRam) {
-            throw new MpRuntimeException(CsceneErrorCode.RAM_LIMIT.format(String.valueOf(totalRam), String.valueOf(usedRam), String.valueOf(ram)));
+            throw new MpRuntimeException(CloudErrorCode.RAM_LIMIT.format(String.valueOf(totalRam), String.valueOf(usedRam), String.valueOf(ram)));
         }
         if (disk > freeDisk) {
-            throw new MpRuntimeException(CsceneErrorCode.DISK_LIMIT.format(String.valueOf(totalDisk), String.valueOf(usedDisk), String.valueOf(disk)));
+            throw new MpRuntimeException(CloudErrorCode.DISK_LIMIT.format(String.valueOf(totalDisk), String.valueOf(usedDisk), String.valueOf(disk)));
         }
     }
 
@@ -128,7 +127,7 @@ public class HardwareLimitUtils {
         private int limitNode;
         private int currentNode;
         private int existNode;
-        private CsceneErrorCode errorCode;
+        private CloudErrorCode errorCode;
 
         public MessageServiceCode getMessage() {
             return errorCode.format(String.valueOf(limitNode), String.valueOf(existNode), String.valueOf(currentNode));

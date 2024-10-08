@@ -23,7 +23,6 @@ import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
-import cn.cyberpeace.mp.cscene.util.HardwareLimitUtils;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -144,7 +143,6 @@ public class BcSceneConfigHandler extends BaseCsceneHandler<
         }
         this.checkVlanIds(getCscene());
         BcSceneInstanceHandler instanceHandler = new BcSceneInstanceHandler(csceneInstance, getContext());
-        HardwareLimitUtils.check(instanceHandler.getCscene());
         // 节点数量增加失败 说明已到达数量上限
         NodeLimitUtils.UpdateResult updateResult = NodeLimitUtils.addLimitedNodeCount(instanceHandler.getCscene());
         if (!updateResult.isSuccess()) {

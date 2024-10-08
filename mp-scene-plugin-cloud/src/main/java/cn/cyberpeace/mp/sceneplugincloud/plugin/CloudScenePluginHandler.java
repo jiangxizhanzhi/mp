@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.basic.BoolUtils;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -45,6 +44,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.SuspendHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.UnpauseHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudScenePluginModelHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.HardwareLimitUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 import cn.cyberpeace.mp.sceneplugincloud.util.TopoReformUtils;
@@ -276,6 +276,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     @Override
     public void initiate() {
+        HardwareLimitUtils.check(new ArrayList<>(getSceneHandler().getElementMap().values()));
         initiateHandler.initiate();
     }
 
