@@ -121,17 +121,17 @@ public class MpDevopsLoad extends BaseModel {
      */
     private Integer role;
 
-    public void setRunTable(String runTable) {
+    public void setConvertRunTable(String runTable) {
         String s = LoadConvertCode.getRunTableConvertMap().get(runTable);
         this.runTable = s != null ? s : LoadConvertCode.RUN_TABLE_OTHER;
     }
 
-    public void setControlType(String controlType) {
+    public void setConvertControlType(String controlType) {
         String s = LoadConvertCode.getControlTypeConvertMap().get(controlType);
         this.controlType = s != null ? s : LoadConvertCode.CONTROL_TYPE_OTHER;
     }
 
-    public void setActionType(String actionType) {
+    public void setConvertActionType(String actionType) {
         String s = LoadConvertCode.getActionTypeConvertMap().get(actionType);
         this.actionType = s != null ? s : LoadConvertCode.ACTION_TYPE_OTHER;
     }

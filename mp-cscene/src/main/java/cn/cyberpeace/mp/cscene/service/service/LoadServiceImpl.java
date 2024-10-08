@@ -281,11 +281,11 @@ public class LoadServiceImpl {
             mpDevopsLoadSceneLog.setId(tool.get("id") != null ? tool.get("id").toString() : null);
             mpDevopsLoadSceneLog.setToolName(tool.get("toolName") != null ? tool.get("toolName").toString() : null);
             mpDevopsLoadSceneLog.setToolDescription(tool.get("toolDescribe") != null ? tool.get("toolDescribe").toString() : null);
-            mpDevopsLoadSceneLog.setRunTable(tool.get("toolPlatform") != null ? tool.get("toolPlatform").toString() : null);
+            mpDevopsLoadSceneLog.setConvertRunTable(tool.get("toolPlatform") != null ? tool.get("toolPlatform").toString() : null);
             mpDevopsLoadSceneLog.setReadMe(tool.get("toolReadme") != null ? tool.get("toolReadme").toString() : null);
             mpDevopsLoadSceneLog.setReadMeName(tool.get("readMeName") != null ? tool.get("readMeName").toString() : null);
             //toolType 工具类型 暂未同步
-            mpDevopsLoadSceneLog.setControlType(tool.get("controlType") != null ? tool.get("controlType").toString() : null);
+            mpDevopsLoadSceneLog.setConvertControlType(tool.get("controlType") != null ? tool.get("controlType").toString() : null);
             mpDevopsLoadSceneLog.setControlPort(tool.get("controlPort") != null ? tool.get("controlPort").toString() : null);
             //imageName 镜像名称 暂未同步
             mpDevopsLoadSceneLog.setDefaultCmd(tool.get("defaultCmd") != null ? tool.get("defaultCmd").toString() : null);
@@ -314,7 +314,7 @@ public class LoadServiceImpl {
                 }
             }
 
-            mpDevopsLoadSceneLog.setActionType(tool.get("toolTags") != null ? tool.get("toolTags").toString() : null);
+            mpDevopsLoadSceneLog.setConvertActionType(tool.get("toolTags") != null ? tool.get("toolTags").toString() : null);
             mpDevopsLoadSceneLog.setSource(tool.get("source") != null ? tool.get("source").toString() : null);
             mpDevopsLoadSceneLog.setAttachment(tool.get("attachment") != null ? tool.get("attachment").toString() : null);
             mpDevopsLoadSceneLog.setAttachmentName(tool.get("attachmentName") != null ? tool.get("attachmentName").toString() : null);
