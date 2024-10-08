@@ -76,6 +76,7 @@ public class CreateHandler extends HandlerCommon {
         public static final EventProcess CREATE_NPC = new EventProcess("create_npc", "sceneplugincloud.event.create_npc");
         public static final EventProcess CREATE_DYNAMIC = new EventProcess("create_dynamic", "sceneplugincloud.event.create_dynamic");
         public static final EventProcess CREATE_LOAD = new EventProcess("create_load", "sceneplugincloud.event.create_load");
+        public static final EventProcess CREATE_NETWORK_EQUIPMENT = new EventProcess("create_network_equipment", "sceneplugincloud.event.create_network_equipment");
     }
 
     @Data

@@ -32,7 +32,6 @@ import cn.cyberpeace.mp.sceneplugincloud.util.ElementNetworkUtils;
 import com.azure.core.http.rest.Response;
 import com.azure.core.management.Region;
 import com.azure.core.util.Context;
-import com.azure.resourcemanager.loganalytics.LogAnalyticsManager;
 import com.azure.resourcemanager.loganalytics.models.Workspace;
 import com.azure.resourcemanager.loganalytics.models.WorkspaceSku;
 import com.azure.resourcemanager.loganalytics.models.WorkspaceSkuNameEnum;
@@ -84,149 +83,179 @@ public class AzureCreateHandler extends CreateHandler {
             allFilteredElements.addAll(filteredVirtualMachineElements);
             allFilteredElements.addAll(filteredContainerElements);
 
-            HashMap<String, List<VirtualNic>> virtualNicsMap = new HashMap<>();
-            allFilteredElements.forEach(element -> {
-                List<VirtualNic> virtualNics = this.genVirutalNics(element);
-                virtualNicsMap.put(element.getSrcElement().getId(), virtualNics);
-            });
-
-            List<CloudPluginSceneElementBO> filteredAuxiliaryNetworkElements = this.filterAuxiliaryNetworkElements(allElements);
-            Map<String, CloudPluginSceneElementBO> vnetElementById = filteredAuxiliaryNetworkElements.stream()
-                    .collect(Collectors.toMap(
-                            element -> element.getSrcElement().getId(),
-                            element -> element,
-                            (existing, replacement) -> existing
-                    ));
-
-            List<Runnable> createAuxiliaryNetworkTasks = new ArrayList<>();
-
-//            集合存已加管理网络节点id 用于判断互联节点是否已加过管理网络
-            HashSet<String> manageElementIdSet = new HashSet<>();
-            for (int i = 0; i < filteredAuxiliaryNetworkElements.size(); i++) {
-                boolean isManage = false;
-                CloudPluginSceneElementBO element = filteredAuxiliaryNetworkElements.get(i);
-                Optional<CloudPluginSceneElementBO> any = element.getSrcElement().getPorts().stream()
-                        .filter(port -> null != this.getPluginHandler().getSceneHandler().getPortConnectedPort(port.getId()))
-                        .map(port ->
-                                allElements.stream()
-                                        .filter(element1 -> element1.getSrcElement().getId().equals(this.getPluginHandler().getSceneHandler().getPortConnectedPort(port.getId()).getElement().getId()))
-                                        .findAny()
-                                        .get()
-                        )
-                        .filter(Objects::nonNull)
-                        .filter(pluginSceneElementBO -> !pluginSceneElementBO.getIsPublicIp() || pluginSceneElementBO.getImageType().equals(BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY))
-                        .findAny();
-                if (any.isPresent()) {
-                    isManage = true;
-                }
-                if (!BaseCloudPluginSceneElementModel.ImageType.VNET.equals(element.getImageType()) && !element.getIsPublicIp()) {
-                    isManage = true;
-                }
-
-                //筛选出所有cidr是否连接容器
-                CloudScenePluginHandler pluginHandler = getPluginHandler();
-                ConcurrentHashMap<String, ElementNetworkUtils.CidrType> cidrContainerMap = ElementNetworkUtils.getCidrToContainerMap(pluginHandler, allElements, element, virtualNicsMap, isManage);
-
-                String nodeId = element.getSrcElement().getId();
-                // 封装创建网络的任务
-                AzureVirtualNetCreateTask task = new AzureVirtualNetCreateTask(resourceService, getPluginHandler(), element, cidrContainerMap, virtualNicsMap);
-                // 格式化任务执行过程，添加 runElementProgress
-                Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_AUXILIARY_NETWORK, task);
-                // 添加格式化后的任务到列表
-                createAuxiliaryNetworkTasks.add(formatTask);
-            }
-            if (!createAuxiliaryNetworkTasks.isEmpty()) {
-                // 执行 创建所有网络
-                runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> runTasks(createAuxiliaryNetworkTasks));
-            }
-//            对等互联
-            Set<String> calledPairs = new HashSet<>();
-            filteredAuxiliaryNetworkElements.stream().collect(Collectors.groupingBy(e -> e.getSrcElement().getId()));
-            for (int i = 0; i < filteredAuxiliaryNetworkElements.size(); i++) {
-//                找出连接VNet的VNet节点
-                CloudPluginSceneElementBO element = filteredAuxiliaryNetworkElements.get(i);
-                element.getSrcElement().getPorts().forEach(port -> {
-                    SceneElementPortBO portConnectedPort = this.getPluginHandler().getSceneHandler().getPortConnectedPort(port.getId());
-                    if (null != portConnectedPort) {
-                        String id = portConnectedPort.getElement().getId();
-                        CloudPluginSceneElementBO elementBO = vnetElementById.get(id);
-                        if (elementBO != null) {
-                            String resourceId = element.getResourceId();
-                            String resourceId1 = elementBO.getResourceId();
-                            createVNetPeering(resourceId, resourceId1, calledPairs);
-                        }
-                    }
-                });
-            }
-            getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_NETWORK);
-
-
-            Response<DataCollectionRuleResourceInner> workspaceAndDataCollectionRules = createWorkspaceAndDataCollectionRules(groupName);
-            String dataCollectionRulesId = workspaceAndDataCollectionRules.getValue().id();
-
-            // 再创建网关 和 防火墙
-            getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_GATEWAY);
-            getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_GATEWAY);
-
-
-            // 再创建终端 终端分虚拟机、容器、和web服务
-            getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_INSTANCE);
+            List<CloudPluginSceneElementBO> filteredNetworkEquipmentElements = this.filterNetworkEquipmentElements(allElements);
 
             List<Runnable> createTerminalTasks = new ArrayList<>();
-            // 虚拟机
-            String eid = getPluginHandler().getSrcScene().getEid();
+            if (!allFilteredElements.isEmpty()) {
 
-            InstanceMapper instanceMapper = BeanCommon.getBean(InstanceMapper.class);
-            HumanCondition instanceHumanCondition = new HumanCondition()
-                    .filterEqual(InstanceModel::getScene, eid);
-            InstanceModel instanceModel = instanceMapper.first(instanceHumanCondition);
+                HashMap<String, List<VirtualNic>> virtualNicsMap = new HashMap<>();
+                allFilteredElements.forEach(element -> {
+                    List<VirtualNic> virtualNics = this.genVirutalNics(element);
+                    virtualNicsMap.put(element.getSrcElement().getId(), virtualNics);
+                });
+
+                List<CloudPluginSceneElementBO> filteredAuxiliaryNetworkElements = this.filterAuxiliaryNetworkElements(allElements);
+                Map<String, CloudPluginSceneElementBO> vnetElementById = filteredAuxiliaryNetworkElements.stream()
+                        .collect(Collectors.toMap(
+                                element -> element.getSrcElement().getId(),
+                                element -> element,
+                                (existing, replacement) -> existing
+                        ));
+
+                List<Runnable> createAuxiliaryNetworkTasks = new ArrayList<>();
+
+//            集合存已加管理网络节点id 用于判断互联节点是否已加过管理网络
+                for (int i = 0; i < filteredAuxiliaryNetworkElements.size(); i++) {
+                    boolean isManage = false;
+                    CloudPluginSceneElementBO element = filteredAuxiliaryNetworkElements.get(i);
+                    Optional<CloudPluginSceneElementBO> any = element.getSrcElement().getPorts().stream()
+                            .filter(port -> null != this.getPluginHandler().getSceneHandler().getPortConnectedPort(port.getId()))
+                            .map(port ->
+                                    allElements.stream()
+                                            .filter(element1 -> element1.getSrcElement().getId().equals(this.getPluginHandler().getSceneHandler().getPortConnectedPort(port.getId()).getElement().getId()))
+                                            .findAny()
+                                            .get()
+                            )
+                            .filter(Objects::nonNull)
+                            .filter(pluginSceneElementBO -> !pluginSceneElementBO.getIsPublicIp() || pluginSceneElementBO.getImageType().equals(BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY))
+                            .findAny();
+                    if (any.isPresent()) {
+                        isManage = true;
+                    }
+                    if (!BaseCloudPluginSceneElementModel.ImageType.VNET.equals(element.getImageType()) && !element.getIsPublicIp()) {
+                        isManage = true;
+                    }
+
+                    //筛选出所有cidr是否连接容器
+                    CloudScenePluginHandler pluginHandler = getPluginHandler();
+                    ConcurrentHashMap<String, ElementNetworkUtils.CidrType> cidrContainerMap = ElementNetworkUtils.getCidrToContainerMap(pluginHandler, allElements, element, virtualNicsMap, isManage);
+
+                    String nodeId = element.getSrcElement().getId();
+                    // 封装创建网络的任务
+                    AzureVirtualNetCreateTask task = new AzureVirtualNetCreateTask(resourceService, getPluginHandler(), element, cidrContainerMap, virtualNicsMap);
+                    // 格式化任务执行过程，添加 runElementProgress
+                    Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_AUXILIARY_NETWORK, task);
+                    // 添加格式化后的任务到列表
+                    createAuxiliaryNetworkTasks.add(formatTask);
+                }
+                if (!createAuxiliaryNetworkTasks.isEmpty()) {
+                    // 执行 创建所有网络
+                    runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> runTasks(createAuxiliaryNetworkTasks));
+                }
+//            对等互联
+                Set<String> calledPairs = new HashSet<>();
+                filteredAuxiliaryNetworkElements.stream().collect(Collectors.groupingBy(e -> e.getSrcElement().getId()));
+                for (int i = 0; i < filteredAuxiliaryNetworkElements.size(); i++) {
+//                找出连接VNet的VNet节点
+                    CloudPluginSceneElementBO element = filteredAuxiliaryNetworkElements.get(i);
+                    element.getSrcElement().getPorts().forEach(port -> {
+                        SceneElementPortBO portConnectedPort = this.getPluginHandler().getSceneHandler().getPortConnectedPort(port.getId());
+                        if (null != portConnectedPort) {
+                            String id = portConnectedPort.getElement().getId();
+                            CloudPluginSceneElementBO elementBO = vnetElementById.get(id);
+                            if (elementBO != null) {
+                                String resourceId = element.getResourceId();
+                                String resourceId1 = elementBO.getResourceId();
+                                createVNetPeering(resourceId, resourceId1, calledPairs);
+                            }
+                        }
+                    });
+                }
+                getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_NETWORK);
 
 
-            AlertRuleMapper alertRuleMapper = BeanCommon.getBean(AlertRuleMapper.class);
-            HumanCondition alertRuleHumanCondition = new HumanCondition()
-                    .filterEqual(AlertRuleModel::getSceneId, instanceModel.getCscene());
-            List<AlertRuleModel> list = alertRuleMapper.list(alertRuleHumanCondition);
-            List<AlertRuleBO> alertRuleBOList = list.stream().map(alertRuleModel -> {
-                        AlertRuleBO alertRuleBO = new AlertRuleBO();
-                        BeanUtils.copyProperties(alertRuleModel, alertRuleBO);
-                        alertRuleBO.parseHosts();
-                        alertRuleBO.parseAlertConditions();
-                        return alertRuleBO;
-                    })
-                    .collect(Collectors.toList());
-            List<Runnable> createVirtualMachineTasks = new ArrayList<>();
-            for (CloudPluginSceneElementBO element : filteredVirtualMachineElements) {
-                String nodeId = element.getSrcElement().getId();
-                List<AlertRuleBO> alertRuleBOListByNodeId = alertRuleBOList
-                        .stream()
-                        .filter(alertRuleBO -> null != alertRuleBO.getHosts() && alertRuleBO.getHostList().contains(nodeId))
+                Response<DataCollectionRuleResourceInner> workspaceAndDataCollectionRules = createWorkspaceAndDataCollectionRules(groupName);
+                String dataCollectionRulesId = workspaceAndDataCollectionRules.getValue().id();
+
+                // 再创建网关 和 防火墙
+                getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_GATEWAY);
+                getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_GATEWAY);
+
+
+                // 再创建终端 终端分虚拟机、容器、和web服务
+                getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_INSTANCE);
+
+
+                // 虚拟机
+                String eid = getPluginHandler().getSrcScene().getEid();
+
+                InstanceMapper instanceMapper = BeanCommon.getBean(InstanceMapper.class);
+                HumanCondition instanceHumanCondition = new HumanCondition()
+                        .filterEqual(InstanceModel::getScene, eid);
+                InstanceModel instanceModel = instanceMapper.first(instanceHumanCondition);
+
+
+                AlertRuleMapper alertRuleMapper = BeanCommon.getBean(AlertRuleMapper.class);
+                HumanCondition alertRuleHumanCondition = new HumanCondition()
+                        .filterEqual(AlertRuleModel::getSceneId, instanceModel.getCscene());
+                List<AlertRuleModel> list = alertRuleMapper.list(alertRuleHumanCondition);
+                List<AlertRuleBO> alertRuleBOList = list.stream().map(alertRuleModel -> {
+                            AlertRuleBO alertRuleBO = new AlertRuleBO();
+                            BeanUtils.copyProperties(alertRuleModel, alertRuleBO);
+                            alertRuleBO.parseHosts();
+                            alertRuleBO.parseAlertConditions();
+                            return alertRuleBO;
+                        })
                         .collect(Collectors.toList());
+                List<Runnable> createVirtualMachineTasks = new ArrayList<>();
+                for (CloudPluginSceneElementBO element : filteredVirtualMachineElements) {
+                    String nodeId = element.getSrcElement().getId();
+                    List<AlertRuleBO> alertRuleBOListByNodeId = alertRuleBOList
+                            .stream()
+                            .filter(alertRuleBO -> null != alertRuleBO.getHosts() && alertRuleBO.getHostList().contains(nodeId))
+                            .collect(Collectors.toList());
 
-                List<VirtualNic> virtualNics = virtualNicsMap.get(nodeId);
-                //            创建虚拟机时不允许扩容
-                element.getSrcElement().setExpansionDisk(null);
-                element.setVmExpansionDiskType(null);
+                    List<VirtualNic> virtualNics = virtualNicsMap.get(nodeId);
+                    //            创建虚拟机时不允许扩容
+                    element.getSrcElement().setExpansionDisk(null);
+                    element.setVmExpansionDiskType(null);
 //                处理云场景无登录按钮、接收虚拟端口信息
-                receiveVirtualPortInfo(element, virtualNics);
-                AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics, combineInitCommand(element), alertRuleBOListByNodeId,dataCollectionRulesId);
-                Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_VIRTUAL_MACHINE, task);
-                createVirtualMachineTasks.add(formatTask);
+                    receiveVirtualPortInfo(element, virtualNics);
+                    AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics, combineInitCommand(element), alertRuleBOListByNodeId, dataCollectionRulesId);
+                    Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_VIRTUAL_MACHINE, task);
+                    createVirtualMachineTasks.add(formatTask);
+                }
+                createTerminalTasks.addAll(createVirtualMachineTasks);
+                // 容器
+                List<Runnable> createContainerTasks = new ArrayList<>();
+                for (CloudPluginSceneElementBO element : filteredContainerElements) {
+                    String nodeId = element.getSrcElement().getId();
+                    List<AlertRuleBO> alertRuleBOListByNodeId = alertRuleBOList
+                            .stream()
+                            .filter(alertRuleBO -> null != alertRuleBO.getHosts() && alertRuleBO.getHostList().contains(nodeId))
+                            .collect(Collectors.toList());
+                    List<VirtualNic> virtualNics = virtualNicsMap.get(nodeId);
+                    AzureContainerCreateTask task = new AzureContainerCreateTask(resourceService, getPluginHandler(), element, virtualNics, alertRuleBOListByNodeId, dataCollectionRulesId);
+                    Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_CONTAINER, task);
+                    createContainerTasks.add(formatTask);
+                }
+                createTerminalTasks.addAll(createContainerTasks);
+
+                // webapp
+                List<CloudPluginSceneElementBO> filteredWebAppElements = this.filterWebAppElements(allElements);
+                List<Runnable> createWebAppTasks = new ArrayList<>();
+                for (CloudPluginSceneElementBO element : filteredWebAppElements) {
+                    String nodeId = element.getSrcElement().getId();
+                    List<VirtualNic> virtualNics = this.genVirutalNics(element);
+                    AzureWebAppCreateTask task = new AzureWebAppCreateTask(resourceService, getPluginHandler(), element, virtualNics);
+                    Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, ElementProcess.CREATE_WEBAPP, task);
+                    createWebAppTasks.add(formatTask);
+                }
+                createTerminalTasks.addAll(createWebAppTasks);
+
+                // 防火墙
+                List<CloudPluginSceneElementBO> filteredFireWallAppElements = this.filterFireWallElements(allElements);
+                List<Runnable> createFireWallTasks = new ArrayList<>();
+                for (CloudPluginSceneElementBO element : filteredFireWallAppElements) {
+                    String nodeId = element.getSrcElement().getId();
+                    List<VirtualNic> virtualNics = this.genVirutalNics(element);
+                    AzureFireWallCreateTask task = new AzureFireWallCreateTask(resourceService, getPluginHandler(), element, virtualNics);
+                    Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, ElementProcess.CREATE_FIRE_WALL, task);
+                    createFireWallTasks.add(formatTask);
+                }
+                createTerminalTasks.addAll(createFireWallTasks);
             }
-            createTerminalTasks.addAll(createVirtualMachineTasks);
-            // 容器
-            List<Runnable> createContainerTasks = new ArrayList<>();
-            for (CloudPluginSceneElementBO element : filteredContainerElements) {
-                String nodeId = element.getSrcElement().getId();
-                List<AlertRuleBO> alertRuleBOListByNodeId = alertRuleBOList
-                        .stream()
-                        .filter(alertRuleBO -> null != alertRuleBO.getHosts() && alertRuleBO.getHostList().contains(nodeId))
-                        .collect(Collectors.toList());
-                List<VirtualNic> virtualNics = virtualNicsMap.get(nodeId);
-                AzureContainerCreateTask task = new AzureContainerCreateTask(resourceService, getPluginHandler(), element, virtualNics, alertRuleBOListByNodeId,dataCollectionRulesId);
-                Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_CONTAINER, task);
-                createContainerTasks.add(formatTask);
-            }
-            createTerminalTasks.addAll(createContainerTasks);
+
             // 载荷
             List<CloudPluginSceneElementBO> filteredLoadElements = this.filterLoadElements(allElements);
             List<Runnable> createLoadTasks = new ArrayList<>();
@@ -237,29 +266,20 @@ public class AzureCreateHandler extends CreateHandler {
                 createLoadTasks.add(formatTask);
             }
             createTerminalTasks.addAll(createLoadTasks);
-            // webapp
-            List<CloudPluginSceneElementBO> filteredWebAppElements = this.filterWebAppElements(allElements);
-            List<Runnable> createWebAppTasks = new ArrayList<>();
-            for (CloudPluginSceneElementBO element : filteredWebAppElements) {
-                String nodeId = element.getSrcElement().getId();
-                List<VirtualNic> virtualNics = this.genVirutalNics(element);
-                AzureWebAppCreateTask task = new AzureWebAppCreateTask(resourceService, getPluginHandler(), element, virtualNics);
-                Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, ElementProcess.CREATE_WEBAPP, task);
-                createWebAppTasks.add(formatTask);
-            }
-            createTerminalTasks.addAll(createWebAppTasks);
 
-            // 防火墙
-            List<CloudPluginSceneElementBO> filteredFireWallAppElements = this.filterFireWallElements(allElements);
-            List<Runnable> createFireWallTasks = new ArrayList<>();
-            for (CloudPluginSceneElementBO element : filteredFireWallAppElements) {
+            List<Runnable> createNetworkEquipmentTasks = new ArrayList<>();
+            for (CloudPluginSceneElementBO element : filteredNetworkEquipmentElements) {
                 String nodeId = element.getSrcElement().getId();
-                List<VirtualNic> virtualNics = this.genVirutalNics(element);
-                AzureFireWallCreateTask task = new AzureFireWallCreateTask(resourceService, getPluginHandler(), element, virtualNics);
-                Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, ElementProcess.CREATE_FIRE_WALL, task);
-                createFireWallTasks.add(formatTask);
+                Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+//                        边界设备无需处理
+                    }
+                };
+                Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_NETWORK_EQUIPMENT, task);
+                createNetworkEquipmentTasks.add(formatTask);
             }
-            createTerminalTasks.addAll(createFireWallTasks);
+            createTerminalTasks.addAll(createNetworkEquipmentTasks);
 
             if (!createTerminalTasks.isEmpty()) {
                 runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
@@ -279,12 +299,13 @@ public class AzureCreateHandler extends CreateHandler {
 
     /**
      * 创建workspace / data collection rules
+     *
      * @param groupName
      */
     private Response<DataCollectionRuleResourceInner> createWorkspaceAndDataCollectionRules(String groupName) {
         Workspace workspace = resourceService
                 .getLogAnalyticsManager()
-                .workspaces().define("Workspace-"+ groupName)
+                .workspaces().define("Workspace-" + groupName)
                 .withRegion(Region.ASIA_EAST)
                 .withExistingResourceGroup(groupName)
                 .withSku(new WorkspaceSku().withName(WorkspaceSkuNameEnum.PER_GB2018))
@@ -295,8 +316,8 @@ public class AzureCreateHandler extends CreateHandler {
         DataCollectionRuleDataSources dataCollectionRuleDataSources = new DataCollectionRuleDataSources();
         PerfCounterDataSource perfSource1 = new PerfCounterDataSource()
                 .withName("perfCounterDataSource")
-                .withCounterSpecifiers(Arrays.asList( "\\VmInsights\\DetailedMetrics"))
-                .withStreams(Arrays.asList( KnownPerfCounterDataSourceStreams.MICROSOFT_INSIGHTS_METRICS))
+                .withCounterSpecifiers(Arrays.asList("\\VmInsights\\DetailedMetrics"))
+                .withStreams(Arrays.asList(KnownPerfCounterDataSourceStreams.MICROSOFT_INSIGHTS_METRICS))
                 .withSamplingFrequencyInSeconds(60);// 性能计数器源
 
         dataCollectionRuleDataSources.withPerformanceCounters(Arrays.asList(perfSource1));
@@ -313,7 +334,7 @@ public class AzureCreateHandler extends CreateHandler {
                 .withDataFlows(
                         Arrays.asList(
                                 new DataFlow()
-                                        .withStreams(Arrays.asList(KnownDataFlowStreams.MICROSOFT_INSIGHTS_METRICS,KnownDataFlowStreams.MICROSOFT_PERF))
+                                        .withStreams(Arrays.asList(KnownDataFlowStreams.MICROSOFT_INSIGHTS_METRICS, KnownDataFlowStreams.MICROSOFT_PERF))
                                         .withDestinations(Arrays.asList("LogAnalyticsDestination"))
                         )
                 );
@@ -323,7 +344,7 @@ public class AzureCreateHandler extends CreateHandler {
                 .serviceClient()
                 .getDataCollectionRules()
                 .createWithResponse(groupName,
-                        "MSVMI-"+ groupName,
+                        "MSVMI-" + groupName,
                         dataCollectionRuleResourceInner,
                         Context.NONE);
     }
@@ -392,6 +413,12 @@ public class AzureCreateHandler extends CreateHandler {
     }
 
 
+    /**
+     * 筛选虚拟机节点
+     *
+     * @param allElements
+     * @return
+     */
     private List<CloudPluginSceneElementBO> filterVirtualMachineElements(List<CloudPluginSceneElementBO> allElements) {
         List<CloudPluginSceneElementBO> filterElements = new ArrayList<>();
         for (var c : allElements) {
@@ -402,10 +429,32 @@ public class AzureCreateHandler extends CreateHandler {
         return filterElements;
     }
 
+    /**
+     * 筛选容器节点
+     *
+     * @param allElements
+     * @return
+     */
     private List<CloudPluginSceneElementBO> filterContainerElements(List<CloudPluginSceneElementBO> allElements) {
         List<CloudPluginSceneElementBO> filterElements = new ArrayList<>();
         for (var c : allElements) {
             if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(c.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == c.getVirtualType()) {
+                filterElements.add(c);
+            }
+        }
+        return filterElements;
+    }
+
+    /**
+     * 筛选边界设备
+     *
+     * @param allElements
+     * @return
+     */
+    private List<CloudPluginSceneElementBO> filterNetworkEquipmentElements(List<CloudPluginSceneElementBO> allElements) {
+        List<CloudPluginSceneElementBO> filterElements = new ArrayList<>();
+        for (var c : allElements) {
+            if (BaseCloudPluginSceneElementModel.ImageType.NETWORK_EQUIPMENT.equals(c.getImageType())) {
                 filterElements.add(c);
             }
         }
