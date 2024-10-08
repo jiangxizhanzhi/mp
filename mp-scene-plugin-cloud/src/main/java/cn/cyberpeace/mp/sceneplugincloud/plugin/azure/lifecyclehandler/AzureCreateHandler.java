@@ -163,27 +163,12 @@ public class AzureCreateHandler extends CreateHandler {
                 }
                 getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_NETWORK);
 
-
-                Response<DataCollectionRuleResourceInner> workspaceAndDataCollectionRules = createWorkspaceAndDataCollectionRules(groupName);
-                String dataCollectionRulesId = workspaceAndDataCollectionRules.getValue().id();
-
-                // 再创建网关 和 防火墙
-                getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_GATEWAY);
-                getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_GATEWAY);
-
-
-                // 再创建终端 终端分虚拟机、容器、和web服务
-                getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_INSTANCE);
-
-
-                // 虚拟机
+//                查需要创建的所有报警规则
                 String eid = getPluginHandler().getSrcScene().getEid();
-
                 InstanceMapper instanceMapper = BeanCommon.getBean(InstanceMapper.class);
                 HumanCondition instanceHumanCondition = new HumanCondition()
                         .filterEqual(InstanceModel::getScene, eid);
                 InstanceModel instanceModel = instanceMapper.first(instanceHumanCondition);
-
 
                 AlertRuleMapper alertRuleMapper = BeanCommon.getBean(AlertRuleMapper.class);
                 HumanCondition alertRuleHumanCondition = new HumanCondition()
@@ -197,6 +182,23 @@ public class AzureCreateHandler extends CreateHandler {
                             return alertRuleBO;
                         })
                         .collect(Collectors.toList());
+//                创建日志区/数据收集规则
+                String dataCollectionRulesId = null;
+                if(!alertRuleBOList.isEmpty()){
+                    Response<DataCollectionRuleResourceInner> workspaceAndDataCollectionRules = createWorkspaceAndDataCollectionRules(groupName);
+                    dataCollectionRulesId = workspaceAndDataCollectionRules.getValue().id();
+                }
+
+                // 再创建网关 和 防火墙
+                getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_GATEWAY);
+                getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_GATEWAY);
+
+
+                // 再创建终端 终端分虚拟机、容器、和web服务
+                getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_INSTANCE);
+
+
+                // 虚拟机
                 List<Runnable> createVirtualMachineTasks = new ArrayList<>();
                 for (CloudPluginSceneElementBO element : filteredVirtualMachineElements) {
                     String nodeId = element.getSrcElement().getId();
@@ -292,7 +294,7 @@ public class AzureCreateHandler extends CreateHandler {
         } catch (Exception e) {
             e.printStackTrace();
 //            云场景启动失败立即删除云资源
-//            resourceService.getManager().resourceGroups().deleteByName(groupName);
+            resourceService.getManager().resourceGroups().deleteByName(groupName);
             throw new MpRuntimeException(BaseErrorCode.ERROR, e);
         }
     }

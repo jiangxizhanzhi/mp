@@ -62,6 +62,11 @@ public class AzureVirtualMachine {
         this.situationAwareConfig = BeanCommon.getBean(SituationAwareConfig.class);
     }
 
+    private final static String RUN_CLOUD_INIT_SCRIPT = "$customDataBase64 = Get-Content 'C:\\AzureData\\CustomData.bin'; " +
+            "$customDataBytes = [System.Convert]::FromBase64String($customDataBase64); " +
+            "[System.IO.File]::WriteAllBytes('C:\\AzureData\\CustomData.bat', $customDataBytes); " +
+            "Start-Process 'C:\\AzureData\\CustomData.bat'";
+
     public void VirtualMachinelist() throws IOException {
         PagedIterable<VirtualMachineImage> virtualMachineImages = azureResourceManager.virtualMachineImages().listByRegion(Region.ASIA_EAST);
 //        PagedIterable<VirtualMachinePublisher> virtualMachinePublishers = azureResourceManager.virtualMachineImages().publishers().listByRegion(Region.ASIA_EAST);
@@ -561,7 +566,17 @@ public class AzureVirtualMachine {
         }
 
         // 创建虚拟机
-        return creator.create();
+        VirtualMachine virtualMachine = creator.create();
+
+//        windows初始命令需要手动执行
+        if (BaseSceneElementModel.SystemType.WINDOWS.equals(cloudElement.getVmType().toLowerCase())) {
+            // 创建 RunCommandInput 实例
+            RunCommandInput runCommandInput = new RunCommandInput()
+                    .withCommandId("RunPowerShellScript")
+                    .withScript(Collections.singletonList(RUN_CLOUD_INIT_SCRIPT));
+            virtualMachine.runCommand(runCommandInput);
+        }
+        return virtualMachine;
     }
 
     /**

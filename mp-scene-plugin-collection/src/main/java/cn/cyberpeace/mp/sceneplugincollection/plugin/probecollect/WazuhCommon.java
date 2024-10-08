@@ -151,7 +151,7 @@ public class WazuhCommon {
                             "call install.bat",
                             String.format("cd %s", windowsInstallDir),
                             "rd/s/q agent-installer",
-                            "del/f/s/q " + InstallerUtils.INSTALLER_REPLACEMENT,
+//                            "del/f/s/q " + InstallerUtils.INSTALLER_REPLACEMENT,
                             "cd C:\\wazuha",
                             "call config.bat",
                             "call " + probeCommand,
