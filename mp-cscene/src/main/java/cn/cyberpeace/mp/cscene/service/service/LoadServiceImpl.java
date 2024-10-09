@@ -1178,7 +1178,7 @@ public class LoadServiceImpl {
         return fileList;
     }
 
-    public Boolean deleteLoadExecutionResultUploadFile(String pk) {
+    public Boolean deleteLoadExecutionResultUploadFile(Integer pk) {
         MpDevopsLoadSceneUploadLogFile file = loadMapper.getFile(pk);
         Boolean flag = loadMapper.deleteLoadExecutionResultUploadFile(pk);
         if (flag) {

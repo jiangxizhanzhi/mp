@@ -353,7 +353,7 @@ public class LoadController {
      * */
     @ApiOperation(value = "载荷执行结果导入的文件删除", notes = "")
     @DeleteMapping("/deleteLoadExecutionResultUploadFile")
-    public ServiceResult deleteLoadExecutionResultUploadFile(@RequestParam(value = "pk") String pk) {
+    public ServiceResult deleteLoadExecutionResultUploadFile(@RequestParam(value = "pk") Integer pk) {
         Boolean flag = loadService.deleteLoadExecutionResultUploadFile(pk);
         return new ServiceResult(flag, BaseErrorCode.SUCCESS).asResult();
     }

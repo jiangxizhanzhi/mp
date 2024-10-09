@@ -81,9 +81,9 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     List<MpDevopsLoadSceneUploadLogFile> getLoadExecutionResultUploadFile(String sceneId);
 
-    Boolean deleteLoadExecutionResultUploadFile(String pk);
+    Boolean deleteLoadExecutionResultUploadFile(Integer pk);
 
-    MpDevopsLoadSceneUploadLogFile getFile(String pk);
+    MpDevopsLoadSceneUploadLogFile getFile(Integer pk);
 
     void importLoadExecutionResultFile(String sceneId, @Param("param") Object data);
 }
