@@ -1151,14 +1151,30 @@ public class LoadServiceImpl {
         return getLoadResultByPks;
     }
 
-    public ServiceResult importLoadExecutionResultFile(MultipartFile file) throws MpRuntimeException, IOException {
+    public ServiceResult importLoadExecutionResultFile(MultipartFile file, String sceneId) throws MpRuntimeException, IOException {
         ServiceResult uploadResult = commonFileService.uploadFile
                 (file.getInputStream(), file.getOriginalFilename(), FileUtil.getSuffix(file.getOriginalFilename()), CommonFileServiceImpl.LOAD_RESULT_FILE);
+        if(uploadResult.isSuccess()){
+            loadMapper.importLoadExecutionResultFile(sceneId, uploadResult.getData());
+        }
         return uploadResult;
     }
 
     public List<MpDevopsLoadSceneUploadLogFile> getLoadExecutionResultUploadFile(String sceneId) {
         return loadMapper.getLoadExecutionResultUploadFile(sceneId);
+    }
+
+    public Boolean deleteLoadExecutionResultUploadFile(String pk) {
+        MpDevopsLoadSceneUploadLogFile file = loadMapper.getFile(pk);
+        Boolean flag = loadMapper.deleteLoadExecutionResultUploadFile(pk);
+        if (flag) {
+            try {
+                FileUtil.del(file.getFile());
+            } catch (Exception e) {
+                throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
+            }
+        }
+        return flag;
     }
 }
 

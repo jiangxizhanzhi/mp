@@ -214,6 +214,14 @@
         </foreach>
     </insert>
 
+    <insert id="importLoadExecutionResultFile">
+        INSERT INTO
+            mp_devops_load_scene_upload_log_file
+        (scene_id,file_name,file,update_time,create_time)
+        VALUES
+        (#{sceneId},#{param.fileName},#{param.httpUrl},now(),now())
+    </insert>
+
     <update id="updateLoadByPk">
         UPDATE
         mp_devops_load
@@ -402,6 +410,14 @@
                 </foreach>
             </if>
         </where>
+    </delete>
+
+    <delete id="deleteLoadExecutionResultUploadFile">
+        DELETE
+        FROM
+            mp_devops_load_scene_upload_log_file
+        WHERE
+            pk = #{pk}
     </delete>
 
     <select id="getLoadList" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoad">
@@ -675,5 +691,14 @@
             mp_devops_load_scene_upload_log_file
         WHERE
             scene_id = #{sceneId}
+    </select>
+
+    <select id="getFile" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneUploadLogFile">
+        SELECT
+            *
+        FROM
+            mp_devops_load_scene_upload_log_file
+        WHERE
+            pk = #{pk}
     </select>
 </mapper>

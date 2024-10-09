@@ -23,7 +23,6 @@ public class CommonFileServiceImpl extends BaseRemoteFileServiceImpl {
     public static final String README = "readMe";
     public static final String LOAD_RESULT_FILE = "load_result_file";
 
-
     @Autowired
     public CommonFileServiceImpl(FdfsCommon fdfsCommon) {
         setFileClient(LfsCommon.lfsClient);

@@ -332,8 +332,9 @@ public class LoadController {
      * */
     @ApiOperation(value = "载荷执行结果文件导入(xlsx、json、xml格式文件导入)", notes = "")
     @PostMapping("/importLoadExecutionResultFile")
-    public ServiceResult importLoadExecutionResultFile(@RequestParam(value = "file") MultipartFile file) throws MpRuntimeException, IOException {
-        ServiceResult importLoadExecutionResultFile = loadService.importLoadExecutionResultFile(file);
+    public ServiceResult importLoadExecutionResultFile(@RequestParam(value = "file") MultipartFile file,
+                                                       @RequestParam(value = "scene_id") String sceneId) throws MpRuntimeException, IOException {
+        ServiceResult importLoadExecutionResultFile = loadService.importLoadExecutionResultFile(file, sceneId);
         return importLoadExecutionResultFile;
     }
 
@@ -345,6 +346,16 @@ public class LoadController {
     public ServiceResult getLoadExecutionResultUploadFile(@RequestParam(value = "scene_id") String sceneId) {
         List<MpDevopsLoadSceneUploadLogFile> list = loadService.getLoadExecutionResultUploadFile(sceneId);
         return new ServiceResult(list, BaseErrorCode.SUCCESS).asResult();
+    }
+
+    /*
+     * 载荷执行结果导入的文件删除
+     * */
+    @ApiOperation(value = "载荷执行结果导入的文件删除", notes = "")
+    @DeleteMapping("/deleteLoadExecutionResultUploadFile")
+    public ServiceResult deleteLoadExecutionResultUploadFile(@RequestParam(value = "pk") String pk) {
+        Boolean flag = loadService.deleteLoadExecutionResultUploadFile(pk);
+        return new ServiceResult(flag, BaseErrorCode.SUCCESS).asResult();
     }
 
     /*
