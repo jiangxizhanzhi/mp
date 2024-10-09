@@ -186,6 +186,16 @@ public class LoadController {
         return synchronousDataSource;
     }
 
+    /*
+     * 获取载荷改造外部链接
+     * */
+    @ApiOperation(value = "获取载荷改造外部链接", notes = "")
+    @GetMapping("/getLoadTransformServiceUrl")
+    public ServiceResult getLoadTransformServiceUrl() {
+        String url = loadService.getLoadTransformServiceUrl();
+        return new ServiceResult(url, BaseErrorCode.SUCCESS).asResult();
+    }
+
 //**********************************************************************************************************//
 
     /*

@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.common.constant.codeEnum.CommonConvertStatusEnum;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonFunctionCodeEnum;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonStatusCodeEnum;
 import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
+import cn.cyberpeace.mp.common.service.impl.CommonConfigServiceImpl;
 import cn.cyberpeace.mp.common.service.impl.CommonFileServiceImpl;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
@@ -68,6 +69,12 @@ public class LoadServiceImpl {
 
     @Autowired
     private CommonFileServiceImpl commonFileService;
+
+    @Autowired
+    private CommonConfigServiceImpl commonConfigService;
+
+    // 载荷改造默认code
+    private static final String LOAD_TRANSFORM_CODE = "loadTransformCode";
 
     /*
      * 载荷页面
@@ -1025,6 +1032,10 @@ public class LoadServiceImpl {
         return result;
     }
 
+    public String getLoadTransformServiceUrl() {
+        return commonConfigService.getUrlByKey(LOAD_TRANSFORM_CODE).getServiceUrl();
+    }
+
     /*
      * 根据载荷执行结果工具列表
      * */
@@ -1044,14 +1055,6 @@ public class LoadServiceImpl {
             load.setControlTypeName(nextLevelMapsByCodes.get(load.getControlType()));
         }
         return data;
-    }
-
-    private Integer addResultLog(JSONObject requestData) {
-        //log表新增初始数据
-        requestData.put("resultStatus", "1005010103");
-        requestData.put("resultType", "自动上报");
-        Integer pk = loadMapper.addResult(requestData);
-        return pk;
     }
 
     public List<JSONObject> getLoadResultBySceneId(String sceneId) {
