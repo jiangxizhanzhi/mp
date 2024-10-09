@@ -35,6 +35,11 @@ public class MpDevopsLoadSceneUploadLogFile {
     private String file;
 
     /**
+     * 文件类型
+     */
+    private String fileType;
+
+    /**
      * 更新时间
      */
     private LocalDateTime updateTime;

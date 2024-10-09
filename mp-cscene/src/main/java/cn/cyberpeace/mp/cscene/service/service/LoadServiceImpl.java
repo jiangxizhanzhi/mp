@@ -1161,7 +1161,21 @@ public class LoadServiceImpl {
     }
 
     public List<MpDevopsLoadSceneUploadLogFile> getLoadExecutionResultUploadFile(String sceneId) {
-        return loadMapper.getLoadExecutionResultUploadFile(sceneId);
+        List<MpDevopsLoadSceneUploadLogFile> fileList = loadMapper.getLoadExecutionResultUploadFile(sceneId);
+        if (fileList != null && !fileList.isEmpty()) {
+            for (MpDevopsLoadSceneUploadLogFile file : fileList) {
+                String fileName = file.getFileName();
+                if (fileName != null && fileName.contains(".")) {
+                    // 提取文件后缀名
+                    String fileType = fileName.substring(fileName.lastIndexOf(".") + 1);
+                    file.setFileType(fileType);
+                } else {
+                    // 如果没有后缀名，可以设置一个默认值或者保持null
+                    file.setFileType("unknown");
+                }
+            }
+        }
+        return fileList;
     }
 
     public Boolean deleteLoadExecutionResultUploadFile(String pk) {
