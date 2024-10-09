@@ -78,7 +78,6 @@
         INSERT INTO mp_devops_load
         (id,
          tool_name,
-         tool_platform,
          tool_description,
          action_type,
          run_table,
@@ -97,7 +96,6 @@
          update_time)
         VALUES (UUID(),
                 #{param.toolName},
-                #{param.toolPlatform},
                 #{param.toolDescription},
                 #{param.actionType},
                 #{param.runTable},
@@ -141,7 +139,6 @@
         id,
         tool_name,
         tool_description,
-        tool_platform,
         action_type,
         run_table,
         control_type,
@@ -163,7 +160,6 @@
             (#{item.id},
             #{item.toolName},
             #{item.toolDescription},
-            #{item.toolPlatform},
             #{item.actionType},
             #{item.runTable},
             #{item.controlType},
@@ -342,9 +338,6 @@
                 <if test="item.toolDescription != null and item.toolDescription != ''">
                     tool_description = #{item.toolDescription},
                 </if>
-                <if test="item.toolPlatform != null and item.toolPlatform != ''">
-                    tool_platform = #{item.toolPlatform},
-                </if>
                 <if test="item.actionType != null and item.actionType != ''">
                     action_type = #{item.actionType},
                 </if>
@@ -471,7 +464,6 @@
         log.*,
         mdl.tool_name,
         mdl.tool_description,
-        mdl.tool_platform,
         mdl.action_type,
         mdl.run_table,
         mdl.control_type
