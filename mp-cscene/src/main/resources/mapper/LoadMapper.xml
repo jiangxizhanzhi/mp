@@ -666,4 +666,14 @@
         WHERE
             id = #{id}
     </select>
+
+    <select id="getLoadExecutionResultUploadFile"
+            resultType="cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneUploadLogFile">
+        SELECT
+            *
+        FROM
+            mp_devops_load_scene_upload_log_file
+        WHERE
+            scene_id = #{sceneId}
+    </select>
 </mapper>

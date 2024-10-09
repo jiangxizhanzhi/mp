@@ -1,15 +1,18 @@
 package cn.cyberpeace.mp.cscene.service.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonConvertStatusEnum;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonFunctionCodeEnum;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonStatusCodeEnum;
 import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
-import cn.cyberpeace.mp.cscene.constant.LoadConvertCode;
+import cn.cyberpeace.mp.common.service.impl.CommonFileServiceImpl;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneUploadLogFile;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
@@ -62,6 +65,9 @@ public class LoadServiceImpl {
 
     @Autowired
     private CsceneInstanceService csceneInstanceService;
+
+    @Autowired
+    private CommonFileServiceImpl commonFileService;
 
     /*
      * 载荷页面
@@ -1140,6 +1146,16 @@ public class LoadServiceImpl {
                     .collect(Collectors.toList());
         }
         return getLoadResultByPks;
+    }
+
+    public ServiceResult importLoadExecutionResultFile(MultipartFile file) throws MpRuntimeException, IOException {
+        ServiceResult uploadResult = commonFileService.uploadFile
+                (file.getInputStream(), file.getOriginalFilename(), FileUtil.getSuffix(file.getOriginalFilename()), CommonFileServiceImpl.LOAD_RESULT_FILE);
+        return uploadResult;
+    }
+
+    public List<MpDevopsLoadSceneUploadLogFile> getLoadExecutionResultUploadFile(String sceneId) {
+        return loadMapper.getLoadExecutionResultUploadFile(sceneId);
     }
 }
 

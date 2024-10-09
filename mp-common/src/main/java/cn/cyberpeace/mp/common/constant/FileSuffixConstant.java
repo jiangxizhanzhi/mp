@@ -133,4 +133,13 @@ public interface FileSuffixConstant {
         add("AVIF");
     }};
 
+    /**
+     * 载荷执行结果文件上传
+     */
+    List<String> LOAD_RESULT_UPLOAD_FILE = new ArrayList<>(){{
+        add("json");
+        add("xml");
+        add("xlsx");
+    }};
+
 }

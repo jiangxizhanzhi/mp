@@ -18,9 +18,10 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 public class CommonFileServiceImpl extends BaseRemoteFileServiceImpl {
 
-    private static final String IMAGE = "image";
-    private static final String ATTACHMENT = "attachment";
-    private static final String README = "readMe";
+    public static final String IMAGE = "image";
+    public static final String ATTACHMENT = "attachment";
+    public static final String README = "readMe";
+    public static final String LOAD_RESULT_FILE = "load_result_file";
 
 
     @Autowired
@@ -43,6 +44,11 @@ public class CommonFileServiceImpl extends BaseRemoteFileServiceImpl {
                 break;
             case README:
                 if (!SuffixCheckUtil.checkBySuffix(fileSuffix, FileSuffixConstant.LOAD_UPLOAD_FILE_README_LIST)) {
+                    return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID, "不符合所需格式的文件").asResult();
+                }
+                break;
+            case LOAD_RESULT_FILE:
+                if (!SuffixCheckUtil.checkBySuffix(fileSuffix, FileSuffixConstant.LOAD_RESULT_UPLOAD_FILE)) {
                     return new ServiceResult(null, BaseErrorCode.PARAMS_INVALID, "不符合所需格式的文件").asResult();
                 }
                 break;

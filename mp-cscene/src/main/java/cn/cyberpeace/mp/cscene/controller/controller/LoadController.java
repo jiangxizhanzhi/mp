@@ -2,11 +2,13 @@ package cn.cyberpeace.mp.cscene.controller.controller;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneUploadLogFile;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
 import cn.cyberpeace.mp.cscene.request.load.LoadResultExportRequest;
@@ -313,6 +315,26 @@ public class LoadController {
         } else {
             return new ServiceResult(null, BaseErrorCode.ERROR, "载荷执行结果导出失败").asResult();
         }
+    }
+
+    /*
+     * 载荷执行结果文件导入(xlsx、json、xml格式文件导入)
+     * */
+    @ApiOperation(value = "载荷执行结果文件导入(xlsx、json、xml格式文件导入)", notes = "")
+    @PostMapping("/importLoadExecutionResultFile")
+    public ServiceResult importLoadExecutionResultFile(@RequestParam(value = "file") MultipartFile file) throws MpRuntimeException, IOException {
+        ServiceResult importLoadExecutionResultFile = loadService.importLoadExecutionResultFile(file);
+        return importLoadExecutionResultFile;
+    }
+
+    /*
+     * 载荷执行结果导入文件列表
+     * */
+    @ApiOperation(value = "载荷执行结果导入文件列表", notes = "")
+    @GetMapping("/getLoadExecutionResultUploadFile")
+    public ServiceResult getLoadExecutionResultUploadFile(@RequestParam(value = "scene_id") String sceneId) {
+        List<MpDevopsLoadSceneUploadLogFile> list = loadService.getLoadExecutionResultUploadFile(sceneId);
+        return new ServiceResult(list, BaseErrorCode.SUCCESS).asResult();
     }
 
     /*

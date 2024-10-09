@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
+import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneUploadLogFile;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
 import cn.cyberpeace.mp.cscene.request.load.LoadResultSearchRequest;
@@ -77,4 +78,6 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
     MpDevopsLoad getLoadByPk(String pk);
 
     MpDevopsLoad getLoadById(String id);
+
+    List<MpDevopsLoadSceneUploadLogFile> getLoadExecutionResultUploadFile(String sceneId);
 }
