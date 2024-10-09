@@ -432,7 +432,7 @@
                 and tool_name like concat('%', #{param.toolName}, '%')
             </if>
             <if test="param != null and param.actionType != null and param.actionType != ''">
-                and action_type = #{param.actionType}
+                and action_type like concat('%', #{param.actionType}, '%')
             </if>
             <if test="param != null and param.runTable != null and param.runTable != ''">
                 and run_table = #{param.runTable}
@@ -584,7 +584,7 @@
                 and tool_name like concat('%', #{param.toolName}, '%')
             </if>
             <if test="param != null and param.actionType != null and param.actionType != ''">
-                and action_type = #{param.actionType}
+                and action_type like concat('%', #{param.actionType}, '%')
             </if>
             <if test="param != null and param.runTable != null and param.runTable != ''">
                 and run_table = #{param.runTable}
