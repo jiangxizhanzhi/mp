@@ -94,12 +94,6 @@ public class LoadServiceImpl {
                 item.setActionTypeConvertName(item.getActionType(),nextLevelMapsByCodes);
             }
             item.setControlTypeName(nextLevelMapsByCodes.get(item.getControlType()));
-            String source = item.getSource();
-            if (source != null && source.equals("1")) {
-                item.setSource("外部同步");
-            } else if (source != null && source.equals("2")) {
-                item.setSource("本地创建");
-            }
         });
         Integer total = loadMapper.getLoadListNum(requestData);
         JSONObject result = new JSONObject();
@@ -119,12 +113,6 @@ public class LoadServiceImpl {
             load.setActionTypeConvertName(load.getActionType(),nextLevelMapsByCodes);
         }
         load.setControlTypeName(nextLevelMapsByCodes.get(load.getControlType()));
-        String source = load.getSource();
-        if (source != null && source.equals("1")) {
-            load.setSource("外部同步");
-        } else if (source != null && source.equals("2")) {
-            load.setSource("本地创建");
-        }
         return load;
     }
 
@@ -139,12 +127,6 @@ public class LoadServiceImpl {
             load.setActionTypeConvertName(load.getActionType(),nextLevelMapsByCodes);
         }
         load.setControlTypeName(nextLevelMapsByCodes.get(load.getControlType()));
-        String source = load.getSource();
-        if (source != null && source.equals("1")) {
-            load.setSource("外部同步");
-        } else if (source != null && source.equals("2")) {
-            load.setSource("本地创建");
-        }
         return load;
     }
 
