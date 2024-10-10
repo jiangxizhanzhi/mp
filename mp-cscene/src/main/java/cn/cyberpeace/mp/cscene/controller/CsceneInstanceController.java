@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.controller.request.*;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.dto.scene.CsceneLoadDto;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
@@ -1080,6 +1081,17 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         String sceneId = this.modelService.get(id).getSource().getObj().getScene();
         var csceneBO = getByAreaId(sceneId, areaId);
         return new ServiceResult<>(csceneBO).asResult();
+    }
+
+    /**
+     * @param csceneLoadDto
+     * @return
+     */
+    @ApiOperation("添加载荷")
+    @ApiImplicitParam(name = "csceneLoadDto", value = "请求体", dataTypeClass = CsceneLoadDto.class)
+    @PostMapping("/add_load")
+    public ServiceResult<Object> addLoad(@RequestBody CsceneLoadDto csceneLoadDto) {
+        return modelService.addLoad(csceneLoadDto).asResult();
     }
 
     private CsceneInstanceBO getByAreaId(String sceneId, String areaId) {

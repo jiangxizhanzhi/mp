@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.dto.scene;
 
+import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import io.swagger.annotations.ApiModelProperty;
@@ -19,4 +20,8 @@ public class CsceneLoadDto {
     private CloudPluginSceneConfigElementBO pluginSceneConfigElement;
     @ApiModelProperty(value = "启动场景id")
     private String sceneId;
+    @ApiModelProperty(value = "场景实例id")
+    private String csceneId;
+    @ApiModelProperty(value = "场景上下文数据")
+    private CsceneContextBO context;
 }
