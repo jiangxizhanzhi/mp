@@ -33,6 +33,11 @@ springfox:
       swagger-ui:
         enabled: ${SWAGGER_DOC_UI:false}
 
+# mp设置
+project:
+  setting:
+    load-transform-url: ${LOAD-TRANSFORM-URL:127.0.0.1:80}
+
 # 中台各模块相关配置
 mp:
   aggregation:

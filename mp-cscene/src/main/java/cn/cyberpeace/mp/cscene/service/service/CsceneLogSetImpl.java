@@ -17,6 +17,9 @@ import java.util.List;
 @Service
 public class CsceneLogSetImpl {
 
+    // 场景采集数据默认保存周期7天
+    private static final Integer DEFAULT_CYCLE = 7;
+
     @Autowired
     private CsceneLogSetMapper csceneLogSetMapper;
 
@@ -30,18 +33,18 @@ public class CsceneLogSetImpl {
 
     // 定时任务 每天凌晨一点执行
     @Scheduled(cron = "0 0 1 * * ?")
-    public void cleanCollectesDataTask() {
+    public void cleanCollectedDataTask() {
         // 查询所有存活的场景
         List<String> sceneIds = csceneLogSetMapper.selectLivedSceneInstance();
         if (sceneIds != null && sceneIds.size() > 0) {
             // 删除超出时限的es数据
-            sceneIds.forEach(sceneId -> cleanCollectesData(sceneId));
+            sceneIds.forEach(sceneId -> cleanCollectedData(sceneId));
         }
     }
 
-    public void cleanCollectesData(String sceneId) {
+    public void cleanCollectedData(String sceneId) {
         Integer days = csceneLogSetMapper.getSceneCollectionDataCycle(sceneId);
-        if (days != null || days == 0) {
+        if (days != null) {
             // 设置默认存储周期
             days = 7;
         }
@@ -58,7 +61,8 @@ public class CsceneLogSetImpl {
 
     public Integer getSceneCollectionDataCycle(String sceneId) {
         // 无数据则为默认值7
-        return csceneLogSetMapper.getSceneCollectionDataCycle(sceneId) != null ? csceneLogSetMapper.getSceneCollectionDataCycle(sceneId) : 7;
+        return csceneLogSetMapper.getSceneCollectionDataCycle(sceneId) != null ?
+                csceneLogSetMapper.getSceneCollectionDataCycle(sceneId) : DEFAULT_CYCLE;
     }
 }
 

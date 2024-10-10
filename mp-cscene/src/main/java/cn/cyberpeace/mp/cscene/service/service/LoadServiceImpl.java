@@ -32,6 +32,7 @@ import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -73,8 +74,9 @@ public class LoadServiceImpl {
     @Autowired
     private CommonConfigServiceImpl commonConfigService;
 
-    // 载荷改造默认code
-    private static final String LOAD_TRANSFORM_CODE = "loadTransformCode";
+    // 载荷改造地址
+    @Value("${project.setting.load-transform-url:http://ip:port}")
+    private String LOAD_TRANSFORM_URL;
 
     /*
      * 载荷页面
@@ -91,7 +93,7 @@ public class LoadServiceImpl {
         list.forEach(item -> {
             item.setRunTableName(nextLevelMapsByCodes.get(item.getRunTable()));
             if (StringUtils.hasText(item.getActionType())) {
-                item.setActionTypeConvertName(item.getActionType(),nextLevelMapsByCodes);
+                item.setActionTypeConvertName(item.getActionType(), nextLevelMapsByCodes);
             }
             item.setControlTypeName(nextLevelMapsByCodes.get(item.getControlType()));
         });
@@ -110,7 +112,7 @@ public class LoadServiceImpl {
         Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes(CommonStatusCodeEnum.CODE.getCode());
         load.setRunTableName(nextLevelMapsByCodes.get(load.getRunTable()));
         if (StringUtils.hasText(load.getActionType())) {
-            load.setActionTypeConvertName(load.getActionType(),nextLevelMapsByCodes);
+            load.setActionTypeConvertName(load.getActionType(), nextLevelMapsByCodes);
         }
         load.setControlTypeName(nextLevelMapsByCodes.get(load.getControlType()));
         return load;
@@ -124,7 +126,7 @@ public class LoadServiceImpl {
         Map<String, String> nextLevelMapsByCodes = commonCodeService.getNextLevelMapsByCodes(CommonStatusCodeEnum.CODE.getCode());
         load.setRunTableName(nextLevelMapsByCodes.get(load.getRunTable()));
         if (StringUtils.hasText(load.getActionType())) {
-            load.setActionTypeConvertName(load.getActionType(),nextLevelMapsByCodes);
+            load.setActionTypeConvertName(load.getActionType(), nextLevelMapsByCodes);
         }
         load.setControlTypeName(nextLevelMapsByCodes.get(load.getControlType()));
         return load;
@@ -454,7 +456,7 @@ public class LoadServiceImpl {
                 .map(log -> {
                     log.setControlTypeName(log.getControlType() != null ? codeMap.get(log.getControlType()) : log.getControlType());
                     if (StringUtils.hasText(log.getActionType())) {
-                        log.setActionTypeConvertName(log.getActionType(),codeMap);
+                        log.setActionTypeConvertName(log.getActionType(), codeMap);
                     }
                     log.setResultTypeName(log.getResultType() != null ? codeMap.get(log.getResultType()) : log.getResultType());
                     log.setResultStatusName(log.getResultStatus() != null ? codeMap.get(log.getResultStatus()) : log.getResultStatus());
@@ -1015,7 +1017,8 @@ public class LoadServiceImpl {
     }
 
     public String getLoadTransformServiceUrl() {
-        return commonConfigService.getUrlByKey(LOAD_TRANSFORM_CODE).getServiceUrl();
+        // 从环境变量中读取
+        return LOAD_TRANSFORM_URL;
     }
 
     /*
@@ -1032,7 +1035,7 @@ public class LoadServiceImpl {
         for (MpDevopsLoad load : data) {
             load.setRunTableName(nextLevelMapsByCodes.get(load.getRunTable()));
             if (StringUtils.hasText(load.getActionType())) {
-                load.setActionTypeConvertName(load.getActionType(),nextLevelMapsByCodes);
+                load.setActionTypeConvertName(load.getActionType(), nextLevelMapsByCodes);
             }
             load.setControlTypeName(nextLevelMapsByCodes.get(load.getControlType()));
         }
@@ -1122,7 +1125,7 @@ public class LoadServiceImpl {
                     .map(log -> {
                         log.setControlTypeName(log.getControlType() != null ? codeMap.get(log.getControlType()) : log.getControlType());
                         if (StringUtils.hasText(log.getActionType())) {
-                            log.setActionTypeConvertName(log.getActionType(),codeMap);
+                            log.setActionTypeConvertName(log.getActionType(), codeMap);
                         }
                         log.setResultTypeName(log.getResultType() != null ? codeMap.get(log.getResultType()) : log.getResultType());
                         log.setResultStatusName(log.getResultStatus() != null ? codeMap.get(log.getResultStatus()) : log.getResultStatus());
@@ -1136,7 +1139,7 @@ public class LoadServiceImpl {
     public ServiceResult importLoadExecutionResultFile(MultipartFile file, String sceneId) throws MpRuntimeException, IOException {
         ServiceResult uploadResult = commonFileService.uploadFile
                 (file.getInputStream(), file.getOriginalFilename(), FileUtil.getSuffix(file.getOriginalFilename()), CommonFileServiceImpl.LOAD_RESULT_FILE);
-        if(uploadResult.isSuccess()){
+        if (uploadResult.isSuccess()) {
             loadMapper.importLoadExecutionResultFile(sceneId, uploadResult.getData());
         }
         return uploadResult;
