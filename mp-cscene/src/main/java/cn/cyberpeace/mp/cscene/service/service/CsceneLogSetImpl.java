@@ -44,7 +44,7 @@ public class CsceneLogSetImpl {
 
     public void cleanCollectedData(String sceneId) {
         Integer days = csceneLogSetMapper.getSceneCollectionDataCycle(sceneId);
-        if (days != null) {
+        if (days == null) {
             // 设置默认存储周期
             days = 7;
         }

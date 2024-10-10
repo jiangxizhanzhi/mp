@@ -365,7 +365,6 @@ public class LoadServiceImpl {
     }
 
     /*
-
      * 根据场景id获取绑定的载荷
      * */
     public List<MpDevopsLoad> getLoadBySceneId(String sceneId) {
