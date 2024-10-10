@@ -344,6 +344,31 @@ public class ProbeService {
         // 4. 表数据？
     }
 
+    /**
+     * 根据时限清除探针数据
+     * @param agentNames
+     * @param sceneInstanceStartTime
+     */
+    public void cleanProbeDataByCycle(List<String> agentNames, LocalDateTime sceneInstanceStartTime, Integer cycleDays) {
+        if (Objects.isNull(sceneInstanceStartTime)) {
+            log.error("scene instance startTime should not be null!");
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        wazuhEventRequest.setAgentNames(agentNames);
+        wazuhEventRequest.setStartTime(sceneInstanceStartTime);
+        if(cycleDays != null){
+            // LocalDateTime.now()减去cycleDays的天数
+            wazuhEventRequest.setEndTime(LocalDateTime.now().minusDays(cycleDays));
+        }else{
+            wazuhEventRequest.setEndTime(LocalDateTime.now());
+        }
+
+        // 清除es 文档数据
+        Long deletedCount = dataCollectionService.deleteDocByAgentNames(wazuhEventRequest);
+        log.info("deletedCount:{}", deletedCount);
+    }
+
     public ProbeModel getByName(String name) {
         return probeMapper.getByName(name);
     }
