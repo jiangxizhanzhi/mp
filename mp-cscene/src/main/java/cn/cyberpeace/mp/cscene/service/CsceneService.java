@@ -37,16 +37,10 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
-import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
-import cn.cyberpeace.mp.scene.model.SceneConfigModel;
-import cn.cyberpeace.mp.scene.model.SceneElementModel;
-import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.*;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
-import cn.cyberpeace.mp.scene.repository.SceneConfigElementMapper;
-import cn.cyberpeace.mp.scene.repository.SceneConfigMapper;
-import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
-import cn.cyberpeace.mp.scene.repository.SceneMapper;
+import cn.cyberpeace.mp.scene.repository.*;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
@@ -115,6 +109,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     private AzureVmSizeMapper azureVmSizeMapper;
     @Resource
     private AzureVmOsDiskMapper azureVmOsDiskMapper;
+    @Resource
+    private SceneConfigElementPluginMapper sceneConfigElementPluginMapper;
 
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
@@ -964,5 +960,32 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         SceneConfigElementMapper sceneConfigElementMapper = BeanCommon.getBean(SceneConfigElementMapper.class);
         int num = sceneConfigElementMapper.total(condition);
         return num;
+    }
+
+    /**
+     * 保存实例数据
+     * @param csceneId
+     * @param sceneConfigElementModel
+     * @param cloudPluginSceneElementModel
+     * @param cloudPluginSceneConfigElementModel
+     */
+    public void saveConfigData(String csceneId, SceneConfigElementModel sceneConfigElementModel, CloudPluginSceneElementModel cloudPluginSceneElementModel,
+                               CloudPluginSceneConfigElementModel cloudPluginSceneConfigElementModel) {
+        log.info("saveConfigData begin. csceneId:{}",csceneId);
+        CsceneModel csceneModel = getModelMapper().get(csceneId);
+        String sceneConfig = csceneModel.getSceneConfig();
+        SceneConfigModel sceneConfigModel = sceneConfigMapper.get(sceneConfig);
+
+        sceneConfigElementModel.setScene(sceneConfigModel.getId());
+        sceneConfigElementMapper.create(sceneConfigElementModel);
+        SceneConfigElementPluginModel sceneConfigElementPluginModel = new SceneConfigElementPluginModel();
+        sceneConfigElementPluginModel.setScene(sceneConfigModel.getId());
+        sceneConfigElementPluginModel.setSceneElement(sceneConfigElementModel.getId());
+        sceneConfigElementPluginModel.setPluginKey("cpcloud");
+        sceneConfigElementPluginMapper.create(sceneConfigElementPluginModel);
+        cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(cloudPluginSceneElementModel, cloudPluginSceneConfigElementModel);
+        cloudPluginSceneConfigElementModel.setScene(sceneConfigModel.getId());
+        cloudPluginSceneConfigElementMapper.create(cloudPluginSceneConfigElementModel);
+        log.info("saveConfigData end.");
     }
 }

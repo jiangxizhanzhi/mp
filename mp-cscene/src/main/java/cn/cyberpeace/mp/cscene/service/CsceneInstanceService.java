@@ -29,18 +29,13 @@ import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeExpansionDiskActionRequest;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
-import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
-import cn.cyberpeace.mp.cscene.dto.scene.SceneInfo;
-import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
-import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
-import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
-import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
-import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
-import cn.cyberpeace.mp.cscene.model.CsceneModel;
+import cn.cyberpeace.mp.cscene.dto.scene.*;
+import cn.cyberpeace.mp.cscene.model.*;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.report.bo.CollectedCsceneElementCommonBO;
 import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.*;
+import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
@@ -68,6 +63,7 @@ import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -119,9 +115,10 @@ import com.azure.resourcemanager.compute.models.ComputeResourceType;
 import com.azure.resourcemanager.resourcegraph.ResourceGraphManager;
 import com.azure.resourcemanager.resourcegraph.models.QueryRequest;
 import com.azure.resourcemanager.resourcegraph.models.QueryResponse;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.cache.Cache;
 import com.google.common.collect.Lists;
-import lombok.Data;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -256,6 +253,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Autowired
     private InstanceMapper instanceMapper;
 
+    @Resource
+    private SceneMapper sceneMapper;
+
+    @Resource
+    private LoadMapper loadMapper;
+
+    @Resource
+    private SceneElementPluginMapper sceneElementPluginMapper;
 
     // expires in 10 minutes
     private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -1056,7 +1061,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 //        处理云场景警告
                 ListObjServiceResult<CollectionHostEventBO> listObjServiceResult = new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
                 List<ElementLogListModel> logList = new ArrayList<>();
-                processAndFillHostEvents(listObjServiceResult,queryParams,id, logList);
+                processAndFillHostEvents(listObjServiceResult, queryParams, id, logList);
                 return listObjServiceResult;
             }
         }
@@ -1094,12 +1099,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         var logList = elementLogListMapper.list(humanCondition);
 
 
-
         processAndFillHostEvents(hostEventsBos, queryParams, sceneId, logList);
     }
 
     /**
      * 处理和填充主机事件列表
+     *
      * @param hostEventsBos
      * @param queryParams
      * @param sceneId
@@ -2532,5 +2537,229 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
 
 
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ServiceResult<Object> addLoad(CsceneLoadDto csceneLoadDto) {
+//        过滤出所有load节点 数据库过滤出要新增节点
+        String sceneId = csceneLoadDto.getSceneId();
+        String loadToolId = csceneLoadDto.getPluginSceneConfigElement().getLoadToolId();
+        log.info("addLoad begin. sceneId:{} loadToolId:{}",sceneId, loadToolId);
+
+        CsceneInstanceModel csceneInstanceModel = getModelMapper().get(sceneId);
+//        根据场景id获取对应模板
+        HumanCondition selectHumanCondition = new HumanCondition()
+                .filterEqual(CloudPluginSceneElementModel::getScene, csceneInstanceModel.getScene())
+                .filterEqual(CloudPluginSceneElementModel::getLoadToolId, loadToolId);
+        List<CloudPluginSceneElementModel> list = cloudPluginSceneElementMapper.list(selectHumanCondition);
+
+        if (list.isEmpty()) {
+//            增加载荷
+//            确定位置
+            String position2 = getPosition2(csceneInstanceModel);
+            String outerPosition2 = getOuterPosition2(csceneInstanceModel);
+            //            实例场景保存
+            SceneConfigElementModel sceneConfigElementModel = csceneLoadDto.getSceneConfigElement().toModel();
+            CloudPluginSceneConfigElementModel cloudPluginSceneConfigElementModel = csceneLoadDto.getPluginSceneConfigElement().toModel();
+            MpDevopsLoad mpDevopsLoad = loadMapper.getLoadById(cloudPluginSceneConfigElementModel.getLoadToolId());
+            log.info("addLoad mpDevopsLoad:{}",JsonCommon.stringify(mpDevopsLoad));
+            SceneElementModel sceneElementModel = new SceneElementModel();
+            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(sceneConfigElementModel, sceneElementModel);
+            sceneElementModel.setScene(csceneInstanceModel.getScene());
+            sceneElementModel.setArea("loadUUID");
+            sceneElementModel.setPosition2(position2);
+            sceneElementModel.setOuterPosition2(outerPosition2);
+            sceneElementModel.setName(mpDevopsLoad.getToolName());
+            sceneElementModel.setActionType(mpDevopsLoad.getActionType());
+            sceneElementModel.setActionTypeName(mpDevopsLoad.getActionTypeName());
+            sceneElementModel.setControlType(mpDevopsLoad.getControlType());
+            sceneElementModel.setControlTypeName(mpDevopsLoad.getControlTypeName());
+            sceneElementModel.setIcon2(mpDevopsLoad.getCover());
+            sceneElementMapper.create(sceneElementModel);
+            SceneElementPluginModel sceneElementPluginModel = new SceneElementPluginModel();
+            sceneElementPluginModel.setScene(csceneInstanceModel.getScene());
+            sceneElementPluginModel.setSceneElement(sceneElementModel.getId());
+            sceneElementPluginModel.setPluginKey("cpcloud");
+            sceneElementPluginMapper.create(sceneElementPluginModel);
+            CloudPluginSceneElementModel cloudPluginSceneElementModel = new CloudPluginSceneElementModel();
+            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(cloudPluginSceneConfigElementModel, cloudPluginSceneElementModel);
+            cloudPluginSceneElementModel.setScene(csceneInstanceModel.getScene());
+            cloudPluginSceneElementModel.setSceneElement(sceneElementModel.getNodeId());
+            cloudPluginSceneElementModel.setRole(BaseSceneElementModel.Type.LOAD);
+            cloudPluginSceneElementModel.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.LOAD);
+            cloudPluginSceneElementMapper.create(cloudPluginSceneElementModel);
+//            启动载荷节点
+            log.info("addLoad.createElement");
+            this.createElement(sceneId, cloudPluginSceneElementModel.getSceneElement(), csceneLoadDto.getContext());
+
+//            保存实例信息
+            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(sceneElementModel, sceneConfigElementModel);
+            csceneService.saveConfigData(csceneLoadDto.getCsceneId(), sceneConfigElementModel, cloudPluginSceneElementModel, cloudPluginSceneConfigElementModel);
+        }
+        log.info("addLoad end.");
+        return new ServiceResult<>(true);
+    }
+
+    /**
+     * 根据所有载荷获取新增载荷位置
+     *
+     * @param csceneInstanceModel
+     * @return
+     */
+    /*private String getPosition2(CsceneInstanceModel csceneInstanceModel) {
+        log.info("getPosition2 begin. sceneId:{}", csceneInstanceModel.getScene());
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(SceneElementModel::getScene, csceneInstanceModel.getScene())
+                .filterEqual(SceneElementModel::getArea, "loadUUID");
+        List<SceneElementModel> sceneElementModelList = sceneElementMapper.list(humanCondition);
+        List<Origin> originList = sceneElementModelList
+                .stream()
+                .map(SceneElementModel::getPosition2)
+                .filter(StringUtils::isNotBlank)
+                .map(position2 -> JsonCommon.parse(position2, Origin.class))
+                .collect(Collectors.toList());
+
+        double maxX = originList.stream()
+                .mapToDouble(Origin::getX)
+                .max()
+                .orElse(0);
+        double maxY = originList.stream()
+                .mapToDouble(Origin::getY)
+                .max()
+                .orElse(0);
+        log.info("getPosition2 end. sceneId:{},maxX:{}, maxY:{}", csceneInstanceModel.getScene(), maxX, maxY);
+        if (maxX != 0 && maxY != 0) {
+            Origin origin = new Origin(maxX + 100, maxY);
+            return JsonCommon.stringify(origin);
+        }
+        return "";
+    }
+
+    *//**
+     * 根据所有载荷获取新增载荷位置
+     *
+     * @param csceneInstanceModel
+     * @return
+     *//*
+    private String getOuterPosition2(CsceneInstanceModel csceneInstanceModel) {
+        log.info("getPosition2 begin. sceneId:{}", csceneInstanceModel.getScene());
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(SceneElementModel::getScene, csceneInstanceModel.getScene())
+                .filterEqual(SceneElementModel::getArea, "loadUUID");
+        List<SceneElementModel> sceneElementModelList = sceneElementMapper.list(humanCondition);
+        List<Origin> originList = sceneElementModelList
+                .stream()
+                .map(SceneElementModel::getOuterPosition2)
+                .filter(StringUtils::isNotBlank)
+                .map(position2 -> {
+//                    云场景无多层
+                    Map<String, String> parse = JsonCommon.parse(position2, new TypeReference<Map<String, String>>() {
+                    });
+                    return parse.get("");
+                })
+                .filter(StringUtils::isNotBlank)
+                .map(position2 -> JsonCommon.parse(position2, Origin.class))
+                .collect(Collectors.toList());
+
+        double maxX = originList.stream()
+                .mapToDouble(Origin::getX)
+                .max()
+                .orElse(0);
+        double maxY = originList.stream()
+                .mapToDouble(Origin::getY)
+                .max()
+                .orElse(0);
+        log.info("getPosition2 end. sceneId:{},maxX:{}, maxY:{}", csceneInstanceModel.getScene(), maxX, maxY);
+        if (maxX != 0 && maxY != 0) {
+            Origin origin = new Origin(maxX + 100, maxY);
+            HashMap<String, String> map = new HashMap<>();
+            map.put("", JsonCommon.stringify(origin));
+            return JsonCommon.stringify(map);
+        }
+        return "";
+    }*/
+
+    /**
+     * 根据所有载荷获取新增载荷位置
+     *
+     * @param csceneInstanceModel 场景实例模型
+     * @return 新增载荷的位置字符串
+     */
+    private String getPosition(CsceneInstanceModel csceneInstanceModel, Function<SceneElementModel, String> positionFunction) {
+
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(SceneElementModel::getScene, csceneInstanceModel.getScene())
+                .filterEqual(SceneElementModel::getArea, "loadUUID");
+        List<SceneElementModel> sceneElementModelList = sceneElementMapper.list(humanCondition);
+
+        List<Origin> originList = sceneElementModelList.stream()
+                .map(positionFunction)
+                .filter(StringUtils::isNotBlank)
+                .map(position -> JsonCommon.parse(position, Origin.class))
+                .collect(Collectors.toList());
+
+        double maxX = originList.stream()
+                .mapToDouble(Origin::getX)
+                .max()
+                .orElse(0);
+        double maxY = originList.stream()
+                .mapToDouble(Origin::getY)
+                .max()
+                .orElse(0);
+
+
+
+        if (maxX != 0 && maxY != 0) {
+            Origin origin = new Origin(maxX + 100, maxY);
+            return JsonCommon.stringify(origin);
+        }
+        return "";
+    }
+
+    /**
+     * 根据所有载荷获取新增载荷位置
+     *
+     * @param csceneInstanceModel 场景实例模型
+     * @return 新增载荷的位置字符串
+     */
+    private String getPosition2(CsceneInstanceModel csceneInstanceModel) {
+        log.info("getPosition2 begin. sceneId:{}", csceneInstanceModel.getScene());
+        String position = getPosition(csceneInstanceModel, SceneElementModel::getPosition2);
+        log.info("getPosition2 end. sceneId:{},position2:{}", csceneInstanceModel.getScene(), position);
+        return position;
+    }
+
+    /**
+     * 根据所有载荷获取新增载荷位置（外部）
+     *
+     * @param csceneInstanceModel 场景实例模型
+     * @return 新增载荷的位置字符串
+     */
+    private String getOuterPosition2(CsceneInstanceModel csceneInstanceModel) {
+        log.info("getOuterPosition2 begin. sceneId:{}", csceneInstanceModel.getScene());
+        String outerPosition2 = getPosition(csceneInstanceModel, sceneElementModel -> {
+            String position = sceneElementModel.getOuterPosition2();
+            if (StringUtils.isBlank(position)) {
+                return position;
+            }
+            Map<String, String> parse = JsonCommon.parse(position, new TypeReference<Map<String, String>>() {});
+            return parse.get("");
+        });
+        if (StringUtils.isNotBlank(outerPosition2)) {
+            HashMap<String, String> map = new HashMap<>();
+            map.put("", outerPosition2);
+            outerPosition2 = JsonCommon.stringify(map);
+        }
+        log.info("getOuterPosition2 end. sceneId:{},OuterPosition2:{}", csceneInstanceModel.getScene(), outerPosition2);
+        return outerPosition2;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    protected static class Origin {
+        private double x;
+        private double y;
     }
 }

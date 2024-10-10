@@ -538,7 +538,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                         .stream()
                         .filter(p -> existingIpSet.contains(p.getIp()))
                         .collect(Collectors.toList());
-                if (sceneElementPortBOS.size() == 0 && notIpPortsByNotConnectedPorts.size() > 0) {
+                if (sceneElementPortBOS.isEmpty() && !notIpPortsByNotConnectedPorts.isEmpty()) {
                     sceneElementPortBOS.add(notIpPortsByNotConnectedPorts.get(0));
                 }
                 for (SceneElementPortBO p : sceneElementPortBOS) {
