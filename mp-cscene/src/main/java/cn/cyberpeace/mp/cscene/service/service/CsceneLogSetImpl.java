@@ -34,7 +34,7 @@ public class CsceneLogSetImpl {
     }
 
     // 定时任务 每天凌晨一点执行
-    @Scheduled(cron = "0 0 17 * * ?")
+    @Scheduled(cron = "0 0 1 * * ?")
     public void cleanCollectedDataTask() {
         log.info("cleanCollectedDataTask start!");
         // 查询所有存活的场景
@@ -53,6 +53,7 @@ public class CsceneLogSetImpl {
         }
         Integer finalDays = days;
         TaskCommon.executeTask(() -> {
+            log.info("cleanCollectedDataTask start! sceneId:{}", sceneId);
             BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), null);
             // 删除采集的数据
             List<String> probeEnabledEid = new ArrayList<>(batchSceneHandler.getProbeEnabledNodeId2EidMap().values());
