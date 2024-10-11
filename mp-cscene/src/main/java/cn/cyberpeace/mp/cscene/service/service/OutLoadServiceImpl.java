@@ -247,7 +247,8 @@ public class OutLoadServiceImpl {
         String ip = synchronousDataSource.getIp() != null ? synchronousDataSource.getIp() : "http://10.108.1.10:5002";
         String url = ip + "/stgj/tool/modifyTags";
         Map<String, Object> formMap = new HashMap();
-        formMap.put("tags", request.getTags());
+        formMap.put("toolTags", request.getTags());
+        formMap.put("id", request.getLoadId());
 
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();

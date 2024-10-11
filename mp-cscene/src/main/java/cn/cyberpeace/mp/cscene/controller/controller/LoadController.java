@@ -114,9 +114,8 @@ public class LoadController {
      * */
     @ApiOperation(value = "修改载荷", notes = "")
     @PatchMapping("/updateLoadByPk")
-    public ServiceResult updateLoadByPk(@RequestBody(required = false) MpDevopsLoad requestData) {
-        JSONObject jsonObject = JsonCommon.snakeParse(JsonCommon.stringify(requestData), JSONObject.class);
-        Boolean updateLoadByPk = loadService.updateLoadByPk(jsonObject);
+    public ServiceResult updateLoadByPk(@RequestBody MpDevopsLoad requestData) {
+        Boolean updateLoadByPk = loadService.updateLoadByPk(requestData);
         if (updateLoadByPk) {
             return new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
         } else {

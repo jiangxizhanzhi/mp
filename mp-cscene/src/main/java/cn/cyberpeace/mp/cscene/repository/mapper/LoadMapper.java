@@ -22,7 +22,7 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     List<MpDevopsLoad> getLoadList(@Param("param") JSONObject requestData);
 
-    Boolean updateLoadByPk(String pk, @Param("param") JSONObject requestData);
+    Boolean updateLoadByPk(String pk, @Param("param") MpDevopsLoad requestData);
 
     Boolean deleteLoadByPk(String pk);
 

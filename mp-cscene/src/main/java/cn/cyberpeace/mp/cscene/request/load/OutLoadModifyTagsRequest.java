@@ -11,6 +11,11 @@ import lombok.NoArgsConstructor;
 public class OutLoadModifyTagsRequest {
 
     /**
+     * 载荷id
+     */
+    private String loadId;
+
+    /**
      * 载荷标签
      */
     private String[] tags;

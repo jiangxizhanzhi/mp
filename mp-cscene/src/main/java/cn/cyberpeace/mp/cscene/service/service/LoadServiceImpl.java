@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
 import cn.cyberpeace.mp.cscene.request.load.LoadResultExportRequest;
 import cn.cyberpeace.mp.cscene.request.load.LoadResultSearchRequest;
+import cn.cyberpeace.mp.cscene.request.load.OutLoadModifyTagsRequest;
 import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.websocket.LoadResultWebSocketServer;
@@ -324,10 +325,26 @@ public class LoadServiceImpl {
     /*
      * 修改载荷
      * */
-    public Boolean updateLoadByPk(JSONObject requestData) {
+    public Boolean updateLoadByPk(MpDevopsLoad requestData) {
         Boolean updateLoadByPk;
-        if (requestData != null && requestData.get("pk") != null && !requestData.get("pk").toString().equals("")) {
-            updateLoadByPk = loadMapper.updateLoadByPk(requestData.get("pk").toString(), requestData);
+        if (!StringUtils.isEmpty(requestData.getPk())) {
+            MpDevopsLoad load = loadMapper.getLoadByPk(requestData.getPk().toString());
+            updateLoadByPk = loadMapper.updateLoadByPk(requestData.getPk().toString(), requestData);
+
+            // 更新载荷平台该载荷的标签
+            OutLoadModifyTagsRequest request = new OutLoadModifyTagsRequest();
+            request.setLoadId(load.getId());
+            // 获取标签 code
+            String s = load.getActionType();
+            String[] split = (s != null && !s.isEmpty()) ? s.split(",") : new String[0];
+            // 使用 commonCodeService 获取 codeMap
+            Map<String, String> codeMap = commonCodeService.convertNextLevelDatasByCodes(split);
+            // 收集 codeMap 的 value 转成 String[]
+            request.setTags(Arrays.stream(split)
+                    .map(codeMap::get)
+                    .filter(Objects::nonNull)
+                    .toArray(String[]::new));
+            Boolean result = outLoadService.modifyLoadTags(request);
         } else {
             return false;
         }
