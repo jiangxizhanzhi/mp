@@ -49,7 +49,11 @@ public class CscenePluginDataRecordService {
     public void action() {
         var instances = csceneService.getRunningCscenes();
         for (var instance : instances) {
-            if (instance.getReferenceType() == null || (BaseCsceneModel.ReferenceType.READ_VS_BLUE != instance.getReferenceType() && BaseCsceneModel.ReferenceType.TEAM_TRAINING != instance.getReferenceType())) {
+            log.info("cscene : " + instance.getId() + " collecting log !");
+            // 云场景的referenceType为236,需要保存采集数据
+            if (instance.getReferenceType() == null || (BaseCsceneModel.ReferenceType.READ_VS_BLUE != instance.getReferenceType() &&
+                                                        BaseCsceneModel.ReferenceType.TEAM_TRAINING != instance.getReferenceType() &&
+                                                        BaseCsceneModel.ReferenceType.RANGE_TEST != instance.getReferenceType())) {
                 continue;
             }
             try {
