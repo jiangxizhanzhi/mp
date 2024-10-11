@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.bo.AlertRuleBO;
+import cn.cyberpeace.mp.scene.config.SceneAppConfig;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -29,6 +30,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementNetworkUtils;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import com.azure.core.http.rest.Response;
 import com.azure.core.management.Region;
 import com.azure.core.util.Context;
@@ -49,8 +51,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AzureCreateHandler extends CreateHandler {
 
-    // 载荷改造地址
-    @Value("${project.setting.group-name-prefix}")
     private String groupNamePrefix;
 
     public static class ElementProcess {
@@ -63,6 +63,7 @@ public class AzureCreateHandler extends CreateHandler {
     public AzureCreateHandler(int cloudType, CloudScenePluginHandler pluginHandler) {
         super(pluginHandler);
         this.resourceService = IAzureResourceManager.getInstance(cloudType);
+        this.groupNamePrefix = BeanCommon.getBean(SituationAwareConfig.class).getGroupNamePrefix();
     }
 
     @Override
@@ -139,7 +140,7 @@ public class AzureCreateHandler extends CreateHandler {
 
                     String nodeId = element.getSrcElement().getId();
                     // 封装创建网络的任务
-                    AzureVirtualNetCreateTask task = new AzureVirtualNetCreateTask(resourceService, getPluginHandler(), element, cidrContainerMap, virtualNicsMap);
+                    AzureVirtualNetCreateTask task = new AzureVirtualNetCreateTask(resourceService, getPluginHandler(), element, cidrContainerMap, virtualNicsMap,groupName);
                     // 格式化任务执行过程，添加 runElementProgress
                     Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_AUXILIARY_NETWORK, task);
                     // 添加格式化后的任务到列表
@@ -220,7 +221,8 @@ public class AzureCreateHandler extends CreateHandler {
                     element.setVmExpansionDiskType(null);
 //                处理云场景无登录按钮、接收虚拟端口信息
                     receiveVirtualPortInfo(element, virtualNics);
-                    AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element, virtualNics, combineInitCommand(element), alertRuleBOListByNodeId, dataCollectionRulesId);
+                    AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element,
+                            virtualNics, combineInitCommand(element), alertRuleBOListByNodeId, dataCollectionRulesId, groupName);
                     Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_VIRTUAL_MACHINE, task);
                     createVirtualMachineTasks.add(formatTask);
                 }
@@ -234,7 +236,7 @@ public class AzureCreateHandler extends CreateHandler {
                             .filter(alertRuleBO -> null != alertRuleBO.getHosts() && alertRuleBO.getHostList().contains(nodeId))
                             .collect(Collectors.toList());
                     List<VirtualNic> virtualNics = virtualNicsMap.get(nodeId);
-                    AzureContainerCreateTask task = new AzureContainerCreateTask(resourceService, getPluginHandler(), element, virtualNics, alertRuleBOListByNodeId, dataCollectionRulesId);
+                    AzureContainerCreateTask task = new AzureContainerCreateTask(resourceService, getPluginHandler(), element, virtualNics, alertRuleBOListByNodeId, dataCollectionRulesId, groupName);
                     Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_CONTAINER, task);
                     createContainerTasks.add(formatTask);
                 }
@@ -246,7 +248,7 @@ public class AzureCreateHandler extends CreateHandler {
                 for (CloudPluginSceneElementBO element : filteredWebAppElements) {
                     String nodeId = element.getSrcElement().getId();
                     List<VirtualNic> virtualNics = this.genVirutalNics(element);
-                    AzureWebAppCreateTask task = new AzureWebAppCreateTask(resourceService, getPluginHandler(), element, virtualNics);
+                    AzureWebAppCreateTask task = new AzureWebAppCreateTask(resourceService, getPluginHandler(), element, virtualNics, groupName);
                     Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, ElementProcess.CREATE_WEBAPP, task);
                     createWebAppTasks.add(formatTask);
                 }
@@ -258,7 +260,7 @@ public class AzureCreateHandler extends CreateHandler {
                 for (CloudPluginSceneElementBO element : filteredFireWallAppElements) {
                     String nodeId = element.getSrcElement().getId();
                     List<VirtualNic> virtualNics = this.genVirutalNics(element);
-                    AzureFireWallCreateTask task = new AzureFireWallCreateTask(resourceService, getPluginHandler(), element, virtualNics);
+                    AzureFireWallCreateTask task = new AzureFireWallCreateTask(resourceService, getPluginHandler(), element, virtualNics,groupName);
                     Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, ElementProcess.CREATE_FIRE_WALL, task);
                     createFireWallTasks.add(formatTask);
                 }
@@ -270,7 +272,7 @@ public class AzureCreateHandler extends CreateHandler {
             List<Runnable> createLoadTasks = new ArrayList<>();
             for (CloudPluginSceneElementBO element : filteredLoadElements) {
                 String nodeId = element.getSrcElement().getId();
-                LoadCreateTask task = new LoadCreateTask(getPluginHandler(), element);
+                LoadCreateTask task = new LoadCreateTask(getPluginHandler(), element, groupName);
                 Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_LOAD, task);
                 createLoadTasks.add(formatTask);
             }

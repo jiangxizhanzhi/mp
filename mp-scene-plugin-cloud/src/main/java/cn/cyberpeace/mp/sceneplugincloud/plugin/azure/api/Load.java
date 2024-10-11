@@ -31,9 +31,8 @@ public class Load {
     }
 
 
-    public void create(CloudScenePluginHandler pluginHandler,CloudPluginSceneElementBO cloudElement) {
+    public void create(CloudScenePluginHandler pluginHandler,CloudPluginSceneElementBO cloudElement, String groupName) {
 
-        String groupName = pluginHandler.getSourceSceneId();
         String nodeId = cloudElement.getSrcElement().getId();
         cloudElement.setLoadTaskName(groupName+"_"+nodeId);
         cloudElement.setLoadTaskDescribe(groupName+"_"+nodeId);

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -7,7 +8,9 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.deletetasks.LoadDeleteTask;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.DeleteHandler;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +18,7 @@ import java.util.List;
 @Slf4j
 public class AzureDeleteHandler extends DeleteHandler {
 
+    private String groupNamePrefix;
     public static class ElementProcess {
         public static final EventProcess DELETE_WEBAPP = new EventProcess("delete_webapp", "sceneplugincloud.event" + ".delete_webapp");
     }
@@ -24,6 +28,7 @@ public class AzureDeleteHandler extends DeleteHandler {
     public AzureDeleteHandler(int cloudType, CloudScenePluginHandler pluginHandler) {
         super(pluginHandler);
         this.resourceService = IAzureResourceManager.getInstance(cloudType);
+        this.groupNamePrefix = BeanCommon.getBean(SituationAwareConfig.class).getGroupNamePrefix();
     }
 
 
@@ -102,6 +107,7 @@ public class AzureDeleteHandler extends DeleteHandler {
 
         // 最后删除资源组 TODO 测试载荷暂时去除
         String groupName = getPluginHandler().getSourceSceneId();
+        groupName = StringUtils.isNotBlank(groupNamePrefix)?groupNamePrefix +"-"+ groupName:groupName;
         resourceService.getManager().resourceGroups().deleteByName(groupName);
     }
 

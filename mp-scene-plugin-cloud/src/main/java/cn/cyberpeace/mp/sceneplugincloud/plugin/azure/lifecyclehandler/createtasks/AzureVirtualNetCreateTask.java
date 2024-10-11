@@ -26,22 +26,26 @@ public class AzureVirtualNetCreateTask implements Runnable {
 
     private HashMap<String, List<VirtualNic>> virtualNicsMap;
 
+    private String groupName;
+
 
     public AzureVirtualNetCreateTask(IAzureResourceManager resourceService,
                                      CloudScenePluginHandler pluginHandler,
                                      CloudPluginSceneElementBO element,
                                      ConcurrentHashMap<String, ElementNetworkUtils.CidrType> cidrContainerMap,
-                                     HashMap<String, List<VirtualNic>> virtualNicsMap) {
+                                     HashMap<String, List<VirtualNic>> virtualNicsMap,
+                                     String groupName) {
         this.azureVirtualNet = new AzureVirtualNet(resourceService);
         this.pluginHandler = pluginHandler;
         this.element = element;
         this.cidrContainerMap = cidrContainerMap;
         this.virtualNicsMap = virtualNicsMap;
+        this.groupName = groupName;
     }
 
     @Override
     public void run() {
-        this.azureVirtualNet.create(this.pluginHandler, element, cidrContainerMap, virtualNicsMap);
+        this.azureVirtualNet.create(this.pluginHandler, element, cidrContainerMap, virtualNicsMap, groupName);
     }
 
 }

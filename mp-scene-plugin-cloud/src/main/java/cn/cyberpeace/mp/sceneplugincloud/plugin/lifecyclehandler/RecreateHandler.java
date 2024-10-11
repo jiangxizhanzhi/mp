@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.repository.DevopsLoadSourceMapper;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import com.azure.resourcemanager.monitor.fluent.models.DataCollectionRuleResourceInner;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -241,9 +242,11 @@ public class RecreateHandler extends HandlerCommon {
     }
 
     private static class CreateInRecreateHandler extends CreateHandler {
+        private String groupNamePrefix;
         public CreateInRecreateHandler(CloudScenePluginHandler pluginHandler) {
             super(pluginHandler);
             this.setEvent(SceneElementModel.Event.RECREATE);
+            this.groupNamePrefix = BeanCommon.getBean(SituationAwareConfig.class).getGroupNamePrefix();
         }
 
         @Override
@@ -283,13 +286,20 @@ public class RecreateHandler extends HandlerCommon {
                 IAzureResourceManager resourceService = IAzureResourceManager.getInstance(cloudType);
                 AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(resourceService);
                 String groupName = getPluginHandler().getSourceSceneId();
-                DataCollectionRuleResourceInner byResourceGroup = resourceService
-                        .getMonitorManager()
-                        .serviceClient()
-                        .getDataCollectionRules()
-                        .getByResourceGroup(groupName, "MSVMI-" + groupName);
-                String dataCollectionRulesId = byResourceGroup != null ? byResourceGroup.id() : "";
+                groupName = StringUtils.isNotBlank(groupNamePrefix)?groupNamePrefix +"-"+ groupName:groupName;
+                String dataCollectionRulesId;
+                if(alertRuleBOList.size()>0){
+                    DataCollectionRuleResourceInner byResourceGroup = resourceService
+                            .getMonitorManager()
+                            .serviceClient()
+                            .getDataCollectionRules()
+                            .getByResourceGroup(groupName, "MSVMI-" + groupName);
+                    dataCollectionRulesId = byResourceGroup != null ? byResourceGroup.id() : "";
+                } else {
+                    dataCollectionRulesId = "";
+                }
                 if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                    String finalGroupName = groupName;
                     runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_MACHINE,
                             () -> {
                                 if (cloudElement.getSrcElement() != null && CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
@@ -303,10 +313,11 @@ public class RecreateHandler extends HandlerCommon {
                                 }
 
                                 List<VirtualNic> virtualNics = this.genVirutalNics(cloudElement);
-                                azureVirtualMachine.create(getPluginHandler(), cloudElement, virtualNics, combineInitCommand(cloudElement), alertRuleBOList, dataCollectionRulesId);
+                                azureVirtualMachine.create(getPluginHandler(), cloudElement, virtualNics, combineInitCommand(cloudElement), alertRuleBOList, dataCollectionRulesId, finalGroupName);
                                 openAccessModes(cloudElement);
                             });
                 } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                    String finalGroupName1 = groupName;
                     runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_CONTAINER,
                             () -> {
                                 if (cloudElement.getSrcElement() != null && CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
@@ -319,10 +330,11 @@ public class RecreateHandler extends HandlerCommon {
                                     });
                                 }
                                 new AzureContainer(IAzureResourceManager.getInstance(cloudType))
-                                        .create(getPluginHandler(), cloudElement, this.genVirutalNics(cloudElement),alertRuleBOList,dataCollectionRulesId);
+                                        .create(getPluginHandler(), cloudElement, this.genVirutalNics(cloudElement),alertRuleBOList,dataCollectionRulesId, finalGroupName1);
                                 openAccessModes(cloudElement);
                             });
                 } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
+                    String finalGroupName2 = groupName;
                     runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_LOAD,
                             () -> {
                                 if (cloudElement.getSrcElement() != null && CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
@@ -336,7 +348,7 @@ public class RecreateHandler extends HandlerCommon {
                                 }
                                 DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
                                 DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
-                                new Load(synchronousDataSource).create(getPluginHandler(), cloudElement);
+                                new Load(synchronousDataSource).create(getPluginHandler(), cloudElement, finalGroupName2);
 
                             });
                 }

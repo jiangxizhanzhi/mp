@@ -1,20 +1,24 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.azure.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSceneStage;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.CreateHandler;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
+import org.apache.commons.lang3.StringUtils;
 
 public class AzureCreateHandler extends CreateHandler {
     public Integer cloudType;
-
+    private String groupNamePrefix;
     private IAzureResourceManager resourceService;
 
     public AzureCreateHandler(int cloudType, CollectionScenePluginHandler pluginHandler) {
         super(pluginHandler);
         this.cloudType = cloudType;
         this.resourceService = IAzureResourceManager.getInstance(cloudType);
+        this.groupNamePrefix = BeanCommon.getBean(SituationAwareConfig.class).getGroupNamePrefix();
     }
 
     public void create() {
@@ -174,6 +178,7 @@ public class AzureCreateHandler extends CreateHandler {
         } catch (Exception e) {
 //            云场景启动失败立即删除云资源
             String groupName = getPluginHandler().getSourceSceneId();
+            groupName = StringUtils.isNotBlank(groupNamePrefix)?groupNamePrefix +"-"+ groupName:groupName;
             resourceService.getManager().resourceGroups().deleteByName(groupName);
         }
     }

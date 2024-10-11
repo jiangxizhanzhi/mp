@@ -18,22 +18,27 @@ public class AzureFireWallCreateTask implements Runnable {
     private CloudScenePluginHandler pluginHandler;
 
     private CloudPluginSceneElementBO element;
+
     private List<VirtualNic> virtualNics;
+
+    private String groupName;
 
 
     public AzureFireWallCreateTask(IAzureResourceManager resourceService,
                                    CloudScenePluginHandler pluginHandler,
                                    CloudPluginSceneElementBO element,
-                                   List<VirtualNic> virtualNics) {
+                                   List<VirtualNic> virtualNics,
+                                   String groupName) {
         this.azureFireWall = new AzureFireWall(resourceService);
         this.pluginHandler = pluginHandler;
         this.element = element;
         this.virtualNics = virtualNics;
+        this.groupName = groupName;
     }
 
     @Override
     public void run() {
-        azureFireWall.create(this.pluginHandler, element, virtualNics);
+        azureFireWall.create(this.pluginHandler, element, virtualNics, groupName);
     }
 
 }

@@ -37,6 +37,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.repository.DevopsLoadSourceMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -59,6 +60,7 @@ public class CreateHandler extends HandlerCommon {
     private final VmRouter vmRouter = new VmRouter();
     private VirtualDynamips vdClient = new VirtualDynamips();
 
+    private String groupNamePrefix;
     private final Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
 
     public static class SceneProcess {
@@ -1276,6 +1278,7 @@ public class CreateHandler extends HandlerCommon {
 
     public CreateHandler(CloudScenePluginHandler pluginHandler) {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.CREATE);
+        this.groupNamePrefix = BeanCommon.getBean(SituationAwareConfig.class).getGroupNamePrefix();
     }
 
     public void create() {
@@ -1418,10 +1421,12 @@ public class CreateHandler extends HandlerCommon {
                     cloudElement.getSrcElement().getId());
             return;
         }
-
+        String groupName = getPluginHandler().getSourceSceneId();
+        groupName = StringUtils.isNotBlank(groupNamePrefix)?groupNamePrefix +"-"+ groupName:groupName;
         Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
         if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
             if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
+                String finalGroupName = groupName;
                 runElementProgress(cloudElement.getSrcElement().getId(), CreateHandler.ElementProcess.CREATE_LOAD,
                         () -> {
                             if (cloudElement.getSrcElement() != null && org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
@@ -1435,7 +1440,7 @@ public class CreateHandler extends HandlerCommon {
                             }
                             DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
                             DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
-                            new Load(synchronousDataSource).create(getPluginHandler(), cloudElement);
+                            new Load(synchronousDataSource).create(getPluginHandler(), cloudElement, finalGroupName);
                         });
             }
         }else {

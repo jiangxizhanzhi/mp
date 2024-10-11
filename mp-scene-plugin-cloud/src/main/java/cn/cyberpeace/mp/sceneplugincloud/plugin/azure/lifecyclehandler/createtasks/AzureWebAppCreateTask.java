@@ -21,19 +21,24 @@ public class AzureWebAppCreateTask implements Runnable {
 
     private List<VirtualNic> virtualNics;
 
+    private String groupName;
+
 
     public AzureWebAppCreateTask(IAzureResourceManager resourceService,
                                  CloudScenePluginHandler pluginHandler,
-                                 CloudPluginSceneElementBO element, List<VirtualNic> virtualNics) {
+                                 CloudPluginSceneElementBO element,
+                                 List<VirtualNic> virtualNics,
+                                 String groupName) {
         this.azureWebApp = new AzureWebApp(resourceService);
         this.pluginHandler = pluginHandler;
         this.element = element;
         this.virtualNics = virtualNics;
+        this.groupName = groupName;
     }
 
     @Override
     public void run() {
-        azureWebApp.create(this.pluginHandler, element, virtualNics);
+        azureWebApp.create(this.pluginHandler, element, virtualNics, groupName);
     }
 
 }

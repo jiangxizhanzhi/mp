@@ -39,13 +39,12 @@ public class AzureContainer {
     }
 
     public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics,
-                       List<AlertRuleBO> alertRuleBOList, String dataCollectionRulesId) {
+                       List<AlertRuleBO> alertRuleBOList, String dataCollectionRulesId,String groupName) {
         VirtualNic virtualNic = virtualNics.get(0);
         String networkId = virtualNic.getNetworkId();
         String fixedIp = virtualNic.getFixedIp();
         String subnetName = IpUtils.extractNetworkPart(fixedIp);
 
-        String groupName = pluginHandler.getSourceSceneId();
         // 调用微软云api 创建虚拟机 回写虚拟机id
         // 虚拟机镜像、名称等信息
 //        容器名中只能包含-字符

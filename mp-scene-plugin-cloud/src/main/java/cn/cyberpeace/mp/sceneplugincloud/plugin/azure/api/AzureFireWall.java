@@ -39,9 +39,8 @@ public class AzureFireWall {
      * 创建前需要将虚拟网络和专有的防火墙子网创建好(防火墙子网名称必须为AzureFirewallSubnet且地址空间后缀必须为/26)
      * 当防火墙SKU为basic时,必须创建防火墙管理子网(防火墙管理子网名称必须为AzureFirewallManagementSubnet,地址空间后缀大于等于26)
      */
-    public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics) {
+    public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String groupName) {
         String fwName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
-        String groupName = pluginHandler.getSourceSceneId();
         String networkId = virtualNics.get(0).getNetworkId();
         Network vnet = azureResourceManager.networks().getById(networkId);
         //当防火墙SKU不为basic时,必须创建该公网ip(SKU为标准)

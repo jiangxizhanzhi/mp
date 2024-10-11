@@ -23,8 +23,7 @@ public class AzureWebApp {
         this.region = resourceService.getRegin();
     }
 
-    public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics) {
-        String groupName = pluginHandler.getSourceSceneId();
+    public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, List<VirtualNic> virtualNics, String groupName) {
         azureResourceManager.webApps().define("")
                 .withRegion(this.region)
                 .withExistingResourceGroup(groupName)

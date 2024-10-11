@@ -109,6 +109,8 @@ public class SituationAwareConfig {
     private String probeMgrAgentScriptWindowsPath;
     private String probeMgrTaskEnable;
 
+    private String groupNamePrefix;
+
     public static DateTimeFormatter esDateTimeFormatter = null;
 
     @PostConstruct

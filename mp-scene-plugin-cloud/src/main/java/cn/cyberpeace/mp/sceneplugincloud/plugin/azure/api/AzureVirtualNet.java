@@ -36,13 +36,12 @@ public class AzureVirtualNet {
     public void create(
             CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement,
             ConcurrentHashMap<String, ElementNetworkUtils.CidrType> cidrContainerMap,
-            HashMap<String, List<VirtualNic>> virtualNicsMap) {
+            HashMap<String, List<VirtualNic>> virtualNicsMap, String groupName) {
         // azure todo 网络名称用节点 eid+序号
         String netName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid(), 0);
         // azure todo 不需要设置网关么?
 //        String gateway = net.getGateway();
 //            String cidr = net.getCidr();
-        String groupName = pluginHandler.getSourceSceneId();
 
         //  azure 调用微软云api 创建网络
         Network.DefinitionStages.WithCreate createdNet = azureResourceManager.networks()
