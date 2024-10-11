@@ -37,6 +37,7 @@ springfox:
 project:
   setting:
     load-transform-url: ${LOAD-TRANSFORM-URL:127.0.0.1:80}
+    group-name-prefix: ${GROUP_NAME_PREFIX:yz3}
 
 # 中台各模块相关配置
 mp:

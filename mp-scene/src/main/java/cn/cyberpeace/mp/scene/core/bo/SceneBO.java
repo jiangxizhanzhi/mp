@@ -44,6 +44,8 @@ public class SceneBO extends BaseSceneBO<SceneModel, SceneBO> implements BaseSce
     private Map<String, List<String>> elementIpMap;
     @ApiModelProperty(value = "资源组id")
     private String resourceGroupId;
+    @ApiModelProperty(value = "探针采集时间间隔")
+    private String intervalSec;
 
     @Override
     public SceneModel createModel() {

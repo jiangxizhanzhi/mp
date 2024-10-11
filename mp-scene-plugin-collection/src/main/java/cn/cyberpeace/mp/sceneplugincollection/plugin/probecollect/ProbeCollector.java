@@ -63,8 +63,8 @@ public class ProbeCollector {
     }
 
     public List<String> generateProbeInstallScript(CloudPluginSceneElementBO cloudElement, Integer cloudType, String systemType, String agentName, String collectorId,
-                                                   WazuhControl.ControlConfigParam controlParam, boolean isContainer) {
-        return WazuhCommon.generateWazuhAgentInstallScript(cloudElement, cloudType, systemType, agentName, getWazuhHost(cloudType, collectorId), controlParam, isContainer);
+                                                   WazuhControl.ControlConfigParam controlParam, boolean isContainer, String intervalSec) {
+        return WazuhCommon.generateWazuhAgentInstallScript(cloudElement, cloudType, systemType, agentName, getWazuhHost(cloudType, collectorId), controlParam, isContainer, intervalSec);
     }
 
 }

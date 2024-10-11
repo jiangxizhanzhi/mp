@@ -22,6 +22,8 @@ public class BaseSceneModel extends BaseModel {
     private Boolean deleted;
     @DefaultInt
     private Integer cloudType ;
+    @DefaultStr
+    private String intervalSec;
 
     public static class CloudType {
         public static final int DEFAULT = 0;
