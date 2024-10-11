@@ -1493,7 +1493,7 @@ public class ScenePluginCollectionSceneService {
         return new ListObjServiceResult<>(new ListObjResult<>(systemUsers, totalList.size()).asResult()).asResult();
     }
 
-    public List<Netiface> listNetifaces(String elementId) {
+    public List<Netiface> listNetifaces(String elementId, Integer cloudType) {
         CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
         PageInfo<Netiface> pageInfo = new PageInfo<>();
         collectorBaseRequest.setAgentName(elementId);
@@ -1503,7 +1503,7 @@ public class ScenePluginCollectionSceneService {
         if (Objects.isNull(collectorBaseRequest.getAgentName())) {
             return new ArrayList<>();
         }
-        return sysCollectorService.pageNetifaces(collectorBaseRequest, null).getSource().getObjs();
+        return sysCollectorService.pageNetifaces(collectorBaseRequest, cloudType).getSource().getObjs();
     }
 
 

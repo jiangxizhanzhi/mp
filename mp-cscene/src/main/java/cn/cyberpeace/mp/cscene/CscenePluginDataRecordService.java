@@ -78,7 +78,7 @@ public class CscenePluginDataRecordService {
                         }).collect(Collectors.toList());
                         result.addAll(models);
                     }
-                    var netifaces = collectionSceneService.listNetifaces(element.getSrcElement().getEid());
+                    var netifaces = collectionSceneService.listNetifaces(element.getSrcElement().getEid(),sceneHandler.getScene().getCloudType());
                     if (CollectionUtils.isNotEmpty(netifaces)) {
                         var models = netifaces.stream().map(n -> {
                             n.setNodeName(elementName);
