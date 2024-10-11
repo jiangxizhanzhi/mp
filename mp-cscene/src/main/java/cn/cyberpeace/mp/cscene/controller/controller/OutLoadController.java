@@ -3,10 +3,7 @@ package cn.cyberpeace.mp.cscene.controller.controller;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskCreateRequest;
-import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskDeleteRequest;
-import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskResetRequest;
-import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
+import cn.cyberpeace.mp.cscene.request.load.*;
 import cn.cyberpeace.mp.cscene.service.service.OutLoadServiceImpl;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
@@ -181,7 +178,7 @@ public class OutLoadController {
     @PostMapping("/addTool")
     public ServiceResult<Boolean> addTool(@RequestBody JSONObject requestData) {
         Boolean addTool = outLoadService.addTool(requestData);
-        return new ServiceResult(addTool).asResult();
+        return new ServiceResult<Boolean>(addTool).asResult();
     }
 
     /**
@@ -191,7 +188,7 @@ public class OutLoadController {
     @PostMapping("/updateToolInfo")
     public ServiceResult<Boolean> updateToolInfo(@RequestBody JSONObject requestData) {
         Boolean updateToolInfo = outLoadService.updateToolInfo(requestData);
-        return new ServiceResult(updateToolInfo).asResult();
+        return new ServiceResult<Boolean>(updateToolInfo).asResult();
     }
 
     /**
@@ -201,7 +198,17 @@ public class OutLoadController {
     @PostMapping("/uploadTool")
     public ServiceResult<Boolean> uploadTool(@RequestParam(value = "file") MultipartFile file) {
         Boolean uploadTool = outLoadService.uploadTool(file);
-        return new ServiceResult(uploadTool).asResult();
+        return new ServiceResult<Boolean>(uploadTool).asResult();
+    }
+
+    /**
+     * 更新工具标签
+     */
+    @ApiOperation(value = "更新工具标签", notes = "")
+    @PostMapping("/modifyLoadTags")
+    public ServiceResult<Boolean> modifyLoadTags(@RequestBody OutLoadModifyTagsRequest request) {
+        Boolean modifyLoadTags = outLoadService.modifyLoadTags(request);
+        return new ServiceResult<Boolean>(modifyLoadTags).asResult();
     }
 
     /**

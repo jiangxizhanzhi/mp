@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.cscene.repository.mapper.CsceneLogSetMapper;
 import cn.cyberpeace.mp.cscene.request.logset.LogSetRequest;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Service
+@Slf4j
 public class CsceneLogSetImpl {
 
     // 场景采集数据默认保存周期7天
@@ -34,6 +36,7 @@ public class CsceneLogSetImpl {
     // 定时任务 每天凌晨一点执行
     @Scheduled(cron = "0 0 1 * * ?")
     public void cleanCollectedDataTask() {
+        log.info("cleanCollectedDataTask start!");
         // 查询所有存活的场景
         List<String> sceneIds = csceneLogSetMapper.selectLivedSceneInstance();
         if (sceneIds != null && sceneIds.size() > 0) {

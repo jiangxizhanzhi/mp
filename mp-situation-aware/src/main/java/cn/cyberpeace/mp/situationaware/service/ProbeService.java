@@ -365,6 +365,7 @@ public class ProbeService {
         }
 
         // 清除es 文档数据
+        log.info("deleting...");
         Long deletedCount = dataCollectionService.deleteDocByAgentNames(wazuhEventRequest);
         log.info("deletedCount:{}", deletedCount);
     }

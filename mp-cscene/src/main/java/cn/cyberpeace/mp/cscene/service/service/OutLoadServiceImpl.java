@@ -5,10 +5,7 @@ import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.repository.mapper.OutLoadMapper;
-import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskCreateRequest;
-import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskDeleteRequest;
-import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskResetRequest;
-import cn.cyberpeace.mp.cscene.request.load.OutLoadTaskUpdateRequest;
+import cn.cyberpeace.mp.cscene.request.load.*;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,10 +24,6 @@ public class OutLoadServiceImpl {
 
     @Autowired
     private LoadServiceImpl loadService;
-
-    public List getTaskList(JSONObject requestData) {
-        return null;
-    }
 
     public Map<String, Object> createTask(OutLoadTaskCreateRequest requestData) {
         MpDevopsLoadSource synchronousDataSource = loadService.getSynchronousDataSource(new JSONObject());
@@ -93,7 +86,7 @@ public class OutLoadServiceImpl {
         try {
             result = HttpUtils.sendHttpPost(url, formMap, headersMap);
         } catch (IOException e) {
-            return null;
+            return false;
         }
         Map<String, Object> dataMap = JsonUtils.parseMap(result);
         if (dataMap.get("code") != null && dataMap.get("code").equals("0")) {
@@ -126,10 +119,6 @@ public class OutLoadServiceImpl {
         } else {
             return false;
         }
-    }
-
-    public Boolean resetTask(OutLoadTaskResetRequest requestData) {
-        return null;
     }
 
     public Map<String, Object> startInstance(JSONObject requestData) {
@@ -168,9 +157,13 @@ public class OutLoadServiceImpl {
                 return true;
             }
         } catch (IOException e) {
-            return null;
+            return false;
         }
         return false;
+    }
+
+    public Boolean resetTask(OutLoadTaskResetRequest requestData) {
+        return null;
     }
 
     public Boolean pauseInstance(JSONObject requestData) {
@@ -217,6 +210,10 @@ public class OutLoadServiceImpl {
         return dataList;
     }
 
+    public List getTaskList(JSONObject requestData) {
+        return null;
+    }
+
     public Boolean addTool(JSONObject requestData) {
         return null;
     }
@@ -243,5 +240,28 @@ public class OutLoadServiceImpl {
 
     public Boolean uploadReadme(MultipartFile file) {
         return null;
+    }
+
+    public Boolean modifyLoadTags(OutLoadModifyTagsRequest request) {
+        MpDevopsLoadSource synchronousDataSource = loadService.getSynchronousDataSource(new JSONObject());
+        String ip = synchronousDataSource.getIp() != null ? synchronousDataSource.getIp() : "http://10.108.1.10:5002";
+        String url = ip + "/stgj/tool/modifyTags";
+        Map<String, Object> formMap = new HashMap();
+        formMap.put("tags", request.getTags());
+
+        //请求头设置
+        HashMap<String, String> headersMap = new HashMap<>();
+        headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
+
+        try {
+            String result = HttpUtils.sendHttpPost(url, formMap, headersMap);
+            Map<String, Object> dataMap = JsonUtils.parseMap(result);
+            if ("0".equals(dataMap.get("code").toString())) {
+                return true;
+            }
+        } catch (IOException e) {
+            return false;
+        }
+        return false;
     }
 }
