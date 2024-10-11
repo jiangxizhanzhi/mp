@@ -1379,13 +1379,13 @@ public class ScenePluginCollectionSceneService {
         return num >> 30;
     }
 
-    public List<Port> listPagePorts(String nodeId) {
+    public List<Port> listPagePorts(String nodeId,Integer cloudType) {
         CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
         collectorBaseRequest.setAgentName(nodeId);
         collectorBaseRequest.setPage(1);
         collectorBaseRequest.setPageSize(10);
         collectorBaseRequest.setPerPage(10);
-        return sysCollectorService.pagePorts(collectorBaseRequest, null).getSource().getObjs();
+        return sysCollectorService.pagePorts(collectorBaseRequest, cloudType).getSource().getObjs();
     }
 
     public ListObjServiceResult<Port> listPagePorts(ListPageInfoQueryParams listPageInfoQueryParams) {

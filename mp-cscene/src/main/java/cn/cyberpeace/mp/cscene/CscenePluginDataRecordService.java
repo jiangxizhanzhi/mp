@@ -65,7 +65,7 @@ public class CscenePluginDataRecordService {
                 List<CollectionPluginSceneDataModel> result = new ArrayList<>();
                 for (var element : collectPlugin.getElementMap().values()) {
                     String elementName = element.getSrcElement().getName();
-                    var ports = collectionSceneService.listPagePorts(element.getSrcElement().getEid());
+                    var ports = collectionSceneService.listPagePorts(element.getSrcElement().getEid(),sceneHandler.getScene().getCloudType());
                     if (CollectionUtils.isNotEmpty(ports)) {
                         var models = ports.stream().map(p -> {
                             p.setNodeName(elementName);
