@@ -112,7 +112,7 @@ public class WazuhCommon {
     }
 
     public static List<String> generateWazuhAgentInstallScript(CloudPluginSceneElementBO cloudElement, Integer cloudType, String systemType, String agentName, String wazuhHost,
-                                                               WazuhControl.ControlConfigParam controlParam, boolean isContainer) {
+                                                               WazuhControl.ControlConfigParam controlParam, boolean isContainer, String intervalSec) {
         if (wazuhProbeConfig == null) {
             wazuhProbeConfig = BeanCommon.getBean(WazuhProbeConfig.class);
         }
@@ -127,6 +127,10 @@ public class WazuhCommon {
         List<WazuhControl.ControlProbeParam> defaultProbeParams;
         defaultProbeParams = getDefaultProbeParams(nameFileMap, metadataFileServer, agentName, wazuhProbeConfig);
         controlProbeParams.addAll(defaultProbeParams);
+//        设置全局探针采集间隔
+        if(StringUtils.isNoneBlank(intervalSec)){
+            controlProbeParams.forEach(probeParam -> probeParam.setInterval(intervalSec));
+        }
         controlParam.setProbeParams(controlProbeParams);
         String probeCommand = WazuhControl.genControlConfigCommand(cloudType, osType, controlParam);
 

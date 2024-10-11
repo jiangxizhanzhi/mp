@@ -22,4 +22,6 @@ public abstract class BaseSceneBO<M extends BaseSceneModel, T extends BaseSceneB
     private LocalDateTime updateTime;
     @ApiModelProperty(value = "云类型")
     private Integer cloudType ;
+    @ApiModelProperty(value = "探针采集时间间隔")
+    private String intervalSec;
 }

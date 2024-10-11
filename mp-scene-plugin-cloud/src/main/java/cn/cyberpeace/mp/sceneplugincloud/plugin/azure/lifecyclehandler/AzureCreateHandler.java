@@ -40,6 +40,7 @@ import com.azure.resourcemanager.monitor.models.*;
 import com.azure.resourcemanager.network.models.Network;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,6 +48,10 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class AzureCreateHandler extends CreateHandler {
+
+    // 载荷改造地址
+    @Value("${project.setting.group-name-prefix}")
+    private String groupNamePrefix;
 
     public static class ElementProcess {
         public static final EventProcess CREATE_WEBAPP = new EventProcess("create_webapp", "sceneplugincloud.event" + ".CREATE_WEBAPP");
@@ -66,27 +71,29 @@ public class AzureCreateHandler extends CreateHandler {
 
         int stepPercentage = this.getStepPercentage();
         List<CloudPluginSceneElementBO> allElements = new ArrayList<>(getPluginHandler().getElementMap().values());
+        List<CloudPluginSceneElementBO> allFilteredElements = new ArrayList<>();
+        List<CloudPluginSceneElementBO> filteredVirtualMachineElements = this.filterVirtualMachineElements(allElements);
+
+        List<CloudPluginSceneElementBO> filteredContainerElements = this.filterContainerElements(allElements);
+        allFilteredElements.addAll(filteredVirtualMachineElements);
+        allFilteredElements.addAll(filteredContainerElements);
+
+        List<CloudPluginSceneElementBO> filteredNetworkEquipmentElements = this.filterNetworkEquipmentElements(allElements);
+
 
         getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_NETWORK);
         // 创建微软云的资源组
         String groupName = getPluginHandler().getSourceSceneId();
+        groupName = StringUtils.isNotBlank(groupNamePrefix)?groupNamePrefix +"-"+ groupName:groupName;
         try {
             SceneBO scene = getPluginHandler().getSceneHandler().getScene();
-            String grouoId = new AzureResourceGroup(resourceService).create(groupName);
-            scene.setResourceGroupId(grouoId);
 
             // 先创建辅助网络
-            List<CloudPluginSceneElementBO> allFilteredElements = new ArrayList<>();
-            List<CloudPluginSceneElementBO> filteredVirtualMachineElements = this.filterVirtualMachineElements(allElements);
-
-            List<CloudPluginSceneElementBO> filteredContainerElements = this.filterContainerElements(allElements);
-            allFilteredElements.addAll(filteredVirtualMachineElements);
-            allFilteredElements.addAll(filteredContainerElements);
-
-            List<CloudPluginSceneElementBO> filteredNetworkEquipmentElements = this.filterNetworkEquipmentElements(allElements);
-
             List<Runnable> createTerminalTasks = new ArrayList<>();
+//            空场景或不涉及云靶标的场景不启动资源组
             if (!allFilteredElements.isEmpty()) {
+                String grouoId = new AzureResourceGroup(resourceService).create(groupName);
+                scene.setResourceGroupId(grouoId);
 
                 HashMap<String, List<VirtualNic>> virtualNicsMap = new HashMap<>();
                 allFilteredElements.forEach(element -> {
