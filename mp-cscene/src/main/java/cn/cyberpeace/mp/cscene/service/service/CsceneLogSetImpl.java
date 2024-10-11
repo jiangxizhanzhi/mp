@@ -60,6 +60,7 @@ public class CsceneLogSetImpl {
             if (CollectionUtils.isNotEmpty(probeEnabledEid)) {
                 probeService.cleanProbeDataByCycle(probeEnabledEid, batchSceneHandler.getEarliestStartTime(), finalDays);
             }
+            log.info("cleanCollectedDataTask end! sceneId:{}", sceneId);
         });
     }
 
