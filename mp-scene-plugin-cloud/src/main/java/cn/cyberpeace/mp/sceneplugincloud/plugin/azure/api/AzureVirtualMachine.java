@@ -62,11 +62,6 @@ public class AzureVirtualMachine {
         this.situationAwareConfig = BeanCommon.getBean(SituationAwareConfig.class);
     }
 
-    private final static String RUN_CLOUD_INIT_SCRIPT = "$customDataBase64 = Get-Content 'C:\\AzureData\\CustomData.bin'; " +
-            "$customDataBytes = [System.Convert]::FromBase64String($customDataBase64); " +
-            "[System.IO.File]::WriteAllBytes('C:\\AzureData\\CustomData.bat', $customDataBytes); " +
-            "Start-Process 'C:\\AzureData\\CustomData.bat'";
-
     public void VirtualMachinelist() throws IOException {
         PagedIterable<VirtualMachineImage> virtualMachineImages = azureResourceManager.virtualMachineImages().listByRegion(Region.ASIA_EAST);
 //        PagedIterable<VirtualMachinePublisher> virtualMachinePublishers = azureResourceManager.virtualMachineImages().publishers().listByRegion(Region.ASIA_EAST);
@@ -571,7 +566,7 @@ public class AzureVirtualMachine {
             // 创建 RunCommandInput 实例
             RunCommandInput runCommandInput = new RunCommandInput()
                     .withCommandId("RunPowerShellScript")
-                    .withScript(Collections.singletonList(RUN_CLOUD_INIT_SCRIPT));
+                    .withScript(prepareScripts());
             virtualMachine.runCommand(runCommandInput);
         }
         return virtualMachine;
@@ -746,5 +741,17 @@ public class AzureVirtualMachine {
                 .create();
     }
 
+    /**
+     * 准备脚本
+     * @return
+     */
+    private static ArrayList<String> prepareScripts() {
+        ArrayList<String> scripts = new ArrayList<>();
+        scripts.add("Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))");
+        scripts.add("choco install unzip -y");
+        scripts.add("Move-Item C:\\AzureData\\CustomData.bin C:\\AzureData\\CustomData.bat");  // 使用 Move-Item
+        scripts.add("Start-Process 'C:\\AzureData\\CustomData.bat'");  // 使用 Start-Process 执行批处理文件
+        return scripts;
+    }
 }
 
