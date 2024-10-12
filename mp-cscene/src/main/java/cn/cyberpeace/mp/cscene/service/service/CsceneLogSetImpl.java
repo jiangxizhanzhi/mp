@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.service.service;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.cscene.repository.mapper.CsceneLogSetMapper;
 import cn.cyberpeace.mp.cscene.request.logset.LogSetRequest;
+import cn.cyberpeace.mp.cscene.vo.SceneTypeVO;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import lombok.Data;
@@ -34,21 +35,15 @@ public class CsceneLogSetImpl {
         return result;
     }
 
-    @Data
-    public class SceneType {
-        private String sceneInstanceId;
-        private Integer sceneType;
-    }
-
     // 定时任务 每天凌晨一点执行
     @Scheduled(cron = "0 0 11 * * ?")
     public void cleanCollectedDataTask() {
         log.info("cleanCollectedDataTask start!");
         // 查询所有存活的场景
-        List<SceneType> list = csceneLogSetMapper.selectLivedSceneInstance();
+        List<SceneTypeVO> list = csceneLogSetMapper.selectLivedSceneInstance();
         if (list != null && list.size() > 0) {
             // 删除超出时限的es数据
-            list.forEach(scene -> cleanCollectedData(scene.getSceneInstanceId(), scene.getSceneType()));
+            list.forEach(scene -> cleanCollectedData(scene.getSceneInstanceId(), scene.getCloudType()));
         }
     }
 

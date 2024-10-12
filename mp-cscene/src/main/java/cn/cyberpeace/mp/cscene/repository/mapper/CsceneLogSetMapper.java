@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.repository.mapper;
 
 import cn.cyberpeace.mp.cscene.request.logset.LogSetRequest;
 import cn.cyberpeace.mp.cscene.service.service.CsceneLogSetImpl;
+import cn.cyberpeace.mp.cscene.vo.SceneTypeVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -16,5 +17,5 @@ public interface CsceneLogSetMapper {
 
     Integer getSceneCollectionDataCycle(String sceneId);
 
-    List<CsceneLogSetImpl.SceneType> selectLivedSceneInstance();
+    List<SceneTypeVO> selectLivedSceneInstance();
 }
