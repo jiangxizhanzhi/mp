@@ -732,6 +732,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> deleteById(String id, boolean logic, CsceneContextBO context) {
+        log.info("deleteById function logic request : {}", logic);
         if (ReentrantLockUtils.tryLock(id)) {
             try {
                 // 移除定时任务

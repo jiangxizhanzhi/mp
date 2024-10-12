@@ -1639,6 +1639,7 @@ public class ScenePluginCollectionSceneService {
      * @param sceneId
      */
     public void asyncCleanProbeData(String sceneId) {
+        log.info("asyncCleanProbeData request sceneId : " + sceneId);
         TaskCommon.executeTask(() -> {
             BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), null);
 
