@@ -262,6 +262,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Resource
     private SceneElementPluginMapper sceneElementPluginMapper;
 
+    @Resource
+    private SceneAreaMapper sceneAreaMapper;
+
     // expires in 10 minutes
     private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
 
@@ -2544,8 +2547,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 //        过滤出所有load节点 数据库过滤出要新增节点
         String sceneId = csceneLoadDto.getSceneId();
         String loadToolId = csceneLoadDto.getPluginSceneConfigElement().getLoadToolId();
-        log.info("addLoad begin. sceneId:{} loadToolId:{}",sceneId, loadToolId);
-
+        log.info("addLoad begin. sceneId:{} loadToolId:{}", sceneId, loadToolId);
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(sceneId, null, true);
         CsceneInstanceModel csceneInstanceModel = getModelMapper().get(sceneId);
 //        根据场景id获取对应模板
         HumanCondition selectHumanCondition = new HumanCondition()
@@ -2556,13 +2559,20 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (list.isEmpty()) {
 //            增加载荷
 //            确定位置
-            String position2 = getPosition2(csceneInstanceModel);
-            String outerPosition2 = getOuterPosition2(csceneInstanceModel);
+            SceneHandler sceneHandler = new SceneHandler(instanceHandler.getSceneId(), null, false, null);
+            Map<String, SceneAreaBO> areaMap = sceneHandler.getAreaMap();
+            SceneAreaBO sceneAreaBO = areaMap.get("loadUUID");
+            Position arePosition = JsonCommon.parse(sceneAreaBO.getPosition2(), Position.class);
+
+            String position2 = getPosition2(csceneInstanceModel, arePosition);
+            String outerPosition2 = getOuterPosition2(csceneInstanceModel, arePosition);
+            String arePositionStr = JsonCommon.stringify(arePosition);
+            sceneAreaBO.setPosition2(arePositionStr);
             //            实例场景保存
             SceneConfigElementModel sceneConfigElementModel = csceneLoadDto.getSceneConfigElement().toModel();
             CloudPluginSceneConfigElementModel cloudPluginSceneConfigElementModel = csceneLoadDto.getPluginSceneConfigElement().toModel();
             MpDevopsLoad mpDevopsLoad = loadMapper.getLoadById(cloudPluginSceneConfigElementModel.getLoadToolId());
-            log.info("addLoad mpDevopsLoad:{}",JsonCommon.stringify(mpDevopsLoad));
+            log.info("addLoad mpDevopsLoad:{}", JsonCommon.stringify(mpDevopsLoad));
             SceneElementModel sceneElementModel = new SceneElementModel();
             cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(sceneConfigElementModel, sceneElementModel);
             sceneElementModel.setScene(csceneInstanceModel.getScene());
@@ -2588,13 +2598,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             cloudPluginSceneElementModel.setRole(BaseSceneElementModel.Type.LOAD);
             cloudPluginSceneElementModel.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.LOAD);
             cloudPluginSceneElementMapper.create(cloudPluginSceneElementModel);
+            SceneAreaModel model = sceneAreaBO.toModel();
+            sceneAreaMapper.update(model);
 //            启动载荷节点
             log.info("addLoad.createElement");
             this.createElement(sceneId, cloudPluginSceneElementModel.getSceneElement(), csceneLoadDto.getContext());
 
 //            保存实例信息
             cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(sceneElementModel, sceneConfigElementModel);
-            csceneService.saveConfigData(csceneLoadDto.getCsceneId(), sceneConfigElementModel, cloudPluginSceneElementModel, cloudPluginSceneConfigElementModel);
+            csceneService.saveConfigData(csceneLoadDto.getCsceneId(), sceneConfigElementModel, cloudPluginSceneElementModel, cloudPluginSceneConfigElementModel, arePositionStr);
         }
         log.info("addLoad end.");
         return new ServiceResult<>(true);
@@ -2685,7 +2697,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
      * @param csceneInstanceModel 场景实例模型
      * @return 新增载荷的位置字符串
      */
-    private String getPosition(CsceneInstanceModel csceneInstanceModel, Function<SceneElementModel, String> positionFunction) {
+    private String getPosition(CsceneInstanceModel csceneInstanceModel, Function<SceneElementModel, String> positionFunction, Position arePosition) {
 
         HumanCondition humanCondition = new HumanCondition();
         humanCondition.filterEqual(SceneElementModel::getScene, csceneInstanceModel.getScene())
@@ -2708,9 +2720,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 .orElse(0);
 
 
-
         if (maxX != 0 && maxY != 0) {
             Origin origin = new Origin(maxX + 100, maxY);
+//            图层处理
+            double newWidth = origin.getX() + 100 - arePosition.getOrigin().getX();
+            if (newWidth > arePosition.getWidth()) {
+                arePosition.setWidth(newWidth);
+            }
             return JsonCommon.stringify(origin);
         }
         return "";
@@ -2722,9 +2738,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
      * @param csceneInstanceModel 场景实例模型
      * @return 新增载荷的位置字符串
      */
-    private String getPosition2(CsceneInstanceModel csceneInstanceModel) {
+    private String getPosition2(CsceneInstanceModel csceneInstanceModel, Position arePosition) {
         log.info("getPosition2 begin. sceneId:{}", csceneInstanceModel.getScene());
-        String position = getPosition(csceneInstanceModel, SceneElementModel::getPosition2);
+        String position = getPosition(csceneInstanceModel, SceneElementModel::getPosition2, arePosition);
         log.info("getPosition2 end. sceneId:{},position2:{}", csceneInstanceModel.getScene(), position);
         return position;
     }
@@ -2735,16 +2751,17 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
      * @param csceneInstanceModel 场景实例模型
      * @return 新增载荷的位置字符串
      */
-    private String getOuterPosition2(CsceneInstanceModel csceneInstanceModel) {
+    private String getOuterPosition2(CsceneInstanceModel csceneInstanceModel, Position arePosition) {
         log.info("getOuterPosition2 begin. sceneId:{}", csceneInstanceModel.getScene());
         String outerPosition2 = getPosition(csceneInstanceModel, sceneElementModel -> {
             String position = sceneElementModel.getOuterPosition2();
             if (StringUtils.isBlank(position)) {
                 return position;
             }
-            Map<String, String> parse = JsonCommon.parse(position, new TypeReference<Map<String, String>>() {});
+            Map<String, String> parse = JsonCommon.parse(position, new TypeReference<Map<String, String>>() {
+            });
             return parse.get("");
-        });
+        }, arePosition);
         if (StringUtils.isNotBlank(outerPosition2)) {
             HashMap<String, String> map = new HashMap<>();
             map.put("", outerPosition2);
@@ -2761,5 +2778,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     protected static class Origin {
         private double x;
         private double y;
+    }
+
+    @Getter
+    @Setter
+    protected static class Position {
+        private Origin origin;
+        private double height;
+        private double width;
     }
 }

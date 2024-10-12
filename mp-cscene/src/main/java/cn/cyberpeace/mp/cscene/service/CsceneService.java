@@ -32,7 +32,6 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneSnapshotDeleteTaskPool;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
-import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
@@ -111,6 +110,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     private AzureVmOsDiskMapper azureVmOsDiskMapper;
     @Resource
     private SceneConfigElementPluginMapper sceneConfigElementPluginMapper;
+    @Resource
+    private SceneConfigAreaMapper sceneConfigAreaMapper;
 
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
@@ -413,7 +414,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
     }
 
-    public ServiceResult<CsceneBO> getById(String id,String areaId , boolean withInstance, CsceneContextBO context) {
+    public ServiceResult<CsceneBO> getById(String id, String areaId, boolean withInstance, CsceneContextBO context) {
         CsceneModel csceneModel = this.getModelMapper().get(id);
         if (csceneModel == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
@@ -964,14 +965,16 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     /**
      * 保存实例数据
+     *
      * @param csceneId
      * @param sceneConfigElementModel
      * @param cloudPluginSceneElementModel
      * @param cloudPluginSceneConfigElementModel
+     * @param arePositionStr
      */
     public void saveConfigData(String csceneId, SceneConfigElementModel sceneConfigElementModel, CloudPluginSceneElementModel cloudPluginSceneElementModel,
-                               CloudPluginSceneConfigElementModel cloudPluginSceneConfigElementModel) {
-        log.info("saveConfigData begin. csceneId:{}",csceneId);
+                               CloudPluginSceneConfigElementModel cloudPluginSceneConfigElementModel, String arePositionStr) {
+        log.info("saveConfigData begin. csceneId:{}", csceneId);
         CsceneModel csceneModel = getModelMapper().get(csceneId);
         String sceneConfig = csceneModel.getSceneConfig();
         SceneConfigModel sceneConfigModel = sceneConfigMapper.get(sceneConfig);
@@ -986,6 +989,12 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(cloudPluginSceneElementModel, cloudPluginSceneConfigElementModel);
         cloudPluginSceneConfigElementModel.setScene(sceneConfigModel.getId());
         cloudPluginSceneConfigElementMapper.create(cloudPluginSceneConfigElementModel);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(SceneConfigAreaModel::getScene, sceneConfigModel.getId())
+                .filterEqual(SceneConfigAreaModel::getNodeId, "loadUUID");
+        List<SceneConfigAreaModel> list = sceneConfigAreaMapper.list(humanCondition);
+        list.stream().forEach(item -> item.setPosition2(arePositionStr));
+        sceneConfigAreaMapper.bulkUpdate(list);
         log.info("saveConfigData end.");
     }
 }
