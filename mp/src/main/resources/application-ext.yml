@@ -37,7 +37,6 @@ springfox:
 project:
   setting:
     load-transform-url: ${LOAD-TRANSFORM-URL:127.0.0.1:80}
-    group-name-prefix: ${GROUP_NAME_PREFIX:yz3}
 
 # 中台各模块相关配置
 mp:
@@ -149,6 +148,7 @@ mp:
       mix-management-image-id: ${MIX_MANAGEMENT_IMAGE_ID:0}
       management-username: ${MANAGEMENT_USERNAME:admin123}
       management-password: ${MANAGEMENT_PASSWORD:NHiOJiZTD4K1}
+      group-name-prefix: ${GROUP_NAME_PREFIX:yz3}
 
   # mp-log 模块
   log:
