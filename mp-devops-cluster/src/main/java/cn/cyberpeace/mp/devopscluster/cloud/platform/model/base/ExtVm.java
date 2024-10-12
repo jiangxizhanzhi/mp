@@ -88,4 +88,6 @@ public class ExtVm implements Serializable {
     private Integer dataDisk;
     @ApiModelProperty("网卡数量")
     private Integer netIfCnt;
+    @ApiModelProperty("硬盘数量")
+    private Integer diskCnt;
 }
