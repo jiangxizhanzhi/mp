@@ -61,22 +61,30 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     private String runTableName;
     @ApiModelProperty(value = "扩展磁盘大小")
     private Integer expansionDisk;
-
+    @ApiModelProperty(value = "节点状态")
+    private List<String> nodeState;
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
-                BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getInitCommands)));
+                BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getInitCommands),
+                BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getNodeState)));
         initCommands = StringUtils.isEmpty(obj.getInitCommands()) ? new ArrayList<>()
                 : JsonCommon.parse(obj.getInitCommands(), new TypeReference<List<String>>() {
         });
+        nodeState = StringUtils.isEmpty(obj.getNodeState()) ? new ArrayList<>()
+                : JsonCommon.parse(obj.getNodeState(), new TypeReference<List<String>>(){});
     }
 
     @Override
     public M toModel(String... ignoreFields) {
         var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
-                BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getInitCommands)));
+                BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getInitCommands),
+                BeanUtils.getBeanGetterFieldName(BaseSceneElementModel::getNodeState)));
         if (initCommands != null) {
             obj.setInitCommands(JsonCommon.stringify(initCommands));
+        }
+        if (nodeState != null) {
+            obj.setNodeState(JsonCommon.stringify(nodeState));
         }
         return obj;
     }

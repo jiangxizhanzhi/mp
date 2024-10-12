@@ -45,7 +45,8 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
     private String runTableName;
     @DefaultInt
     private Integer expansionDisk;
-
+    @DefaultStr
+    private String nodeState;
     public static class Type {
         public static final int OTHER = 0;
         public static final int SWITCH = 1;
