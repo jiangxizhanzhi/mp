@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.cscene.repository.mapper.CsceneLogSetMapper;
 import cn.cyberpeace.mp.cscene.request.logset.LogSetRequest;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,19 +34,25 @@ public class CsceneLogSetImpl {
         return result;
     }
 
+    @Data
+    public class SceneType {
+        private String sceneInstanceId;
+        private Integer sceneType;
+    }
+
     // 定时任务 每天凌晨一点执行
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 0 11 * * ?")
     public void cleanCollectedDataTask() {
         log.info("cleanCollectedDataTask start!");
         // 查询所有存活的场景
-        List<String> sceneIds = csceneLogSetMapper.selectLivedSceneInstance();
-        if (sceneIds != null && sceneIds.size() > 0) {
+        List<SceneType> list = csceneLogSetMapper.selectLivedSceneInstance();
+        if (list != null && list.size() > 0) {
             // 删除超出时限的es数据
-            sceneIds.forEach(sceneId -> cleanCollectedData(sceneId));
+            list.forEach(scene -> cleanCollectedData(scene.getSceneInstanceId(), scene.getSceneType()));
         }
     }
 
-    public void cleanCollectedData(String sceneId) {
+    public void cleanCollectedData(String sceneId, Integer cloudType) {
         Integer days = csceneLogSetMapper.getSceneCollectionDataCycle(sceneId);
         if (days == null) {
             // 设置默认存储周期
@@ -58,7 +65,7 @@ public class CsceneLogSetImpl {
             // 删除采集的数据
             List<String> probeEnabledEid = new ArrayList<>(batchSceneHandler.getProbeEnabledNodeId2EidMap().values());
             if (CollectionUtils.isNotEmpty(probeEnabledEid)) {
-                probeService.cleanProbeDataByCycle(probeEnabledEid, batchSceneHandler.getEarliestStartTime(), finalDays);
+                probeService.cleanProbeDataByCycle(probeEnabledEid, batchSceneHandler.getEarliestStartTime(), finalDays, cloudType);
             }
             log.info("cleanCollectedDataTask end! sceneId:{}", sceneId);
         });

@@ -34,10 +34,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
-  *@Desciption
-  *@Author zhangjin
-  *@Date 9/10/21 11:12 上午
-**/
+ * @Desciption
+ * @Author zhangjin
+ * @Date 9/10/21 11:12 上午
+ **/
 @Service
 @Slf4j
 public class ProbeService {
@@ -270,6 +270,7 @@ public class ProbeService {
 
     /**
      * 根据ids查询列表，包含脚本内容，参数
+     *
      * @param ids
      * @return
      */
@@ -279,7 +280,7 @@ public class ProbeService {
         condition.setNeedScriptContent(true);
         List<ProbeDto> probeDtos = probeMapper.listProbeDtos(condition);
         probeDtos.forEach(p ->
-            processProbeDtoOsTypes(p)
+                processProbeDtoOsTypes(p)
         );
         probeDtos.forEach(p -> {
             processProbeDtoParams(p);
@@ -301,17 +302,18 @@ public class ProbeService {
 
     /**
      * 根据ids逻辑删除
+     *
      * @param ids
      * @return
      */
     public int deleteByIds(List<String> ids) {
         List<ProbeModel> probesToUpdate =
-            ids.stream().map(id -> {
-                ProbeModel probeModel = new ProbeModel();
-                probeModel.setId(id);
-                probeModel.setIsDeleted(1);
-                return probeModel;
-            }).collect(Collectors.toList());
+                ids.stream().map(id -> {
+                    ProbeModel probeModel = new ProbeModel();
+                    probeModel.setId(id);
+                    probeModel.setIsDeleted(1);
+                    return probeModel;
+                }).collect(Collectors.toList());
 
         int cnt = probeMapper.bulkUpdate(probesToUpdate).getSuccessCount();
         return cnt;
@@ -320,6 +322,7 @@ public class ProbeService {
 
     /**
      * 清除探针数据，包括表，es索引，doc等
+     *
      * @param agentNames
      * @param sceneInstanceStartTime
      */
@@ -334,7 +337,7 @@ public class ProbeService {
         wazuhEventRequest.setEndTime(LocalDateTime.now());
 
         // 1. 清除es 文档数据
-        Long deletedCount = dataCollectionService.deleteDocByAgentNames(wazuhEventRequest);
+        Long deletedCount = dataCollectionService.deleteDocByAgentNames(wazuhEventRequest, 0);
         log.info("deletedCount:{}", deletedCount);
 
         // 2. 清除es索引?
@@ -346,10 +349,11 @@ public class ProbeService {
 
     /**
      * 根据时限清除探针数据
+     *
      * @param agentNames
      * @param sceneInstanceStartTime
      */
-    public void cleanProbeDataByCycle(List<String> agentNames, LocalDateTime sceneInstanceStartTime, Integer cycleDays) {
+    public void cleanProbeDataByCycle(List<String> agentNames, LocalDateTime sceneInstanceStartTime, Integer cycleDays, Integer cloudType) {
         if (Objects.isNull(sceneInstanceStartTime)) {
             log.error("scene instance startTime should not be null!");
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
@@ -357,16 +361,16 @@ public class ProbeService {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         wazuhEventRequest.setAgentNames(agentNames);
         wazuhEventRequest.setStartTime(sceneInstanceStartTime);
-        if(cycleDays != null){
+        if (cycleDays != null) {
             // LocalDateTime.now()减去cycleDays的天数
             wazuhEventRequest.setEndTime(LocalDateTime.now().minusDays(cycleDays));
-        }else{
+        } else {
             wazuhEventRequest.setEndTime(LocalDateTime.now());
         }
 
         // 清除es 文档数据
         log.info("deleting...");
-        Long deletedCount = dataCollectionService.deleteDocByAgentNames(wazuhEventRequest);
+        Long deletedCount = dataCollectionService.deleteDocByAgentNames(wazuhEventRequest, cloudType);
         log.info("deletedCount:{}", deletedCount);
     }
 
@@ -392,6 +396,7 @@ public class ProbeService {
 
     /**
      * 国际化转换
+     *
      * @param dto
      */
     private void processInternationalMessage(ProbeDto dto) {
@@ -497,7 +502,6 @@ public class ProbeService {
         probeResult.setCommandInterval(Integer.parseInt(probeModel.getCommandInterval().replace("m", "")));
         return probeResult;
     }*/
-
 
 
     /**

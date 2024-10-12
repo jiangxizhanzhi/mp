@@ -4,15 +4,24 @@
 
     <update id="modifySceneCollectionDataCycle">
         UPDATE mp_cscene_cscene_instance
-        SET log_set_cycle = #{param.days} where id = #{param.sceneId}
+        SET log_set_cycle = #{param.days}
+        where id = #{param.sceneId}
     </update>
 
     <select id="getSceneCollectionDataCycle" resultType="java.lang.Integer">
-        select log_set_cycle from mp_cscene_cscene_instance where id = #{sceneId}
+        select log_set_cycle
+        from mp_cscene_cscene_instance
+        where id = #{sceneId}
     </select>
 
-    <select id="selectLivedSceneInstance" resultType="java.lang.String">
-        select id from mp_cscene_cscene_instance where deleted = 0
+    <select id="selectLivedSceneInstance"
+            resultType="cn.cyberpeace.mp.cscene.service.service.CsceneLogSetImpl.SceneType">
+        SELECT mcci.id        AS sceneInstanceId,
+               mss.cloud_type AS cloudType
+        FROM mp_cscene_cscene_instance mcci
+                 LEFT JOIN mp_scene_scene mss ON mcci.scene = mss.id
+        WHERE mcci.deleted = 0
     </select>
+
 
 </mapper>

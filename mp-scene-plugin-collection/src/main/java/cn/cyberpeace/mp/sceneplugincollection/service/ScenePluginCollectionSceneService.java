@@ -1379,7 +1379,7 @@ public class ScenePluginCollectionSceneService {
         return num >> 30;
     }
 
-    public List<Port> listPagePorts(String nodeId,Integer cloudType) {
+    public List<Port> listPagePorts(String nodeId, Integer cloudType) {
         CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
         collectorBaseRequest.setAgentName(nodeId);
         collectorBaseRequest.setPage(1);
@@ -1652,11 +1652,16 @@ public class ScenePluginCollectionSceneService {
                     fdfsRemoteFileService.delete(key);
                 }
             }
-
+            // 获取云类型
+            SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
             // 删除采集的数据
             List<String> probeEnabledEid = new ArrayList<>(batchSceneHandler.getProbeEnabledNodeId2EidMap().values());
             if (CollectionUtils.isNotEmpty(probeEnabledEid)) {
-                probeService.cleanProbeData(probeEnabledEid, batchSceneHandler.getEarliestStartTime());
+                if (sceneHandler.getScene().getCloudType() != 0) {// 微软云云主机es数据清除
+                    probeService.cleanProbeDataByCycle(probeEnabledEid, batchSceneHandler.getEarliestStartTime(), 0, sceneHandler.getScene().getCloudType());
+                } else {// 传统云es数据清除
+                    probeService.cleanProbeData(probeEnabledEid, batchSceneHandler.getEarliestStartTime());
+                }
             }
 
         });
