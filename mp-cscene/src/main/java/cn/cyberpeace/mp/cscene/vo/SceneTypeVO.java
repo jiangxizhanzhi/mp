@@ -9,5 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SceneTypeVO {
     private String sceneInstanceId;
+    private String sceneId;
     private Integer cloudType;
 }

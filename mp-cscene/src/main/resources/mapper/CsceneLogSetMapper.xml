@@ -16,6 +16,7 @@
 
     <select id="selectLivedSceneInstance" resultType="cn.cyberpeace.mp.cscene.vo.SceneTypeVO">
         SELECT mcci.id        AS sceneInstanceId,
+               mcci.scene     AS sceneId,
                mss.cloud_type AS cloudType
         FROM mp_cscene_cscene_instance mcci
                  LEFT JOIN mp_scene_scene mss ON mcci.scene = mss.id

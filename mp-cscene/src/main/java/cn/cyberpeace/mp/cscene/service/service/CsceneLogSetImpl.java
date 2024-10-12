@@ -34,35 +34,35 @@ public class CsceneLogSetImpl {
         return result;
     }
 
-    // 定时任务 每天十一点四十执行
+    // 定时任务 每天一点执行
 //    @Scheduled(cron = "0 0 1 * * ?")
-    @Scheduled(cron = "0 40 11 * * ?")
+    @Scheduled(cron = "0 55 11 * * ?")
     public void cleanCollectedDataTask() {
         log.info("cleanCollectedDataTask start!");
         // 查询所有存活的场景
         List<SceneTypeVO> list = csceneLogSetMapper.selectLivedSceneInstance();
         if (list != null && list.size() > 0) {
             // 删除超出时限的es数据
-            list.forEach(scene -> cleanCollectedData(scene.getSceneInstanceId(), scene.getCloudType()));
+            list.forEach(scene -> cleanCollectedData(scene));
         }
     }
 
-    public void cleanCollectedData(String sceneId, Integer cloudType) {
-        Integer days = csceneLogSetMapper.getSceneCollectionDataCycle(sceneId);
+    public void cleanCollectedData(SceneTypeVO scene) {
+        Integer days = csceneLogSetMapper.getSceneCollectionDataCycle(scene.getSceneInstanceId());
         if (days == null) {
             // 设置默认存储周期
             days = 7;
         }
         Integer finalDays = days;
         TaskCommon.executeTask(() -> {
-            log.info("cleanCollectedDataTask start! sceneId:{}", sceneId);
-            BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), null);
+            log.info("cleanCollectedDataTask start! sceneId:{}", scene.getSceneId());
+            BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Arrays.asList(scene.getSceneId()), null);
             // 删除采集的数据
             List<String> probeEnabledEid = new ArrayList<>(batchSceneHandler.getProbeEnabledNodeId2EidMap().values());
             if (CollectionUtils.isNotEmpty(probeEnabledEid)) {
-                probeService.cleanProbeDataByCycle(probeEnabledEid, batchSceneHandler.getEarliestStartTime(), finalDays, cloudType);
+                probeService.cleanProbeDataByCycle(probeEnabledEid, batchSceneHandler.getEarliestStartTime(), finalDays, scene.getCloudType());
             }
-            log.info("cleanCollectedDataTask end! sceneId:{}", sceneId);
+            log.info("cleanCollectedDataTask end! sceneId:{}", scene.getSceneId());
         });
     }
 
