@@ -36,7 +36,7 @@ public class CsceneLogSetImpl {
 
     // 定时任务 每天一点执行
 //    @Scheduled(cron = "0 0 1 * * ?")
-    @Scheduled(cron = "0 55 11 * * ?")
+    @Scheduled(cron = "0 25 14 * * ?")
     public void cleanCollectedDataTask() {
         log.info("cleanCollectedDataTask start!");
         // 查询所有存活的场景
