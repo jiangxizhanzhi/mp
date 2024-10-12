@@ -1561,7 +1561,7 @@ public class DataCollectionService extends CollectionBaseService {
      *
      * @param wazuhEventRequest
      */
-    public Long deleteDocByAgentNames(WazuhEventRequest wazuhEventRequest) {
+    public Long deleteDocByAgentNames(WazuhEventRequest wazuhEventRequest, Integer cloudType) {
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return 0L;
         }
@@ -1581,7 +1581,23 @@ public class DataCollectionService extends CollectionBaseService {
         log.info("elasticsearch delete by query quest... index:{}, JSON query:\n{}", indexArray, deleteByQueryRequest.getSearchRequest().source().toString());
 
         try {
-            BulkByScrollResponse response = restHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+            RestHighLevelClient client = null;
+            if (cloudType == null || cloudType == 0) {
+                client = restHighLevelClient;
+            } else {
+                switch (cloudType) {
+                    case 1:
+                        client = publicWazuhRestHighLevelClient;
+                        break;
+                    case 2:
+                        client = privateWazuhRestHighLevelClient;
+                        break;
+                    case 3:
+                        client = mixWazuhRestHighLevelClient;
+                        break;
+                }
+            }
+            BulkByScrollResponse response = client.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
             return response.getUpdated();
         } catch (IOException e) {
             log.error("es delete by query error: {} ", ExceptionUtils.getStackTrace(e));
