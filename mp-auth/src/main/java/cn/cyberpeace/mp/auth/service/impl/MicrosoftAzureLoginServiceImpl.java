@@ -51,13 +51,13 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
     @Override
     public ServiceResult updateLocalAzurer(MicrosoftAzureUserModel requestData) {
         if (requestData == null) {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "请求数据为空");
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, "请求数据为空").asResult();
         }
 
         // 验证私有云地址格式
         String connectIp = requestData.getConnectIp();
         if (!StringUtils.isEmpty(connectIp) && !CheckUtil.checkPrivateCloudAddress(connectIp)) {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "私有云地址格式错误");
+            return new ServiceResult<>(null, BaseErrorCode.ERROR, "私有云地址格式错误").asResult();
         }
 
         // 判断是否为新增账号（没有主键表示新增）
@@ -65,9 +65,9 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
             // 调用新增逻辑
             Boolean addAzurer = microsoftAzureLoginMapper.addAzurer(requestData);
             if (addAzurer) {
-                return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "新增账号信息成功");
+                return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "新增账号信息成功").asResult();
             } else {
-                return new ServiceResult<>(null, BaseErrorCode.ERROR, "新增账号信息失败");
+                return new ServiceResult<>(null, BaseErrorCode.ERROR, "新增账号信息失败").asResult();
             }
         }
 
@@ -75,13 +75,13 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
         if (isUpdateNeeded(requestData)) {
             Boolean updateAzurer = microsoftAzureLoginMapper.updateLocalAzurer(requestData.getPk().toString(), requestData);
             if (updateAzurer) {
-                return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "修改账号信息成功");
+                return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "修改账号信息成功").asResult();
             } else {
-                return new ServiceResult<>(null, BaseErrorCode.ERROR, "修改账号信息失败");
+                return new ServiceResult<>(null, BaseErrorCode.ERROR, "修改账号信息失败").asResult();
             }
         }
 
-        return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "无修改信息，操作成功");
+        return new ServiceResult<>(null, BaseErrorCode.SUCCESS, "无修改信息，操作成功").asResult();
     }
 
     // 检查是否有字段需要更新

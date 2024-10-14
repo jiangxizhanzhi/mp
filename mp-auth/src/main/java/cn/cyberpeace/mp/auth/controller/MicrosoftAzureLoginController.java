@@ -48,15 +48,15 @@ public class MicrosoftAzureLoginController {
 
     @ApiOperation(value = "删除微软云用户", notes = "")
     @DeleteMapping("/deleteAzurer")
-    public ServiceResult<MicrosoftAzureUserModel> deleteAzurer(@RequestBody MicrosoftAzureUserModel requestData) {
+    public ServiceResult deleteAzurer(@RequestBody MicrosoftAzureUserModel requestData) {
         Boolean deleteAzurer = null;
         if (requestData != null && requestData.getPk() != null && !requestData.getPk().equals("")) {
             deleteAzurer = microsoftAzureLoginService.deleteAzurer(requestData.getPk().toString());
             if (deleteAzurer) {
-                return new ServiceResult<>(null, BaseErrorCode.SUCCESS,"删除用户成功");
+                return new ServiceResult<>(null, BaseErrorCode.SUCCESS,"删除用户成功").asResult();
             }
         }
-        return new ServiceResult<>(null, BaseErrorCode.ERROR,"删除用户失败");
+        return new ServiceResult<>(null, BaseErrorCode.ERROR,"删除用户失败").asResult();
     }
 
     @ApiOperation(value = "修改账号信息", notes = "")
