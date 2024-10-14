@@ -3,7 +3,9 @@ package cn.cyberpeace.mp.frontbusiness.controller;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.bo.target.TargetBo;
+import cn.cyberpeace.mp.auth.model.MenuDifferenceModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.repository.MenuDifferenceMapper;
 import cn.cyberpeace.mp.auth.request.target.BindUserTargetsRequest;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -17,7 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 用户权限管理接口
@@ -32,6 +36,9 @@ public class UserPermissionController {
 
     @Autowired
     private UserPermissionService userPermissionService;
+
+    @Autowired
+    private MenuDifferenceMapper menuDifferenceMapper;
 
 
     @ApiOperation(value = "根据userId查询所有权限", notes = "")
@@ -72,8 +79,18 @@ public class UserPermissionController {
 
     @ApiOperation(value = "查询当前登录用户所有菜单权限（编码集合）", notes = "")
     @GetMapping("/menuidents/byloginuser")
-    public ServiceResult listMenuIdentsByLoginUser() {
+    public ServiceResult listMenuIdentsByLoginUser(@RequestParam(required = false) String Type) {
+
         List<String> menuIdents = userPermissionService.listMenuIdentsByLoginUser();
+
+        // 如果Type不为空以及不为空字符串，则过滤掉Type类型
+        if (Type != null && Type.trim().length() > 0 ) {
+            MenuDifferenceModel menuDifferenceModel = menuDifferenceMapper.get(Type);
+            List<String> ids = Arrays.stream(menuDifferenceModel.getDifference().split(",")).collect(Collectors.toList());
+            // 取ids和menuIdents的交集
+            menuIdents.retainAll(ids);
+        }
+
         return ServiceResult.builder().source(menuIdents).build().asResult();
     }
 
