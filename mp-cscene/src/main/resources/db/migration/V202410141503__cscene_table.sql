@@ -1,0 +1,1 @@
+update mp_sys_config set `value` = '' where key_name = 'copyright' ;
