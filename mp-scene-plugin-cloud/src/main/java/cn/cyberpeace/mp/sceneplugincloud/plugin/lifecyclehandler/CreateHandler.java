@@ -651,7 +651,6 @@ public class CreateHandler extends HandlerCommon {
         var command = SystemTypeCommandUtils.joinCommands(standardSystemType, cloudInitCommands.toArray(new String[0]));
         if (!StringUtils.isEmpty(command)) {
             if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
-                command = SystemTypeCommandUtils.appendBeforeCommand(command, "mkdir C:\\Users\\Public223", standardSystemType);
                 command = SystemTypeCommandUtils.appendBeforeCommand(command, "rem cmd", standardSystemType);
             } else {
                 command = SystemTypeCommandUtils.appendBeforeCommand(command, "#cloud-config", standardSystemType);
