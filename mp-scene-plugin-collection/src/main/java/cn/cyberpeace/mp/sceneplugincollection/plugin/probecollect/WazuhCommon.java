@@ -142,8 +142,6 @@ public class WazuhCommon {
             resource.setFile(nameFileMap.getOrDefault(WAZUH_AGENT_WINDOWS_FILE_NAME, StringUtils.EMPTY));
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.WINDOWS_LINE_BREAK,
-                            "@PowerShell -Command \"Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))\"",
-                            "@PowerShell -Command \"choco install unzip -y\"",
                             "call c:\\wazuha\\uninstall.bat",
                             String.format("set SIC_WAZUH_MANAGER_IP=%s", wazuhHost),
                             String.format("set SIC_WAZUH_AGENT_NAME=%s", agentName),
@@ -155,7 +153,6 @@ public class WazuhCommon {
                             "call install.bat",
                             String.format("cd %s", windowsInstallDir),
                             "rd/s/q agent-installer",
-//TODO 测试暂去除
                             "del/f/s/q " + InstallerUtils.INSTALLER_REPLACEMENT,
                             "cd C:\\wazuha",
                             "call config.bat",

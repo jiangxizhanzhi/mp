@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.bo.target.TargetBo;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.model.MenuDifferenceModel;
+import cn.cyberpeace.mp.auth.repository.MenuDifferenceMapper;
 import cn.cyberpeace.mp.auth.service.MenuConfigService;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
@@ -19,7 +21,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 权限管理接口
@@ -43,6 +47,9 @@ public class TargetController {
     @Autowired
     private UserPermissionService userPermissionService;
 
+    @Autowired
+    private MenuDifferenceMapper menuDifferenceMapper;
+
     @ApiOperation(value = "查询权限树", notes = "")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "targetId", value = "权限id", paramType = "query", dataTypeClass = String.class),
@@ -57,8 +64,12 @@ public class TargetController {
 
     @ApiOperation(value = "查询当前用户菜单")
     @GetMapping("/current_user/tree")
-    public ServiceResult getTree() {
+    public ServiceResult getTree(@RequestParam(required = false) String Type) {
+        MenuDifferenceModel menuDifferenceModel = menuDifferenceMapper.get(Type);
+        List<String> ids = Arrays.stream(menuDifferenceModel.getDifference().split(",")).collect(Collectors.toList());
         List<String> menuIdents = userPermissionService.listMenuIdentsByLoginUser();
+        // 取ids和menuIdents的交集
+        menuIdents.retainAll(ids);
         var result = menuConfigService.getUserTreeMenuBy(UserUtils.getLoginUser().getId(), menuIdents);
         return ServiceResult.builder().source(result).build().asResult();
     }
