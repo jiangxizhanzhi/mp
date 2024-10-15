@@ -34,7 +34,6 @@
     <modules>
         <module>mp-agent</module>
         <module>mp-aggregation</module>
-        <module>mp-auth</module>
         <module>mp-base</module>
         <module>mp-cscene</module>
         <module>mp-devops-cluster</module>

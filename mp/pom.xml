@@ -164,10 +164,8 @@
                     <packages>cn.cyberpeace.mp</packages>
                     <excludes>org.spring,org,com.rabbitmq,javax</excludes>
                     <libjars>
-                        mp-auth-0.0.2-SNAPSHOT.jar,
                         mp-agent-0.0.2-SNAPSHOT.jar,
                         mp-aggregation-0.0.2-SNAPSHOT.jar,
-                        mp-auth-0.0.2-SNAPSHOT.jar,
                         mp-base-0.0.2-SNAPSHOT.jar,
                         mp-cscene-0.0.2-SNAPSHOT.jar,
                         mp-devops-cluster-0.0.2-SNAPSHOT.jar,
