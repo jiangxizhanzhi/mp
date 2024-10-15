@@ -11,9 +11,9 @@
 package cn.cyberpeace.mp.aggregation.service;
 
 import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
-import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.common.DefaultImgDirEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;

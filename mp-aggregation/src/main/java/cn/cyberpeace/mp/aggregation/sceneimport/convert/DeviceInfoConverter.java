@@ -10,11 +10,11 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
-import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.common.util.DefaultImgUtil2;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
@@ -137,7 +137,7 @@ class DeviceInfoConverter implements IConverter {
         CloudPluginSceneConfigElementBO pluginElement = params.pluginElement;
 
         if (StringUtils.isNotEmpty(device.getLogo())) {
-            String logo = FsCommon.getFileKey(DefaultImgUtil.pathToFdfsUrl(device.getLogo()));
+            String logo = FsCommon.getFileKey(DefaultImgUtil2.pathToFdfsUrl(device.getLogo()));
             element.setIcon2(logo);
         }
         element.setDescription(device.getDescription());

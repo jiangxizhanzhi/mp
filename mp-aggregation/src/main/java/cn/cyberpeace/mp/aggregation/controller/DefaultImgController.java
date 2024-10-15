@@ -15,9 +15,6 @@ import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
 import cn.cyberpeace.mp.aggregation.dto.cluster.DefaultImgTarget;
 import cn.cyberpeace.mp.aggregation.request.DefaultImgRequest;
 import cn.cyberpeace.mp.aggregation.service.DefaultImgService;
-import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
-import cn.cyberpeace.mp.auth.constant.DefaultImgStyleEnum;
-import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -26,6 +23,9 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.common.DefaultImgDirEnum;
+import cn.cyberpeace.mp.common.DefaultImgStyleEnum;
+import cn.cyberpeace.mp.common.util.DefaultImgUtil2;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -37,9 +37,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-/**
+ /**
  * @ClassName DefaultImgController
  * @Description
  * @Author maojun
@@ -71,7 +70,7 @@ public class DefaultImgController {
         }
         DefaultImgDirEnum defaultImgDirEnum = request.getDefaultImgDirEnum();
         List<String> groupList = Collections.singletonList(defaultImgDirEnum.getGroup());
-        List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
+        List<LocalFileMappingModel> modelList = DefaultImgUtil2.listByGroups(groupList);
         List<String> urlList =
                 new ArrayList<>();
         for (LocalFileMappingModel model : modelList) {
@@ -96,7 +95,7 @@ public class DefaultImgController {
         }
         for (DefaultImgStyleEnum styleEnum : DefaultImgStyleEnum.values()) {
             List<String> groupList = Collections.singletonList(styleEnum.getGroup());
-            List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
+            List<LocalFileMappingModel> modelList = DefaultImgUtil2.listByGroups(groupList);
             DefaultImgTarget defaultImgTarget = new DefaultImgTarget();
             List<String> urlList = new ArrayList<>();
             for (LocalFileMappingModel model : modelList) {
@@ -123,7 +122,7 @@ public class DefaultImgController {
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
         }
         List<String> groupList = Collections.singletonList(DefaultImgDirEnum.SYS_LOGO.getGroup());
-        List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
+        List<LocalFileMappingModel> modelList = DefaultImgUtil2.listByGroups(groupList);
         Map<String, String> urlMap = new HashMap<>();
         if (CollectionUtils.isNotEmpty(modelList)) {
             for (LocalFileMappingModel model : modelList) {

@@ -11,15 +11,10 @@
 package cn.cyberpeace.mp.aggregation.service;
 
 import cn.cyberpeace.mp.aggregation.SceneBusinessSummary;
-import cn.cyberpeace.mp.aggregation.dto.dashboard.UserOnlineReportMonitorBo;
 import cn.cyberpeace.mp.aggregation.response.DailyUserActivityResponse;
 import cn.cyberpeace.mp.aggregation.response.ResourceStatisticsResponse;
 import cn.cyberpeace.mp.aggregation.response.UserResourceResponse;
 import cn.cyberpeace.mp.aggregation.response.UserSummarySceneResponse;
-import cn.cyberpeace.mp.auth.bo.user.UserOnlineReportBo;
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
-import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -81,9 +76,6 @@ public class DashboardService {
 
     private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
 
-    @Autowired
-    private UserOnlineRecordService userOnlineRecordService;
-
     /**
      * DashboardService
      *
@@ -136,11 +128,6 @@ public class DashboardService {
         }
         String[] xAxis = list1.toArray(new String[0]);
         List<Integer> result = new ArrayList<>();
-        for (LocalDate localDate : daylist) {
-            Integer cnt = userOnlineRecordService.getOnlinedUserCntByPeriod(localDate.atStartOfDay(), localDate.plusDays(1).atStartOfDay());
-            Integer apply = cnt;
-            result.add(apply);
-        }
         Integer[] userCount = result.toArray(new Integer[0]);
 
         // 每日活跃场景数量 todo,性能可优化
@@ -223,13 +210,9 @@ public class DashboardService {
                 .sceneCount(0)
                 .dynamips(0)
                 .build();
-        UserModel user = UserCommon.getCurrentUser();
-        if (user == null) {
-            return userResource;
-        }
         HumanCondition condition = new HumanCondition()
                 .filterEqual(CsceneInstanceModel::getDeleted, false)
-                .filterEqual(CsceneInstanceModel::getCreateUser, user.getId());
+                .filterEqual(CsceneInstanceModel::getCreateUser, "");
         List<CsceneInstanceModel> csceneInstances;
         try {
             csceneInstances = csceneInstanceMapper.list(condition);
@@ -293,59 +276,6 @@ public class DashboardService {
                 List.of(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER),
                 List.of(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)));
         return new ServiceResult<>(sceneBusinessSummary);
-    }
-
-    /**
-     * 整合在线报告和节点监控
-     *
-     * @param pageRequest
-     * @return
-     */
-    public PageInfo<UserOnlineReportMonitorBo> getUserOnlineMonitorRecords(UserOnlineRecordSummaryPageRequest pageRequest) {
-        PageInfo<UserOnlineReportBo> pageInfo = userOnlineRecordService.recordSummaryPage(pageRequest);
-        List<UserOnlineReportBo> userOnlineReportBoList = pageInfo.getList();
-
-        //List<String> onlinedUserIds = userOnlineReportDtoList.stream().filter(dto -> Objects.equals(dto.getIsOnline(), 1)).map(UserOnlineReportDto::getUser).collect(Collectors.toList());
-        List<String> onlinedUserIds = new ArrayList<>();
-        for (UserOnlineReportBo onlineReportBo : userOnlineReportBoList) {
-            String user = onlineReportBo.getUser();
-            onlinedUserIds.add(user);
-        }
-        List<UserConnectionNumBO> userConnectionNumBOList = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(onlinedUserIds)) {
-            ServiceResult<List<UserConnectionNumBO>> result = csceneSpecialService.countUserConnections(onlinedUserIds);
-            userConnectionNumBOList = result.getSource();
-        }
-
-        List<UserOnlineReportMonitorBo> monitorDtoList = new ArrayList<>();
-        for (UserOnlineReportBo userOnlineReportBo : userOnlineReportBoList) {
-            UserOnlineReportMonitorBo monitorDto = new UserOnlineReportMonitorBo();
-            BeanUtils.copyProperties(userOnlineReportBo, monitorDto);
-
-            monitorDto.setNodeSessionCnt(0);
-            monitorDto.setHasNodeSession(false);
-
-            if (CollectionUtils.isNotEmpty(userConnectionNumBOList)) {
-                Optional<UserConnectionNumBO> boOptional = Optional.empty();
-                for (UserConnectionNumBO bo : userConnectionNumBOList) {
-                    if (Objects.equals(bo.getUser(), userOnlineReportBo.getUser())) {
-                        boOptional = Optional.of(bo);
-                        break;
-                    }
-                }
-                if (boOptional.isPresent() && boOptional.get().getConnectionNum() > 0) {
-                    monitorDto.setNodeSessionCnt(boOptional.get().getConnectionNum());
-                    monitorDto.setHasNodeSession(true);
-                }
-            }
-
-            monitorDtoList.add(monitorDto);
-        }
-
-        PageInfo<UserOnlineReportMonitorBo> newPageInfo = new PageInfo();
-        BeanUtils.copyProperties(pageInfo, newPageInfo);
-        newPageInfo.setList(monitorDtoList);
-        return newPageInfo;
     }
 
     /**

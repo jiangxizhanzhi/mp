@@ -10,7 +10,7 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.aggregation.request;
 
-import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
+import cn.cyberpeace.mp.common.DefaultImgDirEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

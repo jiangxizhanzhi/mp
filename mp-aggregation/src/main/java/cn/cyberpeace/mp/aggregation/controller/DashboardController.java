@@ -12,16 +12,12 @@ package cn.cyberpeace.mp.aggregation.controller;
 
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
 import cn.cyberpeace.mp.aggregation.dto.cluster.SystemClusterUsed;
-import cn.cyberpeace.mp.aggregation.dto.dashboard.UserOnlineReportMonitorBo;
 import cn.cyberpeace.mp.aggregation.response.DailyUserActivityResponse;
 import cn.cyberpeace.mp.aggregation.response.ResourceStatisticsResponse;
 import cn.cyberpeace.mp.aggregation.response.UserResourceResponse;
 import cn.cyberpeace.mp.aggregation.response.UserSummarySceneResponse;
 import cn.cyberpeace.mp.aggregation.service.DashboardService;
 import cn.cyberpeace.mp.aggregation.service.MockService;
-import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
-import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
-import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -57,9 +53,6 @@ public class DashboardController {
 
     @Autowired
     private MockService mockService;
-
-    @Autowired
-    private UserOnlineRecordService userOnlineRecordService;
 
     private DashboardService dashboardService;
 
@@ -116,20 +109,6 @@ public class DashboardController {
     public ServiceResult<UserSummarySceneResponse> userSummary() {
         UserSummarySceneResponse response = dashboardService.countActivityScene();
         return ResultCommon.success(response);
-    }
-
-    /**
-     * 用户在线记录
-     *
-     * @param pageRequest
-     * @return
-     */
-    @ApiOperation(value = "用户在线记录", notes = "")
-    @GetMapping("/user_online_record")
-    public ListObjServiceResult<UserOnlineReportMonitorBo> getUserOnlineMonitorRecords(UserOnlineRecordSummaryPageRequest pageRequest) {
-        pageRequest.ensure();
-        PageInfo<UserOnlineReportMonitorBo> pageInfo = dashboardService.getUserOnlineMonitorRecords(pageRequest);
-        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
     /**
