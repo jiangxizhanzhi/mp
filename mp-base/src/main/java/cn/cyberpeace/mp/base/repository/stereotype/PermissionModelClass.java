@@ -8,7 +8,7 @@
  // File create date Fri Jul 12 12:55:33 CST 2024.
  // File update date Fri Jul 12 12:55:33 CST 2024.
  // Version 1.0.0
-package cn.cyberpeace.mp.authbase.repository.stereotype;
+package cn.cyberpeace.mp.base.repository.stereotype;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

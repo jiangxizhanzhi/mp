@@ -10,7 +10,6 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.dto;
 
-import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.devopscluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.request.ImagePageRequest;
@@ -215,7 +214,7 @@ public class ImagePageDTO extends BasePageDTO{
             this.setImageType(request.getImageType());
         }
         this.setName(request.getName());
-        this.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
+        this.setOwner("");
         this.setSearchPublicEnum(1);
         this.setOffset((request.getPage() - 1) * request.getPerPage());
         this.setLimit(request.getPerPage());
@@ -277,9 +276,6 @@ public class ImagePageDTO extends BasePageDTO{
         if (Objects.nonNull(request.getPage()) && Objects.nonNull(request.getPerPage())) {
             this.setOffset((request.getPage() - 1) * request.getPerPage());
             this.setLimit(request.getPerPage());
-        }
-        if (Objects.isNull(request.getIgnoreUser()) || !request.getIgnoreUser()) {
-            this.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
         }
         if (Objects.isNull(request.getImageType())){
             this.setSearchType(0);

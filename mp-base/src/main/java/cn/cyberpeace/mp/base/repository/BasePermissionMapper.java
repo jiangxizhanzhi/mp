@@ -8,10 +8,10 @@
  // File create date Fri Jul 12 12:55:33 CST 2024.
  // File update date Fri Jul 12 12:55:33 CST 2024.
  // Version 1.0.0
-package cn.cyberpeace.mp.authbase.repository;
+package cn.cyberpeace.mp.base.repository;
 
-import cn.cyberpeace.mp.authbase.model.BasePermissionModel;
-import cn.cyberpeace.mp.authbase.repository.stereotype.PermissionModelClass;
+import cn.cyberpeace.mp.base.model.BasePermissionModel;
+import cn.cyberpeace.mp.base.repository.stereotype.PermissionModelClass;
 import cn.cyberpeace.mp.base.annotation.Recommendation;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;

@@ -10,7 +10,6 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.controller;
 
-import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -51,8 +50,6 @@ public class DynamipsController {
     private final DynamipsConverter dynamipsConverter;
 
     private final CsceneSpecialService csceneSpecialService;
-
-    private final UserService userService;
 
     private final DeviceTargetMapper deviceTargetMapper;
 

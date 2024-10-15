@@ -10,7 +10,6 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
-import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
@@ -201,7 +200,7 @@ public class ImagesService extends BaseCpService {
 
 
         CloudPlatformItemsPageResult pageResult = super.sendGet(DEVICE_CONNECT +
-                "?device_uuid=" + deviceUuid + "&user_id=" + (Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : ""), CloudPlatformItemsPageResult.class);
+                "?device_uuid=" + deviceUuid , CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<TargetConnection> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), TargetConnection.class);
         CloudPlatformPageResult<TargetConnection> model = new CloudPlatformPageResult<>();

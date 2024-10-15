@@ -10,11 +10,6 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.converter;
 
-import cn.cyberpeace.mp.auth.bo.user.UserBo;
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.service.UserService;
-import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
-import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -104,8 +99,6 @@ public class ImagesConverter implements BaseConverter {
 
     private final DevopsTargetService devopsTargetService;
 
-    private final UserService userService;
-
     private final ScenariosService scenariosService;
 
     private final TargetConverter targetConverter;
@@ -133,7 +126,6 @@ public class ImagesConverter implements BaseConverter {
             ps = device.getExtDocker().getAccessProtocols();
         }
         List<TargetConnection> result = new ArrayList<>();
-        String userId = UserUtils.getLoginUser().getId() ;
         for (var protocol : ps) {
             TargetConnection c = new TargetConnection();
             c.setPort(protocol.getPort());
@@ -142,7 +134,7 @@ public class ImagesConverter implements BaseConverter {
             c.setPassword(protocol.getPassword());
             c.setIpAddress(ip);
             c.setConnectionState(1);
-            var r = CloudSceneConnectionCommon.getOrCreateSceneConnectionV2(userId, device.getImageType(), c.getProtocol(), vmId, c.getUsername(), c.getPassword(), String.valueOf(c.getPort()), c.getIpAddress());
+            var r = CloudSceneConnectionCommon.getOrCreateSceneConnectionV2("", device.getImageType(), c.getProtocol(), vmId, c.getUsername(), c.getPassword(), String.valueOf(c.getPort()), c.getIpAddress());
             if (r.getConnectionId() != null) {
                 c.setConnectionId(Integer.valueOf(r.getConnectionId()));
             }
@@ -513,12 +505,6 @@ public class ImagesConverter implements BaseConverter {
         }
         //再新增权限数据
         List<String> userIds = request.getUserIds();
-        if (PublicEnum.PRIVATE == isAllPublic) {
-            UserModel user = UserUtils.getLoginUser();
-            if (Objects.nonNull(user)) {
-                userIds.add(user.getId());
-            }
-        }
         if (PublicEnum.ALL_PUBLIC != isAllPublic && CollectionUtils.isNotEmpty(userIds)) {
             for (String imageId : imageIds) {
                 List<DeviceTargetAuthPO> authModelList = new ArrayList<>();
@@ -541,32 +527,7 @@ public class ImagesConverter implements BaseConverter {
      */
     private static DeviceTargetAuthPO getDeviceTargetAuthPO(String imageId, String userId) {
         DeviceTargetAuthPO deviceTargetAuthPO = new DeviceTargetAuthPO();
-        deviceTargetAuthPO.setOwner(userId);
-        deviceTargetAuthPO.setTarget(imageId);
         return deviceTargetAuthPO;
-    }
-
-    /**
-     * 根据镜像ID查询用户列表
-     *
-     * @param uuid
-     * @return
-     */
-    public List<UserBo> findUsersByUuid(String uuid) {
-        List<DeviceTargetAuthPO> deviceTargetAuthPOS = devopsTargetAuthService.findByTarget(uuid);
-        if (CollectionUtils.isEmpty(deviceTargetAuthPOS)) {
-            return Lists.newArrayList();
-        }
-        List<String> userIds = new ArrayList<>();
-        for (DeviceTargetAuthPO deviceTargetAuthPO : deviceTargetAuthPOS) {
-            String owner = deviceTargetAuthPO.getOwner();
-            userIds.add(owner);
-        }
-        List<String> list = new ArrayList<>();
-        for (String userId : userIds) {
-            list.add(userId);
-        }
-        return userService.listByUserIds(list.toArray(new String[0]));
     }
 
     /**
@@ -611,7 +572,7 @@ public class ImagesConverter implements BaseConverter {
         if (StringUtils.isBlank(uuid)) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        String instanceCreateUser = Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : StringUtils.EMPTY;
+        String instanceCreateUser = "";
 
         List<VirtualNic> network = new ArrayList<>();
         VirtualNic virtualNic = new VirtualNic();
@@ -703,7 +664,7 @@ public class ImagesConverter implements BaseConverter {
         device.setDeviceVersion(request.getDeviceVersion());
         device.setParentName(request.getParentName());
         device.setDescription(request.getDescription());
-        device.setLogo(DefaultImgUtil.fdfsUrlToPath(request.getLogo()));
+        device.setLogo(request.getLogo());
         Integer role = request.getRole();
         device.setRole(role);
         device.setRoleId(request.getRoleId());
@@ -766,7 +727,7 @@ public class ImagesConverter implements BaseConverter {
         ImageConvertModel imageModel = new ImageConvertModel();
         imageModel.setUuid(device.getUuid());
         imageModel.setName(device.getName());
-        imageModel.setLogo(DefaultImgUtil.pathToFdfsUrl(device.getLogo()));
+        imageModel.setLogo(device.getLogo());
         imageModel.setMainCategory(device.getCategory());
         imageModel.setSubCategory(device.getSecondCategory());
         imageModel.setRole(device.getRole());

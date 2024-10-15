@@ -10,8 +10,8 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.converter;
 
-import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.common.util.DefaultImgUtil2;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.model.CsceneCommonCollectModel;
@@ -355,7 +355,7 @@ public class RealEquipmentConverter implements BaseConverter{
         }
 
         RealEquipmentBO convertModel = RealEquipmentBO.builder().uuid(device.getUuid())
-                .name(device.getName()).role(device.getRole()).logo(DefaultImgUtil.pathToFdfsUrl(device.getLogo()))
+                .name(device.getName()).role(device.getRole()).logo(DefaultImgUtil2.pathToFdfsUrl(device.getLogo()))
                 .mainCategory(device.getCategory()).subCategory(device.getSecondCategory())
                 .description(device.getDescription()).thirdCategory(device.getL3Category()).extEntityAccess(device.getExtEntityAccess()).build();
         convertModel.setSuccess(device.isSuccess());
@@ -385,7 +385,6 @@ public class RealEquipmentConverter implements BaseConverter{
         Device device = new Device();
         device.setName(request.getName());
         device.setDescription(request.getDescription());
-        device.setLogo(DefaultImgUtil.fdfsUrlToPath(request.getLogo()));
         device.setRole(request.getRole());
         device.setCategory(request.getMainCategory());
         device.setSecondCategory(request.getSubCategory());

@@ -10,9 +10,9 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.converter;
 
-import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.common.util.DefaultImgUtil2;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -374,7 +374,7 @@ public class TargetConverter{
      */
     public Device findByUuid(String uuid){
         Device device = deviceService.findByUuid(uuid);
-        device.setLogo(DefaultImgUtil.pathToFdfsUrl(device.getLogo()));
+        device.setLogo(DefaultImgUtil2.pathToFdfsUrl(device.getLogo()));
         return device;
     }
 }

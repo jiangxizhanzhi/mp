@@ -10,7 +10,6 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.controller;
 
-import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
@@ -443,20 +442,6 @@ public class ImagesController {
     public ServiceResult auth(@RequestBody ImagesAuthRequest request){
         imagesConverter.auth(request);
         return ResultCommon.success();
-    }
-
-    /**
-     * 授权
-     *
-     * @param uuid
-     * @return
-     */
-    @ApiOperation("根据uuid查询授权用户信息")
-    @ApiImplicitParam(name = "uuid", value = "请求参数", dataTypeClass = String.class)
-    @GetMapping("/auth-users")
-    public Result<List<UserBo>> authUsers(@RequestParam("uuid") String uuid ){
-        List<UserBo> userBos = imagesConverter.findUsersByUuid(uuid);
-        return new Result<>(userBos);
     }
 
     /**

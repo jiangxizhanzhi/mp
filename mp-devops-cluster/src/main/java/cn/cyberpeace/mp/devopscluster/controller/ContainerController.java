@@ -10,8 +10,6 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.controller;
 
-import cn.cyberpeace.mp.auth.bo.user.UserBo;
-import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
@@ -63,7 +61,6 @@ public class ContainerController {
 
     private final CsceneSpecialService csceneSpecialService;
 
-    private final UserService userService;
 
     /**
      * 重启
@@ -176,7 +173,6 @@ public class ContainerController {
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(nameList);
         Map<String, CsceneNodeInfoBO> source = serviceResult.getSource();
 
-        List<UserBo> userBoList = new ArrayList<>();
         if (Objects.nonNull(source)) {
             List<CsceneNodeInfoBO> values = new ArrayList<>(source.values());
             if (CollectionUtils.isNotEmpty(values)) {
@@ -185,65 +181,11 @@ public class ContainerController {
                     String userId = value.getUserId();
                     userIdList.add(userId);
                 }
-                if (CollectionUtils.isNotEmpty(userIdList)) {
-                    List<UserBo> list = userService.listByUserIds(userIdList.toArray(new String[]{}));
-                    if (CollectionUtils.isNotEmpty(list)) {
-                        userBoList = list;
-                    }
-                }
             }
         }
 
-        List<UserBo> tmpUserBoList = userBoList;
         List<ContainerPageVO> list = new ArrayList<>();
-        for (ContainerBO containerModel : modelList) {
-            ContainerPageVO containerPageVO = getContainerPageVO(source, tmpUserBoList, containerModel);
-            list.add(containerPageVO);
-        }
         return list;
     }
 
-    /**
-     * @param source
-     * @param tmpUserBoList
-     * @param containerModel
-     * @return 容器分页返回信息
-     */
-    private static ContainerPageVO getContainerPageVO(Map<String, CsceneNodeInfoBO> source, List<UserBo> tmpUserBoList, ContainerBO containerModel) {
-        CsceneNodeInfoBO csceneNodeInfoBO = new CsceneNodeInfoBO();
-        if (Objects.nonNull(source.get(containerModel.getName()))) {
-            csceneNodeInfoBO = source.get(containerModel.getName());
-        }
-        String userName = "";
-        String userId = csceneNodeInfoBO.getUserId();
-        if (StringUtils.isNotBlank(userId)) {
-            Optional<UserBo> optional =
-                    Optional.empty();
-            for (UserBo userDto : tmpUserBoList) {
-                if (userDto.getId().equals(userId)) {
-                    optional = Optional.of(userDto);
-                    break;
-                }
-            }
-            if (optional.isPresent()) {
-                userName = optional.get().getUsername();
-            }
-        }
-
-        return ContainerPageVO.builder().name(containerModel.getName())
-                .sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName())
-                .id(containerModel.getId())
-                .image(containerModel.getImage()).node(containerModel.getNode())
-                .status(containerModel.getStatus()).addressList(containerModel.getAddressList())
-                .createdAt(containerModel.getCreatedAt())
-                .userName(userName)
-                .referenceType(csceneNodeInfoBO.getReferenceType())
-                .event(csceneNodeInfoBO.getEvent())
-                .eventStatus(csceneNodeInfoBO.getEventStatus())
-                .sceneStatus(csceneNodeInfoBO.getSceneStatus())
-                .sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc())
-                .runningTime(containerModel.getRunningTime())
-                .processMessage(csceneNodeInfoBO.getProcessMessage())
-                .vlanIdList(containerModel.getVlanIdList()).build();
-    }
 }

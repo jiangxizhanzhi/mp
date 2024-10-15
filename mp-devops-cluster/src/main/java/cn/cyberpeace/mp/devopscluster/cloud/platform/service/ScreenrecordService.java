@@ -10,8 +10,6 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
-import cn.cyberpeace.mp.auth.bo.user.UserBo;
-import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -88,9 +86,6 @@ public class ScreenrecordService extends BaseCpService {
     private ScreenshotService screenshotService;
 
     @Autowired
-    private UserService userService ;
-
-    @Autowired
     private CsceneService csceneService;
 
     /**
@@ -156,22 +151,6 @@ public class ScreenrecordService extends BaseCpService {
                     response.parseResult(record);
                     responseList.add(response);
                     existUserIds.add(response.getUserId());
-                }
-            }
-            // 处理头像
-            if (!existUserIds.isEmpty()) {
-                List<UserBo> users = userService.listByUserIds(existUserIds.toArray(new String[]{}));
-                if (CollectionUtils.isNotEmpty(users)) {
-                    Map<String, UserBo> userId2Bo = new HashMap<>();
-                    for (UserBo u : users) {
-                        userId2Bo.put(u.getId(), u);
-                    }
-                    for (ScreenrecordVO res : responseList) {
-                        if (userId2Bo.containsKey(res.getUserId())) {
-                            UserBo userBo = userId2Bo.get(res.getUserId());
-                            res.setUserAvatar(userBo.getAvatar());
-                        }
-                    }
                 }
             }
         }

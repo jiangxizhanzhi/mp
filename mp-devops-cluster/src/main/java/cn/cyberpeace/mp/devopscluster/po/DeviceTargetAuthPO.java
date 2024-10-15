@@ -10,7 +10,7 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.po;
 
-import cn.cyberpeace.mp.authbase.model.BasePermissionModel;
+import cn.cyberpeace.mp.base.model.BasePermissionModel;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;

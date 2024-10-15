@@ -10,8 +10,6 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.controller;
 
-import cn.cyberpeace.mp.auth.bo.user.UserBo;
-import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
@@ -63,8 +61,6 @@ public class VmController {
     private final VmConverter vmConverter;
 
     private final CsceneSpecialService csceneSpecialService;
-
-    private final UserService userService;
 
     private final DeviceTargetMapper deviceTargetMapper;
 
@@ -175,7 +171,6 @@ public class VmController {
             String name = instance.getName();
             instanceNames.add(name);
         }
-        List<UserBo> userBoList = new ArrayList<>();
         Map<String, String> uuid2UserId = new HashMap<>();
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(instanceNames);
         List<DeviceTargetPO> devopsResult = deviceTargetMapper.findByUuids(instanceNames);
@@ -188,12 +183,6 @@ public class VmController {
                 for (CsceneNodeInfoBO value : values) {
                     String userId = value.getUserId();
                     userIdList.add(userId);
-                }
-                if (CollectionUtils.isNotEmpty(userIdList)) {
-                    List<UserBo> list = userService.listByUserIds(userIdList.toArray(new String[]{}));
-                    if (CollectionUtils.isNotEmpty(list)) {
-                        userBoList = list;
-                    }
                 }
             }
         }
@@ -215,78 +204,10 @@ public class VmController {
                 }
             }
             uuid2UserId = map;
-            if (CollectionUtils.isNotEmpty(userIdList)) {
-                userBoList.addAll(userService.listByUserIds(userIdList.toArray(new String[]{})));
-            }
         }
-        List<UserBo> tmpUserBoList = userBoList;
         Map<String, String> uuid2User = uuid2UserId;
         List<InstancePageVO> list = new ArrayList<>();
-        for (InstanceBO instanceModel : instances) {
-            InstancePageVO instancePageVO = getInstancePageVO(source, tmpUserBoList, uuid2User, instanceModel);
-            list.add(instancePageVO);
-        }
         return list;
     }
 
-    /**
-     * @param source
-     * @param tmpUserBoList
-     * @param uuid2User
-     * @param instanceModel
-     * @return 虚拟机分页返回信息
-     */
-    private static InstancePageVO getInstancePageVO(Map<String, CsceneNodeInfoBO> source, List<UserBo> tmpUserBoList, Map<String, String> uuid2User, InstanceBO instanceModel) {
-        CsceneNodeInfoBO csceneNodeInfoBO = new CsceneNodeInfoBO();
-        if (Objects.nonNull(source.get(instanceModel.getName()))) {
-            csceneNodeInfoBO = source.get(instanceModel.getName());
-        }
-        String userName = "";
-        String userRealname = "";
-        String userId = csceneNodeInfoBO.getUserId();
-        if (StringUtils.isNotBlank(userId)) {
-            Optional<UserBo> optional =
-                    Optional.empty();
-            for (UserBo userDto : tmpUserBoList) {
-                if (userDto.getId().equals(userId)) {
-                    optional = Optional.of(userDto);
-                    break;
-                }
-            }
-            if (optional.isPresent()) {
-                userName = optional.get().getUsername();
-                userRealname = optional.get().getName();
-            }
-        } else if (StringUtils.isNotEmpty(uuid2User.get(instanceModel.getName()))) {
-            String createUser = uuid2User.get(instanceModel.getName());
-            Optional<UserBo> optional =
-                    Optional.empty();
-            for (UserBo userDto : tmpUserBoList) {
-                if (userDto.getId().equals(createUser)) {
-                    optional = Optional.of(userDto);
-                    break;
-                }
-            }
-            if (optional.isPresent()) {
-                userName = optional.get().getUsername();
-                userRealname = optional.get().getName();
-            }
-        }
-
-        return InstancePageVO.builder().name(instanceModel.getName())
-                .sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName())
-                .id(instanceModel.getId())
-                .node(instanceModel.getNode())
-                .addressList(instanceModel.getAddressList())
-                .userName(userName)
-                .userRealname(userRealname)
-                .referenceType(csceneNodeInfoBO.getReferenceType())
-                .event(csceneNodeInfoBO.getEvent())
-                .eventStatus(csceneNodeInfoBO.getEventStatus())
-                .sceneStatus(csceneNodeInfoBO.getSceneStatus())
-                .sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc())
-                .runningTime(instanceModel.getRunningTime())
-                .processMessage(csceneNodeInfoBO.getProcessMessage())
-                .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
-    }
 }

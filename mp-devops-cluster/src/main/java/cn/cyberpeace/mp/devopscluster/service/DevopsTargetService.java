@@ -10,8 +10,6 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.service;
 
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
@@ -244,7 +242,7 @@ public class DevopsTargetService {
         deviceTargetPO.setId(device.getId().toString());
         deviceTargetPO.setUuid(device.getUuid());
         deviceTargetPO.setName(device.getName());
-        deviceTargetPO.setLogo(DefaultImgUtil.fdfsUrlToPath(device.getLogo()));
+        deviceTargetPO.setLogo(device.getLogo());
         deviceTargetPO.setRole(device.getRole());
         deviceTargetPO.setMainCategory(device.getCategory());
         deviceTargetPO.setSubCategory(device.getSecondCategory());

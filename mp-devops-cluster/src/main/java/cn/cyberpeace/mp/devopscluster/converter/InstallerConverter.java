@@ -10,9 +10,9 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.converter;
 
-import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
+import cn.cyberpeace.mp.common.util.DefaultImgUtil2;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.InstallerService;
@@ -128,7 +128,7 @@ public class InstallerConverter implements BaseConverter{
         model.setUuid(installer.getUuid());
         model.setName(installer.getName());
         model.setDescription(installer.getDescription());
-        model.setLogo(DefaultImgUtil.pathToFdfsUrl(installer.getLogo()));
+        model.setLogo(DefaultImgUtil2.pathToFdfsUrl(installer.getLogo()));
         if (StringUtils.isNotBlank(installer.getCategories())){
             model.setCategories(Joiner.on("|").join(installer.getCategories().split("")));
         }
@@ -166,7 +166,6 @@ public class InstallerConverter implements BaseConverter{
         InstallerFormDataCloudPlatformModel installer = new InstallerFormDataCloudPlatformModel();
         installer.setName(request.getName());
         installer.setDescription(request.getDescription());
-        installer.setLogo(DefaultImgUtil.fdfsUrlToPath(request.getLogo()));
         installer.setTmpdirUuid(Objects.nonNull(request.getDockerInstallerData()) ? request.getDockerInstallerData().getTmpdirUuid() : null);
         installer.setUserFilename(Objects.nonNull(request.getDockerInstallerData()) ? request.getDockerInstallerData().getUserFilename() : null);
         if (StringUtils.isNotBlank(request.getCategories())){

@@ -10,7 +10,7 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.converter;
 
-import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
+import cn.cyberpeace.mp.common.util.DefaultImgUtil2;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
@@ -155,7 +155,7 @@ public class SupportExportConvert {
         ImageConvertModel imageModel = new ImageConvertModel();
         imageModel.setUuid(device.getUuid());
         imageModel.setName(device.getName());
-        imageModel.setLogo(DefaultImgUtil.pathToFdfsUrl(device.getLogo()));
+        imageModel.setLogo(DefaultImgUtil2.pathToFdfsUrl(device.getLogo()));
         imageModel.setMainCategory(device.getCategory());
         imageModel.setSubCategory(device.getSecondCategory());
         imageModel.setRole(device.getRole());

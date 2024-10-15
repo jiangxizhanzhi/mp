@@ -10,9 +10,9 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.devopscluster.utils;
 
-import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
-import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
+import cn.cyberpeace.mp.common.DefaultImgDirEnum;
+import cn.cyberpeace.mp.common.util.DefaultImgUtil2;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 
@@ -37,14 +37,14 @@ public class POLogoUtils {
      */
     public static <T> void changeLogoPathToUrl(List<T> targetList) {
         if (CollectionUtils.isNotEmpty(targetList)) {
-            List<LocalFileMappingModel> mappingModelList = DefaultImgUtil.listByGroups(Collections.singletonList(DefaultImgDirEnum.TARGET.getGroup()));
+            List<LocalFileMappingModel> mappingModelList = DefaultImgUtil2.listByGroups(Collections.singletonList(DefaultImgDirEnum.TARGET.getGroup()));
             for (T target : targetList) {
                 try {
                     Class<?> curClass = target.getClass();
                     Field logoField = curClass.getDeclaredField("logo");
                     logoField.setAccessible(true);
                     String logo = logoField.get(target).toString();
-                    String url = DefaultImgUtil.pickPathToFdfsUrl(logo, mappingModelList);
+                    String url = DefaultImgUtil2.pickPathToFdfsUrl(logo, mappingModelList);
                     logoField.set(target, url);
                 } catch (Exception e) {
                     log.error("changePathToUrl error for {}:", target, e);
