@@ -130,7 +130,7 @@ mp:
       file-server: ${FILE_SERVER:lfs}
       lfs-inner-http-url: ${LFS_INNER_HTTP_PROTOCOL:http}://${MP_API_IP:10.100.25.1}:${MP_API_PORT:8002}${LFS_INNER_HTTP_URL:/api/mp/file/%s}
       lfs-outer-http-url: ${LFS_OUTER_HTTP_URL:/api/mp/file/%s}
-      lfs-outer-spice-url: ${LFS_OUTER_SPICE_URL:${MP_PUBLIC_BASE_URL}/file/%s}
+      lfs-outer-spice-url: ${LFS_OUTER_SPICE_URL:${MP_PUBLIC_BASE_URL:}/file/%s}
   # mp-situationaware 模块配置
   situationaware:
     ext-var:
