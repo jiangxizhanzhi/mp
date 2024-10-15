@@ -15,7 +15,6 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.behavior.service.CsceneUserBehaviorService;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.core.base.BaseCsceneHandler;
@@ -67,7 +66,6 @@ public class BcSceneConfigHandler extends BaseCsceneHandler<
     private SceneConfigService sceneConfigService;
     private CsceneInstanceMapper csceneInstanceMapper;
     private CsceneInstanceRoleMapper csceneInstanceRoleMapper;
-    private CsceneUserBehaviorService csceneUserBehaviorService;
 
     /**
      * 从数据库读取综合场景实例信息
@@ -187,7 +185,6 @@ public class BcSceneConfigHandler extends BaseCsceneHandler<
         CsceneInstanceBO result = instanceHandler.toData();
         if (result.getScene() != null && result.getScene().getTopology() != null && result.getScene().getTopology().getScene() != null) {
             result.getScene().getTopology().getScene().setProgressPercentage(5);
-            csceneUserBehaviorService.create(result.getScene().getTopology().getElements().stream().map(SceneElementBO::getId).collect(Collectors.toList()), csceneInstance.getId());
         }
         return result;
     }
@@ -233,7 +230,6 @@ public class BcSceneConfigHandler extends BaseCsceneHandler<
         sceneConfigService = BeanCommon.getBean(SceneConfigService.class);
         csceneInstanceMapper = BeanCommon.getBean(CsceneInstanceMapper.class);
         csceneInstanceRoleMapper = BeanCommon.getBean(CsceneInstanceRoleMapper.class);
-        csceneUserBehaviorService = BeanCommon.getBean(CsceneUserBehaviorService.class);
     }
 
     /**

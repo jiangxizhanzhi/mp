@@ -13,7 +13,6 @@ package cn.cyberpeace.mp.cscene.core;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.behavior.service.CsceneUserBehaviorService;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstaneRoleBO;
@@ -59,7 +58,6 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
 
     private CsceneInstanceUserCountService csceneInstanceUserCountService;
 
-    private CsceneUserBehaviorService csceneUserBehaviorService;
 
     /**
      * generateSceneContext
@@ -153,7 +151,6 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
         super.initBase();
         sceneService = BeanCommon.getBean(SceneService.class);
         csceneInstanceUserCountService = BeanCommon.getBean(CsceneInstanceUserCountService.class);
-        csceneUserBehaviorService = BeanCommon.getBean(CsceneUserBehaviorService.class);
     }
 
     /**
@@ -225,7 +222,6 @@ public class BcSceneInstanceHandler extends BaseCsceneHandler<
                 || sceneData.getTopology().getScene() == null) ? null : sceneData.getTopology().getScene().getEid();
         deleteScene(sceneId, logic);
         csceneBO.setScene(null);
-        csceneUserBehaviorService.delete(csceneBO.getId());
     }
 
     /**
