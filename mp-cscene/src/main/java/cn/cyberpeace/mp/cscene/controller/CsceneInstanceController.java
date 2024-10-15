@@ -10,90 +10,136 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.cscene.controller;
 
-import cn.cyberpeace.mp.agent.netconf.model.NetConfAccessInfo;
-import cn.cyberpeace.mp.agent.netconf.service.NetconfTaskServiceImpl;
-import cn.cyberpeace.mp.agent.snmp.model.SnmpAccessInfo;
-import cn.cyberpeace.mp.agent.snmp.model.Command;
-import cn.cyberpeace.mp.agent.snmp.model.CommandConfig;
-import cn.cyberpeace.mp.agent.snmp.service.SnmpTaskServiceImpl;
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.base.annotation.AuthTarget;
-import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.constant.TargetEnum;
-import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
-import cn.cyberpeace.mp.base.controller.common.ResultCommon;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
-import cn.cyberpeace.mp.common.bo.OptionBO;
-import cn.cyberpeace.mp.common.service.OptionService;
-import cn.cyberpeace.mp.cscene.bo.*;
-import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
-import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
-import cn.cyberpeace.mp.cscene.controller.request.*;
-import cn.cyberpeace.mp.cscene.core.common.UserCommon;
-import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
-import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
-import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudElementAccessMode;
-import cn.cyberpeace.mp.sceneplugincloud.model.CsceneElementSoftVersionModel;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetConnectionUrlParam;
-import cn.cyberpeace.mp.sceneplugincloud.repository.CsceneElementSoftVersionMapper;
-import cn.cyberpeace.mp.cscene.response.CommonCollectRes;
-import cn.cyberpeace.mp.cscene.response.SoftVersionInfo;
-import cn.cyberpeace.mp.cscene.service.CsceneCommonCollectService;
-import cn.cyberpeace.mp.cscene.service.CsceneFileService;
-import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
-import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
-import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
-import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
-import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
-import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
-import cn.cyberpeace.mp.log.enums.OpTypeEnums;
-import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
-import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
-import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
-import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
-import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
-import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConnectionCommon;
-import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventTypeBO;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
-import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataCountParams;
-import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
-import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
-import io.swagger.annotations.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+ import cn.cyberpeace.mp.agent.netconf.model.NetConfAccessInfo;
+ import cn.cyberpeace.mp.agent.netconf.service.NetconfTaskServiceImpl;
+ import cn.cyberpeace.mp.agent.snmp.model.Command;
+ import cn.cyberpeace.mp.agent.snmp.model.CommandConfig;
+ import cn.cyberpeace.mp.agent.snmp.model.SnmpAccessInfo;
+ import cn.cyberpeace.mp.agent.snmp.service.SnmpTaskServiceImpl;
+ import cn.cyberpeace.mp.auth.model.UserModel;
+ import cn.cyberpeace.mp.base.annotation.AuthTarget;
+ import cn.cyberpeace.mp.base.common.BeanCommon;
+ import cn.cyberpeace.mp.base.common.JsonCommon;
+ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+ import cn.cyberpeace.mp.base.constant.TargetEnum;
+ import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
+ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+ import cn.cyberpeace.mp.base.service.result.ServiceResult;
+ import cn.cyberpeace.mp.base.util.HttpUtils;
+ import cn.cyberpeace.mp.base.util.ReentrantLockUtils;
+ import cn.cyberpeace.mp.common.bo.OptionBO;
+ import cn.cyberpeace.mp.common.service.OptionService;
+ import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
+ import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
+ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
+ import cn.cyberpeace.mp.cscene.bo.CsceneUpdateBO;
+ import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
+ import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
+ import cn.cyberpeace.mp.cscene.bo.SceneAreaTreeBO;
+ import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+ import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
+ import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
+ import cn.cyberpeace.mp.cscene.controller.request.CreateNode;
+ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceActionRequest;
+ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceFlowMirrorRequest;
+ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeAccessModeActionRequest;
+ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeActionRequest;
+ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeCommandActionRequest;
+ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeConnectionActionRequest;
+ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeDelSnapshotRequest;
+ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowActionRequest;
+ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowRecordsRequest;
+ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowsActionRequest;
+ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeProbeActionRequest;
+ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeSnapshotRequest;
+ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstancesActionRequest;
+ import cn.cyberpeace.mp.cscene.controller.request.CsceneStrategyRequest;
+ import cn.cyberpeace.mp.cscene.controller.request.DeleteNode;
+ import cn.cyberpeace.mp.cscene.controller.request.DeleteNodeCommand;
+ import cn.cyberpeace.mp.cscene.controller.request.ElementSnapshotActionRequest;
+ import cn.cyberpeace.mp.cscene.controller.request.QueryNode;
+ import cn.cyberpeace.mp.cscene.controller.request.UpdateNodeCommand;
+ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+ import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
+ import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
+ import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+ import cn.cyberpeace.mp.cscene.response.CommonCollectRes;
+ import cn.cyberpeace.mp.cscene.response.SoftVersionInfo;
+ import cn.cyberpeace.mp.cscene.service.CsceneCommonCollectService;
+ import cn.cyberpeace.mp.cscene.service.CsceneFileService;
+ import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
+ import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
+ import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
+ import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
+ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
+ import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
+ import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+ import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
+ import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
+ import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
+ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+ import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
+ import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+ import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudElementAccessMode;
+ import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
+ import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
+ import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+ import cn.cyberpeace.mp.sceneplugincloud.model.CsceneElementSoftVersionModel;
+ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetConnectionUrlParam;
+ import cn.cyberpeace.mp.sceneplugincloud.repository.CsceneElementSoftVersionMapper;
+ import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConnectionCommon;
+ import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
+ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
+ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventTypeBO;
+ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
+ import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
+ import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
+ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
+ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+ import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataCountParams;
+ import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
+ import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
+ import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
+ import io.swagger.annotations.Api;
+ import io.swagger.annotations.ApiImplicitParam;
+ import io.swagger.annotations.ApiImplicitParams;
+ import io.swagger.annotations.ApiOperation;
+ import io.swagger.annotations.ApiParam;
+ import lombok.Data;
+ import lombok.Getter;
+ import lombok.Setter;
+ import lombok.extern.slf4j.Slf4j;
+ import org.apache.commons.collections4.CollectionUtils;
+ import org.apache.commons.lang3.StringUtils;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.web.bind.annotation.DeleteMapping;
+ import org.springframework.web.bind.annotation.GetMapping;
+ import org.springframework.web.bind.annotation.PostMapping;
+ import org.springframework.web.bind.annotation.RequestBody;
+ import org.springframework.web.bind.annotation.RequestMapping;
+ import org.springframework.web.bind.annotation.RequestParam;
+ import org.springframework.web.bind.annotation.ResponseBody;
+ import org.springframework.web.bind.annotation.RestController;
+ import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.*;
+ import javax.annotation.Resource;
+ import javax.servlet.http.HttpServletResponse;
+ import java.io.IOException;
+ import java.util.ArrayList;
+ import java.util.Arrays;
+ import java.util.Collections;
+ import java.util.Comparator;
+ import java.util.HashMap;
+ import java.util.HashSet;
+ import java.util.List;
+ import java.util.Map;
+ import java.util.Set;
 
 /**
  * @ClassName CsceneInstanceController
@@ -1681,6 +1727,47 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
         Collections.sort(result, Comparator.comparing(SoftVersionInfo::getSoft));
         return new ServiceResult<>(softVersionInfoData).asResult();
+    }
+
+    @ApiOperation("创建指定节点")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CreateNode.class)
+    @PostMapping("/create_node")
+    public ServiceResult<CreateNode> createNode(@RequestBody CreateNode request) {
+        return new ServiceResult<>(new CreateNode()).asResult();
+    }
+
+    @ApiOperation("删除指定节点")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = DeleteNode.class)
+    @PostMapping("/delete_node")
+    public ServiceResult<Boolean> deleteNode(@RequestBody DeleteNode request) {
+        return new ServiceResult<>(true).asResult();
+    }
+
+    @ApiOperation("更新节点指定功能的初始化命令")
+    @ApiImplicitParam(name = "updateNodeCommand", value = "请求体", dataTypeClass = UpdateNodeCommand.class)
+    @PostMapping("/update_node_command")
+    public ServiceResult<Boolean> updateNodeCommand(@RequestBody UpdateNodeCommand updateNodeCommand) {
+        return new ServiceResult<>(true).asResult();
+    }
+
+    @ApiOperation("删除节点指定功能的初始化命令")
+    @ApiImplicitParam(name = "deleteNodeCommand", value = "请求体", dataTypeClass = DeleteNodeCommand.class)
+    @PostMapping("/delete_node_command")
+    public ServiceResult<Boolean> deleteNodeCommand(@RequestBody DeleteNodeCommand deleteNodeCommand) {
+        return new ServiceResult<>(true).asResult();
+    }
+
+    @ApiOperation("查询节点信息")
+    @GetMapping("/query_node_info")
+    public ServiceResult<CreateNode> queryNodeNetInfo(@RequestBody QueryNode request) {
+        return new ServiceResult<>(new CreateNode()).asResult();
+    }
+
+    @ApiOperation("查询节点流量发生信息")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = QueryNode.class)
+    @GetMapping("/query_node_flow_info")
+    public ServiceResult<FlowPluginSceneElementBO> queryNodeFlowInfo(@RequestBody QueryNode request) {
+        return new ServiceResult<>(new FlowPluginSceneElementBO()).asResult();
     }
 
     @ApiOperation("创建流量镜像")
