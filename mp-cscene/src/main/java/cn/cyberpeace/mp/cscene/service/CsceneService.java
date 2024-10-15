@@ -415,11 +415,15 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     public ServiceResult<CsceneBO> getById(String id, String areaId, boolean withInstance, CsceneContextBO context) {
+        log.info("modelService.getById id:{}", id);
         CsceneModel csceneModel = this.getModelMapper().get(id);
         if (csceneModel == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
+        long startTime = System.currentTimeMillis();
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(csceneModel.getSceneConfig(), areaId, areaId == null ? false : true, null);
+        long endTime = System.currentTimeMillis();
+        log.info("getById sceneConfigHandler Query time consumption:{}", endTime - startTime);
         SceneConfigDataBO sceneConfigData = sceneConfigHandler.toData();
         CsceneBO csceneBO = new CsceneBO();
         csceneBO.fromModel(csceneModel);
@@ -433,7 +437,10 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 csceneBO.getRoles().add(roleBO);
             }
         }
+        startTime = System.currentTimeMillis();
         CsceneDataModifier.correctReturnCsceneData(csceneBO);
+        endTime = System.currentTimeMillis();
+        log.info("getById correctReturnCsceneData Query time consumption:{}", endTime - startTime);
         return new ServiceResult<>(csceneBO);
     }
 
