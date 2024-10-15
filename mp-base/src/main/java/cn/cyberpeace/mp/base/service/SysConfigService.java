@@ -8,11 +8,11 @@
  // File create date Fri Jul 12 12:55:20 CST 2024.
  // File update date Fri Jul 12 12:55:20 CST 2024.
  // Version 1.0.0
-package cn.cyberpeace.mp.frontadmin.service.sys;
+package cn.cyberpeace.mp.base.service;
 
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
+import cn.cyberpeace.mp.base.model.SysConfigModel;
 
 import java.util.List;
 

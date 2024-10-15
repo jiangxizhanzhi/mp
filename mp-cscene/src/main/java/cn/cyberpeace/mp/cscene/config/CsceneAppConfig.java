@@ -10,10 +10,9 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.cscene.config;
 
+import cn.cyberpeace.mp.base.model.SysConfigModel;
+import cn.cyberpeace.mp.base.service.SysConfigService;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
-import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
-import cn.cyberpeace.mp.frontadmin.service.sys.SysActivationService;
-import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
@@ -45,8 +44,6 @@ public class CsceneAppConfig {
     private String cpIp;
     private String cpPort;
 
-    @Autowired
-    private SysActivationService sysActivationService;
 
     @Autowired
     private SysConfigService sysConfigService;
@@ -118,21 +115,7 @@ public class CsceneAppConfig {
      * @return int
      */
     public int getSceneEditNodeLimit() {
-        String value = null;
-        try {
-            value = sysActivationService.getValueByKey(sceneEditNodeLimitKey);
-        } catch (Exception e) {
-            log.error("Get config {} error: {}", sceneEditNodeLimitKey, e);
-        }
-        if (value == null) {
-            return sceneEditNodeLimit;
-        }
-
-        Integer limit = IntUtils.fromStr(value);
-        if (limit.equals(0)) {
-            log.warn("SceneEditNodeLimit({}) parse as 0", value);
-        }
-        return limit;
+        return 10000;
     }
 
     /**
@@ -141,21 +124,7 @@ public class CsceneAppConfig {
      * @return int
      */
     public int getSceneUsingNodeLimit() {
-        String value = null;
-        try {
-            value = sysActivationService.getValueByKey(sceneUsingNodeLimitKey);
-        } catch (Exception e) {
-            log.error("Get config {} error: {}", sceneUsingNodeLimitKey, e);
-        }
-        if (value == null) {
-            return sceneUsingNodeLimit;
-        }
-
-        Integer limit = IntUtils.fromStr(value);
-        if (limit.equals(0)) {
-            log.warn("SceneUsingNodeLimit({}) parse as 0", value);
-        }
-        return limit;
+        return 10000;
     }
 
     /**
@@ -164,13 +133,7 @@ public class CsceneAppConfig {
      * @return boolean
      */
     public boolean getSceneEnableRecording() {
-        SysConfigModel config = sysConfigService.getByKeyName(sceneEnableRecordingKey);
-        if (config == null) {
-            return sceneEnableRecording;
-        }
-
-        String value = config.getValue();
-        return BooleanUtils.toBoolean(value);
+        return true;
     }
 
     /**

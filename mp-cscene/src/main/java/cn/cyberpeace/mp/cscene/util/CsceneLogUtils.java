@@ -10,15 +10,12 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.cscene.util;
 
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.service.CsceneLogService;
 import cn.cyberpeace.mp.log.constant.LogConstant;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
@@ -280,29 +277,6 @@ public class CsceneLogUtils {
      */
     private static OperationLogRequest getOperationLogRequest(OpTypeEnums opType, String target, String content, String desc, CsceneContextBO context) {
         OperationLogRequest logModel = new OperationLogRequest();
-        UserModel user = null;
-        if (context != null) {
-            UserService userService = BeanCommon.getBean(UserService.class);
-            user = userService.getUserDtoNoRestrict(context.getAccessUserId());
-        }
-        if (user == null) {
-            user = UserCommon.getCurrentUser();
-            if (user == null) {
-                String userName = getUserName();
-                String userId = getUserId();
-                if (StringUtils.isNotEmpty(userName)) {
-                    user = new UserModel();
-                    user.setUsername(userName);
-                    user.setId(userId);
-                }
-                if (user == null) {
-                    log.info("failed to record audit log , because user is null , opType is {},desc is {},context is {}", opType.ordinal(), desc, JsonCommon.stringify(context));
-                    return null;
-                }
-            }
-        }
-        logModel.setUserId(user.getId());
-        logModel.setUserName(user.getUsername());
         //操作类型
         logModel.setOpModule(OpModuleEnums.SCENES.ordinal());
         logModel.setUserType(LogConstant.USER_TYPE_USER);
@@ -327,17 +301,6 @@ public class CsceneLogUtils {
      */
     private static OperationLogRequest getOperationLogRequest(OpTypeEnums opType, OpTargetEnums opTargetEnums, String desc, CsceneContextBO context) {
         OperationLogRequest logModel = new OperationLogRequest();
-        UserModel user = null;
-        if (context != null) {
-            UserService userService = BeanCommon.getBean(UserService.class);
-            user = userService.getUserDtoNoRestrict(context.getAccessUserId());
-        }
-        if (user == null) {
-            log.info("failed to record audit log , because user is null , opType is {},desc is {},context is {}", opType.ordinal(), desc, JsonCommon.stringify(context));
-            return null;
-        }
-        logModel.setUserId(user.getId());
-        logModel.setUserName(user.getUsername());
         //操作类型
         logModel.setOpModule(OpModuleEnums.SCENES.ordinal());
         logModel.setUserType(LogConstant.USER_TYPE_USER);

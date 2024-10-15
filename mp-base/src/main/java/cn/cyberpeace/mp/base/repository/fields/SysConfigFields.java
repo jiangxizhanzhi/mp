@@ -8,9 +8,9 @@
  // File create date Fri Jul 12 12:55:20 CST 2024.
  // File update date Fri Jul 12 12:55:20 CST 2024.
  // Version 1.0.0
-package cn.cyberpeace.mp.frontadmin.service.fields;
+package cn.cyberpeace.mp.base.repository.fields;
 
-import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
+import cn.cyberpeace.mp.base.model.SysConfigModel;
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;

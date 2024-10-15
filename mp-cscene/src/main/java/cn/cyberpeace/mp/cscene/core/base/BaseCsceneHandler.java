@@ -10,14 +10,12 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.cscene.core.base;
 
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneRoleBO;
-import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneRoleModel;
 import cn.cyberpeace.mp.cscene.repository.base.BaseCsceneMapper;
@@ -204,12 +202,6 @@ public abstract class BaseCsceneHandler<
             // 场景id变化了删除原来的
             if (!StringUtils.isEmpty(originSceneId) && !originSceneId.equals(sceneId)) {
                 deleteScene(originSceneId, true);
-            }
-        } else {
-            UserModel user = UserCommon.getUserWithContext(context);
-            if (user != null) {
-                cscene.setCreateUser(user.getId());
-                cscene.setCreateUsername(user.getUsername());
             }
         }
         saveScene(cscene);

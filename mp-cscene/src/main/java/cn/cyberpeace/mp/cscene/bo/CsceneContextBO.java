@@ -10,10 +10,7 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.cscene.bo;
 
-import cn.cyberpeace.mp.auth.bo.org.OrgBO;
-import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
-import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginContext;
 import io.swagger.annotations.ApiModelProperty;
@@ -77,15 +74,6 @@ public class CsceneContextBO {
         CloudScenePluginContext cloudScenePluginContext = new CloudScenePluginContext();
         if (StringUtils.isNotEmpty(accessUserId)) {
             cloudScenePluginContext.setRequestUser(accessUserId);
-            UserBo user = UserCommon.getUserDetail(accessUserId);
-            if (user != null) {
-                List<OrgBO> orgs = user.getOrgs();
-                if (!CollectionUtils.isEmpty(orgs)) {
-                    String orgName = orgs.get(0).getName();
-                    orgName = StringUtils.joinWith("|", user.getName(), orgName);
-                    cloudScenePluginContext.setRequestUserOrg(orgName);
-                }
-            }
         }
         return cloudScenePluginContext;
     }

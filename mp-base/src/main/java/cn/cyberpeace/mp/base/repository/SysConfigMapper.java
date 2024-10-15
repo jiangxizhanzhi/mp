@@ -8,11 +8,11 @@
  // File create date Fri Jul 12 12:55:20 CST 2024.
  // File update date Fri Jul 12 12:55:20 CST 2024.
  // Version 1.0.0
-package cn.cyberpeace.mp.frontadmin.repository;
+package cn.cyberpeace.mp.base.repository;
 
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
-import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
+import cn.cyberpeace.mp.base.model.SysConfigModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 

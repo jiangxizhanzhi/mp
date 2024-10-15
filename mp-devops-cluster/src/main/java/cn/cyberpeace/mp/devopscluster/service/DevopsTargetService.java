@@ -14,7 +14,6 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.converter.SupportExportConvert;
 import cn.cyberpeace.mp.devopscluster.converter.bo.SceneRealEquipmentBo;
@@ -124,11 +123,6 @@ public class DevopsTargetService {
         for (Device device : deviceList) {
             DeviceTargetPO deviceTargetPO = convertToTargetModel(device);
             deviceTargetPOS.add(deviceTargetPO);
-        }
-        UserModel user = UserCommon.getCurrentUser();
-        for (DeviceTargetPO d : deviceTargetPOS) {
-            d.setCreateUser(user != null ? user.getId() : StringUtils.EMPTY);
-            d.setCreateUserName(user != null ? user.getName() : StringUtils.EMPTY);
         }
         return deviceTargetMapper.batchInsert(deviceTargetPOS);
     }

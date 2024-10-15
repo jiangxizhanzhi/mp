@@ -10,7 +10,6 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.cscene.controller;
 
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -162,19 +161,6 @@ public class SceneMonitorController {
     public ServiceResult<List<String>> listIps(BaseSceneElementRequest baseRequest) {
         List<String> ips = sceneMonitorService.listIps(baseRequest);
         return ResultCommon.success(ips);
-    }
-
-    /**
-     * listRecordingUsers
-     *
-     * @param baseRequest
-     * @return
-     */
-    @ApiOperation(value = "查询场景所有录屏用户列表")
-    @GetMapping("/recording/users")
-    public ServiceResult<List<UserModel>> listRecordingUsers(BaseSceneElementRequest baseRequest) {
-        List<UserModel> users = sceneMonitorService.listSceneRecordingUsers(baseRequest);
-        return ResultCommon.success(users);
     }
 
     /**

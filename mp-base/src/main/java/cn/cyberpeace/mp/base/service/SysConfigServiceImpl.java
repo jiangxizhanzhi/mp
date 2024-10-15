@@ -8,29 +8,22 @@
  // File create date Fri Jul 12 12:55:20 CST 2024.
  // File update date Fri Jul 12 12:55:20 CST 2024.
  // Version 1.0.0
-package cn.cyberpeace.mp.frontadmin.service.sys.impl;
+package cn.cyberpeace.mp.base.service;
 
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.service.UserService;
-import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.frontadmin.constant.AdminBasei18nCode;
-import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
-import cn.cyberpeace.mp.frontadmin.constant.SysConfigConstant;
-import cn.cyberpeace.mp.frontadmin.event.ConfigEventPublisher;
-import cn.cyberpeace.mp.frontadmin.event.SysConfigUpdateEvent;
-import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
-import cn.cyberpeace.mp.frontadmin.repository.SysConfigMapper;
-import cn.cyberpeace.mp.frontadmin.service.fields.SysConfigFields;
-import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
+import cn.cyberpeace.mp.base.constant.SysConfigConstant;
+import cn.cyberpeace.mp.base.model.SysConfigModel;
+import cn.cyberpeace.mp.base.repository.SysConfigMapper;
+import cn.cyberpeace.mp.base.service.SysConfigService;
+import cn.cyberpeace.mp.base.repository.fields.SysConfigFields;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -70,11 +63,6 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         setModelFields(modelFields);
     }
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private ConfigEventPublisher configEventPublisher;
 
 
     /**
@@ -89,7 +77,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         SysConfigModel config = getByKeyName(obj.getKeyName());
         if (Objects.nonNull(config)) {
             log.error("config {} already existed! can not add again!", JsonCommon.stringify(config));
-            throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_EXISTED.format(obj.getKeyName()));
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
         return create(obj);
     }
@@ -127,7 +115,6 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
      */
     @Override
     public SysConfigModel getByKeyName(String keyName) {
-        ParamCheck.notEmpty(keyName, AdminBasei18nCode.SYS_CONFIG_KEY_NAME);
         HumanCondition condition = new HumanCondition()
                 .filterEqual(SysConfigModel::getKeyName, keyName);
         SysConfigModel model = getModelMapper().first(condition);
@@ -148,16 +135,8 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
      */
     @Override
     public boolean updateByKeyName(SysConfigModel sysConfigModel) {
-        ParamCheck.notEmpty(sysConfigModel.getKeyName(), AdminBasei18nCode.SYS_CONFIG_KEY_NAME);
         sysConfigModel.setInitValue(null);
 
-        if (sysConfigModel.getKeyName().equals(SysConfigConstant.USER_AUDIT_KEY) && sysConfigModel.getValue().equals("0")) {
-            // 如果要关闭审核功能，需要检查用户中有没有处于待审核状态的
-            List<UserModel> list = userService.listNotAudited();
-            if (CollectionUtils.isNotEmpty(list)) {
-                throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_CANNOT_CLOSE_AUDIT);
-            }
-        }
         HumanCondition condition = new HumanCondition()
                 .filterEqual(SysConfigModel::getKeyName, sysConfigModel.getKeyName());
         SysConfigModel newSysConfigModel = new SysConfigModel();
@@ -197,12 +176,11 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
      */
     @Override
     public ObjServiceResult<SysConfigModel> update(SysConfigModel obj, String[] fields) {
-        ParamCheck.notBlank(obj.getId(), AdminBasei18nCode.SYS_CONFIG_ID);
         SysConfigModel oldConfigModel = getModelMapper().get(obj.getId());
 
         if (Objects.isNull(oldConfigModel)) {
             log.error("Config id:{} not existed!", obj.getId());
-            throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_NOT_EXISTED.format(obj.getId()));
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
 
         // 查看keyname是否是oldConfigModel的
@@ -210,7 +188,7 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
             SysConfigModel configByKeyName = getByKeyName(obj.getKeyName());
             if (configByKeyName != null && !Objects.equals(configByKeyName.getId(), oldConfigModel.getId())) {
                 log.error("Config {} already existed!", obj.getKeyName());
-                throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_EXISTED.format(obj.getKeyName()));
+                throw new MpRuntimeException(BaseErrorCode.ERROR);
             }
         }
 
@@ -241,8 +219,6 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
     public void publishConfigUpdateEvent(List<SysConfigModel> configs) {
         if (CollectionUtils.isNotEmpty(configs)) {
             Map<String, String> configMap = configs2Map(configs);
-            SysConfigUpdateEvent event = new SysConfigUpdateEvent(configMap);
-            configEventPublisher.publishEvent(event);
         }
     }
 

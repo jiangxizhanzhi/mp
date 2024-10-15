@@ -10,12 +10,6 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.cscene.service.impl;
 
-import cn.cyberpeace.mp.auth.bo.org.OrgBO;
-import cn.cyberpeace.mp.auth.bo.user.UserBo;
-import cn.cyberpeace.mp.auth.model.OrgModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.service.UserService;
-import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -74,9 +68,6 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
     }
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
     private AsyncScreenshotModelService asyncScreenshotModelService;
 
     @Autowired
@@ -125,33 +116,6 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         model.setFileSize(request.getFile().getSize());
         model.setNodeId(request.getNodeId());
         model.setScene(request.getScene());
-
-        // 获取当前用户信息
-        UserModel loginUser = UserUtils.getLoginUser();
-        if (Objects.isNull(loginUser)) {
-            return ResultCommon.fail("Get login user info error");
-        }
-        // 用户id
-        model.setUserId(loginUser.getId());
-        UserBo userBo = userService.getUserDto(loginUser.getId());
-        // 姓名
-        if (StringUtils.isEmpty(userBo.getName())) {
-            // 姓名为空时，使用用户名
-            model.setUserName(userBo.getUsername());
-        } else {
-            model.setUserName(userBo.getName());
-        }
-
-        if (CollectionUtils.isNotEmpty(userBo.getOrgs())) {
-            // 封装组织名称，多个以逗号分隔
-            List<String> nameList = new ArrayList<>();
-            for (OrgBO orgBO : userBo.getOrgs()) {
-                String name = orgBO.getName();
-                nameList.add(name);
-            }
-            String userOrgName = Joiner.on(",").join(nameList);
-            model.setUserOrgName(userOrgName);
-        }
 
         // 新增截屏文件
         this.create(model);

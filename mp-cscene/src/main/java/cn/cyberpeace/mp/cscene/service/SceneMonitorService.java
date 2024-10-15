@@ -10,8 +10,6 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.cscene.service;
 
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -21,7 +19,6 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.controller.request.SceneAllElementsQueryRequest;
-import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
@@ -446,24 +443,6 @@ public class SceneMonitorService {
                     String user = connection.getAccessUser();
                     userIds.add(user);
                 }
-                List<UserModel> userModels = UserCommon.getUsers(new ArrayList<>(userIds));
-                Map<String, UserModel> userId2User = new HashMap<>();
-                for (UserModel userModel1 : userModels) {
-                    if (userId2User.put(userModel1.getId(), userModel1) != null) {
-                        throw new IllegalStateException("Duplicate key");
-                    }
-                }
-                for (CloudPluginSceneConnectionModel model : connections) {
-                    List<AccessUserBO> users = nodeId2Users.getOrDefault(model.getSceneElement(), new ArrayList<>());
-                    nodeId2Users.put(model.getSceneElement(), users);
-                    UserModel userModel = userId2User.get(model.getAccessUser());
-                    if (userModel != null) {
-                        AccessUserBO accessUser = new AccessUserBO();
-                        accessUser.setId(userModel.getId());
-                        accessUser.setName(userModel.getName());
-                        users.add(accessUser);
-                    }
-                }
             }
             for (ElementMonitorBasicInfo basicInfo : basicInfos) {
                 List<AccessUserBO> list = new ArrayList<>();
@@ -616,27 +595,6 @@ public class SceneMonitorService {
         }
         return scenePluginCollectionSceneService.listIPs(translatedSceneIds.get(0), request.getElementIds()).getSource();
     }
-
-    /**
-     * 列出场景所有录屏的用户
-     *
-     * @param request
-     * @return
-     */
-    public List<UserModel> listSceneRecordingUsers(BaseSceneElementRequest request) {
-        List<String> translatedSceneIds = csceneCommonService.translateSceneIds(CollectionUtil.toList(request.getSceneId()));
-        if (CollectionUtil.isEmpty(translatedSceneIds)) {
-            return new ArrayList<>();
-        }
-        List<String> userIds = scenePluginCloudSceneService.getRecordingUsers(translatedSceneIds.get(0), request.getElementIds()).getSource();
-        List<UserModel> users = new ArrayList<>();
-        for (String id : userIds) {
-            UserModel user = UserUtils.getUser(id);
-            users.add(user);
-        }
-        return users;
-    }
-
 
     /**
      * 查看top N的节点状态

@@ -19,7 +19,10 @@ import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.SysConfigModel;
+import cn.cyberpeace.mp.base.repository.SysConfigMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.SysConfigService;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -50,10 +53,6 @@ import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
-import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
-import cn.cyberpeace.mp.frontadmin.repository.SysConfigMapper;
-import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
-import cn.cyberpeace.mp.frontadminbusiness.bo.MirrorBO;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaNodeConnectionBO;
@@ -220,33 +219,6 @@ public class CsceneController implements BaseModelListControllerBase {
         this.baseAppConfig = baseAppConfig;
     }
 
-    /**
-     * 授权场景模板
-     *
-     * @param request
-     * @return
-     */
-    @AuthTarget(TargetEnum.NO_AUTH)
-    @ApiOperation("授权场景模板")
-    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneAuthorizeRequest.class)
-    @PostMapping("/authorize")
-    public ServiceResult<Boolean> authorize(@RequestBody CsceneAuthorizeRequest request) {
-        return modelService.csceneAuthorize(request.getTargetIds(), request.getCsceneIds(), request.getAuthType()).asResult();
-    }
-
-    /**
-     * 获取指定场景模板授权信息
-     *
-     * @param id
-     * @return
-     */
-    @AuthTarget(TargetEnum.NO_AUTH)
-    @ApiOperation("获取指定场景模板授权信息")
-    @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class)
-    @GetMapping("/get_authorize")
-    public ServiceResult<CsceneAuthorizeBO> getAuthorize(@RequestParam String id) {
-        return modelService.getCsceneAuthorizeInfo(id).asResult();
-    }
 
     /**
      * list
@@ -1133,30 +1105,6 @@ public class CsceneController implements BaseModelListControllerBase {
         return input;
     }
 
-    @ApiOperation("设定全局流量镜像的ip")
-    @PostMapping(value = "/flow/set_mirror_ip")
-    @ResponseBody
-    public ServiceResult<Boolean> setMirrorIp(@RequestBody MirrorBO mirrorBO) {
-        var mirrorEnableModel = sysConfigService.getByKeyName(MirrorConstant.MIRROR_ENABLE);
-        if (mirrorEnableModel != null && MirrorConstant.ON.equals(mirrorEnableModel.getValue())) {
-            log.error("开启流量镜像时不允许调整ip");
-            throw new MpRuntimeException("开启流量镜像时不允许调整ip");
-        }
-        var mirrorIp = sysConfigService.getByKeyName(MirrorConstant.MIRROR_IP);
-        if (mirrorIp != null) {
-            mirrorIp.setValue(mirrorBO.getIp());
-            sysConfigService.update(mirrorIp);
-        } else {
-            mirrorIp = new SysConfigModel();
-            mirrorIp.setTenant("default");
-            mirrorIp.setKeyName(MirrorConstant.MIRROR_IP);
-            mirrorIp.setValue(mirrorBO.getIp());
-            mirrorIp.setInitValue(mirrorBO.getIp());
-            BeanCommon.getBean(SysConfigMapper.class).save(mirrorIp);
-        }
-        return new ServiceResult<>(true).asResult();
-    }
-
     @ApiOperation("开启全局流量镜像")
     @PostMapping(value = "/flow/create_mirror")
     @ResponseBody
@@ -1222,20 +1170,6 @@ public class CsceneController implements BaseModelListControllerBase {
         }
 
         return new ServiceResult<>(true).asResult();
-    }
-
-    @ApiOperation("查询全局流量镜像")
-    @PostMapping(value = "/flow/get_mirror")
-    @ResponseBody
-    public ServiceResult<MirrorBO> getMirror() {
-        var mirrorEnableModel = sysConfigService.getByKeyName(MirrorConstant.MIRROR_ENABLE);
-        var mirrorIpModel = sysConfigService.getByKeyName(MirrorConstant.MIRROR_IP);
-
-        MirrorBO result = new MirrorBO();
-        result.setIp(mirrorIpModel == null ? "" : mirrorIpModel.getValue());
-        result.setMirrorStatus(mirrorEnableModel == null ? MirrorConstant.OFF : mirrorEnableModel.getValue());
-
-        return new ServiceResult<>(result).asResult();
     }
 
     private static class MirrorConstant {

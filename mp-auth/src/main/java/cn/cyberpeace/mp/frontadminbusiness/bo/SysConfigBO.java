@@ -11,7 +11,7 @@
 package cn.cyberpeace.mp.frontadminbusiness.bo;
 
 import cn.cyberpeace.mp.base.service.bo.ModelBO;
-import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
+import cn.cyberpeace.mp.base.model.SysConfigModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 

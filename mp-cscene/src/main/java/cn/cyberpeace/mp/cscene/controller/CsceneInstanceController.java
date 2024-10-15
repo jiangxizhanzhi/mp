@@ -16,7 +16,6 @@ package cn.cyberpeace.mp.cscene.controller;
  import cn.cyberpeace.mp.agent.snmp.model.CommandConfig;
  import cn.cyberpeace.mp.agent.snmp.model.SnmpAccessInfo;
  import cn.cyberpeace.mp.agent.snmp.service.SnmpTaskServiceImpl;
- import cn.cyberpeace.mp.auth.model.UserModel;
  import cn.cyberpeace.mp.base.annotation.AuthTarget;
  import cn.cyberpeace.mp.base.common.BeanCommon;
  import cn.cyberpeace.mp.base.common.JsonCommon;
@@ -63,7 +62,6 @@ package cn.cyberpeace.mp.cscene.controller;
  import cn.cyberpeace.mp.cscene.controller.request.ElementSnapshotActionRequest;
  import cn.cyberpeace.mp.cscene.controller.request.QueryNode;
  import cn.cyberpeace.mp.cscene.controller.request.UpdateNodeCommand;
- import cn.cyberpeace.mp.cscene.core.common.UserCommon;
  import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
  import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
  import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
@@ -185,15 +183,6 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         }
 
         CsceneContextBO context = request.getContext();
-        if (context == null) {
-            UserModel user = UserCommon.getCurrentUser();
-            if (user != null) {
-                context = new CsceneContextBO();
-                context.setAccessUserId(user.getId());
-                request.setContext(context);
-            }
-        }
-
         return request;
     }
 

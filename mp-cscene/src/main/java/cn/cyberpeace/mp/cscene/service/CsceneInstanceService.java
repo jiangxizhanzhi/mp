@@ -10,10 +10,6 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.cscene.service;
 
-import cn.cyberpeace.mp.auth.bo.user.UserBo;
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.service.UserService;
-import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
@@ -39,7 +35,6 @@ import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.BcSceneInstanceHandler;
-import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
@@ -170,9 +165,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private ScreenshotServiceImpl screenshotService;
@@ -931,18 +923,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 existUserIds.add(userNodeSessionInfo.getUser());
             }
         }
-        if (!existUserIds.isEmpty()) {
-            List<UserBo> users = userService.listByUserIds(existUserIds.toArray(new String[]{}));
-            if (CollectionUtils.isNotEmpty(users)) {
-                Map<String, String> userId2Name = new HashMap<>();
-                for (UserBo user : users) {
-                    userId2Name.put(user.getId(), user.getName());
-                }
-                for (UserNodeSessionInfo nodeSession : result) {
-                    nodeSession.setUserName(userId2Name.containsKey(nodeSession.getUser()) ? userId2Name.get(nodeSession.getUser()) : StringUtils.EMPTY);
-                }
-            }
-        }
         return new ServiceResult<>(result);
     }
 
@@ -980,12 +960,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
             if (StringUtils.isNotEmpty(nodeRecording.getUser())) {
                 log.info("recording user id is :{}", nodeRecording.getUser());
-                var user = UserUtils.getUser(nodeRecording.getUser());
-                if (user != null) {
-                    nodeRecording.setUsername(user.getUsername());
-                } else {
-                    nodeRecording.setUsername("");
-                }
             }
         }
         return nodeRecordingResult;
@@ -2660,24 +2634,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 String user = cloudPluginSceneConnectionModel.getAccessUser();
                 userIds.add(user);
             }
-            Map<String, UserModel> userId2User = new HashMap<>();
-            for (UserModel model : UserCommon.getUsers(new ArrayList<>(userIds))) {
-                if (userId2User.put(model.getId(), model) != null) {
-                    throw new IllegalStateException("Duplicate key");
-                }
-            }
             Set<CloudPluginSceneConnectionModel> uniqueValues = new HashSet<>();
-            for (CloudPluginSceneConnectionModel connection : connections) {
-                if (uniqueValues.add(connection)) {
-                    UserModel userModel = userId2User.get(connection.getAccessUser());
-                    if (userModel != null) {
-                        AccessUserBO accessUser = new AccessUserBO();
-                        accessUser.setId(userModel.getId());
-                        accessUser.setName(userModel.getName());
-                        accessUsers.add(accessUser);
-                    }
-                }
-            }
         }
         CollectedCsceneElementCommonBO<List<AccessUserBO>> csceneElementCommon = new CollectedCsceneElementCommonBO<>();
         csceneElementCommon.setNodeId(nodeId);

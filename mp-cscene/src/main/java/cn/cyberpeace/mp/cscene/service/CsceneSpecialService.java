@@ -10,8 +10,6 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.cscene.service;
 
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -30,7 +28,6 @@ import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
-import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.CsceneInstanceInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
 import cn.cyberpeace.mp.cscene.model.CsceneElementStat;
@@ -113,9 +110,6 @@ public class CsceneSpecialService {
 
     @Resource
     private ScenePluginCloudSceneService cloudSceneService;
-
-    @Autowired
-    private UserService userService;
 
     @Data
     public static class CsceneElementVirtualStat {
@@ -283,12 +277,6 @@ public class CsceneSpecialService {
             humanCondition.filterEqual(CsceneInstanceModel::getDeleted, false);
         }
         Boolean self = queryParams.getSelf();
-        if (Boolean.TRUE.equals(self)) {
-            UserModel currentUser = UserCommon.getCurrentUser();
-            if (currentUser != null) {
-                humanCondition.filterEqual(CsceneInstanceModel::getCreateUser, currentUser.getId());
-            }
-        }
         String search = queryParams.getSearch();
         if (!StringUtils.isEmpty(search)) {
             humanCondition.filterIContains(CsceneInstanceModel::getName, search);
@@ -428,14 +416,6 @@ public class CsceneSpecialService {
             return new ListObjServiceResult<>(null, BaseErrorCode.ERROR, e.getMessage());
         }
         if (CollectionUtils.isNotEmpty(data)) {
-            for (CsceneInstanceStat stat : data) {
-                if (StringUtils.isNotEmpty(stat.getCreateUsername())) {
-                    UserModel userModel = userService.getByUserName(stat.getCreateUsername());
-                    if (userModel != null) {
-                        stat.setCreateName(userModel.getName());
-                    }
-                }
-            }
             List<String> sceneIds = new ArrayList<>();
             for (CsceneInstanceStat datum : data) {
                 String id = datum.getId();

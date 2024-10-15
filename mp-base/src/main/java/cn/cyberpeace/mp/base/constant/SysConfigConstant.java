@@ -8,7 +8,7 @@
  // File create date Fri Jul 12 12:55:20 CST 2024.
  // File update date Fri Jul 12 12:55:20 CST 2024.
  // Version 1.0.0
-package cn.cyberpeace.mp.frontadmin.constant;
+package cn.cyberpeace.mp.base.constant;
 
 /**
  * @ClassName SysConfigConstant

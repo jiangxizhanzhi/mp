@@ -10,7 +10,7 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.cscene.config;
 
-import cn.cyberpeace.mp.auth.config.AuthSwagger2Config;
+import cn.cyberpeace.mp.base.config.AuthSwagger2Config2;
 import cn.cyberpeace.mp.base.config.Swagger2Config;
 import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ public class CsceneSwagger2Config {
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.cscene"))
                 .paths(PathSelectors.any())
                 .build()
-                .globalRequestParameters(CollectionUtil.toList(AuthSwagger2Config.authParameter))
+                .globalRequestParameters(CollectionUtil.toList(AuthSwagger2Config2.authParameter))
                 .groupName("cscene");
     }
 
