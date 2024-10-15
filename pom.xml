@@ -36,7 +36,6 @@
         <module>mp-aggregation</module>
         <module>mp-auth</module>
         <module>mp-base</module>
-        <module>mp-behavior</module>
         <module>mp-cscene</module>
         <module>mp-devops-cluster</module>
         <module>mp-flow</module>
