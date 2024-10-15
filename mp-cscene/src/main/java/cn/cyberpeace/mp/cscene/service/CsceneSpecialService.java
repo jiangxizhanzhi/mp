@@ -38,6 +38,7 @@ import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneConfigElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
@@ -45,6 +46,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.UserConnectionNumBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.IResourceName;
 import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.RsourceNameParams;
@@ -95,6 +97,12 @@ public class CsceneSpecialService {
     @Autowired
     private UserService userService;
 
+    @Resource
+    private SceneConfigElementMapper sceneConfigElementMapper;
+
+    @Resource
+    private CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper;
+
     @Data
     public static class CsceneElementVirtualStat {
         private String csceneId;
@@ -123,10 +131,111 @@ public class CsceneSpecialService {
 
     /**
      * 统计场景模板中各类型节点数量，测试场景数量
+     *
      * @param ids 场景模板id列表
      * @return 统计结果
      */
     public ServiceResult<List<CsceneStat>> statCscenes(String[] ids) {
+        if (ids == null || ids.length == 0) {
+            return new ServiceResult<>(new ArrayList<>());
+        }
+
+        Map<String, CsceneStat> statMap = new HashMap<>();
+        HumanCondition humanCondition = new HumanCondition()
+                .filterIn(CsceneModel::getId, ids)
+                .filterEqual(SceneModel::getDeleted, false);
+
+        long startTime = System.currentTimeMillis();
+        Map<String, String> csceneModelMap = csceneMapper.list(humanCondition).stream().collect(Collectors.toMap(CsceneModel::getSceneConfig, CsceneModel::getId));
+        long endTime = System.currentTimeMillis();
+        log.info("statCscenes csceneModelMap Query time consumption:{}", endTime - startTime);
+
+        Set<String> sceneConfigList = csceneModelMap.keySet();
+
+        for (String id : ids) {
+            var csceneStat = new CsceneStat(id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+            statMap.put(id, csceneStat);
+        }
+
+        HumanCondition elementStatCondition = new HumanCondition()
+                .selectAs(SceneConfigElementModel::getScene, CsceneElementStat::getCsceneId)
+                .selectAs(SceneConfigElementModel::getType, CsceneElementStat::getElementType)
+                .selectAs(Count.f(SceneConfigElementModel::getType), CsceneElementStat::getElementTypeCount)
+                .filterIn(SceneConfigElementModel::getScene, sceneConfigList.toArray(new String[0]))
+                .groupBy(SceneConfigElementModel::getScene)
+                .groupBy(SceneConfigElementModel::getType);
+
+        startTime = System.currentTimeMillis();
+        List<CsceneElementStat> csceneElementStats = sceneConfigElementMapper.list(elementStatCondition, CsceneElementStat.class);
+        endTime = System.currentTimeMillis();
+        log.info("statCscenes csceneElementStats Query time consumption:{}", endTime - startTime);
+
+        csceneElementStats.forEach(elementStat -> {
+            String id = csceneModelMap.get(elementStat.getCsceneId());
+            var stat = statMap.get(id);
+            var elementType = elementStat.getElementType();
+            if (elementType.equals(BaseSceneElementModel.Type.SWITCH)) {
+                stat.setSwitchCount(elementStat.getElementTypeCount());
+            } else if (elementType.equals(BaseSceneElementModel.Type.ROUTER)) {
+                stat.setRouterCount(elementStat.getElementTypeCount());
+            } else if (elementType.equals(BaseSceneElementModel.Type.FIREWALL)) {
+                stat.setFirewallCount(elementStat.getElementTypeCount());
+            } else if (elementType.equals(BaseSceneElementModel.Type.TERMINAL)) {
+                stat.setTerminalCount(elementStat.getElementTypeCount());
+            } else if (elementType.equals(BaseSceneElementModel.Type.NPC)) {
+                stat.setNpcCount(elementStat.getElementTypeCount());
+            } else if (elementType.equals(BaseSceneElementModel.Type.VENT)) {
+                stat.setVentCount(elementStat.getElementTypeCount());
+            } else if (elementType.equals(BaseSceneElementModel.Type.LOAD)) {
+                stat.setLoadCount(elementStat.getElementTypeCount());
+            } else if (elementType.equals(BaseSceneElementModel.Type.EQUIPMENT)) {
+                stat.setEquipmentCount(elementStat.getElementTypeCount());
+            }
+        });
+
+        HumanCondition virtualStatCondition = new HumanCondition()
+                .selectAs(CloudPluginSceneConfigElementModel::getScene, CsceneElementStat::getCsceneId)
+                .selectAs(CloudPluginSceneConfigElementModel::getVirtualType, CsceneElementVirtualStat::getVirtualType)
+                .selectAs(Count.f(CloudPluginSceneConfigElementModel::getVirtualType), CsceneElementVirtualStat::getVirtualTypeCount)
+                .filterIn(CloudPluginSceneConfigElementModel::getScene, sceneConfigList.toArray(new String[0]))
+                .groupBy(CloudPluginSceneConfigElementModel::getScene)
+                .groupBy(CloudPluginSceneConfigElementModel::getVirtualType);
+
+        startTime = System.currentTimeMillis();
+        List<CsceneElementVirtualStat> csceneElementVirtualStats = cloudPluginSceneConfigElementMapper.list(virtualStatCondition, CsceneElementVirtualStat.class);
+        endTime = System.currentTimeMillis();
+        log.info("statCscenes csceneElementVirtualStats Query time consumption:{}", endTime - startTime);
+
+        csceneElementVirtualStats.forEach(elementStat -> {
+            String id = csceneModelMap.get(elementStat.getCsceneId());
+            var stat = statMap.get(id);
+            var virtualType = elementStat.getVirtualType();
+            if (NodeLimitUtils.isLimitedNode(virtualType)) {
+                stat.setResourceOccupiedNums(stat.getResourceOccupiedNums() + elementStat.getVirtualTypeCount());
+            }
+        });
+
+        HumanCondition testSceneStatCondition = new HumanCondition()
+                .selectAs(CsceneInstanceModel::getCscene, CsceneTestInstanceStat::getCsceneId)
+                .selectAs(Count.f(CsceneInstanceModel::getCscene), CsceneTestInstanceStat::getTestInstanceCount)
+                .filterEqual(CsceneInstanceModel::getType, CsceneInstanceModel.Type.TEST)
+                .filterIn(CsceneInstanceModel::getCscene, ids)
+                .groupBy(CsceneInstanceModel::getCscene);
+
+        startTime = System.currentTimeMillis();
+        List<CsceneTestInstanceStat> csceneTestInstanceStats = csceneInstanceMapper.list(testSceneStatCondition, CsceneTestInstanceStat.class);
+        endTime = System.currentTimeMillis();
+        log.info("statCscenes csceneTestInstanceStats Query time consumption:{}", endTime - startTime);
+
+        csceneTestInstanceStats.forEach(testInstanceStat -> {
+            var stat = statMap.get(testInstanceStat.getCsceneId());
+            stat.setTestSceneCount(testInstanceStat.getTestInstanceCount());
+        });
+
+        return new ServiceResult<>(new ArrayList<>(statMap.values()));
+    }
+
+    /*public ServiceResult<List<CsceneStat>> statCscenes(String[] ids) {
         if (ids == null || ids.length == 0) {
             return new ServiceResult<>(new ArrayList<>());
         }
@@ -214,7 +323,7 @@ public class CsceneSpecialService {
         });
 
         return new ServiceResult<>(new ArrayList<>(statMap.values()));
-    }
+    }*/
 
     /**
      * 场景实例数据
