@@ -10,9 +10,6 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.situationaware.service;
 
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.service.UserService;
-import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -87,9 +84,6 @@ public class CollectionTemplateService {
     @Autowired
     private ProbeService probeService;
 
-    @Autowired
-    private UserService userService;
-
     /**
      * 分页查询探针列表
      *
@@ -106,12 +100,6 @@ public class CollectionTemplateService {
         List<CollectionTemplatePageItemDto> templateDtos = templateMapper.listTemplateItemDtos(condition);
         templateDtos.forEach(dto -> {
             dto.setProbeCounts(templateProbeMapper.countByTemplateId(dto.getId(), null));
-            if (StringUtils.isNotEmpty(dto.getCreator())) {
-                UserModel userModel = userService.getByUserName(dto.getCreator());
-                if (userModel != null) {
-                    dto.setCreatorName(userModel.getName());
-                }
-            }
         });
         PageInfo pageInfo = new PageInfo(templateDtos);
 
@@ -270,7 +258,6 @@ public class CollectionTemplateService {
 
         String templateId = TextUtils.uuid();
         colTempModelToCreate.setId(templateId);
-        colTempModelToCreate.setCreator(UserUtils.getLoginUser() != null ? UserUtils.getLoginUser().getUsername() : "");
 
         List<CollectionTemplateProbeModel> allColTempProbeList = new ArrayList<>();
         List<ProbeParamModel> probeParamList = new ArrayList<>();

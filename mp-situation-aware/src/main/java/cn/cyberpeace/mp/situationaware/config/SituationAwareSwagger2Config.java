@@ -10,7 +10,7 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.situationaware.config;
 
-import cn.cyberpeace.mp.auth.config.AuthSwagger2Config;
+import cn.cyberpeace.mp.base.config.AuthSwagger2Config2;
 import cn.cyberpeace.mp.base.config.Swagger2Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -37,7 +37,7 @@ public class SituationAwareSwagger2Config {
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.situationaware"))
                 .paths(PathSelectors.any())
                 .build()
-                .globalRequestParameters(Collections.singletonList(AuthSwagger2Config.authParameter))
+                .globalRequestParameters(Collections.singletonList(AuthSwagger2Config2.authParameter))
                 .groupName("situation-aware");
     }
 
