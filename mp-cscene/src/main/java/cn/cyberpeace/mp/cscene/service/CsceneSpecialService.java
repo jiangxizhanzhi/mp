@@ -135,7 +135,7 @@ public class CsceneSpecialService {
      * @param ids 场景模板id列表
      * @return 统计结果
      */
-    /*public ServiceResult<List<CsceneStat>> statCscenes(String[] ids) {
+    public ServiceResult<List<CsceneStat>> statCscenes(String[] ids) {
         if (ids == null || ids.length == 0) {
             return new ServiceResult<>(new ArrayList<>());
         }
@@ -233,9 +233,9 @@ public class CsceneSpecialService {
         });
 
         return new ServiceResult<>(new ArrayList<>(statMap.values()));
-    }*/
+    }
 
-    public ServiceResult<List<CsceneStat>> statCscenes(String[] ids) {
+    /*public ServiceResult<List<CsceneStat>> statCscenes(String[] ids) {
         if (ids == null || ids.length == 0) {
             return new ServiceResult<>(new ArrayList<>());
         }
@@ -323,7 +323,7 @@ public class CsceneSpecialService {
         });
 
         return new ServiceResult<>(new ArrayList<>(statMap.values()));
-    }
+    }*/
 
     /**
      * 场景实例数据
