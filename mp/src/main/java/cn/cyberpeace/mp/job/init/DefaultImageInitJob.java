@@ -11,10 +11,10 @@
 package cn.cyberpeace.mp.job.init;
 
 import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
-import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.common.DefaultImgDirEnum;
 import cn.cyberpeace.mp.job.base.init.MpInitiate;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;

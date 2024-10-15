@@ -29,7 +29,7 @@ import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.frontadmin.constant.AdminConstant;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivMenuDTO;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationItem;
-import cn.cyberpeace.mp.frontadmin.dto.option.OptionMetaModel;
+import cn.cyberpeace.mp.base.model.OptionMetaModel;
 import cn.cyberpeace.mp.frontadmin.model.MenuExtraInfoModel;
 import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysActivationService;

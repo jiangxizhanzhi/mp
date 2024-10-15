@@ -8,9 +8,10 @@
  // File create date Fri Jul 12 12:55:20 CST 2024.
  // File update date Fri Jul 12 12:55:20 CST 2024.
  // Version 1.0.0
-package cn.cyberpeace.mp.frontadmin.service.sys.activmenu;
+package cn.cyberpeace.mp.base.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
@@ -25,8 +26,7 @@ import cn.cyberpeace.mp.common.request.queryparam.OptionQueryParams;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.common.service.fields.OptionFields;
 import cn.cyberpeace.mp.common.util.LocaleUtil;
-import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
-import cn.cyberpeace.mp.frontadmin.dto.option.OptionMetaModel;
+import cn.cyberpeace.mp.base.model.OptionMetaModel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -189,10 +189,10 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
     public void addOption(OptionModelBO optionModelBO) {
         log.info("SysOptionServiceImpl.addOption begin. optionModelBO:{}", optionModelBO);
         if (StringUtils.isEmpty(optionModelBO.getName())) {
-            throw new MpRuntimeException(AdminErrorCode.PARAMS_ERROR);
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
         if (checkNameExist(optionModelBO, false)) {
-            throw new MpRuntimeException(AdminErrorCode.OPTION_NAME_EXIST);
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
         OptionModel optionModel = new OptionModel();
         BeanUtils.copyProperties(optionModelBO, optionModel);
@@ -214,10 +214,10 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
     public void editOption(OptionModelBO optionModelBO) {
         log.info("SysOptionServiceImpl.editOption begin. optionModelBO:{}", optionModelBO);
         if (StringUtils.isEmpty(optionModelBO.getName()) || StringUtils.isEmpty(optionModelBO.getId())) {
-            throw new MpRuntimeException(AdminErrorCode.PARAMS_ERROR);
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
         if (checkNameExist(optionModelBO, true)) {
-            throw new MpRuntimeException(AdminErrorCode.OPTION_NAME_EXIST);
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
         OptionModel optionModel = new OptionModel();
         BeanUtils.copyProperties(optionModelBO, optionModel);
