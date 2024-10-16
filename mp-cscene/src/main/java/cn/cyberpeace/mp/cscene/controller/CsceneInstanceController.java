@@ -43,6 +43,8 @@ package cn.cyberpeace.mp.cscene.controller;
  import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
  import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
  import cn.cyberpeace.mp.cscene.controller.request.CreateNode;
+ import cn.cyberpeace.mp.cscene.controller.request.CreateNodePort;
+ import cn.cyberpeace.mp.cscene.controller.request.CreateNodePortAccessMode;
  import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceActionRequest;
  import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceFlowMirrorRequest;
  import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeAccessModeActionRequest;
@@ -78,18 +80,24 @@ package cn.cyberpeace.mp.cscene.controller;
  import cn.cyberpeace.mp.log.enums.OpTypeEnums;
  import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
  import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
+ import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
  import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
  import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
  import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
  import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
  import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+ import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
  import cn.cyberpeace.mp.sceneplugincloud.bo.CloudElementAccessMode;
  import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
  import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
  import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
  import cn.cyberpeace.mp.sceneplugincloud.model.CsceneElementSoftVersionModel;
  import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
  import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetConnectionUrlParam;
+ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
+ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineDeleteData;
+ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
  import cn.cyberpeace.mp.sceneplugincloud.repository.CsceneElementSoftVersionMapper;
  import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConnectionCommon;
  import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -1722,13 +1730,44 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CreateNode.class)
     @PostMapping("/create_node")
     public ServiceResult<CreateNode> createNode(@RequestBody CreateNode request) {
-        return new ServiceResult<>(new CreateNode()).asResult();
+        VirtualMachine virtualMachine = new VirtualMachine();
+        //创建trex虚机
+        VirtualMachineCreateData createData = new VirtualMachineCreateData();
+        createData.setName(request.getName());
+        createData.setTemplateId(request.getImageUuid());
+        createData.setCpu(request.getCpu());
+        createData.setRam(request.getRam());
+        createData.setDisk(request.getDisk());
+        createData.setMainCloud(true);
+        createData.setOsType(SystemTypeCommandUtils.OS_TYPE_LINUX);
+
+        List<VirtualNic> virtualNics = new ArrayList<>();
+        for (var port : request.getPorts()) {
+            VirtualNic nic = new VirtualNic();
+            nic.setFixedIp(port.getIp());
+            nic.setNetworkId(port.getNetworkId());
+            virtualNics.add(nic);
+        }
+        createData.setNetwork(virtualNics);
+
+        VirtualMachineCreateData node = virtualMachine.create(createData);
+        getModelService().createSceneBusinessElement(node.getId(), request);
+        request.setResourceId(node.getId());
+        return new ServiceResult<>(request).asResult();
     }
 
     @ApiOperation("删除指定节点")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = DeleteNode.class)
     @PostMapping("/delete_node")
     public ServiceResult<Boolean> deleteNode(@RequestBody DeleteNode request) {
+        VirtualMachineDeleteData deleteData = new VirtualMachineDeleteData();
+        var node = getModelService().getSceneBusinessElement(request.getSceneId(), request.getId());
+        deleteData.setVms(Arrays.asList(node.getResourceId()));
+
+        VirtualMachine virtualMachine = new VirtualMachine();
+        virtualMachine.delete(deleteData);
+
+        getModelService().deleteSceneBusinessElement(request.getSceneId(), request.getId());
         return new ServiceResult<>(true).asResult();
     }
 
@@ -1749,7 +1788,54 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation("查询节点信息")
     @GetMapping("/query_node_info")
     public ServiceResult<CreateNode> queryNodeNetInfo(@RequestBody QueryNode request) {
-        return new ServiceResult<>(new CreateNode()).asResult();
+        // 先在业务创建的节点中查询，如果没有再到场景创建的节点中查询
+        var node = getModelService().getSceneBusinessElement(request.getSceneId(), request.getNodeId());
+        if (node == null) {
+            String id = getModelService().getSceneId(request.getSceneId());
+            var sceneHandler = new SceneHandler(id, null, false, new SceneContextBO());
+            CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler("cpcloud");
+            var element = sceneHandler.getElement(request.getNodeId());
+            var cloudElement = pluginHandler.getElement(request.getNodeId());
+
+            CreateNode createNode = new CreateNode();
+            createNode.setSceneId(request.getSceneId());
+            createNode.setResourceId(cloudElement.getResourceId());
+            createNode.setId(element.getId());
+            createNode.setName(element.getName());
+            createNode.setImage(cloudElement.getImage());
+            createNode.setImageType(cloudElement.getImageType());
+            createNode.setImageUuid(cloudElement.getImageUuid());
+            createNode.setDisk(element.getDisk());
+            createNode.setRam(element.getRam());
+            createNode.setCpu(element.getCpu());
+
+            List<CreateNodePort> ports = new ArrayList<>();
+            for (var port : element.getPorts()) {
+                CreateNodePort nodePort = new CreateNodePort();
+                nodePort.setIp(port.getIp());
+                nodePort.setId(port.getId());
+                nodePort.setEid(port.getEid());
+
+                var cloudPort = pluginHandler.getPort(port.getId());
+                nodePort.setNetworkId(cloudPort.getAuxiliaryNetworkId());
+
+                List<CreateNodePortAccessMode> accessModes = new ArrayList<>();
+                for (var accessMode : cloudPort.getAccessModes()) {
+                    CreateNodePortAccessMode nodeAccessMode = new CreateNodePortAccessMode();
+                    nodeAccessMode.setId(accessMode.getId());
+                    nodeAccessMode.setIp(port.getIp());
+                    nodeAccessMode.setPort(accessMode.getPort());
+                    nodeAccessMode.setUsername(accessMode.getUsername());
+                    nodeAccessMode.setPassword(accessMode.getPassword());
+                    accessModes.add(nodeAccessMode);
+                }
+                nodePort.setAccessMode(accessModes);
+                ports.add(nodePort);
+            }
+            createNode.setPorts(ports);
+            node = createNode;
+        }
+        return new ServiceResult<>(node).asResult();
     }
 
     @ApiOperation("查询节点流量发生信息")

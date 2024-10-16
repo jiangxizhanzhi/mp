@@ -53,11 +53,11 @@ public class VirtualMachine extends CloudClient {
         heavyConcurrentWait();
 
         // 每个虚拟机都要 加一个网卡虚拟
-        VirtualNic virtualNic = new VirtualNic();
-        virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getConfigNetId());
-        virtualNic.setCidr(CloudSingleton.cloudAppConfig.getConfigNetCidr());
-        virtualNic.setFixedIp(IpUtils.getConfigIp());
-        createData.getNetwork().add(virtualNic);
+//        VirtualNic virtualNic = new VirtualNic();
+//        virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getConfigNetId());
+//        virtualNic.setCidr(CloudSingleton.cloudAppConfig.getConfigNetCidr());
+//        virtualNic.setFixedIp(IpUtils.getConfigIp());
+//        createData.getNetwork().add(virtualNic);
 
         CloudResponse<VirtualMachineCreateData> result = cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_CREATE_URL, createData,
                 null, new TypeReference<CloudResponse<VirtualMachineCreateData>>() {

@@ -34,6 +34,9 @@ import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
+import cn.cyberpeace.mp.cscene.controller.request.CreateNode;
+import cn.cyberpeace.mp.cscene.controller.request.CreateNodePort;
+import cn.cyberpeace.mp.cscene.controller.request.CreateNodePortAccessMode;
 import cn.cyberpeace.mp.cscene.core.BcSceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
@@ -60,10 +63,14 @@ import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneBusinessElementModel;
+import cn.cyberpeace.mp.scene.model.SceneBusinessElementPortModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneBusinessElementMapper;
+import cn.cyberpeace.mp.scene.repository.SceneBusinessElementPortMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
@@ -112,6 +119,7 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.SystemUser;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.cache.Cache;
 import com.google.common.collect.Lists;
 import lombok.Data;
@@ -121,6 +129,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -211,7 +220,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Resource
     private SceneService sceneService ;
 
-    // expires in 10 minutes
+    @Resource
+    private SceneBusinessElementMapper sceneBusinessElementMapper ;
+
+     @Resource
+    private SceneBusinessElementPortMapper sceneBusinessElementPortMapper ;
+
+     // expires in 10 minutes
     private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
 
 
@@ -2660,4 +2675,84 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         return sceneElementMapper.list(humanCondition);
     }
+
+    @Transactional
+    public void createSceneBusinessElement(String resourceId, CreateNode createNode) {
+         SceneBusinessElementModel model = new SceneBusinessElementModel();
+         model.setCpu(createNode.getCpu());
+         model.setScene(createNode.getSceneId());
+         model.setDisk(createNode.getDisk());
+         model.setName(createNode.getName());
+         model.setImage(createNode.getImage());
+         model.setImage_uuid(createNode.getImageUuid());
+         model.setImageType(createNode.getImageType());
+         model.setNodeId(createNode.getId());
+         model.setResourceId(resourceId);
+         sceneBusinessElementMapper.save(model);
+
+         List<SceneBusinessElementPortModel> portModels = new ArrayList<>();
+         for (var createNodePort : createNode.getPorts()) {
+             SceneBusinessElementPortModel portModel = new SceneBusinessElementPortModel();
+             portModel.setAccessModes(JsonCommon.snakeStringify(createNodePort.getAccessMode()));
+             portModel.setScene(createNode.getSceneId());
+             portModel.setSceneElement(createNode.getId());
+             portModel.setIp(createNodePort.getIp());
+             portModel.setNetworkId(createNodePort.getNetworkId());
+             portModel.setPortId(createNodePort.getId());
+             portModel.setName("");
+             portModels.add(portModel);
+         }
+         sceneBusinessElementPortMapper.bulkCreate(portModels);
+     }
+
+     @Transactional
+     public void deleteSceneBusinessElement(String sceneId, String nodeId) {
+         HumanCondition elementCondition = new HumanCondition()
+                 .filterEqual(SceneBusinessElementModel::getScene,sceneId)
+                 .filterEqual(SceneBusinessElementModel::getNodeId,nodeId);
+         sceneBusinessElementMapper.filterDelete(elementCondition);
+
+         HumanCondition portCondition = new HumanCondition()
+                 .filterEqual(SceneBusinessElementPortModel::getScene,sceneId)
+                 .filterEqual(SceneBusinessElementPortModel::getSceneElement,nodeId);
+         sceneBusinessElementPortMapper.filterDelete(portCondition);
+     }
+
+     public CreateNode getSceneBusinessElement(String sceneId, String nodeId) {
+         HumanCondition elementCondition = new HumanCondition()
+                 .filterEqual(SceneBusinessElementModel::getScene,sceneId)
+                 .filterEqual(SceneBusinessElementModel::getNodeId,nodeId);
+         var elementModel = sceneBusinessElementMapper.first(elementCondition);
+         if (elementModel == null) {
+             return null;
+         }
+         CreateNode node = new CreateNode();
+         node.setResourceId(elementModel.getResourceId());
+         node.setId(elementModel.getNodeId());
+         node.setName(elementModel.getName());
+         node.setSceneId(elementModel.getScene());
+         node.setImage(elementModel.getImage());
+         node.setImageType(elementModel.getImageType());
+         node.setImageUuid(elementModel.getImage_uuid());
+         node.setCpu(elementModel.getCpu());
+         node.setRam(elementModel.getDisk());
+         node.setDisk(elementModel.getDisk());
+
+         HumanCondition portCondition = new HumanCondition()
+                 .filterEqual(SceneBusinessElementPortModel::getScene, sceneId)
+                 .filterEqual(SceneBusinessElementPortModel::getSceneElement, nodeId);
+         var portModels = sceneBusinessElementPortMapper.list(portCondition);
+         List<CreateNodePort> ports = new ArrayList<>();
+         for (var portModel : portModels) {
+             var port = new CreateNodePort();
+             port.setId(portModel.getPortId());
+             port.setIp(portModel.getIp());
+             port.setNetworkId(portModel.getNetworkId());
+             port.setAccessMode(JsonCommon.snakeParse(portModel.getAccessModes(), new TypeReference<List<CreateNodePortAccessMode>>() {
+             }));
+             ports.add(port);
+         }
+         node.setPorts(ports);
+         return node;
+     }
 }
