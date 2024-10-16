@@ -25,6 +25,12 @@
         </dependency>
         <dependency>
             <groupId>cn.cyberpeace.mp</groupId>
+            <artifactId>mp-common</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>cn.cyberpeace.mp</groupId>
             <artifactId>mp-auth</artifactId>
             <version>0.0.2-SNAPSHOT</version>
         </dependency>

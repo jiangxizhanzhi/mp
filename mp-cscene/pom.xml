@@ -64,7 +64,6 @@
             <groupId>cn.cyberpeace.mp.scenepluginflow</groupId>
             <artifactId>mp-scene-plugin-gns3</artifactId>
             <version>0.0.2-SNAPSHOT</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>cn.cyberpeace.mp.sceneplugincollection</groupId>
