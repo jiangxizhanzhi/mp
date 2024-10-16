@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>cn.cyberpeace.mp</groupId>
+        <artifactId>mp</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>mp-template</artifactId>
+    <version>0.0.2-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>mp-template</name>
+    <description>中台</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>cn.cyberpeace.mp</groupId>
+            <artifactId>mp-log</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.cyberpeace.mp</groupId>
+            <artifactId>mp-auth-base</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.cyberpeace.mp</groupId>
+            <artifactId>mp-front-admin</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.cyberpeace.mp</groupId>
+            <artifactId>mp-front-admin-business</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.cyberpeace.mp</groupId>
+            <artifactId>mp-front-business</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.cyberpeace.mp.aggregation</groupId>
+            <artifactId>mp-aggregation</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.cyberpeace.mp</groupId>
+            <artifactId>mp-auth</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.cyberpeace.mp</groupId>
+            <artifactId>mp-base</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.cyberpeace.mp.cscene</groupId>
+            <artifactId>mp-cscene</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.cyberpeace.mp.devopscluster</groupId>
+            <artifactId>mp-devops-cluster</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.cyberpeace.mp.flow</groupId>
+            <artifactId>mp-flow</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.cyberpeace.mp.scene</groupId>
+            <artifactId>mp-scene</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.cyberpeace.mp.sceneplugincloud</groupId>
+            <artifactId>mp-scene-plugin-cloud</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.cyberpeace.mp.sceneplugincollection</groupId>
+            <artifactId>mp-scene-plugin-collection</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.cyberpeace.mp.scenepluginflow</groupId>
+            <artifactId>mp-scene-plugin-flow</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.cyberpeace.mp.situationaware</groupId>
+            <artifactId>mp-situation-aware</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources/</directory>
+                <includes>
+                    <include>template/*.*</include>
+                    <include>db/**/*.*</include>
+                    <include>*.yml</include>
+                    <include>*.xml</include>
+                    <include>*.properties</include>
+                    <include>META-INF/*.*</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
+        <plugins>
+            <!-- 编译插件 指定java版本 lombok-mapstruct自动注入-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.22</version>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>1.4.2.Final</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>0.2.0</version>
+                        </path>
+                        <path>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-configuration-processor</artifactId>
+                            <version>2.5.12</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <!-- 打jar包插件 -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.5.2</version>
+                <configuration>
+                    <mainClass>cn.cyberpeace.mp.Application</mainClass>
+                    <includeSystemScope>true</includeSystemScope> <!-- 加载本地引入的jar文件 -->
+                </configuration>
+            </plugin>
+            <plugin>
+                <!--
+1.加密后,方法体被清空,保留方法参数、注解等信息.主要兼容swagger文档注解扫描
+2.方法体被清空后,反编译只能看到方法名和注解,看不到方法体的具体内容
+3.加密后的项目需要设置javaagent来启动,启动过程中解密class,完全内存解密,不留下任何解密后的文件
+4.启动加密后的jar,生成xxx-encrypted.jar,这个就是加密后的jar文件,加密后不可直接执行
+5.无密码启动方式,java-javaagent:xxx-encrypted.jar-jarxxx-encrypted.jar
+6.有密码启动方式,java-javaagent:xxx-encrypted.jar='-pwd=密码'-jarxxx-encrypted.jar
+-->
+                <!-- https://gitee.com/roseboy/classfinal -->
+                <groupId>net.roseboy</groupId>
+                <artifactId>classfinal-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <configuration>
+                    <!--                    无密码模式-->
+                    <password>GwFZdWXw9qEDdHQB</password><!--加密打包之后pom.xml会被删除，不用担心在jar包里找到此密码-->
+                    <packages>cn.cyberpeace.mp</packages>
+                    <excludes>org.spring,org,com.rabbitmq,javax</excludes>
+                    <libjars>
+                        mp-auth-0.0.2-SNAPSHOT.jar,
+                        mp-agent-0.0.2-SNAPSHOT.jar,
+                        mp-aggregation-0.0.2-SNAPSHOT.jar,
+                        mp-auth-0.0.2-SNAPSHOT.jar,
+                        mp-base-0.0.2-SNAPSHOT.jar,
+                        mp-cscene-0.0.2-SNAPSHOT.jar,
+                        mp-devops-cluster-0.0.2-SNAPSHOT.jar,
+                        mp-flow-0.0.2-SNAPSHOT.jar,
+                        mp-scene-0.0.2-SNAPSHOT.jar,
+                        mp-scene-plugin-cloud-0.0.2-SNAPSHOT.jar,
+                        mp-scene-plugin-collection-0.0.2-SNAPSHOT.jar,
+                        mp-scene-plugin-flow-0.0.2-SNAPSHOT.jar,
+                        mp-situation-aware-0.0.2-SNAPSHOT.jar
+                    </libjars>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>classFinal</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- git信息 -->
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>4.0.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- 可选配置 -->
+                    <!-- 生成git.properties文件，默认只是将属性添加到maven项目属性中 -->
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                    <!-- git.properties文件的位置，在generateGitPropertiesFile=true时有效 -->
+                    <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+                    <includeOnlyProperties>
+                        <includeOnlyProperty>git.branch</includeOnlyProperty>
+                        <includeOnlyProperty>git.commit.id</includeOnlyProperty>
+                        <includeOnlyProperty>git.commit.message.full</includeOnlyProperty>
+                        <includeOnlyProperty>git.commit.time</includeOnlyProperty>
+                        <includeOnlyProperty>git.commit.user.name</includeOnlyProperty>
+                        <includeOnlyProperty>git.remote.origin.url</includeOnlyProperty>
+                        <includeOnlyProperty>git.build.host</includeOnlyProperty>
+                        <includeOnlyProperty>git.build.time</includeOnlyProperty>
+                    </includeOnlyProperties>
+                    <failOnNoGitDirectory>true</failOnNoGitDirectory>
+                    <!-- 配置git-describe命令 -->
+                    <gitDescribe>
+                        <skip>false</skip>
+                        <always>false</always>
+                        <dirty>-dirty</dirty>
+                    </gitDescribe>
+
+                </configuration>
+            </plugin>
+        </plugins>
+
+    </build>
+
+</project>
