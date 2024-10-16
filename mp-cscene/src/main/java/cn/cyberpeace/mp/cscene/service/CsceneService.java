@@ -32,6 +32,7 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneSnapshotDeleteTaskPool;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
@@ -1003,5 +1004,24 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         list.stream().forEach(item -> item.setPosition2(arePositionStr));
         sceneConfigAreaMapper.bulkUpdate(list);
         log.info("saveConfigData end.");
+    }
+
+    /**
+     * 获取区域信息
+     * @param sceneId
+     * @return
+     */
+    public List<SceneConfigAreaBO> getAres(String sceneId) {
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(SceneConfigAreaModel::getScene, sceneId);
+        List<SceneConfigAreaModel> list = sceneConfigAreaMapper.list(humanCondition);
+        List<SceneConfigAreaBO> sceneConfigAreaBOS = list.stream().map(area -> {
+                    SceneConfigAreaBO sceneConfigAreaBO = new SceneConfigAreaBO();
+                    sceneConfigAreaBO.fromModel(area);
+                    return sceneConfigAreaBO;
+                })
+                .collect(Collectors.toList());
+
+        return sceneConfigAreaBOS;
     }
 }
