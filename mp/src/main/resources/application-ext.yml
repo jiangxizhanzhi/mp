@@ -149,6 +149,7 @@ mp:
       management-username: ${MANAGEMENT_USERNAME:admin123}
       management-password: ${MANAGEMENT_PASSWORD:NHiOJiZTD4K1}
       group-name-prefix: ${GROUP_NAME_PREFIX:yz3}
+      million-scene: ${MILLION_SCENE:sceneid}
 
   # mp-log 模块
   log:
