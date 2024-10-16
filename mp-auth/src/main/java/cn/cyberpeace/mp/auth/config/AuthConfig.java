@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.config;
 
+import cn.cyberpeace.mp.auth.service.impl.ThirdSsoService;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -54,4 +55,14 @@ public class AuthConfig {
 
     // mq消息过期时间
     private Long mqMsgTimeout;
+
+    private String thirdClientId ;
+
+    private String thirdClientSecret ;
+
+    private String thirdTokenUrl ;
+
+    private String thirdUserInfoUrl;
+
+    private String thirdCheckUrl ;
 }
