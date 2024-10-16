@@ -40,4 +40,8 @@
             #{item}
         </foreach>
     </select>
+
+    <update id="updateId" parameterType="java.util.Map">
+        update mp_cscene_cscene set id = #{newId} where id = #{oldId} limit 1
+    </update>
 </mapper>

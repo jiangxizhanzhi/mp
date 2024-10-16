@@ -30,6 +30,7 @@ import cn.cyberpeace.mp.base.util.mptool.ExceptionUtil;
 import cn.cyberpeace.mp.cscene.bo.CreateTemplateBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneAuthorizeBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneRoleBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneStat;
@@ -44,6 +45,7 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneSyncRequest;
+import cn.cyberpeace.mp.cscene.core.BcSceneConfigHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneRoleModel;
@@ -56,9 +58,11 @@ import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaNodeConnectionBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigTopologyBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneConfigAreaModel;
@@ -253,7 +257,29 @@ public class CsceneController implements BaseModelListControllerBase {
         if (areaId == null) {
             areaId = "";
         }
-        return modelService.getById(id, areaId, false, null).asResult();
+        try {
+            return modelService.getById(id, areaId, false, null).asResult();
+        } catch (MpRuntimeException e) {
+            if (e.getServiceCode() == CsceneErrorCode.SCENE_NOT_EXIST) {
+                CsceneBO csceneBO = new CsceneBO();
+                SceneConfigDataBO configDataBO = new SceneConfigDataBO();
+                configDataBO.setPlugins(new HashMap<>());
+                SceneConfigTopologyBO topo = new SceneConfigTopologyBO();
+                topo.setElements(new ArrayList<>());
+                topo.setScene(new SceneConfigBO());
+                topo.setAreas(new ArrayList<>());
+                topo.setConnections(new ArrayList<>());
+                topo.setNodeConnections(new ArrayList<>());
+                topo.setAreaId("");
+                configDataBO.setTopology(topo);
+                csceneBO.setSceneConfig(configDataBO);
+                var result = modelService.sync(csceneBO, new CsceneContextBO(), false).getSource();
+                getModelService().getModelMapper().updateId(result.getId(), id);
+                return modelService.getById(id, areaId, false, null).asResult();
+            } else {
+                throw e;
+            }
+        }
     }
 
     /**
