@@ -975,11 +975,12 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 }
             }
         }
-        var condition = new HumanCondition().filterEqual(BaseSceneElementModel::getScene, sceneId)
-                .filterNotIn(BaseSceneElementModel::getArea, excludeAreaIds.toArray(new String[]{}));
+        var condition = new HumanCondition().filterEqual(BaseSceneElementModel::getScene, sceneId);
         SceneConfigElementMapper sceneConfigElementMapper = BeanCommon.getBean(SceneConfigElementMapper.class);
         int num = sceneConfigElementMapper.total(condition);
-        return num;
+        condition.filterIn(BaseSceneElementModel::getArea, excludeAreaIds.toArray(new String[]{}));
+        int excludeNum = sceneConfigElementMapper.total(condition);
+        return num - excludeNum;
     }
 
     /**
