@@ -32,6 +32,10 @@ public class LoadConvertCode {
         this.actionTypeConvertMap.put("1", "1005020101");
         this.actionTypeConvertMap.put("2", "1005020102");
         this.actionTypeConvertMap.put("3", "1005020103");
+        this.actionTypeConvertMap.put("5", "1005020105");
+        this.actionTypeConvertMap.put("6", "1005020106");
+        this.actionTypeConvertMap.put("7", "1005020107");
+        this.actionTypeConvertMap.put("8", "1005020108");
     }
 
     public static Map<String, String> getRunTableConvertMap() {
