@@ -43,6 +43,8 @@ package cn.cyberpeace.mp.cscene.controller;
  import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
  import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
  import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
+ import cn.cyberpeace.mp.cscene.controller.request.ConnectSceneNode;
+ import cn.cyberpeace.mp.cscene.controller.request.ConnectSceneNodeResult;
  import cn.cyberpeace.mp.cscene.controller.request.CreateNode;
  import cn.cyberpeace.mp.cscene.controller.request.CreateNodePort;
  import cn.cyberpeace.mp.cscene.controller.request.CreateNodePortAccessMode;
@@ -62,6 +64,7 @@ package cn.cyberpeace.mp.cscene.controller;
  import cn.cyberpeace.mp.cscene.controller.request.CsceneStrategyRequest;
  import cn.cyberpeace.mp.cscene.controller.request.DeleteNode;
  import cn.cyberpeace.mp.cscene.controller.request.DeleteNodeCommand;
+ import cn.cyberpeace.mp.cscene.controller.request.DisConnectSceneNode;
  import cn.cyberpeace.mp.cscene.controller.request.ElementSnapshotActionRequest;
  import cn.cyberpeace.mp.cscene.controller.request.QueryNode;
  import cn.cyberpeace.mp.cscene.controller.request.UpdateNodeCommand;
@@ -1779,6 +1782,20 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         virtualMachine.delete(deleteData);
 
         getModelService().deleteSceneBusinessElement(request.getSceneId(), request.getId());
+        return new ServiceResult<>(true).asResult();
+    }
+
+    @ApiOperation(value = "外部节点接入场景", notes = "指定外部节点接入场景内,将外部节点接入到portId指定端口所在的网络")
+    @ApiImplicitParam(name = "connectSceneNode", value = "请求体", dataTypeClass = ConnectSceneNode.class)
+    @PostMapping("/connect_scene_node")
+    public ServiceResult<ConnectSceneNodeResult> connectSceneNode(@RequestBody ConnectSceneNode connectSceneNode) {
+        return new ServiceResult<>(new ConnectSceneNodeResult()).asResult();
+    }
+
+    @ApiOperation(value = "外部节点断开场景", notes = "断开外部节点和场景网络的连接")
+    @ApiImplicitParam(name = "disConnectSceneNode", value = "请求体", dataTypeClass = DisConnectSceneNode.class)
+    @PostMapping("/disconnect_scene_node")
+    public ServiceResult<Boolean> disConnectSceneNode(@RequestBody DisConnectSceneNode disConnectSceneNode) {
         return new ServiceResult<>(true).asResult();
     }
 

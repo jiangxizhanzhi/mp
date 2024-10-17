@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class BusinessSceneCloudPluginElement {
-    @ApiModelProperty(value = "角色id")
+    @ApiModelProperty(value = "角色id,网络：1")
     private Integer role;
     @ApiModelProperty(value = "节点虚拟类型，虚拟机:vm , 容器：container,其他: simple")
     private String imageType;
