@@ -157,7 +157,7 @@ public class UserController {
         List<String> offline = new ArrayList<>();
         Set<String> onlineUsers = new HashSet<>();
         for (UserModel userModel : onlineUser.keySet()) {
-            onlineUsers.add(userModel.getIdentifier());
+            onlineUsers.add(userModel.getId());
         }
         for (String id : params.getIds()) {
             if (onlineUsers.contains(id)) {
