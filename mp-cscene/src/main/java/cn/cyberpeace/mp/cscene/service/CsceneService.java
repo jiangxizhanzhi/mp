@@ -32,7 +32,9 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneSnapshotDeleteTaskPool;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
@@ -52,6 +54,7 @@ import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMappe
 import cn.cyberpeace.mp.sceneplugincloud.repository.DevopsLoadSourceMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -112,6 +115,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     private SceneConfigElementPluginMapper sceneConfigElementPluginMapper;
     @Resource
     private SceneConfigAreaMapper sceneConfigAreaMapper;
+    @Resource
+    private SituationAwareConfig situationAwareConfig;
 
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
@@ -482,6 +487,13 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             if (csceneBO.getId() != null) {
                 String sceneId = this.get(csceneBO.getId()).getSource().getObj().getSceneConfig();
                 csceneBO.getSceneConfig().getTopology().getScene().setEid(sceneId);
+            }
+//            获取百万节点id 单独处理其数据
+            if(situationAwareConfig.getMillionScene().contains(csceneBO.getId())){
+                SceneConfigDataBO sceneConfig = csceneBO.getSceneConfig();
+                SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneConfig,true, null);
+                sceneConfigHandler.save();
+                return new ServiceResult<>(csceneBO);
             }
             handlerEnableRate(csceneBO);
             var csceneHandler = new CsceneHandler(csceneBO, context);
@@ -963,11 +975,12 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 }
             }
         }
-        var condition = new HumanCondition().filterEqual(BaseSceneElementModel::getScene, sceneId)
-                .filterNotIn(BaseSceneElementModel::getArea, excludeAreaIds.toArray(new String[]{}));
+        var condition = new HumanCondition().filterEqual(BaseSceneElementModel::getScene, sceneId);
         SceneConfigElementMapper sceneConfigElementMapper = BeanCommon.getBean(SceneConfigElementMapper.class);
         int num = sceneConfigElementMapper.total(condition);
-        return num;
+        condition.filterIn(BaseSceneElementModel::getArea, excludeAreaIds.toArray(new String[]{}));
+        int excludeNum = sceneConfigElementMapper.total(condition);
+        return num - excludeNum;
     }
 
     /**
@@ -1003,5 +1016,24 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         list.stream().forEach(item -> item.setPosition2(arePositionStr));
         sceneConfigAreaMapper.bulkUpdate(list);
         log.info("saveConfigData end.");
+    }
+
+    /**
+     * 获取区域信息
+     * @param sceneId
+     * @return
+     */
+    public List<SceneConfigAreaBO> getAres(String sceneId) {
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(SceneConfigAreaModel::getScene, sceneId);
+        List<SceneConfigAreaModel> list = sceneConfigAreaMapper.list(humanCondition);
+        List<SceneConfigAreaBO> sceneConfigAreaBOS = list.stream().map(area -> {
+                    SceneConfigAreaBO sceneConfigAreaBO = new SceneConfigAreaBO();
+                    sceneConfigAreaBO.fromModel(area);
+                    return sceneConfigAreaBO;
+                })
+                .collect(Collectors.toList());
+
+        return sceneConfigAreaBOS;
     }
 }

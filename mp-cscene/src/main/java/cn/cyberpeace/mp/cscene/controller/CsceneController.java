@@ -534,6 +534,47 @@ public class CsceneController implements BaseModelListControllerBase {
             return new ServiceResult<>(new SceneAreaTreeBO()).asResult();
         }
         String sceneId = this.modelService.get(id).getSource().getObj().getSceneConfig();
+        List<SceneConfigAreaBO> areas = modelService.getAres(sceneId);
+//        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, null, null);
+        SceneAreaTreeBO sceneAreaTree = new SceneAreaTreeBO();
+//        SceneConfigDataBO result = sceneConfigHandler.toData();
+        if ( CollectionUtils.isNotEmpty(areas)) {
+//            var areas = result.getTopology().getAreas();
+            Map<String, List<SceneConfigAreaBO>> parentId2Children = new HashMap<>();
+            areas.stream()
+                    .filter(sceneConfigAreaBO -> StringUtils.isNotEmpty(sceneConfigAreaBO.getArea()))
+                    .forEach(sceneConfigAreaBO -> {
+                        if (CollectionUtils.isEmpty(parentId2Children.get(sceneConfigAreaBO.getArea()))) {
+                            parentId2Children.put(sceneConfigAreaBO.getArea(), new ArrayList<>());
+                        }
+                        parentId2Children.get(sceneConfigAreaBO.getArea()).add(sceneConfigAreaBO);
+                    });
+            areas.stream()
+                    .filter(sceneConfigAreaBO -> StringUtils.isEmpty(sceneConfigAreaBO.getArea()))
+                    .forEach(sceneConfigAreaBO -> {
+                        if (sceneConfigAreaBO.getType() == BaseSceneAreaModel.Type.LAYER) {
+                            var area = getTreeArea(sceneConfigAreaBO, parentId2Children);
+                            sceneAreaTree.getAreaList().add(area);
+                        } else {
+                            if (CollectionUtils.isNotEmpty(parentId2Children.get(sceneConfigAreaBO.getId()))) {
+                                parentId2Children.get(sceneConfigAreaBO.getId()).stream()
+                                        .filter(a -> a.getType() == BaseSceneAreaModel.Type.LAYER)
+                                        .forEach(sceneConfigAreaBO1 -> {
+                                            var area = getTreeArea(sceneConfigAreaBO1, parentId2Children);
+                                            sceneAreaTree.getAreaList().add(area);
+                                        });
+                            }
+                        }
+                    });
+        }
+        return new ServiceResult<>(sceneAreaTree).asResult();
+    }
+
+    /*public ServiceResult<SceneAreaTreeBO> getSceneConfigAreaTree(@RequestParam String id) {
+        if (StringUtils.isEmpty(id)) {
+            return new ServiceResult<>(new SceneAreaTreeBO()).asResult();
+        }
+        String sceneId = this.modelService.get(id).getSource().getObj().getSceneConfig();
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, null, null);
         SceneAreaTreeBO sceneAreaTree = new SceneAreaTreeBO();
         SceneConfigDataBO result = sceneConfigHandler.toData();
@@ -567,7 +608,7 @@ public class CsceneController implements BaseModelListControllerBase {
                     });
         }
         return new ServiceResult<>(sceneAreaTree).asResult();
-    }
+    }*/
 
     @ApiOperation("更新区域显示参数")
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = AreaUpdateRequest.class)

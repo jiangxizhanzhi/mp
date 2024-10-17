@@ -197,6 +197,7 @@ mp:
     # es 日期格式
     es-date-pattern: ${mp.situationaware.ext-var.es-date-pattern}
     group-name-prefix: ${mp.situationaware.ext-var.group-name-prefix}
+    million-scene: ${mp.situationaware.ext-var.million-scene}
   # mp-log 模块
   log:
     ext-var:
