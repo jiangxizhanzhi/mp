@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.extensions.security.filter.JwtAuthenticationFilter;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.base.common.JsonCommon;
@@ -67,7 +68,17 @@ public class ThirdSsoService {
             UserModel userModel = userService.getUserModelById(userInfo.getUserAccount());
             if (Objects.isNull(userModel)) {
                 // 新增一个用户
-                userModel = new UserModel();
+                UserRequest userRequest = new UserRequest();
+                userRequest.setPassword("");
+                userRequest.setAvatar("");
+                userRequest.setIdentifier(userInfo.getUserAccount());
+                userRequest.setDescription("");
+                userRequest.setTokenSecret("");
+                userRequest.setUsername(userInfo.getUserAccount());
+                userRequest.setNickname(userInfo.getUserName());
+                userRequest.setEmail(userInfo.getUserEmail());
+                userRequest.setTenant("default");
+                userService.add(userRequest);
             }
             String newJwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userModel.getId(), userModel.getUsername(), userModel.getTokenSecret()));
             JwtAuthenticationFilter.addJWTCookieToResponse(httpServletResponse, newJwt);
