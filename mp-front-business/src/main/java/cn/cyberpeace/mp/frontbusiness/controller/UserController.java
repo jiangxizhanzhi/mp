@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.bo.user.UserOnlineCntBo;
 import cn.cyberpeace.mp.auth.bo.user.UserOnlineReportBo;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.user.ResetPwdRequest;
 import cn.cyberpeace.mp.auth.request.user.ResetSelfPwdRequest;
 import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
@@ -25,6 +26,8 @@ import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +35,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @Description: 用户管理接口(业务)
@@ -138,6 +147,42 @@ public class UserController {
     public ServiceResult<UserOnlineCntBo> onlineUserCnt() {
         UserOnlineCntBo userOnlineCntBo = userOnlineRecordService.onlineUserCnt();
         return ResultCommon.success(userOnlineCntBo);
+    }
+
+    @ApiOperation(value = "在线用户查询", notes = "")
+    @PostMapping("/query_online_user")
+    public ServiceResult<QueryUserOnline> queryOnlineUser(@RequestBody QueryUserOnlineParams params) {
+        Map<UserModel, CopyOnWriteArrayList<LocalDateTime>> onlineUser = heartbeatService.getHeartbeatMap();
+        List<String> online = new ArrayList<>();
+        List<String> offline = new ArrayList<>();
+        Set<String> onlineUsers = new HashSet<>();
+        for (UserModel userModel : onlineUser.keySet()) {
+            onlineUsers.add(userModel.getIdentifier());
+        }
+        for (String id : params.getIds()) {
+            if (onlineUsers.contains(id)) {
+                online.add(id);
+            } else {
+                offline.add(id);
+            }
+        }
+        QueryUserOnline queryUserOnline = new QueryUserOnline();
+        queryUserOnline.setOnline(online);
+        queryUserOnline.setOffline(offline);
+        return new ServiceResult<>(queryUserOnline).asResult();
+    }
+
+    @Getter
+    @Setter
+    public static class QueryUserOnlineParams {
+        private List<String> ids;
+    }
+
+    @Getter
+    @Setter
+    public static class QueryUserOnline {
+        private List<String> online;
+        private List<String> offline;
     }
 
 }
