@@ -37,6 +37,7 @@ import cn.cyberpeace.mp.cscene.bo.SceneAreaTreeBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
+import cn.cyberpeace.mp.cscene.controller.business.BusinessCsceneBO;
 import cn.cyberpeace.mp.cscene.controller.request.AreaUpdateRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
@@ -70,6 +71,7 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.scene.repository.SceneConfigAreaMapper;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Mirror;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -1081,6 +1083,38 @@ public class CsceneController implements BaseModelListControllerBase {
         request = formatCreateInstanceRequest(request, id);
         correctRequestCsceneParamsForAppInstance(request.getCscene());
         ServiceResult<CsceneInstanceBO> result = modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
+        CsceneLogUtils.recordSceneInstanceLog(result == null ? null : result.getData(), OpTypeEnums.START, CsceneLogUtils.START_SCENE, request.getContext());
+        return result;
+    }
+
+    @ApiOperation("创建场景模板应用实例")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "request", value = "新增数据请求体", dataTypeClass = BusinessCsceneBO.class)
+    })
+    @PostMapping(value = "/business_app_instance")
+    public ServiceResult<CsceneInstanceBO> businessCreateAppInstance(@RequestBody(required = true) BusinessCsceneBO request) {
+        if (modelService.get(request.getId()).getSource() == null) {
+            // 对应id场景不存在的话，则创建一个
+            CsceneBO csceneBO = new CsceneBO();
+            SceneConfigDataBO configDataBO = new SceneConfigDataBO();
+            configDataBO.setPlugins(new HashMap<>());
+            SceneConfigTopologyBO topo = new SceneConfigTopologyBO();
+            topo.setElements(new ArrayList<>());
+            topo.setScene(new SceneConfigBO());
+            topo.setAreas(new ArrayList<>());
+            topo.setConnections(new ArrayList<>());
+            topo.setNodeConnections(new ArrayList<>());
+            topo.setAreaId("");
+            configDataBO.setTopology(topo);
+            csceneBO.setSceneConfig(configDataBO);
+            var result = modelService.sync(csceneBO, new CsceneContextBO(), false).getSource();
+            getModelService().getModelMapper().updateId(result.getId(), request.getId());
+        }
+
+        var convertRequest = JsonCommon.snakeParse(JsonCommon.snakeStringify(request), new TypeReference<CsceneCreateInstanceRequest>() {
+        });
+        ServiceResult<CsceneInstanceBO> result = modelService.createAppInstance(request.getId(), false, convertRequest.toCsceneInstanceCreateContextBO())
+                .asResult();
         CsceneLogUtils.recordSceneInstanceLog(result == null ? null : result.getData(), OpTypeEnums.START, CsceneLogUtils.START_SCENE, request.getContext());
         return result;
     }
