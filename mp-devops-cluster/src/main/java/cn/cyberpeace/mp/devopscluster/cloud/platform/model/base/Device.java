@@ -322,4 +322,16 @@ public class Device extends BaseCloudPlatformResult {
     }
 
     private Boolean supportExport;
+
+    @ApiModelProperty("是否支持qga")
+    private Boolean supportQga;
+
+    @ApiModelProperty("是否是操作机")
+    private Boolean operateMachine;
+
+    @ApiModelProperty("是否可以参训人员使用")
+    private Boolean canParticipantsUse;
+
+    @ApiModelProperty("扩展字段")
+    private Object ext;
 }

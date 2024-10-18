@@ -19,8 +19,9 @@ import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
-/**
+ /**
  * @ClassName ImageRequest
  * @Description 镜像新增请求信息
  * @Author maojun
@@ -201,5 +202,17 @@ public class ImageRequest extends BaseRequest {
 
     @ApiModelProperty("行为仿真模拟")
     private Boolean behaviorSimulation;
+
+    @ApiModelProperty("是否支持qga")
+    private Boolean supportQga;
+
+    @ApiModelProperty("是否是操作机")
+    private Boolean operateMachine;
+
+    @ApiModelProperty("是否可以参训人员使用")
+    private Boolean canParticipantsUse;
+
+    @ApiModelProperty("扩展字段")
+    private Object ext;
 }
 

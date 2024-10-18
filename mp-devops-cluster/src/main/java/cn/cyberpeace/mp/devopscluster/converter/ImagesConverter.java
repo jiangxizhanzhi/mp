@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -322,6 +323,10 @@ public class ImagesConverter implements BaseConverter {
         device.setInnerApps(request.getInnerApps());
         device.setAttackMockDeviceFlag(Objects.nonNull(request.getAttackMockDeviceFlag()) ? request.getAttackMockDeviceFlag() : Boolean.FALSE);
         device.setBehaveSupport(Objects.nonNull(request.getBehaviorSimulation()) ? request.getBehaviorSimulation() : Boolean.FALSE);
+        device.setExt(request.getExt());
+        device.setSupportQga(request.getSupportQga());
+        device.setCanParticipantsUse(request.getCanParticipantsUse());
+        device.setOperateMachine(request.getOperateMachine());
         devopsTargetService.insert(Collections.singletonList(device));
     }
 
@@ -395,6 +400,10 @@ public class ImagesConverter implements BaseConverter {
     @Transactional
     public void update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(), convertRequest(request));
+        device.setExt(request.getExt());
+        device.setSupportQga(request.getSupportQga());
+        device.setCanParticipantsUse(request.getCanParticipantsUse());
+        device.setOperateMachine(request.getOperateMachine());
         devopsTargetService.updateById(device);
     }
 
@@ -790,6 +799,19 @@ public class ImagesConverter implements BaseConverter {
         imageModel.setModelCode(device.getModelCode());
         imageModel.setAttackMockDeviceFlag(device.getAttackMockDeviceFlag());
         imageModel.setBehaveSupport(device.getBehaveSupport());
+
+        var po = deviceTargetMapper.findByUuid(device.getUuid());
+        if (po != null) {
+            imageModel.setCanParticipantsUse(po.getCanParticipantsUse());
+            imageModel.setSupportQga(po.getSupportQga());
+            imageModel.setOperateMachine(po.getOperateMachine());
+            if (po.getExt() != null) {
+                imageModel.setExt(JsonCommon.parseMap(po.getExt()));
+            } else {
+                imageModel.setExt(new Object());
+            }
+        }
+
         return imageModel;
     }
 
