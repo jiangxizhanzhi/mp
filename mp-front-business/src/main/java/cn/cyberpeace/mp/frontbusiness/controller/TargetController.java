@@ -65,6 +65,7 @@ public class TargetController {
     @ApiOperation(value = "查询当前用户菜单")
     @GetMapping("/current_user/tree")
     public ServiceResult getTree(@RequestParam(required = false) String Type) {
+        if (Type!=null){
         MenuDifferenceModel menuDifferenceModel = menuDifferenceMapper.get(Type);
         List<String> ids = Arrays.stream(menuDifferenceModel.getDifference().split(",")).collect(Collectors.toList());
         List<String> menuIdents = userPermissionService.listMenuIdentsByLoginUser();
@@ -72,5 +73,10 @@ public class TargetController {
         menuIdents.retainAll(ids);
         var result = menuConfigService.getUserTreeMenuBy(UserUtils.getLoginUser().getId(), menuIdents);
         return ServiceResult.builder().source(result).build().asResult();
+     }else {
+            List<String> menuIdentsByLoginUser = userPermissionService.listMenuIdentsByLoginUser();
+            List<TargetBo> userTreeMenuBy = menuConfigService.getUserTreeMenuBy(UserUtils.getLoginUser().getId(), menuIdentsByLoginUser);
+            return ServiceResult.builder().source(userTreeMenuBy).build().asResult();
+        }
     }
 }

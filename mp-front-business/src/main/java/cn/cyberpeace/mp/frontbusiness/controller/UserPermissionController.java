@@ -89,9 +89,12 @@ public class UserPermissionController {
             List<String> ids = Arrays.stream(menuDifferenceModel.getDifference().split(",")).collect(Collectors.toList());
             // 取ids和menuIdents的交集
             menuIdents.retainAll(ids);
+            return ServiceResult.builder().source(menuIdents).build().asResult();
+        }else {
+            return ServiceResult.builder().source(menuIdents).build().asResult();
         }
 
-        return ServiceResult.builder().source(menuIdents).build().asResult();
+
     }
 
 
