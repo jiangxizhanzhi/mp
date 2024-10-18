@@ -10,4 +10,7 @@
             #{userId}
         </foreach>
     </select>
+    <select id="selectALl" resultType="cn.cyberpeace.mp.auth.model.PersonnelManagementModel">
+        select * from mp_auth_personnel_management
+    </select>
 </mapper>

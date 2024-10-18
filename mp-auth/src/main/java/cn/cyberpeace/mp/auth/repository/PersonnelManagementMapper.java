@@ -17,4 +17,6 @@ public interface PersonnelManagementMapper extends BaseModelMapper<PersonnelMana
 
 
     List<PersonnelManagementModel> getUserExist(@Param("teamId") String teamId, @Param("userIds") List<String> userIds);
+
+    List<PersonnelManagementModel> selectALl();
 }

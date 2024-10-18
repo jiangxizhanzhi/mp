@@ -1,25 +1,40 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.bo.Personnel.management.PersonnelManagementBo;
+import cn.cyberpeace.mp.auth.bo.excel.ExportPersonnelManagementBo;
+import cn.cyberpeace.mp.auth.bo.excel.ExportTeamBO;
+import cn.cyberpeace.mp.auth.model.PersonnelManagementModel;
 import cn.cyberpeace.mp.auth.model.TeamModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.repository.PersonnelManagementMapper;
 import cn.cyberpeace.mp.auth.repository.TeamMapper;
+import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.request.team.TeamPageRequest;
 import cn.cyberpeace.mp.auth.request.team.TeamRequest;
 import cn.cyberpeace.mp.auth.service.TeamService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import com.alibaba.excel.EasyExcel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
-import java.util.List;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -27,6 +42,12 @@ public class TeamServiceImpl implements TeamService {
 
     @Autowired
     private TeamMapper teamMapper;
+    
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
+    private PersonnelManagementMapper personnelManagementMapper;
 
     /**
      *分页查询
@@ -132,6 +153,145 @@ public class TeamServiceImpl implements TeamService {
         } else {
             return new ServiceResult<>(result);
         }
+    }
+
+    /**
+     * 导出战队模板
+     * @return
+     */
+    @Override
+    public void exportTeamTemplate(HttpServletResponse response) {
+        String fname = "战队信息模板";
+        List<ExportTeamBO> exportTeamBOS = new ArrayList<>();
+        try {
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode(fname, "UTF-8").replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+            EasyExcel.write(response.getOutputStream(), ExportTeamBO.class).sheet("战队模板").doWrite(exportTeamBOS);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public ServiceResult<String> importTeamTemplate(MultipartFile file) {
+        List<ExportTeamBO> exportTeamBOS = new ArrayList<>();
+        try {
+            exportTeamBOS = EasyExcel.read(new BufferedInputStream(file.getInputStream())).head(ExportTeamBO.class).sheet().doReadSync();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if (exportTeamBOS.size()>1000){
+            throw new MpRuntimeException("超过最多处理条数,最多处理1000条");
+        }
+
+        if (!CollectionUtils.isEmpty(exportTeamBOS)) {
+            String userName = UserUtils.getLoginUser().getName();
+            List<TeamModel> teamModels = new ArrayList<>();
+            for (ExportTeamBO exportTeamBO : exportTeamBOS) {
+                TeamModel teamModel = new TeamModel();
+                BeanUtils.copyProperties(exportTeamBO,teamModel);
+                teamModel.setCreator(userName);
+                teamModels.add(teamModel);
+            }
+            List<String> teamList = teamModels.stream().map(TeamModel::getName).collect(Collectors.toList());
+            List<TeamModel> teamModelList = teamMapper.existTeamList(teamList);
+            if (!CollectionUtils.isEmpty(teamModelList)) {
+                throw new MpRuntimeException("战队名重复");
+            }
+            teamMapper.bulkCreate(teamModels);
+
+        }
+        return ResultCommon.success();
+    }
+
+    @Override
+    public void exportPersonnelTemplate(HttpServletResponse response) {
+        String fname = "关联关系导入模板";
+        List<ExportPersonnelManagementBo> exportPersonnelManagementBos = new ArrayList<>();
+        try {
+            response.setContentType("application/vnd.ms-excel");
+            response.setCharacterEncoding("utf-8");
+            String fileName = URLEncoder.encode(fname, "UTF-8").replaceAll("\\+", "%20");
+            response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+            EasyExcel.write(response.getOutputStream(), ExportPersonnelManagementBo.class).sheet("关联关系导入模板").doWrite(exportPersonnelManagementBos);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public ServiceResult<String> importPersonnelTemplate(MultipartFile file) {
+        List<ExportPersonnelManagementBo> exportPersonnelManagementBos = new ArrayList<>();
+        try {
+            exportPersonnelManagementBos = EasyExcel.read(new BufferedInputStream(file.getInputStream())).head(ExportPersonnelManagementBo.class).sheet().doReadSync();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        if (exportPersonnelManagementBos.size()>1000){
+            throw new MpRuntimeException("超过最多处理条数,最多处理1000条");
+        }
+        //1,排查用户加入不同战队
+        List<String> usernameList = exportPersonnelManagementBos.stream().map(ExportPersonnelManagementBo::getUsername).distinct().collect(Collectors.toList());
+        List<PersonnelManagementModel> personnelManagementModelList = personnelManagementMapper.selectALl();
+        List<String> selectUserName = personnelManagementModelList.stream().map(PersonnelManagementModel::getUsername).collect(Collectors.toList());
+        usernameList.addAll(selectUserName);
+        if (usernameList.size() != exportPersonnelManagementBos.size()){
+            throw new MpRuntimeException("一个用户不能加入2支战队");
+        }
+        //2,战队名称不存在直接抛异常
+        List<String> teamNameList = exportPersonnelManagementBos.stream().map(ExportPersonnelManagementBo::getTeamName).collect(Collectors.toList());
+        List<String> distinctTeamNameList = teamNameList.stream().distinct().collect(Collectors.toList());
+        HumanCondition humanCondition = new HumanCondition().filterIn(TeamModel::getName, distinctTeamNameList.toArray());
+        List<TeamModel> selectByNameTeamList = teamMapper.list(humanCondition);
+        if (distinctTeamNameList.size()!=selectByNameTeamList.size()) {
+            throw new MpRuntimeException("战队名不存在");
+        }
+        //3,用户名称不存在直接抛异常
+        List<String> userNameList = exportPersonnelManagementBos.stream().map(ExportPersonnelManagementBo::getUsername).collect(Collectors.toList());
+        List<String> checkUserNameExistList = checkUserNameExist(userNameList);
+        if (userNameList.size()!=checkUserNameExistList.size()) {
+            throw new MpRuntimeException("用户名称不存在");
+        }
+        //增加成员管理信息
+        Map<String, PersonnelManagementModel> usernamePersonnelManagementModelHashMap = new HashMap<>();
+        for (String username : userNameList) {
+            usernamePersonnelManagementModelHashMap.put(username,new PersonnelManagementModel());
+        }
+        //处理用户名和战队id
+        Map<String, ExportPersonnelManagementBo> teamNameToTeamIdExportPersonnelManagementBoMap = exportPersonnelManagementBos.stream().collect(Collectors.toMap(ExportPersonnelManagementBo::getTeamName, exportPersonnelManagementBo -> exportPersonnelManagementBo));
+        for (TeamModel teamModel : selectByNameTeamList) {
+            if (teamNameToTeamIdExportPersonnelManagementBoMap.containsKey(teamModel.getName())) {
+                teamNameToTeamIdExportPersonnelManagementBoMap.get(teamModel.getName()).setTeamName(teamModel.getId());
+            }
+        }
+        List<ExportPersonnelManagementBo> usernameAndTeamId = new ArrayList<>(teamNameToTeamIdExportPersonnelManagementBoMap.values());
+        Map<String, String> usernameAndTeamIdMap = usernameAndTeamId.stream().collect(Collectors.toMap(ExportPersonnelManagementBo::getUsername, ExportPersonnelManagementBo::getTeamName));
+
+        HumanCondition userHumanCondition = new HumanCondition().filterIn(UserModel::getUsername, userNameList.toArray());
+        List<UserModel> userModelList = userMapper.list(userHumanCondition);
+        for (UserModel userModel : userModelList) {
+            if (usernamePersonnelManagementModelHashMap.containsKey(userModel.getUsername()) &&usernameAndTeamIdMap.containsKey(userModel.getUsername())) {
+                PersonnelManagementModel personnelManagementModel = usernamePersonnelManagementModelHashMap.get(userModel.getUsername());
+                personnelManagementModel.setTeamId(usernameAndTeamIdMap.get(userModel.getUsername()));
+                personnelManagementModel.setName(userModel.getName());
+                personnelManagementModel.setUserId(userModel.getId());
+                personnelManagementModel.setUsername(userModel.getUsername());
+            }
+        }
+        List<PersonnelManagementModel> personnelManagementModels = new ArrayList<>(usernamePersonnelManagementModelHashMap.values());
+        personnelManagementMapper.bulkCreate(personnelManagementModels);
+        return ResultCommon.success();
+    }
+
+    private List<String> checkUserNameExist(List<String> userNameList) {
+        HumanCondition condition = new HumanCondition().filterIn(UserModel::getUsername, userNameList.toArray());
+        List<UserModel> list = userMapper.list(condition);
+        if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(list)) {
+            return list.stream().map(UserModel::getUsername).collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 
 

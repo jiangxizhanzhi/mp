@@ -17,7 +17,9 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @Api(value = "战队接口", tags = "战队")
@@ -82,6 +84,30 @@ public class TeamController {
     public ServiceResult<PersonnelManagementBo> patchPersonnelManagement(@RequestBody List<PersonnelManagementRequest> PersonnelManagementRequestList) {
         personnelManagementService.patchPersonnelManagement(PersonnelManagementRequestList);
         return ResultCommon.success();
+    }
+
+    @ApiOperation(value = "导出战队导入模板", notes = "")
+    @GetMapping("/team/template")
+    public void exportTeamTemplate(HttpServletResponse response) {
+        teamService.exportTeamTemplate(response);
+    }
+
+    @ApiOperation(value = "导入战队信息", notes = "")
+    @PostMapping("/team/import")
+    public ServiceResult<String> importTeamTemplate(MultipartFile file) {
+        return teamService.importTeamTemplate(file);
+    }
+
+    @ApiOperation(value = "导出成员映射导入模板", notes = "")
+    @GetMapping("/team/personnel/template")
+    public void exportPersonnelTemplate(HttpServletResponse response) {
+        teamService.exportPersonnelTemplate(response);
+    }
+
+    @ApiOperation(value = "导入成员映射关系", notes = "")
+    @PostMapping("/team/import/personnel")
+    public ServiceResult<String> importPersonnelTemplate(MultipartFile file) {
+        return teamService.importPersonnelTemplate(file);
     }
 
 }
