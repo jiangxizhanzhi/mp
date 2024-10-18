@@ -70,4 +70,76 @@ public interface FileSuffixConstant {
         add("rar");
     }};
 
+    /**
+     * 附件上传支持后缀
+     */
+    List<String> LOAD_UPLOAD_FILE_LIST = new ArrayList<>(){{
+        add("zip");
+        add("rar");
+    }};
+
+    /**
+     * 帮助上传支持后缀
+     */
+    List<String> LOAD_UPLOAD_FILE_README_LIST = new ArrayList<>(){{
+        add("doc");
+        add("docx");
+        add("xml");
+        add("pdf");
+        add("html");
+        add("markdown");
+    }};
+
+    /**
+     * 上传图片支持后缀
+     */
+    List<String> LOAD_UPLOAD_IMAGE_LIST = new ArrayList<>(){{
+        add("tiff");
+        add("pjp");
+        add("jfif");
+        add("bmp");
+        add("gif");
+        add("svg");
+        add("png");
+        add("xbm");
+        add("dib");
+        add("jxl");
+        add("jpeg");
+        add("svgz");
+        add("jpg");
+        add("webp");
+        add("ico");
+        add("tif");
+        add("pjpeg");
+        add("avif");
+
+        add("TIFF");
+        add("PJP");
+        add("JFIF");
+        add("BMP");
+        add("GIF");
+        add("SVG");
+        add("PNG");
+        add("XBM");
+        add("DIB");
+        add("JXL");
+        add("JPEG");
+        add("SVGZ");
+        add("JPG");
+        add("WEBP");
+        add("ICO");
+        add("TIF");
+        add("PJPEG");
+        add("AVIF");
+    }};
+
+    /**
+     * 执行结果文件上传
+     */
+    List<String> LOAD_RESULT_UPLOAD_FILE = new ArrayList<>(){{
+        add("json");
+        add("xml");
+        add("xlsx");
+    }};
+
 }
