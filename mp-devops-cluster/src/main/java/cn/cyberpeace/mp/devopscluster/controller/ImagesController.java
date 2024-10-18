@@ -338,6 +338,10 @@ public class ImagesController {
         imagesByIdVO.setModelId(model.getModelId());
         imagesByIdVO.setModelCode(model.getModelCode());
         imagesByIdVO.setBehaveSupport(model.getBehaveSupport());
+        imagesByIdVO.setExt(model.getExt());
+        imagesByIdVO.setCanParticipantsUse(model.getCanParticipantsUse());
+        imagesByIdVO.setSupportQga(model.getSupportQga());
+        imagesByIdVO.setOperateMachine(model.getOperateMachine());
         return new Result<>(imagesByIdVO);
     }
 

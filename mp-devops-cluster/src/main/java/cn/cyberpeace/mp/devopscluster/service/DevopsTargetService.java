@@ -228,6 +228,14 @@ public class DevopsTargetService {
             deviceTargetPO.setTemplateId("");
             deviceTargetPO.setTemplateName("");
         }
+        deviceTargetPO.setCanParticipantsUse(device.getCanParticipantsUse());
+        deviceTargetPO.setSupportQga(device.getSupportQga());
+        deviceTargetPO.setOperateMachine(device.getOperateMachine());
+        if (device.getExt() != null) {
+            deviceTargetPO.setExt(JsonCommon.snakeStringify(device.getExt()));
+        } else {
+            deviceTargetPO.setExt(JsonCommon.snakeStringify(new Object()));
+        }
         return deviceTargetPO;
     }
 
@@ -305,7 +313,14 @@ public class DevopsTargetService {
             deviceTargetPO.setLanguage(extSystemInfo.getLanguage());
             deviceTargetPO.setSystemArchitecure(extSystemInfo.getSystemArchitecture());
         }
-
+        deviceTargetPO.setCanParticipantsUse(device.getCanParticipantsUse());
+        deviceTargetPO.setSupportQga(device.getSupportQga());
+        deviceTargetPO.setOperateMachine(device.getOperateMachine());
+        if (device.getExt() != null) {
+            deviceTargetPO.setExt(JsonCommon.snakeStringify(device.getExt()));
+        } else {
+            deviceTargetPO.setExt(JsonCommon.snakeStringify(new Object()));
+        }
         return deviceTargetPO;
     }
 

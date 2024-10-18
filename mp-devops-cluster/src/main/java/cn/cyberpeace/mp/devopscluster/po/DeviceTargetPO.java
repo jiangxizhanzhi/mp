@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -228,4 +229,16 @@ public class DeviceTargetPO extends BaseModel {
 
     @DefaultStr
     private String extEntityAccess;
+
+    @DefaultBool
+    private Boolean supportQga;
+
+    @DefaultBool
+    private Boolean operateMachine;
+
+    @DefaultBool
+    private Boolean canParticipantsUse;
+
+    @DefaultStr
+    private String ext;
 }
