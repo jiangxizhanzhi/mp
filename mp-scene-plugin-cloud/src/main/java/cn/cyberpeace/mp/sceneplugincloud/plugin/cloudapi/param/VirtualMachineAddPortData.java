@@ -23,7 +23,8 @@ import lombok.Data;
  */
 @Data
 public class VirtualMachineAddPortData implements CloudHttpData {
+    private String id;
+    private String name;
     private String networkId;
-    private String fixedIp;
-    private String portId;
+    private String hwVifModel;
 }

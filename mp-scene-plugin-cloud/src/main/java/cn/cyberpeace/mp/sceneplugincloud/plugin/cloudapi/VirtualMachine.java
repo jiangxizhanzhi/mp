@@ -388,8 +388,9 @@ public class VirtualMachine extends CloudClient {
      */
     public boolean deletePort(String instanceId, String portId) {
         String url = CloudUrlConstant.DELETE_VM_PORTS.replace("{instance_id}", instanceId);
-        url = url.replace("{port_id}", portId);
-        cloudDelete(url, null, null, new TypeReference<CloudResponse<VirtualMachineAddPortResult>>() {
+        VirtualMachineDeletePortData deletePortData = new VirtualMachineDeletePortData();
+        deletePortData.setInterfaceId(portId);
+        cloudDelete(url, deletePortData, null, new TypeReference<CloudResponse<VirtualMachineAddPortResult>>() {
         }, true);
         return true;
     }

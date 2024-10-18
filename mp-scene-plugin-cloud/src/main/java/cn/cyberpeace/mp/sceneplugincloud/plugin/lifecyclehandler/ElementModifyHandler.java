@@ -1115,8 +1115,6 @@ public class ElementModifyHandler extends HandlerCommon {
      */
     private VirtualMachineAddPortResult vmAddPort(String elementResourceId, String networkResourceId, String fixedIp, String portResourceId, CloudPluginSceneElementBO originElement, CloudPluginSceneElementPortBO newPort) {
         VirtualMachineAddPortData port = new VirtualMachineAddPortData();
-        port.setFixedIp(fixedIp);
-        port.setPortId(portResourceId);
         port.setNetworkId(networkResourceId);
         VirtualMachineAddPortResult result = virtualMachine.addPort(elementResourceId, port);
 

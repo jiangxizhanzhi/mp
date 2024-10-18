@@ -1467,7 +1467,6 @@ public class CreateHandler extends HandlerCommon {
                 List<VirtualNic> created = new ArrayList<>();
                 nics.forEach(n -> {
                     VirtualMachineAddPortData port = new VirtualMachineAddPortData();
-                    port.setFixedIp(n.getFixedIp());
                     port.setNetworkId(n.getNetworkId());
                     VirtualMachineAddPortResult result = vmClient.addPort(cloudElement.getResourceId(), port);
                     VirtualNic virtualNic = new VirtualNic();
