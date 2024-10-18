@@ -235,8 +235,8 @@ public class CloudUrlConstant {
     public static final String GET_ALL_ROUTER_URL = "/v1/routers";
     public static final String DELETE_ROUTER_URL = "/v1/routers/{router_id}";
     public static final String QUERY_PORTS = "/v1/ports/{resource_id}";
-    public static final String ADD_VM_PORTS = "/v1/instances/{instance_id}/interfaces";
-    public static final String DELETE_VM_PORTS = "/v1/instances/{instance_id}/interfaces/{port_id}";
+    public static final String ADD_VM_PORTS = "/cloud/v1/vm/{instance_id}/network";
+    public static final String DELETE_VM_PORTS = "/cloud/v1/vm/{instance_id}/network";
     public static final String CREATE_PORT_MAPPING = "/cpcloud/fwd_app/v1/";
     public static final String DELETE_PORT_MAPPING = "/cpcloud/fwd_app/v1/{fwd_id}";
     public static final String EXEC_HOST_COMMAND = "/cpcloud/info/v1/command";

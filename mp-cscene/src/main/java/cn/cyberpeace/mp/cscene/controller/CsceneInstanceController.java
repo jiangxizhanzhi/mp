@@ -1778,13 +1778,15 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiImplicitParam(name = "connectSceneNode", value = "请求体", dataTypeClass = ConnectSceneNode.class)
     @PostMapping("/connect_scene_node")
     public ServiceResult<ConnectSceneNodeResult> connectSceneNode(@RequestBody ConnectSceneNode connectSceneNode) {
-        return new ServiceResult<>(new ConnectSceneNodeResult()).asResult();
+        var res = getModelService().connectSceneNode(connectSceneNode);
+        return new ServiceResult<>(res).asResult();
     }
 
     @ApiOperation(value = "外部节点断开场景", notes = "断开外部节点和场景网络的连接")
     @ApiImplicitParam(name = "disConnectSceneNode", value = "请求体", dataTypeClass = DisConnectSceneNode.class)
     @PostMapping("/disconnect_scene_node")
     public ServiceResult<Boolean> disConnectSceneNode(@RequestBody DisConnectSceneNode disConnectSceneNode) {
+        getModelService().disConnectSceneNode(disConnectSceneNode);
         return new ServiceResult<>(true).asResult();
     }
 

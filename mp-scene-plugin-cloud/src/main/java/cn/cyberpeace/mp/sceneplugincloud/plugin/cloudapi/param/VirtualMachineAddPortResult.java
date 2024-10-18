@@ -27,9 +27,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VirtualMachineAddPortResult implements CloudHttpData {
-    private String networkId;
     private String fixedIp;
     private String portId;
     private String macAddress;
     private Boolean portSecurityEnabled;
+
+    private String id;
+    private String name;
+    private String hwVifModel;
+    private String networkId;
 }
