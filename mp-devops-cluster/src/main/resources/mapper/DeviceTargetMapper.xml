@@ -130,6 +130,15 @@
             <if test="attackMockDeviceFlag != null">
                 and i.attack_mock_device_flag = #{attackMockDeviceFlag}
             </if>
+            <if test="supportQga != null">
+                and support_qga = #{supportQga}
+            </if>
+            <if test="operateMachine != null">
+                and operate_machine = #{operateMachine}
+            </if>
+            <if test="canParticipantsUse != null">
+                and can_participants_use = #{canParticipantsUse}
+            </if>
 
         </where>
     </sql>
@@ -212,6 +221,15 @@
             </if>
             <if test="targetCategory != null and targetCategory == 3">
                 and i.is_import = 0
+            </if>
+            <if test="supportQga != null">
+                and support_qga = #{supportQga}
+            </if>
+            <if test="operateMachine != null">
+                and operate_machine = #{operateMachine}
+            </if>
+            <if test="canParticipantsUse != null">
+                and can_participants_use = #{canParticipantsUse}
             </if>
         </where>
     </sql>

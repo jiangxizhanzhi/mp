@@ -194,6 +194,12 @@ public class ImagePageDTO extends BasePageDTO{
 
     private Integer attackMockDeviceType;
 
+    private Boolean supportQga;
+
+    private Boolean operateMachine;
+
+    private Boolean canParticipantsUse;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }
@@ -295,5 +301,8 @@ public class ImagePageDTO extends BasePageDTO{
         this.setParentSystemType(request.getParentSystemType());
         this.setInitSupport(request.getInitSupport());
         this.setAttackMockDeviceFlag(request.getAttackMockDeviceFlag());
+        this.setCanParticipantsUse(request.getCanParticipantsUse());
+        this.setOperateMachine(request.getOperateMachine());
+        this.setSupportQga(request.getSupportQga());
     }
 }

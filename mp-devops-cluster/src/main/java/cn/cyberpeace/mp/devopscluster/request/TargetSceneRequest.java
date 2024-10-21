@@ -163,4 +163,13 @@ public class TargetSceneRequest extends BasePageRequest implements Serializable 
     @ApiModelProperty(value = "攻防模拟器类型 0-攻击 1-防守")
     private Integer attackMockDeviceType;
 
+    @ApiModelProperty("是否支持qga")
+    private Boolean supportQga;
+
+    @ApiModelProperty("是否是操作机")
+    private Boolean operateMachine;
+
+    @ApiModelProperty("是否可以参训人员使用")
+    private Boolean canParticipantsUse;
+
 }

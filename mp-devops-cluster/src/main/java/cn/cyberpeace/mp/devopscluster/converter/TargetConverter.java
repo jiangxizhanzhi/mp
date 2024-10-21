@@ -116,10 +116,14 @@ public class TargetConverter{
         for (Device d : deviceList) {
             d.setAttackMockDeviceType(deviceIdToAttackMockTypeMap.get(String.valueOf(d.getId())));
             if (supportExports.containsKey(d.getUuid())) {
-                d.setBehaveSupport(supportExports.get(d.getUuid()).getBehaveSupport());
+                var supportExport = supportExports.get(d.getUuid());
+                d.setBehaveSupport(supportExport.getBehaveSupport());
                 if (ImageTypeEnum.CONTAINER.toValue().equals(d.getImageType()) && d.getExtDocker() != null) {
-                    d.getExtDocker().setInitSupport(supportExports.get(d.getUuid()).getInitSupport());
+                    d.getExtDocker().setInitSupport(supportExport.getInitSupport());
                 }
+                d.setSupportQga(supportExport.getSupportQga());
+                d.setOperateMachine(supportExport.getOperateMachine());
+                d.setCanParticipantsUse(supportExport.getCanParticipantsUse());
             }
             if (d.getExtVm() != null) {
                 d.setBehaveSupport(d.getExtVm().getBehaveSupport());
