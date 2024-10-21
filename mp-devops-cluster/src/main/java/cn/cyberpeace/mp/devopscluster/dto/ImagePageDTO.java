@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.request.ImagePageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.TargetSceneRequest;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -200,6 +201,8 @@ public class ImagePageDTO extends BasePageDTO{
 
     private Boolean canParticipantsUse;
 
+    private Boolean supportCollect;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }
@@ -285,6 +288,7 @@ public class ImagePageDTO extends BasePageDTO{
             this.setLimit(request.getPerPage());
         }
         if (Objects.isNull(request.getIgnoreUser()) || !request.getIgnoreUser()) {
+
             this.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
         }
         if (Objects.isNull(request.getImageType())){
@@ -302,6 +306,7 @@ public class ImagePageDTO extends BasePageDTO{
         this.setInitSupport(request.getInitSupport());
         this.setAttackMockDeviceFlag(request.getAttackMockDeviceFlag());
         this.setCanParticipantsUse(request.getCanParticipantsUse());
+        this.setSupportCollect(request.getSupportCollect());
         this.setOperateMachine(request.getOperateMachine());
         this.setSupportQga(request.getSupportQga());
     }

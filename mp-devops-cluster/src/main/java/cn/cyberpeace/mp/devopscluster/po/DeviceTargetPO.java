@@ -239,6 +239,9 @@ public class DeviceTargetPO extends BaseModel {
     @DefaultBool
     private Boolean canParticipantsUse;
 
+    @DefaultBool
+    private Boolean supportCollect;
+
     @DefaultStr
     private String ext;
 }

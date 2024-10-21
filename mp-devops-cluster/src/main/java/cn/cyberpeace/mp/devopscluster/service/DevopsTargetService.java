@@ -236,6 +236,7 @@ public class DevopsTargetService {
             deviceTargetPO.setTemplateId("");
             deviceTargetPO.setTemplateName("");
         }
+        deviceTargetPO.setSupportCollect(device.getSupportCollect());
         deviceTargetPO.setCanParticipantsUse(device.getCanParticipantsUse());
         deviceTargetPO.setSupportQga(device.getSupportQga());
         deviceTargetPO.setOperateMachine(device.getOperateMachine());
@@ -321,6 +322,7 @@ public class DevopsTargetService {
             deviceTargetPO.setLanguage(extSystemInfo.getLanguage());
             deviceTargetPO.setSystemArchitecure(extSystemInfo.getSystemArchitecture());
         }
+        deviceTargetPO.setSupportCollect(device.getSupportCollect());
         deviceTargetPO.setCanParticipantsUse(device.getCanParticipantsUse());
         deviceTargetPO.setSupportQga(device.getSupportQga());
         deviceTargetPO.setOperateMachine(device.getOperateMachine());

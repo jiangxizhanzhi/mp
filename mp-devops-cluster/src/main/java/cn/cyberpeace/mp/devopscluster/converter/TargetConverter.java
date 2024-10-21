@@ -121,9 +121,11 @@ public class TargetConverter{
                 if (ImageTypeEnum.CONTAINER.toValue().equals(d.getImageType()) && d.getExtDocker() != null) {
                     d.getExtDocker().setInitSupport(supportExport.getInitSupport());
                 }
+                d.setSupportCollect(supportExport.getSupportCollect());
                 d.setSupportQga(supportExport.getSupportQga());
                 d.setOperateMachine(supportExport.getOperateMachine());
                 d.setCanParticipantsUse(supportExport.getCanParticipantsUse());
+                d.setSupportCollect(supportExport.getSupportCollect());
             }
             if (d.getExtVm() != null) {
                 d.setBehaveSupport(d.getExtVm().getBehaveSupport());

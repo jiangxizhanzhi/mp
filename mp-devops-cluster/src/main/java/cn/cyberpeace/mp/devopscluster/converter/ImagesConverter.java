@@ -323,9 +323,11 @@ public class ImagesConverter implements BaseConverter {
         device.setInnerApps(request.getInnerApps());
         device.setAttackMockDeviceFlag(Objects.nonNull(request.getAttackMockDeviceFlag()) ? request.getAttackMockDeviceFlag() : Boolean.FALSE);
         device.setBehaveSupport(Objects.nonNull(request.getBehaviorSimulation()) ? request.getBehaviorSimulation() : Boolean.FALSE);
+        device.setSupportCollect(request.getSupportCollect());
         device.setExt(request.getExt());
         device.setSupportQga(request.getSupportQga());
         device.setCanParticipantsUse(request.getCanParticipantsUse());
+        device.setSupportCollect(request.getSupportCollect());
         device.setOperateMachine(request.getOperateMachine());
         devopsTargetService.insert(Collections.singletonList(device));
     }
@@ -403,6 +405,7 @@ public class ImagesConverter implements BaseConverter {
         device.setExt(request.getExt());
         device.setSupportQga(request.getSupportQga());
         device.setCanParticipantsUse(request.getCanParticipantsUse());
+        device.setSupportCollect(request.getSupportCollect());
         device.setOperateMachine(request.getOperateMachine());
         devopsTargetService.updateById(device);
     }
@@ -803,6 +806,7 @@ public class ImagesConverter implements BaseConverter {
         var po = deviceTargetMapper.findByUuid(device.getUuid());
         if (po != null) {
             imageModel.setCanParticipantsUse(po.getCanParticipantsUse());
+            imageModel.setSupportCollect(po.getSupportCollect());
             imageModel.setSupportQga(po.getSupportQga());
             imageModel.setOperateMachine(po.getOperateMachine());
             if (po.getExt() != null) {
