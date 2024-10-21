@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCrea
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchUpdateData;
 import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -22,6 +23,13 @@ import java.util.List;
 public class VirtualSwitch extends CloudClient {
 
     private static final Logger log = LoggerFactory.getLogger(VirtualSwitch.class);
+
+    public VirtualSwitch() {
+    }
+
+    public VirtualSwitch(CloudHttpClient httpClient) {
+        super(httpClient);
+    }
 
     public VirtualSwitchCreateData create(VirtualSwitchCreateData createData) {
         heavyConcurrentWait();

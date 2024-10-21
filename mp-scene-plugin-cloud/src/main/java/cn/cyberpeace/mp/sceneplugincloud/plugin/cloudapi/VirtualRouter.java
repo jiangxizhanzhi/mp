@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDele
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterGetData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterUpdateData;
 import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -17,6 +18,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class VirtualRouter extends CloudClient {
+
+    public VirtualRouter() {
+    }
+
+    public VirtualRouter(CloudHttpClient httpClient) {
+        super(httpClient);
+    }
 
     public VirtualRouterCreateData create(VirtualRouterCreateData createData) {
         heavyConcurrentWait();

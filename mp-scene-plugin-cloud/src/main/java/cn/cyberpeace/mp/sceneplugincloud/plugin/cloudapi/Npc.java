@@ -7,12 +7,17 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcCreateResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcGetData;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.List;
 
 public class Npc extends CloudClient {
+
+    public Npc(CloudHttpClient httpClient) {
+        super(httpClient);
+    }
 
     public Npc() {
         super();

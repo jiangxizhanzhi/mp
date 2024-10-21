@@ -111,12 +111,6 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.link_status_hold_size:200}")
     private Integer linkStatusHoldSize;
 
-    @Value("${mp.sceneplugincloud.external_net_id:}")
-    private String externalNetId;
-
-    @Value("${mp.sceneplugincloud.external_net_cidr:}")
-    private String externalNetCidr;
-
     @Value("${mp.sceneplugincloud.mgmt_name:mgmt}")
     private String mgmtName;
 
@@ -188,6 +182,10 @@ public class CloudAppConfig {
 
     private List<String> cachedCidrs;
 
+    private Network network;
+
+    private VirtualInternet virtualInternet;
+
     public void init() {
         this.getCidrPool();
     }
@@ -203,41 +201,6 @@ public class CloudAppConfig {
         List<String> cidrPool = new ArrayList<>();
         cidrPool.addAll(cachedCidrs);
         return cidrPool;
-    }
-
-    public String getExternalNetId() {
-        if (!StringUtils.isEmpty(externalNetId)) {
-            return externalNetId;
-        }
-
-        try {
-            externalNetId = new VirtualInternet().create().getExternalNetId();
-        } catch (Exception e) {
-            log.error("Try to get external net failed: ", e);
-            throw e;
-        }
-
-        return externalNetId;
-    }
-
-    public String getExternalNetCidr() {
-        if (!StringUtils.isEmpty(externalNetCidr)) {
-            return externalNetCidr;
-        }
-
-        var netId = getExternalNetId();
-        if (StringUtils.isEmpty(netId)) {
-            return null;
-        }
-
-        try {
-            externalNetCidr = new Network().get(netId).getSubnet().getCidr();
-        } catch (Exception e) {
-            log.error("Try to get external net cidr failed: ", e);
-            throw e;
-        }
-
-        return externalNetCidr;
     }
 
     public String getMgmtNetId() {

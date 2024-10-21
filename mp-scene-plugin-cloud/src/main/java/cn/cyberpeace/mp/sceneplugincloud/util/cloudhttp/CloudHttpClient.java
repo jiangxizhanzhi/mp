@@ -107,6 +107,10 @@ public class CloudHttpClient {
         return response;
     }
 
+    public CloudHttpClient(String server) {
+        this(server, CloudSingleton.cloudAppConfig.getCpcloudServerTimeout(), CloudSingleton.cloudAppConfig.getCpcloudHttpPoolSize());
+    }
+
     public CloudHttpClient() {
         this(CloudSingleton.cloudAppConfig.getCpcloudServer(),
                 CloudSingleton.cloudAppConfig.getCpcloudServerTimeout(),

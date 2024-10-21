@@ -5,10 +5,18 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallUpdateData;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 public class VirtualFirewall extends CloudClient {
+
+    public VirtualFirewall() {
+    }
+
+    public VirtualFirewall(CloudHttpClient httpClient) {
+        super(httpClient);
+    }
 
     public VirtualFirewallCreateData create(VirtualFirewallCreateData createData) {
         heavyConcurrentWait();

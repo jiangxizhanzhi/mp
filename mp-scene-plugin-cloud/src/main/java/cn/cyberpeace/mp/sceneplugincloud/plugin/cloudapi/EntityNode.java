@@ -5,12 +5,20 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.List;
 
 public class EntityNode extends CloudClient {
+
+    public EntityNode() {
+    }
+
+    public EntityNode(CloudHttpClient httpClient) {
+        super(httpClient);
+    }
 
     /**
      * @description: 配置实装设备接口参数

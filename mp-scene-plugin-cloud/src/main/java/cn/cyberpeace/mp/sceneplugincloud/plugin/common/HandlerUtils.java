@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
 import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.ICloudResourceName;
 import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.RsourceNameParams;
 import lombok.Getter;
@@ -121,7 +122,7 @@ public class HandlerUtils {
         if (StringUtils.isEmpty(networkId)) {
             return false;
         }
-        return networkId.equals(CloudSingleton.cloudAppConfig.getExternalNetId());
+        return networkId.equals(MultiCloudConfig.getExternalNetId(MultiCloudConfig.DEFAULT));
     }
 
     public static String genResourceName(String name) {

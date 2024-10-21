@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ConfigHandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudSceneConfigPluginModelHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
 import cn.cyberpeace.mp.sceneplugincloud.validation.CloudScenePluginValidation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -165,7 +166,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                     String cidr;
                     var role = auxiliaryNetworkCloudElement.getRole();
                     if (role != null && role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)) {
-                        cidr = CloudSingleton.cloudAppConfig.getExternalNetCidr();
+                        cidr = MultiCloudConfig.getExternalNetCidr(MultiCloudConfig.DEFAULT);
                     } else {
                         cidr = auxiliaryNetworkCloudElement.getCidr();
                     }

@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamicDel
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsListParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsListResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsStatisticsResult;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
@@ -27,6 +28,13 @@ import java.util.List;
 
 @Slf4j
 public class VirtualDynamips extends CloudClient {
+
+    public VirtualDynamips() {
+    }
+
+    public VirtualDynamips(CloudHttpClient httpClient) {
+        super(httpClient);
+    }
 
     public VirtualDynamicCreateData create(VirtualDynamicCreateData createData) {
         heavyConcurrentWait();

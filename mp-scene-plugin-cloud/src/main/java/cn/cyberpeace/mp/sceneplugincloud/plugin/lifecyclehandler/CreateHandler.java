@@ -31,6 +31,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -42,16 +44,16 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CreateHandler extends HandlerCommon {
 
-    private final VirtualSwitch vsClient = new VirtualSwitch();
-    private final VirtualRouter vrClient = new VirtualRouter();
-    private final VirtualFirewall vfClient = new VirtualFirewall();
-    private final VirtualMachine vmClient = new VirtualMachine();
-    protected final VirtualPort vpClient = new VirtualPort();
-    private final Container containerClient = new Container();
-    private final EntityNode enClient = new EntityNode();
-    private final Npc npcClient = new Npc();
-    private final VmRouter vmRouter = new VmRouter();
-    private VirtualDynamips vdClient = new VirtualDynamips();
+    private VirtualSwitch vsClient ;
+    private VirtualRouter vrClient ;
+    private VirtualFirewall vfClient;
+    private VirtualMachine vmClient ;
+    protected VirtualPort vpClient ;
+    private Container containerClient ;
+    private EntityNode enClient ;
+    private Npc npcClient;
+    private VmRouter vmRouter;
+    private VirtualDynamips vdClient;
 
     private final Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
 
@@ -1263,7 +1265,24 @@ public class CreateHandler extends HandlerCommon {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.CREATE);
     }
 
+    private void init() {
+        if (vsClient == null) {
+            var pluginHandler = this.getPluginHandler();
+            this.vsClient = new VirtualSwitch(MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex()));
+            this.vrClient = new VirtualRouter(MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex()));
+            this.vfClient = new VirtualFirewall(MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex()));
+            this.vmClient = new VirtualMachine(MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex()));
+            this.containerClient = new Container(MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex()));
+            this.enClient = new EntityNode(MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex()));
+            this.npcClient = new Npc(MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex()));
+            this.vmRouter = new VmRouter(MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex()));
+            this.vdClient = new VirtualDynamips(MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex()));
+        }
+    }
+
     public void create() {
+        this.init();
+
         this.prepareEventProcess();
 
         // 先创建辅助网络(包含虚拟交换机)

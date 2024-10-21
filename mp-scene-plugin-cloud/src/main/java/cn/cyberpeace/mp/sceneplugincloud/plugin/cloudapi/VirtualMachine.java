@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
@@ -18,6 +19,13 @@ import java.util.Map;
 
 @Slf4j
 public class VirtualMachine extends CloudClient {
+
+    public VirtualMachine() {
+    }
+
+    public VirtualMachine(CloudHttpClient httpClient) {
+        super(httpClient);
+    }
 
     public VirtualMachineCreateData create(VirtualMachineCreateData createData) {
         heavyConcurrentWait();

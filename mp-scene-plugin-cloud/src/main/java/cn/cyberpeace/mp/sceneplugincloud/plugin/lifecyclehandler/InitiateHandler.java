@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CoreType;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.InitiateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -328,11 +329,11 @@ public class InitiateHandler extends HandlerCommon {
             cloudElement.setExternal(true);
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH);
             cloudElement.setAuxiliaryNetworkOn(true);
-            cloudElement.setAuxiliaryNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
+            cloudElement.setAuxiliaryNetworkId(MultiCloudConfig.getExternalNetId(MultiCloudConfig.DEFAULT));
 
             CloudPluginSceneElementNetworkBO network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
             network.setExternal(true);
-            network.setResourceId(CloudSingleton.cloudAppConfig.getExternalNetId());
+            network.setResourceId(MultiCloudConfig.getExternalNetId(MultiCloudConfig.DEFAULT));
             var connectNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
             var ports = Optional
                     .ofNullable(cloudElement.getSrcElement().getPorts())

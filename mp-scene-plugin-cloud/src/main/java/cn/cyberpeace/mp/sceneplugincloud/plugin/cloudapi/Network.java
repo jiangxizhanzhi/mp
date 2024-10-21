@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CommonQueryParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkQueryParam;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -13,6 +14,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.List;
 
 public class Network extends CloudClient {
+
+    public Network() {
+    }
+
+    public Network(CloudHttpClient httpClient) {
+        super(httpClient);
+    }
 
     public NetworkData get(String id) {
         var url = String.format(CloudUrlConstant.NETWORK_GET_URL, id);

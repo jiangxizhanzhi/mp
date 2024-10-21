@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSceneStage;
@@ -75,7 +76,7 @@ public class CreateHandler extends HandlerCommon {
         createData.setName(HandlerUtils.genResourceName(sceneId));
         List<VirtualNic> virtualNics = new ArrayList<>();
         var externalVirtualNic = new VirtualNic();
-        externalVirtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
+        externalVirtualNic.setNetworkId(MultiCloudConfig.getExternalNetId(MultiCloudConfig.DEFAULT));
         virtualNics.add(externalVirtualNic);
 
         CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()

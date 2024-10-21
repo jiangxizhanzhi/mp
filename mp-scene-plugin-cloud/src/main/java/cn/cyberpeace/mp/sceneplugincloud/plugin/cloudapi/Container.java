@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
@@ -23,6 +24,13 @@ import java.util.Optional;
 
 @Slf4j
 public class Container extends CloudClient {
+
+    public Container() {
+    }
+
+    public Container(CloudHttpClient httpClient) {
+        super(httpClient);
+    }
 
     public ContainerCreateData create(ContainerCreateData createData) {
         heavyConcurrentWait();

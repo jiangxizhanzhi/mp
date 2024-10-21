@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
@@ -133,7 +134,7 @@ public class InitiateHandler extends HandlerCommon {
         if (!probeCollectionElements.isEmpty()) {
             // 准备采集路由
             runSceneProgress(SceneProcess.INITIATE_PROBE_ROUTER, () -> {
-                final String externalNetCidr = CloudSingleton.cloudAppConfig.getExternalNetCidr();
+                final String externalNetCidr = MultiCloudConfig.getExternalNetCidr(MultiCloudConfig.DEFAULT);
                 if (StringUtils.isEmpty(externalNetCidr)) {
                     return;
                 }
