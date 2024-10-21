@@ -26,9 +26,11 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-/**
+ /**
  * @ClassName BaseCloudPluginSceneElementBO
  * @Description
  * @Author maojun
@@ -239,6 +241,18 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "宿主机名称")
     private String host;
 
+    @ApiModelProperty("是否支持qga")
+    private Boolean supportQga;
+
+    @ApiModelProperty("是否是操作机")
+    private Boolean operateMachine;
+
+    @ApiModelProperty("是否可以参训人员使用")
+    private Boolean canParticipantsUse;
+
+    @ApiModelProperty("扩展字段")
+    private Object ext;
+
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         //忽略直接赋值处理的字段，需要定制处理
@@ -287,6 +301,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
             : JsonCommon.parse(obj.getSnmpConfig(), new TypeReference<SnmpConfig>() {});
         mibData = StringUtils.isEmpty(obj.getMibData()) ? new ArrayList<>()
             : JsonCommon.parse(obj.getMibData(), new TypeReference<List<MibData>>() {});
+        ext = StringUtils.isEmpty(obj.getExt()) ? new HashMap<>()
+                : JsonCommon.parse(obj.getExt(), new TypeReference<Map>() {});
     }
 
     @Override
@@ -349,6 +365,9 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
         }
         if(mibData != null){
             obj.setMibData(JsonCommon.stringify(mibData));
+        }
+        if (ext != null) {
+            obj.setExt(JsonCommon.stringify(ext));
         }
         return obj;
     }
