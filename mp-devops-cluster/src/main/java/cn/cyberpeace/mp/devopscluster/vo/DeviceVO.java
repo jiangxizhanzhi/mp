@@ -199,6 +199,15 @@ public class DeviceVO implements Serializable {
     @ApiModelProperty("默认可运行的镜像名称")
     private String defaultLaunchImageName;
 
+    @ApiModelProperty("是否支持qga")
+    private Boolean supportQga;
+
+    @ApiModelProperty("是否是操作机")
+    private Boolean operateMachine;
+
+    @ApiModelProperty("是否可以参训人员使用")
+    private Boolean canParticipantsUse;
+
     public Boolean getIsBuildIn() {
         boolean tmpImport = !Objects.isNull(isImport) && isImport;
         boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;
