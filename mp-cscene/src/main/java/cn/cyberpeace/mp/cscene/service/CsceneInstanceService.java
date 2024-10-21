@@ -34,8 +34,13 @@ import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
+import cn.cyberpeace.mp.cscene.controller.request.ConnectSceneNode;
+import cn.cyberpeace.mp.cscene.controller.request.ConnectSceneNodeResult;
+import cn.cyberpeace.mp.cscene.controller.request.CreateNode;
+import cn.cyberpeace.mp.cscene.controller.request.CreateNodePort;
+import cn.cyberpeace.mp.cscene.controller.request.CreateNodePortAccessMode;
+import cn.cyberpeace.mp.cscene.controller.request.DisConnectSceneNode;
 import cn.cyberpeace.mp.cscene.core.BcSceneInstanceHandler;
-import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
@@ -61,11 +66,17 @@ import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneBusinessElementModel;
+import cn.cyberpeace.mp.scene.model.SceneBusinessElementPortModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
+import cn.cyberpeace.mp.scene.model.SceneExternalInstanceNetworkModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneBusinessElementMapper;
+import cn.cyberpeace.mp.scene.repository.SceneBusinessElementPortMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.scene.repository.SceneExternalInstanceNetworkMapper;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
@@ -76,8 +87,10 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginContext;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Mirror;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CreateMirrorData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetConnectionUrlParam;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneMapper;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneOptionKeyModel;
@@ -113,6 +126,7 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.SystemUser;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.cache.Cache;
 import com.google.common.collect.Lists;
 import lombok.Data;
@@ -122,6 +136,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -932,18 +947,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 existUserIds.add(userNodeSessionInfo.getUser());
             }
         }
-        if (!existUserIds.isEmpty()) {
-            List<UserBo> users = userService.listByUserIds(existUserIds.toArray(new String[]{}));
-            if (CollectionUtils.isNotEmpty(users)) {
-                Map<String, String> userId2Name = new HashMap<>();
-                for (UserBo user : users) {
-                    userId2Name.put(user.getId(), user.getName());
-                }
-                for (UserNodeSessionInfo nodeSession : result) {
-                    nodeSession.setUserName(userId2Name.containsKey(nodeSession.getUser()) ? userId2Name.get(nodeSession.getUser()) : StringUtils.EMPTY);
-                }
-            }
-        }
         return new ServiceResult<>(result);
     }
 
@@ -979,15 +982,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             }
             nodeRecording.setSceneId(csceneInstance.getId());
 
-            if (StringUtils.isNotEmpty(nodeRecording.getUser())) {
-                log.info("recording user id is :{}", nodeRecording.getUser());
-                var user = UserUtils.getUser(nodeRecording.getUser());
-                if (user != null) {
-                    nodeRecording.setUsername(user.getUsername());
-                } else {
-                    nodeRecording.setUsername("");
-                }
-            }
         }
         return nodeRecordingResult;
     }
@@ -2660,24 +2654,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             for (CloudPluginSceneConnectionModel cloudPluginSceneConnectionModel : connections) {
                 String user = cloudPluginSceneConnectionModel.getAccessUser();
                 userIds.add(user);
-            }
-            Map<String, UserModel> userId2User = new HashMap<>();
-            for (UserModel model : UserCommon.getUsers(new ArrayList<>(userIds))) {
-                if (userId2User.put(model.getId(), model) != null) {
-                    throw new IllegalStateException("Duplicate key");
-                }
-            }
-            Set<CloudPluginSceneConnectionModel> uniqueValues = new HashSet<>();
-            for (CloudPluginSceneConnectionModel connection : connections) {
-                if (uniqueValues.add(connection)) {
-                    UserModel userModel = userId2User.get(connection.getAccessUser());
-                    if (userModel != null) {
-                        AccessUserBO accessUser = new AccessUserBO();
-                        accessUser.setId(userModel.getId());
-                        accessUser.setName(userModel.getName());
-                        accessUsers.add(accessUser);
-                    }
-                }
             }
         }
         CollectedCsceneElementCommonBO<List<AccessUserBO>> csceneElementCommon = new CollectedCsceneElementCommonBO<>();
