@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.scene.core.plugin.model.BasePluginSceneElementModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
@@ -155,6 +156,17 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private Boolean quickCreateSupport;
     @DefaultStr
     private String quickCreateParams;
+    @DefaultBool
+    private Boolean supportQga;
+
+    @DefaultBool
+    private Boolean operateMachine;
+
+    @DefaultBool
+    private Boolean canParticipantsUse;
+
+    @DefaultStr
+    private String ext;
 
     // 宿主机信息
     @DefaultStr
