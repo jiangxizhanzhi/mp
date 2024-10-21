@@ -169,6 +169,9 @@ public class ImagesByIdVO extends BaseVO {
     @ApiModelProperty("是否可以参训人员使用")
     private Boolean canParticipantsUse;
 
+    @ApiModelProperty("是否支持数据采集")
+    private Boolean supportCollect;
+
     @ApiModelProperty("扩展字段")
     private Object ext;
 }

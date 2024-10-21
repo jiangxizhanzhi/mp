@@ -208,6 +208,9 @@ public class DeviceVO implements Serializable {
     @ApiModelProperty("是否可以参训人员使用")
     private Boolean canParticipantsUse;
 
+    @ApiModelProperty("是否支持数据采集")
+    private Boolean supportCollect;
+
     public Boolean getIsBuildIn() {
         boolean tmpImport = !Objects.isNull(isImport) && isImport;
         boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;

@@ -165,6 +165,9 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultBool
     private Boolean canParticipantsUse;
 
+    @DefaultBool
+    private Boolean supportCollect;
+
     @DefaultStr
     private String ext;
 
