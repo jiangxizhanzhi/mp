@@ -37,6 +37,8 @@ import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.controller.request.CreateNode;
 import cn.cyberpeace.mp.cscene.controller.request.CreateNodePort;
 import cn.cyberpeace.mp.cscene.controller.request.CreateNodePortAccessMode;
+import cn.cyberpeace.mp.cscene.controller.request.DeleteNodeCommand;
+import cn.cyberpeace.mp.cscene.controller.request.UpdateNodeCommand;
 import cn.cyberpeace.mp.cscene.core.BcSceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
@@ -63,12 +65,14 @@ import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneBusinessElementCommandModel;
 import cn.cyberpeace.mp.scene.model.SceneBusinessElementModel;
 import cn.cyberpeace.mp.scene.model.SceneBusinessElementPortModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneBusinessElementCommandMapper;
 import cn.cyberpeace.mp.scene.repository.SceneBusinessElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneBusinessElementPortMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
@@ -225,6 +229,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
      @Resource
     private SceneBusinessElementPortMapper sceneBusinessElementPortMapper ;
+
+     @Resource
+     private SceneBusinessElementCommandMapper sceneBusinessElementCommandMapper;
 
      // expires in 10 minutes
     private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -2755,4 +2762,27 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
          node.setPorts(ports);
          return node;
      }
+
+     public void updateSceneElementCommand(UpdateNodeCommand command){
+         SceneBusinessElementCommandModel model = new SceneBusinessElementCommandModel();
+         model.setScene(command.getSceneId());
+         model.setCommand(command.getCommand());
+         model.setFile(command.getFile());
+         model.setNodeId(command.getNodeId());
+         model.setBusinessKey(command.getBusinessKey());
+         sceneBusinessElementCommandMapper.save(model);
+     }
+
+     public void deleteSceneElementCommand(DeleteNodeCommand command) {
+         SceneBusinessElementCommandModel model = new SceneBusinessElementCommandModel();
+         model.setScene(command.getSceneId());
+         model.setNodeId(command.getNodeId());
+         model.setBusinessKey(command.getBusinessKey());
+         HumanCondition condition = new HumanCondition()
+                 .filterEqual(SceneBusinessElementCommandModel::getScene, model.getScene())
+                 .filterEqual(SceneBusinessElementCommandModel::getNodeId, model.getNodeId())
+                 .filterEqual(SceneBusinessElementCommandModel::getBusinessKey, model.getBusinessKey());
+         sceneBusinessElementCommandMapper.filterDelete(condition);
+     }
+
 }
