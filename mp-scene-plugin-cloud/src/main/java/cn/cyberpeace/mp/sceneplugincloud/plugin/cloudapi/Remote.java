@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,10 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class Remote extends CloudClient {
+
+    public Remote(CloudHttpClient httpClient) {
+        super(httpClient);
+    }
 
     public GuacamoleCreateConnectionResult createConnection(GuacamoleCreateConnectionData createConnectionData) {
         GuacamoleCreateConnectionResult result = getHttpClient().post(CloudUrlConstant.CREATE_CONNECTION_URL,

@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.devopscluster.vo.InstancePageVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -62,7 +63,7 @@ public class VmController {
         if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        VirtualMachine virtualMachine = new VirtualMachine();
+        VirtualMachine virtualMachine = new VirtualMachine(MultiCloudConfig.get(MultiCloudConfig.DEFAULT));
         return new ServiceResult<>(virtualMachine.restart(request.getId())).asResult();
     }
 
@@ -77,7 +78,7 @@ public class VmController {
         if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        VirtualMachine virtualMachine = new VirtualMachine();
+        VirtualMachine virtualMachine = new VirtualMachine(MultiCloudConfig.get(MultiCloudConfig.DEFAULT));
         return new ServiceResult<>(virtualMachine.pause(request.getId())).asResult();
     }
 
@@ -92,7 +93,7 @@ public class VmController {
         if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        VirtualMachine virtualMachine = new VirtualMachine();
+        VirtualMachine virtualMachine = new VirtualMachine(MultiCloudConfig.get(MultiCloudConfig.DEFAULT));
         return new ServiceResult<>(virtualMachine.unpause(request.getId())).asResult();
     }
 
@@ -107,7 +108,7 @@ public class VmController {
         if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        VirtualMachine virtualMachine = new VirtualMachine();
+        VirtualMachine virtualMachine = new VirtualMachine(MultiCloudConfig.get(MultiCloudConfig.DEFAULT));
         return new ServiceResult<>(virtualMachine.start(request.getId())).asResult();
     }
 
@@ -122,7 +123,7 @@ public class VmController {
         if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        VirtualMachine virtualMachine = new VirtualMachine();
+        VirtualMachine virtualMachine = new VirtualMachine(MultiCloudConfig.get(MultiCloudConfig.DEFAULT));
         return new ServiceResult<>(virtualMachine.stop(request.getId())).asResult();
     }
 

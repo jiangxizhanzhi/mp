@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.base.SnmpConfig;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.EntityNode;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -49,7 +50,7 @@ public class ProtocolCollectionService {
      * @return ServiceResult
      */
     public ServiceResult<List<MibFileInfo>> importMibFile(MultipartFile multipartFile) {
-        EntityNode entityNode = new EntityNode();
+        EntityNode entityNode = new EntityNode(MultiCloudConfig.get(MultiCloudConfig.DEFAULT));
         String fileName = multipartFile.getOriginalFilename();
         //mib文件临时路径
         String mibFilePath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, baseAppConfig.getResourcesDir(), "mibfile/",fileName);
@@ -146,7 +147,7 @@ public class ProtocolCollectionService {
      * @return ServiceResult
      */
     public ServiceResult queryMibOidInfo(MibInfoQueryRequest mibInfoQueryRequest){
-        EntityNode entityNode = new EntityNode();
+        EntityNode entityNode = new EntityNode(MultiCloudConfig.get(MultiCloudConfig.DEFAULT));
         //请求参数构建（oid必传）
         var paramBuilder = MibNodeQueryParam.builder().oid(mibInfoQueryRequest.getOid());
         //综合场景id获取场景id

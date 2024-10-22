@@ -27,6 +27,8 @@ public class NodeLinkStatusBO {
     @ApiModelProperty("连线状态列表")
     private List<ConnectionStatus> connectionStatusList;
 
+    private String cloudIndex;
+
     public NodeLinkStatusBO(String nodeId) {
         this.nodeId = nodeId;
         this.connectionStatusList = new ArrayList<>();

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincloud.util;
 
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -16,31 +17,31 @@ import java.util.List;
  * @Date 2022/7/21
  */
 public class ForceReleaseResourceUtils {
-    public static void forceDeleteVm(List<String> resourceIds) {
+    public static void forceDeleteVm(CloudHttpClient httpClient , List<String> resourceIds) {
         VmParam param = new VmParam();
         param.setInstanceIds(resourceIds);
-        new Remote().cloudDelete(CloudUrlConstant.FORCE_DELETE_VM, param, null, new TypeReference<CloudResponse<Object>>() {
+        new Remote(httpClient).cloudDelete(CloudUrlConstant.FORCE_DELETE_VM, param, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
     }
 
-    public static void forceDeleteContainer(List<String> resourceIds) {
+    public static void forceDeleteContainer(CloudHttpClient httpClient , List<String> resourceIds) {
         ContainerParam param = new ContainerParam();
         param.setContainerIds(resourceIds);
-        new Remote().cloudDelete(CloudUrlConstant.FORCE_DELETE_CONTAINER, param, null, new TypeReference<CloudResponse<Object>>() {
+        new Remote(httpClient).cloudDelete(CloudUrlConstant.FORCE_DELETE_CONTAINER, param, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
     }
 
-    public static void forceDeleteNetwork(List<String> resourceIds) {
+    public static void forceDeleteNetwork(CloudHttpClient httpClient , List<String> resourceIds) {
         NetworkParam param = new NetworkParam();
         param.setNetworkIds(resourceIds);
-        new Remote().cloudDelete(CloudUrlConstant.FORCE_DELETE_NETWORK, param, null, new TypeReference<CloudResponse<Object>>() {
+        new Remote(httpClient).cloudDelete(CloudUrlConstant.FORCE_DELETE_NETWORK, param, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
     }
 
-    public static void forceDeleteRouter(List<String> resourceIds) {
+    public static void forceDeleteRouter(CloudHttpClient httpClient , List<String> resourceIds) {
         RouterParam param = new RouterParam();
         param.setRouterIds(resourceIds);
-        new Remote().cloudDelete(CloudUrlConstant.FORCE_DELETE_ROUTER, param, null, new TypeReference<CloudResponse<Object>>() {
+        new Remote(httpClient).cloudDelete(CloudUrlConstant.FORCE_DELETE_ROUTER, param, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
     }
 

@@ -9,7 +9,10 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualPort;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.PauseTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
@@ -23,9 +26,9 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class PauseHandler extends HandlerCommon {
-    private final VirtualMachine virtualMachine = new VirtualMachine();
-    private final Container container = new Container();
-    private final VirtualDynamips virtualDynamips = new VirtualDynamips();
+    private VirtualMachine virtualMachine ;
+    private Container container ;
+    private VirtualDynamips virtualDynamips ;
 
     public static class SceneProcess {
         public static final EventProcess PAUSE_TERMINALS = new EventProcess("pause_terminals", "sceneplugincloud.event.pause_terminals");
@@ -40,6 +43,17 @@ public class PauseHandler extends HandlerCommon {
 
     public PauseHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, PauseTaskPool.getInstance(), event);
+        this.initCloudHttpClient();
+    }
+
+    public void initCloudHttpClient() {
+        if (this.virtualMachine == null) {
+            String cloudIndex = getPluginHandler().getScene().getCloudIndex();
+            CloudHttpClient httpClient = MultiCloudConfig.get(cloudIndex);
+            this.virtualMachine = new VirtualMachine(httpClient);
+            this.container = new Container(httpClient);
+            this.virtualDynamips = new VirtualDynamips(httpClient);
+        }
     }
 
     public void pause() {

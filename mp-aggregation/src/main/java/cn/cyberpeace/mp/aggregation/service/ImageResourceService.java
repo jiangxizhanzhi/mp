@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpParam;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -86,7 +87,7 @@ public class ImageResourceService {
         ExportImageParams params = new ExportImageParams();
         params.setImageName(imageName);
         params.setDestPath(imagePath);
-        var result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Map>>() {
+        var result = new Remote(MultiCloudConfig.get(MultiCloudConfig.DEFAULT)).cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Map>>() {
         }, true);
         var imageMap = result.getData();
         if (imageMap.containsKey("Cloud-init")) {

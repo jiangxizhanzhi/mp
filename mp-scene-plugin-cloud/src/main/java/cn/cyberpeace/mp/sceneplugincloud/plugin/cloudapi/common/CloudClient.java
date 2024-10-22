@@ -22,11 +22,11 @@ public abstract class CloudClient {
 
     private static final Object syncObj = new Object();
 
-    public CloudClient(CloudHttpClient httpClient) {
-        this.httpClient = httpClient;
+    public CloudClient() {
     }
 
-    public CloudClient() {
+    public CloudClient(CloudHttpClient httpClient) {
+        this.httpClient = httpClient;
     }
 
     private <T> CloudResponse<T> checkResponse(CloudResponse<T> response, boolean throwException) {

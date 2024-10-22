@@ -34,6 +34,8 @@ public abstract class AbstractClearJob<Q> {
         this.sceneElementMapper = sceneElementMapper;
     }
 
+    public abstract void batchAction();
+
     public void action() {
         for (Integer offset = OFFSET; ; offset++) {
             List<Q> nodes = this.doQuery(offset);

@@ -19,7 +19,9 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.Delete
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,15 +36,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DeleteHandler extends HandlerCommon {
 
-    private final VirtualSwitch vsClient = CloudApiProxyBuilder.build(new VirtualSwitch(), VirtualSwitch.class);
-    private final VirtualRouter vrClient = CloudApiProxyBuilder.build(new VirtualRouter(), VirtualRouter.class);
-    private final VirtualFirewall vfClient = CloudApiProxyBuilder.build(new VirtualFirewall(), VirtualFirewall.class);
-    private final VirtualMachine vmClient = CloudApiProxyBuilder.build(new VirtualMachine(), VirtualMachine.class);
-    protected final VirtualPort vpClient = CloudApiProxyBuilder.build(new VirtualPort(), VirtualPort.class);
-    protected final Container containerClient = CloudApiProxyBuilder.build(new Container(), Container.class);
-    private final EntityNode enClient = new EntityNode();
-    private final Npc npcClient = CloudApiProxyBuilder.build(new Npc(), Npc.class);
-    private final VirtualDynamips virtualDynamips = CloudApiProxyBuilder.build(new VirtualDynamips(), VirtualDynamips.class);
+    private VirtualSwitch vsClient ;
+    private VirtualRouter vrClient ;
+    private VirtualFirewall vfClient ;
+    private  VirtualMachine vmClient ;
+    protected  VirtualPort vpClient ;
+    protected  Container containerClient ;
+    private  EntityNode enClient ;
+    private  Npc npcClient ;
+    private  VirtualDynamips virtualDynamips ;
 
     private final Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
     private final Set<String> dynamipsIds = new ConcurrentHashSet<>();
@@ -302,6 +304,23 @@ public class DeleteHandler extends HandlerCommon {
 
     public DeleteHandler(CloudScenePluginHandler pluginHandler) {
         super(pluginHandler, DeleteTaskPool.getInstance(), SceneModel.Event.DELETE);
+        this.initCloudHttpClient();
+    }
+
+    private void initCloudHttpClient() {
+        if (this.vsClient == null) {
+            String cloudIndex = getPluginHandler().getScene().getCloudIndex();
+            CloudHttpClient httpClient = MultiCloudConfig.get(cloudIndex);
+            this.vsClient = CloudApiProxyBuilder.build(new VirtualSwitch(httpClient), VirtualSwitch.class);
+            this.vrClient = CloudApiProxyBuilder.build(new VirtualRouter(httpClient), VirtualRouter.class);
+            this.vfClient = CloudApiProxyBuilder.build(new VirtualFirewall(httpClient), VirtualFirewall.class);
+            this.vmClient = CloudApiProxyBuilder.build(new VirtualMachine(httpClient), VirtualMachine.class);
+            this.vpClient = CloudApiProxyBuilder.build(new VirtualPort(httpClient), VirtualPort.class);
+            this.containerClient = CloudApiProxyBuilder.build(new Container(httpClient), Container.class);
+            this.enClient = new EntityNode(httpClient);
+            this.npcClient = CloudApiProxyBuilder.build(new Npc(httpClient), Npc.class);
+            this.virtualDynamips = CloudApiProxyBuilder.build(new VirtualDynamips(httpClient), VirtualDynamips.class);
+        }
     }
 
     protected void syncFlowPortInfo() {

@@ -10,6 +10,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAttachISOData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RestartTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -22,9 +24,9 @@ import java.util.Arrays;
  */
 @Slf4j
 public class RestartHandler extends HandlerCommon {
-    private final VirtualMachine virtualMachine = new VirtualMachine();
-    private final Container container = new Container();
-    private final VirtualDynamips virtualDynamips = new VirtualDynamips();
+    private VirtualMachine virtualMachine ;
+    private Container container ;
+    private VirtualDynamips virtualDynamips ;
 
     public static class ElementProcess {
         public static final EventProcess RESTART_VIRTUAL_MACHINE = new EventProcess("restart_virtual_machine", "sceneplugincloud.event.restart_virtual_machine");
@@ -34,6 +36,15 @@ public class RestartHandler extends HandlerCommon {
 
     public RestartHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, RestartTaskPool.getInstance(), event);
+        this.initCloudHttpClient();
+    }
+
+    private void initCloudHttpClient(){
+        String cloudIndex = getPluginHandler().getScene().getCloudIndex();
+        CloudHttpClient httpClient = MultiCloudConfig.get(cloudIndex);
+        this.virtualMachine = new VirtualMachine(httpClient);
+        this.container = new Container(httpClient);
+        this.virtualDynamips = new VirtualDynamips(httpClient);
     }
 
     public void restartElement(CloudPluginSceneElementBO element) {

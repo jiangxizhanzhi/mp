@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
@@ -20,12 +21,15 @@ import cn.cyberpeace.mp.base.util.mptool.URLUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerFileGetData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneMapper;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
 import cn.cyberpeace.mp.sceneplugincollection.bo.*;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
@@ -1766,7 +1770,10 @@ public class ScenePluginCollectionSceneService {
             return new ServiceResult<>(StringUtils.EMPTY);
         }
         String containName = flowCollectors.get(0);
-        var result = this.exportFlowPcap(sceneId, containName, taskId);
+        CloudPluginSceneMapper cloudPluginSceneMapper = BeanCommon.getBean(CloudPluginSceneMapper.class);
+        var cloudModel = cloudPluginSceneMapper.first(new HumanCondition().filterEqual(CloudPluginSceneModel::getScene, sceneId));
+        String cloudIndex = cloudModel.getCloudIndex();
+        var result = this.exportFlowPcap(sceneId, containName, taskId, cloudIndex);
         return result;
     }
 
@@ -1785,9 +1792,9 @@ public class ScenePluginCollectionSceneService {
         }
     }
 
-    public ServiceResult<String> exportFlowPcap(String sceneId, String containName, String taskId) {
+    public ServiceResult<String> exportFlowPcap(String sceneId, String containName, String taskId,String cloudIndex) {
         // containerName -> containerId
-        Container container = new Container();
+        Container container = new Container(MultiCloudConfig.get(cloudIndex));
         var containerResult = container.getContainerByName(containName);
         if (containerResult == null) {
             log.error("find no containerId by containName {}", containName);

@@ -563,7 +563,8 @@ public class CsceneFlowService {
         });
         if (CollectionUtils.isNotEmpty(portIds) && totalSecond > 0) {
             List<String> newPortIds = portIds.stream().distinct().collect(Collectors.toList());
-            NetworkFlowRateResult networkFlowRateResult = scenePluginCloudSceneService.networkFlowRate(newPortIds, totalSecond);
+            String cloudIndex = cloudPluginHandler.getScene().getCloudIndex();
+            NetworkFlowRateResult networkFlowRateResult = scenePluginCloudSceneService.networkFlowRate(newPortIds, totalSecond, cloudIndex);
             if (networkFlowRateResult != null && networkFlowRateResult.getTimeInt() != null && CollectionUtils.isNotEmpty(networkFlowRateResult.getSumRateList())) {
                 Integer offsetValue = 0 - (networkFlowRateResult.getSumRateList().size() - 1) * networkFlowRateResult.getTimeInt();
                 for (Long value : networkFlowRateResult.getSumRateList()) {

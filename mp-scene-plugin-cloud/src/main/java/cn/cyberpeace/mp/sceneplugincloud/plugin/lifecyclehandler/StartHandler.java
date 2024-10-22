@@ -6,12 +6,15 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.AttachEntityUsbsData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.AttachVirtualUsbsData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAttachISOData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.StartTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -30,10 +33,10 @@ import java.util.stream.Collectors;
 public class StartHandler extends HandlerCommon{
 
     //虚拟机云平台工具类
-    private final VirtualMachine virtualMachine = new VirtualMachine();
+    private VirtualMachine virtualMachine ;
     //容器云平台工具类
-    private final Container container = new Container();
-    private final VirtualDynamips virtualDynamips = new VirtualDynamips();
+    private Container container ;
+    private VirtualDynamips virtualDynamips ;
 
 
     //节点处理过程
@@ -49,6 +52,15 @@ public class StartHandler extends HandlerCommon{
 
     public StartHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, StartTaskPool.getInstance(), event);
+        this.initCloudHttpClient();
+    }
+
+    private void initCloudHttpClient(){
+        String cloudIndex = getPluginHandler().getScene().getCloudIndex();
+        CloudHttpClient httpClient = MultiCloudConfig.get(cloudIndex);
+        this.virtualMachine = new VirtualMachine(httpClient);
+        this.container = new Container(httpClient);
+        this.virtualDynamips = new VirtualDynamips(httpClient);
     }
 
 

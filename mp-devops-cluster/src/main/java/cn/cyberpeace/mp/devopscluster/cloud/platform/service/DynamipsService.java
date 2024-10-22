@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.DynamicImageInfo;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +24,8 @@ public class DynamipsService {
 
     private VirtualDynamips virtualDynamips;
 
-    public DynamipsService(@Autowired CloudSingleton cloudSingleton) {
-        virtualDynamips = new VirtualDynamips();
+    public DynamipsService(@Autowired CloudSingleton cloudSingleton, @Autowired MultiCloudConfig config) {
+        virtualDynamips = new VirtualDynamips(MultiCloudConfig.get(MultiCloudConfig.DEFAULT));
     }
 
     public Map<String, Object> getTypeInfo() {

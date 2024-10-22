@@ -57,7 +57,7 @@ public class VirtualSwitch extends CloudClient {
     }
 
     public boolean forceDelete(VirtualSwitchDeleteData deleteData) {
-        ForceReleaseResourceUtils.forceDeleteNetwork(deleteData.getIds());
+        ForceReleaseResourceUtils.forceDeleteNetwork(this.getHttpClient(), deleteData.getIds());
         return true;
     }
 

@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualPortCreate
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualPortCreateResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualPortUpdateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualPortUpdateResult;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,13 @@ import java.util.List;
 
 @Slf4j
 public class VirtualPort extends CloudClient {
+
+    public VirtualPort() {
+    }
+
+    public VirtualPort(CloudHttpClient httpClient) {
+        super(httpClient);
+    }
 
     public VirtualPortCreateResult create(VirtualPortCreateData createData) {
         heavyConcurrentWait();
@@ -67,9 +75,9 @@ public class VirtualPort extends CloudClient {
         log.info("VirtualPort.syncFlowPortInfo begin. portIds:{}, syncType:{}", portIds, syncType);
         boolean result = true;
         if ("add".equals(syncType)) {
-            result = new Remote().addFlowPorts(portIds);
+            result = new Remote(this.getHttpClient()).addFlowPorts(portIds);
         } else if ("delete".equals(syncType)) {
-            result = new Remote().deleteFlowPorts(portIds);
+            result = new Remote(this.getHttpClient()).deleteFlowPorts(portIds);
         }
         log.info("VirtualPort.syncFlowPortInfo end. result:{}", result);
         return result;

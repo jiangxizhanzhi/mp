@@ -9,9 +9,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 public class VirtualInternet extends CloudClient {
 
-    public VirtualInternet() {
-    }
-
     public VirtualInternet(CloudHttpClient httpClient) {
         super(httpClient);
     }

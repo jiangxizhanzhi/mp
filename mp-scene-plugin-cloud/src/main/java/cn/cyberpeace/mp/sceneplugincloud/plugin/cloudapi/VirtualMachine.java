@@ -56,7 +56,7 @@ public class VirtualMachine extends CloudClient {
     }
 
     public boolean forceDelete(VirtualMachineDeleteData deleteData) {
-        ForceReleaseResourceUtils.forceDeleteVm(deleteData.getVms());
+        ForceReleaseResourceUtils.forceDeleteVm(this.getHttpClient(), deleteData.getVms());
         return true;
     }
 

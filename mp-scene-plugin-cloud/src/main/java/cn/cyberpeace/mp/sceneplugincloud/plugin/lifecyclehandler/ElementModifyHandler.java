@@ -52,6 +52,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.VyosNetworkCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
@@ -81,13 +83,14 @@ public class ElementModifyHandler extends HandlerCommon {
     private CloudScenePluginHandler newCloudScenePluginHandler;
     private CloudScenePluginHandler originCloudScenePluginHandler;
 
-    private VirtualMachine virtualMachine = new VirtualMachine();
-    private Container container = new Container();
-    private VirtualSwitch virtualSwitch = new VirtualSwitch();
-    private VirtualRouter virtualRouter = new VirtualRouter();
-    private VirtualFirewall virtualFirewall = new VirtualFirewall();
-    private VirtualPort virtualPort = new VirtualPort();
-    private VmRouter vmRouter = new VmRouter();
+    private VirtualMachine virtualMachine ;
+    private Container container ;
+    private VirtualSwitch virtualSwitch;
+    private VirtualRouter virtualRouter;
+    private VirtualFirewall virtualFirewall;
+    private VirtualPort virtualPort  ;
+    private VmRouter vmRouter  ;
+    private Remote remote ;
 
     private static final String TCP = "tcp";
 
@@ -95,6 +98,17 @@ public class ElementModifyHandler extends HandlerCommon {
         super(newHandler, RecreateTaskPool.getInstance(), event);
         this.newCloudScenePluginHandler = newHandler;
         this.originCloudScenePluginHandler = originHandler;
+
+        String cloudIndex = originHandler.getScene().getCloudIndex();
+        CloudHttpClient httpClient = MultiCloudConfig.get(cloudIndex);
+        this.virtualMachine = new VirtualMachine(httpClient);
+        this.container = new Container(httpClient);
+        this.virtualSwitch = new VirtualSwitch(httpClient);
+        this.virtualRouter = new VirtualRouter(httpClient);
+        this.virtualFirewall = new VirtualFirewall(httpClient);
+        this.virtualPort = new VirtualPort(httpClient);
+        this.vmRouter = new VmRouter(httpClient);
+        this.remote = new Remote(httpClient);
     }
 
     public void modifyElement(String nodeId) {
@@ -412,7 +426,7 @@ public class ElementModifyHandler extends HandlerCommon {
         createFlavorData.setCpu(newCloudElement.getSrcElement().getCpu());
         createFlavorData.setRam(newCloudElement.getSrcElement().getRam());
         createFlavorData.setDisk(newCloudElement.getSrcElement().getDisk());
-        var result = new Remote().cloudPost(CloudUrlConstant.CREATE_FLAVOR, createFlavorData, null, new TypeReference<CloudResponse<CreateFlavorResult>>() {
+        var result = this.remote.cloudPost(CloudUrlConstant.CREATE_FLAVOR, createFlavorData, null, new TypeReference<CloudResponse<CreateFlavorResult>>() {
         }, true);
         return result.getData().getId();
     }
@@ -929,7 +943,7 @@ public class ElementModifyHandler extends HandlerCommon {
                 } catch (InterruptedException e) {
                     // do nothing
                 }
-                var linkStatus = new Remote().cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
+                var linkStatus = this.remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
                 }, true);
                 if (linkStatus.isSuccess() && Boolean.TRUE.equals(linkStatus.getData().getInstanceLinkStatus())) {
                     break;

@@ -362,7 +362,8 @@ public class CreateHandler extends HandlerCommon {
         // 添加管理网卡
         if (Boolean.TRUE.equals(cloudElement.getEnableMgmt())) {
             var virtualNic = new VirtualNic();
-            virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getMgmtNetId());
+            String cloudIndex = getPluginHandler().getScene().getCloudIndex();
+            virtualNic.setNetworkId(MultiCloudConfig.getMgmtNetId(cloudIndex));
             virtualNics.add(virtualNic);
         }
         //所有网络，包含生成的网络和连接的网络
@@ -1263,25 +1264,26 @@ public class CreateHandler extends HandlerCommon {
 
     public CreateHandler(CloudScenePluginHandler pluginHandler) {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.CREATE);
+        this.initCloudHttpClient();
     }
 
-    private void init() {
+    private void initCloudHttpClient() {
         if (vsClient == null) {
-            var pluginHandler = this.getPluginHandler();
-            this.vsClient = new VirtualSwitch(MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex()));
-            this.vrClient = new VirtualRouter(MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex()));
-            this.vfClient = new VirtualFirewall(MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex()));
-            this.vmClient = new VirtualMachine(MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex()));
-            this.containerClient = new Container(MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex()));
-            this.enClient = new EntityNode(MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex()));
-            this.npcClient = new Npc(MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex()));
-            this.vmRouter = new VmRouter(MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex()));
-            this.vdClient = new VirtualDynamips(MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex()));
+            String cloudIndex = getPluginHandler().getScene().getCloudIndex();
+            CloudHttpClient httpClient = MultiCloudConfig.get(cloudIndex);
+            this.vsClient = new VirtualSwitch(httpClient);
+            this.vrClient = new VirtualRouter(httpClient);
+            this.vfClient = new VirtualFirewall(httpClient);
+            this.vmClient = new VirtualMachine(httpClient);
+            this.containerClient = new Container(httpClient);
+            this.enClient = new EntityNode(httpClient);
+            this.npcClient = new Npc(httpClient);
+            this.vmRouter = new VmRouter(httpClient);
+            this.vdClient = new VirtualDynamips(httpClient);
         }
     }
 
     public void create() {
-        this.init();
 
         this.prepareEventProcess();
 

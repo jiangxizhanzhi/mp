@@ -9,6 +9,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.CloudApiProxyBuilder;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
@@ -59,7 +61,10 @@ public class DeleteHandler extends HandlerCommon {
     }
 
     protected boolean deleteProbeRouter(String probeRouterId) {
-        var vrClient = CloudApiProxyBuilder.build(new VirtualRouter(), VirtualRouter.class);
+        CloudScenePluginHandler pluginHandler = getPluginHandler().getSceneHandler().getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        String cloudIndex = pluginHandler.getScene().getCloudIndex();
+        CloudHttpClient cloudHttpClient = MultiCloudConfig.get(cloudIndex);
+        var vrClient = CloudApiProxyBuilder.build(new VirtualRouter(cloudHttpClient), VirtualRouter.class);
         var deleteData = new VirtualRouterDeleteData();
         deleteData.setIds(List.of(probeRouterId));
         return vrClient.delete(deleteData);

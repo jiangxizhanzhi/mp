@@ -37,7 +37,7 @@ public class ClearService {
         }};
         for (AbstractClearJob job : jobs) {
             try {
-                job.action();
+                job.batchAction();
             } catch (Exception e) {
                 log.error("faild to execute clear job {} ", job.getClass().getName(), e);
             }

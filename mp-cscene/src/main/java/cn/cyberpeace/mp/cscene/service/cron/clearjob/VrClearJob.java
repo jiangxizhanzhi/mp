@@ -1,9 +1,12 @@
 package cn.cyberpeace.mp.cscene.service.cron.clearjob;
 
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Npc;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterGetData;
 import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -18,10 +21,18 @@ import java.util.Map;
  */
 public class VrClearJob extends AbstractClearJob<VirtualRouterGetData> {
 
-    private VirtualRouter vrClient = new VirtualRouter();
+    private VirtualRouter vrClient;
 
     public VrClearJob(SceneElementMapper sceneElementMapper) {
         super(sceneElementMapper);
+    }
+
+    @Override
+    public void batchAction() {
+        for (CloudHttpClient httpClient : MultiCloudConfig.getAll()) {
+            vrClient = new VirtualRouter(httpClient);
+            super.action();
+        }
     }
 
     @Override
@@ -50,6 +61,6 @@ public class VrClearJob extends AbstractClearJob<VirtualRouterGetData> {
 
     @Override
     protected void forceClear(VirtualRouterGetData data) {
-        ForceReleaseResourceUtils.forceDeleteRouter(Arrays.asList(data.getId()));
+        ForceReleaseResourceUtils.forceDeleteRouter(this.vrClient.getHttpClient(), Arrays.asList(data.getId()));
     }
 }

@@ -64,7 +64,7 @@ public class VirtualRouter extends CloudClient {
     }
 
     public boolean forceDelete(VirtualRouterDeleteData deleteData) {
-        ForceReleaseResourceUtils.forceDeleteRouter(deleteData.getIds());
+        ForceReleaseResourceUtils.forceDeleteRouter(this.getHttpClient(), deleteData.getIds());
         return true;
     }
 

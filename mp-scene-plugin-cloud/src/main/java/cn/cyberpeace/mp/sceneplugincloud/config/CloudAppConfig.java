@@ -203,30 +203,6 @@ public class CloudAppConfig {
         return cidrPool;
     }
 
-    public String getMgmtNetId() {
-        if (!StringUtils.isEmpty(mgmtNetId)) {
-            return mgmtNetId;
-        }
-
-        NetworkData networkData;
-        try {
-            networkData = new Network().getByName(mgmtName);
-        } catch (Exception e) {
-            log.error("Try to get mgmt net failed: ", e);
-            throw e;
-        }
-
-        if (networkData != null) {
-            mgmtNetId = networkData.getId();
-        } else {
-            var message = "Unable to find mgmt network with name `mgmt`";
-            log.error("Try to get mgmt net failed: {}", message);
-            throw new MpRuntimeException(message);
-        }
-
-        return mgmtNetId;
-    }
-
     public String getContainerHelpInstallerDir() {
         if (!StringUtils.isEmpty(containerHelpInstallerDir)) {
             return containerHelpInstallerDir;

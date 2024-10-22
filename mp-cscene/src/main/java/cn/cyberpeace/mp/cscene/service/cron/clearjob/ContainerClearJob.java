@@ -2,8 +2,11 @@ package cn.cyberpeace.mp.cscene.service.cron.clearjob;
 
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerGetData;
 import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -18,10 +21,18 @@ import java.util.Map;
  */
 public class ContainerClearJob extends AbstractClearJob<ContainerGetData> {
 
-    private Container containerClient = new Container();
+    private Container containerClient;
 
     public ContainerClearJob(SceneElementMapper sceneElementMapper) {
         super(sceneElementMapper);
+    }
+
+    @Override
+    public void batchAction() {
+        for (CloudHttpClient httpClient : MultiCloudConfig.getAll()) {
+            containerClient = new Container(httpClient);
+            super.action();
+        }
     }
 
     @Override
@@ -50,6 +61,6 @@ public class ContainerClearJob extends AbstractClearJob<ContainerGetData> {
 
     @Override
     protected void forceClear(ContainerGetData data) {
-        ForceReleaseResourceUtils.forceDeleteContainer(Arrays.asList(data.getId()));
+        ForceReleaseResourceUtils.forceDeleteContainer(this.containerClient.getHttpClient(), Arrays.asList(data.getId()));
     }
 }

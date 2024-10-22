@@ -29,6 +29,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementPortModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginContext;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -38,10 +39,13 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConnectionCommon;
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneStatCommon;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.AllArgsConstructor;
@@ -102,6 +106,9 @@ public class ScenePluginCloudSceneService {
 
     @Resource
     private SceneSnapshotService sceneSnapshotService;
+
+    @Resource
+    private CloudPluginSceneMapper cloudPluginSceneMapper;
 
     @Data
     @AllArgsConstructor
@@ -231,7 +238,10 @@ public class ScenePluginCloudSceneService {
             }
         });
         if (CollectionUtils.isNotEmpty(connectionIds)) {
-            var remoteClient = new Remote();
+            HumanCondition sceneCondition = new HumanCondition().filterEqual(CloudPluginSceneModel::getScene, sceneId);
+            var cloudSceneModel = cloudPluginSceneMapper.first(sceneCondition);
+            String cloudIndex = cloudSceneModel.getCloudIndex();
+            var remoteClient = new Remote(MultiCloudConfig.get(cloudIndex));
             return remoteClient.getRecords(connectionIds);
         }
         return new ArrayList<>();
@@ -243,17 +253,22 @@ public class ScenePluginCloudSceneService {
         }
         List<String> recordingNames = this.collectRecordingName(sceneId);
         if (CollectionUtils.isNotEmpty(recordingNames)) {
-            var remoteClient = new Remote();
+            HumanCondition sceneCondition = new HumanCondition().filterEqual(CloudPluginSceneModel::getScene, sceneId);
+            var cloudSceneModel = cloudPluginSceneMapper.first(sceneCondition);
+            String cloudIndex = cloudSceneModel.getCloudIndex();
+            var remoteClient = new Remote(MultiCloudConfig.get(cloudIndex));
             remoteClient.deleteRecords(recordingNames);
         }
     }
 
     public OriginIpsResult resetCpcloudAllIps(ResetCplcoudAllIpsData request) {
-        return new Remote().resetCpcloudAllIps(request);
+        CloudHttpClient httpClient = MultiCloudConfig.get(MultiCloudConfig.DEFAULT);
+        return new Remote(httpClient).resetCpcloudAllIps(request);
     }
 
     public OriginIpsResult getCpcloudOriginIps() {
-        return new Remote().getCpcloudOriginIps();
+        CloudHttpClient httpClient = MultiCloudConfig.get(MultiCloudConfig.DEFAULT);
+        return new Remote(httpClient).getCpcloudOriginIps();
     }
 
     public ServiceResult<List<NodeSessionBO>> getSceneRemoteSessions(List<String> sceneIds, List<String> nodeIds,
@@ -268,7 +283,12 @@ public class ScenePluginCloudSceneService {
             return new ServiceResult<>(new ArrayList<>());
         }
 
-        var remoteClient = new Remote();
+        String cloudIndex = null;
+        for (var connectionLinkInfo : connectionLinkInfoMap.values()) {
+            cloudIndex = connectionLinkInfo.accessModeLinkInfo.getCloudScene().getCloudIndex();
+        }
+        CloudHttpClient httpClient = MultiCloudConfig.get(cloudIndex);
+        var remoteClient = new Remote(httpClient);
         Map<String, NodeSessionBO> connectionIdSessionMap = new HashMap<>();
         if (monitor) {
             var monitors = remoteClient.getMonitors(connectionIds);
@@ -338,7 +358,13 @@ public class ScenePluginCloudSceneService {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
-        var remoteClient = new Remote();
+        String cloudIndex = null;
+        for (var connectionLinkInfo : connectionLinkInfoMap.values()) {
+            cloudIndex = connectionLinkInfo.accessModeLinkInfo.getCloudScene().getCloudIndex();
+        }
+        CloudHttpClient httpClient = MultiCloudConfig.get(cloudIndex);
+
+        var remoteClient = new Remote(httpClient);
         var queryData = new GetGuacamoleRecordingData();
         queryData.setConnectionID(Arrays.asList(connectionIds));
         queryData.setPage(queryParams.getPage());
@@ -422,7 +448,8 @@ public class ScenePluginCloudSceneService {
         extraParam.setDepartment(context == null ? StringUtils.EMPTY : context.getRequestUserOrg());
         extraParam.setSceneId(sceneId);
         extraParam.setNodeId(nodeId);
-        CloudSceneConnectionCommon.enableRecording(connectionLinkInfo.getSceneConnection(), extraParam);
+        String cloudIndex = accessModeInfo.getCloudScene().getCloudIndex();
+        CloudSceneConnectionCommon.enableRecording(connectionLinkInfo.getSceneConnection(), extraParam, cloudIndex);
         return new ServiceResult<>(connectionLinkInfo.toNewNodeConnection());
     }
 
@@ -434,7 +461,8 @@ public class ScenePluginCloudSceneService {
         }
         var connectionLinkInfo = connectionLinkInfoMap.get(connectionId);
 //        CloudSceneConnectionCommon.disableRecording(connectionLinkInfo.getSceneConnection());
-        CloudSceneConnectionCommon.convertRecording(connectionLinkInfo.getSceneConnection());
+        String cloudIndex = connectionLinkInfo.getAccessModeLinkInfo().getCloudScene().getCloudIndex();
+        CloudSceneConnectionCommon.convertRecording(connectionLinkInfo.getSceneConnection(), cloudIndex);
         return new ServiceResult<>(connectionLinkInfo.toNewNodeConnection());
     }
 
@@ -445,7 +473,7 @@ public class ScenePluginCloudSceneService {
             var cloudElement = cloudPlugin.getElement(nodeId);
             if (cloudElement != null) {
                 String resourceId = cloudElement.getResourceId();
-                String url = CloudSceneConnectionCommon.getContainerConsoleUrl(resourceId);
+                String url = CloudSceneConnectionCommon.getContainerConsoleUrl(resourceId,cloudPlugin.getScene().getCloudIndex());
                 NodeConnectionBO nodeConnectionBO = new NodeConnectionBO();
                 nodeConnectionBO.setNodeId(nodeId);
                 nodeConnectionBO.setConnectionUrl(url);
@@ -473,7 +501,8 @@ public class ScenePluginCloudSceneService {
         if (accessMode.getProtocol().equals(AccessMode.Protocol.CONSOLE)) {
             var virtualType = accessModeInfo.getCloudElement().getVirtualType();
             if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-                String url = CloudSceneConnectionCommon.getContainerConsoleUrl(accessModeInfo.getCloudElement().getResourceId());
+                String cloudIndex = accessModeInfo.getCloudScene().getCloudIndex();
+                String url = CloudSceneConnectionCommon.getContainerConsoleUrl(accessModeInfo.getCloudElement().getResourceId(),cloudIndex);
                 String formatUrl = formatUrl(url, accessModeInfo);
                 nodeConnection.setConnectionUrl(formatUrl);
                 return new ServiceResult<>(nodeConnection);
@@ -515,7 +544,7 @@ public class ScenePluginCloudSceneService {
             extraParam.setDepartment(context == null ? StringUtils.EMPTY : context.getRequestUserOrg());
             extraParam.setSceneId(sceneId);
             extraParam.setNodeId(nodeId);
-            var enableRecordingFlag = CloudSceneConnectionCommon.enableRecording(sceneConnection, extraParam);
+            var enableRecordingFlag = CloudSceneConnectionCommon.enableRecording(sceneConnection, extraParam, cloudScene.getCloudIndex());
             if (enableRecordingFlag) {
                 nodeConnection.setConnectionEnableRecording(sceneConnection.getConnectionEnableRecording());
                 nodeConnection.setConnectionRecordingName(sceneConnection.getConnectionRecordingName());
@@ -630,14 +659,16 @@ public class ScenePluginCloudSceneService {
     }
 
     public ServiceResult<Boolean> expireAllRemoteConnect(String userId) {
-        Remote remote = new Remote();
-        for (int i = 0; i < 2; i++) {
-            try {
-                remote.expireAllConnect(userId);
-                break;
-            } catch (Exception e) {
-                log.error("failed to expire remote connect , userId is {}", userId, e);
-                continue;
+        for (CloudHttpClient httpClient : MultiCloudConfig.getAll()) {
+            Remote remote = new Remote(httpClient);
+            for (int i = 0; i < 2; i++) {
+                try {
+                    remote.expireAllConnect(userId);
+                    break;
+                } catch (Exception e) {
+                    log.error("failed to expire remote connect , userId is {}", userId, e);
+                    continue;
+                }
             }
         }
         return new ServiceResult<>(true);
@@ -668,7 +699,8 @@ public class ScenePluginCloudSceneService {
             }
             // 转换格式
             String formatVlanRange = vlanRange.replace("-", ":");
-            boolean result = new Remote().changeVlanRange(formatVlanRange);
+            CloudHttpClient httpClient = MultiCloudConfig.get(MultiCloudConfig.DEFAULT);
+            boolean result = new Remote(httpClient).changeVlanRange(formatVlanRange);
             if (!result) {
                 log.error("change vlan range {} error", formatVlanRange);
             }
@@ -692,7 +724,8 @@ public class ScenePluginCloudSceneService {
         var node = pluginHandler.getElement(nodeId);
         if (node != null && node.getVirtualType() != null) {
             if (BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == node.getVirtualType()) {
-                Container container = new Container();
+                CloudHttpClient httpClient = MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex());
+                Container container = new Container(httpClient);
                 var result = container.executeCommand(node.getResourceId(), command,user);
                 if (result.getExitCode() != null && result.getExitCode() == 0) {
                     ElementCommandExecBO execRes = new ElementCommandExecBO();
@@ -707,7 +740,8 @@ public class ScenePluginCloudSceneService {
                     return new ServiceResult<>(execRes);
                 }
             } else if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == node.getVirtualType()) {
-                VirtualMachine virtualMachine = new VirtualMachine();
+                CloudHttpClient httpClient = MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex());
+                VirtualMachine virtualMachine = new VirtualMachine(httpClient);
                 var param = this.getVirtualMachineUploadFileInfo(pluginHandler, node);
                 if (param != null) {
                     var execCommandData = new VirtualMachineExecCommandData();
@@ -749,7 +783,8 @@ public class ScenePluginCloudSceneService {
         }
         if (node != null && node.getVirtualType() != null) {
             if (BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == node.getVirtualType()) {
-                Container container = new Container();
+                CloudHttpClient httpClient = MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex());
+                Container container = new Container(httpClient);
 
                 String dir = "/tmp/mp/" + sceneId + "_" + nodeId;
                 String tmpZipFilepath = dir + "/" + filename;
@@ -776,7 +811,8 @@ public class ScenePluginCloudSceneService {
                     BeanUtils.copyProperties(param, uploadInfoData);
                     uploadInfoData.setFile(finalPath);
                     uploadInfoData.setDestPath(destPath + SystemTypeCommandUtils.getPathDelimiter(standardSystemType) + filename);
-                    VirtualMachine virtualMachine = new VirtualMachine();
+                    CloudHttpClient httpClient = MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex());
+                    VirtualMachine virtualMachine = new VirtualMachine(httpClient);
                     virtualMachine.uploadFile(uploadInfoData);
                     return new ServiceResult<>(true);
                 }
@@ -791,7 +827,8 @@ public class ScenePluginCloudSceneService {
         var node = pluginHandler.getElement(nodeId);
         if (node != null && node.getVirtualType() != null) {
             if (BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == node.getVirtualType()) {
-                Container container = new Container();
+                CloudHttpClient httpClient = MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex());
+                Container container = new Container(httpClient);
                 var tmpFileDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, FileUtil.getTmpDirPath(), sceneId, TextUtils.uuid());
                 new File(tmpFileDir).mkdirs();
                 String tmpZipFilepath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, tmpFileDir, filename);
@@ -823,7 +860,8 @@ public class ScenePluginCloudSceneService {
                     BeanUtils.copyProperties(param, uploadInfoData);
                     uploadInfoData.setFile(finalPath);
                     uploadInfoData.setDestPath(destPath + SystemTypeCommandUtils.getPathDelimiter(standardSystemType) + filename);
-                    VirtualMachine virtualMachine = new VirtualMachine();
+                    CloudHttpClient httpClient = MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex());
+                    VirtualMachine virtualMachine = new VirtualMachine(httpClient);
                     virtualMachine.uploadFile(uploadInfoData);
                     // todo 报错信息处理下
                     return new ServiceResult<>(true);
@@ -844,7 +882,8 @@ public class ScenePluginCloudSceneService {
             params.setImageType(node.getImageType());
             params.setDeviceUuid(node.getImageUuid());
             try {
-                new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
+                CloudHttpClient httpClient = MultiCloudConfig.get(pluginHandler.getScene().getCloudIndex());
+                new Remote(httpClient).cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
                 }, true);
                 sceneSnapshotService.deleteElementSnapshot(snapshotId);
             } catch (Exception e) {
@@ -909,7 +948,8 @@ public class ScenePluginCloudSceneService {
         if (CollectionUtils.isEmpty(connectionIds)) {
             return new ServiceResult<>(connectionNumBOS);
         }
-        var monitors = new Remote().getMonitors(connectionIds.toArray(new String[]{}));
+        CloudHttpClient httpClient = MultiCloudConfig.get(MultiCloudConfig.DEFAULT);
+        var monitors = new Remote(httpClient).getMonitors(connectionIds.toArray(new String[]{}));
         if (monitors == null || monitors.isEmpty()) {
             return new ServiceResult<>(connectionNumBOS);
         }
@@ -967,7 +1007,8 @@ public class ScenePluginCloudSceneService {
     }
 
     private Map<String, NodeSessionBO> getNodeSessions(String[] connectionIds, boolean monitor, boolean assistance) {
-        var remoteClient = new Remote();
+        CloudHttpClient httpClient = MultiCloudConfig.get(MultiCloudConfig.DEFAULT);
+        var remoteClient = new Remote(httpClient);
         Map<String, NodeSessionBO> connectionIdSessionMap = new HashMap<>();
         if (monitor) {
             var monitors = remoteClient.getMonitors(connectionIds);
@@ -1018,9 +1059,10 @@ public class ScenePluginCloudSceneService {
      * @param totalSecond
      * @return
      */
-    public NetworkFlowRateResult networkFlowRate(List<String> portIds, Long totalSecond) {
+    public NetworkFlowRateResult networkFlowRate(List<String> portIds, Long totalSecond,String cloudIndex) {
         log.debug("ScenePluginCloudSceneService.networkFlowRate begin. portIds:{}", portIds);
-        NetworkFlowRateResult result = new Remote().networkFlowRate(portIds, totalSecond);
+        CloudHttpClient httpClient = MultiCloudConfig.get(cloudIndex);
+        NetworkFlowRateResult result = new Remote(httpClient).networkFlowRate(portIds, totalSecond);
         log.debug("ScenePluginCloudSceneService.networkFlowRate end. result:{}", result);
         return result;
     }

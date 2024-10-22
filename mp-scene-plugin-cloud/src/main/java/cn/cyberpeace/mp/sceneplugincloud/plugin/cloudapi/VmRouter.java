@@ -13,9 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class VmRouter extends CloudClient {
 
-    public VmRouter() {
-    }
-
     public VmRouter(CloudHttpClient httpClient) {
         super(httpClient);
     }

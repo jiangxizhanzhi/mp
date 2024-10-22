@@ -6,9 +6,20 @@ import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.EntityNode;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Npc;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualPort;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VmRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -25,7 +36,7 @@ import java.util.List;
 @Slf4j
 public class RecreateHandler extends HandlerCommon {
 
-    private final VirtualPort vpClient = new VirtualPort();
+    private VirtualPort vpClient;
 
     public static class ElementProcess {
         public static final EventProcess RECREATE_VIRTUAL_ROUTER = new EventProcess("recreate_virtual_router", "sceneplugincloud.event.recreate_virtual_router");
@@ -43,6 +54,15 @@ public class RecreateHandler extends HandlerCommon {
         super(pluginHandler, RecreateTaskPool.getInstance(), event);
         this.createHandler = new CreateInRecreateHandler(pluginHandler);
         this.deleteHandler = new DeleteInRecreateHandler(pluginHandler);
+        this.initCloudHttpClient();
+    }
+
+    public void initCloudHttpClient() {
+        if (this.vpClient == null) {
+            String cloudIndex = getPluginHandler().getScene().getCloudIndex();
+            CloudHttpClient httpClient = MultiCloudConfig.get(cloudIndex);
+            this.vpClient = new VirtualPort(httpClient);
+        }
     }
 
     public void recreateElement(CloudPluginSceneElementBO element) {

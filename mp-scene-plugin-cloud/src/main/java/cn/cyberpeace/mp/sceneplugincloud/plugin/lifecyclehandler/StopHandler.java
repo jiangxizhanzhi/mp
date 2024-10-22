@@ -9,6 +9,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.StopTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
@@ -23,10 +25,10 @@ import java.util.Arrays;
 @Slf4j
 public class StopHandler extends HandlerCommon{
     //虚拟机云平台工具类
-    private final VirtualMachine virtualMachine = new VirtualMachine();
+    private VirtualMachine virtualMachine ;
     //容器云平台工具类
-    private final Container container = new Container();
-    private final VirtualDynamips virtualDynamips = new VirtualDynamips();
+    private Container container ;
+    private VirtualDynamips virtualDynamips ;
 
 
     public static class ElementProcess {
@@ -41,6 +43,15 @@ public class StopHandler extends HandlerCommon{
 
     public StopHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, StopTaskPool.getInstance(), event);
+        this.initCloudHttpClient();
+    }
+
+    private void initCloudHttpClient(){
+        String cloudIndex = getPluginHandler().getScene().getCloudIndex();
+        CloudHttpClient httpClient = MultiCloudConfig.get(cloudIndex);
+        this.virtualMachine = new VirtualMachine(httpClient);
+        this.container = new Container(httpClient);
+        this.virtualDynamips = new VirtualDynamips(httpClient);
     }
 
     /**

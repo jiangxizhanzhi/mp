@@ -19,7 +19,6 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
-import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
@@ -86,11 +85,6 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     private final Map<String, CloudPluginSceneElementBO> terminalElementMap = new ConcurrentHashMap<>();
 
     private HandlerUtils handlerUtils;
-    private InitiateHandler initiateHandler;
-    private CreateHandler createHandler;
-    private DeleteHandler deleteHandler;
-    private ModifyHandler modifyHandler;
-    private PrepareHandler prepareHandler;
 
     private volatile boolean networksCreated = false;
 
@@ -132,10 +126,6 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         super.initBase();
         handlerUtils = new HandlerUtils(this);
         pluginModelHandler = new CloudScenePluginModelHandler(this);
-        initiateHandler = new InitiateHandler(this);
-        createHandler = new CreateHandler(this);
-        deleteHandler = new DeleteHandler(this);
-        prepareHandler = new PrepareHandler(this);
     }
 
     @Override
@@ -285,22 +275,22 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     @Override
     public void initiate() {
-        initiateHandler.initiate();
+        new InitiateHandler(this).initiate();
     }
 
     @Override
     public void prepare(boolean partialStart) {
-        prepareHandler.prepare(partialStart);
+        new PrepareHandler(this).prepare(partialStart);
     }
 
     @Override
     public void create() {
-        createHandler.create();
+        new CreateHandler(this).create();
     }
 
     @Override
     public void delete() {
-        deleteHandler.delete();
+        new DeleteHandler(this).delete();
     }
 
     @Override

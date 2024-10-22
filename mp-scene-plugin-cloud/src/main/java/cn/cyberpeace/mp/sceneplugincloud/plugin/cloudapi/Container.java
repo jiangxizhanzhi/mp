@@ -99,7 +99,7 @@ public class Container extends CloudClient {
     }
 
     public boolean forceDelete(ContainerDeleteData deleteData) {
-        ForceReleaseResourceUtils.forceDeleteContainer(deleteData.getContainers());
+        ForceReleaseResourceUtils.forceDeleteContainer(this.getHttpClient(), deleteData.getContainers());
         return true;
     }
 

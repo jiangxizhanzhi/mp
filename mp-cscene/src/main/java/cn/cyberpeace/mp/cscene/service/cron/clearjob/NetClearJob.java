@@ -1,9 +1,12 @@
 package cn.cyberpeace.mp.cscene.service.cron.clearjob;
 
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Network;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkData;
 import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -18,10 +21,18 @@ import java.util.Map;
  */
 public class NetClearJob extends AbstractClearJob<NetworkData> {
 
-    private Network netClient = new Network();
+    private Network netClient ;
 
     public NetClearJob(SceneElementMapper sceneElementMapper) {
         super(sceneElementMapper);
+    }
+
+    @Override
+    public void batchAction() {
+        for (CloudHttpClient httpClient : MultiCloudConfig.getAll()) {
+            netClient = new Network(httpClient);
+            super.action();
+        }
     }
 
     @Override
@@ -50,6 +61,6 @@ public class NetClearJob extends AbstractClearJob<NetworkData> {
 
     @Override
     protected void forceClear(NetworkData data) {
-        ForceReleaseResourceUtils.forceDeleteNetwork(Arrays.asList(data.getId()));
+        ForceReleaseResourceUtils.forceDeleteNetwork(this.netClient.getHttpClient(), Arrays.asList(data.getId()));
     }
 }

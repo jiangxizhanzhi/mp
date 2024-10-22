@@ -6,11 +6,14 @@ import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementPortModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Network;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Npc;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcGetData;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementPortMapper;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -30,12 +33,20 @@ public class NpcClearJob extends AbstractClearJob<NpcGetData> {
 
     private CloudPluginSceneElementPortMapper cloudPortMapper;
 
-    private Npc npc = new Npc();
+    private Npc npc ;
 
     public NpcClearJob(SceneElementPortMapper elementPortMapper, CloudPluginSceneElementPortMapper cloudPortMapper, SceneElementMapper sceneElementMapper) {
         super(sceneElementMapper);
         this.cloudPortMapper = cloudPortMapper;
         this.elementPortMapper = elementPortMapper;
+    }
+
+    @Override
+    public void batchAction() {
+        for (CloudHttpClient httpClient : MultiCloudConfig.getAll()) {
+            npc = new Npc(httpClient);
+            super.action();
+        }
     }
 
     @Override

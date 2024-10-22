@@ -15,9 +15,6 @@ import java.util.List;
 
 public class Network extends CloudClient {
 
-    public Network() {
-    }
-
     public Network(CloudHttpClient httpClient) {
         super(httpClient);
     }

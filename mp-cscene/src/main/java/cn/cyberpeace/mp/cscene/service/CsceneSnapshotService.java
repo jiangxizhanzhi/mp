@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -17,11 +18,14 @@ import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeviceSnapshotParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeviceSnapshotResultData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotDeleteParams;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneMapper;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
 import cn.cyberpeace.mp.sceneplugincloud.util.SnapshotAddressUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -231,7 +235,8 @@ public class CsceneSnapshotService {
                         // 查询云平台的快照列表
                         DeviceSnapshotParam param = new DeviceSnapshotParam();
                         param.setDeviceUuid(node.getImageUuid());
-                        var snapShotResult = new Remote().getHttpClient().get(CloudUrlConstant.SNAPSHOT_LIST, param, DeviceSnapshotResultData.class);
+                        String cloudIndex = cloudPlugin.getScene().getCloudIndex();
+                        var snapShotResult = new Remote(MultiCloudConfig.get(cloudIndex)).getHttpClient().get(CloudUrlConstant.SNAPSHOT_LIST, param, DeviceSnapshotResultData.class);
                         DeviceSnapshotResultData.Snapshot cloudSnapshot = null;
                         if (snapShotResult != null && CollectionUtils.isNotEmpty(snapShotResult.getItems())) {
                             for (var m : snapShotResult.getItems()) {
@@ -365,7 +370,10 @@ public class CsceneSnapshotService {
             return false;
         }
         try {
-            new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
+            CloudPluginSceneMapper cloudPluginSceneMapper = BeanCommon.getBean(CloudPluginSceneMapper.class);
+            CloudPluginSceneModel cloudPluginSceneModel = cloudPluginSceneMapper.first(new HumanCondition().filterEqual(CloudPluginSceneModel::getScene, snapshot.getScene()));
+            String cloudIndex = cloudPluginSceneModel.getCloudIndex();
+            new Remote(MultiCloudConfig.get(cloudIndex)).cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
             }, true);
             this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
             return true;

@@ -70,7 +70,10 @@ public class CreateHandler extends HandlerCommon {
         var sceneId = getPluginHandler().getSrcScene().getEid();
         var routerPorts = getSceneProbeRouterPortMapper().list(
                 new HumanCondition().filterEqual(CollectionPluginSceneProbeRouterPortModel::getScene, sceneId));
-        var vrClient = new VirtualRouter();
+        CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
+                .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        String cloudIndex = cloudPluginHandler.getScene().getCloudIndex();
+        var vrClient = new VirtualRouter(MultiCloudConfig.get(cloudIndex));
         // 创建辅助路由
         var createData = new VirtualRouterCreateData();
         createData.setName(HandlerUtils.genResourceName(sceneId));
@@ -79,8 +82,6 @@ public class CreateHandler extends HandlerCommon {
         externalVirtualNic.setNetworkId(MultiCloudConfig.getExternalNetId(MultiCloudConfig.DEFAULT));
         virtualNics.add(externalVirtualNic);
 
-        CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
-                .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         routerPorts.forEach(routerPort -> {
             var cloudElement = cloudPluginHandler.getElement(routerPort.getSceneElement());
             String networkId = null;
@@ -209,7 +210,8 @@ public class CreateHandler extends HandlerCommon {
                     })
                     .collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(containerElements)) {
-                Container container = new Container();
+                String cloudIndex = cloudPluginHandler.getScene().getCloudIndex();
+                Container container = new Container(MultiCloudConfig.get(cloudIndex));
                 var addRouterTasks = containerElements.stream().filter(c -> {
                             var cloudElement = cloudPluginHandler.getElement(c.getSrcElement().getId());
                             if (cloudElement != null && StringUtils.isNotEmpty(cloudElement.getResourceId())) {

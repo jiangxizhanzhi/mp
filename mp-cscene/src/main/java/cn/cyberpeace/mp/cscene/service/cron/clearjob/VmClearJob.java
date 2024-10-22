@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineGetData;
 import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -18,10 +20,18 @@ import java.util.Map;
  */
 public class VmClearJob extends AbstractClearJob<VirtualMachineGetData> {
 
-    private VirtualMachine vmClient = new VirtualMachine();
+    private VirtualMachine vmClient;
 
     public VmClearJob(SceneElementMapper sceneElementMapper) {
         super(sceneElementMapper);
+    }
+
+    @Override
+    public void batchAction() {
+        for (CloudHttpClient httpClient : MultiCloudConfig.getAll()) {
+            vmClient = new VirtualMachine(httpClient);
+            super.action();
+        }
     }
 
     @Override
@@ -50,6 +60,6 @@ public class VmClearJob extends AbstractClearJob<VirtualMachineGetData> {
 
     @Override
     protected void forceClear(VirtualMachineGetData data) {
-        ForceReleaseResourceUtils.forceDeleteVm(Arrays.asList(data.getId()));
+        ForceReleaseResourceUtils.forceDeleteVm(vmClient.getHttpClient(), Arrays.asList(data.getId()));
     }
 }

@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.LinkStatusParams;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.LinkStatusResultData;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.cache.CacheBuilder;
@@ -129,6 +130,7 @@ public class SceneInstanceLinkCacheUtil {
             )) {
                 NodeLinkStatusBO nodeStatus = new NodeLinkStatusBO(e.getId());
                 nodeStatus.setResourceId(handler.getElement(e.getId()).getResourceId());
+                nodeStatus.setCloudIndex(handler.getScene().getCloudIndex());
                 nodeLinkStatusList.add(nodeStatus);
                 if (CollectionUtils.isNotEmpty(e.getPorts())) {
                     for (var p : e.getPorts()) {
@@ -161,16 +163,19 @@ public class SceneInstanceLinkCacheUtil {
         return nodeLinkStatusList;
     }
 
-    private static void loadStatus(String sceneId, List<NodeLinkStatusBO> nodeLinkStatusList) {
+    private static void loadStatus(String sceneId , List<NodeLinkStatusBO> nodeLinkStatusList) {
         try {
             List<Runnable> tasks = new ArrayList<>();
-            Remote remote = new Remote();
+            Remote remote = null;
             for (var n : nodeLinkStatusList) {
+                CloudHttpClient httpClient = MultiCloudConfig.get(n.getCloudIndex());
+                remote = new Remote(httpClient);
                 if (CollectionUtils.isNotEmpty(n.getConnectionStatusList())) {
                     for (var p : n.getConnectionStatusList()) {
                         String taskKey = getKey(n.getResourceId(), p.getNetworkId());
                         // 已有相同任务,则不处理
                         if (!existsNodeTask.contains(taskKey)) {
+                            Remote finalRemote = remote;
                             tasks.add(() -> {
                                 try {
                                     existsNodeTask.add(taskKey);
@@ -182,7 +187,7 @@ public class SceneInstanceLinkCacheUtil {
                                         p.setStatus(OFFLINE);
                                     } else {
                                         if (CloudSingleton.cloudAppConfig.getLinkStatusEnabled()) {
-                                            var result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
+                                            var result = finalRemote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
                                             }, true);
                                             if (result.isSuccess()) {
                                                 n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? ONLINE : OFFLINE);
@@ -204,6 +209,7 @@ public class SceneInstanceLinkCacheUtil {
                 } else if (StringUtils.isNotEmpty(n.getDefaultNetworkId())) {
                     String taskKey = getKey(n.getResourceId(), n.getDefaultNetworkId());
                     if (!existsNodeTask.contains(taskKey)) {
+                        Remote finalRemote1 = remote;
                         tasks.add(() -> {
                             try {
                                 existsNodeTask.add(taskKey);
@@ -211,7 +217,7 @@ public class SceneInstanceLinkCacheUtil {
                                 params.setInstanceId(n.getResourceId());
                                 params.setNetworkId(n.getDefaultNetworkId());
                                 if (CloudSingleton.cloudAppConfig.getLinkStatusEnabled()) {
-                                    var result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
+                                    var result = finalRemote1.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
                                     }, true);
                                     if (result.isSuccess()) {
                                         n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? ONLINE : OFFLINE);

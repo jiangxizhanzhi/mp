@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.devopscluster.request.ReviseContainerOrVmRequest;
 import cn.cyberpeace.mp.devopscluster.vo.ContainerPageVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -60,7 +61,7 @@ public class ContainerController {
         if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        Container container = new Container();
+        Container container = new Container(MultiCloudConfig.get(MultiCloudConfig.DEFAULT));
         return new ServiceResult<>(container.restart(request.getId())).asResult();
     }
 
@@ -75,7 +76,7 @@ public class ContainerController {
         if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        Container container = new Container();
+        Container container = new Container(MultiCloudConfig.get(MultiCloudConfig.DEFAULT));
         return new ServiceResult<>(container.pause(request.getId())).asResult();
     }
 
@@ -90,7 +91,7 @@ public class ContainerController {
         if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        Container container = new Container();
+        Container container = new Container(MultiCloudConfig.get(MultiCloudConfig.DEFAULT));
         return new ServiceResult<>(container.unPause(request.getId())).asResult();
     }
 
@@ -105,7 +106,7 @@ public class ContainerController {
         if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        Container container = new Container();
+        Container container = new Container(MultiCloudConfig.get(MultiCloudConfig.DEFAULT));
         return new ServiceResult<>(container.start(request.getId())).asResult();
     }
 
@@ -120,7 +121,7 @@ public class ContainerController {
         if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        Container container = new Container();
+        Container container = new Container(MultiCloudConfig.get(MultiCloudConfig.DEFAULT));
         return new ServiceResult<>(container.stop(request.getId())).asResult();
     }
 

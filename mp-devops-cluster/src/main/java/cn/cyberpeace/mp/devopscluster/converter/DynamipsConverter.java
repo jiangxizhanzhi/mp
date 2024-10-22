@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devopscluster.dto.InstancePageDTO;
 import cn.cyberpeace.mp.devopscluster.request.DynamipsInstancePageRequest;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualDynamipsListParam;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +34,7 @@ public class DynamipsConverter implements BaseConverter {
      * @return
      */
     public BasePageBO<InstanceBO> page(DynamipsInstancePageRequest request) {
-        VirtualDynamips virtualDynamips = new VirtualDynamips();
+        VirtualDynamips virtualDynamips = new VirtualDynamips(MultiCloudConfig.get(MultiCloudConfig.DEFAULT));
         VirtualDynamipsListParam param = new VirtualDynamipsListParam();
         param.setIp(request.getAddr());
         param.setLimit(request.getLimit());

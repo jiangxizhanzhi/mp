@@ -15,12 +15,11 @@ import java.util.List;
 
 public class Npc extends CloudClient {
 
-    public Npc(CloudHttpClient httpClient) {
-        super(httpClient);
+    public Npc() {
     }
 
-    public Npc() {
-        super();
+    public Npc(CloudHttpClient httpClient) {
+        super(httpClient);
     }
 
     public NpcCreateResult create(NpcCreateData createData) {

@@ -10,6 +10,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.UnpauseTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
@@ -23,9 +25,9 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class UnpauseHandler extends HandlerCommon {
-    private final VirtualMachine virtualMachine = new VirtualMachine();
-    private final Container container = new Container();
-    private final VirtualDynamips virtualDynamips = new VirtualDynamips();
+    private VirtualMachine virtualMachine ;
+    private Container container ;
+    private VirtualDynamips virtualDynamips ;
 
     public static class SceneProcess {
         public static final EventProcess UNPAUSE_TERMINALS = new EventProcess("unpause_terminals", "sceneplugincloud.event.unpause_terminals");
@@ -40,6 +42,15 @@ public class UnpauseHandler extends HandlerCommon {
 
     public UnpauseHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, UnpauseTaskPool.getInstance(), event);
+        this.initCloudHttpClient();
+    }
+
+    private void initCloudHttpClient(){
+        String cloudIndex = getPluginHandler().getScene().getCloudIndex();
+        CloudHttpClient httpClient = MultiCloudConfig.get(cloudIndex);
+        this.virtualMachine = new VirtualMachine(httpClient);
+        this.container = new Container(httpClient);
+        this.virtualDynamips = new VirtualDynamips(httpClient);
     }
 
     public void unpause() {

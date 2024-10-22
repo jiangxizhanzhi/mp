@@ -14,6 +14,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetRes
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +48,7 @@ public class CloudSceneConnectionCommon {
         private String userId;
         private String systemType;
         private Boolean entity;
+        private String cloudIndex ;
 
         //        private String username;
         private String sceneName;
@@ -102,7 +105,8 @@ public class CloudSceneConnectionCommon {
         var accessIp = sceneConnection == null ? cloudAccessMode.getAccessIp() : sceneConnection.getAccessIp();
         var accessPort = sceneConnection == null ? cloudAccessMode.getAccessPort() : sceneConnection.getAccessPort();
         if (isConsole && !StringUtils.isEmpty(resourceId) && !StringUtils.isEmpty(resourceHost)) {
-            var vmClient = new VirtualMachine();
+            String cloudIndex = param.cloudIndex;
+            var vmClient = new VirtualMachine(MultiCloudConfig.get(cloudIndex));
             ConsoleInfoGetResult consoleInfo = null;
             try {
                 consoleInfo = vmClient.getConsoleInfo(resourceId, resourceHost);
@@ -122,7 +126,8 @@ public class CloudSceneConnectionCommon {
                 log.error("Get instance({}, {}) console empty info", resourceHost, resourceId);
             }
         } else if (isCom && !StringUtils.isEmpty(resourceId) && !StringUtils.isEmpty(resourceHost)) {
-            var vmClient = new VirtualMachine();
+            String cloudIndex = param.cloudIndex;
+            var vmClient = new VirtualMachine(MultiCloudConfig.get(cloudIndex));
             ComInfoGetResult comInfoGetResult = null;
             try {
                 comInfoGetResult = vmClient.getComInfo(resourceId, resourceHost);
@@ -165,7 +170,8 @@ public class CloudSceneConnectionCommon {
         }
 
         var dataUpdateFlag = false;
-        var remoteClient = new Remote();
+        String cloudIndex = param.cloudIndex;
+        var remoteClient = new Remote(MultiCloudConfig.get(cloudIndex));
         if (StringUtils.isEmpty(sceneConnection.getConnectionId())) {
             var guacamoleCreateConnectionData = new GuacamoleCreateConnectionData();
             guacamoleCreateConnectionData.setScene(param.getSceneName());
@@ -233,13 +239,13 @@ public class CloudSceneConnectionCommon {
     }
 
     public static boolean enableRecording(CloudPluginSceneConnectionModel sceneConnection,
-                                          SceneConnectionEnableRecordingExtraParam extraParam) {
+                                          SceneConnectionEnableRecordingExtraParam extraParam,String cloudIndex) {
         var connectionId = sceneConnection.getConnectionId();
         if (StringUtils.isEmpty(connectionId)) {
             return false;
         }
 
-        var remoteClient = new Remote();
+        var remoteClient = new Remote(MultiCloudConfig.get(cloudIndex));
         var result = remoteClient.enableRecording(connectionId, extraParam.getSceneName(), extraParam.getSceneId(),
                 extraParam.getNodeName(), extraParam.getNodeId(), extraParam.getUsername(), extraParam.getDepartment());
         var flag = !StringUtils.isEmpty(result);
@@ -252,13 +258,13 @@ public class CloudSceneConnectionCommon {
         return flag;
     }
 
-    public static boolean disableRecording(CloudPluginSceneConnectionModel sceneConnection) {
+    public static boolean disableRecording(CloudPluginSceneConnectionModel sceneConnection,String cloudIndex) {
         var connectionId = sceneConnection.getConnectionId();
         if (StringUtils.isEmpty(connectionId)) {
             return false;
         }
 
-        var remoteClient = new Remote();
+        var remoteClient = new Remote(MultiCloudConfig.get(cloudIndex));
         var result = remoteClient.disableRecording(connectionId);
         var flag = !StringUtils.isEmpty(result);
         if (flag) {
@@ -270,13 +276,13 @@ public class CloudSceneConnectionCommon {
         return flag;
     }
 
-    public static boolean convertRecording(CloudPluginSceneConnectionModel sceneConnection) {
+    public static boolean convertRecording(CloudPluginSceneConnectionModel sceneConnection,String cloudIndex) {
         var connectionId = sceneConnection.getConnectionId();
         if (StringUtils.isEmpty(connectionId)) {
             return false;
         }
 
-        var remoteClient = new Remote();
+        var remoteClient = new Remote(MultiCloudConfig.get(cloudIndex));
         var result = remoteClient.convertRecording(connectionId);
         var flag = !StringUtils.isEmpty(result);
         sceneConnection.setDisable(true);
@@ -287,8 +293,9 @@ public class CloudSceneConnectionCommon {
         return flag;
     }
 
-    public static String getContainerConsoleUrl(String resourceId) {
-        String url = new Remote().getContainerConsoleUrl(resourceId);
+    public static String getContainerConsoleUrl(String resourceId,String cloudIndex) {
+        CloudHttpClient httpClient = MultiCloudConfig.get(cloudIndex);
+        String url = new Remote(httpClient).getContainerConsoleUrl(resourceId);
         if (StringUtils.isEmpty(url)) {
             log.error("failed to get container console url , containId is {}", resourceId);
         }
