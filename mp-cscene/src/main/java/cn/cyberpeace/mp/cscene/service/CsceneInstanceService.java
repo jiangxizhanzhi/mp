@@ -1,13 +1,13 @@
-// Copyright (C) 2024
-// All rights reserved.
-// Project name mp
-// Description:
-// Author:
-// File name CsceneInstanceService.java.
-// File size 113710.
-// File create date Fri Jul 12 12:55:22 CST 2024.
-// File update date Fri Jul 12 12:55:22 CST 2024.
-// Version 1.0.0
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name CsceneInstanceService.java.
+ // File size 113710.
+ // File create date Fri Jul 12 12:55:22 CST 2024.
+ // File update date Fri Jul 12 12:55:22 CST 2024.
+ // Version 1.0.0
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
@@ -34,12 +34,11 @@ import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
-import cn.cyberpeace.mp.cscene.controller.request.ConnectSceneNode;
-import cn.cyberpeace.mp.cscene.controller.request.ConnectSceneNodeResult;
 import cn.cyberpeace.mp.cscene.controller.request.CreateNode;
 import cn.cyberpeace.mp.cscene.controller.request.CreateNodePort;
 import cn.cyberpeace.mp.cscene.controller.request.CreateNodePortAccessMode;
-import cn.cyberpeace.mp.cscene.controller.request.DisConnectSceneNode;
+import cn.cyberpeace.mp.cscene.controller.request.DeleteNodeCommand;
+import cn.cyberpeace.mp.cscene.controller.request.UpdateNodeCommand;
 import cn.cyberpeace.mp.cscene.core.BcSceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
@@ -66,17 +65,17 @@ import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneBusinessElementCommandModel;
 import cn.cyberpeace.mp.scene.model.SceneBusinessElementModel;
 import cn.cyberpeace.mp.scene.model.SceneBusinessElementPortModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
-import cn.cyberpeace.mp.scene.model.SceneExternalInstanceNetworkModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneBusinessElementCommandMapper;
 import cn.cyberpeace.mp.scene.repository.SceneBusinessElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneBusinessElementPortMapper;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
-import cn.cyberpeace.mp.scene.repository.SceneExternalInstanceNetworkMapper;
 import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
@@ -148,7 +147,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
+ /**
  * @ClassName CsceneInstanceService
  * @Description
  * @Author maojun
@@ -159,7 +158,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @Data
-public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceModel, CsceneInstanceMapper, BaseModelFields, QueryParams> {
+public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceModel, CsceneInstanceMapper,
+        BaseModelFields, QueryParams> {
 
     private CsceneInstanceRoleMapper csceneInstanceRoleMapper;
     private CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper;
@@ -224,18 +224,22 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     private SceneElementMapper sceneElementMapper;
 
     @Resource
-    private SceneService sceneService;
+    private SceneService sceneService ;
 
     @Resource
-    private SceneBusinessElementMapper sceneBusinessElementMapper;
+    private SceneBusinessElementMapper sceneBusinessElementMapper ;
 
-    @Resource
-    private SceneBusinessElementPortMapper sceneBusinessElementPortMapper;
+     @Resource
+    private SceneBusinessElementPortMapper sceneBusinessElementPortMapper ;
 
     @Resource
     private SceneExternalInstanceNetworkMapper sceneExternalInstanceNetworkMapper ;
 
     // expires in 10 minutes
+     @Resource
+     private SceneBusinessElementCommandMapper sceneBusinessElementCommandMapper;
+
+     // expires in 10 minutes
     private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
 
 
@@ -982,6 +986,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             }
             nodeRecording.setSceneId(csceneInstance.getId());
 
+            if (StringUtils.isNotEmpty(nodeRecording.getUser())) {
+                log.info("recording user id is :{}", nodeRecording.getUser());
+            }
         }
         return nodeRecordingResult;
     }
@@ -2655,6 +2662,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 String user = cloudPluginSceneConnectionModel.getAccessUser();
                 userIds.add(user);
             }
+            Set<CloudPluginSceneConnectionModel> uniqueValues = new HashSet<>();
         }
         CollectedCsceneElementCommonBO<List<AccessUserBO>> csceneElementCommon = new CollectedCsceneElementCommonBO<>();
         csceneElementCommon.setNodeId(nodeId);
@@ -2683,132 +2691,159 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Transactional
     public void createSceneBusinessElement(String resourceId, CreateNode createNode) {
-        SceneBusinessElementModel model = new SceneBusinessElementModel();
-        model.setCpu(createNode.getCpu());
-        model.setScene(createNode.getSceneId());
-        model.setDisk(createNode.getDisk());
-        model.setName(createNode.getName());
-        model.setImage(createNode.getImage());
-        model.setImage_uuid(createNode.getImageUuid());
-        model.setImageType(createNode.getImageType());
-        model.setNodeId(createNode.getId());
-        model.setResourceId(resourceId);
-        sceneBusinessElementMapper.save(model);
+         SceneBusinessElementModel model = new SceneBusinessElementModel();
+         model.setCpu(createNode.getCpu());
+         model.setScene(createNode.getSceneId());
+         model.setDisk(createNode.getDisk());
+         model.setName(createNode.getName());
+         model.setImage(createNode.getImage());
+         model.setImage_uuid(createNode.getImageUuid());
+         model.setImageType(createNode.getImageType());
+         model.setNodeId(createNode.getId());
+         model.setResourceId(resourceId);
+         sceneBusinessElementMapper.save(model);
 
-        List<SceneBusinessElementPortModel> portModels = new ArrayList<>();
-        for (var createNodePort : createNode.getPorts()) {
-            SceneBusinessElementPortModel portModel = new SceneBusinessElementPortModel();
-            portModel.setAccessModes(JsonCommon.snakeStringify(createNodePort.getAccessMode()));
-            portModel.setScene(createNode.getSceneId());
-            portModel.setSceneElement(createNode.getId());
-            portModel.setIp(createNodePort.getIp());
-            portModel.setNetworkId(createNodePort.getNetworkId());
-            portModel.setPortId(createNodePort.getId());
-            portModel.setName("");
-            portModels.add(portModel);
-        }
-        sceneBusinessElementPortMapper.bulkCreate(portModels);
-    }
+         List<SceneBusinessElementPortModel> portModels = new ArrayList<>();
+         for (var createNodePort : createNode.getPorts()) {
+             SceneBusinessElementPortModel portModel = new SceneBusinessElementPortModel();
+             portModel.setAccessModes(JsonCommon.snakeStringify(createNodePort.getAccessMode()));
+             portModel.setScene(createNode.getSceneId());
+             portModel.setSceneElement(createNode.getId());
+             portModel.setIp(createNodePort.getIp());
+             portModel.setNetworkId(createNodePort.getNetworkId());
+             portModel.setPortId(createNodePort.getId());
+             portModel.setName("");
+             portModels.add(portModel);
+         }
+         sceneBusinessElementPortMapper.bulkCreate(portModels);
+     }
 
-    @Transactional
-    public void deleteSceneBusinessElement(String sceneId, String nodeId) {
-        HumanCondition elementCondition = new HumanCondition().filterEqual(SceneBusinessElementModel::getScene, sceneId)
-                .filterEqual(SceneBusinessElementModel::getNodeId, nodeId);
-        sceneBusinessElementMapper.filterDelete(elementCondition);
+     @Transactional
+     public void deleteSceneBusinessElement(String sceneId, String nodeId) {
+         HumanCondition elementCondition = new HumanCondition()
+                 .filterEqual(SceneBusinessElementModel::getScene,sceneId)
+                 .filterEqual(SceneBusinessElementModel::getNodeId,nodeId);
+         sceneBusinessElementMapper.filterDelete(elementCondition);
 
-        HumanCondition portCondition = new HumanCondition().filterEqual(SceneBusinessElementPortModel::getScene, sceneId)
-                .filterEqual(SceneBusinessElementPortModel::getSceneElement, nodeId);
-        sceneBusinessElementPortMapper.filterDelete(portCondition);
-    }
+         HumanCondition portCondition = new HumanCondition()
+                 .filterEqual(SceneBusinessElementPortModel::getScene,sceneId)
+                 .filterEqual(SceneBusinessElementPortModel::getSceneElement,nodeId);
+         sceneBusinessElementPortMapper.filterDelete(portCondition);
+     }
 
-    public CreateNode getSceneBusinessElement(String sceneId, String nodeId) {
-        HumanCondition elementCondition = new HumanCondition().filterEqual(SceneBusinessElementModel::getScene, sceneId)
-                .filterEqual(SceneBusinessElementModel::getNodeId, nodeId);
-        var elementModel = sceneBusinessElementMapper.first(elementCondition);
-        if (elementModel == null) {
-            return null;
-        }
-        CreateNode node = new CreateNode();
-        node.setResourceId(elementModel.getResourceId());
-        node.setId(elementModel.getNodeId());
-        node.setName(elementModel.getName());
-        node.setSceneId(elementModel.getScene());
-        node.setImage(elementModel.getImage());
-        node.setImageType(elementModel.getImageType());
-        node.setImageUuid(elementModel.getImage_uuid());
-        node.setCpu(elementModel.getCpu());
-        node.setRam(elementModel.getDisk());
-        node.setDisk(elementModel.getDisk());
+     public CreateNode getSceneBusinessElement(String sceneId, String nodeId) {
+         HumanCondition elementCondition = new HumanCondition()
+                 .filterEqual(SceneBusinessElementModel::getScene,sceneId)
+                 .filterEqual(SceneBusinessElementModel::getNodeId,nodeId);
+         var elementModel = sceneBusinessElementMapper.first(elementCondition);
+         if (elementModel == null) {
+             return null;
+         }
+         CreateNode node = new CreateNode();
+         node.setResourceId(elementModel.getResourceId());
+         node.setId(elementModel.getNodeId());
+         node.setName(elementModel.getName());
+         node.setSceneId(elementModel.getScene());
+         node.setImage(elementModel.getImage());
+         node.setImageType(elementModel.getImageType());
+         node.setImageUuid(elementModel.getImage_uuid());
+         node.setCpu(elementModel.getCpu());
+         node.setRam(elementModel.getDisk());
+         node.setDisk(elementModel.getDisk());
 
-        HumanCondition portCondition = new HumanCondition().filterEqual(SceneBusinessElementPortModel::getScene, sceneId)
-                .filterEqual(SceneBusinessElementPortModel::getSceneElement, nodeId);
-        var portModels = sceneBusinessElementPortMapper.list(portCondition);
-        List<CreateNodePort> ports = new ArrayList<>();
-        for (var portModel : portModels) {
-            var port = new CreateNodePort();
-            port.setId(portModel.getPortId());
-            port.setIp(portModel.getIp());
-            port.setNetworkId(portModel.getNetworkId());
-            port.setAccessMode(JsonCommon.snakeParse(portModel.getAccessModes(), new TypeReference<List<CreateNodePortAccessMode>>() {
-            }));
-            ports.add(port);
-        }
-        node.setPorts(ports);
-        return node;
-    }
+         HumanCondition portCondition = new HumanCondition()
+                 .filterEqual(SceneBusinessElementPortModel::getScene, sceneId)
+                 .filterEqual(SceneBusinessElementPortModel::getSceneElement, nodeId);
+         var portModels = sceneBusinessElementPortMapper.list(portCondition);
+         List<CreateNodePort> ports = new ArrayList<>();
+         for (var portModel : portModels) {
+             var port = new CreateNodePort();
+             port.setId(portModel.getPortId());
+             port.setIp(portModel.getIp());
+             port.setNetworkId(portModel.getNetworkId());
+             port.setAccessMode(JsonCommon.snakeParse(portModel.getAccessModes(), new TypeReference<List<CreateNodePortAccessMode>>() {
+             }));
+             ports.add(port);
+         }
+         node.setPorts(ports);
+         return node;
+     }
 
-    public Boolean disConnectSceneNode(DisConnectSceneNode disConnectSceneNode) {
-        String disconnectId = disConnectSceneNode.getId();
-        var model = sceneExternalInstanceNetworkMapper.get(disconnectId);
-        if (model != null) {
-            var vm = new VirtualMachine();
-            vm.stop(model.getExternalNodeResourceId());
-            vm.deletePort(model.getExternalNodeResourceId(), model.getInterfaceId());
-            sceneExternalInstanceNetworkMapper.delete(disconnectId);
-        }
-        return true;
-    }
+     public void updateSceneElementCommand(UpdateNodeCommand command){
+         SceneBusinessElementCommandModel model = new SceneBusinessElementCommandModel();
+         model.setScene(command.getSceneId());
+         model.setCommand(command.getCommand());
+         model.setFile(command.getFile());
+         model.setNodeId(command.getNodeId());
+         model.setBusinessKey(command.getBusinessKey());
+         sceneBusinessElementCommandMapper.save(model);
+     }
 
-    public ConnectSceneNodeResult connectSceneNode(ConnectSceneNode connectSceneNode) {
-        // 获取需要连接的场景内的网络信息
-        String csceneId = connectSceneNode.getSceneId();
-        String sceneId = getSceneId(csceneId);
-        var sceneHandler = new SceneHandler(sceneId, null, false, new SceneContextBO());
-        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler("cpcloud");
-        String networkId = pluginHandler.getPort(connectSceneNode.getPortId()).getAuxiliaryNetworkId();
+     public void deleteSceneElementCommand(DeleteNodeCommand command) {
+         SceneBusinessElementCommandModel model = new SceneBusinessElementCommandModel();
+         model.setScene(command.getSceneId());
+         model.setNodeId(command.getNodeId());
+         model.setBusinessKey(command.getBusinessKey());
+         HumanCondition condition = new HumanCondition()
+                 .filterEqual(SceneBusinessElementCommandModel::getScene, model.getScene())
+                 .filterEqual(SceneBusinessElementCommandModel::getNodeId, model.getNodeId())
+                 .filterEqual(SceneBusinessElementCommandModel::getBusinessKey, model.getBusinessKey());
+         sceneBusinessElementCommandMapper.filterDelete(condition);
+     }
 
-        // 获取需要接入的节点信息
-        csceneId = connectSceneNode.getExternalSceneId();
-        sceneId = getSceneId(csceneId);
-        String nodeId = connectSceneNode.getExternalNodeId();
-        sceneHandler = new SceneHandler(sceneId, null, false, new SceneContextBO());
-        pluginHandler = sceneHandler.getPluginHandler("cpcloud");
-        String instanceId = pluginHandler.getElement(nodeId).getResourceId();
-        VirtualMachineAddPortData addPortData = new VirtualMachineAddPortData();
-        addPortData.setName("mp_" + System.currentTimeMillis());
-        addPortData.setNetworkId(networkId);
-        addPortData.setHwVifModel("virtio");
-        var result = new VirtualMachine().addPort(instanceId, addPortData);
+     public Boolean disConnectSceneNode(DisConnectSceneNode disConnectSceneNode) {
+         String disconnectId = disConnectSceneNode.getId();
+         var model = sceneExternalInstanceNetworkMapper.get(disconnectId);
+         if (model != null) {
+             var vm = new VirtualMachine();
+             vm.stop(model.getExternalNodeResourceId());
+             vm.deletePort(model.getExternalNodeResourceId(), model.getInterfaceId());
+             sceneExternalInstanceNetworkMapper.delete(disconnectId);
+         }
+         return true;
+     }
 
-        SceneExternalInstanceNetworkModel model = new SceneExternalInstanceNetworkModel();
-        model.setSceneId(connectSceneNode.getSceneId());
-        model.setNodeId(connectSceneNode.getNodeId());
-        model.setPortId(connectSceneNode.getPortId());
-        model.setExternalSceneId(connectSceneNode.getExternalSceneId());
-        model.setExternalNodeId(connectSceneNode.getExternalNodeId());
-        model.setExternalNodeResourceId(instanceId);
-        model.setNetworkId(networkId);
-        model.setInterfaceId(result.getId());
-        sceneExternalInstanceNetworkMapper.create(model);
+     public ConnectSceneNodeResult connectSceneNode(ConnectSceneNode connectSceneNode) {
+         // 获取需要连接的场景内的网络信息
+         String csceneId = connectSceneNode.getSceneId();
+         String sceneId = getSceneId(csceneId);
+         var sceneHandler = new SceneHandler(sceneId, null, false, new SceneContextBO());
+         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler("cpcloud");
+         String networkId = pluginHandler.getPort(connectSceneNode.getPortId()).getAuxiliaryNetworkId();
 
-        ConnectSceneNodeResult connectSceneNodeResult = new ConnectSceneNodeResult();
-        connectSceneNodeResult.setId(model.getId());
-        connectSceneNodeResult.setSceneId(model.getSceneId());
-        connectSceneNodeResult.setNodeId(model.getNodeId());
-        connectSceneNodeResult.setPortId(model.getPortId());
-        connectSceneNodeResult.setExternalSceneId(model.getExternalSceneId());
-        connectSceneNodeResult.setExternalNodeId(model.getExternalNodeId());
+         // 获取需要接入的节点信息
+         csceneId = connectSceneNode.getExternalSceneId();
+         sceneId = getSceneId(csceneId);
+         String nodeId = connectSceneNode.getExternalNodeId();
+         sceneHandler = new SceneHandler(sceneId, null, false, new SceneContextBO());
+         pluginHandler = sceneHandler.getPluginHandler("cpcloud");
+         String instanceId = pluginHandler.getElement(nodeId).getResourceId();
+         VirtualMachineAddPortData addPortData = new VirtualMachineAddPortData();
+         addPortData.setName("mp_" + System.currentTimeMillis());
+         addPortData.setNetworkId(networkId);
+         addPortData.setHwVifModel("virtio");
+         var result = new VirtualMachine().addPort(instanceId, addPortData);
+
+         SceneExternalInstanceNetworkModel model = new SceneExternalInstanceNetworkModel();
+         model.setSceneId(connectSceneNode.getSceneId());
+         model.setNodeId(connectSceneNode.getNodeId());
+         model.setPortId(connectSceneNode.getPortId());
+         model.setExternalSceneId(connectSceneNode.getExternalSceneId());
+         model.setExternalNodeId(connectSceneNode.getExternalNodeId());
+         model.setExternalNodeResourceId(instanceId);
+         model.setNetworkId(networkId);
+         model.setInterfaceId(result.getId());
+         sceneExternalInstanceNetworkMapper.create(model);
+
+         ConnectSceneNodeResult connectSceneNodeResult = new ConnectSceneNodeResult();
+         connectSceneNodeResult.setId(model.getId());
+         connectSceneNodeResult.setSceneId(model.getSceneId());
+         connectSceneNodeResult.setNodeId(model.getNodeId());
+         connectSceneNodeResult.setPortId(model.getPortId());
+         connectSceneNodeResult.setExternalSceneId(model.getExternalSceneId());
+         connectSceneNodeResult.setExternalNodeId(model.getExternalNodeId());
 //        connectSceneNodeResult.setExternalNodeIp(result.getIp());
-        return connectSceneNodeResult;
-    }
+         return connectSceneNodeResult;
+     }
+
 }

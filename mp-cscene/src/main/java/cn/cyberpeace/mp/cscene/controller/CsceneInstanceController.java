@@ -1794,6 +1794,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiImplicitParam(name = "updateNodeCommand", value = "请求体", dataTypeClass = UpdateNodeCommand.class)
     @PostMapping("/update_node_command")
     public ServiceResult<Boolean> updateNodeCommand(@RequestBody UpdateNodeCommand updateNodeCommand) {
+        getModelService().updateSceneElementCommand(updateNodeCommand);
         return new ServiceResult<>(true).asResult();
     }
 
@@ -1801,6 +1802,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiImplicitParam(name = "deleteNodeCommand", value = "请求体", dataTypeClass = DeleteNodeCommand.class)
     @PostMapping("/delete_node_command")
     public ServiceResult<Boolean> deleteNodeCommand(@RequestBody DeleteNodeCommand deleteNodeCommand) {
+        getModelService().deleteSceneElementCommand(deleteNodeCommand);
         return new ServiceResult<>(true).asResult();
     }
 
