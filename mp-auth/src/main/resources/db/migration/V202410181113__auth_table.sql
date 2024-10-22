@@ -1,0 +1,1 @@
+UPDATE `mp`.`mp_auth_target_difference` SET `difference` = 'cr-standard-device-folder,cloud-image-manage,real-manage,image-manage,cr-collection-system-folder,load-management,back_all' WHERE `pk` = 3
