@@ -28,10 +28,10 @@ spring:
 springfox:
   documentation:
     ext-var:
-      enabled: ${SWAGGER_DOC_ENABLED:false}
-      auto-startup: ${SWAGGER_DOC_STARTUP:false}
+      enabled: ${SWAGGER_DOC_ENABLED:true}
+      auto-startup: ${SWAGGER_DOC_STARTUP:true}
       swagger-ui:
-        enabled: ${SWAGGER_DOC_UI:false}
+        enabled: ${SWAGGER_DOC_UI:true}
 
 # 中台各模块相关配置
 mp:

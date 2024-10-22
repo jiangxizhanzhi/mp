@@ -31,8 +31,10 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
+import cn.cyberpeace.mp.scene.model.SceneBusinessElementCommandModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.repository.SceneBusinessElementCommandMapper;
 import cn.cyberpeace.mp.scene.util.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.*;
@@ -859,6 +861,19 @@ public class CreateHandler extends HandlerCommon {
             builder.addAllDns(getHandlerUtils().getDnsIpAndDomains());
         }
         List<String> cloudInitCommands = builder.build();
+
+        // 加入业务添加的功能
+        String csceneId = SceneContextHolder.getCsceneInstanceId();
+        var commandMapper = BeanCommon.getBean(SceneBusinessElementCommandMapper.class);
+        var commandModels = commandMapper.list(new HumanCondition().filterEqual(SceneBusinessElementCommandModel::getScene, csceneId));
+        if (!commandModels.isEmpty()) {
+            String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+            commandModels.forEach(c -> {
+                String file = metadataFileServer + InstallerUtils.FILE_URL_SEPARATOR + c.getFile();
+                String command = c.getCommand();
+            });
+        }
+
         String command = SystemTypeCommandUtils.joinCommands(standardSystemType, cloudInitCommands.toArray(new String[0]));
         if (!StringUtils.isEmpty(command)) {
             if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
