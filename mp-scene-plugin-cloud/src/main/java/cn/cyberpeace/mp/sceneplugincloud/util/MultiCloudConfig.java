@@ -65,8 +65,8 @@ public class MultiCloudConfig {
         for (String cloudInfo : cloudInfoList) {
             String[] keyAndIp = cloudInfo.split("-");
             String key = keyAndIp[0];
-            String ip = keyAndIp[1];
-            cloudConfigs.put(key, new CloudConfig(ip, 11111));
+            String server = keyAndIp[1];
+            cloudConfigs.put(key, new CloudConfig(server));
         }
         for (String key : cloudConfigs.keySet()) {
             log.info("find cloud info, {} -> {}", key, cloudConfigs.get(key).getServerUrl());
@@ -87,8 +87,8 @@ public class MultiCloudConfig {
 
         private String mgmtNetId;
 
-        public CloudConfig(String server, Integer port) {
-            this.serverUrl = "http://" + server + ":" + port;
+        public CloudConfig(String server) {
+            this.serverUrl = server;
             this.cloudHttpClient = new CloudHttpClient(serverUrl);
             this.externalNetId = new VirtualInternet(cloudHttpClient).create().getExternalNetId();
             this.externalNetCidr = new Network(cloudHttpClient).get(this.externalNetId).getSubnet().getCidr();
