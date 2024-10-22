@@ -177,6 +177,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.dhcp_ip_allocate:true}")
     private Boolean dhcpIpAllocate;
 
+    @Value("${mp.sceneplugincloud.multi_cloud_info:}")
+    public String multiCloudInfo;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 

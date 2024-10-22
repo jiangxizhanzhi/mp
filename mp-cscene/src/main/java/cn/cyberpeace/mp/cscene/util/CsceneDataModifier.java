@@ -629,6 +629,25 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void updateCloudIndex(CsceneInstanceBO instance, String cloudIndex) {
+        if (instance.getScene() == null) {
+            return;
+        }
+        if (instance.getScene().getPlugins() == null) {
+            return;
+        }
+        if (!instance.getScene().getPlugins().containsKey("cpcloud")) {
+            return;
+        }
+        var cloudPlugin = instance.getScene().getPlugins().get("cpcloud");
+        var scene = cloudPlugin.getScene();
+        if (scene == null) {
+            scene = new HashMap<>();
+        }
+        scene.put("cloud_index", cloudIndex);
+        cloudPlugin.setScene(scene);
+    }
+
     public static void correctName(String csceneId, String referenceMetaData, CsceneInstanceBO csceneInstance, CsceneBO cscene, CsceneBO dbCscene, String name) {
         if (csceneInstance == null) {
             return;

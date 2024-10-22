@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.util;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Network;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 @Component
 public class MultiCloudConfig {
     public static final String DEFAULT = "default";
@@ -53,15 +56,29 @@ public class MultiCloudConfig {
 
     @PostConstruct
     public void init() {
-        cloudConfigs.put("default", new CloudConfig("10.100.27.1", 11111));
-        cloudConfigs.put("a1", new CloudConfig("10.4.1.36", 11111));
-        cloudConfigs.put("a2", new CloudConfig("10.4.1.37", 11111));
+        String multiCloudInfo = cloudAppConfig.getMultiCloudInfo();
+        if (StringUtils.isEmpty(multiCloudInfo)) {
+            log.error("failed to read multi cloud info !");
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
+        }
+        String[] cloudInfoList = multiCloudInfo.split(",");
+        for (String cloudInfo : cloudInfoList) {
+            String[] keyAndIp = cloudInfo.split("-");
+            String key = keyAndIp[0];
+            String ip = keyAndIp[1];
+            cloudConfigs.put(key, new CloudConfig(ip, 11111));
+        }
+        for (String key : cloudConfigs.keySet()) {
+            log.info("find cloud info, {} -> {}", key, cloudConfigs.get(key).getServerUrl());
+        }
     }
 
     @Slf4j
     @Getter
     @Setter
     private static class CloudConfig {
+        private String serverUrl;
+
         private CloudHttpClient cloudHttpClient;
 
         private String externalNetId;
@@ -71,7 +88,7 @@ public class MultiCloudConfig {
         private String mgmtNetId;
 
         public CloudConfig(String server, Integer port) {
-            String serverUrl = "http://" + server + ":" + port;
+            this.serverUrl = "http://" + server + ":" + port;
             this.cloudHttpClient = new CloudHttpClient(serverUrl);
             this.externalNetId = new VirtualInternet(cloudHttpClient).create().getExternalNetId();
             this.externalNetCidr = new Network(cloudHttpClient).get(this.externalNetId).getSubnet().getCidr();

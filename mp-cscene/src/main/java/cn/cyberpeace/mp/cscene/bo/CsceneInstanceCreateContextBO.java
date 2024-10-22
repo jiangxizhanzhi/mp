@@ -33,4 +33,7 @@ public class CsceneInstanceCreateContextBO {
     @ApiModelProperty(value = "场景上下文数据")
     private CsceneContextBO context;
 
+    @ApiModelProperty(value = "指定在哪个云环境启动场景")
+    private String cloudIndex;
+
 }
