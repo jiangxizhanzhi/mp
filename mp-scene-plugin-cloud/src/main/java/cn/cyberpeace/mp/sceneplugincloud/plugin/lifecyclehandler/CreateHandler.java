@@ -868,10 +868,15 @@ public class CreateHandler extends HandlerCommon {
         var commandModels = commandMapper.list(new HumanCondition().filterEqual(SceneBusinessElementCommandModel::getScene, csceneId));
         if (!commandModels.isEmpty()) {
             String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
-            commandModels.forEach(c -> {
-                String file = metadataFileServer + InstallerUtils.FILE_URL_SEPARATOR + c.getFile();
+            for (SceneBusinessElementCommandModel c : commandModels) {
+                String remoteFile = metadataFileServer + InstallerUtils.FILE_URL_SEPARATOR + c.getFile();
                 String command = c.getCommand();
-            });
+                String localDir = "/tmp/" + c.getBusinessKey();
+                String localFile = "/tmp/" + c.getBusinessKey() + ".zip";
+                cloudInitCommands.add(String.format("curl -o %s %s", localFile, remoteFile));
+                cloudInitCommands.add(String.format("unzip %s %s", localFile, localDir));
+                cloudInitCommands.add(String.format("cd %s && %s", localDir, command));
+            }
         }
 
         String command = SystemTypeCommandUtils.joinCommands(standardSystemType, cloudInitCommands.toArray(new String[0]));
