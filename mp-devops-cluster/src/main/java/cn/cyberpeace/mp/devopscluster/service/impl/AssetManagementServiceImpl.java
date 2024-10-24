@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -65,6 +66,9 @@ public class AssetManagementServiceImpl implements AssetManagementService {
         for (AssetManagementVO assetManagementVO : assetManagementVOS) {
             List<String> ids = JSON.parseArray(assetManagementVO.getTeamId(), String.class);
             teamIdsOrUserIds.addAll(ids);
+        }
+        if (teamIdsOrUserIds.size()==0){
+            return new ListObjResult(assetManagementVOS, total).asResult();
         }
 
         //1是团队2是个人
@@ -109,9 +113,15 @@ public class AssetManagementServiceImpl implements AssetManagementService {
         }
         AssetManagementModel assetManagementModel = assetManagementMapper.get(assetManagementRequest.getId());
         AssetManagementVO assetManagementVO = new AssetManagementVO();
+        if (Objects.isNull(assetManagementModel)) {
+            return new ServiceResult<>(assetManagementVO);
+        }
         BeanUtils.copyProperties(assetManagementModel,assetManagementVO);
 
         List<String> ids = JSON.parseArray(assetManagementModel.getTeamId(), String.class);
+        if (ids.size()==0) {
+            return new ServiceResult<>(assetManagementVO);
+        }
         if (1==assetManagementRequest.getType()){
             HumanCondition humanCondition = new HumanCondition().filterIn(TeamModel::getId, ids.toArray());
             List<TeamModel> list = teamMapper.list(humanCondition);
