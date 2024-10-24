@@ -11,4 +11,6 @@ public class AssetManagementPageRequest extends PageRequest {
     private String sceneId;
 
     private String name;
+
+    private Integer type;
 }

@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
+import cn.cyberpeace.mp.cscene.service.SceneMonitorService;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.request.AssetManagementPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.AssetManagementRequest;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -24,6 +27,9 @@ public class AssetManagementController {
 
     @Autowired
     private AssetManagementService assetManagementService;
+
+    @Autowired
+    private SceneMonitorService sceneMonitorService;
 
 
     @GetMapping("/page")
@@ -38,8 +44,15 @@ public class AssetManagementController {
     }
     @PostMapping("")
     @ApiOperation(value = "批量新增资产管理", notes = "")
-    public ServiceResult<Object> insertListAssetManagement(@RequestBody List<AssetManagementRequest> assetManagementRequest){
-        return assetManagementService.insertListAssetManagement(assetManagementRequest).asResult();
+    public ServiceResult<Object> insertListAssetManagement(@RequestBody String sceneId){
+        List<ElementMonitorBasicInfo> allSceneElements = sceneMonitorService.getAllSceneElements(sceneId, false, null);
+        List<AssetManagementRequest> assetManagementRequests = allSceneElements.stream().map(allSceneElement -> {
+            AssetManagementRequest assetManagementRequest = new AssetManagementRequest();
+            assetManagementRequest.setName(allSceneElement.getName());
+            assetManagementRequest.setAddress(allSceneElement.getPorts().get(0).getIp());
+            return assetManagementRequest;
+        }).collect(Collectors.toList());
+        return assetManagementService.insertListAssetManagement(assetManagementRequests).asResult();
     }
     @PatchMapping
     @ApiOperation(value = "修改资产管理", notes = "")

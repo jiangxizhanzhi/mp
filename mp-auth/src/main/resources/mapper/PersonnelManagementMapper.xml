@@ -13,4 +13,7 @@
     <select id="selectALl" resultType="cn.cyberpeace.mp.auth.model.PersonnelManagementModel">
         select * from mp_auth_personnel_management
     </select>
+    <select id="selectByNameToTeamName" resultType="java.lang.String" parameterType="java.lang.String">
+        SELECT mat.`name` FROM `mp_auth_personnel_management` as mapm INNER JOIN mp_auth_team as mat on mapm.team_id = mat.id WHERE mapm.`name` = #{creator};
+    </select>
 </mapper>

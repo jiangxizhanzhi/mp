@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.devopscluster.request;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class AssetManagementRequest {
 
@@ -15,7 +17,9 @@ public class AssetManagementRequest {
     //资产描述
     private String description;
     //队伍或者人员id
-    private String teamId;
+    private List<String> teamId;
     //相关联的场景ID
     private String sceneId;
+
+    private Integer type;
 }
