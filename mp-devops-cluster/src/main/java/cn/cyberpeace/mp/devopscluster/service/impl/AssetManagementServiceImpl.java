@@ -140,6 +140,7 @@ public class AssetManagementServiceImpl implements AssetManagementService {
         }
         AssetManagementModel assetManagementModel = new AssetManagementModel();
         BeanUtils.copyProperties(assetManagementRequest,assetManagementModel);
+        assetManagementModel.setTeamId(JSON.toJSONString(assetManagementRequest.getTeamId()));
 
         return new ServiceResult<>(assetManagementMapper.update(assetManagementModel));
     }
