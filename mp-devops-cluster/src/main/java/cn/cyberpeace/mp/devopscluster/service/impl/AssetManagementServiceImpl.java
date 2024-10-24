@@ -51,8 +51,10 @@ public class AssetManagementServiceImpl implements AssetManagementService {
         }
             HumanCondition humanCondition = new HumanCondition().orderBy(AssetManagementModel::getCreateTime)
                     .pagination(assetManagementPageRequest.getPage(), assetManagementPageRequest.getPageSize())
-                    .filterContains(AssetManagementModel::getName,assetManagementPageRequest.getName())
-                    .filterContains(AssetManagementModel::getSceneId,assetManagementPageRequest.getSceneId());
+                    .filterEqual(AssetManagementModel::getSceneId,assetManagementPageRequest.getSceneId());
+        if(assetManagementPageRequest.getName()!=null){
+            humanCondition.filterContains(AssetManagementModel::getName,assetManagementPageRequest.getName());
+        }
             int total = assetManagementMapper.total(humanCondition);
             List<AssetManagementModel> models = assetManagementMapper.list(humanCondition);
             //封装返回

@@ -22,7 +22,7 @@ public class TaskManagementModel extends BaseModel {
     private String assetsName;
     //红方人员或者队伍id
     private String redId;
-    //裁判id
+    //裁判id或者裁判队伍id
     private String refereeId;
     //相关联的场景ID
     private String sceneId;

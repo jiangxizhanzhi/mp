@@ -9,4 +9,8 @@ public class TaskManagementPageRequest extends PageRequest {
 
     //场景id
     private String sceneId;
+
+    private String type;
+
+    private String name;
 }

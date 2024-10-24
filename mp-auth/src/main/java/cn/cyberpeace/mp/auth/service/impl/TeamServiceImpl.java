@@ -27,6 +27,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.IdGenerator;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -243,6 +244,10 @@ public class TeamServiceImpl implements TeamService {
         //2,战队名称不存在直接抛异常
         List<String> teamNameList = exportPersonnelManagementBos.stream().map(ExportPersonnelManagementBo::getTeamName).collect(Collectors.toList());
         List<String> distinctTeamNameList = teamNameList.stream().distinct().collect(Collectors.toList());
+        //防止filterIn方法查询报错
+        if (distinctTeamNameList.size()==0) {
+            distinctTeamNameList.add("1");
+        }
         HumanCondition humanCondition = new HumanCondition().filterIn(TeamModel::getName, distinctTeamNameList.toArray());
         List<TeamModel> selectByNameTeamList = teamMapper.list(humanCondition);
         if (distinctTeamNameList.size()!=selectByNameTeamList.size()) {

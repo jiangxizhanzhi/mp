@@ -19,7 +19,7 @@ public class AssetManagementModel extends BaseModel {
     //资产地址
     private String address;
     //分值
-    private String score;
+    private Integer score;
     //资产描述
     private String description;
     //队伍或者人员id

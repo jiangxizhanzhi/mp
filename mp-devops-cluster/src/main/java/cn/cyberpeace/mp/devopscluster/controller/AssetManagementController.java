@@ -42,6 +42,12 @@ public class AssetManagementController {
     public ServiceResult<Object> getAssetManagement(AssetManagementRequest assetManagementRequest){
        return assetManagementService.getAssetManagement(assetManagementRequest).asResult();
     }
+    @PostMapping("/one")
+    @ApiOperation(value = "批量新增资产管理", notes = "")
+    public ServiceResult<Object> insertAssetManagement(@RequestBody AssetManagementRequest assetManagementRequest){
+
+        return assetManagementService.insertPageAssetManagement(assetManagementRequest).asResult();
+    }
     @PostMapping("")
     @ApiOperation(value = "批量新增资产管理", notes = "")
     public ServiceResult<Object> insertListAssetManagement(@RequestBody String sceneId){
