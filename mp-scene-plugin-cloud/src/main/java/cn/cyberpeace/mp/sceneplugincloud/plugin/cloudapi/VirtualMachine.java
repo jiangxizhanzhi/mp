@@ -395,6 +395,19 @@ public class VirtualMachine extends CloudClient {
         return true;
     }
 
+    public boolean updatePort(String instanceId, List<VirtualMachineAddPortData> addNic, List<String> deleteNetworkIds) {
+        String url = CloudUrlConstant.UPDATE_NETWORK;
+        VirtualMachineUpdatePortData updatePortData = new VirtualMachineUpdatePortData();
+        updatePortData.setType("vm");
+        updatePortData.setDeleteNics(deleteNetworkIds);
+        updatePortData.setAddNics(addNic);
+        updatePortData.setHwVifModel("virtio");
+        updatePortData.setSpecial(false);
+        cloudPost(url, updatePortData, null, new TypeReference<CloudResponse<Object>>() {
+        }, true);
+        return true;
+    }
+
     /**
      * snapshot
      *

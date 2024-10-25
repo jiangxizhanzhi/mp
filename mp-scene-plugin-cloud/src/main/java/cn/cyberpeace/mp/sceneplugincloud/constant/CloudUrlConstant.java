@@ -10,7 +10,9 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.sceneplugincloud.constant;
 
-/**
+ import org.apache.kafka.common.protocol.types.Field;
+
+ /**
  * @ClassName CloudUrlConstant
  * @Description
  * @Author maojun
@@ -34,6 +36,8 @@ public class CloudUrlConstant {
      * 修改节点接口，可以不用
      */
     public static final String CONTAINER_DELETE_PORT_URL = "/cloud/v1/scenarios/detach_network";
+
+    public static final String UPDATE_NETWORK = "/cloud/v1/scenarios/node/network";
 
     /**
      *
