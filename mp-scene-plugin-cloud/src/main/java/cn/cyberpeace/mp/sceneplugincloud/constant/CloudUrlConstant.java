@@ -35,6 +35,8 @@ public class CloudUrlConstant {
      */
     public static final String CONTAINER_DELETE_PORT_URL = "/cloud/v1/scenarios/detach_network";
 
+    public static final String UPDATE_NETWORK = "/cloud/v1/scenarios/node/network";
+
     /**
      *
      * todo

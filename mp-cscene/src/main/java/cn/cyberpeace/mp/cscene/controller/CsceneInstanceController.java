@@ -42,6 +42,7 @@ package cn.cyberpeace.mp.cscene.controller;
  import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
  import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
  import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
+ import cn.cyberpeace.mp.cscene.controller.request.AddNodeNetwork;
  import cn.cyberpeace.mp.cscene.controller.request.ConnectSceneNode;
  import cn.cyberpeace.mp.cscene.controller.request.ConnectSceneNodeResult;
  import cn.cyberpeace.mp.cscene.controller.request.CreateNode;
@@ -63,6 +64,7 @@ package cn.cyberpeace.mp.cscene.controller;
  import cn.cyberpeace.mp.cscene.controller.request.CsceneStrategyRequest;
  import cn.cyberpeace.mp.cscene.controller.request.DeleteNode;
  import cn.cyberpeace.mp.cscene.controller.request.DeleteNodeCommand;
+ import cn.cyberpeace.mp.cscene.controller.request.DeleteNodeNetwork;
  import cn.cyberpeace.mp.cscene.controller.request.DisConnectSceneNode;
  import cn.cyberpeace.mp.cscene.controller.request.ElementSnapshotActionRequest;
  import cn.cyberpeace.mp.cscene.controller.request.QueryNode;
@@ -1795,6 +1797,22 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @PostMapping("/update_node_command")
     public ServiceResult<Boolean> updateNodeCommand(@RequestBody UpdateNodeCommand updateNodeCommand) {
         getModelService().updateSceneElementCommand(updateNodeCommand);
+        return new ServiceResult<>(true).asResult();
+    }
+
+    @ApiOperation("给节点加一个网络")
+    @ApiImplicitParam(name = "addNodeNetwork", value = "请求体", dataTypeClass = AddNodeNetwork.class)
+    @PostMapping("/add_node_network")
+    public ServiceResult<Boolean> addNodeNetwork(@RequestBody AddNodeNetwork addNodeNetwork) {
+        getModelService().addNodeNetwork(addNodeNetwork);
+        return new ServiceResult<>(true).asResult();
+    }
+
+    @ApiOperation("给节点删除一个网络")
+    @ApiImplicitParam(name = "deleteNodeNetwork", value = "请求体", dataTypeClass = DeleteNodeNetwork.class)
+    @PostMapping("/delete_node_network")
+    public ServiceResult<Boolean> deleteNodeNetwork(@RequestBody DeleteNodeNetwork deleteNodeNetwork) {
+        getModelService().deleteNodeNetwork(deleteNodeNetwork);
         return new ServiceResult<>(true).asResult();
     }
 

@@ -44,6 +44,8 @@ import cn.cyberpeace.mp.cscene.controller.request.DisConnectSceneNode;
 import cn.cyberpeace.mp.cscene.controller.request.UpdateNodeCommand;
 import cn.cyberpeace.mp.cscene.core.BcSceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
+import cn.cyberpeace.mp.cscene.controller.request.AddNodeNetwork;
+import cn.cyberpeace.mp.cscene.controller.request.DeleteNodeNetwork;
 import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneInfo;
@@ -2849,6 +2851,34 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
          connectSceneNodeResult.setExternalNodeId(model.getExternalNodeId());
 //        connectSceneNodeResult.setExternalNodeIp(result.getIp());
          return connectSceneNodeResult;
+     }
+
+
+     public void addNodeNetwork(AddNodeNetwork addNodeNetwork) {
+         String csceneId = addNodeNetwork.getSceneId();
+         String sceneId = getSceneId(csceneId);
+         var sceneHandler = new SceneHandler(sceneId, null, false, new SceneContextBO());
+         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler("cpcloud");
+         String instanceId = pluginHandler.getElement(addNodeNetwork.getNodeId()).getResourceId();
+
+         List<VirtualMachineAddPortData> addPortDatas = new ArrayList<>();
+         VirtualMachineAddPortData addPortData = new VirtualMachineAddPortData();
+         addPortData.setNetworkId(addNodeNetwork.getNetworkId());
+         addPortData.setFixedIp(addNodeNetwork.getIp());
+         addPortDatas.add(addPortData);
+         new VirtualMachine().updatePort(instanceId, addPortDatas, new ArrayList<>());
+     }
+
+     public void deleteNodeNetwork(DeleteNodeNetwork deleteNodeNetwork) {
+         String csceneId = deleteNodeNetwork.getSceneId();
+         String sceneId = getSceneId(csceneId);
+         var sceneHandler = new SceneHandler(sceneId, null, false, new SceneContextBO());
+         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler("cpcloud");
+         String instanceId = pluginHandler.getElement(deleteNodeNetwork.getNodeId()).getResourceId();
+
+         List<String> deleteNetworkIds = new ArrayList<>();
+         deleteNetworkIds.add(deleteNodeNetwork.getNetworkId());
+         new VirtualMachine().updatePort(instanceId, new ArrayList<>(), deleteNetworkIds);
      }
 
 }
