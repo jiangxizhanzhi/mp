@@ -398,6 +398,7 @@ public class VirtualMachine extends CloudClient {
     public boolean updatePort(String instanceId, List<VirtualMachineAddPortData> addNic, List<String> deleteNetworkIds) {
         String url = CloudUrlConstant.UPDATE_NETWORK;
         VirtualMachineUpdatePortData updatePortData = new VirtualMachineUpdatePortData();
+        updatePortData.setNodeId(instanceId);
         updatePortData.setType("vm");
         updatePortData.setDeleteNics(deleteNetworkIds);
         updatePortData.setAddNics(addNic);
