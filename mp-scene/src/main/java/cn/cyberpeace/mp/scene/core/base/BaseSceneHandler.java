@@ -1802,6 +1802,18 @@ public abstract class BaseSceneHandler<
         // 保存区域，可能会跨区域连接
         DiffTargets<TSceneAreaModel> diffAreas = saveAreas(existAreaMap);
         DiffTargets<TScenePieceModel> diffPieces = savePieces(existPieceMap);
+        // 删除掉区块时 原本属于区块的节点应该要变成当前层下的节点
+        if (CollectionUtils.isNotEmpty(diffAreas.getRemovingTargets())) {
+            Set<String> removedAreaIds = new HashSet<>();
+            for (TSceneAreaModel e : diffAreas.getRemovingTargets()) {
+                removedAreaIds.add(e.getNodeId());
+            }
+            for (TSceneElementBO v : getElementMap().values()) {
+                if (removedAreaIds.contains(v.getArea())) {
+                    v.setArea(areaId == null ? "" : areaId);
+                }
+            }
+        }
         DiffTargets<TSceneElementModel> diffElements = saveElements(existElementMap);
         DiffTargets<TSceneElementPortModel> diffElementPorts = saveElementPorts(existElementPortMap);
         // 此时可能存在已被删除的跨区域连接，可优化
