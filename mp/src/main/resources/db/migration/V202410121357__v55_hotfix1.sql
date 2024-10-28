@@ -49,3 +49,4 @@ INSERT IGNORE INTO `mp_sceneplugincollection_wazuh_rule`( `file`, `relative_dirn
 INSERT IGNORE INTO `mp_sceneplugincollection_wazuh_rule_type_relation`( `id`, `rule_id`, `type_id`, `create_time`, `update_time`) VALUES ( NULL, '34300', '9', now(), now());
 INSERT IGNORE INTO `mp_sceneplugincollection_wazuh_rule`( `file`, `relative_dirname`, `id`, `level`, `status`, `details`, `pci_dss`, `gpg13`, `gdpr`, `hipaa`, `nist`, `tsc`, `mitre`, `groups`, `description`, `create_time`, `update_time`) VALUES ( 'postgres_rules.xml', 'etc/rules', '34300', 7, 'enabled', '', '[]', '[]', '[]', '[]', '[]', '[]', '[]', '[\"syslog\"]', 'postgres database started', now(), now());
 
+INSERT IGNORE INTO `mp_common_option`( `id`, `code`, `parent_code`, `zh_name`, `en_name`, `sort`, `type`, `meta`, `create_time`, `update_time`) VALUES ( 'fe6dd6f30f0411ed996d0242ac110002', '5', '', '授权', 'licence', 5, 'notice_type', '{\"activKeys\":\"no_auth\",\"visible\":1}', now(), now());
