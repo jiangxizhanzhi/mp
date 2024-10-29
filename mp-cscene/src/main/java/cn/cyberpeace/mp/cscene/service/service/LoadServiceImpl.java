@@ -1191,5 +1191,9 @@ public class LoadServiceImpl {
         }
         return flag;
     }
+
+    public Boolean batchAddLoadResult(List<MpDevopsLoadSceneLog> list) {
+        return loadMapper.batchAddLoadResult(list);
+    }
 }
 

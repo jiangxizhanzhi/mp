@@ -218,6 +218,36 @@
         (#{sceneId},#{param.fileName},#{param.httpUrl},now(),now())
     </insert>
 
+    <insert id="batchAddLoadResult">
+        INSERT INTO mp_devops_load_scene_result_log
+        (id,
+        instance_id,
+        scene_id,
+        stage_id,
+        task_id,
+        result_log,
+        result_status,
+        result_type,
+        update_time,
+        create_time,
+        creator_id)
+        VALUES
+        <foreach item="item" collection="param" separator=",">
+            (#{item.id},
+            #{item.instanceId},
+            #{item.sceneId},
+            #{item.stageId},
+            #{item.taskId},
+            #{item.resultLog},
+            #{item.resultStatus},
+            #{item.resultType},
+            now(),
+            now(),
+            #{item.creatorId}
+            )
+        </foreach>
+    </insert>
+
     <update id="updateLoadByPk">
         UPDATE
         mp_devops_load

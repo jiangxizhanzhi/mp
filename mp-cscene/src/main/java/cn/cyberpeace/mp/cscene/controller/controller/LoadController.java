@@ -295,8 +295,18 @@ public class LoadController {
      * 批量新增载荷执行结果
      * */
     @ApiOperation(value = "批量新增载荷执行结果", notes = "")
-    @PostMapping("/addLoadExecutionOutResult")
-    public ServiceResult addLoadExecutionOutResult(@RequestBody(required = false) List<LoadRequest> requestData) {
+    @PostMapping("/batchAddLoadResult")
+    public ServiceResult<Boolean> batchAddLoadResult(@RequestBody List<MpDevopsLoadSceneLog> list) {
+        Boolean result = loadService.batchAddLoadResult(list);
+        return new ServiceResult<>(result);
+    }
+
+    /*
+     * 批量修改载荷执行结果
+     * */
+    @ApiOperation(value = "批量修改载荷执行结果", notes = "")
+    @PostMapping("/updateLoadExecutionOutResult")
+    public ServiceResult updateLoadExecutionOutResult(@RequestBody List<LoadRequest> requestData) {
         ServiceResult serviceResult = loadService.updateLoadExecutionOutResult(requestData);
         return serviceResult;
     }
