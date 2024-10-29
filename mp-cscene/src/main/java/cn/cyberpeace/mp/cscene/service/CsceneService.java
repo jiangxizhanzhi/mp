@@ -489,7 +489,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 csceneBO.getSceneConfig().getTopology().getScene().setEid(sceneId);
             }
 //            获取百万节点id 单独处理其数据
-            if(situationAwareConfig.getMillionScene().contains(csceneBO.getId())){
+            if(csceneBO.getId()!= null && situationAwareConfig.getMillionScene().contains(csceneBO.getId())){
                 SceneConfigDataBO sceneConfig = csceneBO.getSceneConfig();
                 SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneConfig,true, null);
                 sceneConfigHandler.save();
