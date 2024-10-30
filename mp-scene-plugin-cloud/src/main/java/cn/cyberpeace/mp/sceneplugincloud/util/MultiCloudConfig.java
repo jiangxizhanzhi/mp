@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincloud.util;
 
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Network;
@@ -23,6 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Component
 public class MultiCloudConfig {
+    private static boolean multiEnable = false;
+
     public static final String DEFAULT = "default";
 
     private static final Map<String, CloudConfig> cloudConfigs = new ConcurrentHashMap<>();
@@ -31,7 +31,12 @@ public class MultiCloudConfig {
     private CloudAppConfig cloudAppConfig;
 
     public static CloudHttpClient get(String key) {
-        return cloudConfigs.get(key).getCloudHttpClient();
+        if (!multiEnable) {
+            // 未开启多云 则无论传什么key都返回默认的云
+            return cloudConfigs.get(DEFAULT).getCloudHttpClient();
+        } else {
+            return cloudConfigs.get(key).getCloudHttpClient();
+        }
     }
 
     public static String getMgmtNetId(String key) {
@@ -58,16 +63,19 @@ public class MultiCloudConfig {
     public void init() {
         String multiCloudInfo = cloudAppConfig.getMultiCloudInfo();
         if (StringUtils.isEmpty(multiCloudInfo)) {
-            log.error("failed to read multi cloud info !");
-            throw new MpRuntimeException(BaseErrorCode.ERROR);
+            multiEnable = false;
+            cloudConfigs.put(DEFAULT, new CloudConfig(cloudAppConfig.getCpcloudServer()));
+        } else {
+            multiEnable = true;
+            String[] cloudInfoList = multiCloudInfo.split(",");
+            for (String cloudInfo : cloudInfoList) {
+                String[] keyAndIp = cloudInfo.split("-");
+                String key = keyAndIp[0];
+                String server = keyAndIp[1];
+                cloudConfigs.put(key, new CloudConfig(server));
+            }
         }
-        String[] cloudInfoList = multiCloudInfo.split(",");
-        for (String cloudInfo : cloudInfoList) {
-            String[] keyAndIp = cloudInfo.split("-");
-            String key = keyAndIp[0];
-            String server = keyAndIp[1];
-            cloudConfigs.put(key, new CloudConfig(server));
-        }
+        log.info("multi cloud is {}", multiEnable ? "enable" : "disable");
         for (String key : cloudConfigs.keySet()) {
             log.info("find cloud info, {} -> {}", key, cloudConfigs.get(key).getServerUrl());
         }
