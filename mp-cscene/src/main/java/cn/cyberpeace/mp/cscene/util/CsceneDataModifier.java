@@ -462,6 +462,9 @@ public class CsceneDataModifier {
         var cpcloudPluginScene = Optional.ofNullable(scenePluginDataBO.getScene())
                 .orElse(new HashMap<>());
         cpcloudPluginScene.put("enable_recording", enableRecording);
+        if(!cpcloudPluginScene.containsKey("cloudIndex")){
+            cpcloudPluginScene.put("cloudIndex","default");
+        }
         scenePluginDataBO.setScene(cpcloudPluginScene);
     }
 
