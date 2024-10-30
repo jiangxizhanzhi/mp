@@ -75,7 +75,11 @@ public enum OpModuleEnums {
 
     @JsonCreator
     public static OpModuleEnums fromValue(int value) {
-        return values()[value];
+        var op_values = values();
+        if (value > op_values.length - 1) {
+            return op_values[op_values.length - 1];
+        }
+        return op_values[value];
     }
 
     @JsonValue
