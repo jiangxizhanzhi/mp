@@ -46,6 +46,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
+import cn.cyberpeace.mp.sceneplugincloud.util.MultiCloudConfig;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -559,6 +560,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         if (StringUtils.isNotEmpty(createContext.getCloudIndex())) {
             CsceneDataModifier.updateCloudIndex(csceneInstance, createContext.getCloudIndex());
+        }else{
+            CsceneDataModifier.updateCloudIndex(csceneInstance, MultiCloudConfig.DEFAULT);
         }
         return new ServiceResult<>(csceneHandler.createTestInstance(unique, csceneInstance));
     }
@@ -614,6 +617,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
         if (StringUtils.isNotEmpty(createContext.getCloudIndex())) {
             CsceneDataModifier.updateCloudIndex(csceneInstance, createContext.getCloudIndex());
+        }else{
+            CsceneDataModifier.updateCloudIndex(csceneInstance, MultiCloudConfig.DEFAULT);
         }
         return new ServiceResult<>(csceneHandler.createAppInstance(unique, csceneInstance));
     }
