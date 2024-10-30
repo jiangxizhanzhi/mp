@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CommonOutServiceServiceImpl {
 
-    // 载荷改造地址
+    // 共性平台改造地址
     @Value("${project.setting.gxpt-service-url:http://ip:port}")
     private String GXPT_SERVICE_URL;
 
