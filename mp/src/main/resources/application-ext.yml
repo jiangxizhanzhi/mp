@@ -37,6 +37,7 @@ springfox:
 project:
   setting:
     load-transform-url: ${LOAD-TRANSFORM-URL:127.0.0.1:80}
+    gxpt-service-url: ${GXPT-SERVICE-URL:127.0.0.1:81}
 
 # 中台各模块相关配置
 mp:
