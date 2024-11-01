@@ -1478,8 +1478,10 @@ public class CreateHandler extends HandlerCommon {
             VirtualNic virtualNic = new VirtualNic();
             virtualNic.setFixedIp(hostRoute.getNexthop());
             for (var n : nets) {
-                if (IpUtils.newIsInCidr(virtualNic.getFixedIp(), n.getNetwork().getCidr())) {
+                if (StringUtils.equals(n.getNetwork().getCidr(),entry.getKey())) {
+                    log.info("find same cidr {} , net_id is {}",entry.getKey(),n.getNetwork().getResourceId());
                     virtualNic.setNetworkId(n.getNetwork().getResourceId());
+                    break;
                 }
             }
             virtualNics.add(virtualNic);
