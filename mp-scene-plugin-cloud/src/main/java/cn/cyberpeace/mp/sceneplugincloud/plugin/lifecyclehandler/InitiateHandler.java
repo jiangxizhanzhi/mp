@@ -187,7 +187,7 @@ public class InitiateHandler extends HandlerCommon {
         if (createInternalVm) {
             for (var elementBO : getPluginHandler().getElementMap().values()) {
                 for (var networkBO : elementBO.getDeriveNetworks()) {
-                    log.info("init createInternalVm net : {}", JsonCommon.stringify(networkBO));
+                    log.info("init createInternalVm net : {}", JsonCommon.stringify(networkBO.getNetwork()));
                     // 外部网络不需要处理
                     if (CloudSingleton.cloudAppConfig.getExternalNetId()
                             .equals(networkBO.getNetwork().getResourceId())) {
@@ -212,10 +212,11 @@ public class InitiateHandler extends HandlerCommon {
                     hostRoutes.add(hostRoute);
                     networkBO.getNetwork().setHostRoutes(hostRoutes);
 
-                    getPluginHandler().getHandlerUtils().getHostRouteMap().put(networkInfo, hostRoute);
+                    getPluginHandler().getHandlerUtils().getHostRouteMap().put(networkInfo.getCidr(), hostRoute);
                 }
             }
         }
+        log.info("init createInternalVm net : {}", JsonCommon.stringify(getPluginHandler().getHandlerUtils().getHostRouteMap()));
     }
 
     public void initiateForSingleNode(List<CloudPluginSceneElementBO> noEventElements) {

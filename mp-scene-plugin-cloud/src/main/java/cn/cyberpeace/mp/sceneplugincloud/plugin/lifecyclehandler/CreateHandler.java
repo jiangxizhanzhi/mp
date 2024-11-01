@@ -1464,7 +1464,7 @@ public class CreateHandler extends HandlerCommon {
         getPluginHandler().getScene().setInternalVmId(vm.getId());
     }
 
-    private void createInternalServerVmMode2(Map<CloudPluginSceneElementNetworkBO, HostRoute> hostRouteMap ){
+    private void createInternalServerVmMode2(Map<String, HostRoute> hostRouteMap ){
         var nets = new ArrayList<ConnectedNetworkBO>();
         for (CloudPluginSceneElementBO e : getPluginHandler().getElementMap().values()) {
             for (ConnectedNetworkBO n : e.getDeriveNetworks()) {

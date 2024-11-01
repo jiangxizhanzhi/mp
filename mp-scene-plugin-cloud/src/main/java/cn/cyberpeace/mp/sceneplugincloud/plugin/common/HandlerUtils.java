@@ -51,13 +51,13 @@ public class HandlerUtils {
 
     private List<HostRoute> internalServerHostRoutes = null;
 
-    private Map<CloudPluginSceneElementNetworkBO, HostRoute> hostRouteMap = new ConcurrentHashMap<>();
+    private Map<String, HostRoute> hostRouteMap = new ConcurrentHashMap<>();
 
-    public Map<CloudPluginSceneElementNetworkBO, HostRoute> getHostRouteMap() {
+    public Map<String, HostRoute> getHostRouteMap() {
         return hostRouteMap;
     }
 
-    public void setHostRouteMap(Map<CloudPluginSceneElementNetworkBO, HostRoute> hostRouteMap) {
+    public void setHostRouteMap(Map<String, HostRoute> hostRouteMap) {
         this.hostRouteMap = hostRouteMap;
     }
 
