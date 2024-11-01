@@ -1482,9 +1482,9 @@ public class CreateHandler extends HandlerCommon {
         VirtualMachineCreateData createData = new VirtualMachineCreateData();
         createData.setName("MP_SCENE_SPEC_VM_" + getPluginHandler().getSrcScene().getEid());
         createData.setImage(CloudSingleton.cloudAppConfig.getInternalVmImage());
-        createData.setCpu(2);
-        createData.setRam(2048);
-        createData.setDisk(60);
+        createData.setCpu(4);
+        createData.setRam(4096);
+        createData.setDisk(80);
         createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
         createData.setNetworks(virtualNics);
         CloudInitConfigCommon.Builder builder = CloudInitConfigCommon.builder(BaseSceneElementModel.SystemType.LINUX);
