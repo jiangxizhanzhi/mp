@@ -187,6 +187,7 @@ public class InitiateHandler extends HandlerCommon {
         if (createInternalVm) {
             for (var elementBO : getPluginHandler().getElementMap().values()) {
                 for (var networkBO : elementBO.getDeriveNetworks()) {
+                    log.info("init createInternalVm net : {}", JsonCommon.stringify(networkBO));
                     // 外部网络不需要处理
                     if (CloudSingleton.cloudAppConfig.getExternalNetId()
                             .equals(networkBO.getNetwork().getResourceId())) {

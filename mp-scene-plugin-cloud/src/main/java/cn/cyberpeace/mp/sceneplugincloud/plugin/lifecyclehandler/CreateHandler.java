@@ -1465,13 +1465,23 @@ public class CreateHandler extends HandlerCommon {
     }
 
     private void createInternalServerVmMode2(Map<CloudPluginSceneElementNetworkBO, HostRoute> hostRouteMap ){
+        var nets = new ArrayList<ConnectedNetworkBO>();
+        for (CloudPluginSceneElementBO e : getPluginHandler().getElementMap().values()) {
+            for (ConnectedNetworkBO n : e.getDeriveNetworks()) {
+                nets.add(n);
+            }
+        }
+
         List<VirtualNic> virtualNics = new ArrayList<>();
         for (var entry : hostRouteMap.entrySet()) {
-            var net = entry.getKey();
             var hostRoute = entry.getValue();
             VirtualNic virtualNic = new VirtualNic();
-            virtualNic.setNetworkId(net.getResourceId());
             virtualNic.setFixedIp(hostRoute.getNexthop());
+            for (var n : nets) {
+                if (IpUtils.newIsInCidr(virtualNic.getFixedIp(), n.getNetwork().getCidr())) {
+                    virtualNic.setNetworkId(n.getNetwork().getResourceId());
+                }
+            }
             virtualNics.add(virtualNic);
         }
 
