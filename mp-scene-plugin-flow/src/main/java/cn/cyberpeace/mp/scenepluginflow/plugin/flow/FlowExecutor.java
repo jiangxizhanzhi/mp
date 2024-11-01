@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin.flow;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -19,6 +20,7 @@ import cn.cyberpeace.mp.flow.service.impl.FlowTaskServiceImpl;
 import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+@Slf4j
 @Data
 @Component
 public class FlowExecutor {
@@ -210,6 +213,7 @@ public class FlowExecutor {
     }
 
     public int updateFlowTaskInfo(FlowTaskModel flowTaskModel) {
+        log.info(JsonCommon.stringify(flowTaskModel));
         return this.flowService3.updateFlowTaskInfo(flowTaskModel);
     }
 

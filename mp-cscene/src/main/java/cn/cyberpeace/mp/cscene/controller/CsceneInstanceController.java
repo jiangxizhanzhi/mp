@@ -332,6 +332,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         if (request == null || request.getId() == null || request.getNodeId() == null || request.getFlowId() == null) {
             return ResultCommon.fail(BaseErrorCode.PARAMS_INVALID);
         }
+        log.info("update_flow_params");
+        log.info(JsonCommon.stringify(request));
         var result = modelService.updateFlowParams(request.getId(), request.getNodeId(),
                 request.getFlowId(), request.getSourceIp(), request.getContext()).asResult();
         CsceneLogUtils.recordSceneFlowLog(request.getId(), request.getNodeId(), request.getFlowId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_FLOW, request.getContext());

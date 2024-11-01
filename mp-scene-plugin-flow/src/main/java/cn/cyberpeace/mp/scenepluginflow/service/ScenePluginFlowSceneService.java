@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.scenepluginflow.service;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;

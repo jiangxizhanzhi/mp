@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.common.TimeCommon;
 import cn.cyberpeace.mp.base.constant.BaseSingleton;
@@ -854,6 +855,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         } else {
             flowTaskModel.setOriginIps("127.0.0.1-127.0.0.1");
         }
+        log.info(JsonCommon.stringify(flowTaskModel));
         int result = getModelMapper().updateTaskInfo(flowTaskModel);
         flowTaskModel = getModelMapper().get(flowTaskModel.getId());
         AddFlowTaskRequest addFlowTaskRequest = new AddFlowTaskRequest();
