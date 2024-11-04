@@ -72,19 +72,19 @@ public class OutLoadServiceImpl {
     public Boolean updateTaskInfo(OutLoadTaskUpdateRequest requestData) {
         MpDevopsLoadSource synchronousDataSource = loadService.getSynchronousDataSource(new JSONObject());
         String ip = synchronousDataSource.getIp() != null ? synchronousDataSource.getIp() : "http://10.108.1.10:5002";
-        String url = ip + "/stgj/task/modify";
+        String id = requestData.getTaskId() != null ? requestData.getTaskId().toString() : "";
+        String url = ip + "/stgj/task/modify?id="+id;
         Map<String, Object> formMap = new HashMap();
-        formMap.put("id", requestData.getTaskId() != null ? requestData.getTaskId() : "");
-        formMap.put("taskDescribe", requestData.getTaskDescribe() != null ? requestData.getTaskDescribe() : "");
-        formMap.put("execCommand", requestData.getExecCommand() != null ? requestData.getExecCommand() : "");
+        formMap.put("id", id );
+        formMap.put("taskDescribe", requestData.getTaskDescribe() != null ? requestData.getTaskDescribe().toString() : "");
+        formMap.put("execCommand", requestData.getExecCommand() != null ? requestData.getExecCommand().toString() : "");
 
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
-        headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
-
+        String body = JsonUtils.stringify(formMap);
         String result = null;
         try {
-            result = HttpUtils.sendHttpPost(url, formMap, headersMap);
+            result = HttpUtils.sendHttpPost(url, body, headersMap);
         } catch (IOException e) {
             return false;
         }
