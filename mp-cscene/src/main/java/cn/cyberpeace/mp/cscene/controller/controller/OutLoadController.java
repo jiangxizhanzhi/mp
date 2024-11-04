@@ -70,6 +70,9 @@ public class OutLoadController {
     @PostMapping("/updateTaskInfo")
     public ServiceResult<Boolean> updateTaskInfo(@RequestBody OutLoadTaskUpdateRequest requestData) {
         Boolean updateTaskInfo = outLoadService.updateTaskInfo(requestData);
+        if (!updateTaskInfo) {
+            return new ServiceResult(updateTaskInfo, BaseErrorCode.ERROR).asResult();
+        }
         return new ServiceResult(updateTaskInfo).asResult();
     }
 
@@ -80,6 +83,9 @@ public class OutLoadController {
     @PostMapping("/deleteTask")
     public ServiceResult<Boolean> deleteTask(@RequestBody OutLoadTaskDeleteRequest requestData) {
         Boolean deleteTask = outLoadService.deleteTask(requestData);
+        if (!deleteTask) {
+            return new ServiceResult(deleteTask, BaseErrorCode.ERROR).asResult();
+        }
         return new ServiceResult(deleteTask).asResult();
     }
 
@@ -90,6 +96,9 @@ public class OutLoadController {
     @PostMapping("/resetTask")
     public ServiceResult<Boolean> resetTask(@RequestBody OutLoadTaskResetRequest requestData) {
         Boolean resetTask = outLoadService.resetTask(requestData);
+        if (!resetTask) {
+            return new ServiceResult(resetTask, BaseErrorCode.ERROR).asResult();
+        }
         return new ServiceResult(resetTask).asResult();
     }
 
@@ -110,6 +119,9 @@ public class OutLoadController {
     @PostMapping("/stopInstance")
     public ServiceResult<Boolean> stopInstance(@RequestBody JSONObject requestData) {
         Boolean stopInstance = outLoadService.stopInstance(requestData);
+        if (!stopInstance) {
+            return new ServiceResult(stopInstance, BaseErrorCode.ERROR).asResult();
+        }
         return new ServiceResult(stopInstance).asResult();
     }
 
@@ -120,6 +132,9 @@ public class OutLoadController {
     @PostMapping("/pauseInstance")
     public ServiceResult<Boolean> pauseInstance(@RequestBody JSONObject requestData) {
         Boolean pauseInstance = outLoadService.pauseInstance(requestData);
+        if (!pauseInstance) {
+            return new ServiceResult(pauseInstance, BaseErrorCode.ERROR).asResult();
+        }
         return new ServiceResult(pauseInstance).asResult();
     }
 
@@ -130,6 +145,9 @@ public class OutLoadController {
     @PostMapping("/unpauseInstance")
     public ServiceResult<Boolean> unpauseInstance(@RequestBody JSONObject requestData) {
         Boolean unpauseInstance = outLoadService.unpauseInstance(requestData);
+        if (!unpauseInstance) {
+            return new ServiceResult(unpauseInstance, BaseErrorCode.ERROR).asResult();
+        }
         return new ServiceResult(unpauseInstance).asResult();
     }
 
@@ -140,6 +158,9 @@ public class OutLoadController {
     @PostMapping("/deleteInstance")
     public ServiceResult<Boolean> deleteInstance(@RequestBody JSONObject requestData) {
         Boolean deleteInstance = outLoadService.deleteInstance(requestData);
+        if (!deleteInstance) {
+            return new ServiceResult(deleteInstance, BaseErrorCode.ERROR).asResult();
+        }
         return new ServiceResult(deleteInstance).asResult();
     }
 
@@ -178,6 +199,9 @@ public class OutLoadController {
     @PostMapping("/addTool")
     public ServiceResult<Boolean> addTool(@RequestBody JSONObject requestData) {
         Boolean addTool = outLoadService.addTool(requestData);
+        if (!addTool) {
+            return new ServiceResult<Boolean>(addTool, BaseErrorCode.ERROR).asResult();
+        }
         return new ServiceResult<Boolean>(addTool).asResult();
     }
 
@@ -188,6 +212,9 @@ public class OutLoadController {
     @PostMapping("/updateToolInfo")
     public ServiceResult<Boolean> updateToolInfo(@RequestBody JSONObject requestData) {
         Boolean updateToolInfo = outLoadService.updateToolInfo(requestData);
+        if (!updateToolInfo) {
+            return new ServiceResult<Boolean>(updateToolInfo, BaseErrorCode.ERROR).asResult();
+        }
         return new ServiceResult<Boolean>(updateToolInfo).asResult();
     }
 
@@ -198,6 +225,9 @@ public class OutLoadController {
     @PostMapping("/uploadTool")
     public ServiceResult<Boolean> uploadTool(@RequestParam(value = "file") MultipartFile file) {
         Boolean uploadTool = outLoadService.uploadTool(file);
+        if (!uploadTool) {
+            return new ServiceResult<Boolean>(uploadTool, BaseErrorCode.ERROR).asResult();
+        }
         return new ServiceResult<Boolean>(uploadTool).asResult();
     }
 
@@ -208,6 +238,9 @@ public class OutLoadController {
     @PostMapping("/modifyLoadTags")
     public ServiceResult<Boolean> modifyLoadTags(@RequestBody OutLoadModifyTagsRequest request) {
         Boolean modifyLoadTags = outLoadService.modifyLoadTags(request);
+        if (!modifyLoadTags) {
+            return new ServiceResult<Boolean>(modifyLoadTags, BaseErrorCode.ERROR).asResult();
+        }
         return new ServiceResult<Boolean>(modifyLoadTags).asResult();
     }
 
@@ -218,6 +251,9 @@ public class OutLoadController {
     @PostMapping("/deleteTool")
     public ServiceResult<Boolean> deleteTool(@RequestBody JSONObject requestData) {
         Boolean deleteTool = outLoadService.deleteTool(requestData);
+        if (!deleteTool) {
+            return new ServiceResult(deleteTool, BaseErrorCode.ERROR).asResult();
+        }
         return new ServiceResult(deleteTool).asResult();
     }
 
@@ -252,6 +288,9 @@ public class OutLoadController {
     @PostMapping("/uploadReadme")
     public ServiceResult<Boolean> uploadReadme(@RequestParam(value = "file") MultipartFile file) {
         Boolean uploadReadme = outLoadService.uploadReadme(file);
+        if (!uploadReadme) {
+            return new ServiceResult(uploadReadme, BaseErrorCode.ERROR).asResult();
+        }
         return new ServiceResult(uploadReadme).asResult();
     }
 }
