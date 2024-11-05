@@ -126,4 +126,11 @@ public class RealEquipmentDevopsDetailVO extends BaseVO {
 
     @ApiModelProperty("是否开启snmp采集,0不开启,1开启")
     private Boolean openSnmp;
+
+    @ApiModelProperty(value = "实体设备跳转地址")
+    private String entityJumpUrl;
+    @ApiModelProperty(value = "实体设备用户名")
+    private String entityUserName;
+    @ApiModelProperty(value = "实体设备密码")
+    private String entityPassword;
 }

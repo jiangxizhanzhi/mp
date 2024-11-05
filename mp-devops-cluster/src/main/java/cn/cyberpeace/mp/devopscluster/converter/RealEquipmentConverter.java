@@ -229,6 +229,9 @@ public class RealEquipmentConverter implements BaseConverter{
         result.setOpenKafka(request.getOpenKafka());
         result.setOpenSoap(request.getOpenSoap());
         result.setOpenSyslog(request.getOpenSyslog());
+        result.setEntityJumpUrl(request.getEntityJumpUrl());
+        result.setEntityPassword(request.getEntityPassword());
+        result.setEntityUserName(request.getEntityUserName());
         devopsTargetService.updateById(result, request.getExtEntityAccess());
         return result;
     }
@@ -421,33 +424,33 @@ public class RealEquipmentConverter implements BaseConverter{
      */
     private void refreshIfNecessary() {
         // 20秒没更新 尝试更新
-        if (System.currentTimeMillis() - IN_POSITION_UPDATE_TIME > 20000) {
-            //  拿到锁就更新下,没拿到就使用旧的数据
-            if (IN_POSITION_UPDATE_TIME_LOCK.tryLock()) {
-                try {
-                    // 刷新一下在位状态
-                    ImagePageDTO refreshDto = new ImagePageDTO();
-                    refreshDto.setLimit(50);
-                    refreshDto.setImageType(ImageTypeEnum.ENTITY.toValue());
-                    List<DeviceTargetPO> deviceTargetPOS = devopsTargetService.page(refreshDto);
-                    List<Integer> ids = new ArrayList<>();
-                    for (DeviceTargetPO deviceTargetPO : deviceTargetPOS) {
-                        String id = deviceTargetPO.getId();
-                        Integer parseInt = Integer.parseInt(id);
-                        ids.add(parseInt);
-                    }
-                    if (CollectionUtils.isNotEmpty(ids)) {
-                        List<Device> deviceList = deviceService.findByIds(ids);
-                        if (CollectionUtils.isNotEmpty(deviceList)) {
-                            devopsTargetService.updateInPosition(deviceList);
-                        }
-                    }
-                    IN_POSITION_UPDATE_TIME = System.currentTimeMillis();
-                } finally {
-                    IN_POSITION_UPDATE_TIME_LOCK.unlock();
-                }
-            }
-        }
+//        if (System.currentTimeMillis() - IN_POSITION_UPDATE_TIME > 20000) {
+//            //  拿到锁就更新下,没拿到就使用旧的数据
+//            if (IN_POSITION_UPDATE_TIME_LOCK.tryLock()) {
+//                try {
+//                    // 刷新一下在位状态
+//                    ImagePageDTO refreshDto = new ImagePageDTO();
+//                    refreshDto.setLimit(50);
+//                    refreshDto.setImageType(ImageTypeEnum.ENTITY.toValue());
+//                    List<DeviceTargetPO> deviceTargetPOS = devopsTargetService.page(refreshDto);
+//                    List<Integer> ids = new ArrayList<>();
+//                    for (DeviceTargetPO deviceTargetPO : deviceTargetPOS) {
+//                        String id = deviceTargetPO.getId();
+//                        Integer parseInt = Integer.parseInt(id);
+//                        ids.add(parseInt);
+//                    }
+//                    if (CollectionUtils.isNotEmpty(ids)) {
+//                        List<Device> deviceList = deviceService.findByIds(ids);
+//                        if (CollectionUtils.isNotEmpty(deviceList)) {
+//                            devopsTargetService.updateInPosition(deviceList);
+//                        }
+//                    }
+//                    IN_POSITION_UPDATE_TIME = System.currentTimeMillis();
+//                } finally {
+//                    IN_POSITION_UPDATE_TIME_LOCK.unlock();
+//                }
+//            }
+//        }
     }
 
 

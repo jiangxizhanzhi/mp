@@ -228,4 +228,13 @@ public class DeviceTargetPO extends BaseModel {
 
     @DefaultStr
     private String extEntityAccess;
+
+    @DefaultStr
+    private String entityJumpUrl;
+
+    @DefaultStr
+    private String entityUserName;
+
+    @DefaultStr
+    private String entityPassword;
 }

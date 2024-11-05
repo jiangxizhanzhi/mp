@@ -101,6 +101,9 @@ public class DevopsTargetService {
             DeviceTargetPO deviceTargetPO = convertDevice(device);
             deviceTargetPO.setIsPublic(oldDeviceTargetPO.getIsPublic());
             deviceTargetPO.setExtEntityAccess(JsonCommon.snakeStringify(list));
+            deviceTargetPO.setEntityPassword(device.getEntityPassword());
+            deviceTargetPO.setEntityJumpUrl(device.getEntityJumpUrl());
+            deviceTargetPO.setEntityUserName(device.getEntityUserName());
             return deviceTargetMapper.updateById(deviceTargetPO);
         }
         return 0;
@@ -247,7 +250,9 @@ public class DevopsTargetService {
      */
     protected DeviceTargetPO convertDevice(Device device) {
         DeviceTargetPO deviceTargetPO = new DeviceTargetPO();
-        deviceTargetPO.setId(device.getId().toString());
+        if(device.getId() != null){
+            deviceTargetPO.setId(device.getId().toString());
+        }
         deviceTargetPO.setUuid(device.getUuid());
         deviceTargetPO.setName(device.getName());
         deviceTargetPO.setLogo(DefaultImgUtil.fdfsUrlToPath(device.getLogo()));
@@ -292,10 +297,14 @@ public class DevopsTargetService {
             deviceTargetPO.setInitSupport(Boolean.FALSE);
         }
 
-        deviceTargetPO.setCreateTime(TimeUtils.utcStringToLocalDateTime(device.getCreatedAt()));
-        deviceTargetPO.setUpdateTime(TimeUtils.utcStringToLocalDateTime(device.getUpdatedAt()));
+        if(device.getCreatedAt() != null){
+            deviceTargetPO.setCreateTime(TimeUtils.utcStringToLocalDateTime(device.getCreatedAt()));
+        }
+        if(device.getUpdatedAt() != null){
+            deviceTargetPO.setUpdateTime(TimeUtils.utcStringToLocalDateTime(device.getUpdatedAt()));
+        }
         ExtEntity extEntity = device.getExtEntity();
-        if (Objects.nonNull(extEntity)) {
+        if (Objects.nonNull(extEntity) && extEntity.getEntityStatus() != null) {
             deviceTargetPO.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
         }
 

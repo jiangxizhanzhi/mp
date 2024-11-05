@@ -322,4 +322,11 @@ public class Device extends BaseCloudPlatformResult {
     }
 
     private Boolean supportExport;
+
+    @ApiModelProperty(value = "实体设备跳转地址")
+    private String entityJumpUrl;
+    @ApiModelProperty(value = "实体设备用户名")
+    private String entityUserName;
+    @ApiModelProperty(value = "实体设备密码")
+    private String entityPassword;
 }

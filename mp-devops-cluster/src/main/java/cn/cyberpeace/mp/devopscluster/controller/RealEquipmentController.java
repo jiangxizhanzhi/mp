@@ -378,7 +378,11 @@ public class RealEquipmentController {
                 .name(realEquipmentBO.getName()).logo(realEquipmentBO.getLogo())
                 .extSystemInfo(realEquipmentBO.getExtSystemInfo()).extEntity(realEquipmentBO.getExtEntity()).extEntityUsb(realEquipmentBO.getExtEntityUsb())
                 .openSyslog(targetPO.getOpenSyslog()).openKafka(targetPO.getOpenKafka()).openRestapi(targetPO.getOpenRestapi())
-                .openSoap(targetPO.getOpenSoap()).openSnmp(targetPO.getOpenSnmp()).build();
+                .openSoap(targetPO.getOpenSoap()).openSnmp(targetPO.getOpenSnmp())
+                .entityJumpUrl(targetPO.getEntityJumpUrl())
+                .entityPassword(targetPO.getEntityPassword())
+                .entityUserName(targetPO.getEntityUserName())
+                .build();
         if (CollectionUtils.isNotEmpty(realEquipmentBO.getExtEntityAccess())) {
             List<String> list = new ArrayList<>();
             for (ExtEntityAccess extEntityAccess : realEquipmentBO.getExtEntityAccess()) {
