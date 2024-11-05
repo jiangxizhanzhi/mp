@@ -11,6 +11,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
@@ -238,6 +239,13 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
 
     @ApiModelProperty(value = "宿主机名称")
     private String host;
+
+    @ApiModelProperty(value = "实体设备跳转地址")
+    private String entityJumpUrl;
+    @ApiModelProperty(value = "实体设备用户名")
+    private String entityUserName;
+    @ApiModelProperty(value = "实体设备密码")
+    private String entityPassword;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
