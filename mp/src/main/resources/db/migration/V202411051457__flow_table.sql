@@ -1,0 +1,9 @@
+alter table mp_sceneplugincloud_scene_config_element add column `entity_jump_url` varchar(256) DEFAULT '' COMMENT '实体设备跳转地址' ;
+alter table mp_sceneplugincloud_scene_config_element add column `entity_user_name` varchar(256) DEFAULT '' COMMENT '实体设备用户名' ;
+alter table mp_sceneplugincloud_scene_config_element add column `entity_password` varchar(256) DEFAULT '' COMMENT '实体设备密码' ;
+alter table mp_sceneplugincloud_scene_element add column `entity_jump_url` varchar(256) DEFAULT '' COMMENT '实体设备跳转地址' ;
+alter table mp_sceneplugincloud_scene_element add column `entity_user_name` varchar(256) DEFAULT '' COMMENT '实体设备用户名' ;
+alter table mp_sceneplugincloud_scene_element add column `entity_password` varchar(256) DEFAULT '' COMMENT '实体设备密码' ;
+alter table mp_devops_target add column `entity_jump_url` varchar(256) DEFAULT '' COMMENT '实体设备跳转地址' ;
+alter table mp_devops_target add column `entity_user_name` varchar(256) DEFAULT '' COMMENT '实体设备用户名' ;
+alter table mp_devops_target add column `entity_password` varchar(256) DEFAULT '' COMMENT '实体设备密码' ;

@@ -304,5 +304,11 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String mgmtIp;
     @DefaultStr
     private String mgmtMacAddr;
+    @DefaultStr
+    private String entityJumpUrl;
+    @DefaultStr
+    private String entityUserName;
+    @DefaultStr
+    private String entityPassword;
 
 }
