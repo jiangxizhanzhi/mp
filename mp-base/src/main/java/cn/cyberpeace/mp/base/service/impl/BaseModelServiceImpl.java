@@ -130,6 +130,8 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
             if (lastOrders != null) {
                 humanCondition.orderBy(lastOrders);
             }
+        } else if (orders != null && orders.length > 0) {
+            humanCondition.orderBy(orders);
         }
         return humanCondition;
     }

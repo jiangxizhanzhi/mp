@@ -1,13 +1,13 @@
- // Copyright (C) 2024
- // All rights reserved.
- // Project name mp
- // Description:
- // Author:
- // File name FlowTaskTaskMapper.java.
- // File size 1408.
- // File create date Fri Jul 12 12:55:30 CST 2024.
- // File update date Fri Jul 12 12:55:30 CST 2024.
- // Version 1.0.0
+// Copyright (C) 2024
+// All rights reserved.
+// Project name mp
+// Description:
+// Author:
+// File name FlowTaskTaskMapper.java.
+// File size 1408.
+// File create date Fri Jul 12 12:55:30 CST 2024.
+// File update date Fri Jul 12 12:55:30 CST 2024.
+// Version 1.0.0
 package cn.cyberpeace.mp.flow.repository;
 
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
@@ -35,25 +35,11 @@ import java.util.List;
 @ModelClass(FlowTaskTaskModel.class)
 public interface FlowTaskTaskMapper extends BaseModelMapper<FlowTaskTaskModel> {
 
-    /**
-     * 根据场景id查询节点列表
-     * @param sceneId
-     * @return
-     */
     List<FlowTaskNode> nodeList(@Param("sceneId") String sceneId);
 
-    /**
-     * 根据场景id分页查询流量任务
-     * @param params
-     * @return
-     */
-    List<FlowTaskPageResponse> pageBySceneId(FlowTaskPageQueryParams params);
+    List<FlowTaskPageResponse> listTasks(FlowTaskPageQueryParams params, @Param("offset") int offset, @Param("limit") int limit);
 
-    /**
-     * 根据场景id查询任务数
-     * @param params
-     * @return
-     */
-    int countBySceneId(FlowTaskPageQueryParams params);
-	
+    int countTasks(FlowTaskPageQueryParams params);
+
+
 }

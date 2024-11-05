@@ -1,0 +1,103 @@
+{
+  "scene_config": {
+    "plugins": {
+      "cpcloud": {
+        "element_ports": {
+          "port_a0018ce7-9646-4386-bd9b-52518670e469_electrical_1": {
+            "access_modes": []
+          },
+          "port_6b073509-3aa4-420f-9b27-87acc6b3fad9_1": {
+            "access_modes": [
+              {
+                "protocol": "ssh",
+                "port": 22,
+                "username": "root",
+                "password": "111111"
+              },
+              {
+                "protocol": "http",
+                "port": 80
+              }
+            ]
+          }
+        },
+        "elements": {
+          "a0018ce7-9646-4386-bd9b-52518670e469": {
+            "role": 1,
+            "image_type": "simple",
+            "image_uuid": "66e6244c-90d1-48d6-a615-0762af79e4f2",
+            "image": "Switch Simple",
+            "external": true,
+            "resource_id": "5489d262-8d06-4909-b893-4191ef036f46"
+          },
+          "6b073509-3aa4-420f-9b27-87acc6b3fad9": {
+            "role": 4,
+            "image_type": "vm",
+            "image_uuid": "a7bab5f1-b60c-440a-ae03-b2341788a536",
+            "image": "tgn-trex"
+          }
+        },
+        "scene": {}
+      }
+    },
+    "topology": {
+      "connections": [
+        {
+          "id": "b236621c-b1e6-46e1-97af-0c7a0bca18f8",
+          "source": "port_a0018ce7-9646-4386-bd9b-52518670e469_electrical_1",
+          "target": "port_6b073509-3aa4-420f-9b27-87acc6b3fad9_1",
+          "name": "{\"source\":\"E0/1\",\"target\":\"eth0/1\"}"
+        }
+      ],
+      "elements": [
+        {
+          "id": "a0018ce7-9646-4386-bd9b-52518670e469",
+          "name": "交换机",
+          "type": 1,
+          "icon2": "/api/mp/file/639/162/85ce8f4bcad3948c390f774d2916fee2.png",
+          "cpu": 0,
+          "ram": 0,
+          "disk": 0,
+          "ports": [
+            {
+              "id": "port_a0018ce7-9646-4386-bd9b-52518670e469_electrical_1",
+              "name": "E0/1",
+              "access_modes": []
+            }
+          ]
+        },
+        {
+          "id": "6b073509-3aa4-420f-9b27-87acc6b3fad9",
+          "name": "trex",
+          "type": 4,
+          "icon2": "/api/mp/file/504/805/726bd707e8ebacd6d1147584f221a5e2.png",
+          "cpu": 4,
+          "ram": 4096,
+          "disk": 60,
+          "ports": [
+            {
+              "id": "port_6b073509-3aa4-420f-9b27-87acc6b3fad9_1",
+              "name": "eth0/1",
+              "ip": "",
+              "access_modes": [
+                {
+                  "protocol": "ssh",
+                  "port": 22,
+                  "username": "root",
+                  "password": "111111"
+                },
+                {
+                  "protocol": "http",
+                  "port": 80
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "scene": {
+        "name": "trex"
+      }
+    }
+  }
+}

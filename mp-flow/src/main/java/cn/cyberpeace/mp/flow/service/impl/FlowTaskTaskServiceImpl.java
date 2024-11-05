@@ -448,15 +448,6 @@ public class FlowTaskTaskServiceImpl extends BaseModelServiceImpl<FlowTaskTaskMo
 
     @Override
     public List<FlowTaskTaskModel> listByCondition(FlowTaskPageQueryParams request) {
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual(FlowTaskTaskModel::getSceneId, request.getSceneId());
-        if (StringUtils.isNotBlank(request.getNodeId())) {
-            condition.filterEqual(FlowTaskTaskModel::getNodeId, request.getNodeId());
-        }
-        if (StringUtils.isNotBlank(request.getInteractiveType())) {
-            condition.filterEqual(FlowTaskTaskModel::getInteractiveType, request.getInteractiveType());
-        }
-        List<FlowTaskTaskModel> flowTaskTaskModels = getModelMapper().list(condition);
-        return flowTaskTaskModels;
+        return null;
     }
 }

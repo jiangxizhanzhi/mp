@@ -1,13 +1,13 @@
- // Copyright (C) 2024
- // All rights reserved.
- // Project name mp
- // Description:
- // Author:
- // File name FlowCollectionServiceImpl.java.
- // File size 13138.
- // File create date Fri Jul 12 12:55:24 CST 2024.
- // File update date Fri Jul 12 12:55:24 CST 2024.
- // Version 1.0.0
+// Copyright (C) 2024
+// All rights reserved.
+// Project name mp
+// Description:
+// Author:
+// File name FlowCollectionServiceImpl.java.
+// File size 13138.
+// File create date Fri Jul 12 12:55:24 CST 2024.
+// File update date Fri Jul 12 12:55:24 CST 2024.
+// Version 1.0.0
 package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -43,7 +43,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @ClassName FlowCollectionServiceImpl
@@ -93,8 +92,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         if (Objects.nonNull(objServiceResult.getSource())) {
             List<FlowCollectionRelModel> relModels = objServiceResult.getSource().getObjs();
             if (CollectionUtils.isNotEmpty(relModels)) {
-                List<String> idList =
-                        new ArrayList<>();
+                List<String> idList = new ArrayList<>();
                 for (FlowCollectionRelModel relModel : relModels) {
                     String flowId = relModel.getFlowId();
                     idList.add(flowId);
@@ -103,7 +101,8 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
             }
         }
 
-        return new ListObjServiceResult<>(new ListObjResult<>(flowInfoModels, objServiceResult.getSource().getTotal())).asResult();
+        return new ListObjServiceResult<>(new ListObjResult<>(flowInfoModels, objServiceResult.getSource()
+                .getTotal())).asResult();
     }
 
     /**
@@ -117,8 +116,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         if (Objects.nonNull(objServiceResult.getSource())) {
             List<FlowCollectionRelModel> relModels = objServiceResult.getSource().getObjs();
             if (CollectionUtils.isNotEmpty(relModels)) {
-                List<String> idList =
-                        new ArrayList<>();
+                List<String> idList = new ArrayList<>();
                 for (FlowCollectionRelModel relModel : relModels) {
                     String flowId = relModel.getFlowId();
                     idList.add(flowId);

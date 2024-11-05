@@ -1,13 +1,13 @@
- // Copyright (C) 2024
- // All rights reserved.
- // Project name mp
- // Description:
- // Author:
- // File name OptionQueryParams.java.
- // File size 879.
- // File create date Fri Jul 12 12:55:31 CST 2024.
- // File update date Fri Jul 12 12:55:31 CST 2024.
- // Version 1.0.0
+// Copyright (C) 2024
+// All rights reserved.
+// Project name mp
+// Description:
+// Author:
+// File name OptionQueryParams.java.
+// File size 879.
+// File create date Fri Jul 12 12:55:31 CST 2024.
+// File update date Fri Jul 12 12:55:31 CST 2024.
+// Version 1.0.0
 package cn.cyberpeace.mp.common.request.queryparam;
 
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -38,9 +38,6 @@ public class OptionQueryParams extends QueryParams {
      */
     @ApiModelProperty(value = "名称")
     private String zhName;
-
-    @ApiModelProperty(value = "前端传递的名称字段")
-    private String pattern;
 
     @ApiModelProperty(value = "名称en")
     private String enName;

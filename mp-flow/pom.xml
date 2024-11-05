@@ -30,18 +30,6 @@
             <version>0.0.2-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>cn.cyberpeace.mp.situationaware</groupId>
-            <artifactId>mp-situation-aware</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>cn.cyberpeace.mp.log</groupId>
-            <artifactId>mp-log</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
 
     </dependencies>
 

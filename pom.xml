@@ -33,17 +33,11 @@
 
     <modules>
         <module>mp-agent</module>
-        <module>mp-aggregation</module>
         <module>mp-base</module>
-        <module>mp-cscene</module>
-        <module>mp-devops-cluster</module>
         <module>mp-flow</module>
-        <module>mp-log</module>
         <module>mp-scene</module>
         <module>mp-scene-plugin-cloud</module>
-        <module>mp-scene-plugin-collection</module>
         <module>mp-scene-plugin-flow</module>
-        <module>mp-situation-aware</module>
         <module>mp</module>
     </modules>
     <dependencies>

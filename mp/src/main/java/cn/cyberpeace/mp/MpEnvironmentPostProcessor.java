@@ -11,7 +11,6 @@
 package cn.cyberpeace.mp;
 
 import cn.cyberpeace.mp.evn.UTF8PropertiesPropertySourceLoader;
-import cn.cyberpeace.mp.log.config.EnvConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.SpringApplication;
@@ -35,11 +34,6 @@ import java.util.List;
 public class MpEnvironmentPostProcessor implements EnvironmentPostProcessor {
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-
-        EnvConfig.setProfileActive(environment.getProperty("spring.profiles.active"));
-        EnvConfig.setAddtionLocation(environment.getProperty("spring.config.additional-location"));
-        EnvConfig.setMpEnvPath(environment.getProperty("MP_ENV_PATH"));
-        EnvConfig.splitForExtAndProp();
 
         String env = environment.getProperty("spring.profiles.active");
         if (StringUtils.isBlank(env) || (!"test".equals(env) && !"prod".equals(env))) {

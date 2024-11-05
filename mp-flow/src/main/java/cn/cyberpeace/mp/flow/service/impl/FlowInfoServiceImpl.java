@@ -45,7 +45,7 @@ package cn.cyberpeace.mp.flow.service.impl;
  import cn.cyberpeace.mp.flow.util.FileUtil;
  import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
  import cn.cyberpeace.mp.flow.util.FlowTaskPool;
- import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
+ import cn.cyberpeace.mp.flow.util.MessageCommonUtil;
  import com.alibaba.fastjson.JSON;
  import com.alibaba.fastjson.JSONArray;
  import com.alibaba.fastjson.JSONObject;
@@ -364,8 +364,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 || "vnc".equalsIgnoreCase(title) || "arp".equalsIgnoreCase(title)) {
             needInternational = false;
         } else {
-            title = MessageCommonUtil.convertMessage(flowInfoModel.getTitle());
-            flowInfoModel.setFlowDesc(MessageCommonUtil.convertMessage(flowInfoModel.getFlowDesc()));
+            title = flowInfoModel.getTitle();
         }
 
         flowInfoModel.setTitle(title);
@@ -373,7 +372,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         if (fileName.endsWith(".pcap")) {
             fileName = fileName.substring(0, fileName.length() - 5);
             if (needInternational) {
-                flowInfoModel.setFileName(MessageCommonUtil.convertMessage(fileName).concat(".pcap"));
+                flowInfoModel.setFileName(fileName.concat(".pcap"));
             }
         } else if (fileName.endsWith(".py")) {
             fileName = fileName.substring(0, fileName.length() - 3);

@@ -5,22 +5,19 @@
     <select id="nodeList" resultType="cn.cyberpeace.mp.flow.bo.FlowTaskNode">
         select distinct(node_id) as nodeId, node_name as nodeName
         from mp_flow_task_task
-        where scene_id=#{sceneId}
+        where scene_id = #{sceneId}
     </select>
 
-    <select id="countBySceneId" parameterType="cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams" resultType="java.lang.Integer">
+    <select id="countTasks" parameterType="cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams"
+            resultType="java.lang.Integer">
         select count(1) from mp_flow_task_task t,mp_flow_flow_info i
-        where t.flow_id=i.id and t.scene_id=#{sceneId}
-        <if test="interactiveType != null and interactiveType != ''">
-            and t.interactive_type = #{interactiveType}
-        </if>
-        <if test="nodeId != null and nodeId != ''">
-            and t.node_id = #{nodeId}
-        </if>
+        where t.flow_id=i.id and t.actiator_id=#{actuatorId}
     </select>
 
-    <select id="pageBySceneId" parameterType="cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams" resultType="cn.cyberpeace.mp.flow.response.FlowTaskPageResponse">
-        select t.id as id, t.interactive_type as interactiveType, t.node_name as nodeName, t.node_id as nodeId, t.node_ip as nodeIp
+    <select id="listTasks" parameterType="cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams"
+            resultType="cn.cyberpeace.mp.flow.response.FlowTaskPageResponse">
+        select t.id as id,t.actuator_id as actuatorId, t.interactive_type as interactiveType, t.node_name as nodeName,
+        t.node_id as nodeId, t.node_ip as nodeIp
         ,t.success_count as successCount, t.error_count as errorCount, t.success_count+t.error_count as totalCount
         ,t.task_status as taskStatus, t.msg as msg, i.title as title, t.resource_type as resourceType
         ,(select duration from mp_flow_pcap where flow_id=i.id) as duration
@@ -28,13 +25,7 @@
         ,(select pkt_num from mp_flow_pcap where flow_id=i.id) as pktNum
         ,(select protocols from mp_flow_pcap where flow_id=i.id) as protocols
         from mp_flow_task_task t,mp_flow_flow_info i
-        where t.flow_id=i.id and t.scene_id=#{sceneId}
-        <if test="interactiveType != null and interactiveType != ''">
-            and t.interactive_type = #{interactiveType}
-        </if>
-        <if test="nodeId != null and nodeId != ''">
-            and t.node_id = #{nodeId}
-        </if>
+        where t.flow_id=i.id and t.actiator_id=#{actuatorId}
         <if test="offset != null and perPage != null">
             limit #{offset}, #{pageSize}
         </if>

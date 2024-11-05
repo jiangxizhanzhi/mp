@@ -1,13 +1,13 @@
- // Copyright (C) 2024
- // All rights reserved.
- // Project name mp
- // Description:
- // Author:
- // File name FlowActuatorModel.java.
- // File size 1503.
- // File create date Fri Jul 12 12:55:31 CST 2024.
- // File update date Fri Jul 12 12:55:31 CST 2024.
- // Version 1.0.0
+// Copyright (C) 2024
+// All rights reserved.
+// Project name mp
+// Description:
+// Author:
+// File name FlowActuatorModel.java.
+// File size 1503.
+// File create date Fri Jul 12 12:55:31 CST 2024.
+// File update date Fri Jul 12 12:55:31 CST 2024.
+// Version 1.0.0
 package cn.cyberpeace.mp.flow.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -67,4 +67,7 @@ public class FlowActuatorModel extends BaseModel {
      */
     @ApiModelProperty(value = "流量运行状态：0 初始化， 1 运行中， 2 停止中， 3 已停止， 4 未启动过")
     private Integer status;
+
+    @ApiModelProperty(value = "创建发生器时关联的场景实例id")
+    private String csceneId;
 }
