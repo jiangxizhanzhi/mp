@@ -210,6 +210,9 @@ public class RealEquipmentConverter implements BaseConverter{
         if (Objects.isNull(result) || !result.isSuccess()){
             return result;
         }
+        result.setEntityJumpUrl(device.getEntityJumpUrl());
+        result.setEntityPassword(device.getEntityPassword());
+        result.setEntityUserName(device.getEntityUserName());
         devopsTargetService.insert(Arrays.asList(result));
         return result;
     }
