@@ -132,10 +132,12 @@ public class RealEquipmentConverter implements BaseConverter{
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = csceneSpecialService.statDeviceReferCsceneInstances(imageNames).getSource();
 
         List<Integer> ids = new ArrayList<>();
+        Map<String,DeviceTargetPO> map = new HashMap<>();
         for (DeviceTargetPO deviceTargetPO : deviceTargetPOS) {
             String id = deviceTargetPO.getId();
             Integer parseInt = Integer.parseInt(id);
             ids.add(parseInt);
+            map.put(deviceTargetPO.getUuid(),deviceTargetPO);
         }
         if (CollectionUtils.isEmpty(ids)){
             convertModel.setList(Lists.newArrayList());
@@ -151,6 +153,12 @@ public class RealEquipmentConverter implements BaseConverter{
         List<RealEquipmentBO> modelList = new ArrayList<>();
         for (Device device : deviceList) {
             RealEquipmentBO realEquipmentBO = getRealEquipmentBO(referStateMap, useStateMap, device);
+            if(map.containsKey(device.getUuid())){
+                var po = map.get(device.getUuid());
+                realEquipmentBO.setEntityJumpUrl(po.getEntityJumpUrl());
+                realEquipmentBO.setEntityPassword(po.getEntityPassword());
+                realEquipmentBO.setEntityUserName(po.getEntityUserName());
+            }
             modelList.add(realEquipmentBO);
         }
 
