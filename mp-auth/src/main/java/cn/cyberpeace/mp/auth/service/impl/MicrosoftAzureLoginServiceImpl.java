@@ -54,12 +54,6 @@ public class MicrosoftAzureLoginServiceImpl implements MicrosoftAzureLoginServic
             return new ServiceResult<>(null, BaseErrorCode.ERROR, "请求数据为空").asResult();
         }
 
-        // 验证私有云地址格式
-        String connectIp = requestData.getConnectIp();
-        if (!StringUtils.isEmpty(connectIp) && !CheckUtil.checkPrivateCloudAddress(connectIp)) {
-            return new ServiceResult<>(null, BaseErrorCode.ERROR, "私有云地址格式错误").asResult();
-        }
-
         // 判断是否为新增账号（没有主键表示新增）
         if (StringUtils.isEmpty(requestData.getPk())) {
             // 调用新增逻辑
