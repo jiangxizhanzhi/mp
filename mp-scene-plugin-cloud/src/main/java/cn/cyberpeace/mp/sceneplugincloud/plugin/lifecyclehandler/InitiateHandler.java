@@ -212,6 +212,7 @@ public class InitiateHandler extends HandlerCommon {
                     hostRoutes.add(hostRoute);
                     networkBO.getNetwork().setHostRoutes(hostRoutes);
 
+                    getPluginHandler().getHandlerUtils().getHostRouteMap().clear();
                     getPluginHandler().getHandlerUtils().getHostRouteMap().put(networkInfo.getCidr(), hostRoute);
                 }
             }
