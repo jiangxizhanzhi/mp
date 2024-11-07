@@ -154,7 +154,6 @@ public class HttpClient {
             }
         }
 
-
         if(logRequest){
             log.info("ad result:{}",result.getResult());
         }
