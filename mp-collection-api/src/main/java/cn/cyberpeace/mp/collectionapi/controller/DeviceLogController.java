@@ -74,7 +74,7 @@ public class DeviceLogController {
     /**
      * 测试环境业务AD client, 也需要推一下日志
      */
-    private HttpClient testAdClient;
+    public static HttpClient testAdClient;
 
     private static final Object DEFAULT_MESSAGE_RETURN = new Object();
 

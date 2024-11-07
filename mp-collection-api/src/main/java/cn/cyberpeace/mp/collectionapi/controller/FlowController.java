@@ -53,6 +53,7 @@ public class FlowController {
     @ApiOperation(value = "更新debugLogFlag")
     public ServiceResult<Boolean> updateDebugLogFlag() {
         debugLogFlag = !debugLogFlag;
+        DeviceLogController.testAdClient.setLogRequest(debugLogFlag);
         return ServiceResult.success(debugLogFlag);
     }
 

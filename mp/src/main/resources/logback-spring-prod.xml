@@ -29,7 +29,7 @@
     <!--日志路径-->
     <springProperty scope="context" name="LOG_FILE_PATH" source="logging.file.path" defaultValue="/logs"/>
     <!--日志级别-->
-    <springProperty scope="context" name="LOG_LEVEL_ROOT" source="logging.level.root" defaultValue="ERROR"/>
+    <springProperty scope="context" name="LOG_LEVEL_ROOT" source="logging.level.root" defaultValue="INFO"/>
     <!--日志最大天数-->
     <springProperty scope="context" name="LOG_FILE_MAX_HISTORY" source="logging.logback.rollingpolicy.max-history" defaultValue="15"/>
     <!--日志最大容量-->

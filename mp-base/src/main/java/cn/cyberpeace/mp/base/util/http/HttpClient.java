@@ -37,7 +37,7 @@ public class HttpClient {
 
     public static final String DEFAULT_CONTENT_TYPE = "application/json";
 
-    private boolean logRequest;
+    public boolean logRequest;
 
     private org.apache.http.client.HttpClient innerHttpClient;
 
@@ -152,6 +152,10 @@ public class HttpClient {
                         request.getURI(), request.getAllHeaders(), data == null ? StringUtils.EMPTY : data.toContent(), e);
                 result.setException(e);
             }
+        }
+
+        if(logRequest){
+            log.info("ad result:{}",result.getResult());
         }
 
         return result;

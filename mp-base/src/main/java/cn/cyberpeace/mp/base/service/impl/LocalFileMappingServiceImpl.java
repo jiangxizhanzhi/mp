@@ -17,12 +17,10 @@ import java.util.List;
 
 
 @Slf4j
-@Service
 public class LocalFileMappingServiceImpl
         extends BaseObjMappingServiceImpl<LocalFileMappingModel, LocalFileMappingMapper>
         implements LocalFileMappingService {
 
-    @Autowired
     public LocalFileMappingServiceImpl(LocalFileMappingMapper modelMapper) {
         setModelMapper(modelMapper);
     }

@@ -3,6 +3,8 @@ package cn.cyberpeace.mp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -18,7 +20,7 @@ import java.util.TimeZone;
 @EnableAsync
 @EnableScheduling
 @EnableCaching
-@SpringBootApplication
+@SpringBootApplication(exclude = {RabbitAutoConfiguration.class, DataSourceAutoConfiguration.class})
 public class Application {
 
     public static void main(String[] args) {
