@@ -177,7 +177,7 @@ public class DeviceLogController {
         if (logBO.getMessage() instanceof String) {
             logBO.setMessage(JSON.parse(logBO.getMessage().toString()));
         }
-        testAdClient.post("/api/ct/web/bwm_race/situation/chain/get_log/?viewer_key=4b5d6dbdde4f98dc0641391a8d059cc2", logBO, null, null, 10_000);
+        testAdClient.post("/api/ct/web/bwm_race/situation/chain/get_log/?viewer_key=dd42bacedfdef66b417333c47803d69c", logBO, null, null, 10_000);
         // client.post("/api/mp/log/dev/mock", logBO, null, null, 0);
     }
 
@@ -233,5 +233,21 @@ public class DeviceLogController {
         DeviceLogVO result = BeanUtil.copyProperties(logs, DeviceLogVO.class, "data");
         result.setData(rawLogs);
         return result;
+    }
+
+    @GetMapping("/page")
+    @ApiOperation(value = "查询设备上报的日志信息")
+    public Object queryLogs(@RequestParam @NotBlank String type) {
+        if (FlowController.debugLogFlag) {
+            log.info("queryLogs  type = {}", type);
+        }
+        DeviceLogQueryRequest req = DeviceLogQueryRequest.builder()
+                .type(type)
+                .build();
+            req.setPageSize(10);
+            req.setPageIndex(1);
+
+        PageableLogs logs = deviceLogService.searchLog(req);
+        return logs.getData();
     }
 }
