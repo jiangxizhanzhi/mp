@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.model.*;
 import cn.cyberpeace.mp.devopscluster.model.common.Hypervisor;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
+import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentNetworkCardPageRequest;
@@ -50,7 +51,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -403,6 +406,18 @@ public class RealEquipmentController {
         if (Objects.isNull(bySwitchName)){
             return new Result<>();
         }
+
+        // 获取设备的物理位置
+        List<String> deviceUuids = bySwitchName.getList().stream().map(RealEquipmentByParams::getDeviceUuid).collect(Collectors.toList());
+        List<DeviceTargetPO> devices = deviceTargetMapper.findByUuids(deviceUuids);
+        Map<String, String> uuidMap = new HashMap<>();
+        for (DeviceTargetPO device : devices) {
+            uuidMap.put(device.getUuid(), device.getPlace());
+        }
+        for (RealEquipmentByParams realEquipmentByParams : bySwitchName.getList()) {
+            realEquipmentByParams.setPlace(uuidMap.get(realEquipmentByParams.getDeviceUuid()));
+        }
+
         return new Result<>(bySwitchName.getList());
     }
 

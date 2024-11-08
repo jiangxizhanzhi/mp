@@ -29,4 +29,7 @@ public class RealEquipmentByParams implements Serializable {
 
     @ApiModelProperty("mac地址")
     private String mac;
+
+    @ApiModelProperty("位置地址")
+    private String place;
 }

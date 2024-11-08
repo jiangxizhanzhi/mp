@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQuer
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.Api;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -173,7 +175,7 @@ public class HostStateController {
         hostExportState.setProcess(process);
         ObjectMapper objectMapper = new ObjectMapper();
         String fileName = "/home/mp/host.json";
-        exportData(response, objectMapper, fileName, objectMapper.writeValueAsString(hostExportState));
+        exportData(response, objectMapper, fileName, JSON.toJSONString(hostExportState));
     }
 
     private void exportData(HttpServletResponse response, ObjectMapper objectMapper, String fileName, String s) {
@@ -182,8 +184,9 @@ public class HostStateController {
             FileUtil.deleteDir(file);
         }
         try {
-            String jsonString = s;
-            objectMapper.writeValue(file, jsonString);
+            FileWriter fileWriter = new FileWriter(file);
+            fileWriter.write(s);
+            fileWriter.close();
             response.setContentType("application/octet-stream;charset=UTF-8");
             response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
 
