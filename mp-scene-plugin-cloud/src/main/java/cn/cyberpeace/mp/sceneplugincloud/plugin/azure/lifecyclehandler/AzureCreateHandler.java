@@ -337,7 +337,22 @@ public class AzureCreateHandler extends CreateHandler {
         } catch (Exception e) {
             e.printStackTrace();
 //            云场景启动失败立即删除云资源
-            resourceService.getManager().resourceGroups().deleteByName(groupName);
+            if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
+                resourceService.getManager().resourceGroups().deleteByName(groupName);
+            } else {
+                String url = azureManagerUrl + "/cloud/delete_group";
+                Map<String, Object> formMap = new HashMap();
+                formMap.put("azureUser", localAzurer);
+                formMap.put("groupName", groupName);
+                //请求头设置
+                HashMap<String, String> headersMap = new HashMap<>();
+                String body = JsonUtils.stringify(formMap);
+                try {
+                    HttpUtils.sendHttpPost(url, body, headersMap);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
             throw new MpRuntimeException(BaseErrorCode.ERROR, e);
         }
     }

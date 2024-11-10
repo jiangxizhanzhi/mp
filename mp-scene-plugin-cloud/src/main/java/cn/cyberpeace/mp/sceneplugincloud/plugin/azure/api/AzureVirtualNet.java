@@ -109,7 +109,6 @@ public class AzureVirtualNet {
             if (BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
                 Map<String, Object> data = JsonUtils.beanToSnakeMap(dataMap.get("data"));
                 networkId = data.get("network_id").toString();
-                manageamentSubName = data.get("manageament_sub_name").toString();
             } else {
                 networkId = null;
             }

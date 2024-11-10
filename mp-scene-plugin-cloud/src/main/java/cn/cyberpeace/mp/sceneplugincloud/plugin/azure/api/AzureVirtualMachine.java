@@ -253,7 +253,7 @@ public class AzureVirtualMachine {
             // azure todo 调整 root name
             VirtualNic virtualNic = virtualNics.get(0);
             String netId = virtualNic.getNetworkId();
-            Stream<String> ipList = virtualNics.stream().skip(1).map(VirtualNic::getFixedIp);
+            List<String> ipList = virtualNics.stream().skip(1).map(VirtualNic::getFixedIp).collect(Collectors.toList());
             List<SceneElementPortBO> ports = cloudElement.getSrcElement().getPorts();
 
             String url = azureManagerUrl + "/cloud/create_vm";
@@ -274,7 +274,7 @@ public class AzureVirtualMachine {
             formMap.put("sku", cloudElement.getSku());
             formMap.put("sourceType", cloudElement.getSourceType());
             formMap.put("uploadImageId", cloudElement.getUploadImageId());
-            formMap.put("userName", cloudElement.getUsername());
+            formMap.put("username", cloudElement.getUsername());
             formMap.put("password", cloudElement.getPassword());
             formMap.put("isPublicIp", cloudElement.getIsPublicIp());
             formMap.put("ip", virtualNic.getFixedIp());
@@ -294,11 +294,13 @@ public class AzureVirtualMachine {
             if (BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
                 Map<String, Object> data = JsonUtils.beanToSnakeMap(dataMap.get("data"));
                 String vmId = data.get("vm_id").toString();
-                String isPublicIp = data.get("is_public_ip").toString();
+                Object publicIp = data.get("public_ip");
                 cloudElement.setResourceId(vmId);
                 if (cloudElement.getIsPublicIp()) {
-                    cloudElement.setPublicIpAddress(isPublicIp);
+                    cloudElement.setPublicIpAddress(String.valueOf(publicIp));
                 }
+            }else {
+                throw new RuntimeException("create vm fault");
             }
         }
 

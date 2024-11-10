@@ -54,6 +54,7 @@ public class AzureVirtualMachineCreateTask implements Runnable {
         this.dataCollectionRulesId = dataCollectionRulesId;
         this.groupName = groupName;
         this.azureManagerUrl = azureManagerUrl;
+        this.localAzurer = localAzurer;
     }
 
     @Override
