@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.createtasks;
 
+import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualNet;
@@ -28,24 +29,32 @@ public class AzureVirtualNetCreateTask implements Runnable {
 
     private String groupName;
 
+    private String azureManagerUrl;
+
+    private MicrosoftAzureUserModel localAzurer;
+
 
     public AzureVirtualNetCreateTask(IAzureResourceManager resourceService,
                                      CloudScenePluginHandler pluginHandler,
                                      CloudPluginSceneElementBO element,
                                      ConcurrentHashMap<String, ElementNetworkUtils.CidrType> cidrContainerMap,
                                      HashMap<String, List<VirtualNic>> virtualNicsMap,
-                                     String groupName) {
+                                     String groupName, String azureManagerUrl,
+                                     MicrosoftAzureUserModel localAzurer) {
         this.azureVirtualNet = new AzureVirtualNet(resourceService);
         this.pluginHandler = pluginHandler;
         this.element = element;
         this.cidrContainerMap = cidrContainerMap;
         this.virtualNicsMap = virtualNicsMap;
         this.groupName = groupName;
+        this.azureManagerUrl = azureManagerUrl;
+        this.localAzurer = localAzurer;
     }
 
     @Override
     public void run() {
-        this.azureVirtualNet.create(this.pluginHandler, element, cidrContainerMap, virtualNicsMap, groupName);
+        this.azureVirtualNet.create(this.pluginHandler, element, cidrContainerMap,
+                virtualNicsMap, groupName, azureManagerUrl, localAzurer);
     }
 
 }

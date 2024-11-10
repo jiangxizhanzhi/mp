@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler.createtasks;
 
+import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.bo.AlertRuleBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -31,6 +32,10 @@ public class AzureVirtualMachineCreateTask implements Runnable {
 
     private String groupName;
 
+    private String azureManagerUrl;
+
+    private MicrosoftAzureUserModel localAzurer;
+
     public AzureVirtualMachineCreateTask(IAzureResourceManager resourceService,
                                          CloudScenePluginHandler pluginHandler,
                                          CloudPluginSceneElementBO element,
@@ -38,7 +43,8 @@ public class AzureVirtualMachineCreateTask implements Runnable {
                                          String userData,
                                          List<AlertRuleBO> alertRuleBOList,
                                          String dataCollectionRulesId,
-                                         String groupName) {
+                                         String groupName, String azureManagerUrl,
+                                         MicrosoftAzureUserModel localAzurer) {
         this.azureVirtualMachine = new AzureVirtualMachine(resourceService);
         this.pluginHandler = pluginHandler;
         this.element = element;
@@ -47,11 +53,14 @@ public class AzureVirtualMachineCreateTask implements Runnable {
         this.alertRuleBOList = alertRuleBOList;
         this.dataCollectionRulesId = dataCollectionRulesId;
         this.groupName = groupName;
+        this.azureManagerUrl = azureManagerUrl;
     }
 
     @Override
     public void run() {
-        this.azureVirtualMachine.create(this.pluginHandler, element, virtualNics, userData, alertRuleBOList, dataCollectionRulesId, groupName);
+        this.azureVirtualMachine.create(this.pluginHandler, element, virtualNics, userData,
+                alertRuleBOList, dataCollectionRulesId, groupName,
+                azureManagerUrl, localAzurer);
     }
 
 }

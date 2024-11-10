@@ -1,19 +1,23 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler;
 
+import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
+import cn.cyberpeace.mp.auth.repository.MicrosoftAzureLoginMapper;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.scene.bo.AlertRuleBO;
-import cn.cyberpeace.mp.scene.config.SceneAppConfig;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.AlertRuleModel;
 import cn.cyberpeace.mp.scene.model.InstanceModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.scene.repository.AlertRuleMapper;
 import cn.cyberpeace.mp.scene.repository.InstanceMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -31,6 +35,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetwor
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementNetworkUtils;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
+import com.alibaba.fastjson.JSONObject;
 import com.azure.core.http.rest.Response;
 import com.azure.core.management.Region;
 import com.azure.core.util.Context;
@@ -42,8 +47,8 @@ import com.azure.resourcemanager.monitor.models.*;
 import com.azure.resourcemanager.network.models.Network;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -52,6 +57,9 @@ import java.util.stream.Collectors;
 public class AzureCreateHandler extends CreateHandler {
 
     private String groupNamePrefix;
+    private String azureManagerUrl;
+
+    private MicrosoftAzureLoginMapper sceneElementPluginConfigMapper;
 
     public static class ElementProcess {
         public static final EventProcess CREATE_WEBAPP = new EventProcess("create_webapp", "sceneplugincloud.event" + ".CREATE_WEBAPP");
@@ -64,6 +72,9 @@ public class AzureCreateHandler extends CreateHandler {
         super(pluginHandler);
         this.resourceService = IAzureResourceManager.getInstance(cloudType);
         this.groupNamePrefix = BeanCommon.getBean(SituationAwareConfig.class).getGroupNamePrefix();
+        this.azureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getAzureManagerUrl();
+        this.sceneElementPluginConfigMapper = BeanCommon.getBean(MicrosoftAzureLoginMapper.class);
+
     }
 
     @Override
@@ -81,11 +92,16 @@ public class AzureCreateHandler extends CreateHandler {
 
         List<CloudPluginSceneElementBO> filteredNetworkEquipmentElements = this.filterNetworkEquipmentElements(allElements);
 
+        Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
+        JSONObject jsonObject = new JSONObject();
+        //云类型(1: 微软公有云 2:微软私有云 3:微软混合云)
+        jsonObject.put("cloudType", cloudType);
+        MicrosoftAzureUserModel localAzurer = sceneElementPluginConfigMapper.getLocalAzurer(jsonObject);
 
         getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_NETWORK);
         // 创建微软云的资源组
         String groupName = getPluginHandler().getSourceSceneId();
-        groupName = StringUtils.isNotBlank(groupNamePrefix)?groupNamePrefix +"-"+ groupName:groupName;
+        groupName = StringUtils.isNotBlank(groupNamePrefix) ? groupNamePrefix + "-" + groupName : groupName;
         try {
             SceneBO scene = getPluginHandler().getSceneHandler().getScene();
 
@@ -93,8 +109,24 @@ public class AzureCreateHandler extends CreateHandler {
             List<Runnable> createTerminalTasks = new ArrayList<>();
 //            空场景或不涉及云靶标的场景不启动资源组
             if (!allFilteredElements.isEmpty()) {
-                String grouoId = new AzureResourceGroup(resourceService).create(groupName);
-                scene.setResourceGroupId(grouoId);
+                String groupId = "";
+                if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
+                    groupId = new AzureResourceGroup(resourceService).create(groupName);
+                } else {
+                    String url = azureManagerUrl + "/cloud/create_group_name";
+                    Map<String, Object> formMap = new HashMap();
+                    formMap.put("azureUser", localAzurer);
+                    formMap.put("groupName", groupName);
+                    //请求头设置
+                    HashMap<String, String> headersMap = new HashMap<>();
+                    String body = JsonUtils.stringify(formMap);
+                    String result = HttpUtils.sendHttpPost(url, body, headersMap);
+                    Map<String, Object> dataMap = JsonUtils.parseMap(result);
+                    if (BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
+                        groupId = dataMap.get("data").toString();
+                    }
+                }
+                scene.setResourceGroupId(groupId);
 
                 HashMap<String, List<VirtualNic>> virtualNicsMap = new HashMap<>();
                 allFilteredElements.forEach(element -> {
@@ -140,7 +172,8 @@ public class AzureCreateHandler extends CreateHandler {
 
                     String nodeId = element.getSrcElement().getId();
                     // 封装创建网络的任务
-                    AzureVirtualNetCreateTask task = new AzureVirtualNetCreateTask(resourceService, getPluginHandler(), element, cidrContainerMap, virtualNicsMap,groupName);
+                    AzureVirtualNetCreateTask task = new AzureVirtualNetCreateTask(resourceService, getPluginHandler(), element,
+                            cidrContainerMap, virtualNicsMap, groupName, azureManagerUrl, localAzurer);
                     // 格式化任务执行过程，添加 runElementProgress
                     Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_AUXILIARY_NETWORK, task);
                     // 添加格式化后的任务到列表
@@ -164,7 +197,7 @@ public class AzureCreateHandler extends CreateHandler {
                             if (elementBO != null) {
                                 String resourceId = element.getResourceId();
                                 String resourceId1 = elementBO.getResourceId();
-                                createVNetPeering(resourceId, resourceId1, calledPairs);
+                                createVNetPeering(cloudType,resourceId, resourceId1, calledPairs, localAzurer);
                             }
                         }
                     });
@@ -192,7 +225,7 @@ public class AzureCreateHandler extends CreateHandler {
                         .collect(Collectors.toList());
 //                创建日志区/数据收集规则
                 String dataCollectionRulesId = null;
-                if(!alertRuleBOList.isEmpty()){
+                if (!alertRuleBOList.isEmpty()) {
                     Response<DataCollectionRuleResourceInner> workspaceAndDataCollectionRules = createWorkspaceAndDataCollectionRules(groupName);
                     dataCollectionRulesId = workspaceAndDataCollectionRules.getValue().id();
                 }
@@ -222,7 +255,8 @@ public class AzureCreateHandler extends CreateHandler {
 //                处理云场景无登录按钮、接收虚拟端口信息
                     receiveVirtualPortInfo(element, virtualNics);
                     AzureVirtualMachineCreateTask task = new AzureVirtualMachineCreateTask(resourceService, getPluginHandler(), element,
-                            virtualNics, combineInitCommand(element), alertRuleBOListByNodeId, dataCollectionRulesId, groupName);
+                            virtualNics, combineInitCommand(element), alertRuleBOListByNodeId, dataCollectionRulesId, groupName,
+                            azureManagerUrl, localAzurer);
                     Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_VIRTUAL_MACHINE, task);
                     createVirtualMachineTasks.add(formatTask);
                 }
@@ -260,7 +294,7 @@ public class AzureCreateHandler extends CreateHandler {
                 for (CloudPluginSceneElementBO element : filteredFireWallAppElements) {
                     String nodeId = element.getSrcElement().getId();
                     List<VirtualNic> virtualNics = this.genVirutalNics(element);
-                    AzureFireWallCreateTask task = new AzureFireWallCreateTask(resourceService, getPluginHandler(), element, virtualNics,groupName);
+                    AzureFireWallCreateTask task = new AzureFireWallCreateTask(resourceService, getPluginHandler(), element, virtualNics, groupName);
                     Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, ElementProcess.CREATE_FIRE_WALL, task);
                     createFireWallTasks.add(formatTask);
                 }
@@ -365,15 +399,19 @@ public class AzureCreateHandler extends CreateHandler {
      * 该方法用于检查两个虚拟网络是否已经建立了对等互连，如果没有，则建立对等互连。
      * 对等互连的标识通过两个资源ID的哈希值最小值和最大值组合而成，以确保唯一性。
      *
+     * @param cloudType
      * @param resourceId  第一个虚拟网络的资源ID。
      * @param resourceId1 第二个虚拟网络的资源ID。
      * @param calledPairs 已经建立对等互连的虚拟网络对的集合，用于避免重复建立互连。
+     * @param localAzurer
      */
-    private void createVNetPeering(String resourceId, String resourceId1, Set<String> calledPairs) {
+    private void createVNetPeering(Integer cloudType, String resourceId, String resourceId1, Set<String> calledPairs, MicrosoftAzureUserModel localAzurer){
         // 创建一个基于参数对的唯一标识符
         String pairId = Math.min(resourceId.hashCode(), resourceId1.hashCode()) + ":" + Math.max(resourceId.hashCode(), resourceId1.hashCode());
 
         if (!calledPairs.contains(pairId)) {
+            if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
+
             Network network = resourceService.getManager().networks().getById(resourceId);
             Network network1 = resourceService.getManager().networks().getById(resourceId1);
 
@@ -381,6 +419,27 @@ public class AzureCreateHandler extends CreateHandler {
             network.peerings().define(resourceId.substring(resourceId1.length() - 10) + "To" + resourceId1.substring(resourceId1.length() - 10) + "VNet2Peering")
                     .withRemoteNetwork(network1)
                     .create();
+            } else {
+                String url = azureManagerUrl + "/cloud/connection";
+                Map<String, Object> formMap = new HashMap();
+                formMap.put("azureUser", localAzurer);
+                formMap.put("networkId", resourceId);
+                formMap.put("connectionNetworkId", resourceId1);
+
+                //请求头设置
+                HashMap<String, String> headersMap = new HashMap<>();
+                String body = JsonUtils.stringify(formMap);
+                String result = null;
+                try {
+                    result = HttpUtils.sendHttpPost(url, body, headersMap);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                Map<String, Object> dataMap = JsonUtils.parseMap(result);
+                if (!BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
+                    throw new MpRuntimeException("Peering failure");
+                }
+            }
             calledPairs.add(pairId);
         }
     }

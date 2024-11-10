@@ -1,7 +1,13 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api;
 
+import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -11,11 +17,13 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementNetworkUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.azure.resourcemanager.network.models.Network;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -27,69 +35,142 @@ public class AzureVirtualNet {
 
     private Region region;
 
+    private SituationAwareConfig situationAwareConfig;
+
     public AzureVirtualNet(IAzureResourceManager resourceService) {
         this.resourceService = resourceService;
         this.azureResourceManager = resourceService.getManager();
         this.region = resourceService.getRegin();
+        this.situationAwareConfig = BeanCommon.getBean(SituationAwareConfig.class);
     }
 
     public void create(
             CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement,
             ConcurrentHashMap<String, ElementNetworkUtils.CidrType> cidrContainerMap,
-            HashMap<String, List<VirtualNic>> virtualNicsMap, String groupName) {
+            HashMap<String, List<VirtualNic>> virtualNicsMap, String groupName,
+            String azureManagerUrl, MicrosoftAzureUserModel localAzurer) {
+
+        Integer cloudType = pluginHandler.getSrcScene().getCloudType();
+
         // azure todo 网络名称用节点 eid+序号
         String netName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid(), 0);
-        // azure todo 不需要设置网关么?
-//        String gateway = net.getGateway();
-//            String cidr = net.getCidr();
-
-        //  azure 调用微软云api 创建网络
-        Network.DefinitionStages.WithCreate createdNet = azureResourceManager.networks()
-                .define(netName)
-                .withRegion(this.region)
-                .withExistingResourceGroup(groupName);
-        Set<Map.Entry<String, ElementNetworkUtils.CidrType>> entrySet = cidrContainerMap.entrySet();
+        String networkId;
         String manageamentSubName = null;
-        for (Map.Entry<String, ElementNetworkUtils.CidrType> entry : entrySet) {
-            String addressSpace = entry.getKey();
-            ElementNetworkUtils.CidrType value = entry.getValue();
+        if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
+            //  azure 调用微软云api 创建网络
+            Network.DefinitionStages.WithCreate createdNet = azureResourceManager.networks()
+                    .define(netName)
+                    .withRegion(this.region)
+                    .withExistingResourceGroup(groupName);
+            Set<Map.Entry<String, ElementNetworkUtils.CidrType>> entrySet = cidrContainerMap.entrySet();
+            for (Map.Entry<String, ElementNetworkUtils.CidrType> entry : entrySet) {
+                String addressSpace = entry.getKey();
+                ElementNetworkUtils.CidrType value = entry.getValue();
 
-            switch (value) {
-                case CONTAINER:
-                    addSubnetWithDelegation(createdNet, addressSpace);
-                    break;
-                case VM:
-                    addStandardSubnet(createdNet, addressSpace);
-                    break;
-                case FIRE_WALL_MANAGEMENT:
-                    addFirewallManagementSubnet(createdNet, addressSpace);
-                    break;
-                case FIRE_WALL:
-                    addFirewallSubnet(createdNet, addressSpace);
-                    break;
-                case MANAGEMENT:
-                    addStandardSubnet(createdNet, addressSpace);
-                    manageamentSubName = IpUtils.extractNetworkPart(addressSpace);
-                    break;
+                switch (value) {
+                    case CONTAINER:
+                        addSubnetWithDelegation(createdNet, addressSpace);
+                        break;
+                    case VM:
+                        addStandardSubnet(createdNet, addressSpace);
+                        break;
+                    case FIRE_WALL_MANAGEMENT:
+                        addFirewallManagementSubnet(createdNet, addressSpace);
+                        break;
+                    case FIRE_WALL:
+                        addFirewallSubnet(createdNet, addressSpace);
+                        break;
+                    case MANAGEMENT:
+                        addStandardSubnet(createdNet, addressSpace);
+                        manageamentSubName = IpUtils.extractNetworkPart(addressSpace);
+                        break;
+                }
+            }
+
+            Network network = createdNet.create();
+            networkId = network.id();
+        } else {
+            String url = azureManagerUrl + "/cloud/create_nvet";
+            Map<String, Object> formMap = new HashMap();
+            formMap.put("azureUser", localAzurer);
+            formMap.put("groupName", groupName);
+            formMap.put("netName", netName);
+            formMap.put("cidrContainerMap", cidrContainerMap);
+            //请求头设置
+            HashMap<String, String> headersMap = new HashMap<>();
+            String body = JsonUtils.stringify(formMap);
+            String result = null;
+            try {
+                result = HttpUtils.sendHttpPost(url, body, headersMap);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            Map<String, Object> dataMap = JsonUtils.parseMap(result);
+            if (BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
+                Map<String, Object> data = JsonUtils.beanToSnakeMap(dataMap.get("data"));
+                networkId = data.get("network_id").toString();
+                manageamentSubName = data.get("manageament_sub_name").toString();
+            } else {
+                networkId = null;
             }
         }
-
-        Network network = createdNet.create();
-        cloudElement.setResourceId(network.id());
+        cloudElement.setResourceId(networkId);
 
 //        创建管理虚拟机用于远程连接
 //        manageamentSubName = null;
         if (null != manageamentSubName) {
-            Integer cloudType = pluginHandler.getSrcScene().getCloudType();
-            AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(resourceService);
-            VirtualMachine managementVm = azureVirtualMachine.createManagementVM(cloudType, groupName, "ManagementVM_" + netName, network, manageamentSubName);
-            cloudElement.setManagementIp(managementVm.getPrimaryPublicIPAddress().ipAddress());
+            if(BaseSceneModel.CloudType.PUBLIC==cloudType){
+                AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(resourceService);
+                VirtualMachine managementVm = azureVirtualMachine.createManagementVM(cloudType, groupName, "ManagementVM_" + netName, networkId, manageamentSubName);
+                cloudElement.setManagementIp(managementVm.getPrimaryPublicIPAddress().ipAddress());
+            }else {
+                String customImageId = null;
+                switch (cloudType) {
+                    case BaseSceneModel.CloudType.PRIVATE:
+                        customImageId = situationAwareConfig.getPrivateManagementImageId();
+                        break;
+                    case BaseSceneModel.CloudType.MIX:
+                        customImageId = situationAwareConfig.getMixManagementImageId();
+                        break;
+                }
+
+                String url = azureManagerUrl + "/cloud/create_management_vm";
+                Map<String, Object> formMap = new HashMap();
+                formMap.put("azureUser", localAzurer);
+                formMap.put("networkId", networkId);
+                formMap.put("customImageId", customImageId);
+                formMap.put("vmName", "ManagementVM_" + netName);
+                formMap.put("groupName", groupName);
+                formMap.put("manageamentSubName", manageamentSubName);
+                formMap.put("managementUsername", situationAwareConfig.getManagementUsername());
+                formMap.put("managementPassword", situationAwareConfig.getManagementPassword());
+
+                //请求头设置
+                HashMap<String, String> headersMap = new HashMap<>();
+                String body = JsonUtils.stringify(formMap);
+                String result = null;
+                try {
+                    result = HttpUtils.sendHttpPost(url, body, headersMap);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                Map<String, Object> dataMap = JsonUtils.parseMap(result);
+                if (BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
+                    Map<String, Object> data = JsonUtils.beanToSnakeMap(dataMap.get("data"));
+                    networkId = data.get("network_id").toString();
+                    manageamentSubName = data.get("manageament_sub_name").toString();
+                } else {
+                    networkId = null;
+                }
+            }
+
         }
 
         // azure 回写网络id
+        String finalNetworkId = networkId;
         cloudElement.getDeriveNetworks().forEach(networkBO -> {
             CloudPluginSceneElementNetworkBO net = networkBO.getNetwork();
-            net.setResourceId(network.id());
+            net.setResourceId(finalNetworkId);
         });
         List<String> nodeIds = null;
         if (BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudElement.getImageType())) {
@@ -110,11 +191,12 @@ public class AzureVirtualNet {
             nodeIds.add(cloudElement.getSrcElement().getId());
         }
 
+        String finalNetworkId1 = networkId;
         nodeIds.stream().forEach(nodeId -> {
             List<VirtualNic> virtualNics = virtualNicsMap.get(nodeId);
             if (virtualNics != null) {
                 virtualNics.forEach(virtualNic -> {
-                    virtualNic.setNetworkId(network.id());
+                    virtualNic.setNetworkId(finalNetworkId1);
                 });
             }
             virtualNicsMap.put(nodeId, virtualNics);
@@ -212,6 +294,7 @@ public class AzureVirtualNet {
 //        processedElementIds.add(element.getSrcElement().getId());
         for (SceneElementPortBO port : element.getSrcElement().getPorts()) {
             SceneElementPortBO portConnectedPort = pluginHandler.getSceneHandler().getPortConnectedPort(port.getId());
+
             if (null != portConnectedPort) {
                 String id = portConnectedPort.getElement().getId();
                 CloudPluginSceneElementBO cloudPluginSceneConfigElementBO = pluginHandler.getElement(id);

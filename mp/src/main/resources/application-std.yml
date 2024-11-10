@@ -197,6 +197,7 @@ mp:
     # es 日期格式
     es-date-pattern: ${mp.situationaware.ext-var.es-date-pattern}
     group-name-prefix: ${mp.situationaware.ext-var.group-name-prefix}
+    azure-Manager-Url: ${mp.situationaware.ext-var.azure-Manager-Url}
     million-scene: ${mp.situationaware.ext-var.million-scene}
   # mp-log 模块
   log:

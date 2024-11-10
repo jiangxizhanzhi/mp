@@ -1,6 +1,10 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api;
 
+import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.scene.bo.AlertRuleBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -41,6 +45,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class AzureVirtualMachine {
@@ -132,7 +137,8 @@ public class AzureVirtualMachine {
         return dataMaps;
     }
 
-    public VirtualMachine createManagementVM(Integer cloudType, String groupName, String vmName, Network network, String subName) {
+    public VirtualMachine createManagementVM(Integer cloudType, String groupName, String vmName, String networkId, String subName) {
+        Network network = azureResourceManager.networks().getById(networkId);
         String customImageId = null;
         switch (cloudType) {
             case BaseSceneModel.CloudType.PUBLIC:
@@ -207,31 +213,94 @@ public class AzureVirtualMachine {
     }
 
     public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement,
-                       List<VirtualNic> virtualNics, String userData, List<AlertRuleBO> alertRuleBOList, String dataCollectionRulesId, String groupName) {
-//        cloudElement.setResourceId("1233");
-//        cloudElement.setPublicIpAddress("20.30.40.5");
+                       List<VirtualNic> virtualNics, String userData, List<AlertRuleBO> alertRuleBOList,
+                       String dataCollectionRulesId, String groupName,
+                       String azureManagerUrl, MicrosoftAzureUserModel localAzurer) {
+        Integer cloudType = pluginHandler.getSceneHandler().getScene().getCloudType();
+        if(BaseSceneModel.CloudType.PUBLIC==cloudType) {
 
-//        TODO 资源不浪费
-
-        // 调用微软云api 创建虚拟机 回写虚拟机id
-        VirtualMachine vm = createVirtualMachine(cloudElement, virtualNics, userData, groupName);
-        cloudElement.setResourceId(vm.id());
-        if (cloudElement.getIsPublicIp()) {
-            cloudElement.setPublicIpAddress(vm.getPrimaryPublicIPAddress().ipAddress());
-        }
+            // 调用微软云api 创建虚拟机 回写虚拟机id
+            VirtualMachine vm = createVirtualMachine(cloudElement, virtualNics, userData, groupName);
+            cloudElement.setResourceId(vm.id());
+            if (cloudElement.getIsPublicIp()) {
+                cloudElement.setPublicIpAddress(vm.getPrimaryPublicIPAddress().ipAddress());
+            }
 
 //        创建网络安全组
 //        绑定网络接口
 //        设置入站规则
 //        更新网络安全组
 
-        createNsg(cloudElement, groupName);
+            createNsg(cloudElement, groupName);
 
-        configureMonitoringForVirtualMachine(cloudElement, dataCollectionRulesId, vm, groupName);
+            configureMonitoringForVirtualMachine(cloudElement, dataCollectionRulesId, vm, groupName);
 
 //        createAlertRules(alertRuleBOList, vm.id(), vm.name(), groupName);
 
-        AzureAlertRuleUtils.createAlertRules(resourceService, alertRuleBOList, groupName, vm.id(), vm.name());
+            AzureAlertRuleUtils.createAlertRules(resourceService, alertRuleBOList, groupName, vm.id(), vm.name());
+        }else {
+
+            String vmName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
+
+            // 获取磁盘信息
+            Integer disk = cloudElement.getSrcElement().getDisk();
+            Integer expansionDisk = cloudElement.getSrcElement().getExpansionDisk();
+            String vmExpansionDiskType = cloudElement.getVmExpansionDiskType();
+
+
+            VirtualMachine.DefinitionStages.WithFromImageCreateOptionsManaged creator;
+            // 取第一块网卡
+            // azure todo 调整 root name
+            VirtualNic virtualNic = virtualNics.get(0);
+            String netId = virtualNic.getNetworkId();
+            Stream<String> ipList = virtualNics.stream().skip(1).map(VirtualNic::getFixedIp);
+            List<SceneElementPortBO> ports = cloudElement.getSrcElement().getPorts();
+
+            String url = azureManagerUrl + "/cloud/create_vm";
+            Map<String, Object> formMap = new HashMap();
+            formMap.put("azureUser", localAzurer);
+            formMap.put("groupName", groupName);
+            formMap.put("vmName", vmName);
+            formMap.put("disk", disk);
+            formMap.put("expansionDisk", expansionDisk);
+            formMap.put("vmExpansionDiskType", vmExpansionDiskType);
+            formMap.put("vmSizeType", cloudElement.getVmSizeType());
+            formMap.put("vmOsDiskType", cloudElement.getVmOsDiskType());
+            formMap.put("networkId", netId);
+            formMap.put("vmType", cloudElement.getVmType());
+            formMap.put("userData", userData);
+            formMap.put("publisher", cloudElement.getPublisher());
+            formMap.put("offer", cloudElement.getOffer());
+            formMap.put("sku", cloudElement.getSku());
+            formMap.put("sourceType", cloudElement.getSourceType());
+            formMap.put("uploadImageId", cloudElement.getUploadImageId());
+            formMap.put("userName", cloudElement.getUsername());
+            formMap.put("password", cloudElement.getPassword());
+            formMap.put("isPublicIp", cloudElement.getIsPublicIp());
+            formMap.put("ip", virtualNic.getFixedIp());
+            formMap.put("ipList", ipList);
+            formMap.put("ports",ports);
+
+            //请求头设置
+            HashMap<String, String> headersMap = new HashMap<>();
+            String body = JsonUtils.stringify(formMap);
+            String result = null;
+            try {
+                result = HttpUtils.sendHttpPost(url, body, headersMap);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            Map<String, Object> dataMap = JsonUtils.parseMap(result);
+            if (BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
+                Map<String, Object> data = JsonUtils.beanToSnakeMap(dataMap.get("data"));
+                String vmId = data.get("vm_id").toString();
+                String isPublicIp = data.get("is_public_ip").toString();
+                cloudElement.setResourceId(vmId);
+                if (cloudElement.getIsPublicIp()) {
+                    cloudElement.setPublicIpAddress(isPublicIp);
+                }
+            }
+        }
 
     }
 
@@ -503,18 +572,64 @@ public class AzureVirtualMachine {
         virtualMachine.deallocate();
     }
 
-    public void expansion(CloudPluginSceneElementBO cloudElement) {
-        VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(cloudElement.getResourceId());
-        VirtualMachine.Update update = virtualMachine.update().withSize(cloudElement.getVmSizeType());
+    public void expansion(MicrosoftAzureUserModel microsoftAzureUserModel, CloudPluginSceneElementBO cloudElement) {
+        if (microsoftAzureUserModel.getCloudType() == BaseSceneModel.CloudType.PUBLIC) {
+            VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(cloudElement.getResourceId());
+            VirtualMachine.Update update = virtualMachine.update().withSize(cloudElement.getVmSizeType());
+            update.apply();
+        }else {
+            String url = situationAwareConfig.getAzureManagerUrl() + "/cloud/vm_size_update";
+            Map<String, Object> formMap = new HashMap();
+            formMap.put("azureUser", microsoftAzureUserModel);
+            formMap.put("vmId", cloudElement.getResourceId());
+            formMap.put("vmSizeType", cloudElement.getVmSizeType());
+            //请求头设置
+            HashMap<String, String> headersMap = new HashMap<>();
+            String body = JsonUtils.stringify(formMap);
+            String result = null;
+            try {
+                result = HttpUtils.sendHttpPost(url, body, headersMap);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            Map<String, Object> dataMap = JsonUtils.parseMap(result);
+            if (!BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
+                throw new RuntimeException();
+            }
+        }
+
         Integer expansionDisk = cloudElement.getSrcElement().getExpansionDisk();
         if (!cloudElement.getExpansion() &&
                 expansionDisk != null &&
                 expansionDisk > 0 &&
                 StringUtils.isNotBlank(cloudElement.getVmExpansionDiskType())) {
-            update.withDataDiskDefaultStorageAccountType(StorageAccountTypes.fromString(cloudElement.getVmExpansionDiskType()))
-                    .withNewDataDisk(expansionDisk);
+            if (microsoftAzureUserModel.getCloudType() == BaseSceneModel.CloudType.PUBLIC) {
+                VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(cloudElement.getResourceId());
+                VirtualMachine.Update update = virtualMachine.update();
+                update.withDataDiskDefaultStorageAccountType(StorageAccountTypes.fromString(cloudElement.getVmExpansionDiskType()))
+                        .withNewDataDisk(expansionDisk);
+                update.apply();
+            }else {
+                String url = situationAwareConfig.getAzureManagerUrl() + "/cloud/vm_expansion_disk";
+                Map<String, Object> formMap = new HashMap();
+                formMap.put("azureUser", microsoftAzureUserModel);
+                formMap.put("vmExpansionDiskType", cloudElement.getVmExpansionDiskType());
+                formMap.put("expansionDisk", cloudElement.getExpansion());
+                //请求头设置
+                HashMap<String, String> headersMap = new HashMap<>();
+                String body = JsonUtils.stringify(formMap);
+                String result = null;
+                try {
+                    result = HttpUtils.sendHttpPost(url, body, headersMap);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                Map<String, Object> dataMap = JsonUtils.parseMap(result);
+                if (!BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
+                    throw new RuntimeException();
+                }
+            }
         }
-        update.apply();
     }
 
     /**
