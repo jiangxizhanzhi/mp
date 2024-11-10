@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.repository.MicrosoftAzureLoginMapper;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.JsonCommon;
@@ -111,6 +113,7 @@ import cn.cyberpeace.mp.situationaware.repository.WazuhProbeDataMapper;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import com.alibaba.fastjson.JSONObject;
 import com.azure.resourcemanager.compute.models.ComputeResourceType;
 import com.azure.resourcemanager.resourcegraph.ResourceGraphManager;
 import com.azure.resourcemanager.resourcegraph.models.QueryRequest;
@@ -264,6 +267,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Resource
     private SceneAreaMapper sceneAreaMapper;
+
+    @Resource
+    private MicrosoftAzureLoginMapper sceneElementPluginConfigMapper;
 
     // expires in 10 minutes
     private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -2380,6 +2386,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         Integer cloudType = sceneHandler.getScene().getCloudType();
+        JSONObject jsonObject = new JSONObject();
+        //云类型(1: 微软公有云 2:微软私有云 3:微软混合云)
+        jsonObject.put("cloudType", cloudType);
+        MicrosoftAzureUserModel localAzurer = sceneElementPluginConfigMapper.getLocalAzurer(jsonObject);
         if (cloudType == BaseSceneModel.CloudType.DEFAULT) {
             throw new MpRuntimeException("传统场景，不支持扩容");
         }
@@ -2399,7 +2409,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(element.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == element.getVirtualType()) {
             SceneTaskPool.getInstance().executeTask(() -> {
                 AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
-                azureVirtualMachine.expansion(element);
+                azureVirtualMachine.expansion(localAzurer,element);
             });
             Integer expansionDisk = element.getSrcElement().getExpansionDisk();
             if (!element.getExpansion() &&

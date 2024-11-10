@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
+import cn.cyberpeace.mp.auth.repository.MicrosoftAzureLoginMapper;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -27,6 +29,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.Recrea
 import cn.cyberpeace.mp.sceneplugincloud.repository.DevopsLoadSourceMapper;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import com.azure.resourcemanager.monitor.fluent.models.DataCollectionRuleResourceInner;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -243,10 +246,15 @@ public class RecreateHandler extends HandlerCommon {
 
     private static class CreateInRecreateHandler extends CreateHandler {
         private String groupNamePrefix;
+        private String azureManagerUrl;
+
+        private MicrosoftAzureLoginMapper sceneElementPluginConfigMapper;
         public CreateInRecreateHandler(CloudScenePluginHandler pluginHandler) {
             super(pluginHandler);
             this.setEvent(SceneElementModel.Event.RECREATE);
             this.groupNamePrefix = BeanCommon.getBean(SituationAwareConfig.class).getGroupNamePrefix();
+            this.azureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getAzureManagerUrl();
+            this.sceneElementPluginConfigMapper = BeanCommon.getBean(MicrosoftAzureLoginMapper.class);
         }
 
         @Override
@@ -283,6 +291,10 @@ public class RecreateHandler extends HandlerCommon {
             }
             Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
             if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
+                JSONObject jsonObject = new JSONObject();
+                //云类型(1: 微软公有云 2:微软私有云 3:微软混合云)
+                jsonObject.put("cloudType", cloudType);
+                MicrosoftAzureUserModel localAzurer = sceneElementPluginConfigMapper.getLocalAzurer(jsonObject);
                 IAzureResourceManager resourceService = IAzureResourceManager.getInstance(cloudType);
                 AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(resourceService);
                 String groupName = getPluginHandler().getSourceSceneId();
@@ -313,7 +325,7 @@ public class RecreateHandler extends HandlerCommon {
                                 }
 
                                 List<VirtualNic> virtualNics = this.genVirutalNics(cloudElement);
-                                azureVirtualMachine.create(getPluginHandler(), cloudElement, virtualNics, combineInitCommand(cloudElement), alertRuleBOList, dataCollectionRulesId, finalGroupName);
+                                azureVirtualMachine.create(getPluginHandler(), cloudElement, virtualNics, combineInitCommand(cloudElement), alertRuleBOList, dataCollectionRulesId, finalGroupName, azureManagerUrl, localAzurer);
                                 openAccessModes(cloudElement);
                             });
                 } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {

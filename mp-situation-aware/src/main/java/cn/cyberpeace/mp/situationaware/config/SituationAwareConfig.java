@@ -111,6 +111,8 @@ public class SituationAwareConfig {
 
     private String groupNamePrefix;
 
+    private String azureManagerUrl;
+
     private String millionScene;
 
     public static DateTimeFormatter esDateTimeFormatter = null;
