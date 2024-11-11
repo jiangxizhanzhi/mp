@@ -18,4 +18,11 @@ public class AzureVmOsDiskQueryParams {
     private String name;
     @ApiModelProperty(value = "虚拟机系统类型")
     private String vmType;
+    @ApiModelProperty(value = "云类型")
+    private String cloudType;
+    @ApiModelProperty(value = "分页页码")
+    private Integer page;
+    /** 分页每页条数 */
+    @ApiModelProperty(value = "分页每页条数")
+    private Integer pageSize;
 }

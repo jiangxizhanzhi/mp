@@ -62,8 +62,13 @@
                     WHEN name LIKE '%Premium_ZRS%' THEN 7
                     ELSE 8
                     END AS storage_type_weight
-                FROM mp_azure_vm_os_disk) AS subquery
+                FROM mp_azure_vm_os_disk
+        <if test="cloudType != null and cloudType != 1 ">
+            where name in ('Standard_LRS','Premium_LRS')
+        </if>
+            ) AS subquery
         WHERE rn = 1
+
         ORDER BY storage_type_weight;
     </select>
 

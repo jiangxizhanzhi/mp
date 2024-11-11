@@ -25,4 +25,6 @@ public class AzureVmSize extends BaseModel {
     private Integer maxNics;
     @ApiModelProperty(value = "成本/月")
     private String costMonth;
+    @ApiModelProperty(value = "云类型")
+    private String cloudType;
 }

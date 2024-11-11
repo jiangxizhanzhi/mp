@@ -28,13 +28,11 @@ import cn.cyberpeace.mp.cscene.model.*;
 import cn.cyberpeace.mp.cscene.repository.*;
 import cn.cyberpeace.mp.cscene.service.filed.CsceneModelFields;
 import cn.cyberpeace.mp.cscene.service.param.AzureVmOsDiskQueryParams;
-import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneSnapshotDeleteTaskPool;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
-import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
@@ -905,8 +903,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return new ServiceResult<>(true);
     }
 
-    public ListObjServiceResult<Map> vmSizeList(CsceneInstanceStatQueryParams queryParams) {
+    public ListObjServiceResult<Map> vmSizeList(Integer cloudType) {
         HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterContains(AzureVmSize::getCloudType,cloudType);
         List<AzureVmSize> list = azureVmSizeMapper.list(humanCondition);
         List<Map> data = list.stream()
                 .map(vs -> {
@@ -921,10 +920,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return new ListObjServiceResult<>(new ListObjResult<>(data, data.size()));
     }
 
-    public ListObjServiceResult<AzureVmOsDisk> vmOsDiskTypeList(CsceneInstanceStatQueryParams queryParams) {
-        HumanCondition humanCondition = new HumanCondition()
-                .pagination(queryParams.getPage(), queryParams.getPageSize());
-        List<AzureVmOsDisk> list = azureVmOsDiskMapper.vmOsDiskTypeList(humanCondition);
+    public ListObjServiceResult<AzureVmOsDisk> vmOsDiskTypeList(AzureVmOsDiskQueryParams queryParams) {
+        List<AzureVmOsDisk> list = azureVmOsDiskMapper.vmOsDiskTypeList(queryParams);
         return new ListObjServiceResult<>(new ListObjResult<>(list, list.size()));
     }
 
@@ -961,8 +958,11 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 .select(AzureVmSize::getMaxNics)
                 .filterEqual(AzureVmSize::getName, queryParams.getName());
         List<AzureVmSize> list = azureVmSizeMapper.list(humanCondition);
-
-        return new ServiceResult<>(list.size() > 0 ? list.get(0).getMaxNics().toString() : null);
+        String maxNics = list.size() > 0 ? list.get(0).getMaxNics().toString() : null;
+        if(maxNics==null){
+            maxNics = "1";
+        }
+        return new ServiceResult<>(maxNics);
     }
 
     public int getOutAreaElementNum(String sceneId, String areaId, SceneConfigDataBO dataBO) {

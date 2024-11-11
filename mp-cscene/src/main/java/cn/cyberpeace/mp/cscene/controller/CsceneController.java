@@ -393,9 +393,8 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @ApiOperation("虚拟机大小列表")
     @GetMapping("/vm_size_list")
-    public ListObjServiceResult<Map> vmSizeList(CsceneInstanceStatQueryParams queryParams) {
-        handleQueryParams("list", queryParams);
-        return modelService.vmSizeList(queryParams).asResult();
+    public ListObjServiceResult<Map> vmSizeList(@RequestParam(value = "cloud_type") Integer cloudType) {
+        return modelService.vmSizeList(cloudType).asResult();
     }
 
     @ApiOperation("根据名字查网卡数")
@@ -406,8 +405,7 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @ApiOperation("虚拟机系统磁盘类型列表")
     @GetMapping("/vm_os_disk_type_list")
-    public ListObjServiceResult<AzureVmOsDisk> vmOsDiskTypeList(CsceneInstanceStatQueryParams queryParams) {
-        handleQueryParams("list", queryParams);
+    public ListObjServiceResult<AzureVmOsDisk> vmOsDiskTypeList(AzureVmOsDiskQueryParams queryParams) {
         return modelService.vmOsDiskTypeList(queryParams).asResult();
     }
 
