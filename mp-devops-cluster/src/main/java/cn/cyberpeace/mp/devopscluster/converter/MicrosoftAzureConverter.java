@@ -5,11 +5,13 @@ import cn.cyberpeace.mp.base.bo.MpSysCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonStatusCodeEnum;
 import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
 import cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.CloudDevice;
+import cn.cyberpeace.mp.devopscluster.dto.CloudImageAddDTO;
 import cn.cyberpeace.mp.devopscluster.po.*;
 import cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper;
 import cn.cyberpeace.mp.devopscluster.utils.ExcelUtils;
@@ -501,6 +503,21 @@ public class MicrosoftAzureConverter implements BaseConverter {
         }
     }
 
+    @Transactional
+    public ServiceResult addCloudTargetData(CloudImageAddDTO requestData) {
+        String cloudTargetType = requestData.getCloudTargetType();
+        String uuid = UUID.randomUUID().toString();
+        switch (cloudTargetType) {
+            case "calculate":
+                microsoftAzureMapper.addCloudTargetCommonData(uuid, requestData.getCommonCloudTarget());
+                microsoftAzureMapper.addCalculateTargetData(uuid,requestData.getCalculateTarget());
+                break;
+            default:
+                return new ServiceResult<>(null, BaseErrorCode.ERROR, "云镜像类型参数错误").asResult();
+        }
+        return new ServiceResult(null, BaseErrorCode.SUCCESS).asResult();
+    }
+
     @Data
     public static class WhiteImageInfo {
         private String publisherName;
@@ -576,7 +593,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 .publishers().listByRegion(region);
         for (VirtualMachinePublisher publisher : virtualMachinePublishers) {
             //todo 根据需求列表筛选出需要的VM镜像
-            System.out.println("publisherName: " + publisher.name());
+//            System.out.println("publisherName: " + publisher.name());
             if (!isExist || (isExist && publisherWhiteList.contains(publisher.name()))) {
                 // 获取发布者的所有产品(offer)
                 VirtualMachineOffers offers = publisher.offers();
@@ -584,7 +601,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 for (VirtualMachineOffer offer : list) {
                     //休眠0.5秒,请求速度过快会导致请求微软云的连接中断
                     sleep(500);
-                    System.out.println("offerName: " + offer.name());
+//                    System.out.println("offerName: " + offer.name());
                     // 获取该产品的所有SKU
                     VirtualMachineSkus skus = offer.skus();
                     PagedIterable<VirtualMachineSku> skuList = skus.list();
@@ -592,7 +609,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
                     for (VirtualMachineSku sku : skuList) {
                         //休眠0.5秒,请求速度过快会导致请求微软云的连接中断
                         sleep(500);
-                        System.out.println("skuName: " + sku.name());
+//                        System.out.println("skuName: " + sku.name());
                         // 获取每个SKU的所有版本（image versions）
                         PagedIterable<VirtualMachineImage> imageList = sku.images().list();
                         int thirdTime = 0;
@@ -600,11 +617,10 @@ public class MicrosoftAzureConverter implements BaseConverter {
                             if (thirdTime < 1) {
                                 thirdTime++;
                                 JSONObject forth = new JSONObject();
-                                forth.put("imageName", offer.name());
-                                forth.put("imageVersion", image.version());
                                 forth.put("publisherName", publisher.name());
                                 forth.put("offerName", offer.name());
                                 forth.put("skuName", sku.name());
+                                forth.put("imageVersion", image.version());
                                 forth.put("operatingSystem", image.osDiskImage().operatingSystem());
                                 result.add(forth);
                                 //休眠0.5秒,请求速度过快会导致请求微软云的连接中断

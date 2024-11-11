@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.po;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -82,6 +83,11 @@ public class DeviceCloudTargetCalculate extends BaseModel {
      * 是否隐藏，0：false,1:true
      */
     private Integer isHide;
+    /**
+     * 是否自定义
+     */
+    @DefaultInt(0)
+    private Integer isCustom;
     /**
      * 创建时间
      */

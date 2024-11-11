@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.MicrosoftAzureConverter;
+import cn.cyberpeace.mp.devopscluster.dto.CloudImageAddDTO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import com.alibaba.fastjson.JSONObject;
@@ -98,6 +99,15 @@ public class MicrosoftAzureController {
     public ServiceResult synchronousCloudData() {
         microsoftAzureConverter.executeSequentially();
         return new ServiceResult(null, BaseErrorCode.SUCCESS).asResult();
+    }
+
+    /**
+     * 云镜像自定义新增
+     */
+    @ApiOperation(value = "云镜像自定义新增")
+    @PostMapping("/addCloudTargetData")
+    public ServiceResult addCloudTargetData(@RequestBody CloudImageAddDTO requestData) {
+        return microsoftAzureConverter.addCloudTargetData(requestData);
     }
 
     @ApiOperation(value = "同步后初始化用户")

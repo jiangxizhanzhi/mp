@@ -13,22 +13,24 @@
         operating_system_status,
         version,
         generation,
+        is_custom,
         create_time,
         update_time
         ) VALUES
         <foreach collection="param" item="item" index="index" separator=",">
             (
-                #{item.id},
-                #{item.name},
-                #{item.otherName},
-                #{item.cloudType},
-                #{item.cloudServiceType},
-                #{item.operatingSystem},
-                #{item.operatingSystemStatus},
-                #{item.version},
-                #{item.generation},
-                now(),
-                now()
+            #{item.id},
+            #{item.name},
+            #{item.otherName},
+            #{item.cloudType},
+            #{item.cloudServiceType},
+            #{item.operatingSystem},
+            #{item.operatingSystemStatus},
+            #{item.version},
+            #{item.generation},
+            0,
+            now(),
+            now()
             )
         </foreach>
     </insert>
@@ -47,6 +49,7 @@
         is_hide,
         create_time,
         update_time,
+        is_custom,
         logo
         ) VALUES
         <foreach collection="param" item="item" index="index" separator=",">
@@ -63,6 +66,7 @@
             #{item.isHide},
             now(),
             now(),
+            0,
             #{item.logo}
             )
         </foreach>
@@ -70,27 +74,28 @@
 
     <insert id="batchInsertCloudTargetCalculate">
         INSERT INTO mp_devops_cloud_target_calculate (
-        `link_id`,
-        `name`,
-        `source_type`,
-        `upload_image_id`,
-        `cloud_type`,
-        `publisher`,
-        `offer`,
-        `sku`,
-        `sub_type`,
-        `calculate_type`,
-        `operating_system`,
-        `operating_system_status`,
-        `is_public`,
-        `quick_create_support`,
-        `is_import`,
-        `is_hide`,
-        `create_time`,
-        `update_time`,
-        `logo`,
-        `version`,
-        `generation`
+        link_id,
+        name,
+        source_type,
+        upload_image_id,
+        cloud_type,
+        publisher,
+        offer,
+        sku,
+        sub_type,
+        calculate_type,
+        operating_system,
+        operating_system_status,
+        is_public,
+        quick_create_support,
+        is_import,
+        is_hide,
+        create_time,
+        update_time,
+        logo,
+        version,
+        is_custom,
+        generation
         ) VALUES
         <foreach collection="param" item="item" index="index" separator=",">
             (
@@ -114,6 +119,7 @@
             now(),
             #{item.logo},
             #{item.version},
+            0,
             #{item.generation}
             )
         </foreach>
@@ -121,24 +127,25 @@
 
     <insert id="batchInsertCloudTargetContainer">
         INSERT INTO mp_devops_cloud_target_container (
-        `link_id`,
-        `name`,
-        `source_type`,
-        `cloud_type`,
-        `container_type`,
-        `sub_type`,
-        `upload_target_name`,
-        `operating_system`,
-        `operating_system_status`,
-        `is_public`,
-        `quick_create_support`,
-        `is_import`,
-        `is_hide`,
-        `create_time`,
-        `update_time`,
-        `logo`,
-        `version`,
-        `generation`
+        link_id,
+        name,
+        source_type,
+        cloud_type,
+        container_type,
+        sub_type,
+        upload_target_name,
+        operating_system,
+        operating_system_status,
+        is_public,
+        quick_create_support,
+        is_import,
+        is_hide,
+        create_time,
+        update_time,
+        logo,
+        version,
+        is_custom,
+        generation
         ) VALUES
         <foreach collection="param" item="item" index="index" separator=",">
             (
@@ -159,9 +166,86 @@
             now(),
             #{item.logo},
             #{item.version},
+            0,
             #{item.generation}
             )
         </foreach>
+    </insert>
+
+    <insert id="addCloudTargetCommonData">
+        INSERT INTO mp_devops_cloud_target
+        (id,
+         name,
+         other_name,
+         cloud_type,
+         cloud_service_type,
+         operating_system,
+         operating_system_status,
+         version,
+         generation,
+         is_custom,
+         create_time,
+         update_time)
+        VALUES (#{uuid},
+                #{param.name},
+                #{param.otherName},
+                #{param.cloudType},
+                #{param.cloudServiceType},
+                #{param.operatingSystem},
+                #{param.operatingSystemStatus},
+                #{param.version},
+                #{param.generation},
+                #{param.isCustom},
+                now(),
+                now())
+    </insert>
+
+    <insert id="addCalculateTargetData">
+        INSERT INTO mp_devops_cloud_target_calculate
+        (link_id,
+         name,
+         source_type,
+         upload_image_id,
+         cloud_type,
+         publisher,
+         offer,
+         sku,
+         sub_type,
+         calculate_type,
+         operating_system,
+         operating_system_status,
+         is_public,
+         quick_create_support,
+         is_import,
+         is_hide,
+         create_time,
+         update_time,
+         logo,
+         version,
+         is_custom,
+         generation)
+        VALUES (#{uuid},
+                #{param.name},
+                #{param.sourceType},
+                #{param.uploadImageId},
+                #{param.cloudType},
+                #{param.publisher},
+                #{param.offer},
+                #{param.sku},
+                #{param.subType},
+                #{param.calculateType},
+                #{param.operatingSystem},
+                #{param.operatingSystemStatus},
+                #{param.isPublic},
+                #{param.quickCreateSupport},
+                #{param.isImport},
+                #{param.isHide},
+                now(),
+                now(),
+                #{param.logo},
+                #{param.version},
+                #{param.isCustom},
+                #{param.generation})
     </insert>
 
     <update id="updateCloudTarget">
@@ -187,7 +271,7 @@
     <delete id="deleteByIds">
         DELETE
         FROM
-            mp_devops_cloud_target
+        mp_devops_cloud_target
         <where>
             <if test="id != null and id != ''">
                 or id = #{id}
@@ -241,7 +325,7 @@
     <delete id="deleteCloudTarget">
         DELETE
         FROM
-            mp_devops_cloud_target
+        mp_devops_cloud_target
         <where>
             <if test="param != null and param.size != 0">
                 pk in (
@@ -277,7 +361,7 @@
     <delete id="deleteCloudTargetCalculate">
         DELETE
         FROM
-            mp_devops_cloud_target_calculate
+        mp_devops_cloud_target_calculate
         <where>
             <if test="param != null and param.size != 0">
                 pk in (
@@ -295,7 +379,7 @@
     <delete id="deleteCloudTargetContainer">
         DELETE
         FROM
-            mp_devops_cloud_target_container
+        mp_devops_cloud_target_container
         <where>
             <if test="param != null and param.size != 0">
                 pk in (
@@ -312,9 +396,9 @@
 
     <select id="getCloudTargetList" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetPO">
         SELECT
-            *
+        *
         FROM
-            mp_devops_cloud_target
+        mp_devops_cloud_target
         <where>
             <if test="param != null and param.name != null and param.name != ''">
                 and name like concat('%', #{param.name}, '%')
@@ -352,113 +436,98 @@
     </select>
 
     <select id="getCloudTargetCalculateById" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO">
-        SELECT
-            t.id,
-            t.name,
-            tc.source_type,
-            tc.publisher,
-            tc.offer,
-            tc.sku,
-            tc.operating_system,
-            tc.operating_system_status,
-            tc.is_public,
-            tc.quick_create_support,
-            tc.is_import,
-            tc.is_hide,
-            tc.create_time,
-            tc.update_time,
-            tc.logo,
-            tc.version,
-            tc.generation
-        FROM
-            mp_devops_cloud_target t inner join mp_devops_cloud_target_calculate tc on t.id = tc.link_id
-        WHERE
-            t.id = #{id}
+        SELECT t.id,
+               t.name,
+               tc.source_type,
+               tc.publisher,
+               tc.offer,
+               tc.sku,
+               tc.operating_system,
+               tc.operating_system_status,
+               tc.is_public,
+               tc.quick_create_support,
+               tc.is_import,
+               tc.is_hide,
+               tc.create_time,
+               tc.update_time,
+               tc.logo,
+               tc.version,
+               tc.generation
+        FROM mp_devops_cloud_target t
+                 inner join mp_devops_cloud_target_calculate tc on t.id = tc.link_id
+        WHERE t.id = #{id}
     </select>
 
     <select id="getCloudTargetContainerById" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO">
-        SELECT
-            t.id,
-            t.name,
-            tc.source_type,
-            tc.upload_target_name,
-            tc.operating_system,
-            tc.operating_system_status,
-            tc.is_public,
-            tc.quick_create_support,
-            tc.is_import,
-            tc.is_hide,
-            tc.create_time,
-            tc.update_time,
-            tc.logo,
-            tc.version,
-            tc.generation
-        FROM
-            mp_devops_cloud_target t inner join mp_devops_cloud_target_container tc on t.id = tc.link_id
-        WHERE
-            t.id = #{id}
+        SELECT t.id,
+               t.name,
+               tc.source_type,
+               tc.upload_target_name,
+               tc.operating_system,
+               tc.operating_system_status,
+               tc.is_public,
+               tc.quick_create_support,
+               tc.is_import,
+               tc.is_hide,
+               tc.create_time,
+               tc.update_time,
+               tc.logo,
+               tc.version,
+               tc.generation
+        FROM mp_devops_cloud_target t
+                 inner join mp_devops_cloud_target_container tc on t.id = tc.link_id
+        WHERE t.id = #{id}
     </select>
 
     <select id="getCloudTargetNetById" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceCloudTargetVO">
-        SELECT
-            t.id,
-            t.name,
-            tn.source_type,
-            tn.cloud_type,
-            tn.net_type,
-            tn.is_public,
-            tn.quick_create_support,
-            tn.is_import,
-            tn.is_hide,
-            tn.create_time,
-            tn.update_time,
-            tn.logo
-        FROM
-            mp_devops_cloud_target t inner join mp_devops_cloud_target_net tn on t.id = tn.link_id
-        WHERE
-            t.id = #{id}
+        SELECT t.id,
+               t.name,
+               tn.source_type,
+               tn.cloud_type,
+               tn.net_type,
+               tn.is_public,
+               tn.quick_create_support,
+               tn.is_import,
+               tn.is_hide,
+               tn.create_time,
+               tn.update_time,
+               tn.logo
+        FROM mp_devops_cloud_target t
+                 inner join mp_devops_cloud_target_net tn on t.id = tn.link_id
+        WHERE t.id = #{id}
     </select>
 
     <select id="getAlldata" resultType="cn.cyberpeace.mp.base.bo.MpSysCodeMenu">
-        WITH RECURSIVE recursion ( CODE, code_name, parent_code, type, remark, STATUS, LEVEL ) AS (
-	SELECT
-		T1.CODE,
-		T1.code_name,
-		T1.parent_code,
-        T1.type,
-		T1.remark,
-		T1.STATUS,
-		T1.LEVEL
-	FROM
-		mp_sys_code_menu T1
-	WHERE
-		T1.CODE = #{code} UNION ALL
-	SELECT
-		T2.CODE,
-		T2.code_name,
-		T2.parent_code,
-        T2.type,
-		T2.remark,
-		T2.STATUS,
-		T2.LEVEL
-	FROM
-		mp_sys_code_menu T2,
-		recursion T3
-	WHERE
-		T2.parent_code = T3.CODE
-	) SELECT
-            *
-      FROM
-            recursion T
-      ORDER BY
-            T.code
+        WITH RECURSIVE recursion (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) AS (SELECT T1.CODE,
+                                                                                                        T1.code_name,
+                                                                                                        T1.parent_code,
+                                                                                                        T1.type,
+                                                                                                        T1.remark,
+                                                                                                        T1.STATUS,
+                                                                                                        T1.LEVEL
+                                                                                                 FROM mp_sys_code_menu T1
+                                                                                                 WHERE T1.CODE = #{code}
+                                                                                                 UNION ALL
+                                                                                                 SELECT T2.CODE,
+                                                                                                        T2.code_name,
+                                                                                                        T2.parent_code,
+                                                                                                        T2.type,
+                                                                                                        T2.remark,
+                                                                                                        T2.STATUS,
+                                                                                                        T2.LEVEL
+                                                                                                 FROM mp_sys_code_menu T2,
+                                                                                                      recursion T3
+                                                                                                 WHERE T2.parent_code = T3.CODE)
+        SELECT *
+        FROM recursion T
+        ORDER BY T.code
     </select>
 
     <select id="getSqlByCodes" resultType="cn.cyberpeace.mp.base.bo.MpSysCodeMenu">
         SELECT
-            code,supplement
+        code,supplement
         FROM
-            mp_sys_code_menu
+        mp_sys_code_menu
         <where>
             <if test="param != null and param.size != 0">
                 code in
@@ -557,29 +626,24 @@
 
     <select id="getCommonTargets" resultType="cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment">
         select
-            *
+        *
         from
-            mp_devops_boundary_network_equipment
+        mp_devops_boundary_network_equipment
         <if test="offset != null and pageSize != null">
             limit #{offset}, #{pageSize}
         </if>
     </select>
 
     <select id="getCommonTargetNum" resultType="java.lang.Integer">
-        select
-            count(0)
-        from
-            mp_devops_boundary_network_equipment
+        select count(0)
+        from mp_devops_boundary_network_equipment
     </select>
 
     <select id="getSubTypeName" resultType="com.alibaba.fastjson.JSONObject">
-        SELECT DISTINCT
-            code_name,
-            code_other_name
-        FROM
-            mp_sys_code_menu
-        WHERE
-            code_name IS NOT NULL
+        SELECT DISTINCT code_name,
+                        code_other_name
+        FROM mp_sys_code_menu
+        WHERE code_name IS NOT NULL
           AND code_other_name IS NOT NULL
     </select>
 

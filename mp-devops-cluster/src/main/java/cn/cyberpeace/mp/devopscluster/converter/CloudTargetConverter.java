@@ -339,10 +339,11 @@ public class CloudTargetConverter {
             for (int i = 0; i < images.size(); i++) {
                 //主表元素
                 DeviceCloudTargetPO deviceCloudTarget = new DeviceCloudTargetPO();
-                String imageName = ((JSONObject) images.get(i)).get("imageName") != null ? ((JSONObject) images.get(i)).get("imageName").toString() : "";
+                String offerName = ((JSONObject) images.get(i)).get("offerName") != null ? ((JSONObject) images.get(i)).get("offerName").toString() : "";
+                String skuName = ((JSONObject) images.get(i)).get("skuName") != null ? ((JSONObject) images.get(i)).get("skuName").toString() : "";
                 String imageVersion = ((JSONObject) images.get(i)).get("imageVersion") != null ? ((JSONObject) images.get(i)).get("imageVersion").toString() : "";
-                deviceCloudTarget.setName(imageName + "_" + imageVersion);
-                deviceCloudTarget.setOtherName(imageName + "_" + imageVersion);
+                deviceCloudTarget.setName(offerName + "_" + skuName);
+                deviceCloudTarget.setOtherName(offerName + "_" + skuName);
                 String id = String.valueOf(UUID.randomUUID());
                 deviceCloudTarget.setId(id);
                 //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储
@@ -357,7 +358,7 @@ public class CloudTargetConverter {
                 //计算副表元素
                 DeviceCloudTargetCalculate deviceCloudTargetCalculate = new DeviceCloudTargetCalculate();
                 deviceCloudTargetCalculate.setLinkId(id);
-                deviceCloudTargetCalculate.setName(imageName + "_" + imageVersion);
+                deviceCloudTargetCalculate.setName(offerName + "_" + skuName);
                 deviceCloudTargetCalculate.setSourceType(1);
                 deviceCloudTargetCalculate.setCloudType(cloudType);
                 deviceCloudTargetCalculate.setPublisher(((JSONObject) images.get(i)).get("publisherName") != null ? ((JSONObject) images.get(i)).get("publisherName").toString() : "");

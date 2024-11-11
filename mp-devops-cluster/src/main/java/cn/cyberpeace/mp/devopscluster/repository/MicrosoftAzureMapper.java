@@ -78,4 +78,8 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
     List<JSONObject> getSubTypeName();
 
     List<MpDevopsLoad> getTopoLoadList(@Param("param") LoadRequestVO requestData);
+
+    void addCloudTargetCommonData(@Param("uuid") String uuid, @Param("param") DeviceCloudTargetPO commonCloudTarget);
+
+    void addCalculateTargetData(@Param("uuid") String uuid, @Param("param") DeviceCloudTargetCalculate calculateTarget);
 }

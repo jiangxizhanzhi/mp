@@ -58,6 +58,11 @@ public class DeviceCloudTargetPO extends BaseModel {
      */
     private String generation;
     /**
+     * 是否自定义
+     */
+    @DefaultInt(0)
+    private Integer isCustom;
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;
