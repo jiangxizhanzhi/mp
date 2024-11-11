@@ -42,6 +42,9 @@ public class MicrosoftAzureUserModel extends BaseModel {
     @ApiModelProperty(value = "client_secret")
     private String azureClientSecret;
 
+    @ApiModelProperty(value = "区域")
+    private String area;
+
     @ApiModelProperty(value = "创建人")
     private String creator;
 

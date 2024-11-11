@@ -11,6 +11,7 @@
             azure_subscription_id,
             azure_client_id,
             azure_client_secret,
+            area,
             create_time,
             creator,
             version
@@ -23,6 +24,7 @@
             #{param.azureSubscriptionId},
             #{param.azureClientId},
             #{param.azureClientSecret},
+            #{param.area},
             now(),
             #{param.creator},
             #{param.version}
@@ -47,6 +49,9 @@
             </if>
             <if test="param.connectIp != null and param.connectIp != ''">
                 connect_ip = #{param.connectIp},
+            </if>
+            <if test="param.area != null and param.area != ''">
+                area = #{param.area},
             </if>
             <if test="param.version != null and param.version != ''">
                 version = #{param.version},
