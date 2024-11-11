@@ -26,8 +26,8 @@ public class LoadConvertCode {
         this.runTableConvertMap.put("VMware", "1005020202");
         this.runTableConvertMap.put("VM", "1005020203");
 
-        this.controlTypeConvertMap.put("shell", "1005020301");
-        this.controlTypeConvertMap.put("web", "1005020302");
+        this.controlTypeConvertMap.put("1", "1005020301");
+        this.controlTypeConvertMap.put("2", "1005020302");
 
         this.actionTypeConvertMap.put("1", "1005020101");
         this.actionTypeConvertMap.put("2", "1005020102");
