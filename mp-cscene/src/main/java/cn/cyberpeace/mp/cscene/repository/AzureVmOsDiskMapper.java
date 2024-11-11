@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.cscene.repository;
 
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.cscene.model.AzureVmOsDisk;
 import cn.cyberpeace.mp.cscene.service.param.AzureVmOsDiskQueryParams;
@@ -22,7 +21,7 @@ public interface AzureVmOsDiskMapper extends BaseModelMapper<AzureVmOsDisk> {
 
     Boolean batchInsert(List<Map<String, String>> azureVmOsDisks);
 
-    List<AzureVmOsDisk> vmOsDiskTypeList(HumanCondition humanCondition);
+    List<AzureVmOsDisk> vmOsDiskTypeList(AzureVmOsDiskQueryParams humanCondition);
 
     List<AzureVmOsDisk> list(AzureVmOsDiskQueryParams queryParams);
 }
