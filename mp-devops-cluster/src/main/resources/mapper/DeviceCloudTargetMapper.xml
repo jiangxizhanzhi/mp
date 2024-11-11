@@ -257,7 +257,7 @@
             mp_devops_cloud_target_calculate
         </if>
         <if test="cloudServiceType != null and cloudServiceType == 3">
-            mp_devops_cloud_target_docker
+            mp_devops_cloud_target_container
         </if>
         SET
         <if test="param != null and param.logo != null">
