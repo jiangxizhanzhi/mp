@@ -89,7 +89,7 @@ public class OutLoadServiceImpl {
             return false;
         }
         Map<String, Object> dataMap = JsonUtils.parseMap(result);
-        if (dataMap.get("code") != null && dataMap.get("code").equals("0")) {
+        if (dataMap.get("code") != null && Integer.parseInt(dataMap.get("code").toString()) == 0) {
             return true;
         } else {
             return false;
@@ -114,7 +114,7 @@ public class OutLoadServiceImpl {
             return null;
         }
         Map<String, Object> dataMap = JsonUtils.parseMap(result);
-        if (dataMap.get("code") != null && dataMap.get("code").equals("0")) {
+        if (dataMap.get("code") != null && Integer.parseInt(dataMap.get("code").toString()) == 0) {
             return true;
         } else {
             return false;
@@ -153,7 +153,7 @@ public class OutLoadServiceImpl {
         try {
             String result = HttpUtils.sendHttpGet(url, headersMap, 2000);
             Map<String, Object> dataMap = JsonUtils.parseMap(result);
-            if ("0".equals(dataMap.get("code").toString())) {
+            if (dataMap.get("code") != null && Integer.parseInt(dataMap.get("code").toString()) == 0) {
                 return true;
             }
         } catch (IOException e) {
@@ -201,7 +201,7 @@ public class OutLoadServiceImpl {
         }
         Map<String, Object> dataMap;
         dataMap = JsonUtils.parseMap(result);
-        if ("0".equals(dataMap.get("code").toString())) {
+        if (dataMap.get("code") != null && Integer.parseInt(dataMap.get("code").toString()) == 0) {
             LinkedHashMap data = (LinkedHashMap) dataMap.get("data");
             if (data != null && data.get("toolList") != null && data.get("toolList") instanceof List) {
                 dataList = (List) data.get("toolList");
@@ -257,7 +257,7 @@ public class OutLoadServiceImpl {
         try {
             String result = HttpUtils.sendHttpPost(url, formMap, headersMap);
             Map<String, Object> dataMap = JsonUtils.parseMap(result);
-            if ("0".equals(dataMap.get("code").toString())) {
+            if (dataMap.get("code") != null && Integer.parseInt(dataMap.get("code").toString()) == 0) {
                 return true;
             }
         } catch (IOException e) {
