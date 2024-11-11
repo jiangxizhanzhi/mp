@@ -41,7 +41,8 @@ public class OutLoadServiceImpl {
 
         String result = null;
         try {
-            result = HttpUtils.sendHttpPost(url, formMap, headersMap);
+            String body = JsonUtils.stringify(formMap);
+            result = HttpUtils.sendHttpPost(url, body, headersMap);
         } catch (IOException e) {
             return null;
         }
@@ -109,7 +110,8 @@ public class OutLoadServiceImpl {
 
         String result = null;
         try {
-            result = HttpUtils.sendHttpPost(url, formMap, headersMap);
+            String body = JsonUtils.stringify(formMap);
+            result = HttpUtils.sendHttpPost(url, body, headersMap);
         } catch (IOException e) {
             return null;
         }
@@ -134,7 +136,8 @@ public class OutLoadServiceImpl {
 
         String result = null;
         try {
-            result = HttpUtils.sendHttpPost(url, formMap, headersMap);
+            String body = JsonUtils.stringify(formMap);
+            result = HttpUtils.sendHttpPost(url, body, headersMap);
         } catch (IOException e) {
             return null;
         }
@@ -246,16 +249,15 @@ public class OutLoadServiceImpl {
         MpDevopsLoadSource synchronousDataSource = loadService.getSynchronousDataSource(new JSONObject());
         String ip = synchronousDataSource.getIp() != null ? synchronousDataSource.getIp() : "http://10.108.1.10:5002";
         String url = ip + "/stgj/tool/modifyTags";
-        Map<String, Object> formMap = new HashMap();
-        formMap.put("toolTags", request.getTags());
-        formMap.put("id", request.getLoadId());
+        String body = JsonUtils.stringify(request.getTags());
+        url = url + "?id=" + request.getLoadId();
 
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();
         headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
 
         try {
-            String result = HttpUtils.sendHttpPost(url, formMap, headersMap);
+            String result = HttpUtils.sendHttpPost(url, body, headersMap);
             Map<String, Object> dataMap = JsonUtils.parseMap(result);
             if (dataMap.get("code") != null && Integer.parseInt(dataMap.get("code").toString()) == 0) {
                 return true;
