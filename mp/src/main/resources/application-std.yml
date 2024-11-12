@@ -296,8 +296,8 @@ mp:
     wazuh-run-command-http-callback-url: http://${mp.situationaware.ext-var.wazuh-ip}:${mp.situationaware.ext-var.self-port}/api/mp/scene_plugin_collection/wazuh_run_command_result
     azurePublic:
       wazuh-server-host: ${mp.situationaware.ext-var.public-wazuh-es-ip}
-      wazuh-remote-port: ${mp.situationaware.ext-var.public-es-port}
-      wazuh-auth-port: ${mp.situationaware.ext-var.public-es-port}
+      wazuh-remote-port: ${mp.situationaware.ext-var.public-wazuh-es-port}
+      wazuh-auth-port: ${mp.situationaware.ext-var.public-wazuh-es-port}
     azurePrivate:
       wazuh-server-host: ${mp.situationaware.ext-var.private-wazuh-es-ip}
       wazuh-remote-port: ${mp.situationaware.ext-var.private-wazuh-es-port}
