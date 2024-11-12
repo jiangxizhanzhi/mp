@@ -110,7 +110,7 @@ public class SceneMonitorController {
             SceneHandler sceneHandler = new SceneHandler(csceneCommonService.translateSceneId(sceneId), null, null);
             CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
             for (var e: data) {
-                if(e.getImageType()!=null && !e.getImageType().equals("load") && !e.getImageType().equals("networkEquipment")){
+                if(e.getImageType()!=null && !e.getImageType().equals("load") && !e.getImageType().equals("networkEquipment") && !e.getImageType().equals("VNet")){
                     CloudPluginSceneElementBO element = cloudPlugin.getElement(e.getId());
                     CloudElementMonitorBasicInfo cloudElement = new CloudElementMonitorBasicInfo();
                     cloudElement.setCloudServiceType(element.getCloudServiceType());
