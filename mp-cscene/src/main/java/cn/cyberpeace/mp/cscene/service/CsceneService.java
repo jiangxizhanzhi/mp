@@ -911,7 +911,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 .map(vs -> {
                     // 使用StringBuilder代替字符串连接以提高性能
                     StringBuilder sb = new StringBuilder(vs.getName());
-                    sb.append("、").append(vs.getVcpu()).append("vcpu、").append(vs.getRam()).append("GIB内存、").append(vs.getMaxNics()).append("网卡");
+                    sb.append("、").append(vs.getVcpu()).append("vcpu、").append(vs.getRam()).append("GIB内存、").append(vs.getMaxNics()==null?1:vs.getMaxNics()).append("网卡");
                     HashMap<String, String> map = new HashMap<>();
                     map.put(vs.getName(), sb.toString());
                     return map;
