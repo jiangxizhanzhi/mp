@@ -29,13 +29,13 @@ public class LoadConvertCode {
         this.controlTypeConvertMap.put("1", "1005020301");
         this.controlTypeConvertMap.put("2", "1005020302");
 
-        this.actionTypeConvertMap.put("1", "1005020101");
-        this.actionTypeConvertMap.put("2", "1005020102");
-        this.actionTypeConvertMap.put("3", "1005020103");
-        this.actionTypeConvertMap.put("5", "1005020105");
-        this.actionTypeConvertMap.put("6", "1005020106");
-        this.actionTypeConvertMap.put("7", "1005020107");
-        this.actionTypeConvertMap.put("8", "1005020108");
+        this.actionTypeConvertMap.put("逆向分析", "1005020101");
+        this.actionTypeConvertMap.put("信息探测", "1005020102");
+        this.actionTypeConvertMap.put("漏洞自动化利用", "1005020103");
+        this.actionTypeConvertMap.put("资产扫描", "1005020105");
+        this.actionTypeConvertMap.put("资产发现", "1005020106");
+        this.actionTypeConvertMap.put("弱口令扫描", "1005020107");
+        this.actionTypeConvertMap.put("漏洞扫描", "1005020108");
     }
 
     public static Map<String, String> getRunTableConvertMap() {
