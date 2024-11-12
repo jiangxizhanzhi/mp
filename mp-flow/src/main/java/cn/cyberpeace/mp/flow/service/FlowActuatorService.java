@@ -1,80 +1,101 @@
- // Copyright (C) 2024
- // All rights reserved.
- // Project name mp
- // Description:
- // Author:
- // File name FlowActuatorService.java.
- // File size 1795.
- // File create date Fri Jul 12 12:55:24 CST 2024.
- // File update date Fri Jul 12 12:55:24 CST 2024.
- // Version 1.0.0
 package cn.cyberpeace.mp.flow.service;
 
-import cn.cyberpeace.mp.base.service.BaseModelService;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
-import cn.cyberpeace.mp.flow.request.queryparam.FlowActuatorQueryParams;
+import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.response.FlowActuatorResponse;
-import cn.cyberpeace.mp.flow.response.SceneInstanceResponse;
+import cn.cyberpeace.mp.flow.service.field.FlowActuatorFields;
+import cn.cyberpeace.mp.flow.service.params.FlowActuatorQueryParams;
+import cn.cyberpeace.mp.flow.util.RemoteServerUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @ClassName FlowActuatorService
- * @Description
- * @Author maojun
- * @Date 2024/07/02
- * @Version 1.0.0
- * @see BaseModelService
- */
-public interface FlowActuatorService extends BaseModelService<FlowActuatorModel, FlowActuatorQueryParams> {
+@Service
+@Slf4j
+public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel, FlowActuatorMapper, FlowActuatorFields, FlowActuatorQueryParams> {
 
+    private FlowActuatorMapper flowActuatorMapper;
 
-    /**
-     * delExecutor
-     *
-     * @param actuatorId
-     */
-    void delExecutor(String actuatorId);
+    @Autowired
+    public FlowActuatorService(FlowActuatorMapper flowActuatorMapper) {
+        super();
+        super.setModelMapper(flowActuatorMapper);
+        this.flowActuatorMapper = flowActuatorMapper;
+    }
 
-    /**
-     * 分页获取流量发生器信息
-     *
-     * @author erZhu
-     * @date 2024/6/24 10:09
-     */
-    ListObjServiceResult<FlowActuatorResponse> page(FlowActuatorQueryParams queryParams);
+    public FlowActuatorResponse getFlowActuator(String actuatorId) {
+        var res = super.get(actuatorId);
+        var model = res.asResult().getData();
+        FlowActuatorResponse response = new FlowActuatorResponse();
+        response.setTitle(model.getTitle());
+        response.setIp(model.getIp());
+        response.setTargetSubnet(model.getNetworkId());
+        response.setStatus(model.getStatus());
+        response.setCreateTime(TimeUtils.localDateTimeToString(model.getCreateTime()));
+        return response;
+    }
 
-    /**
-     * 批量启动流量发生器
-     *
-     * @author erZhu
-     * @date 2024/6/24 11:24
-     */
-    void batchStart(List<String> actuatorIds);
+    public ListObjServiceResult<FlowActuatorResponse> getFlowActuatorList(FlowActuatorQueryParams params) {
+        if (params.getOrders() == null || params.getOrders().length == 0) {
+            params.setOrders(new String[]{"-createTime"});
+        }
+        var result = super.list(params);
+        int total = result.sourceTotal();
+        if (total == 0) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        } else {
+            List<FlowActuatorModel> objs = result.sourceObjs();
+            List<FlowActuatorResponse> responses = new ArrayList<>();
+            for (var m : objs) {
+                FlowActuatorResponse response = new FlowActuatorResponse();
+                response.setId(m.getId());
+                response.setTitle(m.getTitle());
+                response.setIp(m.getIp());
+                response.setTargetSubnet(m.getNetworkId());
+                response.setStatus(m.getStatus());
+                response.setCreateTime(TimeUtils.localDateTimeToString(m.getCreateTime()));
+                responses.add(response);
+            }
+            ListObjServiceResult<FlowActuatorResponse> res = new ListObjServiceResult<>(new ListObjResult<>(responses, total));
+            return res;
+        }
+    }
 
-    /**
-     * 批量暂停流量发生器
-     *
-     * @author erZhu
-     * @date 2024/6/24 11:24
-     */
-    void batchPause(List<String> actuatorIds);
+    public FlowActuatorResponse createFlowActuator() {
+        // 提交创建请求
+        var instance = RemoteServerUtil.createFlowTopo();
+        String instanceId = instance.getId();
 
-    /**
-     * 批量重启流量发生器
-     *
-     * @author erZhu
-     * @date 2024/6/24 11:24
-     */
-    void batchReboot(List<String> actuatorIds);
+        FlowActuatorModel actuatorModel = new FlowActuatorModel();
+        actuatorModel.setStatus(0);
+        actuatorModel.setTitle("");
+        actuatorModel.setCsceneId(instanceId);
+        flowActuatorMapper.save(actuatorModel);
+        var res = this.convert2FlowActuatorResponse(actuatorModel);
+        return res;
+    }
 
-    /**
-     * 模糊查询场景实例列表
-     *
-     * @author erZhu
-     * @date 2024/6/25 10:17
-     */
-    ListObjServiceResult<SceneInstanceResponse> listSceneByFuzzy(String name, int limit);
+    public void deleteFlowActuator(String actuatorId) {
+        FlowActuatorModel model = flowActuatorMapper.get(actuatorId);
+        RemoteServerUtil.delete(model.getCsceneId());
+        flowActuatorMapper.delete(actuatorId);
+    }
+
+    private FlowActuatorResponse convert2FlowActuatorResponse(FlowActuatorModel model) {
+        FlowActuatorResponse response = new FlowActuatorResponse();
+        response.setId(model.getId());
+        response.setTitle(model.getTitle());
+        response.setIp(model.getIp());
+        response.setTargetSubnet(model.getNetworkId());
+        response.setStatus(model.getStatus());
+        response.setCreateTime(TimeUtils.localDateTimeToString(model.getCreateTime()));
+        return response;
+    }
 }

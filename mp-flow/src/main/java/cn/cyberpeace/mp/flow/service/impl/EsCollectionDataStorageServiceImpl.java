@@ -13,28 +13,16 @@ package cn.cyberpeace.mp.flow.service.impl;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.flow.config.FlowConfig;
-import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.model.EsCollectionDataStorageModel;
-import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.repository.EsCollectionDataStorageMapper;
-import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.service.EsCollectionDataStorageService;
-import cn.cyberpeace.mp.flow.service.FlowActuatorService;
 import cn.cyberpeace.mp.flow.service.field.EsCollectionDataStorageFields;
-import cn.cyberpeace.mp.flow.service.field.FlowActuatorFields;
-import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
-/**
+ /**
  * @ClassName EsCollectionDataStorageServiceImpl
  * @Description
  * @Author maojun
