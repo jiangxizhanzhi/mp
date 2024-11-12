@@ -58,7 +58,7 @@ public class OutLoadServiceImpl {
     public ServiceResult getTaskNet(String taskId) {
         MpDevopsLoadSource dataSource = loadService.getSynchronousDataSource(new JSONObject());
         String ip = (dataSource != null && dataSource.getIp() != null) ? dataSource.getIp() : "http://10.108.1.10:5002";
-        String url = ip + "/stgj/task/enter?taskId=" + taskId;
+        String url = ip + "/stgj/task/enter?id=" + taskId;
 
         // 设置请求头
         HashMap<String, String> headersMap = new HashMap<>();
