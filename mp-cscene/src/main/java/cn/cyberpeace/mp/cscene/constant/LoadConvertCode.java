@@ -27,7 +27,7 @@ public class LoadConvertCode {
         this.runTableConvertMap.put("VM", "1005020203");
 
         this.controlTypeConvertMap.put("1", "1005020301");
-        this.controlTypeConvertMap.put("2", "1005020302");
+        this.controlTypeConvertMap.put("0", "1005020302");
 
         this.actionTypeConvertMap.put("逆向分析", "1005020101");
         this.actionTypeConvertMap.put("信息探测", "1005020102");
