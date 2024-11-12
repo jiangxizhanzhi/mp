@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.service.service;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
@@ -7,6 +9,7 @@ import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
 import cn.cyberpeace.mp.cscene.repository.mapper.OutLoadMapper;
 import cn.cyberpeace.mp.cscene.request.load.*;
 import com.alibaba.fastjson.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +20,7 @@ import java.util.*;
 import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
 
 @Service
+@Slf4j
 public class OutLoadServiceImpl {
 
     @Autowired
@@ -51,32 +55,60 @@ public class OutLoadServiceImpl {
         return dataMap;
     }
 
-    public Map<String, Object> getTaskNet(String taskId) {
-        MpDevopsLoadSource synchronousDataSource = loadService.getSynchronousDataSource(new JSONObject());
-        String ip = synchronousDataSource.getIp() != null ? synchronousDataSource.getIp() : "http://10.108.1.10:5002";
+    public ServiceResult getTaskNet(String taskId) {
+        MpDevopsLoadSource dataSource = loadService.getSynchronousDataSource(new JSONObject());
+        String ip = (dataSource != null && dataSource.getIp() != null) ? dataSource.getIp() : "http://10.108.1.10:5002";
         String url = ip + "/stgj/task/enter?taskId=" + taskId;
-        //请求头设置
+
+        // 设置请求头
         HashMap<String, String> headersMap = new HashMap<>();
         headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
 
-        String result = null;
+        String result;
         try {
             result = HttpUtils.sendHttpGet(url, headersMap, 2000);
         } catch (IOException e) {
-            return null;
+            log.error("HTTP请求失败: {}", e.getMessage());
+            return new ServiceResult(null, BaseErrorCode.ERROR, "HTTP请求失败").asResult();
         }
-        Map<String, Object> dataMap;
-        dataMap = JsonUtils.parseMap(result);
-        return dataMap;
+
+        Map<String, Object> dataMap = JsonUtils.parseMap(result);
+        if (dataMap == null) {
+            log.error("载荷平台返回数据为空或结构无效: {}", result);
+            return new ServiceResult(null, BaseErrorCode.ERROR, "载荷平台返回数据结构解析失败").asResult();
+        }
+
+        // 检查响应代码
+        Object codeObj = dataMap.get("code");
+        if (codeObj == null || Integer.parseInt(codeObj.toString()) != 0) {
+            String errorMessage = (String) dataMap.getOrDefault("message", "未知错误");
+            log.error("请求返回错误: {}", errorMessage);
+            return new ServiceResult(dataMap, BaseErrorCode.ERROR, errorMessage).asResult();
+        }
+
+        // 解析data
+        String data = (String) dataMap.getOrDefault("data", "");
+        if (!data.isEmpty()) {
+            Map<String, Object> dataParsed = JsonUtils.parseMap(data);
+            if (dataParsed != null) {
+                String link = (String) dataParsed.getOrDefault("link", "");
+                if (!link.isEmpty()) {
+                    return new ServiceResult(link, BaseErrorCode.SUCCESS).asResult();
+                }
+            }
+        }
+
+        log.warn("数据解析成功，但无有效链接信息");
+        return new ServiceResult(dataMap, BaseErrorCode.ERROR, "无有效链接信息").asResult();
     }
 
     public Boolean updateTaskInfo(OutLoadTaskUpdateRequest requestData) {
         MpDevopsLoadSource synchronousDataSource = loadService.getSynchronousDataSource(new JSONObject());
         String ip = synchronousDataSource.getIp() != null ? synchronousDataSource.getIp() : "http://10.108.1.10:5002";
         String id = requestData.getTaskId() != null ? requestData.getTaskId().toString() : "";
-        String url = ip + "/stgj/task/modify?id="+id;
+        String url = ip + "/stgj/task/modify?id=" + id;
         Map<String, Object> formMap = new HashMap();
-        formMap.put("id", id );
+        formMap.put("id", id);
         formMap.put("taskDescribe", requestData.getTaskDescribe() != null ? requestData.getTaskDescribe().toString() : "");
         formMap.put("execCommand", requestData.getExecCommand() != null ? requestData.getExecCommand().toString() : "");
 

@@ -59,8 +59,7 @@ public class OutLoadController {
     @ApiOperation(value = "获取任务访问链接", notes = "")
     @GetMapping("/getTaskNet")
     public ServiceResult getTaskNet(@RequestParam(value = "task_id") String taskId) {
-        Map<String, Object> data = outLoadService.getTaskNet(taskId);
-        return new ServiceResult(data, BaseErrorCode.SUCCESS).asResult();
+        return outLoadService.getTaskNet(taskId);
     }
 
     /**
