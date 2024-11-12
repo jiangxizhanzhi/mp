@@ -328,6 +328,8 @@ mp:
     element-process-save-realtime: ${mp.scene.ext-var.element-process-save-realtime}
     dhcp-control: ${mp.scene.ext-var.dhcp-control}
     metadata-public-file-server: http://${mp.situationaware.ext-var.public-wazuh-es-ip}/api/mp/file
+    metadata-private-file-server: http://${mp.situationaware.ext-var.private-wazuh-es-ip}/api/mp/file
+    metadata-mix-file-server: http://${mp.situationaware.ext-var.mix-wazuh-es-ip}/api/mp/file
   aggregation:
     export-image-timeout: ${mp.aggregation.ext-var.export-image-timeout}
 

@@ -51,8 +51,8 @@ public class SceneAppConfig {
     private String metadataPrivateFileServer;
 
     //混合云
-    @Value("${mp.scene.metadata_mixed_file_server:http://169.254.169.254/file}")
-    private String metadataMixedFileServer;
+    @Value("${mp.scene.metadata_mix_file_server:http://169.254.169.254/file}")
+    private String metadataMixFileServer;
 
     @Value("${mp.scene.windows_help_installer_dir:}")
     private String windowsHelpInstallerDir;
@@ -97,7 +97,7 @@ public class SceneAppConfig {
                 metadataFileServer = this.metadataPrivateFileServer;
                 break;
             case 3:
-                metadataFileServer = this.metadataMixedFileServer;
+                metadataFileServer = this.metadataMixFileServer;
                 break;
             default:
                 metadataFileServer = this.metadataFileServer;
