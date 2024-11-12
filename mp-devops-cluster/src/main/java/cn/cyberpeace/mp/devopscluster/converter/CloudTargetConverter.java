@@ -97,7 +97,7 @@ public class CloudTargetConverter {
         device.setDeviceCloudTarget(target);
     }
 
-    public void convertExtVm(CloudDevice device, DeviceCloudTargetVO target) {
+    public void convertExtVm(CloudDevice device, DeviceCloudTargetVO target,String cloudType) {
         String operatingSystem = target.getOperatingSystem();
         /**
          * ext_vm
@@ -120,8 +120,16 @@ public class CloudTargetConverter {
             extVm.setRam(1);
             extVm.setDisk(127);
         }
-        extVm.setVmSizeType("Standard_B1s");
-        extVm.setVmOsDiskType("StandardSSD_LRS");
+        if(cloudType.equals("1002")){//1002 混合云 1003 私有云 1004 公有云
+            extVm.setVmSizeType("Standard_DS1_v2");
+            extVm.setVmOsDiskType("Premium_LRS");
+        }else if(cloudType.equals("1003")){
+            extVm.setVmSizeType("Standard_DS1_v2");
+            extVm.setVmOsDiskType("Premium_LRS");
+        }else if(cloudType.equals("1004")){
+            extVm.setVmSizeType("Standard_B1s");
+            extVm.setVmOsDiskType("StandardSSD_LRS");
+        }
         extVm.setInitSupport(true);
         extVm.setQuickCreateSupport(false);
         extVm.setUsername("admin123");

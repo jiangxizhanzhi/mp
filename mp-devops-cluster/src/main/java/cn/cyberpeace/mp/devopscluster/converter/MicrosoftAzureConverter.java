@@ -183,7 +183,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             default:
         }
         //结果转Device集合
-        List<CloudDevice> convert = convert(vos);
+        List<CloudDevice> convert = convert(vos,request.getCloudType());
 
         //根据convert中subType分类收集成returnDate,list在收集returnDate
         List<JSONObject> list = new ArrayList<>();
@@ -219,7 +219,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
     }
 
     //结果转Device集合
-    private List<CloudDevice> convert(List<DeviceCloudTargetVO> vos) {
+    private List<CloudDevice> convert(List<DeviceCloudTargetVO> vos,String cloudType) {
         List<CloudDevice> deviceList = new ArrayList<>();
         if (vos != null && vos.size() > 0) {
             for (DeviceCloudTargetVO target : vos) {
@@ -257,7 +257,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
                         device.setServiceType(target.getCalculateType());
                         device.setSubType(target.getSubType());
                         if (target.getSubType() != null && target.getSubType().equals("vm")) {
-                            cloudTargetConverter.convertExtVm(device, target);
+                            cloudTargetConverter.convertExtVm(device, target,cloudType);
                         } else {
                         }
                         break;
