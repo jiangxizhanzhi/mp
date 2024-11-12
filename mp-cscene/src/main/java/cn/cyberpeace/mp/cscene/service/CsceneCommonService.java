@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,6 +147,17 @@ public class CsceneCommonService {
             return sceneStateInfo.isRunning();
         }
         return false;
+    }
+
+    public static JSONObject getSceneLoadInfo(String sceneId) {
+        JSONObject jsonResult = new JSONObject();
+//        // 查询该场景的载荷列表和服务类型
+//        List<String> cloudServices = CsceneCommonService.getCloudServiceList(sceneId);
+//        jsonResult.put("cloudServices", cloudServices);
+//        List<String> toolList = CsceneCommonService.getSceneToolList(sceneId);
+//        jsonResult.put("toolList", toolList);
+//        jsonResult.put("toolCount", toolList.size());
+        return jsonResult;
     }
 
 }

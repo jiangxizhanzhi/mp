@@ -50,6 +50,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataCountParams;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -1081,6 +1082,17 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         String sceneId = this.modelService.get(id).getSource().getObj().getScene();
         var csceneBO = getByAreaId(sceneId, areaId);
         return new ServiceResult<>(csceneBO).asResult();
+    }
+
+    @ApiOperation("查询场景的服务类型、试验工具等信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景资源id", dataTypeClass = String.class)
+    })
+    @GetMapping("getSceneLoadInfo")
+    public ServiceResult<JSONObject> getSceneLoadInfo(@RequestParam String id) {
+        String sceneId = this.modelService.get(id).getSource().getObj().getScene();
+         JSONObject result = CsceneCommonService.getSceneLoadInfo(sceneId);
+        return new ServiceResult<>(result).asResult();
     }
 
     /**

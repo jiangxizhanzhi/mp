@@ -87,9 +87,8 @@ public class OutLoadServiceImpl {
         }
 
         // 解析data
-        String data = (String) dataMap.getOrDefault("data", "");
-        if (!data.isEmpty()) {
-            Map<String, Object> dataParsed = JsonUtils.parseMap(data);
+        if (dataMap.get("data") != null) {
+            HashMap dataParsed = dataMap.get("data") instanceof HashMap ? (HashMap) dataMap.get("data") : null;
             if (dataParsed != null) {
                 String link = (String) dataParsed.getOrDefault("link", "");
                 if (!link.isEmpty()) {
