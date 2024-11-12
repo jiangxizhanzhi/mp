@@ -538,6 +538,62 @@ public class LoadServiceImpl {
      * 新增载荷执行结果
      * */
     public Boolean addLoadExecutionResult(MpDevopsLoadSceneLog requestData) {
+        // todo 假数据待删除
+        switch (requestData.getId()){
+            case "16":
+                requestData.setResultStatus("1005010101");//success
+                requestData.setResultLog(" INF Detect config path: config/config.yaml\n" +
+                        " INF Detect provider path: config/modules\n" +
+                        " INF Initialized scan config\n" +
+                        " INF amazon detected\n" +
+                        " INF Initialized amazon config0/321 [-.-]0.00%\n" +
+                        " M WRN 403:Protected-github-user.s3.amazonaws.com3/321 [0.93% 01m04s");
+                break;
+            case "14":
+                requestData.setResultStatus("1005010101");//success
+                requestData.setResultLog("CloudSploit by Aqua Security, Ltd.\n" +
+                        "Cloud security auditing for AWS,Azure,GCP, Oracle, and GitHub\n" +
+                        "\n" +
+                        "INFO: Ignoring passing resultsINF0: Skipping Aws pagination mode\n" +
+                        "INF0: Testing plugin: A Certificate Validation\n" +
+                        "INF0: Determining API calls to make...\n" +
+                        "INF0: Found 2 API calls to make for aws plugins\n" +
+                        "INF0:Collecting metadata, This may take several minutes..\n" +
+                        "INF0:Metadata collection complete. Analyzing...\n" +
+                        "INF0: Analysis complete.Scan report to follow..\n" +
+                        "Category plugin Description Resource Region Status Message \n" +
+                        "ACM Certificate Validation ACM certificates should beconfigured to use DNs validation.\n" +
+                        "arn:aws:acm:us-east-1:131213121312:certificate/0268e442-daec-49e1-9093-131213121312\n" +
+                        "uS-east-1\n" +
+                        "WARN\n" +
+                        "test .example.com is using EMAIL validation.");
+                break;
+            case "9":
+                requestData.setResultStatus("1005010101");//success
+                requestData.setResultLog("Namespaces,Service Accounts and Roles\n" +
+                        "---------\n" +
+                        "[1] List, maintain, or switch service account contexts [sa-menu] (try: listsa *, switchsa)\n" +
+                        "[2]List and/or change namespaces [ns-menu](try: listns, switchns)\n" +
+                        "[3]Get list of pods in current namespace [list-pods]\n" +
+                        "[4]Get complete info on all pods(json)[dump-pod-info]\n" +
+                        "[5]check all pods for volume mounts [find-volume-mounts]\n" +
+                        "[6]Enter Azure IAM credentials manually [enter-azure-credentials]\n" +
+                        "[7]Attempt to Assume a Different azure Role [azure-assume-role]\n" +
+                        "[8]Deactivate assumed azure role [azure-empty-assumed-role]\n" +
+                        "[9]switch authentication contexts: certificate-based authentication (kubelet, kubeproxy, manually-entered) fcert-menu]\n" +
+                        "-----------\n" +
+                        "Steal Service Accounts……\n" +
+                        "[10]List secrets in this namespace from API server [list secrets]\n" +
+                        "[11]Get a service account token from a secret [secret-to-sa]\n" +
+                        "[12]Request IAM credentials from azure Metadata API [get-aws-token]\n" +
+                        "[13]Request IAM credentials from Gcp Metadata API [get-gcp-token]\n" +
+                        "[14]Request kube-env from Gcp Metadata API [attack kube-env-gcp]\n" +
+                        "[15]Pull Kubernetes service account tokens from kops’acs bucket (Google cloud only) [attack-kops-gcs-1]\n" +
+                        "[16]Pull Kubernetes service account tokens from kops' s3 bucket(AZURE only)[attack-kops-aws-1]---------------十Interrogate/Abuse cloud API's\n");
+                break;
+            default:
+                break;
+        }
         Boolean addLoadExecutionResult = loadMapper.addLoadExecutionResult(requestData);
         return addLoadExecutionResult;
     }
