@@ -2553,6 +2553,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             case 1:
                 PublicWazuhControlCommon.wazuhControl.controlConfigOld(agentName, osType, controlConfigParam);
                 break;
+            default:
+                WazuhControlCommon.wazuhControl.controlConfigOld(agentName, osType, controlConfigParam);
+                break;
         }
 
 

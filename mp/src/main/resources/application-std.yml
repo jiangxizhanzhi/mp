@@ -296,16 +296,16 @@ mp:
     wazuh-run-command-http-callback-url: http://${mp.situationaware.ext-var.wazuh-ip}:${mp.situationaware.ext-var.self-port}/api/mp/scene_plugin_collection/wazuh_run_command_result
     azurePublic:
       wazuh-server-host: ${mp.situationaware.ext-var.public-wazuh-es-ip}
-      wazuh-remote-port: 9200
-      wazuh-auth-port: 9200
+      wazuh-remote-port: ${mp.situationaware.ext-var.public-es-port}
+      wazuh-auth-port: ${mp.situationaware.ext-var.public-es-port}
     azurePrivate:
-      wazuh-server-host: 20.2.80.26
-      wazuh-remote-port: 9200
-      wazuh-auth-port: 9200
+      wazuh-server-host: ${mp.situationaware.ext-var.private-wazuh-es-ip}
+      wazuh-remote-port: ${mp.situationaware.ext-var.private-wazuh-es-port}
+      wazuh-auth-port: ${mp.situationaware.ext-var.private-wazuh-es-port}
     azureMixed:
-      wazuh-server-host: 20.2.80.26
-      wazuh-remote-port: 9200
-      wazuh-auth-port: 9200
+      wazuh-server-host: ${mp.situationaware.ext-var.mix-wazuh-es-ip}
+      wazuh-remote-port: ${mp.situationaware.ext-var.mix-wazuh-es-port}
+      wazuh-auth-port: ${mp.situationaware.ext-var.mix-wazuh-es-port}
     public_wazuh_api_server: http://${mp.situationaware.ext-var.public-wazuh-es-ip}:${mp.situationaware.ext-var.public-wazuh-port}
   cscene:
     has-own-recording-set: ${mp.cscene.ext-var.has-own-recording-set}
