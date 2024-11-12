@@ -74,4 +74,16 @@
         </foreach>
     </select>
 
+    <select id="getDatasByCodes" resultType="cn.cyberpeace.mp.base.bo.MpSysCodeEnum">
+        SELECT
+        *
+        FROM
+        mp_sys_code_enum
+        WHERE
+        code in
+        <foreach collection="codes" item="code" open="(" separator="," close=")">
+            #{code}
+        </foreach>
+    </select>
+
 </mapper>

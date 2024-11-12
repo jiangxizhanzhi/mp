@@ -335,10 +335,13 @@ public class LoadServiceImpl {
             OutLoadModifyTagsRequest request = new OutLoadModifyTagsRequest();
             request.setLoadId(load.getId());
             // 获取标签 code
-            String s = load.getActionType();
+            String s = requestData.getActionType();
             String[] split = (s != null && !s.isEmpty()) ? s.split(",") : new String[0];
             // 使用 commonCodeService 获取 codeMap
-            Map<String, String> codeMap = commonCodeService.convertNextLevelDatasByCodes(split);
+            Map<String, String> codeMap = new HashMap<String, String>();
+            if(split != null && split.length > 0){
+                codeMap = commonCodeService.getDatasByCodes(split);
+            }
             // 收集 codeMap 的 value 转成 String[]
             request.setTags(Arrays.stream(split)
                     .map(codeMap::get)

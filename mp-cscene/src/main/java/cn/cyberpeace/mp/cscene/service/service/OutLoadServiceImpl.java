@@ -249,8 +249,8 @@ public class OutLoadServiceImpl {
         MpDevopsLoadSource synchronousDataSource = loadService.getSynchronousDataSource(new JSONObject());
         String ip = synchronousDataSource.getIp() != null ? synchronousDataSource.getIp() : "http://10.108.1.10:5002";
         String url = ip + "/stgj/tool/modifyTags";
-        String body = JsonUtils.stringify(request.getTags());
         url = url + "?id=" + request.getLoadId();
+        String body = JsonUtils.stringify(request.getTags());
 
         //请求头设置
         HashMap<String, String> headersMap = new HashMap<>();

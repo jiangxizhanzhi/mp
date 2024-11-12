@@ -18,4 +18,6 @@ public interface CommonCodeMapper{
     List<MpSysCodeEnum> getNextLevelDatasByCodes(@Param("codes") String[] codes);
 
     List<MpSysCodeEnum> getNextLevelTreeDatasByCodes(@Param("codes")String[] codes);
+
+    List<MpSysCodeEnum> getDatasByCodes(String[] codes);
 }

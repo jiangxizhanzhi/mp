@@ -110,6 +110,17 @@ public class CommonCodeServiceImpl {
         return codeMap;
     }
 
+    public Map<String,String> getDatasByCodes(String[] codes) {
+        List<MpSysCodeEnum> getDatasByCodes = commonCodeMapper.getDatasByCodes(codes);
+        Map<String, String> codeMap = new HashMap<>();
+        if(getDatasByCodes != null && getDatasByCodes.size() > 0){
+            //将nextLevelDatasByCodes中的code和codeName转换成map
+            codeMap = getDatasByCodes.stream()
+                    .collect(Collectors.toMap(MpSysCodeEnum::getCode, MpSysCodeEnum::getCodeName));
+        }
+        return codeMap;
+    }
+
     @Cacheable(key = "'getNextLevelMapsByCodes' + #code", value = "getNextLevelMapsByCodes")
     public Map<String,String> getNextLevelMapsByCodes(String code) {
         Map<String,String> map = new HashMap<>();
