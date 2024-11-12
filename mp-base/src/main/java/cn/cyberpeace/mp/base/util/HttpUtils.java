@@ -241,7 +241,7 @@ public class HttpUtils {
      * @throws IOException
      */
     public static String sendHttpDelete(String url, String body, Map<String, String> headers) throws IOException {
-        log.info("=======sendHttpDelete url: {}", url);
+        log.info("=======sendHttpDelete url: {} , body {}", url, body);
 
         HttpDeleteWithBody httpDelete = new HttpDeleteWithBody(url);
         // header

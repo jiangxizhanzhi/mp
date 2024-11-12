@@ -45,17 +45,17 @@ public class FlowSwagger2Config {
     @Autowired
     private Swagger2Config swagger2Config;
 
-    @Bean
-    public Docket apiFlow() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .apiInfo(swagger2Config.apiInfo())
-                .enableUrlTemplating(true)
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.flow"))
-                .paths(PathSelectors.any())
-                .build()
-                .globalRequestParameters(Collections.singletonList(authParameter))
-                .groupName("flow");
-    }
+//    @Bean
+//    public Docket apiFlow() {
+//        return new Docket(DocumentationType.SWAGGER_2)
+//                .apiInfo(swagger2Config.apiInfo())
+//                .enableUrlTemplating(true)
+//                .select()
+//                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.flow"))
+//                .paths(PathSelectors.any())
+//                .build()
+//                .globalRequestParameters(Collections.singletonList(authParameter))
+//                .groupName("flow");
+//    }
 
 }

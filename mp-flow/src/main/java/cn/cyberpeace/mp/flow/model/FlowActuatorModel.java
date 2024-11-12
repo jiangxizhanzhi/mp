@@ -11,6 +11,7 @@
 package cn.cyberpeace.mp.flow.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
@@ -46,6 +47,7 @@ public class FlowActuatorModel extends BaseModel {
      */
     @ApiModelProperty(value = "执行器ip地址")
     @NotBlank(message = "ip can not be empty")
+    @DefaultStr
     private String ip;
 
     /**
@@ -66,8 +68,10 @@ public class FlowActuatorModel extends BaseModel {
      * 运行状态：0 初始化， 1 运行中， 2 停止中， 3 已停止， 4 未启动过
      */
     @ApiModelProperty(value = "流量运行状态：0 初始化， 1 运行中， 2 停止中， 3 已停止， 4 未启动过")
+    @DefaultInt
     private Integer status;
 
     @ApiModelProperty(value = "创建发生器时关联的场景实例id")
+    @DefaultStr
     private String csceneId;
 }

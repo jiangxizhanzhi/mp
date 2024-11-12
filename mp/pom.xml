@@ -32,21 +32,6 @@
             <artifactId>mp-flow</artifactId>
             <version>0.0.2-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>cn.cyberpeace.mp.scene</groupId>
-            <artifactId>mp-scene</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>cn.cyberpeace.mp.sceneplugincloud</groupId>
-            <artifactId>mp-scene-plugin-cloud</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>cn.cyberpeace.mp.scenepluginflow</groupId>
-            <artifactId>mp-scene-plugin-flow</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
     <build>
@@ -141,8 +126,6 @@
                         mp-devops-cluster-0.0.2-SNAPSHOT.jar,
                         mp-flow-0.0.2-SNAPSHOT.jar,
                         mp-log-0.0.2-SNAPSHOT.jar,
-                        mp-scene-0.0.2-SNAPSHOT.jar,
-                        mp-scene-plugin-cloud-0.0.2-SNAPSHOT.jar,
                         mp-scene-plugin-collection-0.0.2-SNAPSHOT.jar,
                         mp-scene-plugin-flow-0.0.2-SNAPSHOT.jar,
                         mp-situation-aware-0.0.2-SNAPSHOT.jar

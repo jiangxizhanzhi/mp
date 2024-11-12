@@ -10,18 +10,25 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.base.util.mptool;
 
-import joptsimple.internal.Strings;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.StringUtils;
-import org.apache.commons.codec.net.URLCodec;
+ import lombok.extern.slf4j.Slf4j;
+ import org.apache.commons.codec.binary.StringUtils;
+ import org.apache.commons.codec.net.URLCodec;
 
-import java.io.File;
-import java.lang.reflect.Array;
-import java.net.*;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
+ import java.io.File;
+ import java.lang.reflect.Array;
+ import java.net.MalformedURLException;
+ import java.net.URI;
+ import java.net.URISyntaxException;
+ import java.net.URL;
+ import java.net.URLStreamHandler;
+ import java.nio.charset.Charset;
+ import java.nio.charset.StandardCharsets;
+ import java.util.ArrayList;
+ import java.util.BitSet;
+ import java.util.Collection;
+ import java.util.HashMap;
+ import java.util.List;
+ import java.util.Map;
 
 /**
  * @ClassName URLUtil
@@ -154,7 +161,7 @@ public class URLUtil {
                 String str = toStr(item);
                 values.add(str);
             }
-            return Strings.join(values, ",");
+            return org.apache.commons.lang3.StringUtils.join(values, ",");
         }
 
         if (value.getClass().isArray()) {
@@ -168,7 +175,7 @@ public class URLUtil {
                 String str = toStr(object);
                 values.add(str);
             }
-            return Strings.join(values, ",");
+            return org.apache.commons.lang3.StringUtils.join(values, ",");
         }
         return value.toString();
     }

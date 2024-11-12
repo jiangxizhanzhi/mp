@@ -46,24 +46,24 @@ public class CommonSwagger2Config {
     @Autowired
     private Swagger2Config swagger2Config;
 
-    /**
-     * apiBase
-     *
-     * @return
-     */
-    @Bean
-    public Docket apiBase() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .apiInfo(swagger2Config.apiInfo())
-                .enableUrlTemplating(true)
-                .select()
-                .apis(RequestHandlerSelectors
-                              .basePackage("cn.cyberpeace.mp.common")
-                              .or(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.base")))
-                .paths(PathSelectors.any())
-                .build()
-                .globalRequestParameters(Collections.singletonList(authParameter))
-                .groupName("base");
-    }
+//    /**
+//     * apiBase
+//     *
+//     * @return
+//     */
+//    @Bean
+//    public Docket apiBase() {
+//        return new Docket(DocumentationType.SWAGGER_2)
+//                .apiInfo(swagger2Config.apiInfo())
+//                .enableUrlTemplating(true)
+//                .select()
+//                .apis(RequestHandlerSelectors
+//                              .basePackage("cn.cyberpeace.mp.common")
+//                              .or(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.base")))
+//                .paths(PathSelectors.any())
+//                .build()
+//                .globalRequestParameters(Collections.singletonList(authParameter))
+//                .groupName("base");
+//    }
 
 }
