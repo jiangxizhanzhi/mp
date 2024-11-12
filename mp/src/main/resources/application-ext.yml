@@ -130,6 +130,14 @@ mp:
       public-wazuh-es-ip: ${PUBLIC_WAZUH_ES_IP:10.108.1.10}
       public-wazuh-es-port: ${PUBLIC_WAZUH_ES_PORT:9205}
       public-wazuh-es-max-page-size: ${PUBLIC_ES_MAX_PAGESIZE:10000}
+      private-wazuh-ip: ${PRIVATE_WAZUH_IP:10.108.1.10}
+      private-wazuh-port: ${PRIVATE_WAZUH_PORT:15500}
+      private-wazuh-username: ${PRIVATE_WAZUH_USERNAME:wazuh}
+      private-wazuh-password: ${PRIVATE_WAZUH_PASSWORD:Abcd123#}
+      mix-wazuh-ip: ${MIX_WAZUH_IP:10.108.1.10}
+      mix-wazuh-port: ${MIX_WAZUH_PORT:15500}
+      mix-wazuh-username: ${MIX_WAZUH_USERNAME:wazuh}
+      mix-wazuh-password: ${MIX_WAZUH_PASSWORD:Abcd123#}
       private-wazuh-es-ip: ${PRIVATE_WAZUH_ES_IP:10.108.1.10}
       private-wazuh-es-port: ${PRIVATE_WAZUH_ES_PORT:9205}
       private-wazuh-es-max-page-size: ${PRIVATE_ES_MAX_PAGESIZE:10000}

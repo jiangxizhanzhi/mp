@@ -164,10 +164,18 @@ mp:
     wazuh-username: ${mp.situationaware.ext-var.wazuh-username}
     wazuh-password: ${mp.situationaware.ext-var.wazuh-password}
     wazuh-flow-table-url: http://${mp.common.ext-var.cp-ip}:9999/knapsack/probe/v1
-    #wazuh 开放接口地址用户名密码
+    #public wazuh 开放接口地址用户名密码
     public-wazuh-base-url: http://${mp.situationaware.ext-var.public-wazuh-ip}:${mp.situationaware.ext-var.public-wazuh-port}
     public-wazuh-username: ${mp.situationaware.ext-var.public-wazuh-username}
     public-wazuh-password: ${mp.situationaware.ext-var.public-wazuh-password}
+    #private wazuh 开放接口地址用户名密码
+    private-wazuh-base-url: http://${mp.situationaware.ext-var.private-wazuh-ip}:${mp.situationaware.ext-var.private-wazuh-port}
+    private-wazuh-username: ${mp.situationaware.ext-var.private-wazuh-username}
+    private-wazuh-password: ${mp.situationaware.ext-var.private-wazuh-password}
+    #mix wazuh 开放接口地址用户名密码
+    mix-wazuh-base-url: http://${mp.situationaware.ext-var.mix-wazuh-ip}:${mp.situationaware.ext-var.mix-wazuh-port}
+    mix-wazuh-username: ${mp.situationaware.ext-var.mix-wazuh-username}
+    mix-wazuh-password: ${mp.situationaware.ext-var.mix-wazuh-password}
     #managemnet 管理节点镜像用户名密码
     public-management-image-id: ${mp.situationaware.ext-var.public-management-image-id}
     private-management-image-id: ${mp.situationaware.ext-var.private-management-image-id}
