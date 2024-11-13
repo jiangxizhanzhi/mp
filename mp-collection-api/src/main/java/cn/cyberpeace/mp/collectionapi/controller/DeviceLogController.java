@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -81,39 +82,43 @@ public class DeviceLogController {
     @PostConstruct
     private void init() {
         testAdClient = HttpClient.builder().configServer(config.getAdApp()).configMaxConnTotal(100).configMaxConnPerRoute(75).configTimeout(30_000).build();
-        // 每两秒执行一次，或者size>100 保存日志
-        ScheduledExecutorService deviceLogBufferScheduleExecutor = Executors.newScheduledThreadPool(1);
-        ScheduledExecutorService pushLogScheduleExecutor = Executors.newScheduledThreadPool(1);
-
-        deviceLogBufferScheduleExecutor.scheduleAtFixedRate(() -> {
-            synchronized (DEVICE_BUFFER) {
-                if (!CollectionUtils.isEmpty(DEVICE_BUFFER)) {
-                    deviceLogService.saveDocuments(DEVICE_BUFFER);
-                    DEVICE_BUFFER.clear();
-                }
-            }
-        }, 1, 2, TimeUnit.SECONDS);
-
-        //每过1s清理一下PUSH_LOG_COUNT_BUFFER记录的数目。因为如果扰动日志1s内，某设备记录数超过10条就不再发送了。
-        pushLogScheduleExecutor.scheduleAtFixedRate(() -> {
-            synchronized (PUSH_LOG_COUNT_BUFFER) {
-                if (!CollectionUtils.isEmpty(PUSH_LOG_COUNT_BUFFER)) {
-                    PUSH_LOG_COUNT_BUFFER.clear();
-                }
-            }
-        }, 1, 1, TimeUnit.SECONDS);
-
     }
 
+    @Scheduled(cron = "0/2 * * * * *")
+    private void schedule1() {
+        // 每两秒执行一次，或者size>100 保存日志
+        synchronized (DEVICE_BUFFER) {
+            if (FlowController.debugLogFlag) {
+                log.info("save DEVICE_BUFFER , size is {}", DEVICE_BUFFER.size());
+            }
+            if (!CollectionUtils.isEmpty(DEVICE_BUFFER)) {
+                deviceLogService.saveDocuments(DEVICE_BUFFER);
+                DEVICE_BUFFER.clear();
+            }
+        }
+    }
 
+    @Scheduled(cron = "0/1 * * * * *")
+    private void schedule2() {
+        //每过1s清理一下PUSH_LOG_COUNT_BUFFER记录的数目。因为如果扰动日志1s内，某设备记录数超过10条就不再发送了。
+        synchronized (PUSH_LOG_COUNT_BUFFER) {
+            if (FlowController.debugLogFlag) {
+                log.info("clear PUSH_LOG_COUNT_BUFFER , content is {}", JsonCommon.stringify(PUSH_LOG_COUNT_BUFFER));
+            }
+            if (!CollectionUtils.isEmpty(PUSH_LOG_COUNT_BUFFER)) {
+                PUSH_LOG_COUNT_BUFFER.clear();
+            }
+        }
+    }
 
     /**
-     *  DEVICE_BUFFER 收集日志。
-     *  如果缓存长度大于100或者等待2s后，就批量存储
-     * @author
-     * @date 16:46 2023/11/30
+     * DEVICE_BUFFER 收集日志。
+     * 如果缓存长度大于100或者等待2s后，就批量存储
+     *
      * @param logData
      * @return cn.cyberpeace.mp.base.service.result.ServiceResult<java.lang.Boolean>
+     * @author
+     * @date 16:46 2023/11/30
      **/
     @PostMapping("")
     @ApiOperation(value = "上报单条设备日志")
@@ -244,8 +249,8 @@ public class DeviceLogController {
         DeviceLogQueryRequest req = DeviceLogQueryRequest.builder()
                 .type(type)
                 .build();
-            req.setPageSize(10);
-            req.setPageIndex(1);
+        req.setPageSize(10);
+        req.setPageIndex(1);
 
         PageableLogs logs = deviceLogService.searchLog(req);
         return logs.getData();
