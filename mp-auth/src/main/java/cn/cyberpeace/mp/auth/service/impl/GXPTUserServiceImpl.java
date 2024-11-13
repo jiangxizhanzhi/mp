@@ -112,7 +112,7 @@ public class GXPTUserServiceImpl {
         try {
             result = HttpUtils.sendHttpGet(url, headersMap, 2000);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.info("gxpt delete user error: {}", e.getMessage());
         }
         Map<String, Object> dataMap;
         dataMap = JsonUtils.parseMap(result);
