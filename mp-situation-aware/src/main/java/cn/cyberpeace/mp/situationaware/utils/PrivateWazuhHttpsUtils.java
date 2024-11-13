@@ -78,7 +78,7 @@ public class PrivateWazuhHttpsUtils {
         }
     }
 
-    private static String sendGetWithAuthToken(String url) {
+    public static String sendGetWithAuthToken(String url) {
         CloseableHttpResponse response = null;
         CloseableHttpClient httpClient = null;
         try {

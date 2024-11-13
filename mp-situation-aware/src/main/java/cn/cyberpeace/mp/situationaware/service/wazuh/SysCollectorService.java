@@ -12,9 +12,7 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseResponse;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.*;
-import cn.cyberpeace.mp.situationaware.utils.CloudAwareWazuhHttpClient;
-import cn.cyberpeace.mp.situationaware.utils.PublicWazuhHttpsUtils;
-import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
+import cn.cyberpeace.mp.situationaware.utils.*;
 import com.alibaba.fastjson.*;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -208,7 +206,25 @@ public class SysCollectorService extends RequestProcessor {
         }
         String res = "";
         String requestUrl = CloudAwareWazuhHttpClient.getRequestUrl(situationAwareConfig, cloudType, "/syscollector/" + agentId + "/os");
-        res = PublicWazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
+        if (cloudType != null) {
+            switch (cloudType) {
+                case BaseSceneModel.CloudType.PUBLIC:
+                    res = PublicWazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
+                    break;
+                case BaseSceneModel.CloudType.PRIVATE:
+                    res = PrivateWazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
+                    break;
+                case BaseSceneModel.CloudType.MIX:
+                    res = MixWazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
+                    break;
+                default:
+                    res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
+                    break;
+            }
+        } else {
+            res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
+        }
+
         BaseResponse<OS> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
         log.info("{}", result);

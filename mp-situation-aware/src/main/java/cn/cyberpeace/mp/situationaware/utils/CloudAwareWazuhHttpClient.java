@@ -30,7 +30,8 @@ public class CloudAwareWazuhHttpClient {
                     requestUrl = situationAwareConfig.getMixWazuhBaseUrl();
                     break;
                 default:
-                    throw new IllegalArgumentException("Invalid cloudType: " + cloudType);
+                    requestUrl = situationAwareConfig.getWazuhBaseUrl();
+                    break;
             }
         } else {
             requestUrl = situationAwareConfig.getWazuhBaseUrl();
@@ -66,7 +67,8 @@ public class CloudAwareWazuhHttpClient {
                     res = MixWazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
                     break;
                 default:
-                    throw new IllegalArgumentException("Invalid cloudType: " + cloudType);
+                    res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
+                    break;
             }
         } else {
             res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
