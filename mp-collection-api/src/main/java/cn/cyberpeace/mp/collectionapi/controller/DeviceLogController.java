@@ -176,7 +176,6 @@ public class DeviceLogController {
                 if (PUSH_LOG_COUNT_BUFFER.get(logBO.getIp()) > DEVICE_DMF_MAX_SEQ) {
                     return;
                 }
-
             }
         }
 
