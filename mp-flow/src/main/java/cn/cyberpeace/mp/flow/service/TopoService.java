@@ -13,15 +13,16 @@ package cn.cyberpeace.mp.flow.service;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.base.util.protocolprobe.ProtocolProbe;
-import cn.cyberpeace.mp.base.util.protocolprobe.SSHProbe;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.FlowTaskAttackConf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
+import cn.cyberpeace.mp.flow.integration.RemoteServerUtil;
+import cn.cyberpeace.mp.flow.integration.actuator.FlowActuator;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
+import cn.cyberpeace.mp.flow.model.FlowProtocolModel;
 import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskConfModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskPortModel;
@@ -34,14 +35,9 @@ import cn.cyberpeace.mp.flow.repository.FlowTaskPortMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
 import cn.cyberpeace.mp.flow.response.FlowActuatorResponse;
-import cn.cyberpeace.mp.flow.service.impl.FlowTaskTaskServiceImpl;
-import cn.cyberpeace.mp.flow.util.SshUtil;
-import cn.cyberpeace.mp.flow.util.RemoteServerUtil;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -81,10 +77,16 @@ public class TopoService {
     private FlowTaskConfMapper flowTaskConfMapper;
 
     @Resource
-    private FlowTaskTaskServiceImpl flowTaskTaskService;
+    private AsyncPlatFlowTaskService asyncPlatFlowTaskService;
 
     @Resource
     private FlowTaskRecordMapper flowTaskRecordMapper;
+
+    @Resource
+    private FlowProtocolService flowProtocolService;
+
+    @Resource
+    private FlowTaskTaskService flowTaskTaskService;
 
     public List<FlowActuatorResponse> getFlowActuator() {
         var list = flowActuatorMapper.list(new HumanCondition());
@@ -120,10 +122,10 @@ public class TopoService {
         HumanCondition portCondition = new HumanCondition().filterEqual(FlowTaskPortModel::getActuatorId, actuatorId)
                 .filterEqual(FlowTaskPortModel::getNetworkId, networkId);
         var portModel = flowTaskPortMapper.first(portCondition);
-        String mac = "" ;
+        FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(actuatorId);
+        String mac = "";
         if (portModel == null) {
             // 无数据 说明未接入网络 ， 需要先接入网络
-            FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(actuatorId);
             flowActuatorModel.getInstanceId();
             mac = RemoteServerUtil.addPort(flowActuatorModel.getInstanceId(), networkId);
             portModel = new FlowTaskPortModel();
@@ -201,13 +203,17 @@ public class TopoService {
             taskIdList.add(flowTaskTaskModel.getId());
         }
 
-        if (!flowTaskTaskService.initNetwork(portModel.getMac(), taskIdList, targetIp, actuatorId, taskIdList.size())) {
+        FlowActuator flowActuator = new FlowActuator(flowActuatorModel.getIp(), flowTaskTaskService);
+        boolean initNetwork = flowActuator.initNetwork(portModel.getMac(), targetIp, taskIdList);
+        if (!initNetwork) {
             log.error("init network error");
             throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
         }
         //上传pcap包虚拟机
         for (FlowInfoModel flowInfoModel : flowInfoModelList) {
-            if (!flowTaskTaskService.uploadPcapToTrex(flowInfoModel, actuatorId)) {
+            List<FlowProtocolModel> flowProtocolModelList = flowProtocolService.selectByFlowId(flowInfoModel.getId());
+            boolean uploadPcap = flowActuator.uploadPcap(flowInfoModel, flowProtocolModelList);
+            if (!uploadPcap) {
                 log.error("upload flow file info error");
                 throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
             }
@@ -221,38 +227,19 @@ public class TopoService {
         flowTaskRecordMapper.filterDelete(new HumanCondition().filterIn(FlowTaskRecordModel::getTaskId, ids.toArray(new String[]{})));
     }
 
-    @Scheduled(cron = "0/5 * * * * ?")
-    public void queryFlowActuator() {
-        HumanCondition condition = new HumanCondition().filterEqual(FlowActuatorModel::getStatus, 0);
-        var list = flowActuatorMapper.list(condition);
-        for (var m : list) {
-            if (StringUtils.isEmpty(m.getIp())) {
-                var instance = RemoteServerUtil.getTopo(m.getCsceneId());
-                String flowNodeResourceId = RemoteServerUtil.getFlowNodeResourceId(instance);
-                String ip = RemoteServerUtil.getFlowNodeIp(instance);
-                String netNodeResourceId = RemoteServerUtil.getFlowNodeNetResourceId(instance);
-                if (StringUtils.isNotEmpty(flowNodeResourceId)) {
-                    m.setIp(ip);
-                    m.setInstanceId(flowNodeResourceId);
-                    m.setNetworkId(netNodeResourceId);
-                    flowActuatorMapper.update(m);
-                }
-            } else {
-                String ip = m.getIp();
-                ProtocolProbe protocolProbe = new SSHProbe(ip, 22);
-                if (protocolProbe.probe()) {
-                    // 更新trex代码
-                    String commands = "./init.sh";
-                    SshUtil.ServerInfo serverInfo = new SshUtil.ServerInfo();
-                    serverInfo.setHost(ip);
-                    serverInfo.setUser("root");
-                    serverInfo.setPassword("111111");
-                    String TGN_PATH = "D:\\MJ\\code2024\\30s\\mp\\mp-scene-plugin-flow\\src\\main\\resources\\traffic_generators.zip";
-                    SshUtil.refreshDir(serverInfo, commands, TGN_PATH, "/opt/project_dirs");
-                    m.setStatus(1);
-                    flowActuatorMapper.update(m);
-                }
-            }
-        }
+    public void startTask(String taskId) {
+        asyncPlatFlowTaskService.startTask(taskId);
+    }
+
+    public void stopTask(String taskId) {
+        asyncPlatFlowTaskService.stopTask(taskId);
+    }
+
+    public void startTasks(List<String> taskIds){
+        asyncPlatFlowTaskService.batchStartTasks(taskIds);
+    }
+
+    public void stopTasks(List<String> taskIds){
+        asyncPlatFlowTaskService.batchStopTasks(taskIds);
     }
 }

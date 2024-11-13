@@ -98,6 +98,16 @@ public class QueryParams {
         }
     }
 
+    public Integer getPerPage() {
+        if (pageSize != null) {
+            return pageSize;
+        } else if (perPage != null) {
+            return perPage;
+        } else {
+            return 10;
+        }
+    }
+
     public Integer getPage() {
         return page == null ? 1 : page;
     }

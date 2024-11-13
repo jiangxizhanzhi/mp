@@ -1,1 +1,0 @@
-update mp_common_option set zh_name = '测试床' where `code` = '236' ;

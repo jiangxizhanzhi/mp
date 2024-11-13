@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.bo.EditFlowTaskConfRequest;
+import cn.cyberpeace.mp.flow.bo.FlowTaskBatchStartRequest;
 import cn.cyberpeace.mp.flow.bo.QueryFlowTaskConfResponse;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams;
@@ -60,17 +61,31 @@ public class FlowActuatorTaskController {
         return new ServiceResult(true).asResult();
     }
 
-    @ApiOperation("批量启动流量任务")
-    @GetMapping("/start_tasks")
-    public String startTasks(String[] taskIds) {
-        topoService.deleteTasks(List.of(taskIds));
-        return null;
+    @ApiOperation("启动单个流量任务")
+    @PostMapping("/task/start")
+    public ServiceResult<Boolean> startTask(String taskId) {
+        topoService.startTask(taskId);
+        return new ServiceResult<>(true).asResult();
     }
 
-    @ApiOperation("批量停止流量任务")
+    @ApiOperation("关闭单个流量任务")
+    @PostMapping("/task/stop")
+    public ServiceResult<Boolean> stopTask(String taskId) {
+        topoService.stopTask(taskId);
+        return new ServiceResult<>(true).asResult();
+    }
+
+    @ApiOperation("启动多个流量任务")
+    @PostMapping("/task/batch_start")
+    public ServiceResult<Boolean> startTasks(@RequestBody FlowTaskBatchStartRequest request) {
+        topoService.startTasks(request.getTaskIds());
+        return new ServiceResult<>(true).asResult();
+    }
+
+    @ApiOperation("关闭多个流量任务")
     @GetMapping("/stop_tasks")
-    public String stopTasks(List<String> taskIds) {
-        topoService.deleteTasks(taskIds);
+    public String stopTasks(@RequestBody FlowTaskBatchStartRequest request) {
+        topoService.stopTasks(request.getTaskIds());
         return null;
     }
 

@@ -1,2 +1,0 @@
-alter table mp_sceneplugincloud_scene add COLUMN strategy_ip VARCHAR(32) null default '' COMMENT '策略下发客户端ip' ;
-alter table mp_sceneplugincloud_scene add COLUMN strategy_instance VARCHAR(64) null default '' COMMENT '策略下发实例id' ;

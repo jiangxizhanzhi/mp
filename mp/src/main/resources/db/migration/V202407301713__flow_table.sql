@@ -1,1 +1,0 @@
-alter table mp_scene_scene_element_snapshot modify column id VARCHAR(128) NOT NULL COMMENT 'ID' ;

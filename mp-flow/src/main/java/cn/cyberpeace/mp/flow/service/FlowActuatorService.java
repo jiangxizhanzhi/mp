@@ -9,7 +9,7 @@ import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.response.FlowActuatorResponse;
 import cn.cyberpeace.mp.flow.service.field.FlowActuatorFields;
 import cn.cyberpeace.mp.flow.service.params.FlowActuatorQueryParams;
-import cn.cyberpeace.mp.flow.util.RemoteServerUtil;
+import cn.cyberpeace.mp.flow.integration.RemoteServerUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
