@@ -64,7 +64,7 @@
                     END AS storage_type_weight
                 FROM mp_azure_vm_os_disk
         <if test="cloudType != null and cloudType != 1 ">
-            where name in ('Standard_LRS','Premium_LRS')
+            where name ='Premium_LRS'
         </if>
             ) AS subquery
         WHERE rn = 1
