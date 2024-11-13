@@ -114,8 +114,10 @@ public class GXPTUserServiceImpl {
         } catch (Exception e) {
             log.info("gxpt delete user error: {}", e.getMessage());
         }
-        Map<String, Object> dataMap;
-        dataMap = JsonUtils.parseMap(result);
+        Map<String, Object> dataMap = null;
+        if(result != null){
+            dataMap = JsonUtils.parseMap(result);
+        }
         return dataMap;
     }
 
