@@ -2,13 +2,12 @@ package cn.cyberpeace.mp.flow.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.flow.bo.DeleteActuatorParams;
+import cn.cyberpeace.mp.flow.bo.FlowActuatorQueryParams;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.response.FlowActuatorResponse;
 import cn.cyberpeace.mp.flow.service.FlowActuatorService;
-import cn.cyberpeace.mp.flow.service.impl.FlowTaskTaskServiceImpl;
-import cn.cyberpeace.mp.flow.service.params.DeleteActuatorParams;
-import cn.cyberpeace.mp.flow.service.params.FlowActuatorQueryParams;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
@@ -31,9 +30,6 @@ import javax.annotation.Resource;
 @Slf4j
 @Data
 public class FlowActuatorController {
-
-    @Resource
-    private FlowTaskTaskServiceImpl flowTaskTaskService;
 
     @Resource
     private FlowActuatorMapper flowActuatorMapper;

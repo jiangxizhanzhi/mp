@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.flow.bo.FlowNodeTxBps;
 import cn.cyberpeace.mp.flow.bo.FlowStatisticsAll;
 import cn.cyberpeace.mp.flow.bo.FlowStatisticsInfo;
 import cn.cyberpeace.mp.flow.bo.FlowSummary;
-import cn.cyberpeace.mp.flow.service.impl.FlowTaskRecordServiceImpl;
+import cn.cyberpeace.mp.flow.service.impl.FlowTaskRecordService;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -30,7 +30,7 @@ import java.util.List;
 public class FlowTaskCountController {
 
     @Resource
-    private FlowTaskRecordServiceImpl flowTaskRecordService;
+    private FlowTaskRecordService flowTaskRecordService;
 
     /**
      * 流量仿真概况

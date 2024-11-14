@@ -28,7 +28,7 @@ import cn.cyberpeace.mp.flow.request.ModifyCollectionRequest;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowCollectionQueryParams;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowCollectionRelQueryParams;
 import cn.cyberpeace.mp.flow.response.FlowCollectionResponse;
-import cn.cyberpeace.mp.flow.service.impl.FlowCollectionServiceImpl;
+import cn.cyberpeace.mp.flow.service.impl.FlowCollectionService;
 import io.micrometer.core.instrument.util.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -63,7 +63,7 @@ import java.util.Objects;
 public class FlowCollectionController {
 
     @Resource
-    private FlowCollectionServiceImpl flowCollectionService;
+    private FlowCollectionService flowCollectionService;
 
     @ApiOperation("分页查询流量集合信息")
     @GetMapping("/page")

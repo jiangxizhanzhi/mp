@@ -12,7 +12,7 @@ package cn.cyberpeace.mp.flow.util;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.flow.service.FlowTaskRecordService;
+import cn.cyberpeace.mp.flow.service.impl.FlowTaskRecordService;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 

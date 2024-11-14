@@ -1,0 +1,54 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name HttpDeleteWithBody.java.
+ // File size 940.
+ // File create date Fri Jul 12 12:55:23 CST 2024.
+ // File update date Fri Jul 12 12:55:23 CST 2024.
+ // Version 1.0.0
+package cn.cyberpeace.mp.flow.util;
+
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+
+import javax.annotation.concurrent.NotThreadSafe;
+import java.net.URI;
+
+/**
+ * @ClassName HttpDeleteWithBody
+ * @Description
+ * @Author qiaokang
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ * @see HttpEntityEnclosingRequestBase
+ */
+@NotThreadSafe
+public class HttpDeleteWithBody extends HttpEntityEnclosingRequestBase {
+
+    public static final String METHOD_NAME = "DELETE";
+
+    /**
+     * 获取方法（必须重载）
+     *
+     * @return
+     */
+    @Override
+    public String getMethod() {
+        return METHOD_NAME;
+    }
+
+    public HttpDeleteWithBody(final String uri) {
+        super();
+        setURI(URI.create(uri));
+    }
+
+    public HttpDeleteWithBody(final URI uri) {
+        super();
+        setURI(uri);
+    }
+
+    public HttpDeleteWithBody() {
+        super();
+    }
+}

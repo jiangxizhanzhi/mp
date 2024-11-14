@@ -11,7 +11,6 @@
 package cn.cyberpeace.mp.flow.service;
 
 import cn.cyberpeace.mp.flow.response.BatchActuatorResponse;
-import cn.cyberpeace.mp.flow.service.FlowPostService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +20,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class FlowTaskPostService implements FlowPostService {
+public class FlowTaskPostService  {
 
     /**
      * 单个任务执行异常时的回调处理

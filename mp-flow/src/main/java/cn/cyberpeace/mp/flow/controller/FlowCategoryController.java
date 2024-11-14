@@ -13,7 +13,6 @@ package cn.cyberpeace.mp.flow.controller;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.bo.OptionModelBO;
 import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.request.queryparam.OptionQueryParams;
@@ -22,7 +21,7 @@ import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.constant.FlowConstant;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.request.DeleteCategoryRequest;
-import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
+import cn.cyberpeace.mp.flow.service.impl.FlowInfoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -50,7 +49,7 @@ public class FlowCategoryController {
     private static final String FLOW_CATEGORY = "flow_category";
 
     @Autowired
-    private FlowInfoServiceImpl flowServiceImpl;
+    private FlowInfoService flowServiceImpl;
 
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;

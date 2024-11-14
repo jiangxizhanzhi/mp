@@ -10,7 +10,6 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.flow.util;
 
-import cn.cyberpeace.mp.flow.config.HttpDeleteWithBody;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;

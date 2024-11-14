@@ -13,7 +13,7 @@ package cn.cyberpeace.mp.flow.controller;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.response.QueryFlowScriptDemoResponse;
-import cn.cyberpeace.mp.flow.service.impl.FlowScriptDemoServiceImpl;
+import cn.cyberpeace.mp.flow.service.impl.FlowScriptDemoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class FlowScriptDemoController {
 
     @Autowired
-    private FlowScriptDemoServiceImpl flowScriptDemoService;
+    private FlowScriptDemoService flowScriptDemoService;
 
     /**
      * listFlowScriptDemos

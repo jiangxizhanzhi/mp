@@ -2,10 +2,9 @@ package cn.cyberpeace.mp.flow.integration.cloud.sncloud;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.flow.integration.cloud.base.AbstractAddVirtualNicParams;
-import cn.cyberpeace.mp.flow.integration.cloud.base.AbstractCreateVirtualMachineParams;
-import cn.cyberpeace.mp.flow.integration.cloud.base.AbstractDeleteVirtualMachineParams;
+import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.integration.cloud.base.AbstractGetVirtualMachineParams;
+import cn.cyberpeace.mp.flow.integration.cloud.base.AddVirtualNicParams;
 import cn.cyberpeace.mp.flow.integration.cloud.base.AddVirtualNicResult;
 import cn.cyberpeace.mp.flow.integration.cloud.base.DeleteVirtualMachineResult;
 import cn.cyberpeace.mp.flow.integration.cloud.base.GetVirtualMachineResult;
@@ -14,12 +13,16 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
+@Service("saiNingCloudClient")
 public class SaiNingCloudClient implements ICloudClient {
 
     private static final String VIRTUAL_MACHINE_GET_URL = "/v1/instances/{instance_id}";
@@ -30,24 +33,19 @@ public class SaiNingCloudClient implements ICloudClient {
 
     private static final String VIRTUAL_MACHINE_DELETE_URL = "/v1/scenarios/vm";
 
-    private String cloudIp;
-
-    private Integer cloudPort;
-
     private String cloudHost;
 
-    public SaiNingCloudClient(String cloudIp, Integer cloudPort) {
-        this.cloudIp = cloudIp;
-        this.cloudPort = cloudPort;
-        this.cloudHost = "http://" + cloudIp + ":" + cloudPort;
+    public SaiNingCloudClient(@Autowired FlowConfig flowConfig) {
+        this.cloudHost = flowConfig.getCpUrl();
     }
 
     @Override
-    public GetVirtualMachineResult getVirtualMachine(AbstractGetVirtualMachineParams params) {
-        SnGetVirtualMachineParams snParams = (SnGetVirtualMachineParams) params;
-        String url = this.cloudHost + VIRTUAL_MACHINE_GET_URL;
-        url.replace("{instance_id}", snParams.getId());
+    public GetVirtualMachineResult getVirtualMachine(String id) {
+        SnGetVirtualMachineParams snParams = new SnGetVirtualMachineParams();
+        snParams.setId(id);
         try {
+            String url = this.cloudHost + VIRTUAL_MACHINE_GET_URL;
+            url.replace("{instance_id}", snParams.getId());
             var resp = HttpUtils.sendGet(url);
             var rsp = JsonCommon.snakeParse(resp, new TypeReference<CloudResponse<GetVirtualMachineResult>>() {
             });
@@ -62,10 +60,10 @@ public class SaiNingCloudClient implements ICloudClient {
     }
 
     @Override
-    public GetVirtualMachineResult createVirtualMachine(AbstractCreateVirtualMachineParams params) {
-        SnCreateVirtualMachineParams snParams = (SnCreateVirtualMachineParams) params;
-        String url = this.cloudHost + VIRTUAL_MACHINE_CREATE_URL;
+    public GetVirtualMachineResult createVirtualMachine() {
+        SnCreateVirtualMachineParams snParams = SnCreateVirtualMachineParams.getDefault();
         try {
+            String url = this.cloudHost + VIRTUAL_MACHINE_CREATE_URL;
             var resp = HttpUtils.sendPost(url, JsonCommon.snakeStringify(snParams));
             var rsp = JsonCommon.snakeParse(resp, new TypeReference<CloudResponse<GetVirtualMachineResult>>() {
             });
@@ -80,10 +78,11 @@ public class SaiNingCloudClient implements ICloudClient {
     }
 
     @Override
-    public DeleteVirtualMachineResult deleteVirtualMachine(AbstractDeleteVirtualMachineParams params) {
-        SnDeleteVirtualMachineParams snParams = (SnDeleteVirtualMachineParams) params;
-        String url = this.cloudHost + VIRTUAL_MACHINE_DELETE_URL;
+    public DeleteVirtualMachineResult deleteVirtualMachine(String id) {
+        SnDeleteVirtualMachineParams snParams = new SnDeleteVirtualMachineParams();
+        snParams.setVms(Arrays.asList(id));
         try {
+            String url = this.cloudHost + VIRTUAL_MACHINE_DELETE_URL;
             var resp = HttpUtils.sendDelete(url, JsonCommon.snakeStringify(snParams));
             var rsp = JsonCommon.snakeParse(resp, new TypeReference<CloudResponse<DeleteVirtualMachineResult>>() {
             });
@@ -98,17 +97,16 @@ public class SaiNingCloudClient implements ICloudClient {
     }
 
     @Override
-    public AddVirtualNicResult addVirtualNic(AbstractAddVirtualNicParams params) {
-        SnAddVirtualNicParams snParams = (SnAddVirtualNicParams) params;
-        String url = ADD_VIRTUAL_NIC_URL.replace("{instanceId}", ((SnAddVirtualNicParams) params).getInstanceId());
-        url = this.cloudHost + url;
-        Map<String, String> body = Map.of("network_id", snParams.getNetworkId());
+    public AddVirtualNicResult addVirtualNic(AddVirtualNicParams params) {
+        Map<String, String> body = Map.of("network_id", params.getNetworkId());
         try {
+            String url = ADD_VIRTUAL_NIC_URL.replace("{instanceId}", params.getInstanceId());
+            url = this.cloudHost + url;
             var addTrexClientPortRsp = HttpUtils.sendHttpPost(url, JsonCommon.snakeStringify(body), new HashMap<>());
             CloudResponse<AddVirtualNicResponse> response = JsonCommon.snakeParse(addTrexClientPortRsp, new TypeReference<CloudResponse<AddVirtualNicResponse>>() {
             });
             if (!"0".equals(response.getCode()) || response.getData() == null) {
-                log.error("failed to add nic , instacne {} , network {} , result {}", snParams.getInstanceId(), snParams.getNetworkId(), addTrexClientPortRsp);
+                log.error("failed to add nic , instacne {} , network {} , result {}", params.getInstanceId(), params.getNetworkId(), addTrexClientPortRsp);
                 throw new RuntimeException("add nic error");
             }
             AddVirtualNicResult result = new AddVirtualNicResult();

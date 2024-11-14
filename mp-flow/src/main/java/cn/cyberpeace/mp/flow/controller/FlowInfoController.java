@@ -11,7 +11,6 @@
 package cn.cyberpeace.mp.flow.controller;
 
 import cn.cyberpeace.mp.base.common.FsCommon;
-import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -33,7 +32,7 @@ import cn.cyberpeace.mp.flow.response.AttackFlowResponse;
 import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
 import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
 import cn.cyberpeace.mp.flow.response.PcapAnalyseResponse;
-import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
+import cn.cyberpeace.mp.flow.service.impl.FlowInfoService;
 import cn.cyberpeace.mp.flow.util.FileUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -63,7 +62,7 @@ import java.util.Objects;
 public class FlowInfoController {
 
     @Autowired
-    private FlowInfoServiceImpl flowServiceImpl;
+    private FlowInfoService flowServiceImpl;
 
     /**
      * 删除流量信息

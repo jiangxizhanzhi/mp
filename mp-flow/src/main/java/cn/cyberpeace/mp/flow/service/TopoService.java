@@ -21,8 +21,8 @@ import cn.cyberpeace.mp.flow.bo.QueryFlowTaskConfResponse;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.integration.actuator.FlowActuator;
-import cn.cyberpeace.mp.flow.integration.cloud.sncloud.SaiNingCloudClient;
-import cn.cyberpeace.mp.flow.integration.cloud.sncloud.SnAddVirtualNicParams;
+import cn.cyberpeace.mp.flow.integration.cloud.base.AddVirtualNicParams;
+import cn.cyberpeace.mp.flow.integration.cloud.base.ICloudClient;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.model.FlowProtocolModel;
@@ -37,7 +37,10 @@ import cn.cyberpeace.mp.flow.repository.FlowTaskConfMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskPortMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
-import cn.cyberpeace.mp.flow.service.impl.FlowTaskConfServiceImpl;
+import cn.cyberpeace.mp.flow.service.impl.FlowProtocolService;
+import cn.cyberpeace.mp.flow.service.impl.FlowScriptParamService;
+import cn.cyberpeace.mp.flow.service.impl.FlowTaskConfService;
+import cn.cyberpeace.mp.flow.service.impl.FlowTaskTaskService;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -93,7 +96,10 @@ public class TopoService {
     private FlowTaskTaskService flowTaskTaskService;
 
     @Resource
-    private FlowTaskConfServiceImpl flowTaskConfService;
+    private FlowTaskConfService flowTaskConfService;
+
+    @Resource(name = "saiNingCloudClient")
+    private ICloudClient cloudClient;
 
     public void addTasks(List<AddFlowTaskFlowInfo> tasks, String actuatorId, String networkId, String targetIp) {
         // 判断网络是否已经接入
@@ -105,11 +111,10 @@ public class TopoService {
         if (portModel == null) {
             // 无数据 说明未接入网络 ， 需要先接入网络
             flowActuatorModel.getInstanceId();
-            var cloud = new SaiNingCloudClient("10.100.27.1", 11111);
-            SnAddVirtualNicParams params = new SnAddVirtualNicParams();
+            AddVirtualNicParams params = new AddVirtualNicParams();
             params.setInstanceId(flowActuatorModel.getInstanceId());
             params.setNetworkId(networkId);
-            var res = cloud.addVirtualNic(params);
+            var res = cloudClient.addVirtualNic(params);
             mac = res.getMacAddress();
             portModel = new FlowTaskPortModel();
             portModel.setActuatorId(actuatorId);

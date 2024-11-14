@@ -13,8 +13,7 @@ package cn.cyberpeace.mp.flow.job;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.protocolprobe.ProtocolProbe;
 import cn.cyberpeace.mp.base.util.protocolprobe.SSHProbe;
-import cn.cyberpeace.mp.flow.integration.cloud.sncloud.SaiNingCloudClient;
-import cn.cyberpeace.mp.flow.integration.cloud.sncloud.SnGetVirtualMachineParams;
+import cn.cyberpeace.mp.flow.integration.cloud.base.ICloudClient;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.util.SshUtil;
@@ -39,16 +38,16 @@ public class FlowActuatorStateJob {
     @Resource
     private FlowActuatorMapper flowActuatorMapper;
 
+    @Resource
+    private ICloudClient cloudClient;
+
     @Scheduled(cron = "0/5 * * * * ?")
     public void queryFlowActuator() {
         HumanCondition condition = new HumanCondition().filterEqual(FlowActuatorModel::getStatus, 0);
         var list = flowActuatorMapper.list(condition);
         for (var m : list) {
             if (StringUtils.isEmpty(m.getIp())) {
-                var cloud = new SaiNingCloudClient("10.100.27.1", 11111);
-                SnGetVirtualMachineParams params = new SnGetVirtualMachineParams();
-                params.setId(m.getInstanceId());
-                var res = cloud.getVirtualMachine(params);
+                var res = cloudClient.getVirtualMachine(m.getInstanceId());
                 if (res != null) {
                     m.setIp(res.getNetworks().get(0).getFixedIp());
                     m.setInstanceId(res.getId());

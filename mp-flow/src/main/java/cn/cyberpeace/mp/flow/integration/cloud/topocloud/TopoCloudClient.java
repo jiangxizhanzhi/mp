@@ -3,12 +3,9 @@ package cn.cyberpeace.mp.flow.integration.cloud.topocloud;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.flow.controller.FlowActuatorController;
-import cn.cyberpeace.mp.flow.integration.cloud.base.AbstractAddVirtualNicParams;
-import cn.cyberpeace.mp.flow.integration.cloud.base.AbstractCreateVirtualMachineParams;
-import cn.cyberpeace.mp.flow.integration.cloud.base.AbstractDeleteVirtualMachineParams;
 import cn.cyberpeace.mp.flow.integration.cloud.base.AbstractGetVirtualMachineParams;
+import cn.cyberpeace.mp.flow.integration.cloud.base.AddVirtualNicParams;
 import cn.cyberpeace.mp.flow.integration.cloud.base.AddVirtualNicResult;
-import cn.cyberpeace.mp.flow.integration.cloud.base.CreateVirtualMachineResult;
 import cn.cyberpeace.mp.flow.integration.cloud.base.DeleteVirtualMachineResult;
 import cn.cyberpeace.mp.flow.integration.cloud.base.GetVirtualMachineResult;
 import cn.cyberpeace.mp.flow.integration.cloud.base.ICloudClient;
@@ -80,9 +77,7 @@ public class TopoCloudClient implements ICloudClient {
     }
 
     @Override
-    public GetVirtualMachineResult getVirtualMachine(AbstractGetVirtualMachineParams params) {
-        TopoGetVirtualMachineParams topoParams = (TopoGetVirtualMachineParams) params;
-        String csceneId = topoParams.getId();
+    public GetVirtualMachineResult getVirtualMachine(String csceneId) {
         String url = GET_TOPO_URL.replace("{id}", csceneId);
         String res = null;
         try {
@@ -111,7 +106,7 @@ public class TopoCloudClient implements ICloudClient {
     }
 
     @Override
-    public GetVirtualMachineResult createVirtualMachine(AbstractCreateVirtualMachineParams params) {
+    public GetVirtualMachineResult createVirtualMachine() {
         var businessCscene = getDefaultFlowTopoContent();
         BusinessCsceneBO businessCsceneBO = new BusinessCsceneBO();
         businessCsceneBO.setCscene(businessCscene);
@@ -133,7 +128,7 @@ public class TopoCloudClient implements ICloudClient {
                 Thread.sleep(3000);
                 TopoGetVirtualMachineParams getParams = new TopoGetVirtualMachineParams();
                 getParams.setId(csceneId);
-                var res = this.getVirtualMachine(getParams);
+                var res = this.getVirtualMachine(csceneId);
                 if (res != null) {
                     return res;
                 }
@@ -145,9 +140,8 @@ public class TopoCloudClient implements ICloudClient {
     }
 
     @Override
-    public DeleteVirtualMachineResult deleteVirtualMachine(AbstractDeleteVirtualMachineParams params) {
-        TopoDeleteVirtualMachineParams tpParams = (TopoDeleteVirtualMachineParams) params;
-        Map<String, String> data = Map.of("id", tpParams.getCsceneId());
+    public DeleteVirtualMachineResult deleteVirtualMachine(String id) {
+        Map<String, String> data = Map.of("id", id);
         try {
             HttpUtils.sendHttpDelete(DELETE_TOPO_URL, JsonCommon.snakeStringify(data), HEADER);
         } catch (Exception e) {
@@ -157,7 +151,7 @@ public class TopoCloudClient implements ICloudClient {
     }
 
     @Override
-    public AddVirtualNicResult addVirtualNic(AbstractAddVirtualNicParams params) {
+    public AddVirtualNicResult addVirtualNic(AddVirtualNicParams params) {
         return null;
     }
 

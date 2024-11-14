@@ -11,7 +11,7 @@ import cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams;
 import cn.cyberpeace.mp.flow.response.FlowTaskPageResponse;
 import cn.cyberpeace.mp.flow.service.FlowActuatorTaskService;
 import cn.cyberpeace.mp.flow.service.TopoService;
-import cn.cyberpeace.mp.flow.service.params.AddFlowTaskParams;
+import cn.cyberpeace.mp.flow.bo.AddFlowTaskParams;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;

@@ -4,20 +4,17 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.flow.integration.cloud.sncloud.SaiNingCloudClient;
-import cn.cyberpeace.mp.flow.integration.cloud.sncloud.SnCreateVirtualMachineParams;
-import cn.cyberpeace.mp.flow.integration.cloud.sncloud.SnDeleteVirtualMachineParams;
+import cn.cyberpeace.mp.flow.integration.cloud.base.ICloudClient;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.response.FlowActuatorResponse;
 import cn.cyberpeace.mp.flow.service.field.FlowActuatorFields;
-import cn.cyberpeace.mp.flow.service.params.FlowActuatorQueryParams;
+import cn.cyberpeace.mp.flow.bo.FlowActuatorQueryParams;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -26,11 +23,14 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
 
     private FlowActuatorMapper flowActuatorMapper;
 
+    private ICloudClient cloudClient;
+
     @Autowired
-    public FlowActuatorService(FlowActuatorMapper flowActuatorMapper) {
+    public FlowActuatorService(FlowActuatorMapper flowActuatorMapper, ICloudClient cloudClient) {
         super();
         super.setModelMapper(flowActuatorMapper);
         this.flowActuatorMapper = flowActuatorMapper;
+        this.cloudClient = cloudClient;
     }
 
     public FlowActuatorResponse getFlowActuator(String actuatorId) {
@@ -67,8 +67,7 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
 
     public FlowActuatorResponse createFlowActuator(String title) {
         // 提交创建请求
-        var cloud = new SaiNingCloudClient("10.100.27.1", 11111);
-        var instance = cloud.createVirtualMachine(SnCreateVirtualMachineParams.getDefault());
+        var instance = cloudClient.createVirtualMachine();
         String instanceId = instance.getId();
         FlowActuatorModel actuatorModel = new FlowActuatorModel();
         actuatorModel.setStatus(0);
@@ -84,10 +83,7 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
 
     public void deleteFlowActuator(String actuatorId) {
         FlowActuatorModel model = flowActuatorMapper.get(actuatorId);
-        var cloud = new SaiNingCloudClient("10.100.27.1", 11111);
-        SnDeleteVirtualMachineParams params = new SnDeleteVirtualMachineParams();
-        params.setVms(Arrays.asList(model.getInstanceId()));
-        cloud.deleteVirtualMachine(params);
+        cloudClient.deleteVirtualMachine(model.getInstanceId());
         flowActuatorMapper.delete(actuatorId);
     }
 
