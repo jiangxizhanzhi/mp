@@ -76,13 +76,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
     private FlowInfoServiceImpl flowInfoService;
 
     @Autowired
-    private FlowExecuteScheduleMethodImpl flowExecuteScheduleMethod;
-
-    @Autowired
     private AsyncPlatFlowTaskService asyncPlatFlowTaskService;
-
-    @Autowired
-    private FlowPortService flowPortService;
 
     @Autowired
     private FlowTaskRecordService flowTaskRecordService;

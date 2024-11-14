@@ -97,6 +97,7 @@ public class FlowActuatorTaskController {
     @ApiOperation("编辑流量任务配置")
     @PostMapping("/task/conf/edit")
     public ServiceResult editTaskConf(@RequestBody EditFlowTaskConfRequest request) {
+        topoService.editTaskConf(request);
         return ResultCommon.success();
     }
 
@@ -109,7 +110,8 @@ public class FlowActuatorTaskController {
     @ApiImplicitParam(name = "taskId", value = "流量任务ID", dataTypeClass = String.class)
     @GetMapping("/task/conf/detail")
     public ServiceResult<QueryFlowTaskConfResponse> queryConfByTaskId(@RequestParam String taskId) {
-        return new ServiceResult<>(new QueryFlowTaskConfResponse());
+        var result = topoService.queryConfByTaskId(taskId);
+        return new ServiceResult<>(result).asResult();
     }
 
 }

@@ -10,11 +10,14 @@
 // Version 1.0.0
 package cn.cyberpeace.mp.flow.service;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
+import cn.cyberpeace.mp.flow.bo.EditFlowTaskConfRequest;
 import cn.cyberpeace.mp.flow.bo.FlowTaskAttackConf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
+import cn.cyberpeace.mp.flow.bo.QueryFlowTaskConfResponse;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.integration.actuator.FlowActuator;
@@ -34,9 +37,11 @@ import cn.cyberpeace.mp.flow.repository.FlowTaskConfMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskPortMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
+import cn.cyberpeace.mp.flow.service.impl.FlowTaskConfServiceImpl;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,6 +91,9 @@ public class TopoService {
 
     @Resource
     private FlowTaskTaskService flowTaskTaskService;
+
+    @Resource
+    private FlowTaskConfServiceImpl flowTaskConfService;
 
     public void addTasks(List<AddFlowTaskFlowInfo> tasks, String actuatorId, String networkId, String targetIp) {
         // 判断网络是否已经接入
@@ -216,5 +224,36 @@ public class TopoService {
 
     public void stopTasks(List<String> taskIds) {
         asyncPlatFlowTaskService.batchStopTasks(taskIds);
+    }
+
+    public void editTaskConf(EditFlowTaskConfRequest request) {
+        // 根据 config 字段调整下 replay 和 rate_unlimited
+        if (request.getConfig() == null || request.getConfig() == 0) {
+            // config 配置关闭时 ：
+            //      直接使用pcap重放，所以replay = 1
+            //      速率使用默认配置，所以rate_unlimited = 1
+            request.setReplay(1);
+            request.setRateUnlimited(1);
+        } else {
+            request.setReplay(0);
+            request.setRateUnlimited(0);
+        }
+        FlowTaskConf flowTaskConf = request.getFlowTaskConf();
+        FlowTaskConfModel flowTaskConfModel = flowTaskConfService.findByTaskId(request.getTaskId());
+        flowTaskConfModel.setKeepRunning(request.getKeepRunning());
+        flowTaskConfModel.setReplay(request.getReplay());
+        flowTaskConfModel.setRateUnlimited(request.getRateUnlimited());
+        flowTaskConfModel.setConf(JsonCommon.stringify(flowTaskConf));
+        flowTaskConfModel.setConfig(request.getConfig());
+        flowTaskConfService.update(flowTaskConfModel);
+    }
+
+    public QueryFlowTaskConfResponse queryConfByTaskId(String taskId) {
+        QueryFlowTaskConfResponse result = new QueryFlowTaskConfResponse();
+        FlowTaskConfModel flowTaskConfModel = flowTaskConfService.findByTaskId(taskId);
+        BeanUtils.copyProperties(flowTaskConfModel, result);
+        FlowTaskConf flowTaskConf = JsonCommon.parse(flowTaskConfModel.getConf(), FlowTaskConf.class);
+        result.setFlowTaskConf(flowTaskConf);
+        return result;
     }
 }

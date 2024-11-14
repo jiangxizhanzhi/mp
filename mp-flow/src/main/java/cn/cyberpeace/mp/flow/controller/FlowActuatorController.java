@@ -5,9 +5,8 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.response.FlowActuatorResponse;
-import cn.cyberpeace.mp.flow.service.impl.FlowTaskTaskServiceImpl;
 import cn.cyberpeace.mp.flow.service.FlowActuatorService;
-import cn.cyberpeace.mp.flow.service.TopoService;
+import cn.cyberpeace.mp.flow.service.impl.FlowTaskTaskServiceImpl;
 import cn.cyberpeace.mp.flow.service.params.DeleteActuatorParams;
 import cn.cyberpeace.mp.flow.service.params.FlowActuatorQueryParams;
 import io.swagger.annotations.Api;
@@ -38,9 +37,6 @@ public class FlowActuatorController {
 
     @Resource
     private FlowActuatorMapper flowActuatorMapper;
-
-    @Resource
-    private TopoService topoService;
 
     @Resource
     private FlowActuatorService flowActuatorService;
