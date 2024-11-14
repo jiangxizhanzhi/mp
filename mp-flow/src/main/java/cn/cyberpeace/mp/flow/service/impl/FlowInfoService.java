@@ -1,73 +1,106 @@
- // Copyright (C) 2024
- // All rights reserved.
- // Project name mp
- // Description:
- // Author:
- // File name FlowInfoServiceImpl.java.
- // File size 80581.
- // File create date Fri Jul 12 12:55:24 CST 2024.
- // File update date Fri Jul 12 12:55:24 CST 2024.
- // Version 1.0.0
+// Copyright (C) 2024
+// All rights reserved.
+// Project name mp
+// Description:
+// Author:
+// File name FlowInfoServiceImpl.java.
+// File size 80581.
+// File create date Fri Jul 12 12:55:24 CST 2024.
+// File update date Fri Jul 12 12:55:24 CST 2024.
+// Version 1.0.0
 package cn.cyberpeace.mp.flow.service.impl;
 
- import cn.cyberpeace.mp.base.common.FsCommon;
- import cn.cyberpeace.mp.base.common.MessageCommon;
- import cn.cyberpeace.mp.base.common.TaskCommon;
- import cn.cyberpeace.mp.base.config.BaseAppConfig;
- import cn.cyberpeace.mp.base.constant.BaseErrorCode;
- import cn.cyberpeace.mp.base.controller.common.ResultCommon;
- import cn.cyberpeace.mp.base.exception.MpRuntimeException;
- import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
- import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
- import cn.cyberpeace.mp.base.service.result.*;
- import cn.cyberpeace.mp.base.util.basic.TextUtils;
- import cn.cyberpeace.mp.flow.bo.ProtocolBO;
- import cn.cyberpeace.mp.flow.constant.BaseConstants;
- import cn.cyberpeace.mp.flow.constant.FlowCategory;
- import cn.cyberpeace.mp.flow.constant.FlowConstant;
- import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
- import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
- import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
- import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
- import cn.cyberpeace.mp.flow.model.*;
- import cn.cyberpeace.mp.flow.repository.FlowCollectionMapper;
- import cn.cyberpeace.mp.flow.repository.FlowCollectionRelMapper;
- import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
- import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
- import cn.cyberpeace.mp.flow.request.*;
- import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
- import cn.cyberpeace.mp.flow.response.AttackFlowResponse;
- import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
- import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
- import cn.cyberpeace.mp.flow.service.AsyncPlatFlowTaskService;
- import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
- import cn.cyberpeace.mp.flow.util.CommonUtil;
- import cn.cyberpeace.mp.flow.util.FileUtil;
- import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
- import cn.cyberpeace.mp.flow.util.FlowTaskPool;
- import cn.cyberpeace.mp.flow.util.MessageCommonUtil;
- import com.alibaba.fastjson.JSON;
- import com.alibaba.fastjson.JSONArray;
- import com.alibaba.fastjson.JSONObject;
- import io.micrometer.core.instrument.util.StringUtils;
- import lombok.extern.slf4j.Slf4j;
- import org.apache.commons.codec.digest.DigestUtils;
- import org.apache.commons.collections4.CollectionUtils;
- import org.apache.commons.io.FilenameUtils;
- import org.apache.commons.lang3.ArrayUtils;
- import org.apache.commons.lang3.exception.ExceptionUtils;
- import org.springframework.beans.BeanUtils;
- import org.springframework.beans.factory.annotation.Autowired;
- import org.springframework.stereotype.Service;
- import org.springframework.transaction.annotation.Transactional;
- import org.springframework.web.multipart.MultipartFile;
+import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.common.TaskCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.flow.bo.ProtocolBO;
+import cn.cyberpeace.mp.flow.constant.BaseConstants;
+import cn.cyberpeace.mp.flow.constant.FlowCategory;
+import cn.cyberpeace.mp.flow.constant.FlowConstant;
+import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
+import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
+import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
+import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
+import cn.cyberpeace.mp.flow.model.FlowCollectionModel;
+import cn.cyberpeace.mp.flow.model.FlowCollectionRelModel;
+import cn.cyberpeace.mp.flow.model.FlowInfoModel;
+import cn.cyberpeace.mp.flow.model.FlowPcapModel;
+import cn.cyberpeace.mp.flow.model.FlowProtocolModel;
+import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
+import cn.cyberpeace.mp.flow.model.FlowTaskModel;
+import cn.cyberpeace.mp.flow.repository.FlowCollectionMapper;
+import cn.cyberpeace.mp.flow.repository.FlowCollectionRelMapper;
+import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
+import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
+import cn.cyberpeace.mp.flow.request.AddAttackFlowRequest;
+import cn.cyberpeace.mp.flow.request.AddBackgroundFlowRequest;
+import cn.cyberpeace.mp.flow.request.CheckNamesRequest;
+import cn.cyberpeace.mp.flow.request.DelFlowCollectionRelRequest;
+import cn.cyberpeace.mp.flow.request.ImportFlowInfoRequest;
+import cn.cyberpeace.mp.flow.request.ListByCollectionIdsRequest;
+import cn.cyberpeace.mp.flow.request.ModifyAttackFlowRequest;
+import cn.cyberpeace.mp.flow.request.ModifyBackgroundFlowRequest;
+import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
+import cn.cyberpeace.mp.flow.response.AttackFlowResponse;
+import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
+import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
+import cn.cyberpeace.mp.flow.service.AsyncPlatFlowTaskService;
+import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
+import cn.cyberpeace.mp.flow.util.CommonUtil;
+import cn.cyberpeace.mp.flow.util.FileUtil;
+import cn.cyberpeace.mp.flow.util.FlowCacheUtil;
+import cn.cyberpeace.mp.flow.util.FlowTaskPool;
+import cn.cyberpeace.mp.flow.util.MessageCommonUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import io.micrometer.core.instrument.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
- import java.io.*;
- import java.math.BigDecimal;
- import java.nio.charset.StandardCharsets;
- import java.time.LocalDateTime;
- import java.util.*;
- import java.util.stream.Collectors;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @ClassName FlowInfoServiceImpl
@@ -147,7 +180,6 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
 
     /**
      * 删除流量信息
-     *
      * @param id
      * @param checkTask
      * @return
@@ -163,8 +195,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
         }
 
         // 判断流量是否关联流量集合信息
-        List<FlowCollectionRelModel> flowCollectionRelModels =
-                flowCollectionRelMapper.selectByFlowIds(Collections.singletonList(id));
+        List<FlowCollectionRelModel> flowCollectionRelModels = flowCollectionRelMapper.selectByFlowIds(Collections.singletonList(id));
         if (CollectionUtils.isNotEmpty(flowCollectionRelModels)) {
             // 遍历删除流量集合关联信息
             for (FlowCollectionRelModel rel : flowCollectionRelModels) {
@@ -202,7 +233,6 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
 
     /**
      * 批量删除流量信息
-     *
      * @param ids
      * @return
      */
@@ -217,12 +247,10 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
         }
 
         // 判断流量是否关联流量集合信息
-        List<FlowCollectionRelModel> flowCollectionRelModels =
-                flowCollectionRelMapper.selectByFlowIds(idList);
+        List<FlowCollectionRelModel> flowCollectionRelModels = flowCollectionRelMapper.selectByFlowIds(idList);
         if (CollectionUtils.isNotEmpty(flowCollectionRelModels)) {
             // 按流量集合id分组关联信息
-            Map<String, List<String>> relMap =
-                    new HashMap<>();
+            Map<String, List<String>> relMap = new HashMap<>();
             for (FlowCollectionRelModel flowCollectionRelModel : flowCollectionRelModels) {
                 String flowId = flowCollectionRelModel.getFlowId();
                 relMap.computeIfAbsent(flowCollectionRelModel.getCollectionId(), k -> new ArrayList<>()).add(flowId);
@@ -244,8 +272,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
             asyncPlatFlowTaskService.deleteFlowFile(flowInfoModels);
 
             // 过滤攻击流量
-            List<FlowInfoModel> attackFlows =
-                    new ArrayList<>();
+            List<FlowInfoModel> attackFlows = new ArrayList<>();
             for (FlowInfoModel flow : flowInfoModels) {
                 if (InteractiveTypeEnum.ATTACK.toValue() == flow.getInteractiveType()) {
                     attackFlows.add(flow);
@@ -277,11 +304,12 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
      */
     public ListObjServiceResult<FlowInfoResponse> pageFlowInfo(FlowInfoQueryParams queryParams) {
         if (StringUtils.isNotBlank(queryParams.getFlowProtocol())) {
-            List<FlowProtocolModel> allProtocolFlows = flowProtocolService.getModelMapper().list(new HumanCondition().select(FlowProtocolModel::getFlowId)
-                    .filterEqual(FlowProtocolModel::getProtocolName, queryParams.getFlowProtocol()));
+            List<FlowProtocolModel> allProtocolFlows = flowProtocolService.getModelMapper()
+                    .list(new HumanCondition().select(FlowProtocolModel::getFlowId)
+                                  .filterEqual(FlowProtocolModel::getProtocolName, queryParams.getFlowProtocol()));
             if (CollectionUtils.isNotEmpty(allProtocolFlows)) {
-                queryParams.setFlowIds(allProtocolFlows.stream().map(FlowProtocolModel::getFlowId).collect(Collectors.toSet())
-                        .toArray(new String[0]));
+                queryParams.setFlowIds(allProtocolFlows.stream().map(FlowProtocolModel::getFlowId)
+                                               .collect(Collectors.toSet()).toArray(new String[0]));
             }
         }
         // 查询流量信息
@@ -305,7 +333,8 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
             responseList = list;
         }
 
-        return new ListObjServiceResult<>(new ListObjResult<>(responseList, listObjServiceResult.getSource().getTotal())).asResult();
+        return new ListObjServiceResult<>(new ListObjResult<>(responseList, listObjServiceResult.getSource()
+                .getTotal())).asResult();
     }
 
     private FlowInfoResponse getFlowInfoResponse(List<FlowScriptParamModel> flowScriptParamModels, FlowInfoModel model) {
@@ -318,8 +347,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
                     list.add(param);
                 }
             }
-            currentFlowParamModels =
-                    list;
+            currentFlowParamModels = list;
         }
         this.internationalize(model);
         FlowInfoResponse response = new FlowInfoResponse(model, currentFlowParamModels);
@@ -344,8 +372,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
     private void internationalize(FlowInfoModel flowInfoModel) {
         String title = flowInfoModel.getTitle();
         boolean needInternational = true;
-        if ("ftp".equalsIgnoreCase(title) || "dns".equalsIgnoreCase(title)
-                || "vnc".equalsIgnoreCase(title) || "arp".equalsIgnoreCase(title)) {
+        if ("ftp".equalsIgnoreCase(title) || "dns".equalsIgnoreCase(title) || "vnc".equalsIgnoreCase(title) || "arp".equalsIgnoreCase(title)) {
             needInternational = false;
         } else {
             title = flowInfoModel.getTitle();
@@ -371,14 +398,12 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
      */
     public ServiceResult<List<FlowInfoResponse>> listByCollectionIds(ListByCollectionIdsRequest request) {
         // 查询流量集合关联流量信息
-        List<FlowCollectionRelModel> flowCollectionRelModels =
-                flowCollectionRelService.selectByCollectionIds(request.getCollectionIds());
+        List<FlowCollectionRelModel> flowCollectionRelModels = flowCollectionRelService.selectByCollectionIds(request.getCollectionIds());
         if (CollectionUtils.isEmpty(flowCollectionRelModels)) {
             return ResultCommon.success(new ArrayList<>());
         }
 
-        List<String> flowIds =
-                new ArrayList<>();
+        List<String> flowIds = new ArrayList<>();
         for (FlowCollectionRelModel flowCollectionRelModel : flowCollectionRelModels) {
             String flowId = flowCollectionRelModel.getFlowId();
             flowIds.add(flowId);
@@ -428,7 +453,8 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
             for (FlowProtocolModel flowProtocolModel : flowProtocolModels) {
                 ProtocolBO protocolBO = new ProtocolBO();
                 BeanUtils.copyProperties(flowProtocolModel, protocolBO);
-                String desc = MessageCommonUtil.convertMessageWithNull(flowProtocolModel.getProtocolName().toLowerCase());
+                String desc = MessageCommonUtil.convertMessageWithNull(flowProtocolModel.getProtocolName()
+                                                                               .toLowerCase());
                 if (org.apache.commons.lang3.StringUtils.isBlank(desc)) {
                     // 未知协议
                     desc = MessageCommonUtil.convertMessageWithNull(FlowConstant.FLOW_UNKNOWN_PROTOCOL);
@@ -459,8 +485,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
             }
 
             // 根据流量id查询脚本参数
-            List<FlowScriptParamModel> flowScriptParamModels =
-                    flowScriptParamService.selectByFlowId(flowInfoModel.getId());
+            List<FlowScriptParamModel> flowScriptParamModels = flowScriptParamService.selectByFlowId(flowInfoModel.getId());
             if (CollectionUtils.isNotEmpty(flowScriptParamModels)) {
                 flowScriptParamModels.stream().map(scriptParam -> {
                     // ip、port的参数说明进行国际化处理
@@ -507,7 +532,8 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
             String filePath = null;
             try {
                 filePath = FsCommon.upload(addRequest.getPcapFile().getInputStream(), suffix);
-                log.info("{} upload result path: {} with suffix: {}", addRequest.getPcapFile().getOriginalFilename(), filePath, suffix);
+                log.info("{} upload result path: {} with suffix: {}", addRequest.getPcapFile()
+                        .getOriginalFilename(), filePath, suffix);
             } catch (IOException e) {
                 log.error("upload pcap file error, {}", ExceptionUtils.getStackTrace(e));
                 return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
@@ -627,8 +653,8 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
                     paramModel.setParamDesc(paramArray.getString(2));
 
                     // 参数校验
-                    if (paramKey.length() > 40 || paramModel.getParamValue().length() > 50 ||
-                            paramModel.getParamDesc().length() > 2048) {
+                    if (paramKey.length() > 40 || paramModel.getParamValue().length() > 50 || paramModel.getParamDesc()
+                            .length() > 2048) {
                         log.error("param length is invalid");
                         throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
                     }
@@ -647,7 +673,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
                 addRequest.setFileName(fileName);
             }
 
-            try ( InputStream is = new ByteArrayInputStream(addRequest.getCode().getBytes())) {
+            try (InputStream is = new ByteArrayInputStream(addRequest.getCode().getBytes())) {
                 String filePath = FsCommon.upload(is, suffix);
                 addRequest.setFilePath(filePath);
             } catch (MpRuntimeException e) {
@@ -740,7 +766,8 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
             return ResultCommon.fail(FlowErrorCode.FLOW_NOT_EXIST);
         } else {
             // 判断是否背景流量
-            if (InteractiveTypeEnum.BACKGROUND.toValue() != oldServiceResult.getSource().getObj().getInteractiveType()) {
+            if (InteractiveTypeEnum.BACKGROUND.toValue() != oldServiceResult.getSource().getObj()
+                    .getInteractiveType()) {
                 return ResultCommon.fail(FlowErrorCode.NOT_BACKGROUND_FLOW);
             }
         }
@@ -755,7 +782,8 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
             String filePath = null;
             try {
                 filePath = FsCommon.upload(modifyRequest.getPcapFile().getInputStream(), suffix);
-                log.info("{} upload result path: {} with suffix: {}", modifyRequest.getPcapFile().getOriginalFilename(), filePath, suffix);
+                log.info("{} upload result path: {} with suffix: {}", modifyRequest.getPcapFile()
+                        .getOriginalFilename(), filePath, suffix);
             } catch (IOException e) {
                 log.error("upload pcap file for update error, {}", ExceptionUtils.getStackTrace(e));
                 return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
@@ -839,7 +867,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
                 if (StringUtils.isBlank(modifyRequest.getCode())) {
                     // 下载攻击脚本，更改后缀重新上传
                     String code = FsCommon.downloadContent(oldServiceResult.getSource().getObj().getScriptFile());
-                    try (InputStream is = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8))){
+                    try (InputStream is = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8))) {
                         String filePath = FsCommon.upload(is, suffix);
                         modifyRequest.setFilePath(filePath);
                     } catch (MpRuntimeException | IOException e) {
@@ -863,7 +891,8 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
                 }
 
 
-                try (InputStream is = new ByteArrayInputStream(modifyRequest.getCode().getBytes(StandardCharsets.UTF_8))){
+                try (InputStream is = new ByteArrayInputStream(modifyRequest.getCode()
+                                                                       .getBytes(StandardCharsets.UTF_8))) {
                     String filePath = FsCommon.upload(is, suffix);
                     modifyRequest.setFilePath(filePath);
                 } catch (MpRuntimeException | IOException e) {
@@ -1045,61 +1074,6 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
     }
 
     /**
-     *
-     * 批量导入预制流量文件
-     * @return
-     */
-    public ServiceResult<Boolean> batchImportFlowInfo() {
-        String pcapPath = PRE_PATH + "/pcap";
-        File pcapFile = new File(pcapPath);
-        if (!this.doImport(pcapFile)) {
-            return new ServiceResult<>(false);
-        }
-
-        String scriptPath = PRE_PATH + "/scripts";
-        File scriptFile = new File(scriptPath);
-        if (!this.doImport(scriptFile)) {
-            return new ServiceResult<>(false);
-        }
-
-        return new ServiceResult<>(true);
-    }
-
-    /**
-     * 检查力流量脚本参数是否初始化完整，否则进行修正
-     */
-    public void checkDefaultFlowScriptParams(){
-        log.info("============= checkDefaultFlowScriptParams ================");
-        // 首先读取全量的流量模型和参数信息
-        HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual(FlowInfoModel::getResourceType, ResourceTypeEnum.SCRIPT.toValue());
-        List<FlowInfoModel> flowInfoModelList = getModelMapper().list(humanCondition);
-        List<FlowScriptParamModel> scriptParamModelList  = flowScriptParamService.getModelMapper().list(new HumanCondition());
-
-        // 已经初始化的流量参数
-        Set<String> flowIds = new HashSet<>();
-        for (FlowScriptParamModel flowScriptParamModel : scriptParamModelList) {
-            String flowId = flowScriptParamModel.getFlowId();
-            flowIds.add(flowId);
-        }
-
-        // 针对攻击脚本类型的流量，检测是否存在参数，不存在则补充创建
-        List<FlowInfoModel> unInitialedModels = new ArrayList<>();
-        for (FlowInfoModel info : flowInfoModelList) {
-            if (!flowIds.contains(info.getId())) {
-                unInitialedModels.add(info);
-            }
-        }
-        if(unInitialedModels.isEmpty()){
-            log.info("all default flow script params are valid, ignore");
-            return;
-        }
-
-        // 攻击流量，要添加默认脚本参数信息
-        addDefaultScriptParams(unInitialedModels);
-    }
-
-    /**
      * 导入流量文件
      * @param file
      * @return
@@ -1123,7 +1097,8 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
                 List<FlowInfoModel> flowInfoModelList = new ArrayList<>();
 
                 for (File flowFile : list) {
-                    if (flowFile.getName().endsWith(".pcap") || flowFile.getName().endsWith(".sh") || flowFile.getName().endsWith(".py")) {
+                    if (flowFile.getName().endsWith(".pcap") || flowFile.getName().endsWith(".sh") || flowFile.getName()
+                            .endsWith(".py")) {
                         String fileName = flowFile.getName().split(BaseConstants.SPOT)[0];
                         FlowInfoModel flowInfoModel = new FlowInfoModel();
                         String flowId = CommonUtil.md5Hex(fileName);
@@ -1222,8 +1197,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
                     if (flowFile.getName().contains("README.md")) {
                         // 解析README.md
                         File readmeFile = flowFile;
-                        try (FileReader fileReader = new FileReader(readmeFile);
-                             BufferedReader bufferedReader  = new BufferedReader(fileReader)) {
+                        try (FileReader fileReader = new FileReader(readmeFile); BufferedReader bufferedReader = new BufferedReader(fileReader)) {
                             String s;
                             while ((s = bufferedReader.readLine()) != null) {
                                 readmeList.add(s);
@@ -1406,7 +1380,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
             pcapPath = PRE_PATH.concat("/" + System.currentTimeMillis() + "_" + fileName);
             tmpFile = new File(pcapPath);
 
-            try (OutputStream out = new FileOutputStream(tmpFile)){
+            try (OutputStream out = new FileOutputStream(tmpFile)) {
                 byte[] ss = multipartFile.getBytes();
                 for (byte s : ss) {
                     out.write(s);
@@ -1420,7 +1394,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
             process.waitFor();
             strProtocols = "";
 
-            try (BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()))){
+            try (BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line = "";
                 while ((line = input.readLine()) != null) {
                     strProtocols = line;
@@ -1463,54 +1437,6 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
     }
 
     /**
-     * 初始化pcap包解析
-     */
-    @Deprecated
-    public void initPcapAnalyse() {
-        log.info("start init pcap analyse");
-        // 清空原数据
-        flowPcapService.deleteAll();
-        flowProtocolService.deleteAll();
-
-        HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual(FlowInfoModel::getResourceType, ResourceTypeEnum.PACP.toValue());
-        List<FlowInfoModel> flowInfoModelList = this.getModelMapper().list(humanCondition);
-        if (CollectionUtils.isNotEmpty(flowInfoModelList)) {
-            List<Runnable> tasks = new ArrayList<>();
-            for (FlowInfoModel flowInfoModel : flowInfoModelList) {
-                tasks.add(() -> initPcapProtocols(flowInfoModel));
-            }
-            TaskCommon.runTasks(tasks, true, true);
-        }
-        log.info("end init pcap analyse");
-    }
-
-    /**
-     * 更新flowPcap的pcapFile
-     */
-    public void replacePcapPath() {
-        log.info("start init pcap replace path");
-        HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual(FlowInfoModel::getResourceType, ResourceTypeEnum.PACP.toValue());
-        List<FlowInfoModel> flowInfoModelList = this.getModelMapper().list(humanCondition);
-        if (CollectionUtils.isNotEmpty(flowInfoModelList)) {
-            // 批量更新flowPcap的pcapFile
-            List<FlowPcapModel> flowPcapModels = flowPcapService.listAll();
-            if (CollectionUtils.isNotEmpty(flowPcapModels)) {
-                for (FlowPcapModel flowPcapModel : flowPcapModels) {
-                    for (FlowInfoModel flowInfoModel : flowInfoModelList) {
-                        if (flowPcapModel.getFlowId().equals(flowInfoModel.getId())) {
-                            flowPcapModel.setPcapFile(flowInfoModel.getPcapFile());
-                        }
-                    }
-                }
-                flowPcapService.bulkUpdate(flowPcapModels);
-            }
-        }
-        log.info("end init pcap replace path");
-    }
-
-    /**
      * 初始化解析文件协议
      * @param flowInfoModel
      * @return
@@ -1527,7 +1453,8 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
 
         try {
             byte[] flowBytes = FsCommon.downloadRawContent(pcapPath);
-            String fileName = FilenameUtils.getName(pcapPath);;
+            String fileName = FilenameUtils.getName(pcapPath);
+            ;
             String srcPcapPath = PRE_PATH.concat("/" + title + "_" + fileName);
             log.info("===========srcPcapPath: {}", srcPcapPath);
             srcFile = new File(srcPcapPath);
@@ -1695,7 +1622,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
 
     /**
      * 根据协议结合过滤pcap包
-     * @param pcapPath 原pcap的fdfs地址
+     * @param pcapPath     原pcap的fdfs地址
      * @param protocolList 保留的协议集合
      * @return 过滤后的pcap包fdfs地址
      */
@@ -1713,7 +1640,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
         try {
             // 下载原pcap文件
             byte[] pcapByte = FsCommon.downloadRawContent(pcapPath);
-            String fileName = FilenameUtils.getName(pcapPath);;
+            String fileName = FilenameUtils.getName(pcapPath);
             String srcPcapPath = PRE_PATH.concat("/" + System.currentTimeMillis() + "_" + fileName);
             srcFile = new File(srcPcapPath);
             try (FileOutputStream fs = new FileOutputStream(srcFile)) {
@@ -1726,7 +1653,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
             Process process = Runtime.getRuntime().exec(pythonCmd);
             process.waitFor();
 
-            try (BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));){
+            try (BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));) {
                 String line = "";
                 String filterResult = "";
                 while ((line = input.readLine()) != null) {
@@ -1736,9 +1663,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
                 // {'duration': 9.08, 'count': 998, 'dstPath': '/root/.mp/resources/flows/QQ影像1682298574.pcap', 'fileSize': 717504}
                 if (StringUtils.isBlank(filterResult)) {
                     StringBuilder errorBuilder = new StringBuilder();
-                    try (InputStream errorStream = process.getErrorStream();
-                         InputStreamReader isr = new InputStreamReader(errorStream);
-                         BufferedReader br = new BufferedReader(isr)) {
+                    try (InputStream errorStream = process.getErrorStream(); InputStreamReader isr = new InputStreamReader(errorStream); BufferedReader br = new BufferedReader(isr)) {
                         String errorResult;
                         while ((errorResult = br.readLine()) != null) {
                             errorBuilder.append(errorResult + " ");
@@ -1770,14 +1695,9 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
                     flowPcapService.update(pcapModel);
                 } else {
                     // 新增流量包数据
-                    FlowPcapModel flowPcapModel = FlowPcapModel.builder()
-                            .flowId(flowId)
-                            .pcapFile(outPcapPath)
-                            .pcapSize(pcapSize)
-                            .pktNum(pktNum.longValue())
-                            .duration(Math.round(duration * 1000))
-                            .protocols(String.join(BaseConstants.COMMA, protocolList))
-                            .build();
+                    FlowPcapModel flowPcapModel = FlowPcapModel.builder().flowId(flowId).pcapFile(outPcapPath)
+                            .pcapSize(pcapSize).pktNum(pktNum.longValue()).duration(Math.round(duration * 1000))
+                            .protocols(String.join(BaseConstants.COMMA, protocolList)).build();
                     flowPcapService.create(flowPcapModel);
                 }
             }

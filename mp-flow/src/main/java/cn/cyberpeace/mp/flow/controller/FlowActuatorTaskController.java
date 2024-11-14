@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.flow.controller;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.flow.bo.AddFlowTaskParams;
 import cn.cyberpeace.mp.flow.bo.EditFlowTaskConfRequest;
 import cn.cyberpeace.mp.flow.bo.FlowTaskBatchStartRequest;
 import cn.cyberpeace.mp.flow.bo.QueryFlowTaskConfResponse;
@@ -10,8 +11,6 @@ import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams;
 import cn.cyberpeace.mp.flow.response.FlowTaskPageResponse;
 import cn.cyberpeace.mp.flow.service.FlowActuatorTaskService;
-import cn.cyberpeace.mp.flow.service.FlowActuatorTask;
-import cn.cyberpeace.mp.flow.bo.AddFlowTaskParams;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -34,10 +33,7 @@ import java.util.List;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/actuator")
 @Data
 public class FlowActuatorTaskController {
-
-    @Resource
-    private FlowActuatorTask flowActuatorTask;
-
+    
     @Resource
     private FlowActuatorTaskService flowActuatorTaskService;
 
@@ -50,42 +46,42 @@ public class FlowActuatorTaskController {
     @ApiOperation("新增流量任务")
     @PostMapping("/task/add")
     public ServiceResult addTasks(@RequestBody AddFlowTaskParams params) {
-        flowActuatorTask.addTasks(params.getTasks(), params.getActuatorId(), params.getNetworkId(), params.getTargetIp());
+        flowActuatorTaskService.addTasks(params.getTasks(), params.getActuatorId(), params.getNetworkId(), params.getTargetIp());
         return new ServiceResult(true).asResult();
     }
 
     @ApiOperation("删除流量任务")
     @DeleteMapping("/task/delete")
     public ServiceResult deleteTasks(List<String> taskIds) {
-        flowActuatorTask.deleteTasks(taskIds);
+        flowActuatorTaskService.deleteTasks(taskIds);
         return new ServiceResult(true).asResult();
     }
 
     @ApiOperation("启动单个流量任务")
     @PostMapping("/task/start")
     public ServiceResult<Boolean> startTask(String taskId) {
-        flowActuatorTask.startTask(taskId);
+        flowActuatorTaskService.startTask(taskId);
         return new ServiceResult<>(true).asResult();
     }
 
     @ApiOperation("关闭单个流量任务")
     @PostMapping("/task/stop")
     public ServiceResult<Boolean> stopTask(String taskId) {
-        flowActuatorTask.stopTask(taskId);
+        flowActuatorTaskService.stopTask(taskId);
         return new ServiceResult<>(true).asResult();
     }
 
     @ApiOperation("启动多个流量任务")
     @PostMapping("/task/batch_start")
     public ServiceResult<Boolean> startTasks(@RequestBody FlowTaskBatchStartRequest request) {
-        flowActuatorTask.startTasks(request.getTaskIds());
+        flowActuatorTaskService.startTasks(request.getTaskIds());
         return new ServiceResult<>(true).asResult();
     }
 
     @ApiOperation("关闭多个流量任务")
     @GetMapping("/stop_tasks")
     public String stopTasks(@RequestBody FlowTaskBatchStartRequest request) {
-        flowActuatorTask.stopTasks(request.getTaskIds());
+        flowActuatorTaskService.stopTasks(request.getTaskIds());
         return null;
     }
 
@@ -97,7 +93,7 @@ public class FlowActuatorTaskController {
     @ApiOperation("编辑流量任务配置")
     @PostMapping("/task/conf/edit")
     public ServiceResult editTaskConf(@RequestBody EditFlowTaskConfRequest request) {
-        flowActuatorTask.editTaskConf(request);
+        flowActuatorTaskService.editTaskConf(request);
         return ResultCommon.success();
     }
 
@@ -110,7 +106,7 @@ public class FlowActuatorTaskController {
     @ApiImplicitParam(name = "taskId", value = "流量任务ID", dataTypeClass = String.class)
     @GetMapping("/task/conf/detail")
     public ServiceResult<QueryFlowTaskConfResponse> queryConfByTaskId(@RequestParam String taskId) {
-        var result = flowActuatorTask.queryConfByTaskId(taskId);
+        var result = flowActuatorTaskService.queryConfByTaskId(taskId);
         return new ServiceResult<>(result).asResult();
     }
 

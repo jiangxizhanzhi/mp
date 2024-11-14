@@ -64,7 +64,4 @@ public class FlowProtocolService extends BaseModelServiceImpl<FlowProtocolModel,
         getModelMapper().filterDelete(condition);
     }
 
-    public int deleteAll() {
-        return getModelMapper().filterDelete(new HumanCondition());
-    }
 }

@@ -77,66 +77,6 @@ public class FlowTaskRecordService extends BaseModelServiceImpl<FlowTaskRecordMo
     }
 
     /**
-     * 根据taskId查询流量任务记录
-     * @param taskId
-     * @return
-     */
-    public List<FlowTaskRecordModel> findByTaskId(String taskId) {
-        log.info("FlowTaskRecordServiceImpl.findByTaskId begin. taskId:{}", taskId);
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual(FlowTaskRecordModel::getTaskId, taskId);
-        condition.orderBy("createTime");
-        List<FlowTaskRecordModel> flowTaskConfModelList = getModelMapper().list(condition);
-        log.info("FlowTaskRecordServiceImpl.findByTaskId end. flowTaskConfModelList:{}", flowTaskConfModelList);
-        return flowTaskConfModelList;
-    }
-
-    /**
-     * 根据taskId删除
-     * @param taskId
-     */
-    public void deleteByTaskId(String taskId) {
-        log.info("FlowTaskRecordServiceImpl.deleteByTaskId begin. taskId:{}", taskId);
-        HumanCondition condition = new HumanCondition();
-        condition.filterEqual(FlowTaskRecordModel::getTaskId, taskId);
-        getModelMapper().filterDelete(condition);
-        log.info("FlowTaskRecordServiceImpl.deleteByTaskId end.");
-    }
-
-    /**
-     * 批量统计每一个流量任务的实时速率
-     * @param taskIds
-     * @param conditions
-     * @return
-     */
-    public Map<String, List<FlowRealTimeRate>> realTimeRate(List<String> taskIds, List<FlowStatisticalCondition> conditions) {
-        log.info("FlowTaskRecordServiceImpl.realTimeRate begin. taskIds:{}, condition:{}", taskIds, conditions);
-        List<FlowRealTimeRate> flowRealTimeRateList = this.getModelMapper().realTimeRateByTaskId(taskIds, conditions);
-        Map<String, List<FlowRealTimeRate>> result = new HashMap<String, List<FlowRealTimeRate>>();
-        if (CollectionUtils.isNotEmpty(flowRealTimeRateList)) {
-            String taskId = "";
-            List<FlowRealTimeRate> mapList = new ArrayList<>();
-            for (FlowRealTimeRate temp : flowRealTimeRateList) {
-                if (taskId.equals(temp.getTaskId())) {
-                    mapList.add(temp);
-                } else {
-                    if (StringUtils.isNotEmpty(taskId) && CollectionUtils.isNotEmpty(mapList)) {
-                        result.put(taskId, mapList);
-                    }
-                    mapList = new ArrayList<>();
-                    taskId = temp.getTaskId();
-                    mapList.add(temp);
-                }
-            }
-            if (StringUtils.isNotEmpty(taskId) && CollectionUtils.isNotEmpty(mapList)) {
-                result.put(taskId, mapList);
-            }
-        }
-        log.info("FlowTaskRecordServiceImpl.realTimeRate end. result:{}", result);
-        return result;
-    }
-
-    /**
      * 仿真概况
      * @param actuatorId
      * @return

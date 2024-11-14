@@ -58,21 +58,6 @@ public class FlowTaskTaskService extends BaseModelServiceImpl<FlowTaskTaskModel,
     @Autowired
     private FlowProtocolService flowProtocolService;
 
-    @Autowired
-    private FlowScriptParamService flowScriptParamService;
-
-    @Autowired
-    private FlowTaskPortService flowTaskPortService;
-
-    @Autowired
-    private FlowConfig flowConfig;
-
-    @Autowired
-    private FlowInfoMapper flowInfoMapper;
-
-    @Autowired
-    private FlowTaskConfService flowTaskConfService;
-
     public FlowTaskTaskService(FlowTaskTaskMapper stuMapper, FlowTaskTaskFields stuFields) {
         setModelFields(stuFields);
         setModelMapper(stuMapper);

@@ -72,9 +72,6 @@ public class AsyncPlatFlowTaskService {
     private FlowActuatorMapper flowActuatorMapper;
 
     @Autowired
-    private FlowPortService flowPortService;
-
-    @Autowired
     private FlowTaskTaskService flowTaskTaskService;
 
     @Autowired
@@ -82,11 +79,6 @@ public class AsyncPlatFlowTaskService {
 
     @Autowired
     private FlowTaskRecordService flowTaskRecordService;
-
-    /**
-     * tgn代码目录
-     */
-    private static final String TGN_PATH = "/root/.mp/resources/flows/traffic_generators.zip";
 
     /**
      * 单个启动流量任务
