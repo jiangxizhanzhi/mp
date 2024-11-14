@@ -5,7 +5,9 @@ import cn.cyberpeace.mp.auth.repository.MicrosoftAzureLoginMapper;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.scene.bo.AlertRuleBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.AlertRuleModel;
@@ -34,9 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -114,9 +115,16 @@ public class RecreateHandler extends HandlerCommon {
     }
 
     private static class DeleteInRecreateHandler extends DeleteHandler {
+
+        private String azureManagerUrl;
+
+        private MicrosoftAzureLoginMapper sceneElementPluginConfigMapper;
+
         public DeleteInRecreateHandler(CloudScenePluginHandler pluginHandler) {
             super(pluginHandler);
             this.setEvent(SceneElementModel.Event.RECREATE);
+            this.azureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getAzureManagerUrl();
+            this.sceneElementPluginConfigMapper = BeanCommon.getBean(MicrosoftAzureLoginMapper.class);
         }
 
         protected void deleteElementProcess(CloudPluginSceneElementBO cloudElement) {
@@ -147,8 +155,30 @@ public class RecreateHandler extends HandlerCommon {
                     runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_VIRTUAL_MACHINE,
                             () -> {
                                 closeAccessModes(cloudElement);
-                                AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
-                                azureVirtualMachine.delete(cloudElement);
+
+                                if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
+                                    AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+                                    azureVirtualMachine.delete(cloudElement);
+                                } else {
+                                    JSONObject jsonObject = new JSONObject();
+                                    //云类型(1: 微软公有云 2:微软私有云 3:微软混合云)
+                                    jsonObject.put("cloudType", cloudType);
+                                    MicrosoftAzureUserModel localAzurer = sceneElementPluginConfigMapper.getLocalAzurer(jsonObject);
+
+                                    String url = azureManagerUrl + "/cloud/vm_delete";
+                                    Map<String, Object> formMap = new HashMap();
+                                    formMap.put("azureUser", localAzurer);
+                                    formMap.put("vmId", cloudElement.getResourceId());
+                                    //请求头设置
+                                    HashMap<String, String> headersMap = new HashMap<>();
+                                    String body = JsonUtils.stringify(formMap);
+                                    try {
+                                        HttpUtils.sendHttpPost(url, body, headersMap);
+                                    } catch (IOException ex) {
+                                        throw new RuntimeException(ex);
+                                    }
+                                }
+
                                 this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                             });
                 } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
