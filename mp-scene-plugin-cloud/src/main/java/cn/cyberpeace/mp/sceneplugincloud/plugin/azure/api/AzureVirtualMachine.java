@@ -616,7 +616,8 @@ public class AzureVirtualMachine {
                 Map<String, Object> formMap = new HashMap();
                 formMap.put("azureUser", microsoftAzureUserModel);
                 formMap.put("vmExpansionDiskType", cloudElement.getVmExpansionDiskType());
-                formMap.put("expansionDisk", cloudElement.getExpansion());
+                formMap.put("expansionDisk", expansionDisk);
+                formMap.put("vmId", cloudElement.getResourceId());
                 //请求头设置
                 HashMap<String, String> headersMap = new HashMap<>();
                 String body = JsonUtils.stringify(formMap);

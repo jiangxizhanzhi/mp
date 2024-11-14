@@ -1,6 +1,11 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
+import cn.cyberpeace.mp.auth.repository.MicrosoftAzureLoginMapper;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
@@ -20,11 +25,16 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.AttachVirtualUsbs
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAttachISOData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.StartTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.repository.DevopsLoadSourceMapper;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -43,6 +53,10 @@ public class StartHandler extends HandlerCommon {
     private final Container container = new Container();
     private final VirtualDynamips virtualDynamips = new VirtualDynamips();
 
+    private String azureManagerUrl;
+
+    private MicrosoftAzureLoginMapper sceneElementPluginConfigMapper;
+
 
     //节点处理过程
     public static class ElementProcess {
@@ -58,6 +72,8 @@ public class StartHandler extends HandlerCommon {
 
     public StartHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, StartTaskPool.getInstance(), event);
+        this.azureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getAzureManagerUrl();
+        this.sceneElementPluginConfigMapper = BeanCommon.getBean(MicrosoftAzureLoginMapper.class);
     }
 
 
@@ -85,10 +101,37 @@ public class StartHandler extends HandlerCommon {
                         StartHandler.ElementProcess.START_VIRTUAL_MACHINE));
                 runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_VIRTUAL_MACHINE, () -> {
                     //启动
-                    AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
-                    azureVirtualMachine.start(element);
-                    //                    TODO 云场景连接用的公网ip 这里用私有ip测不通 暂去
-//                checkAccessModes(element);
+                        if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
+                        AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+                        azureVirtualMachine.start(element);
+                    } else {
+                        JSONObject jsonObject = new JSONObject();
+                        //云类型(1: 微软公有云 2:微软私有云 3:微软混合云)
+                        jsonObject.put("cloudType", cloudType);
+                        MicrosoftAzureUserModel localAzurer = sceneElementPluginConfigMapper.getLocalAzurer(jsonObject);
+                        String url = azureManagerUrl + "/cloud/vm_start";
+                        Map<String, Object> formMap = new HashMap();
+                        formMap.put("azureUser", localAzurer);
+                        formMap.put("isPublicIp",element.getIsPublicIp());
+                        formMap.put("vmId", element.getResourceId());
+                        //请求头设置
+                        HashMap<String, String> headersMap = new HashMap<>();
+                        String body = JsonUtils.stringify(formMap);
+                        String result;
+                        try {
+                            result = HttpUtils.sendHttpPost(url, body, headersMap);
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                        Map<String, Object> dataMap = JsonUtils.parseMap(result);
+                        if (BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
+                            Map<String, Object> data = JsonUtils.beanToSnakeMap(dataMap.get("data"));
+                            Object publicIp = data.get("public_ip");
+                            if (element.getIsPublicIp()) {
+                                element.setPublicIpAddress(String.valueOf(publicIp));
+                            }
+                        }
+                    }
                     openAccessModes(element);
                 });
 

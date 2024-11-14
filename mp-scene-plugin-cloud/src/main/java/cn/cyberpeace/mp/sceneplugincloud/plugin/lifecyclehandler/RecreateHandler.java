@@ -32,6 +32,7 @@ import cn.cyberpeace.mp.sceneplugincloud.repository.DevopsLoadSourceMapper;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import com.azure.resourcemanager.monitor.fluent.models.DataCollectionRuleResourceInner;
 import com.alibaba.fastjson.JSONObject;
+import com.azure.resourcemanager.network.models.PublicIpAddress;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
