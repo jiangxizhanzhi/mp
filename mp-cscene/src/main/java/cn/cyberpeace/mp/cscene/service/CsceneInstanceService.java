@@ -2412,8 +2412,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         element.setVmExpansionDiskType(request.getExpansionDiskType());
         element.getSrcElement().setExpansionDisk(request.getExpansionDisk());
         if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(element.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == element.getVirtualType()) {
+            SceneTaskPool.getInstance().executeTask(() -> {
+                Boolean expansion = element.getExpansion();
                 AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
-                azureVirtualMachine.expansion(localAzurer,element);
+                azureVirtualMachine.expansion(localAzurer,element,expansion);
+            });
             Integer expansionDisk = element.getSrcElement().getExpansionDisk();
             if (!element.getExpansion() &&
                     expansionDisk != null &&

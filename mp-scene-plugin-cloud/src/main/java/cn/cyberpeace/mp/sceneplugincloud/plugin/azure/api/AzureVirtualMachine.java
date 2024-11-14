@@ -45,7 +45,6 @@ import java.time.Duration;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 public class AzureVirtualMachine {
@@ -574,7 +573,7 @@ public class AzureVirtualMachine {
         virtualMachine.deallocate();
     }
 
-    public void expansion(MicrosoftAzureUserModel microsoftAzureUserModel, CloudPluginSceneElementBO cloudElement) {
+    public void expansion(MicrosoftAzureUserModel microsoftAzureUserModel, CloudPluginSceneElementBO cloudElement, Boolean expansion) {
         if (microsoftAzureUserModel.getCloudType() == BaseSceneModel.CloudType.PUBLIC) {
             VirtualMachine virtualMachine = azureResourceManager.virtualMachines().getById(cloudElement.getResourceId());
             VirtualMachine.Update update = virtualMachine.update().withSize(cloudElement.getVmSizeType());
@@ -601,7 +600,7 @@ public class AzureVirtualMachine {
         }
 
         Integer expansionDisk = cloudElement.getSrcElement().getExpansionDisk();
-        if (!cloudElement.getExpansion() &&
+        if (!expansion &&
                 expansionDisk != null &&
                 expansionDisk > 0 &&
                 StringUtils.isNotBlank(cloudElement.getVmExpansionDiskType())) {

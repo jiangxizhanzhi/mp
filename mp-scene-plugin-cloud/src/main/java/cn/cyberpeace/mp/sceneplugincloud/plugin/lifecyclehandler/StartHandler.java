@@ -101,7 +101,7 @@ public class StartHandler extends HandlerCommon {
                         StartHandler.ElementProcess.START_VIRTUAL_MACHINE));
                 runElementProgress(nodeId, SceneElementModel.Event.START, StartHandler.ElementProcess.START_VIRTUAL_MACHINE, () -> {
                     //启动
-                        if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
+                    if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
                         AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
                         azureVirtualMachine.start(element);
                     } else {
@@ -112,7 +112,7 @@ public class StartHandler extends HandlerCommon {
                         String url = azureManagerUrl + "/cloud/vm_start";
                         Map<String, Object> formMap = new HashMap();
                         formMap.put("azureUser", localAzurer);
-                        formMap.put("isPublicIp",element.getIsPublicIp());
+                        formMap.put("isPublicIp", element.getIsPublicIp());
                         formMap.put("vmId", element.getResourceId());
                         //请求头设置
                         HashMap<String, String> headersMap = new HashMap<>();
