@@ -10,9 +10,6 @@
 // Version 1.0.0
 package cn.cyberpeace.mp.flow.controller;
 
-import cn.cyberpeace.mp.base.annotation.AuthTarget;
-import cn.cyberpeace.mp.base.constant.TargetEnum;
-import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.response.QueryFlowScriptDemoResponse;
@@ -33,13 +30,11 @@ import org.springframework.web.bind.annotation.RestController;
  * @Author qiaokang
  * @Date 2024/07/02
  * @Version 1.0.0
- * @see BaseModelController
  */
 @Slf4j
 @Api(tags = "流量脚本模板管理")
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/scriptdemo")
-@AuthTarget(TargetEnum.NO_AUTH)
 public class FlowScriptDemoController {
 
     @Autowired

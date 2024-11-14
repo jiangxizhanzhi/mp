@@ -44,10 +44,10 @@ public interface FlowTaskRecordMapper extends BaseModelMapper<FlowTaskRecordMode
 
     /**
      * 仿真概况
-     * @param sceneId
+     * @param actuatorId
      * @return
      */
-    FlowSummary queryFlowSummary(@Param("sceneId") String sceneId);
+    FlowSummary queryFlowSummary(@Param("actuatorId") String actuatorId);
 
     /**
      * 流量最开始启动时间
@@ -74,9 +74,9 @@ public interface FlowTaskRecordMapper extends BaseModelMapper<FlowTaskRecordMode
 
     /**
      * 查询节点实时速率，按照速率倒序排列
-     * @param sceneId
+     * @param actuatorId
      * @return
      */
-    List<FlowNodeTxBps> queryNodeTxBps(@Param("sceneId") String sceneId);
+    List<FlowNodeTxBps> queryNodeTxBps(@Param("actuatorId") String actuatorId);
 
 }

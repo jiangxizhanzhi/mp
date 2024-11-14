@@ -13,9 +13,10 @@ package cn.cyberpeace.mp.flow.job;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.protocolprobe.ProtocolProbe;
 import cn.cyberpeace.mp.base.util.protocolprobe.SSHProbe;
+import cn.cyberpeace.mp.flow.integration.cloud.sncloud.SaiNingCloudClient;
+import cn.cyberpeace.mp.flow.integration.cloud.sncloud.SnGetVirtualMachineParams;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
-import cn.cyberpeace.mp.flow.integration.RemoteServerUtil;
 import cn.cyberpeace.mp.flow.util.SshUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -44,14 +45,14 @@ public class FlowActuatorStateJob {
         var list = flowActuatorMapper.list(condition);
         for (var m : list) {
             if (StringUtils.isEmpty(m.getIp())) {
-                var instance = RemoteServerUtil.getTopo(m.getCsceneId());
-                String flowNodeResourceId = RemoteServerUtil.getFlowNodeResourceId(instance);
-                String ip = RemoteServerUtil.getFlowNodeIp(instance);
-                String netNodeResourceId = RemoteServerUtil.getFlowNodeNetResourceId(instance);
-                if (StringUtils.isNotEmpty(flowNodeResourceId)) {
-                    m.setIp(ip);
-                    m.setInstanceId(flowNodeResourceId);
-                    m.setNetworkId(netNodeResourceId);
+                var cloud = new SaiNingCloudClient("10.100.27.1", 11111);
+                SnGetVirtualMachineParams params = new SnGetVirtualMachineParams();
+                params.setId(m.getInstanceId());
+                var res = cloud.getVirtualMachine(params);
+                if (res != null) {
+                    m.setIp(res.getNetworks().get(0).getFixedIp());
+                    m.setInstanceId(res.getId());
+                    m.setNetworkId(res.getNetworks().get(0).getNetworkId());
                     flowActuatorMapper.update(m);
                 }
             } else {
@@ -64,7 +65,7 @@ public class FlowActuatorStateJob {
                     serverInfo.setHost(ip);
                     serverInfo.setUser("root");
                     serverInfo.setPassword("111111");
-                    String TGN_PATH = "D:\\MJ\\code2024\\30s\\mp\\mp-scene-plugin-flow\\src\\main\\resources\\traffic_generators.zip";
+                    String TGN_PATH = "D:\\MJ\\code2024\\30s\\mp\\mp-flow\\src\\main\\resources\\traffic_generators.zip";
                     SshUtil.refreshDir(serverInfo, commands, TGN_PATH, "/opt/project_dirs");
                     m.setStatus(1);
                     flowActuatorMapper.update(m);

@@ -1,23 +1,32 @@
- // Copyright (C) 2024
- // All rights reserved.
- // Project name mp
- // Description:
- // Author:
- // File name FlowTaskRecordServiceImpl.java.
- // File size 20743.
- // File create date Fri Jul 12 12:55:24 CST 2024.
- // File update date Fri Jul 12 12:55:24 CST 2024.
- // Version 1.0.0
+// Copyright (C) 2024
+// All rights reserved.
+// Project name mp
+// Description:
+// Author:
+// File name FlowTaskRecordServiceImpl.java.
+// File size 20743.
+// File create date Fri Jul 12 12:55:24 CST 2024.
+// File update date Fri Jul 12 12:55:24 CST 2024.
+// Version 1.0.0
 package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.flow.bo.*;
+import cn.cyberpeace.mp.flow.bo.FlowNodeTxBps;
+import cn.cyberpeace.mp.flow.bo.FlowRealTimeRate;
+import cn.cyberpeace.mp.flow.bo.FlowStatisticalCondition;
+import cn.cyberpeace.mp.flow.bo.FlowStatisticsDetail;
+import cn.cyberpeace.mp.flow.bo.FlowStatisticsInfo;
+import cn.cyberpeace.mp.flow.bo.FlowStatisticsTemp;
+import cn.cyberpeace.mp.flow.bo.FlowSummary;
 import cn.cyberpeace.mp.flow.enums.TaskTaskStatusEnum;
+import cn.cyberpeace.mp.flow.integration.actuator.FlowActuator;
+import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskRecordModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskTaskModel;
+import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
 import cn.cyberpeace.mp.flow.response.BatchActuatorResponse;
@@ -25,6 +34,7 @@ import cn.cyberpeace.mp.flow.service.FlowPostService;
 import cn.cyberpeace.mp.flow.service.FlowTaskRecordService;
 import cn.cyberpeace.mp.flow.service.fields.FlowTaskRecordFields;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -34,7 +44,11 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @ClassName FlowTaskRecordServiceImpl
@@ -47,14 +61,16 @@ import java.util.*;
  */
 @Service
 @Slf4j
-public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskRecordModel, FlowTaskRecordMapper, FlowTaskRecordFields,
-        QueryParams> implements FlowTaskRecordService {
+public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskRecordModel, FlowTaskRecordMapper, FlowTaskRecordFields, QueryParams> implements FlowTaskRecordService {
 
     @Autowired
     private FlowTaskTaskMapper flowTaskTaskMapper;
 
     @Resource
     private FlowPostService flowPostService;
+
+    @Resource
+    private FlowActuatorMapper flowActuatorMapper;
 
 
     public FlowTaskRecordServiceImpl(FlowTaskRecordMapper stuMapper, FlowTaskRecordFields stuFields) {
@@ -127,28 +143,31 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
 
     /**
      * 仿真概况
-     * @param sceneId
+     * @param actuatorId
      * @return
      */
     @Override
-    public FlowSummary queryFlowSummary(String sceneId) {
-        log.info("FlowTaskRecordServiceImpl.queryFlowSummary begin. id:{}", sceneId);
-        FlowSummary flowSummary = this.getModelMapper().queryFlowSummary(sceneId);
-        log.info("FlowTaskRecordServiceImpl.queryFlowSummary end. flowSummary:{}", flowSummary);
+    public FlowSummary queryFlowSummary(String actuatorId) {
+        FlowSummary flowSummary = this.getModelMapper().queryFlowSummary(actuatorId);
         return flowSummary;
     }
 
     /**
      * 根据节点统计实时速率
-     * @param sceneId
+     * @param actuatorId
      * @return
      */
     @Override
-    public List<FlowNodeTxBps> queryNodeTxBps(String sceneId) {
-        log.info("FlowTaskRecordServiceImpl.queryNodeTxBps begin. id:{}", sceneId);
-        List<FlowNodeTxBps> flowNodeTxBpsList = this.getModelMapper().queryNodeTxBps(sceneId);
+    public List<FlowNodeTxBps> queryNodeTxBps(String actuatorId) {
+        log.info("FlowTaskRecordServiceImpl.queryNodeTxBps begin. id:{}", actuatorId);
+        List<FlowNodeTxBps> flowNodeTxBpsList = this.getModelMapper().queryNodeTxBps(actuatorId);
         log.info("FlowTaskRecordServiceImpl.queryNodeTxBps end. flowNodeTxBpsList:{}", flowNodeTxBpsList);
         return flowNodeTxBpsList;
+    }
+
+    public ArrayNode top5Protocols(String actuatorId) {
+        FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(actuatorId);
+        return new FlowActuator(flowActuatorModel.getIp(), null).top5Protocols();
     }
 
     /**
@@ -174,7 +193,8 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
             return flowStatisticsInfo;
         }
         List<FlowStatisticsTemp> tempList = this.getModelMapper().statisticsTaskId(sceneId, conditionList);
-        List<FlowStatisticsTemp> tempContainOldList = this.getModelMapper().statisticsTaskIdContainOld(sceneId, conditionList);
+        List<FlowStatisticsTemp> tempContainOldList = this.getModelMapper()
+                .statisticsTaskIdContainOld(sceneId, conditionList);
         List<FlowStatisticsDetail> txBpsList = new ArrayList<>();
         List<FlowStatisticsDetail> txPpsList = new ArrayList<>();
         List<FlowStatisticsDetail> latencyList = new ArrayList<>();
@@ -398,10 +418,10 @@ public class FlowTaskRecordServiceImpl extends BaseModelServiceImpl<FlowTaskReco
         } else if (totalDiff > 1800 && totalDiff <= 3600) {
             diff = 5;
             offsetUnit = "m";
-        } else if (totalDiff > 3600 && totalDiff <= 3600*2) {
+        } else if (totalDiff > 3600 && totalDiff <= 3600 * 2) {
             diff = 10;
             offsetUnit = "m";
-        } else if (totalDiff > 3600*2 && totalDiff <= 3600*5) {
+        } else if (totalDiff > 3600 * 2 && totalDiff <= 3600 * 5) {
             diff = 30;
             offsetUnit = "m";
         } else {

@@ -76,9 +76,7 @@ public class BaseCommon {
         objectMapper.registerModule(javaTimeModule);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        if (Boolean.FALSE.equals(baseAppConfig.getJsonStringifyIncludeNull())) {
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        }
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         return objectMapper;
     }
 

@@ -10,7 +10,6 @@
 // Version 1.0.0
 package cn.cyberpeace.mp.flow.controller;
 
-import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -83,7 +82,6 @@ public class FlowInfoController {
      * @param ids
      * @return
      */
-    @AuthTarget({TargetEnum.DYNAMIC_TRAFFIC_LIST, TargetEnum.STATIC_TRAFFIC_LIST})
     @ApiOperation("批量删除流量信息")
     @ApiImplicitParam(name = "ids", value = "流量ID集合", dataTypeClass = String[].class)
     @DeleteMapping("/batch_delete")
@@ -152,7 +150,6 @@ public class FlowInfoController {
      * @param modifyRequest
      * @return
      */
-    @AuthTarget(TargetEnum.STATIC_TRAFFIC_LIST)
     @ApiOperation("更新背景流量")
     @PatchMapping("/background")
     public ServiceResult<BackgroundFlowResponse> modifyBackgroundFlow(@Validated ModifyBackgroundFlowRequest modifyRequest) {
@@ -164,7 +161,6 @@ public class FlowInfoController {
      * @param id
      * @return
      */
-    @AuthTarget(TargetEnum.DYNAMIC_TRAFFIC_LIST)
     @ApiOperation("攻击流量详情")
     @ApiImplicitParam(name = "id", value = "流量ID", dataTypeClass = String.class)
     @GetMapping("/attack")
@@ -177,7 +173,6 @@ public class FlowInfoController {
      * @param addRequest
      * @return
      */
-    @AuthTarget(TargetEnum.DYNAMIC_TRAFFIC_LIST)
     @ApiOperation("新增攻击流量")
     @PostMapping("/attack")
     public ServiceResult<AttackFlowResponse> addAttackFlow(@Validated AddAttackFlowRequest addRequest) {
@@ -189,7 +184,6 @@ public class FlowInfoController {
      * @param modifyRequest
      * @return
      */
-    @AuthTarget(TargetEnum.DYNAMIC_TRAFFIC_LIST)
     @ApiOperation("更新攻击流量")
     @PatchMapping("/attack")
     public ServiceResult<AttackFlowResponse> modifyAttackFlow(@Validated ModifyAttackFlowRequest modifyRequest) {
@@ -201,7 +195,6 @@ public class FlowInfoController {
      * @param request
      * @return
      */
-    @AuthTarget(TargetEnum.FLOW_GROUP)
     @ApiOperation("根据集合id批量查询")
     @GetMapping("/list_by_collection_ids")
     public ServiceResult<List<FlowInfoResponse>> listByCollectionIds(ListByCollectionIdsRequest request) {

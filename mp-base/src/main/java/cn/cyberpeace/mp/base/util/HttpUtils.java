@@ -437,7 +437,9 @@ public class HttpUtils {
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
         HttpResponse response = client.execute(httpDelete);
         httpDelete.setConfig(requestConfig);
-        return EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+        var res = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+        log.info("结果================>{}", res);
+        return res;
     }
 
     /**
@@ -507,7 +509,7 @@ public class HttpUtils {
         } finally {
             IOUtils.closeQuietly(response);
         }
-
+        log.info("结果================>{}", result);
         return result;
     }
 
@@ -597,7 +599,9 @@ public class HttpUtils {
 
         HttpResponse resp = client.execute(httpPost);
         // 获得返回值
-        return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
+        var res = EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
+        log.info("结果================>{}", res);
+        return res;
     }
 
     static class HttpDeleteWithBody extends HttpEntityEnclosingRequestBase {

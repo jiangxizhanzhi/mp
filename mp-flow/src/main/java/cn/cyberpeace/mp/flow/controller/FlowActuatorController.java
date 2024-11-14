@@ -61,7 +61,7 @@ public class FlowActuatorController {
     @ApiOperation("启动流量发生器")
     @PostMapping("/create_actuator")
     public ServiceResult<FlowActuatorResponse> createFlowActuator() {
-        var result = flowActuatorService.createFlowActuator();
+        var result = flowActuatorService.createFlowActuator("");
         return new ServiceResult<>(result).asResult();
     }
 
@@ -71,7 +71,6 @@ public class FlowActuatorController {
         flowActuatorService.deleteFlowActuator(params.getActuatorId());
         return new ServiceResult<>(true).asResult();
     }
-
 
     @Getter
     @Setter

@@ -22,12 +22,22 @@
     </select>
 
     <select id="queryFlowSummary" resultType="cn.cyberpeace.mp.flow.bo.FlowSummary">
-        select if(count(1) is null, 0, count(1)) as taskNum,if(sum(success_count) is null, 0, sum(success_count)) as successCount,if(sum(error_count) is null, 0, sum(error_count)) as errorCount,
-               if(sum(success_count+error_count) is null, 0, sum(success_count+error_count)) as runnedCount,if(count(distinct(node_id)) is null, 0, count(distinct(node_id))) as totalNode,
-               if((SELECT COUNT(1) from mp_flow_task_task where task_status='1' and scene_id=#{sceneId}) is null, 0, (SELECT COUNT(1) from mp_flow_task_task where task_status='1' and scene_id=#{sceneId})) as runningTask,
-               if((SELECT COUNT(distinct(node_id)) from mp_flow_task_task where task_status='1' and scene_id=#{sceneId}) is null, 0, (SELECT COUNT(distinct(node_id)) from mp_flow_task_task where task_status='1' and scene_id=#{sceneId})) as runningNode
+        select if(count(1) is null, 0, count(1)) as taskNum,if(sum(success_count) is null, 0, sum(success_count)) as successCount,
+               if(sum(error_count) is null, 0, sum(error_count)) as errorCount,
+               if(sum(success_count+error_count) is null, 0, sum(success_count+error_count)) as runnedCount,
+               if(count(distinct(node_id)) is null, 0, count(distinct(node_id))) as totalNode,
+               if(
+                   (SELECT COUNT(1) from mp_flow_task_task where task_status='1' and actuator_id=#{actuatorId}) is null,
+                   0,
+                   (SELECT COUNT(1) from mp_flow_task_task where task_status='1' and actuator_id=#{actuatorId})
+               ) as runningTask,
+               if(
+                   (SELECT COUNT(distinct(node_id)) from mp_flow_task_task where task_status='1' and actuator_id=#{actuatorId}) is null,
+                   0,
+                   (SELECT COUNT(distinct(node_id)) from mp_flow_task_task where task_status='1' and actuator_id=#{actuatorId})
+               ) as runningNode
         from mp_flow_task_task t
-        where scene_id=#{sceneId}
+        where actuator_id=#{actuatorId}
     </select>
 
     <select id="getFirstTime" resultType="java.time.LocalDateTime">
@@ -68,12 +78,16 @@
     </select>
 
     <select id="queryNodeTxBps" resultType="cn.cyberpeace.mp.flow.bo.FlowNodeTxBps">
-        select node_name as nodeName,sum(tx_bps) as txBps
+        select
+            node_name as nodeName,sum(tx_bps) as txBps
         from mp_flow_task_task t,mp_flow_task_record r
-        where t.id=r.task_id and scene_id=#{sceneId} and task_status='1'
-          and (r.task_id,r.create_time) in(
-            select task_id,max(r1.create_time) as create_time from mp_flow_task_task t1,mp_flow_task_record r1
-            where t1.id=r1.task_id and scene_id=#{sceneId} and task_status='1' group by task_id)
+        where t.id=r.task_id
+          and t.actuator_id=#{actuatorId} and task_status='1'
+          and (r.task_id,r.create_time) in (
+            select task_id, max(r1.create_time) as create_time
+                from mp_flow_task_task t1,mp_flow_task_record r1
+                where t1.id=r1.task_id and t1.actuator_id=#{actuatorId} and task_status='1' group by task_id
+          )
         group by nodeName
         order by txBps desc
     </select>

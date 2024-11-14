@@ -11,7 +11,6 @@
 package cn.cyberpeace.mp.flow.controller;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -56,7 +55,6 @@ import java.util.Objects;
  * @Author qiaokang
  * @Date 2024/07/02
  * @Version 1.0.0
- * @see BaseModelController
  */
 @Slf4j
 @Api(tags = "流量资源集合管理")

@@ -4,17 +4,20 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.flow.integration.cloud.sncloud.SaiNingCloudClient;
+import cn.cyberpeace.mp.flow.integration.cloud.sncloud.SnCreateVirtualMachineParams;
+import cn.cyberpeace.mp.flow.integration.cloud.sncloud.SnDeleteVirtualMachineParams;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.response.FlowActuatorResponse;
 import cn.cyberpeace.mp.flow.service.field.FlowActuatorFields;
 import cn.cyberpeace.mp.flow.service.params.FlowActuatorQueryParams;
-import cn.cyberpeace.mp.flow.integration.RemoteServerUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -54,13 +57,7 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
             List<FlowActuatorModel> objs = result.sourceObjs();
             List<FlowActuatorResponse> responses = new ArrayList<>();
             for (var m : objs) {
-                FlowActuatorResponse response = new FlowActuatorResponse();
-                response.setId(m.getId());
-                response.setTitle(m.getTitle());
-                response.setIp(m.getIp());
-                response.setTargetSubnet(m.getNetworkId());
-                response.setStatus(m.getStatus());
-                response.setCreateTime(TimeUtils.localDateTimeToString(m.getCreateTime()));
+                FlowActuatorResponse response = this.convert2FlowActuatorResponse(m);
                 responses.add(response);
             }
             ListObjServiceResult<FlowActuatorResponse> res = new ListObjServiceResult<>(new ListObjResult<>(responses, total));
@@ -68,15 +65,18 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
         }
     }
 
-    public FlowActuatorResponse createFlowActuator() {
+    public FlowActuatorResponse createFlowActuator(String title) {
         // 提交创建请求
-        var instance = RemoteServerUtil.createFlowTopo();
+        var cloud = new SaiNingCloudClient("10.100.27.1", 11111);
+        var instance = cloud.createVirtualMachine(SnCreateVirtualMachineParams.getDefault());
         String instanceId = instance.getId();
-
         FlowActuatorModel actuatorModel = new FlowActuatorModel();
         actuatorModel.setStatus(0);
-        actuatorModel.setTitle("");
+        actuatorModel.setTitle(title);
         actuatorModel.setCsceneId(instanceId);
+        actuatorModel.setInstanceId(instanceId);
+        actuatorModel.setNetworkId(instance.getNetworks().get(0).getNetworkId());
+        actuatorModel.setIp(instance.getNetworks().get(0).getFixedIp());
         flowActuatorMapper.save(actuatorModel);
         var res = this.convert2FlowActuatorResponse(actuatorModel);
         return res;
@@ -84,7 +84,10 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
 
     public void deleteFlowActuator(String actuatorId) {
         FlowActuatorModel model = flowActuatorMapper.get(actuatorId);
-        RemoteServerUtil.delete(model.getCsceneId());
+        var cloud = new SaiNingCloudClient("10.100.27.1", 11111);
+        SnDeleteVirtualMachineParams params = new SnDeleteVirtualMachineParams();
+        params.setVms(Arrays.asList(model.getInstanceId()));
+        cloud.deleteVirtualMachine(params);
         flowActuatorMapper.delete(actuatorId);
     }
 

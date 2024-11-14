@@ -12,14 +12,14 @@ package cn.cyberpeace.mp.flow.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.FlowTaskAttackConf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
-import cn.cyberpeace.mp.flow.integration.RemoteServerUtil;
 import cn.cyberpeace.mp.flow.integration.actuator.FlowActuator;
+import cn.cyberpeace.mp.flow.integration.cloud.sncloud.SaiNingCloudClient;
+import cn.cyberpeace.mp.flow.integration.cloud.sncloud.SnAddVirtualNicParams;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.model.FlowProtocolModel;
@@ -34,7 +34,6 @@ import cn.cyberpeace.mp.flow.repository.FlowTaskConfMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskPortMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
-import cn.cyberpeace.mp.flow.response.FlowActuatorResponse;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -88,35 +87,6 @@ public class TopoService {
     @Resource
     private FlowTaskTaskService flowTaskTaskService;
 
-    public List<FlowActuatorResponse> getFlowActuator() {
-        var list = flowActuatorMapper.list(new HumanCondition());
-        List<FlowActuatorResponse> responses = new ArrayList<>();
-        for (var m : list) {
-            FlowActuatorResponse response = new FlowActuatorResponse();
-            response.setStatus(m.getStatus());
-            response.setIp(m.getIp());
-            response.setCreateTime(TimeUtils.localDateTimeToString(m.getCreateTime()));
-            response.setTargetSubnet(m.getNetworkId());
-            response.setTitle(m.getTitle());
-            response.setId(m.getId());
-            responses.add(response);
-        }
-        return responses;
-    }
-
-    public FlowActuatorModel createFlowTrex() {
-        // 提交创建请求
-        var instance = RemoteServerUtil.createFlowTopo();
-        String instanceId = instance.getId();
-
-        FlowActuatorModel actuatorModel = new FlowActuatorModel();
-        actuatorModel.setId(instanceId);
-        actuatorModel.setStatus(0);
-        actuatorModel.setTitle("");
-        flowActuatorMapper.save(actuatorModel);
-        return actuatorModel;
-    }
-
     public void addTasks(List<AddFlowTaskFlowInfo> tasks, String actuatorId, String networkId, String targetIp) {
         // 判断网络是否已经接入
         HumanCondition portCondition = new HumanCondition().filterEqual(FlowTaskPortModel::getActuatorId, actuatorId)
@@ -127,7 +97,12 @@ public class TopoService {
         if (portModel == null) {
             // 无数据 说明未接入网络 ， 需要先接入网络
             flowActuatorModel.getInstanceId();
-            mac = RemoteServerUtil.addPort(flowActuatorModel.getInstanceId(), networkId);
+            var cloud = new SaiNingCloudClient("10.100.27.1", 11111);
+            SnAddVirtualNicParams params = new SnAddVirtualNicParams();
+            params.setInstanceId(flowActuatorModel.getInstanceId());
+            params.setNetworkId(networkId);
+            var res = cloud.addVirtualNic(params);
+            mac = res.getMacAddress();
             portModel = new FlowTaskPortModel();
             portModel.setActuatorId(actuatorId);
             portModel.setNetworkId(networkId);
@@ -235,11 +210,11 @@ public class TopoService {
         asyncPlatFlowTaskService.stopTask(taskId);
     }
 
-    public void startTasks(List<String> taskIds){
+    public void startTasks(List<String> taskIds) {
         asyncPlatFlowTaskService.batchStartTasks(taskIds);
     }
 
-    public void stopTasks(List<String> taskIds){
+    public void stopTasks(List<String> taskIds) {
         asyncPlatFlowTaskService.batchStopTasks(taskIds);
     }
 }

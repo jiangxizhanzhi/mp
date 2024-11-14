@@ -19,6 +19,8 @@ import cn.cyberpeace.mp.flow.util.FlowWebSocketClientUtil;
 import cn.cyberpeace.mp.flow.util.ResponseUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +44,8 @@ public class FlowActuator {
     private static final String START_TASKS_URL = "/api/v1/task/v2/tasks/batch/action";
 
     private static final String UPLOAD_PCAP_URL = "/api/v1/resource/pcap/upload";
+
+    private static final String PROTOCOL_TOP5 = "/api/v1/task/tasks/protocols/top5";
 
     private String actuatorHost;
 
@@ -91,7 +95,7 @@ public class FlowActuator {
         }
     }
 
-    public boolean startTasks(Integer runType, List<FlowTaskStart> flowTaskStartList,List<String> notRunningTaskIds) {
+    public boolean startTasks(Integer runType, List<FlowTaskStart> flowTaskStartList, List<String> notRunningTaskIds) {
         String url = this.actuatorHost + START_TASKS_URL;
         try {
             BatchStartFlowTaskRequest batchStartFlowTaskRequest = BatchStartFlowTaskRequest.builder()
@@ -189,6 +193,23 @@ public class FlowActuator {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public ArrayNode top5Protocols() {
+        ArrayNode protocols = JsonCommon.createArrayNode();
+        try {
+            String url = this.actuatorHost + PROTOCOL_TOP5;
+            String rsp = HttpUtils.sendPost(url, "{}");
+            JsonNode rspObj = JsonCommon.parseTree(rsp);
+            if (ResponseUtils.checkResponse(rspObj)) {
+                protocols.addAll((ArrayNode) rspObj.get(BaseConstants.STR_DATA).get("protocols"));
+            } else {
+                log.error("query top5 protocols failed");
+            }
+        } catch (Exception e) {
+            log.error("query top5 protocols error, {}", ExceptionUtils.getStackTrace(e));
+        }
+        return protocols;
     }
 
     @Getter
