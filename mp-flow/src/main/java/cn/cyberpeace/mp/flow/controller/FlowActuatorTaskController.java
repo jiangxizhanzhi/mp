@@ -10,7 +10,7 @@ import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams;
 import cn.cyberpeace.mp.flow.response.FlowTaskPageResponse;
 import cn.cyberpeace.mp.flow.service.FlowActuatorTaskService;
-import cn.cyberpeace.mp.flow.service.TopoService;
+import cn.cyberpeace.mp.flow.service.FlowActuatorTask;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskParams;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -36,7 +36,7 @@ import java.util.List;
 public class FlowActuatorTaskController {
 
     @Resource
-    private TopoService topoService;
+    private FlowActuatorTask flowActuatorTask;
 
     @Resource
     private FlowActuatorTaskService flowActuatorTaskService;
@@ -50,42 +50,42 @@ public class FlowActuatorTaskController {
     @ApiOperation("新增流量任务")
     @PostMapping("/task/add")
     public ServiceResult addTasks(@RequestBody AddFlowTaskParams params) {
-        topoService.addTasks(params.getTasks(), params.getActuatorId(), params.getNetworkId(), params.getTargetIp());
+        flowActuatorTask.addTasks(params.getTasks(), params.getActuatorId(), params.getNetworkId(), params.getTargetIp());
         return new ServiceResult(true).asResult();
     }
 
     @ApiOperation("删除流量任务")
     @DeleteMapping("/task/delete")
     public ServiceResult deleteTasks(List<String> taskIds) {
-        topoService.deleteTasks(taskIds);
+        flowActuatorTask.deleteTasks(taskIds);
         return new ServiceResult(true).asResult();
     }
 
     @ApiOperation("启动单个流量任务")
     @PostMapping("/task/start")
     public ServiceResult<Boolean> startTask(String taskId) {
-        topoService.startTask(taskId);
+        flowActuatorTask.startTask(taskId);
         return new ServiceResult<>(true).asResult();
     }
 
     @ApiOperation("关闭单个流量任务")
     @PostMapping("/task/stop")
     public ServiceResult<Boolean> stopTask(String taskId) {
-        topoService.stopTask(taskId);
+        flowActuatorTask.stopTask(taskId);
         return new ServiceResult<>(true).asResult();
     }
 
     @ApiOperation("启动多个流量任务")
     @PostMapping("/task/batch_start")
     public ServiceResult<Boolean> startTasks(@RequestBody FlowTaskBatchStartRequest request) {
-        topoService.startTasks(request.getTaskIds());
+        flowActuatorTask.startTasks(request.getTaskIds());
         return new ServiceResult<>(true).asResult();
     }
 
     @ApiOperation("关闭多个流量任务")
     @GetMapping("/stop_tasks")
     public String stopTasks(@RequestBody FlowTaskBatchStartRequest request) {
-        topoService.stopTasks(request.getTaskIds());
+        flowActuatorTask.stopTasks(request.getTaskIds());
         return null;
     }
 
@@ -97,7 +97,7 @@ public class FlowActuatorTaskController {
     @ApiOperation("编辑流量任务配置")
     @PostMapping("/task/conf/edit")
     public ServiceResult editTaskConf(@RequestBody EditFlowTaskConfRequest request) {
-        topoService.editTaskConf(request);
+        flowActuatorTask.editTaskConf(request);
         return ResultCommon.success();
     }
 
@@ -110,7 +110,7 @@ public class FlowActuatorTaskController {
     @ApiImplicitParam(name = "taskId", value = "流量任务ID", dataTypeClass = String.class)
     @GetMapping("/task/conf/detail")
     public ServiceResult<QueryFlowTaskConfResponse> queryConfByTaskId(@RequestParam String taskId) {
-        var result = topoService.queryConfByTaskId(taskId);
+        var result = flowActuatorTask.queryConfByTaskId(taskId);
         return new ServiceResult<>(result).asResult();
     }
 
