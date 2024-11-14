@@ -57,6 +57,7 @@ public class UnpauseHandler extends HandlerCommon {
         public static final EventProcess UNPAUSE_NODE = new EventProcess("unpause_node", "sceneplugincloud.event.unpause_node");
         public static final EventProcess UNPAUSE_DYNAMIPS = new EventProcess("unpause_dynamips", "sceneplugincloud.event.unpause_dynamips");
         public static final EventProcess UNPAUSE_LOAD = new EventProcess("unpause_load", "sceneplugincloud.event.unpause_load");
+        public static final EventProcess UNPAUSE_VNET = new EventProcess("unpause_vent", "sceneplugincloud.event.unpause_vnet");
     }
 
     public UnpauseHandler(CloudScenePluginHandler pluginHandler, int event) {
@@ -119,12 +120,17 @@ public class UnpauseHandler extends HandlerCommon {
                     openAccessModes(element);
                 });
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
-                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.UNPAUSE, Arrays.asList(PauseHandler.ElementProcess.PAUSE_LOAD));
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.UNPAUSE, Arrays.asList(ElementProcess.UNPAUSE_LOAD));
                 runElementProgress(nodeId, SceneElementModel.Event.UNPAUSE, ElementProcess.UNPAUSE_LOAD, () -> {
                     DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
                     DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
                     Load load = new Load(synchronousDataSource);
                     load.unpause(element.getLoadResourceInstanceId());
+                });
+            }else {
+                getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.UNPAUSE, Arrays.asList(ElementProcess.UNPAUSE_VNET));
+                runElementProgress(nodeId, SceneElementModel.Event.UNPAUSE, ElementProcess.UNPAUSE_VNET, () -> {
+                    log.info("unpause vnet");
                 });
             }
         } else {
