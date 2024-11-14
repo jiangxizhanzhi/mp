@@ -1,6 +1,11 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
+import cn.cyberpeace.mp.auth.repository.MicrosoftAzureLoginMapper;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
@@ -17,10 +22,15 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualDynamips;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.PauseTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.repository.DevopsLoadSourceMapper;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -34,6 +44,9 @@ public class PauseHandler extends HandlerCommon {
     private final Container container = new Container();
     private final VirtualDynamips virtualDynamips = new VirtualDynamips();
 
+    private String azureManagerUrl;
+
+    private MicrosoftAzureLoginMapper sceneElementPluginConfigMapper;
     public static class SceneProcess {
         public static final EventProcess PAUSE_TERMINALS = new EventProcess("pause_terminals", "sceneplugincloud.event.pause_terminals");
     }
@@ -48,6 +61,8 @@ public class PauseHandler extends HandlerCommon {
 
     public PauseHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, PauseTaskPool.getInstance(), event);
+        this.azureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getAzureManagerUrl();
+        this.sceneElementPluginConfigMapper = BeanCommon.getBean(MicrosoftAzureLoginMapper.class);
     }
 
     public void pause() {
@@ -79,8 +94,27 @@ public class PauseHandler extends HandlerCommon {
                 getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.PAUSE, Arrays.asList(ElementProcess.PAUSE_VIRTUAL_MACHINE));
                 runElementProgress(nodeId, SceneElementModel.Event.PAUSE, ElementProcess.PAUSE_VIRTUAL_MACHINE, () -> {
                     closeAccessModes(element);
-                    AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
-                    azureVirtualMachine.pause(instanceId);
+                    if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
+                        AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
+                        azureVirtualMachine.pause(instanceId);
+                    } else {
+                        JSONObject jsonObject = new JSONObject();
+                        //云类型(1: 微软公有云 2:微软私有云 3:微软混合云)
+                        jsonObject.put("cloudType", cloudType);
+                        MicrosoftAzureUserModel localAzurer = sceneElementPluginConfigMapper.getLocalAzurer(jsonObject);
+                        String url = azureManagerUrl + "/cloud/vm_pause";
+                        Map<String, Object> formMap = new HashMap();
+                        formMap.put("azureUser", localAzurer);
+                        formMap.put("vmId", element.getResourceId());
+                        //请求头设置
+                        HashMap<String, String> headersMap = new HashMap<>();
+                        String body = JsonUtils.stringify(formMap);
+                        try {
+                            HttpUtils.sendHttpPost(url, body, headersMap);
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
                 });
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.LOAD)) {
                 getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.PAUSE, Arrays.asList(ElementProcess.PAUSE_LOAD));
