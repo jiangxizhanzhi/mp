@@ -178,8 +178,15 @@ public class DevopsTargetService {
             deviceTargetPO.setInitSupport(Boolean.FALSE);
         }
 
-//        deviceTargetPO.setCreateTime(LocalDateTime.parse(device.getCreatedAt(), df));
-//        deviceTargetPO.setUpdateTime(LocalDateTime.parse(device.getUpdatedAt(), df));
+        if (device.getCreatedAt() != null) {
+            deviceTargetPO.setCreateTime(LocalDateTime.parse(device.getCreatedAt(), df));
+            deviceTargetPO.setUpdateTime(LocalDateTime.parse(device.getUpdatedAt(), df));
+        } else {
+            LocalDateTime now = LocalDateTime.now();
+            String time = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            device.setUpdatedAt(time);
+        }
+
         ExtEntity extEntity = device.getExtEntity();
         if (Objects.nonNull(extEntity)){
             deviceTargetPO.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
