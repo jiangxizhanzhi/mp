@@ -579,7 +579,11 @@ public class AzureVirtualMachine {
             VirtualMachine.Update update = virtualMachine.update().withSize(cloudElement.getVmSizeType());
             update.apply();
         }else {
-            String url = situationAwareConfig.getAzureManagerUrl() + "/cloud/vm_size_update";
+            String azureManagerUrl = situationAwareConfig.getMixAzureManagerUrl();
+            if(microsoftAzureUserModel.getCloudType() == BaseSceneModel.CloudType.PRIVATE){
+                azureManagerUrl = situationAwareConfig.getPrivateAzureManagerUrl();
+            }
+            String url = azureManagerUrl + "/cloud/vm_size_update";
             Map<String, Object> formMap = new HashMap();
             formMap.put("azureUser", microsoftAzureUserModel);
             formMap.put("vmId", cloudElement.getResourceId());
@@ -611,7 +615,11 @@ public class AzureVirtualMachine {
                         .withNewDataDisk(expansionDisk);
                 update.apply();
             }else {
-                String url = situationAwareConfig.getAzureManagerUrl() + "/cloud/vm_expansion_disk";
+                String azureManagerUrl = situationAwareConfig.getMixAzureManagerUrl();
+                if(microsoftAzureUserModel.getCloudType() == BaseSceneModel.CloudType.PRIVATE){
+                    azureManagerUrl = situationAwareConfig.getPrivateAzureManagerUrl();
+                }
+                String url = azureManagerUrl + "/cloud/vm_expansion_disk";
                 Map<String, Object> formMap = new HashMap();
                 formMap.put("azureUser", microsoftAzureUserModel);
                 formMap.put("vmExpansionDiskType", cloudElement.getVmExpansionDiskType());

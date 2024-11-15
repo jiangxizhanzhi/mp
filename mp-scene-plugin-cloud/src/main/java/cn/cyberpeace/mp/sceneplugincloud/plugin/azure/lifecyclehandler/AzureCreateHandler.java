@@ -57,7 +57,8 @@ import java.util.stream.Collectors;
 public class AzureCreateHandler extends CreateHandler {
 
     private String groupNamePrefix;
-    private String azureManagerUrl;
+    private String mixAzureManagerUrl;
+    private String privateAzureManagerUrl;
 
     private MicrosoftAzureLoginMapper sceneElementPluginConfigMapper;
 
@@ -72,7 +73,8 @@ public class AzureCreateHandler extends CreateHandler {
         super(pluginHandler);
         this.resourceService = IAzureResourceManager.getInstance(cloudType);
         this.groupNamePrefix = BeanCommon.getBean(SituationAwareConfig.class).getGroupNamePrefix();
-        this.azureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getAzureManagerUrl();
+        this.mixAzureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getMixAzureManagerUrl();
+        this.privateAzureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getPrivateAzureManagerUrl();
         this.sceneElementPluginConfigMapper = BeanCommon.getBean(MicrosoftAzureLoginMapper.class);
 
     }
@@ -100,6 +102,10 @@ public class AzureCreateHandler extends CreateHandler {
 
         getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_NETWORK);
         // 创建微软云的资源组
+        String azureManagerUrl = mixAzureManagerUrl;
+        if(cloudType == BaseSceneModel.CloudType.PRIVATE){
+            azureManagerUrl = privateAzureManagerUrl;
+        }
         String groupName = getPluginHandler().getSourceSceneId();
         groupName = StringUtils.isNotBlank(groupNamePrefix) ? groupNamePrefix + "-" + groupName : groupName;
         try {
@@ -435,6 +441,10 @@ public class AzureCreateHandler extends CreateHandler {
                     .withRemoteNetwork(network1)
                     .create();
             } else {
+                String azureManagerUrl = mixAzureManagerUrl;
+                if(cloudType == BaseSceneModel.CloudType.PRIVATE){
+                    azureManagerUrl = privateAzureManagerUrl;
+                }
                 String url = azureManagerUrl + "/cloud/connection";
                 Map<String, Object> formMap = new HashMap();
                 formMap.put("azureUser", localAzurer);

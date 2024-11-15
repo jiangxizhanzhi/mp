@@ -44,7 +44,8 @@ public class RestartHandler extends HandlerCommon {
     private final Container container = new Container();
     private final VirtualDynamips virtualDynamips = new VirtualDynamips();
 
-    private String azureManagerUrl;
+    private String mixAzureManagerUrl;
+    private String privateAzureManagerUrl;
 
     private MicrosoftAzureLoginMapper sceneElementPluginConfigMapper;
 
@@ -57,7 +58,8 @@ public class RestartHandler extends HandlerCommon {
 
     public RestartHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, RestartTaskPool.getInstance(), event);
-        this.azureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getAzureManagerUrl();
+        this.mixAzureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getMixAzureManagerUrl();
+        this.privateAzureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getPrivateAzureManagerUrl();
         this.sceneElementPluginConfigMapper = BeanCommon.getBean(MicrosoftAzureLoginMapper.class);
     }
 
@@ -85,6 +87,10 @@ public class RestartHandler extends HandlerCommon {
                         //云类型(1: 微软公有云 2:微软私有云 3:微软混合云)
                         jsonObject.put("cloudType", cloudType);
                         MicrosoftAzureUserModel localAzurer = sceneElementPluginConfigMapper.getLocalAzurer(jsonObject);
+                        String azureManagerUrl = mixAzureManagerUrl;
+                        if(cloudType == BaseSceneModel.CloudType.PRIVATE){
+                            azureManagerUrl = privateAzureManagerUrl;
+                        }
                         String url = azureManagerUrl + "/cloud/vm_restart";
                         Map<String, Object> formMap = new HashMap();
                         formMap.put("azureUser", localAzurer);

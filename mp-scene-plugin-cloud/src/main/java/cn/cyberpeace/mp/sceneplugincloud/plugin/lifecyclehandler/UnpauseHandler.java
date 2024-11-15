@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
 import cn.cyberpeace.mp.auth.repository.MicrosoftAzureLoginMapper;
 import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
@@ -44,7 +43,8 @@ public class UnpauseHandler extends HandlerCommon {
     private final Container container = new Container();
     private final VirtualDynamips virtualDynamips = new VirtualDynamips();
 
-    private String azureManagerUrl;
+    private String mixAzureManagerUrl;
+    private String privateAzureManagerUrl;
 
     private MicrosoftAzureLoginMapper sceneElementPluginConfigMapper;
     public static class SceneProcess {
@@ -62,7 +62,8 @@ public class UnpauseHandler extends HandlerCommon {
 
     public UnpauseHandler(CloudScenePluginHandler pluginHandler, int event) {
         super(pluginHandler, UnpauseTaskPool.getInstance(), event);
-        this.azureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getAzureManagerUrl();
+        this.mixAzureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getMixAzureManagerUrl();
+        this.privateAzureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getPrivateAzureManagerUrl();
         this.sceneElementPluginConfigMapper = BeanCommon.getBean(MicrosoftAzureLoginMapper.class);
     }
 
@@ -103,6 +104,10 @@ public class UnpauseHandler extends HandlerCommon {
                         //云类型(1: 微软公有云 2:微软私有云 3:微软混合云)
                         jsonObject.put("cloudType", cloudType);
                         MicrosoftAzureUserModel localAzurer = sceneElementPluginConfigMapper.getLocalAzurer(jsonObject);
+                        String azureManagerUrl = mixAzureManagerUrl;
+                        if(cloudType == BaseSceneModel.CloudType.PRIVATE){
+                            azureManagerUrl = privateAzureManagerUrl;
+                        }
                         String url = azureManagerUrl + "/cloud/vm_start";
                         Map<String, Object> formMap = new HashMap();
                         formMap.put("azureUser", localAzurer);

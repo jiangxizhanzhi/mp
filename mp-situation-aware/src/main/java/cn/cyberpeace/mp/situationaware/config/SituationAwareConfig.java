@@ -111,7 +111,9 @@ public class SituationAwareConfig {
 
     private String groupNamePrefix;
 
-    private String azureManagerUrl;
+    private String mixAzureManagerUrl;
+
+    private String privateAzureManagerUrl;
 
     private String millionScene;
 

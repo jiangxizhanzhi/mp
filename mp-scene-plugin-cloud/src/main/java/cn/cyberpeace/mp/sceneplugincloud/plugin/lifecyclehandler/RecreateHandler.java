@@ -32,7 +32,6 @@ import cn.cyberpeace.mp.sceneplugincloud.repository.DevopsLoadSourceMapper;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import com.azure.resourcemanager.monitor.fluent.models.DataCollectionRuleResourceInner;
 import com.alibaba.fastjson.JSONObject;
-import com.azure.resourcemanager.network.models.PublicIpAddress;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -117,14 +116,15 @@ public class RecreateHandler extends HandlerCommon {
 
     private static class DeleteInRecreateHandler extends DeleteHandler {
 
-        private String azureManagerUrl;
-
+        private String mixAzureManagerUrl;
+        private String privateAzureManagerUrl;
         private MicrosoftAzureLoginMapper sceneElementPluginConfigMapper;
 
         public DeleteInRecreateHandler(CloudScenePluginHandler pluginHandler) {
             super(pluginHandler);
             this.setEvent(SceneElementModel.Event.RECREATE);
-            this.azureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getAzureManagerUrl();
+            this.mixAzureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getMixAzureManagerUrl();
+            this.privateAzureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getPrivateAzureManagerUrl();
             this.sceneElementPluginConfigMapper = BeanCommon.getBean(MicrosoftAzureLoginMapper.class);
         }
 
@@ -166,6 +166,10 @@ public class RecreateHandler extends HandlerCommon {
                                     jsonObject.put("cloudType", cloudType);
                                     MicrosoftAzureUserModel localAzurer = sceneElementPluginConfigMapper.getLocalAzurer(jsonObject);
 
+                                    String azureManagerUrl = mixAzureManagerUrl;
+                                    if(cloudType == BaseSceneModel.CloudType.PRIVATE){
+                                        azureManagerUrl = privateAzureManagerUrl;
+                                    }
                                     String url = azureManagerUrl + "/cloud/vm_delete";
                                     Map<String, Object> formMap = new HashMap();
                                     formMap.put("azureUser", localAzurer);
@@ -277,14 +281,16 @@ public class RecreateHandler extends HandlerCommon {
 
     private static class CreateInRecreateHandler extends CreateHandler {
         private String groupNamePrefix;
-        private String azureManagerUrl;
+        private String mixAzureManagerUrl;
+        private String privateAzureManagerUrl;
 
         private MicrosoftAzureLoginMapper sceneElementPluginConfigMapper;
         public CreateInRecreateHandler(CloudScenePluginHandler pluginHandler) {
             super(pluginHandler);
             this.setEvent(SceneElementModel.Event.RECREATE);
             this.groupNamePrefix = BeanCommon.getBean(SituationAwareConfig.class).getGroupNamePrefix();
-            this.azureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getAzureManagerUrl();
+            this.mixAzureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getMixAzureManagerUrl();
+            this.privateAzureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getPrivateAzureManagerUrl();
             this.sceneElementPluginConfigMapper = BeanCommon.getBean(MicrosoftAzureLoginMapper.class);
         }
 
@@ -354,7 +360,10 @@ public class RecreateHandler extends HandlerCommon {
                                         }
                                     });
                                 }
-
+                                String azureManagerUrl = mixAzureManagerUrl;
+                                if(cloudType == BaseSceneModel.CloudType.PRIVATE){
+                                    azureManagerUrl = privateAzureManagerUrl;
+                                }
                                 List<VirtualNic> virtualNics = this.genVirutalNics(cloudElement);
                                 azureVirtualMachine.create(getPluginHandler(), cloudElement, virtualNics, combineInitCommand(cloudElement), alertRuleBOList, dataCollectionRulesId, finalGroupName, azureManagerUrl, localAzurer);
                                 openAccessModes(cloudElement);

@@ -29,7 +29,8 @@ public class AzureDeleteHandler extends DeleteHandler {
 
     private String groupNamePrefix;
 
-    private String azureManagerUrl;
+    private String mixAzureManagerUrl;
+    private String privateAzureManagerUrl;
 
     private MicrosoftAzureLoginMapper sceneElementPluginConfigMapper;
     public static class ElementProcess {
@@ -42,7 +43,8 @@ public class AzureDeleteHandler extends DeleteHandler {
         super(pluginHandler);
         this.resourceService = IAzureResourceManager.getInstance(cloudType);
         this.groupNamePrefix = BeanCommon.getBean(SituationAwareConfig.class).getGroupNamePrefix();
-        this.azureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getAzureManagerUrl();
+        this.mixAzureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getMixAzureManagerUrl();
+        this.privateAzureManagerUrl = BeanCommon.getBean(SituationAwareConfig.class).getPrivateAzureManagerUrl();
         this.sceneElementPluginConfigMapper = BeanCommon.getBean(MicrosoftAzureLoginMapper.class);
     }
 
@@ -132,6 +134,10 @@ public class AzureDeleteHandler extends DeleteHandler {
         if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
             resourceService.getManager().resourceGroups().deleteByName(groupName);
         } else {
+            String azureManagerUrl = mixAzureManagerUrl;
+            if(cloudType == BaseSceneModel.CloudType.PRIVATE){
+                azureManagerUrl = privateAzureManagerUrl;
+            }
             String url = azureManagerUrl + "/cloud/delete_group";
             Map<String, Object> formMap = new HashMap();
             formMap.put("azureUser", localAzurer);
