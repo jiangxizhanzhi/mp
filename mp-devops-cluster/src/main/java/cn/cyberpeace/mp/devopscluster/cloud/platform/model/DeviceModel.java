@@ -203,4 +203,10 @@ public class DeviceModel extends BaseModel {
      */
     @DefaultStr
     private String defaultLaunchImageName;
+
+    /**
+     * 漏洞id
+     */
+    @ApiModelProperty(value = "漏洞id")
+    private String vulns;
 }

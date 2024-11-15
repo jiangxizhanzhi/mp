@@ -136,6 +136,9 @@ public class DevopsTargetService {
         deviceTargetPO.setIsPublic(PublicEnum.ALL_PUBLIC);
         deviceTargetPO.setUseStatus(StatusEnum.NO);
         deviceTargetPO.setReferenceStatus(NumberUtils.INTEGER_ZERO);
+        if (device.getVulns() != null) {
+            deviceTargetPO.setVulns(device.getVulns());
+        }
         return deviceTargetPO;
     }
 
@@ -175,8 +178,8 @@ public class DevopsTargetService {
             deviceTargetPO.setInitSupport(Boolean.FALSE);
         }
 
-        deviceTargetPO.setCreateTime(LocalDateTime.parse(device.getCreatedAt(), df));
-        deviceTargetPO.setUpdateTime(LocalDateTime.parse(device.getUpdatedAt(), df));
+//        deviceTargetPO.setCreateTime(LocalDateTime.parse(device.getCreatedAt(), df));
+//        deviceTargetPO.setUpdateTime(LocalDateTime.parse(device.getUpdatedAt(), df));
         ExtEntity extEntity = device.getExtEntity();
         if (Objects.nonNull(extEntity)){
             deviceTargetPO.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
@@ -199,6 +202,13 @@ public class DevopsTargetService {
 
         if (CollectionUtils.isNotEmpty(device.getLeaks())) {
             deviceTargetPO.setLeaks(JsonCommon.stringify(device.getLeaks()));
+        }
+
+        deviceTargetPO.setUuid(device.getUuid());
+        if (device.getVulns() != null) {
+            deviceTargetPO.setVulns(device.getVulns());
+        } else {
+            deviceTargetPO.setVulns("");
         }
 
         return deviceTargetPO;

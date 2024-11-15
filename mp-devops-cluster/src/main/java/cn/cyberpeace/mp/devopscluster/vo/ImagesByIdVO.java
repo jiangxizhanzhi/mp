@@ -129,4 +129,10 @@ public class ImagesByIdVO extends BaseVO {
      */
     @ApiModelProperty(value = "容器信息")
     private ExtDocker extDocker;
+
+    /**
+     * 漏洞信息
+     */
+    @ApiModelProperty(value = "漏洞信息")
+    private List<String> vulns;
 }

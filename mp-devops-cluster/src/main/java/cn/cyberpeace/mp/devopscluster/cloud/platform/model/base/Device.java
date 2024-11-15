@@ -185,6 +185,11 @@ public class Device extends BaseCloudPlatformResult {
      */
     private String defaultLaunchImageName;
 
+    /**
+     * 漏洞id
+     */
+    private String vulns;
+
     public Boolean getIsBuildIn() {
         boolean tmpImport = !Objects.isNull(isImport) && isImport;
         boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;

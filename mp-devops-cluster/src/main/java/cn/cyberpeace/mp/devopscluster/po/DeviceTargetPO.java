@@ -149,4 +149,6 @@ public class DeviceTargetPO extends BaseModel {
 
     @DefaultStr
     private String leaks;
+
+    private String vulns;
 }

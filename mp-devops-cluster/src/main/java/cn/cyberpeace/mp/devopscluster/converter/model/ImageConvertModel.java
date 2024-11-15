@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devopscluster.converter.model;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -135,5 +136,11 @@ public class ImageConvertModel extends BasePageConvertModel{
      * 引用状态
      */
     private Integer referenceStatus;
+
+    /**
+     * 漏洞id
+     */
+    @ApiModelProperty(value = "漏洞id")
+    private String vulns;
 
 }

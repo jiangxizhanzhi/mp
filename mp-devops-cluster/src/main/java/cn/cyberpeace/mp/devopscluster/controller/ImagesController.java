@@ -74,6 +74,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -91,12 +92,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -216,6 +212,10 @@ public class ImagesController {
         imagesByIdVO.setExtVm(extVm);
         imagesByIdVO.setExtSystemInfo(model.getExtSystemInfo());
         imagesByIdVO.setExtDocker(extDocker);
+        if (model.getVulns() != null && !model.getVulns().equals("")) {
+            String[] split = model.getVulns().split(",");
+            imagesByIdVO.setVulns(Arrays.asList(split));
+        }
         return new Result<>(imagesByIdVO);
     }
 

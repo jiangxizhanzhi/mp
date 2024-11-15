@@ -162,6 +162,11 @@ public class ImagesConverter implements BaseConverter{
         Device device = convertRequest(request);
         device = cpDeviceService.add(device);
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
+        if (CollectionUtils.isNotEmpty(request.getVulns())) {
+            device.setVulns(String.join(",", request.getVulns()));
+        } else {
+            device.setVulns("");
+        }
         devopsTargetService.insert(Collections.singletonList(device));
         return;
     }
@@ -200,6 +205,11 @@ public class ImagesConverter implements BaseConverter{
     public void update(ImageRequest request) {
 //        Device device = imagesService.update(request.getUuid(),convertRequest(request));
         Device device = cpDeviceService.update(request.getUuid(), convertRequest(request));
+        if (CollectionUtils.isNotEmpty(request.getVulns())) {
+            device.setVulns(String.join(",", request.getVulns()));
+        } else {
+            device.setVulns("");
+        }
         devopsTargetService.updateById(device);
         return;
     }
@@ -457,6 +467,12 @@ public class ImagesConverter implements BaseConverter{
         device.setExtVm(extVm);
         device.setExtDocker(extDocker);
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE );
+
+        if (CollectionUtils.isNotEmpty(request.getVulns())) {
+            device.setVulns(String.join(",", request.getVulns()));
+        } else {
+            device.setVulns("");
+        }
         return device;
     }
 
@@ -489,6 +505,7 @@ public class ImagesConverter implements BaseConverter{
         imageModel.setExtVm(device.getExtVm());
         imageModel.setExtGateway(device.getExtGateway());
         imageModel.setExtDocker(device.getExtDocker());
+        imageModel.setVulns(device.getVulns());
         return imageModel;
     }
 

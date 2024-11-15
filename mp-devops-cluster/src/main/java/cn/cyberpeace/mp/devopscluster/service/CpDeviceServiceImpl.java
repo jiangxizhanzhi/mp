@@ -94,6 +94,11 @@ public class CpDeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, Devic
             model.setLeaks(JsonCommon.stringify(device.getLeaks()));
         }
         model.setIsBuildIn(device.getIsBuildIn());
+        if (device.getVulns() != null) {
+            model.setVulns(device.getVulns());
+        } else {
+            model.setVulns("");
+        }
         boolean b = getModelMapper().create(model);
         if (!b) {
             throw new MpRuntimeException("failed to create");
@@ -155,6 +160,12 @@ public class CpDeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, Devic
         model.setIsHide(device.getIsHide());
         model.setDefaultLaunchImageName(device.getDefaultLaunchImageName());
         model.setId(first.getId());
+        model.setUuid(first.getUuid());
+        if (device.getVulns() != null) {
+            model.setVulns(device.getVulns());
+        } else {
+            model.setVulns("");
+        }
 
         ObjServiceResult<DeviceModel> result = this.update(model);
         model = result.sourceObj();
@@ -230,6 +241,11 @@ public class CpDeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, Devic
         if (StringUtils.isNotBlank(model.getLeaks())) {
             List<Leak> leaks = JsonCommon.parse(model.getLeaks(), new TypeReference<List<Leak>>() {});
             device.setLeaks(leaks);
+        }
+        if (model.getVulns() != null) {
+            device.setVulns(model.getVulns());
+        } else {
+            device.setVulns("");
         }
 
         device.setDefaultLaunchImageName(model.getDefaultLaunchImageName());

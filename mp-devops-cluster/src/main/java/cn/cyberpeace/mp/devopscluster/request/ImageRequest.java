@@ -124,4 +124,10 @@ public class ImageRequest extends BaseRequest {
 
     @ApiModelProperty(value = "是否隐藏")
     private Boolean isHide = Boolean.FALSE;
+
+    /**
+     * 漏洞信息
+     */
+    @ApiModelProperty(value = "漏洞信息")
+    private List<String> vulns;
 }
