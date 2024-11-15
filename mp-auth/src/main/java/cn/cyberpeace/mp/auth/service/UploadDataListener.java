@@ -195,10 +195,10 @@ public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_NAME_EMPTY.format(String.valueOf(index)));
         }
 
-        if (StringUtils.length(name) < 2 || StringUtils.length(name) > 20) {
-            log.error("No {} row error! name {} has illegal length!", index, name);
-            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_NAME_ILLEGAL_LENGTH.format(String.valueOf(index), name));
-        }
+//        if (StringUtils.length(name) < 2 || StringUtils.length(name) > 20) {
+//            log.error("No {} row error! name {} has illegal length!", index, name);
+//            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_NAME_ILLEGAL_LENGTH.format(String.valueOf(index), name));
+//        }
 
     }
 
