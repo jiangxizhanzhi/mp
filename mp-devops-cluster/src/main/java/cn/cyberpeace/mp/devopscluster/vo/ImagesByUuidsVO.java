@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * 根据ID查询返回信息
  */
@@ -29,4 +31,9 @@ public class ImagesByUuidsVO {
     @ApiModelProperty(value = "名称")
     private String name;
 
+    /**
+     * 漏洞
+     */
+    @ApiModelProperty(value = "漏洞")
+    private List<String> vulns;
 }

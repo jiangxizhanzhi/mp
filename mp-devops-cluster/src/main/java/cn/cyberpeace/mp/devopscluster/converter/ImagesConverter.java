@@ -62,11 +62,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -192,6 +188,12 @@ public class ImagesConverter implements BaseConverter{
             ImageTargetConvertModel model = new ImageTargetConvertModel();
             model.setUuid(v.getUuid());
             model.setName(v.getName());
+            if (v.getVulns() != null && !v.getVulns().equals("")) {
+                String[] split = v.getVulns().split(",");
+                if (split.length != 0) {
+                    model.setVulns(Arrays.asList(split));
+                }
+            }
             return model;
         }).collect(Collectors.toList());
     }

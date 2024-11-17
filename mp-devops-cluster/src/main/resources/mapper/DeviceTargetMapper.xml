@@ -17,6 +17,7 @@
         <result column="in_position" property="inPosition" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
         <result column="reference_status" property="referenceStatus" />
         <result column="use_status" property="useStatus" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
+        <result column="vulns" property="vulns"/>
     </resultMap>
 
     <sql id="commonTargetWhere">
@@ -279,6 +280,7 @@
     <select id="findByUuids"  resultMap="BaseResultMap">
         select
         <include refid="commonTargetColumn"/>
+        ,i.vulns
         from
         mp_devops_target i
         <where>

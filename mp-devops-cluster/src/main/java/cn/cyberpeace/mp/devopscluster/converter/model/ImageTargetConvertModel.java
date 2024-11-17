@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -20,5 +22,7 @@ public class ImageTargetConvertModel{
      * 名称
      */
     private String name;
+
+    private List<String> vulns;
 
 }

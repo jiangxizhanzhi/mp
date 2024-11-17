@@ -232,6 +232,7 @@ public class ImagesController {
             ImagesByUuidsVO response = new ImagesByUuidsVO();
             response.setName(model.getName());
             response.setUuid(model.getUuid());
+            response.setVulns(model.getVulns());
             return response;
         }).collect(Collectors.toList());
         return  new Result<>(responseList);
