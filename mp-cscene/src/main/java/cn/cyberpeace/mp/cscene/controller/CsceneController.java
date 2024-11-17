@@ -266,4 +266,10 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<ElementLeaksDto> getElementLeaks(@RequestParam("id") String id) {
         return new ServiceResult<>(csceneSpecialService.getElementLeaks(id)).asResult();
     }
+
+    @ApiOperation("获取节点设备id")
+    @GetMapping("/queryImageId")
+    public ServiceResult<String> queryImageId(@RequestParam("element_id") String elementId) {
+        return new ServiceResult<>(csceneSpecialService.queryImageId(elementId)).asResult();
+    }
 }
