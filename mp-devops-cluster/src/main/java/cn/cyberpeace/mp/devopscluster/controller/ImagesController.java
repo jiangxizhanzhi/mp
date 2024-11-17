@@ -188,8 +188,8 @@ public class ImagesController {
     @GetMapping("/search/{uuid}")
     public Result<ImagesByIdVO> findByUuid(@PathVariable("uuid") String uuid) {
         ImageConvertModel model = imagesConverter.findByUuid(uuid);
+        ImagesByIdVO imagesByIdVO = new ImagesByIdVO();
         if (model != null) {
-            ImagesByIdVO imagesByIdVO = new ImagesByIdVO();
             imagesByIdVO.setUuid(model.getUuid());
             imagesByIdVO.setName(model.getName());
             imagesByIdVO.setCategory(model.getMainCategory());
@@ -217,9 +217,8 @@ public class ImagesController {
                 String[] split = model.getVulns().split(",");
                 imagesByIdVO.setVulns(Arrays.asList(split));
             }
-            return new Result<>(imagesByIdVO);
         }
-        return null;
+        return new Result<>(imagesByIdVO);
     }
 
 
