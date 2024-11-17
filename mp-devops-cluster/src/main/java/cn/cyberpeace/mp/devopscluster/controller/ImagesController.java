@@ -188,35 +188,38 @@ public class ImagesController {
     @GetMapping("/search/{uuid}")
     public Result<ImagesByIdVO> findByUuid(@PathVariable("uuid") String uuid) {
         ImageConvertModel model = imagesConverter.findByUuid(uuid);
-        ImagesByIdVO imagesByIdVO = new ImagesByIdVO();
-        imagesByIdVO.setUuid(model.getUuid());
-        imagesByIdVO.setName(model.getName());
-        imagesByIdVO.setCategory(model.getMainCategory());
-        imagesByIdVO.setSecondCategory(model.getSubCategory());
-        imagesByIdVO.setThirdCategory(model.getThirdCategory());
-        imagesByIdVO.setRole(model.getRole());
-        imagesByIdVO.setLogo(model.getLogo());
-        imagesByIdVO.setIsInternal(model.getIsInternal());
-        imagesByIdVO.setIsInit(model.getIsInit());
-        imagesByIdVO.setIsImport(model.getIsImport());
-        ExtVm extVm = model.getExtVm();
-        imagesByIdVO.setAccessProtocolList(Objects.nonNull(extVm) ? extVm.getAccessProtocols() : null);
-        ExtDocker extDocker = model.getExtDocker();
-        if (model.getImageType().equals("container")) {
-            imagesByIdVO.setAccessProtocolList(Objects.nonNull(extDocker) ? extDocker.getAccessProtocols() : null);
+        if (model != null) {
+            ImagesByIdVO imagesByIdVO = new ImagesByIdVO();
+            imagesByIdVO.setUuid(model.getUuid());
+            imagesByIdVO.setName(model.getName());
+            imagesByIdVO.setCategory(model.getMainCategory());
+            imagesByIdVO.setSecondCategory(model.getSubCategory());
+            imagesByIdVO.setThirdCategory(model.getThirdCategory());
+            imagesByIdVO.setRole(model.getRole());
+            imagesByIdVO.setLogo(model.getLogo());
+            imagesByIdVO.setIsInternal(model.getIsInternal());
+            imagesByIdVO.setIsInit(model.getIsInit());
+            imagesByIdVO.setIsImport(model.getIsImport());
+            ExtVm extVm = model.getExtVm();
+            imagesByIdVO.setAccessProtocolList(Objects.nonNull(extVm) ? extVm.getAccessProtocols() : null);
+            ExtDocker extDocker = model.getExtDocker();
+            if (model.getImageType().equals("container")) {
+                imagesByIdVO.setAccessProtocolList(Objects.nonNull(extDocker) ? extDocker.getAccessProtocols() : null);
+            }
+            imagesByIdVO.setImageType(model.getImageType());
+            imagesByIdVO.setDescription(model.getDescription());
+            imagesByIdVO.setExtImageInfo(model.getExtImageInfo());
+            imagesByIdVO.setExtGateway(model.getExtGateway());
+            imagesByIdVO.setExtVm(extVm);
+            imagesByIdVO.setExtSystemInfo(model.getExtSystemInfo());
+            imagesByIdVO.setExtDocker(extDocker);
+            if (model.getVulns() != null && !model.getVulns().equals("")) {
+                String[] split = model.getVulns().split(",");
+                imagesByIdVO.setVulns(Arrays.asList(split));
+            }
+            return new Result<>(imagesByIdVO);
         }
-        imagesByIdVO.setImageType(model.getImageType());
-        imagesByIdVO.setDescription(model.getDescription());
-        imagesByIdVO.setExtImageInfo(model.getExtImageInfo());
-        imagesByIdVO.setExtGateway(model.getExtGateway());
-        imagesByIdVO.setExtVm(extVm);
-        imagesByIdVO.setExtSystemInfo(model.getExtSystemInfo());
-        imagesByIdVO.setExtDocker(extDocker);
-        if (model.getVulns() != null && !model.getVulns().equals("")) {
-            String[] split = model.getVulns().split(",");
-            imagesByIdVO.setVulns(Arrays.asList(split));
-        }
-        return new Result<>(imagesByIdVO);
+        return null;
     }
 
 

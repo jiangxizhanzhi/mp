@@ -174,7 +174,10 @@ public class ImagesConverter implements BaseConverter{
      */
     public ImageConvertModel findByUuid(String id) {
         Device device = cpDeviceService.findByUuid(id);
-        return wrapperImageConvertModel(device);
+        if (device != null) {
+            return wrapperImageConvertModel(device);
+        }
+        return null;
     }
 
     /**

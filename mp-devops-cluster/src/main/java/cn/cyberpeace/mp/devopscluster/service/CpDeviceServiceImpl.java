@@ -184,7 +184,10 @@ public class CpDeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, Devic
     public Device findByUuid(String uuid) {
         HumanCondition cond = new HumanCondition().filterEqual(DeviceModel::getUuid, uuid);
         DeviceModel model = getModelMapper().first(cond);
-        return convert(model);
+        if (model != null) {
+            return convert(model);
+        }
+        return null;
     }
 
     @Override
