@@ -100,11 +100,11 @@ public class CsceneSpecialService {
     @Autowired
     private CloudPluginSceneConfigElementMapper cloudPluginSceneConfigElementMapper;
 
-    public String queryImageId(String elementId) {
+    public CloudPluginSceneConfigElementModel queryImageId(String elementId) {
         HumanCondition cloudCondition = new HumanCondition().filterEqual(CloudPluginSceneConfigElementModel::getSceneElement, elementId);
         List<CloudPluginSceneConfigElementModel> elementModel = cloudPluginSceneConfigElementMapper.list(cloudCondition);
         if (elementModel != null && elementModel.size() != 0) {
-            return elementModel.get(0).getImageUuid();
+            return elementModel.get(0);
         }
         return null;
     }

@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -268,8 +269,9 @@ public class CsceneController implements BaseModelListControllerBase {
     }
 
     @ApiOperation("获取节点设备id")
+    @ApiImplicitParam(name = "element_id", value = "节点id", dataTypeClass = String.class)
     @GetMapping("/queryImageId")
-    public ServiceResult<String> queryImageId(@RequestParam("element_id") String elementId) {
+    public ServiceResult<CloudPluginSceneConfigElementModel> queryImageId(@RequestParam("element_id") String elementId) {
         return new ServiceResult<>(csceneSpecialService.queryImageId(elementId)).asResult();
     }
 }
