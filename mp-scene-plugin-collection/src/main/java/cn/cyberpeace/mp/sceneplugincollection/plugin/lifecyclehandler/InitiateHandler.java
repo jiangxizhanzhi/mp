@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -39,9 +40,11 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.sceneplugincollection.config.WazuhModifyEventConfig.ProbeType.FILE;
@@ -150,6 +153,32 @@ public class InitiateHandler extends HandlerCommon {
                         return;
                     }
                     for (var network : cloudElement.getDeriveNetworks()) {
+                        // 网络是外部网络 则不需要采集路由
+                        if (Boolean.TRUE.equals(network.getNetwork().getExternal())) {
+                            return;
+                        }
+                        // 该网络连接的节点，如果存在多网卡的虚拟机或容器 则不能加采集路由
+                        boolean add = true;
+                        Set<String> connectedNodeIds = new HashSet<>();
+                        if (CollectionUtils.isNotEmpty(network.getFromPorts())) {
+                            connectedNodeIds.add(network.getFromPorts().get(0).getElement().getId());
+                        }
+                        if (CollectionUtils.isNotEmpty(network.getToPorts())) {
+                            for (var toPort : network.getToPorts()) {
+                                connectedNodeIds.add(toPort.getElement().getId());
+                            }
+                        }
+                        for (String connectedNodeId : connectedNodeIds) {
+                            var cloudNode = cloudPluginHandler.getElement(connectedNodeId);
+                            var netSize = cloudNode.getAccessNetworks().size() + cloudNode.getDeriveNetworks().size();
+                            if (netSize > 1) {
+                                add = false;
+                            }
+                        }
+
+                        if (!add) {
+                            continue;
+                        }
 
                         //当连接两端只有virtual machine router, 不需要采集路由
                         boolean currentNodeIsVirtualMachineRouter = ElementTypeUtils.isVirtualRouter(cloudElement);
