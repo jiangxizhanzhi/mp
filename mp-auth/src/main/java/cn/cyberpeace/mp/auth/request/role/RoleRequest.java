@@ -11,5 +11,13 @@ public class RoleRequest extends RoleModel {
 
     @ApiModelProperty(value = "权限id集合")
     List<String> targetIds;
+    /**
+     * 关联靶场名称
+     */
+    private String bcName;
+    /**
+     * 关联靶场id
+     */
+    private String bcIds;
 
 }

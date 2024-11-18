@@ -47,15 +47,21 @@ public class RoleModel extends BaseModel {
     @DefaultInt(1)
     private Integer visible;
 
+    private String bcIds;
+
+    private String bcName;
+
 
     @Builder
-    public RoleModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String org, String identifier, String name, String description) {
+    public RoleModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String org, String identifier, String name, String description, String bcIds, String bcName) {
         super(id, createTime, updateTime);
         this.tenant = tenant;
         this.org = org;
         this.identifier = identifier;
         this.name = name;
         this.description = description;
+        this.bcIds = bcIds;
+        this.bcName = bcName;
     }
 
     @Override

@@ -9,9 +9,11 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.PersonnelManagementMapper;
 import cn.cyberpeace.mp.auth.repository.TeamMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
+import cn.cyberpeace.mp.auth.request.team.TeamIdAndUserInfo;
 import cn.cyberpeace.mp.auth.request.team.TeamPageRequest;
 import cn.cyberpeace.mp.auth.request.team.TeamRequest;
 import cn.cyberpeace.mp.auth.service.TeamService;
+import cn.cyberpeace.mp.auth.service.TenantUserService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -20,8 +22,13 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +56,9 @@ public class TeamServiceImpl implements TeamService {
 
     @Autowired
     private PersonnelManagementMapper personnelManagementMapper;
+
+    @Autowired
+    private TenantUserService tenantUserService;
 
     /**
      *分页查询
@@ -81,7 +91,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public TeamModel addTeam(TeamRequest teamRequest) {
         if (teamRequest.getName().isEmpty()) {
-            throw new MpRuntimeException(BaseErrorCode.ERROR, "添加战队失败,缺少战队名称");
+            throw new MpRuntimeException( "添加战队失败,缺少战队名称");
         }
         //检查战队名称是否重复
         checkName(teamRequest);
@@ -101,12 +111,12 @@ public class TeamServiceImpl implements TeamService {
         if ((!CollectionUtils.isEmpty(list))&&teamRequest.getId()!=null) {
             for (TeamModel teamModel : list) {
                 if (!teamModel.getId().equals(teamRequest.getId())) {
-                    throw new MpRuntimeException(BaseErrorCode.ERROR,"战队名称重复");
+                    throw new MpRuntimeException("战队名称重复");
                 }
             }
         }
         if ((!CollectionUtils.isEmpty(list))&&teamRequest.getId()==null){
-            throw new MpRuntimeException(BaseErrorCode.ERROR,"战队名称重复");
+            throw new MpRuntimeException("战队名称重复");
         }
     }
 
@@ -118,7 +128,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public TeamModel getTeam(TeamRequest teamRequest) {
         if (StringUtils.isEmpty(teamRequest.getId())) {
-            throw new MpRuntimeException(BaseErrorCode.ERROR, "战队查询缺少id");
+            throw new MpRuntimeException( "战队查询缺少id");
         }
         TeamModel teamModel = teamMapper.get(teamRequest.getId());
         return teamModel;
@@ -288,6 +298,47 @@ public class TeamServiceImpl implements TeamService {
         List<PersonnelManagementModel> personnelManagementModels = new ArrayList<>(usernamePersonnelManagementModelHashMap.values());
         personnelManagementMapper.bulkCreate(personnelManagementModels);
         return ResultCommon.success();
+    }
+
+    /**
+     *
+     * @param list 战队id集合
+     * @return
+     */
+    @Override
+    public ServiceResult getTeamList(List<String> list) {
+        //根据队伍id查询该队伍下的人员信息
+        List<TeamIdAndUserInfo> teamIdAndUserInfos = Lists.newArrayList();
+        for (String teamId : list) {
+            TeamIdAndUserInfo teamIdAndUserInfo = new TeamIdAndUserInfo();
+            teamIdAndUserInfo.setTeamId(teamId);
+            HumanCondition humanCondition = new HumanCondition().filterEqual(PersonnelManagementModel::getTeamId, teamId);
+            List<String> userIds = personnelManagementMapper.list(humanCondition).stream().map(PersonnelManagementModel::getUserId).collect(Collectors.toList());
+            teamIdAndUserInfo.getUserBos().addAll(tenantUserService.listByUserIds(userIds));
+            teamIdAndUserInfos.add(teamIdAndUserInfo);
+        }
+
+        return new ServiceResult(teamIdAndUserInfos).asResult();
+    }
+
+    @Override
+    public JSONObject getListTeamInfo(List<String> list) {
+        HumanCondition humanCondition = new HumanCondition().filterIn(TeamModel::getId, list.toArray());
+        List<TeamModel> teamModelList = teamMapper.list(humanCondition);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("teamModelList",teamModelList);
+        return jsonObject;
+    }
+
+    @Override
+    public String getTeamInfoByUserId(String userId) {
+        HumanCondition humanCondition = new HumanCondition();
+        List<PersonnelManagementModel> list = personnelManagementMapper.list(humanCondition);
+        Map<String, String> map = list.stream().collect(Collectors.toMap(PersonnelManagementModel::getUserId, PersonnelManagementModel::getTeamId));
+        if (map.containsKey(userId)) {
+            return map.get(userId);
+        }
+        throw new RuntimeException("该人员没有参加战队");
     }
 
     private List<String> checkUserNameExist(List<String> userNameList) {

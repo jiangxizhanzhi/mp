@@ -45,7 +45,6 @@ public class TeamController {
     @ApiOperation(value = "获取战队信息", notes = "")
     @GetMapping("/get")
     public ServiceResult<TeamModel> getPageTeam(TeamRequest teamRequest) {
-
         return new ServiceResult<>(teamService.getTeam(teamRequest)).asResult();
     }
 
@@ -63,6 +62,26 @@ public class TeamController {
 
         return new ServiceResult<>(teamService.patchTeam(teamRequest)).asResult();
     }
+    @ApiOperation(value = "获取多個战队以及成员信息", notes = "")
+    @PostMapping("/get/list")
+    public ServiceResult getPageTeam(@RequestBody List<String> list) {
+
+        return new ServiceResult(teamService.getTeamList(list)).asResult();
+    }
+
+    @ApiOperation(value = "获取多個战队以及成员信息", notes = "")
+    @PostMapping("/get/info")
+    public ServiceResult getListTeamInfo(@RequestBody List<String> list) {
+
+        return new ServiceResult(teamService.getListTeamInfo(list)).asResult();
+    }
+    @ApiOperation(value = "通过id获取是否在该战队里", notes = "")
+    @PostMapping("/get/user")
+    public ServiceResult getListTeamInfo(@RequestBody String userId) {
+
+        return new ServiceResult(teamService.getTeamInfoByUserId(userId)).asResult();
+    }
+
 
     @ApiOperation(value = "删除战队", notes = "")
     @DeleteMapping("/delete")

@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.request.team.TeamPageRequest;
 import cn.cyberpeace.mp.auth.request.team.TeamRequest;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -30,4 +31,10 @@ public interface TeamService  {
     void exportPersonnelTemplate(HttpServletResponse response);
 
     ServiceResult<String> importPersonnelTemplate(MultipartFile file);
+
+    ServiceResult getTeamList(List<String> list);
+
+    JSONObject getListTeamInfo(List<String> list);
+
+    String getTeamInfoByUserId(String userId);
 }
