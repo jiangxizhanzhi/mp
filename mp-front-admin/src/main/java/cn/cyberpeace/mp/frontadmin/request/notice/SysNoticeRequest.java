@@ -37,7 +37,7 @@ public class SysNoticeRequest {
     private List<String> tags;
 
     // 1:系统  2:课程  3:练习  4:考试
-    @ApiModelProperty(value = "1:系统  2:课程  3:练习  4:考试")
+    @ApiModelProperty(value = "1:系统  2:课程  3:练习  4:考试  5:演训")
     private Integer type;
 
     @ApiModelProperty(value = "是否公开，对所有人可见  0:否 1:是 默认是0  (注意，如果传了1，则后台会忽略roleIds的内容)")
@@ -51,5 +51,8 @@ public class SysNoticeRequest {
 
     @ApiModelProperty(value = "用户id列表")
     private List<String> userIds;
+
+    //判断类型（是用户还是战队）
+    private String category;
 
 }
