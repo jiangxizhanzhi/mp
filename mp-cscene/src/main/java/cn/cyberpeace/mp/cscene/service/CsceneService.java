@@ -496,8 +496,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             handlerEnableRate(csceneBO);
             var csceneHandler = new CsceneHandler(csceneBO, context);
             // 以前没有 cscene.name , 目前都和 scene.name 保持一致
-            String sceneName = getSceneName(csceneBO.getSceneConfig());
-            csceneBO.setName(sceneName == null ? StringUtils.EMPTY : sceneName);
+            csceneBO.getSceneConfig().getTopology().getScene().setName(csceneBO.getName());
             csceneHandler.save();
             return new ServiceResult<>(csceneHandler.toData());
         }

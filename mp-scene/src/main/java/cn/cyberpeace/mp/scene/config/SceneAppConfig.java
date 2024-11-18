@@ -43,15 +43,12 @@ public class SceneAppConfig {
     private String metadataFileServer;
 
     //公有云
-    @Value("${mp.scene.metadata_public_file_server:http://20.205.18.81/file}")
     private String metadataPublicFileServer;
 
     //私有云
-    @Value("${mp.scene.metadata_private_file_server:http://169.254.169.254/file}")
     private String metadataPrivateFileServer;
 
     //混合云
-    @Value("${mp.scene.metadata_mix_file_server:http://169.254.169.254/file}")
     private String metadataMixFileServer;
 
     @Value("${mp.scene.windows_help_installer_dir:}")
