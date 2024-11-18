@@ -210,7 +210,7 @@ public class InitiateHandler extends HandlerCommon {
                         hostRoute.setDestination(externalNetCidr);
                         hostRoute.setNexthop(ip);
                         hostRoutes.add(hostRoute);
-                        network.getNetwork().setHostRoutes(hostRoutes);
+//                        network.getNetwork().setHostRoutes(hostRoutes);
 
                         var routerPort = new CollectionPluginSceneProbeRouterPortModel();
                         routerPort.setScene(getPluginHandler().getSrcScene().getEid());
