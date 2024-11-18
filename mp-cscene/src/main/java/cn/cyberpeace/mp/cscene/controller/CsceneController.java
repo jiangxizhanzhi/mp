@@ -53,8 +53,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.io.InputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -666,6 +667,60 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<Boolean> saveAlertRule(@RequestBody List<AlertRuleModel> alertRuleModels) {
         alertRuleService.saveAlertRule(alertRuleModels);
         return new ServiceResult<>(true).asResult();
+    }
+
+    @ApiOperation("导出指定id场景模板（分层）")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
+    })
+    @GetMapping(value = "/export_file", params = "id")
+    public void exportFile(@RequestParam String id, HttpServletResponse response) {
+        var csceneBO = modelService.export(id, null).getSource();
+        csceneBO.setRoles(new ArrayList<>());
+        File file;
+        var res = csceneBO.getSceneConfig();
+        if (Objects.nonNull(res.getTopology()) && Objects.nonNull(res.getTopology().getScene()) &&
+                StringUtils.isNotEmpty(res.getTopology().getScene().getName())) {
+            file = new File(res.getTopology().getScene().getName());
+        } else {
+            file = new File(id);
+        }
+
+        InputStream fis = null;
+        OutputStream outputStream = null;
+        if (!file.exists()) {
+            try {
+                String filename = file.getName();
+                file.createNewFile();
+                FileWriter fileWriter = new FileWriter(file);
+                fileWriter.write(JsonCommon.snakeStringify(csceneBO));
+                fileWriter.close();
+
+                FileInputStream fileInputStream = new FileInputStream(file);
+                fis = new BufferedInputStream(fileInputStream);
+                byte[] buffer = new byte[fis.available()];
+                fis.read(buffer);
+
+                response.reset();
+                response.setCharacterEncoding("UTF-8");
+                response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("scene.json", StandardCharsets.UTF_8));
+                response.addHeader("Content-Length", "" + file.length());
+                outputStream = new BufferedOutputStream(response.getOutputStream());
+                response.setContentType("application/octet-stream");
+                outputStream.write(buffer);
+                outputStream.flush();
+            } catch (Exception e) {
+                log.error("create file error", e);
+            } finally {
+                try {
+                    outputStream.close();
+                    fis.close();
+                    file.delete();
+                } catch (Exception e) {
+
+                }
+            }
+        }
     }
 
     private CsceneBO getByAreaId(String sceneId, String areaId) {
