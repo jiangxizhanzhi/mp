@@ -795,7 +795,7 @@ public class ScenePluginCloudSceneService {
             builder.configPassword(password);
             builder.configUsername(username);
             SshClient sshClient = builder.build();
-            var s = sshClient.execReturn(command, 5000L);
+            var s = sshClient.execReturn(command, 100000L);
             ElementCommandExecBO execRes = new ElementCommandExecBO();
             execRes.setOutput(s);
             execRes.setStatus(true);
