@@ -2491,7 +2491,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
      * @return
      */
     public ServiceResult<Boolean> elementRestartProbes(String id, String nodeId, List<Probe> probeList) {
-        modifyProbes(id, nodeId, probeList, SceneElementSituationProbeModel.ProbeStatus.NOT_INSTALL.getValue(), false, SceneElementSituationProbeModel.ProbeType.UPDATE);
+        modifyProbes(id, nodeId, probeList, SceneElementSituationProbeModel.ProbeStatus.RUNNING.getValue(), false, SceneElementSituationProbeModel.ProbeType.UPDATE);
         return new ServiceResult<>(true);
     }
 
@@ -2549,10 +2549,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         var osType = SystemTypeCommandUtils.getOsType(systemType);
 
         switch (sceneHandler.getScene().getCloudType()) {
-            case 0:
+            case BaseSceneModel.CloudType.DEFAULT:
                 WazuhControlCommon.wazuhControl.controlConfigOld(agentName, osType, controlConfigParam);
                 break;
-            case 1:
+            case BaseSceneModel.CloudType.PUBLIC:
                 PublicWazuhControlCommon.wazuhControl.controlConfigOld(agentName, osType, controlConfigParam);
                 break;
             default:
