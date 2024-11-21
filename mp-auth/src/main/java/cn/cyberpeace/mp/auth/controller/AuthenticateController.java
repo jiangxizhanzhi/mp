@@ -1,11 +1,15 @@
 package cn.cyberpeace.mp.auth.controller;
 
 
+import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.model.TokenModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.repository.TokenMapper;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.impl.ThirdSsoService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -22,6 +26,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -38,10 +45,32 @@ public class AuthenticateController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private ThirdSsoService thirdSsoService;
+
+    @Autowired
+    private TokenMapper tokenMapper;
+
+    @Autowired
+    private AuthConfig authConfig;
+
     @ApiOperation(value = "检查是否是有效token", notes = "")
     @ApiImplicitParam(name = "token", value = "token", dataTypeClass = String.class)
     @GetMapping
-    public ServiceResult<UserModel> authenticate(@RequestParam String token) {
+    public ServiceResult<UserModel> authenticate(HttpServletRequest request, HttpServletResponse response, @RequestParam String token) {
+        if (StringUtils.isBlank(token)) {
+            log.warn("jwt token is blank");
+            throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
+        }
+        TokenModel tokenModel = tokenMapper.getByJwt(token);
+        if (tokenModel != null && !thirdSsoService.tokenCheck(tokenModel.getLoginToken())) {
+            try {
+                response.sendRedirect(String.format("http://%s:%s", authConfig.getThirdIp(), authConfig.getThirdPort()));
+            } catch (IOException e) {
+                log.error("sendRedirect error = ", e);
+                e.printStackTrace();
+            }
+        }
         JwtUtils.UserInfo user = verifyToken(token);
         UserModel userModel = UserUtils.getUser(user.getId());
         UserBo userBo = userService.userModel2UserDtoWithoutOrg(userModel);

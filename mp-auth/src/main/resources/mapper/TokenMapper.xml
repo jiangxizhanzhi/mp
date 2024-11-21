@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.auth.repository.TokenMapper">
+
+    <select id="getByJwt" resultType="cn.cyberpeace.mp.auth.model.TokenModel">
+        select * from mp_token
+        <where>
+            <if test="jwt != null and jwt != ''">
+                jwt = #{jwt}
+            </if>
+        </where>
+    </select>
+
+    <select id="getByLoginToken" resultType="cn.cyberpeace.mp.auth.model.TokenModel">
+        select * from mp_token
+        <where>
+            <if test="loginToken != null and loginToken != ''">
+                login_token = #{loginToken}
+            </if>
+        </where>
+    </select>
+</mapper>

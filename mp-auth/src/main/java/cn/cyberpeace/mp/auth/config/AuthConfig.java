@@ -56,13 +56,19 @@ public class AuthConfig {
     // mq消息过期时间
     private Long mqMsgTimeout;
 
-    private String thirdClientId ;
+    private String mpIp;
 
-    private String thirdClientSecret ;
+    private String thirdIp;
 
-    private String thirdTokenUrl ;
+    private String thirdPort;
+
+    private String thirdClientId;
+
+    private String thirdClientSecret;
+
+    private String thirdTokenUrl;
 
     private String thirdUserInfoUrl;
 
-    private String thirdCheckUrl ;
+    private String thirdCheckUrl;
 }

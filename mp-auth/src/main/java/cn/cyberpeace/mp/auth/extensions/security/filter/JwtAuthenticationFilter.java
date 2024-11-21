@@ -153,7 +153,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     public static void addThirdTokenToResponse(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie("thirdtoken", null);
+        Cookie cookie = new Cookie("third_token", null);
         cookie.setPath("/");
         cookie.setMaxAge(Integer.MAX_VALUE);
         // httponly = false

@@ -2,7 +2,9 @@ package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.extensions.security.filter.JwtAuthenticationFilter;
+import cn.cyberpeace.mp.auth.model.TokenModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.repository.TokenMapper;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
@@ -19,8 +21,13 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
+import static cn.cyberpeace.mp.auth.constant.AuthConstant.ROLE_ADMIN_ID;
+import static cn.cyberpeace.mp.auth.constant.AuthConstant.ROOT_ORG_ID;
 
 @Slf4j
 @Service
@@ -33,65 +40,79 @@ public class ThirdSsoService {
     @Resource
     private UserService userService;
 
+    @Resource
+    private TokenMapper tokenMapper;
 
-    public void loginByToken(String code, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
-        String clientId = "";
-        String clientSecret = "";
-        String getTokenUrl = "http://127.0.0.1:8080/api/v1/sso/token";
-        String getUserInfoUrl = "http://127.0.0.1:8080/api/v1/sso/getuserinfo";
-        try {
-            GetTokenParams getTokenParams = new GetTokenParams();
-            getTokenParams.setCode(code);
-            getTokenParams.setClientId(clientId);
-            getTokenParams.setClientSecret(clientSecret);
-            String params = JsonCommon.snakeStringify(getTokenParams);
-            log.info("query third sso token , url is {} , params is {}", getTokenUrl, params);
-            String result = HttpUtils.sendPost(getTokenUrl, params);
-            log.info("query third sso token , result is {}", result);
+    public String loginByToken(String code, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, String url) {
+        String clientId = authConfig.getThirdClientId();
+        String clientSecret = authConfig.getThirdClientSecret();
+        String getTokenUrl = authConfig.getThirdTokenUrl();
+        String getUserInfoUrl = authConfig.getThirdUserInfoUrl();
+        String getCodeUrl = String.format("http://%s:%s/oauth?client_id=%s&redirect_url=http://%s/api/mp/unauth/third-logon?%s", authConfig.getThirdIp(), authConfig.getThirdPort(), clientId, authConfig.getMpIp(), url);
 
-            ThirdResponse<ThirdToken> tokenResponse = JsonCommon.snakeParse(result, new TypeReference<ThirdResponse<ThirdToken>>() {
-            });
+        if (code == null) {
+            return String.format("redirect:%s", getCodeUrl);
+        } else {
+            try {
+                GetTokenParams getTokenParams = new GetTokenParams();
+                getTokenParams.setCode(code);
+                getTokenParams.setClientId(clientId);
+                getTokenParams.setClientSecret(clientSecret);
+                String params = JsonCommon.snakeStringify(getTokenParams);
+                log.info("query third sso token , url is {} , params is {}", getTokenUrl, params);
+                String result = HttpUtils.sendPost(getTokenUrl, params);
+                log.info("query third sso token , result is {}", result);
 
-            // 查询用户信息
-            var thirdToken = tokenResponse.getData();
-            GetUserinfoParams getUserinfoParams = new GetUserinfoParams();
-            getUserinfoParams.setAccessToken(thirdToken.getAccessToken());
-            getUserinfoParams.setClientId(clientId);
-            params = JsonCommon.snakeStringify(getUserinfoParams);
-            log.info("query user info , url is {} , params is {}", getUserInfoUrl, params);
-            result = HttpUtils.sendPost(getUserInfoUrl, params);
-            log.info("query user info , result is {}", result);
+                ThirdResponse<ThirdToken> tokenResponse = JsonCommon.snakeParse(result, new TypeReference<ThirdResponse<ThirdToken>>() {
+                });
 
-            ThirdResponse<ThirdUserInfo> userResponse = JsonCommon.snakeParse(result, new TypeReference<ThirdResponse<ThirdUserInfo>>() {
-            });
-            var userInfo = userResponse.getData();
-            UserModel userModel = userService.getUserModelById(userInfo.getUserAccount());
-            if (Objects.isNull(userModel)) {
-                // 新增一个用户
-                UserRequest userRequest = new UserRequest();
-                userRequest.setPassword("");
-                userRequest.setAvatar("");
-                userRequest.setIdentifier(userInfo.getUserAccount());
-                userRequest.setDescription("");
-                userRequest.setTokenSecret("");
-                userRequest.setUsername(userInfo.getUserAccount());
-                userRequest.setNickname(userInfo.getUserName());
-                userRequest.setEmail(userInfo.getUserEmail());
-                userRequest.setTenant("default");
-                userService.add(userRequest);
+                // 查询用户信息
+                var thirdToken = tokenResponse.getData();
+                GetUserinfoParams getUserinfoParams = new GetUserinfoParams();
+                getUserinfoParams.setAccessToken(thirdToken.getAccessToken());
+                getUserinfoParams.setClientId(clientId);
+                params = JsonCommon.snakeStringify(getUserinfoParams);
+                log.info("query user info , url is {} , params is {}", getUserInfoUrl, params);
+                result = HttpUtils.sendPost(getUserInfoUrl, params);
+                log.info("query user info , result is {}", result);
+
+                ThirdResponse<ThirdUserInfo> userResponse = JsonCommon.snakeParse(result, new TypeReference<ThirdResponse<ThirdUserInfo>>() {
+                });
+                var userInfo = userResponse.getData();
+                UserModel userModel = userService.getByUserName(userInfo.getUserAccount());
+                if (Objects.isNull(userModel)) {
+                    // 新增一个用户
+                    UserRequest userRequest = new UserRequest();
+                    userRequest.setUsername(userInfo.getUserAccount());
+                    userRequest.setName(userInfo.getUserName());
+                    userRequest.setRoleIds(Collections.singletonList(ROLE_ADMIN_ID));
+                    userRequest.setOrgIds(Collections.singletonList(ROOT_ORG_ID));
+                    userRequest.setPassword("d8165e80c4abed2dcc1dd06df1a8be31");
+                    userModel = userService.add(userRequest, true);
+                }
+                String newJwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userModel.getId(), userModel.getUsername(), userModel.getTokenSecret()));
+                JwtAuthenticationFilter.addJWTCookieToResponse(httpServletResponse, newJwt);
+                JwtAuthenticationFilter.addThirdTokenToResponse(httpServletResponse, thirdToken.getLoginToken());
+
+                TokenModel tokenModel = new TokenModel();
+                tokenModel.setLoginToken(thirdToken.getLoginToken());
+                tokenModel.setAccessToken(thirdToken.getAccessToken());
+                tokenModel.setJwt(newJwt);
+                tokenModel.setUserName(userModel.getUsername());
+                tokenModel.setCreateTime(LocalDateTime.now());
+                log.info("tokeModel:[{}]", tokenModel);
+                tokenMapper.create(tokenModel);
+            } catch (Exception e) {
+                log.error("faild to loginByToken ", e);
+                throw new RuntimeException(e);
             }
-            String newJwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userModel.getId(), userModel.getUsername(), userModel.getTokenSecret()));
-            JwtAuthenticationFilter.addJWTCookieToResponse(httpServletResponse, newJwt);
-            JwtAuthenticationFilter.addThirdTokenToResponse(httpServletResponse, thirdToken.getLoginToken());
-        } catch (Exception e) {
-            log.error("faild to loginByToken ", e);
-            throw new RuntimeException(e);
+            return String.format("redirect:%s", url);
         }
     }
 
-    public boolean tokenCheck(String token) {
-        String clientId = "";
-        String tokenCheckUrl = "http://127.0.0.1:8080/api/v1/sso/logintoken";
+    public Boolean tokenCheck(String token) {
+        String clientId = authConfig.getThirdClientId();
+        String tokenCheckUrl = authConfig.getThirdCheckUrl();
         TokenCheckParams tokenCheckParams = new TokenCheckParams();
         tokenCheckParams.setClientId(clientId);
         tokenCheckParams.setLoginToken(token);
@@ -106,9 +127,13 @@ public class ThirdSsoService {
             log.error("faild to tokenCheck ", e);
             throw new RuntimeException(e);
         }
-        ThirdResponse<TokenCheckResult> response = JsonCommon.snakeParse(result, new TypeReference<ThirdResponse<TokenCheckResult>>() {
+        ThirdResponse<TokenCheckResult> thirdResponse = JsonCommon.snakeParse(result, new TypeReference<ThirdResponse<TokenCheckResult>>() {
         });
-        if (response.getCode() == 0) {
+        if (thirdResponse.getCode() != 0) {
+            TokenModel tokenModel = tokenMapper.getByLoginToken(token);
+            if (tokenModel != null) {
+                tokenMapper.delete(tokenModel.getId());
+            }
             return true;
         } else {
             return false;

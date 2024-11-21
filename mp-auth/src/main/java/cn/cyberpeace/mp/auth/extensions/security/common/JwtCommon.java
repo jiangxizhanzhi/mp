@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
@@ -38,6 +39,19 @@ public class JwtCommon {
             token = token.replace(AuthConstant.JWT_PREFIX, StringUtils.EMPTY);
         }
         return token;
+    }
+
+    public static String getThirdToken(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                //查找名为"third_token"的Cookie
+                if ("third_token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
     }
 
     public static UserModel verifyToken(String token) {

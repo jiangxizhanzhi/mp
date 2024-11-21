@@ -220,6 +220,14 @@ mp:
     #authenticate-exclude-urls: /unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public,/config/single_ip,/file/**
     authenticate-encoder-iterations: ${mp.auth.ext-var.authenticate-encoder-iterations}
     authenticate-encoder-hash-width: 256
+    mp-ip: ${mp.auth.ext-var.mp-ip}
+    third-ip: ${mp.auth.ext-var.third-ip}
+    third-port: ${mp.auth.ext-var.third-port}
+    third-client-id: ${mp.auth.ext-var.third-client-id}
+    third-client-secret: ${mp.auth.ext-var.third-client-secret}
+    third-token-url: http://${mp.auth.ext-var.third-ip}:${mp.auth.ext-var.third-port}/api/v1/sso/token
+    third-user-info-url: http://${mp.auth.ext-var.third-ip}:${mp.auth.ext-var.third-port}/api/v1/sso/getuserinfo
+    third-check-url: http://${mp.auth.ext-var.third-ip}:${mp.auth.ext-var.third-port}/api/v1/sso/logintoken
   # mp-front-admin 模块配置
   frontadmin:
     activ-enable: true

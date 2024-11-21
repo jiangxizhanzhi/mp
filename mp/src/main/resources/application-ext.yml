@@ -89,12 +89,12 @@ mp:
       mq-msg-timeout: ${MP_AUTH_MQ_MSG_TIMEOUT:3600000}
       authenticate-cache-time: ${MP_AUTH_CACHE_TIME:30}
       authenticate-use-individual-token-secret: ${MP_AUTH_USE_INDIVIDUAL_TOKEN_SECRET:true}
-      authenticate-jwt-expires: ${MP_AUTH_JWT_EXPIRES:604800}
-      third-client-id: ${MP_THIRD_CLIENT_ID:123aaa}
-      third-client-secret: ${MP_THIRD_CLIENT_SECRET:123aaa}
-      third-token-url: ${MP_THIRD_TOKEN_URL:http://127.0.0.1:8080/api/v1/sso/token}
-      third-user-info-url: ${MP_THIRD_USER_INFO_URL:http://127.0.0.1:8080/api/v1/sso/getuserinfo}
-      third-check-url: ${MP_THIRD_CHECK_URL:http://127.0.0.1:8080/api/v1/sso/logintoken}
+      authenticate-jwt-expires: ${MP_AUTH_JWT_EXPIRES:604800000000}
+      mp-ip: ${MP_API_IP:10.100.7.1}
+      third-ip: ${THIRD_IP:172.30.102.41}
+      third-port: ${THIRD_PORT:80}
+      third-client-id: ${THIRD_CLIENT_ID:9bed8beb083e6f91}
+      third-client-secret: ${THIRD_CLIENT_SECRET:111}
   frontbusiness:
     ext-var:
       url-ac-filter-enabled: ${MP_FRONTBUSINESS_URLACFILTER_ENABLED:true}
