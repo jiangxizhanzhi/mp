@@ -871,6 +871,19 @@ public class CreateHandler extends HandlerCommon {
             commandModels.forEach(c -> {
                 String file = metadataFileServer + InstallerUtils.FILE_URL_SEPARATOR + c.getFile();
                 String command = c.getCommand();
+                if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
+                    cloudInitCommands.add("curl -o C:\\Users\\Public\\" + c.getBusinessKey() + ".zip " + file);
+                    cloudInitCommands.add("cd C:\\Users\\Public");
+                    cloudInitCommands.add("unzip " + c.getBusinessKey() + ".zip");
+                    cloudInitCommands.add("cd C:\\Users\\Public\\" + c.getBusinessKey());
+                    cloudInitCommands.add(command);
+                } else {
+                    cloudInitCommands.add("curl -o /tmp/" + c.getBusinessKey() + ".zip " + file);
+                    cloudInitCommands.add("cd /tmp");
+                    cloudInitCommands.add("unzip " + c.getBusinessKey() + ".zip");
+                    cloudInitCommands.add("cd /tmp/" + c.getBusinessKey());
+                    cloudInitCommands.add(command);
+                }
             });
         }
 
