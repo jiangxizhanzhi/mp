@@ -190,7 +190,7 @@ logging:
       root: ${ROOT_LEVEL:INFO}
   file:
     ext-var:
-      max-row-length: ${MP_LOGFILE_MAX_ROW_LENGTH:2000}
+      max-row-length: ${MP_LOGFILE_MAX_ROW_LENGTH:20000}
       max-file-size: ${MP_LOGFILE_MAX_FILE_SIZE:300MB}
       max-total-size: ${MP_LOGFILE_MAX_TOTAL_SIZE:650MB}
       max-history: ${MP_LOGFILE_MAX_HISTORY:15}
