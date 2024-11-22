@@ -1,17 +1,22 @@
 package cn.cyberpeace.mp.auth.controller;
 
 
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.config.ThirdSsoConfig;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.model.TokenModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.repository.TokenMapper;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.impl.GuanWangAuthServiceImpl;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -24,6 +29,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -41,10 +48,35 @@ public class AuthenticateController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private TokenMapper tokenMapper;
+
+    @Autowired
+    private ThirdSsoConfig thirdSsoConfig;
+
+    @Autowired
+    private GuanWangAuthServiceImpl thirdSsoService;
+
     @ApiOperation(value = "检查是否是有效token", notes = "")
     @ApiImplicitParam(name = "token", value = "token", dataTypeClass = String.class)
     @GetMapping
-    public ServiceResult<UserModel> authenticate(@RequestParam String token) {
+    public ServiceResult<UserModel> authenticate(@RequestParam String token, HttpServletResponse response) {
+        if (StringUtils.isBlank(token)) {
+            log.warn("jwt token is blank");
+            throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
+        }
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(TokenModel::getJwt, token);
+
+        TokenModel tokenModel = tokenMapper.first(humanCondition);
+        if (tokenModel != null && !thirdSsoService.tokenCheck(tokenModel.getAccessToken())) {
+            try {
+                response.sendRedirect(thirdSsoConfig.getGetCodeUrl());
+            } catch (IOException e) {
+                log.error("sendRedirect error = ", e);
+                throw new RuntimeException(e);
+            }
+        }
         JwtUtils.UserInfo user = verifyToken(token);
         UserModel userModel = UserUtils.getUser(user.getId());
         UserBo userBo = userService.userModel2UserDtoWithoutOrg(userModel);
