@@ -227,15 +227,21 @@ public class RealEquipmentConverter implements BaseConverter{
         convertModel.setSuccess(device.isSuccess());
         convertModel.setMessage(device.getErrorMessage());
         convertModel.setExtEntity(device.getExtEntity());
-        convertModel.getExtEntity().setSshConfig(JSON.parseObject(device.getSshConfig(), SshConfig.class));
-        convertModel.getExtEntity().setTelnetConfig(JSON.parseObject(device.getTelnetConfig(), SshConfig.class));
-        convertModel.getExtEntity().setSyslogConfig(JSON.parseObject(device.getSyslogConfig(), SshConfig.class));
         convertModel.setExtSystemInfo(device.getExtSystemInfo());
         convertModel.setExtGateway(device.getExtGateway());
         convertModel.setExtEntityUsb(device.getExtEntityUsb());
         ExtEntity extEntity = device.getExtEntity();
         if (Objects.nonNull(extEntity)){
             convertModel.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
+            if (Objects.nonNull(device.getSshConfig())) {
+                convertModel.getExtEntity().setSshConfig(JSON.parseObject(device.getSshConfig(), SshConfig.class));
+            }
+            if (Objects.nonNull(device.getTelnetConfig())) {
+                convertModel.getExtEntity().setTelnetConfig(JSON.parseObject(device.getTelnetConfig(), SshConfig.class));
+            }
+            if (Objects.nonNull(device.getSyslogConfig())) {
+                convertModel.getExtEntity().setSyslogConfig(JSON.parseObject(device.getSyslogConfig(), SshConfig.class));
+            }
         }
         return convertModel;
     }
