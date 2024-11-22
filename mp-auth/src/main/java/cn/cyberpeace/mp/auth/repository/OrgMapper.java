@@ -15,5 +15,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 @ModelClass(OrgModel.class)
 public interface OrgMapper extends BaseModelMapper<OrgModel> {
-
+    public void insert(OrgModel model);
 }
