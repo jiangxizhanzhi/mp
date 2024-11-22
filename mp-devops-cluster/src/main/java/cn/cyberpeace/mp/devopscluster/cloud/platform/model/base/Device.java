@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.model.base;
 
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
+import com.alibaba.fastjson.annotation.JSONField;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -215,4 +216,16 @@ public class Device extends BaseCloudPlatformResult {
      * 位置信息
      */
     private String place;
+
+    @ApiModelProperty("ssh配置")
+    @JSONField(name = "ssh_config")
+    private String sshConfig;
+
+    @ApiModelProperty("telnet配置")
+    @JSONField(name = "telnet_config")
+    private String telnetConfig;
+
+    @ApiModelProperty("syslog配置")
+    @JSONField(name = "syslog_config")
+    private String syslogConfig;
 }

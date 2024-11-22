@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntity;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.SshConfig;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.RealEquipmentService;
@@ -28,6 +29,7 @@ import cn.cyberpeace.mp.devopscluster.request.RealEquipmentRequest;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -141,6 +143,9 @@ public class RealEquipmentConverter implements BaseConverter{
         DeviceTargetMapper mapper = BeanCommon.getBean(DeviceTargetMapper.class);
         DeviceTargetPO devPo = mapper.findByUuid(uuid);
         device.setPlace(devPo.getPlace());
+        device.setSshConfig(devPo.getSshConfig());
+        device.setTelnetConfig(devPo.getTelnetConfig());
+        device.setSyslogConfig(devPo.getSyslogConfig());
         return convertDevice(device);
     }
 
@@ -162,6 +167,9 @@ public class RealEquipmentConverter implements BaseConverter{
         }
         result.setPlace(request.getPlace());
         result.setBusinessTag(1);
+        result.setSshConfig(JSON.toJSONString(request.getExtEntity().getSshConfig()));
+        result.setTelnetConfig(JSON.toJSONString(request.getExtEntity().getTelnetConfig()));
+        result.setSyslogConfig(JSON.toJSONString(request.getExtEntity().getSyslogConfig()));
         devopsTargetService.insert(Arrays.asList(result));
         return result;
     }
@@ -177,6 +185,9 @@ public class RealEquipmentConverter implements BaseConverter{
         Device device = convertRequest(request);
         Device result = realEquipmentService.update(request.getUuid(),device);
         result.setPlace(request.getPlace());
+        result.setSshConfig(JSON.toJSONString(request.getExtEntity().getSshConfig()));
+        result.setTelnetConfig(JSON.toJSONString(request.getExtEntity().getTelnetConfig()));
+        result.setSyslogConfig(JSON.toJSONString(request.getExtEntity().getSyslogConfig()));
         devopsTargetService.updateById(result);
         return result;
     }
@@ -216,6 +227,9 @@ public class RealEquipmentConverter implements BaseConverter{
         convertModel.setSuccess(device.isSuccess());
         convertModel.setMessage(device.getErrorMessage());
         convertModel.setExtEntity(device.getExtEntity());
+        convertModel.getExtEntity().setSshConfig(JSON.parseObject(device.getSshConfig(), SshConfig.class));
+        convertModel.getExtEntity().setTelnetConfig(JSON.parseObject(device.getTelnetConfig(), SshConfig.class));
+        convertModel.getExtEntity().setSyslogConfig(JSON.parseObject(device.getSyslogConfig(), SshConfig.class));
         convertModel.setExtSystemInfo(device.getExtSystemInfo());
         convertModel.setExtGateway(device.getExtGateway());
         convertModel.setExtEntityUsb(device.getExtEntityUsb());

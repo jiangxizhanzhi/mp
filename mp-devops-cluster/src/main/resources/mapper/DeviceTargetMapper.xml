@@ -221,7 +221,7 @@
     <sql id="commonTargetColumn">
         i.instance_state,i.pk,i.id,i.uuid,i.name,i.logo,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
         i.in_position,i.reference_status,i.use_status,i.create_time,i.is_init,i.instance_create_user,i.support_export,i.create_user_name,i.init_support,
-        i.business_tag,i.reference_nums,i.use_duration,i.last_create_time,i.place,i.update_time
+        i.business_tag,i.reference_nums,i.use_duration,i.last_create_time,i.place,i.ssh_config,i.telnet_config,i.syslog_config,i.update_time
     </sql>
 
     <select id="totalCount" parameterType="cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO" resultType="java.lang.Integer">
@@ -480,7 +480,7 @@
         create_time, update_time, in_position,use_status,reference_status,parent_system_type,
         system_type,system_architecure, language,image_status,base_image_support,
         init_support,image_source,is_import,is_hide,is_init,support_export,create_user,create_user_name,business_tag,reference_nums,use_duration,
-        place)
+        place, ssh_config, telnet_config, syslog_config)
         VALUES
         <foreach collection="list" item="item" index="index" separator=",">
             (
@@ -493,7 +493,8 @@
             #{item.referenceStatus},#{item.parentSystemType}, #{item.systemType},
             #{item.systemArchitecure},#{item.language}, #{item.imageStatus},
             #{item.baseImageSupport}, #{item.initSupport}, #{item.imageSource}, #{item.isImport},
-            #{item.isHide},#{item.isInit},#{item.supportExport},#{item.createUser},#{item.createUserName},#{item.businessTag},#{item.referenceNums},#{item.useDuration},#{item.place}
+            #{item.isHide},#{item.isInit},#{item.supportExport},#{item.createUser},#{item.createUserName},#{item.businessTag},#{item.referenceNums},#{item.useDuration},#{item.place},
+            #{item.sshConfig},#{item.telnetConfig},#{item.syslogConfig}
             )
         </foreach>
     </insert>

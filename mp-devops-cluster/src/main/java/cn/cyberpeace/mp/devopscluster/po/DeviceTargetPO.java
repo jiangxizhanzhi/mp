@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
+import com.alibaba.fastjson.annotation.JSONField;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -200,5 +201,16 @@ public class DeviceTargetPO extends BaseModel {
     private String place;
 
 
+    @ApiModelProperty("ssh配置")
+    @JSONField(name = "ssh_config")
+    private String sshConfig;
+
+    @ApiModelProperty("telnet配置")
+    @JSONField(name = "telnet_config")
+    private String telnetConfig;
+
+    @ApiModelProperty("syslog配置")
+    @JSONField(name = "syslog_config")
+    private String syslogConfig;
 
 }

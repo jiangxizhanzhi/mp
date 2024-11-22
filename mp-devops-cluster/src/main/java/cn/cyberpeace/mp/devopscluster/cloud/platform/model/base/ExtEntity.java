@@ -43,6 +43,15 @@ public class ExtEntity implements Serializable {
     @ApiModelProperty("SNMP配置")
     private SnmpConfig snmpConfig;
 
+    @ApiModelProperty("ssh协议")
+    private SshConfig sshConfig;
+
+    @ApiModelProperty("telnet协议")
+    private SshConfig telnetConfig;
+
+    @ApiModelProperty("syslog")
+    private SshConfig syslogConfig;
+
     /**
      * SNMP CPU占用率table根节点OID
      */

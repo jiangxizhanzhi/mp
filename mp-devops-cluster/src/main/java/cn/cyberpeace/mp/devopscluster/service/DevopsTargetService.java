@@ -78,6 +78,9 @@ public class DevopsTargetService {
             DeviceTargetPO deviceTargetPO = convertDevice(device);
             deviceTargetPO.setPlace(device.getPlace());
             deviceTargetPO.setIsPublic(oldDeviceTargetPO.getIsPublic());
+            deviceTargetPO.setSshConfig(device.getSshConfig());
+            deviceTargetPO.setTelnetConfig(device.getTelnetConfig());
+            deviceTargetPO.setSyslogConfig(device.getSyslogConfig());
             var ret = deviceTargetMapper.update(deviceTargetPO);
             return ret ? 1 : 0;
         }
@@ -182,6 +185,9 @@ public class DevopsTargetService {
         deviceTargetPO.setUseStatus(StatusEnum.NO);
         deviceTargetPO.setReferenceStatus(NumberUtils.INTEGER_ZERO);
         deviceTargetPO.setPlace(device.getPlace());
+        deviceTargetPO.setSshConfig(device.getSshConfig());
+        deviceTargetPO.setTelnetConfig(device.getTelnetConfig());
+        deviceTargetPO.setSyslogConfig(device.getSyslogConfig());
         return deviceTargetPO;
     }
 
