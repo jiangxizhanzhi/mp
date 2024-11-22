@@ -1813,10 +1813,10 @@ public class ScenePluginCollectionSceneService {
         // 建立本次下载的临时目录 所有的临时文件都放在该目录下
         String dirName = TextUtils.uuid();
         String dir = "/opt/arkime/" + dirName;
+        String docFilePath = dir + "/report.doc"; //word文档
         container.executeCommand(containerId, "mkdir -p " + dir);
         // 创建生成zip文件需要的命令
         List<String> commands = new ArrayList<>();
-
         String[] files = StringUtils.split(result.getOutput(), "\n");
         int step = Math.max(65 / files.length / 3, 1);
         int stepEcho = 0;
@@ -1825,10 +1825,15 @@ public class ScenePluginCollectionSceneService {
             String pcapFile = files[i];
             String newFileName = (i + 1) + ".pcap";
             String newFile = dir + "/" + newFileName;
+            String fileSizeCommand = String.format("stat -c%%s", newFile); // 获取文件大小
             // 复制文件
             commands.add(String.format("cd /opt/arkime/raw && cp %s %s ", pcapFile, newFile));
             stepEcho = stepEcho + step;
             commands.add(String.format("echo %s >> %s", stepEcho, stepFile));
+            commands.add(String.format(
+                    "echo '%s, $(cat %s) KB' >> %s",
+                    newFileName, fileSizeCommand, docFilePath
+            ));
             // 压缩文件
             commands.add(String.format("cd %s && zip %s flow.zip %s ", dir, i == 0 ? "" : "-g", newFileName));
             stepEcho = stepEcho + step * 2;
@@ -1836,6 +1841,7 @@ public class ScenePluginCollectionSceneService {
             // 删除临时文件避免空间占用
             commands.add(String.format("rm -rf %s ", newFileName));
         }
+        commands.add(String.format("zip -r %s/flow.zip %s", dir, docFilePath));
         commands.add(String.format("echo success >> %s", stepFile));
         // 将命令组成脚本文件
         File zipSh = null;

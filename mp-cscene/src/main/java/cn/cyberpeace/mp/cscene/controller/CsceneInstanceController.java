@@ -1,10 +1,12 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
@@ -47,9 +49,16 @@ import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.log.constant.LogConstant;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementNetworkMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
+import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventTypeBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
@@ -909,5 +918,82 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         val boList = intOptions.getSource().stream().filter(s ->list1.contains(s.getCode())).collect(Collectors.toList());
         intOptions.setData(boList);
         return intOptions;
+    }
+
+    /**
+     * getFrameServerBizIp
+     *
+     * @param request
+     * @return
+     */
+    @ApiOperation("获取代理的业务端口ip")
+    @GetMapping("/get_agent_server_biz_ip")
+    public ServiceResult<String> getFrameServerBizIp(CsceneInstanceNodeActionRequest request) {
+        // 参数校验
+        String csceneId = request.getId();
+        String nodeId = request.getNodeId();
+        try {
+            String sceneId = this.getModelService().getSceneId(csceneId);
+            SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
+            CloudScenePluginHandler handler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+            String internalVmId = handler.getScene().getInternalVmId();
+            log.info("get_agent_server_biz_ip , internalVmId : {}", internalVmId);
+            // 未开启场景内部服务 则无须执行后续查询信息的步骤
+            if (StringUtils.isEmpty(internalVmId)) {
+                log.info("failed to get_agent_server_biz_ip , because no internalVmId");
+                return new ServiceResult<>("").asResult();
+            }
+
+            var node = sceneHandler.getElement(nodeId);
+            String host = null;
+            for (var p : node.getPorts()) {
+                if (StringUtils.isNotEmpty(p.getIp())) {
+                    host = p.getIp();
+                    break;
+                }
+            }
+            if (StringUtils.isEmpty(host)) {
+                log.info("failed to get_agent_server_biz_ip , because node {} no ip", nodeId);
+                return new ServiceResult<>("").asResult();
+            }
+            log.info("get_agent_server_biz_ip , host : {}", host);
+            String frameServerBizIp = this.getFrameConfigIp(sceneId, internalVmId, host);
+            return new ServiceResult<>(frameServerBizIp).asResult();
+        } catch (Exception e) {
+            log.info("failed to get_agent_server_biz_ip for node {} , exception is {}", request.getNodeId(), e.getMessage());
+            return new ServiceResult<>("").asResult();
+        }
+    }
+
+    /**
+     * getFrameConfigIp
+     *
+     * @param sceneId
+     * @param frameServerId
+     * @param bizTargetIp
+     * @return
+     */
+    private String getFrameConfigIp(String sceneId, String frameServerId, String bizTargetIp) {
+        // 找到内部服务虚拟机中和目标设备同网段的ip地址
+        var nets = BeanCommon.getBean(CloudPluginSceneElementNetworkMapper.class)
+                .list(new HumanCondition().filterEqual(CloudPluginSceneElementNetworkModel::getScene, sceneId));
+        var vm = new VirtualMachine().get(frameServerId);
+        String cidr = null;
+        for (var net : nets) {
+            if (IpUtils.newIsInCidr(bizTargetIp, net.getCidr())) {
+                cidr = net.getCidr();
+                break;
+            }
+        }
+
+        String frameServerBizIp = null;
+        for (var address : vm.getAddresses()) {
+            String ip = address.getIp();
+            if (IpUtils.newIsInCidr(ip, cidr)) {
+                frameServerBizIp = ip;
+                break;
+            }
+        }
+        return frameServerBizIp;
     }
 }

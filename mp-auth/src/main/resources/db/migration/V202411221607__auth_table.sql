@@ -1,0 +1,1 @@
+UPDATE `mp_auth_target_difference` SET `difference` = 'range-test-self，front_all，tool-magazine，vulnerability-library，tool-exp，tool-shell，ghdb-library，recourse-center-folder' WHERE `pk` = 2;
