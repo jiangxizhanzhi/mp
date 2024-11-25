@@ -103,6 +103,7 @@ import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
+import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhProbeDataModel;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
@@ -618,6 +619,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                                                                                   List<String> nodeIds, CollectionScenePluginHandler pluginHandler,
                                                                                   Map<String, Map<String, String>> nodeId2ProbeNameMap,
                                                                                   HostEventQueryParams queryParams) {
+
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition
+                .filterEqual(ProbeModel::getType, ProbeModel.TYPE_CUSTOM)
+                .filterEqual(ProbeModel::getIsDeleted, 0);
+        List<ProbeModel> list = probeMapper.list(humanCondition);
+        List<String> customProbeIds = list.stream().map(ProbeModel::getId).collect(Collectors.toList());
+        Map<String, String> customProbeMap = list.stream().collect(Collectors.toMap(ProbeModel::getId, ProbeModel::getName));
+
         var startTime = TimeUtils.stringToLocalDateTime(queryParams.getStartTime());
         var endTime = TimeUtils.stringToLocalDateTime(queryParams.getEndTime());
         List<CollectionHostEventBO> result = new ArrayList<>();
@@ -633,12 +643,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             if (nodeIds.contains(element.getId())) {
                 agentNames.add(element.getEid());
             }
-            e.getProbes().forEach(probe -> {
+//            自定义探针采集需要查询历史数据 这里查所有探针id
+
+            probeIds.addAll(customProbeIds);
+            probeId2ProbeName.putAll(customProbeMap);
+            /*e.getProbes().forEach(probe -> {
                 if (!Boolean.TRUE.equals(probe.getCommon()) && !probeIds.contains(probe.getId())) {
                     probeIds.add(probe.getId());
                     probeId2ProbeName.put(probe.getId(), probe.getName());
                 }
-            });
+            });*/
         });
         List<String> queryProbeIds = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(queryParams.getKeyword())) {
