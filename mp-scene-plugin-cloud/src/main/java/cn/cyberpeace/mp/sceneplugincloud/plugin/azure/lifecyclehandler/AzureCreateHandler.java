@@ -341,7 +341,7 @@ public class AzureCreateHandler extends CreateHandler {
             getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CONFIG);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("创建场景失败", e);
 //            云场景启动失败立即删除云资源
             if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
                 resourceService.getManager().resourceGroups().deleteByName(groupName);

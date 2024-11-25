@@ -22,12 +22,14 @@ import com.azure.core.management.Region;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.azure.resourcemanager.network.models.Network;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class AzureVirtualNet {
     private IAzureResourceManager resourceService;
 
@@ -52,10 +54,13 @@ public class AzureVirtualNet {
 
         Integer cloudType = pluginHandler.getSrcScene().getCloudType();
 
+        log.info("AzureVirtualNet create sceneId:{}", pluginHandler.getSrcScene().getEid());
+
         // azure todo 网络名称用节点 eid+序号
         String netName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid(), 0);
-        String networkId;
+        String networkId = null;
         String manageamentSubName = null;
+        log.info("AzureVirtualNet create netName:{} sceneId:{}", netName, pluginHandler.getSrcScene().getEid());
         if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
             //  azure 调用微软云api 创建网络
             Network.DefinitionStages.WithCreate createdNet = azureResourceManager.networks()
@@ -86,7 +91,6 @@ public class AzureVirtualNet {
                         break;
                 }
             }
-
             Network network = createdNet.create();
             networkId = network.id();
         } else {
@@ -110,15 +114,15 @@ public class AzureVirtualNet {
                 Map<String, Object> data = JsonUtils.beanToSnakeMap(dataMap.get("data"));
                 networkId = data.get("network_id").toString();
                 manageamentSubName = data.get("management_subnet_name") != null ? data.get("management_subnet_name").toString() : null;
-            } else {
-                networkId = null;
             }
         }
         cloudElement.setResourceId(networkId);
 
+        log.info("AzureVirtualNet Complete create networkId:{} sceneId", networkId, pluginHandler.getSrcScene().getEid());
 //        创建管理虚拟机用于远程连接
 //        manageamentSubName = null;
         if (null != manageamentSubName) {
+            log.info("AzureVirtualNet create management subnetName:{} sceneId:{}", manageamentSubName, pluginHandler.getSrcScene().getEid());
             if (BaseSceneModel.CloudType.PUBLIC == cloudType) {
                 AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(resourceService);
                 VirtualMachine managementVm = azureVirtualMachine.createManagementVM(cloudType, groupName, "ManagementVM_" + netName, networkId, manageamentSubName);
@@ -158,14 +162,13 @@ public class AzureVirtualNet {
                 if (BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
                     Map<String, Object> data = JsonUtils.beanToSnakeMap(dataMap.get("data"));
                     cloudElement.setManagementIp(data.get("public_ip").toString());
-                } else {
-                    networkId = null;
                 }
             }
-
+            log.info("AzureVirtualNet Complete create management ip:{} sceneId:{}", cloudElement.getManagementIp(), pluginHandler.getSrcScene().getEid());
         }
 
         // azure 回写网络id
+        log.info("AzureVirtualNet Write back network networkId:{} sceneId:{}", networkId, pluginHandler.getSrcScene().getEid());
         String finalNetworkId = networkId;
         cloudElement.getDeriveNetworks().forEach(networkBO -> {
             CloudPluginSceneElementNetworkBO net = networkBO.getNetwork();
@@ -184,7 +187,6 @@ public class AzureVirtualNet {
                 propagateMgmtIpToElements(pluginHandler, cloudElement, null);
             }
 
-
         } else {
             nodeIds = new ArrayList<>();
             nodeIds.add(cloudElement.getSrcElement().getId());
@@ -200,6 +202,7 @@ public class AzureVirtualNet {
             }
             virtualNicsMap.put(nodeId, virtualNics);
         });
+        log.info("AzureVirtualNet Complete write back networkId:{} sceneId:{}", networkId, pluginHandler.getSrcScene().getEid());
 
 
     }
