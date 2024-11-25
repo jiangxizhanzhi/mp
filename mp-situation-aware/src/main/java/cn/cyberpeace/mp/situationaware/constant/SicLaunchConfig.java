@@ -22,4 +22,7 @@ public class SicLaunchConfig {
     // 进程
     public static final String LAUNCH_ID_PROCESSES = "38949dcf3829489d8dd9e0e63cc66541";
 
+    // 文件
+    public static final String LAUNCH_ID_FILE = "909651719b054ebca6a3226f18f27431";
+
 }
