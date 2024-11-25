@@ -109,6 +109,7 @@ public class AzureVirtualNet {
             if (BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
                 Map<String, Object> data = JsonUtils.beanToSnakeMap(dataMap.get("data"));
                 networkId = data.get("network_id").toString();
+                manageamentSubName = data.get("management_subnet_name") != null ? data.get("management_subnet_name").toString() : null;
             } else {
                 networkId = null;
             }
@@ -118,11 +119,11 @@ public class AzureVirtualNet {
 //        创建管理虚拟机用于远程连接
 //        manageamentSubName = null;
         if (null != manageamentSubName) {
-            if(BaseSceneModel.CloudType.PUBLIC==cloudType){
+            if (BaseSceneModel.CloudType.PUBLIC == cloudType) {
                 AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(resourceService);
                 VirtualMachine managementVm = azureVirtualMachine.createManagementVM(cloudType, groupName, "ManagementVM_" + netName, networkId, manageamentSubName);
                 cloudElement.setManagementIp(managementVm.getPrimaryPublicIPAddress().ipAddress());
-            }else {
+            } else {
                 String customImageId = null;
                 switch (cloudType) {
                     case BaseSceneModel.CloudType.PRIVATE:
@@ -156,8 +157,7 @@ public class AzureVirtualNet {
                 Map<String, Object> dataMap = JsonUtils.parseMap(result);
                 if (BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
                     Map<String, Object> data = JsonUtils.beanToSnakeMap(dataMap.get("data"));
-                    networkId = data.get("network_id").toString();
-                    manageamentSubName = data.get("manageament_sub_name").toString();
+                    cloudElement.setManagementIp(data.get("public_ip").toString());
                 } else {
                     networkId = null;
                 }
