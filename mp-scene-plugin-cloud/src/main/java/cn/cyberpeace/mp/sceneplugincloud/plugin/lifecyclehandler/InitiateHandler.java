@@ -155,6 +155,7 @@ public class InitiateHandler extends HandlerCommon {
         // 存在需要重新分配的ip，重新分配ip
         List<CloudPluginSceneElementBO> networkElements = cloudElements.stream()
                 .filter(c -> CollectionUtils.isNotEmpty(c.getDeriveNetworks()))
+                .filter(c -> !BaseCloudPluginSceneElementModel.ImageType.NETWORK_EQUIPMENT.equals(c.getImageType()))
                 .collect(Collectors.toList());
         if (!Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getEnableReallocateIpPorts())) {
             if (CollectionUtils.isNotEmpty(networkElements)) {

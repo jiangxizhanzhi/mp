@@ -148,6 +148,10 @@ public class InitiateHandler extends HandlerCommon {
                         .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
                 List<CollectionPluginSceneProbeRouterPortModel> routerPorts = new ArrayList<>();
                 cloudPluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
+//                    过滤配置ip的边界设备
+                    if (BaseCloudPluginSceneElementModel.ImageType.NETWORK_EQUIPMENT.equals(cloudElement.getImageType())) {
+                        return;
+                    }
                     if (cloudElement.getDeriveNetworks().isEmpty()) {
                         return;
                     }
