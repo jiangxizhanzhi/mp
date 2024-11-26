@@ -1181,7 +1181,10 @@ public class LoadServiceImpl {
     }
 
     public List<MpDevopsLoadSceneLog> getLoadResultByNodeIds(String sceneId, String[] nodeIds, String endTime) {
-        LocalDateTime localDateTime = TimeUtils.stringToLocalDateTime(endTime);
+        LocalDateTime localDateTime = null;
+        if(org.apache.commons.lang3.StringUtils.isNotBlank(endTime)){
+            localDateTime = TimeUtils.stringToLocalDateTime(endTime);
+        }
         CsceneInstanceModel csceneInstanceModel = csceneInstanceService.getModelMapper().get(sceneId);
         String scene = csceneInstanceModel.getScene();
         //节点表
