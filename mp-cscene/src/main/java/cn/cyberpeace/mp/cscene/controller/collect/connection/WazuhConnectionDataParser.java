@@ -26,13 +26,17 @@ public class WazuhConnectionDataParser implements WazuhDataParser<OneRowDataWrap
                 result = JsonCommon.snakeParse(output, new TypeReference<OneRowDataWrapper<WazuhNetworkConnectionModel>>() {
                 });
             }
+            result.getValues().forEach(v -> {
+                v.setAgentName(wazuhFileRoot.getAgent().getName());
+            });
         }
         return result;
     }
 
     @Override
     public boolean handlerData(WazuhFileRoot wazuhFileRoot) {
-        if (wazuhFileRoot.getData() != null && SicLaunchConfig.LAUNCH_ID_NET_CONNS.equals(wazuhFileRoot.getData().getSicLaunchId())) {
+        if (wazuhFileRoot.getData() != null && SicLaunchConfig.LAUNCH_ID_NET_CONNS.equals(wazuhFileRoot.getData()
+                                                                                                  .getSicLaunchId())) {
             return true;
         }
         return false;

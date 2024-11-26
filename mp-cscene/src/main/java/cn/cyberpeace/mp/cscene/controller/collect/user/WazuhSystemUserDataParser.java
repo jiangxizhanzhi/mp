@@ -26,6 +26,9 @@ public class WazuhSystemUserDataParser implements WazuhDataParser<OneRowDataWrap
                 result = JsonCommon.snakeParse(output, new TypeReference<OneRowDataWrapper<WazuhSystemUserModel>>() {
                 });
             }
+            result.getValues().forEach(v ->{
+                v.setAgentName(wazuhFileRoot.getAgent().getName());
+            });
         }
         return result;
     }

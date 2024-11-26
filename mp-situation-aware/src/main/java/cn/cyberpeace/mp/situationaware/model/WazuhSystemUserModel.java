@@ -14,6 +14,10 @@ import java.time.LocalDateTime;
 @Builder
 public class WazuhSystemUserModel {
 
+    private String agentIp;
+
+    private String agentName;
+
     @JSONField(name = "comment")
     private String comment;
 

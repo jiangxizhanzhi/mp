@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.cscene.controller.host;
+package cn.cyberpeace.mp.cscene.controller.collect.host;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -31,6 +31,7 @@ public class WazuhHostInfoDataParser implements WazuhDataParser<WazuhHostStateMo
             });
 
             WazuhHostStateModel wazuhHostStateModel = DataCollectionService.convertHostStateOutput2WazuhModel(hostStateOutput);
+            wazuhHostStateModel.setAgentName(wazuhFileRoot.getAgent().getName());
             return wazuhHostStateModel;
         }
         return new WazuhHostStateModel();

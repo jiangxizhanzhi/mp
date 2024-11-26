@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 @Builder
 public class WazuhNetworkConnectionModel {
 
+    private String agentIp;
+    private String agentName;
+
     @JSONField(name = "pid")
     private String pid;
 
