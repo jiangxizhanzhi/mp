@@ -200,6 +200,12 @@ public class CpDeviceServiceImpl extends BaseModelServiceImpl<DeviceModel, Devic
         return convert(list);
     }
 
+    @Override
+    public List<DeviceModel> queryImage() {
+        HumanCondition cond = new HumanCondition().filterEqual(DeviceModel::getVulns, null);
+        return getModelMapper().list(cond);
+    }
+
     private Device convert(DeviceModel model) {
         Device device = new Device();
         device.setId(Integer.parseInt(model.getId()));

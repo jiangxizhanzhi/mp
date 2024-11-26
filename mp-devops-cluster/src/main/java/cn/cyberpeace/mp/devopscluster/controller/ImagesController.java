@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.DeviceModel;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
@@ -561,6 +562,16 @@ public class ImagesController {
     public ServiceResult<FileResponseData> uploadInjectFile(MultipartFile file, HttpServletRequest request) {
         injectFileUploadService = injectFileUploadService.build(file);
         return injectFileUploadService.upload();
+    }
+
+    /**
+     * 查询没有选择漏洞的设备
+     */
+    @ApiOperation("查询没有选择漏洞的设备")
+    @GetMapping("/queryImage")
+    public Result<List<DeviceModel>> queryImage(){
+        List<DeviceModel> models = imagesConverter.queryImage();
+        return new Result<>(models);
     }
 
     /**

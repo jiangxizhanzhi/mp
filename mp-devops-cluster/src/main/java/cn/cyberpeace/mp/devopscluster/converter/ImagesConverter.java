@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.DeviceModel;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
@@ -527,4 +528,7 @@ public class ImagesConverter implements BaseConverter{
         }
     }
 
+    public List<DeviceModel> queryImage() {
+        return cpDeviceService.queryImage();
+    }
 }
