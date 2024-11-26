@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopscluster.repository;
 
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.DeviceModel;
 import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
@@ -106,4 +107,10 @@ public interface DeviceTargetMapper extends BaseModelMapper<DeviceTargetPO> {
      * @return
      */
     Integer deleteAllTarget();
+
+    List<DeviceModel> queryImage();
+
+    void updateDeviceVulns(@Param("vulns") String vulns, @Param("uuid") String uuid);
+
+    void updateTargetVulns(@Param("vulns") String vulns, @Param("uuid") String uuid);
 }

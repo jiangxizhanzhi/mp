@@ -8,21 +8,14 @@ import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.DeviceModel;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.QuickCreateParam;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ContainerService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ImagesService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ScenariosService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.VmService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.service.*;
 import cn.cyberpeace.mp.devopscluster.converter.bo.DeviceAsyncBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.ImageTargetConvertModel;
+import cn.cyberpeace.mp.devopscluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.dto.InstallerDTO;
@@ -52,7 +45,11 @@ import cn.cyberpeace.mp.devopscluster.service.CpDeviceService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.service.JsonMockService;
+import cn.cyberpeace.mp.devopscluster.utils.HttpClientUtil;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
+import cn.cyberpeace.mp.devopscluster.vo.TypeAllVO;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -94,6 +91,10 @@ public class ImagesConverter implements BaseConverter{
 
     @Autowired
     private final CpDeviceService cpDeviceService;
+
+    private final JsonMockService jsonMockService;
+
+    private static final String TYPE_JSON = "config/type.json";
 
     /**
      * 分页查询镜像列表
@@ -529,6 +530,87 @@ public class ImagesConverter implements BaseConverter{
     }
 
     public List<DeviceModel> queryImage() {
-        return cpDeviceService.queryImage();
+        List<DeviceModel> deviceModels = deviceTargetMapper.queryImage();
+        List<DeviceModel> devices = new ArrayList<>();
+        for (DeviceModel deviceModel : deviceModels) {
+            if (deviceModel.getVulns() == null || deviceModel.getVulns().equals("")) {
+                devices.add(deviceModel);
+            }
+        }
+        String queryVuln = HttpClientUtil.sendGet("http://127.0.0.1/api/ojj/situation/control/queryVuln", null);
+        JSONObject jsonObject = JSON.parseObject(queryVuln);
+        String data = jsonObject.getString("data");
+        List<Vuln> vulnList =  JSON.parseArray(data, Vuln.class);
+        TypeAllVO allResponse = jsonMockService.getTypeAllVO(TYPE_JSON);
+        for (DeviceModel device : devices) {
+            String category = null;
+            String secondCategory = null;
+            String l3Category = null;
+            String type;
+            List<TypeConvertModel> firstTypeList = allResponse.getFirstTypeList();
+            List<TypeConvertModel> secondTypeList = allResponse.getSecondTypeList();
+            List<TypeConvertModel> thirdTypeList = allResponse.getThirdTypeList();
+            for (TypeConvertModel typeConvertModel : firstTypeList) {
+                if (device.getCategory().equals(typeConvertModel.getId())) {
+                    category = typeConvertModel.getName();
+                    break;
+                }
+            }
+            for (TypeConvertModel typeConvertModel : secondTypeList) {
+                if (device.getSecondCategory().equals(typeConvertModel.getId())) {
+                    secondCategory = typeConvertModel.getName();
+                    break;
+                }
+            }
+            for (TypeConvertModel typeConvertModel : thirdTypeList) {
+                if (device.getL3Category().equals(typeConvertModel.getId())) {
+                    l3Category = typeConvertModel.getName();
+                    break;
+                }
+            }
+            if (l3Category != null) {
+                type = category + "/" + secondCategory + "/" + l3Category;
+            } else {
+                type = category + "/" + secondCategory;
+            }
+
+            List<String> vulnIds = new ArrayList<>();
+            for (Vuln vuln : vulnList) {
+                if (type.toLowerCase().contains(vuln.getApplication().toLowerCase())) {
+                    vulnIds.add(vuln.getResourceId());
+                }
+            }
+
+            if (vulnIds != null && vulnIds.size() != 0 && vulnIds.size() <= 5) {
+                String join = String.join(",", vulnIds);
+                // 修改设备信息
+                deviceTargetMapper.updateDeviceVulns(join, device.getUuid());
+                deviceTargetMapper.updateTargetVulns(join, device.getUuid());
+            } else if (vulnIds != null && vulnIds.size() != 0 && vulnIds.size() > 5) {
+                List<String> randoms = createRandoms(vulnIds, 5);
+                String join = String.join(",", randoms);
+                // 修改设备信息
+                deviceTargetMapper.updateDeviceVulns(join, device.getUuid());
+                deviceTargetMapper.updateTargetVulns(join, device.getUuid());
+            }
+        }
+        return null;
+    }
+
+    private List<String> createRandoms(List<String> list, int n) {
+        Map<Integer,String> map = new HashMap();
+        List<String> news = new ArrayList();
+        if (list.size() <= n) {
+            return list;
+        } else {
+            while (map.size() < n) {
+                int random = (int)(Math.random() * list.size());
+                if (!map.containsKey(random)) {
+                    map.put(random, "");
+                    news.add(list.get(random));
+                }
+            }
+            return news;
+        }
     }
 }

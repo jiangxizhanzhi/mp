@@ -476,4 +476,16 @@
             sum(case when t.image_type = 'entity' and t.main_category = 4 then 1 else 0 end ) as '4'
         from mp_devops_target t where t.is_hide = 0
     </select>
+
+    <select id="queryImage" resultType="cn.cyberpeace.mp.devopscluster.cloud.platform.model.DeviceModel">
+        select * from mp_devops_device
+    </select>
+
+    <update id="updateDeviceVulns">
+        update mp_devops_device set vulns = #{vulns} where uuid = #{uuid}
+    </update>
+
+    <update id="updateTargetVulns" >
+        update mp_devops_target set vulns = #{vulns} where uuid = #{uuid}
+    </update>
 </mapper>
