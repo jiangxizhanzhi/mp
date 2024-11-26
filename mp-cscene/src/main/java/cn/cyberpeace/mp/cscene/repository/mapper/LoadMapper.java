@@ -13,6 +13,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -61,7 +62,9 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     List<JSONObject> getLoadResultByLoads(@Param("param") List<String> loadIds);
 
-    List<MpDevopsLoadSceneLog> getLoadResultByLoadIds(@Param("param") List<String> loadIds, @Param("sceneId") String sceneId);
+    List<MpDevopsLoadSceneLog> getLoadResultByLoadIds(@Param("param") List<String> loadIds,
+                                                      @Param("sceneId") String sceneId,
+                                                      @Param("endTime") LocalDateTime endTime);
 
     Integer getLoadListNum(@Param("param") JSONObject requestData);
 

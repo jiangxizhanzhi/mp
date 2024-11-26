@@ -682,6 +682,9 @@
             <if test="sceneId != null and sceneId != ''">
                 and log.scene_id = #{sceneId}
             </if>
+            <if test="endTime != null ">
+                and log.create_time &lt;= #{endTime, jdbcType=TIMESTAMP}
+            </if>
         </where>
     </select>
 

@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonConvertStatusEnum;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonFunctionCodeEnum;
@@ -1179,7 +1180,8 @@ public class LoadServiceImpl {
         return returnList;
     }
 
-    public List<MpDevopsLoadSceneLog> getLoadResultByNodeIds(String sceneId, String[] nodeIds) {
+    public List<MpDevopsLoadSceneLog> getLoadResultByNodeIds(String sceneId, String[] nodeIds, String endTime) {
+        LocalDateTime localDateTime = TimeUtils.stringToLocalDateTime(endTime);
         CsceneInstanceModel csceneInstanceModel = csceneInstanceService.getModelMapper().get(sceneId);
         String scene = csceneInstanceModel.getScene();
         //节点表
@@ -1191,7 +1193,7 @@ public class LoadServiceImpl {
                 .collect(Collectors.toList());
         List<MpDevopsLoadSceneLog> getLoadResultByPks = new ArrayList<>();
         if (loadIds != null && loadIds.size() > 0) {
-            getLoadResultByPks = loadMapper.getLoadResultByLoadIds(loadIds,sceneId);
+            getLoadResultByPks = loadMapper.getLoadResultByLoadIds(loadIds,sceneId,localDateTime);
         }
         if (getLoadResultByPks != null && getLoadResultByPks.size() > 0) {
             String[] codes = {CommonStatusCodeEnum.RESULT_STATUS.getCode(), CommonStatusCodeEnum.ACTION_TYPE.getCode(),
