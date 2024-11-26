@@ -679,6 +679,9 @@
                     #{item}
                 </foreach>
             </if>
+            <if test="sceneId != null and sceneId != ''">
+                and log.scene_id = #{sceneId}
+            </if>
         </where>
     </select>
 

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.service.service;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonConvertStatusEnum;
@@ -11,10 +12,8 @@ import cn.cyberpeace.mp.common.constant.codeEnum.CommonStatusCodeEnum;
 import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
 import cn.cyberpeace.mp.common.service.impl.CommonConfigServiceImpl;
 import cn.cyberpeace.mp.common.service.impl.CommonFileServiceImpl;
-import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
-import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
-import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneUploadLogFile;
-import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSource;
+import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
+import cn.cyberpeace.mp.cscene.model.*;
 import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
 import cn.cyberpeace.mp.cscene.request.load.LoadResultExportRequest;
@@ -24,6 +23,7 @@ import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.websocket.LoadResultWebSocketServer;
 import cn.cyberpeace.mp.cscene.websocket.WebSocketServer;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -1179,9 +1179,11 @@ public class LoadServiceImpl {
         return returnList;
     }
 
-    public List<MpDevopsLoadSceneLog> getLoadResultByNodeIds(String[] nodeIds) {
+    public List<MpDevopsLoadSceneLog> getLoadResultByNodeIds(String sceneId, String[] nodeIds) {
+        CsceneInstanceModel csceneInstanceModel = csceneInstanceService.getModelMapper().get(sceneId);
+        String scene = csceneInstanceModel.getScene();
         //节点表
-        List<CloudPluginSceneElementModel> loadList = csceneInstanceService.getLoadResultByNodeIds(nodeIds);
+        List<CloudPluginSceneElementModel> loadList = csceneInstanceService.getLoadResultByNodeIds(scene, nodeIds);
         List<String> loadIds = loadList.stream()
                 .map(CloudPluginSceneElementModel::getLoadToolId)
                 .filter(Objects::nonNull)
@@ -1189,7 +1191,7 @@ public class LoadServiceImpl {
                 .collect(Collectors.toList());
         List<MpDevopsLoadSceneLog> getLoadResultByPks = new ArrayList<>();
         if (loadIds != null && loadIds.size() > 0) {
-            getLoadResultByPks = loadMapper.getLoadResultByLoadIds(loadIds);
+            getLoadResultByPks = loadMapper.getLoadResultByLoadIds(loadIds,sceneId);
         }
         if (getLoadResultByPks != null && getLoadResultByPks.size() > 0) {
             String[] codes = {CommonStatusCodeEnum.RESULT_STATUS.getCode(), CommonStatusCodeEnum.ACTION_TYPE.getCode(),

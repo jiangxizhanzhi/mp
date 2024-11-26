@@ -959,9 +959,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return list;
     }
 
-    public List<CloudPluginSceneElementModel> getLoadResultByNodeIds(String[] nodeIds) {
+    public List<CloudPluginSceneElementModel> getLoadResultByNodeIds(String sceneId, String[] nodeIds) {
         HumanCondition humanCondition = new HumanCondition()
-                .filterIn(CloudPluginSceneElementModel::getSceneElement, nodeIds);
+                .filterEqual(CloudPluginSceneElementModel::getScene,sceneId);
+        if (nodeIds != null && nodeIds.length > 0){
+            humanCondition.filterIn(CloudPluginSceneElementModel::getSceneElement, nodeIds);
+        }
         List<CloudPluginSceneElementModel> list = cloudPluginSceneElementMapper.list(humanCondition);
         return list;
     }
