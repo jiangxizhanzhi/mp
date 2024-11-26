@@ -1584,7 +1584,7 @@ public class DataCollectionService extends CollectionBaseService {
     }
 
 
-    private WazuhHostStateModel convertHostStateOutput2WazuhModel(HostStateOutput output) {
+    public static WazuhHostStateModel convertHostStateOutput2WazuhModel(HostStateOutput output) {
         WazuhHostStateModel wazuhHostStateModel = new WazuhHostStateModel();
         if (StringUtils.isNotBlank(output.getDiskTotal())) {
             wazuhHostStateModel.setDiskTotal(string2Long(output.getDiskTotal()));
@@ -1692,7 +1692,7 @@ public class DataCollectionService extends CollectionBaseService {
         return model;
     }
 
-    private Long string2Long(String val) {
+    private static Long string2Long(String val) {
         Double doubleVal = Double.valueOf(val);
         Long longVal = BigDecimal.valueOf(doubleVal).longValue();
         return longVal;
