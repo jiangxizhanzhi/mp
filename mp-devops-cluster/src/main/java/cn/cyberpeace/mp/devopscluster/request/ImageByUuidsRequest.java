@@ -22,7 +22,7 @@ public class ImageByUuidsRequest extends BaseRequest {
      * UUID
      */
     @NotEmpty
-    @ApiModelProperty("UUID集合")
+    @ApiModelProperty("UUID集合(镜像id)")
     private List<String> uuids;
 
 }

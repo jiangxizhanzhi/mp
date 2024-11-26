@@ -18,7 +18,7 @@ public class SituationAwareSwagger2Config {
     @Autowired
     private Swagger2Config swagger2Config;
 
-    @Bean
+//    @Bean
     public Docket apiSituationAware() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(swagger2Config.apiInfo())

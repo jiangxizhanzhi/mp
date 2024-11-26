@@ -18,7 +18,7 @@ public class FrontAdminBizSwagger2Config {
     @Autowired
     private Swagger2Config swagger2Config;
 
-    @Bean
+//    @Bean
     public Docket apiFrontAdminBiz() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(swagger2Config.apiInfo())

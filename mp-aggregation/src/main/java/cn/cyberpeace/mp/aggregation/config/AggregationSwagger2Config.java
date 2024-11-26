@@ -21,7 +21,7 @@ public class AggregationSwagger2Config {
     /**
      * @Deprecated
      */
-    @Bean
+//    @Bean
     public Docket apiBase() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(swagger2Config.apiInfo())
@@ -34,7 +34,7 @@ public class AggregationSwagger2Config {
                 .groupName("base");
     }
 
-    @Bean
+//    @Bean
     public Docket apiAggregation() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(swagger2Config.apiInfo())

@@ -25,7 +25,8 @@ public class DevopsClusterSwagger2Config {
                 .enableUrlTemplating(true)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.devopscluster"))
-                .paths(PathSelectors.any())
+                .paths(PathSelectors.regex("/api/mp/devops/cluster/images.*|/api/mp/devops/cluster/real-equipment.*"))
+//                .paths(PathSelectors.any())
                 .build()
                 .globalRequestParameters(Collections.singletonList(AuthSwagger2Config.authParameter))
                 .groupName("devops-cluster");

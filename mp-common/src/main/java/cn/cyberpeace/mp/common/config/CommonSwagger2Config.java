@@ -27,7 +27,7 @@ public class CommonSwagger2Config {
     @Autowired
     private Swagger2Config swagger2Config;
 
-    @Bean
+//    @Bean
     public Docket apiCommon() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(swagger2Config.apiInfo())

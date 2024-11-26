@@ -696,9 +696,8 @@ public class ImagesController {
      * 根据UUID查询
      */
     @ApiOperation("根据UUID查询")
-    @ApiImplicitParam(name = "uuid", value = "镜像ID", dataTypeClass = String.class)
     @PostMapping("/search")
-    public Result<List<ImagesByIdVO>> findByUuids(@RequestBody ImageByUuidsRequest request) {
+    public Result<List<ImagesByIdVO>> findByUuids( @RequestBody ImageByUuidsRequest request) {
         List<ImagesByIdVO> res = new ArrayList<>();
         List<String> uuids = request.getUuids();
         for (String uuid : uuids) {

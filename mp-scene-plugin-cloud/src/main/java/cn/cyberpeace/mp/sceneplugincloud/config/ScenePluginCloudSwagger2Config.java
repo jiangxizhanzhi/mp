@@ -27,7 +27,7 @@ public class ScenePluginCloudSwagger2Config implements ApplicationListener<Appli
     @Autowired
     private Swagger2Config swagger2Config;
 
-    @Bean
+//    @Bean
     public Docket apiScenePluginCloud() {
         Docket docket = new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(swagger2Config.apiInfo())

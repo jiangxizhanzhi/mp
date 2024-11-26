@@ -35,7 +35,8 @@ public class FlowSwagger2Config {
                 .enableUrlTemplating(true)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.flow"))
-                .paths(PathSelectors.any())
+                .paths(PathSelectors.regex("/api/mp/flow/info.*|/api/mp/flow/collection.*"))
+//                .paths(PathSelectors.any())
                 .build()
                 .globalRequestParameters(Collections.singletonList(authParameter))
                 .groupName("flow");
