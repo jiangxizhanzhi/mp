@@ -61,6 +61,8 @@ public class FileEventModel {
     @ApiModelProperty("wazuh AgentName")
     private String agentName;
 
+    private String agentIp;
+
     @ApiModelProperty("rule等级")
     private Integer level;
 

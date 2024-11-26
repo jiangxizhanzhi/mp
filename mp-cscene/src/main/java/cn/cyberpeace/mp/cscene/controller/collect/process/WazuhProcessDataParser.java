@@ -17,7 +17,7 @@ public class WazuhProcessDataParser implements WazuhDataParser<OneRowDataWrapper
         OneRowDataWrapper<WazuhProcessModel> result = new OneRowDataWrapper<WazuhProcessModel>();
         if (wazuhFileRoot.getData() != null && wazuhFileRoot.getData().getSicLaunchOutput() != null) {
             Object processData = wazuhFileRoot.getData().getSicLaunchOutput().get("data");
-            if(processData == null){
+            if (processData == null) {
                 processData = wazuhFileRoot.getData().getSicLaunchOutput().get("raw_output");
             }
             if (processData != null) {
@@ -27,13 +27,17 @@ public class WazuhProcessDataParser implements WazuhDataParser<OneRowDataWrapper
                 result = JsonCommon.snakeParse(output, new TypeReference<OneRowDataWrapper<WazuhProcessModel>>() {
                 });
             }
+            for (WazuhProcessModel v : result.getValues()) {
+                v.setAgentName(wazuhFileRoot.getAgent().getName());
+            }
         }
         return result;
     }
 
     @Override
     public boolean handlerData(WazuhFileRoot wazuhFileRoot) {
-        if (wazuhFileRoot.getData() != null && SicLaunchConfig.LAUNCH_ID_PROCESSES.equals(wazuhFileRoot.getData().getSicLaunchId())) {
+        if (wazuhFileRoot.getData() != null && SicLaunchConfig.LAUNCH_ID_PROCESSES.equals(wazuhFileRoot.getData()
+                                                                                                  .getSicLaunchId())) {
             return true;
         }
         return false;

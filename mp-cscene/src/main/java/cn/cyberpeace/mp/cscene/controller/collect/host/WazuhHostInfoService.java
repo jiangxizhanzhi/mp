@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.cscene.controller.host;
+package cn.cyberpeace.mp.cscene.controller.collect.host;
 
 import cn.cyberpeace.mp.cscene.controller.collect.base.WazuhParsedResult;
 import cn.cyberpeace.mp.cscene.controller.collect.base.WazuhQueryService;

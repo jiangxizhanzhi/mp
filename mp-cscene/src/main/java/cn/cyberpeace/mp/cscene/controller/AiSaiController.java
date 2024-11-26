@@ -6,10 +6,9 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.controller.collect.connection.WazuhConnectionService;
 import cn.cyberpeace.mp.cscene.controller.collect.filemodify.WazuhFileQueryService;
+import cn.cyberpeace.mp.cscene.controller.collect.host.WazuhHostInfoService;
 import cn.cyberpeace.mp.cscene.controller.collect.process.WazuhProcessQueryService;
 import cn.cyberpeace.mp.cscene.controller.collect.user.WazuhSystemUserService;
-import cn.cyberpeace.mp.cscene.controller.host.HostInfo;
-import cn.cyberpeace.mp.cscene.controller.host.WazuhHostInfoService;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
 import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
@@ -92,7 +91,10 @@ public class AiSaiController {
         for (var t : teamInfoList) {
             var es = createClient(t.getEsIp(), t.getEsPort());
             t.setRestClient(es);
-
+            t.setAgentNameIp(new HashMap<>());
+            for (Map.Entry<String, String> entry : t.getIpAgentName().entrySet()) {
+                t.getAgentNameIp().put(entry.getValue(), entry.getKey());
+            }
             this.teamInfoMap.put(t.getTeamId(), t);
         }
     }
@@ -192,7 +194,8 @@ public class AiSaiController {
 
     @GetMapping("/wazuh/process_info")
     public ListObjServiceResult<WazuhProcessModel> pageWazuh(WazuhQueryParams queryParams) {
-        var restClient = teamInfoMap.get(queryParams.getTeamId()).getRestClient();
+        var team = teamInfoMap.get(queryParams.getTeamId());
+        var restClient = team.getRestClient();
         List<String> agentNames = new ArrayList<>();
         var map = teamInfoMap.get(queryParams.getTeamId()).getIpAgentName();
         for (String agentIp : queryParams.getAgentIps()) {
@@ -208,12 +211,18 @@ public class AiSaiController {
 
         var res = new WazuhProcessQueryService(restClient).queryCurrentProcessData(agentNames, start, end, null);
         var result = res.subList(from, from + size >= res.size() ? res.size() : from + size);
+
+        for (WazuhProcessModel r : result) {
+            r.setAgentIp(team.getAgentNameIp().get(r.getAgentName()));
+        }
+
         return new ListObjServiceResult<>(new ListObjResult<>(result, res.size())).asResult();
     }
 
     @GetMapping("/wazuh/system_user")
     public ListObjServiceResult<WazuhSystemUserModel> pageFile(WazuhQueryParams queryParams) {
-        var restClient = teamInfoMap.get(queryParams.getTeamId()).getRestClient();
+        var team = teamInfoMap.get(queryParams.getTeamId());
+        var restClient = team.getRestClient();
         List<String> agentNames = new ArrayList<>();
         var map = teamInfoMap.get(queryParams.getTeamId()).getIpAgentName();
         for (String agentIp : queryParams.getAgentIps()) {
@@ -227,14 +236,17 @@ public class AiSaiController {
         LocalDateTime end = LocalDateTime.now();
         LocalDateTime start = end.minusDays(10);
         var res = new WazuhSystemUserService(restClient).queryCurrentSystemUserData(agentNames, start, end);
-
         var result = res.subList(from, from + size >= res.size() ? res.size() : from + size);
+        for (WazuhSystemUserModel r : result) {
+            r.setAgentIp(team.getAgentNameIp().get(r.getAgentName()));
+        }
         return new ListObjServiceResult<>(new ListObjResult<>(result, res.size())).asResult();
     }
 
     @GetMapping("/wazuh/file_events")
     public ListObjServiceResult<FileEventModel> pageUser(WazuhQueryParams queryParams) {
-        var restClient = teamInfoMap.get(queryParams.getTeamId()).getRestClient();
+        var team = teamInfoMap.get(queryParams.getTeamId());
+        var restClient = team.getRestClient();
 
         List<String> agentNames = new ArrayList<>();
         var map = teamInfoMap.get(queryParams.getTeamId()).getIpAgentName();
@@ -248,13 +260,17 @@ public class AiSaiController {
         int from = (queryParams.getPage() - 1) * size;
         LocalDateTime end = LocalDateTime.now();
         LocalDateTime start = end.minusMinutes(200);
-        var res1 = new WazuhFileQueryService(restClient).queryFileModifyData(from, size, agentNames, start, end, null, null);
-        return new ListObjServiceResult<>(new ListObjResult<>(res1.getData(), (int) res1.getTotal())).asResult();
+        var res = new WazuhFileQueryService(restClient).queryFileModifyData(from, size, agentNames, start, end, null, null);
+        for (FileEventModel r : res.getData()) {
+            r.setAgentIp(team.getAgentNameIp().get(r.getAgentName()));
+        }
+        return new ListObjServiceResult<>(new ListObjResult<>(res.getData(), (int) res.getTotal())).asResult();
     }
 
     @GetMapping("/wazuh/port_info")
     public ListObjServiceResult<WazuhNetworkConnectionModel> pagePorts(WazuhQueryParams queryParams) {
-        var restClient = teamInfoMap.get(queryParams.getTeamId()).getRestClient();
+        var team = teamInfoMap.get(queryParams.getTeamId());
+        var restClient = team.getRestClient();
 
         List<String> agentNames = new ArrayList<>();
         var map = teamInfoMap.get(queryParams.getTeamId()).getIpAgentName();
@@ -271,12 +287,16 @@ public class AiSaiController {
 
         var res = new WazuhConnectionService(restClient).queryCurrentConnectionData(agentNames, start, end);
         var result = res.subList(from, from + size >= res.size() ? res.size() : from + size);
+        for (WazuhNetworkConnectionModel r : result) {
+            r.setAgentIp(team.getAgentNameIp().get(r.getAgentName()));
+        }
         return new ListObjServiceResult<>(new ListObjResult<>(result, res.size())).asResult();
     }
 
     @GetMapping("/wazuh/host_info")
     public ListObjServiceResult<WazuhHostStateModel> hostInfo(WazuhQueryParams queryParams) {
-        var rest = teamInfoMap.get(queryParams.getTeamId()).getRestClient();
+        var team = teamInfoMap.get(queryParams.getTeamId());
+        var rest = team.getRestClient();
 
         LocalDateTime end = LocalDateTime.now();
         LocalDateTime start = end.minusDays(10);
@@ -293,7 +313,9 @@ public class AiSaiController {
         int size = queryParams.getPerPage();
         int from = (queryParams.getPage() - 1) * size;
         var res = new WazuhHostInfoService(rest).getWazuhHostInfoData(agentNames, start, end, from, size);
-
+        for (WazuhHostStateModel r : res.getData()) {
+            r.setAgentIp(team.getAgentNameIp().get(r.getAgentName()));
+        }
         return new ListObjServiceResult<>(new ListObjResult<>(res.getData(), (int) res.getTotal())).asResult();
     }
 
@@ -304,6 +326,7 @@ public class AiSaiController {
         private String teamName;
         private List<String> agentIps;
         private Map<String, String> ipAgentName;
+        private Map<String, String> agentNameIp;
         private String esIp;
         private Integer esPort;
         private RestHighLevelClient restClient;

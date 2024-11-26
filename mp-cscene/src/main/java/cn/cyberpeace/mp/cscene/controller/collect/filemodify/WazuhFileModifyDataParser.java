@@ -30,6 +30,7 @@ public class WazuhFileModifyDataParser implements WazuhDataParser<FileEventModel
         } else {
             this.parsedOneScriptData(wazuhFileRoot, fileEventModel);
         }
+        fileEventModel.setAgentName(wazuhFileRoot.getAgent().getName());
         return fileEventModel;
     }
 

@@ -14,6 +14,10 @@ import java.time.LocalDateTime;
 @Builder
 public class WazuhProcessModel {
 
+    private String agentIp;
+
+    private String agentName;
+
     @JSONField(name = "status")
     private String status;
 

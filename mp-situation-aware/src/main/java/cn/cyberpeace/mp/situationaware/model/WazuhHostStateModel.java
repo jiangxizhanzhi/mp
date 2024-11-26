@@ -88,6 +88,8 @@ public class WazuhHostStateModel {
     @ApiModelProperty("agentName")
     private String agentName;
 
+    private String agentIp;
+
     @ApiModelProperty("macId")
     private List<String> macIds;
 
