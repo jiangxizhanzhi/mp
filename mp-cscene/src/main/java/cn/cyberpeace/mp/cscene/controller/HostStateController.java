@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -7,15 +8,18 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.dto.element.*;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowPcapFileInfo;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
+import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
 import cn.cyberpeace.mp.cscene.util.FileUtil;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
@@ -23,6 +27,8 @@ import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -57,6 +63,9 @@ public class HostStateController {
 
     @Autowired
     private HostStateService hostStateService;
+
+    @Autowired
+    private FlowMonitorService flowMonitorService;
 
     @Autowired
     private SceneElementMonitorService sceneElementMonitorService;
@@ -244,6 +253,30 @@ public class HostStateController {
 
         String fileName = "/home/mp/flow.json";
         exportData(response, objectMapper, fileName, objectMapper.writeValueAsString(hostStates));
+    }
+
+    @ApiOperation(value = "流量采集数据pcap导出")
+    @GetMapping("/export/flow/acquisition/pcap")
+    public ServiceResult<FlowPcapFileInfo> exportFlowAcquisitionPcap(HostStateTrendRequest hostStateTrendRequest) throws JsonProcessingException {
+        FlowPcapFileInfo pcapFileInfo = new FlowPcapFileInfo();
+        String taskId = hostStateTrendRequest.getSceneId();
+        if (FlowPcapExportUtil.initProcess(taskId)) {
+            TaskCommon.executeTask(new Runnable() {
+                @Override
+                public void run() {
+                    flowMonitorService.export(taskId, hostStateTrendRequest.getSceneId());
+                }
+            });
+        }
+        pcapFileInfo.setTaskId(taskId);
+        return new ServiceResult<>(pcapFileInfo).asResult();
+    }
+
+    @ApiOperation(value = "流量导出进度")
+    @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "任务id", dataTypeClass = String.class)})
+    @GetMapping("/export/flow/process")
+    public ServiceResult<FlowPcapExportUtil.FlowPcapExportProcess> process(String id) {
+        return new ServiceResult<>(FlowPcapExportUtil.getProcess(id)).asResult();
     }
 
     @ApiOperation(value = "漏洞数据json导出")
