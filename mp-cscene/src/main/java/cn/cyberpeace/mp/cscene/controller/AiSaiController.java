@@ -64,7 +64,7 @@ import java.util.Map;
 @RestController
 public class AiSaiController {
 
-    private Map<String, TeamInfo> teamInfoMap = new HashMap<>();
+    private Map<String, TeamInfo> teamInfoMap;
 
     public static RestHighLevelClient createClient(String ip, Integer port) {
         // 通过 IP 和端口构建 RestHighLevelClient
@@ -73,8 +73,12 @@ public class AiSaiController {
         ));
     }
 
-    @PostConstruct
-    public void init() throws IOException {
+
+    public void init() {
+        if (this.teamInfoMap != null) {
+            return;
+        }
+        teamInfoMap = new HashMap<>();
         List<TeamInfo> teamInfoList = null;
         File file = new File("/home/team.json");
         if (file.exists()) {
@@ -82,8 +86,18 @@ public class AiSaiController {
             teamInfoList = JsonCommon.snakeParse(content, new TypeReference<List<TeamInfo>>() {
             });
         } else {
-            Resource[] resources = new PathMatchingResourcePatternResolver().getResources(ResourceUtils.CLASSPATH_URL_PREFIX + "team.json");
-            String content = FileUtils.readLine(resources);
+            Resource[] resources = new Resource[0];
+            try {
+                resources = new PathMatchingResourcePatternResolver().getResources(ResourceUtils.CLASSPATH_URL_PREFIX + "team.json");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            String content = null;
+            try {
+                content = FileUtils.readLine(resources);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             teamInfoList = JsonCommon.snakeParse(content, new TypeReference<List<TeamInfo>>() {
             });
         }
@@ -101,6 +115,7 @@ public class AiSaiController {
 
     @GetMapping("/flow/page")
     public ListObjServiceResult<CollectionFlowBO> pageFlow(FlowQueryParams queryParams) {
+        this.init();
         // 创建查询请求
         SearchRequest searchRequest = new SearchRequest("mp*");
 
@@ -194,6 +209,7 @@ public class AiSaiController {
 
     @GetMapping("/wazuh/process_info")
     public ListObjServiceResult<WazuhProcessModel> pageWazuh(WazuhQueryParams queryParams) {
+        this.init();
         var team = teamInfoMap.get(queryParams.getTeamId());
         var restClient = team.getRestClient();
         List<String> agentNames = new ArrayList<>();
@@ -221,6 +237,7 @@ public class AiSaiController {
 
     @GetMapping("/wazuh/system_user")
     public ListObjServiceResult<WazuhSystemUserModel> pageFile(WazuhQueryParams queryParams) {
+        this.init();
         var team = teamInfoMap.get(queryParams.getTeamId());
         var restClient = team.getRestClient();
         List<String> agentNames = new ArrayList<>();
@@ -245,6 +262,7 @@ public class AiSaiController {
 
     @GetMapping("/wazuh/file_events")
     public ListObjServiceResult<FileEventModel> pageUser(WazuhQueryParams queryParams) {
+        this.init();
         var team = teamInfoMap.get(queryParams.getTeamId());
         var restClient = team.getRestClient();
 
@@ -269,6 +287,7 @@ public class AiSaiController {
 
     @GetMapping("/wazuh/port_info")
     public ListObjServiceResult<WazuhNetworkConnectionModel> pagePorts(WazuhQueryParams queryParams) {
+        this.init();
         var team = teamInfoMap.get(queryParams.getTeamId());
         var restClient = team.getRestClient();
 
@@ -295,6 +314,7 @@ public class AiSaiController {
 
     @GetMapping("/wazuh/host_info")
     public ListObjServiceResult<WazuhHostStateModel> hostInfo(WazuhQueryParams queryParams) {
+        this.init();
         var team = teamInfoMap.get(queryParams.getTeamId());
         var rest = team.getRestClient();
 
