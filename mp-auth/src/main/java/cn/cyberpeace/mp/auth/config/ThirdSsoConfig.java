@@ -15,12 +15,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "mp.thirdsso")
 public class ThirdSsoConfig {
-    private String clientId;
-    private String responseType;
-    private String redirectUri;
-    private String pageUrl;
-    private String clientSecret;
-    private String getTokenUrl;
-    private String getUserUrl;
-    private String getCodeUrl;
+    private String clientid;
+    private String clientsecret;
+    private String responsetype;
+    private String redirecturi;
+    private String pageurl;
+    private String gettokenurl;
+    private String getuserurl;
+    private String getcodeurl;
+    private String syncroleurl;
 }

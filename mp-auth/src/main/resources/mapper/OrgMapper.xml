@@ -3,7 +3,7 @@
 <mapper namespace="cn.cyberpeace.mp.auth.repository.OrgMapper">
 
     <insert id="insert" parameterType="cn.cyberpeace.mp.auth.model.OrgModel">
-        INSERT INTO mp_auth_org `(id`, `tenant`, `parent`, `identifier`, `name`, `path`, `description`,
+        INSERT INTO mp_auth_org (`id`, `tenant`, `parent`, `identifier`, `name`, `path`, `description`,
                                        `create_time`, `update_time`)
         VALUES ( #{id}, #{tenant}, #{parent}, #{identifier}, #{name}, NULL, #{description}, #{createTime}, #{updateTime});
     </insert>

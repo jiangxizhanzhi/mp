@@ -1,28 +1,41 @@
 package cn.cyberpeace.mp.auth.controller;
 
+import cn.cyberpeace.mp.auth.bo.excel.ImportUserBo;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
-import cn.cyberpeace.mp.auth.request.user.*;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.request.user.ThirdSyncOrg;
+import cn.cyberpeace.mp.auth.request.user.ThirdSyncUser;
+import cn.cyberpeace.mp.auth.request.user.ThirdSyncUserOrganization;
+import cn.cyberpeace.mp.auth.request.user.ThirdSyncUserType;
+import cn.cyberpeace.mp.auth.request.user.UserRequest;
+import cn.cyberpeace.mp.auth.service.impl.TenantUserServiceImpl;
+import cn.cyberpeace.mp.auth.service.impl.UserServiceImpl;
+import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
-@Controller
-@RequestMapping("/api/mp/unauth")
+@RestController
+@RequestMapping("/unauth")
 public class ThirdSyncController {
 
     @Resource
@@ -32,18 +45,22 @@ public class ThirdSyncController {
     private UserMapper userMapper;
 
     @Resource
-    private UserService userService;
+    private UserServiceImpl userService;
 
+    @Resource
+    private TenantUserServiceImpl tenantUserService;
+
+    @AuthTarget(TargetEnum.NO_AUTH)
     @PostMapping("/api/v1/user")
-    public Res syncUser(@RequestBody ThirdSyncUser user) {
-        log.info("sync user , {}", JsonCommon.stringify(user));
+    public Res syncUser(@RequestBody Map<String, Object> input, @RequestParam(value = "access_token") String accessToken) {
+        ThirdSyncUser user = JsonCommon.parse(JsonCommon.stringify(input), ThirdSyncUser.class);
+        log.info("sync user , {}", JsonCommon.snakeStringify(user));
         UserRequest request = new UserRequest();
         request.setIdentifier(user.getAccountNo());
         request.setMobile(user.getMobile());
         request.setTenant("default");
         request.setUsername(user.getAccountNo());
-        request.setPassword("");
-        request.setTokenSecret("");
+        request.setPassword("d8165e80c4abed2dcc1dd06df1a8be31");
         request.setName(user.getUserName());
         request.setNickname(user.getUserName());
         request.setAvatar("");
@@ -52,8 +69,8 @@ public class ThirdSyncController {
         request.setName(user.getUserUid());
         List<String> orgIds = new ArrayList<>();
         List<String> roleIds = new ArrayList<>();
-        request.setOrgIds(orgIds);
         request.setRoleIds(roleIds);
+        request.setOrgIds(orgIds);
         if (user.getOrgs() != null) {
             for (ThirdSyncUserOrganization r : user.getOrgs()) {
                 orgIds.add(r.getOrgCustomUnique());
@@ -65,33 +82,49 @@ public class ThirdSyncController {
             }
         }
 
-        HumanCondition condition = new HumanCondition().filterEqual(UserModel::getIdentifier, request.getIdentifier());
-        var userModel = userMapper.first(condition);
-        if (userModel == null) {
-            userService.add(request);
+
+        if (user.getActionFlag() == 4) {
+            HumanCondition condition = new HumanCondition().filterEqual(UserModel::getUsername, request.getUsername());
+            var userModel = userMapper.first(condition);
+            if (userModel != null) {
+                userService.disable(userModel.getId());
+            }
         } else {
-            userService.modify(request);
+            HumanCondition condition = new HumanCondition().filterEqual(UserModel::getUsername, request.getUsername());
+            var userModel = userMapper.first(condition);
+            if (userModel == null) {
+                userService.addV2(request);
+            } else {
+                request.setId(userModel.getId());
+                userService.modifyV2(request);
+            }
         }
         return Res.success();
     }
 
+    @AuthTarget(TargetEnum.NO_AUTH)
     @PostMapping("/api/v1/org")
-    public Res syncOrg(@RequestBody ThirdSyncOrg org) {
-        log.info("sync user , {}", JsonCommon.stringify(org));
-
-        OrgModel orgModel = new OrgModel();
-        orgModel.setDescription("");
-        orgModel.setTenant("default");
-        orgModel.setId(org.getOrgCustomUnique());
-        orgModel.setParent(org.getParentOrgId());
-        orgModel.setName(org.getOrgName());
-        orgModel.setIdentifier(org.getOrgCustomUnique());
-
-        boolean existOrg = orgMapper.get(orgModel.getId()) != null;
-        if (existOrg) {
-            orgMapper.update(orgModel);
+    public Res syncOrg(@RequestBody Map<String, Object> input, @RequestParam(value = "access_token") String accessToken) {
+        ThirdSyncOrg org = JsonCommon.parse(JsonCommon.stringify(input), ThirdSyncOrg.class);
+        log.info("sync org , {}", JsonCommon.stringify(org));
+        if (org.getActionFlag() == 4) {
+            orgMapper.delete(org.getOrgCustomUnique());
         } else {
-            orgMapper.insert(orgModel);
+            OrgModel orgModel = new OrgModel();
+            orgModel.setDescription("");
+            orgModel.setTenant("default");
+            orgModel.setId(org.getOrgCustomUnique());
+            orgModel.setParent(org.getParentOrgID());
+            orgModel.setName(org.getOrgName());
+            orgModel.setIdentifier(org.getOrgCustomUnique());
+            orgModel.initDefault();
+
+            boolean existOrg = orgMapper.get(orgModel.getId()) != null;
+            if (existOrg) {
+                orgMapper.update(orgModel);
+            } else {
+                orgMapper.insert(orgModel);
+            }
         }
 
         return Res.success();

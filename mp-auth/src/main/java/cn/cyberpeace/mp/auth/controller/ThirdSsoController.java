@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.auth.controller;
 
-import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.config.ThirdSsoConfig;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
@@ -8,6 +7,8 @@ import cn.cyberpeace.mp.auth.extensions.security.filter.JwtAuthenticationFilter;
 import cn.cyberpeace.mp.auth.model.TokenModel;
 import cn.cyberpeace.mp.auth.repository.TokenMapper;
 import cn.cyberpeace.mp.auth.service.impl.GuanWangAuthServiceImpl;
+import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,26 +35,22 @@ public class ThirdSsoController {
     private TokenMapper tokenMapper;
 
     @Resource
-    private AuthConfig authConfig;
-
-    @Resource
     private ThirdSsoConfig thirdSsoConfig;
 
     @Resource
     private GuanWangAuthServiceImpl thirdLoginService;
 
+    @AuthTarget(value = {TargetEnum.NO_AUTH})
     @GetMapping
     @ApiOperation("赛宁第三方登录接口")
     public String loginAndRedirectToHomePage(@RequestParam("code") String code, @RequestParam(name = "state", required = false) String type, HttpServletRequest request, HttpServletResponse response) {
-
-        String url = thirdSsoConfig.getRedirectUri();
+        String url = thirdSsoConfig.getPageurl();
         // 如果有 jwt 且为有效的登录状态，则直接跳转到url
         if (this.tokenCheck(request, response)) {
             return String.format("redirect:%s", url);
         } else {
             return thirdLoginService.loginByCode(code, request, response);
         }
-
     }
 
     private boolean tokenCheck(HttpServletRequest request, HttpServletResponse response) {
