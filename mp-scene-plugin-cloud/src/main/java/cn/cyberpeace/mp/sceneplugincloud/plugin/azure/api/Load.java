@@ -80,11 +80,14 @@ public class Load {
     public void delete(CloudPluginSceneElementBO cloudElement) {
         HashMap<String, Object> formMap = new HashMap<>();
         formMap.put("instanceId", cloudElement.getLoadResourceInstanceId());
+        String formBody = JSON.toJSONString(formMap);
+        log.info("load instance delete post request body:{}", formBody);
         //删除实例
-        sendPost(loadUrl + LoadUrlConstant.DELETE_INSTANCE_URL, JSON.toJSONString(formMap), "load instance delete post request failed");
+        sendPost(loadUrl + LoadUrlConstant.DELETE_INSTANCE_URL, formBody, "load instance delete post request failed");
         //删除任务
         String resourceId = cloudElement.getResourceId();
         String body = JSON.toJSONString(new String[]{resourceId});
+        log.info("load task delete post request body:{}", body);
 
         HashMap<String, String> headersMap = new HashMap<>();
         headersMap.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
