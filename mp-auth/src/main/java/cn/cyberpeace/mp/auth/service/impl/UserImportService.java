@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -54,7 +55,12 @@ public class UserImportService {
         if (CollectionUtils.isNotEmpty(userModels)) {
 
             for (UserModel m : userModels) {
-                m.setDelayRemindLicenseTime(BeanCommon.getBean(ExpireRemindDateGetter.class).get());
+                try {
+                    m.setDelayRemindLicenseTime(BeanCommon.getBean(ExpireRemindDateGetter.class).get());
+                } catch (Exception e) {
+                    log.info("failed to get ActivationResponse delay data , {}" , e.getMessage());
+                    m.setDelayRemindLicenseTime(LocalDateTime.now().plusMonths(360));
+                }
             }
 
             ServiceResult<Integer> re = userService.bulkCreateWithPasswordPreSet(userModels);

@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.auth.request.role.RoleRequest;
 import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.auth.util.ThirdSsoUtil;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -58,15 +60,22 @@ public class RoleController {
 
 
     @ApiOperation("删除指定id角色")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="id", paramType="path", value="id",dataTypeClass = String.class),
-    })
+    @ApiImplicitParams({@ApiImplicitParam(name = "id", paramType = "path", value = "id", dataTypeClass = String.class),})
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "删除角色", target = OpTargetEnums.ROLE)
     public ServiceResult<Boolean> delete(@PathVariable String id) {
+        var model = roleService.get(id).getData();
+        ThirdSsoUtil.SyncRole syncRole = new ThirdSsoUtil.SyncRole();
+        syncRole.setAppRoleName(model.getName());
+        syncRole.setAppRoleStatus("0");
+        syncRole.setAppRoleRemarks("");
+        syncRole.setAppAppCode(id);
+        syncRole.setAppRoleCode(id);
         opRolePermService.checkByTargetRoleIds(Arrays.asList(id));
-        return roleService.delete(id);
+        var res = roleService.delete(id);
+        ThirdSsoUtil.syncRole(syncRole);
+        return res;
     }
 
     /**
@@ -76,17 +85,32 @@ public class RoleController {
      */
     @AuthTarget(TargetEnum.USER_MANAGE)
     @ApiOperation("批量删除角色")
-    @ApiImplicitParam(name="ids", value="角色ID列表",dataTypeClass = String[].class)
+    @ApiImplicitParam(name = "ids", value = "角色ID列表", dataTypeClass = String[].class)
     @DeleteMapping("/bulk_delete")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
-        return roleService.bulkDelete(ids).asResult();
+        List<ThirdSsoUtil.SyncRole> roles = new ArrayList<>();
+        for (String id : ids) {
+            var model = roleService.get(id).getData();
+            ThirdSsoUtil.SyncRole syncRole = new ThirdSsoUtil.SyncRole();
+            syncRole.setAppRoleName(model.getName());
+            syncRole.setAppRoleStatus("0");
+            syncRole.setAppRoleRemarks("");
+            syncRole.setAppAppCode(id);
+            syncRole.setAppRoleCode(id);
+            roles.add(syncRole);
+        }
+        var res = roleService.bulkDelete(ids).asResult();
+        for (var r : roles) {
+            ThirdSsoUtil.syncRole(r);
+        }
+        return res;
     }
 
     @AuthTarget(TargetEnum.USER_MANAGE)
     @GetMapping("/{id}")
     @ApiOperation(value = "查询指定id角色，附带权限集合", notes = "")
-    @ApiImplicitParam(name="id", value="角色ID",dataTypeClass = String.class)
+    @ApiImplicitParam(name = "id", value = "角色ID", dataTypeClass = String.class)
     public ObjServiceResult get(@PathVariable String id) {
         RoleBo roleBo = roleService.getRoleDto(id);
         return ResultUtils.obj2ObjServiceResult(roleBo);
@@ -94,9 +118,7 @@ public class RoleController {
 
     @ApiOperation("获取指定id角色")
     @AuthTarget(TargetEnum.USER_MANAGE)
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class)
-    })
+    @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class)})
     @GetMapping
     public ObjServiceResult<RoleModel> getByParam(@RequestParam String id) {
         return roleService.get(id).asResult();
@@ -110,6 +132,15 @@ public class RoleController {
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增角色", target = OpTargetEnums.ROLE)
     public ServiceResult<RoleModel> add(@RequestBody @Validated RoleRequest createRequest) {
         RoleModel roleModel = roleService.add(createRequest);
+
+        ThirdSsoUtil.SyncRole syncRole = new ThirdSsoUtil.SyncRole();
+        syncRole.setAppRoleName(roleModel.getName());
+        syncRole.setAppRoleStatus("1");
+        syncRole.setAppRoleRemarks("");
+        syncRole.setAppAppCode(roleModel.getId());
+        syncRole.setAppRoleCode(roleModel.getId());
+        ThirdSsoUtil.syncRole(syncRole);
+
         return ResultCommon.success(roleModel);
     }
 
@@ -121,6 +152,15 @@ public class RoleController {
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "修改角色", target = OpTargetEnums.ROLE)
     public ServiceResult<RoleModel> modify(@RequestBody @Validated RoleRequest modifyRequest) {
         RoleModel roleModel = roleService.modify(modifyRequest);
+
+        ThirdSsoUtil.SyncRole syncRole = new ThirdSsoUtil.SyncRole();
+        syncRole.setAppRoleName(roleModel.getName());
+        syncRole.setAppRoleStatus("1");
+        syncRole.setAppRoleRemarks("");
+        syncRole.setAppAppCode(roleModel.getId());
+        syncRole.setAppRoleCode(roleModel.getId());
+        ThirdSsoUtil.syncRole(syncRole);
+
         return ResultCommon.success(roleModel);
     }
 

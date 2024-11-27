@@ -374,7 +374,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             BeanUtils.copyProperties(org, orgBO);
             orgBO.setPath(this.getOrgPath(org, orgMap));
             OrgBO apply = orgBO;
-            orgBOS.add(apply);
+            orgBOS.add(apply);  
         }
         return orgBOS;
     }
@@ -529,7 +529,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         List<OrgDto> parentOrgs = new ArrayList<>();
         //get the root
         for (OrgDto node : mapTmp.values()) {
-            if(StringUtils.isBlank(node.getParent())) {
+            if(StringUtils.isBlank(node.getParent()) || !mapTmp.containsKey(node.getParent())) {
                 parentOrgs.add(node);
             }
         }

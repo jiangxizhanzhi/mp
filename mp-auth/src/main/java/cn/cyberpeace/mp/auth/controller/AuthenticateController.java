@@ -71,7 +71,7 @@ public class AuthenticateController {
         TokenModel tokenModel = tokenMapper.first(humanCondition);
         if (tokenModel != null && !thirdSsoService.tokenCheck(tokenModel.getAccessToken())) {
             try {
-                response.sendRedirect(thirdSsoConfig.getGetCodeUrl());
+                response.sendRedirect(thirdSsoConfig.getGetcodeurl());
             } catch (IOException e) {
                 log.error("sendRedirect error = ", e);
                 throw new RuntimeException(e);

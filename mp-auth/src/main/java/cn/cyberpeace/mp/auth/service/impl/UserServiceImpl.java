@@ -373,6 +373,21 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userCreated;
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public UserModel addV2(UserRequest createRequest) {
+        UserModel userCreated = upsertUserModel(createRequest);
+        String userId = userCreated.getId();
+        log.info("user create success id:{}", userId);
+
+        // 保存组织-用户关系
+        saveUserOrgRelationV2(createRequest.getOrgIds(), userId);
+        // 保存角色-用户关系
+        saveUserRoleRelationV2(createRequest.getRoleIds(), userId);
+
+        userCacheService.evictAllUserCache();
+        return userCreated;
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserModel modify(UserRequest modifyRequest) {
@@ -389,6 +404,19 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         userCacheService.evictAllUserCache();
         messageSender.send(Collections.singletonList(userId), AuthConstant.MSG_TYPE_USER_MODIFY, AuthConstant.ROUTING_KEY_USER_MODIFY, null);
+        return userModified;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public UserModel modifyV2(UserRequest modifyRequest) {
+
+        UserModel userModified = upsertUserModel(modifyRequest);
+        String userId = userModified.getId();
+
+        saveUserOrgRelationV2(modifyRequest.getOrgIds(), userId);
+        saveUserRoleRelationV2(modifyRequest.getRoleIds(), userId);
+
+        userCacheService.evictAllUserCache();
         return userModified;
     }
 
@@ -481,6 +509,36 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
             });
         }
+    }
+
+    private void saveUserRoleRelationV2(List<String> roleIds, String userId) {
+        // 保存角色-用户关系
+        if (CollectionUtils.isNotEmpty(roleIds)) {
+            // 清除原来所有用户关联的角色
+            userRoleService.deleteByUserId(userId);
+
+            roleIds.forEach(id -> {
+                UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(id).build();
+                var re = userRoleService.create(userRoleModel);
+                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
+            });
+        }
+    }
+
+    private void saveUserOrgRelationV2(List<String> orgIds, String userId) {
+
+        // 保存组织-用户关系
+        if (CollectionUtils.isNotEmpty(orgIds)) {
+            // 清除原来所有用户关联的组织
+            tenantUserService.deleteByUserId(userId);
+
+            orgIds.forEach(id -> {
+                TenantUserModel tenantUserModel = TenantUserModel.builder().user(userId).org(id).build();
+                var re = tenantUserService.create(tenantUserModel);
+                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
+            });
+        }
+
     }
 
     private void saveUserOrgRelation(List<String> orgIds, String userId) {
@@ -787,6 +845,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             String userId = TextUtils.uuid();
             userModel.setId(userId);
+            userModel.initDefault();
             userModels.add(userModel);
 
             // http://10.10.10.10/biz/bug-view-4861.html

@@ -6,11 +6,11 @@ spring:
       max: ${MP_TOMCAT_MAX_POOL_SIZE:200}
   datasource:
     ext-var:
-      db-ip: ${MP_DB_IP:10.4.1.16}
+      db-ip: ${MP_DB_IP:10.100.27.1}
       db-port: ${MP_DB_PORT:3306}
       db-database: ${MP_DB_DATABASE:mp}
       username: ${MP_DB_USERNAME:mp}
-      password: ${MP_DB_PASSWORD:NDQzZTQ4MjIzMTQx}
+      password: ${MP_DB_PASSWORD:YjViMjg0Y2RiZWRh}
       maximum-pool-size: ${MP_DB_MAX_POOL_SIZE:10}
       minimum-idle: ${MP_DB_MIN_POOL_SIZE:10}
 
@@ -172,6 +172,17 @@ mp:
       element-process-save-realtime: ${MP_ELEMENT_PROCESS_SAVE_REALTIME:true}
       dhcp-control: ${MP_SCENE_DHCP_CONTROL:false}
       metadata-file-server: ${MP_METADATA_FILE_SERVER:http://169.254.169.254/file}
+  thirdsso:
+    ext-var:
+      clientid: ${clientid:test}
+      clientsecret: ${clientsecret:test}
+      responsetype: ${responsetype:test}
+      redirecturi: ${redirecturi:http://www.cyberpeacebc.cn/api/mp/unauth/third-login}
+      pageurl: ${pageurl:http://10.100.1.28/page/mg/personal}
+      gettokenurl: ${gettokenurl:http://127.0.0.1:5000/esc-sso/oauth2.0/accessToken}
+      getuserurl: ${getuserurl:http://127.0.0.1:5000/esc-sso/oauth2.0/profile}
+      getcodeurl: ${getcodeurl:}
+
 
 # for kaptcha
 #kaptcha:

@@ -23,6 +23,7 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 
 import static cn.cyberpeace.mp.auth.constant.AuthConstant.ROLE_ADMIN_ID;
@@ -43,7 +44,7 @@ public class GuanWangAuthServiceImpl {
 
     public String loginByCode(String code, HttpServletRequest request, HttpServletResponse response) {
         if (code == null) {
-            String getCodeUrl = thirdSsoConfig.getGetCodeUrl();
+            String getCodeUrl = thirdSsoConfig.getGetcodeurl();
             return String.format("redirect:%s", getCodeUrl);
         } else {
             GetTokenRes getTokenRes = this.getToken(code, request, response);
@@ -71,21 +72,21 @@ public class GuanWangAuthServiceImpl {
             log.info("tokeModel:[{}]", tokenModel);
             tokenMapper.create(tokenModel);
         }
-        return String.format("redirect:%s", thirdSsoConfig.getPageUrl());
+        return String.format("redirect:%s", thirdSsoConfig.getPageurl());
     }
 
     public GetTokenRes getToken(String code, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         GetTokenReq req = new GetTokenReq();
         req.setCode(code);
-        req.setClientId(thirdSsoConfig.getClientId());
+        req.setClientId(thirdSsoConfig.getClientid());
         req.setGrantType("authorization_code");
         req.setOauthTimestamp(String.valueOf(System.currentTimeMillis()));
-        req.setClientSecret(thirdSsoConfig.getClientSecret());
-        req.setRedirectUri(URLEncoder.encode(thirdSsoConfig.getRedirectUri(), Charset.forName("utf-8")));
+        req.setClientSecret(thirdSsoConfig.getClientsecret());
+        req.setRedirectUri(URLEncoder.encode(thirdSsoConfig.getRedirecturi(), Charset.forName("utf-8")));
         String bodyContent = JsonCommon.stringify(req);
         log.info("body content is : {}", bodyContent);
         try {
-            String result = HttpUtils.sendPost(thirdSsoConfig.getGetTokenUrl(), JsonCommon.snakeStringify(req));
+            String result = HttpUtils.sendPost(thirdSsoConfig.getGettokenurl(), JsonCommon.snakeStringify(req));
             log.info("result is : {}", result);
             GetTokenRes res = JsonCommon.snakeParse(result, GetTokenRes.class);
             return res;
@@ -96,11 +97,12 @@ public class GuanWangAuthServiceImpl {
     }
 
     public ThirdUser getThirdUser(String accessToken) {
-        String url = thirdSsoConfig.getGetUserUrl() + "?access_token=" + accessToken;
+        String url = thirdSsoConfig.getGetuserurl() + "?access_token=" + accessToken;
         try {
             var result = HttpUtils.sendGet(url);
             log.info("result is : {}", result);
-            ThirdUser thirdUser = JsonCommon.snakeParse(result, ThirdUser.class);
+            Map<String,Object> data = JsonCommon.parseMap(result);
+            ThirdUser thirdUser = JsonCommon.snakeParse(JsonCommon.snakeStringify(data.get("attributes")), ThirdUser.class);
             return thirdUser;
         } catch (IOException e) {
             log.error("failed to get user ", e);

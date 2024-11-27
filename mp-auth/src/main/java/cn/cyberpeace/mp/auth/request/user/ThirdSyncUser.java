@@ -17,6 +17,7 @@ public class ThirdSyncUser {
     private String email;             // 电子邮箱
     private List<ThirdSyncUserType> userTypes; // 用户类型列表
     private List<ThirdSyncUserOrganization> orgs;  // 用户所属组织列表
+    private List<ThirdSyncRole> roles;
     private String wesisCustomUnique; // WeSIS用户唯一标识
     private String newCustomUnique;   // 二期用户唯一标识
     private String identityType;      // 证件类型

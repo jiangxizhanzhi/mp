@@ -297,6 +297,15 @@ mp:
     metadata-file-server: ${mp.scene.ext-var.metadata-file-server}
   aggregation:
     export-image-timeout: ${mp.aggregation.ext-var.export-image-timeout}
+  thirdsso:
+    clientid: ${mp.thirdsso.ext-var.clientid}
+    clientsecret: ${mp.thirdsso.ext-var.clientsecret}
+    responsetype: ${mp.thirdsso.ext-var.responsetype}
+    redirecturi: ${mp.thirdsso.ext-var.redirecturi}
+    pageurl: ${mp.thirdsso.ext-var.pageurl}
+    gettokenurl: ${mp.thirdsso.ext-var.gettokenurl}
+    getuserurl: ${mp.thirdsso.ext-var.getuserurl}
+    getcodeurl: ${mp.thirdsso.ext-var.getcodeurl}
 
 # for kaptcha
 kaptcha:
