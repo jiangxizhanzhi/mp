@@ -5,9 +5,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
-import cn.cyberpeace.mp.cscene.dto.scene.SceneAttCkTypeCountInfo;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
-import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
@@ -23,10 +21,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description:
@@ -67,6 +67,7 @@ public class HostStateController {
 
     /**
      * 集群状态趋势
+     *
      * @param hostStateTrendRequest
      * @return
      */
@@ -140,6 +141,12 @@ public class HostStateController {
     @GetMapping("/element_netifaces")
     public ListObjServiceResult<Netiface> pageNetifaces(TimeListPageInfoQueryParams listPageInfoQueryParams) {
         return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
+    }
+
+    @ApiOperation(value = "场景网卡top")
+    @GetMapping("/scene_netifaces_top")
+    public ServiceResult<Map> sceneNetifacesTop(@RequestParam(value = "scene_id") String sceneId) {
+        return hostStateService.sceneNetifacesTop(sceneId).asResult();
     }
 
 }

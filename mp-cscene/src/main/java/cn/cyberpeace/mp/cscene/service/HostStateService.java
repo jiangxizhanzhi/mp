@@ -25,6 +25,9 @@ import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttCkTypeCount;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneDataModel;
@@ -36,12 +39,14 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQuer
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
+import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.SystemUser;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.AgentService;
+import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -96,6 +101,9 @@ public class HostStateService {
 
     @Autowired
     private CscenePluginDataRecordService dataRecordService;
+
+    @Autowired
+    private SysCollectorService sysCollectorService;
 
 
     public List<HostState> getHostStatesFromWazuh(String sceneId, String agentName, LocalDateTime startTime, LocalDateTime endTime) {
@@ -627,4 +635,40 @@ public class HostStateService {
         return headers;
     }
 
+    public ServiceResult<Map> sceneNetifacesTop(String sceneId) {
+        String scene = csceneCommonService.translateSceneId(sceneId);
+        SceneHandler sceneHandler = new SceneHandler(scene, null, false, null);
+        Integer cloudType = sceneHandler.getScene().getCloudType();
+        CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
+
+        ArrayList<Netiface> netifaceList = new ArrayList<>();
+
+        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        cloudPlugin.getElementMap()
+                .values()
+                .stream()
+                .filter(element -> BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(element.getImageType()) ||
+                        BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(element.getImageType()))
+                .forEach(element -> {
+                    String eid = element.getSrcElement().getEid();
+                    collectorBaseRequest.setAgentName(eid);
+                    List<Netiface> netifaces = sysCollectorService.pageNetifaces(collectorBaseRequest, cloudType).getSource().getObjs();
+                    String name = element.getSrcElement().getName();
+                    netifaces.forEach(netiface -> netiface.setNodeName(name));
+                    netifaceList.addAll(netifaces);
+                });
+        netifaceList.sort((o1, o2) -> Integer.compare(o2.getRx().getBytes(), o1.getRx().getBytes()));
+
+//        netifaceList.sort(Comparator.comparingInt(o -> o.getRx().getBytes()));
+        List<Netiface> topFiveRx = new ArrayList<>(netifaceList.subList(0, Math.min(5, netifaceList.size())));
+        Map map = new HashMap<>();
+        map.put("topFiveRx", topFiveRx);
+
+        netifaceList.sort((o1, o2) -> Integer.compare(o2.getTx().getBytes(), o1.getTx().getBytes()));
+//        netifaceList.sort(Comparator.comparingInt(o -> o.getTx().getBytes()));
+        List<Netiface> topFiveTx = new ArrayList<>(netifaceList.subList(0, Math.min(5, netifaceList.size())));
+        map.put("topFiveTx", topFiveTx);
+
+        return new ServiceResult<>(map).asResult();
+    }
 }
