@@ -52,64 +52,17 @@ public class AzureDeleteHandler extends DeleteHandler {
     @Override
     public void delete() {
         this.prepareEventProcess();
-
         int stepPercentage = this.getStepPercentage();
-//        List<CloudPluginSceneElementBO> allElements = new ArrayList<>(getPluginHandler().getElementMap().values());
-//
-//        // 再删除终端 终端分虚拟机、容器、和web服务
-//        List<Runnable> deleteTerminalTasks = new ArrayList<>();
-//        // 虚拟机
-//        List<CloudPluginSceneElementBO> filteredVirtualMachineElements = this.filterVirtualMachineElements(allElements);
-//        List<Runnable> deleteVirtualMachineTasks = new ArrayList<>();
-//        for (CloudPluginSceneElementBO element : filteredVirtualMachineElements) {
-//            String nodeId = element.getSrcElement().getId();
-//            AzureVirtualMachineDeleteTask task = new AzureVirtualMachineDeleteTask(resourceService, element);
-//            Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, DeleteHandler.ElementProcess.DELETE_VIRTUAL_MACHINE, task);
-//            deleteVirtualMachineTasks.add(formatTask);
-//        }
-//        deleteTerminalTasks.addAll(deleteVirtualMachineTasks);
-//
-//        // 容器
-//        List<CloudPluginSceneElementBO> filteredContainerElements = this.filterContainerElements(allElements);
-//        List<Runnable> deleteContainerTasks = new ArrayList<>();
-//        for (CloudPluginSceneElementBO element : filteredContainerElements) {
-//            String nodeId = element.getSrcElement().getId();
-//            AzureContainerDeleteTask task = new AzureContainerDeleteTask(resourceService, element);
-//            Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, DeleteHandler.ElementProcess.DELETE_CONTAINER, task);
-//            deleteContainerTasks.add(formatTask);
-//        }
-//        deleteTerminalTasks.addAll(deleteContainerTasks);
-//
-//        // webapp
-//        List<CloudPluginSceneElementBO> filteredWebAppElements = this.filterWebAppElements(allElements);
-//        List<Runnable> deleteWebAppTasks = new ArrayList<>();
-//        for (CloudPluginSceneElementBO element : filteredWebAppElements) {
-//            String nodeId = element.getSrcElement().getId();
-//            AzureWebAppDeleteTask task = new AzureWebAppDeleteTask(resourceService, element);
-//            Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, ElementProcess.DELETE_WEBAPP, task);
-//            deleteWebAppTasks.add(formatTask);
-//        }
-//        deleteTerminalTasks.addAll(deleteWebAppTasks);
-//
-//        if (!deleteTerminalTasks.isEmpty()) {
-//            runSceneProgress(SceneProcess.DELETE_TERMINALS, () -> runTasks(deleteTerminalTasks));
-//        }
-//
-//        // 删除辅助网络
-//        List<CloudPluginSceneElementBO> filteredAuxiliaryNetworkElements = this.filterAuxiliaryNetworkElements(allElements);
-//        List<Runnable> deleteAuxiliaryNetworkTasks = new ArrayList<>();
-//        for (CloudPluginSceneElementBO element : filteredAuxiliaryNetworkElements) {
-//            String nodeId = element.getSrcElement().getId();
-//            AzureVirtualNetDeleteTask task = new AzureVirtualNetDeleteTask(resourceService, element);
-//            Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, DeleteHandler.ElementProcess.DELETE_AUXILIARY_NETWORK, task);
-//            deleteAuxiliaryNetworkTasks.add(formatTask);
-//        }
-//        if (!deleteAuxiliaryNetworkTasks.isEmpty()) {
-//            runSceneProgress(SceneProcess.DELETE_AUXILIARY_NETWORKS, () -> runTasks(deleteAuxiliaryNetworkTasks));
-//        }
+
+        List<CloudPluginSceneElementBO> allElements = new ArrayList<>(getPluginHandler().getElementMap().values());
+        List<CloudPluginSceneElementBO> allFilteredElements = new ArrayList<>();
+        List<CloudPluginSceneElementBO> filteredVirtualMachineElements = this.filterVirtualMachineElements(allElements);
+
+        List<CloudPluginSceneElementBO> filteredContainerElements = this.filterContainerElements(allElements);
+        allFilteredElements.addAll(filteredVirtualMachineElements);
+        allFilteredElements.addAll(filteredContainerElements);
 
 //        删除载荷
-        List<CloudPluginSceneElementBO> allElements = new ArrayList<>(getPluginHandler().getElementMap().values());
         List<CloudPluginSceneElementBO> filteredLoadElements = filterLoadElements(allElements);
         List<Runnable> deleteLoadTasks = new ArrayList<>();
         for (CloudPluginSceneElementBO element : filteredLoadElements) {
@@ -122,33 +75,35 @@ public class AzureDeleteHandler extends DeleteHandler {
             runSceneProgress(SceneProcess.DELETE_TERMINALS, () -> runTasks(deleteLoadTasks));
         }
 
-        // 最后删除资源组 TODO 测试载荷暂时去除
-        String groupName = getPluginHandler().getSourceSceneId();
-        groupName = StringUtils.isNotBlank(groupNamePrefix)?groupNamePrefix +"-"+ groupName:groupName;
+        // 最后删除资源组 空场景或不涉及云靶标的场景不启动资源组
+        if (!allFilteredElements.isEmpty()) {
+            String groupName = getPluginHandler().getSourceSceneId();
+            groupName = StringUtils.isNotBlank(groupNamePrefix) ? groupNamePrefix + "-" + groupName : groupName;
 
-        Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
-        JSONObject jsonObject = new JSONObject();
-        //云类型(1: 微软公有云 2:微软私有云 3:微软混合云)
-        jsonObject.put("cloudType", cloudType);
-        MicrosoftAzureUserModel localAzurer = sceneElementPluginConfigMapper.getLocalAzurer(jsonObject);
-        if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
-            resourceService.getManager().resourceGroups().deleteByName(groupName);
-        } else {
-            String azureManagerUrl = mixAzureManagerUrl;
-            if(cloudType == BaseSceneModel.CloudType.PRIVATE){
-                azureManagerUrl = privateAzureManagerUrl;
-            }
-            String url = azureManagerUrl + "/cloud/delete_group";
-            Map<String, Object> formMap = new HashMap();
-            formMap.put("azureUser", localAzurer);
-            formMap.put("groupName", groupName);
-            //请求头设置
-            HashMap<String, String> headersMap = new HashMap<>();
-            String body = JsonUtils.stringify(formMap);
-            try {
-                HttpUtils.sendHttpPost(url, body, headersMap);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
+            Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
+            JSONObject jsonObject = new JSONObject();
+            //云类型(1: 微软公有云 2:微软私有云 3:微软混合云)
+            jsonObject.put("cloudType", cloudType);
+            MicrosoftAzureUserModel localAzurer = sceneElementPluginConfigMapper.getLocalAzurer(jsonObject);
+            if (cloudType == BaseSceneModel.CloudType.PUBLIC) {
+                resourceService.getManager().resourceGroups().deleteByName(groupName);
+            } else {
+                String azureManagerUrl = mixAzureManagerUrl;
+                if (cloudType == BaseSceneModel.CloudType.PRIVATE) {
+                    azureManagerUrl = privateAzureManagerUrl;
+                }
+                String url = azureManagerUrl + "/cloud/delete_group";
+                Map<String, Object> formMap = new HashMap();
+                formMap.put("azureUser", localAzurer);
+                formMap.put("groupName", groupName);
+                //请求头设置
+                HashMap<String, String> headersMap = new HashMap<>();
+                String body = JsonUtils.stringify(formMap);
+                try {
+                    HttpUtils.sendHttpPost(url, body, headersMap);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         }
     }
@@ -184,7 +139,7 @@ public class AzureDeleteHandler extends DeleteHandler {
     private List<CloudPluginSceneElementBO> filterVirtualMachineElements(List<CloudPluginSceneElementBO> allElements) {
         List<CloudPluginSceneElementBO> filterElements = new ArrayList<>();
         for (var c : allElements) {
-            if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(c.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == c.getVirtualType()) {
+            if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(c.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == c.getVirtualType()) {
                 filterElements.add(c);
             }
         }
@@ -194,7 +149,7 @@ public class AzureDeleteHandler extends DeleteHandler {
     private List<CloudPluginSceneElementBO> filterContainerElements(List<CloudPluginSceneElementBO> allElements) {
         List<CloudPluginSceneElementBO> filterElements = new ArrayList<>();
         for (var c : allElements) {
-            if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(c.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == c.getVirtualType()) {
+            if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(c.getImageType()) && BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == c.getVirtualType()) {
                 filterElements.add(c);
             }
         }
