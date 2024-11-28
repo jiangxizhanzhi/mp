@@ -57,6 +57,12 @@ public class FlowCsceneController {
     @ApiOperation("新增场景模板中的流量任务")
     @PostMapping("/task/add")
     public ListObjServiceResult<CsceneFlowTaskResponse> add(@RequestBody CsceneFlowTaskRequest request) {
+
+        var condition = new HumanCondition()
+                .filterEqual(CsceneConfigFlowTaskModel::getCsceneId, request.getId())
+                .filterEqual(CsceneConfigFlowTaskModel::getCsceneNodeId, request.getNodeId());
+        csceneConfigFlowTaskMapper.filterDelete(condition);
+
         List<CsceneConfigFlowTaskModel> models = new ArrayList<>();
         for (var task : request.getTasks()) {
             CsceneConfigFlowTaskModel model = new CsceneConfigFlowTaskModel();
