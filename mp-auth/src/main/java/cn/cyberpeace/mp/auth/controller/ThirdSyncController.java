@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.bo.excel.ImportUserBo;
+import cn.cyberpeace.mp.auth.config.ThirdSsoConfig;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
@@ -13,6 +14,7 @@ import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.impl.TenantUserServiceImpl;
 import cn.cyberpeace.mp.auth.service.impl.UserServiceImpl;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import cn.cyberpeace.mp.auth.util.ThirdSsoUtil;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
@@ -50,9 +52,13 @@ public class ThirdSyncController {
     @Resource
     private TenantUserServiceImpl tenantUserService;
 
+    @Resource
+    private ThirdSsoConfig config ;
+
     @AuthTarget(TargetEnum.NO_AUTH)
     @PostMapping("/api/v1/user")
     public Res syncUser(@RequestBody Map<String, Object> input, @RequestParam(value = "access_token") String accessToken) {
+        ThirdSsoUtil.verify(accessToken,config.getClientsecret());
         ThirdSyncUser user = JsonCommon.parse(JsonCommon.stringify(input), ThirdSyncUser.class);
         log.info("sync user , {}", JsonCommon.snakeStringify(user));
         UserRequest request = new UserRequest();
