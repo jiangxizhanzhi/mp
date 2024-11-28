@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -79,7 +80,7 @@ public class CollectionFlowBO {
         private String time;
     }
 
-    public Output toOutput(){
+    public Output toOutput() {
         Output output = new Output();
         output.setProtocol(this.protocol);
         output.setSourceIp(this.sourceIp);
@@ -87,15 +88,13 @@ public class CollectionFlowBO {
         output.setSourcePort(this.sourcePort);
         output.setTargetPort(this.targetPort);
         output.setSize(this.size);
-
-        var a = TimeUtils.localDateTimeToUtcString(this.getTime());
-        DateTimeFormatter inputFormatter = DateTimeFormatter.ISO_DATE_TIME;
-        OffsetDateTime offsetDateTime = OffsetDateTime.parse(a, inputFormatter);
-        LocalDateTime localDateTime = offsetDateTime.atZoneSameInstant(ZoneId.of("Asia/Shanghai")).toLocalDateTime();
-        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String aaa = localDateTime.format(outputFormatter);
-        output.setTime(aaa);
-
+        if (timestamp != null) {
+            LocalDateTime localDateTime = new Date(timestamp).toInstant().atZone(ZoneId.of("Asia/Shanghai"))
+                    .toLocalDateTime();
+            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String aaa = localDateTime.format(outputFormatter);
+            output.setTime(aaa);
+        }
         return output;
     }
 }
