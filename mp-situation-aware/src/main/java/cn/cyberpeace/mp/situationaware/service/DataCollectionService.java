@@ -136,6 +136,8 @@ public class DataCollectionService extends CollectionBaseService {
 
     private static final String CUSTOM_PROBE_ID_PATH = "data.sic_launch_id";
 
+    public static final String SYSLOG_ES_INDEX_PREFIX = "scene_syslog-";
+
     private LocalDateTime getUtcTime(LocalDateTime time) {
         return TimeUtils.utcToLocalDateTime(TimeUtils.localDateTimeToUtcString(time));
     }
@@ -1996,4 +1998,8 @@ public class DataCollectionService extends CollectionBaseService {
         boolQueryBuilder.filter(QueryBuilders.nestedQuery(SicLaunchConfig.FIELD_SIC_LAUNCH_OUTPUT, existsQuery, ScoreMode.None));
     }
 
+    public String[] buildRequestSyslogIndex(String sceneId) {
+        return new String[]{SYSLOG_ES_INDEX_PREFIX+sceneId};
+//        return new String[]{SYSLOG_ES_INDEX_PREFIX+"d96a48ac42134ac39096c22dd2679cac"};
+    }
 }

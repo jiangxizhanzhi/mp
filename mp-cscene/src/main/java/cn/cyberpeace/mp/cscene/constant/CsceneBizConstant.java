@@ -20,7 +20,7 @@ public final class CsceneBizConstant {
 
     //操作系统日志 code集合 mp_sceneplugincollection_wazuh_rule_type.code
     public static List<String> OS_CATEGORY = CollUtil.toList("020101", "020102", "020103", "020104", "020105",
-            "020106", "020107", "020108");
+            "020106", "020107", "020108", "020109");
 
     //应用系统日志 code集合 mp_sceneplugincollection_wazuh_rule_type.code
     public static List<String> APPLICATION_CATEGORY = CollUtil.toList("020201", "020202", "020203", "020204",

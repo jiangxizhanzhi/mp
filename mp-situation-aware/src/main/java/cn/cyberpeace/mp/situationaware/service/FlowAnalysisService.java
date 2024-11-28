@@ -77,14 +77,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.Flow;
 import java.util.stream.Collectors;
 
@@ -969,4 +962,63 @@ public class FlowAnalysisService extends AbstractBaseService {
         return getIndexResponse.getIndices();
     }
 
+    /**
+     * 查询 log.syslog.severity-name 和 log.syslog.facility-name 的不重复值集合
+     *
+     * @param searchRequest 请求参数
+     * @return 返回一个Map，包含两个Key："severity-names"和"facility-names"，对应各自的不重复值集合
+     */
+    public Map<String, List<String>> fetchUniqueSeverityAndFacilityNames(SearchRequest searchRequest) {
+        TermsAggregationBuilder severityNameAggBuilder = AggregationBuilders
+                .terms("severity_names")
+                .field("log.syslog.severity.name.keyword")
+                .size(Integer.MAX_VALUE); // 为了获取所有不重复的值
+
+        TermsAggregationBuilder facilityNameAggBuilder = AggregationBuilders
+                .terms("facility_names")
+                .field("log.syslog.facility.name.keyword")
+                .size(Integer.MAX_VALUE); // 同上
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.aggregation(severityNameAggBuilder);
+        searchSourceBuilder.aggregation(facilityNameAggBuilder);
+        searchSourceBuilder.size(0); // 不需要实际的文档结果，只关心聚合结果
+
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+
+
+        searchRequest.source(searchSourceBuilder);
+
+        log.info("fetchUniqueSeverityAndFacilityNames >>>> Search JSON query: {}", searchRequest.source().toString());
+
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            Aggregations aggregations = response.getAggregations();
+            if(aggregations==null){
+                return new HashMap<>();
+            }
+
+            ParsedStringTerms severityNames = aggregations.get("severity_names");
+            ParsedStringTerms facilityNames = aggregations.get("facility_names");
+
+            List<String> uniqueSeverityNames = severityNames.getBuckets().stream()
+                    .map(Terms.Bucket::getKeyAsString)
+                    .collect(Collectors.toList());
+
+            List<String> uniqueFacilityNames = facilityNames.getBuckets().stream()
+                    .map(Terms.Bucket::getKeyAsString)
+                    .collect(Collectors.toList());
+
+            Map<String, List<String>> result = new HashMap<>();
+            result.put("level_name", uniqueSeverityNames);
+            result.put("app_name", uniqueFacilityNames);
+
+            return result;
+
+        } catch (IOException e) {
+            log.error("fetch unique severity and facility names error, {}", ExceptionUtils.getStackTrace(e));
+        }
+
+        return new HashMap<>();
+    }
 }

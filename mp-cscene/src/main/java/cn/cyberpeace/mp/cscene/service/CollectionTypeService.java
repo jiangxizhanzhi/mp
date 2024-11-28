@@ -177,7 +177,8 @@ public class CollectionTypeService {
         CollectionType junos = CollectionType.builder().name("Junos").code(code + "06").type(type).build();
         CollectionType solaris = CollectionType.builder().name("solaris").code(code + "07").type(type).build();
 //        CollectionType common = CollectionType.builder().name("common").code(code + "08").type(type).build();
-        List<CollectionType> osSubTypes = Arrays.asList(windows, linux, cisco, hp, freebsd, junos, solaris);
+        CollectionType syslog = CollectionType.builder().name("syslog").code(code + "09").type(type).build();
+        List<CollectionType> osSubTypes = Arrays.asList(windows, linux, cisco, hp, freebsd, junos, solaris, syslog);
         osType.setChildren(osSubTypes);
 
         return osType;

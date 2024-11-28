@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.BaseObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -91,6 +92,7 @@ import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsRespons
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
+import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import com.google.common.cache.Cache;
@@ -99,6 +101,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.action.search.SearchRequest;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -152,6 +155,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private DataCollectionService dataCollectionService;
+
+    @Autowired
+    private FlowAnalysisService flowAnalysisService;
 
     @Autowired
     private SceneElementMonitorService sceneElementMonitorService;
@@ -1798,5 +1804,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             humanCondition.select(selectFields);
         }
         return sceneElementMapper.list(humanCondition);
+    }
+
+    public ServiceResult<Map> listSyslogParams(String id, HostEventQueryParams queryParams) {
+        String sceneId = getSceneId(id);
+        String[] indexArray = dataCollectionService.buildRequestSyslogIndex(sceneId);
+        SearchRequest searchRequest = new SearchRequest(indexArray);
+
+        Map<String, List<String>> stringListMap = flowAnalysisService.fetchUniqueSeverityAndFacilityNames(searchRequest);
+        return new ServiceResult<>(stringListMap);
     }
 }

@@ -1664,8 +1664,13 @@ public class ScenePluginCollectionSceneService {
      */
     private List<String> getTypeIdsByCodes(List<String> codes) {
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeModel.class).filterIn(CollectionPluginWazuhRuleTypeModel::getCode, codes.toArray());
-        var typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
-        return typeModels.stream().map(t -> t.getId()).collect(Collectors.toList());
+        List<CollectionPluginWazuhRuleTypeModel> typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
+        List<String> list = new ArrayList<>();
+        for (CollectionPluginWazuhRuleTypeModel t : typeModels) {
+            String id = t.getId();
+            list.add(id);
+        }
+        return list;
     }
 
     /**
@@ -1707,8 +1712,14 @@ public class ScenePluginCollectionSceneService {
             return new ServiceResult<>(new HashMap<>());
         }
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleModel.class).filterIn(CollectionPluginWazuhRuleModel::getId, ruleIds.toArray());
-        var ruleModels = collectionPluginWazuhRuleMapper.list(humanCondition);
-        return new ServiceResult<>(ruleModels.stream().collect(Collectors.toMap(r -> r.getId(), r -> r.getFile())));
+        List<CollectionPluginWazuhRuleModel> ruleModels = collectionPluginWazuhRuleMapper.list(humanCondition);
+        Map<String, String> map = new HashMap<>();
+        for (CollectionPluginWazuhRuleModel r : ruleModels) {
+            if (map.put(r.getId(), r.getFile()) != null) {
+                throw new IllegalStateException("Duplicate key");
+            }
+        }
+        return new ServiceResult<>(map);
     }
 
     /**
@@ -1745,12 +1756,22 @@ public class ScenePluginCollectionSceneService {
             return new ServiceResult<>(new HashMap<>());
         }
         List<String> typeIds = getTypeIdsByCodes(codes);
+        if (CollectionUtils.isEmpty(typeIds)) {
+            return new ServiceResult<>(new HashMap<>());
+        }
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class).filterIn(CollectionPluginWazuhRuleTypeRelationModel::getTypeId, typeIds.toArray());
-        var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
+        List<CollectionPluginWazuhRuleTypeRelationModel> relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
         if (CollectionUtils.isEmpty(relationModels)) {
             return new ServiceResult<>(new HashMap<>());
         }
-        List<String> ruleIds = relationModels.stream().distinct().map(r -> r.getRuleId()).collect(Collectors.toList());
+        List<String> ruleIds = new ArrayList<>();
+        Set<CollectionPluginWazuhRuleTypeRelationModel> uniqueValues = new HashSet<>();
+        for (CollectionPluginWazuhRuleTypeRelationModel r : relationModels) {
+            if (uniqueValues.add(r)) {
+                String ruleId = r.getRuleId();
+                ruleIds.add(ruleId);
+            }
+        }
         return getRuleId2FileByIds(ruleIds);
     }
 

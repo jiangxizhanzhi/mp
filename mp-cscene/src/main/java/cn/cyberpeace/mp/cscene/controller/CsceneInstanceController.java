@@ -538,6 +538,15 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return modelService.listHostEvents(id, queryParams).asResult();
     }
 
+    @ApiOperation("查询syslog列表下拉参数")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+    })
+    @GetMapping(value = "/list_syslog_params", params = "id")
+    public ServiceResult<Map> listSyslogParams(@RequestParam String id, HostEventQueryParams queryParams) {
+        return modelService.listSyslogParams(id, queryParams).asResult();
+    }
+
     @ApiOperation("查询场景实例复盘时各类别采集数据的总数")
     @GetMapping(value = "/query_data_count")
     public ServiceResult<Map<String, Integer>> queryCollectionDataCount(QueryCollectionDataCountParams params) {

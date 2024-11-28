@@ -1950,6 +1950,11 @@
     "en_name": "common"
   },
   {
+    "key": "collection.type.020109",
+    "zh_name": "syslog",
+    "en_name": "syslog"
+  },
+  {
     "key": "collection.type.0202",
     "zh_name": "应用系统日志",
     "en_name": "application system log"
