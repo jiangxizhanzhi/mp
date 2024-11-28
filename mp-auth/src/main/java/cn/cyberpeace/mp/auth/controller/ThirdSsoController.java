@@ -43,8 +43,24 @@ public class ThirdSsoController {
     @AuthTarget(value = {TargetEnum.NO_AUTH})
     @GetMapping
     @ApiOperation("赛宁第三方登录接口")
-    public String loginAndRedirectToHomePage(@RequestParam("code") String code, @RequestParam(name = "state", required = false) String type, HttpServletRequest request, HttpServletResponse response) {
+    public String loginAndRedirectToHomePage(@RequestParam(value = "code", required = false) String code, @RequestParam(name = "state", required = false) String type, HttpServletRequest request, HttpServletResponse response) {
+        if (code == null) {
+            String url = thirdSsoConfig.getGetcodeurl();
+            url = url + "?client_id=" + thirdSsoConfig.getClientid();
+            url = url + "&redirect_uri=" + thirdSsoConfig.getRedirecturi();
+            url = url + "&response_type=" + thirdSsoConfig.getResponsetype();
+            url = url + "&oauth_timestamp=" + System.currentTimeMillis();
+            return String.format("redirect:" + url);
+        }
+        return this.loginAndRedirectToHomePageCode(code, type, request, response);
+    }
+
+    @AuthTarget(value = {TargetEnum.NO_AUTH})
+    @GetMapping("/code")
+    @ApiOperation("赛宁第三方登录接口")
+    public String loginAndRedirectToHomePageCode(@RequestParam("code") String code, @RequestParam(name = "state", required = false) String type, HttpServletRequest request, HttpServletResponse response) {
         String url = thirdSsoConfig.getPageurl();
+        log.info("第三方登录 , code {} , 跳转url {}", code, url);
         // 如果有 jwt 且为有效的登录状态，则直接跳转到url
         if (this.tokenCheck(request, response)) {
             return String.format("redirect:%s", url);
@@ -55,13 +71,14 @@ public class ThirdSsoController {
 
     private boolean tokenCheck(HttpServletRequest request, HttpServletResponse response) {
         String thirdToken = JwtCommon.getThirdToken(request);
-        log.info("thirdToken:{}", thirdToken);
+        log.info("check thirdToken:{}", thirdToken);
         if (StringUtils.isEmpty(thirdToken)) {
             return false;
         }
         HumanCondition humanCondition = new HumanCondition().filterEqual(TokenModel::getAccessToken, thirdToken);
         TokenModel tokenModel = tokenMapper.first(humanCondition);
         if (tokenModel == null) {
+            log.info("未查询到 access token对应的jwt token");
             return false;
         }
         JwtAuthenticationFilter.addJWTCookieToResponse(response, tokenModel.getJwt());

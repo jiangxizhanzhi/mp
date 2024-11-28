@@ -1,7 +1,7 @@
 server:
   servlet:
     context-path: /api/mp
-  port: 8080
+  port: 80
   tomcat:
     threads:
       min-spare: ${spring.tomcat.ext-var.min-spare}
@@ -306,6 +306,7 @@ mp:
     gettokenurl: ${mp.thirdsso.ext-var.gettokenurl}
     getuserurl: ${mp.thirdsso.ext-var.getuserurl}
     getcodeurl: ${mp.thirdsso.ext-var.getcodeurl}
+    syncroleurl: ${mp.thirdsso.ext-var.syncroleurl}
 
 # for kaptcha
 kaptcha:

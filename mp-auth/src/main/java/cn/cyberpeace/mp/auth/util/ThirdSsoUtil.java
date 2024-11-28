@@ -29,7 +29,7 @@ public class ThirdSsoUtil {
     }
 
     public static void verify(String token, String secretKey) {
-        StrUtil.removePrefix(token, "Bearer").trim();
+        token = StrUtil.removePrefix(token, "Bearer").trim();
         DecodedJWT decode = JWT.decode(token);
         int jwtTimeout = 60000;
         try {
@@ -46,7 +46,7 @@ public class ThirdSsoUtil {
         ThirdSsoConfig config = BeanCommon.getBean(ThirdSsoConfig.class);
         Map<String, String> header = new HashMap<>();
         header.put("Content-Type", "application/json");
-        header.put("Authorization", "Bearer " + createToken("appId", "appSecret"));
+        header.put("Authorization", "Bearer " + createToken("a03d6972555f244810c9", "5c188c3799dc0c495bdbedaabd683e5e7d46"));
         try {
             var res = HttpUtils.sendHttpPost(config.getSyncroleurl(), JsonCommon.snakeStringify(syncRole), header);
         } catch (IOException e) {

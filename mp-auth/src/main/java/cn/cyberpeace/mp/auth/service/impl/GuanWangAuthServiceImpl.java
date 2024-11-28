@@ -5,9 +5,11 @@ import cn.cyberpeace.mp.auth.extensions.security.filter.JwtAuthenticationFilter;
 import cn.cyberpeace.mp.auth.model.TokenModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.TokenMapper;
+import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import lombok.Getter;
@@ -52,14 +54,15 @@ public class GuanWangAuthServiceImpl {
             UserModel userModel = userService.getByUserName(userInfo.getAccount_no());
             if (Objects.isNull(userModel)) {
                 // 新增一个用户
-                UserRequest userRequest = new UserRequest();
-                userRequest.setUsername(userInfo.getAccount_no());
-                userRequest.setName(userInfo.getUserName());
-                userRequest.setRoleIds(Collections.singletonList(ROLE_ADMIN_ID));
-                userRequest.setOrgIds(Collections.singletonList(ROOT_ORG_ID));
-                userRequest.setPassword("d8165e80c4abed2dcc1dd06df1a8be31");
-                // todo 处理默认的角色关系等
-                userModel = userService.add(userRequest);
+                userModel = new UserModel();
+                userModel.setUsername(userInfo.getAccount_no());
+                userModel.setIdentifier(userInfo.getAccount_no());
+                userModel.setAvatar("");
+                userModel.setEmail("");
+                userModel.setMobile("");
+                userModel.setAddress("");
+                userModel.initDefault();
+                BeanCommon.getBean(UserMapper.class).save(userModel);
             }
             String newJwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userModel.getId(), userModel.getUsername(), userModel.getTokenSecret()));
             JwtAuthenticationFilter.addJWTCookieToResponse(response, newJwt);
@@ -82,11 +85,20 @@ public class GuanWangAuthServiceImpl {
         req.setGrantType("authorization_code");
         req.setOauthTimestamp(String.valueOf(System.currentTimeMillis()));
         req.setClientSecret(thirdSsoConfig.getClientsecret());
-        req.setRedirectUri(URLEncoder.encode(thirdSsoConfig.getRedirecturi(), Charset.forName("utf-8")));
+        req.setRedirectUri(URLEncoder.encode("http://www.cyberpeacebc.cn/api/mp/unauth/third-login", Charset.forName("utf-8")));
         String bodyContent = JsonCommon.stringify(req);
         log.info("body content is : {}", bodyContent);
+
+        String url = thirdSsoConfig.getGettokenurl();
+        url = url + "?client_id=" + thirdSsoConfig.getClientid();
+        url = url + "&client_secret=" + thirdSsoConfig.getClientsecret();
+        url = url + "&grant_type=authorization_code";
+        url = url + "&redirect_uri=" + URLEncoder.encode("http://www.cyberpeacebc.cn/api/mp/unauth/third-login", Charset.forName("utf-8"));
+        url = url + "&oauth_timestamp=" + System.currentTimeMillis();
+        url = url + "&code=" + code;
+        log.info("url is {}", url);
         try {
-            String result = HttpUtils.sendPost(thirdSsoConfig.getGettokenurl(), JsonCommon.snakeStringify(req));
+            String result = HttpUtils.sendPost(url, JsonCommon.snakeStringify(req));
             log.info("result is : {}", result);
             GetTokenRes res = JsonCommon.snakeParse(result, GetTokenRes.class);
             return res;
@@ -101,7 +113,7 @@ public class GuanWangAuthServiceImpl {
         try {
             var result = HttpUtils.sendGet(url);
             log.info("result is : {}", result);
-            Map<String,Object> data = JsonCommon.parseMap(result);
+            Map<String, Object> data = JsonCommon.parseMap(result);
             ThirdUser thirdUser = JsonCommon.snakeParse(JsonCommon.snakeStringify(data.get("attributes")), ThirdUser.class);
             return thirdUser;
         } catch (IOException e) {
