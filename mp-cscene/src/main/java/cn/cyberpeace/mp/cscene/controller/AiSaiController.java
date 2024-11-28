@@ -121,7 +121,7 @@ public class AiSaiController {
     }
 
     @GetMapping("/flow/page")
-    public ListObjServiceResult<CollectionFlowBO> pageFlow(FlowQueryParams queryParams) {
+    public ListObjServiceResult<CollectionFlowBO.Output> pageFlow(FlowQueryParams queryParams) {
         this.init();
         // 创建查询请求
         SearchRequest searchRequest = new SearchRequest("mp*");
@@ -173,6 +173,7 @@ public class AiSaiController {
         int total = (int) hits.getTotalHits().value;
 
         List<CollectionFlowBO> bos = new ArrayList<>();
+        List<CollectionFlowBO.Output> ll = new ArrayList<>();
         hits.forEach(hit -> {
             FlowLogBO flowLogBO = JSONObject.parseObject(hit.getSourceAsString(), FlowLogBO.class);
             CollectionFlowBO flowBO = new CollectionFlowBO();
@@ -208,10 +209,10 @@ public class AiSaiController {
                 flowBO.setSize(flowLogBO.getNetwork().getBytes());
             }
             flowBO.setProtocol(flowLogBO.getProtocol());
-
+            ll.add(flowBO.toOutput());
             bos.add(flowBO);
         });
-        return new ListObjServiceResult<>(new ListObjResult<>(bos, total)).asResult();
+        return new ListObjServiceResult<>(new ListObjResult<>(ll, total)).asResult();
     }
 
     @GetMapping("/wazuh/process_info")
