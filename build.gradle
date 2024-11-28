@@ -44,6 +44,11 @@ subprojects {
         }
     }
 
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/public/' }
+        mavenCentral()
+    }
+
     ext {
         set('snippetsDir', file("build/generated-snippets"))
     }
