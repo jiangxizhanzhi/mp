@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.controller.collect.connection.WazuhConnectionService;
 import cn.cyberpeace.mp.cscene.controller.collect.filemodify.WazuhFileQueryService;
@@ -16,6 +17,7 @@ import cn.cyberpeace.mp.situationaware.model.FileEventModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhProcessModelV2;
 import cn.cyberpeace.mp.situationaware.model.WazuhSystemUserModel;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.utils.FileUtils;
@@ -48,7 +50,12 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Time;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -208,7 +215,7 @@ public class AiSaiController {
     }
 
     @GetMapping("/wazuh/process_info")
-    public ListObjServiceResult<WazuhProcessModel> pageWazuh(WazuhQueryParams queryParams) {
+    public ListObjServiceResult<WazuhProcessModelV2> pageWazuh(WazuhQueryParams queryParams) {
         this.init();
         var team = teamInfoMap.get(queryParams.getTeamId());
         var restClient = team.getRestClient();
@@ -232,11 +239,27 @@ public class AiSaiController {
             r.setAgentIp(team.getAgentNameIp().get(r.getAgentName()));
         }
 
-        return new ListObjServiceResult<>(new ListObjResult<>(result, res.size())).asResult();
+        var ll = new ArrayList<WazuhProcessModelV2>();
+        for (WazuhProcessModel r : result) {
+            WazuhProcessModelV2 v2 = new WazuhProcessModelV2();
+            BeanUtils.copyProperties(r, v2);
+
+            DateTimeFormatter inputFormatter = DateTimeFormatter.ISO_DATE_TIME;
+            OffsetDateTime offsetDateTime = OffsetDateTime.parse(v2.getCreateTime(), inputFormatter);
+            LocalDateTime localDateTime = offsetDateTime.atZoneSameInstant(ZoneId.of("Asia/Shanghai"))
+                    .toLocalDateTime();
+            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String output = localDateTime.format(outputFormatter);
+            v2.setTime(output);
+
+            ll.add(v2);
+        }
+
+        return new ListObjServiceResult<>(new ListObjResult<>(ll, res.size())).asResult();
     }
 
     @GetMapping("/wazuh/system_user")
-    public ListObjServiceResult<WazuhSystemUserModel> pageFile(WazuhQueryParams queryParams) {
+    public ListObjServiceResult<WazuhSystemUserModel.Output> pageFile(WazuhQueryParams queryParams) {
         this.init();
         var team = teamInfoMap.get(queryParams.getTeamId());
         var restClient = team.getRestClient();
@@ -254,10 +277,12 @@ public class AiSaiController {
         LocalDateTime start = end.minusDays(10);
         var res = new WazuhSystemUserService(restClient).queryCurrentSystemUserData(agentNames, start, end);
         var result = res.subList(from, from + size >= res.size() ? res.size() : from + size);
+        List<WazuhSystemUserModel.Output> ll = new ArrayList<>();
         for (WazuhSystemUserModel r : result) {
             r.setAgentIp(team.getAgentNameIp().get(r.getAgentName()));
+            ll.add(r.toOutput());
         }
-        return new ListObjServiceResult<>(new ListObjResult<>(result, res.size())).asResult();
+        return new ListObjServiceResult<>(new ListObjResult<>(ll, res.size())).asResult();
     }
 
     @GetMapping("/wazuh/file_events")
@@ -286,7 +311,7 @@ public class AiSaiController {
     }
 
     @GetMapping("/wazuh/port_info")
-    public ListObjServiceResult<WazuhNetworkConnectionModel> pagePorts(WazuhQueryParams queryParams) {
+    public ListObjServiceResult<WazuhNetworkConnectionModel.Output> pagePorts(WazuhQueryParams queryParams) {
         this.init();
         var team = teamInfoMap.get(queryParams.getTeamId());
         var restClient = team.getRestClient();
@@ -306,14 +331,17 @@ public class AiSaiController {
 
         var res = new WazuhConnectionService(restClient).queryCurrentConnectionData(agentNames, start, end);
         var result = res.subList(from, from + size >= res.size() ? res.size() : from + size);
+
+        List<WazuhNetworkConnectionModel.Output> ll = new ArrayList<>();
         for (WazuhNetworkConnectionModel r : result) {
             r.setAgentIp(team.getAgentNameIp().get(r.getAgentName()));
+            ll.add(r.toOutput());
         }
-        return new ListObjServiceResult<>(new ListObjResult<>(result, res.size())).asResult();
+        return new ListObjServiceResult<>(new ListObjResult<>(ll, res.size())).asResult();
     }
 
     @GetMapping("/wazuh/host_info")
-    public ListObjServiceResult<WazuhHostStateModel> hostInfo(WazuhQueryParams queryParams) {
+    public ListObjServiceResult<WazuhHostStateModel.Output> hostInfo(WazuhQueryParams queryParams) {
         this.init();
         var team = teamInfoMap.get(queryParams.getTeamId());
         var rest = team.getRestClient();
@@ -333,10 +361,14 @@ public class AiSaiController {
         int size = queryParams.getPerPage();
         int from = (queryParams.getPage() - 1) * size;
         var res = new WazuhHostInfoService(rest).getWazuhHostInfoData(agentNames, start, end, from, size);
+        List<WazuhHostStateModel.Output> ll = new ArrayList<>();
         for (WazuhHostStateModel r : res.getData()) {
             r.setAgentIp(team.getAgentNameIp().get(r.getAgentName()));
+            ll.add(r.toOuput());
         }
-        return new ListObjServiceResult<>(new ListObjResult<>(res.getData(), (int) res.getTotal())).asResult();
+
+
+        return new ListObjServiceResult<>(new ListObjResult<>(ll, (int) res.getTotal())).asResult();
     }
 
     @Getter

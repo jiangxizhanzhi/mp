@@ -10,6 +10,9 @@ import cn.cyberpeace.mp.situationaware.model.WazuhSystemUserModel;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang3.StringUtils;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
 public class WazuhSystemUserDataParser implements WazuhDataParser<OneRowDataWrapper<WazuhSystemUserModel>> {
     @Override
     public OneRowDataWrapper<WazuhSystemUserModel> parsedOneData(WazuhFileRoot wazuhFileRoot) {
@@ -28,6 +31,10 @@ public class WazuhSystemUserDataParser implements WazuhDataParser<OneRowDataWrap
             }
             result.getValues().forEach(v ->{
                 v.setAgentName(wazuhFileRoot.getAgent().getName());
+                LocalDateTime localDateTime = wazuhFileRoot.getTimestamp().toInstant()
+                        .atZone(ZoneId.systemDefault()) // 使用默认时区
+                        .toLocalDateTime();
+                v.setTime(localDateTime);
             });
         }
         return result;

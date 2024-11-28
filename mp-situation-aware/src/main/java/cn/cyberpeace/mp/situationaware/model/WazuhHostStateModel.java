@@ -1,13 +1,19 @@
 package cn.cyberpeace.mp.situationaware.model;
 
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import com.alibaba.fastjson.annotation.JSONField;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Data
@@ -15,7 +21,6 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class WazuhHostStateModel {
-
     @JSONField(name = "MemoryTotal")
     @ApiModelProperty("总内存")
     private long memoryTotal;
@@ -97,4 +102,32 @@ public class WazuhHostStateModel {
     @ApiModelProperty("时间")
     private LocalDateTime time;
 
+    public Output toOuput(){
+        Output output = new Output();
+        output.setAgentIp(agentIp);
+        output.setCpuPercent(cpuTotalPercent);
+        output.setDiskUsePercent(diskPercent);
+        output.setMemoryUsePercent(memoryPercent);
+
+        var a = TimeUtils.localDateTimeToUtcString(this.getTime());
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ISO_DATE_TIME;
+        OffsetDateTime offsetDateTime = OffsetDateTime.parse(a, inputFormatter);
+        LocalDateTime localDateTime = offsetDateTime.atZoneSameInstant(ZoneId.of("Asia/Shanghai")).toLocalDateTime();
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String aaa = localDateTime.format(outputFormatter);
+        output.setTime(aaa);
+
+        return output;
+    }
+
+
+    @Getter
+    @Setter
+    public static class Output {
+        private String agentIp;
+        private Double cpuPercent;
+        private Double memoryUsePercent;
+        private Double diskUsePercent;
+        private String time;
+    }
 }

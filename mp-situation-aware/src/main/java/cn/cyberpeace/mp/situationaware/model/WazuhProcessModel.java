@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.model;
 
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -63,5 +64,4 @@ public class WazuhProcessModel {
     private String description;
 
     private LocalDateTime time;
-
 }

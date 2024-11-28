@@ -12,6 +12,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.commons.lang3.StringUtils;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
+
 public class WazuhHostInfoDataParser implements WazuhDataParser<WazuhHostStateModel> {
     @Override
     public WazuhHostStateModel parsedOneData(WazuhFileRoot wazuhFileRoot) {
@@ -32,6 +36,10 @@ public class WazuhHostInfoDataParser implements WazuhDataParser<WazuhHostStateMo
 
             WazuhHostStateModel wazuhHostStateModel = DataCollectionService.convertHostStateOutput2WazuhModel(hostStateOutput);
             wazuhHostStateModel.setAgentName(wazuhFileRoot.getAgent().getName());
+            LocalDateTime localDateTime = wazuhFileRoot.getTimestamp().toInstant()
+                    .atZone(ZoneId.systemDefault()) // 使用默认时区
+                    .toLocalDateTime();
+            wazuhHostStateModel.setTime(localDateTime);
             return wazuhHostStateModel;
         }
         return new WazuhHostStateModel();
