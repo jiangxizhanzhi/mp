@@ -1,9 +1,12 @@
 [
   {
-    "team_id": "aaa",
+    "team_id": "29829ee4adf14474bcf64ac3f049ddee",
     "team_name": "aaa",
     "es_ip": "10.100.39.249",
     "es_port": 9207,
+    "agent_ips": [
+      "192.168.50.17"
+    ],
     "ip_agent_name": {
       "192.168.50.17": "test00001"
     }

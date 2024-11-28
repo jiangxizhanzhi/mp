@@ -175,7 +175,11 @@ public class AiSaiController {
         List<CollectionFlowBO> bos = new ArrayList<>();
         List<CollectionFlowBO.Output> ll = new ArrayList<>();
         hits.forEach(hit -> {
+            var map = hit.getSourceAsMap();
             FlowLogBO flowLogBO = JSONObject.parseObject(hit.getSourceAsString(), FlowLogBO.class);
+            if (map.containsKey("@timestamp")) {
+                flowLogBO.setTimestamp(Long.valueOf(map.get("@timestamp").toString()));
+            }
             CollectionFlowBO flowBO = new CollectionFlowBO();
             if (flowLogBO.getTimestamp() != null) {
                 flowBO.setTime(TimeUtils.timestampToLocalDateTime(flowLogBO.getTimestamp()));
