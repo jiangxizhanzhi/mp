@@ -44,6 +44,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private String loadExecCommand;
     @ApiModelProperty(value = "载荷工具id")
     private String loadToolId;
+    @ApiModelProperty(value = "载荷来源(1载荷平台 2本地)")
+    private Integer loadSource;
     @ApiModelProperty(value = "云平台三层防火墙资源id")
     private String firewallResourceId;
 

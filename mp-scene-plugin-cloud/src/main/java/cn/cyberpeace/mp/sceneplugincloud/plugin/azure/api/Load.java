@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.LoadUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.DevopsLoadSourceModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,10 @@ public class Load {
 
 
     public void create(CloudScenePluginHandler pluginHandler,CloudPluginSceneElementBO cloudElement, String groupName) {
+//        本地创建载荷不执行启动操作
+        if(BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL == cloudElement.getLoadSource()){
+            return;
+        }
 
         String nodeId = cloudElement.getSrcElement().getId();
         cloudElement.setLoadTaskName(groupName+"_"+nodeId);
@@ -43,9 +48,6 @@ public class Load {
 //            回写id
         cloudElement.setResourceId(data.get("id").toString());
         cloudElement.setLoadResourceInstanceId(data.get("instanceId").toString());
-
-//        启动实例
-        // start(data.get("instanceId").toString());
     }
 
     public Map create(String taskName, String taskDescribe, String toolId, String execCommand) {
@@ -78,6 +80,11 @@ public class Load {
     }
 
     public void delete(CloudPluginSceneElementBO cloudElement) {
+        //        本地创建载荷不执行启动操作
+        if(BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL == cloudElement.getLoadSource()){
+            return;
+        }
+
         HashMap<String, Object> formMap = new HashMap<>();
         formMap.put("instanceId", cloudElement.getLoadResourceInstanceId());
         String formBody = JSON.toJSONString(formMap);
@@ -101,10 +108,6 @@ public class Load {
             log.error("{} request error:", loadUrl + LoadUrlConstant.DELETE_TASK_URL, e);
             throw new MpRuntimeException("load task delete post request failed");
         }
-    }
-
-    public void execCommand(CloudPluginSceneElementBO element, String command) {
-
     }
 
     public void pause(String instanceId) {

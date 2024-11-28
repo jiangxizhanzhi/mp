@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.scene.core.plugin.model.BasePluginSceneElementModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
@@ -40,6 +41,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String loadExecCommand;
     @DefaultStr
     private String loadToolId;
+    @DefaultInt
+    private Integer loadSource;
 
     /**
      * 三层防火墙对应防火墙资源id
@@ -292,6 +295,16 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
 
         private ImageType() {
         }
+    }
+
+    public static class LoadSourceType {
+//        1.同步 2.本地
+        public static final int SYNC = 1;
+        public static final int LOCAL = 2;
+
+        private LoadSourceType() {
+        }
+
     }
 
     public static class NetMode {
