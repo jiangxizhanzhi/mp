@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.config.ThirdSsoConfig;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.extensions.security.filter.JwtAuthenticationFilter;
@@ -87,6 +88,8 @@ public class ThirdSsoController {
             return false;
         }
         JwtAuthenticationFilter.addJWTCookieToResponse(response, tokenModel.getJwt());
+        response.setHeader(AuthConstant.JWT_HEADER_KEY, tokenModel.getJwt());
+        response.setHeader(AuthConstant.CP_TOKEN_REFRESHED_HEADER_KEY, "true");
         return thirdLoginService.tokenCheck(tokenModel.getAccessToken());
     }
 

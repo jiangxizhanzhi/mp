@@ -88,6 +88,9 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
             log.info("user:{} has logout!", userName);
         }
 
+        // 删除第三方token
+        response.setHeader("third_token", "");
+
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);
 

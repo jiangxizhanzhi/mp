@@ -74,7 +74,7 @@ public class GuanWangAuthServiceImpl {
             JwtAuthenticationFilter.addThirdTokenToResponse(response, getTokenRes.getAccessToken());
             TokenModel tokenModel = new TokenModel();
             tokenModel.setUserName(userModel.getUsername());
-            tokenModel.setAccessToken(tokenModel.getAccessToken());
+            tokenModel.setAccessToken(getTokenRes.getAccessToken());
             tokenModel.setJwt(newJwt);
             tokenModel.setCreateTime(LocalDateTime.now());
             log.info("tokeModel:[{}]", tokenModel);
