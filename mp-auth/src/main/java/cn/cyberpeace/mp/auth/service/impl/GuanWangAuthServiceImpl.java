@@ -54,6 +54,7 @@ public class GuanWangAuthServiceImpl {
             ThirdUser userInfo = this.getThirdUser(getTokenRes.getAccessToken());
             UserModel userModel = userService.getByUserName(userInfo.getAccount_no());
             if (Objects.isNull(userModel)) {
+                log.info("用户不存在,新增 , username is {}", userInfo.getAccount_no());
                 // 新增一个用户
                 userModel = new UserModel();
                 userModel.setUsername(userInfo.getAccount_no());
@@ -63,7 +64,8 @@ public class GuanWangAuthServiceImpl {
                 userModel.setMobile("");
                 userModel.setAddress("");
                 userModel.initDefault();
-                BeanCommon.getBean(UserMapper.class).save(userModel);
+                boolean saveRes = BeanCommon.getBean(UserMapper.class).save(userModel);
+                log.info("新增结果: {}", saveRes);
             }
             String newJwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userModel.getId(), userModel.getUsername(), userModel.getTokenSecret()));
             JwtAuthenticationFilter.addJWTCookieToResponse(response, newJwt);
