@@ -67,11 +67,10 @@ public class RoleController {
     public ServiceResult<Boolean> delete(@PathVariable String id) {
         var model = roleService.get(id).getData();
         ThirdSsoUtil.SyncRole syncRole = new ThirdSsoUtil.SyncRole();
-        syncRole.setAppRoleName(model.getName());
-        syncRole.setAppRoleStatus("0");
-        syncRole.setAppRoleRemarks("");
-        syncRole.setAppAppCode(id);
-        syncRole.setAppRoleCode(id);
+        syncRole.setApp_role__name(model.getName());
+        syncRole.setApp_role__status("0");
+        syncRole.setApp_role__remarks("");
+        syncRole.setApp_role__code(id);
         opRolePermService.checkByTargetRoleIds(Arrays.asList(id));
         var res = roleService.delete(id);
         ThirdSsoUtil.syncRole(syncRole);
@@ -93,11 +92,10 @@ public class RoleController {
         for (String id : ids) {
             var model = roleService.get(id).getData();
             ThirdSsoUtil.SyncRole syncRole = new ThirdSsoUtil.SyncRole();
-            syncRole.setAppRoleName(model.getName());
-            syncRole.setAppRoleStatus("0");
-            syncRole.setAppRoleRemarks("");
-            syncRole.setAppAppCode(id);
-            syncRole.setAppRoleCode(id);
+            syncRole.setApp_role__name(model.getName());
+            syncRole.setApp_role__status("0");
+            syncRole.setApp_role__remarks("");
+            syncRole.setApp_role__code(id);
             roles.add(syncRole);
         }
         var res = roleService.bulkDelete(ids).asResult();
@@ -134,11 +132,10 @@ public class RoleController {
         RoleModel roleModel = roleService.add(createRequest);
 
         ThirdSsoUtil.SyncRole syncRole = new ThirdSsoUtil.SyncRole();
-        syncRole.setAppRoleName(roleModel.getName());
-        syncRole.setAppRoleStatus("1");
-        syncRole.setAppRoleRemarks("");
-        syncRole.setAppAppCode(roleModel.getId());
-        syncRole.setAppRoleCode(roleModel.getId());
+        syncRole.setApp_role__name(roleModel.getName());
+        syncRole.setApp_role__status("1");
+        syncRole.setApp_role__remarks("");
+        syncRole.setApp_role__code(roleModel.getId());
         ThirdSsoUtil.syncRole(syncRole);
 
         return ResultCommon.success(roleModel);
@@ -154,11 +151,10 @@ public class RoleController {
         RoleModel roleModel = roleService.modify(modifyRequest);
 
         ThirdSsoUtil.SyncRole syncRole = new ThirdSsoUtil.SyncRole();
-        syncRole.setAppRoleName(roleModel.getName());
-        syncRole.setAppRoleStatus("1");
-        syncRole.setAppRoleRemarks("");
-        syncRole.setAppAppCode(roleModel.getId());
-        syncRole.setAppRoleCode(roleModel.getId());
+        syncRole.setApp_role__name(roleModel.getName());
+        syncRole.setApp_role__status("1");
+        syncRole.setApp_role__remarks("");
+        syncRole.setApp_role__code(roleModel.getId());
         ThirdSsoUtil.syncRole(syncRole);
 
         return ResultCommon.success(roleModel);

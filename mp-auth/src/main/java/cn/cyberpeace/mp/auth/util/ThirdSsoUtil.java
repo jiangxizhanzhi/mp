@@ -44,9 +44,10 @@ public class ThirdSsoUtil {
 
     public static void syncRole(SyncRole syncRole) {
         ThirdSsoConfig config = BeanCommon.getBean(ThirdSsoConfig.class);
+        syncRole.setApp_app__code(config.getAppcode());
         Map<String, String> header = new HashMap<>();
         header.put("Content-Type", "application/json");
-        header.put("Authorization", "Bearer " + createToken("a03d6972555f244810c9", "5c188c3799dc0c495bdbedaabd683e5e7d46"));
+        header.put("Authorization", "Bearer " + createToken(config.getClientid(), config.getClientsecret()));
         try {
             var res = HttpUtils.sendHttpPost(config.getSyncroleurl(), JsonCommon.snakeStringify(syncRole), header);
         } catch (IOException e) {
@@ -57,10 +58,10 @@ public class ThirdSsoUtil {
     @Getter
     @Setter
     public static class SyncRole {
-        private String appAppCode;
-        private String appRoleStatus;
-        private String appRoleCode;
-        private String appRoleName;
-        private String appRoleRemarks;
+        private String app_app__code;
+        private String app_role__status;
+        private String app_role__code;
+        private String app_role__name;
+        private String app_role__remarks;
     }
 }
