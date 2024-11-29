@@ -298,6 +298,7 @@ mp:
   aggregation:
     export-image-timeout: ${mp.aggregation.ext-var.export-image-timeout}
   thirdsso:
+    appcode: ${mp.thirdsso.ext-var.appcode}
     clientid: ${mp.thirdsso.ext-var.clientid}
     clientsecret: ${mp.thirdsso.ext-var.clientsecret}
     responsetype: ${mp.thirdsso.ext-var.responsetype}
