@@ -87,7 +87,6 @@ public class GuanWangAuthServiceImpl {
         req.setClientSecret(thirdSsoConfig.getClientsecret());
         req.setRedirectUri(URLEncoder.encode("http://www.cyberpeacebc.cn/api/mp/unauth/third-login", Charset.forName("utf-8")));
         String bodyContent = JsonCommon.stringify(req);
-        log.info("body content is : {}", bodyContent);
 
         String url = thirdSsoConfig.getGettokenurl();
         url = url + "?client_id=" + thirdSsoConfig.getClientid();
@@ -96,7 +95,7 @@ public class GuanWangAuthServiceImpl {
         url = url + "&redirect_uri=" + URLEncoder.encode("http://www.cyberpeacebc.cn/api/mp/unauth/third-login", Charset.forName("utf-8"));
         url = url + "&oauth_timestamp=" + System.currentTimeMillis();
         url = url + "&code=" + code;
-        log.info("url is {}", url);
+        log.info("url is {} , body content is {}", url, bodyContent);
         try {
             String result = HttpUtils.sendPost(url, JsonCommon.snakeStringify(req));
             log.info("result is : {}", result);
@@ -111,6 +110,7 @@ public class GuanWangAuthServiceImpl {
     public ThirdUser getThirdUser(String accessToken) {
         String url = thirdSsoConfig.getGetuserurl() + "?access_token=" + accessToken;
         try {
+            log.info("查询用户信息,url is {}", url);
             var result = HttpUtils.sendGet(url);
             log.info("result is : {}", result);
             Map<String, Object> data = JsonCommon.parseMap(result);

@@ -50,8 +50,10 @@ public class ThirdSsoController {
             url = url + "&redirect_uri=" + thirdSsoConfig.getRedirecturi();
             url = url + "&response_type=" + thirdSsoConfig.getResponsetype();
             url = url + "&oauth_timestamp=" + System.currentTimeMillis();
+            log.info("第三方登录, code 为空 , 重定向至 {}", url);
             return String.format("redirect:" + url);
         }
+        log.info("第三方登录, code 为 {} ", code);
         return this.loginAndRedirectToHomePageCode(code, type, request, response);
     }
 
@@ -60,11 +62,14 @@ public class ThirdSsoController {
     @ApiOperation("赛宁第三方登录接口")
     public String loginAndRedirectToHomePageCode(@RequestParam("code") String code, @RequestParam(name = "state", required = false) String type, HttpServletRequest request, HttpServletResponse response) {
         String url = thirdSsoConfig.getPageurl();
-        log.info("第三方登录 , code {} , 跳转url {}", code, url);
+        log.info("第三方登录 , code {}", code);
         // 如果有 jwt 且为有效的登录状态，则直接跳转到url
-        if (this.tokenCheck(request, response)) {
+        boolean tokenCheck = this.tokenCheck(request, response);
+        if (tokenCheck) {
+            log.info("原有 token 校验成功,跳转至: {}", url);
             return String.format("redirect:%s", url);
         } else {
+            log.info("原有 token 失败");
             return thirdLoginService.loginByCode(code, request, response);
         }
     }
