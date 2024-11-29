@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.config.ThirdSsoConfig;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.extensions.security.filter.JwtAuthenticationFilter;
 import cn.cyberpeace.mp.auth.model.TokenModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -66,6 +67,8 @@ public class GuanWangAuthServiceImpl {
             }
             String newJwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userModel.getId(), userModel.getUsername(), userModel.getTokenSecret()));
             JwtAuthenticationFilter.addJWTCookieToResponse(response, newJwt);
+            response.setHeader(AuthConstant.JWT_HEADER_KEY, newJwt);
+            response.setHeader(AuthConstant.CP_TOKEN_REFRESHED_HEADER_KEY, "true");
             JwtAuthenticationFilter.addThirdTokenToResponse(response, getTokenRes.getAccessToken());
             TokenModel tokenModel = new TokenModel();
             tokenModel.setUserName(userModel.getUsername());
@@ -95,7 +98,7 @@ public class GuanWangAuthServiceImpl {
         url = url + "&redirect_uri=" + URLEncoder.encode("http://www.cyberpeacebc.cn/api/mp/unauth/third-login", Charset.forName("utf-8"));
         url = url + "&oauth_timestamp=" + System.currentTimeMillis();
         url = url + "&code=" + code;
-        log.info("url is {} , body content is {}", url, bodyContent);
+        log.info("查询access_token , url is {} , body content is {}", url, bodyContent);
         try {
             String result = HttpUtils.sendPost(url, JsonCommon.snakeStringify(req));
             log.info("result is : {}", result);
