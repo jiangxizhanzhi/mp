@@ -132,7 +132,7 @@ public class GuanWangAuthServiceImpl {
         if (user == null) {
             return false;
         }
-        if (System.currentTimeMillis() > user.getTokenExpired()) {
+        if (System.currentTimeMillis() / 1000 - user.getTokenGtime() > user.getTokenExpired()) {
             return false;
         }
         return true;
