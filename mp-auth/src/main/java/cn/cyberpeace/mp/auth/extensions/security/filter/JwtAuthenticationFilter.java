@@ -138,6 +138,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     public static void addJWTCookieToResponse(HttpServletResponse response, String newJwt) {
+        log.info("新增 jwt token , key is {} , value is {}", "cr_jwttoken", newJwt);
         Cookie cookie = new Cookie("cr_jwttoken", null);
         cookie.setPath("/");
         cookie.setMaxAge(Integer.MAX_VALUE);
@@ -149,10 +150,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             e.printStackTrace();
         }
         response.addCookie(cookie);
-
     }
 
     public static void addThirdTokenToResponse(HttpServletResponse response, String token) {
+        log.info("新增 third_token , key is {} , value is {}", "third_token", token);
         Cookie cookie = new Cookie("third_token", null);
         cookie.setPath("/");
         cookie.setMaxAge(Integer.MAX_VALUE);
