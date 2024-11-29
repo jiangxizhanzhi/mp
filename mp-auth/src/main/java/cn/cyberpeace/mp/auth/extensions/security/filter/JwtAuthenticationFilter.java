@@ -165,7 +165,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             e.printStackTrace();
         }
         response.addCookie(cookie);
+    }
 
+    public static void delThirdTokenToResponse(HttpServletResponse response) {
+        log.info("删除 third_token , key is {}", "third_token");
+        Cookie cookie = new Cookie("third_token", null);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        // httponly = false
+        cookie.setHttpOnly(false);
+        response.addCookie(cookie);
     }
 
 }
