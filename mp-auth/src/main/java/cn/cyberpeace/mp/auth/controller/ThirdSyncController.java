@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.auth.controller;
 
-import cn.cyberpeace.mp.auth.bo.excel.ImportUserBo;
 import cn.cyberpeace.mp.auth.config.ThirdSsoConfig;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -9,11 +8,9 @@ import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.request.user.ThirdSyncOrg;
 import cn.cyberpeace.mp.auth.request.user.ThirdSyncUser;
 import cn.cyberpeace.mp.auth.request.user.ThirdSyncUserOrganization;
-import cn.cyberpeace.mp.auth.request.user.ThirdSyncUserType;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.impl.TenantUserServiceImpl;
 import cn.cyberpeace.mp.auth.service.impl.UserServiceImpl;
-import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.auth.util.ThirdSsoUtil;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.JsonCommon;
@@ -22,7 +19,6 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -82,9 +77,9 @@ public class ThirdSyncController {
                 orgIds.add(r.getOrgCustomUnique());
             }
         }
-        if (user.getUserTypes() != null) {
-            for (ThirdSyncUserType t : user.getUserTypes()) {
-                roleIds.add(t.getTypeCode());
+        if (user.getRoles() != null) {
+            for (var t : user.getRoles()) {
+                roleIds.add(t.getRole_code());
             }
         }
 
