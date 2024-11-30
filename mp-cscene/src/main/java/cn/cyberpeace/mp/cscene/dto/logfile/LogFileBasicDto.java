@@ -32,4 +32,6 @@ public class LogFileBasicDto {
     @ApiModelProperty("文件名")
     private String name;
 
+    @ApiModelProperty("协议")
+    private String protocol;
 }
