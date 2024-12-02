@@ -458,13 +458,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         userModel.setPassword(thirdUserRequest.getPassword());
         userModel.encodePassword();
         userModel.setIdentifier(userModel.getUsername());
-        userModel.initDefault();
         try {
             userModel.setDelayRemindLicenseTime(BeanCommon.getBean(ExpireRemindDateGetter.class).get());
         } catch (Exception e) {
             log.info("failed to get ActivationResponse delay data , {}", e.getMessage());
             userModel.setDelayRemindLicenseTime(LocalDateTime.now().plusMonths(360));
         }
+        getModelMapper().save(userModel);
         return userModel;
     }
 
