@@ -65,18 +65,6 @@ public class AuthenticateController {
             log.warn("jwt token is blank");
             throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
         }
-        HumanCondition humanCondition = new HumanCondition()
-                .filterEqual(TokenModel::getJwt, token);
-
-        TokenModel tokenModel = tokenMapper.first(humanCondition);
-        if (tokenModel != null && !thirdSsoService.tokenCheck(tokenModel.getAccessToken())) {
-            try {
-                response.sendRedirect(thirdSsoConfig.getGetcodeurl());
-            } catch (IOException e) {
-                log.error("sendRedirect error = ", e);
-                throw new RuntimeException(e);
-            }
-        }
         JwtUtils.UserInfo user = verifyToken(token);
         UserModel userModel = UserUtils.getUser(user.getId());
         UserBo userBo = userService.userModel2UserDtoWithoutOrg(userModel);
