@@ -18,4 +18,5 @@ public class TokenModel extends BaseModel {
 
     private String accessToken;
 
+
 }

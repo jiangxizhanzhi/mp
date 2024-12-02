@@ -8,6 +8,9 @@ import lombok.Setter;
 @Setter
 public class ThirdSyncOrg {
 
+    @JSONField(name = "idt_org__id")
+    private String idt_org__id ;
+
     @JSONField(name = "orgCustomUnique")
     private String orgCustomUnique;
 
