@@ -48,26 +48,25 @@ public class ThirdSyncController {
     private TenantUserServiceImpl tenantUserService;
 
     @Resource
-    private ThirdSsoConfig config ;
+    private ThirdSsoConfig config;
 
     @AuthTarget(TargetEnum.NO_AUTH)
     @PostMapping("/api/v1/user")
     public Res syncUser(@RequestBody Map<String, Object> input, @RequestParam(value = "access_token") String accessToken) {
-        ThirdSsoUtil.verify(accessToken,config.getClientsecret());
+        log.info("同步用户, 内容: {}", JsonCommon.stringify(input));
+        ThirdSsoUtil.verify(accessToken, config.getClientsecret());
         ThirdSyncUser user = JsonCommon.parse(JsonCommon.stringify(input), ThirdSyncUser.class);
-        log.info("sync user , {}", JsonCommon.snakeStringify(user));
         UserRequest request = new UserRequest();
-        request.setIdentifier(user.getAccountNo());
+        request.setIdentifier(user.getWesisCustomUnique());
         request.setMobile(user.getMobile());
         request.setTenant("default");
-        request.setUsername(user.getAccountNo());
-        request.setPassword("d8165e80c4abed2dcc1dd06df1a8be31");
+        request.setUsername(user.getWesisCustomUnique());
+        request.setPassword(String.format("%s123#", user.getWesisCustomUnique()));
         request.setName(user.getUserName());
         request.setNickname(user.getUserName());
         request.setAvatar("");
         request.setEmail(user.getEmail());
         request.setDescription("");
-        request.setName(user.getUserUid());
         List<String> orgIds = new ArrayList<>();
         List<String> roleIds = new ArrayList<>();
         request.setRoleIds(roleIds);
@@ -85,17 +84,35 @@ public class ThirdSyncController {
 
 
         if (user.getActionFlag() == 4) {
+            // 禁用
             HumanCondition condition = new HumanCondition().filterEqual(UserModel::getUsername, request.getUsername());
             var userModel = userMapper.first(condition);
             if (userModel != null) {
                 userService.disable(userModel.getId());
+            } else {
+                log.error("禁用用户，但是指定的用户不存在!");
+                return Res.fail("disable user , user not exists");
+            }
+        } else if (user.getActionFlag() == 3) {
+            // 启用
+            HumanCondition condition = new HumanCondition().filterEqual(UserModel::getUsername, request.getUsername());
+            var userModel = userMapper.first(condition);
+            if (userModel != null) {
+                userService.enable(userModel.getId());
+            } else {
+                log.error("启用用户，但是指定的用户不存在!");
+                return Res.fail("enable user , user not exists");
             }
         } else {
             HumanCondition condition = new HumanCondition().filterEqual(UserModel::getUsername, request.getUsername());
             var userModel = userMapper.first(condition);
             if (userModel == null) {
+                // 新增用户
+                log.info("新增用户");
                 userService.addV2(request);
             } else {
+                // 修改用户
+                log.info("修改用户 , user id {} ", userModel.getId());
                 request.setId(userModel.getId());
                 userService.modifyV2(request);
             }
@@ -106,15 +123,15 @@ public class ThirdSyncController {
     @AuthTarget(TargetEnum.NO_AUTH)
     @PostMapping("/api/v1/org")
     public Res syncOrg(@RequestBody Map<String, Object> input, @RequestParam(value = "access_token") String accessToken) {
+        log.info("同步组织, 内容: {}", JsonCommon.stringify(input));
         ThirdSyncOrg org = JsonCommon.parse(JsonCommon.stringify(input), ThirdSyncOrg.class);
-        log.info("sync org , {}", JsonCommon.stringify(org));
         if (org.getActionFlag() == 4) {
             orgMapper.delete(org.getOrgCustomUnique());
         } else {
             OrgModel orgModel = new OrgModel();
             orgModel.setDescription("");
             orgModel.setTenant("default");
-            orgModel.setId(org.getOrgCustomUnique());
+            orgModel.setId(org.getIdt_org__id());
             orgModel.setParent(org.getParentOrgID());
             orgModel.setName(org.getOrgName());
             orgModel.setIdentifier(org.getOrgCustomUnique());
@@ -140,6 +157,13 @@ public class ThirdSyncController {
         public static Res success() {
             Res res = new Res();
             res.setCode("0");
+            return res;
+        }
+
+        public static Res fail(String msg) {
+            Res res = new Res();
+            res.setCode("-1");
+            res.setMsg(msg);
             return res;
         }
     }

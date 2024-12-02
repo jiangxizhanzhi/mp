@@ -20,11 +20,24 @@ import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
-import cn.cyberpeace.mp.auth.service.*;
+import cn.cyberpeace.mp.auth.service.ExpireRemindDateGetter;
+import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
+import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.auth.service.RoleService;
+import cn.cyberpeace.mp.auth.service.TenantUserService;
+import cn.cyberpeace.mp.auth.service.UserCacheService;
+import cn.cyberpeace.mp.auth.service.UserPermissionService;
+import cn.cyberpeace.mp.auth.service.UserRoleService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.service.sender.AuthStatusRabbitmqSender;
-import cn.cyberpeace.mp.auth.util.*;
+import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
+import cn.cyberpeace.mp.auth.util.FileUtils;
+import cn.cyberpeace.mp.auth.util.ParamCheck;
+import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
@@ -54,10 +67,26 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.Function;
 
 /**
@@ -68,8 +97,7 @@ import java.util.function.Function;
 @Service
 @Slf4j
 @CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL)
-public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper, UserFields, UserQueryParams>
-        implements UserService {
+public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper, UserFields, UserQueryParams> implements UserService {
 
     public static final String CACHE_VAL_USERMODEL_BY_ID = "USERMODEL_BY_ID_CACHE";
 
@@ -217,8 +245,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
      */
     public void batchSetDefaultIfNoAvatar(List<UserBo> userBos) {
         if (CollectionUtils.isNotEmpty(userBos)) {
-            List<LocalFileMappingModel> mappingModelList =
-                    DefaultImgUtil.listByGroups(Collections.singletonList(DefaultImgDirEnum.AVATAR.getGroup()));
+            List<LocalFileMappingModel> mappingModelList = DefaultImgUtil.listByGroups(Collections.singletonList(DefaultImgDirEnum.AVATAR.getGroup()));
             String defaultAvatar = getDefaultUserAvatar();
             for (UserBo userDto : userBos) {
                 if (StringUtils.isEmpty(userDto.getAvatar())) {
@@ -247,7 +274,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         opUserPermCheckService.checkByTargetUserIdsForSearching(Objects.nonNull(queryParams.getIds()) ? Arrays.asList(queryParams.getIds()) : null);
         ListObjServiceResult<UserModel> listObjSrvResult = super.list(queryParams);
 
-        if (Objects.isNull(listObjSrvResult.getSource()) || CollectionUtils.isEmpty(listObjSrvResult.getSource().getObjs())) {
+        if (Objects.isNull(listObjSrvResult.getSource()) || CollectionUtils.isEmpty(listObjSrvResult.getSource()
+                                                                                            .getObjs())) {
             return listObjSrvResult;
         }
 
@@ -318,7 +346,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public ServiceResult<Boolean>  delete(String userId) {
+    public ServiceResult<Boolean> delete(String userId) {
         if (opUserPermCheckService.isOperateSelf(Collections.singletonList(userId))) {
             throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_DELETE_SELF);
         }
@@ -375,7 +403,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Transactional(rollbackFor = Exception.class)
     public UserModel addV2(UserRequest createRequest) {
-        UserModel userCreated = upsertUserModel(createRequest);
+        UserModel userCreated = upsertThirdUserModel(createRequest);
         String userId = userCreated.getId();
         log.info("user create success id:{}", userId);
 
@@ -408,16 +436,36 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public UserModel modifyV2(UserRequest modifyRequest) {
+    public void modifyV2(UserRequest modifyRequest) {
+        String userId = modifyRequest.getId();
 
-        UserModel userModified = upsertUserModel(modifyRequest);
-        String userId = userModified.getId();
+        UserModel updateModel = new UserModel();
+        updateModel.setId(modifyRequest.getId());
+        updateModel.setName(modifyRequest.getName());
+        updateModel.setNickname(modifyRequest.getNickname());
+        BeanCommon.getBean(UserMapper.class).update(updateModel);
 
         saveUserOrgRelationV2(modifyRequest.getOrgIds(), userId);
         saveUserRoleRelationV2(modifyRequest.getRoleIds(), userId);
-
         userCacheService.evictAllUserCache();
-        return userModified;
+    }
+
+    private UserModel upsertThirdUserModel(UserRequest thirdUserRequest) {
+        UserModel userModel = new UserModel();
+        userModel.setName(thirdUserRequest.getName());
+        userModel.setUsername(thirdUserRequest.getUsername());
+        userModel.setInitCheck(0);
+        userModel.setPassword(thirdUserRequest.getPassword());
+        userModel.encodePassword();
+        userModel.setIdentifier(userModel.getUsername());
+        userModel.initDefault();
+        try {
+            userModel.setDelayRemindLicenseTime(BeanCommon.getBean(ExpireRemindDateGetter.class).get());
+        } catch (Exception e) {
+            log.info("failed to get ActivationResponse delay data , {}", e.getMessage());
+            userModel.setDelayRemindLicenseTime(LocalDateTime.now().plusMonths(360));
+        }
+        return userModel;
     }
 
     private UserModel upsertUserModel(UserModel userModel) {
@@ -604,7 +652,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
         }
 
-        UserModel userUpdate = UserModel.builder().id(currentUser.getId()).password(newPwd).initCheck(UserModel.INT_CHECK_NO).build();
+        UserModel userUpdate = UserModel.builder().id(currentUser.getId()).password(newPwd)
+                .initCheck(UserModel.INT_CHECK_NO).build();
         update(userUpdate);
         userCacheService.evictAllUserCache();
         return true;
@@ -625,7 +674,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
         }
 
-        UserModel userUpdate = UserModel.builder().id(userId).password(newPwd).initCheck(UserModel.INT_CHECK_NO).build();
+        UserModel userUpdate = UserModel.builder().id(userId).password(newPwd).initCheck(UserModel.INT_CHECK_NO)
+                .build();
         update(userUpdate);
         userCacheService.evictAllUserCache();
         return true;
@@ -942,7 +992,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     /**
      * 处理用户过期状态，只有当用户状态为正常状态，且过期时间已到的时候，才会更改为过期状态
-     *
      * @param user
      */
     @Override
@@ -1098,7 +1147,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
 
-        if(needRole) {
+        if (needRole) {
             List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
             userBo.setRoles(roles);
 
@@ -1116,7 +1165,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         return userBo;
     }
-
 
 
 //    @Override
@@ -1180,12 +1228,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (Objects.isNull(importUserBo)) {
             return null;
         }
-        UserModel userModel =
-                UserModel.builder().username(importUserBo.getUsername())
-                        .name(importUserBo.getName())
-                        // 此处不需要加密，后面的create()方法会加密
-                        .password(importUserBo.getPassword())
-                        .build();
+        UserModel userModel = UserModel.builder().username(importUserBo.getUsername()).name(importUserBo.getName())
+                // 此处不需要加密，后面的create()方法会加密
+                .password(importUserBo.getPassword()).build();
         if (StringUtils.isNotBlank(importUserBo.getExpiredTime())) {
             LocalDate expDate = TimeUtils.stringToLocalDate(importUserBo.getExpiredTime());
             userModel.setExpiredTime(expDate.atTime(23, 59, 59));
@@ -1281,21 +1326,18 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         boolean cleanUserTargetsSuccess = userPermissionService.deleteByUserId(userId);
         boolean cleanUserTenantsSuccess = tenantUserService.deleteByUserId(userId);
 
-        if(!cleanUserRolesSuccess || !cleanUserOrgsSuccess || !cleanUserTargetsSuccess || !cleanUserTenantsSuccess) {
+        if (!cleanUserRolesSuccess || !cleanUserOrgsSuccess || !cleanUserTargetsSuccess || !cleanUserTenantsSuccess) {
             log.info("cleanUserRolesSuccess:{}, cleanUserOrgsSuccess:{}, cleanUserTargetsSuccess:{}, cleanUserTenantsSuccess:{}", cleanUserRolesSuccess, cleanUserOrgsSuccess, cleanUserTargetsSuccess, cleanUserTenantsSuccess);
             throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
         }
     }
 
     public List<UserOrgRoleBo> getByUserIds(String[] userIds) {
-        HumanCondition userCondition = new HumanCondition()
-                .filterIn(UserModel::getId, userIds)
-                .distinct()
+        HumanCondition userCondition = new HumanCondition().filterIn(UserModel::getId, userIds).distinct()
                 .orderBy(UserModel::getPk);
         List<UserModel> userModels = getModelMapper().list(userCondition);
 
-        HumanCondition orgUserCondition = new HumanCondition()
-                .filterIn(TenantUserModel::getUser, userIds)
+        HumanCondition orgUserCondition = new HumanCondition().filterIn(TenantUserModel::getUser, userIds)
                 .select(TenantUserModel::getUser)
                 .selectAs(GroupConcat.f(TenantUserModel::getOrg).distinct(), UserOrgRoleBo.FIELD_ORGS)
                 .groupBy(TenantUserModel::getUser);
@@ -1305,8 +1347,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             orgMap.put((String) userOrg.get(UserOrgRoleBo.FIELD_USER), (String) userOrg.get(UserOrgRoleBo.FIELD_ORGS));
         }
 
-        HumanCondition userRoleCondition = new HumanCondition()
-                .filterIn(UserRoleModel::getUser, userIds)
+        HumanCondition userRoleCondition = new HumanCondition().filterIn(UserRoleModel::getUser, userIds)
                 .select(UserRoleModel::getUser)
                 .selectAs(GroupConcat.f(UserRoleModel::getRole).distinct(), UserOrgRoleBo.FIELD_ROLES)
                 .groupBy(UserRoleModel::getUser);
