@@ -178,8 +178,8 @@ mp:
       clientid: ${clientid:0ebc99b175b4449c}
       clientsecret: ${clientsecret:8ec51f5d869e4f1388b97edfaf24f8f9}
       responsetype: ${responsetype:code}
-      redirecturi: ${redirecturi:http://www.cyberpeacebc.cn/api/mp/unauth/third-login/code}
-      pageurl: ${pageurl:http://10.100.1.28/page/mg/personal}
+      redirecturi: ${redirecturi:http://www.cyberpeacebc.cn/api/mp/unauth/third-login}
+      pageurl: ${pageurl:http://www.cyberpeacebc.cn/page/mg/personal}
       gettokenurl: ${gettokenurl:https://wesis-test.pipechina.com.cn/esc-sso/oauth2.0/accessToken}
       getuserurl: ${getuserurl:https://wesis-test.pipechina.com.cn/esc-sso/oauth2.0/profile}
       getcodeurl: ${getcodeurl:https://wesis-test.pipechina.com.cn/esc-sso/oauth2.0/authorize}
