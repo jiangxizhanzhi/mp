@@ -56,14 +56,7 @@ public class ThirdSsoController {
         } else {
             String url = thirdSsoConfig.getPageurl();
             log.info("第三方登录 , code {} , 跳转页面 {}", code, url);
-            // 如果有 jwt 且为有效的登录状态，则直接跳转到url
-            boolean tokenCheck = this.tokenCheck(request, response);
-            if (tokenCheck) {
-                log.info("原有 token 校验成功,跳转至: {}", url);
-                return String.format("redirect:%s", url);
-            } else {
-                return thirdLoginService.loginByCode(code, request, response);
-            }
+            return thirdLoginService.loginByCode(code, request, response);
         }
     }
 

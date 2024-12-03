@@ -154,7 +154,7 @@ mp:
       mq-msg-timeout: ${MP_AUTH_MQ_MSG_TIMEOUT:3600000}
       authenticate-cache-time: ${MP_AUTH_CACHE_TIME:30}
       authenticate-use-individual-token-secret: ${MP_AUTH_USE_INDIVIDUAL_TOKEN_SECRET:true}
-      authenticate-jwt-expires: ${MP_AUTH_JWT_EXPIRES:604800}
+      authenticate-jwt-expires: ${MP_AUTH_JWT_EXPIRES:172800}
       authenticate-urls: ${MP_AUTH_URLS:/auth/**,/sys/**,/flow/**,/cscene/**,/devops/**,/agg/**,/common/**,/collection/**,/probes/**,/wazuh/**,/sessions/**,/flow_group/**}
       authenticate-encoder-hash-width: ${MP_AUTH_ENCODER_HASHWIDTH:256}
   sceneplugingns3:
