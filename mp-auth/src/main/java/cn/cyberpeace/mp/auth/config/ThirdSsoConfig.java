@@ -15,7 +15,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "mp.thirdsso")
 public class ThirdSsoConfig {
-    private String appcode;
+    private String roleappcode;
+    private String roleclientid;
+    private String roleclientsecret;
     private String clientid;
     private String clientsecret;
     private String responsetype;

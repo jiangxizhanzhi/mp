@@ -57,7 +57,7 @@ public class ThirdSyncController {
         ThirdSsoUtil.verify(accessToken, config.getClientsecret());
         ThirdSyncUser user = JsonCommon.parse(JsonCommon.stringify(input), ThirdSyncUser.class);
         UserRequest request = new UserRequest();
-        request.setIdentifier(user.getWesisCustomUnique());
+        request.setThirdAccountNo(user.getAccountNo());
         request.setMobile(user.getMobile());
         request.setTenant("default");
         request.setUsername(user.getWesisCustomUnique());

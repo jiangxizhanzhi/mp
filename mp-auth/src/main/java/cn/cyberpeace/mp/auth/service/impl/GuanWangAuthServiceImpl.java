@@ -7,10 +7,13 @@ import cn.cyberpeace.mp.auth.extensions.security.filter.JwtAuthenticationFilter;
 import cn.cyberpeace.mp.auth.model.TokenModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.TokenMapper;
+import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,7 +47,9 @@ public class GuanWangAuthServiceImpl {
     public String loginByCode(String code, HttpServletRequest request, HttpServletResponse response) {
         GetTokenRes getTokenRes = this.getToken(code, request, response);
         ThirdUser userInfo = this.getThirdUser(getTokenRes.getAccessToken());
-        UserModel userModel = userService.getByUserName(userInfo.getAccount_no());
+
+        HumanCondition condition = new HumanCondition().filterEqual(UserModel::getThirdAccountNo, userInfo.getAccount_no());
+        UserModel userModel = BeanCommon.getBean(UserMapper.class).first(condition);
         if (Objects.isNull(userModel)) {
             log.info("用户不存在 , username is {}", userInfo.getAccount_no());
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);

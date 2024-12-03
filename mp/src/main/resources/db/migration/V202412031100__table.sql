@@ -1,0 +1,1 @@
+ALTER TABLE mp_auth_user ADD COLUMN third_account_no varchar(128) NOT NULL default '' DEFAULT 0 COMMENT '第三方账户' ;

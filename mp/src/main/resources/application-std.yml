@@ -290,7 +290,9 @@ mp:
   aggregation:
     export-image-timeout: ${mp.aggregation.ext-var.export-image-timeout}
   thirdsso:
-    appcode: ${mp.thirdsso.ext-var.appcode}
+    roleappcode: ${mp.thirdsso.ext-var.roleappcode}
+    roleclientid: ${mp.thirdsso.ext-var.roleclientid}
+    roleclientsecret: ${mp.thirdsso.ext-var.roleclientsecret}
     clientid: ${mp.thirdsso.ext-var.clientid}
     clientsecret: ${mp.thirdsso.ext-var.clientsecret}
     responsetype: ${mp.thirdsso.ext-var.responsetype}
