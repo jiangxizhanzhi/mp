@@ -103,7 +103,7 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
      */
     @ApiOperation("分页查询告警信息")
     @GetMapping("/sendMail")
-    public ServiceResult<SystemAlarmVO> sendMail(AlarmQueryParams queryParams) {
+    public ServiceResult<String> sendMail(AlarmQueryParams queryParams) {
 //        queryParams.ensure();
         if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
             // 默认按时间降序
@@ -139,8 +139,8 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
                         .append(",").append(model.getCreateTime().format(formatter)).append(";");
             }
             //
-            mailService.sendMail(content);
-            return ResultCommon.success();
+            return mailService.sendMail(content);
+
         } else {
             return ResultCommon.fail("告警信息为空，邮件发送失败");
         }

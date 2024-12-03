@@ -1,7 +1,10 @@
 package cn.cyberpeace.mp.devopscluster.service;
 
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +26,7 @@ public class MailService {
     @Autowired
     private SituationAwareConfig situationAwareConfig;
 
-    public void sendMail(StringBuffer content) {
+    public ServiceResult<String> sendMail(StringBuffer content) {
         String to = situationAwareConfig.getTarget();
         String from = situationAwareConfig.getUsername();
         String host = situationAwareConfig.getHost();
@@ -103,9 +106,10 @@ public class MailService {
             message.saveChanges();
             Transport.send(message);
             log.error("邮件发送成功");
+            return ResultCommon.success();
         }catch (MessagingException | UnsupportedEncodingException mex) {
             log.error("邮件发送失败："+mex.getMessage());
-            throw new MpRuntimeException(BaseErrorCode.ERROR);
+            return ServiceResult.<String>builder().serviceCode(AuthErrorCode.CONNECT_MAIL_ERROR).build().asResult();
         }
     }
 
