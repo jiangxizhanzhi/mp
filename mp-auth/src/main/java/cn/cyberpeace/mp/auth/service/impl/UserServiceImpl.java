@@ -443,6 +443,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         updateModel.setId(modifyRequest.getId());
         updateModel.setName(modifyRequest.getName());
         updateModel.setNickname(modifyRequest.getNickname());
+        updateModel.setThirdAccountNo(modifyRequest.getThirdAccountNo());
         BeanCommon.getBean(UserMapper.class).update(updateModel);
 
         saveUserOrgRelationV2(modifyRequest.getOrgIds(), userId);
@@ -452,6 +453,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     private UserModel upsertThirdUserModel(UserRequest thirdUserRequest) {
         UserModel userModel = new UserModel();
+        userModel.setThirdAccountNo(thirdUserRequest.getThirdAccountNo());
         userModel.setName(thirdUserRequest.getName());
         userModel.setUsername(thirdUserRequest.getUsername());
         userModel.setInitCheck(0);

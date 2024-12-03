@@ -44,10 +44,10 @@ public class ThirdSsoUtil {
 
     public static void syncRole(SyncRole syncRole) {
         ThirdSsoConfig config = BeanCommon.getBean(ThirdSsoConfig.class);
-        syncRole.setApp_app__code(config.getAppcode());
+        syncRole.setApp_app__code(config.getRoleappcode());
         Map<String, String> header = new HashMap<>();
         header.put("Content-Type", "application/json");
-        header.put("Authorization", "Bearer " + createToken(config.getClientid(), config.getClientsecret()));
+        header.put("Authorization", "Bearer " + createToken(config.getRoleclientid(), config.getRoleclientsecret()));
         try {
             log.info("sync role ,url is {}, header is {} , body is {}", config.getSyncroleurl(), JsonCommon.stringify(header), JsonCommon.stringify(syncRole));
             var res = HttpUtils.sendHttpPost(config.getSyncroleurl(), JsonCommon.snakeStringify(syncRole), header);
