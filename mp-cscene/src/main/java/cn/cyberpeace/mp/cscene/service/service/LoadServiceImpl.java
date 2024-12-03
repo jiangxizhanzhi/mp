@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.cscene.service.service;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
@@ -13,7 +12,6 @@ import cn.cyberpeace.mp.common.constant.codeEnum.CommonStatusCodeEnum;
 import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
 import cn.cyberpeace.mp.common.service.impl.CommonConfigServiceImpl;
 import cn.cyberpeace.mp.common.service.impl.CommonFileServiceImpl;
-import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.model.*;
 import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
@@ -21,15 +19,20 @@ import cn.cyberpeace.mp.cscene.request.load.LoadResultExportRequest;
 import cn.cyberpeace.mp.cscene.request.load.LoadResultSearchRequest;
 import cn.cyberpeace.mp.cscene.request.load.OutLoadModifyTagsRequest;
 import cn.cyberpeace.mp.cscene.request.ojj.IdsRequest;
+import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.websocket.LoadResultWebSocketServer;
 import cn.cyberpeace.mp.cscene.websocket.WebSocketServer;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.BeanUtils;
@@ -56,6 +59,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class LoadServiceImpl {
     @Autowired
@@ -75,6 +79,9 @@ public class LoadServiceImpl {
 
     @Autowired
     private CommonConfigServiceImpl commonConfigService;
+
+    @Autowired
+    private CsceneCommonService csceneCommonService;
 
     // 载荷改造地址
     @Value("${project.setting.load-transform-url:http://ip:port}")
@@ -274,6 +281,17 @@ public class LoadServiceImpl {
         }
     }
 
+    private void sendMessage(WebSocketServer webSocketServer, Session session, JSONObject jsonObject) {
+        try {
+            // 将JSONObject转换为JSON字符串
+            String jsonString = jsonObject.toJSONString();
+            webSocketServer.sendMessage(session, jsonString);
+            webSocketServer.onClose(session);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private MpDevopsLoadSceneLog convertToolToJSONObject(LinkedHashMap tool) {
         MpDevopsLoadSceneLog mpDevopsLoadSceneLog = new MpDevopsLoadSceneLog();
         if (tool != null) {
@@ -340,7 +358,7 @@ public class LoadServiceImpl {
             String[] split = (s != null && !s.isEmpty()) ? s.split(",") : new String[0];
             // 使用 commonCodeService 获取 codeMap
             Map<String, String> codeMap = new HashMap<String, String>();
-            if(split != null && split.length > 0){
+            if (split != null && split.length > 0) {
                 codeMap = commonCodeService.getDatasByCodes(split);
             }
             // 收集 codeMap 的 value 转成 String[]
@@ -540,7 +558,7 @@ public class LoadServiceImpl {
      * */
     public Boolean addLoadExecutionResult(MpDevopsLoadSceneLog requestData) {
         // todo 假数据待删除
-        switch (requestData.getId()){
+        switch (requestData.getId()) {
             case "16":
                 requestData.setResultStatus("1005010101");//success
                 requestData.setResultLog(" INF Detect config path: config/config.yaml\n" +
@@ -596,7 +614,69 @@ public class LoadServiceImpl {
                 break;
         }
         Boolean addLoadExecutionResult = loadMapper.addLoadExecutionResult(requestData);
+        String sceneId = requestData.getSceneId();
+        String scene = csceneCommonService.translateSceneId(sceneId);
+        SceneHandler sceneHandler = new SceneHandler(scene, null, false, null);
+        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        Map<String, CloudPluginSceneElementBO> elementMap = cloudPlugin.getElementMap();
+        Map<String, CloudPluginSceneElementBO> taskIdToMap = elementMap.values().stream()
+                .filter(element -> BaseCloudPluginSceneElementModel.ImageType.LOAD.equals(element.getImageType()))
+                .collect(Collectors.toMap(CloudPluginSceneElementBO::getResourceId, element -> element, (existing, replacement) -> replacement));
+        Map<String, CloudPluginSceneElementBO> collect = elementMap.values().stream()
+                .filter(element -> "cloudUUID".equals(element.getSrcElement().getArea()))
+                .collect(Collectors.toMap(element -> element.getSrcElement().getId(), element -> element));
+        List<String> elementIds = elementMap.values().stream()
+                .filter(element -> "cloudUUID".equals(element.getSrcElement().getArea()))
+                .map(element -> element.getSrcElement().getId())
+                .collect(Collectors.toList());
+        List<String> loadElementIds = elementMap.values().stream()
+                .filter(element -> "loadUUID".equals(element.getSrcElement().getArea()))
+                .map(element -> element.getSrcElement().getId())
+                .collect(Collectors.toList());
+
+        Random random = new Random();
+        JSONObject rbSituationAttack = new JSONObject();
+        String srcNode = taskIdToMap.get(requestData.getTaskId()).getSrcElement().getId();
+        rbSituationAttack.put("code", "attack_event_element-element");
+        rbSituationAttack.put("look_at_target", false);
+        rbSituationAttack.put("scene_id", sceneId);
+        rbSituationAttack.put("scene_name", sceneHandler.getScene().getName());
+        rbSituationAttack.put("source_id", taskIdToMap.get(requestData.getTaskId()).getSrcElement().getId());
+        if (elementIds.size() > 0) {
+            rbSituationAttack.put("target_id", getdstNode(srcNode, elementIds, random));
+        } else {
+            rbSituationAttack.put("target_id", getdstNode(srcNode, loadElementIds, random));
+        }
+        rbSituationAttack.put("type", 0);
+        rbSituationAttack.put("use_name", 1);
+        JSONObject data = new JSONObject();
+        data.put("category", "attack");
+        data.put("description", "载荷执行");
+        data.put("duration", 3);
+        JSONObject lineStyle = new JSONObject();
+        lineStyle.put("color", "#FF0000");
+        lineStyle.put("line_type", "fly");
+        lineStyle.put("width", 0);
+        data.put("line_style", "solid");
+        data.put("flow_type", lineStyle);
+        rbSituationAttack.put("data", data);
+
+        log.info("addLoadExecutionResult sendMessage begin.");
+//给所有当前登录的session推送消息
+        WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
+            log.info("addLoadExecutionResult sendMessage success message: {}" + rbSituationAttack.toString());
+            sendMessage(webSocketServer, session, rbSituationAttack);
+        });
+
         return addLoadExecutionResult;
+    }
+
+    private String getdstNode(String srcNode, List<String> ids, Random random) {
+        String dstNode = ids.get(random.nextInt(ids.size()));
+        if (ids.size() >= 2 && srcNode.equals(dstNode)) {
+            dstNode = getdstNode(srcNode, ids, random);
+        }
+        return dstNode;
     }
 
     private boolean validateRequestData(List<LoadRequest> requestData) {
@@ -1182,7 +1262,7 @@ public class LoadServiceImpl {
 
     public List<MpDevopsLoadSceneLog> getLoadResultByNodeIds(String sceneId, String[] nodeIds, String endTime) {
         LocalDateTime localDateTime = null;
-        if(org.apache.commons.lang3.StringUtils.isNotBlank(endTime)){
+        if (org.apache.commons.lang3.StringUtils.isNotBlank(endTime)) {
             localDateTime = TimeUtils.stringToLocalDateTime(endTime);
         }
         CsceneInstanceModel csceneInstanceModel = csceneInstanceService.getModelMapper().get(sceneId);
@@ -1196,7 +1276,7 @@ public class LoadServiceImpl {
                 .collect(Collectors.toList());
         List<MpDevopsLoadSceneLog> getLoadResultByPks = new ArrayList<>();
         if (loadIds != null && loadIds.size() > 0) {
-            getLoadResultByPks = loadMapper.getLoadResultByLoadIds(loadIds,sceneId,localDateTime);
+            getLoadResultByPks = loadMapper.getLoadResultByLoadIds(loadIds, sceneId, localDateTime);
         }
         if (getLoadResultByPks != null && getLoadResultByPks.size() > 0) {
             String[] codes = {CommonStatusCodeEnum.RESULT_STATUS.getCode(), CommonStatusCodeEnum.ACTION_TYPE.getCode(),
