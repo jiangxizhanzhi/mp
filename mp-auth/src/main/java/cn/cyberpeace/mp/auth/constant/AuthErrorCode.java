@@ -93,7 +93,7 @@ public enum AuthErrorCode implements ErrorCode {
     ROLE_NAME_EXISTED("MP-110089", "role_name_existed"),
     ROLE_CANNOT_DELETE_FOR_REGISTER_DEFAULT("MP-110090", "role_cannot_delete_for_register_default"),
 
-    CONNECT_MAIL_ERROR("MP-110091", "连接邮件服务器异常"),
+    CONNECT_MAIL_ERROR("MP-110091", "smtp_connect_error"),
 
 
 
