@@ -57,6 +57,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,6 +121,11 @@ public class AiSaiController {
         }
     }
 
+    @GetMapping("/flow/detail")
+    public ListObjServiceResult<CollectionFlowBO.Output> detail(FlowQueryParams queryParams) {
+        return null;
+    }
+
     @GetMapping("/flow/page")
     public ListObjServiceResult<CollectionFlowBO.Output> pageFlow(FlowQueryParams queryParams) {
         this.init();
@@ -130,8 +136,18 @@ public class AiSaiController {
         // 构建查询
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         var boolquery = QueryBuilders.boolQuery();
-        boolquery.must(QueryBuilders.termsQuery("source.ip", queryParams.getAgentIps()));
-        boolquery.must(QueryBuilders.termsQuery("destination.ip", new ArrayList<>(team.getIpAgentName().keySet())));
+
+        if(StringUtils.isNotEmpty(queryParams.getSourceIps())){
+            boolquery.must(QueryBuilders.termsQuery("source.ip", Arrays.asList(queryParams.getSourceIps())));
+        }else{
+            boolquery.must(QueryBuilders.termsQuery("source.ip", queryParams.getAgentIps()));
+        }
+
+        if(StringUtils.isNotEmpty(queryParams.getTargetIps())){
+            boolquery.must(QueryBuilders.termsQuery("destination.ip", Arrays.asList(queryParams.getTargetIps())));
+        }else{
+            boolquery.must(QueryBuilders.termsQuery("destination.ip", new ArrayList<>(team.getIpAgentName().keySet())));
+        }
 //        boolquery.must(QueryBuilders.existsQuery("suricata"));
         if (queryParams.getProtocol() != null) {
             boolquery.must(QueryBuilders.termQuery("protocol", queryParams.getProtocol()));
@@ -419,6 +435,8 @@ public class AiSaiController {
         private String startTime;
         private String endTime;
         private Integer port;
+        private String sourceIps ;
+        private String targetIps;
     }
 
     @Getter
