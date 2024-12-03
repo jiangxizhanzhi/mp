@@ -140,7 +140,9 @@ public class StopHandler extends HandlerCommon {
                     DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
                     DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
                     Load load = new Load(synchronousDataSource);
-                    load.stop(element.getLoadResourceInstanceId());
+                    if(BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL != element.getLoadSource()) {
+                        load.stop(element.getLoadResourceInstanceId());
+                    }
                 });
             }
         } else {

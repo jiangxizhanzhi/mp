@@ -127,7 +127,9 @@ public class PauseHandler extends HandlerCommon {
                     DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
                     DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
                     Load load = new Load(synchronousDataSource);
-                    load.pause(element.getLoadResourceInstanceId());
+                    if(BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL != element.getLoadSource()){
+                        load.pause(element.getLoadResourceInstanceId());
+                    }
                 });
             }
         } else {

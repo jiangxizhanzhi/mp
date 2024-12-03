@@ -896,7 +896,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                     .filterOrEnd();
 //              判断场景是否在启动状态 启动载荷
             if (sceneMapper.list(humanCondition).size() > 0) {
-                load.start(cloudPluginSceneElementModel.getLoadResourceInstanceId());
+                if(BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL != cloudPluginSceneElementModel.getLoadSource()) {
+                    load.start(cloudPluginSceneElementModel.getLoadResourceInstanceId());
+                }
             }
         }
         return new ServiceResult<>(true);

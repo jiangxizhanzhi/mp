@@ -130,7 +130,9 @@ public class UnpauseHandler extends HandlerCommon {
                     DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
                     DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
                     Load load = new Load(synchronousDataSource);
-                    load.unpause(element.getLoadResourceInstanceId());
+                    if(BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL != element.getLoadSource()) {
+                        load.unpause(element.getLoadResourceInstanceId());
+                    }
                 });
             }else {
                 getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.UNPAUSE, Arrays.asList(ElementProcess.UNPAUSE_VNET));

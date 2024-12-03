@@ -160,8 +160,9 @@ public class StartHandler extends HandlerCommon {
                     DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
                     DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
                     Load load = new Load(synchronousDataSource);
-
-                    load.start(element.getLoadResourceInstanceId());
+                    if(BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL != element.getLoadSource()) {
+                        load.start(element.getLoadResourceInstanceId());
+                    }
                 });
             }
         } else {

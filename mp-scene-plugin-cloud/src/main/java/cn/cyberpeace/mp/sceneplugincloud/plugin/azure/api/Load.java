@@ -165,6 +165,9 @@ public class Load {
     }
 
     public void recreate(CloudPluginSceneElementBO element) {
+        if(BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL == element.getLoadSource()){
+            return;
+        }
         HashMap<String, Object> formMap = new HashMap<>();
         formMap.put("taskId", element.getResourceId());
         //重置任务
