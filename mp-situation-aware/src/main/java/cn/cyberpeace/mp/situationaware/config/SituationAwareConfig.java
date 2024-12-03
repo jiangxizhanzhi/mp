@@ -100,4 +100,11 @@ public class SituationAwareConfig {
         private List<String> restartRestrictList;
     }
 
+    private String host;
+    private String username;
+    private String password;
+    private String target;
+    private String sendname;
+    private String title;
+
 }

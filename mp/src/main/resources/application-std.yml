@@ -176,6 +176,15 @@ mp:
     arkime-es-nodes: ${mp.situationaware.ext-var.arkime-es-host}:${mp.situationaware.ext-var.arkime-es-port}
     # es 日期格式
     es-date-pattern: yyyy-MM-dd'T'HH:mm:ss.SSSZ
+
+    #邮箱设置
+    host: ${MAIL_HOST:smtp.163.com}
+    username: ${MAIL_USERNAME:m18311016658@163.com}
+    password: ${MAIL_PASSWORD:VPT2GYswAxyKNdcy}
+    target: ${MAIL_TARGET:858379880@qq.com}
+    sendname: ${MAIL_SENDNAME:m18311016658@163.com<一体化安全测试平台>}
+    title: ${MAIL_TITLE:一体化安全测试平台告警邮件}
+
   # mp-log 模块
   log:
     ext-var:

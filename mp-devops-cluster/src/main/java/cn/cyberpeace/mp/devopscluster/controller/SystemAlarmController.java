@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.devopscluster.request.alarm.AlarmDistributionRequest;
 import cn.cyberpeace.mp.devopscluster.request.alarm.AlarmQueryParams;
 import cn.cyberpeace.mp.devopscluster.request.alarm.AlarmTrendRequest;
 import cn.cyberpeace.mp.devopscluster.service.AlarmStatisticsService;
+import cn.cyberpeace.mp.devopscluster.service.MailService;
 import cn.cyberpeace.mp.devopscluster.service.ServiceMonitorService;
 import cn.cyberpeace.mp.devopscluster.service.SystemAlarmService;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmDistributionVo;
@@ -28,14 +29,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,6 +64,11 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
 
     @Autowired
     private AlarmStatisticsService alarmStatisticsService;
+
+    @Autowired
+    private MailService mailService;
+
+
 
     /**
      * 分页查询告警信息
@@ -86,6 +95,58 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
         this.changeServiceName(systemAlarmModels);
         return listResult;
     }
+
+    /**
+     * 分页查询告警信息
+     * @param
+     * @return
+     */
+    @ApiOperation("分页查询告警信息")
+    @GetMapping("/sendMail")
+    public ServiceResult<SystemAlarmVO> sendMail(AlarmQueryParams queryParams) {
+//        queryParams.ensure();
+        if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
+            // 默认按时间降序
+            String updateTime = BeanUtils.getBeanGetterFieldName(SystemAlarmModel::getUpdateTime);
+            updateTime = StrUtil.toUnderlineCase(updateTime);
+            queryParams.setOrders(new String[]{"-" + updateTime});
+        }
+
+        queryParams.setAlarmStatus(new Integer[]{AlarmStatusEnum.DISABLED.toValue()});
+
+        ListObjServiceResult<SystemAlarmModel> listResult = getModelService().listSystemAlarm(queryParams).asResult();
+        List<SystemAlarmModel> systemAlarmModels = listResult.getData().getList();
+        this.changeServiceName(systemAlarmModels);
+        if(CollectionUtils.isNotEmpty(systemAlarmModels)) {
+            StringBuffer content = new StringBuffer();
+            //拼装邮件内容
+            for(SystemAlarmModel model : systemAlarmModels) {
+//                告警类型：0 云平台服务, 1 业务服务 2 服务器
+                String alarmType = "";
+                if("0".equals(model.getAlarmType()+"")) {
+                    alarmType = "云平台服务";
+                }
+                if("1".equals(model.getAlarmType()+"")) {
+                    alarmType = "业务服务";
+                }
+                if("2".equals(model.getAlarmType()+"")) {
+                    alarmType = "服务器";
+                }
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+                content.append(alarmType).append(",").append(model.getServername())
+                        .append(",").append(model.getHostname()).append(",").append(model.getAlarmMsg())
+                        .append(",").append(model.getCreateTime().format(formatter)).append(";");
+            }
+            //
+            mailService.sendMail(content);
+            return ResultCommon.success();
+        } else {
+            return ResultCommon.fail("告警信息为空，邮件发送失败");
+        }
+
+    }
+
 
     /**
      * 替换服务名称
