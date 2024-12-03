@@ -49,7 +49,9 @@ public class ThirdSsoUtil {
         header.put("Content-Type", "application/json");
         header.put("Authorization", "Bearer " + createToken(config.getClientid(), config.getClientsecret()));
         try {
+            log.info("sync role ,url is {}, header is {} , body is {}", config.getSyncroleurl(), JsonCommon.stringify(header), JsonCommon.stringify(syncRole));
             var res = HttpUtils.sendHttpPost(config.getSyncroleurl(), JsonCommon.snakeStringify(syncRole), header);
+            log.info("result is {}", res);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
