@@ -181,7 +181,7 @@ mp:
     host: ${MAIL_HOST:smtp.163.com}
     username: ${MAIL_USERNAME:m18311016658@163.com}
     password: ${MAIL_PASSWORD:VPT2GYswAxyKNdcy}
-    target: ${MAIL_TARGET:858379880@qq.com}
+    target: ${MAIL_TARGET:m18311016658@qq.com}
     sendname: ${MAIL_SENDNAME:m18311016658@163.com<一体化安全测试平台>}
     title: ${MAIL_TITLE:一体化安全测试平台告警邮件}
 
