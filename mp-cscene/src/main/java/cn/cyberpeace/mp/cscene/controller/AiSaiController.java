@@ -123,14 +123,15 @@ public class AiSaiController {
     @GetMapping("/flow/page")
     public ListObjServiceResult<CollectionFlowBO.Output> pageFlow(FlowQueryParams queryParams) {
         this.init();
+        var team = teamInfoMap.get(queryParams.getTeamId());
         // 创建查询请求
-        SearchRequest searchRequest = new SearchRequest("mp*");
+        SearchRequest searchRequest = new SearchRequest("mp_arkime*");
 
         // 构建查询
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
         var boolquery = QueryBuilders.boolQuery();
         boolquery.must(QueryBuilders.termsQuery("source.ip", queryParams.getAgentIps()));
-//                boolquery.must(QueryBuilders.termsQuery("destination.ip", queryParams.getAgentIps()));
+        boolquery.must(QueryBuilders.termsQuery("destination.ip", new ArrayList<>(team.getIpAgentName().keySet())));
 //        boolquery.must(QueryBuilders.existsQuery("suricata"));
         if (queryParams.getProtocol() != null) {
             boolquery.must(QueryBuilders.termQuery("protocol", queryParams.getProtocol()));
@@ -159,7 +160,7 @@ public class AiSaiController {
 
         searchRequest.source(sourceBuilder);
 
-        var restClient = teamInfoMap.get(queryParams.getTeamId()).getRestClient();
+        var restClient = team.getRestClient();
         // 执行查询
         SearchResponse searchResponse = null;
         try {
@@ -232,6 +233,10 @@ public class AiSaiController {
             }
         }
 
+        if (agentNames.isEmpty()) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<WazuhProcessModelV2>(), 0)).asResult();
+        }
+
         int size = queryParams.getPerPage();
         int from = (queryParams.getPage() - 1) * size;
         LocalDateTime end = LocalDateTime.now();
@@ -275,6 +280,9 @@ public class AiSaiController {
                 agentNames.add(map.get(agentIp));
             }
         }
+        if (agentNames.isEmpty()) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<WazuhSystemUserModel.Output>(), 0)).asResult();
+        }
 
         int size = queryParams.getPerPage();
         int from = (queryParams.getPage() - 1) * size;
@@ -303,6 +311,9 @@ public class AiSaiController {
                 agentNames.add(map.get(agentIp));
             }
         }
+        if (agentNames.isEmpty()) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<FileEventModel>(), 0)).asResult();
+        }
 
         int size = queryParams.getPerPage();
         int from = (queryParams.getPage() - 1) * size;
@@ -327,6 +338,9 @@ public class AiSaiController {
             if (map.containsKey(agentIp)) {
                 agentNames.add(map.get(agentIp));
             }
+        }
+        if (agentNames.isEmpty()) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<WazuhNetworkConnectionModel.Output>(), 0)).asResult();
         }
 
         int size = queryParams.getPerPage();
@@ -361,6 +375,10 @@ public class AiSaiController {
             if (map.containsKey(agentIp)) {
                 agentNames.add(map.get(agentIp));
             }
+        }
+
+        if (agentNames.isEmpty()) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<WazuhHostStateModel.Output>(), 0)).asResult();
         }
 
         int size = queryParams.getPerPage();
