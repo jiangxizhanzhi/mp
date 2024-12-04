@@ -23,11 +23,7 @@ import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.websocket.LoadResultWebSocketServer;
 import cn.cyberpeace.mp.cscene.websocket.WebSocketServer;
-import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
-import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -614,60 +610,6 @@ public class LoadServiceImpl {
                 break;
         }
         Boolean addLoadExecutionResult = loadMapper.addLoadExecutionResult(requestData);
-        String sceneId = requestData.getSceneId();
-        String scene = csceneCommonService.translateSceneId(sceneId);
-        SceneHandler sceneHandler = new SceneHandler(scene, null, false, null);
-        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-        Map<String, CloudPluginSceneElementBO> elementMap = cloudPlugin.getElementMap();
-        Map<String, CloudPluginSceneElementBO> taskIdToMap = elementMap.values().stream()
-                .filter(element -> BaseCloudPluginSceneElementModel.ImageType.LOAD.equals(element.getImageType()))
-                .collect(Collectors.toMap(CloudPluginSceneElementBO::getResourceId, element -> element, (existing, replacement) -> replacement));
-        Map<String, CloudPluginSceneElementBO> collect = elementMap.values().stream()
-                .filter(element -> "cloudUUID".equals(element.getSrcElement().getArea()))
-                .collect(Collectors.toMap(element -> element.getSrcElement().getId(), element -> element));
-        List<String> elementIds = elementMap.values().stream()
-                .filter(element -> "cloudUUID".equals(element.getSrcElement().getArea()))
-                .map(element -> element.getSrcElement().getId())
-                .collect(Collectors.toList());
-        List<String> loadElementIds = elementMap.values().stream()
-                .filter(element -> "loadUUID".equals(element.getSrcElement().getArea()))
-                .map(element -> element.getSrcElement().getId())
-                .collect(Collectors.toList());
-
-        Random random = new Random();
-        JSONObject rbSituationAttack = new JSONObject();
-        String srcNode = taskIdToMap.get(requestData.getTaskId()).getSrcElement().getId();
-        rbSituationAttack.put("code", "attack_event_element-element");
-        rbSituationAttack.put("look_at_target", false);
-        rbSituationAttack.put("scene_id", sceneId);
-        rbSituationAttack.put("scene_name", sceneHandler.getScene().getName());
-        rbSituationAttack.put("source_id", taskIdToMap.get(requestData.getTaskId()).getSrcElement().getId());
-        if (elementIds.size() > 0) {
-            rbSituationAttack.put("target_id", getdstNode(srcNode, elementIds, random));
-        } else {
-            rbSituationAttack.put("target_id", getdstNode(srcNode, loadElementIds, random));
-        }
-        rbSituationAttack.put("type", 0);
-        rbSituationAttack.put("use_name", 1);
-        JSONObject data = new JSONObject();
-        data.put("category", "attack");
-        data.put("description", "载荷执行");
-        data.put("duration", 3);
-        JSONObject lineStyle = new JSONObject();
-        lineStyle.put("color", "#FF0000");
-        lineStyle.put("line_type", "fly");
-        lineStyle.put("width", 0);
-        data.put("line_style", "solid");
-        data.put("flow_type", lineStyle);
-        rbSituationAttack.put("data", data);
-
-        log.info("addLoadExecutionResult sendMessage begin.");
-//给所有当前登录的session推送消息
-        WebSocketServer.sessionPools.forEach((session, webSocketServer) -> {
-            log.info("addLoadExecutionResult sendMessage success message: {}" + rbSituationAttack.toString());
-            sendMessage(webSocketServer, session, rbSituationAttack);
-        });
-
         return addLoadExecutionResult;
     }
 
