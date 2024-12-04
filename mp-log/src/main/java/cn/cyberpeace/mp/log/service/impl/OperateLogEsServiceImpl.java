@@ -209,6 +209,43 @@ public class OperateLogEsServiceImpl implements OperateLogDbService {
         return new ListObjServiceResult(new ListObjResult<>(list, Integer.valueOf(String.valueOf(searchHits.getTotalHits().value)))).asResult();
     }
 
+    @Override
+    public void createToolLog(OperationLogRequest request, Locale locale) {
+        OperationLogModel model = new OperationLogModel();
+        model.setFrom(request.getFrom());
+        model.setLogType(request.getLogType());
+        if (Objects.nonNull(request.getOpModule())) {
+            OpModuleEnums opModuleEnum = OpModuleEnums.fromValue(request.getOpModule());
+            if (Objects.nonNull(opModuleEnum)) {
+                String localizedMsg = getlocalizedMessage(locale, opModuleEnum.getCode());
+                model.setOpModule(localizedMsg);
+                model.setOpModuleID(opModuleEnum.ordinal());
+            }
+        }
+        if (Objects.nonNull(request.getOpType())) {
+            OpTypeEnums opTypeEnum = OpTypeEnums.fromValue(request.getOpType());
+            if (Objects.nonNull(opTypeEnum)) {
+                String localizedMsg = getlocalizedMessage(locale, opTypeEnum.getCode());
+                model.setOpType(localizedMsg);
+                model.setOpTypeID(opTypeEnum.ordinal());
+            }
+        }
+        model.setOpTarget(request.getOpTarget());
+        model.setTitle(request.getTitle());
+        model.setUserId(request.getUserId());
+        model.setUserName(request.getUserName());
+        model.setUserType(request.getUserType());
+        model.setDescription(request.getDescription());
+        model.setOpIp(request.getOpIp());
+        model.setContent(request.getContent());
+        processDefaultContent(model);
+        if (StringUtils.isBlank(model.getUserName())) {
+            log.error("operationlog, username cannot be null. {}", model);
+            return;
+        }
+        this.create(model);
+    }
+
     private void processDefaultContent(OperationLogModel model) {
         if (StringUtils.isNotBlank(model.getContent())) {
             return;

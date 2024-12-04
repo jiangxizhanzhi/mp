@@ -57,4 +57,10 @@ public class SysNoticeModel extends BaseModel {
     @DefaultInt(0)
     private Integer isPublic;
 
+    @ApiModelProperty(value = "战队id")
+    private String teamId;
+
+    @ApiModelProperty(value = "战队id")
+    private String teamName;
+
 }

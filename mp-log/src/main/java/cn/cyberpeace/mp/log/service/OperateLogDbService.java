@@ -20,4 +20,6 @@ public interface OperateLogDbService {
     void create(OperateLog operateLog, HttpServletRequest request, Locale locale);
 
     ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request, Locale locale);
+
+    void createToolLog(OperationLogRequest request, Locale locale);
 }

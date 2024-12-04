@@ -3,7 +3,9 @@ package cn.cyberpeace.mp.common.controller;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.common.constant.ControllerConstant;
+import cn.cyberpeace.mp.common.constant.FileSuffixConstant;
 import cn.cyberpeace.mp.common.service.impl.CommonFileServiceImpl;
+import cn.cyberpeace.mp.common.util.SuffixCheckUtil;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +35,22 @@ public class CommonFileController {
     public ServiceResult uploadFile(@RequestParam(value = "file") MultipartFile file,
                                     @RequestParam(value = "upload_type", required = false) String uploadType)
             throws IOException {
+        String suffix = FileUtil.getSuffix(file.getOriginalFilename());
+        if (SuffixCheckUtil.checkBySuffix(suffix, FileSuffixConstant.LOAD_UPLOAD_IMAGE_LIST)) {
+            uploadType= "image";
+        }
+        if (SuffixCheckUtil.checkBySuffix(suffix, FileSuffixConstant.LOAD_UPLOAD_FILE_LIST)) {
+            uploadType= "attachment";
+        }
+        if (SuffixCheckUtil.checkBySuffix(suffix, FileSuffixConstant.LOAD_UPLOAD_FILE_README_LIST)) {
+            uploadType= "readMe";
+        }
+        if (SuffixCheckUtil.checkBySuffix(suffix, FileSuffixConstant.LOAD_RESULT_UPLOAD_FILE)) {
+            uploadType= "load_result_file";
+        }
+
         ServiceResult uploadResult = commonFileService.uploadFile
-                (file.getInputStream(), file.getOriginalFilename(), FileUtil.getSuffix(file.getOriginalFilename()), uploadType);
+                (file.getInputStream(), file.getOriginalFilename(), suffix, uploadType);
         return uploadResult;
     }
 }

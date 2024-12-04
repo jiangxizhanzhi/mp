@@ -20,4 +20,6 @@ public interface OperateLogService {
     void create(OperateLog operateLog, HttpServletRequest request);
 
     ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request);
+
+    void createToolLog(OperationLogRequest request);
 }

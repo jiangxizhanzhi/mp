@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.service;
 
 
 import cn.cyberpeace.mp.auth.model.TeamModel;
+import cn.cyberpeace.mp.auth.request.team.TeamIdAndUserInfo;
 import cn.cyberpeace.mp.auth.request.team.TeamPageRequest;
 import cn.cyberpeace.mp.auth.request.team.TeamRequest;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -32,7 +33,7 @@ public interface TeamService  {
 
     ServiceResult<String> importPersonnelTemplate(MultipartFile file);
 
-    ServiceResult getTeamList(List<String> list);
+    List<TeamIdAndUserInfo>  getTeamList(List<String> list);
 
     JSONObject getListTeamInfo(List<String> list);
 

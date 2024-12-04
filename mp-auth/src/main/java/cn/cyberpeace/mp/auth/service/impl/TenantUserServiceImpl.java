@@ -1,9 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.bo.org.OrgBO;
-import cn.cyberpeace.mp.auth.bo.org.OrgDto;
-import cn.cyberpeace.mp.auth.bo.org.UserOrgBo;
-import cn.cyberpeace.mp.auth.bo.org.UserOrgMapBo;
+import cn.cyberpeace.mp.auth.bo.org.*;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
@@ -391,6 +388,12 @@ public class TenantUserServiceImpl
     public boolean deleteByTenantId(String tenantId) {
         // todo
         return true;
+    }
+
+    @Override
+    public List<OrgIdAndCount> getGroupByOrg() {
+
+        return tenantUserMapper.getGroupByOrg();
     }
 
     private List<OrgModel> selectOrgsByUserId(String userId) {

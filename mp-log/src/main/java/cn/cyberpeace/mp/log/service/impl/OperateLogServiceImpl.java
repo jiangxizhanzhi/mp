@@ -52,6 +52,13 @@ public class OperateLogServiceImpl implements OperateLogService {
     }
 
     @Override
+    public void createToolLog(OperationLogRequest request) {
+        Locale locale = LocaleContextHolder.getLocale();
+        request.setOpModule(1);
+        operateLogDbService.createToolLog(request, locale);
+    }
+
+    @Override
     public void create(OperateLog operateLog, HttpServletRequest request) {
         Locale locale = LocaleContextHolder.getLocale();
         operateLogDbService.create(operateLog, request, locale);

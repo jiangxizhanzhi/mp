@@ -306,7 +306,7 @@ public class TeamServiceImpl implements TeamService {
      * @return
      */
     @Override
-    public ServiceResult getTeamList(List<String> list) {
+    public List<TeamIdAndUserInfo>  getTeamList(List<String> list) {
         //根据队伍id查询该队伍下的人员信息
         List<TeamIdAndUserInfo> teamIdAndUserInfos = Lists.newArrayList();
         for (String teamId : list) {
@@ -318,7 +318,7 @@ public class TeamServiceImpl implements TeamService {
             teamIdAndUserInfos.add(teamIdAndUserInfo);
         }
 
-        return new ServiceResult(teamIdAndUserInfos).asResult();
+        return teamIdAndUserInfos;
     }
 
     @Override

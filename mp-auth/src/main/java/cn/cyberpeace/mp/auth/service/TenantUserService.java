@@ -1,9 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
-import cn.cyberpeace.mp.auth.bo.org.OrgBO;
-import cn.cyberpeace.mp.auth.bo.org.OrgDto;
-import cn.cyberpeace.mp.auth.bo.org.UserOrgBo;
-import cn.cyberpeace.mp.auth.bo.org.UserOrgMapBo;
+import cn.cyberpeace.mp.auth.bo.org.*;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.TenantUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -81,5 +78,7 @@ public interface TenantUserService extends BaseModelService<TenantUserModel, Que
 
     boolean deleteByTenantId(String tenantId);
 
+
+    List<OrgIdAndCount> getGroupByOrg();
 
 }

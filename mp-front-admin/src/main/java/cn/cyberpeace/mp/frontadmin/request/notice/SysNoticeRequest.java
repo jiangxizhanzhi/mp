@@ -52,7 +52,11 @@ public class SysNoticeRequest {
     @ApiModelProperty(value = "用户id列表")
     private List<String> userIds;
 
-    //判断类型（是用户还是战队）
-    private String category;
+    @ApiModelProperty(value = "战队id")
+    private String teamId;
+
+    @ApiModelProperty(value = "战队名称")
+    private String teamName;
+
 
 }

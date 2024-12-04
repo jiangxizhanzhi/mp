@@ -56,6 +56,12 @@ public class SysNoticeDto {
     @ApiModelProperty(value = "角色id集合")
     List<String> roleIds;
 
+    @ApiModelProperty(value = "战队id")
+    private String teamId;
+
+    @ApiModelProperty(value = "战队id")
+    private String teamName;
+
     @ApiModelProperty(value = "角色，多个用逗号隔开")
     private String roleNames;
 

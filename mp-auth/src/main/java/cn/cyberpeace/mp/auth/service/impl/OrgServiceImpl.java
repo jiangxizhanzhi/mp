@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.bo.org.OrgDto;
+import cn.cyberpeace.mp.auth.bo.org.OrgIdAndCount;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
@@ -31,13 +32,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -349,10 +345,43 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         if (StringUtils.isBlank(parentOrgId)) {
             // 查询所有组织树
             List<OrgBO> orgBOS = listAll(AuthConstant.DEFAULT_TENANT);
-            if (CollectionUtil.isEmpty(orgBOS)) {
+
+            List<OrgIdAndCount> orgIdAndCounts = tenantUserService.getGroupByOrg();
+            Map<String, OrgBO> orgIdOrgBoMap = orgBOS.stream().collect(Collectors.toMap(OrgBO::getId, Function.identity()));
+            for (OrgIdAndCount orgIdAndCount : orgIdAndCounts) {
+                if (orgIdOrgBoMap.containsKey(orgIdAndCount.getOrgId())) {
+                    orgIdOrgBoMap.get(orgIdAndCount.getOrgId()).setCount(orgIdAndCount.getCount());
+                }
+            }
+            List<OrgBO> orgBosNoPrent = orgBOS.stream().filter(s -> !StringUtils.isBlank(s.getParent())).collect(Collectors.toList());
+            Map<String, List<OrgBO>> parentMap = orgBosNoPrent.stream().collect(Collectors.groupingBy(OrgBO::getParent));
+
+            parentMap.forEach((parent, itemList) -> {
+                Integer count = 0;
+                for (OrgBO orgBO : itemList) {
+                    count+=orgBO.getCount();
+                }
+                orgIdOrgBoMap.get(parent).setCount(orgIdOrgBoMap.get(parent).getCount()+count);
+            });
+            //处理根目录
+            OrgBO orgBosPrent = orgBOS.stream().filter(s -> StringUtils.isBlank(s.getParent())).collect(Collectors.toList()).get(0);
+            OrgBO orgBoPrent = orgIdOrgBoMap.get(orgBosPrent.getId());
+            parentMap.forEach((parent, itemList) -> {
+                if (parent.equals(orgBoPrent.getId())){
+                    Integer count = 0;
+                    for (OrgBO orgBO : itemList) {
+                        count+=orgBO.getCount();
+                    }
+                    orgBoPrent.setCount(orgBoPrent.getCount()+count);
+                }
+            });
+            orgIdOrgBoMap.put(orgBoPrent.getId(), orgBoPrent);
+            Collection<OrgBO> values = orgIdOrgBoMap.values();
+            List<OrgBO> orgBOList = new ArrayList<>(values);
+            if (CollectionUtil.isEmpty(orgBOList)) {
                 return new ArrayList<>();
             }
-            List<OrgDto> tree = toTree(orgBOS);
+            List<OrgDto> tree = toTree(orgBOList);
 
             sortTree(tree);
 

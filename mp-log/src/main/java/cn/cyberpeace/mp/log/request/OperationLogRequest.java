@@ -100,4 +100,7 @@ public class OperationLogRequest {
     @ApiModelProperty(value = "操作人IP")
     private String opIp;
 
+    @ApiModelProperty(value = "下载次数")
+    private Integer count;
+
 }

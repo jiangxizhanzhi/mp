@@ -168,6 +168,18 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
         return new ListObjServiceResult(new ListObjResult<>(list, total).asResult()).asResult();
     }
 
+    @Override
+    public void createToolLog(OperationLogRequest request, Locale locale) {
+        OperateLogSqlModel model = opRequest2Model(request, locale);
+        assert model != null;
+        model.setOpModuleId(1);
+        model.setOpModule("工具");
+        model.setOpTime(LocalDateTime.now());
+        model.setLogType(3);
+        model.setSiteType(0);
+        this.create(model);
+    }
+
     private List<OperationLogPageResponse> opModel2Response(List<OperateLogSqlModel> models, Locale locale) {
         List<OperationLogPageResponse> list = new ArrayList<>(models.size());
         for (OperateLogSqlModel model : models) {

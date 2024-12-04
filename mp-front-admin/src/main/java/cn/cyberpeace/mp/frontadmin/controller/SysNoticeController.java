@@ -1,6 +1,11 @@
 package cn.cyberpeace.mp.frontadmin.controller;
 
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.model.TeamModel;
+import cn.cyberpeace.mp.auth.request.team.TeamIdAndUserInfo;
+import cn.cyberpeace.mp.auth.request.team.TeamRequest;
+import cn.cyberpeace.mp.auth.service.TeamService;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -21,17 +26,20 @@ import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.hutool.core.collection.CollUtil;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import nl.altindag.ssl.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -52,6 +60,9 @@ public class SysNoticeController {
 
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
+    
+    @Autowired
+    private TeamService teamService;
 
     @ApiOperation("查询单个公告")
     @ApiImplicitParam(name = "id", value = "公告ID", dataTypeClass = String.class)
@@ -126,8 +137,28 @@ public class SysNoticeController {
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.CREATE, title = "新增公告", target = OpTargetEnums.NOTICE)
     public ServiceResult<SysNoticeModel> create(@RequestBody @Validated(AddGroup.class) SysNoticeRequest noticeReq) {
+        judgmentTeamPresence(noticeReq);
         SysNoticeModel noticeModel = noticeService.add(noticeReq);
         return ResultCommon.success(noticeModel);
+    }
+
+    private void judgmentTeamPresence(SysNoticeRequest noticeReq) {
+        if (!StringUtils.isBlank(noticeReq.getTeamId())) {
+            List<String> userIds = Lists.newArrayList();
+            String teamId = noticeReq.getTeamId();
+            TeamRequest teamRequest = new TeamRequest();
+            teamRequest.setId(teamId);
+            TeamModel team = teamService.getTeam(teamRequest);
+            noticeReq.setTeamName(team.getName());
+            List<TeamIdAndUserInfo> teamList = teamService.getTeamList(Lists.newArrayList(teamId));
+            for (TeamIdAndUserInfo teamIdAndUserInfo : teamList) {
+                for (UserBo userBo : teamIdAndUserInfo.getUserBos()) {
+                    String id = userBo.getId();
+                    userIds.add(id);
+                }
+            }
+            noticeReq.setUserIds(userIds);
+        }
     }
 
     @ApiOperation("更新公告")
@@ -136,6 +167,7 @@ public class SysNoticeController {
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "修改公告", target = OpTargetEnums.NOTICE)
     public ServiceResult modify(@PathVariable String id, @RequestBody @Validated(UpdateGroup.class) SysNoticeRequest noticeReq) {
+        judgmentTeamPresence(noticeReq);
         SysNoticeModel noticeModel = noticeService.modify(id, noticeReq);
 
         return ServiceResult.builder().source(noticeModel).build().asResult();

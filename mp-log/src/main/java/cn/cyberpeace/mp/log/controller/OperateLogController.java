@@ -72,4 +72,14 @@ public class OperateLogController {
         return optionService.getIntOptions(LogConstant.MP_COMMON_OPTION_TYPE_LOG_OP_TYPE);
     }
 
+    @ApiOperation(value = "新增工具下载日志")
+    @ApiImplicitParam(name = "request", value = "新增工具下载日志", dataTypeClass = OperationLogRequest.class)
+    @PostMapping("/add/tool")
+    public ServiceResult addTool(@RequestBody OperationLogRequest request, HttpServletRequest httpServletRequest){
+        request.setOpIp(SnUtils.getRealRemoteIp(httpServletRequest));
+        operateLogService.createToolLog(request);
+        return ResultCommon.success();
+    }
+
+
 }

@@ -15,4 +15,7 @@ public class OrgBO extends OrgModel {
     @ApiModelProperty(value = "路径")
     private String path;
 
+    @ApiModelProperty(value = "组织人员数量")
+    private Integer count = 0;
+
 }
