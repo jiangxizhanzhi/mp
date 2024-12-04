@@ -68,9 +68,12 @@ public class CollectionFlowBO {
     @ApiModelProperty("本条流量包含的攻击信息")
     private List<AttackInfo> attackInfos;
 
+    private String dataId;
+
     @Getter
     @Setter
     public static class Output {
+        private String dataId;
         private List<String> protocol;
         private String sourceIp;
         private String targetIp;
@@ -82,6 +85,7 @@ public class CollectionFlowBO {
 
     public Output toOutput() {
         Output output = new Output();
+        output.setDataId(this.dataId);
         output.setProtocol(this.protocol);
         output.setSourceIp(this.sourceIp);
         output.setTargetIp(this.targetIp);

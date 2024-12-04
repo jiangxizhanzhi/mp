@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.controller.collect.connection.WazuhConnectionService;
@@ -31,6 +32,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -122,8 +125,32 @@ public class AiSaiController {
     }
 
     @GetMapping("/flow/detail")
-    public ListObjServiceResult<CollectionFlowBO.Output> detail(FlowQueryParams queryParams) {
-        return null;
+    public ServiceResult detail(FlowQueryParams queryParams) {
+        this.init();
+
+        if (StringUtils.isEmpty(queryParams.getDataId())) {
+            return new ServiceResult<>(new Object()).asResult();
+        }
+
+        var team = teamInfoMap.get(queryParams.getTeamId());
+        SearchRequest searchRequest = new SearchRequest("mp_arkime*");
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        var boolquery = QueryBuilders.boolQuery();
+        boolquery.must(QueryBuilders.termQuery("_id", queryParams.getDataId()));
+        sourceBuilder.query(boolquery);
+        searchRequest.source(sourceBuilder);
+
+        // 执行搜索请求
+        try {
+            SearchResponse searchResponse = team.getRestClient().search(searchRequest, RequestOptions.DEFAULT);
+            if (searchResponse.getHits() == null || searchResponse.getHits().getTotalHits().value == 0) {
+                return new ServiceResult<>(new Object()).asResult();
+            } else {
+                return new ServiceResult(searchResponse.getHits().getHits()[0].getSourceAsMap()).asResult();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @GetMapping("/flow/page")
@@ -198,6 +225,7 @@ public class AiSaiController {
                 flowLogBO.setTimestamp(Long.valueOf(map.get("@timestamp").toString()));
             }
             CollectionFlowBO flowBO = new CollectionFlowBO();
+            flowBO.setDataId(hit.getId());
             if (flowLogBO.getTimestamp() != null) {
                 flowBO.setTime(TimeUtils.timestampToLocalDateTime(flowLogBO.getTimestamp()));
                 flowBO.setTimestamp(flowLogBO.getTimestamp());
@@ -429,6 +457,7 @@ public class AiSaiController {
     public static class FlowQueryParams {
         private int perPage = 10;
         private int page = 1;
+        private String dataId;
         private String teamId;
         private String[] agentIps;
         private String protocol;
