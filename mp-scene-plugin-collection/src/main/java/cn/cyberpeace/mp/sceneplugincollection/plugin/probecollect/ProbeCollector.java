@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect;
 
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionFlowTableService;
@@ -44,8 +45,8 @@ public class ProbeCollector {
     }
 
     public List<String> generateProbeInstallScript(String systemType, String agentName, String collectorId,
-                                                   WazuhControl.ControlConfigParam controlParam, boolean isContainer) {
-        return WazuhCommon.generateWazuhAgentInstallScript(systemType, agentName, getWazuhHost(collectorId), controlParam, isContainer);
+                                                   WazuhControl.ControlConfigParam controlParam, boolean isContainer, HandlerUtils handlerUtils) {
+        return WazuhCommon.generateWazuhAgentInstallScript(systemType, agentName, getWazuhHost(collectorId), controlParam, isContainer, handlerUtils);
     }
 
 }
