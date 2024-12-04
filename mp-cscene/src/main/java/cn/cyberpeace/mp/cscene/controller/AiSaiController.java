@@ -157,6 +157,9 @@ public class AiSaiController {
     public ListObjServiceResult<CollectionFlowBO.Output> pageFlow(FlowQueryParams queryParams) {
         this.init();
         var team = teamInfoMap.get(queryParams.getTeamId());
+        if (team == null) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<CollectionFlowBO.Output>(), 0)).asResult();
+        }
         // 创建查询请求
         SearchRequest searchRequest = new SearchRequest("mp_arkime*");
 
@@ -268,6 +271,9 @@ public class AiSaiController {
     public ListObjServiceResult<WazuhProcessModelV2> pageWazuh(WazuhQueryParams queryParams) {
         this.init();
         var team = teamInfoMap.get(queryParams.getTeamId());
+        if(team == null){
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<WazuhProcessModelV2>(), 0)).asResult();
+        }
         var restClient = team.getRestClient();
         List<String> agentNames = new ArrayList<>();
         var map = teamInfoMap.get(queryParams.getTeamId()).getIpAgentName();
@@ -316,6 +322,9 @@ public class AiSaiController {
     public ListObjServiceResult<WazuhSystemUserModel.Output> pageFile(WazuhQueryParams queryParams) {
         this.init();
         var team = teamInfoMap.get(queryParams.getTeamId());
+        if(team == null){
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<WazuhSystemUserModel.Output>(), 0)).asResult();
+        }
         var restClient = team.getRestClient();
         List<String> agentNames = new ArrayList<>();
         var map = teamInfoMap.get(queryParams.getTeamId()).getIpAgentName();
@@ -346,6 +355,9 @@ public class AiSaiController {
     public ListObjServiceResult<FileEventModel> pageUser(WazuhQueryParams queryParams) {
         this.init();
         var team = teamInfoMap.get(queryParams.getTeamId());
+        if(team == null){
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<FileEventModel>(), 0)).asResult();
+        }
         var restClient = team.getRestClient();
 
         List<String> agentNames = new ArrayList<>();
@@ -374,6 +386,9 @@ public class AiSaiController {
     public ListObjServiceResult<WazuhNetworkConnectionModel.Output> pagePorts(WazuhQueryParams queryParams) {
         this.init();
         var team = teamInfoMap.get(queryParams.getTeamId());
+        if(team == null){
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<WazuhNetworkConnectionModel.Output>(), 0)).asResult();
+        }
         var restClient = team.getRestClient();
 
         List<String> agentNames = new ArrayList<>();
@@ -407,6 +422,9 @@ public class AiSaiController {
     public ListObjServiceResult<WazuhHostStateModel.Output> hostInfo(WazuhQueryParams queryParams) {
         this.init();
         var team = teamInfoMap.get(queryParams.getTeamId());
+        if(team == null){
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<WazuhHostStateModel.Output>(), 0)).asResult();
+        }
         var rest = team.getRestClient();
 
         LocalDateTime end = LocalDateTime.now();
