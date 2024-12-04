@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.cscene.controller;
+    package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
