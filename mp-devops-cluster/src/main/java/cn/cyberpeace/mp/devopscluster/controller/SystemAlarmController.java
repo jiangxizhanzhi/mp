@@ -142,7 +142,10 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
             return mailService.sendMail(content);
 
         } else {
-            return ResultCommon.fail("告警信息为空，邮件发送失败");
+            StringBuffer content = new StringBuffer();
+            content.append("告警数据为空");
+            return mailService.sendMail(content);
+//            return ResultCommon.fail("告警信息为空，邮件发送失败");
         }
 
     }

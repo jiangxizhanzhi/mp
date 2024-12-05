@@ -105,7 +105,7 @@ public class MailService {
 
             message.saveChanges();
             Transport.send(message);
-            log.error("邮件发送成功");
+            log.info("邮件发送成功");
             return ResultCommon.success();
         }catch (MessagingException | UnsupportedEncodingException mex) {
             log.error("邮件发送失败："+mex.getMessage());
