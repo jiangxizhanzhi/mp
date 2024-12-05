@@ -47,6 +47,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -1202,10 +1203,18 @@ public class LoadServiceImpl {
         return returnList;
     }
 
-    public List<MpDevopsLoadSceneLog> getLoadResultByNodeIds(String sceneId, String[] nodeIds, String endTime) {
+    public List<MpDevopsLoadSceneLog> getLoadResultByNodeIds(String sceneId, String[] nodeIds, Integer interval, String endTime) {
         LocalDateTime localDateTime = null;
         if (org.apache.commons.lang3.StringUtils.isNotBlank(endTime)) {
             localDateTime = TimeUtils.stringToLocalDateTime(endTime);
+        }
+        LocalDateTime startDateTime = null;
+        if (interval != null) {
+            // 创建一个表示interval秒的持续时间
+            Duration duration = Duration.ofSeconds(interval);
+
+            // 从endDateTime减去duration得到开始时间
+            startDateTime = localDateTime.minus(duration);
         }
         CsceneInstanceModel csceneInstanceModel = csceneInstanceService.getModelMapper().get(sceneId);
         String scene = csceneInstanceModel.getScene();
@@ -1218,7 +1227,7 @@ public class LoadServiceImpl {
                 .collect(Collectors.toList());
         List<MpDevopsLoadSceneLog> getLoadResultByPks = new ArrayList<>();
         if (loadIds != null && loadIds.size() > 0) {
-            getLoadResultByPks = loadMapper.getLoadResultByLoadIds(loadIds, sceneId, localDateTime);
+            getLoadResultByPks = loadMapper.getLoadResultByLoadIds(loadIds, sceneId, startDateTime, localDateTime);
         }
         if (getLoadResultByPks != null && getLoadResultByPks.size() > 0) {
             String[] codes = {CommonStatusCodeEnum.RESULT_STATUS.getCode(), CommonStatusCodeEnum.ACTION_TYPE.getCode(),

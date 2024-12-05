@@ -383,9 +383,10 @@ public class LoadController {
     @ApiOperation(value = "查询该节点id的载荷执行结果", notes = "")
     @GetMapping("/getLoadResultByNodeIds")
     public ServiceResult getLoadResultByNodeIds(@RequestParam(value = "scene_id") String sceneId,
-                                                @RequestParam(value = "node_ids") String[] nodeIds,
+                                                @RequestParam(value = "node_ids", required = false) String[] nodeIds,
+                                                @RequestParam(value = "interval", required = false) Integer interval,
                                                 @RequestParam(value = "end_time") String endTime) {
-        List<MpDevopsLoadSceneLog> log = loadService.getLoadResultByNodeIds(sceneId,nodeIds,endTime);
+        List<MpDevopsLoadSceneLog> log = loadService.getLoadResultByNodeIds(sceneId, nodeIds, interval, endTime);
         return new ServiceResult(log, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 }
