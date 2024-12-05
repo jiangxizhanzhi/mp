@@ -170,13 +170,13 @@ public class AiSaiController {
         if(StringUtils.isNotEmpty(queryParams.getSourceIps())){
             boolquery.must(QueryBuilders.termsQuery("source.ip", Arrays.asList(queryParams.getSourceIps())));
         }else{
-            boolquery.must(QueryBuilders.termsQuery("source.ip", queryParams.getAgentIps()));
+//            boolquery.must(QueryBuilders.termsQuery("source.ip", queryParams.getAgentIps()));
         }
 
-        if(StringUtils.isNotEmpty(queryParams.getTargetIps())){
+        if (StringUtils.isNotEmpty(queryParams.getTargetIps())) {
             boolquery.must(QueryBuilders.termsQuery("destination.ip", Arrays.asList(queryParams.getTargetIps())));
-        }else{
-            boolquery.must(QueryBuilders.termsQuery("destination.ip", new ArrayList<>(team.getIpAgentName().keySet())));
+        } else {
+            boolquery.must(QueryBuilders.termsQuery("destination.ip", queryParams.getAgentIps()));
         }
 //        boolquery.must(QueryBuilders.existsQuery("suricata"));
         if (queryParams.getProtocol() != null) {
