@@ -544,6 +544,11 @@ public class VirtualMachine extends CloudClient {
         return virtualMachineExecuteResult;
     }
 
+    public VirtualMachineExecuteResult execCommandQga(VirtualMachineExecCommandQgaData data) {
+        VirtualMachineExecuteResult virtualMachineExecuteResult = getHttpClient().post(CloudUrlConstant.QGA_CMD, data, null, VirtualMachineExecuteResult.class);
+        return virtualMachineExecuteResult;
+    }
+
     /**
      * attachISO
      *

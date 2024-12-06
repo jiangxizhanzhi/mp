@@ -54,6 +54,7 @@ package cn.cyberpeace.mp.cscene.service;
  import cn.cyberpeace.mp.cscene.controller.request.DeleteNodeCommand;
  import cn.cyberpeace.mp.cscene.controller.request.DeleteNodeNetwork;
  import cn.cyberpeace.mp.cscene.controller.request.DisConnectSceneNode;
+ import cn.cyberpeace.mp.cscene.controller.request.NodeCommandQgaActionRequest;
  import cn.cyberpeace.mp.cscene.controller.request.UpdateNodeCommand;
  import cn.cyberpeace.mp.cscene.core.BcSceneInstanceHandler;
  import cn.cyberpeace.mp.cscene.core.common.UserCommon;
@@ -2054,6 +2055,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         result.setStatus(execBO.getStatus());
         return new ServiceResult<>(result);
     }
+
+     public ServiceResult<ElementCommandExecResult> execElementQga(NodeCommandQgaActionRequest actionRequest) {
+         String sceneId = getSceneId(actionRequest.getId());
+         ElementCommandExecBO execBO = scenePluginCloudSceneService.execElementCommandQga(sceneId, actionRequest.getNodeId(), actionRequest.getExecCmd(), actionRequest.getArgs(), actionRequest.getEnvs())
+                 .getSource();
+         ElementCommandExecResult result = new ElementCommandExecResult();
+         result.setOutput(execBO.getOutput());
+         result.setStatus(execBO.getStatus());
+         return new ServiceResult<>(result);
+     }
 
     public Boolean deleteFlowMirror(String csceneId) {
         String sceneId = this.getSceneId(csceneId);

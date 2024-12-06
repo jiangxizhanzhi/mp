@@ -61,6 +61,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -807,6 +808,24 @@ public class ScenePluginCloudSceneService {
             log.error("failed get link status for scene {} , message is {}", sceneId, ExceptionUtils.getStackTrace(e));
             return new ServiceResult<>(new ArrayList<>());
         }
+    }
+
+    public ServiceResult<ElementCommandExecBO> execElementCommandQga(String sceneId, String nodeId, String cmd, List<String> args, List<String> envs) {
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        CloudPluginSceneElementBO node = pluginHandler.getElement(nodeId);
+
+        VirtualMachine virtualMachine = new VirtualMachine();
+        VirtualMachineExecCommandQgaData qgaData = new VirtualMachineExecCommandQgaData();
+        qgaData.setArgs(args);
+        qgaData.setEnvs(envs);
+        qgaData.setVmId(node.getResourceId());
+        qgaData.setExecCmd(cmd);
+        virtualMachine.execCommandQga(qgaData);
+
+        ElementCommandExecBO execRes = new ElementCommandExecBO();
+        execRes.setStatus(false);
+        return new ServiceResult<>(execRes);
     }
 
     /**
