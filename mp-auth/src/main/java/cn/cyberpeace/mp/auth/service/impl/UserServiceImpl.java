@@ -40,6 +40,7 @@ import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
@@ -1067,20 +1068,27 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             processExpiredStatus(userBo);
 
             if (StringUtils.isNotBlank(userOrgRoleBo.getOrgs())) {
-                List<String> userOrgIds = Arrays.asList(userOrgRoleBo.getOrgs().split(","));
-                List<OrgBO> userOrgModels = new ArrayList<>();
-                for (String userOrgId : userOrgIds) {
-                    OrgBO orgBO = orgMap.get(userOrgId);
-                    userOrgModels.add(orgBO);
+                try {
+                    List<String> userOrgIds = Arrays.asList(userOrgRoleBo.getOrgs().split(","));
+                    List<OrgBO> userOrgModels = new ArrayList<>();
+                    for (String userOrgId : userOrgIds) {
+                        OrgBO orgBO = orgMap.get(userOrgId);
+                        userOrgModels.add(orgBO);
+                    }
+                    List<List<String>> allorgpath = new ArrayList<>();
+                    for (OrgBO o : userOrgModels) {
+                        List<String> list = Arrays.asList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR));
+                        allorgpath.add(list);
+                    }
+                    userBo.setOrgs(userOrgModels);
+                    userBo.setOrgIds(userOrgIds);
+                    userBo.setOrgpaths(allorgpath);
+                } catch (Exception e) {
+                    log.error("failed to parse org , {}", JsonCommon.stringify(userOrgRoleBo.getOrgs()), e);
+                    userBo.setOrgs(Collections.emptyList());
+                    userBo.setOrgIds(Collections.emptyList());
+                    userBo.setOrgpaths(Collections.emptyList());
                 }
-                List<List<String>> allorgpath = new ArrayList<>();
-                for (OrgBO o : userOrgModels) {
-                    List<String> list = Arrays.asList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR));
-                    allorgpath.add(list);
-                }
-                userBo.setOrgs(userOrgModels);
-                userBo.setOrgIds(userOrgIds);
-                userBo.setOrgpaths(allorgpath);
             } else {
                 userBo.setOrgs(Collections.emptyList());
                 userBo.setOrgIds(Collections.emptyList());

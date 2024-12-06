@@ -303,6 +303,7 @@ mp:
     roleclientsecret: ${mp.thirdsso.ext-var.roleclientsecret}
     clientid: ${mp.thirdsso.ext-var.clientid}
     clientsecret: ${mp.thirdsso.ext-var.clientsecret}
+    syncclientsecret: ${mp.thirdsso.ext-var.syncclientsecret}
     responsetype: ${mp.thirdsso.ext-var.responsetype}
     redirecturi: ${mp.thirdsso.ext-var.redirecturi}
     pageurl: ${mp.thirdsso.ext-var.pageurl}

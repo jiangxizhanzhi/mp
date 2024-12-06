@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ThirdSyncUserOrganization {
+    private String orgID;
     private String orgCustomUnique;   // 组织唯一标识
     private String orgName;           // 组织名称
     private String orgCode;           // 组织code
