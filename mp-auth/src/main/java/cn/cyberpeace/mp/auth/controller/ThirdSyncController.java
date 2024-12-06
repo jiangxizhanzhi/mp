@@ -54,7 +54,7 @@ public class ThirdSyncController {
     @PostMapping("/api/v1/user")
     public Res syncUser(@RequestBody Map<String, Object> input, @RequestParam(value = "access_token") String accessToken) {
         log.info("同步用户, 内容: {}", JsonCommon.stringify(input));
-        ThirdSsoUtil.verify(accessToken, config.getClientsecret());
+        ThirdSsoUtil.verify(accessToken, config.getSyncclientsecret());
         ThirdSyncUser user = JsonCommon.parse(JsonCommon.stringify(input), ThirdSyncUser.class);
         UserRequest request = new UserRequest();
         request.setThirdAccountNo(user.getAccountNo());
@@ -73,7 +73,7 @@ public class ThirdSyncController {
         request.setOrgIds(orgIds);
         if (user.getOrgs() != null) {
             for (ThirdSyncUserOrganization r : user.getOrgs()) {
-                orgIds.add(r.getOrgCustomUnique());
+                orgIds.add(r.getOrgID());
             }
         }
         if (user.getRoles() != null) {
@@ -124,6 +124,7 @@ public class ThirdSyncController {
     @PostMapping("/api/v1/org")
     public Res syncOrg(@RequestBody Map<String, Object> input, @RequestParam(value = "access_token") String accessToken) {
         log.info("同步组织, 内容: {}", JsonCommon.stringify(input));
+        ThirdSsoUtil.verify(accessToken, config.getSyncclientsecret());
         ThirdSyncOrg org = JsonCommon.parse(JsonCommon.stringify(input), ThirdSyncOrg.class);
         if (org.getActionFlag() == 4) {
             orgMapper.delete(org.getOrgCustomUnique());

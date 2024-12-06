@@ -180,6 +180,7 @@ mp:
     ext-var:
       clientid: ${clientid:a03d6972555f244810c9}
       clientsecret: ${clientsecret:5c188c3799dc0c495bdbedaabd683e5e7d46}
+      syncclientsecret: ${syncclientsecret:5c188c3799dc0c495bdbedaabd683e5e7d46}
       roleappcode: ${roleappcode:sxpt}
       roleclientid: ${roleclientid:0ebc99b175b4449c}
       roleclientsecret: ${roleclientsecret:8ec51f5d869e4f1388b97edfaf24f8f9}

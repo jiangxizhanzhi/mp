@@ -20,6 +20,7 @@ public class ThirdSsoConfig {
     private String roleclientsecret;
     private String clientid;
     private String clientsecret;
+    private String syncclientsecret;
     private String responsetype;
     private String redirecturi;
     private String pageurl;
@@ -27,4 +28,5 @@ public class ThirdSsoConfig {
     private String getuserurl;
     private String getcodeurl;
     private String syncroleurl;
+    private Boolean synctokencheck;
 }

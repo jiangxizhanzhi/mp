@@ -29,16 +29,22 @@ public class ThirdSsoUtil {
     }
 
     public static void verify(String token, String secretKey) {
-        token = StrUtil.removePrefix(token, "Bearer").trim();
-        DecodedJWT decode = JWT.decode(token);
-        int jwtTimeout = 60000;
         try {
+            token = StrUtil.removePrefix(token, "Bearer").trim();
+            DecodedJWT decode = JWT.decode(token);
+            int jwtTimeout = 60000;
             Date date = decode.getIssuedAt();
             JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(secretKey))
                     .acceptIssuedAt((long) (jwtTimeout / 1000)).build();
             jwtVerifier.verify(token);
         } catch (JWTVerificationException var6) {
             log.error("Exception occurred:", var6);
+            Boolean tokenCheck = BeanCommon.getBean(ThirdSsoConfig.class).getSynctokencheck();
+            if (tokenCheck != null && Boolean.FALSE.equals(tokenCheck)) {
+                return;
+            } else {
+                throw var6;
+            }
         }
     }
 
