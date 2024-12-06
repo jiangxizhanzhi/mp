@@ -21,19 +21,7 @@ import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeAccessModeActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeCommandActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeConnectionActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeDelSnapshotRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowRecordsRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowsActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeProbeActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeSnapshotRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodesActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstancesActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.*;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
@@ -860,6 +848,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @PostMapping("/exec_element")
     public ServiceResult<ElementCommandExecResult> execElement(@RequestBody CsceneInstanceNodeCommandActionRequest request) {
         return modelService.execElement(request.getId(), request.getNodeId(), request.getCommand(), request.getExecUser(), request.getContext()).asResult();
+    }
+
+    @ApiOperation("节点通过QGA执行命令")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = NodeCommandQgaActionRequest.class)
+    @PostMapping("/exec_element_qga")
+    public ServiceResult<ElementCommandExecResult> execElementQga(@RequestBody NodeCommandQgaActionRequest request) {
+        return modelService.execElementQga(request).asResult();
     }
 
     @ApiOperation("节点文件上传")

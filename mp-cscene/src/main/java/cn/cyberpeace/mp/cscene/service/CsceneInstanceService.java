@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
+import cn.cyberpeace.mp.cscene.controller.request.NodeCommandQgaActionRequest;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
@@ -1362,6 +1363,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         String sceneId = getSceneId(id);
         var execBO = scenePluginCloudSceneService.execElementCommand(sceneId, nodeId, command,user).getSource();
         var result = new ElementCommandExecResult();
+        result.setOutput(execBO.getOutput());
+        result.setStatus(execBO.getStatus());
+        return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<ElementCommandExecResult> execElementQga(NodeCommandQgaActionRequest actionRequest) {
+        String sceneId = getSceneId(actionRequest.getId());
+        ElementCommandExecBO execBO = scenePluginCloudSceneService.execElementCommandQga(sceneId, actionRequest.getNodeId(), actionRequest.getExecCmd(), actionRequest.getArgs(), actionRequest.getEnvs())
+                .getSource();
+        ElementCommandExecResult result = new ElementCommandExecResult();
         result.setOutput(execBO.getOutput());
         result.setStatus(execBO.getStatus());
         return new ServiceResult<>(result);

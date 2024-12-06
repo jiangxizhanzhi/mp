@@ -45,15 +45,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleRecordingData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleRecordingData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkFlowRateResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.OriginIpsResult;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ResetCplcoudAllIpsData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotDeleteParams;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineExecCommandData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachinePrivateOperateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineUploadFileData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConnectionCommon;
@@ -710,6 +702,24 @@ public class ScenePluginCloudSceneService {
             log.error("failed get link status for scene {} , message is {}", sceneId, ExceptionUtils.getStackTrace(e));
             return new ServiceResult<>(new ArrayList<>());
         }
+    }
+
+    public ServiceResult<ElementCommandExecBO> execElementCommandQga(String sceneId, String nodeId, String cmd, List<String> args, List<String> envs) {
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        CloudPluginSceneElementBO node = pluginHandler.getElement(nodeId);
+
+        VirtualMachine virtualMachine = new VirtualMachine();
+        VirtualMachineExecCommandQgaData qgaData = new VirtualMachineExecCommandQgaData();
+        qgaData.setArgs(args);
+        qgaData.setEnvs(envs);
+        qgaData.setVmId(node.getResourceId());
+        qgaData.setExecCmd(cmd);
+        virtualMachine.execCommandQga(qgaData);
+
+        ElementCommandExecBO execRes = new ElementCommandExecBO();
+        execRes.setStatus(false);
+        return new ServiceResult<>(execRes);
     }
 
     public ServiceResult<ElementCommandExecBO> execElementCommand(String sceneId, String nodeId, String command, String user) {
