@@ -105,9 +105,9 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
         String mac = "";
         if (portModel == null) {
             // 无数据 说明未接入网络 ， 需要先接入网络
-            flowActuatorModel.getInstanceId();
+            flowActuatorModel.getResourceId();
             AddVirtualNicParams params = new AddVirtualNicParams();
-            params.setInstanceId(flowActuatorModel.getInstanceId());
+            params.setInstanceId(flowActuatorModel.getResourceId());
             params.setNetworkId(networkId);
             var res = cloudClient.addVirtualNic(params);
             mac = res.getMacAddress();

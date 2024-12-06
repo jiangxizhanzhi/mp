@@ -22,5 +22,7 @@ public class ControllerConstant {
     @SuppressWarnings("java:S1075")
     public static final String BASE_API_PATH = "/flow";
 
+    public static final String OUT_API_PATH = "/out/flow";
+
     private ControllerConstant() {}
 }

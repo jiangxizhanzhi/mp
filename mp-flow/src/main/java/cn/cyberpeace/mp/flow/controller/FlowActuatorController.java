@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.bo.DeleteActuatorParams;
 import cn.cyberpeace.mp.flow.bo.FlowActuatorQueryParams;
+import cn.cyberpeace.mp.flow.bo.StartFlowActuatorParams;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.response.FlowActuatorResponse;
@@ -52,8 +53,8 @@ public class FlowActuatorController {
 
     @ApiOperation("启动流量发生器")
     @PostMapping("/create_actuator")
-    public ServiceResult<FlowActuatorResponse> createFlowActuator() {
-        var result = flowActuatorService.createFlowActuator("");
+    public ServiceResult<FlowActuatorResponse> createFlowActuator(@RequestBody StartFlowActuatorParams params) {
+        var result = flowActuatorService.createFlowActuator(params);
         return new ServiceResult<>(result).asResult();
     }
 

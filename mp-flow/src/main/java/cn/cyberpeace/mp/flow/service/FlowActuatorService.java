@@ -4,9 +4,11 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.flow.bo.StartFlowActuatorParams;
 import cn.cyberpeace.mp.flow.integration.cloud.base.ICloudClient;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
+import cn.cyberpeace.mp.flow.request.CsceneConfigFlowTaskRequest;
 import cn.cyberpeace.mp.flow.response.FlowActuatorResponse;
 import cn.cyberpeace.mp.flow.service.field.FlowActuatorFields;
 import cn.cyberpeace.mp.flow.bo.FlowActuatorQueryParams;
@@ -25,12 +27,15 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
 
     private ICloudClient cloudClient;
 
+    private FlowCsceneService flowCsceneService ;
+
     @Autowired
-    public FlowActuatorService(FlowActuatorMapper flowActuatorMapper, ICloudClient cloudClient) {
+    public FlowActuatorService(FlowActuatorMapper flowActuatorMapper, ICloudClient cloudClient,FlowCsceneService flowCsceneService) {
         super();
         super.setModelMapper(flowActuatorMapper);
         this.flowActuatorMapper = flowActuatorMapper;
         this.cloudClient = cloudClient;
+        this.flowCsceneService = flowCsceneService;
     }
 
     public FlowActuatorResponse getFlowActuator(String actuatorId) {
@@ -65,15 +70,16 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
         }
     }
 
-    public FlowActuatorResponse createFlowActuator(String title) {
+    public FlowActuatorResponse createFlowActuator(StartFlowActuatorParams params) {
         // 提交创建请求
         var instance = cloudClient.createVirtualMachine();
-        String instanceId = instance.getId();
+        String resourceId = instance.getId();
         FlowActuatorModel actuatorModel = new FlowActuatorModel();
         actuatorModel.setStatus(0);
-        actuatorModel.setTitle(title);
-        actuatorModel.setCsceneId(instanceId);
-        actuatorModel.setInstanceId(instanceId);
+        actuatorModel.setTitle(params.getActuatorName());
+        actuatorModel.setCsceneId(params.getCsceneId());
+        actuatorModel.setCsceneInstanceId(params.getCsceneInstanceId());
+        actuatorModel.setResourceId(resourceId);
         actuatorModel.setNetworkId(instance.getNetworks().get(0).getNetworkId());
         actuatorModel.setIp(instance.getNetworks().get(0).getFixedIp());
         flowActuatorMapper.save(actuatorModel);
@@ -83,7 +89,7 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
 
     public void deleteFlowActuator(String actuatorId) {
         FlowActuatorModel model = flowActuatorMapper.get(actuatorId);
-        cloudClient.deleteVirtualMachine(model.getInstanceId());
+        cloudClient.deleteVirtualMachine(model.getResourceId());
         flowActuatorMapper.delete(actuatorId);
     }
 

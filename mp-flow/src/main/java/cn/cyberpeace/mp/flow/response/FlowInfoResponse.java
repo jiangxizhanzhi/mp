@@ -86,7 +86,7 @@ public class FlowInfoResponse {
     /**
      * 攻击脚本参数列表
      */
-    @ApiModelProperty(value = "攻击脚本运行参数")
+    @ApiModelProperty(value = "攻击流量 脚本运行参数")
     private List<FlowScriptParamModel> scriptParamModels;
 
     public FlowInfoResponse(FlowInfoModel flowInfoModel, List<FlowScriptParamModel> scriptParamModels) {

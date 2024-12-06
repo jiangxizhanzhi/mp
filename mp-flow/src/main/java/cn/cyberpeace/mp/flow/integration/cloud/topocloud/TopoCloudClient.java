@@ -81,7 +81,7 @@ public class TopoCloudClient implements ICloudClient {
         String url = GET_TOPO_URL.replace("{id}", csceneId);
         String res = null;
         try {
-            res = HttpUtils.sendHttpGet(url, HEADER, 10000);
+            res = HttpUtils.sendHttpGet(this.host+url, HEADER, 10000);
             TopoResponse<BusinessCSceneInstance> tmpRes = JsonCommon.snakeParse(res, new TypeReference<TopoResponse<BusinessCSceneInstance>>() {
             });
             var instance = tmpRes.getData();
@@ -103,6 +103,20 @@ public class TopoCloudClient implements ICloudClient {
             throw new RuntimeException(e);
         }
         return null;
+    }
+
+    public static BusinessCSceneInstance getCscene(String csceneId) {
+        String url = GET_TOPO_URL.replace("{id}", csceneId);
+        String res = null;
+        try {
+            res = HttpUtils.sendHttpGet("http://10.100.27.1" + url, HEADER, 10000);
+            TopoResponse<BusinessCSceneInstance> tmpRes = JsonCommon.snakeParse(res, new TypeReference<TopoResponse<BusinessCSceneInstance>>() {
+            });
+            var instance = tmpRes.getData();
+            return instance;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -11,7 +11,9 @@ import java.util.List;
 @Setter
 public class BusinessSceneCloudPluginElementPort {
     @ApiModelProperty(value = "ip")
-    private String ip ;
+    private String ip;
+    @ApiModelProperty(value = "网络id")
+    private String auxiliaryNetworkId;
     @ApiModelProperty(value = "接入方式")
     private List<BusinessSceneElementAccessMode> accessModes;
 }

@@ -1,0 +1,103 @@
+// Copyright (C) 2024
+// All rights reserved.
+// Project name mp
+// Description:
+// Author:
+// File name FlowTaskPageResponse.java.
+// File size 2789.
+// File create date Fri Jul 12 12:55:30 CST 2024.
+// File update date Fri Jul 12 12:55:30 CST 2024.
+// Version 1.0.0
+package cn.cyberpeace.mp.flow.request.out;
+
+
+import cn.cyberpeace.mp.flow.bo.FlowRealTimeRate;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+import java.util.List;
+
+/**
+ * @ClassName FlowTaskPageResponse
+ * @Description
+ * @Author maojun
+ * @Date 2024/07/02
+ * @Version 1.0.0
+ */
+@Data
+@ApiModel("查询流量任务列表响应体")
+public class OutputFlowTaskPageResponse {
+
+    /**
+     * 任务id
+     */
+    @ApiModelProperty(value = "任务id")
+    private String id;
+
+    @ApiModelProperty(value = "执行器id")
+    private String actuatorId;
+
+    /**
+     * 名称
+     */
+    @ApiModelProperty(value = "名称")
+    private String title;
+
+    /**
+     * 交互类型：0 背景流量，1 攻击流量，2 全流量
+     */
+    @ApiModelProperty(value = "交互类型：0 背景流量，1 攻击流量，2 全流量")
+    private Integer interactiveType;
+
+    /**
+     * 目标节点名称
+     */
+    @ApiModelProperty(value = "目标节点名称")
+    private String nodeName;
+
+    @ApiModelProperty(value = "目标节点id")
+    private String nodeId;
+
+    /**
+     * 目标节点ip
+     */
+    @ApiModelProperty(value = "目标节点ip")
+    private String nodeIp;
+
+    /**
+     * 包含协议
+     */
+    @ApiModelProperty(value = "包含协议")
+    private String protocols;
+
+    /**
+     * 成功执行次数
+     */
+    @ApiModelProperty(value = "成功执行次数")
+    private Integer successCount;
+
+    /**
+     * 失败执行次数
+     */
+    @ApiModelProperty(value = "失败执行次数")
+    private Integer errorCount;
+
+    /**
+     * 执行次数
+     */
+    @ApiModelProperty(value = "执行次数")
+    private Integer totalCount;
+
+
+    /**
+     * 任务状态: 0 初始化，1 正在运行，2 正在停止， 3 已停止, 4 失败
+     */
+    @ApiModelProperty(value = "任务状态: 0 初始化，1 正在运行，2 正在停止， 3 已停止, 4 失败")
+    private Integer taskStatus;
+    /**
+     * 错误信息
+     */
+    @ApiModelProperty(value = "执行错误时的错误信息")
+    private String msg;
+}

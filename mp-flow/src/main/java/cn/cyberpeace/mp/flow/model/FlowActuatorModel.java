@@ -60,9 +60,9 @@ public class FlowActuatorModel extends BaseModel {
     /**
      * 实例id
      */
-    @ApiModelProperty(value = "实例id")
+    @ApiModelProperty(value = "发生器云资源id")
     @DefaultStr
-    private String instanceId;
+    private String resourceId;
 
     /**
      * 运行状态：0 初始化， 1 运行中， 2 停止中， 3 已停止， 4 未启动过
@@ -71,7 +71,11 @@ public class FlowActuatorModel extends BaseModel {
     @DefaultInt
     private Integer status;
 
-    @ApiModelProperty(value = "创建发生器时关联的场景实例id")
+    @ApiModelProperty(value = "创建发生器时关联的场景模板id")
     @DefaultStr
     private String csceneId;
+
+    @ApiModelProperty(value = "创建发生器时关联的场景实例id")
+    @DefaultStr
+    private String csceneInstanceId;
 }

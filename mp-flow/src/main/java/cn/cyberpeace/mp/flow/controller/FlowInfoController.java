@@ -111,7 +111,8 @@ public class FlowInfoController {
      * @return
      */
     @ApiOperation("分页查询流量信息")
-    @GetMapping("/page")
+    @GetMapping("" +
+            "/page")
     public ListObjServiceResult<FlowInfoResponse> pageFlowInfo(FlowInfoQueryParams queryParams) {
         if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
             // 默认按时间降序
@@ -211,7 +212,6 @@ public class FlowInfoController {
     public ServiceResult<Boolean> flowImport(@RequestBody @Validated ImportFlowInfoRequest request) {
         return flowServiceImpl.flowImport(request);
     }
-
 
     /**
      * 名称存在校验
