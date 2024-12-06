@@ -135,7 +135,7 @@ public class CloudHttpClient {
 
     public <T> CloudResponse<T> cloudPost(String url, HttpData data, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef) {
 
-        return cloudResultBean(httpClient.post(url, data, param, this.getHeaders(), null), valueTypeRef, "post", url, data, param);
+        return cloudResultBean(httpClient.post(url, data, param, this.getHeaders(), 600000), valueTypeRef, "post", url, data, param);
     }
 
     public <T> CloudResponse<T> cloudPatch(String url, HttpData data, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef) {
