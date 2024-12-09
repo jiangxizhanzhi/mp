@@ -67,6 +67,7 @@ package cn.cyberpeace.mp.cscene.controller;
  import cn.cyberpeace.mp.cscene.controller.request.DeleteNodeNetwork;
  import cn.cyberpeace.mp.cscene.controller.request.DisConnectSceneNode;
  import cn.cyberpeace.mp.cscene.controller.request.ElementSnapshotActionRequest;
+ import cn.cyberpeace.mp.cscene.controller.request.NodeCommandQgaActionRequest;
  import cn.cyberpeace.mp.cscene.controller.request.QueryNode;
  import cn.cyberpeace.mp.cscene.controller.request.UpdateNodeCommand;
  import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
@@ -1542,6 +1543,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @PostMapping("/exec_element")
     public ServiceResult<ElementCommandExecResult> execElement(@RequestBody CsceneInstanceNodeCommandActionRequest request) {
         return modelService.execElement(request.getId(), request.getNodeId(), request.getCommand(), request.getExecUser(), request.getContext()).asResult();
+    }
+
+    @ApiOperation("节点通过QGA执行命令")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = NodeCommandQgaActionRequest.class)
+    @PostMapping("/exec_element_qga")
+    public ServiceResult<ElementCommandExecResult> execElementQga(@RequestBody NodeCommandQgaActionRequest request) {
+        return modelService.execElementQga(request).asResult();
     }
 
     /**

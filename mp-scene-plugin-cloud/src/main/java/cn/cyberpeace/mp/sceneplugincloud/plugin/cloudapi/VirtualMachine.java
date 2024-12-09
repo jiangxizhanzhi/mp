@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineExecCommandQgaData;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
@@ -515,6 +516,11 @@ public class VirtualMachine extends CloudClient {
         } catch (Exception e) {
             log.error("vm exc cmd error:{}", ExceptionUtils.getStackTrace(e));
         }
+    }
+
+    public VirtualMachineExecuteResult execCommandQga(VirtualMachineExecCommandQgaData data) {
+        VirtualMachineExecuteResult virtualMachineExecuteResult = getHttpClient().post(CloudUrlConstant.QGA_CMD, data, null, VirtualMachineExecuteResult.class);
+        return virtualMachineExecuteResult;
     }
 
     /**
