@@ -175,7 +175,7 @@ public class Container extends CloudClient {
         data.setCommand(String.format("sh -c '%s'", command));
         data.setInteractive(false);
         data.setRun(true);
-        data.setUser(user);
+        data.setUser("root");
         var requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
         var result = new CloudResponse<ContainerExecuteResult>();
         try {
