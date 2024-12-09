@@ -1065,6 +1065,7 @@ public class CreateHandler extends HandlerCommon {
         if (StringUtils.isNotEmpty(cloudElement.getIsoAttachFilename()) && StringUtils.isNotEmpty(cloudElement.getIsoTmpdirUuid())) {
             createData.setIsoAttach(true);
         }
+        log.info("element.userdata:{}",createData.getUserData());
         var virtualMachine = vmClient.create(createData);
         cloudElement.setResourceId(virtualMachine.getId());
         cloudElement.setHost(virtualMachine.getHost());
