@@ -88,7 +88,7 @@ public class ThirdSyncController {
         }
         if (user.getRoles() != null) {
             for (var t : user.getRoles()) {
-                roleIds.add(t.getRole_code());
+                roleIds.add(t.getRoleCode());
             }
         }
 
