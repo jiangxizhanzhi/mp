@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ThirdSyncRole {
-    private String role_Name;  // 用户类型名称
-    private String role_code;  // 用户类型code
+    private String roleName;  // 用户类型名称
+    private String roleCode;  // 用户类型code
 }
