@@ -311,6 +311,7 @@ mp:
     getuserurl: ${mp.thirdsso.ext-var.getuserurl}
     getcodeurl: ${mp.thirdsso.ext-var.getcodeurl}
     syncroleurl: ${mp.thirdsso.ext-var.syncroleurl}
+    logoutredirecturl: ${mp.thirdsso.ext-var.logoutredirecturl}
 
 # for kaptcha
 kaptcha:
