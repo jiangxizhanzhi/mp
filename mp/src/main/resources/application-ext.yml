@@ -84,7 +84,7 @@ mp:
       cloud-heavy-concurrent-delay: ${MP_CLOUD_HEAVY_CONCURRENT_DELAY:10}
       scene-create-install-unzip-apk: ${MP_SCENE_CREATE_INSTALL_UNZIP_APK:true}
       dhcp-ip-allocate: ${MP_DHCP_IP_ALLOCATE:true}
-      multi-cloud-info: ${MP_MULTI_CLOUD_INFO:default-http://10.100.27.1:11111,a1-http://10.4.1.36:11111,a2-http://10.4.1.37:11111}
+      multi-cloud-info: ${MP_MULTI_CLOUD_INFO:}
   monitor:
     ext-var:
       monitor-cp-cloud-interval: ${MP_MONITOR_CP_SRV_INTERVAL:}
