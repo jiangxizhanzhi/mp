@@ -14,20 +14,17 @@ import cn.cyberpeace.mp.cscene.request.logfile.LogFileIntervalRequest;
 import cn.cyberpeace.mp.cscene.request.logfile.LogFileSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.LogFileService;
-import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneDataModel;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -129,6 +126,25 @@ public class LogFileController {
     public ServiceResult<Integer> getDeleteInterval() {
         Integer interval = logFileService.getInterval();
         return new ServiceResult<>(interval).asResult();
+    }
+
+    @ApiOperation(value = "自定义原始日志查询")
+    @GetMapping("/custom/page")
+    public ServiceResult getCustomDataPage(@RequestParam String cscene,
+                                           @RequestParam(value = "page", defaultValue = "1") Integer page,
+                                           @RequestParam(value = "per_page", defaultValue = "10") Integer perPage) {
+        List<JSONObject> data = logFileService.getCustomDataPage(cscene, page, perPage);
+        for (JSONObject jsonObject : data) {
+            // 检查 createTime 字段是否存在并且不为空
+            if (jsonObject.containsKey("create_time") && jsonObject.get("create_time") != null) {
+                try {
+                    jsonObject.put("create_time", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(jsonObject.get("create_time")));
+                } catch (Exception e) {
+                    System.out.println("Error formatting createTime: " + e.getMessage());
+                }
+            }
+        }
+        return new ServiceResult<>(data).asResult();
     }
 
 }

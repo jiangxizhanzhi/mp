@@ -29,7 +29,6 @@ import cn.cyberpeace.mp.log.service.LogFileServiceFactory;
 import cn.cyberpeace.mp.log.service.impl.BCLogFileServiceImpl;
 import cn.cyberpeace.mp.log.service.impl.CpLogFileServiceImpl;
 import cn.cyberpeace.mp.log.service.impl.MpLogFileServiceImpl;
-import cn.cyberpeace.mp.log.service.impl.ReportLogFileServiceImpl;
 import cn.cyberpeace.mp.sceneplugincloud.service.CloudCommonConfigService;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
@@ -39,10 +38,10 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhCon
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneMapper;
 import cn.cyberpeace.mp.situationaware.model.enums.ProbeOSType;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -381,6 +380,12 @@ public class LogFileService {
         } 
         return Integer.valueOf(model.getValue());
 
+    }
+
+    public List<JSONObject> getCustomDataPage(String cscene, Integer page, Integer perPage) {
+        int offset = (page - 1) * perPage;
+        int pageSize = perPage;
+        return csceneInstanceMapper.getCustomDataPage(cscene, offset, pageSize);
     }
 
     @Data

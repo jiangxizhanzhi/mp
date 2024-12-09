@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneDataMapper">
+
+    <insert id="addData">
+        insert
+        mp_sceneplugincollection_scene_data_custom
+        (
+            id,
+            cscene,
+            file_name,
+            file_path,
+            scene_element,
+            scene_element_name,
+            size,
+            protocol,
+            create_time
+        )
+        values
+        (
+        #{param.id},
+        #{param.cscene},
+        #{param.fileName},
+        #{param.filePath},
+        #{param.sceneElement},
+        #{param.sceneElementName},
+        #{param.size},
+        #{param.protocol},
+        #{param.createTime}
+        )
+    </insert>
+
+</mapper>

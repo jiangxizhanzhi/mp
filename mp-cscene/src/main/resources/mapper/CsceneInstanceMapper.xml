@@ -2,78 +2,61 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper">
 
-    <select id="countGroupByReferenceType" resultType="cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel">
+    <select id="countGroupByReferenceType"
+            resultType="cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel">
         SELECT
-            i.reference_type,
-            count( i.pk ) AS total
+        i.reference_type,
+        count( i.pk ) AS total
         FROM
-            mp_cscene_cscene_instance i
+        mp_cscene_cscene_instance i
         LEFT JOIN
-            mp_scene_scene s ON i.scene = s.id
+        mp_scene_scene s ON i.scene = s.id
         <where>
             <if test="events != null and events.size > 0">
                 s.event NOT IN
-                <foreach collection="events" item="item" index="index"  open="(" separator="," close=")">
+                <foreach collection="events" item="item" index="index" open="(" separator="," close=")">
                     #{item}
                 </foreach>
             </if>
         </where>
         GROUP BY
-            i.reference_type
+        i.reference_type
     </select>
 
     <select id="countActivityScene" resultType="cn.cyberpeace.mp.cscene.model.CsceneInstanceCountActivitySceneModel">
         SELECT COALESCE
-                   ( sum( a.total ), 0 ) AS total,
-               COALESCE ( sum( a.activitySceneTotal ), 0 ) AS activitySceneTotal
-        FROM
-            (
-                SELECT
-                    0 AS total,
-                    count(*) AS activitySceneTotal
-                FROM
-                    (
-                        SELECT
-                            count(*)
-                        FROM
-                            mp_cscene_cscene_instance m0,
-                            mp_scene_scene m1,
-                            mp_scene_scene_element m2,
-                            mp_sceneplugincloud_scene_element m3
-                        WHERE
-                            (
-                                    m0.scene = m1.id
-                                    AND m1.id = m2.scene
-                                    AND m1.id = m3.scene
-                                    AND m2.node_id = m3.scene_element
-                                    AND m1.EVENT != 9
-                                )
-                        GROUP BY
-                            m0.id
-                    ) tmp UNION ALL
-                SELECT
-                    count(*) AS total,
-                    0 AS activitySceneTotal
-                FROM
-                    (
-                        SELECT
-                            count(*)
-                        FROM
-                            mp_cscene_cscene_instance m0,
-                            mp_scene_scene m1,
-                            mp_scene_scene_element m2,
-                            mp_sceneplugincloud_scene_element m3
-                        WHERE
-                            (
-                                    m0.scene = m1.id
-                                    AND m1.id = m2.scene
-                                    AND m1.id = m3.scene
-                                    AND m2.node_id = m3.scene_element
-                                )
-                        GROUP BY
-                            m0.id
-                    ) tmp
-            ) a
+                   (sum(a.total), 0)                  AS total,
+               COALESCE(sum(a.activitySceneTotal), 0) AS activitySceneTotal
+        FROM (SELECT 0        AS total,
+                     count(*) AS activitySceneTotal
+              FROM (SELECT count(*)
+                    FROM mp_cscene_cscene_instance m0,
+                         mp_scene_scene m1,
+                         mp_scene_scene_element m2,
+                         mp_sceneplugincloud_scene_element m3
+                    WHERE (
+                                      m0.scene = m1.id
+                                  AND m1.id = m2.scene
+                                  AND m1.id = m3.scene
+                                  AND m2.node_id = m3.scene_element
+                                  AND m1.EVENT != 9
+                              )
+                    GROUP BY m0.id) tmp
+              UNION ALL
+              SELECT count(*) AS total,
+                     0        AS activitySceneTotal
+              FROM (SELECT count(*)
+                    FROM mp_cscene_cscene_instance m0,
+                         mp_scene_scene m1,
+                         mp_scene_scene_element m2,
+                         mp_sceneplugincloud_scene_element m3
+                    WHERE (
+                                      m0.scene = m1.id
+                                  AND m1.id = m2.scene
+                                  AND m1.id = m3.scene
+                                  AND m2.node_id = m3.scene_element
+                              )
+                    GROUP BY m0.id) tmp) a
     </select>
 
     <select id="countActivitySceneByTime" resultType="java.lang.Integer">
@@ -94,6 +77,15 @@
         <foreach collection="list" open="(" separator="," close=")" item="item">
             #{item}
         </foreach>
+    </select>
+
+    <select id="getCustomDataPage" resultType="com.alibaba.fastjson.JSONObject">
+        select * from
+        mp_sceneplugincollection_scene_data_custom
+        where cscene = #{cscene}
+        <if test="offset != null and pageSize != null">
+            limit #{offset}, #{pageSize}
+        </if>
     </select>
 
 </mapper>
