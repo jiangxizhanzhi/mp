@@ -29,4 +29,5 @@ public class ThirdSsoConfig {
     private String getcodeurl;
     private String syncroleurl;
     private Boolean synctokencheck;
+    private String logoutredirecturl;
 }

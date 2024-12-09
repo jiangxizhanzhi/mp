@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
+import cn.cyberpeace.mp.auth.config.ThirdSsoConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.extensions.security.event.UserEventPublisher;
@@ -9,6 +10,7 @@ import cn.cyberpeace.mp.auth.extensions.security.filter.JwtAuthenticationFilter;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -94,13 +96,18 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
         response.setHeader("third_token", "");
         JwtAuthenticationFilter.delThirdTokenToResponse(response);
 
-        response.setContentType("application/json;charset=UTF-8");
-        response.setStatus(HttpServletResponse.SC_OK);
+        ThirdSsoConfig ssoConfig = BeanCommon.getBean(ThirdSsoConfig.class);
+        if (StringUtils.isNotEmpty(ssoConfig.getLogoutredirecturl())) {
+            response.sendRedirect(ssoConfig.getLogoutredirecturl());
+        } else {
+            response.setContentType("application/json;charset=UTF-8");
+            response.setStatus(HttpServletResponse.SC_OK);
 
-        ServiceResult<Object> result = new ServiceResult<>(null);
-        PrintWriter writer = response.getWriter();
-        mapper.writeValue(writer, result.asResult());
-        writer.flush();
+            ServiceResult<Object> result = new ServiceResult<>(null);
+            PrintWriter writer = response.getWriter();
+            mapper.writeValue(writer, result.asResult());
+            writer.flush();
+        }
     }
 
     private void recordLogoutLog(UserModel user, HttpServletRequest request) {
