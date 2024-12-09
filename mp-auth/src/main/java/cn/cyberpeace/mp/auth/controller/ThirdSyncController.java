@@ -13,12 +13,14 @@ import cn.cyberpeace.mp.auth.service.impl.TenantUserServiceImpl;
 import cn.cyberpeace.mp.auth.service.impl.UserServiceImpl;
 import cn.cyberpeace.mp.auth.util.ThirdSsoUtil;
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -72,8 +74,16 @@ public class ThirdSyncController {
         request.setRoleIds(roleIds);
         request.setOrgIds(orgIds);
         if (user.getOrgs() != null) {
+            List<String> orgIdentfierIds = new ArrayList<>();
             for (ThirdSyncUserOrganization r : user.getOrgs()) {
-                orgIds.add(r.getOrgID());
+                orgIdentfierIds.add(r.getOrgCustomUnique());
+            }
+            HumanCondition condition = new HumanCondition().filterIn(OrgModel::getIdentifier, orgIdentfierIds.toArray(new String[]{}));
+            var list = BeanCommon.getBean(OrgMapper.class).list(condition);
+            if (!CollectionUtils.isEmpty(list)) {
+                for (OrgModel l : list) {
+                    request.getOrgIds().add(l.getId());
+                }
             }
         }
         if (user.getRoles() != null) {
