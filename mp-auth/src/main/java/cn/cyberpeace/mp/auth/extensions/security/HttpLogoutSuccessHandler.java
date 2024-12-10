@@ -96,19 +96,13 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
         response.setHeader("third_token", "");
         JwtAuthenticationFilter.delThirdTokenToResponse(response);
 
-        ThirdSsoConfig ssoConfig = BeanCommon.getBean(ThirdSsoConfig.class);
-        if (StringUtils.isNotEmpty(ssoConfig.getLogoutredirecturl())) {
-            log.info("logout redirect: {}", ssoConfig.getLogoutredirecturl());
-            response.sendRedirect(ssoConfig.getLogoutredirecturl());
-        } else {
-            response.setContentType("application/json;charset=UTF-8");
-            response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("application/json;charset=UTF-8");
+        response.setStatus(HttpServletResponse.SC_OK);
 
-            ServiceResult<Object> result = new ServiceResult<>(null);
-            PrintWriter writer = response.getWriter();
-            mapper.writeValue(writer, result.asResult());
-            writer.flush();
-        }
+        ServiceResult<Object> result = new ServiceResult<>(null);
+        PrintWriter writer = response.getWriter();
+        mapper.writeValue(writer, result.asResult());
+        writer.flush();
     }
 
     private void recordLogoutLog(UserModel user, HttpServletRequest request) {
