@@ -103,6 +103,9 @@ class NodeElementConverter implements IConverter {
         // 插件表
         CloudPluginSceneConfigElementBO pluginElement = new CloudPluginSceneConfigElementBO();
         pluginElement.setImage(node.getImage());
+        if (pluginElement.getImage() != null && pluginElement.getImage().endsWith("Core Router")) {
+            pluginElement.setImage("Core Router");
+        }
         // 初步加载role imageType (部分简单靶标不会导入), 这里不一定准确
         if (node.getId().toLowerCase().startsWith("router")) {
             sceneConfigElementBO.setIcon2(DefaultImgUtil.pathToFdfsUrl(CommonConstant.DefaultImageUrl.ROUTER));
