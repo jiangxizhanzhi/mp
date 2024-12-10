@@ -50,4 +50,27 @@ public class HostEventQueryParams extends QueryParams {
      */
     @ApiModelProperty(value = "是否是滚动分页请求")
     private Boolean scroll;
+
+    /**
+     * 是否syslog日志
+     */
+    @ApiModelProperty(value = "是否查询syslog日志")
+    private Boolean isSyslog;
+
+    /**
+     * 实体设备级别
+     */
+    @ApiModelProperty(value = "级别")
+    private String levelName;
+
+    /**
+     * 实体设备应用名
+     */
+    @ApiModelProperty(value = "应用名")
+    private String appName;
+    /**
+     * 实体设备节点
+     */
+    @ApiModelProperty(value = "节点id列表")
+    private String nodeId;
 }

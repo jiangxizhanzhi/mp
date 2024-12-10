@@ -44,6 +44,7 @@ import cn.cyberpeace.mp.sceneplugincollection.util.DatetimeUtil;
 import cn.cyberpeace.mp.sceneplugincollection.util.EsHttpUtil;
 import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
 import cn.cyberpeace.mp.situationaware.bo.*;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.*;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
@@ -60,6 +61,7 @@ import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.cyberpeace.mp.situationaware.service.FlowClassificationsService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -67,10 +69,24 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.IndicesOptions;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.core.TimeValue;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.Scroll;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -102,6 +118,9 @@ public class ScenePluginCollectionSceneService {
         public static final String EVENT_TYPE = "eventType";
         public static final String NODE_NAME = "nodeName";
     }
+
+    @Resource(name = "wazuhRestHighLevelClient")
+    private RestHighLevelClient restHighLevelClient;
 
     @Autowired
     private FlowClassificationsService flowClassificationsService;
@@ -2045,5 +2064,77 @@ public class ScenePluginCollectionSceneService {
         return dateTime;
     }
 
+    public ListObjServiceResult<CollectionHostEventBO> listSysLogsData(String sceneId, HostEventQueryParams queryParams) {
+        log.info("sceneId:{}, scroll:{}", sceneId, queryParams.getScroll());
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+        WazuhEventRequest request = genWazuhEventRequest(queryParams, sceneHandler.getScene().getCreateTime(), new ArrayList<>());
+
+        //根据日期构造索引
+
+        String[] indexArray = dataCollectionService.buildRequestSyslogIndex(sceneId);
+        SearchRequest searchRequest = new SearchRequest(indexArray);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+
+        //构造查询条件
+        if (Objects.nonNull(request.getStartTime()) && Objects.nonNull(request.getEndTime())) {
+            //时间查询
+            boolQueryBuilder.must(QueryBuilders.rangeQuery("@timestamp")
+                    .from(request.getStartTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter))
+                    .to(request.getEndTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter)));
+        }
+
+        if (StringUtils.isNotBlank(queryParams.getNodeId())) {
+            boolQueryBuilder.filter(QueryBuilders.termsQuery("node_id", queryParams.getNodeId()));
+        }
+        if (StringUtils.isNotBlank(queryParams.getAppName())) {
+            boolQueryBuilder.filter(QueryBuilders.termsQuery("log.syslog.facility.name", queryParams.getAppName().toLowerCase()));
+        }
+        if (StringUtils.isNotBlank(queryParams.getLevelName())) {
+            boolQueryBuilder.filter(QueryBuilders.termsQuery("log.syslog.severity.name", queryParams.getLevelName().toLowerCase()));
+        }
+
+
+        // 按时间降序
+        sourceBuilder.sort("@timestamp", SortOrder.DESC);
+        sourceBuilder.trackTotalHits(true);
+        searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+
+        if (request.isScroll()) {
+            final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(35L));
+            searchRequest.scroll(scroll);
+        }
+        //配置索引为空
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+        //处理分页
+        dataCollectionService.processPageable(request, indexArray, boolQueryBuilder, sourceBuilder);
+        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            List<CollectionHostEventBO> wazuhFileRootList = new ArrayList<>();
+            for (SearchHit hit : response.getHits().getHits()) {
+                EsSyslog esSyslog = JSONObject.parseObject(hit.getSourceAsString(), EsSyslog.class);
+                CollectionHostEventBO collectionHostEventBO = new CollectionHostEventBO();
+                collectionHostEventBO.setSceneId(esSyslog.getSceneId());
+                collectionHostEventBO.setNodeId(esSyslog.getNodeId());
+                collectionHostEventBO.setNodeName(esSyslog.getNodeName());
+                collectionHostEventBO.setTime(DatetimeUtil.parseDateTimeFronLacunchOutput(esSyslog.getTimestamp()));
+                collectionHostEventBO.setAppName(esSyslog.getLog().getSyslog().getFacility().getName());
+                collectionHostEventBO.setEventDesc(esSyslog.getMessage());
+                collectionHostEventBO.setLevelName(esSyslog.getLog().getSyslog().getSeverity().getName());
+
+                wazuhFileRootList.add(collectionHostEventBO);
+            }
+
+            long total = 0L;
+            if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
+                total = response.getHits().getTotalHits().value;
+            }
+            return new ListObjServiceResult(wazuhFileRootList, BigDecimal.valueOf(total).intValue());
+        } catch (IOException e) {
+            log.error("es queryFileEvents error: {} ", ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
+        }
+    }
 
 }

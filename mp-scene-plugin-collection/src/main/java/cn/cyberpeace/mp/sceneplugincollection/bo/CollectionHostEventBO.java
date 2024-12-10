@@ -80,4 +80,7 @@ public class CollectionHostEventBO {
     @ApiModelProperty("滚动分页的scroll_id")
     private String scrollId;
 
+    @ApiModelProperty("rule等级")
+    private String levelName;
+
 }

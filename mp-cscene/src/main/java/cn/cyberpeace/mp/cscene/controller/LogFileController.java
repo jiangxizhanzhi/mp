@@ -147,7 +147,7 @@ public class LogFileController {
         }
         // 分页处理
         JSONObject result = new JSONObject();
-        result.put("data", data);
+        result.put("list", data);
         result.put("total", total);
         return new ServiceResult<>(result).asResult();
     }

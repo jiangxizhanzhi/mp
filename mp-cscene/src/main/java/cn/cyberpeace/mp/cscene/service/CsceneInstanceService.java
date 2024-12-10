@@ -896,6 +896,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
+        if (null != queryParams.getIsSyslog() && queryParams.getIsSyslog()) {
+            return scenePluginCollectionSceneService.listSysLogsData(sceneId, queryParams);
+        }
+
         // 0:所有 1:进程 2:端口 3:网络连接 4:文件 5:用户 6:注册表
         if (Objects.nonNull(queryParams.getType()) && queryParams.getType() != 0) {
             // 传入的sceneId不需要提前转

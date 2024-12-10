@@ -1634,8 +1634,8 @@ public class DataCollectionService extends CollectionBaseService {
      * @param sourceBuilder
      * @return
      */
-    private int processPageable(WazuhEventRequest wazuhEventRequest, String[] indexArray,
-                                BoolQueryBuilder boolQueryBuilder, SearchSourceBuilder sourceBuilder) {
+    public int processPageable(WazuhEventRequest wazuhEventRequest, String[] indexArray,
+                               BoolQueryBuilder boolQueryBuilder, SearchSourceBuilder sourceBuilder) {
 
         if (Objects.isNull(wazuhEventRequest.getPageNum())) {
             wazuhEventRequest.setPageNum(1);
