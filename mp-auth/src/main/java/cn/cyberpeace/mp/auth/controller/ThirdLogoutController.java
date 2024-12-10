@@ -28,6 +28,7 @@ public class ThirdLogoutController {
     @GetMapping
     @ApiOperation("/logout_page")
     public String loginAndRedirectToHomePage(HttpServletRequest request, HttpServletResponse response) {
+        log.info("logout redirect: {}", thirdSsoConfig.getLogoutredirecturl());
         return "redirect:" + thirdSsoConfig.getLogoutredirecturl();
     }
 }
