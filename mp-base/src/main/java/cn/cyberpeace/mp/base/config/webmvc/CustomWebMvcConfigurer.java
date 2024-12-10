@@ -5,11 +5,13 @@ import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.CacheControl;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class CustomWebMvcConfigurer implements WebMvcConfigurer {
@@ -30,7 +32,8 @@ public class CustomWebMvcConfigurer implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler(baseAppConfig.getLfsUrlPattern())
-                .addResourceLocations(String.format("file:%s%s", LfsCommon.lfsClient.getGroupDir(), FileUtil.FILE_SEPARATOR));
+                .addResourceLocations(String.format("file:%s%s", LfsCommon.lfsClient.getGroupDir(), FileUtil.FILE_SEPARATOR))
+                .setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS).cachePublic());
 
         //W:add swagger resource mapping
         registry.addResourceHandler("doc.html")
