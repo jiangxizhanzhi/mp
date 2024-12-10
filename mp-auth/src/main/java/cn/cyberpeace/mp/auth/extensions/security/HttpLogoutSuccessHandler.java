@@ -98,6 +98,7 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
 
         ThirdSsoConfig ssoConfig = BeanCommon.getBean(ThirdSsoConfig.class);
         if (StringUtils.isNotEmpty(ssoConfig.getLogoutredirecturl())) {
+            log.info("logout redirect: {}", ssoConfig.getLogoutredirecturl());
             response.sendRedirect(ssoConfig.getLogoutredirecturl());
         } else {
             response.setContentType("application/json;charset=UTF-8");
