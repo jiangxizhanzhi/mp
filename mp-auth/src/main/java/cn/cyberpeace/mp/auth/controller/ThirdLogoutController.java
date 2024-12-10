@@ -25,8 +25,7 @@ public class ThirdLogoutController {
     private ThirdSsoConfig thirdSsoConfig;
 
     @AuthTarget(value = {TargetEnum.NO_AUTH})
-    @GetMapping
-    @ApiOperation("/logout_page")
+    @GetMapping("/logout_page")
     public String loginAndRedirectToHomePage(HttpServletRequest request, HttpServletResponse response) {
         log.info("logout redirect: {}", thirdSsoConfig.getLogoutredirecturl());
         return "redirect:" + thirdSsoConfig.getLogoutredirecturl();
