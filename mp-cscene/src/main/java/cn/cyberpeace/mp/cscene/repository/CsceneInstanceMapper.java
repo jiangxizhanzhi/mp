@@ -44,4 +44,6 @@ public interface CsceneInstanceMapper extends BaseCsceneMapper<CsceneInstanceMod
     List<CloudPluginSceneElementModel> getVlanUsedInstance(List<Integer> vlanId);
 
     List<JSONObject> getCustomDataPage(String cscene, Integer offset, Integer pageSize);
+
+    Integer getCustomDataPageTotal(String cscene);
 }

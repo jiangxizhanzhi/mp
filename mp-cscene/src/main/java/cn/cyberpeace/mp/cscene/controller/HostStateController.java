@@ -26,6 +26,7 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -47,9 +48,6 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -285,13 +283,16 @@ public class HostStateController {
         List<ElementVulnerabilityCountInfo> vulnerabilityCountInfo = sceneElementMonitorService.getVulnerabilityCountInfo(pageRequest);
         List<ElementVulnerabilityPieChartInfo> vulnerabilityPieChartInfo = sceneElementMonitorService.getVulnerabilityPieChartInfo(pageRequest);
         ListObjResult<ElementVulnerabilityInfo> vulnerabilityInfo = sceneElementMonitorService.getVulnerabilityInfo(pageRequest);
-        List<ElementVulnerabilityInfo> list = vulnerabilityInfo.getList();
+        List<ElementVulnerabilityInfo> list = vulnerabilityInfo.getObjs();
         VulnExportState vulnExportState = new VulnExportState();
         vulnExportState.setList(list);
         vulnExportState.setVulnerabilityCountInfo(vulnerabilityCountInfo);
         vulnExportState.setVulnerabilityPieChartInfo(vulnerabilityPieChartInfo);
         ObjectMapper objectMapper = new ObjectMapper();
+        // 注册 Java 8 时间模块
+        objectMapper.registerModule(new JavaTimeModule());
         String fileName = "/home/mp/vlun.json";
-        exportData(response, objectMapper, fileName, objectMapper.writeValueAsString(vulnExportState));
+        String string = objectMapper.writeValueAsString(vulnExportState);
+        exportData(response, objectMapper, fileName, string);
     }
 }

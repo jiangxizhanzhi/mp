@@ -388,6 +388,10 @@ public class LogFileService {
         return csceneInstanceMapper.getCustomDataPage(cscene, offset, pageSize);
     }
 
+    public Integer getCustomDataPageTotal(String cscene) {
+        return csceneInstanceMapper.getCustomDataPageTotal(cscene);
+    }
+
     @Data
     @AllArgsConstructor
     public class Composite {

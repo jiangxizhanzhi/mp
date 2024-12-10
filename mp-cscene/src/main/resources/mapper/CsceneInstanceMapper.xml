@@ -88,4 +88,10 @@
         </if>
     </select>
 
+    <select id="getCustomDataPageTotal" resultType="java.lang.Integer">
+        select count(*) from
+        mp_sceneplugincollection_scene_data_custom
+        where cscene = #{cscene}
+    </select>
+
 </mapper>

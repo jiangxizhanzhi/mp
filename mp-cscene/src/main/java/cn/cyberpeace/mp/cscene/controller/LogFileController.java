@@ -134,6 +134,7 @@ public class LogFileController {
                                            @RequestParam(value = "page", defaultValue = "1") Integer page,
                                            @RequestParam(value = "per_page", defaultValue = "10") Integer perPage) {
         List<JSONObject> data = logFileService.getCustomDataPage(cscene, page, perPage);
+        Integer total = logFileService.getCustomDataPageTotal(cscene);
         for (JSONObject jsonObject : data) {
             // 检查 createTime 字段是否存在并且不为空
             if (jsonObject.containsKey("create_time") && jsonObject.get("create_time") != null) {
@@ -144,7 +145,11 @@ public class LogFileController {
                 }
             }
         }
-        return new ServiceResult<>(data).asResult();
+        // 分页处理
+        JSONObject result = new JSONObject();
+        result.put("data", data);
+        result.put("total", total);
+        return new ServiceResult<>(result).asResult();
     }
 
 }
