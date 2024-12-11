@@ -43,6 +43,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 @Slf4j
@@ -70,7 +72,7 @@ public class GenerateEntityLogfileTask {
     private CsceneInstanceService modelService;
 
 
-    @Scheduled(cron = "0 */10 * * * ?")
+    @Scheduled(cron = "0 */1 * * * ?")
     private void generateEntityLogfile() {
         log.info("start generateEntityLogfile task");
         // 获取运行中的场景列表
@@ -170,32 +172,88 @@ public class GenerateEntityLogfileTask {
                 String url = "http://{ip}:8001/agent/ssh/exec_list_cmds".replace("{ip}", frameServerConfigIp);
                 cmdListRequest.setCmds(List.of("ls -l " + config.getFile()));
                 result = HttpUtils.sendPost(url, JsonCommon.snakeStringify(cmdListRequest));
+                log.info("ssh exec_list_cmds result:{}", result);
             } else if (TYPE_TELNET.equals(type)) {
                 String url = "http://{ip}:8001/agent/telnet/exec_list_cmds".replace("{ip}", frameServerConfigIp);
                 cmdListRequest.setCmds(List.of("ls -l " + config.getFile()));
                 result = HttpUtils.sendPost(url, JsonCommon.snakeStringify(cmdListRequest));
+                log.info("telnet exec_list_cmds result:{}", result);
             }
 
-            if (StringUtils.isNotBlank(result)) {
+            if (StringUtils.isNotBlank(result) && protocol.equals(TYPE_SSH)) {
                 // 执行结果解析
                 ExecCommandResult execCommandResult = JSONObject.parseObject(result, ExecCommandResult.class);
                 // 遍历返回信息
                 for (String commandResult : execCommandResult.getData()) {
-                    if(protocol.equals(TYPE_TELNET)){// telnet执行后获取的控制台数据,需要进行整理
-                        // 清理所有 ANSI 控制序列
-                        commandResult = commandResult.replaceAll("\\u001B\\[[;?0-9]*[a-zA-Z]", "").trim();
-                        // 替换换行符
-                        commandResult = commandResult.replace("\r\n", "\n");
+                    String sizeMessage = "";
+                    if (protocol.equals(TYPE_SSH)) {
+                        // 确保结果包含目标文件且无错误提示
+                        if (!commandResult.contains(config.getFile())
+                                || commandResult.contains("ls -l")
+                                || commandResult.contains("No such file or directory")) {
+                            log.warn("Skipping invalid SSH result: {}", commandResult);
+                            continue;
+                        }
+                        log.info("Valid SSH result: {}", commandResult);
+                    } else {
+                        continue;
                     }
-                    if (commandResult.contains(config.getFile()) && !commandResult.contains("ls -l")
-                            && !commandResult.contains("No such file or directory")) {
-                        log.info("queryEntityLogfile result========{}", commandResult);
-                        // 示例：-rw-r--r-- 1 root root 56 Nov 30 03:16 /home/123.txt
-                        String sizeMessage = commandResult.split("\\s+", -1)[4];
-                        log.info("queryEntityLogfile size========{}", sizeMessage);
-                        // 解析result后将获取的信息记录插入
-                        writeData(sizeMessage, csceneInstanceModel, info.getNode().getEid(), protocol, config.getFile(), elementBO, node_eid_id_Map, nodeIdNameMap);
-                        log.info("writeData finished");
+
+                    // 提取文件大小信息
+                    try {
+                        // 示例：-rw-r--r-- 1 root root 56 Nov 30 03:16 /home/1233.txt
+                        sizeMessage = commandResult.split("\\s+", -1)[4];
+                        log.info("Extracted file size: {}", sizeMessage);
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        log.error("Failed to extract file size from result: {}", commandResult, e);
+                        continue;
+                    }
+
+                    // 将解析后的数据记录插入
+                    try {
+                        writeData(sizeMessage, csceneInstanceModel, info.getNode().getEid(), protocol, config.getFile(),
+                                elementBO, node_eid_id_Map, nodeIdNameMap);
+                        log.info("writeData finished for file: {}", config.getFile());
+                    } catch (Exception e) {
+                        log.error("Failed to write data for file: {}", config.getFile(), e);
+                    }
+                }
+            }else if(StringUtils.isNotBlank(result) && protocol.equals(TYPE_TELNET)){
+                // 执行结果解析
+                ExecCommandResult execCommandResult = JSONObject.parseObject(result, ExecCommandResult.class);// 只会解析出一行
+                // 遍历返回信息
+                for (String commandResult : execCommandResult.getData()) {
+                    String[] split = commandResult.split("\r\n");
+                    // 对result 进行二次处理
+                    for(String line : split){
+                        String sizeMessage = "";
+                        // 清理所有 ANSI 控制序列
+                        line = line.replaceAll("\\u001B\\[[;?0-9]*[a-zA-Z]", "").trim();
+                        // 替换换行符
+                        line = line.replace("\r\n", "\n");
+                        // 匹配文件信息的正则表达式
+                        String regex = "^[-d].*\\s\\d+\\s\\w+\\s+\\w+\\s+\\d+\\s+[A-Za-z]{3}\\s+\\d{1,2}\\s+\\d{2}:\\d{2}\\s+/?.*$";
+                        Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+                        Matcher matcher = pattern.matcher(line);
+                        if(matcher.find()){
+                            // 提取文件大小信息
+                            try {
+                                // 示例：-rw-r--r-- 1 root root 56 Nov 30 03:16 /home/1233.txt
+                                sizeMessage = matcher.group().split("\\s+", -1)[4];
+                                log.info("Extracted file size: {}", sizeMessage);
+                            } catch (ArrayIndexOutOfBoundsException e) {
+                                log.error("Failed to extract file size from result: {}", commandResult, e);
+                                continue;
+                            }
+                            // 将解析后的数据记录插入
+                            try {
+                                writeData(sizeMessage, csceneInstanceModel, info.getNode().getEid(), protocol, config.getFile(),
+                                        elementBO, node_eid_id_Map, nodeIdNameMap);
+                                log.info("writeData finished for file: {}", config.getFile());
+                            } catch (Exception e) {
+                                log.error("Failed to write data for file: {}", config.getFile(), e);
+                            }
+                        }
                     }
                 }
             }
@@ -218,7 +276,7 @@ public class GenerateEntityLogfileTask {
         data.put("createTime", LocalDateTime.now());
         data.put("cscene", csceneInstanceModel.getId());// 场景实例id
         data.put("fileName", filePath.substring(filePath.lastIndexOf("/") + 1));
-        collectionPluginSceneDataMapper.deletePreviousDataByProtocol(protocol);// 只保留最新数据
+        collectionPluginSceneDataMapper.deletePreviousDataByProtocol(protocol, csceneInstanceModel.getId());// 只保留最新数据
         collectionPluginSceneDataMapper.addData(data);
     }
 

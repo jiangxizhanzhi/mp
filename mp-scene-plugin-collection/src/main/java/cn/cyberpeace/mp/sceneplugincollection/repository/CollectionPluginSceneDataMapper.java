@@ -14,5 +14,5 @@ import org.springframework.stereotype.Repository;
 public interface CollectionPluginSceneDataMapper extends BaseModelMapper<CollectionPluginSceneDataModel> {
     void addData(@Param("param") JSONObject data);
 
-    void deletePreviousDataByProtocol(String protocol);
+    void deletePreviousDataByProtocol(String protocol, String cscene);
 }

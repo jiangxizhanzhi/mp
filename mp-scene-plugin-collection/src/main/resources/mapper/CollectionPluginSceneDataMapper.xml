@@ -33,7 +33,7 @@
     <delete id="deletePreviousDataByProtocol">
         delete
         from mp_sceneplugincollection_scene_data_custom
-        where protocol = #{protocol}
+        where protocol = #{protocol} and cscene = #{cscene}
     </delete>
 
 </mapper>
