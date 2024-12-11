@@ -28,7 +28,7 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
-@ApiModel(value = "流量发生器返回信息")
+@ApiModel(value = "任务统计")
 @Builder
 public class ActuatorTaskCount {
     @ApiModelProperty(value = "类型")

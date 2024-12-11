@@ -28,7 +28,7 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
-@ApiModel(value = "流量发生器返回信息")
+@ApiModel(value = "名称列表")
 @Builder
 public class ActuatorSceneName {
     @ApiModelProperty(value = "场景id")
