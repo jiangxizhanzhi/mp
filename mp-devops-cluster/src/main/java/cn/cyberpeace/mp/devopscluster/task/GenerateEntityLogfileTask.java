@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.CmdListRequest;
+import cn.cyberpeace.mp.devopscluster.request.DownloadFileRequest;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
@@ -38,6 +39,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -72,7 +75,7 @@ public class GenerateEntityLogfileTask {
     private CsceneInstanceService modelService;
 
 
-    @Scheduled(cron = "0 */1 * * * ?")
+    @Scheduled(cron = "0 */10 * * * ?")
     private void generateEntityLogfile() {
         log.info("start generateEntityLogfile task");
         // 获取运行中的场景列表
@@ -286,6 +289,65 @@ public class GenerateEntityLogfileTask {
                 && StringUtils.isNotBlank(sshConfig.getPassword())
                 && StringUtils.isNotBlank(sshConfig.getPort())
                 && StringUtils.isNotBlank(sshConfig.getUsername());
+    }
+
+    public void downloadFile(DownloadFileRequest downloadFileRequest, HttpServletRequest request, HttpServletResponse response) {
+        String sceneId = downloadFileRequest.getSceneId();
+        // 获取运行中的场景列表
+        HumanCondition condition = new HumanCondition()
+                    .filterEqual(CsceneInstanceModel::getDeleted, false);
+        List<CsceneInstanceModel> list = csceneInstanceMapper.list(condition);
+        for (CsceneInstanceModel csceneInstanceModel : list) {
+            try {
+                // 判断场景实例是否处于进行中状态
+                if (!csceneCommonService.isCsceneInstanceRunning(csceneInstanceModel.getId())) {
+                    return;
+                }
+                // 获取场景实例信息
+                ServiceResult<SceneDataBO> serviceResult = sceneService.get(csceneInstanceModel.getScene(), false, null, null);
+                // 收集element中的id和eid成为map
+                List<SceneElementBO> elementList = serviceResult.getSource().getTopology().getElements();
+                Map<String, String> node_id_eid_Map = new HashMap<>();
+                Map<String, String> node_eid_id_Map = new HashMap<>();
+                Map<String, String> nodeIdNameMap = new HashMap<>();
+                elementList.forEach(element -> {
+                    node_id_eid_Map.put(element.getId(), element.getEid());
+                    node_eid_id_Map.put(element.getEid(), element.getId());
+                    nodeIdNameMap.put(element.getId(), element.getName());
+                });
+                Map<String, Map<String, Object>> elements = serviceResult.getSource().getPlugins().get("cpcloud").getElements();
+                for (var entry : elements.entrySet()) {
+                    CloudPluginSceneConfigElementBO elementBO = JsonCommon.snakeMapToBean(entry.getValue(), CloudPluginSceneConfigElementBO.class);
+                    // 判断是否存在实体靶标
+                    if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(elementBO.getImageType())) {
+                        // 获取设备信息
+                        DeviceTargetPO deviceTargetPO = deviceTargetMapper.findByUuid(elementBO.getImageUuid());
+                        if (null == deviceTargetPO) {
+                            continue;
+                        }
+                        // 判断设备信息是否配置
+                        if (StringUtils.isNotBlank(deviceTargetPO.getSshConfig()) || StringUtils.isNotBlank(deviceTargetPO.getTelnetConfig())) {
+                            // 配置信息
+                            log.info("deviceTargetPO.getSshConfig={}", deviceTargetPO.getSshConfig());
+                            log.info("deviceTargetPO.getTelnetConfig={}", deviceTargetPO.getTelnetConfig());
+                            EntityLogfileConfig sshConfig = JSONObject.parseObject(deviceTargetPO.getSshConfig(), EntityLogfileConfig.class);
+                            EntityLogfileConfig telnetConfig = JSONObject.parseObject(deviceTargetPO.getTelnetConfig(), EntityLogfileConfig.class);
+                            // 下载文件,通过执行scp命令将文件传到本地
+                            String command = "scp -r " + sshConfig.getUsername() + "@" + sshConfig.getIp() + ":" + sshConfig.getFile() + " " + downloadFileRequest.getFilePath();
+                            if (checkConfigComplete(sshConfig)) {
+                                queryEntityLogfile(csceneInstanceModel.getId(), entry.getKey(), TYPE_SSH, elementBO, sshConfig, csceneInstanceModel, node_eid_id_Map, nodeIdNameMap);
+                            }
+                            if (checkConfigComplete(telnetConfig)) {
+                                queryEntityLogfile(csceneInstanceModel.getId(), entry.getKey(), TYPE_TELNET, elementBO, telnetConfig, csceneInstanceModel, node_eid_id_Map, nodeIdNameMap);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.error("GenerateEntityLogfileJob error, csceneInstanceModel={}", csceneInstanceModel, e);
+            }
+        }
+
     }
 
     @Data
