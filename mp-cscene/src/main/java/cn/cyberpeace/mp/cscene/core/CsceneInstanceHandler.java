@@ -364,4 +364,13 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         }
         return csceneInstanceBO;
     }
+
+    public boolean addLoad(String nodeId) {
+        String sceneId = this.getSceneId();
+        if (sceneId == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+
+        return this.sceneService.addLoad(sceneId, nodeId, generateSceneContext()).getSource();
+    }
 }

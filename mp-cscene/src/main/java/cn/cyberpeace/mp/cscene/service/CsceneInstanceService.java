@@ -2651,7 +2651,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             sceneAreaMapper.update(model);
 //            启动载荷节点
             log.info("addLoad.createElement");
-            this.createElement(sceneId, cloudPluginSceneElementModel.getSceneElement(), csceneLoadDto.getContext());
+            this.addLoad(sceneId, cloudPluginSceneElementModel.getSceneElement(), csceneLoadDto.getContext());
 
 //            保存实例信息
             cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(sceneElementModel, sceneConfigElementModel);
@@ -2659,6 +2659,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         log.info("addLoad end.");
         return new ServiceResult<>(true);
+    }
+
+    private ServiceResult<Boolean> addLoad(String id, String nodeId, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+        boolean result = instanceHandler.addLoad(nodeId);
+        return new ServiceResult<>(result);
     }
 
     /**

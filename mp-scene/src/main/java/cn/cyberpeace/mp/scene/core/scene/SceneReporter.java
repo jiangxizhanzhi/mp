@@ -16,4 +16,6 @@ public interface SceneReporter {
     void reportScene(CollectedSceneBO scene);
 
     void reportElement(CollectedSceneElementBO sceneElement);
+
+    void reportLoadSuccess(CollectedSceneElementBO nodeId, String loadToolId);
 }

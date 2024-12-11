@@ -291,6 +291,11 @@ public class SceneHandler extends BaseSceneHandler<
         reporters.forEach(reporter -> reportTaskPool.executeTask(() -> reporter.reportElement(collectedSceneElement)));
     }
 
+    public void reportLoadSuccess(String nodeId, String loadToolId) {
+        var collectedSceneElement = getCollectedSceneElementBO(nodeId);
+        reporters.forEach(reporter -> reportTaskPool.executeTask(() -> reporter.reportLoadSuccess(collectedSceneElement,loadToolId)));
+    }
+
     public void ackSceneChanged(boolean forceSave, boolean withPlugins) {
         if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneProcessSaveRealtime())) {
             forceSave = false;

@@ -21,6 +21,8 @@ import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import cn.cyberpeace.mp.scene.util.SceneEventUtils;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -413,6 +415,21 @@ public class SceneService {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
         sceneHandler.snapshotElement(nodeId, snapshotId, snapshotName, description);
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> addLoad(String id, String nodeId, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        ElementTaskPool.getInstance().executeTask(() -> {
+            sceneHandler.initiateElement(nodeId);
+            sceneHandler.createElement(nodeId);
+//            通知载荷添加
+            Object cloudElement = sceneHandler.getPluginElement("cpcloud", nodeId);
+            JSONObject jsonObject = JSON.parseObject(JSON.toJSONString(cloudElement), JSONObject.class);
+            String loadToolId = jsonObject.getString("loadToolId");
+            sceneHandler.reportLoadSuccess(nodeId,loadToolId);
+        });
         return new ServiceResult<>(true);
     }
 }
