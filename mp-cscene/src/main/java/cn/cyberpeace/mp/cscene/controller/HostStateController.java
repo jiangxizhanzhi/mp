@@ -13,13 +13,17 @@ import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
+import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
 import cn.cyberpeace.mp.cscene.util.FileUtil;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
+import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
+import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
@@ -35,10 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -67,6 +68,9 @@ public class HostStateController {
 
     @Autowired
     private SceneElementMonitorService sceneElementMonitorService;
+
+    @Autowired
+    private CsceneInstanceService modelService;
 
     /**
      * 默认查询场景所有节点
@@ -227,6 +231,72 @@ public class HostStateController {
         ObjectMapper objectMapper = new ObjectMapper();
         String fileName = "/home/mp/host_acqu.json";
         exportData(response, objectMapper, fileName, objectMapper.writeValueAsString(fileExportState));
+    }
+
+    @ApiOperation(value = "主机信息json导出")
+    @PostMapping("/export/hosts/acquisition")
+    public void exportHostAcquisition(HttpServletResponse response, String id, HostEventQueryParams queryParams) {
+        ListObjServiceResult<CollectionHostEventBO> hostStates = new ListObjServiceResult<>() ;
+        if (Objects.nonNull(queryParams.getType()) && queryParams.getType() != 0) {
+            // 传入的sceneId不需要提前转
+            //文件变更
+            if (queryParams.getType().equals(0)) {
+                hostStates=modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.FILE_MODIFY,
+                        queryParams, FileEventType.FILE.name());
+            }
+            //注册变更
+            if (queryParams.getType().equals(1)) {
+                hostStates= modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.REGISTRY_MODIFY, queryParams,
+                        FileEventType.REGISTRY.name());
+            }
+            //原始日志
+            if (queryParams.getType().equals(2)) {
+
+                hostStates= modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.LOG_FILE, queryParams,
+                        FileEventType.LOG.name());
+            }
+            //操作系统日志
+            if (queryParams.getType().equals(3)) {
+
+                hostStates= modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.OS_LOG, queryParams,
+                        FileEventType.OS_LOG.name());
+            }
+            //应用系统日志
+            if (queryParams.getType().equals(4)) {
+
+                hostStates= modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.APPLICATION_LOG, queryParams,
+                        FileEventType.APPLICATION_LOG.name());
+            }
+            //安全系统日志
+            if (queryParams.getType().equals(5)) {
+
+                hostStates= modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.SECURITY_LOG, queryParams,
+                        FileEventType.SECURITY_LOG.name());
+            }
+            //自定义采集
+            else  {
+                hostStates = modelService.listHostEvents(id, queryParams);
+            }
+
+        }
+
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String fileName = "/tmp/host_acqu.json";
+        File file = new File(fileName);
+        if (file.exists()) {
+            FileUtil.deleteDir(file);
+        }
+        try{
+            String jsonString = objectMapper.writeValueAsString(hostStates);
+            objectMapper.writeValue(file, jsonString);
+            response.setContentType("application/octet-stream;charset=UTF-8");
+            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName,"UTF-8").replaceAll("\\+","%20"));
+
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        FileUtil.setResponse(file, true, response);
     }
 
 
