@@ -21,7 +21,7 @@
                 #{param.resultLog},
                 #{param.resultStatus},
                 #{param.creatorId},
-                now())
+                #{param.createTime})
     </insert>
 
     <insert id="addResult">
@@ -320,6 +320,9 @@
             </if>
             <if test="param != null and param.creatorId != null and param.creatorId != ''">
                 creator_id = #{param.creatorId},
+            </if>
+            <if test="param != null and param.createTime != null and param.createTime != ''">
+                create_time = #{param.createTime},
             </if>
             update_time = now()
         </set>

@@ -610,6 +610,10 @@ public class LoadServiceImpl {
             default:
                 break;
         }
+        LocalDateTime createTime = requestData.getCreateTime();
+        if( createTime == null){
+            requestData.setCreateTime(LocalDateTime.now());
+        }
         Boolean addLoadExecutionResult = loadMapper.addLoadExecutionResult(requestData);
         return addLoadExecutionResult;
     }
