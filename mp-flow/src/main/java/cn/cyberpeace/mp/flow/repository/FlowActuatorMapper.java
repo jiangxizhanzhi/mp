@@ -1,22 +1,22 @@
- // Copyright (C) 2024
- // All rights reserved.
- // Project name mp
- // Description:
- // Author:
- // File name FlowActuatorMapper.java.
- // File size 956.
- // File create date Fri Jul 12 12:55:31 CST 2024.
- // File update date Fri Jul 12 12:55:31 CST 2024.
- // Version 1.0.0
+// Copyright (C) 2024
+// All rights reserved.
+// Project name mp
+// Description:
+// Author:
+// File name FlowActuatorMapper.java.
+// File size 956.
+// File create date Fri Jul 12 12:55:31 CST 2024.
+// File update date Fri Jul 12 12:55:31 CST 2024.
+// Version 1.0.0
 package cn.cyberpeace.mp.flow.repository;
 
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
-import cn.cyberpeace.mp.flow.request.queryparam.FlowActuatorQueryParams;
-import cn.cyberpeace.mp.flow.response.FlowActuatorResponse;
+import cn.cyberpeace.mp.flow.response.ActuatorSceneName;
+import cn.cyberpeace.mp.flow.response.ActuatorStatistic;
+import cn.cyberpeace.mp.flow.response.ActuatorTaskCount;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -33,8 +33,9 @@ import java.util.List;
 @Repository
 @ModelClass(FlowActuatorModel.class)
 public interface FlowActuatorMapper extends BaseModelMapper<FlowActuatorModel> {
+    List<ActuatorSceneName> groupByScene();
 
-    int countForPage(FlowActuatorQueryParams queryParams);
+    List<ActuatorStatistic> countByType();
 
-    List<FlowActuatorResponse> page(FlowActuatorQueryParams queryParams);
+    List<ActuatorTaskCount> countTask();
 }

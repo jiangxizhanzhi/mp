@@ -51,8 +51,8 @@ mp:
       default-container-cpu-count: ${MP_DEFAULT_CONTAINER_CPU_COUNT:1}
       default-container-ram-count: ${MP_DEFAULT_CONTAINER_RAM_COUNT:512}
       default-container-disk-count: ${MP_DEFAULT_CONTAINER_DISK_COUNT:10}
-      cp-ip: ${CP_IP:10.4.1.57}
-      cp-port: ${CP_PORT:9999}
+      cp-ip: ${CP_IP:10.100.27.1}
+      cp-port: ${CP_PORT:11111}
   frontbusiness:
     ext-var:
       url-ac-filter-enabled: ${MP_FRONTBUSINESS_URLACFILTER_ENABLED:true}
@@ -110,8 +110,8 @@ mp:
     ext-var:
       mp-ip: ${MP_API_IP:10.4.1.58}          # MP中台地址
       mp-port: ${MP_API_PORT:8001}
-      cp-ip: ${CP_IP:10.4.1.57}                # 云平台适配层接口地址
-      cp-port: ${CP_PORT:9999}
+      cp-ip: ${CP_IP:10.100.27.1}                # 云平台适配层接口地址
+      cp-port: ${CP_PORT:11111}
       bas-ip: ${BAS_IP:10.4.1.58}
       bas-port: ${BAS_PORT:9876}
       public-net-proxy: ${MP_PUBLIC_NET_PROXY:false}

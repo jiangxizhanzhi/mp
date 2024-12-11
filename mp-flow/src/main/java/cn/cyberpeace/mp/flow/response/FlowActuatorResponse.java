@@ -10,24 +10,16 @@
  // Version 1.0.0
 package cn.cyberpeace.mp.flow.response;
 
-import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
-import cn.cyberpeace.mp.flow.model.FlowInfoModel;
-import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
 
-/**
+ /**
  * @ClassName FlowActuatorResponse
  * @Description
  * @Author maojun
@@ -51,8 +43,8 @@ public class FlowActuatorResponse implements Serializable {
     /**
      * 名称
      */
-    @ApiModelProperty(value = "名称")
-    private String title;
+    @ApiModelProperty(value = "仪表名称")
+    private String name;
 
     /**
      * 场景名称
@@ -70,7 +62,7 @@ public class FlowActuatorResponse implements Serializable {
      * 目标子网
      */
     @ApiModelProperty(value = "目标子网")
-    private String targetSubnet;
+    private String nics;
 
     /**
      * 运行状态：0 初始化， 1 运行中， 2 停止中， 3 已停止， 4 未启动过

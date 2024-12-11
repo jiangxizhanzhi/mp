@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.service;
 
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -8,11 +9,14 @@ import cn.cyberpeace.mp.flow.bo.StartFlowActuatorParams;
 import cn.cyberpeace.mp.flow.integration.cloud.base.ICloudClient;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
-import cn.cyberpeace.mp.flow.request.CsceneConfigFlowTaskRequest;
+import cn.cyberpeace.mp.flow.response.ActuatorSceneName;
+import cn.cyberpeace.mp.flow.response.ActuatorStatistic;
+import cn.cyberpeace.mp.flow.response.ActuatorTaskCount;
 import cn.cyberpeace.mp.flow.response.FlowActuatorResponse;
 import cn.cyberpeace.mp.flow.service.field.FlowActuatorFields;
 import cn.cyberpeace.mp.flow.bo.FlowActuatorQueryParams;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,12 +46,34 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
         var res = super.get(actuatorId);
         var model = res.asResult().getData();
         FlowActuatorResponse response = new FlowActuatorResponse();
-        response.setTitle(model.getTitle());
+        response.setName(model.getTitle());
         response.setIp(model.getIp());
-        response.setTargetSubnet(model.getNetworkId());
+        response.setNics(model.getNetworkId());
         response.setStatus(model.getStatus());
         response.setCreateTime(TimeUtils.localDateTimeToString(model.getCreateTime()));
         return response;
+    }
+
+    public List<ActuatorTaskCount> taskCount() {
+        return flowActuatorMapper.countTask();
+    }
+
+    public List<ActuatorStatistic> getFlowActuatorStatistics() {
+        return flowActuatorMapper.countByType();
+    }
+
+    public List<ActuatorSceneName> getFlowActuatorSceneNames() {
+        return flowActuatorMapper.groupByScene();
+    }
+
+    @Override
+    public void loadListFilterCondition(HumanCondition humanCondition, FlowActuatorQueryParams queryParams) {
+        if (StringUtils.isNotEmpty(queryParams.getSceneId())) {
+            humanCondition.filterEqual(FlowActuatorModel::getCsceneInstanceId, queryParams.getSceneId());
+        }
+        if (queryParams.getStatus() != null) {
+            humanCondition.filterEqual(FlowActuatorModel::getStatus, queryParams.getStatus());
+        }
     }
 
     public ListObjServiceResult<FlowActuatorResponse> getFlowActuatorList(FlowActuatorQueryParams params) {
@@ -96,9 +122,9 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
     private FlowActuatorResponse convert2FlowActuatorResponse(FlowActuatorModel model) {
         FlowActuatorResponse response = new FlowActuatorResponse();
         response.setId(model.getId());
-        response.setTitle(model.getTitle());
+        response.setName(model.getTitle());
         response.setIp(model.getIp());
-        response.setTargetSubnet(model.getNetworkId());
+        response.setNics(model.getNetworkId());
         response.setStatus(model.getStatus());
         response.setCreateTime(TimeUtils.localDateTimeToString(model.getCreateTime()));
         return response;

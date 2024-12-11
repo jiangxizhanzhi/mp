@@ -78,4 +78,8 @@ public class FlowActuatorModel extends BaseModel {
     @ApiModelProperty(value = "创建发生器时关联的场景实例id")
     @DefaultStr
     private String csceneInstanceId;
+
+    @ApiModelProperty(value = "创建发生器时关联的场景实例名称")
+    @DefaultStr
+    private String csceneInstanceName;
 }

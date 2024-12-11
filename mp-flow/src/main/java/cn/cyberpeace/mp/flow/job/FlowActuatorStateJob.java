@@ -140,6 +140,7 @@ public class FlowActuatorStateJob {
                         flowActuatorTaskService.addTasks(e.getTasks(), e.getActuatorId(), e.getNetworkId(), e.getTargetIp());
                     }
 
+                    m.setCsceneInstanceName(instance.getScene().getTopology().getScene().getName());
                     m.setStatus(1);
                     flowActuatorMapper.update(m);
                 }

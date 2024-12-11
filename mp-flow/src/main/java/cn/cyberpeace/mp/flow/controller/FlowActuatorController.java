@@ -7,6 +7,9 @@ import cn.cyberpeace.mp.flow.bo.FlowActuatorQueryParams;
 import cn.cyberpeace.mp.flow.bo.StartFlowActuatorParams;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
+import cn.cyberpeace.mp.flow.response.ActuatorSceneName;
+import cn.cyberpeace.mp.flow.response.ActuatorStatistic;
+import cn.cyberpeace.mp.flow.response.ActuatorTaskCount;
 import cn.cyberpeace.mp.flow.response.FlowActuatorResponse;
 import cn.cyberpeace.mp.flow.service.FlowActuatorService;
 import io.swagger.annotations.Api;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 
 @Api(tags = "流量发生器管理")
@@ -37,6 +41,27 @@ public class FlowActuatorController {
 
     @Resource
     private FlowActuatorService flowActuatorService;
+
+    @ApiOperation("统计流量发生器数量")
+    @GetMapping("/task_count")
+    public ServiceResult<List<ActuatorTaskCount>> taskCount() {
+        var names = flowActuatorService.taskCount();
+        return new ServiceResult<>(names).asResult();
+    }
+
+    @ApiOperation("统计流量发生器数量")
+    @GetMapping("/statistics")
+    public ServiceResult<List<ActuatorStatistic>> statistics() {
+        var names = flowActuatorService.getFlowActuatorStatistics();
+        return new ServiceResult<>(names).asResult();
+    }
+
+    @ApiOperation("查询流量发生器列表中的场景名称")
+    @GetMapping("/name_list")
+    public ServiceResult<List<ActuatorSceneName>> nameList() {
+        var names = flowActuatorService.getFlowActuatorSceneNames();
+        return new ServiceResult<>(names).asResult();
+    }
 
     @ApiOperation("查询流量发生器列表")
     @GetMapping("/page")

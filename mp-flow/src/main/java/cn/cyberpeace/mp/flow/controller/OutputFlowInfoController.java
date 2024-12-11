@@ -60,7 +60,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-@Api(tags = "业务流量管理接口")
+@Api(tags = "对外提供的流量接口")
 @RestController
 @RequestMapping(ControllerConstant.OUT_API_PATH)
 public class OutputFlowInfoController {
