@@ -72,28 +72,26 @@ public class GenerateEntityLogfileTask {
 
     @Scheduled(cron = "0 */10 * * * ?")
     private void generateEntityLogfile() {
-
         log.info("start generateEntityLogfile task");
-
         // 获取运行中的场景列表
         List<CsceneInstanceModel> list;
         try {
             HumanCondition condition = new HumanCondition()
                     .filterEqual(CsceneInstanceModel::getDeleted, false);
             list = csceneInstanceMapper.list(condition);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("list csceneInstance error", e);
             return;
         }
-        if (CollectionUtils.isEmpty(list)){
+        if (CollectionUtils.isEmpty(list)) {
             return;
         }
 
         // 对场景实例进行实体靶标日志文件记录生成
-        for (CsceneInstanceModel csceneInstanceModel : list){
+        for (CsceneInstanceModel csceneInstanceModel : list) {
             try {
                 generateEntityLogfile4CsceneInstance(csceneInstanceModel);
-            }catch (Exception e){
+            } catch (Exception e) {
                 log.error("GenerateEntityLogfileJob error, csceneInstanceModel={}", csceneInstanceModel, e);
             }
         }
@@ -103,7 +101,7 @@ public class GenerateEntityLogfileTask {
     private void generateEntityLogfile4CsceneInstance(CsceneInstanceModel csceneInstanceModel) {
 
         // 判断场景实例是否处于进行中状态
-        if (!csceneCommonService.isCsceneInstanceRunning(csceneInstanceModel.getId())){
+        if (!csceneCommonService.isCsceneInstanceRunning(csceneInstanceModel.getId())) {
             return;
         }
 
@@ -111,9 +109,9 @@ public class GenerateEntityLogfileTask {
         ServiceResult<SceneDataBO> serviceResult = sceneService.get(csceneInstanceModel.getScene(), false, null, null);
         // 收集element中的id和eid成为map
         List<SceneElementBO> elementList = serviceResult.getSource().getTopology().getElements();
-        Map<String,String> node_id_eid_Map = new HashMap<>();
-        Map<String,String> node_eid_id_Map = new HashMap<>();
-        Map<String,String> nodeIdNameMap = new HashMap<>();
+        Map<String, String> node_id_eid_Map = new HashMap<>();
+        Map<String, String> node_eid_id_Map = new HashMap<>();
+        Map<String, String> nodeIdNameMap = new HashMap<>();
         elementList.forEach(element -> {
             node_id_eid_Map.put(element.getId(), element.getEid());
             node_eid_id_Map.put(element.getEid(), element.getId());
@@ -123,7 +121,7 @@ public class GenerateEntityLogfileTask {
         for (var entry : elements.entrySet()) {
             CloudPluginSceneConfigElementBO elementBO = JsonCommon.snakeMapToBean(entry.getValue(), CloudPluginSceneConfigElementBO.class);
             // 判断是否存在实体靶标
-            if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(elementBO.getImageType())){
+            if (BaseCloudPluginSceneElementModel.ImageType.ENTITY.equals(elementBO.getImageType())) {
                 // 获取设备信息
                 DeviceTargetPO deviceTargetPO = deviceTargetMapper.findByUuid(elementBO.getImageUuid());
 
@@ -131,17 +129,17 @@ public class GenerateEntityLogfileTask {
                     continue;
                 }
                 // 判断设备信息是否配置
-                if (StringUtils.isNotBlank(deviceTargetPO.getSshConfig()) || StringUtils.isNotBlank(deviceTargetPO.getTelnetConfig())){
+                if (StringUtils.isNotBlank(deviceTargetPO.getSshConfig()) || StringUtils.isNotBlank(deviceTargetPO.getTelnetConfig())) {
                     // 配置信息
                     log.info("deviceTargetPO.getSshConfig={}", deviceTargetPO.getSshConfig());
                     log.info("deviceTargetPO.getTelnetConfig={}", deviceTargetPO.getTelnetConfig());
                     EntityLogfileConfig sshConfig = JSONObject.parseObject(deviceTargetPO.getSshConfig(), EntityLogfileConfig.class);
                     EntityLogfileConfig telnetConfig = JSONObject.parseObject(deviceTargetPO.getTelnetConfig(), EntityLogfileConfig.class);
-                    if (checkConfigComplete(sshConfig)){
-                        queryEntityLogfile(csceneInstanceModel.getId(), entry.getKey(), TYPE_SSH, elementBO, sshConfig, csceneInstanceModel,node_eid_id_Map, nodeIdNameMap);
+                    if (checkConfigComplete(sshConfig)) {
+                        queryEntityLogfile(csceneInstanceModel.getId(), entry.getKey(), TYPE_SSH, elementBO, sshConfig, csceneInstanceModel, node_eid_id_Map, nodeIdNameMap);
                     }
-                    if (checkConfigComplete(telnetConfig)){
-                        queryEntityLogfile(csceneInstanceModel.getId(), entry.getKey(),TYPE_TELNET, elementBO, telnetConfig, csceneInstanceModel,node_eid_id_Map, nodeIdNameMap);
+                    if (checkConfigComplete(telnetConfig)) {
+                        queryEntityLogfile(csceneInstanceModel.getId(), entry.getKey(), TYPE_TELNET, elementBO, telnetConfig, csceneInstanceModel, node_eid_id_Map, nodeIdNameMap);
                     }
                 }
             }
@@ -149,7 +147,7 @@ public class GenerateEntityLogfileTask {
     }
 
     private void queryEntityLogfile(String csceneId, String nodeId, String type, CloudPluginSceneConfigElementBO elementBO, EntityLogfileConfig config,
-                                    CsceneInstanceModel csceneInstanceModel, Map<String,String> node_eid_id_Map, Map<String,String> nodeIdNameMap) {
+                                    CsceneInstanceModel csceneInstanceModel, Map<String, String> node_eid_id_Map, Map<String, String> nodeIdNameMap) {
         try {
             Info info = this.getParsedInfo(csceneId, nodeId, config.getIp());
             // 必须开启了场景内部服务
@@ -167,44 +165,49 @@ public class GenerateEntityLogfileTask {
             String frameServerConfigIp = info.getFrameServerConfigIp();
             String frameServerBizIp = info.getFrameServerBizIp();
             String result = null;
-            String protocol = null;
-            if (TYPE_SSH.equals(type)){
+            String protocol = type;
+            if (TYPE_SSH.equals(type)) {
                 String url = "http://{ip}:8001/agent/ssh/exec_list_cmds".replace("{ip}", frameServerConfigIp);
                 cmdListRequest.setCmds(List.of("ls -l " + config.getFile()));
                 result = HttpUtils.sendPost(url, JsonCommon.snakeStringify(cmdListRequest));
-                protocol = "ssh";
-            }else if (TYPE_TELNET.equals(type)){
+            } else if (TYPE_TELNET.equals(type)) {
                 String url = "http://{ip}:8001/agent/telnet/exec_list_cmds".replace("{ip}", frameServerConfigIp);
                 cmdListRequest.setCmds(List.of("ls -l " + config.getFile()));
                 result = HttpUtils.sendPost(url, JsonCommon.snakeStringify(cmdListRequest));
-                protocol = "telnet";
             }
 
-            if (StringUtils.isNotBlank(result)){
+            if (StringUtils.isNotBlank(result)) {
                 // 执行结果解析
                 ExecCommandResult execCommandResult = JSONObject.parseObject(result, ExecCommandResult.class);
                 // 遍历返回信息
-                for (String commandResult : execCommandResult.getData()){
+                for (String commandResult : execCommandResult.getData()) {
+                    if(protocol.equals(TYPE_TELNET)){// telnet执行后获取的控制台数据,需要进行整理
+                        // 清理所有 ANSI 控制序列
+                        commandResult = commandResult.replaceAll("\\u001B\\[[;?0-9]*[a-zA-Z]", "").trim();
+                        // 替换换行符
+                        commandResult = commandResult.replace("\r\n", "\n");
+                    }
                     if (commandResult.contains(config.getFile()) && !commandResult.contains("ls -l")
-                            && !commandResult.contains("No such file or directory")){
+                            && !commandResult.contains("No such file or directory")) {
                         log.info("queryEntityLogfile result========{}", commandResult);
                         // 示例：-rw-r--r-- 1 root root 56 Nov 30 03:16 /home/123.txt
                         String sizeMessage = commandResult.split("\\s+", -1)[4];
                         log.info("queryEntityLogfile size========{}", sizeMessage);
                         // 解析result后将获取的信息记录插入
-                        writeData(sizeMessage,csceneInstanceModel, info.getNode().getEid(), protocol, config.getFile(), elementBO, node_eid_id_Map, nodeIdNameMap);
+                        writeData(sizeMessage, csceneInstanceModel, info.getNode().getEid(), protocol, config.getFile(), elementBO, node_eid_id_Map, nodeIdNameMap);
+                        log.info("writeData finished");
                     }
                 }
-
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             // 异常不进行抛出，记录异常信息即可
             log.error("queryEntityLogfile error, type={}, elementBO={}, config={}", type, elementBO, config, e);
         }
     }
 
-    private void writeData(String sizeMessage,CsceneInstanceModel csceneInstanceModel,String nodeId,
-                           String protocol,String filePath,CloudPluginSceneConfigElementBO elementBO, Map<String,String> node_eid_id_Map, Map<String,String> nodeIdNameMap) {
+    private void writeData(String sizeMessage, CsceneInstanceModel csceneInstanceModel, String nodeId,
+                           String protocol, String filePath, CloudPluginSceneConfigElementBO elementBO,
+                           Map<String, String> node_eid_id_Map, Map<String, String> nodeIdNameMap) {
         JSONObject data = new JSONObject();
         data.put("id", UUID.randomUUID().toString());
         data.put("size", sizeMessage);
@@ -215,6 +218,7 @@ public class GenerateEntityLogfileTask {
         data.put("createTime", LocalDateTime.now());
         data.put("cscene", csceneInstanceModel.getId());// 场景实例id
         data.put("fileName", filePath.substring(filePath.lastIndexOf("/") + 1));
+        collectionPluginSceneDataMapper.deletePreviousDataByProtocol(protocol);// 只保留最新数据
         collectionPluginSceneDataMapper.addData(data);
     }
 
@@ -328,7 +332,7 @@ public class GenerateEntityLogfileTask {
         private CloudPluginSceneElementBO pluginNode;
         private String frameServerConfigIp;
         private String frameServerBizIp;
-        private SceneHandler sceneHandler ;
+        private SceneHandler sceneHandler;
     }
 
     @Data

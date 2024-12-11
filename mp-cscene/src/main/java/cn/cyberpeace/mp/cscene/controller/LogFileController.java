@@ -151,5 +151,4 @@ public class LogFileController {
         result.put("total", total);
         return new ServiceResult<>(result).asResult();
     }
-
 }

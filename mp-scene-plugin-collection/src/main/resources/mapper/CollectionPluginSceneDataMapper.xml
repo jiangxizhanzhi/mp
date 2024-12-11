@@ -30,4 +30,10 @@
         )
     </insert>
 
+    <delete id="deletePreviousDataByProtocol">
+        delete
+        from mp_sceneplugincollection_scene_data_custom
+        where protocol = #{protocol}
+    </delete>
+
 </mapper>
