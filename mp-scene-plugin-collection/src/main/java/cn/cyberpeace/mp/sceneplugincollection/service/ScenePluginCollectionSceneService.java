@@ -2064,14 +2064,14 @@ public class ScenePluginCollectionSceneService {
         return dateTime;
     }
 
-    public ListObjServiceResult<CollectionHostEventBO> listSysLogsData(String sceneId, HostEventQueryParams queryParams) {
+    public ListObjServiceResult<CollectionHostEventBO> listSysLogsData(String id, String sceneId, HostEventQueryParams queryParams) {
         log.info("sceneId:{}, scroll:{}", sceneId, queryParams.getScroll());
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
         WazuhEventRequest request = genWazuhEventRequest(queryParams, sceneHandler.getScene().getCreateTime(), new ArrayList<>());
 
         //根据日期构造索引
-
-        String[] indexArray = dataCollectionService.buildRequestSyslogIndex(sceneId);
+        // 如果es中有数据,查看存放syslog数据的索引名称是否使用的sceneId
+        String[] indexArray = dataCollectionService.buildRequestSyslogIndex(id);
         SearchRequest searchRequest = new SearchRequest(indexArray);
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
