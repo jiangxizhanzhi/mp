@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.dto.element.*;
@@ -49,6 +50,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -97,6 +99,7 @@ public class HostStateController {
 
     /**
      * 集群状态趋势
+     *
      * @param hostStateTrendRequest
      * @return
      */
@@ -236,48 +239,47 @@ public class HostStateController {
     @ApiOperation(value = "主机信息json导出")
     @PostMapping("/export/hosts/acquisition")
     public void exportHostAcquisition(HttpServletResponse response, String id, HostEventQueryParams queryParams) {
-        ListObjServiceResult<CollectionHostEventBO> hostStates = new ListObjServiceResult<>() ;
+        ListObjServiceResult<CollectionHostEventBO> hostStates = new ListObjServiceResult<>();
         if (Objects.nonNull(queryParams.getType()) && queryParams.getType() != 0) {
             // 传入的sceneId不需要提前转
             //文件变更
             if (queryParams.getType().equals(0)) {
-                hostStates=modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.FILE_MODIFY,
+                hostStates = modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.FILE_MODIFY,
                         queryParams, FileEventType.FILE.name());
             }
             //注册变更
             if (queryParams.getType().equals(1)) {
-                hostStates= modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.REGISTRY_MODIFY, queryParams,
+                hostStates = modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.REGISTRY_MODIFY, queryParams,
                         FileEventType.REGISTRY.name());
             }
             //原始日志
             if (queryParams.getType().equals(2)) {
 
-                hostStates= modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.LOG_FILE, queryParams,
+                hostStates = modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.LOG_FILE, queryParams,
                         FileEventType.LOG.name());
             }
             //操作系统日志
             if (queryParams.getType().equals(3)) {
 
-                hostStates= modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.OS_LOG, queryParams,
+                hostStates = modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.OS_LOG, queryParams,
                         FileEventType.OS_LOG.name());
             }
             //应用系统日志
             if (queryParams.getType().equals(4)) {
 
-                hostStates= modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.APPLICATION_LOG, queryParams,
+                hostStates = modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.APPLICATION_LOG, queryParams,
                         FileEventType.APPLICATION_LOG.name());
             }
             //安全系统日志
             if (queryParams.getType().equals(5)) {
 
-                hostStates= modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.SECURITY_LOG, queryParams,
+                hostStates = modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.SECURITY_LOG, queryParams,
                         FileEventType.SECURITY_LOG.name());
             }
             //自定义采集
-            else  {
+            if (queryParams.getType().equals(6)) {
                 hostStates = modelService.listHostEvents(id, queryParams);
             }
-
         }
 
 
@@ -287,18 +289,18 @@ public class HostStateController {
         if (file.exists()) {
             FileUtil.deleteDir(file);
         }
-        try{
-            String jsonString = objectMapper.writeValueAsString(hostStates);
+        try {
+            List<CollectionHostEventBO> result = hostStates.getSource().getObjs();
+            String jsonString = JsonUtils.stringify(result);
             objectMapper.writeValue(file, jsonString);
             response.setContentType("application/octet-stream;charset=UTF-8");
-            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName,"UTF-8").replaceAll("\\+","%20"));
+            response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
 
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
         FileUtil.setResponse(file, true, response);
     }
-
 
 
 //    @ApiOperation(value = "流量采集数据json导出")
