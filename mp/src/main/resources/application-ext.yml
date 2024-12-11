@@ -37,6 +37,7 @@ springfox:
 project:
   setting:
     gxpt-service-url: ${GXPT-SERVICE-URL:127.0.0.1:81}
+    other_node_controller: ${OTHER_NODE_CONTROLLER:192.168.100.3,192.168.100.4}
 
 # 中台各模块相关配置
 mp:

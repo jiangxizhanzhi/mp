@@ -43,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -93,6 +94,10 @@ public class CloudPlatformMonitorController {
     private final MonitorScriptControlService monitorScriptControlService;
 
     private final HostStateService hostStateService;
+
+    // 共性平台改造地址
+    @Value("${project.other_node_controller:192.168.100.3,192.168.100.4}")
+    private String OTHER_NODE_CONTROLLER;
 
     /**
      * 资源统计
@@ -230,6 +235,19 @@ public class CloudPlatformMonitorController {
         hypervisorPageRespons.forEach(v -> {
             v.setTotalDynamips(result.getStatics().get(v.getName()));
         });
+        // 添加配置文件中节点
+        String otherNodeController = OTHER_NODE_CONTROLLER;
+        if(otherNodeController != null && !otherNodeController.equals("")){
+            String[] split = otherNodeController.split(",");
+            for(String node : split){
+                HypervisorPageVO hypervisorPageVO = new HypervisorPageVO();
+                hypervisorPageVO.setName(node);
+                hypervisorPageVO.setIp(node);
+                hypervisorPageVO.setServiceStatus(true);
+                hypervisorPageVO.setStatus("enabled");
+                hypervisorPageRespons.add(hypervisorPageVO);
+            }
+        }
         return new PageResult<>(hypervisorPageRespons, model.getTotal());
     }
 
