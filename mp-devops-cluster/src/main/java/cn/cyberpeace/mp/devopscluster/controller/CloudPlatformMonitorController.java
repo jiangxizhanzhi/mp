@@ -244,9 +244,10 @@ public class CloudPlatformMonitorController {
                 hypervisorPageVO.setName(node);
                 hypervisorPageVO.setIp(node);
                 hypervisorPageVO.setServiceStatus(true);
-                hypervisorPageVO.setStatus("enabled");
+                hypervisorPageVO.setStatus("up");
                 hypervisorPageRespons.add(hypervisorPageVO);
             }
+            model.setTotal( model.getTotal() + split.length);
         }
         return new PageResult<>(hypervisorPageRespons, model.getTotal());
     }
