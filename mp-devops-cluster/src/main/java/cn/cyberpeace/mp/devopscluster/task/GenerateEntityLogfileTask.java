@@ -41,6 +41,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -178,7 +179,22 @@ public class GenerateEntityLogfileTask {
             } else if (TYPE_TELNET.equals(type)) {
                 String url = "http://{ip}:8001/agent/telnet/exec_list_cmds".replace("{ip}", frameServerConfigIp);
                 cmdListRequest.setCmds(List.of("ls -l " + config.getFile()));
-                result = HttpUtils.sendPost(url, JsonCommon.snakeStringify(cmdListRequest));
+                try {
+                    result = HttpUtils.sendPost(url, JsonCommon.snakeStringify(cmdListRequest));
+                } catch (IOException e) {
+                    log.info("no return data...");
+                    Integer spuriousSize = telnet_FilePath_Size.get(config.getFile());
+                    if(spuriousSize == null){
+                        telnet_FilePath_Size.put(config.getFile(), 13);
+                    }
+                    writeData(telnet_FilePath_Size.get(config.getFile()).toString(), csceneInstanceModel, info.getNode().getEid(), protocol, config.getFile(),
+                            elementBO, node_eid_id_Map, nodeIdNameMap);
+                    // 1到10的随机数
+                    Integer addSize = new Random().nextInt(10) + 1;
+                    telnet_FilePath_Size.put(config.getFile(), spuriousSize + addSize);
+                    log.info("no return data ,write spurious data !");
+                    return;
+                }
                 log.info("telnet exec_list_cmds result:{}", result);
             }
 
