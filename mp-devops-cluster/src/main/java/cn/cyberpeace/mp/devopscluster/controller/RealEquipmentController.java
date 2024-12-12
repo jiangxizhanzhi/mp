@@ -373,6 +373,7 @@ public class RealEquipmentController {
         snmpParams.setIp(extEntity.getSnmpConfig().getIp());
         snmpParams.setOid(extEntity.getSnmpCpuOid());
         SnmpInterfaceResourceCloudPlatform model = realEquipmentService.interfacesResource(snmpParams);
+        log.info("snmp接口资源返回数据:{}", model.toString());
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getResult())){
             return new PageResult<>(Lists.newArrayList(),0);
         }
