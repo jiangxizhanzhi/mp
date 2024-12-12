@@ -14,10 +14,7 @@ import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
-import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
-import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
-import cn.cyberpeace.mp.cscene.service.HostStateService;
-import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
+import cn.cyberpeace.mp.cscene.service.*;
 import cn.cyberpeace.mp.cscene.util.FileUtil;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
@@ -29,6 +26,7 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -73,6 +71,9 @@ public class HostStateController {
 
     @Autowired
     private CsceneInstanceService modelService;
+
+    @Autowired
+    private LogFileService logFileService;
 
     /**
      * 默认查询场景所有节点
@@ -240,6 +241,7 @@ public class HostStateController {
     @PostMapping("/export/hosts/acquisition")
     public void exportHostAcquisition(HttpServletResponse response, String id, HostEventQueryParams queryParams) {
         ListObjServiceResult<CollectionHostEventBO> hostStates = new ListObjServiceResult<>();
+        List<JSONObject> customDataPage = new ArrayList<>();
         if (Objects.nonNull(queryParams.getType()) && queryParams.getType() != 0) {
             // 传入的sceneId不需要提前转
             //文件变更
@@ -254,9 +256,8 @@ public class HostStateController {
             }
             //原始日志
             if (queryParams.getType().equals(2)) {
-
-                hostStates = modelService.getProbeCollectionData(null, id, ProbeConstant.ProbeId.LOG_FILE, queryParams,
-                        FileEventType.LOG.name());
+                // yz4的原始日志不走es的方式
+                customDataPage = logFileService.getCustomDataPage(id, 1, 100);
             }
             //操作系统日志
             if (queryParams.getType().equals(3)) {
@@ -290,12 +291,16 @@ public class HostStateController {
             FileUtil.deleteDir(file);
         }
         try {
-            List<CollectionHostEventBO> result = hostStates.getSource().getObjs();
-            String jsonString = JsonUtils.stringify(result);
+            String jsonString = "";
+            if(queryParams.getType().equals(2)){
+                jsonString = JsonUtils.stringify(customDataPage);
+            }else{
+                List<CollectionHostEventBO> result = hostStates.getSource().getObjs();
+                jsonString = JsonUtils.stringify(result);
+            }
             objectMapper.writeValue(file, jsonString);
             response.setContentType("application/octet-stream;charset=UTF-8");
             response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20"));
-
         } catch (IOException e) {
             e.printStackTrace();
         }
