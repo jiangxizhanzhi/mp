@@ -30,13 +30,13 @@ public class VersionLibraryParams extends QueryParams {
             setPageSize(getPerPage());
         }
 
-        // 默认值
+        /*// 默认值
         if (Objects.isNull(getPage()) || getPage() <= 1) {
             setPage(1);
         }
 
         if (Objects.isNull(getPageSize())) {
             setPageSize(10);
-        }
+        }*/
     }
 }
