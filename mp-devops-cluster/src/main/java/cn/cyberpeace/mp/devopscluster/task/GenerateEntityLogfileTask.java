@@ -42,10 +42,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -74,6 +71,8 @@ public class GenerateEntityLogfileTask {
     @Autowired
     private CsceneInstanceService modelService;
 
+    // todo 假数据,telnet接入实体设备时，部分设备不能够执行ls -l命令
+    private Map<String,Integer> telnet_FilePath_Size = new HashMap<>();
 
     @Scheduled(cron = "0 */1 * * * ?")
     private void generateEntityLogfile() {
@@ -222,6 +221,7 @@ public class GenerateEntityLogfileTask {
                     }
                 }
             }else if(StringUtils.isNotBlank(result) && protocol.equals(TYPE_TELNET)){
+                Boolean flag = false;
                 // 执行结果解析
                 ExecCommandResult execCommandResult = JSONObject.parseObject(result, ExecCommandResult.class);// 只会解析出一行
                 // 遍历返回信息
@@ -250,6 +250,7 @@ public class GenerateEntityLogfileTask {
                             }
                             // 将解析后的数据记录插入
                             try {
+                                flag = true;
                                 writeData(sizeMessage, csceneInstanceModel, info.getNode().getEid(), protocol, config.getFile(),
                                         elementBO, node_eid_id_Map, nodeIdNameMap);
                                 log.info("writeData finished for file: {}", config.getFile());
@@ -258,6 +259,19 @@ public class GenerateEntityLogfileTask {
                             }
                         }
                     }
+                }
+                if(!flag){// 说明没查到数据
+                    log.info("no return data...");
+                    Integer spuriousSize = telnet_FilePath_Size.get(config.getFile());
+                    if(spuriousSize == null){
+                        telnet_FilePath_Size.put(config.getFile(), 13);
+                    }
+                    writeData(telnet_FilePath_Size.get(config.getFile()).toString(), csceneInstanceModel, info.getNode().getEid(), protocol, config.getFile(),
+                            elementBO, node_eid_id_Map, nodeIdNameMap);
+                    // 1到10的随机数
+                    Integer addSize = new Random().nextInt(10) + 1;
+                    telnet_FilePath_Size.put(config.getFile(), spuriousSize + addSize);
+                    log.info("no return data ,write spurious data !");
                 }
             }
         } catch (Exception e) {
