@@ -46,6 +46,12 @@ public class VersionLibraryModel extends BaseModel {
     /**
      * 固件地址
      */
+    @ApiModelProperty(value = "firmware_name")
+    private String firmwareName = "";
+
+    /**
+     * 固件地址
+     */
     @ApiModelProperty(value = "firmware_address")
     private String firmwareAddress = "";
 

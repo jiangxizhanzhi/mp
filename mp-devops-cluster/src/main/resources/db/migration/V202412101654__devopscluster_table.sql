@@ -6,6 +6,7 @@ CREATE TABLE mp_version_library
     firmware_version  varchar(50)  NOT NULL COMMENT '固件版本',
     applicable_object varchar(255) COMMENT '适用对象',
     software_name     varchar(255) COMMENT '软件名',
+    firmware_name     varchar(255) COMMENT '固件名',
     firmware_address  varchar(255) COMMENT '固件地址',
     type              int(1)   NOT NULL COMMENT '类型(0:软件 1:固件)',
     create_time       datetime     not null comment '创建时间',
