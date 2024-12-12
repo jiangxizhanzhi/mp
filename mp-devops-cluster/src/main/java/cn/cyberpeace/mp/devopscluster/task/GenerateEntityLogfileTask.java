@@ -75,7 +75,7 @@ public class GenerateEntityLogfileTask {
     private CsceneInstanceService modelService;
 
 
-    @Scheduled(cron = "0 */10 * * * ?")
+    @Scheduled(cron = "0 */1 * * * ?")
     private void generateEntityLogfile() {
         log.info("start generateEntityLogfile task");
         // 获取运行中的场景列表

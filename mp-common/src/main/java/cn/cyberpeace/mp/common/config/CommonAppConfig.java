@@ -9,9 +9,9 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "mp.common")
 @Data
 public class CommonAppConfig {
-    @Value("${mp.common.mp-ip:10.100.7.1}")
+    @Value("${mp.common.ext-var.mp-ip:10.100.7.1}")
     private String mpIp;
 
-    @Value("${mp.common.mp-port:8001}")
+    @Value("${mp.common.ext-var.mp-port:8001}")
     private String mpPort;
 }
