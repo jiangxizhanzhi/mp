@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.util.Objects;
 
 import static cn.cyberpeace.mp.base.constant.BaseErrorCode.SUCCESS;
@@ -33,6 +34,7 @@ import static cn.cyberpeace.mp.base.constant.BaseErrorCode.SUCCESS;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/version_library")
 public class VersionLibraryController {
 
+    private final static String DIRECTORY_PATH = "/home/ftp/";
     @Autowired
     private VersionLibraryService versionLibraryService;
 
@@ -45,7 +47,6 @@ public class VersionLibraryController {
     @ApiOperation("分页查询软件/固件版本库")
     @GetMapping("/page")
     public ListObjServiceResult<VersionLibraryModel> page(VersionLibraryParams queryParams) {
-        queryParams.ensure();
         if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
             // 默认按时间降序
             String updateTime = BeanUtils.getBeanGetterFieldName(SystemAlarmModel::getUpdateTime);
@@ -63,6 +64,9 @@ public class VersionLibraryController {
     @ApiImplicitParam(name = "request", value = "查询信息请求体", dataTypeClass = VersionLibraryModel.class)
     @PostMapping("/add")
     public ServiceResult<VersionLibraryModel> add(@RequestBody VersionLibraryModel versionLibraryModel) {
+        if (fileExists(versionLibraryModel)) {
+            return ResultCommon.fail("文件 " + versionLibraryModel.getName() + " 不存在于目录,请先上传软件 ");
+        }
         ObjServiceResult<VersionLibraryModel> versionLibraryModelObjServiceResult = versionLibraryService.create(versionLibraryModel);
         String code = versionLibraryModelObjServiceResult.getServiceCode().getCode();
         if (SUCCESS.getCode().equals(code)) {
@@ -72,6 +76,16 @@ public class VersionLibraryController {
         }
     }
 
+    private static boolean fileExists(VersionLibraryModel versionLibraryModel) {
+        if(null == versionLibraryModel.getType() || 0== versionLibraryModel.getType()){
+            File file = new File(DIRECTORY_PATH, versionLibraryModel.getSoftwareName());
+            if (!file.exists()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * 更新
      */
@@ -79,6 +93,9 @@ public class VersionLibraryController {
     @ApiImplicitParam(name = "request", value = "更新信息请求体", dataTypeClass = VersionLibraryModel.class)
     @PostMapping("/update")
     public ServiceResult update(@RequestBody VersionLibraryModel versionLibraryModel) {
+        if (fileExists(versionLibraryModel)) {
+            return ResultCommon.fail("文件 " + versionLibraryModel.getName() + " 不存在于目录,请先上传软件 ");
+        }
         ObjServiceResult<VersionLibraryModel> update = versionLibraryService.update(versionLibraryModel);
         String code = update.getServiceCode().getCode();
         if (SUCCESS.getCode().equals(code)) {
