@@ -35,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -102,6 +103,7 @@ public class GenerateEntityLogfileTask {
     }
 
     // 对场景实例进行实体靶标日志文件记录生成
+    @Async
     private void generateEntityLogfile4CsceneInstance(CsceneInstanceModel csceneInstanceModel) {
 
         // 判断场景实例是否处于进行中状态
