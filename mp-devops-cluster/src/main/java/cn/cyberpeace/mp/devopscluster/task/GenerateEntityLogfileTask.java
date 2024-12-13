@@ -198,9 +198,13 @@ public class GenerateEntityLogfileTask {
             }
             Boolean flag = false;
             if (StringUtils.isNotBlank(result) && protocol.equals(TYPE_SSH)) {
-                log.info("ssh exec_list_cmds analyzing result...");
+                log.info("ssh exec_list_cmds analyzing result :" + result);
                 // 执行结果解析
                 ExecCommandResult execCommandResult = JSONObject.parseObject(result, ExecCommandResult.class);
+                log.info("ssh exec_list_cmds analyzed result", execCommandResult);
+                if(execCommandResult.getData() == null){
+                    execCommandResult.setData(new ArrayList<>());
+                }
                 // 遍历返回信息
                 for (String commandResult : execCommandResult.getData()) {
                     String sizeMessage = "";
@@ -237,9 +241,13 @@ public class GenerateEntityLogfileTask {
                     }
                 }
             }else if(StringUtils.isNotBlank(result) && protocol.equals(TYPE_TELNET)){
-                log.info("telnet exec_list_cmds analyzing result...");
+                log.info("telnet exec_list_cmds analyzing result :" + result);
                 // 执行结果解析
                 ExecCommandResult execCommandResult = JSONObject.parseObject(result, ExecCommandResult.class);// 只会解析出一行
+                log.info("telnet exec_list_cmds analyzed result :" + execCommandResult);
+                if(execCommandResult.getData() == null){
+                    execCommandResult.setData(new ArrayList<>());
+                }
                 // 遍历返回信息
                 for (String commandResult : execCommandResult.getData()) {
                     String[] split = commandResult.split("\r\n");
@@ -276,6 +284,7 @@ public class GenerateEntityLogfileTask {
                         }
                     }
                 }
+                log.info("telnet exec_list_cmds result, write spurious data");
                 if(!flag && protocol.equals(TYPE_TELNET)){// 说明没查到数据
                     log.info("no return data!!!");
                     Integer spuriousSize = telnet_FilePath_Size.get(nodeId);
