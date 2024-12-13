@@ -48,7 +48,7 @@ public class ThirdSsoService {
         String clientSecret = authConfig.getThirdClientSecret();
         String getTokenUrl = authConfig.getThirdTokenUrl();
         String getUserInfoUrl = authConfig.getThirdUserInfoUrl();
-        String getCodeUrl = String.format("http://%s:%s/oauth?client_id=%s&redirect_url=http://%s/api/mp/unauth/third-logon?%s", authConfig.getThirdIp(), authConfig.getThirdPort(), clientId, authConfig.getMpIp(), url);
+        String getCodeUrl = String.format("http://%s:%s/oauth?client_id=%s&redirect_uri=http://%s/api/mp/unauth/third-login?%s", authConfig.getThirdIp(), authConfig.getThirdPort(), clientId, authConfig.getMpIp(), url);
 
         if (code == null) {
             return String.format("redirect:%s", getCodeUrl);
