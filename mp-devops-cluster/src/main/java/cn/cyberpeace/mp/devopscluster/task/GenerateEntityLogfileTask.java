@@ -183,22 +183,23 @@ public class GenerateEntityLogfileTask {
                     result = HttpUtils.sendPost(url, JsonCommon.snakeStringify(cmdListRequest));
                 } catch (IOException e) {
                     log.info("no return data...");
-                    Integer spuriousSize = telnet_FilePath_Size.get(config.getFile());
+                    Integer spuriousSize = telnet_FilePath_Size.get(nodeId);
                     if(spuriousSize == null){
-                        telnet_FilePath_Size.put(config.getFile(), 13);
+                        telnet_FilePath_Size.put(nodeId, 13);
                     }
-                    writeData(telnet_FilePath_Size.get(config.getFile()).toString(), csceneInstanceModel, info.getNode().getEid(), protocol, config.getFile(),
+                    writeData(telnet_FilePath_Size.get(nodeId).toString(), csceneInstanceModel, info.getNode().getEid(), protocol, config.getFile(),
                             elementBO, node_eid_id_Map, nodeIdNameMap);
                     // 1到10的随机数
                     Integer addSize = new Random().nextInt(10) + 1;
-                    telnet_FilePath_Size.put(config.getFile(), spuriousSize + addSize);
+                    telnet_FilePath_Size.put(nodeId, spuriousSize + addSize);
                     log.info("no return data ,write spurious data !");
                     return;
                 }
                 log.info("telnet exec_list_cmds result:{}", result);
             }
-
+            Boolean flag = false;
             if (StringUtils.isNotBlank(result) && protocol.equals(TYPE_SSH)) {
+                log.info("ssh exec_list_cmds analyzing result...");
                 // 执行结果解析
                 ExecCommandResult execCommandResult = JSONObject.parseObject(result, ExecCommandResult.class);
                 // 遍历返回信息
@@ -237,7 +238,7 @@ public class GenerateEntityLogfileTask {
                     }
                 }
             }else if(StringUtils.isNotBlank(result) && protocol.equals(TYPE_TELNET)){
-                Boolean flag = false;
+                log.info("telnet exec_list_cmds analyzing result...");
                 // 执行结果解析
                 ExecCommandResult execCommandResult = JSONObject.parseObject(result, ExecCommandResult.class);// 只会解析出一行
                 // 遍历返回信息
@@ -276,8 +277,8 @@ public class GenerateEntityLogfileTask {
                         }
                     }
                 }
-                if(!flag){// 说明没查到数据
-                    log.info("no return data...");
+                if(!flag && protocol.equals(TYPE_TELNET)){// 说明没查到数据
+                    log.info("no return data!!!");
                     Integer spuriousSize = telnet_FilePath_Size.get(nodeId);
                     if(spuriousSize == null){
                         telnet_FilePath_Size.put(nodeId, 13);
