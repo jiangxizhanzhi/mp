@@ -104,7 +104,7 @@ public class GenerateEntityLogfileTask {
 
     // 对场景实例进行实体靶标日志文件记录生成
     @Async
-    private void generateEntityLogfile4CsceneInstance(CsceneInstanceModel csceneInstanceModel) {
+    public void generateEntityLogfile4CsceneInstance(CsceneInstanceModel csceneInstanceModel) {
 
         // 判断场景实例是否处于进行中状态
         if (!csceneCommonService.isCsceneInstanceRunning(csceneInstanceModel.getId())) {
