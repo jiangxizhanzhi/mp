@@ -41,7 +41,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -181,7 +180,7 @@ public class GenerateEntityLogfileTask {
                 cmdListRequest.setCmds(List.of("ls -l " + config.getFile()));
                 try {
                     result = HttpUtils.sendPost(url, JsonCommon.snakeStringify(cmdListRequest));
-                } catch (IOException e) {
+                } catch (Exception e) {
                     log.info("no return data...");
                     Integer spuriousSize = telnet_FilePath_Size.get(nodeId);
                     if(spuriousSize == null){
@@ -223,7 +222,7 @@ public class GenerateEntityLogfileTask {
                         // 示例：-rw-r--r-- 1 root root 56 Nov 30 03:16 /home/1233.txt
                         sizeMessage = commandResult.split("\\s+", -1)[4];
                         log.info("Extracted file size: {}", sizeMessage);
-                    } catch (ArrayIndexOutOfBoundsException e) {
+                    } catch (Exception e) {
                         log.error("Failed to extract file size from result: {}", commandResult, e);
                         continue;
                     }
@@ -261,7 +260,7 @@ public class GenerateEntityLogfileTask {
                                 // 示例：-rw-r--r-- 1 root root 56 Nov 30 03:16 /home/1233.txt
                                 sizeMessage = matcher.group().split("\\s+", -1)[4];
                                 log.info("Extracted file size: {}", sizeMessage);
-                            } catch (ArrayIndexOutOfBoundsException e) {
+                            } catch (Exception e) {
                                 log.error("Failed to extract file size from result: {}", commandResult, e);
                                 continue;
                             }
