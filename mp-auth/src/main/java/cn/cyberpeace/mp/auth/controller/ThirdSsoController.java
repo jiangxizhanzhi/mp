@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.auth.service.impl.ThirdSsoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +21,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @Api(value = "第三方登录管理接口", tags = "UNAUTH-第三方登录接口")
 @Slf4j
@@ -56,11 +58,11 @@ public class ThirdSsoController {
         if (StringUtils.isEmpty(thirdToken)) {
             return false;
         }
-        TokenModel tokenModel = tokenMapper.getByLoginToken(thirdToken);
-        if (tokenModel == null) {
+        List<TokenModel> tokenModels = tokenMapper.getByLoginToken(thirdToken);
+        if (CollectionUtils.isEmpty(tokenModels)) {
             return false;
         }
-        JwtAuthenticationFilter.addJWTCookieToResponse(response, tokenModel.getJwt());
-        return thirdLoginService.tokenCheck(tokenModel.getLoginToken());
+        JwtAuthenticationFilter.addJWTCookieToResponse(response, tokenModels.get(0).getJwt());
+        return thirdLoginService.tokenCheck(tokenModels.get(0).getLoginToken());
     }
 }

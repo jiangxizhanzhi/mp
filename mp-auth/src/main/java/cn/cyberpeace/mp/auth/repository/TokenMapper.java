@@ -7,6 +7,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -19,6 +21,6 @@ public interface TokenMapper extends BaseModelMapper<TokenModel> {
 
     TokenModel getByJwt(@Param("jwt") String jwt);
 
-    TokenModel getByLoginToken(@Param("loginToken") String loginToken);
+    List<TokenModel> getByLoginToken(@Param("loginToken") String loginToken);
 
 }

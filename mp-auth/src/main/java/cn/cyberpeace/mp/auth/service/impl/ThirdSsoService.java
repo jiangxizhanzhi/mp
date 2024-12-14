@@ -15,6 +15,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -130,13 +131,15 @@ public class ThirdSsoService {
         ThirdResponse<TokenCheckResult> thirdResponse = JsonCommon.snakeParse(result, new TypeReference<ThirdResponse<TokenCheckResult>>() {
         });
         if (thirdResponse.getCode() != 0) {
-            TokenModel tokenModel = tokenMapper.getByLoginToken(token);
-            if (tokenModel != null) {
-                tokenMapper.delete(tokenModel.getId());
+            List<TokenModel> tokenModels = tokenMapper.getByLoginToken(token);
+            if (CollectionUtils.isNotEmpty(tokenModels)) {
+                for (TokenModel tokenModel : tokenModels){
+                    tokenMapper.delete(tokenModel.getId());
+                }
             }
-            return true;
-        } else {
             return false;
+        } else {
+            return true;
         }
     }
 

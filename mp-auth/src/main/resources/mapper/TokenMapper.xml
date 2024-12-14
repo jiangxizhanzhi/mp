@@ -18,5 +18,6 @@
                 login_token = #{loginToken}
             </if>
         </where>
+        order by pk desc
     </select>
 </mapper>
