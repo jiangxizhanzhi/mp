@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.integration.cloud.lincloud;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.integration.cloud.base.AbstractGetVirtualMachineParams;
 import cn.cyberpeace.mp.flow.integration.cloud.base.AddVirtualNicParams;
 import cn.cyberpeace.mp.flow.integration.cloud.base.AddVirtualNicResult;
@@ -12,13 +13,15 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 
 @Slf4j
-//@Service("linyunCloudClient")
+@Service("linyunCloudClient")
 public class LinyunCloudClient implements ICloudClient {
 
     private static final String VIRTUAL_MACHINE_GET_URL = "/v1/instances/{instance_id}";
@@ -29,16 +32,10 @@ public class LinyunCloudClient implements ICloudClient {
 
     private static final String VIRTUAL_MACHINE_DELETE_URL = "/cloud/v1/scenarios/vm";
 
-    private String cloudIp;
-
-    private Integer cloudPort;
-
     private String cloudHost;
 
-    public LinyunCloudClient(String cloudIp, Integer cloudPort) {
-        this.cloudIp = cloudIp;
-        this.cloudPort = cloudPort;
-        this.cloudHost = "http://" + cloudIp + ":" + cloudPort;
+    public LinyunCloudClient(@Autowired FlowConfig flowConfig) {
+        this.cloudHost = flowConfig.getCpUrl();
     }
 
     @Override
