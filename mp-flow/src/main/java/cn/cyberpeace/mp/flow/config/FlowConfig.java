@@ -35,7 +35,8 @@ public class FlowConfig {
 
     /**
      * 云平台地址
-     */
+    */
+    @Value("${mp.flow.cp_url:}")
     private String cpUrl;
 
     @Value("${mp.flow.trex_cpu:4}")
