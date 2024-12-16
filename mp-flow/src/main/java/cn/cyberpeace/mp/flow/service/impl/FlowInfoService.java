@@ -33,6 +33,7 @@ import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
 import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
+import cn.cyberpeace.mp.flow.integration.FlowClient;
 import cn.cyberpeace.mp.flow.model.FlowCollectionModel;
 import cn.cyberpeace.mp.flow.model.FlowCollectionRelModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
@@ -421,23 +422,8 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
      * @return
      */
     public ServiceResult<BackgroundFlowResponse> queryBackgroundDetail(String id) {
-        BackgroundFlowResponse response;
-        String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
-
-        ObjResult<FlowInfoModel> objResult = get(id).getSource();
-        if (Objects.nonNull(objResult)) {
-            FlowInfoModel flowInfoModel = objResult.getObj();
-            this.internationalize(flowInfoModel);
-            if (InteractiveTypeEnum.BACKGROUND.toValue() != flowInfoModel.getInteractiveType()) {
-                return ResultCommon.fail(FlowErrorCode.NOT_BACKGROUND_FLOW);
-            }
-            response = new BackgroundFlowResponse(flowInfoModel, prefixUrl);
-        } else {
-            return ResultCommon.fail(FlowErrorCode.FLOW_NOT_EXIST);
-        }
-
-        response.setProtocolList(this.getProtocolBOList(id));
-        return ResultCommon.success(response);
+        var response = FlowClient.getBackgroundFlowInfo(id);
+        return new ServiceResult<>(response).asResult();
     }
 
     /**

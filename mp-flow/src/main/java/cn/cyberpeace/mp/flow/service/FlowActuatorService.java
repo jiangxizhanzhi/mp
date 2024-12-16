@@ -102,7 +102,7 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
         String resourceId = instance.getId();
         FlowActuatorModel actuatorModel = new FlowActuatorModel();
         actuatorModel.setStatus(0);
-        actuatorModel.setTitle(params.getActuatorName());
+//        actuatorModel.setTitle(params.getActuatorName());
         actuatorModel.setCsceneId(params.getCsceneId());
         actuatorModel.setCsceneInstanceId(params.getCsceneInstanceId());
         actuatorModel.setResourceId(resourceId);

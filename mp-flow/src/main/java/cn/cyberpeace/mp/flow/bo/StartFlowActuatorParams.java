@@ -11,6 +11,4 @@ public class StartFlowActuatorParams {
     private String csceneId;
     @ApiModelProperty("场景实例id")
     private String csceneInstanceId;
-    @ApiModelProperty("执行器名称")
-    private String actuatorName;
 }

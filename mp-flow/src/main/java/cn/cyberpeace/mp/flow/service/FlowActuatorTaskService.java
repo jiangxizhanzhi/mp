@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
 import cn.cyberpeace.mp.flow.bo.QueryFlowTaskConfResponse;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
+import cn.cyberpeace.mp.flow.integration.FlowClient;
 import cn.cyberpeace.mp.flow.integration.actuator.FlowActuator;
 import cn.cyberpeace.mp.flow.integration.cloud.base.AddVirtualNicParams;
 import cn.cyberpeace.mp.flow.integration.cloud.base.ICloudClient;
@@ -122,6 +123,24 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
         for (AddFlowTaskFlowInfo t : tasks) {
             flowIds.add(t.getFlowId());
         }
+
+//        List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList<FlowTaskTaskModel>();
+//        for (String flowId : flowIds) {
+//            var flow = FlowClient.getBackgroundFlowInfo(flowId);
+//            FlowTaskTaskModel flowTaskTaskModel = new FlowTaskTaskModel();
+//            flowTaskTaskModel.setSceneId("");
+//            flowTaskTaskModel.setActuatorId(actuatorId);
+////            flowTaskTaskModel.setResourceType(flow.getResourceType());
+////            flowTaskTaskModel.setInteractiveType(flowInfoModel.getInteractiveType());
+////            flowTaskTaskModel.setFlowId(flowInfoModel.getId());
+//            flowTaskTaskModel.setPortId(portModel.getId());
+//            flowTaskTaskModel.setNodeId("");
+//            flowTaskTaskModel.setNodeIp(targetIp);
+//            flowTaskTaskModel.setNodeName("");
+//            flowTaskTaskModelList.add(flowTaskTaskModel);
+//        }
+
+
         HumanCondition condition = new HumanCondition();
         condition.filterIn(FlowInfoModel::getId, flowIds.toArray());
         List<FlowInfoModel> flowInfoModelList = flowInfoMapper.list(condition);

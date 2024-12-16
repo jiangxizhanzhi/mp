@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.flow.bo.DeleteActuatorParams;
 import cn.cyberpeace.mp.flow.bo.EditFlowTaskConfRequest;
 import cn.cyberpeace.mp.flow.bo.FlowTaskCommonConf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
@@ -23,6 +24,8 @@ import cn.cyberpeace.mp.flow.bo.FlowTaskFlowConf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskIpv4Conf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskRateConf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskTcpConf;
+import cn.cyberpeace.mp.flow.bo.StartFlowActuatorParams;
+import cn.cyberpeace.mp.flow.bo.StartFlowActuatorResponse;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.model.CsceneConfigFlowTaskModel;
 import cn.cyberpeace.mp.flow.repository.CsceneConfigFlowTaskMapper;
@@ -37,7 +40,9 @@ import cn.cyberpeace.mp.flow.request.out.OutputStartTaskRequest;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams;
 import cn.cyberpeace.mp.flow.response.CsceneFlowTaskResponse;
+import cn.cyberpeace.mp.flow.response.FlowActuatorResponse;
 import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
+import cn.cyberpeace.mp.flow.service.FlowActuatorService;
 import cn.cyberpeace.mp.flow.service.FlowActuatorTaskService;
 import cn.cyberpeace.mp.flow.service.FlowCsceneService;
 import cn.cyberpeace.mp.flow.service.impl.FlowInfoService;
@@ -76,6 +81,25 @@ public class OutputFlowInfoController {
 
     @Resource
     private FlowCsceneService flowCsceneService ;
+
+    @Resource
+    private FlowActuatorService flowActuatorService;
+
+    @ApiOperation("启动流量发生器")
+    @PostMapping("/create_actuator")
+    public ServiceResult<StartFlowActuatorResponse> createFlowActuator(@RequestBody StartFlowActuatorParams params) {
+        var result = flowActuatorService.createFlowActuator(params);
+        StartFlowActuatorResponse startFlowActuatorResponse = new StartFlowActuatorResponse();
+        startFlowActuatorResponse.setId(result.getId());
+        return new ServiceResult<>(startFlowActuatorResponse).asResult();
+    }
+
+    @ApiOperation("删除流量发生器")
+    @PostMapping("/delete_actuator")
+    public ServiceResult<Boolean> deleteFlowActuator(@RequestBody DeleteActuatorParams params) {
+        flowActuatorService.deleteFlowActuator(params.getActuatorId());
+        return new ServiceResult<>(true).asResult();
+    }
 
     /**
      * 分页查询流量信息
