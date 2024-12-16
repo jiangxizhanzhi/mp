@@ -36,6 +36,7 @@ public class LinyunCloudClient implements ICloudClient {
 
     public LinyunCloudClient(@Autowired FlowConfig flowConfig) {
         this.cloudHost = flowConfig.getCpUrl();
+        log.info("使用 linyunCloudClient , cloud host : {}", this.cloudHost);
     }
 
     @Override
@@ -45,7 +46,9 @@ public class LinyunCloudClient implements ICloudClient {
         String url = this.cloudHost + VIRTUAL_MACHINE_GET_URL;
         url.replace("{instance_id}", snParams.getId());
         try {
+            log.info("查询虚拟机信息 , url is : {}", url);
             var resp = HttpUtils.sendGet(url);
+            log.info("结果: {}", resp);
             var rsp = JsonCommon.snakeParse(resp, new TypeReference<CloudResponse<GetVirtualMachineResult>>() {
             });
             if ("0".equals(rsp.getCode())) {
@@ -63,7 +66,10 @@ public class LinyunCloudClient implements ICloudClient {
         LinyunCreateVirtualMachineParams snParams = LinyunCreateVirtualMachineParams.getDefault();
         String url = this.cloudHost + VIRTUAL_MACHINE_CREATE_URL;
         try {
-            var resp = HttpUtils.sendPost(url, JsonCommon.snakeStringify(snParams));
+            var params = JsonCommon.snakeStringify(snParams);
+            log.info("创建虚拟机 , url is : {} , params is : {}", url, params);
+            var resp = HttpUtils.sendPost(url, params);
+            log.info("结果: {}", resp);
             var rsp = JsonCommon.snakeParse(resp, new TypeReference<CloudResponse<GetVirtualMachineResult>>() {
             });
             if ("0".equals(rsp.getCode())) {
@@ -82,7 +88,10 @@ public class LinyunCloudClient implements ICloudClient {
         params.setVms(Arrays.asList(id));
         String url = this.cloudHost + VIRTUAL_MACHINE_DELETE_URL;
         try {
-            var resp = HttpUtils.sendDelete(url, JsonCommon.snakeStringify(params));
+            var strParams = JsonCommon.snakeStringify(params);
+            log.info("删除虚拟机 , url is : {} , params is : {}", url, strParams);
+            var resp = HttpUtils.sendDelete(url, strParams);
+            log.info("结果: {}", resp);
             var rsp = JsonCommon.snakeParse(resp, new TypeReference<CloudResponse<DeleteVirtualMachineResult>>() {
             });
             if ("0".equals(rsp.getCode())) {
@@ -105,7 +114,10 @@ public class LinyunCloudClient implements ICloudClient {
         try {
             String url = ADD_VIRTUAL_NIC_URL.replace("{instanceId}", params.getInstanceId());
             url = this.cloudHost + url;
-            var addTrexClientPortRsp = HttpUtils.sendHttpPost(url, JsonCommon.snakeStringify(addPortData), new HashMap<>());
+            var strParams = JsonCommon.snakeStringify(addPortData);
+            log.info("添加网口 ， url is : {} , params is : {}", url, strParams);
+            var addTrexClientPortRsp = HttpUtils.sendHttpPost(url, strParams, new HashMap<>());
+            log.info("结果: {}", addTrexClientPortRsp);
             CloudResponse<AddVirtualNicResponse> response = JsonCommon.snakeParse(addTrexClientPortRsp, new TypeReference<CloudResponse<AddVirtualNicResponse>>() {
             });
             if (!"0".equals(response.getCode()) || response.getData() == null) {
