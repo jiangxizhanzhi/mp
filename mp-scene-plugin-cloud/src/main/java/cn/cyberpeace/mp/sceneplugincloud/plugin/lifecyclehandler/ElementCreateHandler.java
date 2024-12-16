@@ -3,11 +3,13 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualPort;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
@@ -18,7 +20,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @Description
@@ -66,6 +70,23 @@ public class ElementCreateHandler extends HandlerCommon {
         this.createHandler.createElementProcess(element);
         getPluginHandler().updateElements(element.getSrcElement().getId());
         SceneInstanceLinkCacheUtil.refresh(getPluginHandler().getSourceSceneId());
+
+        // 增加流量速率的统计
+        if (Boolean.TRUE.equals(getPluginHandler().getScene().getEnableRate())) {
+            var ports = element.getSrcElement().getPorts();
+            Set<String> portIds = new HashSet<>();
+            if (ports != null) {
+                for (SceneElementPortBO p : ports) {
+                    var cloudPort = getPluginHandler().getPort(p.getId());
+                    if (cloudPort != null && StringUtils.isNotEmpty(cloudPort.getResourceId())) {
+                        portIds.add(cloudPort.getResourceId());
+                    }
+                }
+            }
+            if (!portIds.isEmpty()) {
+                new VirtualPort().syncFlowPortInfo(new ArrayList<>(portIds), "add");
+            }
+        }
     }
 
     protected void createAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement, List<ConnectedNetworkBO> networks) {
