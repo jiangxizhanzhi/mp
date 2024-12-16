@@ -32,6 +32,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -109,8 +112,8 @@ public class FlowActuatorStateJob {
         serverInfo.setHost(actuatorIp);
         serverInfo.setUser("root");
         serverInfo.setPassword("111111");
-        String TGN_PATH = "D:\\MJ\\code2024\\30s\\mp\\mp-flow\\src\\main\\resources\\traffic_generators.zip";
-        SshUtil.refreshDir(serverInfo, commands, TGN_PATH, "/opt/project_dirs");
+
+        SshUtil.refreshDir(serverInfo, commands, "traffic_generators.zip", "/opt/project_dirs");
     }
 
     private void loadNetworkInfo(Map<String, AddFlowTaskParams> map, BusinessCSceneInstance instance) {

@@ -16,7 +16,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -35,9 +40,17 @@ public class LinyunCloudClient implements ICloudClient {
     private String cloudHost;
 
     public LinyunCloudClient(@Autowired FlowConfig flowConfig) {
+        File file = new File("traffic_generators.zip");
+        if (file.exists()) {
+            file.delete();
+        }
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("traffic_generators.zip");
+        writeFile(inputStream, "traffic_generators.zip");
         this.cloudHost = flowConfig.getCpUrl();
         log.info("使用 linyunCloudClient , cloud host : {}", this.cloudHost);
     }
+
+
 
     @Override
     public GetVirtualMachineResult getVirtualMachine(String id) {
@@ -156,4 +169,42 @@ public class LinyunCloudClient implements ICloudClient {
         private String hwVifModel;
     }
 
+
+    public static void writeFile(InputStream inputStream,String fileName) {
+        FileOutputStream outputStream = null;
+        try {
+            if (inputStream == null) {
+                System.out.println("文件未找到！");
+                return;
+            }
+            // 输出文件路径
+            outputStream = new FileOutputStream(fileName);
+
+            // 创建缓冲区（1KB）
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+
+            // 从 InputStream 读取并写入文件
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            System.out.println("文件写入成功！");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // 关闭流
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
