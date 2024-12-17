@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @Description
@@ -52,7 +53,11 @@ public class SceneImportController {
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = SceneExportRequest.class)
     @PostMapping("/export_scene")
     public ServiceResult<ExportResult> exportScene(@RequestBody SceneExportRequest request) {
-        log.info("导入场景开始 , 输入参数为: {}", JsonCommon.stringify(request));
+        log.info("导出场景开始 , 输入参数为: {}", JsonCommon.stringify(request));
+        String envPath = request.getEnvPath();
+        log.info("env 路径: {}", envPath);
+        log.info("env 路径 (iso_8859 -> utf8): {}", new String(envPath.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8));
+
         String sceneNumber = request.getSceneNumber() == null ? "" : request.getSceneNumber();
         boolean disableImageExport = request.getDisableImageExport() == null ? false : request.getDisableImageExport();
         return ResultCommon.success(resourceCenterService.exportScene(
