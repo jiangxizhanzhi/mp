@@ -88,7 +88,7 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
     @Resource
     private FlowTaskConfService flowTaskConfService;
 
-    @Resource(name = "linyunCloudClient")
+    @Resource
     private ICloudClient cloudClient;
 
     public FlowActuatorTaskService(FlowTaskTaskMapper flowTaskTaskMapper) {

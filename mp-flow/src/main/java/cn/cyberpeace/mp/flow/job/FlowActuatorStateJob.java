@@ -85,7 +85,7 @@ public class FlowActuatorStateJob {
                 this.updateActuatorCodesAndServer(actuatorIp);
                 log.info("准备创建任务");
                 var map = this.getCsceneConfigFlowTaskParams(m);
-                var instance = TopoCloudClient.getCscene(m.getCsceneId());
+                var instance = TopoCloudClient.getCscene(m.getCsceneInstanceId());
                 this.loadNetworkInfo(map, instance);
 
                 log.info("任务内容: {}", JsonCommon.stringify(map));
