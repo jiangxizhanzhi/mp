@@ -52,6 +52,7 @@ public class SceneImportController {
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = SceneExportRequest.class)
     @PostMapping("/export_scene")
     public ServiceResult<ExportResult> exportScene(@RequestBody SceneExportRequest request) {
+        log.info("导入场景开始 , 输入参数为: {}", JsonCommon.stringify(request));
         String sceneNumber = request.getSceneNumber() == null ? "" : request.getSceneNumber();
         boolean disableImageExport = request.getDisableImageExport() == null ? false : request.getDisableImageExport();
         return ResultCommon.success(resourceCenterService.exportScene(
