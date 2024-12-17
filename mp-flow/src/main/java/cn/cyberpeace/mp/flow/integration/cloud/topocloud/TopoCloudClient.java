@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.flow.integration.cloud.topocloud;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.controller.FlowActuatorController;
 import cn.cyberpeace.mp.flow.integration.cloud.base.AbstractGetVirtualMachineParams;
 import cn.cyberpeace.mp.flow.integration.cloud.base.AddVirtualNicParams;
@@ -109,8 +111,9 @@ public class TopoCloudClient implements ICloudClient {
     public static BusinessCSceneInstance getCscene(String csceneId) {
         String url = GET_TOPO_URL.replace("{id}", csceneId);
         String res = null;
+        FlowConfig flowConfig = BeanCommon.getBean(FlowConfig.class);
         try {
-            res = HttpUtils.sendHttpGet("http://10.100.27.1" + url, HEADER, 10000);
+            res = HttpUtils.sendHttpGet(flowConfig.getCsceneUrl() + url, HEADER, 10000);
             TopoResponse<BusinessCSceneInstance> tmpRes = JsonCommon.snakeParse(res, new TypeReference<TopoResponse<BusinessCSceneInstance>>() {
             });
             var instance = tmpRes.getData();
