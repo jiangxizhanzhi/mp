@@ -10,6 +10,7 @@
 // Version 1.0.0
 package cn.cyberpeace.mp.flow.job;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.protocolprobe.ProtocolProbe;
 import cn.cyberpeace.mp.base.util.protocolprobe.SSHProbe;
@@ -32,9 +33,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,22 +66,29 @@ public class FlowActuatorStateJob {
         HumanCondition condition = new HumanCondition().filterEqual(FlowActuatorModel::getStatus, 0);
         var list = flowActuatorMapper.list(condition);
         for (var m : list) {
+            log.info("开始处理执行器 {} ", m.getId());
             String actuatorIp = m.getIp();
             if (StringUtils.isEmpty(actuatorIp)) {
                 // 没有ip先更新ip
+                log.info("更新ip");
                 this.updateActuatorIp(m);
             } else {
                 // 检测ssh协议是否可用
+                log.info("检测ssh是否可用");
                 ProtocolProbe protocolProbe = new SSHProbe(actuatorIp, 22);
                 if (!protocolProbe.probe()) {
+                    log.info("完成处理执行器 {}  ， ssh还不可用", m.getId());
                     continue;
                 }
+                log.info("ssh 可用 ， 更新发生器代码");
                 // 更新 发生器代码、创建任务等
                 this.updateActuatorCodesAndServer(actuatorIp);
+                log.info("准备创建任务");
                 var map = this.getCsceneConfigFlowTaskParams(m);
                 var instance = TopoCloudClient.getCscene(m.getCsceneId());
                 this.loadNetworkInfo(map, instance);
 
+                log.info("任务内容: {}", JsonCommon.stringify(map));
                 for (var e : map.values()) {
                     flowActuatorTaskService.addTasks(e.getTasks(), e.getActuatorId(), e.getNetworkId(), e.getTargetIp());
                 }
@@ -92,6 +97,7 @@ public class FlowActuatorStateJob {
                 m.setStatus(1);
                 flowActuatorMapper.update(m);
             }
+            log.info("完成处理执行器 {} ", m.getId());
         }
     }
 

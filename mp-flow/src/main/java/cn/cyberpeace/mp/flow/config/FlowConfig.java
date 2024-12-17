@@ -42,10 +42,13 @@ public class FlowConfig {
     @Value("${mp.flow.trex_cpu:4}")
     private Integer trexCpu;
 
-    @Value("${mp.flow.trex_ram:8194}")
+    @Value("${mp.flow.trex_ram:8192}")
     private Integer trexRam;
 
-    @Value("${mp.flow.trex_disk:40}")
+    @Value("${mp.flow.trex_disk:80}")
     private Integer trexDisk;
+
+    @Value("${mp.flow.network_id:5489d262-8d06-4909-b893-4191ef036f46}")
+    private String networkId;
 
 }

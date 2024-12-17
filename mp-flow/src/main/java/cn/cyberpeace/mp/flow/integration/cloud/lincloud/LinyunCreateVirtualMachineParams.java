@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.flow.integration.cloud.lincloud;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.integration.cloud.base.AbstractCreateVirtualMachineParams;
 import cn.cyberpeace.mp.flow.integration.cloud.base.VirtualNic;
 import lombok.Getter;
@@ -23,11 +25,12 @@ public class LinyunCreateVirtualMachineParams extends AbstractCreateVirtualMachi
     private List<VirtualNic> networks;
 
     public static LinyunCreateVirtualMachineParams getDefault() {
-        int trexCpu = 4;
-        int trexRam = 4096;
-        int trexDisk = 80;
-        String networkId = "5489d262-8d06-4909-b893-4191ef036f46";
-        String trexImage = "tgn-trex";
+        FlowConfig flowConfig = BeanCommon.getBean(FlowConfig.class);
+        int trexCpu = flowConfig.getTrexCpu();
+        int trexRam = flowConfig.getTrexRam();
+        int trexDisk = flowConfig.getTrexDisk();
+        String networkId = flowConfig.getNetworkId();
+        String trexImage = flowConfig.getTrexImage();
         String name = "Trex-" + TextUtils.uuid();
 
         LinyunCreateVirtualMachineParams params = new LinyunCreateVirtualMachineParams();

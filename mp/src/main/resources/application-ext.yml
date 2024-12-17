@@ -204,6 +204,9 @@ mp:
       version-soft: ${MP_VERSION_SOFT:wget_and_libpcre3}
       version-image: ${MP_VERSION_IMAGE:ubuntu_test_cloudint_not_delete}
       metadata-file-server: http://${MP_API_IP:10.100.25.1}:${MP_API_PORT:8002}/api/mp/file
+  flow:
+    ext-var:
+      network-id: ${MP_FLOW_NETWORK_ID:5489d262-8d06-4909-b893-4191ef036f46}
 # for kaptcha
 #kaptcha:
 #  text-producer:

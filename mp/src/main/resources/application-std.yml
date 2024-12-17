@@ -256,6 +256,7 @@ mp:
     #url-ac-filter-exclude-urls: /api/mp/actuator/info,/api/mp/actuator/health,/api/mp/config/single_ip,/api/mp/file/**
   # mp-flow 模块配置
   flow:
+    network-id: ${mp.flow.ext-var.network-id}
     trex-image: ${mp.common.ext-var.trex-image}
     cp-url: http://${mp.common.ext-var.cp-ip}:${mp.common.ext-var.cp-port} #云平台地址
   sceneplugincloud:
