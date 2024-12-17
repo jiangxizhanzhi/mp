@@ -42,18 +42,18 @@ public class FlowActuatorController {
     @Resource
     private FlowActuatorService flowActuatorService;
 
-    @ApiOperation("分类统计流量发生器已配置的任务数量")
+    @ApiOperation("统计流量发生器已配置的任务数量")
     @GetMapping("/task_count")
-    public ServiceResult<List<ActuatorTaskCount>> taskCount() {
+    public ServiceResult<Integer> taskCount() {
         var names = flowActuatorService.taskCount();
-        return new ServiceResult<>(names).asResult();
+        return new ServiceResult<>(names.get(0).getCount()).asResult();
     }
 
-    @ApiOperation("分类统计流量发生器数量")
+    @ApiOperation("统计流量发生器数量")
     @GetMapping("/statistics")
-    public ServiceResult<List<ActuatorStatistic>> statistics() {
+    public ServiceResult<Integer> statistics() {
         var names = flowActuatorService.getFlowActuatorStatistics();
-        return new ServiceResult<>(names).asResult();
+        return new ServiceResult<>(names.get(0).getCount()).asResult();
     }
 
     @ApiOperation("查询流量发生器中的场景名称列表")
