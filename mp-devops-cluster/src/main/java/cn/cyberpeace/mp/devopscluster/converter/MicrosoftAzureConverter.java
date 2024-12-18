@@ -509,6 +509,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         String uuid = UUID.randomUUID().toString();
         switch (cloudTargetType) {
             case "calculate":
+                requestData.getCalculateTarget().setSubType("vm");
                 microsoftAzureMapper.addCloudTargetCommonData(uuid, requestData.getCommonCloudTarget());
                 microsoftAzureMapper.addCalculateTargetData(uuid,requestData.getCalculateTarget());
                 break;
