@@ -42,6 +42,10 @@ public class SceneImportController {
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = SceneImportRequest.class)
     @PostMapping("/import_resource_center")
     public ServiceResult<String> importResourceCenter(@RequestBody SceneImportRequest request) {
+        log.info("导入场景开始 , 输入参数为: {}", JsonCommon.stringify(request));
+        String envPath = request.getPath();
+        log.info(" 路径: {}", envPath);
+        log.info(" 路径 (iso_8859 -> utf8): {}", new String(envPath.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8));
         if (StringUtils.isEmpty(request.getPath())) {
             return ResultCommon.fail(BaseErrorCode.PARAMS_INVALID);
         }
