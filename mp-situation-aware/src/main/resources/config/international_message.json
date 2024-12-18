@@ -1856,7 +1856,7 @@
   },
   {
     "key": "probe.description.010",
-    "zh_name": "安全软件",
+    "zh_name": "认证、登录、注销事件、以及安全策略变化、帐户锁定、权限提升等安全相关事件",
     "en_name": "security software"
   },
   {
@@ -1866,7 +1866,7 @@
   },
   {
     "key": "probe.description.008",
-    "zh_name": "操作系统",
+    "zh_name": "系统级别的事件、例如硬件或驱动程序错误、以及windows 服务的启动、停止及失败事件",
     "en_name": "operating system"
   },
   {
@@ -1876,7 +1876,7 @@
   },
   {
     "key": "probe.description.009",
-    "zh_name": "应用系统日志",
+    "zh_name": "应用程序级别的错误和警告、例如数据库、Web 服务器、文件系统等应用的错误",
     "en_name": "application system log"
   },
   {
