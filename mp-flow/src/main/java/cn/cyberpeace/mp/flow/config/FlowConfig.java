@@ -54,4 +54,7 @@ public class FlowConfig {
     @Value("${mp.flow.cscene_url:http://10.100.27.1}")
     private String csceneUrl;
 
+    @Value("${mp.flow.trex_template_id:}")
+    private String trexTemplateId;
+
 }

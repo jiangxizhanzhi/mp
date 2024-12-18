@@ -208,6 +208,7 @@ mp:
     ext-var:
       network-id: ${MP_FLOW_NETWORK_ID:5489d262-8d06-4909-b893-4191ef036f46}
       cscene-url: ${MP_CSCENE_URL:http://10.100.27.1}
+      trex-template-id: ${MP_TREX_TEMPLATE_ID:}
 # for kaptcha
 #kaptcha:
 #  text-producer:

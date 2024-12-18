@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.flow.integration;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -24,7 +26,8 @@ public class FlowClient {
 
     public static BackgroundFlowResponse getBackgroundFlowInfo(String id) {
         try {
-            var res = HttpUtils.sendHttpGet("http://10.100.27.1:8001" + BACKGROUND_FLOW_INFO_URL + "?id=" + id, HEADER, 10000);
+            FlowConfig flowConfig = BeanCommon.getBean(FlowConfig.class);
+            var res = HttpUtils.sendHttpGet(flowConfig.getCsceneUrl() + BACKGROUND_FLOW_INFO_URL + "?id=" + id, HEADER, 10000);
             ServiceResult<BackgroundFlowResponse> result = JsonCommon.snakeParse(res, new TypeReference<ServiceResult<BackgroundFlowResponse>>() {
             });
             var response = result.getData();

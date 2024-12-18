@@ -258,6 +258,7 @@ mp:
   flow:
     network-id: ${mp.flow.ext-var.network-id}
     cscene-url: ${mp.flow.ext-var.cscene-url}
+    trex-template-id: ${mp.flow.ext-var.trex-template-id}
     trex-image: ${mp.common.ext-var.trex-image}
     cp-url: http://${mp.common.ext-var.cp-ip}:${mp.common.ext-var.cp-port} #云平台地址
   sceneplugincloud:
