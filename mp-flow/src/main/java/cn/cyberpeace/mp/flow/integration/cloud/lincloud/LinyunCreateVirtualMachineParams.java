@@ -36,7 +36,7 @@ public class LinyunCreateVirtualMachineParams extends AbstractCreateVirtualMachi
         LinyunCreateVirtualMachineParams params = new LinyunCreateVirtualMachineParams();
         params.setOsType("linux");
         params.setMainCloud(true);
-        params.setTemplateId("");
+        params.setTemplateId(flowConfig.getTrexTemplateId());
         params.setCpu(trexCpu);
         params.setDisk(trexDisk);
         params.setRam(trexRam);

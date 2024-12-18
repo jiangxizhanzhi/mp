@@ -130,9 +130,9 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
 //            FlowTaskTaskModel flowTaskTaskModel = new FlowTaskTaskModel();
 //            flowTaskTaskModel.setSceneId("");
 //            flowTaskTaskModel.setActuatorId(actuatorId);
-////            flowTaskTaskModel.setResourceType(flow.getResourceType());
-////            flowTaskTaskModel.setInteractiveType(flowInfoModel.getInteractiveType());
-////            flowTaskTaskModel.setFlowId(flowInfoModel.getId());
+//            flowTaskTaskModel.setResourceType(flow.getAttackFlowType());
+//            flowTaskTaskModel.setInteractiveType(flow.getInteractiveType());
+//            flowTaskTaskModel.setFlowId(flowId);
 //            flowTaskTaskModel.setPortId(portModel.getId());
 //            flowTaskTaskModel.setNodeId("");
 //            flowTaskTaskModel.setNodeIp(targetIp);

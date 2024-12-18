@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 @Slf4j
-@Service("linyunCloudClient")
+//@Service("linyunCloudClient")
 public class LinyunCloudClient implements ICloudClient {
 
     private static final String VIRTUAL_MACHINE_GET_URL = "/v1/instances/{instance_id}";
@@ -125,7 +125,7 @@ public class LinyunCloudClient implements ICloudClient {
         addPortData.setHwVifModel("virtio");
 
         try {
-            String url = ADD_VIRTUAL_NIC_URL.replace("{instanceId}", params.getInstanceId());
+            String url = ADD_VIRTUAL_NIC_URL.replace("{instance_id}", params.getInstanceId());
             url = this.cloudHost + url;
             var strParams = JsonCommon.snakeStringify(addPortData);
             log.info("添加网口 ， url is : {} , params is : {}", url, strParams);
