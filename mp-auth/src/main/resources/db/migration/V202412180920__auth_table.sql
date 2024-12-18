@@ -1,0 +1,1 @@
+UPDATE `mp`.`mp_auth_target_difference` SET `difference` = 'cloud-scene-template,cr-team-training,assessment-system,assessment-indicators,assessment-model,assessment-algorithm,traffic-manage-folder,traffic-scheme-list,dynamic-traffic-list,static-traffic-list,back_all,verification-tasks,front_all' WHERE `pk` = 1
