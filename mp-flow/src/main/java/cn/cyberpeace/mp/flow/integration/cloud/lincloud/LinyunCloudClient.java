@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 @Slf4j
-//@Service("linyunCloudClient")
+@Service("linyunCloudClient")
 public class LinyunCloudClient implements ICloudClient {
 
     private static final String VIRTUAL_MACHINE_GET_URL = "/v1/instances/{instance_id}";
