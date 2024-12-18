@@ -40,7 +40,6 @@ public class MenuReImportSupportService {
     @Autowired
     private MenuTemplateMapper menuTemplateMapper;
 
-
     /**
      * 场景：重新导入menu.json
      * 清除并且重建menus, menu_extra_infos

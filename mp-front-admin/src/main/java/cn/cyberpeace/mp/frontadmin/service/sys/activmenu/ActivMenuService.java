@@ -70,7 +70,6 @@ public class ActivMenuService {
     @Autowired
     private MenuTemplateMapper menuTemplateMapper;
 
-
     /**
      * 适用场景：重新导入menu.json
      * 1. 清空原有menu, keymenu, editionmenu表。
@@ -99,6 +98,7 @@ public class ActivMenuService {
                 enNameMap.put(temp.getMenuId(), temp.getEnName());
             }
         }
+
         for (ActivMenuDTO menu : menus) {
             // 以authority内的值为id
             menu.setId(menu.getAuthority());
@@ -121,6 +121,18 @@ public class ActivMenuService {
         return success;
     }
 
+    private MenuTemplateModel activMenuDto2TemplateModel(ActivMenuDTO menuDTO, String parentId, Map<String, String> enNameMap) {
+        MenuTemplateModel menuTemplateModel = new MenuTemplateModel();
+        menuTemplateModel.setTemplateId("1");
+        menuTemplateModel.setMenuId(menuDTO.getId());
+        menuTemplateModel.setParent(parentId);
+        menuTemplateModel.setIdentifier(menuDTO.getValue());
+        menuTemplateModel.setType(TargetModel.TYPE_MENU);
+        menuTemplateModel.setName(menuDTO.getName());
+        menuTemplateModel.setEnName(enNameMap.get(menuDTO.getId()) == null ? "" : enNameMap.get(menuDTO.getId()));
+        menuTemplateModel.setPath(menuDTO.getPath_name());
+        return menuTemplateModel;
+    }
 
     private void check(List<TargetModel> targetModels) {
         var notEqualList = targetModels.stream().filter(t -> !Objects.equals(t.getId(), t.getIdentifier())).collect(Collectors.toList());
@@ -260,19 +272,6 @@ public class ActivMenuService {
         return target;
     }
 
-    private MenuTemplateModel activMenuDto2TemplateModel(ActivMenuDTO menuDTO, String parentId, Map<String, String> enNameMap) {
-        MenuTemplateModel menuTemplateModel = new MenuTemplateModel();
-        menuTemplateModel.setTemplateId("1");
-        menuTemplateModel.setMenuId(menuDTO.getId());
-        menuTemplateModel.setParent(parentId);
-        menuTemplateModel.setIdentifier(menuDTO.getValue());
-        menuTemplateModel.setType(TargetModel.TYPE_MENU);
-        menuTemplateModel.setName(menuDTO.getName());
-        menuTemplateModel.setEnName(enNameMap.get(menuDTO.getId()) == null ? "" : enNameMap.get(menuDTO.getId()));
-        menuTemplateModel.setPath(menuDTO.getPath_name());
-        return menuTemplateModel;
-    }
-
     private MenuExtraInfoModel activMenuDto2MenuExtraInfo(ActivMenuDTO menuDTO, String parentId) {
         MenuExtraInfoModel menuExtraInfo = new MenuExtraInfoModel();
         menuExtraInfo.setMenu(menuDTO.getId());
@@ -287,8 +286,6 @@ public class ActivMenuService {
 
         return menuExtraInfo;
     }
-
-
 
 
     private void recursion(List<TargetModel> targets, List<MenuTemplateModel> menuTemplateModels, List<MenuExtraInfoModel> menuExtraInfos, ActivMenuDTO menu, String parentId, Map<String, String> enNameMap) {
