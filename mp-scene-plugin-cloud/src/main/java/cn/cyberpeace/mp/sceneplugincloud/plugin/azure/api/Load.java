@@ -39,14 +39,6 @@ public class Load {
             //本地载荷的任务id
             UUID uuid = UUID.randomUUID();
             cloudElement.setResourceId(uuid.toString());
-            String nodeId = cloudElement.getSrcElement().getId();
-            cloudElement.setLoadTaskName(groupName+"_"+nodeId);
-            cloudElement.setLoadTaskDescribe(groupName+"_"+nodeId);
-            Map data = create(cloudElement.getLoadTaskName(),
-                    cloudElement.getLoadTaskDescribe(),
-                    cloudElement.getLoadToolId(),
-                    cloudElement.getLoadExecCommand());
-            cloudElement.setLoadResourceInstanceId(data.get("instanceId").toString());
             return;
         }
         String nodeId = cloudElement.getSrcElement().getId();
