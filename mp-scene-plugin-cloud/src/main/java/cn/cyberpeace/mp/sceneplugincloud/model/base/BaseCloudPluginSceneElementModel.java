@@ -43,6 +43,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String loadToolId;
     @DefaultInt
     private Integer loadSource;
+    @DefaultStr
+    private String loadAccessModel;
 
     /**
      * 三层防火墙对应防火墙资源id

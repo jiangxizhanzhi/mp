@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.bo.base;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
@@ -46,6 +47,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private String loadToolId;
     @ApiModelProperty(value = "载荷来源(1载荷平台 2本地)")
     private Integer loadSource;
+    @DefaultStr
+    private String loadAccessModel;
     @ApiModelProperty(value = "云平台三层防火墙资源id")
     private String firewallResourceId;
 
