@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
 
@@ -35,9 +36,19 @@ public class Load {
     public void create(CloudScenePluginHandler pluginHandler,CloudPluginSceneElementBO cloudElement, String groupName) {
 //        本地创建载荷不执行启动操作
         if(BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL == cloudElement.getLoadSource()){
+            //本地载荷的任务id
+            UUID uuid = UUID.randomUUID();
+            cloudElement.setResourceId(uuid.toString());
+            String nodeId = cloudElement.getSrcElement().getId();
+            cloudElement.setLoadTaskName(groupName+"_"+nodeId);
+            cloudElement.setLoadTaskDescribe(groupName+"_"+nodeId);
+            Map data = create(cloudElement.getLoadTaskName(),
+                    cloudElement.getLoadTaskDescribe(),
+                    cloudElement.getLoadToolId(),
+                    cloudElement.getLoadExecCommand());
+            cloudElement.setLoadResourceInstanceId(data.get("instanceId").toString());
             return;
         }
-
         String nodeId = cloudElement.getSrcElement().getId();
         cloudElement.setLoadTaskName(groupName+"_"+nodeId);
         cloudElement.setLoadTaskDescribe(groupName+"_"+nodeId);
