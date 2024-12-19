@@ -4,15 +4,12 @@ import cn.cyberpeace.mp.auth.bo.role.RoleBo;
 import cn.cyberpeace.mp.auth.bo.role.RolePermBo;
 import cn.cyberpeace.mp.auth.bo.target.PermissionBo;
 import cn.cyberpeace.mp.auth.bo.target.TargetRoleBo;
+import cn.cyberpeace.mp.auth.bo.user.RoleCount;
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.model.RolePermissionModel;
-import cn.cyberpeace.mp.auth.model.TargetModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.model.UserRoleModel;
+import cn.cyberpeace.mp.auth.model.*;
 import cn.cyberpeace.mp.auth.repository.RoleMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.role.RolePageRequest;
@@ -59,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -101,6 +99,9 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Autowired
     private AdminConfigService adminConfigService;
+
+    @Autowired
+    private RoleMapper roleMapper;
 
     @Autowired
     public RoleServiceImpl(RoleMapper modelMapper, RoleFields modelFields) {
@@ -365,6 +366,11 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
             return new ArrayList<>();
         }
         return models.stream().map(m -> m.getId()).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<RoleModelCount> selectRoles(List<String> ids) {
+        return userRoleMapper.selectCount(ids);
     }
 
 

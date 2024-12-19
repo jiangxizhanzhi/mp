@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.service;
 import cn.cyberpeace.mp.auth.bo.role.RoleBo;
 import cn.cyberpeace.mp.auth.bo.role.RolePermBo;
 import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.RoleModelCount;
 import cn.cyberpeace.mp.auth.request.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.request.role.RoleRequest;
 import cn.cyberpeace.mp.base.service.BaseModelService;
@@ -43,4 +44,6 @@ public interface RoleService extends BaseModelService<RoleModel, QueryParams> {
     RoleModel modify(RoleRequest modifyRequest);
 
     List<String> getSystemUnVisibleRoleIds();
+
+    List<RoleModelCount> selectRoles(List<String> ids);
 }

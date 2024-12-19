@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.auth.request.role.RoleRequest;
 import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -16,6 +17,8 @@ import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -123,6 +126,12 @@ public class RoleController {
         rolePageRequest.ensure();
         List<RoleModel> roles = roleService.listAll(rolePageRequest);
         return ResultCommon.success(roles);
+    }
+
+    @PostMapping("/ids")
+    public ServiceResult<String> listByIds(@RequestBody List<String> ids) {
+
+        return ResultCommon.success(JSON.toJSONString(roleService.selectRoles(ids)));
     }
 
 }

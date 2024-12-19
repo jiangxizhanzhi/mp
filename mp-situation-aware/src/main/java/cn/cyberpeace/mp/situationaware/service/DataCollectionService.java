@@ -56,12 +56,10 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.BucketOrder;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
-import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
-import org.elasticsearch.search.aggregations.bucket.histogram.LongBounds;
+import org.elasticsearch.search.aggregations.bucket.histogram.*;
 import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.nested.ParsedNested;
+import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
@@ -1854,6 +1852,101 @@ public class DataCollectionService extends CollectionBaseService {
         boolQueryBuilder.filter(QueryBuilders.termQuery(SicLaunchConfig.FIELD_SIC_LAUNCH_STATUS, LaunchStatusEnum.SUCCESS.getValue()));
         ExistsQueryBuilder existsQuery = QueryBuilders.existsQuery(SicLaunchConfig.FIELD_SIC_LAUNCH_OUTPUT);
         boolQueryBuilder.filter(QueryBuilders.nestedQuery(SicLaunchConfig.FIELD_SIC_LAUNCH_OUTPUT, existsQuery, ScoreMode.None));
+    }
+
+    public Map<String, Long> getAttCkTypeCountTrend(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, int timeInterval) {
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            return new HashMap<>();
+        }
+        var searchRequest = new SearchRequest();
+        // 根据日期构造索引
+        String[] indexArray = buildRequestIndex(wazuhMonitorEventsRequest.getStartTime(), wazuhMonitorEventsRequest.getEndTime());
+        searchRequest.indices(indexArray);
+        var sourceBuilder = new SearchSourceBuilder();
+        // 查询条件
+        sourceBuilder.size(0);
+        sourceBuilder.trackTotalHits(true);
+        var query = QueryBuilders.boolQuery()
+                .should(
+                        QueryBuilders.boolQuery()
+                                .must(QueryBuilders.termsQuery("agent.name", wazuhMonitorEventsRequest.getAgentNames()))
+                                .must(QueryBuilders.existsQuery("rule.mitre.tactic"))
+                );
+        sourceBuilder.query(query);
+
+        // 聚合
+        AggregationBuilder aggregationBuilder = AggregationBuilders.dateHistogram("timeTrend").field("@timestamp")
+                .fixedInterval(DateHistogramInterval.seconds(timeInterval))
+                .subAggregation(AggregationBuilders.terms("type").field("rule.mitre.tactic"));
+        sourceBuilder.aggregation(aggregationBuilder);
+
+        searchRequest.source(sourceBuilder);
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+
+        log.info("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            if (Objects.nonNull(response.getAggregations())) {
+                Map<String, Long> result = new HashMap<>();
+                ParsedDateHistogram timeTrend = response.getAggregations().get("timeTrend");
+                for (var timeTrendBucket : timeTrend.getBuckets()) {
+                    long count = 0;
+                    ParsedStringTerms type = timeTrendBucket.getAggregations().get("type");
+                    for (var typeBucket : type.getBuckets()) {
+                        count += typeBucket.getDocCount();
+                    }
+                    result.put(timeTrendBucket.getKeyAsString(), count);
+                }
+                return result;
+            }
+        } catch (Exception e) {
+            log.error("failed to query es data ", e);
+        }
+        return new HashMap<>();
+    }
+
+    public Map<String, Long> getAttCkTypeCountInfo(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            return new HashMap<>();
+        }
+        var searchRequest = new SearchRequest();
+        // 根据日期构造索引
+        String[] indexArray = buildRequestIndex(wazuhMonitorEventsRequest.getStartTime(), wazuhMonitorEventsRequest.getEndTime());
+        searchRequest.indices(indexArray);
+        var sourceBuilder = new SearchSourceBuilder();
+        // 查询条件
+        sourceBuilder.size(0);
+        sourceBuilder.trackTotalHits(true);
+        var query = QueryBuilders.boolQuery()
+                .should(
+                        QueryBuilders.boolQuery()
+                                .must(QueryBuilders.termsQuery("agent.name", wazuhMonitorEventsRequest.getAgentNames()))
+                                .must(QueryBuilders.existsQuery("rule.mitre.tactic"))
+                );
+        sourceBuilder.query(query);
+
+        // 聚合
+        AggregationBuilder aggBuilder = AggregationBuilders.terms("category").field("rule.mitre.tactic");
+        sourceBuilder.aggregation(aggBuilder);
+
+        searchRequest.source(sourceBuilder);
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+
+        log.info("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            if (Objects.nonNull(response.getAggregations())) {
+                Map<String, Long> result = new HashMap<>();
+                ParsedTerms histogram = response.getAggregations().get("category");
+                histogram.getBuckets().forEach(b -> {
+                    result.put(b.getKeyAsString(), b.getDocCount());
+                });
+                return result;
+            }
+        } catch (Exception e) {
+            log.error("failed to query es data ", e);
+        }
+        return new HashMap<>();
     }
 
 }

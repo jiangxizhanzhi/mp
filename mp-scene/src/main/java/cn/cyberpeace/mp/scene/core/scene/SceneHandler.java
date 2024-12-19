@@ -1,17 +1,15 @@
 package cn.cyberpeace.mp.scene.core.scene;
 
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
+import cn.cyberpeace.mp.scene.constant.CommonSceneStage;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
-import cn.cyberpeace.mp.scene.core.bo.CollectedElementStatusBO;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneElementBO;
-import cn.cyberpeace.mp.scene.core.bo.CollectedSceneStatusBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
@@ -24,6 +22,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
 import cn.cyberpeace.mp.scene.core.event.SceneEventHandler;
+import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.EventFlag;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
@@ -48,7 +47,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.i18n.LocaleContextHolder;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,6 +59,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -121,9 +125,6 @@ public class SceneHandler extends BaseSceneHandler<
 
     private static final DelayTaskPool delayTaskPool = new DelayTaskPool();
 
-    // mock的进度
-    private static Map<String, Integer> progressPercentageMap = new ConcurrentHashMap<>();
-
     @Setter
     private boolean realTimeUpdate;
 
@@ -132,6 +133,16 @@ public class SceneHandler extends BaseSceneHandler<
     private final Map<String, SceneElementEventHandler> elementEventHandlerMap = new ConcurrentHashMap<>();
 
     private final List<SceneReporter> reporters = SceneReporter.getReporters();
+
+    private SceneStageRecorder sceneStageRecorder;
+
+    public void setSceneStageRecorder(SceneStageRecorder sceneStageRecorder) {
+        this.sceneStageRecorder = sceneStageRecorder;
+    }
+
+    public SceneStageRecorder getSceneStageRecorder() {
+        return this.sceneStageRecorder;
+    }
 
     public final Set<String> excludeHandleNodes = new HashSet<>();
 
@@ -143,90 +154,24 @@ public class SceneHandler extends BaseSceneHandler<
         excludeHandleNodes.add(nodeId);
     }
 
-    private final StatusReporter<CollectedSceneStatusBO> sceneStatusReporter = (StatusReporter) BeanCommon.getBean("sceneStatusReporter");
-
-    private final StatusReporter<CollectedElementStatusBO> elementStatusReporter = (StatusReporter) BeanCommon.getBean("elementStatusReporter");
-
     private final SceneReportTaskPool reportTaskPool = SceneReportTaskPool.getInstance();
-
-    private String genEventKey(String targetId, int event) {
-        return String.format("%s:%d", targetId, event);
-    }
-
-    private void prepareSceneEvent(int event) {
-        sceneEventHandlerMap.put(genEventKey(getScene().getEid(), event), new SceneEventHandler(getScene(), event));
-    }
-
-    private void prepareElementEvent(SceneElementBO element, int event) {
-        elementEventHandlerMap.put(genEventKey(element.getId(), event), new SceneElementEventHandler(element, event));
-    }
-
-    private void prepareAllEvent(int sceneEvent, int elementEvent) {
-        prepareSceneEvent(sceneEvent);
-        for (var element : getElementMap().values()) {
-            if (isHandleNode(element.getId())) {
-                prepareElementEvent(element, elementEvent);
-            }
-        }
-    }
-
-    private SceneEventHandler getSceneEventHandler(int event) {
-        return sceneEventHandlerMap.get(genEventKey(getScene().getEid(), event));
-    }
-
-    private SceneElementEventHandler getElementEventHandler(String nodeId, int event) {
-        return elementEventHandlerMap.get(genEventKey(nodeId, event));
-    }
-
-    private boolean isTriggerEventSuccess(int flag) {
-        return EventFlag.SUCCESS == flag;
-    }
-
-    private int startSceneEvent(int event) {
-        var flag = getSceneEventHandler(event).startEvent();
-        this.getScene().setProgressPercentage(this.calculateProgressPercentage());
-        if (isTriggerEventSuccess(flag)) {
-            // 推送场景最新的事件状态
-            asyncAckSceneStatusChanged();
-            asyncAckSceneChanged(false, false);
-        }
-        return flag;
-    }
-
-    private int startElementEvent(String nodeId, int event) {
-        var flag = getElementEventHandler(nodeId, event).startEvent();
-        if (isTriggerEventSuccess(flag)) {
-            // 推送节点最新的事件状态
-            asyncAckSceneElementStatusChanged(nodeId);
-            asyncAckElementChanged(nodeId, false, false);
-        }
-        return flag;
-    }
-
-    private int overSceneEvent(int event) {
-        var flag = getSceneEventHandler(event).overEvent();
-        this.getScene().setProgressPercentage(this.calculateProgressPercentage());
-        if (isTriggerEventSuccess(flag)) {
-            asyncAckSceneStatusChanged();
-            asyncAckSceneChanged(false, false);
-        }
-        return flag;
-    }
-
-    private int overElementEvent(String nodeId, int event) {
-        var flag = getElementEventHandler(nodeId, event).overEvent();
-        if (isTriggerEventSuccess(flag)) {
-            asyncAckSceneElementStatusChanged(nodeId);
-            asyncAckElementChanged(nodeId, false, false);
-        }
-        return flag;
-    }
 
     public int errorScene(int event, String errorMessage) {
         var flag = getSceneEventHandler(event).error(errorMessage);
         if (isTriggerEventSuccess(flag)) {
-            asyncAckSceneStatusChanged();
             asyncAckSceneChanged(false, false);
+            SceneStageRecorder.getRecorder(getSceneId()).refreshSceneBO(this.getScene());
+            SceneStageRecorder.removeRecorder(getSceneId());
+            String message = this.getScene().getProcessMessage();
+            for (var e : this.getElementMap().values()) {
+                if (e.getEventStatus() == 5) {
+                    message += ";" + e.getProcessMessage();
+                }
+            }
+            if (StringUtils.isNotEmpty(message) && message.length() > 2000) {
+                message = message.substring(0, 2000);
+            }
+            this.getScene().setProcessMessage(message);
             save();
         }
         return flag;
@@ -235,28 +180,9 @@ public class SceneHandler extends BaseSceneHandler<
     public int errorElement(String nodeId, int event, String errorMessage) {
         var flag = getElementEventHandler(nodeId, event).error(errorMessage);
         if (isTriggerEventSuccess(flag)) {
-            asyncAckSceneElementStatusChanged(nodeId);
             asyncAckElementChanged(nodeId, false, true);
         }
         return flag;
-    }
-
-    private void startAllEvent(int sceneEvent, int elementEvent) {
-        startSceneEvent(sceneEvent);
-        for (var element : getElementMap().values()) {
-            if (isHandleNode(element.getId())) {
-                startElementEvent(element.getId(), elementEvent);
-            }
-        }
-    }
-
-    private void overAllEvent(int sceneEvent, int elementEvent) {
-        for (var element : getElementMap().values()) {
-            if (isHandleNode(element.getId())) {
-                overElementEvent(element.getId(), elementEvent);
-            }
-        }
-        overSceneEvent(sceneEvent);
     }
 
     public SceneHandler() {
@@ -264,18 +190,22 @@ public class SceneHandler extends BaseSceneHandler<
 
     public SceneHandler(SceneDataBO sceneDataBO, SceneContextBO context) {
         init(sceneDataBO, false, context);
+        this.setSceneStageRecorder(new SceneStageRecorder(this.getScene()));
     }
 
     public SceneHandler(SceneDataBO sceneDataBO, boolean isAreaMode, SceneContextBO context) {
         init(sceneDataBO, isAreaMode, context);
+        this.setSceneStageRecorder(new SceneStageRecorder(this.getScene()));
     }
 
     public SceneHandler(String sceneId, String areaId, SceneContextBO context) {
         init(sceneId, areaId, false, context);
+        this.setSceneStageRecorder(new SceneStageRecorder(this.getScene()));
     }
 
     public SceneHandler(String sceneId, String areaId, boolean isAreaMode, SceneContextBO context) {
         init(sceneId, areaId, isAreaMode, context);
+        this.setSceneStageRecorder(new SceneStageRecorder(this.getScene()));
     }
 
     @Override
@@ -285,7 +215,10 @@ public class SceneHandler extends BaseSceneHandler<
 
     public CollectedSceneBO getCollectedSceneBO() {
         var collectedSceneBO = new CollectedSceneBO();
-        collectedSceneBO.setScene(getScene());
+        SceneBO sceneBO = new SceneBO();
+        BeanUtils.copyProperties(getScene(), sceneBO);
+        collectedSceneBO.setScene(sceneBO);
+
         String message = null;
         if (collectedSceneBO.getScene() != null && collectedSceneBO.getScene().getProcessMessage() != null) {
             message = collectedSceneBO.getScene().getProcessMessage();
@@ -297,6 +230,13 @@ public class SceneHandler extends BaseSceneHandler<
             }
             collectedSceneBO.getScene().setProcessMessage(newMessage);
         }
+
+        Locale locale = LocaleContextHolder.getLocale();
+        boolean chinaFlag = StringUtils.isBlank(locale.getLanguage()) || Locale.CHINA.getLanguage().equals(locale.getLanguage());
+        if (chinaFlag) {
+            collectedSceneBO.getScene().setStageName(String.format("正在%s", collectedSceneBO.getScene().getStageName()));
+        }
+
         Map<String, Object> pluginData = new HashMap<>();
         getPlugins().forEach(plugin -> {
             var pluginScene = plugin.getScene();
@@ -410,20 +350,6 @@ public class SceneHandler extends BaseSceneHandler<
         reportElementUpdated(nodeId);
     }
 
-    public void asyncAckSceneStatusChanged() {
-//        CollectedSceneStatusBO sceneStatusBO = this.getCollectedSceneStatusBO();
-//        delayTaskPool.execute(TextUtils.uuid(), () -> {
-//            sceneStatusReporter.reportStatus(sceneStatusBO);
-//        });
-    }
-
-    public void asyncAckSceneElementStatusChanged(String nodeId) {
-//        CollectedElementStatusBO elementStatusBO = this.getCollectedElementStatusBO(nodeId);
-//        delayTaskPool.execute(TextUtils.uuid(), () -> {
-//            elementStatusReporter.reportStatus(elementStatusBO);
-//        });
-    }
-
     public void asyncAckSceneChanged(boolean forceSave, boolean withPlugins) {
         delayTaskPool.execute(StringUtils.joinWith(":", getSceneId(), forceSave, withPlugins), () -> {
             ackSceneChanged(forceSave, withPlugins);
@@ -445,6 +371,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public int progressSceneProcess(int event, String process) {
+        getSceneStageRecorder().progress(process);
         var flag = getSceneEventHandler(event).progressProcess(process);
         if (isTriggerEventSuccess(flag)) {
             asyncAckSceneChanged(false, false);
@@ -461,6 +388,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public int overSceneProcess(int event) {
+        getSceneStageRecorder().overProgress(this.getScene().getProcess());
         var flag = getSceneEventHandler(event).overProcess();
         if (isTriggerEventSuccess(flag)) {
             boolean forceSave = Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneProcessSaveRealtime());
@@ -492,6 +420,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public boolean initiate(boolean isSave) {
+        getSceneStageRecorder().startStage(CommonSceneStage.INIT);
         prepareAllEvent(SceneModel.Event.INITIATE, SceneElementModel.Event.INITIATE);
         startAllEvent(SceneModel.Event.INITIATE, SceneElementModel.Event.INITIATE);
         try {
@@ -503,6 +432,7 @@ public class SceneHandler extends BaseSceneHandler<
             errorScene(SceneModel.Event.INITIATE, e.getMessage());
             return false;
         }
+        getSceneStageRecorder().endStage(CommonSceneStage.INIT);
         overAllEvent(SceneModel.Event.INITIATE, SceneElementModel.Event.INITIATE);
         if (isSave) {
             save();
@@ -858,9 +788,6 @@ public class SceneHandler extends BaseSceneHandler<
         }
     }
 
-    public void snapshotElement(String nodeId) {
-    }
-
     public void deleteElement(String nodeId) {
         SceneElementBO element = getElement(nodeId);
         prepareElementEvent(element, SceneElementModel.Event.DELETE);
@@ -1018,34 +945,33 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public synchronized int addProgressPercentage(int newProcess) {
-        Integer progressPercentage = progressPercentageMap.getOrDefault(getSceneId(), 0);
+        Integer progressPercentage = this.getScene().getProgressPercentage();
         int result = progressPercentage + newProcess;
         if (result >= 100) {
-            progressPercentageMap.put(getSceneId(), 95);
+            this.getScene().setProgressPercentage(progressPercentage);
             return 95;
         } else {
-            progressPercentageMap.put(getSceneId(), result);
+            this.getScene().setProgressPercentage(progressPercentage);
             return result;
         }
     }
 
     private Integer calculateProgressPercentage() {
-        if (CollectionUtils.isEmpty(this.getElementMap().values())) {
-            progressPercentageMap.remove(getSceneId());
+        if (this.isTerminateEvent(getScene().getEvent()) && getScene().getEventStatus() == EventStatus.OVER) {
             return 100;
-        } else {
-            if (this.isTerminateEvent(getScene().getEvent()) && getScene().getEventStatus() == EventStatus.OVER) {
-                progressPercentageMap.remove(getSceneId());
-                return 100;
-            } else {
-                var percentage = progressPercentageMap.get(getSceneId());
-                if (percentage == null) {
-                    return 5;
-                } else {
-                    return percentage;
-                }
+        }
+        BigDecimal total = BigDecimal.valueOf(0);
+        BigDecimal current = BigDecimal.valueOf(0);
+        if (CollectionUtils.isNotEmpty(this.getScene().getStageList())) {
+            for (var stage : this.getScene().getStageList()) {
+                total = total.add(BigDecimal.valueOf(100));
+                current = current.add(BigDecimal.valueOf(stage.getStagePercentage()));
             }
         }
+        if (current.intValue() == 0) {
+            return 0;
+        }
+        return current.divide(total, 4, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100)).intValue();
     }
 
     private boolean isTerminateEvent(int state) {
@@ -1065,28 +991,90 @@ public class SceneHandler extends BaseSceneHandler<
         return terminateStates.contains(state);
     }
 
-    private CollectedSceneStatusBO getCollectedSceneStatusBO() {
-        CollectedSceneStatusBO bo = new CollectedSceneStatusBO();
-        bo.setName(getScene().getName());
-        bo.setEvent(getScene().getEvent());
-        bo.setEventStatus(getScene().getEventStatus());
-        bo.setProcess(getScene().getProcess());
-        bo.setProcessStatus(getScene().getProcessStatus());
-        bo.setProcessMessage(getScene().getProcessMessage());
-        bo.setProgressPercentage(this.calculateProgressPercentage());
-        return bo;
+    private String genEventKey(String targetId, int event) {
+        return String.format("%s:%d", targetId, event);
     }
 
-    private CollectedElementStatusBO getCollectedElementStatusBO(String nodeId) {
-        CollectedElementStatusBO bo = new CollectedElementStatusBO();
-        SceneElementBO element = getElement(nodeId);
-        bo.setName(getScene().getName());
-        bo.setNodeId(nodeId);
-        bo.setEvent(element.getEvent());
-        bo.setEventStatus(element.getEventStatus());
-        bo.setProcess(element.getProcess());
-        bo.setProcessStatus(element.getProcessStatus());
-        bo.setProcessMessage(element.getProcessMessage());
-        return bo;
+    private void prepareSceneEvent(int event) {
+        sceneEventHandlerMap.put(genEventKey(getScene().getEid(), event), new SceneEventHandler(getScene(), event));
+    }
+
+    private void prepareElementEvent(SceneElementBO element, int event) {
+        elementEventHandlerMap.put(genEventKey(element.getId(), event), new SceneElementEventHandler(element, event));
+    }
+
+    private void prepareAllEvent(int sceneEvent, int elementEvent) {
+        prepareSceneEvent(sceneEvent);
+        for (var element : getElementMap().values()) {
+            if (isHandleNode(element.getId())) {
+                prepareElementEvent(element, elementEvent);
+            }
+        }
+    }
+
+    private SceneEventHandler getSceneEventHandler(int event) {
+        return sceneEventHandlerMap.get(genEventKey(getScene().getEid(), event));
+    }
+
+    private SceneElementEventHandler getElementEventHandler(String nodeId, int event) {
+        return elementEventHandlerMap.get(genEventKey(nodeId, event));
+    }
+
+    private boolean isTriggerEventSuccess(int flag) {
+        return EventFlag.SUCCESS == flag;
+    }
+
+    private int startSceneEvent(int event) {
+        var flag = getSceneEventHandler(event).startEvent();
+        this.getScene().setProgressPercentage(this.calculateProgressPercentage());
+        if (isTriggerEventSuccess(flag)) {
+            // 推送场景最新的事件状态
+            asyncAckSceneChanged(false, false);
+        }
+        return flag;
+    }
+
+    private int startElementEvent(String nodeId, int event) {
+        var flag = getElementEventHandler(nodeId, event).startEvent();
+        if (isTriggerEventSuccess(flag)) {
+            // 推送节点最新的事件状态
+            asyncAckElementChanged(nodeId, false, false);
+        }
+        return flag;
+    }
+
+    private int overSceneEvent(int event) {
+        var flag = getSceneEventHandler(event).overEvent();
+        this.getScene().setProgressPercentage(this.calculateProgressPercentage());
+        if (isTriggerEventSuccess(flag)) {
+            asyncAckSceneChanged(false, false);
+        }
+        return flag;
+    }
+
+    private int overElementEvent(String nodeId, int event) {
+        var flag = getElementEventHandler(nodeId, event).overEvent();
+        if (isTriggerEventSuccess(flag)) {
+            asyncAckElementChanged(nodeId, false, false);
+        }
+        return flag;
+    }
+
+    private void startAllEvent(int sceneEvent, int elementEvent) {
+        startSceneEvent(sceneEvent);
+        for (var element : getElementMap().values()) {
+            if (isHandleNode(element.getId())) {
+                startElementEvent(element.getId(), elementEvent);
+            }
+        }
+    }
+
+    private void overAllEvent(int sceneEvent, int elementEvent) {
+        for (var element : getElementMap().values()) {
+            if (isHandleNode(element.getId())) {
+                overElementEvent(element.getId(), elementEvent);
+            }
+        }
+        overSceneEvent(sceneEvent);
     }
 }

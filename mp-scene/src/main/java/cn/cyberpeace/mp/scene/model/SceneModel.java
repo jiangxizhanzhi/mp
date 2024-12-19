@@ -4,11 +4,15 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultLong;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
+import cn.cyberpeace.mp.scene.core.event.SceneStageRecorder;
 import cn.cyberpeace.mp.scene.core.event.base.BaseEventModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -27,6 +31,14 @@ public class SceneModel extends BaseSceneModel implements BaseEventModel {
     private String processMessage;
     @DefaultLong
     private Long createConsumeSeconds;
+    @DefaultStr
+    private String stage;
+    @DefaultStr
+    private String stageName;
+    @DefaultInt
+    private Integer stagePercentage;
+    @DefaultStr
+    private String stageList;
 
     @Override
     public String genTarget() {

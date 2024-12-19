@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin;
 
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
@@ -28,6 +29,8 @@ public class BatchSceneHandler {
 
     private LocalDateTime earliestStartTime;
 
+    private LocalDateTime latestUpdateTime;
+
     private List<String> flowCollectors = new ArrayList<>();
 
     private List<String> probeCollectors = new ArrayList<>();
@@ -39,6 +42,8 @@ public class BatchSceneHandler {
     private Map<String, SceneElementBO> allMac2ElementMap = new HashMap<>();
 
     private Map<String, SceneElementBO> allIp2ElementMap = new HashMap<>();
+
+    private Map<String, SceneElementBO> allNodeId2ElementMap = new HashMap<>();
 
     private Map<String, SceneElementBO> allEid2ElementMap = new HashMap<>();
 
@@ -58,6 +63,8 @@ public class BatchSceneHandler {
 
     private Map<Integer, CategoryGroupBO> category2CountInfo = new HashMap<>();
 
+    private Map<String, SceneHandler> id2SceneHandler = new HashMap<>();
+
     public BatchSceneHandler(List<String> sceneIds, List<String> nodeIds) {
         this.sceneIds = sceneIds;
         this.nodeIds = nodeIds;
@@ -66,6 +73,26 @@ public class BatchSceneHandler {
 
     public LocalDateTime getEarliestStartTime() {
         return earliestStartTime;
+    }
+
+    public LocalDateTime getLatestUpdateTime(){
+        return latestUpdateTime;
+    }
+
+    public LocalDateTime getLatestSceneRunningTime() {
+        LocalDateTime dateTime = null;
+        for (var s : id2SceneHandler.values()) {
+            if (s.getScene().getEvent() == SceneModel.Event.DELETE) {
+                if (dateTime == null) {
+                    dateTime = s.getScene().getUpdateTime();
+                } else if (dateTime.isBefore(s.getScene().getUpdateTime())) {
+                    dateTime = s.getScene().getUpdateTime();
+                }
+            } else {
+                dateTime = LocalDateTime.now();
+            }
+        }
+        return dateTime == null ? LocalDateTime.now() : dateTime;
     }
 
     public List<String> getFlowCollectors() {
@@ -124,6 +151,10 @@ public class BatchSceneHandler {
         this.allMac2SceneIdMap = allMac2SceneIdMap;
     }
 
+    public SceneElementBO getNodeByNodeId(String nodeId) {
+        return this.allNodeId2ElementMap.get(nodeId);
+    }
+
     public SceneElementBO getNodeByIpAddr(String ip) {
         return this.allIp2ElementMap.get(ip);
     }
@@ -176,11 +207,19 @@ public class BatchSceneHandler {
         return this.category2CountInfo;
     }
 
+    public CollectionScenePluginHandler getCollectionScenePluginHandler(String sceneId) {
+        return this.id2SceneHandler.get(sceneId).getPluginHandler(PluginConstant.PLUGIN_KEY);
+    }
+
     private void init() {
         for (String sceneId : sceneIds) {
             SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
+            this.id2SceneHandler.put(sceneId,sceneHandler);
             if (earliestStartTime == null || sceneHandler.getScene().getCreateTime().isBefore(earliestStartTime)) {
                 earliestStartTime = sceneHandler.getScene().getCreateTime();
+            }
+            if (latestUpdateTime == null || sceneHandler.getScene().getUpdateTime().isAfter(latestUpdateTime)) {
+                latestUpdateTime = sceneHandler.getScene().getUpdateTime();
             }
             CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
             CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
@@ -196,6 +235,7 @@ public class BatchSceneHandler {
             this.handlerElement(sceneId, srcElements, pluginHandler, cloudPlugin);
             if (sceneHandler.getElementMap() != null) {
                 sceneHandler.getElementMap().values().forEach(srcElement -> {
+                    this.allNodeId2ElementMap.put(srcElement.getId(), srcElement);
                     var srcPorts = srcElement.getPorts();
                     if (srcPorts == null) {
                         return;

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.auth.repository.UserRoleMapper">
+
+
+    <select id="selectRoleCount" resultType="cn.cyberpeace.mp.auth.bo.user.RoleCount">
+        select count(1) as number,role from mp_auth_user_role group by role
+    </select>
+    <select id="selectCount" resultType="cn.cyberpeace.mp.auth.model.RoleModelCount">
+        SELECT
+            mp_auth_role.*,
+            (SELECT COUNT(1) AS number
+             FROM mp_auth_user_role
+             WHERE role = mp_auth_role.id) AS count
+        FROM
+            mp_auth_role
+        WHERE 1=1 and mp_auth_role.id in
+        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+</mapper>

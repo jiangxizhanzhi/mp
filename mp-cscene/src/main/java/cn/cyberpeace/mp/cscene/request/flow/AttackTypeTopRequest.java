@@ -10,4 +10,6 @@ import lombok.Data;
 public class AttackTypeTopRequest extends BaseSceneElementRequest {
     @ApiModelProperty(value = "留下前 N 个类型,剩余的聚合成一个其他")
     private Integer topNWithOther;
+    @ApiModelProperty("攻击类型是否国际化")
+    private boolean attackTypeI18 = true;
 }
