@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.*;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.base.util.mptool.URLUtil;
+import cn.cyberpeace.mp.base.util.ssh.SshClient;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
@@ -1015,6 +1016,72 @@ public class ScenePluginCloudSceneService {
             }
         }
         return connectionIdSessionMap;
+    }
+
+    public ServiceResult<ElementCommandExecBO> execElementCommandV2(String sceneId, String nodeId, String command, String user) {
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        var element = sceneHandler.getElement(nodeId);
+        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+
+        var cloudElement = pluginHandler.getElement(element.getId());
+        if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(cloudElement.getImageType())) {
+            Container container = new Container();
+            var result = container.executeCommand(cloudElement.getResourceId(), command,user);
+            if (result.getExitCode() != null && result.getExitCode() == 0) {
+                ElementCommandExecBO execRes = new ElementCommandExecBO();
+                execRes.setOutput(result.getOutput());
+                execRes.setStatus(true);
+                return new ServiceResult<>(execRes);
+            } else {
+                log.error("failed to exec command {} , nodeId is {}", command, nodeId);
+                ElementCommandExecBO execRes = new ElementCommandExecBO();
+                execRes.setStatus(false);
+                execRes.setOutput(result.getOutput());
+                return new ServiceResult<>(execRes);
+            }
+        } else {
+            if (element.getPorts() == null) {
+                ElementCommandExecBO execRes = new ElementCommandExecBO();
+                execRes.setStatus(false);
+                return new ServiceResult<>(execRes).asResult();
+            }
+            String host = null, username = null, password = null;
+            Integer port = null;
+            for (var p : element.getPorts()) {
+                var cloudPort = pluginHandler.getPort(p.getId());
+                if (cloudPort.getAccessModes() != null) {
+                    for (var a : cloudPort.getAccessModes()) {
+                        if (AccessMode.Protocol.SSH.equals(a.getProtocol())) {
+                            host = a.getAccessIp();
+                            port = a.getAccessPort();
+                            username = a.getUsername();
+                            password = a.getPassword();
+                            break;
+                        }
+                    }
+                    if (host != null) {
+                        break;
+                    }
+                }
+            }
+            if (host == null) {
+                ElementCommandExecBO execRes = new ElementCommandExecBO();
+                execRes.setStatus(false);
+                return new ServiceResult<>(execRes).asResult();
+            }
+
+            SshClient.SshClientBuilder builder = new SshClient.SshClientBuilder();
+            builder.configHost(host);
+            builder.configPort(port);
+            builder.configPassword(password);
+            builder.configUsername(username);
+            SshClient sshClient = builder.build();
+            var s = sshClient.execReturn(command, 100000L);
+            ElementCommandExecBO execRes = new ElementCommandExecBO();
+            execRes.setOutput(s);
+            execRes.setStatus(true);
+            return new ServiceResult<>(execRes).asResult();
+        }
     }
 
     /**

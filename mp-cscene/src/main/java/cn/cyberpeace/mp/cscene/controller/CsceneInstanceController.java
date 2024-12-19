@@ -1143,4 +1143,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             });
         }
     }
+
+    @ApiOperation("节点命令执行")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeCommandActionRequest.class)
+    @PostMapping("/element/execute")
+    public ServiceResult<ElementCommandExecResult> elementExecute(@RequestBody CsceneInstanceNodeCommandActionRequest request) {
+        log.info("element execute , params is {}", JsonCommon.stringify(request));
+        return modelService.execElementV2(request.getId(), request.getNodeId(), request.getCommand(), request.getExecUser(), request.getContext()).asResult();
+    }
+
 }
