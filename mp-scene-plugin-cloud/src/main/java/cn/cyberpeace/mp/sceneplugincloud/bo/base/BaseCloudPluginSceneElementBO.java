@@ -49,8 +49,6 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private Integer loadSource;
     @DefaultStr
     private String loadAccessModel;
-    //传统场景id
-    private String traSceneId;
     @ApiModelProperty(value = "云平台三层防火墙资源id")
     private String firewallResourceId;
 

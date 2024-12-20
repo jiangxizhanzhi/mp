@@ -36,9 +36,6 @@ public class Load {
     public void create(CloudScenePluginHandler pluginHandler,CloudPluginSceneElementBO cloudElement, String groupName) {
 //        本地创建载荷不执行启动操作
         if(BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL == cloudElement.getLoadSource()){
-//            //本地载荷的任务id
-//            UUID uuid = UUID.randomUUID();
-//            cloudElement.setResourceId(uuid.toString());
             return;
         }
         String nodeId = cloudElement.getSrcElement().getId();
