@@ -90,7 +90,7 @@ public class FlowActuatorStateJob {
 
                 log.info("任务内容: {}", JsonCommon.stringify(map));
                 for (var e : map.values()) {
-                    flowActuatorTaskService.addTasks(e.getTasks(), e.getActuatorId(), e.getNetworkId(), e.getTargetIp());
+                    flowActuatorTaskService.addTasksByLocalData(e.getTasks(), e.getActuatorId(), e.getNetworkId(), e.getTargetIp());
                 }
 
                 m.setCsceneInstanceName(instance.getScene().getTopology().getScene().getName());

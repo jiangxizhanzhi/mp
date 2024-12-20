@@ -28,6 +28,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -148,6 +149,54 @@ public class FlowActuator {
             fileByte = FsCommon.downloadRawContent(flowInfoModel.getScriptFile());
             String fileName = flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getScriptFile()
                     .split(BaseConstants.SPOT)[1];
+            object.put("fileName", fileName);
+            object.put("file_name", fileName);
+        }
+
+        try {
+            String url = this.actuatorHost + UPLOAD_PCAP_URL;
+            String pcapRsp = HttpUtils.postFileV2(url, fileByte, "file", object);
+            var rsp = JsonCommon.snakeParse(pcapRsp, new TypeReference<TrexResponse<Object>>() {
+            });
+            if ("1000".equals(rsp.getCode())) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Getter
+    public static class ProtocolRate {
+        private String name;
+        private BigDecimal rate;
+
+        public ProtocolRate(String name, BigDecimal rate) {
+            this.name = name;
+            this.rate = rate;
+        }
+    }
+
+    public boolean uploadPcapV2(byte[] fileByte, String flowId, String flowTile, String flowFileName, int resourceType, List<ProtocolRate> flowProtocolModelList) {
+        JSONObject object = new JSONObject();
+        object.put("flowId", flowId);
+        object.put("flow_id", flowId);
+        if (ResourceTypeEnum.PACP.toValue() == resourceType) {
+            String fileName = flowTile + System.currentTimeMillis() + "." + flowFileName.split(BaseConstants.SPOT)[1];
+            object.put("fileName", fileName);
+            object.put("file_name", fileName);
+            if (CollectionUtils.isNotEmpty(flowProtocolModelList)) {
+                JSONObject protocolRate = new JSONObject();
+                for (ProtocolRate flowProtocolModel : flowProtocolModelList) {
+                    protocolRate.put(flowProtocolModel.getName(), flowProtocolModel.getRate());
+                }
+                object.put("protocolRate", protocolRate);
+                object.put("protocol_rate", protocolRate);
+            }
+        } else {
+            String fileName = flowTile + System.currentTimeMillis() + "." + flowFileName.split(BaseConstants.SPOT)[1];
             object.put("fileName", fileName);
             object.put("file_name", fileName);
         }

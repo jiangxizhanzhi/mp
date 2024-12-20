@@ -5,7 +5,9 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.flow.config.FlowConfig;
+import cn.cyberpeace.mp.flow.response.AttackFlowResponse;
 import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
+import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.IOException;
@@ -15,7 +17,7 @@ import java.util.Map;
 public class FlowClient {
     private static String BACKGROUND_FLOW_INFO_URL = "/api/mp/flow/info/background";
 
-    private static String ATTACK_FLOW_INFO_URL = "";
+    private static String ATTACK_FLOW_INFO_URL = "/api/mp/flow/info/background";
 
     private static Map<String, String> HEADER = new HashMap<>();
 
@@ -37,7 +39,16 @@ public class FlowClient {
         }
     }
 
-    public void getAttackFlowInfo() {
-
+    public static AttackFlowResponse getAttackFlowInfo(String id) {
+        try {
+            FlowConfig flowConfig = BeanCommon.getBean(FlowConfig.class);
+            var res = HttpUtils.sendHttpGet(flowConfig.getCsceneUrl() + ATTACK_FLOW_INFO_URL + "?id=" + id, HEADER, 10000);
+            ServiceResult<AttackFlowResponse> result = JsonCommon.snakeParse(res, new TypeReference<ServiceResult<AttackFlowResponse>>() {
+            });
+            var response = result.getData();
+            return response;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

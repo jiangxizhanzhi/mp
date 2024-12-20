@@ -19,6 +19,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
@@ -26,6 +27,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -45,6 +47,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -52,6 +55,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.net.http.HttpRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -400,6 +404,35 @@ public class HttpUtils {
     public static String sendGet(String url, String userName, String password) throws IOException {
         HttpClient client = withDigestAuth(userName, password);
         return doGetRequest(url, client);
+    }
+
+    public static byte[] downloadFileToByteArray(String fileUrl)  {
+        // 创建 HttpClient 实例
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+
+            // 创建 HTTP GET 请求
+            HttpGet httpGet = new HttpGet(fileUrl);
+
+            // 发送请求并获取响应
+            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+
+                // 获取响应实体
+                HttpEntity entity = response.getEntity();
+
+                // 检查响应状态
+                if (response.getStatusLine().getStatusCode() == 200) {
+                    // 使用 ByteArrayOutputStream 将文件内容转换为字节数组
+                    try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+                        entity.writeTo(outputStream);
+                        return outputStream.toByteArray();
+                    }
+                } else {
+                    throw new IOException("下载失败，HTTP 状态码: " + response.getStatusLine().getStatusCode());
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

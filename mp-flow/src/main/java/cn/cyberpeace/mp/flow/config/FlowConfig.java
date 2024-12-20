@@ -51,6 +51,9 @@ public class FlowConfig {
     @Value("${mp.flow.network_id:5489d262-8d06-4909-b893-4191ef036f46}")
     private String networkId;
 
+    @Value("${mp.flow.gateway:172.30.102.1}")
+    private String gateway;
+
     @Value("${mp.flow.cidr:5489d262-8d06-4909-b893-4191ef036f46}")
     private String cidr;
 

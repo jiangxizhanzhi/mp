@@ -1,16 +1,19 @@
 package cn.cyberpeace.mp.flow.service;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.EditFlowTaskConfRequest;
 import cn.cyberpeace.mp.flow.bo.FlowTaskAttackConf;
 import cn.cyberpeace.mp.flow.bo.FlowTaskConf;
 import cn.cyberpeace.mp.flow.bo.QueryFlowTaskConfResponse;
+import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.integration.FlowClient;
@@ -32,6 +35,9 @@ import cn.cyberpeace.mp.flow.repository.FlowTaskPortMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskRecordMapper;
 import cn.cyberpeace.mp.flow.repository.FlowTaskTaskMapper;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowTaskPageQueryParams;
+import cn.cyberpeace.mp.flow.response.AttackFlowResponse;
+import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
+import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
 import cn.cyberpeace.mp.flow.response.FlowTaskPageResponse;
 import cn.cyberpeace.mp.flow.service.fields.FlowTaskTaskFields;
 import cn.cyberpeace.mp.flow.service.impl.FlowProtocolService;
@@ -39,8 +45,11 @@ import cn.cyberpeace.mp.flow.service.impl.FlowScriptParamService;
 import cn.cyberpeace.mp.flow.service.impl.FlowTaskConfService;
 import cn.cyberpeace.mp.flow.service.impl.FlowTaskTaskService;
 import com.alibaba.fastjson.JSONObject;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,7 +106,7 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
         this.flowTaskTaskMapper = flowTaskTaskMapper;
     }
 
-    public void addTasks(List<AddFlowTaskFlowInfo> tasks, String actuatorId, String networkId, String targetIp) {
+    public void addTasksByLocalData(List<AddFlowTaskFlowInfo> tasks, String actuatorId, String networkId, String targetIp) {
         // 判断网络是否已经接入
         HumanCondition portCondition = new HumanCondition().filterEqual(FlowTaskPortModel::getActuatorId, actuatorId)
                 .filterEqual(FlowTaskPortModel::getNetworkId, networkId);
@@ -106,7 +115,6 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
         String mac = "";
         if (portModel == null) {
             // 无数据 说明未接入网络 ， 需要先接入网络
-            flowActuatorModel.getResourceId();
             AddVirtualNicParams params = new AddVirtualNicParams();
             params.setInstanceId(flowActuatorModel.getResourceId());
             params.setNetworkId(networkId);
@@ -123,23 +131,6 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
         for (AddFlowTaskFlowInfo t : tasks) {
             flowIds.add(t.getFlowId());
         }
-
-//        List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList<FlowTaskTaskModel>();
-//        for (String flowId : flowIds) {
-//            var flow = FlowClient.getBackgroundFlowInfo(flowId);
-//            FlowTaskTaskModel flowTaskTaskModel = new FlowTaskTaskModel();
-//            flowTaskTaskModel.setSceneId("");
-//            flowTaskTaskModel.setActuatorId(actuatorId);
-//            flowTaskTaskModel.setResourceType(flow.getAttackFlowType());
-//            flowTaskTaskModel.setInteractiveType(flow.getInteractiveType());
-//            flowTaskTaskModel.setFlowId(flowId);
-//            flowTaskTaskModel.setPortId(portModel.getId());
-//            flowTaskTaskModel.setNodeId("");
-//            flowTaskTaskModel.setNodeIp(targetIp);
-//            flowTaskTaskModel.setNodeName("");
-//            flowTaskTaskModelList.add(flowTaskTaskModel);
-//        }
-
 
         HumanCondition condition = new HumanCondition();
         condition.filterIn(FlowInfoModel::getId, flowIds.toArray());
@@ -160,6 +151,7 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
             flowTaskTaskModel.setNodeName("");
             flowTaskTaskModelList.add(flowTaskTaskModel);
         }
+
         flowTaskTaskMapper.bulkCreate(flowTaskTaskModelList);
         // 存任务配置
         Map<String, AddFlowTaskFlowInfo> addFlowTaskFlowInfoMap = new HashMap<>();
@@ -220,6 +212,160 @@ public class FlowActuatorTaskService extends BaseModelServiceImpl<FlowTaskTaskMo
                 throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
             }
         }
+    }
+
+    public void addTasksByRemoteData(List<AddFlowTaskFlowInfo> tasks, String actuatorId, String networkId, String targetIp) {
+        // 判断网络是否已经接入
+        HumanCondition portCondition = new HumanCondition().filterEqual(FlowTaskPortModel::getActuatorId, actuatorId)
+                .filterEqual(FlowTaskPortModel::getNetworkId, networkId);
+        var portModel = flowTaskPortMapper.first(portCondition);
+        FlowActuatorModel flowActuatorModel = flowActuatorMapper.get(actuatorId);
+        String mac = "";
+        if (portModel == null) {
+            // 无数据 说明未接入网络 ， 需要先接入网络
+            AddVirtualNicParams params = new AddVirtualNicParams();
+            params.setInstanceId(flowActuatorModel.getResourceId());
+            params.setNetworkId(networkId);
+            var res = cloudClient.addVirtualNic(params);
+            mac = res.getMacAddress();
+            portModel = new FlowTaskPortModel();
+            portModel.setActuatorId(actuatorId);
+            portModel.setNetworkId(networkId);
+            portModel.setMac(mac);
+            flowTaskPortMapper.save(portModel);
+        }
+
+        List<FlowTaskTaskModel> flowTaskTaskModelList = new ArrayList<FlowTaskTaskModel>();
+        List<AssembleFlowInfo> assembleFlowInfos = new ArrayList<>();
+        for (var t : tasks) {
+            String flowId = t.getFlowId();
+
+            FlowInfoResponse flow = FlowClient.getBackgroundFlowInfo(flowId);
+            if (flow == null) {
+                flow = FlowClient.getAttackFlowInfo(flowId);
+            }
+            if (flow == null) {
+                log.info("未查询到流量,flow id : {}", flowId);
+                continue;
+            }
+
+            FlowTaskTaskModel flowTaskTaskModel = new FlowTaskTaskModel();
+            flowTaskTaskModel.setSceneId("");
+            flowTaskTaskModel.setActuatorId(actuatorId);
+            flowTaskTaskModel.setFlowId(flowId);
+            flowTaskTaskModel.setPortId(portModel.getId());
+            flowTaskTaskModel.setNodeId("");
+            flowTaskTaskModel.setNodeIp(targetIp);
+            flowTaskTaskModel.setNodeName("");
+            flowTaskTaskModel.setInteractiveType(flow.getInteractiveType());
+
+            if (flow instanceof AttackFlowResponse) {
+                AttackFlowResponse attackFlowResponse = (AttackFlowResponse) flow;
+                flowTaskTaskModel.setResourceType(StringUtils.isNotEmpty(attackFlowResponse.getPcapFile()) ? 0 : 1);
+
+                flowTaskTaskModelList.add(flowTaskTaskModel);
+                AssembleFlowInfo assembleFlowInfo = new AssembleFlowInfo();
+                assembleFlowInfo.setFlowId(flowId);
+                assembleFlowInfo.setFlowTitle(flow.getTitle());
+                assembleFlowInfo.setFilePath(attackFlowResponse.getFile());
+                assembleFlowInfo.setFlowFileName(attackFlowResponse.getFileName());
+            } else {
+                BackgroundFlowResponse backgroundFlowResponse = (BackgroundFlowResponse) flow;
+                flowTaskTaskModel.setResourceType(StringUtils.isNotEmpty(backgroundFlowResponse.getPcapFile()) ? 0 : 1);
+                flowTaskTaskModelList.add(flowTaskTaskModel);
+
+                AssembleFlowInfo assembleFlowInfo = new AssembleFlowInfo();
+                assembleFlowInfo.setFlowId(flowId);
+                assembleFlowInfo.setFlowTitle(flow.getTitle());
+                assembleFlowInfo.setFlowFileName(backgroundFlowResponse.getFileName());
+                assembleFlowInfo.setResourceType(StringUtils.isNotEmpty(backgroundFlowResponse.getPcapFile()) ? 0 : 1);
+                assembleFlowInfo.setFilePath(backgroundFlowResponse.getPcapFile());
+                List<FlowActuator.ProtocolRate> protocolRates = new ArrayList<>();
+                for (var p : backgroundFlowResponse.getProtocolList()) {
+                    protocolRates.add(new FlowActuator.ProtocolRate(p.getProtocolName(), p.getRate()));
+                }
+                assembleFlowInfo.setProtocolRates(protocolRates);
+                assembleFlowInfos.add(assembleFlowInfo);
+            }
+
+        }
+
+        flowTaskTaskMapper.bulkCreate(flowTaskTaskModelList);
+        // 存任务配置
+        Map<String, AddFlowTaskFlowInfo> addFlowTaskFlowInfoMap = new HashMap<>();
+        for (AddFlowTaskFlowInfo f : tasks) {
+            addFlowTaskFlowInfoMap.put(f.getFlowId(), f);
+        }
+
+        List<FlowTaskConfModel> flowTaskConfModelList = new ArrayList<FlowTaskConfModel>();
+        for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModelList) {
+            FlowTaskConfModel flowTaskConfModel = new FlowTaskConfModel();
+            flowTaskConfModel.setTaskId(flowTaskTaskModel.getId());
+            flowTaskConfModel.setKeepRunning(0);
+            flowTaskConfModel.setReplay(1);
+            flowTaskConfModel.setRateUnlimited(1);
+            FlowTaskConf flowTaskConf = new FlowTaskConf();
+            if (ResourceTypeEnum.SCRIPT.toValue() == flowTaskTaskModel.getResourceType()) {
+                List<FlowTaskAttackConf> attackConfs = addFlowTaskFlowInfoMap.get(flowTaskTaskModel.getFlowId())
+                        .getAttackConfs();
+                if (CollectionUtils.isNotEmpty(attackConfs)) {
+                    flowTaskConf.setAttackConfs(attackConfs);
+                } else {
+                    List<FlowScriptParamModel> flowScriptParamModelList = flowScriptParamService.selectByFlowId(flowTaskTaskModel.getFlowId());
+                    if (CollectionUtils.isNotEmpty(flowScriptParamModelList)) {
+                        List<FlowTaskAttackConf> flowTaskAttackConfList = new ArrayList<FlowTaskAttackConf>();
+                        for (FlowScriptParamModel flowScriptParamModel : flowScriptParamModelList) {
+                            FlowTaskAttackConf flowTaskAttackConf = new FlowTaskAttackConf();
+                            flowTaskAttackConf.setConfDesc(flowScriptParamModel.getParamDesc());
+                            flowTaskAttackConf.setConfType(flowScriptParamModel.getParamType());
+                            flowTaskAttackConf.setConfKey(flowScriptParamModel.getParamKey());
+                            flowTaskAttackConf.setConfValue(flowScriptParamModel.getParamValue());
+                            flowTaskAttackConfList.add(flowTaskAttackConf);
+                        }
+                        flowTaskConf.setAttackConfs(flowTaskAttackConfList);
+                    }
+                }
+            }
+            flowTaskConfModel.setConf(JSONObject.toJSONString(flowTaskConf));
+            flowTaskConfModelList.add(flowTaskConfModel);
+        }
+        flowTaskConfMapper.bulkCreate(flowTaskConfModelList);
+        // 初始化网口
+        List<String> taskIdList = new ArrayList<>();
+        for (FlowTaskTaskModel flowTaskTaskModel : flowTaskTaskModelList) {
+            taskIdList.add(flowTaskTaskModel.getId());
+        }
+
+        FlowActuator flowActuator = new FlowActuator(flowActuatorModel.getIp(), flowTaskTaskService);
+//        boolean initNetwork = flowActuator.initNetwork(portModel.getMac(), targetIp, taskIdList);
+//        if (!initNetwork) {
+//            log.error("init network error");
+//            throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
+//        }
+        //上传pcap包虚拟机
+        var flowConfig = BeanCommon.getBean(FlowConfig.class);
+        for (var flowInfoModel : assembleFlowInfos) {
+            // 下载文件
+            String fileKey = flowInfoModel.getFilePath();
+            fileKey = fileKey.replace("\\", "/");
+            var bytes = HttpUtils.downloadFileToByteArray(flowConfig.getCsceneUrl() + "/api/mp/file/" + fileKey);
+            boolean uploadPcap = flowActuator.uploadPcapV2(bytes, flowInfoModel.getFlowId(), flowInfoModel.getFlowTitle(), flowInfoModel.getFlowFileName(), flowInfoModel.getResourceType(), flowInfoModel.getProtocolRates());
+            if (!uploadPcap) {
+                log.error("upload flow file info error");
+                throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
+            }
+        }
+    }
+
+    @Getter
+    @Setter
+    public static class AssembleFlowInfo {
+        String flowId;
+        String flowTitle;
+        String flowFileName;
+        String filePath;
+        int resourceType;
+        List<FlowActuator.ProtocolRate> protocolRates;
     }
 
     @Transactional

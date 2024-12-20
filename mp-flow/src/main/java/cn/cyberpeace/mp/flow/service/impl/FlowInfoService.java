@@ -153,7 +153,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
     /**
      * 预制流量文件目录
      */
-    private static final String PRE_PATH = "D:\\MJ\\code2024\\30s\\mp";
+    private static final String PRE_PATH = ".";
 
     /**
      * 补充list查询条件
@@ -1358,8 +1358,7 @@ public class FlowInfoService extends BaseModelServiceImpl<FlowInfoModel, FlowInf
         }
 
         String strProtocols;
-//        String scriptPath = PRE_PATH.concat("/protocol_analyse.py");
-        String scriptPath = "D:\\MJ\\code2024\\30s\\mp\\protocol_analyse.py";
+        String scriptPath = PRE_PATH.concat("/protocol_analyse.py");
         String pcapPath = "";
         File tmpFile = new File(pcapPath);
         try {

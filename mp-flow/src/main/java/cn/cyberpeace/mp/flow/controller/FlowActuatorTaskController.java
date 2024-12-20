@@ -46,7 +46,7 @@ public class FlowActuatorTaskController {
     @ApiOperation("新增流量任务")
     @PostMapping("/task/add")
     public ServiceResult addTasks(@RequestBody AddFlowTaskParams params) {
-        flowActuatorTaskService.addTasks(params.getTasks(), params.getActuatorId(), params.getNetworkId(), params.getTargetIp());
+        flowActuatorTaskService.addTasksByLocalData(params.getTasks(), params.getActuatorId(), params.getNetworkId(), params.getTargetIp());
         return new ServiceResult(true).asResult();
     }
 
