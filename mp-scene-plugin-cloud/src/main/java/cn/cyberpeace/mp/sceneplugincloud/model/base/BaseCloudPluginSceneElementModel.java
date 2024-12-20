@@ -45,7 +45,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private Integer loadSource;
     @DefaultStr
     private String loadAccessModel;
-
+    //传统场景id
+    private String traSceneId;
     /**
      * 三层防火墙对应防火墙资源id
      */
