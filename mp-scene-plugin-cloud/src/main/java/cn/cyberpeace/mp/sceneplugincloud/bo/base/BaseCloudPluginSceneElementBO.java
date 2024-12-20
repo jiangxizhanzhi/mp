@@ -47,10 +47,11 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private String loadToolId;
     @ApiModelProperty(value = "载荷来源(1载荷平台 2本地)")
     private Integer loadSource;
-    @DefaultStr
-    private String loadAccessModel;
-    //传统场景id
-    private String traSceneId;
+    // todo 跟传统云的kali攻击机绑定使用的参数 待开发
+//    @DefaultStr
+//    private String loadAccessModel;
+//    //传统场景id
+//    private String traSceneId;
     @ApiModelProperty(value = "云平台三层防火墙资源id")
     private String firewallResourceId;
 
