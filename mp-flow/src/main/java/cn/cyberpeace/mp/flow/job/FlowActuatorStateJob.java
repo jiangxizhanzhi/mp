@@ -10,6 +10,7 @@
 // Version 1.0.0
 package cn.cyberpeace.mp.flow.job;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.protocolprobe.ProtocolProbe;
@@ -17,6 +18,8 @@ import cn.cyberpeace.mp.base.util.protocolprobe.SSHProbe;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
 import cn.cyberpeace.mp.flow.bo.AddFlowTaskParams;
 import cn.cyberpeace.mp.flow.bo.FlowTaskAttackConf;
+import cn.cyberpeace.mp.flow.config.FlowConfig;
+import cn.cyberpeace.mp.flow.integration.addtask.IAddTaskService;
 import cn.cyberpeace.mp.flow.integration.cloud.base.ICloudClient;
 import cn.cyberpeace.mp.flow.integration.cloud.topocloud.TopoCloudClient;
 import cn.cyberpeace.mp.flow.integration.cloud.topocloud.request.BusinessCSceneInstance;
@@ -24,11 +27,11 @@ import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.request.CsceneConfigFlowTaskRequest;
 import cn.cyberpeace.mp.flow.response.CsceneFlowTaskResponse;
-import cn.cyberpeace.mp.flow.service.FlowActuatorTaskService;
 import cn.cyberpeace.mp.flow.service.FlowCsceneService;
 import cn.cyberpeace.mp.flow.util.SshUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -56,13 +59,19 @@ public class FlowActuatorStateJob {
     private FlowCsceneService flowCsceneService;
 
     @Resource
-    private FlowActuatorTaskService flowActuatorTaskService;
+    @Qualifier(value = "addTaskByRemoteFlowService")
+    private IAddTaskService addTaskByRemoteFlowService;
+
+    @Resource
+    @Qualifier(value = "addTaskByLocalFlowService")
+    private IAddTaskService addTaskByLocalFlowService;
 
     @Resource
     private ICloudClient cloudClient;
 
     @Scheduled(cron = "0/5 * * * * ?")
     public void queryFlowActuator() {
+        FlowConfig flowConfig = BeanCommon.getBean(FlowConfig.class);
         HumanCondition condition = new HumanCondition().filterEqual(FlowActuatorModel::getStatus, 0);
         var list = flowActuatorMapper.list(condition);
         for (var m : list) {
@@ -90,7 +99,11 @@ public class FlowActuatorStateJob {
 
                 log.info("任务内容: {}", JsonCommon.stringify(map));
                 for (var e : map.values()) {
-                    flowActuatorTaskService.addTasksByLocalData(e.getTasks(), e.getActuatorId(), e.getNetworkId(), e.getTargetIp());
+                    if ("local".equals(flowConfig.getFlowResMode())) {
+                        addTaskByLocalFlowService.addTasks(e.getTasks(), e.getActuatorId(), e.getNetworkId(), e.getTargetIp());
+                    } else {
+                        addTaskByRemoteFlowService.addTasks(e.getTasks(), e.getActuatorId(), e.getNetworkId(), e.getTargetIp());
+                    }
                 }
 
                 m.setCsceneInstanceName(instance.getScene().getTopology().getScene().getName());

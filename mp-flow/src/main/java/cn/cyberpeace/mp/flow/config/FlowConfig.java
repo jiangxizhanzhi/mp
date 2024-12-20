@@ -1,13 +1,13 @@
- // Copyright (C) 2024
- // All rights reserved.
- // Project name mp
- // Description:
- // Author:
- // File name FlowConfig.java.
- // File size 881.
- // File create date Fri Jul 12 12:55:31 CST 2024.
- // File update date Fri Jul 12 12:55:31 CST 2024.
- // Version 1.0.0
+// Copyright (C) 2024
+// All rights reserved.
+// Project name mp
+// Description:
+// Author:
+// File name FlowConfig.java.
+// File size 881.
+// File create date Fri Jul 12 12:55:31 CST 2024.
+// File update date Fri Jul 12 12:55:31 CST 2024.
+// Version 1.0.0
 package cn.cyberpeace.mp.flow.config;
 
 import lombok.Data;
@@ -35,7 +35,7 @@ public class FlowConfig {
 
     /**
      * 云平台地址
-    */
+     */
     @Value("${mp.flow.cp_url:}")
     private String cpUrl;
 
@@ -65,5 +65,8 @@ public class FlowConfig {
 
     @Value("${mp.flow.trex_template_id:}")
     private String trexTemplateId;
+
+    @Value("${mp.flow.flow_res_mode:}")
+    private String flowResMode;
 
 }
