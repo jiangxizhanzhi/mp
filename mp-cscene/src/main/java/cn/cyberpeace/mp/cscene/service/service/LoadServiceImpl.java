@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.service.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
@@ -1150,7 +1151,7 @@ public class LoadServiceImpl {
         List<JSONObject> loadResultBySceneId = null;
         if (loadIds != null && loadIds.size() > 0) {
             //查询该场景绑定的载荷及记录
-            loadResultBySceneId = loadMapper.getLoadResultByLoads(loadIds);
+            loadResultBySceneId = loadMapper.getLoadResultByLoads(sceneId,loadIds);
             return loadResultBySceneId;
         } else {
             return loadResultBySceneId;

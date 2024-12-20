@@ -60,7 +60,7 @@ public interface LoadMapper extends BaseModelMapper<MpDevopsLoad> {
 
     List<String> getLoadsBySceneId(String sceneId);
 
-    List<JSONObject> getLoadResultByLoads(@Param("param") List<String> loadIds);
+    List<JSONObject> getLoadResultByLoads(@Param("sceneId") String sceneId, @Param("param") List<String> loadIds);
 
     List<MpDevopsLoadSceneLog> getLoadResultByLoadIds(@Param("param") List<String> loadIds,
                                                       @Param("sceneId") String sceneId,

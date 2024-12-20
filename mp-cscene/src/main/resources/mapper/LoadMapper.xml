@@ -321,7 +321,7 @@
             <if test="param != null and param.creatorId != null and param.creatorId != ''">
                 creator_id = #{param.creatorId},
             </if>
-            <if test="param != null and param.createTime != null and param.createTime != ''">
+            <if test="param != null and param.createTime != null ">
                 create_time = #{param.createTime},
             </if>
             update_time = now()
@@ -583,24 +583,30 @@
 
     <select id="getLoadResultByLoads" resultType="com.alibaba.fastjson.JSONObject">
         SELECT
-        load.id as tool_id,
-        load.tool_name,
+        loada.id as tool_id,
+        loada.tool_name,
         DATE_FORMAT(log.create_time, '%Y-%m-%d %H:%i:%S') AS create_time
         FROM
         mp_devops_load_scene_result_log log
-        inner join mp_devops_load load on log.id = load.id
-        <where>
-            <if test="param != null and param.size != 0">
-                and log.id in
-                <foreach collection="param" item="item" separator="," open="(" close=")">
-                    #{item}
-                </foreach>
-            </if>
-        </where>
+        inner join mp_devops_load loada on log.id = loada.id
+        where scene_id = #{sceneId}
+            and log.id in
+        <foreach collection="param" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
     </select>
 
     <select id="getLoadsBySceneId" resultType="java.lang.String">
         SELECT
+            load_tool_id
+        FROM
+            mp_sceneplugincloud_scene_element
+        where image_type = 'load' and scene = (
+            SELECT mp_cscene_cscene_instance.scene
+            FROM mp_cscene_cscene_instance
+            where id = #{sceneId}
+        )
+        <!--SELECT
         scene_element
         FROM
         mp_sceneplugincloud_scene_element
@@ -609,7 +615,7 @@
             <if test="sceneId != null and sceneId != ''">
                 and scene = #{sceneId}
             </if>
-        </where>
+        </where>-->
     </select>
 
     <select id="getLoadListNum" resultType="java.lang.Integer">
