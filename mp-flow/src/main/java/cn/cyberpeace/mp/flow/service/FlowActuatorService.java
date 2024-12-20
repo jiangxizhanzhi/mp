@@ -106,8 +106,8 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
         actuatorModel.setCsceneId(params.getCsceneId());
         actuatorModel.setCsceneInstanceId(params.getCsceneInstanceId());
         actuatorModel.setResourceId(resourceId);
-        actuatorModel.setNetworkId(instance.getNetworks().get(0).getNetworkId());
-        actuatorModel.setIp(instance.getNetworks().get(0).getFixedIp());
+        actuatorModel.setNetworkId(instance.getNetwork().get(0).getNetworkId());
+        actuatorModel.setIp(instance.getNetwork().get(0).getFixedIp());
         flowActuatorMapper.save(actuatorModel);
         var res = this.convert2FlowActuatorResponse(actuatorModel);
         return res;

@@ -9,5 +9,5 @@ import java.util.List;
 @Setter
 public class GetVirtualMachineResult {
     private String id ;
-    private List<VirtualNic> networks;
+    private List<VirtualNic> network;
 }

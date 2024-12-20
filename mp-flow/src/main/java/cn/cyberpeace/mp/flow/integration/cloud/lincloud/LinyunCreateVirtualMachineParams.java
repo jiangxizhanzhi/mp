@@ -25,7 +25,7 @@ public class LinyunCreateVirtualMachineParams extends AbstractCreateVirtualMachi
     private Integer disk;
     private Boolean mainCloud;
     private String osType;
-    private List<VirtualNic> networks;
+    private List<VirtualNic> network;
 
     public static LinyunCreateVirtualMachineParams getDefault() {
         FlowConfig flowConfig = BeanCommon.getBean(FlowConfig.class);
@@ -35,6 +35,7 @@ public class LinyunCreateVirtualMachineParams extends AbstractCreateVirtualMachi
         String networkId = flowConfig.getNetworkId();
         String trexImage = flowConfig.getTrexImage();
         String cidr = flowConfig.getCidr();
+        String gateway = flowConfig.getGateway();
         String name = "Trex-" + TextUtils.uuid();
 
         LinyunCreateVirtualMachineParams params = new LinyunCreateVirtualMachineParams();
@@ -46,13 +47,14 @@ public class LinyunCreateVirtualMachineParams extends AbstractCreateVirtualMachi
         params.setRam(trexRam);
         params.setImage(trexImage);
         params.setName(name);
-        params.setNetworks(new ArrayList<>());
+        params.setNetwork(new ArrayList<>());
 
         VirtualNic virtualNic = new VirtualNic();
 
         virtualNic.setNetworkId(networkId);
         virtualNic.setCidr(cidr);
         virtualNic.setFixedIp(generateRandomIP(cidr));
+        virtualNic.setGateway(gateway);
 
         virtualNic.setAccessModes(new ArrayList<>());
         VirtualNic.AccessMode accessMode = new VirtualNic.AccessMode();
@@ -61,7 +63,7 @@ public class LinyunCreateVirtualMachineParams extends AbstractCreateVirtualMachi
         accessMode.setPassword("111111");
         accessMode.setPort(22);
         virtualNic.getAccessModes().add(accessMode);
-        params.getNetworks().add(virtualNic);
+        params.getNetwork().add(virtualNic);
 
         return params;
     }

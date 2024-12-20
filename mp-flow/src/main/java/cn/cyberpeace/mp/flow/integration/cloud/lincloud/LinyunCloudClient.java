@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.flow.integration.cloud.lincloud;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.flow.config.FlowConfig;
-import cn.cyberpeace.mp.flow.integration.cloud.base.AbstractGetVirtualMachineParams;
 import cn.cyberpeace.mp.flow.integration.cloud.base.AddVirtualNicParams;
 import cn.cyberpeace.mp.flow.integration.cloud.base.AddVirtualNicResult;
 import cn.cyberpeace.mp.flow.integration.cloud.base.DeleteVirtualMachineResult;
@@ -20,8 +19,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -57,7 +54,7 @@ public class LinyunCloudClient implements ICloudClient {
         LinyunGetVirtualMachineParams snParams = new LinyunGetVirtualMachineParams();
         snParams.setId(id);
         String url = this.cloudHost + VIRTUAL_MACHINE_GET_URL;
-        url.replace("{instance_id}", snParams.getId());
+        url = url.replace("{instance_id}", snParams.getId());
         try {
             log.info("查询虚拟机信息 , url is : {}", url);
             var resp = HttpUtils.sendGet(url);
@@ -138,7 +135,7 @@ public class LinyunCloudClient implements ICloudClient {
                 throw new RuntimeException("add nic error");
             }
             AddVirtualNicResult result = new AddVirtualNicResult();
-            result.setMacAddress(response.getData().getMacAddress());
+            result.setMacAddress(response.getData().getMac());
             return result;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -156,7 +153,7 @@ public class LinyunCloudClient implements ICloudClient {
     @Getter
     @Setter
     private static class AddVirtualNicResponse {
-        private String macAddress;
+        private String mac;
     }
 
     @Setter

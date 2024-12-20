@@ -104,9 +104,9 @@ public class FlowActuatorStateJob {
     private void updateActuatorIp(FlowActuatorModel m) {
         var res = cloudClient.getVirtualMachine(m.getResourceId());
         if (res != null) {
-            m.setIp(res.getNetworks().get(0).getFixedIp());
+            m.setIp(res.getNetwork().get(0).getFixedIp());
             m.setResourceId(res.getId());
-            m.setNetworkId(res.getNetworks().get(0).getNetworkId());
+            m.setNetworkId(res.getNetwork().get(0).getNetworkId());
             flowActuatorMapper.update(m);
         }
     }

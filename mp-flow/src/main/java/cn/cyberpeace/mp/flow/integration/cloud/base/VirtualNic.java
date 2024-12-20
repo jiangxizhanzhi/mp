@@ -10,6 +10,7 @@ import java.util.List;
 public class VirtualNic {
     private String networkId;
     private String fixedIp;
+    private String gateway;
     private String cidr;
     private List<AccessMode> accessModes;
 

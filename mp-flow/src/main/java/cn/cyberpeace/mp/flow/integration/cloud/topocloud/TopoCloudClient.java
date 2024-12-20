@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.controller.FlowActuatorController;
-import cn.cyberpeace.mp.flow.integration.cloud.base.AbstractGetVirtualMachineParams;
 import cn.cyberpeace.mp.flow.integration.cloud.base.AddVirtualNicParams;
 import cn.cyberpeace.mp.flow.integration.cloud.base.AddVirtualNicResult;
 import cn.cyberpeace.mp.flow.integration.cloud.base.DeleteVirtualMachineResult;
@@ -25,7 +24,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -95,11 +93,11 @@ public class TopoCloudClient implements ICloudClient {
                 GetVirtualMachineResult result = new GetVirtualMachineResult();
                 result.setId(flowNodeResourceId);
                 List<VirtualNic> virtualNics = new ArrayList<>();
-                result.setNetworks(virtualNics);
+                result.setNetwork(virtualNics);
                 VirtualNic virtualNic = new VirtualNic();
                 virtualNic.setFixedIp(ip);
                 virtualNic.setNetworkId(netNodeResourceId);
-                result.getNetworks().add(virtualNic);
+                result.getNetwork().add(virtualNic);
                 return result;
             }
         } catch (IOException e) {
@@ -113,7 +111,7 @@ public class TopoCloudClient implements ICloudClient {
         String res = null;
         FlowConfig flowConfig = BeanCommon.getBean(FlowConfig.class);
         try {
-            res = HttpUtils.sendHttpGet(flowConfig.getCsceneUrl() + url, HEADER, 10000);
+            res = HttpUtils.sendHttpGet(flowConfig.getCsceneUrl() + url, HEADER, 300000);
             TopoResponse<BusinessCSceneInstance> tmpRes = JsonCommon.snakeParse(res, new TypeReference<TopoResponse<BusinessCSceneInstance>>() {
             });
             var instance = tmpRes.getData();

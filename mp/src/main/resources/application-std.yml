@@ -258,6 +258,7 @@ mp:
   flow:
     network-id: ${mp.flow.ext-var.network-id}
     cidr: ${mp.flow.ext-var.cidr}
+    gateway: ${mp.flow.ext-var.gateway}
     cscene-url: ${mp.flow.ext-var.cscene-url}
     trex-template-id: ${mp.flow.ext-var.trex-template-id}
     trex-image: ${mp.common.ext-var.trex-image}
