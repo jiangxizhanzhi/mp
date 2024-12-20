@@ -445,7 +445,14 @@ public class DeleteHandler extends HandlerCommon {
         }
         Integer cloudType = getPluginHandler().getSceneHandler().getScene().getCloudType();
         if (cloudType != BaseSceneModel.CloudType.DEFAULT) {
-            if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+//            TODO 云场景使用传统kali机方案开发暂时搁置
+            /*if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType()) && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_VIRTUAL_MACHINE,
+                        () -> {
+                            deleteVirtualMachine(cloudElement);
+                            this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                        });
+            } else*/ if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(cloudElement.getImageType()) && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_VIRTUAL_MACHINE,
                         () -> {
                             SceneTaskPool.getInstance().executeTask(() -> {

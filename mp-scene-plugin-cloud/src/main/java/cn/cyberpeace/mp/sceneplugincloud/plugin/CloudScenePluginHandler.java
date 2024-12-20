@@ -583,6 +583,85 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         }
     }
 
+    @Override
+    public void completionKaliTopo() {
+        TopoReformUtils topoReformUtils = new TopoReformUtils(this);
+        List<CloudPluginSceneElementBO> collect = getElementMap().values().stream()
+                .filter(e -> e.getLoadSource() == 2)
+                .collect(Collectors.toList());
+        if (collect.size() > 0) {
+//            增加一个外部网络节点
+            var externalNetwork = topoReformUtils.addExternalNetworkNode();
+//            增加n个kali虚拟机节点并连线
+            var kali = topoReformUtils.addKaliNode();
+
+            // 交换机新增一个端口
+            var switchPort = topoReformUtils.addExternalNetworkPort(externalNetwork.getPluginElement());
+            // 核心路由器新增一个端口 端口默认有telnet接入方式
+            var coreRouterPort = topoReformUtils.addExternalNetworkPort(kali.getPluginElement());
+            topoReformUtils.addAuxiliaryAccessMode(coreRouterPort.getPluginPort(), AccessMode.Protocol.SSH);
+            // 交换机和核心路由器新增一根连线
+            topoReformUtils.addConnect(switchPort.getScenePort(), coreRouterPort.getScenePort());
+
+        }
+        // 如果节点没有连线的 把交换机补充上
+        /*for (CloudPluginSceneElementBO element : getElementMap().values()) {
+            Set<String> existingIpSet = existingIpSetMap.get(element.getSrcElement().getId());
+
+            if (BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(element.getImageType())
+                    || BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(element.getImageType())) {
+
+                List<SceneElementPortBO> notIpPortsByNotConnectedPorts = getElementNotConnectedPorts(element.getSrcElement().getId());
+//                只连接有ip的端口 若都无ip连接一条即可
+                List<SceneElementPortBO> sceneElementPortBOS = notIpPortsByNotConnectedPorts
+                        .stream()
+                        .filter(p -> existingIpSet.contains(p.getIp()))
+                        .collect(Collectors.toList());
+                if (sceneElementPortBOS.isEmpty() && !notIpPortsByNotConnectedPorts.isEmpty()) {
+                    sceneElementPortBOS.add(notIpPortsByNotConnectedPorts.get(0));
+                }
+                for (SceneElementPortBO p : sceneElementPortBOS) {
+                    nodeWrapper1 = getElementWrapper(element, nodeWrapper1, topoReformUtils);
+
+                    //                    云场景网络节点类型更改
+                    CloudPluginSceneElementBO pluginElement = nodeWrapper1.getPluginElement();
+
+                    //                    加交换机端口 不创建element端口
+                    TopoReformUtils.PortWrapper port2Wrapper = topoReformUtils.addAuxiliaryPort(pluginElement);
+                    //                    连线
+                    p.setIsAuxiliary(false);
+                    port2Wrapper.getScenePort().setIsAuxiliary(false);
+                    topoReformUtils.addConnect(p, port2Wrapper.getScenePort());
+                    //                    如果端口有ip需要反向推cidr和geteway
+                    //                    cidr抹零+.0/24 geteway 抹零+.254
+                    if (StringUtils.isNotEmpty(p.getIp()) && existingIpSet.contains(p.getIp())) {
+                        String ip = p.getIp();
+                        String cidr = ip.substring(0, ip.lastIndexOf(".")) + ".0/24";
+                        Map<String, Map<String, Object>> elements = this.getSceneHandler().getScenePluginData().get(PluginConstant.PLUGIN_KEY).getElements();
+                        Map<String, Object> stringObjectMap = elements.get(nodeWrapper1.getSceneElement().getId());
+                        List<String> cidrPools = (List<String>) stringObjectMap.get("cidr_pools");
+                        if (null == cidrPools) {
+                            cidrPools = new ArrayList<String>();
+                        }
+                        if (!cidrPools.contains(cidr)) {
+                            cidrPools.add(cidr);
+                            stringObjectMap.put("cidr_pools", cidrPools);
+                        }
+                        this.getSceneHandler().getScenePluginData().get(PluginConstant.PLUGIN_KEY).setElements(elements);
+                    } else if (StringUtils.isNotEmpty(p.getIp()) && !existingIpSet.contains(p.getIp())) {
+                        p.setIp(null);
+                    }
+                }
+            }
+            SceneElementBO srcElement = element.getSrcElement();
+            for (SceneElementPortBO port : srcElement.getPorts()) {
+                if (null != port.getIp() && !existingIpSet.contains(port.getIp())) {
+                    port.setIp(null);
+                }
+            }
+        }*/
+    }
+
     @NotNull
     private static TopoReformUtils.ElementWrapper getElementWrapper(CloudPluginSceneElementBO element, TopoReformUtils.ElementWrapper nodeWrapper, TopoReformUtils topoReformUtils) {
         if (null == nodeWrapper) {

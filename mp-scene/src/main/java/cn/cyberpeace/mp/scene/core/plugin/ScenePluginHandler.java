@@ -190,4 +190,7 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
     public void snapshotElement(String nodeId, String snapshotId, String snapshotName, String description) {
 
     }
+
+    public void completionKaliTopo() {
+    }
 }

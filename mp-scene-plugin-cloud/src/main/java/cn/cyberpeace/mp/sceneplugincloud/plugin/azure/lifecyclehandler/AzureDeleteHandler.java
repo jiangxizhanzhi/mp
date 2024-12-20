@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class AzureDeleteHandler extends DeleteHandler {
@@ -61,6 +62,17 @@ public class AzureDeleteHandler extends DeleteHandler {
         List<CloudPluginSceneElementBO> filteredContainerElements = this.filterContainerElements(allElements);
         allFilteredElements.addAll(filteredVirtualMachineElements);
         allFilteredElements.addAll(filteredContainerElements);
+
+        // 删除终端 TODO 云场景使用传统kali机方案开发暂时搁置
+        /*var terminals = getPluginHandler().getTerminalElementMap().values().stream()
+                .filter(t -> getPluginHandler().getSceneHandler().isHandleNode(t.getSrcElement().getId()))
+                .collect(Collectors.toList());
+        var deleteTerminalTasks = terminals.stream()
+                .filter(c -> BaseCloudPluginSceneElementModel.ImageType.VM.equals(c.getImageType()))
+                .map(cloudElement -> (Runnable) () -> deleteElementProcess(cloudElement)).collect(Collectors.toList());
+        if (!deleteTerminalTasks.isEmpty()) {
+            runSceneProgress(SceneProcess.DELETE_TERMINALS, () -> runTasks(deleteTerminalTasks));
+        }*/
 
 //        删除载荷
         List<CloudPluginSceneElementBO> filteredLoadElements = filterLoadElements(allElements);

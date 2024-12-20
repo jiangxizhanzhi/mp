@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.controller.request.*;
+import cn.cyberpeace.mp.cscene.core.CsceneHandler;
 import cn.cyberpeace.mp.cscene.dto.scene.CsceneLoadDto;
 import cn.cyberpeace.mp.cscene.model.AzureVmOsDisk;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
@@ -308,6 +309,8 @@ public class CsceneController implements BaseModelListControllerBase {
             @RequestParam(required = false) String id, @RequestBody(required = false) CsceneCreateInstanceRequest request) {
         log.info("app_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
         request = formatCreateInstanceRequest(request, id);
+//        TODO 端口接入信息需要处理 已加但被过滤
+//        completionKaliTopo(request.getId(), false, request.toCsceneInstanceCreateContextBO());
         correctRequestCsceneParamsForAppInstance(request.getCscene());
         var result = modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
         CsceneLogUtils.recordSceneInstanceLog(result == null ? null : result.getData(), OpTypeEnums.START, CsceneLogUtils.START_SCENE, request.getContext());
@@ -378,6 +381,85 @@ public class CsceneController implements BaseModelListControllerBase {
         returnData.getTopology().setScene(csceneBO.getSceneConfig().getTopology().getScene());
         csceneBO.setSceneConfig(newConfigHandler.toData());
         CsceneDataModifier.correctReturnCsceneData(csceneBO);
+        return new ServiceResult<>(csceneBO).asResult();
+    }
+
+
+    public ServiceResult<CsceneBO> completionKaliTopo(String csceneId, boolean unique,
+                                                      CsceneInstanceCreateContextBO createContext) {
+        var csceneHandler = new CsceneHandler(csceneId, createContext.getContext());
+        CsceneBO csceneBO = csceneHandler.getCscene();
+        correctRequestCsceneParamsForSyncCompletionTopo(csceneBO);
+        // 场景模板对象 转成 场景实例对象
+        String configContent = JsonCommon.snakeStringify(csceneBO.getSceneConfig());
+        SceneDataBO sceneDataBO = JsonCommon.snakeParse(configContent, SceneDataBO.class);
+        sceneDataBO.getTopology().setScene(new SceneBO());
+
+        // 对场景实例对象先保存再进行初始化
+        // 必须先保存 否则无法进行初始化
+        SceneHandler instanceHandler = new SceneHandler(sceneDataBO, null);
+        instanceHandler.save();
+        instanceHandler.initiate();
+        instanceHandler.completionKaliTopo();
+        instanceHandler.save();
+
+        // 把实例转回成模板
+        String instanceContent = JsonCommon.snakeStringify(instanceHandler.toData());
+        SceneConfigDataBO sceneConfigDataBO = JsonCommon.snakeParse(instanceContent, SceneConfigDataBO.class);
+
+        CsceneBO tmp = new CsceneBO();
+        sceneConfigDataBO.getTopology().setScene(new SceneConfigBO());
+        tmp.setSceneConfig(sceneConfigDataBO);
+        correctRequestCsceneParamsForSync(tmp);
+        CsceneDataModifier.removeInitCommands(tmp);
+        SceneConfigHandler newConfigHandler = new SceneConfigHandler(sceneConfigDataBO, null);
+        newConfigHandler.save();
+
+        SceneConfigDataBO returnData = newConfigHandler.toData();
+        returnData.getTopology().setScene(csceneBO.getSceneConfig().getTopology().getScene());
+        csceneBO.setSceneConfig(newConfigHandler.toData());
+        CsceneDataModifier.correctReturnCsceneData(csceneBO);
+        csceneHandler.getCscene().setSceneConfig(csceneBO.getSceneConfig());
+        csceneHandler.save();
+        return new ServiceResult<>(csceneBO).asResult();
+    }
+
+    /*@ApiOperation("拓扑回显")
+    @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
+    @PostMapping("/completion_topo")*/
+    public ServiceResult<CsceneBO> completionKaliTopo(@RequestBody CsceneBO csceneBO) {
+        Integer cloudType = csceneBO.getSceneConfig().getTopology().getScene().getCloudType();
+        correctRequestCsceneParamsForSyncCompletionTopo(csceneBO);
+        // 场景模板对象 转成 场景实例对象
+        String configContent = JsonCommon.snakeStringify(csceneBO.getSceneConfig());
+        SceneDataBO sceneDataBO = JsonCommon.snakeParse(configContent, SceneDataBO.class);
+        sceneDataBO.getTopology().setScene(new SceneBO());
+
+        // 对场景实例对象先保存再进行初始化
+        // 必须先保存 否则无法进行初始化
+        SceneHandler instanceHandler = new SceneHandler(sceneDataBO, null);
+        instanceHandler.save();
+        instanceHandler.initiate();
+        instanceHandler.completionKaliTopo();
+        instanceHandler.save();
+
+        // 把实例转回成模板
+        String instanceContent = JsonCommon.snakeStringify(instanceHandler.toData());
+        SceneConfigDataBO sceneConfigDataBO = JsonCommon.snakeParse(instanceContent, SceneConfigDataBO.class);
+
+        CsceneBO tmp = new CsceneBO();
+        sceneConfigDataBO.getTopology().setScene(new SceneConfigBO());
+        tmp.setSceneConfig(sceneConfigDataBO);
+        correctRequestCsceneParamsForSync(tmp);
+        CsceneDataModifier.removeInitCommands(tmp);
+        SceneConfigHandler newConfigHandler = new SceneConfigHandler(sceneConfigDataBO, null);
+        newConfigHandler.save();
+
+        SceneConfigDataBO returnData = newConfigHandler.toData();
+        returnData.getTopology().setScene(csceneBO.getSceneConfig().getTopology().getScene());
+        csceneBO.setSceneConfig(newConfigHandler.toData());
+        CsceneDataModifier.correctReturnCsceneData(csceneBO);
+        csceneBO.getSceneConfig().getTopology().getScene().setCloudType(cloudType);
         return new ServiceResult<>(csceneBO).asResult();
     }
 

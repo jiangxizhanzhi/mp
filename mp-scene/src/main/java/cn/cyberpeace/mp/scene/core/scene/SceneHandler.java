@@ -401,6 +401,12 @@ public class SceneHandler extends BaseSceneHandler<
         }
     }
 
+    public void completionKaliTopo() {
+        for (var plugin : getPlugins()) {
+            plugin.completionKaliTopo();
+        }
+    }
+
     public boolean initiate() {
         return initiate(true);
     }
