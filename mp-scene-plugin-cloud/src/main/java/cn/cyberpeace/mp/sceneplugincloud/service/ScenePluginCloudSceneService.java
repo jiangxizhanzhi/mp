@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.service.result.BaseObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -526,6 +527,12 @@ public class ScenePluginCloudSceneService {
             }
         }
         return new ServiceResult<>(nodeConnection);
+    }
+
+
+    public ServiceResult<String> getBorderConnection(String protocol, String hostname, String port, String username, String password, String userId) {
+        String sceneConnection = CloudSceneConnectionCommon.getOrCreateBorderConnection(protocol,hostname,port,username,password,userId);
+        return new ServiceResult<>(sceneConnection);
     }
 
     private String formatUrl(String inputUrl, AccessModeLinkInfo modeLinkInfo) {

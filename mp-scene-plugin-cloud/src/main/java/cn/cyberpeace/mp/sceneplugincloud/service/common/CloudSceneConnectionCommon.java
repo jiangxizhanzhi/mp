@@ -278,6 +278,35 @@ public class CloudSceneConnectionCommon {
         return sceneConnection;
     }
 
+
+    public static String getOrCreateBorderConnection(String protocol, String hostname, String port, String username, String password, String userId) {
+        var remoteClient = new Remote();
+        var connectionParams = new GuacamoleCreateConnectionData.ConnectionParams();
+        connectionParams.setProtocol(protocol);
+        connectionParams.setHostname(hostname);
+        connectionParams.setPort(port);
+        connectionParams.setUsername(username);
+        connectionParams.setPassword(password);
+        var guacamoleCreateConnectionData = new GuacamoleCreateConnectionData();
+        guacamoleCreateConnectionData.setUsername(userId);
+        guacamoleCreateConnectionData.setConnectionParams(connectionParams);
+
+        var result = remoteClient.createConnection(guacamoleCreateConnectionData);
+        String s = JsonUtils.snakeStringify(guacamoleCreateConnectionData);
+        if (result == null || StringUtils.isEmpty(result.getConnectionId())) {
+            log.error("Create scene connection[{}] with empty result: {}", guacamoleCreateConnectionData, result);
+            return null;
+        }
+        CloudPluginSceneConnectionModel sceneConnection = new CloudPluginSceneConnectionModel();
+        var result1 = remoteClient.getConnectionUrl(result.getConnectionId(), userId);
+        if (result == null || StringUtils.isEmpty(result.getUrl())) {
+            log.error("Get scene connection[{}] url with empty result: {}", hostname, result);
+            return null;
+        }else {
+            return result1.getUrl();
+        }
+    }
+
     public static boolean enableRecording(CloudPluginSceneConnectionModel sceneConnection,
                                           SceneConnectionEnableRecordingExtraParam extraParam) {
         var connectionId = sceneConnection.getConnectionId();

@@ -39,6 +39,8 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureVirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionData;
+import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventTypeBO;
@@ -85,6 +87,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @Autowired
     private CsceneCommonService csceneCommonService;
+
+    @Autowired
+    private ScenePluginCloudSceneService scenePluginCloudSceneService;
 
     private CsceneInstanceActionRequest formatActionRequest(CsceneInstanceActionRequest request, String paramId) {
         if (request == null) {
@@ -420,6 +425,25 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         request = formatNodeAccessModeActionRequest(request, id, nodeId, accessModeId, interpreter);
         return modelService.getRemoteConnection(request.getId(), request.getNodeId(), request.getAccessModeId(), request.getInterpreter(),
                 request.getContext()).asResult();
+    }
+
+    @ApiOperation("场景实例获取远程连接")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "protocol", value = "接入协议", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "hostname", value = "ip", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "port", value = "端口", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "username", value = "用户名", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "password", value = "密码", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "userId", value = "userId", dataTypeClass = String.class),
+    })
+    @PostMapping(value = "/get_border_connection")
+    public ServiceResult<String> getBorderConnection(@RequestBody BorderConnectionRequest borderConnectionRequest) {
+        return scenePluginCloudSceneService.getBorderConnection(borderConnectionRequest.getProtocol(),
+                borderConnectionRequest.getHostname(),
+                borderConnectionRequest.getPort(),
+                borderConnectionRequest.getUsername(),
+                borderConnectionRequest.getPassword(),
+                borderConnectionRequest.getUserId()).asResult();
     }
 
     @ApiOperation("获取容器console连接,仅支持非neutron网络的容器")
