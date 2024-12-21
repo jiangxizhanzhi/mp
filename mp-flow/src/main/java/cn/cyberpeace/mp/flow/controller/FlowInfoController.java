@@ -109,6 +109,13 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return optionService.getIntOptions(FlowConstant.MP_COMMON_OPTION_TYPE_FLOW_CATEGORY);
     }
 
+    @GetMapping("/categories_type")
+    @ApiOperation(value = "查询流量分类")
+    @ApiImplicitParam(name = "interactive_type", value = "流量ID", dataTypeClass = String.class)
+    public ServiceResult<List<OptionBO>> flowCategoriesByType(@RequestParam(name = "interactive_type") int interactiveType) {
+        return optionService.flowCategoriesByType(FlowConstant.MP_COMMON_OPTION_TYPE_FLOW_CATEGORY,interactiveType);
+    }
+
     /**
      * 分页查询流量信息
      * @param queryParams

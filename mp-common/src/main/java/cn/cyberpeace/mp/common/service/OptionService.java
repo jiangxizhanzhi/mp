@@ -95,4 +95,5 @@ public interface OptionService extends BaseModelService<OptionModel, OptionQuery
      */
     Integer getMaxSort(String type);
 
+    ServiceResult<List<OptionBO>> flowCategoriesByType(String type, int interactiveType);
 }

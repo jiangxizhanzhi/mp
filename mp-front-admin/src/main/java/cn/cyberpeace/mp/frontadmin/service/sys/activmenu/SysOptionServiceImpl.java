@@ -269,6 +269,16 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         return result;
     }
 
+    @Override
+    public ServiceResult<List<OptionBO>> flowCategoriesByType(String type, int interactiveType) {
+        List<Integer> list = Arrays.asList(interactiveType, 2);
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(OptionModel::getType,type);
+        humanCondition.filterIn(OptionModel::getInteractiveType, list.toArray());
+        List<OptionModel> list1 = optionMapper.list(humanCondition);
+        return new ServiceResult<>(flatModels2NestedBos(list1, Integer::parseInt)).asResult();
+    }
+
     private void filterByVisibility(List<OptionModel> optionModels) {
         Iterator<OptionModel> iter = optionModels.iterator();
         while (iter.hasNext()) {

@@ -49,5 +49,9 @@ public class OptionModel extends BaseModel {
     @ApiModelProperty(value = "元数据")
     @DefaultStr
     private String meta;
+
+    @ApiModelProperty(value = "交互类型：0 背景流量，1 攻击流量，2 全流量")
+    @DefaultInt
+    private Integer interactiveType;
 }
 
