@@ -585,7 +585,7 @@ public class LoadServiceImpl {
                         "WARN\n" +
                         "test .example.com is using EMAIL validation.");
                 break;
-            case "9":
+            case "23":
                 requestData.setResultStatus("1005010101");//success
                 requestData.setResultLog("Namespaces,Service Accounts and Roles\n" +
                         "---------\n" +
