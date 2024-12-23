@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.base.util.mptool.CacheUtil;
 import cn.cyberpeace.mp.base.util.mptool.CollUtil;
+import cn.cyberpeace.mp.cscene.CscenePluginDataRecordService;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -31,6 +32,7 @@ import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeExpansionDiskActionRequest;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.dto.logfile.LogFileVO;
 import cn.cyberpeace.mp.cscene.dto.scene.*;
 import cn.cyberpeace.mp.cscene.model.*;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
@@ -41,6 +43,7 @@ import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
+import cn.cyberpeace.mp.cscene.request.logfile.LogFileSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
@@ -88,6 +91,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneDataModel;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincollection.model.ElementLogListModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
@@ -276,6 +280,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private LoadServiceImpl loadService;
+
+    @Autowired
+    private CscenePluginDataRecordService dataRecordService;
 
     // expires in 10 minutes
     private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -970,8 +977,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public List<CloudPluginSceneElementModel> getLoadResultByNodeIds(String sceneId, String[] nodeIds) {
         HumanCondition humanCondition = new HumanCondition()
-                .filterEqual(CloudPluginSceneElementModel::getScene,sceneId);
-        if (nodeIds != null && nodeIds.length > 0){
+                .filterEqual(CloudPluginSceneElementModel::getScene, sceneId);
+        if (nodeIds != null && nodeIds.length > 0) {
             humanCondition.filterIn(CloudPluginSceneElementModel::getSceneElement, nodeIds);
         }
         List<CloudPluginSceneElementModel> list = cloudPluginSceneElementMapper.list(humanCondition);
@@ -992,6 +999,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         Map<String, Integer> count = new ConcurrentHashMap<>();
         List<Runnable> tasks = new ArrayList<>();
         String sceneId = params.getSceneId();
+
+        String translateSceneId = csceneCommonService.translateSceneId(sceneId);
+        SceneHandler sceneHandler = new SceneHandler(translateSceneId, null, false, null);
+        if(params.getNodeIds() == null || params.getNodeIds().isEmpty()){
+            params.setNodeIds(new ArrayList<>(sceneHandler.getElementMap().keySet()));
+        }
         // 事件类
         tasks.add(() -> {
             ElementMonitorRequest request = new ElementMonitorRequest();
@@ -1008,7 +1021,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     null).getSource().getTotal();
 //            载荷执行结果
             List<MpDevopsLoadSceneLog> loadlog = loadService.getLoadResultByNodeIds(sceneId, params.getNodeIds().toArray(new String[0]), null, params.getEndTime());
-            count.put("event", fileCount + registryCount+loadlog.size());
+            count.put("event", fileCount + registryCount + loadlog.size());
         });
         // 信息类
         tasks.add(() -> {
@@ -1029,11 +1042,34 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         });
         // 日志类
         tasks.add(() -> {
+            List<String> categories = Arrays.asList(
+                    "020101", "020102", "020103", "020104", "020105", "020106", "020107",
+                    "020201", "020202", "020203", "020204", "020205", "020206", "020207", "020208", "020210",
+                    "020301", "020302", "020303", "020304", "020313", "020305"
+            );
             HostEventQueryParams hostEventQueryParams = new HostEventQueryParams();
             hostEventQueryParams.setNodeIds(params.getNodeIds());
             hostEventQueryParams.setEndTime(params.getEndTime());
+            hostEventQueryParams.setCatagories(categories);
             var result = listHostEvents(params.getSceneId(), hostEventQueryParams);
-            count.put("log", result.getSource().getTotal());
+
+            TimeListPageInfoQueryParams timeListPageInfoQueryParams = new TimeListPageInfoQueryParams();
+            timeListPageInfoQueryParams.setSceneIds(List.of(translateSceneId));
+            timeListPageInfoQueryParams.setNodeIds(params.getNodeIds());
+            var dataModels = dataRecordService.getData(timeListPageInfoQueryParams, CollectionPluginSceneDataModel.Type.LOGFile, sceneHandler.getScene().getCreateTime(),
+                    LocalDateTime.now());
+            var logs = dataModels.stream().map(d -> {
+                return JsonCommon.parse(d.getData(), LogFileVO.class);
+            }).collect(Collectors.toList());
+            Set<String> exists = new HashSet<>();
+            List<LogFileVO> finalResult = new ArrayList<>();
+            for (var log : logs) {
+                if (!exists.contains(log.getPath())) {
+                    exists.add(log.getPath());
+                    finalResult.add(log);
+                }
+            }
+            count.put("log", result.getSource().getTotal()+finalResult.size());
         });
         // 流量类
         tasks.add(() -> {
@@ -1158,13 +1194,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         hostEventsBos.getSource().setTotal(alreadyHasNum + logList.size());
 
         // 当前页元素数量足够
-        int pageSize = queryParams.getPageSize();
+        int pageSize = queryParams.getPageSize() == null ? 10 : queryParams.getPageSize();
         if (bos.size() == pageSize) {
             return;
         }
 
         // 计算分页起始位置
-        int totalNeedNum = pageSize * queryParams.getPage();
+        Integer page = queryParams.getPage() == null ? 1 : queryParams.getPage();
+        int totalNeedNum = pageSize * page;
         int stillNeedNum = totalNeedNum - alreadyHasNum;
         int startIndex = stillNeedNum <= pageSize ? 0 : stillNeedNum - pageSize;
         if (startIndex >= logList.size()) {
@@ -2444,7 +2481,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             Boolean expansion = element.getExpansion();
             SceneTaskPool.getInstance().executeTask(() -> {
                 AzureVirtualMachine azureVirtualMachine = new AzureVirtualMachine(IAzureResourceManager.getInstance(cloudType));
-                azureVirtualMachine.expansion(localAzurer,element,expansion);
+                azureVirtualMachine.expansion(localAzurer, element, expansion);
             });
             Integer expansionDisk = element.getSrcElement().getExpansionDisk();
             if (!element.getExpansion() &&
@@ -2825,6 +2862,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         log.info("getOuterPosition2 end. sceneId:{},OuterPosition2:{}", csceneInstanceModel.getScene(), outerPosition2);
         return outerPosition2;
     }
+
     public ServiceResult<ElementCommandExecResult> execElementV2(String id, String nodeId, String command,
                                                                  String user, CsceneContextBO context) {
         String sceneId = getSceneId(id);
