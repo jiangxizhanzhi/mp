@@ -422,7 +422,7 @@ public class SceneService {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
         ElementTaskPool.getInstance().executeTask(() -> {
-            sceneHandler.initiateElement(nodeId);
+//            sceneHandler.initiateElement(nodeId);
             sceneHandler.createElement(nodeId);
 //            通知载荷添加
             Object cloudElement = sceneHandler.getPluginElement("cpcloud", nodeId);
