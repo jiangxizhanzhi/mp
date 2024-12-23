@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -141,6 +142,7 @@ public class SysDespireScheduleJob {
                         .content(remindContent)
                         .type(NoticeTypeEnum.LICENSE.getCode())
                         .isPublic(0)
+                        .roleIds(Arrays.asList(AuthConstant.ROLE_ADMIN_ID))
                         .publisher(AuthConstant.ROOT_USER_ID)
                         .userIds(userIds).build();
         log.info("system activation remind notice: {}", sysNoticeRequest);
