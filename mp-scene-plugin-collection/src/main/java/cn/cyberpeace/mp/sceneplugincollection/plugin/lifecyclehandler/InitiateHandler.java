@@ -81,8 +81,7 @@ public class InitiateHandler extends HandlerCommon {
 
         CollectionPluginSceneBO scene = getPluginHandler().getScene();
         // 全局开启流量采集
-        if (Boolean.TRUE.equals(CollectionSingleton.collectionAppConfig.getEnableFlowCollect())
-                || Boolean.TRUE.equals(scene.getEnableFlowCollect()) || Boolean.TRUE.equals(scene.getEnableFlowMirror())) {
+        if (getPluginHandler().enableFlowCollect()) {
             CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                     .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             runSceneProgress(SceneProcess.INITIATE_FLOW_COLLECTION, () -> {
@@ -108,8 +107,7 @@ public class InitiateHandler extends HandlerCommon {
         }
 
         // 全局开启探针采集
-        if (Boolean.TRUE.equals(CollectionSingleton.collectionAppConfig.getEnableProbeCollect())
-                || Boolean.TRUE.equals(scene.getEnableProbeCollect())) {
+        if (getPluginHandler().enableProbeCollect()) {
             CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                     .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             runSceneProgress(SceneProcess.INITIATE_PROBE_COLLECTION, () -> {

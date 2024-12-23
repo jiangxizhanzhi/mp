@@ -1,2 +1,1 @@
-INSERT IGNORE INTO `mp_common_option` ( `id`, `code`, `parent_code`, `zh_name`, `en_name`, `sort`, `type`, `meta`, `create_time`, `update_time`)
-    VALUES ( 'fe6dd6f30f0411ed996d0242ac110002', '5', '', '授权', 'licence', 5, 'notice_type', '{\"activKeys\":\"no_auth\",\"visible\":1}', now(), now());
+update  mp_sys_config set  `value` = '1000-2000' , `init_value` = '1000-2000' where `value` = '100-200' ;

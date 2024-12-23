@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.DeleteHandler;
@@ -159,5 +160,27 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
         super.elementBOClass = CollectionPluginSceneElementBO.class;
         super.elementPortBOClass = CollectionPluginSceneElementPortBO.class;
         super.contextClass = Object.class;
+    }
+
+    public boolean enableFlowCollect() {
+        if (Boolean.TRUE.equals(CollectionSingleton.collectionAppConfig.getEnableFlowCollect())) {
+            // 优先判断是否默认全打开流量采集
+            return true;
+        } else {
+            // 场景内的开关
+            boolean sceneEnableFlowCollect = Boolean.TRUE.equals(getScene().getEnableFlowCollect());
+            boolean sceneEnableFlowMirror = Boolean.TRUE.equals(getScene().getEnableFlowMirror());
+            return sceneEnableFlowMirror || sceneEnableFlowCollect;
+        }
+    }
+
+    public boolean enableProbeCollect() {
+        if (Boolean.TRUE.equals(CollectionSingleton.collectionAppConfig.getEnableProbeCollect())) {
+            // 优先判断是否默认全打开数据采集
+            return true;
+        }
+        // 场景内的开关
+        boolean sceneEnableProbeCollect = Boolean.TRUE.equals(getScene().getEnableProbeCollect());
+        return sceneEnableProbeCollect;
     }
 }

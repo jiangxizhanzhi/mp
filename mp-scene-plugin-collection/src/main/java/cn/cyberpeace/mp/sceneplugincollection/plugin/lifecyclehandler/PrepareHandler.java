@@ -27,14 +27,24 @@ public class PrepareHandler extends HandlerCommon {
     }
 
     public void prepare(boolean partialStart) {
+        boolean enableFlowCollect = getPluginHandler().enableFlowCollect();
+        boolean enableProbeCollect = getPluginHandler().enableProbeCollect();
+        if (!enableProbeCollect && !enableFlowCollect) {
+            return;
+        }
         SceneStageRecorder stageRecorder = getPluginHandler().getSceneHandler().getSceneStageRecorder();
 
         stageRecorder.addStage(CommonSceneStage.INIT);
         List<EventProcess> sceneEventProcesses = new ArrayList<>(ClassUtils.getClassConstantFieldMap(InitiateHandler.SceneProcess.class, EventProcess.class).values());
         stageRecorder.submitProcess(sceneEventProcesses);
 
-        stageRecorder.addStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
-        stageRecorder.addStage(CollectionSceneStage.CREATE_DATA_COLLECT);
+        if (enableFlowCollect) {
+            stageRecorder.addStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
+        }
+        if (enableProbeCollect) {
+            stageRecorder.addStage(CollectionSceneStage.CREATE_DATA_COLLECT);
+        }
+
         sceneEventProcesses = new ArrayList<>(ClassUtils.getClassConstantFieldMap(CreateHandler.SceneProcess.class, EventProcess.class).values());
         stageRecorder.submitProcess(sceneEventProcesses);
     }
