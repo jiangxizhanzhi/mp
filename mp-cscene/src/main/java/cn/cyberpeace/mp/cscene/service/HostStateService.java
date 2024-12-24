@@ -648,7 +648,8 @@ public class HostStateService {
                 .values()
                 .stream()
                 .filter(element -> BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(element.getImageType()) ||
-                        BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(element.getImageType()))
+                        BaseCloudPluginSceneElementModel.ImageType.VM.equals(element.getImageType()) ||
+                BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(element.getImageType()))
                 .forEach(element -> {
                     String eid = element.getSrcElement().getEid();
                     collectorBaseRequest.setAgentName(eid);

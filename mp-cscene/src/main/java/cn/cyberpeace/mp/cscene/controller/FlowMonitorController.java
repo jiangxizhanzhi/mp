@@ -345,13 +345,15 @@ public class FlowMonitorController {
             List<SceneElementBO> vmList = categoryGroups.stream()
                     .filter(group -> group.getCategory() == 1)
                     .flatMap(group -> group.getElements().stream())
-                    .filter(element -> BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(cloudPlugin.getElement(element.getId()).getImageType()))
+                    .filter(element -> BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(cloudPlugin.getElement(element.getId()).getImageType()) ||
+                            BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudPlugin.getElement(element.getId()).getImageType()))
                     .collect(Collectors.toList());
             // 容器
             List<SceneElementBO> containerList = categoryGroups.stream()
                     .filter(group -> group.getCategory() == 2)
                     .flatMap(group -> group.getElements().stream())
-                    .filter(element -> BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(cloudPlugin.getElement(element.getId()).getImageType()))
+                    .filter(element -> BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(cloudPlugin.getElement(element.getId()).getImageType()) ||
+                            BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(cloudPlugin.getElement(element.getId()).getImageType()))
                     .collect(Collectors.toList());
             // 边界设备
             List<SceneElementBO> peripheryList = categoryGroups.stream()
