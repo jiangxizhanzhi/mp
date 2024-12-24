@@ -341,6 +341,12 @@ public class TeamServiceImpl implements TeamService {
         throw new RuntimeException("该人员没有参加战队");
     }
 
+    @Override
+    public ServiceResult<JSONObject> getTeamInfoByUser(String userId) {
+
+        return personnelManagementMapper.selectByUserIdToTeamInfo(userId);
+    }
+
     private List<String> checkUserNameExist(List<String> userNameList) {
         HumanCondition condition = new HumanCondition().filterIn(UserModel::getUsername, userNameList.toArray());
         List<UserModel> list = userMapper.list(condition);

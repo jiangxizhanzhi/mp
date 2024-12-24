@@ -4,6 +4,8 @@ package cn.cyberpeace.mp.auth.repository;
 import cn.cyberpeace.mp.auth.model.PersonnelManagementModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -21,4 +23,6 @@ public interface PersonnelManagementMapper extends BaseModelMapper<PersonnelMana
     List<PersonnelManagementModel> selectALl();
 
     String selectByNameToTeamName(@Param("creator") String creator);
+
+    ServiceResult<JSONObject> selectByUserIdToTeamInfo(@Param("userId") String userId);
 }

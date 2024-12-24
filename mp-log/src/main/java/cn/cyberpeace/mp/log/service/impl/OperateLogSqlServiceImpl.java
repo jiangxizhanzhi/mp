@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
+import cn.cyberpeace.mp.log.bo.UserModelBoNameAndId;
 import cn.cyberpeace.mp.log.constant.LogConstant;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
@@ -53,6 +54,9 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
 
     @Autowired
     private MessageSource messageSource;
+
+    @Autowired
+    private OperateLogSqlMapper operateLogSqlMapper;
 
     @Override
     public void create(OperationLogRequest request, Locale locale) {
@@ -178,6 +182,12 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
         model.setLogType(3);
         model.setSiteType(0);
         this.create(model);
+    }
+
+    @Override
+    public List<UserModelBoNameAndId> selectByUserId() {
+
+        return operateLogSqlMapper.selectByUserId();
     }
 
     private List<OperationLogPageResponse> opModel2Response(List<OperateLogSqlModel> models, Locale locale) {

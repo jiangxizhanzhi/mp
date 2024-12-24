@@ -38,4 +38,6 @@ public interface TeamService  {
     JSONObject getListTeamInfo(List<String> list);
 
     String getTeamInfoByUserId(String userId);
+
+    ServiceResult<JSONObject> getTeamInfoByUser(String userId);
 }

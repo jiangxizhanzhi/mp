@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.auth.service.TeamService;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -127,6 +128,11 @@ public class TeamController {
     @PostMapping("/team/import/personnel")
     public ServiceResult<String> importPersonnelTemplate(MultipartFile file) {
         return teamService.importPersonnelTemplate(file);
+    }
+    @ApiOperation(value = "根据用户id获取队伍信息", notes = "")
+    @PostMapping("/team/get/user")
+    public ServiceResult<JSONObject> importPersonnelTemplate(@RequestParam("userId") String userId) {
+        return teamService.getTeamInfoByUser(userId);
     }
 
 }

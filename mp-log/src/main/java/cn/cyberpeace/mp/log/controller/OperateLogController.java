@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.log.response.OperationLogPageResponse;
 import cn.cyberpeace.mp.log.service.OperateLogService;
 import cn.cyberpeace.mp.log.utils.SnUtils;
+import com.alibaba.excel.EasyExcel;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -21,6 +22,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -59,6 +63,13 @@ public class OperateLogController {
         request.ensure();
         return operateLogService.search(request);
     }
+
+    @ApiOperation("导出审计日志")
+    @GetMapping("/export")
+    public void exportOperationLog(HttpServletResponse response){
+        operateLogService.exportOperationLog(new OperationLogPageRequest(),response);
+    }
+
 
     @GetMapping("/modules")
     @ApiOperation(value = "查询审计日志操作模块")

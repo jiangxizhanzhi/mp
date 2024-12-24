@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.log.response.OperationLogPageResponse;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @Description
@@ -22,4 +23,6 @@ public interface OperateLogService {
     ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request);
 
     void createToolLog(OperationLogRequest request);
+
+    void exportOperationLog(OperationLogPageRequest operationLogPageRequest, HttpServletResponse response);
 }

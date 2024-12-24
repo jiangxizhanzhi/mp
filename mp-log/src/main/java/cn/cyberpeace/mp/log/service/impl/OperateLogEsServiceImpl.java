@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.log.service.impl;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
+import cn.cyberpeace.mp.log.bo.UserModelBoNameAndId;
 import cn.cyberpeace.mp.log.constant.LogConstant;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
@@ -244,6 +245,11 @@ public class OperateLogEsServiceImpl implements OperateLogDbService {
             return;
         }
         this.create(model);
+    }
+
+    @Override
+    public List<UserModelBoNameAndId> selectByUserId() {
+        return null;
     }
 
     private void processDefaultContent(OperationLogModel model) {
