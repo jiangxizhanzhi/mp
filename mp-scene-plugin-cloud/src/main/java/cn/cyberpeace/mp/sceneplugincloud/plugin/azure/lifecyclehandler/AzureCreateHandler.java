@@ -87,8 +87,8 @@ public class AzureCreateHandler extends CreateHandler {
         List<CloudPluginSceneElementBO> allFilteredElements = new ArrayList<>();
         List<CloudPluginSceneElementBO> filteredVirtualMachineElements = this.filterVirtualMachineElements(allElements);
 
-//        创建外部网络+kali TODO 云场景使用传统kali机方案开发暂时搁置
-        /*var createExternalNetworkTasks = getPluginHandler().getAuxiliaryNetworkElement().stream()
+//        创建外部网络+kali TODO 云场景使用传统kali机方案开发
+        var createExternalNetworkTasks = getPluginHandler().getAuxiliaryNetworkElement().stream()
                 .map(cloudElement -> (Runnable) () -> createAuxiliaryNetworkProcess(cloudElement))
                 .collect(Collectors.toList());
 
@@ -114,7 +114,7 @@ public class AzureCreateHandler extends CreateHandler {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> {
                 runTasks(createKaliTasks);
             });
-        }*/
+        }
 
         List<CloudPluginSceneElementBO> filteredContainerElements = this.filterContainerElements(allElements);
         allFilteredElements.addAll(filteredVirtualMachineElements);

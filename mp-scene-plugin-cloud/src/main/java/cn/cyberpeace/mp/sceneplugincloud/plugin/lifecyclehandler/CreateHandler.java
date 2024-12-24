@@ -1442,11 +1442,11 @@ public class CreateHandler extends HandlerCommon {
                             DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
                             new Load(synchronousDataSource).create(getPluginHandler(), cloudElement, finalGroupName);
                         });
-//                TODO 云场景使用传统kali机方案开发暂时搁置
-            } /*else if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType()) && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+//                TODO 云场景使用传统kali机方案开发
+            } else if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType()) && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_VIRTUAL_MACHINE,
                         () -> createVirtualMachine(cloudElement));
-            }*/
+            }
         }else {
             if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_VIRTUAL_SWITCH,
