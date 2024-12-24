@@ -585,7 +585,7 @@ public class LoadServiceImpl {
                         "WARN\n" +
                         "test .example.com is using EMAIL validation.");
                 break;
-            case "23":
+            case "9":
                 requestData.setResultStatus("1005010101");//success
                 requestData.setResultLog("Namespaces,Service Accounts and Roles\n" +
                         "---------\n" +
@@ -607,6 +607,47 @@ public class LoadServiceImpl {
                         "[14]Request kube-env from Gcp Metadata API [attack kube-env-gcp]\n" +
                         "[15]Pull Kubernetes service account tokens from kops’acs bucket (Google cloud only) [attack-kops-gcs-1]\n" +
                         "[16]Pull Kubernetes service account tokens from kops' s3 bucket(AZURE only)[attack-kops-aws-1]---------------十Interrogate/Abuse cloud API's\n");
+                break;
+            case "23":
+                requestData.setResultStatus("1005010101");//success
+                requestData.setResultLog("K9s is a CLI to view and manage your Kubernetes clusters.\n" +
+                        "\n" +
+                        "Usage:\n" +
+                        "  k9s [flags]\n" +
+                        "  k9s [command]\n" +
+                        "\n" +
+                        "Available Commands:\n" +
+                        "  completion  generate the autocompletion script for the specified shell\n" +
+                        "  help        Help about any command\n" +
+                        "  info        Print configuration info\n" +
+                        "  version     Print version/build info\n" +
+                        "\n" +
+                        "Flags:\n" +
+                        "  -A, --all-namespaces                 Launch K9s in all namespaces\n" +
+                        "      --as string                      Username to impersonate for the operation\n" +
+                        "      --as-group stringArray           Group to impersonate for the operation\n" +
+                        "      --certificate-authority string   Path to a cert file for the certificate authority\n" +
+                        "      --client-certificate string      Path to a client certificate file for TLS\n" +
+                        "      --client-key string              Path to a client key file for TLS\n" +
+                        "      --cluster string                 The name of the kubeconfig cluster to use\n" +
+                        "  -c, --command string                 Overrides the default resource to load when the application launches\n" +
+                        "      --context string                 The name of the kubeconfig context to use\n" +
+                        "      --crumbsless                     Turn K9s crumbs off\n" +
+                        "      --headless                       Turn K9s header off\n" +
+                        "  -h, --help                           help for k9s\n" +
+                        "      --insecure-skip-tls-verify       If true, the server's caCertFile will not be checked for validity\n" +
+                        "      --kubeconfig string              Path to the kubeconfig file to use for CLI requests\n" +
+                        "  -l, --logLevel string                Specify a log level (info, warn, debug, error, fatal, panic, trace) (default \"info\")\n" +
+                        "      --logoless                       Turn K9s logo off\n" +
+                        "  -n, --namespace string               If present, the namespace scope for this CLI request\n" +
+                        "      --readonly                       Sets readOnly mode by overriding readOnly configuration setting\n" +
+                        "  -r, --refresh int                    Specify the default refresh rate as an integer (sec) (default 2)\n" +
+                        "      --request-timeout string         The length of time to wait before giving up on a single server request\n" +
+                        "      --token string                   Bearer token for authentication to the API server\n" +
+                        "      --user string                    The name of the kubeconfig user to use\n" +
+                        "      --write                          Sets write mode by overriding the readOnly configuration setting\n" +
+                        "\n" +
+                        "Use \"k9s [command] --help\" for more information about a command.");
                 break;
             default:
                 break;
