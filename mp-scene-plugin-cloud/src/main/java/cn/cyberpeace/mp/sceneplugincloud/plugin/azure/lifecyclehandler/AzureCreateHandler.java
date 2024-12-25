@@ -87,36 +87,6 @@ public class AzureCreateHandler extends CreateHandler {
         List<CloudPluginSceneElementBO> allFilteredElements = new ArrayList<>();
         List<CloudPluginSceneElementBO> filteredVirtualMachineElements = this.filterVirtualMachineElements(allElements);
 
-//        创建外部网络+kali TODO 云场景使用传统kali机方案开发
-        var createExternalNetworkTasks = getPluginHandler().getAuxiliaryNetworkElement().stream()
-                .map(cloudElement -> (Runnable) () -> createAuxiliaryNetworkProcess(cloudElement))
-                .collect(Collectors.toList());
-
-        if (!createExternalNetworkTasks.isEmpty()) {
-            runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> {
-                runTasks(createExternalNetworkTasks);
-            });
-        }
-
-        var createGatewayTasks = getPluginHandler().getGatewayElements().stream()
-                .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement))
-                .collect(Collectors.toList());
-
-        if (!createGatewayTasks.isEmpty()) {
-            runSceneProgress(SceneProcess.CREATE_GATEWAYS, () -> {
-                runTasks(createGatewayTasks);
-            });
-        }
-
-        List<CloudPluginSceneElementBO> terminalExcludeNpcElements = getPluginHandler().getTerminalExcludeNpcElements();
-        var createKaliTasks = getPluginHandler().getTerminalExcludeNpcElements().stream()
-                .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement)).collect(Collectors.toList());
-        if (!createKaliTasks.isEmpty()) {
-            runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> {
-                runTasks(createKaliTasks);
-            });
-        }
-
         List<CloudPluginSceneElementBO> filteredContainerElements = this.filterContainerElements(allElements);
         allFilteredElements.addAll(filteredVirtualMachineElements);
         allFilteredElements.addAll(filteredContainerElements);
@@ -336,6 +306,35 @@ public class AzureCreateHandler extends CreateHandler {
                 createTerminalTasks.addAll(createFireWallTasks);
             }
 
+//        创建外部网络+kali TODO 云场景使用传统kali机方案开发
+            var createExternalNetworkTasks = getPluginHandler().getAuxiliaryNetworkElement().stream()
+                    .map(cloudElement -> (Runnable) () -> createAuxiliaryNetworkProcess(cloudElement))
+                    .collect(Collectors.toList());
+
+            if (!createExternalNetworkTasks.isEmpty()) {
+                runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> {
+                    runTasks(createExternalNetworkTasks);
+                });
+            }
+
+            var createGatewayTasks = getPluginHandler().getGatewayElements().stream()
+                    .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement))
+                    .collect(Collectors.toList());
+
+            if (!createGatewayTasks.isEmpty()) {
+                runSceneProgress(SceneProcess.CREATE_GATEWAYS, () -> {
+                    runTasks(createGatewayTasks);
+                });
+            }
+
+            List<CloudPluginSceneElementBO> terminalExcludeNpcElements = getPluginHandler().getTerminalExcludeNpcElements();
+            var createKaliTasks = getPluginHandler().getTerminalExcludeNpcElements().stream()
+                    .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement)).collect(Collectors.toList());
+            if (!createKaliTasks.isEmpty()) {
+                runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> {
+                    runTasks(createKaliTasks);
+                });
+            }
             CloudPluginSceneElementBO loadToolElementBO = null;
             if(terminalExcludeNpcElements.size() == 1){
                 loadToolElementBO = terminalExcludeNpcElements.get(0);

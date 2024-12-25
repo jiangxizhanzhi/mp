@@ -45,11 +45,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String loadToolId;
     @DefaultInt
     private Integer loadSource;
-    // todo 跟传统云的kali攻击机绑定使用的参数 待开发
-//    @DefaultStr
-//    private String loadAccessModel;
-//    //传统场景id
-//    private String traSceneId;
+    @DefaultStr
+    private String loadAccessModel;
     /**
      * 三层防火墙对应防火墙资源id
      */
