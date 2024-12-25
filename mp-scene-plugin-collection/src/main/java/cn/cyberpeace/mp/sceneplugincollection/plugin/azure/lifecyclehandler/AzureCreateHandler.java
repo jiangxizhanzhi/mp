@@ -2,12 +2,17 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.azure.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSceneStage;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
 
 public class AzureCreateHandler extends CreateHandler {
     public Integer cloudType;
@@ -30,6 +35,14 @@ public class AzureCreateHandler extends CreateHandler {
         getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_DATA_COLLECT);
 
         try {
+            CloudScenePluginHandler pluginHandler = getPluginHandler().getSceneHandler().getPluginHandler(PluginConstant.PLUGIN_KEY);
+
+            List<CloudPluginSceneElementBO> terminalExcludeNpcElements = pluginHandler.getTerminalExcludeNpcElements();
+            if (terminalExcludeNpcElements.size() > 0) {
+                super.create();
+            }
+
+
 //            TODO arkime暂停开发
             /*prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
 
@@ -178,7 +191,7 @@ public class AzureCreateHandler extends CreateHandler {
         } catch (Exception e) {
 //            云场景启动失败立即删除云资源
             String groupName = getPluginHandler().getSourceSceneId();
-            groupName = StringUtils.isNotBlank(groupNamePrefix)?groupNamePrefix +"-"+ groupName:groupName;
+            groupName = StringUtils.isNotBlank(groupNamePrefix) ? groupNamePrefix + "-" + groupName : groupName;
             resourceService.getManager().resourceGroups().deleteByName(groupName);
         }
     }

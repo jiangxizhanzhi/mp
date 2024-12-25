@@ -43,6 +43,7 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.scene.repository.SceneConfigAreaMapper;
 import cn.cyberpeace.mp.scene.service.AlertRuleService;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
+import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -422,6 +423,9 @@ public class CsceneController implements BaseModelListControllerBase {
         csceneBO.setSceneConfig(newConfigHandler.toData());
         CsceneDataModifier.correctReturnCsceneData(csceneBO);
         csceneBO.getSceneConfig().getTopology().getScene().setCloudType(cloudType);
+        Map<String, Object> scene = csceneBO.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getScene();
+        scene.put("enable_flow_mirror",true);
+        scene.put("enable_flow_collect",true);
         csceneHandler.getCscene().setSceneConfig(csceneBO.getSceneConfig());
         csceneHandler.save();
         return new ServiceResult<>(csceneBO).asResult();
@@ -461,6 +465,9 @@ public class CsceneController implements BaseModelListControllerBase {
         csceneBO.setSceneConfig(newConfigHandler.toData());
         CsceneDataModifier.correctReturnCsceneData(csceneBO);
         csceneBO.getSceneConfig().getTopology().getScene().setCloudType(cloudType);
+        Map<String, Object> scene = csceneBO.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getScene();
+        scene.put("enable_flow_mirror",true);
+        scene.put("enable_flow_collect",true);
         return new ServiceResult<>(csceneBO).asResult();
     }
 
