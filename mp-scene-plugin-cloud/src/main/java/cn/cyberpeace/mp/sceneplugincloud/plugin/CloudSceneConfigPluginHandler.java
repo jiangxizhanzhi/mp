@@ -264,7 +264,10 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                             if (null != portConnectedPort) {
                                 String id = portConnectedPort.getElement().getId();
                                 CloudPluginSceneConfigElementBO cloudPluginSceneConfigElementBO = elementMap.get(id);
-                                if (!BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudPluginSceneConfigElementBO.getImageType())) {
+                                if (!BaseCloudPluginSceneElementModel.ImageType.VNET.equals(cloudPluginSceneConfigElementBO.getImageType()) &&
+//                                本地载荷调度方案功能 SIMPLE 外部网络 VM kali机
+                                        !BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(cloudPluginSceneConfigElementBO.getImageType()) &&
+                                        !BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudPluginSceneConfigElementBO.getImageType())) {
                                     throw new MpRuntimeException(CloudErrorCode.INVALID_CONNECTION.format());
                                 }
                             }
