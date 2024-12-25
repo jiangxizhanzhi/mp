@@ -141,7 +141,17 @@ public enum AuthErrorCode implements ErrorCode {
     VERIFY_CODE_EMPTY("MP-110162", "verify_code_empty"),
 
     // 演示环境禁止访问某些操作
-    DEMO_ACCESS_ERROR("MP-110163", "demo_access_error");
+    DEMO_ACCESS_ERROR("MP-110163", "demo_access_error"),
+    MISSING_CLAN_NAME("MP-110164","missing_clan_name"),
+
+    CLAN_NAME_DUPLICATION("MP-110165","clan_name_duplication"),
+
+    CLAN_QUERY_MISSING_PARAMETERS("MP-110166","clan_query_missing_parameters"),
+    UPLOAD_EXCESS_NUMBER("MP-110167","upload_excess_number"),
+    USERS_CANNOT_ADD_TWO_TEAMS("MP-110168","users_cannot_add_two_teams"),
+    TEAM_NAME_DOES_NOT_EXIST("MP-110169","team_name_does_not_exist"),
+    USER_NOT_EXIST("MP-110170","user_not_exist"),
+    PEOPLE_NOT_JOIN_TEAM("MP-110171","people_not_join_team");
 
 
     AuthErrorCode(String code, String message) {

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.bo.Personnel.management.PersonnelManagementBo;
 import cn.cyberpeace.mp.auth.bo.excel.ExportPersonnelManagementBo;
 import cn.cyberpeace.mp.auth.bo.excel.ExportTeamBO;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.PersonnelManagementModel;
 import cn.cyberpeace.mp.auth.model.TeamModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -91,7 +92,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public TeamModel addTeam(TeamRequest teamRequest) {
         if (teamRequest.getName().isEmpty()) {
-            throw new MpRuntimeException( "添加战队失败,缺少战队名称");
+            throw new MpRuntimeException(AuthErrorCode.MISSING_CLAN_NAME);
         }
         //检查战队名称是否重复
         checkName(teamRequest);
@@ -111,12 +112,12 @@ public class TeamServiceImpl implements TeamService {
         if ((!CollectionUtils.isEmpty(list))&&teamRequest.getId()!=null) {
             for (TeamModel teamModel : list) {
                 if (!teamModel.getId().equals(teamRequest.getId())) {
-                    throw new MpRuntimeException("战队名称重复");
+                    throw new MpRuntimeException(AuthErrorCode.CLAN_NAME_DUPLICATION);
                 }
             }
         }
         if ((!CollectionUtils.isEmpty(list))&&teamRequest.getId()==null){
-            throw new MpRuntimeException("战队名称重复");
+            throw new MpRuntimeException(AuthErrorCode.CLAN_NAME_DUPLICATION);
         }
     }
 
@@ -128,7 +129,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public TeamModel getTeam(TeamRequest teamRequest) {
         if (StringUtils.isEmpty(teamRequest.getId())) {
-            throw new MpRuntimeException( "战队查询缺少id");
+            throw new MpRuntimeException( AuthErrorCode.CLAN_QUERY_MISSING_PARAMETERS);
         }
         TeamModel teamModel = teamMapper.get(teamRequest.getId());
         return teamModel;
@@ -194,7 +195,7 @@ public class TeamServiceImpl implements TeamService {
             throw new RuntimeException(e);
         }
         if (exportTeamBOS.size()>1000){
-            throw new MpRuntimeException("超过最多处理条数,最多处理1000条");
+            throw new MpRuntimeException(AuthErrorCode.UPLOAD_EXCESS_NUMBER);
         }
 
         if (!CollectionUtils.isEmpty(exportTeamBOS)) {
@@ -209,7 +210,7 @@ public class TeamServiceImpl implements TeamService {
             List<String> teamList = teamModels.stream().map(TeamModel::getName).collect(Collectors.toList());
             List<TeamModel> teamModelList = teamMapper.existTeamList(teamList);
             if (!CollectionUtils.isEmpty(teamModelList)) {
-                throw new MpRuntimeException("战队名重复");
+                throw new MpRuntimeException(AuthErrorCode.CLAN_NAME_DUPLICATION);
             }
             teamMapper.bulkCreate(teamModels);
 
@@ -241,7 +242,7 @@ public class TeamServiceImpl implements TeamService {
             throw new RuntimeException(e);
         }
         if (exportPersonnelManagementBos.size()>1000){
-            throw new MpRuntimeException("超过最多处理条数,最多处理1000条");
+            throw new MpRuntimeException(AuthErrorCode.UPLOAD_EXCESS_NUMBER);
         }
         //1,排查用户加入不同战队
         List<String> usernameList = exportPersonnelManagementBos.stream().map(ExportPersonnelManagementBo::getUsername).distinct().collect(Collectors.toList());
@@ -249,7 +250,7 @@ public class TeamServiceImpl implements TeamService {
         List<String> selectUserName = personnelManagementModelList.stream().map(PersonnelManagementModel::getUsername).collect(Collectors.toList());
         usernameList.addAll(selectUserName);
         if (usernameList.size() != exportPersonnelManagementBos.size()){
-            throw new MpRuntimeException("一个用户不能加入2支战队");
+            throw new MpRuntimeException(AuthErrorCode.USERS_CANNOT_ADD_TWO_TEAMS);
         }
         //2,战队名称不存在直接抛异常
         List<String> teamNameList = exportPersonnelManagementBos.stream().map(ExportPersonnelManagementBo::getTeamName).collect(Collectors.toList());
@@ -261,13 +262,13 @@ public class TeamServiceImpl implements TeamService {
         HumanCondition humanCondition = new HumanCondition().filterIn(TeamModel::getName, distinctTeamNameList.toArray());
         List<TeamModel> selectByNameTeamList = teamMapper.list(humanCondition);
         if (distinctTeamNameList.size()!=selectByNameTeamList.size()) {
-            throw new MpRuntimeException("战队名不存在");
+            throw new MpRuntimeException(AuthErrorCode.TEAM_NAME_DOES_NOT_EXIST);
         }
         //3,用户名称不存在直接抛异常
         List<String> userNameList = exportPersonnelManagementBos.stream().map(ExportPersonnelManagementBo::getUsername).collect(Collectors.toList());
         List<String> checkUserNameExistList = checkUserNameExist(userNameList);
         if (userNameList.size()!=checkUserNameExistList.size()) {
-            throw new MpRuntimeException("用户名称不存在");
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_USERNAME_EXISTED);
         }
         //增加成员管理信息
         Map<String, PersonnelManagementModel> usernamePersonnelManagementModelHashMap = new HashMap<>();
@@ -338,7 +339,7 @@ public class TeamServiceImpl implements TeamService {
         if (map.containsKey(userId)) {
             return map.get(userId);
         }
-        throw new RuntimeException("该人员没有参加战队");
+        throw new MpRuntimeException(AuthErrorCode.PEOPLE_NOT_JOIN_TEAM);
     }
 
     @Override

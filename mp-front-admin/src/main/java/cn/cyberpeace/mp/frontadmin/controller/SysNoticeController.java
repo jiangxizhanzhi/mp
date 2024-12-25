@@ -203,4 +203,14 @@ public class SysNoticeController {
         return optionService.getIntOptions(FrontAdminConstant.MP_COMMON_OPTION_TYPE_FRONT_ADMIN_NOTICE_TYPE);
     }
 
+    @ApiOperation("新增公告靶场不在线发公告")
+    @ApiImplicitParam(name = "noticeReq", value = "新增公告靶场不在线发公告", dataTypeClass = SysNoticeRequest.class)
+    @PostMapping("/isonline")
+    @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.CREATE, title = "新增公告", target = OpTargetEnums.NOTICE)
+    public ServiceResult<SysNoticeModel> createOnline(@RequestBody @Validated(AddGroup.class) SysNoticeRequest noticeReq) {
+        noticeReq.setPublisher("admin");
+        SysNoticeModel noticeModel = noticeService.add(noticeReq);
+        return ResultCommon.success(noticeModel);
+    }
+
 }
