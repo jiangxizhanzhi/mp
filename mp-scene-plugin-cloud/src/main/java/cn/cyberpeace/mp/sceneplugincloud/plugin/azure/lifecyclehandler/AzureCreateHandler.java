@@ -108,6 +108,7 @@ public class AzureCreateHandler extends CreateHandler {
             });
         }
 
+        List<CloudPluginSceneElementBO> terminalExcludeNpcElements = getPluginHandler().getTerminalExcludeNpcElements();
         var createKaliTasks = getPluginHandler().getTerminalExcludeNpcElements().stream()
                 .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement)).collect(Collectors.toList());
         if (!createKaliTasks.isEmpty()) {
@@ -335,12 +336,16 @@ public class AzureCreateHandler extends CreateHandler {
                 createTerminalTasks.addAll(createFireWallTasks);
             }
 
+            CloudPluginSceneElementBO loadToolElementBO = null;
+            if(terminalExcludeNpcElements.size() == 1){
+                loadToolElementBO = terminalExcludeNpcElements.get(0);
+            }
             // 载荷
             List<CloudPluginSceneElementBO> filteredLoadElements = this.filterLoadElements(allElements);
             List<Runnable> createLoadTasks = new ArrayList<>();
             for (CloudPluginSceneElementBO element : filteredLoadElements) {
                 String nodeId = element.getSrcElement().getId();
-                LoadCreateTask task = new LoadCreateTask(getPluginHandler(), element, groupName);
+                LoadCreateTask task = new LoadCreateTask(getPluginHandler(), element, groupName,loadToolElementBO);
                 Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_LOAD, task);
                 createLoadTasks.add(formatTask);
             }

@@ -1440,7 +1440,12 @@ public class CreateHandler extends HandlerCommon {
                             }
                             DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
                             DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
-                            new Load(synchronousDataSource).create(getPluginHandler(), cloudElement, finalGroupName);
+                            List<CloudPluginSceneElementBO> terminalExcludeNpcElements = getPluginHandler().getTerminalExcludeNpcElements();
+                            CloudPluginSceneElementBO loadToolElementBO = null;
+                            if(terminalExcludeNpcElements.size() == 1){
+                                loadToolElementBO = terminalExcludeNpcElements.get(0);
+                            }
+                            new Load(synchronousDataSource).create(getPluginHandler(), cloudElement, finalGroupName, loadToolElementBO);
                         });
 //                TODO 云场景使用传统kali机方案开发
             } else if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType()) && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
