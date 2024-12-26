@@ -131,7 +131,7 @@ public class TeamController {
     }
     @ApiOperation(value = "根据用户id获取队伍信息", notes = "")
     @PostMapping("/team/get/user")
-    public ServiceResult<JSONObject> importPersonnelTemplate(@RequestParam("userId") String userId) {
+    public ServiceResult<JSONObject> importPersonnelTemplate(String userId) {
         return teamService.getTeamInfoByUser(userId);
     }
 
