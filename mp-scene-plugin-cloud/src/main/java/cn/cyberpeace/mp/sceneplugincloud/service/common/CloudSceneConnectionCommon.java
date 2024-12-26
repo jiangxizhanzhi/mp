@@ -242,9 +242,11 @@ public class CloudSceneConnectionCommon {
                     connectionParams.setUsername(situationAwareConfig.getManagementUsername());
                     connectionParams.setPassword(situationAwareConfig.getManagementPassword());
                     connectionParams.setCmd(getContainerCmd(pluginHandler, cloudType, element, interpreter));
+                }else {
+                    connectionParams.setHostname(accessIp);
                 }
             } else {
-                connectionParams.setHostname(sceneConnection.getAccessIp());
+                connectionParams.setHostname(accessIp);
             }
             guacamoleCreateConnectionData.setUsername(userId);
             guacamoleCreateConnectionData.setConnectionParams(connectionParams);

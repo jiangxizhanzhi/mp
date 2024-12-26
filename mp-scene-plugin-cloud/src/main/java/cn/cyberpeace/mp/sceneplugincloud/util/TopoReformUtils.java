@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.util;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -12,6 +13,7 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -122,6 +124,35 @@ public class TopoReformUtils {
         pluginMode.setProxy(true);
         pluginMode.setProtocol(mode.getProtocol());
         pluginMode.setPort(mode.getPort());
+        port.getAccessModes().add(pluginMode);
+    }
+
+
+    public void addExternalNetworkPort(CloudPluginSceneElementPortBO port, String protocol) {
+        if (port.getSrcPort().getAccessModes() == null) {
+            port.getSrcPort().setAccessModes(new ArrayList<>());
+        }
+        AccessMode mode = new AccessMode();
+        mode.setProxy(true);
+        mode.setProtocol(protocol);
+        mode.setPort(AccessMode.Protocol.DEFAULT_PORT_MAP.get(protocol));
+        mode.setUsername("snwa");
+        mode.setPassword("NHiOJiZTD4K");
+        mode.setManageMode(false);
+        mode.setPrivateKeyEnable(false);
+        port.getSrcPort().getAccessModes().add(mode);
+
+        if (port.getAccessModes() == null) {
+            port.setAccessModes(new ArrayList<>());
+        }
+        CloudAccessMode pluginMode = new CloudAccessMode();
+        pluginMode.setProxy(true);
+        pluginMode.setProtocol(mode.getProtocol());
+        pluginMode.setPort(mode.getPort());
+        pluginMode.setUsername(mode.getUsername());
+        pluginMode.setPassword(mode.getPassword());
+        pluginMode.setManageMode(false);
+        pluginMode.setPrivateKeyEnable(false);
         port.getAccessModes().add(pluginMode);
     }
 
@@ -242,15 +273,17 @@ public class TopoReformUtils {
         sceneElementBO.setType(BaseSceneElementModel.Type.TERMINAL);
         sceneElementBO.setArea("");
         sceneElementBO.setName("kali");
-        sceneElementBO.setIcon2("727/701/a4aade52f418bc39965d76b6b6dca305.png");
+//        需要修改为上海靶标信息
+        sceneElementBO.setIcon2("772/139/a9f351341fd38db3003af9f0bc777fe4.png");
+        sceneElementBO.setCpu(1);
+        sceneElementBO.setRam(1024);
+        sceneElementBO.setDisk(15);
+
         sceneElementBO.setSystemType("304");
         sceneElementBO.setSystemArchitecture("64");
         sceneElementBO.setSystemLanguage("cn");
         sceneElementBO.setPosition2("{\"x\":460,\"y\":180}");
-        sceneElementBO.setCpu(2);
-        sceneElementBO.setRam(2048);
-        sceneElementBO.setDisk(40);
-        List<String> commands = Arrays.asList("s:");
+        List<String> commands = Arrays.asList("");
         sceneElementBO.setInitCommands(commands);
         sceneElementBO.setMaxPortNumber(1);
 
@@ -272,7 +305,6 @@ public class TopoReformUtils {
         cloudPluginSceneElementBO.setExternal(false);
         cloudPluginSceneElementBO.setIsBuildIn(false);
         cloudPluginSceneElementBO.setNetMode(0);
-        cloudPluginSceneElementBO.setLoadToolId("34");
         cloudPluginSceneElementBO.setElectricPortType("E");
         cloudPluginSceneElementBO.setOpticalPortType("sfp");
         cloudPluginSceneElementBO.setWanPortType("E");
@@ -280,13 +312,14 @@ public class TopoReformUtils {
         cloudPluginSceneElementBO.setGatewayOff(false);
         cloudPluginSceneElementBO.setDhcp(true);
         cloudPluginSceneElementBO.setVlan(false);
-        cloudPluginSceneElementBO.setImage("ubuntu_22.04");
-        cloudPluginSceneElementBO.setImageUuid("843be965-2237-4e0a-85fd-cd343f929eb1");
         cloudPluginSceneElementBO.setCategory(1);
         cloudPluginSceneElementBO.setCategory2(2);
         cloudPluginSceneElementBO.setCategory3(304);
-        cloudPluginSceneElementBO.setDefaultLaunchImageName("ubuntu_22.04");
         cloudPluginSceneElementBO.setInitSupport(true);
+        //        需要修改为上海靶标信息
+        cloudPluginSceneElementBO.setImage("Kubuntu-18.10-x64-desktop");
+        cloudPluginSceneElementBO.setDefaultLaunchImageName("Kubuntu-18.10-x64-desktop");
+        cloudPluginSceneElementBO.setImageUuid("47c44495-44ba-4570-93e6-c3eb8e4c691d");
 
 
         return new ElementWrapper(sceneElementBO, cloudPluginSceneElementBO);
@@ -339,6 +372,8 @@ public class TopoReformUtils {
         CloudPluginSceneElementPortBO pluginPort = new CloudPluginSceneElementPortBO();
         pluginPort.setSrcPort(port);
         pluginPort.setConnToExtNet(true);
+        pluginPort.setNat(false);
+        pluginPort.setGatewayPortType(0);
         if (element.getPorts() == null) {
             element.setPorts(new ArrayList<>());
         }

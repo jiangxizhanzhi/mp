@@ -20,19 +20,22 @@ public class LoadCreateTask implements Runnable {
 
     private String groupName;
 
+    private CloudPluginSceneElementBO loadToolElementBO;
+
     public LoadCreateTask(
-            CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO element, String groupName) {
+            CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO element, String groupName, CloudPluginSceneElementBO loadToolElementBO) {
         this.pluginHandler = pluginHandler;
         DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
         DevopsLoadSourceModel synchronousDataSource = devopsLoadSourceMapper.getSynchronousDataSource();
         this.load = new Load(synchronousDataSource);
         this.element = element;
         this.groupName = groupName;
+        this.loadToolElementBO = loadToolElementBO;
     }
 
     @Override
     public void run() {
-        load.create(pluginHandler, element, groupName);
+        load.create(pluginHandler, element, groupName,loadToolElementBO);
     }
 
 }

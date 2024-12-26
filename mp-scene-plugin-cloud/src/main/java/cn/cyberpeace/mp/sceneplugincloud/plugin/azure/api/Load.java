@@ -4,7 +4,10 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.LoadUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.DevopsLoadSourceModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -14,8 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
 
@@ -33,9 +38,18 @@ public class Load {
     }
 
 
-    public void create(CloudScenePluginHandler pluginHandler,CloudPluginSceneElementBO cloudElement, String groupName) {
+    public void create(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO cloudElement, String groupName, CloudPluginSceneElementBO loadToolElementBO) {
 //        本地创建载荷不执行启动操作
         if(BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL == cloudElement.getLoadSource()){
+            cloudElement.setResourceId(UUID.randomUUID().toString());
+            if(loadToolElementBO!=null){
+                cloudElement.setLoadResourceInstanceId(loadToolElementBO.getSrcElement().getId());
+                List<CloudPluginSceneElementPortBO> ports = pluginHandler.getPorts(loadToolElementBO.getSrcElement());
+                List<CloudAccessMode> collect = ports.get(0).getAccessModes().stream().filter(cloudAccessMode -> AccessMode.Protocol.RDP.equals(cloudAccessMode.getProtocol())).collect(Collectors.toList());
+                if(collect.size()>0){
+                    cloudElement.setLoadAccessModel(collect.get(0).getId());
+                }
+            }
             return;
         }
         String nodeId = cloudElement.getSrcElement().getId();

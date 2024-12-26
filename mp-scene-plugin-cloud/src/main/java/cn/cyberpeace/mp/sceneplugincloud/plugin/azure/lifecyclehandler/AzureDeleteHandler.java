@@ -63,8 +63,8 @@ public class AzureDeleteHandler extends DeleteHandler {
         allFilteredElements.addAll(filteredVirtualMachineElements);
         allFilteredElements.addAll(filteredContainerElements);
 
-        // 删除终端 TODO 云场景使用传统kali机方案开发暂时搁置
-        /*var terminals = getPluginHandler().getTerminalElementMap().values().stream()
+        // 删除终端 TODO 云场景使用传统kali机方案开发
+        var terminals = getPluginHandler().getTerminalElementMap().values().stream()
                 .filter(t -> getPluginHandler().getSceneHandler().isHandleNode(t.getSrcElement().getId()))
                 .collect(Collectors.toList());
         var deleteTerminalTasks = terminals.stream()
@@ -72,7 +72,7 @@ public class AzureDeleteHandler extends DeleteHandler {
                 .map(cloudElement -> (Runnable) () -> deleteElementProcess(cloudElement)).collect(Collectors.toList());
         if (!deleteTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.DELETE_TERMINALS, () -> runTasks(deleteTerminalTasks));
-        }*/
+        }
 
 //        删除载荷
         List<CloudPluginSceneElementBO> filteredLoadElements = filterLoadElements(allElements);

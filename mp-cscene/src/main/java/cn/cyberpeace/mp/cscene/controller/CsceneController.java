@@ -43,6 +43,7 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneAreaModel;
 import cn.cyberpeace.mp.scene.repository.SceneConfigAreaMapper;
 import cn.cyberpeace.mp.scene.service.AlertRuleService;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
+import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -310,7 +311,7 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("app_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
         request = formatCreateInstanceRequest(request, id);
 //        TODO 端口接入信息需要处理 已加但被过滤
-//        completionKaliTopo(request.getId(), false, request.toCsceneInstanceCreateContextBO());
+        completionKaliTopo(request.getId(), false, request.toCsceneInstanceCreateContextBO());
         correctRequestCsceneParamsForAppInstance(request.getCscene());
         var result = modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
         CsceneLogUtils.recordSceneInstanceLog(result == null ? null : result.getData(), OpTypeEnums.START, CsceneLogUtils.START_SCENE, request.getContext());
@@ -389,6 +390,7 @@ public class CsceneController implements BaseModelListControllerBase {
                                                       CsceneInstanceCreateContextBO createContext) {
         var csceneHandler = new CsceneHandler(csceneId, createContext.getContext());
         CsceneBO csceneBO = csceneHandler.getCscene();
+        Integer cloudType = csceneBO.getSceneConfig().getTopology().getScene().getCloudType();
         correctRequestCsceneParamsForSyncCompletionTopo(csceneBO);
         // 场景模板对象 转成 场景实例对象
         String configContent = JsonCommon.snakeStringify(csceneBO.getSceneConfig());
@@ -419,14 +421,14 @@ public class CsceneController implements BaseModelListControllerBase {
         returnData.getTopology().setScene(csceneBO.getSceneConfig().getTopology().getScene());
         csceneBO.setSceneConfig(newConfigHandler.toData());
         CsceneDataModifier.correctReturnCsceneData(csceneBO);
+        csceneBO.getSceneConfig().getTopology().getScene().setCloudType(cloudType);
+
         csceneHandler.getCscene().setSceneConfig(csceneBO.getSceneConfig());
         csceneHandler.save();
         return new ServiceResult<>(csceneBO).asResult();
     }
 
-    /*@ApiOperation("拓扑回显")
-    @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
-    @PostMapping("/completion_topo")*/
+//    @PostMapping("/completion_topo")
     public ServiceResult<CsceneBO> completionKaliTopo(@RequestBody CsceneBO csceneBO) {
         Integer cloudType = csceneBO.getSceneConfig().getTopology().getScene().getCloudType();
         correctRequestCsceneParamsForSyncCompletionTopo(csceneBO);

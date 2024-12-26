@@ -7,6 +7,8 @@ import cn.cyberpeace.mp.scene.core.plugin.model.BasePluginSceneElementModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.Arrays;
+
 @Data
 public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementModel {
     /**
@@ -43,11 +45,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String loadToolId;
     @DefaultInt
     private Integer loadSource;
-    // todo 跟传统云的kali攻击机绑定使用的参数 待开发
-//    @DefaultStr
-//    private String loadAccessModel;
-//    //传统场景id
-//    private String traSceneId;
+    @DefaultStr
+    private String loadAccessModel;
     /**
      * 三层防火墙对应防火墙资源id
      */
@@ -296,6 +295,11 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final String NETWORK_EQUIPMENT = "networkEquipment";
         public static final String FIRE_WALL = "fireWall";
 
+        public static boolean isCloudImageType(String imageType){
+            boolean isInList = Arrays.asList(LOAD, VNET, LAAS_VM, CONTAINER_REGISTRY, NETWORK_EQUIPMENT, FIRE_WALL).contains(imageType);
+
+            return isInList;
+        }
 
         private ImageType() {
         }
