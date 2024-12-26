@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleAction;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.IpVersion;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -104,6 +105,12 @@ class NodeElementConverter implements IConverter {
         // 插件表
         CloudPluginSceneConfigElementBO pluginElement = new CloudPluginSceneConfigElementBO();
         pluginElement.setImage(node.getImage());
+        if (StringUtils.isNotEmpty(pluginElement.getImage()) && pluginElement.getImage()
+                .endsWith(ElementTypeUtils.CORE_ROUTER_IMAGE_NAME)) {
+            // 由于导出时，核心路由器的image字段可能会带上靶标编号前缀，所以在导入的时候要恢复一下
+            pluginElement.setImage(ElementTypeUtils.CORE_ROUTER_IMAGE_NAME);
+            pluginElement.setIsBuildIn(true);
+        }
         // 初步加载role imageType (部分简单靶标不会导入), 这里不一定准确
         if (node.getId().toLowerCase().startsWith("router")) {
             sceneConfigElementBO.setIcon2(DefaultImgUtil.pathToFdfsUrl(CommonConstant.DefaultImageUrl.ROUTER));
