@@ -310,7 +310,7 @@ public class CsceneController implements BaseModelListControllerBase {
             @RequestParam(required = false) String id, @RequestBody(required = false) CsceneCreateInstanceRequest request) {
         log.info("app_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
         request = formatCreateInstanceRequest(request, id);
-//        TODO 端口接入信息需要处理 已加但被过滤
+//       本地载荷
         completionKaliTopo(request.getId(), false, request.toCsceneInstanceCreateContextBO());
         correctRequestCsceneParamsForAppInstance(request.getCscene());
         var result = modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
