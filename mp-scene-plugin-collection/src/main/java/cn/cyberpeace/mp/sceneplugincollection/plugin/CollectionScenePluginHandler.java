@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.lifecyclehandler.AzureCreateHandler;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.azure.lifecyclehandler.AzureDeleteHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.*;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.modelhandler.CollectionScenePluginModelHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhCommon;
@@ -53,11 +54,13 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
 
         if (cloudType == null || cloudType == BaseSceneModel.CloudType.DEFAULT) {
             createHandler = new CreateHandler(this);
+            deleteHandler = new DeleteHandler(this);
         } else {
             createHandler = new AzureCreateHandler(cloudType, this);
+            deleteHandler = new AzureDeleteHandler(cloudType,this);
         }
 
-        deleteHandler = new DeleteHandler(this);
+
         prepareHandler = new PrepareHandler(this);
     }
 

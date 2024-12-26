@@ -337,7 +337,7 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @ApiOperation("拓扑回显")
     @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
-//    @PostMapping("/completion_topo")
+    @PostMapping("/completion_topo")
     public ServiceResult<CsceneBO> completionTopo(@RequestBody CsceneBO csceneBO) {
         correctRequestCsceneParamsForSyncCompletionTopo(csceneBO);
 
@@ -390,7 +390,6 @@ public class CsceneController implements BaseModelListControllerBase {
                                                       CsceneInstanceCreateContextBO createContext) {
         var csceneHandler = new CsceneHandler(csceneId, createContext.getContext());
         CsceneBO csceneBO = csceneHandler.getCscene();
-//        TODO
         Integer cloudType = csceneBO.getSceneConfig().getTopology().getScene().getCloudType();
         correctRequestCsceneParamsForSyncCompletionTopo(csceneBO);
         // 场景模板对象 转成 场景实例对象
@@ -423,15 +422,13 @@ public class CsceneController implements BaseModelListControllerBase {
         csceneBO.setSceneConfig(newConfigHandler.toData());
         CsceneDataModifier.correctReturnCsceneData(csceneBO);
         csceneBO.getSceneConfig().getTopology().getScene().setCloudType(cloudType);
-        Map<String, Object> scene = csceneBO.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getScene();
-        scene.put("enable_flow_mirror",true);
-        scene.put("enable_flow_collect",true);
+
         csceneHandler.getCscene().setSceneConfig(csceneBO.getSceneConfig());
         csceneHandler.save();
         return new ServiceResult<>(csceneBO).asResult();
     }
 
-    @PostMapping("/completion_topo")
+//    @PostMapping("/completion_topo")
     public ServiceResult<CsceneBO> completionKaliTopo(@RequestBody CsceneBO csceneBO) {
         Integer cloudType = csceneBO.getSceneConfig().getTopology().getScene().getCloudType();
         correctRequestCsceneParamsForSyncCompletionTopo(csceneBO);
@@ -465,9 +462,6 @@ public class CsceneController implements BaseModelListControllerBase {
         csceneBO.setSceneConfig(newConfigHandler.toData());
         CsceneDataModifier.correctReturnCsceneData(csceneBO);
         csceneBO.getSceneConfig().getTopology().getScene().setCloudType(cloudType);
-        Map<String, Object> scene = csceneBO.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getScene();
-        scene.put("enable_flow_mirror",true);
-        scene.put("enable_flow_collect",true);
         return new ServiceResult<>(csceneBO).asResult();
     }
 

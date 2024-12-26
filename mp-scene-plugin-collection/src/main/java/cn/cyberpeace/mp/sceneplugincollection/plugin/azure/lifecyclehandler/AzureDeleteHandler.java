@@ -29,13 +29,6 @@ public class AzureDeleteHandler extends DeleteHandler {
     }
 
     public void delete() {
-        prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
-        getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
-        getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
-
-        getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CollectionSceneStage.CREATE_DATA_COLLECT);
-        getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CollectionSceneStage.CREATE_DATA_COLLECT);
-
         try {
             CloudScenePluginHandler pluginHandler = getPluginHandler().getSceneHandler().getPluginHandler(PluginConstant.PLUGIN_KEY);
 

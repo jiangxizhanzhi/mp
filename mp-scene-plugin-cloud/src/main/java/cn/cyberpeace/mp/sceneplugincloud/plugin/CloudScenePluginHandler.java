@@ -606,6 +606,10 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             // 交换机和核心路由器新增一根连线
             topoReformUtils.addConnect(switchPort.getScenePort(), coreRouterPort.getScenePort());
 
+//            开启流量镜像/流量采集
+            Map<String, Object> scene = this.getSceneHandler().getScenePluginData().get("cpcollection").getScene();
+            scene.put("enable_flow_mirror",true);
+            scene.put("enable_flow_collect",true);
         }
     }
 
