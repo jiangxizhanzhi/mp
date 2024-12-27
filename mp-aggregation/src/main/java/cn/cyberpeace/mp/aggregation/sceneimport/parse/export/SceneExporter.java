@@ -170,28 +170,45 @@ public class SceneExporter {
     private void createElementFiles(SceneConfigHandler sceneConfigHandler, String envPath) {
         for (var e : sceneConfigHandler.getElementMap().values()) {
             String nodeId = e.getId();
-            String icon2 = e.getIcon2();
-            if (StringUtils.isNotEmpty(icon2)) {
-                String fileSuffix = FileUtil.getSuffix(icon2);
-                if (StringUtils.isEmpty(fileSuffix)) {
-                    fileSuffix = "png";
-                }
-                byte[] content = FsCommon.downloadRawContent(icon2);
-                writeFile(content, envPath + "/" + nodeId + "/icon2." + fileSuffix, 3);
+            if (StringUtils.isNotEmpty(e.getIcon2())) {
+                var p = new ParseFileKey(e.getIcon2(), "png");
+                byte[] content = FsCommon.downloadRawContent(p.getFilePath());
+                writeFile(content, envPath + "/" + nodeId + "/icon2." + p.getSuffix(), 3);
             }
             String icon3 = e.getIcon3();
             if (StringUtils.isNotEmpty(icon3)) {
-                String fileSuffix = FileUtil.getSuffix(icon3);
-                if (StringUtils.isEmpty(fileSuffix)) {
-                    fileSuffix = "png";
-                }
-                byte[] content = FsCommon.downloadRawContent(icon3);
-                writeFile(content, envPath + "/" + nodeId + "/icon3." + fileSuffix, 3);
+                var p = new ParseFileKey(e.getIcon3(), "png");
+                byte[] content = FsCommon.downloadRawContent(p.getFilePath());
+                writeFile(content, envPath + "/" + nodeId + "/icon3." + p.getSuffix(), 3);
             }
-            if (StringUtils.isNotEmpty(e.getFile())) {
-                String fileSuffix = FileUtil.getSuffix(icon3);
-                byte[] content = FsCommon.downloadRawContent(e.getFile());
-                writeFile(content, envPath + "/" + nodeId + "/attachment." + fileSuffix, 3);
+            String file = e.getFile();
+            if (StringUtils.isNotEmpty(file)) {
+                var p = new ParseFileKey(e.getFile(), "zip");
+                byte[] content = FsCommon.downloadRawContent(p.getFilePath());
+                writeFile(content, envPath + "/" + nodeId + "/attachment." + p.getSuffix(), 3);
+            }
+        }
+    }
+
+    private String getFilePath(String input) {
+        int queryIndex = input.indexOf('?');
+        String pathPart = (queryIndex != -1) ? input.substring(0, queryIndex) : input;
+        return pathPart;
+    }
+
+    @Getter
+    private static class ParseFileKey {
+        private String filePath;
+        private String fileName;
+        private String suffix;
+
+        public ParseFileKey(String input, String defaultSuffix) {
+            int queryIndex = input.indexOf('?');
+            this.filePath = (queryIndex != -1) ? input.substring(0, queryIndex) : input;
+            this.suffix = FileUtil.getSuffix(this.filePath);
+            this.fileName = FileUtil.getName(this.filePath);
+            if (StringUtils.isEmpty(this.suffix)) {
+                this.suffix = defaultSuffix;
             }
         }
     }
