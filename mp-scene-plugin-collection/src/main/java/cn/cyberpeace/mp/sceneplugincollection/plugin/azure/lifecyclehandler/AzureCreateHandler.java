@@ -10,10 +10,12 @@ import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSceneStage;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
+@Slf4j
 public class AzureCreateHandler extends CreateHandler {
     public Integer cloudType;
     private String groupNamePrefix;
@@ -189,6 +191,7 @@ public class AzureCreateHandler extends CreateHandler {
 
             }*/
         } catch (Exception e) {
+            log.error("创建场景失败", e);
 //            云场景启动失败立即删除云资源
             String groupName = getPluginHandler().getSourceSceneId();
             groupName = StringUtils.isNotBlank(groupNamePrefix) ? groupNamePrefix + "-" + groupName : groupName;

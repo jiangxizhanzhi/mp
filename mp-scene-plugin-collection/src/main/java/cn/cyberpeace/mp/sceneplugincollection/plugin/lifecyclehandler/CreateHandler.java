@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.SceneEventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
@@ -82,22 +83,24 @@ public class CreateHandler extends HandlerCommon {
                 .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         routerPorts.forEach(routerPort -> {
             var cloudElement = cloudPluginHandler.getElement(routerPort.getSceneElement());
-            String networkId = null;
-            if (CollectionUtils.isNotEmpty(cloudElement.getDeriveNetworks())) {
-                for (var deriveNet : cloudElement.getDeriveNetworks()) {
-                    if (deriveNet.getNetwork().getExcloudIps().contains(routerPort.getIp())) {
-                        networkId = deriveNet.getNetwork().getResourceId();
+            if(!BaseCloudPluginSceneElementModel.ImageType.isCloudImageType(cloudElement.getImageType())) {
+                String networkId = null;
+                if (CollectionUtils.isNotEmpty(cloudElement.getDeriveNetworks())) {
+                    for (var deriveNet : cloudElement.getDeriveNetworks()) {
+                        if (deriveNet.getNetwork().getExcloudIps().contains(routerPort.getIp())) {
+                            networkId = deriveNet.getNetwork().getResourceId();
+                        }
                     }
                 }
+                if (StringUtils.isEmpty(networkId)) {
+                    return;
+                }
+                routerPort.setNetworkId(networkId);
+                var virtualNic = new VirtualNic();
+                virtualNic.setNetworkId(networkId);
+                virtualNic.setFixedIp(routerPort.getIp());
+                virtualNics.add(virtualNic);
             }
-            if (StringUtils.isEmpty(networkId)) {
-                return;
-            }
-            routerPort.setNetworkId(networkId);
-            var virtualNic = new VirtualNic();
-            virtualNic.setNetworkId(networkId);
-            virtualNic.setFixedIp(routerPort.getIp());
-            virtualNics.add(virtualNic);
         });
         getSceneProbeRouterPortMapper().bulkUpdate(routerPorts);
         createData.setNetworks(virtualNics);
@@ -119,6 +122,9 @@ public class CreateHandler extends HandlerCommon {
         boolean creatFlowCollector = false;
         for (Map.Entry<String, CollectionPluginSceneElementPortBO> entry : getPluginHandler().getElementPortMap().entrySet()) {
             var collectionPort = entry.getValue();
+            var element = collectionPort.getSrcPort().getElement();
+            CloudPluginSceneElementBO pluginElement = getPluginHandler().getPluginElement("cpcloud", element.getId());
+            if(BaseCloudPluginSceneElementModel.ImageType.isCloudImageType(pluginElement.getImageType())) continue;
             if (Boolean.TRUE.equals(collectionPort.getEnableFlowCollect())) {
                 creatFlowCollector = true;
                 var srcPort = collectionPort.getSrcPort();
@@ -139,9 +145,11 @@ public class CreateHandler extends HandlerCommon {
                 var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
                 if (cloudElement != null && cloudElement.getVirtualType() != null
                         && !StringUtils.isEmpty(cloudElement.getResourceId())) {
-                    if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
+                    if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) &&
+                            !BaseCloudPluginSceneElementModel.ImageType.isCloudImageType(cloudElement.getImageType())) {
                         mirrorVmInstanceIds.add(cloudElement.getResourceId());
-                    } else if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+                    } else if (cloudElement.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) &&
+                            !BaseCloudPluginSceneElementModel.ImageType.isCloudImageType(cloudElement.getImageType())) {
                         mirrorContainerInstanceIds.add(cloudElement.getResourceId());
                     }
                 }
@@ -183,6 +191,7 @@ public class CreateHandler extends HandlerCommon {
         if (!StringUtils.isEmpty(probeCollectorId)) {
             var containerElements = getPluginHandler().getElementMap().values().stream()
                     .filter(e -> Boolean.TRUE.equals(e.getEnableProbeCollect()))
+                    .filter(e -> !BaseCloudPluginSceneElementModel.ImageType.isCloudImageType(cloudPluginHandler.getElement(e.getSrcElement().getId()).getImageType()))
                     .filter(e -> {
                         // 非macvlan模式下的容器 且 有探针安装需要的可以加路由
                         var cloudElement = cloudPluginHandler.getElement(e.getSrcElement().getId());

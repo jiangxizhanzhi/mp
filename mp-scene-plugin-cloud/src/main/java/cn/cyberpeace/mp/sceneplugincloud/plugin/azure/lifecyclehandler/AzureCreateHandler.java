@@ -184,6 +184,16 @@ public class AzureCreateHandler extends CreateHandler {
                     // 添加格式化后的任务到列表
                     createAuxiliaryNetworkTasks.add(formatTask);
                 }
+                //        创建外部网络+kali TODO 云场景使用传统kali机方案开发
+                var createExternalNetworkTasks = getPluginHandler().getAuxiliaryNetworkElement().stream()
+                        .map(cloudElement -> (Runnable) () -> createAuxiliaryNetworkProcess(cloudElement))
+                        .collect(Collectors.toList());
+                createAuxiliaryNetworkTasks.addAll(createExternalNetworkTasks);
+                /*if (!createExternalNetworkTasks.isEmpty()) {
+                    runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> {
+                        runTasks(createExternalNetworkTasks);
+                    });
+                }*/
                 if (!createAuxiliaryNetworkTasks.isEmpty()) {
                     // 执行 创建所有网络
                     runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> runTasks(createAuxiliaryNetworkTasks));
@@ -237,6 +247,15 @@ public class AzureCreateHandler extends CreateHandler {
 
                 // 再创建网关 和 防火墙
                 getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CREATE_GATEWAY);
+                var createGatewayTasks = getPluginHandler().getGatewayElements().stream()
+                        .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement))
+                        .collect(Collectors.toList());
+
+                if (!createGatewayTasks.isEmpty()) {
+                    runSceneProgress(SceneProcess.CREATE_GATEWAYS, () -> {
+                        runTasks(createGatewayTasks);
+                    });
+                }
                 getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_GATEWAY);
 
 
@@ -304,27 +323,6 @@ public class AzureCreateHandler extends CreateHandler {
                     createFireWallTasks.add(formatTask);
                 }
                 createTerminalTasks.addAll(createFireWallTasks);
-            }
-
-//        创建外部网络+kali TODO 云场景使用传统kali机方案开发
-            var createExternalNetworkTasks = getPluginHandler().getAuxiliaryNetworkElement().stream()
-                    .map(cloudElement -> (Runnable) () -> createAuxiliaryNetworkProcess(cloudElement))
-                    .collect(Collectors.toList());
-
-            if (!createExternalNetworkTasks.isEmpty()) {
-                runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> {
-                    runTasks(createExternalNetworkTasks);
-                });
-            }
-
-            var createGatewayTasks = getPluginHandler().getGatewayElements().stream()
-                    .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement))
-                    .collect(Collectors.toList());
-
-            if (!createGatewayTasks.isEmpty()) {
-                runSceneProgress(SceneProcess.CREATE_GATEWAYS, () -> {
-                    runTasks(createGatewayTasks);
-                });
             }
 
             List<CloudPluginSceneElementBO> terminalExcludeNpcElements = getPluginHandler().getTerminalExcludeNpcElements();
@@ -527,8 +525,9 @@ public class AzureCreateHandler extends CreateHandler {
             if (StringUtils.isNotEmpty(c.getImageType()) && (BaseCloudPluginSceneElementModel.ImageType.LOAD.equals(c.getImageType()) ||
                     BaseCloudPluginSceneElementModel.ImageType.NETWORK_EQUIPMENT.equals(c.getImageType()) ||
                     BaseCloudPluginSceneElementModel.ImageType.FIRE_WALL.equals(c.getImageType()))) {
-
-            } else if (sceneHandler.isHandleNode(c.getSrcElement().getId()) && !c.getDeriveNetworks().isEmpty()) {
+            } else if (sceneHandler.isHandleNode(c.getSrcElement().getId()) &&
+                    !c.getDeriveNetworks().isEmpty() &&
+                    BaseCloudPluginSceneElementModel.ImageType.VNET.equals(c.getImageType())) {
                 filterElements.add(c);
             } else if (StringUtils.isNotEmpty(c.getImageType()) && BaseCloudPluginSceneElementModel.ImageType.VNET.equals(c.getImageType())) {
 //    筛选出所有VNet节点
