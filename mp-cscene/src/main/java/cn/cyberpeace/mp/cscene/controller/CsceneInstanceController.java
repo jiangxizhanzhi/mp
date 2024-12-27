@@ -1173,7 +1173,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @PostMapping("/element/execute")
     public ServiceResult<ElementCommandExecResult> elementExecute(@RequestBody CsceneInstanceNodeCommandActionRequest request) {
         log.info("element execute , params is {}", JsonCommon.stringify(request));
-        return modelService.execElementV2(request.getId(), request.getNodeId(), request.getCommand(), request.getExecUser(), request.getContext()).asResult();
+        return modelService.execElementV2(request.getId(), request.getNodeId(), request.getCommand(),
+                request.getExecUser(), request.getContext(),request.getLoadNodeId()).asResult();
     }
 
 }

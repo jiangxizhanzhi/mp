@@ -43,7 +43,6 @@ import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
-import cn.cyberpeace.mp.cscene.request.logfile.LogFileSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.service.LoadServiceImpl;
@@ -148,6 +147,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -2864,13 +2865,38 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<ElementCommandExecResult> execElementV2(String id, String nodeId, String command,
-                                                                 String user, CsceneContextBO context) {
+                                                                 String user, CsceneContextBO context, String loadNodeId) {
         String sceneId = getSceneId(id);
+//        此处保存态势动效任务
+        String destinationIp = extractIP(command);
+        if(StringUtils.isNotBlank(destinationIp)){
+            var sceneHandler = new SceneHandler(sceneId, null, false, null);
+            CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+//            索引
+            String flowCollector = collectionScenePluginHandler.getScene().getFlowCollector();
+//            载荷节点 缺少
+
+//            kali ip
+            var element = sceneHandler.getElement(nodeId);
+            String sourceIp = element.getPorts().get(0).getIp();
+            System.out.println("666");
+
+        }
         var execBO = scenePluginCloudSceneService.execElementCommandV2(sceneId, nodeId, command, user).getSource();
         var result = new ElementCommandExecResult();
         result.setOutput(execBO.getOutput());
         result.setStatus(execBO.getStatus());
         return new ServiceResult<>(result);
+    }
+
+    public static String extractIP(String str) {
+        String regex = "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(str);
+        if (matcher.find()) {
+            return matcher.group();
+        }
+        return null;
     }
 
     @Getter
