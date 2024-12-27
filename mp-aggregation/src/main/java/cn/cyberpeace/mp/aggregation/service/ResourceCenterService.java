@@ -36,6 +36,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -75,13 +76,16 @@ public class ResourceCenterService {
     @Resource
     private SceneConfigAreaMapper sceneConfigAreaMapper ;
 
+    @Resource
+    private Environment environment ;
+
     public ServiceResult<CsceneBO> importByConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
-        // 后续改名成 topo.json
-        String jsonFilePath = ymlFilePath + "/topo_not_support.json";
-        File file = new File(jsonFilePath);
-        if (file.exists()) {
+        String mpPropertiesPath = environment.getProperty("MP_SCENE_IMPORT_MODE");
+        if (StringUtils.isNotEmpty(mpPropertiesPath) && mpPropertiesPath.equals("json")) {
+            log.info("使用json文件导入");
             return this.importByJsonConfig(ymlFilePath, imageFilePath, imageFilePathList, sceneFilePath);
         } else {
+            log.info("使用yml文件导入");
             return this.importByYmlConfig(ymlFilePath, imageFilePath, imageFilePathList, sceneFilePath);
         }
     }
@@ -144,7 +148,7 @@ public class ResourceCenterService {
                     } else if (nodeFile.getName().startsWith("icon3")) {
                         element.setIcon3(fileKey);
                     } else if (nodeFile.getName().startsWith("attachment")) {
-                        element.setFile(fileKey + "?" + nodeFile.getName());
+                        element.setFile(fileKey + "?filename=" + nodeFile.getName());
                     }
                 }
             }
