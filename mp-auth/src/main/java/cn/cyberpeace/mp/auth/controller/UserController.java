@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -151,5 +152,12 @@ public class UserController {
 //        modifyRequest.setAvatar(FsCommon.getFileKey(modifyRequest.getAvatar()));
         UserModel userModel = userService.modify(modifyRequest);
         return ResultCommon.success(userModel);
+    }
+
+    @ApiOperation(value = "根据id查询用户是否在线", notes = "")
+    @PostMapping("/isonline")
+    public ServiceResult<List<String>> getIsOnline(@RequestBody List<String> list) {
+        List<String> onlineList = userService.getIsOnline(list);
+        return ResultCommon.success(onlineList);
     }
 }

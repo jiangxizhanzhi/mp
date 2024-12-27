@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service;
 
 
+import cn.cyberpeace.mp.auth.bo.user.TeamInfoIdAndName;
 import cn.cyberpeace.mp.auth.model.TeamModel;
 import cn.cyberpeace.mp.auth.request.team.TeamIdAndUserInfo;
 import cn.cyberpeace.mp.auth.request.team.TeamPageRequest;
@@ -39,5 +40,5 @@ public interface TeamService  {
 
     String getTeamInfoByUserId(String userId);
 
-    ServiceResult<JSONObject> getTeamInfoByUser(String userId);
+    TeamInfoIdAndName getTeamInfoByUser(String userId);
 }

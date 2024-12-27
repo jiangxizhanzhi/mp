@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -114,4 +115,5 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
    List<String> listExistedUserNames(List<String> userNames, Integer limit);
 
+    List<String> getIsOnline(List<String> list);
 }

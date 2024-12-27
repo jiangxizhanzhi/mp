@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.bo.Personnel.management.PersonnelManagementBo;
+import cn.cyberpeace.mp.auth.bo.user.TeamInfoIdAndName;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.TeamModel;
 import cn.cyberpeace.mp.auth.request.management.PersonnelManagementPageRequest;
@@ -130,9 +131,10 @@ public class TeamController {
         return teamService.importPersonnelTemplate(file);
     }
     @ApiOperation(value = "根据用户id获取队伍信息", notes = "")
-    @PostMapping("/team/get/user")
-    public ServiceResult<JSONObject> importPersonnelTemplate(@RequestBody String userId) {
-        return teamService.getTeamInfoByUser(userId);
+    @GetMapping("/team/get/user")
+    public ServiceResult<TeamInfoIdAndName> importPersonnelTemplate(String userId) {
+        TeamInfoIdAndName teamInfoByUser = teamService.getTeamInfoByUser(userId);
+        return new ServiceResult<>(teamInfoByUser).asResult();
     }
 
 }

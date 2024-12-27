@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.auth.repository;
 
 
+import cn.cyberpeace.mp.auth.bo.user.TeamInfoIdAndName;
 import cn.cyberpeace.mp.auth.model.PersonnelManagementModel;
+import cn.cyberpeace.mp.auth.model.TeamModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -24,5 +26,5 @@ public interface PersonnelManagementMapper extends BaseModelMapper<PersonnelMana
 
     String selectByNameToTeamName(@Param("creator") String creator);
 
-    ServiceResult<JSONObject> selectByUserIdToTeamInfo(@Param("userId") String userId);
+    TeamInfoIdAndName selectByUserIdToTeamInfo(@Param("userId") String userId);
 }

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.bo.Personnel.management.PersonnelManagementBo;
 import cn.cyberpeace.mp.auth.bo.excel.ExportPersonnelManagementBo;
 import cn.cyberpeace.mp.auth.bo.excel.ExportTeamBO;
+import cn.cyberpeace.mp.auth.bo.user.TeamInfoIdAndName;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.PersonnelManagementModel;
 import cn.cyberpeace.mp.auth.model.TeamModel;
@@ -343,9 +344,10 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public ServiceResult<JSONObject> getTeamInfoByUser(String userId) {
+    public TeamInfoIdAndName getTeamInfoByUser(String userId) {
 
-        return personnelManagementMapper.selectByUserIdToTeamInfo(userId);
+        TeamInfoIdAndName teamInfoIdAndName = personnelManagementMapper.selectByUserIdToTeamInfo(userId);
+        return teamInfoIdAndName;
     }
 
     private List<String> checkUserNameExist(List<String> userNameList) {

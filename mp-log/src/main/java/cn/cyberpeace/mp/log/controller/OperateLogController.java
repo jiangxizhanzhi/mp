@@ -65,7 +65,7 @@ public class OperateLogController {
     }
 
     @ApiOperation("导出审计日志")
-    @GetMapping("/export")
+    @PostMapping("/export")
     public void exportOperationLog(HttpServletResponse response){
         operateLogService.exportOperationLog(new OperationLogPageRequest(),response);
     }
