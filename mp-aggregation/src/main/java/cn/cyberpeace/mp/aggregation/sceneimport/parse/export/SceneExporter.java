@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
@@ -110,9 +111,6 @@ public class SceneExporter {
         }
         this.createSceneYml(parseResult.getYmlResult(), envPath, "topo2");
 
-        // 生成 topo.json
-        this.createTopoJson(sceneId, sceneNumber, envPath + "/topo.json");
-
         // 下载附件
         this.downloadNodeFile(envPath, resultV1.getFile2Download());
         // 生成server.yml与导出靶标
@@ -130,10 +128,16 @@ public class SceneExporter {
             convertInfos.add(convertInfo);
         }
         exportResult.setConvertInfos(convertInfos);
+
+        // 生成json格式的tuop导入资源
+        var sceneConfigHandler = this.createTopoJson(sceneId, sceneNumber, envPath + "/topo.json");
+        // 生成各个节点的图片和附件
+        this.createElementFiles(sceneConfigHandler, envPath);
+
         return exportResult;
     }
 
-    private void createTopoJson(String sceneId,String sceneNum, String filePath) {
+    private SceneConfigHandler createTopoJson(String sceneId,String sceneNum, String filePath) {
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, null, null);
         this.removeEid(sceneConfigHandler);
         SceneConfigDataBO sceneConfigDataBO = sceneConfigHandler.toData();
@@ -159,6 +163,51 @@ public class SceneExporter {
             this.createFile(content.getBytes("utf8"), filePath);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
+        }
+        return sceneConfigHandler;
+    }
+
+    private void createElementFiles(SceneConfigHandler sceneConfigHandler, String envPath) {
+        for (var e : sceneConfigHandler.getElementMap().values()) {
+            String nodeId = e.getId();
+            String icon2 = e.getIcon2();
+            if (StringUtils.isNotEmpty(icon2)) {
+                String fileSuffix = FileUtil.getSuffix(icon2);
+                if (StringUtils.isEmpty(fileSuffix)) {
+                    fileSuffix = "png";
+                }
+                byte[] content = FsCommon.downloadRawContent(icon2);
+                writeFile(content, envPath + "/" + nodeId + "/icon2." + fileSuffix, 3);
+            }
+            String icon3 = e.getIcon3();
+            if (StringUtils.isNotEmpty(icon3)) {
+                String fileSuffix = FileUtil.getSuffix(icon3);
+                if (StringUtils.isEmpty(fileSuffix)) {
+                    fileSuffix = "png";
+                }
+                byte[] content = FsCommon.downloadRawContent(icon3);
+                writeFile(content, envPath + "/" + nodeId + "/icon3." + fileSuffix, 3);
+            }
+            if (StringUtils.isNotEmpty(e.getFile())) {
+                String fileSuffix = FileUtil.getSuffix(icon3);
+                byte[] content = FsCommon.downloadRawContent(e.getFile());
+                writeFile(content, envPath + "/" + nodeId + "/attachment." + fileSuffix, 3);
+            }
+        }
+    }
+
+    private void writeFile(byte[] content, String filePath, int tryTimes) {
+        Exception throwE = null;
+        for (int i = 0; i < tryTimes; i++) {
+            try {
+                FileUtils.writeByteArrayToFile(new File(filePath), content);
+                return;
+            } catch (Exception e) {
+                throwE = e;
+            }
+        }
+        if (throwE != null) {
+            throw new MpRuntimeException(throwE.getMessage());
         }
     }
 
@@ -404,6 +453,7 @@ public class SceneExporter {
             } catch (Exception e) {
                 String detail = "导出场景出错 , 下载附件失败 , 附件地址为" + fdfsFilePath;
                 log.error(detail, e);
+                throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
             }
         }
     }
@@ -433,6 +483,7 @@ public class SceneExporter {
         } catch (Exception e) {
             String detail = "[" + envPath + "/" + name + ".yml" + "]-文件创建失败";
             log.error(detail, e);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
         }
     }
 
