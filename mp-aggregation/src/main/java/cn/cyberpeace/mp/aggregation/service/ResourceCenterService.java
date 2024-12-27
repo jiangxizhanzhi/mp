@@ -30,6 +30,7 @@ import cn.cyberpeace.mp.scene.repository.SceneConfigAreaMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -120,15 +121,36 @@ public class ResourceCenterService {
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneConfigDataBO, null);
         CloudSceneConfigPluginHandler pluginHandler = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         for (String nodeId : sceneConfigHandler.getElementMap().keySet()) {
+            var element = pluginHandler.getSceneHandler().getElement(nodeId);
             CloudPluginSceneConfigElementBO pluginElement = pluginHandler.getElement(nodeId);
+            // 处理image和image_uuid字段
             String imageName = pluginElement.getImage();
+            if (StringUtils.isNotEmpty(imageName) && imageName.endsWith(ElementTypeUtils.CORE_ROUTER_IMAGE_NAME)) {
+                imageName = ElementTypeUtils.CORE_ROUTER_IMAGE_NAME;
+                pluginElement.setImage(imageName);
+            }
             Device device = this.getByImageName(imageName);
             if (device != null) {
                 pluginElement.setImageUuid(device.getUuid());
             }
+
+            // 处理图片和附件
+            File nodeDir = new File(ymlFilePath + "/" + nodeId);
+            if (nodeDir.exists()) {
+                for (var nodeFile : nodeDir.listFiles()) {
+                    var fileKey = FsCommon.upload(nodeFile.getAbsolutePath());
+                    if (nodeFile.getName().startsWith("icon2")) {
+                        element.setIcon2(fileKey);
+                    } else if (nodeFile.getName().startsWith("icon3")) {
+                        element.setIcon3(fileKey);
+                    } else if (nodeFile.getName().startsWith("attachment")) {
+                        element.setFile(fileKey + "?" + nodeFile.getName());
+                    }
+                }
+            }
         }
         CsceneBO csceneBO = new CsceneBO();
-        csceneBO.setSceneConfig(sceneConfigDataBO);
+        csceneBO.setSceneConfig(sceneConfigHandler.toData());
         csceneBO.setLogo(fdfsLogoFilePath);
 
         // 保存
