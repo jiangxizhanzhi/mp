@@ -2873,19 +2873,23 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 //        此处保存态势动效任务
         String destinationIp = extractIP(command);
         LocalLoadExecutionRecordModel localLoadExecutionRecordModel = new LocalLoadExecutionRecordModel();
-        if (StringUtils.isNotBlank(destinationIp)) {
-            var sceneHandler = new SceneHandler(sceneId, null, false, null);
-            CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-//            索引
-            String flowCollector = collectionScenePluginHandler.getScene().getFlowCollector();
+
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        Map<String, String> ipNodeMap = sceneHandler.getElementPortMap().values().stream()
+                .collect(Collectors.toMap(SceneElementPortBO::getIp, port -> port.getElement().getId(), (existingValue, newValue) -> newValue));
+        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        ipNodeMap.putAll(pluginHandler.getElementMap().values().stream()
+                .collect(Collectors.toMap(CloudPluginSceneElementBO::getPublicIpAddress, element -> element.getSrcElement().getId(), (existingValue, newValue) -> newValue)));
+        if (StringUtils.isNotBlank(destinationIp) && ipNodeMap.containsKey(destinationIp)) {
+//            找出目标节点
 //            载荷节点
 //            kali ip
             var element = sceneHandler.getElement(nodeId);
             String sourceIp = element.getPorts().get(0).getIp();
             localLoadExecutionRecordModel.setScene(id);
             localLoadExecutionRecordModel.setLoadNode(loadNodeId);
-            localLoadExecutionRecordModel.setTrafficIndex(flowCollector);
             localLoadExecutionRecordModel.setSourceIp(sourceIp);
+            localLoadExecutionRecordModel.setDestinationNode(ipNodeMap.get(destinationIp));
             localLoadExecutionRecordModel.setDestinationIp(destinationIp);
             localLoadExecutionRecordModel.setStatus(LocalLoadExecutionRecordModel.Status.NOT_EXECUTED.getCode());
             localLoadExecutionRecordMapper.create(localLoadExecutionRecordModel);

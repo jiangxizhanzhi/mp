@@ -21,14 +21,14 @@ public class LocalLoadExecutionRecordModel extends BaseModel {
     @ApiModelProperty(value = "场景id")
     private String scene;
 
-    @ApiModelProperty(value = "流量索引")
-    private String trafficIndex;
-
     @ApiModelProperty(value = "载荷节点")
     private String loadNode;
 
     @ApiModelProperty(value = "源ip")
     private String sourceIp;
+
+    @ApiModelProperty(value = "目标节点")
+    private String destinationNode;
 
     @ApiModelProperty(value = "目标ip")
     private String destinationIp;
