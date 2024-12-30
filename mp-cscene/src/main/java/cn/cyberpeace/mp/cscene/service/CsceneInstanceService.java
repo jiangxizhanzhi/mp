@@ -285,6 +285,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Autowired
     private CscenePluginDataRecordService dataRecordService;
 
+    @Resource
+    private LocalLoadExecutionRecordMapper localLoadExecutionRecordMapper;
+
     // expires in 10 minutes
     private Cache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
 
@@ -1003,7 +1006,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
         String translateSceneId = csceneCommonService.translateSceneId(sceneId);
         SceneHandler sceneHandler = new SceneHandler(translateSceneId, null, false, null);
-        if(params.getNodeIds() == null || params.getNodeIds().isEmpty()){
+        if (params.getNodeIds() == null || params.getNodeIds().isEmpty()) {
             params.setNodeIds(new ArrayList<>(sceneHandler.getElementMap().keySet()));
         }
         // 事件类
@@ -1070,7 +1073,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     finalResult.add(log);
                 }
             }
-            count.put("log", result.getSource().getTotal()+finalResult.size());
+            count.put("log", result.getSource().getTotal() + finalResult.size());
         });
         // 流量类
         tasks.add(() -> {
@@ -2869,20 +2872,38 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         String sceneId = getSceneId(id);
 //        此处保存态势动效任务
         String destinationIp = extractIP(command);
-        if(StringUtils.isNotBlank(destinationIp)){
+        LocalLoadExecutionRecordModel localLoadExecutionRecordModel = new LocalLoadExecutionRecordModel();
+        if (StringUtils.isNotBlank(destinationIp)) {
             var sceneHandler = new SceneHandler(sceneId, null, false, null);
             CollectionScenePluginHandler collectionScenePluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
 //            索引
             String flowCollector = collectionScenePluginHandler.getScene().getFlowCollector();
-//            载荷节点 缺少
-
+//            载荷节点
 //            kali ip
             var element = sceneHandler.getElement(nodeId);
             String sourceIp = element.getPorts().get(0).getIp();
-            System.out.println("666");
-
+            localLoadExecutionRecordModel.setScene(id);
+            localLoadExecutionRecordModel.setLoadNode(loadNodeId);
+            localLoadExecutionRecordModel.setTrafficIndex(flowCollector);
+            localLoadExecutionRecordModel.setSourceIp(sourceIp);
+            localLoadExecutionRecordModel.setDestinationIp(destinationIp);
+            localLoadExecutionRecordModel.setStatus(LocalLoadExecutionRecordModel.Status.NOT_EXECUTED.getCode());
+            localLoadExecutionRecordMapper.create(localLoadExecutionRecordModel);
         }
         var execBO = scenePluginCloudSceneService.execElementCommandV2(sceneId, nodeId, command, user).getSource();
+
+        if (null != localLoadExecutionRecordModel.getId()) {
+//            执行过慢的命令可能已经出流量发送了态势动效
+            localLoadExecutionRecordModel = localLoadExecutionRecordMapper.get(localLoadExecutionRecordModel.getId());
+            if (LocalLoadExecutionRecordModel.Status.ANIMATION_SENT.getCode() != localLoadExecutionRecordModel.getStatus()) {
+                if (execBO.getStatus()) {
+                    localLoadExecutionRecordModel.setStatus(LocalLoadExecutionRecordModel.Status.EXECUTED.getCode());
+                } else {
+                    localLoadExecutionRecordModel.setStatus(LocalLoadExecutionRecordModel.Status.EXECUTION_FAILED.getCode());
+                }
+                localLoadExecutionRecordMapper.update(localLoadExecutionRecordModel);
+            }
+        }
         var result = new ElementCommandExecResult();
         result.setOutput(execBO.getOutput());
         result.setStatus(execBO.getStatus());

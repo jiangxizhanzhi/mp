@@ -657,6 +657,7 @@ public class LoadServiceImpl {
             requestData.setCreateTime(LocalDateTime.now());
         }
         Boolean addLoadExecutionResult = loadMapper.addLoadExecutionResult(requestData);
+
         return addLoadExecutionResult;
     }
 
