@@ -47,7 +47,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.sceneplugincollection.config.WazuhModifyEventConfig.ProbeType.FILE;
 import static cn.cyberpeace.mp.sceneplugincollection.config.WazuhModifyEventConfig.ProbeType.REGISTRY;
@@ -107,7 +106,7 @@ public class InitiateHandler extends HandlerCommon {
         }
 
         // 全局开启探针采集
-        if (getPluginHandler().enableProbeCollect()) {
+        if (getPluginHandler().enableSceneGeneralProbeCollect()) {
             CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                     .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             runSceneProgress(SceneProcess.INITIATE_PROBE_COLLECTION, () -> {

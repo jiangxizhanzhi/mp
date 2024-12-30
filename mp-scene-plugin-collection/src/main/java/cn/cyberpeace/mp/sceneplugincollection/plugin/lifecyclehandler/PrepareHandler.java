@@ -28,8 +28,9 @@ public class PrepareHandler extends HandlerCommon {
 
     public void prepare(boolean partialStart) {
         boolean enableFlowCollect = getPluginHandler().enableFlowCollect();
-        boolean enableProbeCollect = getPluginHandler().enableProbeCollect();
-        if (!enableProbeCollect && !enableFlowCollect) {
+        boolean enableProbeCollect = getPluginHandler().enableSceneGeneralProbeCollect();
+        boolean enableElementProbeCollect = getPluginHandler().enableElementProbeCollect();
+        if (!enableProbeCollect && !enableFlowCollect && !enableElementProbeCollect) {
             return;
         }
         SceneStageRecorder stageRecorder = getPluginHandler().getSceneHandler().getSceneStageRecorder();

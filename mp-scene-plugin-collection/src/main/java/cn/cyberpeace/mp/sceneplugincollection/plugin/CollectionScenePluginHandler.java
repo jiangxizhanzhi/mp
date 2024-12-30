@@ -174,7 +174,7 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
         }
     }
 
-    public boolean enableProbeCollect() {
+    public boolean enableSceneGeneralProbeCollect() {
         if (Boolean.TRUE.equals(CollectionSingleton.collectionAppConfig.getEnableProbeCollect())) {
             // 优先判断是否默认全打开数据采集
             return true;
@@ -182,5 +182,16 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
         // 场景内的开关
         boolean sceneEnableProbeCollect = Boolean.TRUE.equals(getScene().getEnableProbeCollect());
         return sceneEnableProbeCollect;
+    }
+
+    public boolean enableElementProbeCollect() {
+        boolean hasElementProbeCollect = false;
+        for (var e : getElementMap().values()) {
+            if (Boolean.TRUE.equals(e.getEnableProbeCollect())) {
+                hasElementProbeCollect = true;
+                break;
+            }
+        }
+        return hasElementProbeCollect;
     }
 }
