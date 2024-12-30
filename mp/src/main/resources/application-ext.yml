@@ -2,11 +2,11 @@
 spring:
   datasource:
     ext-var:
-      db-ip: ${MP_DB_IP:10.100.7.1}
-      db-port: ${MP_DB_PORT:9306}
+      db-ip: ${MP_DB_IP:10.100.27.1}
+      db-port: ${MP_DB_PORT:3306}
       db-database: ${MP_DB_DATABASE:mp}
-      username: ${MP_DB_USERNAME:root}
-      password: ${MP_DB_PASSWORD:cyberpeace@2020}
+      username: ${MP_DB_USERNAME:mp}
+      password: ${MP_DB_PASSWORD:YjViMjg0Y2RiZWRh}
 
   flyway:
     ext-var:
@@ -78,6 +78,32 @@ mp:
   scene:
     ext-var:
       dhcp-control: ${MP_SCENE_DHCP_CONTROL:false}
+  sceneplugincloud:
+    ext-var:
+      delete-retry-times: ${MP_DELETE_RETRY_TIMES:2}
+      default-core-router-name: ${MP_DEFAULT_CORE_ROUTER_NAME:Router}
+      enable-reallocate-ip-ports: ${MP_ENABLE_REALLOCATE_IP_PORTS:false}
+      link-status-enabled: ${MP_LINK_STATUS_ENABLED:true}
+      link-status-refresh-period: ${MP_LINK_STATUS_REFRESH_PERIOD:5}
+      link-status-cache-seconds: ${MP_LINK_STATUS_CACHE_SECONDS:600}
+      link-status-pool-size: ${MP_LINK_STATUS_POOL_SIZE:10}
+      link-status-hold-size: ${MP_LINK_STATUS_HOLD_SIZE:200}
+      public-net-proxy-server: ${MP_PUBLIC_NET_PROXY_SERVER:false}
+      public-net-proxy: ${MP_PUBLIC_NET_PROXY:false}
+      public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:}
+      public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:}
+      gateway-types: ${GATEWAY_TYPES:2,3}
+      cpcloud-server-timeout: ${MP_CPCLOUD_SERVER_TIMEOUT:600000}
+      cpcloud-http-pool-size: ${MP_CPLOUD_HTTP_POOL_SIZE:50}
+      initiate-pool-size: ${MP_INITIATE_POOL_SIZE:100}
+      initiate-hold-size: ${MP_INITIATE_HOLD_SIZE:20000}
+      create-pool-size: ${MP_CREATE_POOL_SIZE:1}
+      create-hold-size: ${MP_CREATE_HOLD_SIZE:20000}
+      delete-pool-size: ${MP_DELETE_POOL_SIZE:1}
+      cloud-heavy-concurrent-delay-enable: ${MP_CLOUD_HEAVY_CONCURRENT_DELAY_ENABLE:true}
+      cloud-heavy-concurrent-delay: ${MP_CLOUD_HEAVY_CONCURRENT_DELAY:10}
+      scene-create-install-unzip-apk: ${MP_SCENE_CREATE_INSTALL_UNZIP_APK:true}
+      dhcp-ip-allocate: ${MP_DHCP_IP_ALLOCATE:true}
 
 # for kaptcha
 #kaptcha:

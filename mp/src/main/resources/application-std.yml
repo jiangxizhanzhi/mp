@@ -235,29 +235,30 @@ mp:
     cp-url: http://${mp.common.ext-var.cp-ip}:${mp.common.ext-var.cp-port} #云平台地址
   sceneplugincloud:
     cpcloud-server: http://${mp.common.ext-var.cp-ip}:${mp.common.ext-var.cp-port}
-    delete-retry-times: 2
-    default-core-router-name: Router
-    enable-reallocate-ip-ports: false
-    link-status-enabled: true
-    link-status-refresh-period: 5
-    link-status-cache-seconds: 600
-    link-status-pool-size: 10
-    link-status-hold-size: 200
-    public-net-proxy-server: false
-    public-net-proxy: false
-    public-net-proxy-ip:
-    public-net-proxy-port:
-    gateway-types: 2,3
-    cpcloud-server-timeout: 600000
-    cpcloud-http-pool-size: 200
-    initiate-pool-size: 10
-    initiate-hold-size: 20000
-    create-pool-size: 10
-    create-hold-size: 20000
-    cloud-heavy-concurrent-delay-enable: true
-    cloud-heavy-concurrent-delay: 10
-    scene-create-install-unzip-apk: true
-    dhcp-ip-allocate: true
+    delete-retry-times: ${mp.sceneplugincloud.ext-var.delete-retry-times}
+    default-core-router-name: ${mp.sceneplugincloud.ext-var.default-core-router-name}
+    enable-reallocate-ip-ports: ${mp.sceneplugincloud.ext-var.enable-reallocate-ip-ports}
+    link-status-enabled: ${mp.sceneplugincloud.ext-var.link-status-enabled}
+    link-status-refresh-period: ${mp.sceneplugincloud.ext-var.link-status-refresh-period}
+    link-status-cache-seconds: ${mp.sceneplugincloud.ext-var.link-status-cache-seconds}
+    link-status-pool-size: ${mp.sceneplugincloud.ext-var.link-status-pool-size}
+    link-status-hold-size: ${mp.sceneplugincloud.ext-var.link-status-hold-size}
+    public-net-proxy-server: ${mp.sceneplugincloud.ext-var.public-net-proxy-server}
+    public-net-proxy: ${mp.sceneplugincloud.ext-var.public-net-proxy}
+    public-net-proxy-ip: ${mp.sceneplugincloud.ext-var.public-net-proxy-ip}
+    public-net-proxy-port: ${mp.sceneplugincloud.ext-var.public-net-proxy-port}
+    gateway-types: ${mp.sceneplugincloud.ext-var.gateway-types}
+    cpcloud-server-timeout: ${mp.sceneplugincloud.ext-var.cpcloud-server-timeout}
+    cpcloud-http-pool-size: ${mp.sceneplugincloud.ext-var.cpcloud-http-pool-size}
+    initiate-pool-size: ${mp.sceneplugincloud.ext-var.initiate-pool-size}
+    initiate-hold-size: ${mp.sceneplugincloud.ext-var.initiate-hold-size}
+    create-pool-size: ${mp.sceneplugincloud.ext-var.create-pool-size}
+    create-hold-size: ${mp.sceneplugincloud.ext-var.create-hold-size}
+    delete-pool-size: ${mp.sceneplugincloud.ext-var.delete-pool-size}
+    cloud-heavy-concurrent-delay-enable: ${mp.sceneplugincloud.ext-var.cloud-heavy-concurrent-delay-enable}
+    cloud-heavy-concurrent-delay: ${mp.sceneplugincloud.ext-var.cloud-heavy-concurrent-delay}
+    scene-create-install-unzip-apk: ${mp.sceneplugincloud.ext-var.scene-create-install-unzip-apk}
+    dhcp-ip-allocate: ${mp.sceneplugincloud.ext-var.dhcp-ip-allocate}
   sceneplugincollection:
     wazuh-server-host: ${mp.situationaware.ext-var.wazuh-ip}
     wazuh-api-server: http://${mp.situationaware.ext-var.wazuh-ip}:15500
