@@ -42,7 +42,7 @@ public class PrepareHandler extends HandlerCommon {
         if (enableFlowCollect) {
             stageRecorder.addStage(CollectionSceneStage.CREATE_FLOW_COLLECT);
         }
-        if (enableProbeCollect) {
+        if (enableProbeCollect || enableElementProbeCollect) {
             stageRecorder.addStage(CollectionSceneStage.CREATE_DATA_COLLECT);
         }
 
