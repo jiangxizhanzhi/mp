@@ -112,6 +112,15 @@ public class AzureCreateHandler extends CreateHandler {
 
             // 先创建辅助网络
             List<Runnable> createTerminalTasks = new ArrayList<>();
+            //        创建外部网络+kali TODO 云场景使用传统kali机方案开发
+            var createExternalNetworkTasks = getPluginHandler().getAuxiliaryNetworkElement().stream()
+                    .map(cloudElement -> (Runnable) () -> createAuxiliaryNetworkProcess(cloudElement))
+                    .collect(Collectors.toList());
+            if (!createExternalNetworkTasks.isEmpty()) {
+                runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> {
+                    runTasks(createExternalNetworkTasks);
+                });
+            }
 //            空场景或不涉及云靶标的场景不启动资源组
             if (!allFilteredElements.isEmpty()) {
                 String groupId = "";
@@ -184,16 +193,6 @@ public class AzureCreateHandler extends CreateHandler {
                     // 添加格式化后的任务到列表
                     createAuxiliaryNetworkTasks.add(formatTask);
                 }
-                //        创建外部网络+kali TODO 云场景使用传统kali机方案开发
-                var createExternalNetworkTasks = getPluginHandler().getAuxiliaryNetworkElement().stream()
-                        .map(cloudElement -> (Runnable) () -> createAuxiliaryNetworkProcess(cloudElement))
-                        .collect(Collectors.toList());
-                createAuxiliaryNetworkTasks.addAll(createExternalNetworkTasks);
-                /*if (!createExternalNetworkTasks.isEmpty()) {
-                    runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> {
-                        runTasks(createExternalNetworkTasks);
-                    });
-                }*/
                 if (!createAuxiliaryNetworkTasks.isEmpty()) {
                     // 执行 创建所有网络
                     runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> runTasks(createAuxiliaryNetworkTasks));
