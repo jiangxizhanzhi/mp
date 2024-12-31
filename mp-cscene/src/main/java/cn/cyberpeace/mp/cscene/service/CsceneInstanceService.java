@@ -2868,7 +2868,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<ElementCommandExecResult> execElementV2(String id, String nodeId, String command,
-                                                                 String user, CsceneContextBO context, String loadNodeId) {
+                                                                 String user, CsceneContextBO context,
+                                                                 String loadNodeId, String resourceId) {
         String sceneId = getSceneId(id);
 //        此处保存态势动效任务
         String destinationIp = extractIP(command);
@@ -2881,13 +2882,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         ipNodeMap.putAll(pluginHandler.getElementMap().values().stream()
                 .collect(Collectors.toMap(CloudPluginSceneElementBO::getPublicIpAddress, element -> element.getSrcElement().getId(), (existingValue, newValue) -> newValue)));
         if (StringUtils.isNotBlank(destinationIp) && ipNodeMap.containsKey(destinationIp)) {
-//            找出目标节点
-//            载荷节点
-//            kali ip
+            SceneElementBO loadElement = sceneHandler.getElement(loadNodeId);
+            String loadElementName = loadElement.getName();
+
             var element = sceneHandler.getElement(nodeId);
             String sourceIp = element.getPorts().get(0).getIp();
             localLoadExecutionRecordModel.setScene(id);
+            localLoadExecutionRecordModel.setResourceId(resourceId);
             localLoadExecutionRecordModel.setLoadNode(loadNodeId);
+            localLoadExecutionRecordModel.setLoadNodeName(loadElementName);
             localLoadExecutionRecordModel.setSourceIp(sourceIp);
             localLoadExecutionRecordModel.setDestinationNode(ipNodeMap.get(destinationIp));
             localLoadExecutionRecordModel.setDestinationIp(destinationIp);
