@@ -1214,6 +1214,7 @@ public class CsceneSpecialService {
                 .filterEqual(CsceneInstanceModel::getDeleted, false)
                 .selectAs(CsceneInstanceModel::getName, CsceneInstanceModel::getName)
                 .currentLink(CloudPluginSceneElementModel.class)
+                .filterEqual(CloudPluginSceneElementModel::getNetMode, BaseCloudPluginSceneElementModel.NetMode.NORMAL)
                 .filterEqual(CloudPluginSceneElementModel::getVlanId, vlanId)
                 .setLimit(1);
         CsceneInstanceMapper csceneInstanceMapper = BeanCommon.getBean(CsceneInstanceMapper.class);
