@@ -25,7 +25,9 @@ import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.websocket.LoadResultWebSocketServer;
 import cn.cyberpeace.mp.cscene.websocket.WebSocketServer;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
+import cn.cyberpeace.mp.situationaware.utils.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -693,6 +695,12 @@ public class LoadServiceImpl {
      * 批量新增载荷执行结果
      * */
     public ServiceResult updateLoadExecutionOutResult(List<LoadRequest> requestData) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            log.info("begin updateLoadExecutionOutResult requestData:{}", objectMapper.writeValueAsString(requestData));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         // 验证参数
         if (!validateRequestData(requestData)) {
             return new ServiceResult(null, BaseErrorCode.ERROR, "列表数据部分参数缺失").asResult();
@@ -721,6 +729,7 @@ public class LoadServiceImpl {
 
         // 更新数据库
         Boolean success = requestData.size() > 0 && loadMapper.updateLoadExecutionOutResult(requestData);
+        log.info("end updateLoadExecutionOutResult success:{}", success);
         return success
                 ? new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult()
                 : new ServiceResult(null, BaseErrorCode.ERROR, "批量新增载荷执行结果失败").asResult();
