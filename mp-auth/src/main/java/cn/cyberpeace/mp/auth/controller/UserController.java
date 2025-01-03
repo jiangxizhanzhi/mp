@@ -158,6 +158,6 @@ public class UserController {
     @PostMapping("/isonline")
     public ServiceResult<List<String>> getIsOnline(@RequestBody List<String> list) {
         List<String> onlineList = userService.getIsOnline(list);
-        return ResultCommon.success(onlineList);
+        return new ServiceResult<>(onlineList).asResult();
     }
 }
