@@ -37,6 +37,7 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
         public static final int FIREWALL = 3;
         public static final int TERMINAL = 4;
         public static final int NPC = 7;
+        public static final int EQUIPMENT = 8;
 
         private Type() {}
     }

@@ -117,7 +117,11 @@ public class TypeService extends BaseCpService {
         }
         CloudPlatformItemsPageResult pageResult = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + TYPE + QUESTION_TYPE + type + "&isAll=" + isAll, CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
+        TypeItemModel typeItemModel = new TypeItemModel();
         List<TypeItemModel> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), TypeItemModel.class);
+        typeItemModel.setId(24);
+        typeItemModel.setName("Equipment");
+        list.add(typeItemModel);
         CloudPlatformPageResult<TypeItemModel> model = new CloudPlatformPageResult();
         model.setList(list);
         lfuCache.put(key,model,TIME_OUT);
