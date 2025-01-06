@@ -184,7 +184,12 @@ public class DevopsTargetController {
             List<Device> secondDeviceList = targetSceneConvertModel.getList();
             deviceList.addAll(secondDeviceList);
         }
-        return new Result(new ListResult<>(deviceList));
+        List<Device> finalDeviceList = new ArrayList<>();
+        if(request.getBussnessTag() != null){
+            // 筛选出业务标签对应的数据
+            finalDeviceList = deviceList.stream().filter(device -> device.getBusinessTag().equals(request.getBussnessTag())).collect(Collectors.toList());
+        }
+        return new Result(new ListResult<>(finalDeviceList));
     }
 
 

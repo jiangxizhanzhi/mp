@@ -135,4 +135,10 @@ public class TargetSceneRequest extends BasePageRequest implements Serializable 
     @ApiModelProperty(value = "操作系统类型：1 WINDOWS, 2 LINUX, 3 UNIX, 4 BSD, 5 OTHER")
     private Integer parentSystemType;
 
+    /**
+     * 业务标签类型
+     */
+    @ApiModelProperty(value = "业务标签类型")
+    private Integer bussnessTag;
+
 }
