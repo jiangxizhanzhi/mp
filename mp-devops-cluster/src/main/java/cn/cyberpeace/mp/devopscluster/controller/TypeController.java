@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.devopscluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devopscluster.converter.model.SerialPortConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.SwitchConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.TypeAllConvertModel;
+import cn.cyberpeace.mp.devopscluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetType;
 import cn.cyberpeace.mp.devopscluster.vo.SerialPortVO;
 import cn.cyberpeace.mp.devopscluster.vo.TypeAllVO;
@@ -105,11 +106,16 @@ public class TypeController {
         var firstTypeList = Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getFirstTypeList() : null;
         if (CollectionUtils.isNotEmpty(firstTypeList)) {
             for (int i = 0; i < firstTypeList.size(); i++) {
-                if (firstTypeList.get(i).getId() == 5) {
+                if (firstTypeList.get(i).getId() == 5) {// 硬件外设
                     firstTypeList.remove(i);
                     break;
                 }
             }
+            // yz4新增业务标签选择镜像
+            TypeConvertModel model = new TypeConvertModel();
+            model.setId(6);
+            model.setName("业务标签");
+            firstTypeList.add(model);
         }
         allResponse.setFirstTypeList(firstTypeList);
         allResponse.setSecondTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getSecondTypeList() : null);

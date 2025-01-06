@@ -72,7 +72,7 @@ public class GenerateEntityLogfileTask {
     private CsceneInstanceService modelService;
 
     // todo 假数据,telnet接入实体设备时，部分设备不能够执行ls -l命令
-    private Map<String,Integer> telnet_FilePath_Size = new HashMap<>();
+    private Map<String, Integer> telnet_FilePath_Size = new HashMap<>();
 
     @Scheduled(cron = "0 */1 * * * ?")
     private void generateEntityLogfile() {
@@ -183,7 +183,7 @@ public class GenerateEntityLogfileTask {
                 } catch (Exception e) {
                     log.info("no return data...");
                     Integer spuriousSize = telnet_FilePath_Size.get(nodeId);
-                    if(spuriousSize == null){
+                    if (spuriousSize == null) {
                         telnet_FilePath_Size.put(nodeId, 13);
                     }
                     writeData(telnet_FilePath_Size.get(nodeId).toString(), csceneInstanceModel, info.getNode().getEid(), protocol, config.getFile(),
@@ -202,7 +202,7 @@ public class GenerateEntityLogfileTask {
                 // 执行结果解析
                 ExecCommandResult execCommandResult = JSONObject.parseObject(result, ExecCommandResult.class);
                 log.info("ssh exec_list_cmds analyzed result", execCommandResult);
-                if(execCommandResult.getData() == null){
+                if (execCommandResult.getData() == null) {
                     execCommandResult.setData(new ArrayList<>());
                 }
                 // 遍历返回信息
@@ -240,19 +240,19 @@ public class GenerateEntityLogfileTask {
                         log.error("Failed to write data for file: {}", config.getFile(), e);
                     }
                 }
-            }else if(StringUtils.isNotBlank(result) && protocol.equals(TYPE_TELNET)){
+            } else if (StringUtils.isNotBlank(result) && protocol.equals(TYPE_TELNET)) {
                 log.info("telnet exec_list_cmds analyzing result :" + result);
                 // 执行结果解析
                 ExecCommandResult execCommandResult = JSONObject.parseObject(result, ExecCommandResult.class);// 只会解析出一行
                 log.info("telnet exec_list_cmds analyzed result :" + execCommandResult);
-                if(execCommandResult.getData() == null){
+                if (execCommandResult.getData() == null) {
                     execCommandResult.setData(new ArrayList<>());
                 }
                 // 遍历返回信息
                 for (String commandResult : execCommandResult.getData()) {
                     String[] split = commandResult.split("\r\n");
                     // 对result 进行二次处理
-                    for(String line : split){
+                    for (String line : split) {
                         String sizeMessage = "";
                         // 清理所有 ANSI 控制序列
                         line = line.replaceAll("\\u001B\\[[;?0-9]*[a-zA-Z]", "").trim();
@@ -262,7 +262,7 @@ public class GenerateEntityLogfileTask {
                         String regex = "^[-d].*\\s\\d+\\s\\w+\\s+\\w+\\s+\\d+\\s+[A-Za-z]{3}\\s+\\d{1,2}\\s+\\d{2}:\\d{2}\\s+/?.*$";
                         Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
                         Matcher matcher = pattern.matcher(line);
-                        if(matcher.find()){
+                        if (matcher.find()) {
                             // 提取文件大小信息
                             try {
                                 // 示例：-rw-r--r-- 1 root root 56 Nov 30 03:16 /home/1233.txt
@@ -285,10 +285,10 @@ public class GenerateEntityLogfileTask {
                     }
                 }
                 log.info("telnet exec_list_cmds result, write spurious data");
-                if(!flag && protocol.equals(TYPE_TELNET)){// 说明没查到数据
+                if (!flag && protocol.equals(TYPE_TELNET)) {// 说明没查到数据
                     log.info("no return data!!!");
                     Integer spuriousSize = telnet_FilePath_Size.get(nodeId);
-                    if(spuriousSize == null){
+                    if (spuriousSize == null) {
                         telnet_FilePath_Size.put(nodeId, 13);
                     }
                     writeData(telnet_FilePath_Size.get(nodeId).toString(), csceneInstanceModel, info.getNode().getEid(), protocol, config.getFile(),
@@ -334,10 +334,13 @@ public class GenerateEntityLogfileTask {
         String sceneId = downloadFileRequest.getSceneId();
         // 获取运行中的场景列表
         HumanCondition condition = new HumanCondition()
-                    .filterEqual(CsceneInstanceModel::getDeleted, false);
+                .filterEqual(CsceneInstanceModel::getDeleted, false);
         List<CsceneInstanceModel> list = csceneInstanceMapper.list(condition);
         for (CsceneInstanceModel csceneInstanceModel : list) {
             try {
+                if (!csceneInstanceModel.getId().equals(sceneId)) {
+                    return;
+                }
                 // 判断场景实例是否处于进行中状态
                 if (!csceneCommonService.isCsceneInstanceRunning(csceneInstanceModel.getId())) {
                     return;
@@ -371,22 +374,82 @@ public class GenerateEntityLogfileTask {
                             log.info("deviceTargetPO.getTelnetConfig={}", deviceTargetPO.getTelnetConfig());
                             EntityLogfileConfig sshConfig = JSONObject.parseObject(deviceTargetPO.getSshConfig(), EntityLogfileConfig.class);
                             EntityLogfileConfig telnetConfig = JSONObject.parseObject(deviceTargetPO.getTelnetConfig(), EntityLogfileConfig.class);
-                            // 下载文件,通过执行scp命令将文件传到本地
-                            String command = "scp -r " + sshConfig.getUsername() + "@" + sshConfig.getIp() + ":" + sshConfig.getFile() + " " + downloadFileRequest.getFilePath();
-                            if (checkConfigComplete(sshConfig)) {
-                                queryEntityLogfile(csceneInstanceModel.getId(), entry.getKey(), TYPE_SSH, elementBO, sshConfig, csceneInstanceModel, node_eid_id_Map, nodeIdNameMap);
+                            if (downloadFileRequest.getProtocol().equals(TYPE_SSH) && checkConfigComplete(sshConfig)) {
+                                downloadLogfile(csceneInstanceModel.getId(), entry.getKey(), TYPE_SSH, elementBO, sshConfig, csceneInstanceModel, node_eid_id_Map, nodeIdNameMap);
                             }
-                            if (checkConfigComplete(telnetConfig)) {
-                                queryEntityLogfile(csceneInstanceModel.getId(), entry.getKey(), TYPE_TELNET, elementBO, telnetConfig, csceneInstanceModel, node_eid_id_Map, nodeIdNameMap);
+                            if (downloadFileRequest.getProtocol().equals(TYPE_TELNET) && checkConfigComplete(telnetConfig)) {
+                                downloadLogfile(csceneInstanceModel.getId(), entry.getKey(), TYPE_TELNET, elementBO, telnetConfig, csceneInstanceModel, node_eid_id_Map, nodeIdNameMap);
                             }
                         }
                     }
                 }
             } catch (Exception e) {
-                log.error("GenerateEntityLogfileJob error, csceneInstanceModel={}", csceneInstanceModel, e);
+                log.error("downloadFile error ......");
             }
         }
+    }
 
+    private void downloadLogfile(String csceneId, String nodeId, String type, CloudPluginSceneConfigElementBO elementBO, EntityLogfileConfig config,
+                                 CsceneInstanceModel csceneInstanceModel, Map<String, String> node_eid_id_Map, Map<String, String> nodeIdNameMap) {
+        try {
+            Info info = this.getParsedInfo(csceneId, nodeId, config.getIp());
+            // 必须开启了场景内部服务
+            String internalVmId = info.getInternalVmId();
+            if (StringUtils.isEmpty(internalVmId)) {
+                log.error("未开启场景内部服务!");
+                return;
+            }
+
+            CmdListRequest downloadFileRequest = new CmdListRequest();
+            downloadFileRequest.setUser(config.getUsername());
+            downloadFileRequest.setPort(Integer.parseInt(config.getPort()));
+            downloadFileRequest.setHost(config.getIp());
+            downloadFileRequest.setPassword(config.getPassword());
+            String frameServerConfigIp = info.getFrameServerConfigIp();
+
+            String result = null;
+            if (TYPE_SSH.equals(type)) {
+                String url = "http://{ip}:8001/agent/ssh/exec_list_cmds".replace("{ip}", frameServerConfigIp);
+                String fileName = config.getFile().substring(config.getFile().lastIndexOf("/") + 1);
+                // todo 获取本地服务器的账号密码
+                String localServerIp = "10.108.1.10";
+                String localServerPassword = "CPMDEwMTAuMT123#";
+                String cmdRequest =
+                        "scp " + config.getFile() + " root@" + localServerIp
+                                + ":/temp_scene_file/" + fileName;
+                downloadFileRequest.setCmds(List.of(cmdRequest));
+                result = HttpUtils.sendPost(url, JsonCommon.snakeStringify(downloadFileRequest));
+                String secondCmdRequest = "yes";
+                downloadFileRequest.setCmds(List.of(secondCmdRequest));
+                result = HttpUtils.sendPost(url, JsonCommon.snakeStringify(downloadFileRequest));
+                String thirdCmdRequest = localServerPassword;
+                downloadFileRequest.setCmds(List.of(thirdCmdRequest));
+                result = HttpUtils.sendPost(url, JsonCommon.snakeStringify(downloadFileRequest));
+
+                if(result.contains("command not found")){
+                    downloadFileRequest.setCmds(List.of(cmdRequest));
+                    result = HttpUtils.sendPost(url, JsonCommon.snakeStringify(downloadFileRequest));
+                    downloadFileRequest.setCmds(List.of(thirdCmdRequest));
+                    result = HttpUtils.sendPost(url, JsonCommon.snakeStringify(downloadFileRequest));
+                }
+                log.info("ssh ftp download result:{}", result);
+            } else if (TYPE_TELNET.equals(type)) {// todo 待完善
+                String url = "http://{ip}:8001/agent/telnet/exec_list_cmds".replace("{ip}", frameServerConfigIp);
+                downloadFileRequest.setCmds(null);
+                downloadFileRequest.setRemotePath(config.getFile());
+                return;
+            }
+
+            if (StringUtils.isNotBlank(result) && type.equals(TYPE_SSH)) {
+                // 解析是否成功
+
+            } else if (StringUtils.isNotBlank(result) && type.equals(TYPE_TELNET)) {
+                // todo
+            }
+        } catch (Exception e) {
+            // 异常不进行抛出，记录异常信息即可
+            log.error("downloadLogfile error, type={}, elementBO={}, config={}", type, elementBO, config, e);
+        }
     }
 
     @Data

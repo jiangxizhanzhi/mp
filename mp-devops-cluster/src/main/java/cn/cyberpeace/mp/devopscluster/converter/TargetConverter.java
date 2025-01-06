@@ -72,7 +72,11 @@ public class TargetConverter{
      */
     public BasePageBO<Device> allTarget(ImagePageDTO dto) {
         BasePageBO<DeviceTargetPO> targetPageModel = this.page(dto);
-
+        // map收集uuid,bussness_tag
+        Map<String, Integer> deviceTagMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(targetPageModel.getList())){
+            deviceTagMap = targetPageModel.getList().stream().collect(Collectors.toMap(DeviceTargetPO::getUuid, DeviceTargetPO::getBusinessTag));
+        }
         List<DeviceTargetPO> deviceTargetPOS = targetPageModel.getList();
         Map<String,DeviceTargetPO> supportExports = new HashMap<>();
         deviceTargetPOS.stream().forEach(d -> {
@@ -109,7 +113,11 @@ public class TargetConverter{
             }
         }
         POLogoUtils.changeLogoPathToUrl(model.getList());
-        sceneConvertModel.setList(model.getList());
+        List<Device> modelList = model.getList();
+        for(Device device : modelList){
+            device.setBusinessTag(deviceTagMap.get(device.getUuid()));
+        }
+        sceneConvertModel.setList(modelList);
         return sceneConvertModel;
     }
 
