@@ -75,7 +75,9 @@ public class TargetConverter{
         // map收集uuid,bussness_tag
         Map<String, Integer> deviceTagMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(targetPageModel.getList())){
-            deviceTagMap = targetPageModel.getList().stream().collect(Collectors.toMap(DeviceTargetPO::getUuid, DeviceTargetPO::getBusinessTag));
+            targetPageModel.getList().stream().forEach(d -> {
+                deviceTagMap.put(d.getUuid(), d.getBusinessTag());
+            });
         }
         List<DeviceTargetPO> deviceTargetPOS = targetPageModel.getList();
         Map<String,DeviceTargetPO> supportExports = new HashMap<>();
