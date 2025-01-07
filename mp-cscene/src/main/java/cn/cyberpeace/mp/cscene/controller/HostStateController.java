@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -456,7 +457,8 @@ public class HostStateController implements BaseModelListControllerBase {
                 writer.write(processInfo, writeSheet, writeTable5);
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("导出主机信息Excel失败", e);
+            throw new MpRuntimeException("导出主机信息Excel失败");
         } finally {
             if (writer != null) {
                 writer.finish();
@@ -669,7 +671,8 @@ public class HostStateController implements BaseModelListControllerBase {
             writer.write(probeCollectionData, writeSheet27, writeTable7);
 
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("导出主机采集信息Excel失败", e);
+            throw new MpRuntimeException("导出主机采集信息Excel失败");
         } finally {
             if (writer != null) {
                 writer.finish();
