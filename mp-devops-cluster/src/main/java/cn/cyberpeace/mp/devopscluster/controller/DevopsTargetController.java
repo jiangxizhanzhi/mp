@@ -184,14 +184,22 @@ public class DevopsTargetController {
             List<Device> secondDeviceList = targetSceneConvertModel.getList();
             deviceList.addAll(secondDeviceList);
         }
-        List<Device> finalDeviceList = new ArrayList<>();
-        if(request.getBussnessTag() != null){
-            // 筛选出业务标签对应的数据
-            finalDeviceList = deviceList.stream()
-                    .filter(device -> Objects.equals(device.getBusinessTag(), request.getBussnessTag()))
-                    .collect(Collectors.toList());
+        if(request.getIsSearchBussnessTag() != null && request.getIsSearchBussnessTag()){// yz4新增的业务标签相关靶标
+            if(request.getBussnessTag() != null){
+                // 筛选出业务标签对应的数据
+                List<Device> finalDeviceList = deviceList.stream()
+                        .filter(device -> Objects.equals(device.getBusinessTag(), request.getBussnessTag()))
+                        .collect(Collectors.toList());
+                return new Result(new ListResult<>(finalDeviceList));
+            }else{
+                // 筛选出所有有业务标签的数据
+                List<Device> finalDeviceList = deviceList.stream()
+                        .filter(device -> Objects.nonNull(device.getBusinessTag()))
+                        .collect(Collectors.toList());
+                return new Result(new ListResult<>(finalDeviceList));
+            }
         }
-        return new Result(new ListResult<>(finalDeviceList));
+        return new Result(new ListResult<>(deviceList));
     }
 
 
