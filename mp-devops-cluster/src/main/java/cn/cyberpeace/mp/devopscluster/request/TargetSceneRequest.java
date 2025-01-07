@@ -141,4 +141,9 @@ public class TargetSceneRequest extends BasePageRequest implements Serializable 
     @ApiModelProperty(value = "业务标签类型")
     private Integer bussnessTag;
 
+    /**
+     * 是否查询业务标签
+     */
+    @ApiModelProperty(value = "是否查询业务标签")
+    private Boolean isSearchBussnessTag;
 }
