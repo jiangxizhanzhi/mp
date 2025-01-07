@@ -35,6 +35,9 @@ public class MultiCloudConfig {
             // 未开启多云 则无论传什么key都返回默认的云
             return cloudConfigs.get(DEFAULT).getCloudHttpClient();
         } else {
+            if (key == null) {
+                key = DEFAULT;
+            }
             return cloudConfigs.get(key).getCloudHttpClient();
         }
     }
