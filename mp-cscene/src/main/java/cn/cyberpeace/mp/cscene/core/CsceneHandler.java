@@ -351,7 +351,8 @@ public class CsceneHandler extends BaseCsceneHandler<
                             }
                         }
                     }
-                    if (e.get("vlan_id") != null && Integer.parseInt(e.get("vlan_id").toString()) != 0) {
+                    if (e.get("vlan_id") != null && Integer.parseInt(e.get("vlan_id").toString()) != 0
+                            && e.get("net_mode") != BaseCloudPluginSceneElementModel.NetMode.MACVLAN) {
                         var result = csceneSpecialService.getInstanceUseVlanId((Integer) e.get("vlan_id")).getSource();
                         if (CollectionUtils.isNotEmpty(result)) {
                             throw new MpRuntimeException(CsceneErrorCode.VLANID_HAS_BEEN_USED.format(String.valueOf(e.get("vlan_id")), JsonCommon.stringify(result.get(0).getName())));
