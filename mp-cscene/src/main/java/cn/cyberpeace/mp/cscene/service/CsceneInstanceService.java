@@ -686,7 +686,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return bulkDeleteByIds(csceneInstanceObjs.stream().map(BaseModel::getId).toArray(String[]::new), false, context);
     }
 
-    public ServiceResult<List<UserNodeSessionInfo>> getNodeSessions(List<String> ids, List<String> nodeIds, List<String> userIds, String type) {
+    public ServiceResult<List<UserNodeSessionInfo>> getNodeSessions(List<String> ids, List<String> nodeIds, List<String> portIds, List<String> userIds, String type) {
         if (type == null) {
             type = MONITOR;
         }
@@ -701,15 +701,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         switch (type) {
             case ASSISTANT:
                 nodeSessionResult = scenePluginCloudSceneService.getSceneRemoteSessions(
-                        sceneIds, nodeIds, userIds, false, true);
+                        sceneIds, nodeIds, portIds, userIds, false, true);
                 break;
             case ALL:
                 nodeSessionResult = scenePluginCloudSceneService.getSceneRemoteSessions(
-                        sceneIds, nodeIds, userIds, true, true);
+                        sceneIds, nodeIds, portIds, userIds, true, true);
                 break;
             case MONITOR:
                 nodeSessionResult = scenePluginCloudSceneService.getSceneRemoteSessions(
-                        sceneIds, nodeIds, userIds, true, false);
+                        sceneIds, nodeIds, portIds, userIds, true, false);
                 break;
             default:
                 throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);

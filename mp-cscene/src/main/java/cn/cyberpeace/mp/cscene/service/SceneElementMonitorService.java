@@ -922,7 +922,7 @@ public class SceneElementMonitorService {
      */
     private int countNodeSessionUsers(BaseSceneElementRequest baseSceneElementRequest) {
         BaseRequestUtil.checkBaseRequestWithSceneId(baseSceneElementRequest);
-        ServiceResult<List<UserNodeSessionInfo>> result = csceneInstanceService.getNodeSessions(CollectionUtil.toList(baseSceneElementRequest.getSceneId()), baseSceneElementRequest.getElementIds(), null, null);
+        ServiceResult<List<UserNodeSessionInfo>> result = csceneInstanceService.getNodeSessions(CollectionUtil.toList(baseSceneElementRequest.getSceneId()), baseSceneElementRequest.getElementIds(), null, null, null);
         if (CollectionUtil.isNotEmpty(result.getSource())) {
             return result.getSource().size();
         } else {
