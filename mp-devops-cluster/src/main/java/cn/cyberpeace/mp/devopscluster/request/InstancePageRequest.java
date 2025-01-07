@@ -23,4 +23,7 @@ public class InstancePageRequest extends BasePageRequest implements Serializable
 
     @ApiModelProperty(value = "IP地址")
     private String addr;
+
+    @ApiModelProperty(value = "节点名称")
+    private String node;
 }

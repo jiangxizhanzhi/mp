@@ -38,6 +38,8 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
+import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -101,6 +103,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     private CsceneSpecialService csceneSpecialService;
 
     private CsceneFileService csceneFileService;
+
+    @Autowired
+    private CsceneInstanceMapper csceneInstanceMapper;
 
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
@@ -415,6 +420,36 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                                @RequestParam(required = false) String nodeId,
                                                                @RequestParam(required = false) String accessModeId,
                                                                @RequestBody(required = false) CsceneInstanceNodeAccessModeActionRequest request) {
+        request = formatNodeAccessModeActionRequest(request, id, nodeId, accessModeId);
+        return modelService.getRemoteConnection(request.getId(), request.getNodeId(), request.getAccessModeId(),
+                request.getContext()).asResult();
+    }
+
+    @ApiOperation("计算机实力管理-场景实例获取远程连接")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "node", value = "节点名称", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "accessModeId", value = "接入方式id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeAccessModeActionRequest.class),
+
+    })
+    @PostMapping(value = "/get_jsj_connection")
+    public ServiceResult<NodeConnectionBO> getRemoteConnectionForJSJ(@RequestParam(required = false) String node,
+                                                                     @RequestParam(required = false) String id,
+                                                                     @RequestParam(required = false) String nodeId,
+                                                                     @RequestParam(required = false) String accessModeId,
+                                                                     @RequestBody(required = false) CsceneInstanceNodeAccessModeActionRequest request) {
+        log.info("do get_jsj_connection : node->{}",node);
+        node = node.substring(9);
+        CsceneInstanceModel csceneInstanceModel = csceneInstanceMapper.getNodeInfoForConnect(node);
+        if(csceneInstanceModel != null) {
+            id = csceneInstanceModel.getLogo();
+            nodeId = csceneInstanceModel.getCscene();
+        } else {
+            log.info("do get_jsj_connection error : node is illegal ->{}",node);
+//            return null;
+        }
         request = formatNodeAccessModeActionRequest(request, id, nodeId, accessModeId);
         return modelService.getRemoteConnection(request.getId(), request.getNodeId(), request.getAccessModeId(),
                 request.getContext()).asResult();

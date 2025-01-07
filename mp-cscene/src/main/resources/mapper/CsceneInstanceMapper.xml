@@ -96,4 +96,15 @@
         </foreach>
     </select>
 
+    <select id="getNodeInfoForConnect" resultType="cn.cyberpeace.mp.cscene.model.CsceneInstanceModel">
+        SELECT
+            a.node_id as cscene,
+            c.id as logo
+        FROM
+            mp_scene_scene_element a
+                LEFT JOIN mp_cscene_cscene_instance c ON c.scene = a.scene
+        WHERE
+            a.id = #{node} limit 1
+    </select>
+
 </mapper>

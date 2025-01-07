@@ -26,4 +26,9 @@ public class ImagesCreateInstanceCloudPlatform extends BaseRequest {
      */
     private String requestUser;
 
+    /**
+     * 传入主机名，支持指定主机创建虚拟机和容器
+     */
+    private String host;
+
 }

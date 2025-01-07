@@ -33,6 +33,7 @@ import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -43,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ImagesConverter implements BaseConverter{
@@ -340,7 +342,24 @@ public class ImagesConverter implements BaseConverter{
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         String insctanceCreateUser = Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : StringUtils.EMPTY;
-        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser));
+        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser,""));
+        var updateTargetModel = new DeviceTargetPO();
+        updateTargetModel.setUuid(uuid);
+        updateTargetModel.setInstanceCreateUser(insctanceCreateUser);
+        deviceTargetMapper.updateById(updateTargetModel);
+    }
+
+    /**
+     * 创建镜像机器
+     * @param uuid
+     */
+    public void createForBJYD(String uuid,String host) {
+        if (StringUtils.isBlank(uuid) || StringUtils.isBlank(host)) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        String insctanceCreateUser = Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : StringUtils.EMPTY;
+        log.info("do createForBJYD : {},{},{}",uuid,insctanceCreateUser,host);
+        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser,host));
         var updateTargetModel = new DeviceTargetPO();
         updateTargetModel.setUuid(uuid);
         updateTargetModel.setInstanceCreateUser(insctanceCreateUser);

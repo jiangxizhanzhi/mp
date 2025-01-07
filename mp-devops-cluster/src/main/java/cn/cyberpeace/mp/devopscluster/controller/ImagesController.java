@@ -347,10 +347,11 @@ public class ImagesController {
      * 创建虚拟机/容器
      */
     @ApiOperation("编辑镜像")
-    @PostMapping("/{id}/create")
+    @PostMapping("/{id}/{host}/create")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.START, title = "创建虚拟机/容器", target = OpTargetEnums.IMAGE)
-    public ServiceResult create(@PathVariable("id") String uuid){
-        imagesConverter.create(uuid);
+    public ServiceResult create(@PathVariable("id") String uuid,@PathVariable("host") String host){
+        log.info(" do create image bjyd : {},{}",uuid,host);
+        imagesConverter.createForBJYD(uuid,host);
         return ResultCommon.success();
     }
 
