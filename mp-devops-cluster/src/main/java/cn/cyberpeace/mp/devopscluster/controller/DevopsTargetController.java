@@ -187,7 +187,9 @@ public class DevopsTargetController {
         List<Device> finalDeviceList = new ArrayList<>();
         if(request.getBussnessTag() != null){
             // 筛选出业务标签对应的数据
-            finalDeviceList = deviceList.stream().filter(device -> device.getBusinessTag().equals(request.getBussnessTag())).collect(Collectors.toList());
+            finalDeviceList = deviceList.stream()
+                    .filter(device -> Objects.equals(device.getBusinessTag(), request.getBussnessTag()))
+                    .collect(Collectors.toList());
         }
         return new Result(new ListResult<>(finalDeviceList));
     }
