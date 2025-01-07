@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.util.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
@@ -72,6 +73,7 @@ public class CreateHandler extends HandlerCommon {
         public static final EventProcess CREATE_ENTITY_NODE = new EventProcess("create_entity_node", "sceneplugincloud.event.create_entity_node");
         public static final EventProcess CREATE_NPC = new EventProcess("create_npc", "sceneplugincloud.event.create_npc");
         public static final EventProcess CREATE_DYNAMIC = new EventProcess("create_dynamic", "sceneplugincloud.event.create_dynamic");
+        public static final EventProcess CREATE_OTHER = new EventProcess("create_other", "sceneplugincloud.event.create_other");
     }
 
     @Data
@@ -1257,6 +1259,7 @@ public class CreateHandler extends HandlerCommon {
         long firewallTasks = getPluginHandler().getFirewallElementMap().values().size();
         long terminalTasks = getPluginHandler().getTerminalElementMap().values().size();
         int stepPercentage = (int) (100 / Math.max(networkTasks + gatewayTasks + firewallTasks + terminalTasks, 1));
+        List<CloudPluginSceneElementBO> filteredNetworkEquipmentElements = this.filterNetworkEquipmentElements(new ArrayList<>(getPluginHandler().getElementMap().values()));
 
         // 先创建辅助网络(包含虚拟交换机)
         var createAuxiliaryNetworkTasks = getPluginHandler().getElementMap().values().stream()
@@ -1311,6 +1314,20 @@ public class CreateHandler extends HandlerCommon {
         if (network2Info.values().size() > 0) {
             runSceneProgress(SceneProcess.CREATE_NPCS, () -> createNpcElements(new ArrayList<>(network2Info.values())));
         }
+
+        List<Runnable> createNetworkEquipmentTasks = new ArrayList<>();
+        for (CloudPluginSceneElementBO element : filteredNetworkEquipmentElements) {
+            String nodeId = element.getSrcElement().getId();
+            Runnable task = new Runnable() {
+                @Override
+                public void run() {
+//
+                }
+            };
+            Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, ElementProcess.CREATE_OTHER, task);
+            createNetworkEquipmentTasks.add(formatTask);
+        }
+        createTerminalTasks.addAll(createNetworkEquipmentTasks);
         // 下发配置
         runSceneProgress(SceneProcess.CONFIGURE, () -> {
             configDynamic(new ArrayList<>(getPluginHandler().getElementMap().values()));
@@ -1328,6 +1345,23 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    private Runnable formatElementTask(String nodeId, int stepPercentage, EventProcess elementProcess, Runnable action) {
+        return () -> {
+            runElementProgress(nodeId, elementProcess, action);
+            getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
+        };
+    }
+
+
+    private List<CloudPluginSceneElementBO> filterNetworkEquipmentElements(List<CloudPluginSceneElementBO> allElements) {
+        List<CloudPluginSceneElementBO> filterElements = new ArrayList<>();
+        for (var c : allElements) {
+            if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(c.getImageType())&&(BaseCloudPluginSceneElementModel.Role.EQUIPMENT==c.getRole())) {
+                filterElements.add(c);
+            }
+        }
+        return filterElements;
+    }
     protected void prepareEventProcess() {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
     }
@@ -1359,10 +1393,16 @@ public class CreateHandler extends HandlerCommon {
                     cloudElement.getSrcElement().getId());
             return;
         }
+        if (cloudElement.getRole()==24){
+            virtualType= 8;
+            cloudElement.setVirtualType(virtualType);
+        }
+        //Todo
+
 
         if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
-            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_VIRTUAL_SWITCH,
-                    () -> cloudElement.setResourceId(cloudElement.getAuxiliaryNetworkId()));
+            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_VIRTUAL_ROUTER,
+                    () -> createVirtualRouter(cloudElement));
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
             runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_VIRTUAL_ROUTER,
                     () -> createVirtualRouter(cloudElement));
@@ -1382,6 +1422,14 @@ public class CreateHandler extends HandlerCommon {
             runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_NPC, () -> recordNpcNode(cloudElement));
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.DYNAMIPS)) {
             runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_DYNAMIC, () -> createVirtualDynamips(cloudElement));
+        }else if (cloudElement.getSrcElement().getType().equals(BaseSceneElementModel.Type.EQUIPMENT)){
+            runElementProgress(cloudElement.getSrcElement().getId(),ElementProcess.CREATE_OTHER,
+                    ()-> new Runnable() {
+                        @Override
+                        public void run() {
+
+                        }
+                    });
         }
     }
 
@@ -1395,10 +1443,12 @@ public class CreateHandler extends HandlerCommon {
 
         List<Runnable> configDynamicIps = dynamicElements.stream().map(e -> (Runnable) () -> {
             List<String> commands = new ArrayList<>();
-            commands.addAll(DynamicCommandUtils.genSetIpCmdList(e, getPluginHandler()));
-            commands.addAll(DynamicCommandUtils.genNetworkCmdList(e, getPluginHandler()));
-            // 下发配置
-            vdClient.sendRule(e.getResourceId(), commands);
+            if (e.getRole()!=24) {
+                commands.addAll(DynamicCommandUtils.genSetIpCmdList(e, getPluginHandler()));
+                commands.addAll(DynamicCommandUtils.genNetworkCmdList(e, getPluginHandler()));
+                // 下发配置
+                vdClient.sendRule(e.getResourceId(), commands);
+            }
         }).collect(Collectors.toList());
         runTasks(configDynamicIps);
     }

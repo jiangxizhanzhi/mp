@@ -171,10 +171,14 @@ public class CsceneDataModifier {
         Map<String, Map<String, Object>> cloudElements = cloudPlugin.getElements();
         if (cloudElements != null) {
             for (SceneElementBO elementBO : csceneInstance.getScene().getTopology().getElements()) {
+
                 if (CollectionUtils.isEmpty(elementBO.getPorts())) {
                     continue;
                 }
                 Map<String, Object> cloudElement = cloudElements.get(elementBO.getId());
+                if (cloudElement.get("role").equals(24)){
+                    continue;
+                }
                 if (cloudElement == null) {
                     continue;
                 }

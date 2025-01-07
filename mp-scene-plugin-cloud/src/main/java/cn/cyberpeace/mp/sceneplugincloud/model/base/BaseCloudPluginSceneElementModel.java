@@ -194,6 +194,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final int VIRTUAL_TRANSPARENT_GATEWAY = 5;
         public static final int VIRTUAL_GATEWAY = 6;
         public static final int NPC = 7;
+        public static final int EQUIPMENT = 24;
         public static final int VIRTUAL_LAYER_3_IMAGE_GATEWAY = 20;
         public static final int VIRTUAL_LAYER_3_SIMPLE_ROUTER = 21;
         public static final int VIRTUAL_LAYER_3_SIMPLE_SWITCH = 22;

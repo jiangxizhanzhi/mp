@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
@@ -202,6 +203,7 @@ public class SceneService {
                     e.setEvent(SceneElementModel.Event.DEFAULT);
                     e.setEventStatus(EventStatus.INITIAL);
                 }
+//                if (e.getType() == BaseSceneElementModel.Type.EQUIPMENT) {}
             });
 
             for (var e : updatedSceneHandler.getElementMap().values()) {
