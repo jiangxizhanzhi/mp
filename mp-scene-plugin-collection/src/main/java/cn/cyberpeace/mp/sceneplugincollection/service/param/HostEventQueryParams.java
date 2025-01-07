@@ -73,4 +73,9 @@ public class HostEventQueryParams extends QueryParams {
      */
     @ApiModelProperty(value = "节点id列表")
     private String nodeId;
+
+    @ApiModelProperty(value = "ID")
+    private String id;
+    private String requestId;
+    private String probeId;
 }

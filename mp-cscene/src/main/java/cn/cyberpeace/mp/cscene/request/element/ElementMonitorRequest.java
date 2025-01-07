@@ -20,4 +20,8 @@ public class ElementMonitorRequest extends BaseSceneElementPageRequest {
 
     @ApiModelProperty("结束时间")
     private String endTime;
+
+    @ApiModelProperty("文件路径")
+    private String path;
+
 }
