@@ -43,4 +43,6 @@ public interface CsceneInstanceMapper extends BaseCsceneMapper<CsceneInstanceMod
     List<CloudPluginSceneElementModel> getVlanUsedInstance(List<Integer> vlanId);
 
     CsceneInstanceModel getNodeInfoForConnect(@Param("node") String node);
+
+    CsceneInstanceModel getAccessModeIdForJsj(@Param("node") String node);
 }

@@ -107,4 +107,16 @@
             a.id = #{node} limit 1
     </select>
 
+    <select id="getAccessModeIdForJsj" resultType="cn.cyberpeace.mp.cscene.model.CsceneInstanceModel">
+        SELECT
+        access_modes as cscene
+        FROM
+        mp_sceneplugincloud_scene_element_port
+        WHERE
+        scene_element_port like CONCAT('%',#{node},'%')
+        AND access_modes IS NOT NULL
+        LIMIT 1
+    </select>
+
+
 </mapper>

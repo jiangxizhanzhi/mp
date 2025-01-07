@@ -51,6 +51,7 @@ import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -64,6 +65,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataCountParams;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
+import com.alibaba.fastjson.JSONArray;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -423,6 +425,28 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         request = formatNodeAccessModeActionRequest(request, id, nodeId, accessModeId);
         return modelService.getRemoteConnection(request.getId(), request.getNodeId(), request.getAccessModeId(),
                 request.getContext()).asResult();
+    }
+
+    @ApiOperation("计算机实力管理-场景实例获取远程连接")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "node", value = "节点名称", dataTypeClass = String.class)
+    })
+    @PostMapping(value = "/getAccessModeInfo")
+    public ServiceResult<JSONArray> getAccessModeInfo(@RequestParam(required = false) String node) {
+        log.info("do get_jsj_connection : node->{}",node);
+        node = node.substring(9);
+        CsceneInstanceModel csceneInstanceModel = csceneInstanceMapper.getAccessModeIdForJsj(node);
+
+
+        if(csceneInstanceModel != null ) {
+            CsceneInstanceModel accessMode = csceneInstanceMapper.getNodeInfoForConnect(csceneInstanceModel.getCscene());
+            JSONArray jsonArray = JSONArray.parseArray(accessMode.getCscene());
+            return new ServiceResult<>(jsonArray);
+        } else {
+            log.info("do get_jsj_connection error : node is illegal ->{}",node);
+            return null;
+        }
+
     }
 
     @ApiOperation("计算机实力管理-场景实例获取远程连接")
