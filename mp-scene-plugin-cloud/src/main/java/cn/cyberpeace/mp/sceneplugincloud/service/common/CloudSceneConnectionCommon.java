@@ -42,6 +42,7 @@ public class CloudSceneConnectionCommon {
     private static CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper;
     private final static String CONTAINER_EXEC_COMMAND_TEMPLATE = "az login --service-principal -u %s -p %s --tenant %s > /dev/null 2>&1 && az container exec --resource-group %s --name %s --exec-command '%s'";
 
+    private final static String LOAD_EXEC_COMMAND_TEMPLATE = "bash -c 'echo %s;%s;bash'";
     @Autowired
     private CloudSceneConnectionCommon(CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper) {
         CloudSceneConnectionCommon.cloudPluginSceneConnectionMapper = cloudPluginSceneConnectionMapper;
@@ -219,7 +220,6 @@ public class CloudSceneConnectionCommon {
                 connectionParams.setUsername(sceneConnection.getUsername());
                 connectionParams.setPassword(sceneConnection.getPassword());
             }
-
             if (BaseSceneModel.CloudType.DEFAULT != cloudType) {
 
                 CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
@@ -242,12 +242,19 @@ public class CloudSceneConnectionCommon {
                     connectionParams.setUsername(situationAwareConfig.getManagementUsername());
                     connectionParams.setPassword(situationAwareConfig.getManagementPassword());
                     connectionParams.setCmd(getContainerCmd(pluginHandler, cloudType, element, interpreter));
-                }else {
+                } else if (StringUtils.isNotBlank(interpreter) && AccessMode.Protocol.SSH.equals(protocol)) {
+                    userId = userId + "_" + halfString;
+                    connectionParams.setHostname(element.getSrcElement().getPorts().get(0).getIp());
+                    connectionParams.setProtocol("container");
+                    connectionParams.setPort(sceneConnection.getPort().toString());
+                    connectionParams.setCmd(getLoadCmd(interpreter));
+                } else {
                     connectionParams.setHostname(accessIp);
                 }
             } else {
                 connectionParams.setHostname(accessIp);
             }
+
             guacamoleCreateConnectionData.setUsername(userId);
             guacamoleCreateConnectionData.setConnectionParams(connectionParams);
             var result = remoteClient.createConnection(guacamoleCreateConnectionData);
@@ -304,7 +311,7 @@ public class CloudSceneConnectionCommon {
         if (result == null || StringUtils.isEmpty(result.getUrl())) {
             log.error("Get scene connection[{}] url with empty result: {}", hostname, result);
             return null;
-        }else {
+        } else {
             return result1.getUrl();
         }
     }
@@ -391,6 +398,15 @@ public class CloudSceneConnectionCommon {
         String groupName = pluginHandler.getSourceSceneId();
         String containerName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
         return String.format(CONTAINER_EXEC_COMMAND_TEMPLATE, azureClientId, azureClientSecret, azureTenantId, groupName, containerName, interpreter);
+    }
+
+    /**
+     * 包装载荷命令
+     * @param interpreter
+     * @return
+     */
+    private static String getLoadCmd(String interpreter) {
+        return String.format(LOAD_EXEC_COMMAND_TEMPLATE, interpreter, interpreter);
     }
 
 

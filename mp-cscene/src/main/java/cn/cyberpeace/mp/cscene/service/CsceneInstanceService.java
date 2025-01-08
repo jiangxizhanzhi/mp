@@ -2897,7 +2897,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             localLoadExecutionRecordModel.setStatus(LocalLoadExecutionRecordModel.Status.NOT_EXECUTED.getCode());
             localLoadExecutionRecordMapper.create(localLoadExecutionRecordModel);
         }
-        var execBO = scenePluginCloudSceneService.execElementCommandV2(sceneId, nodeId, command, user).getSource();
+//        业务修改 此处不执行命令
+        /*var execBO = scenePluginCloudSceneService.execElementCommandV2(sceneId, nodeId, command, user).getSource();
 
         if (null != localLoadExecutionRecordModel.getId()) {
 //            执行过慢的命令可能已经出流量发送了态势动效
@@ -2910,10 +2911,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 }
                 localLoadExecutionRecordMapper.update(localLoadExecutionRecordModel);
             }
-        }
+        }*/
         var result = new ElementCommandExecResult();
-        result.setOutput(execBO.getOutput());
-        result.setStatus(execBO.getStatus());
+//        result.setOutput(execBO.getOutput());
+//        result.setStatus(execBO.getStatus());
+        result.setStatus(true);
         return new ServiceResult<>(result);
     }
 
