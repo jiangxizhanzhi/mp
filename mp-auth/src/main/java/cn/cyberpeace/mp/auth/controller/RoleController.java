@@ -20,11 +20,13 @@ import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.hutool.core.collection.ListUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -133,24 +135,31 @@ public class RoleController {
 
     @PostMapping("/ids")
     public ServiceResult<String> listByIds(@RequestBody List<String> ids) {
-
+        if (ids == null || ids.size() == 0) {
+         return  ResultCommon.success(null);
+        }
         return ResultCommon.success(JSON.toJSONString(roleService.selectRoles(ids)));
     }
 
     @PostMapping("/update")
-    public ServiceResult<Integer> update(@RequestBody @Validated List<RoleRequest> modifyRequest) {
+    public ServiceResult<Integer> update(@RequestBody @Validated String Json) {
+        List<RoleRequest> modifyRequest = JSONArray.parseArray(Json, RoleRequest.class);
         ArrayList<RoleModel> roleModels = new ArrayList<>();
         for (RoleRequest roleRequest : modifyRequest) {
             RoleModel roleModel = new RoleModel();
             BeanUtils.copyProperties(roleRequest, roleModel);
             roleModels.add(roleModel);
         }
-        return roleService.bulkUpdate(roleModels).asResult();
+        ServiceResult<Integer> integerServiceResult = roleService.bulkUpdate(roleModels);
+        return integerServiceResult.asResult();
     }
 
     @PostMapping("/getrole")
     public ServiceResult<List<RoleModel>> getRoleInfo(@RequestBody List<String> ids) {
-
+        if (ids == null || ids.size() == 0) {
+            List<RoleModel> roleModels = new ArrayList<>();
+            return  new ServiceResult<>(roleModels).asResult();
+        }
         return  new ServiceResult<>(roleService.getRoleModelByids(ids)).asResult();
     }
 }
