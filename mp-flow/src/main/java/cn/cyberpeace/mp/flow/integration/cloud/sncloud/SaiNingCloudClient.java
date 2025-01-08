@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.flow.integration.cloud.sncloud;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.flow.config.FlowConfig;
-import cn.cyberpeace.mp.flow.integration.cloud.base.AbstractGetVirtualMachineParams;
 import cn.cyberpeace.mp.flow.integration.cloud.base.AddVirtualNicParams;
 import cn.cyberpeace.mp.flow.integration.cloud.base.AddVirtualNicResult;
 import cn.cyberpeace.mp.flow.integration.cloud.base.DeleteVirtualMachineResult;
@@ -72,7 +71,7 @@ public class SaiNingCloudClient implements ICloudClient {
             } else {
                 return null;
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
