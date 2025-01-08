@@ -13,4 +13,10 @@ public abstract class BaseCloudPluginSceneBO<M extends BaseCloudPluginSceneModel
     private Boolean enableRecording;
     @ApiModelProperty(value = "是否开启环境总速率统计")
     private Boolean enableRate;
+
+    @ApiModelProperty(value = "是否创建虚拟机")
+    private Boolean createInternalVm;
+
+    private String internalVmId;
+    private String internalVmIp;
 }

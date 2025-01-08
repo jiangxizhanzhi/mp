@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -44,6 +45,8 @@ public class HandlerUtils {
     private Set<String> createdNetworks = new HashSet<>();
 
     private Set<String> toDeleteNodes = new HashSet<>();
+
+    private Map<String, HostRoute> hostRouteMap = new ConcurrentHashMap<>();
 
     public void addFwdnsInterfaceIp(String node, String netId, String fwdnsInterfaceIp) {
         getPluginHandler().getElement(node).getFwdnsIps().putIfAbsent(netId, fwdnsInterfaceIp);

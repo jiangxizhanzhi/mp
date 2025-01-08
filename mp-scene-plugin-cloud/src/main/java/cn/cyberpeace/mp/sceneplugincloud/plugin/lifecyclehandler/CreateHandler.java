@@ -1,6 +1,9 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
+import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
@@ -10,12 +13,14 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.util.*;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.FirewallRule;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.SnmpConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
@@ -26,7 +31,9 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.*;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.service.CloudCommonConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.io.file.FileNameUtil;
 import lombok.Data;
@@ -1326,7 +1333,90 @@ public class CreateHandler extends HandlerCommon {
             });
             vpClient.syncFlowPortInfo(portIds, "add");
         }
+
+        //创建虚拟机
+        if (Boolean.TRUE.equals(getPluginHandler().getScene().getCreateInternalVm())) {
+            this.createInternalServerVm();
+        }
     }
+
+    /**
+     * 创建一个场景内部的虚拟机，对场景内的虚拟机提供logstash等服务
+     */
+    protected void createInternalServerVm() {
+        log.info("执行创建提供内部服务的虚拟机");
+        var hostRouteMap = getPluginHandler().getHandlerUtils().getHostRouteMap();
+        log.info("已下发的主机路由: {}", JsonCommon.stringify(hostRouteMap));
+        if (hostRouteMap.isEmpty()) {
+            return;
+        }
+        this.createInternalServerVmMode2(hostRouteMap);
+    }
+
+    private void createInternalServerVmMode2(Map<String, HostRoute> hostRouteMap ){
+        var nets = new ArrayList<ConnectedNetworkBO>();
+        for (CloudPluginSceneElementBO e : getPluginHandler().getElementMap().values()) {
+            for (ConnectedNetworkBO n : e.getDeriveNetworks()) {
+                nets.add(n);
+            }
+        }
+
+        List<VirtualNic> virtualNics = new ArrayList<>();
+        for (var entry : hostRouteMap.entrySet()) {
+            var net = entry.getKey();
+            var hostRoute = entry.getValue();
+            VirtualNic virtualNic = new VirtualNic();
+            for (var n : nets) {
+                if (StringUtils.equals(n.getNetwork().getCidr(),entry.getKey())) {
+                    log.info("find same cidr {} , net_id is {}",entry.getKey(),n.getNetwork().getResourceId());
+                    virtualNic.setNetworkId(n.getNetwork().getResourceId());
+                    break;
+                }
+            }
+            virtualNic.setFixedIp(hostRoute.getNexthop());
+            virtualNics.add(virtualNic);
+        }
+
+        VirtualNic externalNet = new VirtualNic();
+        externalNet.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
+        if (StringUtils.isNotEmpty(CloudSingleton.cloudAppConfig.getInternalVmIp())) {
+            externalNet.setFixedIp(CloudSingleton.cloudAppConfig.getInternalVmIp());
+        }
+        virtualNics.add(externalNet);
+
+        VirtualMachineCreateData createData = new VirtualMachineCreateData();
+        createData.setName("MP_SCENE_SPEC_VM_" + getPluginHandler().getSrcScene().getEid());
+        createData.setImage(CloudSingleton.cloudAppConfig.getInternalVmImage());
+        createData.setCpu(2);
+        createData.setRam(2048);
+        createData.setDisk(60);
+        createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
+        createData.setNetworks(virtualNics);
+        CloudInitConfigCommon.Builder builder = CloudInitConfigCommon.builder(BaseSceneElementModel.SystemType.LINUX);
+        builder.setRootPassword("123456");
+        builder.addUser("dev", "123456");
+        List<String> initCommands = new ArrayList<>();
+//        initCommands.addAll(this.getLogstashInstallCmds());
+//        initCommands.addAll(this.getFrameInstallCmds());
+        builder.setInitCommands(initCommands);
+        var cloudInitCommands = builder.build();
+        String command = SystemTypeCommandUtils.joinCommands(BaseSceneElementModel.SystemType.LINUX, cloudInitCommands.toArray(new String[0]));
+        if (!StringUtils.isEmpty(command)) {
+            command = SystemTypeCommandUtils.appendBeforeCommand(command, "#cloud-config", BaseSceneElementModel.SystemType.LINUX);
+        }
+        createData.setUserData(command);
+
+        var vm = vmClient.create(createData);
+        getPluginHandler().getScene().setInternalVmId(vm.getId());
+        for (var nic : vm.getNetworks()) {
+            if (IpUtils.newIsInCidr2(nic.getFixedIp(), CloudSingleton.cloudAppConfig.getInternalNetCidr())) {
+                getPluginHandler().getScene().setInternalVmIp(nic.getFixedIp());
+                break;
+            }
+        }
+    }
+
+
 
     protected void prepareEventProcess() {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
