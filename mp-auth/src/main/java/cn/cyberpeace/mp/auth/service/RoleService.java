@@ -46,4 +46,6 @@ public interface RoleService extends BaseModelService<RoleModel, QueryParams> {
     List<String> getSystemUnVisibleRoleIds();
 
     List<RoleModelCount> selectRoles(List<String> ids);
+
+    List<RoleModel> getRoleModelByids(List<String> ids);
 }

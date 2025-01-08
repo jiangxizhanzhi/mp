@@ -9,21 +9,23 @@ import cn.cyberpeace.mp.auth.request.role.RoleRequest;
 import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
-import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.hutool.core.collection.ListUtil;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -36,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -134,4 +137,20 @@ public class RoleController {
         return ResultCommon.success(JSON.toJSONString(roleService.selectRoles(ids)));
     }
 
+    @PostMapping("/update")
+    public ServiceResult<Integer> update(@RequestBody @Validated List<RoleRequest> modifyRequest) {
+        ArrayList<RoleModel> roleModels = new ArrayList<>();
+        for (RoleRequest roleRequest : modifyRequest) {
+            RoleModel roleModel = new RoleModel();
+            BeanUtils.copyProperties(roleRequest, roleModel);
+            roleModels.add(roleModel);
+        }
+        return roleService.bulkUpdate(roleModels).asResult();
+    }
+
+    @PostMapping("/getrole")
+    public ServiceResult<List<RoleModel>> getRoleInfo(@RequestBody List<String> ids) {
+
+        return  new ServiceResult<>(roleService.getRoleModelByids(ids)).asResult();
+    }
 }

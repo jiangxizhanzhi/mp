@@ -373,6 +373,13 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return userRoleMapper.selectCount(ids);
     }
 
+    @Override
+    public List<RoleModel> getRoleModelByids(List<String> ids) {
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterIn(RoleModel::getId,ids.toArray(new String[ids.size()]));
+        return roleMapper.list(humanCondition);
+    }
+
 
     private RoleBo roleModel2RoleDto(RoleModel roleModel) {
         if (Objects.isNull(roleModel)) {
