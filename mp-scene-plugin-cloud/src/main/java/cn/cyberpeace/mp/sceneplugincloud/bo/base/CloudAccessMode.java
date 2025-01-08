@@ -32,6 +32,12 @@ public class CloudAccessMode extends AccessMode {
     @ApiModelProperty(value = "连接所属用户")
     private String connectionUser;
 
+    @ApiModelProperty(value = "连接禁用下载")
+    private Boolean connectionDisableDownload;
+
+    @ApiModelProperty(value = "连接禁用上传")
+    private Boolean connectionDisableUpload;
+
     @ApiModelProperty(value = "代理id")
     private String proxyId;
 

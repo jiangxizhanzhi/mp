@@ -55,5 +55,9 @@ public class CloudPluginSceneConnectionModel extends BaseModel {
     @DefaultStr
     private String connectionUrl;
     @DefaultBool
+    private Boolean connectionDisableDownload;
+    @DefaultBool
+    private Boolean connectionDisableUpload;
+    @DefaultBool
     private Boolean disable;
 }
