@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -306,8 +307,10 @@ public class LoadController {
      * */
     @ApiOperation(value = "批量修改载荷执行结果", notes = "")
     @PostMapping("/updateLoadExecutionOutResult")
-    public ServiceResult updateLoadExecutionOutResult(@RequestBody List<LoadRequest> requestData) {
-        ServiceResult serviceResult = loadService.updateLoadExecutionOutResult(requestData);
+    public ServiceResult updateLoadExecutionOutResult(@RequestBody JSONObject jsonObject) {
+        LoadRequest requestData = JSONObject.toJavaObject(jsonObject, LoadRequest.class);
+        requestData.setResultStatus("成功");
+        ServiceResult serviceResult = loadService.updateLoadExecutionOutResult(Arrays.asList(requestData));
         return serviceResult;
     }
 

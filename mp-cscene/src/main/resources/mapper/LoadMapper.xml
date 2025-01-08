@@ -65,14 +65,20 @@
                 </if>
                 update_time = now()
             </set>
-            <where>
-                <if test="item.taskId != null and item.taskId != ''">
-                    AND task_id = #{item.taskId}
-                </if>
-                <if test="item.instanceId != null and item.instanceId != ''">
-                    AND instance_id = #{item.instanceId}
-                </if>
-            </where>
+            WHERE id = (
+                SELECT id
+                FROM mp_devops_load_scene_result_log
+                <where>
+                    <if test="item.taskId != null and item.taskId != ''">
+                        AND task_id = #{item.taskId}
+                    </if>
+                    <if test="item.instanceId != null and item.instanceId != ''">
+                        AND instance_id = #{item.instanceId}
+                    </if>
+                </where>
+                ORDER BY create_time DESC
+                LIMIT 1
+            );
         </foreach>
     </update>
 
