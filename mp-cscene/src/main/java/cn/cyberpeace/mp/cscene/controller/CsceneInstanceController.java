@@ -464,8 +464,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             bo.setAccessUserId(req.getAccessUserId());
             request.setContext(bo);
             request = formatNodeAccessModeActionRequest(request, csceneInstanceModel.getLogo(), csceneInstanceModel.getCscene(), req.getAccessModeId());
-            return modelService.getRemoteConnection(request.getId(), request.getNodeId(), request.getAccessModeId(),
+            ServiceResult<NodeConnectionBO> result = modelService.getRemoteConnection(request.getId(), request.getNodeId(), request.getAccessModeId(),
                     request.getContext()).asResult();
+            result.getData().setConnectionRecordingName(req.getAccessModeId());
+            return result;
         } else {
             log.info("do get_jsj_connection error : node is illegal ->{}",node);
             return null;
