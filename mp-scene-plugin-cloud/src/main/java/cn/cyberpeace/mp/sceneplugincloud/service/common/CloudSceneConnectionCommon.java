@@ -167,6 +167,8 @@ public class CloudSceneConnectionCommon {
             sceneConnection.setPassword(cloudAccessMode.getPassword());
             sceneConnection.setAccessIp(accessIp);
             sceneConnection.setAccessPort(accessPort);
+            sceneConnection.setConnectionDisableDownload(cloudAccessMode.getConnectionDisableDownload());
+            sceneConnection.setConnectionDisableUpload(cloudAccessMode.getConnectionDisableUpload());
         }
 
         var dataUpdateFlag = false;
@@ -208,6 +210,12 @@ public class CloudSceneConnectionCommon {
                 connectionParams.setPassword(sceneConnection.getPassword());
             }
             connectionParams.setHostname(sceneConnection.getAccessIp());
+            if (sceneConnection.getConnectionDisableDownload() != null) {
+                connectionParams.setDisableDownload(sceneConnection.getConnectionDisableDownload());
+            }
+            if (sceneConnection.getConnectionDisableUpload() != null) {
+                connectionParams.setDisableUpload(sceneConnection.getConnectionDisableUpload());
+            }
             guacamoleCreateConnectionData.setConnectionParams(connectionParams);
             var result = remoteClient.createConnection(guacamoleCreateConnectionData);
             if (result == null || StringUtils.isEmpty(result.getConnectionId())) {
