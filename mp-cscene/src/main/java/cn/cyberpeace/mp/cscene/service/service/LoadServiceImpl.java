@@ -25,6 +25,8 @@ import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.websocket.LoadResultWebSocketServer;
 import cn.cyberpeace.mp.cscene.websocket.WebSocketServer;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.situationaware.utils.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -83,10 +85,15 @@ public class LoadServiceImpl {
     @Autowired
     private CsceneCommonService csceneCommonService;
 
+    @Autowired
+    private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
+
+
     // 载荷改造地址
     @Value("${project.setting.load-transform-url:http://ip:port}")
     private String LOAD_TRANSFORM_URL;
 
+    private static final String LOAD_RESULT_LOG = "![载荷执行记录](%s) ";
     /*
      * 载荷页面
      * */
@@ -704,6 +711,18 @@ public class LoadServiceImpl {
         // 验证参数
         if (!validateRequestData(requestData)) {
             return new ServiceResult(null, BaseErrorCode.ERROR, "列表数据部分参数缺失").asResult();
+        }
+
+        LoadRequest loadRequest = requestData.get(0);
+        String instanceId = loadRequest.getInstanceId();
+        String taskId = loadRequest.getTaskId();
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(CloudPluginSceneElementModel::getResourceId,taskId);
+        humanCondition.filterEqual(CloudPluginSceneElementModel::getLoadResourceInstanceId,instanceId);
+        List<CloudPluginSceneElementModel> cloudPluginSceneElementModels = cloudPluginSceneElementMapper.list(humanCondition);
+        if(cloudPluginSceneElementModels.size()>0 && BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL==cloudPluginSceneElementModels.get(0).getLoadSource()){
+            String resultLog = loadRequest.getResultLog();
+            loadRequest.setResultLog(String.format(LOAD_RESULT_LOG, resultLog));
         }
 
         // 状态字符串转状态码

@@ -2929,6 +2929,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return null;
     }
 
+    public ServiceResult<Integer> updateElementDefaultCommand(String loadNodeId, String scene, String command) {
+        SceneElementModel sceneElementModel = new SceneElementModel();
+        sceneElementModel.setDefaultCmd(command);
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(SceneElementModel::getNodeId, loadNodeId);
+        humanCondition.filterEqual(SceneElementModel::getScene,scene);
+        int i = sceneElementMapper.filterUpdate(sceneElementModel, humanCondition);
+        return new ServiceResult<>(i);
+    }
+
     @Getter
     @Setter
     @NoArgsConstructor

@@ -1177,4 +1177,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                 request.getExecUser(), request.getContext(),request.getLoadNodeId(),request.getResourceId()).asResult();
     }
 
+//    修改节点默认命令
+    @ApiOperation("修改节点默认命令")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneInstanceNodeCommandActionRequest.class)
+    @PostMapping("/element/defaultCommand")
+    public ServiceResult<Integer> elementDefaultCommand(@RequestBody CsceneInstanceNodeCommandActionRequest request) {
+        log.info("element defaultCommand , params is {}", JsonCommon.stringify(request));
+        return modelService.updateElementDefaultCommand(request.getLoadNodeId(),request.getScene(),request.getCommand()).asResult();
+    }
+
 }

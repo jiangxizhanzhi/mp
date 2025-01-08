@@ -13,4 +13,6 @@ public class CsceneInstanceNodeCommandActionRequest extends CsceneInstanceNodeAc
     private String loadNodeId;
     @ApiModelProperty(value = "ojj实例id")
     private String resourceId;
+    @ApiModelProperty(value = "场景id")
+    private String scene;
 }
