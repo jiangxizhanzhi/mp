@@ -440,7 +440,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         CsceneInstanceModel csceneInstanceModel = csceneInstanceMapper.getNodeInfoForConnect(node);
         log.info("do getNodeInfoForConnect : csceneInstanceModel->{}",csceneInstanceModel);
         if(csceneInstanceModel != null ) {
-            CsceneInstanceModel accessMode = csceneInstanceMapper.getAccessModeIdForJsj(csceneInstanceModel.getCscene());
+            CsceneInstanceModel accessMode = csceneInstanceMapper.getAccessModeIdForJsj(csceneInstanceModel.getCscene(),csceneInstanceModel.getScene());
             log.info("do getAccessModeIdForJsj : accessMode->{}",accessMode);
             JSONArray jsonArray = JSONArray.parseArray(accessMode.getCscene());
             log.info("do parseArray : jsonArray->{}",jsonArray);
