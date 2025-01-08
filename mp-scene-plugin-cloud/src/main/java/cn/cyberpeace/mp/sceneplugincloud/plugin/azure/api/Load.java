@@ -46,6 +46,9 @@ public class Load {
                 cloudElement.setLoadResourceInstanceId(loadToolElementBO.getSrcElement().getId());
                 List<CloudPluginSceneElementPortBO> ports = pluginHandler.getPorts(loadToolElementBO.getSrcElement());
                 List<CloudAccessMode> collect = ports.get(0).getAccessModes().stream().filter(cloudAccessMode -> AccessMode.Protocol.RDP.equals(cloudAccessMode.getProtocol())).collect(Collectors.toList());
+                if("shell".equals(cloudElement.getSrcElement().getControlTypeName())){
+                    collect = ports.get(0).getAccessModes().stream().filter(cloudAccessMode -> AccessMode.Protocol.SSH.equals(cloudAccessMode.getProtocol())).collect(Collectors.toList());
+                }
                 if(collect.size()>0){
                     cloudElement.setLoadAccessModel(collect.get(0).getId());
                 }
