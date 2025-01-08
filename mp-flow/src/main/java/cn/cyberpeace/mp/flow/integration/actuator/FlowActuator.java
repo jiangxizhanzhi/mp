@@ -240,7 +240,8 @@ public class FlowActuator {
                 return false;
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("init network error, {}", ExceptionUtils.getStackTrace(e));
+            return false;
         }
     }
 

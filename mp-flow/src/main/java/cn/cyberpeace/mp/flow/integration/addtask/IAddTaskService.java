@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.flow.integration.addtask;
 
-import cn.cyberpeace.mp.flow.bo.AddFlowTaskFlowInfo;
-
-import java.util.List;
+import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 
 public interface IAddTaskService {
-    void addTasks(List<AddFlowTaskFlowInfo> tasks, String actuatorId, String networkId, String targetIp);
+    void addTasksToDb(FlowActuatorModel flowActuatorModel);
+
+    void addTasksToActuator(FlowActuatorModel flowActuatorModel);
 }

@@ -5,7 +5,9 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.flow.bo.FlowActuatorQueryParams;
 import cn.cyberpeace.mp.flow.bo.StartFlowActuatorParams;
+import cn.cyberpeace.mp.flow.integration.addtask.AddTaskByLocalFlowFacade;
 import cn.cyberpeace.mp.flow.integration.cloud.base.ICloudClient;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
@@ -14,12 +16,12 @@ import cn.cyberpeace.mp.flow.response.ActuatorStatistic;
 import cn.cyberpeace.mp.flow.response.ActuatorTaskCount;
 import cn.cyberpeace.mp.flow.response.FlowActuatorResponse;
 import cn.cyberpeace.mp.flow.service.field.FlowActuatorFields;
-import cn.cyberpeace.mp.flow.bo.FlowActuatorQueryParams;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,15 +33,15 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
 
     private ICloudClient cloudClient;
 
-    private FlowCsceneService flowCsceneService ;
+    @Resource
+    private AddTaskByLocalFlowFacade addTaskService;
 
     @Autowired
-    public FlowActuatorService(FlowActuatorMapper flowActuatorMapper, ICloudClient cloudClient,FlowCsceneService flowCsceneService) {
+    public FlowActuatorService(FlowActuatorMapper flowActuatorMapper, ICloudClient cloudClient, FlowCsceneService flowCsceneService) {
         super();
         super.setModelMapper(flowActuatorMapper);
         this.flowActuatorMapper = flowActuatorMapper;
         this.cloudClient = cloudClient;
-        this.flowCsceneService = flowCsceneService;
     }
 
     public FlowActuatorResponse getFlowActuator(String actuatorId) {
@@ -110,6 +112,7 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
         actuatorModel.setIp(instance.getNetwork().get(0).getFixedIp());
         flowActuatorMapper.save(actuatorModel);
         var res = this.convert2FlowActuatorResponse(actuatorModel);
+        addTaskService.addTasksToDb(actuatorModel);
         return res;
     }
 

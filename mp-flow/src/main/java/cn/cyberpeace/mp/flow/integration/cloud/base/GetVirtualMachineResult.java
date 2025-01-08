@@ -8,6 +8,15 @@ import java.util.List;
 @Getter
 @Setter
 public class GetVirtualMachineResult {
-    private String id ;
+    private String id;
     private List<VirtualNic> network;
+    private List<VirtualNic> networks;
+
+    public List<VirtualNic> getNetwork() {
+        if (networks != null) {
+            return networks;
+        } else {
+            return network;
+        }
+    }
 }

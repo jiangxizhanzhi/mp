@@ -115,6 +115,10 @@ public class FlowTaskTaskModel extends BaseModel {
 	@DefaultStr
 	private String nodeIp;
 
+	@ApiModelProperty(value = "目标节点网络")
+	@DefaultStr
+	private String nodeNetworkId ;
+
 	/**
 	 * 目标节点名称
 	 */
