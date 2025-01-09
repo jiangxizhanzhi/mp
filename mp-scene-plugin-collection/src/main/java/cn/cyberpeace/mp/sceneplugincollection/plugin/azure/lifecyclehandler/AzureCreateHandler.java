@@ -193,9 +193,14 @@ public class AzureCreateHandler extends CreateHandler {
         } catch (Exception e) {
             log.error("创建场景失败", e);
 //            云场景启动失败立即删除云资源
-            String groupName = getPluginHandler().getSourceSceneId();
-            groupName = StringUtils.isNotBlank(groupNamePrefix) ? groupNamePrefix + "-" + groupName : groupName;
-            resourceService.getManager().resourceGroups().deleteByName(groupName);
+            try {
+                String groupName = getPluginHandler().getSourceSceneId();
+                groupName = StringUtils.isNotBlank(groupNamePrefix) ? groupNamePrefix + "-" + groupName : groupName;
+                resourceService.getManager().resourceGroups().deleteByName(groupName);
+            }catch (Exception exception){
+//                未启云场景会删除失败异常 此处不处理
+            }
+            throw e;
         }
     }
 }

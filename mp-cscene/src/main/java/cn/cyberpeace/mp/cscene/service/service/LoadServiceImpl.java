@@ -751,7 +751,7 @@ public class LoadServiceImpl {
         log.info("end updateLoadExecutionOutResult success:{}", success);
         return success
                 ? new ServiceResult(null, BaseErrorCode.SUCCESS, "SUCCESS").asResult()
-                : new ServiceResult(null, BaseErrorCode.ERROR, "批量新增载荷执行结果失败").asResult();
+                : new ServiceResult(null, BaseErrorCode.ERROR, "载荷执行结果更新失败").asResult();
     }
 
     private void sendResultMessage(LoadResultWebSocketServer webSocketServer, Session session, Map map, Map data,
