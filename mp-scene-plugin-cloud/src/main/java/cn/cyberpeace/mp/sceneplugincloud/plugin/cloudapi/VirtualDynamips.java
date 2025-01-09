@@ -98,6 +98,8 @@ public class VirtualDynamips extends CloudClient {
         type.setType("port");
         var result = getHttpClient().get(CloudUrlConstant.GET_DYNAMIPS_INFO, type, new TypeReference<DynamipsInfoItems>() {
         });
+        log.info("get dynamips info ,request is {} , result is {}", JsonCommon.stringify(type),
+                JsonCommon.stringify(result));
         return result;
     }
 
