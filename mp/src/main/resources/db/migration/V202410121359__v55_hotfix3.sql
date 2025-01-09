@@ -1,0 +1,2 @@
+update mp_common_option set meta = '{"activKeys":"LCS-FUNC-CR-ZHISHIKU","visible":0}' where code = '310' and type = 'cscene_instance_type' ;
+update mp_common_option set meta = '{"activKeys":"LCS-FUNC-CR-JINGSAI","visible":0}' where code = '306' and type = 'cscene_instance_type' ;
