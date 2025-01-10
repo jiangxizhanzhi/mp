@@ -70,8 +70,8 @@ public class FlowActuatorService extends BaseModelServiceImpl<FlowActuatorModel,
 
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, FlowActuatorQueryParams queryParams) {
-        if (StringUtils.isNotEmpty(queryParams.getSceneId())) {
-            humanCondition.filterEqual(FlowActuatorModel::getCsceneInstanceId, queryParams.getSceneId());
+        if (StringUtils.isNotEmpty(queryParams.getCsceneInstanceId())) {
+            humanCondition.filterEqual(FlowActuatorModel::getCsceneInstanceId, queryParams.getCsceneInstanceId());
         }
         if (queryParams.getStatus() != null) {
             humanCondition.filterEqual(FlowActuatorModel::getStatus, queryParams.getStatus());

@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class FlowActuatorQueryParams extends QueryParams {
     @ApiModelProperty(value = "场景id")
-    private String sceneId;
+    private String csceneInstanceId;
 
     @ApiModelProperty(value = "状态")
     private Integer status ;
