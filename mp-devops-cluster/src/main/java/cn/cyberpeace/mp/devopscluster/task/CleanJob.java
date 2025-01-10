@@ -80,7 +80,9 @@ public class CleanJob implements SchedulingConfigurer {
                         this.doClearImages(imagesSwitch);
                     },
                     triggerContext -> {
-                        DEFAULT_CRON = !isValidCron(parse.getCron()) ? DEFAULT_CRON : parse.getCron();
+                        if (isValidCron(parse.getCron())) {
+                            DEFAULT_CRON = parse.getCron();
+                        }
                         //任务触发，可修改任务的执行周期
                         try {
                             CronTrigger trigger = new CronTrigger(DEFAULT_CRON);
