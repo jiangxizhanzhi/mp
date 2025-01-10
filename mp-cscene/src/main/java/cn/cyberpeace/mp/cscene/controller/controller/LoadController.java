@@ -31,6 +31,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static org.springframework.web.bind.annotation.RequestMethod.*;
+
 @Api(value = "载荷页面", tags = "载荷页面管理")
 @Slf4j
 @RestController
@@ -306,7 +308,8 @@ public class LoadController {
      * 批量修改载荷执行结果
      * */
     @ApiOperation(value = "批量修改载荷执行结果", notes = "")
-    @PostMapping("/updateLoadExecutionOutResult")
+    @CrossOrigin(origins = "*", maxAge = 60L)
+    @RequestMapping("/updateLoadExecutionOutResult")
     public ServiceResult updateLoadExecutionOutResult(@RequestBody JSONObject jsonObject) {
         LoadRequest requestData = JSONObject.toJavaObject(jsonObject, LoadRequest.class);
         requestData.setResultStatus("成功");
