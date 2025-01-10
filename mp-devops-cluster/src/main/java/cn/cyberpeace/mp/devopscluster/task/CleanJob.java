@@ -42,9 +42,6 @@ public class CleanJob implements SchedulingConfigurer {
 
     public static String SCENE_DEL_CONFIG = "scene_del_config";
 
-    private static final String CRON_REGEX = "^(\\*|([0-5]?[0-9])) (\\*|([0-5]?[0-9])) (\\*|([0-1]?[0-9]|2[0-3])) (\\*|([1-9]|1[0-9]|2[0-9]|3[0-1])) (\\*|([1-9]|1[0-2])) (\\*|([0-6]))(\\s\\*|\\s([0-1]?[0-9]|2[0-3]))?$";
-
-
     // 默认一小时执行一次
     public static String DEFAULT_CRON = "0 0 * * * ?";
 
@@ -158,8 +155,8 @@ public class CleanJob implements SchedulingConfigurer {
         if (StringUtils.isEmpty(cron)) {
             return false;
         }
-        Pattern pattern = Pattern.compile(CRON_REGEX);
-        return pattern.matcher(cron).matches();
+
+        return true;
     }
 
     //    @Scheduled(cron = "0 0/1 * * * ?")
