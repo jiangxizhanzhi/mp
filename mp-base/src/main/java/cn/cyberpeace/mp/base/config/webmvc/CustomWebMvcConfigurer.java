@@ -44,7 +44,7 @@ public class CustomWebMvcConfigurer implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/mp/load/load/updateLoadExecutionOutResult")
-                .allowedOrigins("/*")  // 这里替换成实际允许的前端源地址，可以用通配符*允许所有源，但不太安全，建议指定具体源
+                .allowedOrigins("*")  // 这里替换成实际允许的前端源地址，可以用通配符*允许所有源，但不太安全，建议指定具体源
                 .allowedMethods("POST")  // 根据实际需求指定允许的HTTP方法
                 .allowedHeaders("*")  // 允许所有请求头，也可以按需指定具体的请求头
                 .maxAge(3600);  // 预检请求的缓存时间，单位秒
