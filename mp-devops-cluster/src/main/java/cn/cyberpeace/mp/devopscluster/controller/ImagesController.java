@@ -875,4 +875,35 @@ public class ImagesController {
                     .format(StringUtils.joinWith(",", result.toArray())));
         }
     }
+
+    @ApiOperation("查看自动删除拓扑配置")
+    @GetMapping("/get_scene_delete_config")
+    public ServiceResult<CleanJob.SceneDelConfig> getSceneDeleteConfig() {
+        var conf = sysConfigService.getByKeyName(CleanJob.SCENE_DEL_CONFIG);
+        if (conf == null) {
+            return new ServiceResult<>(new CleanJob.SceneDelConfig()).asResult();
+        } else {
+            var result = JsonCommon.parse(conf.getValue(), CleanJob.SceneDelConfig.class);
+            return new ServiceResult<>(result).asResult();
+        }
+    }
+
+    @ApiOperation("更新自动删除拓扑配置")
+    @ApiImplicitParam(name = "params", value = "配置", dataTypeClass = CleanJob.SceneDelConfig.class)
+    @PostMapping("/update_scene_delete_config")
+    public ServiceResult<CleanJob.SceneDelConfig> updateSceneDeleteConfig(@RequestBody CleanJob.SceneDelConfig params) {
+        var conf = sysConfigService.getByKeyName(CleanJob.SCENE_DEL_CONFIG);
+        if (conf != null) {
+            conf.setValue(JsonCommon.stringify(params));
+            sysConfigService.update(conf);
+        } else {
+            SysConfigModel sysConfigModel = new SysConfigModel();
+            sysConfigModel.setValue(JsonCommon.stringify(params));
+            sysConfigModel.setInitValue(sysConfigModel.getValue());
+            sysConfigModel.setKeyName("scene_del_config");
+            sysConfigModel.setTenant("default");
+            sysConfigService.create(sysConfigModel);
+        }
+        return new ServiceResult<>(params).asResult();
+    }
 }
