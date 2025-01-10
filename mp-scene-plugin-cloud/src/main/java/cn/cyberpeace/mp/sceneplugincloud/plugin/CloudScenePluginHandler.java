@@ -933,6 +933,13 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         return getTerminalElementMap().values().stream()
                 .filter(cloudElement -> getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
                 .filter(cloudElement -> cloudElement.getVirtualType() != BaseCloudPluginSceneElementModel.VirtualType.NPC)
+                .collect(Collectors.toList());
+    }
+
+    public List<CloudPluginSceneElementBO> getTerminalExcludeNpcCloudElements() {
+        return getTerminalElementMap().values().stream()
+                .filter(cloudElement -> getSceneHandler().isHandleNode(cloudElement.getSrcElement().getId()))
+                .filter(cloudElement -> cloudElement.getVirtualType() != BaseCloudPluginSceneElementModel.VirtualType.NPC)
                 .filter(cloudElement -> !BaseCloudPluginSceneElementModel.ImageType.isCloudImageType(cloudElement.getImageType()))
                 .collect(Collectors.toList());
     }

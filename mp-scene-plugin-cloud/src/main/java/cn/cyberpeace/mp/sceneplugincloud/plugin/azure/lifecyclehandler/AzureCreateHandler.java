@@ -112,7 +112,7 @@ public class AzureCreateHandler extends CreateHandler {
 
             // 先创建辅助网络
             List<Runnable> createTerminalTasks = new ArrayList<>();
-            //        创建外部网络+kali TODO 云场景使用传统kali机方案开发
+            //        创建外部网络+kali 云场景使用传统kali机方案开发
             var createExternalNetworkTasks = getPluginHandler().getAuxiliaryNetworkElement().stream()
                     .map(cloudElement -> (Runnable) () -> createAuxiliaryNetworkProcess(cloudElement))
                     .collect(Collectors.toList());
@@ -324,7 +324,7 @@ public class AzureCreateHandler extends CreateHandler {
                 createTerminalTasks.addAll(createFireWallTasks);
             }
 
-            List<CloudPluginSceneElementBO> terminalExcludeNpcElements = getPluginHandler().getTerminalExcludeNpcElements();
+            List<CloudPluginSceneElementBO> terminalExcludeNpcElements = getPluginHandler().getTerminalExcludeNpcCloudElements();
             var createKaliTasks = getPluginHandler().getTerminalExcludeNpcElements().stream()
                     .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement)).collect(Collectors.toList());
             if (!createKaliTasks.isEmpty()) {
