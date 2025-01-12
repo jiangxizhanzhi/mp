@@ -533,6 +533,7 @@
                 and log.create_time &lt;= #{param.overTime, jdbcType=TIMESTAMP}
             </if>
         </where>
+        order by log.update_time desc
         <if test="param != null and param.offset != null and param.pageSize != null">
             limit #{param.offset}, #{param.pageSize}
         </if>
