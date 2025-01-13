@@ -7,18 +7,9 @@ import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.QuickCreateParam;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ContainerService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DynamipsService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ImagesService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ScenariosService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.VmService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.service.*;
 import cn.cyberpeace.mp.devopscluster.converter.bo.DeviceAsyncBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.converter.model.ImageConvertModel;
@@ -30,24 +21,12 @@ import cn.cyberpeace.mp.devopscluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devopscluster.enums.MainTypeEnum;
 import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.enums.UploadTypeEnum;
-import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
-import cn.cyberpeace.mp.devopscluster.model.ContainerActionCloudPlatformModel;
-import cn.cyberpeace.mp.devopscluster.model.DeviceQuickCreateCloudPlatformModel;
-import cn.cyberpeace.mp.devopscluster.model.ImageAuthTotalCount;
-import cn.cyberpeace.mp.devopscluster.model.ImagesCreateInstanceCloudPlatform;
-import cn.cyberpeace.mp.devopscluster.model.ImagesDeleteInstanceCloudPlatform;
-import cn.cyberpeace.mp.devopscluster.model.VmActionCloudPlatformModel;
+import cn.cyberpeace.mp.devopscluster.model.*;
 import cn.cyberpeace.mp.devopscluster.model.common.ServiceStatus;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetAuthPO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
-import cn.cyberpeace.mp.devopscluster.request.ImageAsyncRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImageRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImagesAuthRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImagesBuildRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteInstanceRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImagesRebootInstanceRequest;
+import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
@@ -62,7 +41,9 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -175,7 +156,6 @@ public class ImagesConverter implements BaseConverter {
                 }
             }
         }
-
         imageConvertPageModel.setList(modelList);
         return imageConvertPageModel;
     }
@@ -555,7 +535,6 @@ public class ImagesConverter implements BaseConverter {
         target.setBusinessTag(source.getBusinessTag());
         target.setReferenceNums(source.getReferenceNums());
         target.setUseDuration(source.getUseDuration());
-        target.setUpdateTime(source.getUpdateTime());
     }
 
     private void setImageBusinessProperties(Device target, ImageRequest source) {
@@ -572,6 +551,15 @@ public class ImagesConverter implements BaseConverter {
         target.setBusinessTag(source.getBusinessTag());
         target.setUseDuration(source.getUseDuration());
         target.setReferenceNums(source.getReferenceNums());
+        LocalDateTime localDateTime = null;
+        try {
+            // 解析字符串到 Instant 对象
+            Instant instant = Instant.parse(source.getUpdatedAt());
+            // 将 Instant 转换为系统默认时区的 LocalDateTime
+            localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+        } catch (Exception e) {
+        }
+        target.setUpdateTime(localDateTime);
     }
 
 }

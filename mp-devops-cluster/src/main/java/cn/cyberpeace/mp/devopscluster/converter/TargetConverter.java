@@ -115,11 +115,11 @@ public class TargetConverter{
             }
         }
         POLogoUtils.changeLogoPathToUrl(model.getList());
-        List<Device> modelList = model.getList();
-        for(Device device : modelList){
-            device.setBusinessTag(deviceTagMap.get(device.getUuid()));
-        }
-        sceneConvertModel.setList(modelList);
+        model.getList().forEach(device -> {
+            Optional.ofNullable(deviceTagMap.get(device.getUuid()))
+                    .ifPresent(device::setBusinessTag);
+        });
+        sceneConvertModel.setList(model.getList());
         return sceneConvertModel;
     }
 

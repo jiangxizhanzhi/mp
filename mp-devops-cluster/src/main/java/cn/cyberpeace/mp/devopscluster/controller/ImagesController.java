@@ -37,7 +37,6 @@ import cn.cyberpeace.mp.devopscluster.service.upload.ISOUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.InjectFileUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.SshPrivateKeyUploadService;
 import cn.cyberpeace.mp.devopscluster.task.CleanJob;
-import cn.cyberpeace.mp.devopscluster.utils.MyCompare;
 import cn.cyberpeace.mp.devopscluster.utils.URLUtils;
 import cn.cyberpeace.mp.devopscluster.utils.VmCompare;
 import cn.cyberpeace.mp.devopscluster.vo.*;
@@ -69,9 +68,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.awt.*;
+import java.lang.reflect.Method;
 import java.util.*;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -166,7 +164,27 @@ public class ImagesController {
                 orders = orders.replace("-","");
                 isReverse = true;
             }
-            modelList = modelList.stream().sorted(new MyCompare<>(orders, isReverse)).collect(Collectors.toList());
+
+            // 反射排序：根据 orders 字段进行排序
+            final boolean reverseFlag = isReverse;
+            String finalOrders = orders;
+            modelList.sort((o1, o2) -> {
+                try {
+                    // 获取排序字段对应的 getter 方法
+                    Method method1 = o1.getClass().getMethod("get" + capitalize(finalOrders));
+                    Method method2 = o2.getClass().getMethod("get" + capitalize(finalOrders));
+
+                    // 获取属性值并比较
+                    Comparable val1 = (Comparable) method1.invoke(o1);
+                    Comparable val2 = (Comparable) method2.invoke(o2);
+
+                    // 根据是否倒序来决定排序顺序
+                    return reverseFlag ? val2.compareTo(val1) : val1.compareTo(val2);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return 0;
+                }
+            });
         }
         int size = modelList.size();
         Integer page = dto.getOffset();
@@ -178,6 +196,26 @@ public class ImagesController {
         }
 
         return new PageResult<>(modelList, model.getTotal());
+    }
+
+    // 辅助方法：将字符串首字母大写,并转换成驼峰
+    private String capitalize(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        // 如果包含下划线，先转换为驼峰格式
+        if (str.contains("_")) {
+            String[] parts = str.split("_");
+            StringBuilder sb = new StringBuilder();
+            for (String part : parts) {
+                if (!part.isEmpty()) {
+                    sb.append(part.substring(0, 1).toUpperCase()).append(part.substring(1).toLowerCase());
+                }
+            }
+            return sb.toString();
+        }
+        // 否则仅首字母大写
+        return str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
     }
 
     /**
