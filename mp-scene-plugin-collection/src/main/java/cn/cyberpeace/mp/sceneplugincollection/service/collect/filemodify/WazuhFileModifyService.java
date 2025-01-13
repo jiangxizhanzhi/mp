@@ -136,9 +136,17 @@ public class WazuhFileModifyService {
             String fileSize = output.getFileSize() == null ? "" : output.getFileSize().toString();
             fileEventModel.setSize(fileSize);
             fileEventModel.setDescription("");
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("name", output.getData());
+            jsonObject.put("size", fileSize + "B");
+            fileEventModel.setContent(jsonObject);
         } else {
             fileEventModel.setSize("");
             fileEventModel.setDescription("-");
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("name", output.getData());
+            jsonObject.put("message", "not exist");
+            fileEventModel.setContent(jsonObject);
         }
     }
 

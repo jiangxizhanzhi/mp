@@ -134,8 +134,14 @@ public class WazuhRegistryModifyService {
         FileRegistrySicLaunchOutput output = JsonCommon.snakeMapToBean(launchOutput, FileRegistrySicLaunchOutput.class);
         fileEventModel.setFilePath(output.getRegPath());
         if (Boolean.TRUE.equals(output.getExists())) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put(output.getRegPath(), "exist");
+            fileEventModel.setContent(jsonObject);
             fileEventModel.setDescription("");
         } else {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put(output.getRegPath(), "not exist");
+            fileEventModel.setContent(jsonObject);
             fileEventModel.setDescription("-");
         }
     }
