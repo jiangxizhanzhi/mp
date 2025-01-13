@@ -1808,6 +1808,8 @@ public abstract class BaseSceneHandler<
         condition.filterEqual(BaseSceneAreaModel::getScene, sceneId);
         var allAreas = sceneAreaMapper.list(condition);
         Set<String> allAreaIds = new HashSet<>();
+        // 第一层为空字符串
+        allAreaIds.add("");
         for (TSceneAreaModel a : allAreas) {
             allAreaIds.add(a.getNodeId());
         }
