@@ -19,14 +19,14 @@ task createFileForJar {
         def commitId = "${process2.text.trim()}"
 
         // 生成一个文件
-        def file = new File("$buildDir/version.txt")
+        def file = new File("$buildDir/code_version.txt")
         file.text = "branch: $branchName\ncommit id : $commitId"
     }
 }
 
 bootJar {
     dependsOn createFileForJar
-    from "$buildDir/version.txt"
+    from "$buildDir/code_version.txt"
     enabled = true
 }
 
