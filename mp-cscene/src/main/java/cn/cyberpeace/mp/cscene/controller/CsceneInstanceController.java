@@ -869,9 +869,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
 
     @ApiOperation("获取场景内部虚拟机ip")
-    @PostMapping("/getInternalVmIp")
-    public ServiceResult<String> getInternalVmIp(@RequestParam String csceneId) {
-        String sceneId = this.getModelService().getSceneId(csceneId);
+        @PostMapping("/getInternalVmIp")
+    public ServiceResult<String> getInternalVmIp(@RequestParam String sceneId) {
+//        String sceneId = this.getModelService().getSceneId(csceneId);
         SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
         CloudScenePluginHandler handler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         // 获取内部服务上的配置网络ip
