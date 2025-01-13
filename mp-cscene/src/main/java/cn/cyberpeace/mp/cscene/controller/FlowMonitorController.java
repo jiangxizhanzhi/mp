@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
@@ -8,7 +9,10 @@ import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.controller.response.FlowExportResponse;
+import cn.cyberpeace.mp.cscene.controller.response.FlowOrVulnerabilityExportQueryParam;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAnalysisSummary;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackConfigInfo;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
@@ -30,6 +34,7 @@ import cn.cyberpeace.mp.cscene.response.AssetsStatisticsResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.FlowAttackTypeConvert;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
+import cn.cyberpeace.mp.cscene.util.FileUtil;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
@@ -40,6 +45,10 @@ import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionScene
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.util.FlowPcapExportUtil;
 import cn.cyberpeace.mp.situationaware.service.FlowClassificationsService;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.excel.write.metadata.WriteTable;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -48,16 +57,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -405,6 +410,71 @@ public class FlowMonitorController {
     @GetMapping("/export/process")
     public ServiceResult<FlowPcapExportUtil.FlowPcapExportProcess> process(String id) {
         return new ServiceResult<>(FlowPcapExportUtil.getProcess(id)).asResult();
+    }
+
+
+    @ApiOperation(value = "流量采集数据Excel导出")
+    @PostMapping("/excel_export/flow")
+    public void exportExcelFlow(HttpServletResponse response, @RequestBody List<FlowOrVulnerabilityExportQueryParam> queryParams) {
+        log.info("流量采集导出 ====>> queryParams:{}", queryParams);
+//        String destXlsPath = "/cpms/excel/export_flow_acquisition_info.xls";
+        // 本地测试
+        String destXlsPath = "C:/data/yz1/excel/export_flow_acquisition_info.xls";
+
+        File file = new File(destXlsPath);
+        if (!file.getParentFile().exists()) {
+            boolean mkdirs = file.getParentFile().mkdirs();
+        }
+
+        ExcelWriter writer = null;
+
+        try {
+            writer = EasyExcel.write(file).build();
+            for (FlowOrVulnerabilityExportQueryParam queryParam : queryParams) {
+                // 获取单个主机的流量采集信息
+                List<FlowExportResponse> list = getFlowExportList(queryParam.getSceneId(), queryParam.getElementId());
+                // 定义sheet页
+                WriteSheet sheet = EasyExcel.writerSheet().sheetName(queryParam.getName()).needHead(Boolean.FALSE).build();
+                // 定义表头
+                WriteTable table = EasyExcel.writerTable().head(FlowExportResponse.class).needHead(Boolean.TRUE).build();
+                // 写入数据
+                writer.write(list, sheet, table);
+            }
+        } catch (Exception e) {
+            log.error("流量采集导出异常", e);
+            throw new MpRuntimeException("流量采集导出异常");
+        } finally {
+            if (writer != null) {
+                writer.finish();
+            }
+        }
+
+        FileUtil.setResponse(file, true, response);
+    }
+
+    /**
+     * 获取流量采集数据列表
+     * @param id
+     * @param nodeId
+     * @return
+     */
+    private List<FlowExportResponse> getFlowExportList(String id, String nodeId) {
+        FlowQueryParams flowQueryParams = new FlowQueryParams();
+        flowQueryParams.setNodeIds(Collections.singletonList(nodeId));
+        flowQueryParams.setPage(1);
+        flowQueryParams.setPerPage(999);
+        List<FlowAttackDto> list = flowMonitorService.pageFlow(id, flowQueryParams).getData().getList();
+        if (CollectionUtils.isEmpty(list)) {
+            return new ArrayList<>();
+        }
+        List<FlowExportResponse> responses = new ArrayList<>();
+        list.forEach(e -> {
+            FlowExportResponse flowExportResponse = new FlowExportResponse();
+            BeanUtils.copyProperties(e, flowExportResponse);
+            flowExportResponse.setProtocol(e.getProtocol().toString());
+            responses.add(flowExportResponse);
+        });
+        return responses;
     }
 
 }
