@@ -1,6 +1,3 @@
-plugins {
-    id "com.gorylenko.gradle-git-properties" version "2.3.1"
-}
 
 apply from: 'config.gradle'
 
@@ -11,7 +8,25 @@ dependencies {
     }
 }
 
+task createFileForJar {
+    doLast {
+        def process1 = 'git rev-parse --abbrev-ref HEAD'.execute()
+        process1.waitFor() // 等待命令执行完成
+        def branchName = "${process1.text.trim()}"
+
+        def process2 = 'git rev-parse --short HEAD'.execute()
+        process2.waitFor() // 等待命令执行完成
+        def commitId = "${process2.text.trim()}"
+
+        // 生成一个文件
+        def file = new File("$buildDir/version.txt")
+        file.text = "branch: $branchName\ncommit id : $commitId"
+    }
+}
+
 bootJar {
+    dependsOn createFileForJar
+    from "$buildDir/version.txt"
     enabled = true
 }
 
