@@ -306,7 +306,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
     @Transactional
     public JSONObject synchronousCloudData(Integer cloudType) {
         // 获取该订阅Id的资源管理器
-        IAzureResourceManager instance = IAzureResourceManager.getInstance(cloudType);
         String cloudTypeStr;
         switch (cloudType) {
             case 1://公有云
@@ -343,6 +342,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             synchronousVmLocalImages(azureManagerUrl, body, headersMap, result);
 
         } else {
+            IAzureResourceManager instance = IAzureResourceManager.getInstance(cloudType);
             //获取微软云市场 网络服务(网络-网络服务)
             List getCloudInternetServices = getCloudInternetServices(instance);
             result.put("getCloudInternetServiceList", getCloudInternetServices);
@@ -418,8 +418,10 @@ public class MicrosoftAzureConverter implements BaseConverter {
         }
         Map<String, Object> dataMap = JsonUtils.parseMap(res);
         if (BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
-            List data = (List)dataMap.get("data");
-            result.put("imageList", data);
+            List<Map> data = (List)dataMap.get("data");
+            result.put("imageList", data.stream()
+                    .map(JSONObject::new)
+                    .collect(Collectors.toList()));
         }else {
             throw new RuntimeException("synchronous vm images fault");
         }
@@ -442,8 +444,10 @@ public class MicrosoftAzureConverter implements BaseConverter {
         }
         Map<String, Object> dataMap = JsonUtils.parseMap(res);
         if (BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
-            List data = (List)dataMap.get("data");
-            result.put("localImageList", data);
+            List<Map> data = (List)dataMap.get("data");
+            result.put("localImageList", data.stream()
+                    .map(JSONObject::new)
+                    .collect(Collectors.toList()));
         }else {
             throw new RuntimeException("synchronous vm local images fault");
         }
