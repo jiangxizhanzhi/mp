@@ -37,7 +37,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
@@ -134,13 +136,17 @@ public class WazuhRegistryModifyService {
         FileRegistrySicLaunchOutput output = JsonCommon.snakeMapToBean(launchOutput, FileRegistrySicLaunchOutput.class);
         fileEventModel.setFilePath(output.getRegPath());
         if (Boolean.TRUE.equals(output.getExists())) {
+            Map<String, String> fullLog = new HashMap<>();
+            fullLog.put(output.getRegPath(), "exist");
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put(output.getRegPath(), "exist");
+            jsonObject.put("full_log", fullLog);
             fileEventModel.setContent(jsonObject);
             fileEventModel.setDescription("");
         } else {
+            Map<String, String> fullLog = new HashMap<>();
+            fullLog.put(output.getRegPath(), "not exist");
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put(output.getRegPath(), "not exist");
+            jsonObject.put("full_log", fullLog);
             fileEventModel.setContent(jsonObject);
             fileEventModel.setDescription("-");
         }

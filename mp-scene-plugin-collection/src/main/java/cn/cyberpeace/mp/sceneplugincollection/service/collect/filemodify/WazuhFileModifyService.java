@@ -37,7 +37,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -136,16 +138,20 @@ public class WazuhFileModifyService {
             String fileSize = output.getFileSize() == null ? "" : output.getFileSize().toString();
             fileEventModel.setSize(fileSize);
             fileEventModel.setDescription("");
+            Map<String, String> fullLog = new HashMap<>();
+            fullLog.put("name", output.getData());
+            fullLog.put("size", fileSize + "B");
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("name", output.getData());
-            jsonObject.put("size", fileSize + "B");
+            jsonObject.put("full_log", fullLog);
             fileEventModel.setContent(jsonObject);
         } else {
             fileEventModel.setSize("");
             fileEventModel.setDescription("-");
+            Map<String, String> fullLog = new HashMap<>();
+            fullLog.put("name", output.getData());
+            fullLog.put("message", "not exist");
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("name", output.getData());
-            jsonObject.put("message", "not exist");
+            jsonObject.put("full_log", fullLog);
             fileEventModel.setContent(jsonObject);
         }
     }
