@@ -1,11 +1,15 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
+import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
+import cn.cyberpeace.mp.auth.repository.MicrosoftAzureLoginMapper;
 import cn.cyberpeace.mp.auth.util.ParentCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeEnum;
 import cn.cyberpeace.mp.base.bo.MpSysCodeMenu;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonStatusCodeEnum;
 import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
 import cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment;
@@ -20,6 +24,7 @@ import cn.cyberpeace.mp.devopscluster.vo.LoadRequestVO;
 import cn.cyberpeace.mp.devopscluster.vo.MpSysCodeMenuVO;
 import cn.cyberpeace.mp.devopscluster.vo.TargerRequestVO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import com.alibaba.fastjson.JSONObject;
 import com.azure.containers.containerregistry.ContainerRegistryClient;
 import com.azure.containers.containerregistry.ContainerRegistryClientBuilder;
@@ -46,6 +51,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -65,6 +71,11 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
     @Autowired
     private CommonCodeServiceImpl commonCodeService;
+
+    @Autowired
+    private SituationAwareConfig situationAwareConfig;
+    @Autowired
+    private MicrosoftAzureLoginMapper sceneElementPluginConfigMapper;
 
     // 镜像同步白名单路径
     private static final String filePath = "/whitelist/whitelist.xlsx";
@@ -183,7 +194,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             default:
         }
         //结果转Device集合
-        List<CloudDevice> convert = convert(vos,request.getCloudType());
+        List<CloudDevice> convert = convert(vos, request.getCloudType());
 
         //根据convert中subType分类收集成returnDate,list在收集returnDate
         List<JSONObject> list = new ArrayList<>();
@@ -219,7 +230,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
     }
 
     //结果转Device集合
-    private List<CloudDevice> convert(List<DeviceCloudTargetVO> vos,String cloudType) {
+    private List<CloudDevice> convert(List<DeviceCloudTargetVO> vos, String cloudType) {
         List<CloudDevice> deviceList = new ArrayList<>();
         if (vos != null && vos.size() > 0) {
             for (DeviceCloudTargetVO target : vos) {
@@ -257,7 +268,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
                         device.setServiceType(target.getCalculateType());
                         device.setSubType(target.getSubType());
                         if (target.getSubType() != null && target.getSubType().equals("vm")) {
-                            cloudTargetConverter.convertExtVm(device, target,cloudType);
+                            cloudTargetConverter.convertExtVm(device, target, cloudType);
                         } else {
                         }
                         break;
@@ -284,9 +295,9 @@ public class MicrosoftAzureConverter implements BaseConverter {
     @Async
     public void executeSequentially() {
         //1: 微软公有云 2:微软私有云 3:微软混合云
+        JSONObject privateTargetResult = synchronousCloudData(2);
+        JSONObject mixTargetResult = synchronousCloudData(3);
         JSONObject publicTargetResult = synchronousCloudData(1);
-//        JSONObject privateTargetResult = synchronousCloudData(2);
-//        JSONObject mixTargetResult = synchronousCloudData(3);
     }
 
     /**
@@ -313,41 +324,60 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
         //目前是根据配置的环境信息去获取微软云资源
         JSONObject result = new JSONObject();
+        if (cloudType == 2 || cloudType == 3) {
+            JSONObject jsonObject = new JSONObject();
+            //云类型(1: 微软公有云 2:微软私有云 3:微软混合云)
+            jsonObject.put("cloudType", cloudType);
+            MicrosoftAzureUserModel localAzurer = sceneElementPluginConfigMapper.getLocalAzurer(jsonObject);
+// 创建微软云的资源组
+            String azureManagerUrl = situationAwareConfig.getMixAzureManagerUrl();
+            if(cloudType == 2){
+                azureManagerUrl = situationAwareConfig.getPrivateAzureManagerUrl();
+            }
+            Map<String, Object> formMap = new HashMap();
+            formMap.put("azureUser", localAzurer);
+            //请求头设置
+            HashMap<String, String> headersMap = new HashMap<>();
+            String body = JsonUtils.stringify(formMap);
+            synchronousVmImages(azureManagerUrl, body, headersMap, result);
+            synchronousVmLocalImages(azureManagerUrl, body, headersMap, result);
 
-        //获取微软云市场 网络服务(网络-网络服务)
-        List getCloudInternetServices = getCloudInternetServices(instance);
-        result.put("getCloudInternetServiceList", getCloudInternetServices);
-        //获取用户上传 容器注册表(容器-容器基础结构-容器注册表)
-        List dockerImages = getDockerImages(instance);
-        result.put("dockerImageList", dockerImages);
-        //获取用户上传 虚拟机镜像(计算-lass-映像)
-        List localImages = getLocalImages(instance);
-        result.put("localImageList", localImages);
-        //获取 容器实例列表(容器-容器基础结构-容器实例)
-        List dockerInstances = null;
+        } else {
+            //获取微软云市场 网络服务(网络-网络服务)
+            List getCloudInternetServices = getCloudInternetServices(instance);
+            result.put("getCloudInternetServiceList", getCloudInternetServices);
+            //获取用户上传 容器注册表(容器-容器基础结构-容器注册表)
+            List dockerImages = getDockerImages(instance);
+            result.put("dockerImageList", dockerImages);
+            //获取用户上传 虚拟机镜像(计算-lass-映像)
+            List localImages = getLocalImages(instance);
+            result.put("localImageList", localImages);
+            //获取 容器实例列表(容器-容器基础结构-容器实例)
+            List dockerInstances = null;
 //        List dockerInstances = getDockerInstances(instance);
 //        result.put("dockerInstanceList", dockerInstances);
-        //获取微软云市场 虚拟机镜像(计算-lass-映像)
-        List images = null;
-        images = getImages(instance);
-        result.put("imageList", images);
+            //获取微软云市场 虚拟机镜像(计算-lass-映像)
+            List images = null;
+            images = getImages(instance);
+            result.put("imageList", images);
+        }
 
         //云靶标主数据表
         List<DeviceCloudTargetPO> mainTargetList = new ArrayList<>();
 
         //网络表数据
         List<DeviceCloudTargetNet> netList = new ArrayList<>();
-        cloudTargetConverter.cloudNetServiceConvert(cloudTypeStr, mainTargetList, netList, getCloudInternetServices);
+        cloudTargetConverter.cloudNetServiceConvert(cloudTypeStr, mainTargetList, netList, (List) result.get("getCloudInternetServiceList"));
 
         //容器表数据
         List<DeviceCloudTargetContainer> containerList = new ArrayList<>();
-        cloudTargetConverter.cloudContainerRegistryConvert(cloudTypeStr, mainTargetList, containerList, dockerImages);//容器-容器基础结构-容器注册表
-        cloudTargetConverter.cloudContainerInstanceConvert(cloudTypeStr, mainTargetList, containerList, dockerInstances);//容器-容器基础结构-容器实例
+        cloudTargetConverter.cloudContainerRegistryConvert(cloudTypeStr, mainTargetList, containerList, (List) result.get("dockerImageList"));//容器-容器基础结构-容器注册表
+        cloudTargetConverter.cloudContainerInstanceConvert(cloudTypeStr, mainTargetList, containerList, (List) result.get("dockerInstanceList"));//容器-容器基础结构-容器实例
 
         //计算表数据
         List<DeviceCloudTargetCalculate> calculateList = new ArrayList<>();
-        cloudTargetConverter.cloudCalculateSoftVMConvert(cloudTypeStr, mainTargetList, calculateList, images);//计算-laas-vm(微软云)
-        cloudTargetConverter.cloudCalculateUploadVMConvert(cloudTypeStr, mainTargetList, calculateList, localImages);//计算-laas-vm(用户上传)
+        cloudTargetConverter.cloudCalculateSoftVMConvert(cloudTypeStr, mainTargetList, calculateList, (List) result.get("imageList"));//计算-laas-vm(微软云)
+        cloudTargetConverter.cloudCalculateUploadVMConvert(cloudTypeStr, mainTargetList, calculateList, (List) result.get("localImageList"));//计算-laas-vm(用户上传)
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("result", result);
@@ -369,6 +399,54 @@ public class MicrosoftAzureConverter implements BaseConverter {
             jsonObject.put("code", BaseErrorCode.ERROR);
         }
         return jsonObject;
+    }
+
+    /**
+     * 混合云/私有云虚拟机镜像同步
+     * @param azureManagerUrl
+     * @param body
+     * @param headersMap
+     * @param result
+     */
+    private static void synchronousVmImages(String azureManagerUrl, String body, HashMap<String, String> headersMap, JSONObject result) {
+        String res = null;
+        try {
+            String url = azureManagerUrl + "/cloud/vm_images";
+            res = HttpUtils.sendHttpPost(url, body, headersMap);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        Map<String, Object> dataMap = JsonUtils.parseMap(res);
+        if (BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
+            List data = (List)dataMap.get("data");
+            result.put("imageList", data);
+        }else {
+            throw new RuntimeException("synchronous vm images fault");
+        }
+    }
+
+    /**
+     * 混合云/私有云虚拟机本地上传镜像同步
+     * @param azureManagerUrl
+     * @param body
+     * @param headersMap
+     * @param result
+     */
+    private static void synchronousVmLocalImages(String azureManagerUrl, String body, HashMap<String, String> headersMap, JSONObject result) {
+        String res = null;
+        try {
+            String url = azureManagerUrl + "/cloud/vm_local_images";
+            res = HttpUtils.sendHttpPost(url, body, headersMap);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        Map<String, Object> dataMap = JsonUtils.parseMap(res);
+        if (BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
+            List data = (List)dataMap.get("data");
+            result.put("localImageList", data);
+        }else {
+            throw new RuntimeException("synchronous vm local images fault");
+        }
     }
 
     private <T> boolean batchInsert(List<T> dataList, Function<List<T>, Boolean> insertFunction, String entityType) {
@@ -511,7 +589,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             case "calculate":
                 requestData.getCalculateTarget().setSubType("vm");
                 microsoftAzureMapper.addCloudTargetCommonData(uuid, requestData.getCommonCloudTarget());
-                microsoftAzureMapper.addCalculateTargetData(uuid,requestData.getCalculateTarget());
+                microsoftAzureMapper.addCalculateTargetData(uuid, requestData.getCalculateTarget());
                 break;
             default:
                 return new ServiceResult<>(null, BaseErrorCode.ERROR, "云镜像类型参数错误").asResult();
@@ -790,7 +868,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             item.setRole(60);
             item.setRunTableName(nextLevelMapsByCodes.get(item.getRunTable()));
             if (StringUtils.hasText(item.getActionType())) {
-                item.setActionTypeConvertName(item.getActionType(),nextLevelMapsByCodes);
+                item.setActionTypeConvertName(item.getActionType(), nextLevelMapsByCodes);
             }
             item.setControlTypeName(nextLevelMapsByCodes.get(item.getControlType()));
         });
