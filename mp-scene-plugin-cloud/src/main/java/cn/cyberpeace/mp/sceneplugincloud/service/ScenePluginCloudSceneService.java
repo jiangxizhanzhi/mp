@@ -424,7 +424,7 @@ public class ScenePluginCloudSceneService {
             }
             var timeStr = rawRecording.getRecordate();
             if (!StringUtils.isEmpty(timeStr)) {
-                recording.setTime(TimeUtils.utcStringToLocalDateTime(timeStr));
+                recording.setTime(TimeUtils.utcToLocalDateTime(timeStr));
             }
 
             return recording;
