@@ -33,6 +33,7 @@ public class CloudHttpClient {
             response.setRequestError();
             return response;
         }
+        log.info("resut -> {}", result.getResult());
 
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -65,6 +66,7 @@ public class CloudHttpClient {
                     data == null ? StringUtils.EMPTY : data.toContent());
             return null;
         }
+        log.info("resut -> {}", result.getResult());
 
         T response;
         ObjectMapper objectMapper = new ObjectMapper();
