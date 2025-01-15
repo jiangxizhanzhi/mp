@@ -2,7 +2,9 @@ package cn.cyberpeace.mp.frontadmin.service.sys;
 
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.frontadmin.config.FrontAdminConfig;
@@ -13,6 +15,8 @@ import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationModuleItem;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationResourceItem;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationVerifyInfo;
 import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
+import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
+import cn.cyberpeace.mp.frontadmin.repository.SysConfigMapper;
 import cn.cyberpeace.mp.frontadmin.request.activation.ActivationRequest;
 import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.service.sys.activmenu.ActivMenuService;
@@ -29,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import oshi.util.ExecutingCommand;
 
 import java.io.File;
 import java.time.Duration;
@@ -36,11 +41,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 系统激活相关service
@@ -57,6 +65,17 @@ public class SysActivationService {
 
     private static DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+    private static final Integer TRIAL_DAYS = 7;
+
+    public static final String TRIAL_USE_SYS_CONFIG = "trial_use_sys_config";
+
+//    // 竞赛相关激活项目
+//    private static List<String> AD_MODULE_KEYS = Arrays.asList(ActivationItemKeyEnums.JINGSAI.getCode(), ActivationItemKeyEnums.SHENTOUSAI.getCode(), ActivationItemKeyEnums.YUNWEISAI.getCode());
+//    // 实训相关激活项
+//    private static List<String> OJ_MODULE_KEYS = Arrays.asList(ActivationItemKeyEnums.SHIXUN.getCode());
+//    // 靶场相关激活项
+//    private static List<String> CR_MODULE_KEYS = Arrays.asList(ActivationItemKeyEnums.HUOTILOUDONG.getCode(),ActivationItemKeyEnums.ZHISHIKU.getCode(),ActivationItemKeyEnums.ZONGHEXUNLIAN.getCode(),ActivationItemKeyEnums.HONGLANDUIKANG.getCode(),ActivationItemKeyEnums.CEPING.getCode());
+
     @Autowired
     private LicenseService licenseService;
 
@@ -72,76 +91,107 @@ public class SysActivationService {
     @Autowired
     private SysActivCtlService sysActivCtlService;
 
+    @Autowired
+    private SysConfigMapper sysConfigMapper;
+
     /**
      * 激活
      *
      * @param activationRequest
      */
     public void activate(ActivationRequest activationRequest) {
-        log.info("activationRequest:{}", activationRequest);
-
         ActivationResponse content = status();
-        SysActivCtlModel validModel = sysCtlService.getValidCtlModel();
         boolean isSysActivited = false;
         if (Objects.nonNull(content) && Objects.equals(AdminConstant.STATUS_ACTIVITED, content.getIsActived())) {
             log.error("content status is actived!");
             isSysActivited = true;
         }
-        if (Objects.nonNull(validModel)) {
-            log.error("valid model existed!");
-            isSysActivited = true;
-        }
-        if (isSysActivited) {
-            log.error("isSysActivited:{}, system activation status not cleanup! please Check!", isSysActivited);
-            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_STATUS_ERROR);
-        }
 
+        synchronized (this) {
+            if (!isSysActivited) {
+                SysActivCtlModel validModel = sysCtlService.getValidCtlModel();
+                if (Objects.nonNull(validModel)) {
+                    log.error("valid model existed!");
+                    isSysActivited = true;
+                }
+            }
 
-        SysActivCtlModel unusedActivCtlModel = sysCtlService.getUnusedActivCtlModel();
-        if (Objects.isNull(unusedActivCtlModel)) {
-            log.error("unused activctl not existed!");
-            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR);
-        }
+            if (isSysActivited) {
+                log.error("isSysActivited:{}, system activation status not cleanup! please Check!", isSysActivited);
+                throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_STATUS_ERROR);
+            }
 
-        String localSysUUID = querySysUUID();
-        if (!Objects.equals(activationRequest.getMachineCode(), localSysUUID)) {
-            log.error("sysuuid not match! request machine code is:{}, localSysUUID is:{}", activationRequest.getMachineCode(), localSysUUID);
-            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_SYSUUID_NOTMATCH);
-        }
+            SysActivCtlModel unusedActivCtlModel = sysCtlService.getUnusedActivCtlModel();
+            if (Objects.isNull(unusedActivCtlModel)) {
+                log.error("unused activctl not existed!");
+                throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR);
+            }
 
-        // 拼接json串，调用licenseService验证
-        ActivationVerifyInfo verifyInfo = new ActivationVerifyInfo();
-        verifyInfo.setDeadline(activationRequest.getDeadline());
-        verifyInfo.setMachinecode(activationRequest.getMachineCode());
+            String localSysUUID = querySysUUID();
+            if (!Objects.equals(activationRequest.getMachineCode(), localSysUUID)) {
+                log.error("sysuuid not match! request machine code is:{}, localSysUUID is:{}", activationRequest.getMachineCode(), localSysUUID);
+                throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_SYSUUID_NOTMATCH);
+            }
 
-        // 自定义信息
-        Map<String, String> infoMap = convertActivationItems2CustomVerifyInfoMap(activationRequest.getItems());
-        verifyInfo.setInfo(infoMap);
+            // 拼接json串，调用licenseService验证
+            ActivationVerifyInfo verifyInfo = new ActivationVerifyInfo();
+            verifyInfo.setDeadline(activationRequest.getDeadline());
+            verifyInfo.setMachinecode(activationRequest.getMachineCode());
 
-        String verifyStr = JSON.toJSONString(verifyInfo);
-        String verifyCode = activationRequest.getVerifyCode();
+            // 自定义信息
+            Map<String, String> infoMap = convertActivationItems2CustomVerifyInfoMap(activationRequest.getItems());
+            verifyInfo.setInfo(infoMap);
 
-        // 校验激活码和激活配置项，是否匹配
-        boolean success = licenseService.verify(verifyStr, verifyCode);
+            String verifyStr = JSON.toJSONString(verifyInfo);
+            String verifyCode = activationRequest.getVerifyCode();
 
-        if (success) {
-            // 校验通过，生成加密文件存储磁盘
-            ACTIVATION_CONTENT = null;
-            generateEncryptedFile(activationRequest);
+            // 校验激活码和激活配置项，是否匹配
+            boolean success = false;
+            if (activationRequest.getTrialFlag()) {
+                HumanCondition condition = new HumanCondition().filterEqual(SysConfigModel::getKeyName, TRIAL_USE_SYS_CONFIG);
+                SysConfigModel sysConfigModel = sysConfigMapper.first(condition);
+                if (sysConfigModel == null) {
+                    success = true;
+                    sysConfigModel = new SysConfigModel();
+                    sysConfigModel.setTenant("default");
+                    sysConfigModel.setKeyName(TRIAL_USE_SYS_CONFIG);
+//                    sysConfigModel.setInitValue("1");
+                    sysConfigModel.setValue("1");
+                    sysConfigMapper.create(sysConfigModel);
+                } else {
+                    log.error("Trial use out of date!");
+                    throw new MpRuntimeException(AdminErrorCode.TRIAL_USE_OUT_OF_DATE);
+                }
+            } else {
+                success = licenseService.verify(verifyStr, verifyCode);
+            }
 
-            // 更新数据库激活限制配置
-            processActivCtlAfterActivationSuccess(activationRequest);
+            if (success) {
+                // 校验通过，生成加密文件存储磁盘
+                ACTIVATION_CONTENT = null;
+                generateEncryptedFile(activationRequest);
 
-            ACTIVATION_CONTENT = status();
-            log.info("ACTIVATION_CONTENT:{}", ACTIVATION_CONTENT);
-            activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
-            activMenuService.resetOptionsVisibility(ACTIVATION_CONTENT);
-        } else {
-            log.error("license verify failed！");
-            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_FAILED);
+                // 更新数据库激活限制配置
+                processActivCtlAfterActivationSuccess(activationRequest);
+
+                ACTIVATION_CONTENT = status();
+                log.info("ACTIVATION_CONTENT:{}", ACTIVATION_CONTENT);
+                activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
+                activMenuService.resetOptionsVisibility(ACTIVATION_CONTENT);
+            } else {
+                log.error("license verify failed！");
+                throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_FAILED);
+            }
         }
 
     }
+
+
+    public void resetMenuVisibility() {
+        ACTIVATION_CONTENT = status();
+        activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
+    }
+
 
     /**
      * 查询系统激活状态
@@ -160,6 +210,7 @@ public class SysActivationService {
 
         return ACTIVATION_CONTENT;
     }
+
 
 
     public String getValueByKey(String key) {
@@ -193,14 +244,17 @@ public class SysActivationService {
      * @return
      */
     public String querySysUUID() {
-        /*status();
+        status();
         SysActivCtlModel sysActivCtlModel = null;
         if (Objects.isNull(ACTIVATION_CONTENT) || Objects.equals(AdminConstant.STATUS_NOT_ACTIVITED, ACTIVATION_CONTENT.getIsActived())) {
             sysActivCtlModel = sysCtlService.generateOrGetUnusedActivCtlModel();
         } else {
             sysActivCtlModel = sysCtlService.getValidCtlModel();
         }
-        SysActivCtlModel sysActivCtlModel = sysCtlService.getValidCtlModel();
+        if (Objects.isNull(sysActivCtlModel)) {
+            log.error("sysActivCtlModel is null!");
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
+        }
         String suffix = sysActivCtlModel.getSuffix();
 
         String uuid = "";
@@ -210,8 +264,11 @@ public class SysActivationService {
                 uuid = checkLine;
                 log.info("origin uuid is {}", uuid);
             }
-        }*/
-        String uuid = "c59a0e42-da48-5545-275b-9dcfae06ca85-z7mx0g";
+        }
+
+        // todo
+        //uuid = "aaaa-bbbb-cccc-dddd";
+        uuid = uuid + "-" + suffix;
         return uuid;
     }
 
@@ -249,7 +306,6 @@ public class SysActivationService {
      */
     private void processActivedStatus() {
         if (Objects.nonNull(ACTIVATION_CONTENT)) {
-            /*
             //默认状态为未激活
             LocalDate expireDate = LocalDate.parse(ACTIVATION_CONTENT.getExpiredDate(), dateFormatter);
             expireDate = expireDate.plusDays(1);
@@ -295,11 +351,9 @@ public class SysActivationService {
                 updateActivCtlModel.setId(validActivCtlModel.getId());
                 updateActivCtlModel.setStatus(SysActivCtlModel.STATUS_INVALID);
                 sysActivCtlService.update(updateActivCtlModel);
+            } else {
+                ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_ACTIVITED);
             }
-
-            ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_ACTIVITED);
-            */
-            ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_ACTIVITED);
         }
     }
 
@@ -310,10 +364,14 @@ public class SysActivationService {
     private void generateEncryptedFile(ActivationRequest activationRequest) {
         String verifyCode = activationRequest.getVerifyCode();
         String encryptedVerifyCode = EncryptUtils.desEncrypt(verifyCode);
-        log.info("generate encrypted file activationRequest:{}", activationRequest);
         ActivationResponse activationResponse = new ActivationResponse();
         BeanUtils.copyProperties(activationRequest, activationResponse);
-        String expiredDateStr = getExpiredDateStr(activationRequest.getDeadline());
+        String expiredDateStr = "";
+        if (activationRequest.getTrialFlag()) {
+            expiredDateStr = getExpiredDateStrDay(TRIAL_DAYS);
+        } else {
+            expiredDateStr = getExpiredDateStr(activationRequest.getDeadline());
+        }
         activationResponse.setExpiredDate(expiredDateStr);
         activationResponse.setVerifyCode(encryptedVerifyCode);
 
@@ -374,25 +432,39 @@ public class SysActivationService {
         return expiredDate;
     }
 
+    private String getExpiredDateStrDay(Integer days) {
+        LocalDate localDate = LocalDate.now().plusDays(days);
+        String expiredDate = localDate.format(dateFormatter);
+        return expiredDate;
+    }
 
     /**
      * 激活成功，变更数据库激活限制相关配置信息
      * @param activationRequest
      */
     private void processActivCtlAfterActivationSuccess(ActivationRequest activationRequest) {
-        log.info("update activ ctl config info");
         SysActivCtlModel oldSysActivCtlModel = sysCtlService.getUnusedActivCtlModel();
         SysActivCtlModel updateSysActivCtlModel = new SysActivCtlModel();
         updateSysActivCtlModel.setId(oldSysActivCtlModel.getId());
 
         // 考虑用时间戳替代
-        LocalDateTime expiredTime = LocalDateTime.now().plusMonths(activationRequest.getDeadline()).plusDays(1);
+        LocalDateTime expiredTime = null;
+        if (activationRequest.getTrialFlag()) {
+            expiredTime = LocalDateTime.now().plusDays(TRIAL_DAYS).plusDays(1);
+        } else {
+            expiredTime = LocalDateTime.now().plusMonths(activationRequest.getDeadline()).plusDays(1);
+        }
         Duration duration = Duration.between(LocalDateTime.now(), expiredTime);
         Long lifeTimeSeconds = duration.toSeconds();
         updateSysActivCtlModel.setSysLifetime(EncryptUtils.desEncrypt(String.valueOf(lifeTimeSeconds)));
 
         String activeDateStr = LocalDate.now().format(dateFormatter);
-        String expiredDateStr = getExpiredDateStr(activationRequest.getDeadline());
+        String expiredDateStr = "";
+        if (activationRequest.getTrialFlag()) {
+            expiredDateStr = getExpiredDateStrDay(TRIAL_DAYS);
+        } else {
+            expiredDateStr = getExpiredDateStr(activationRequest.getDeadline());
+        }
         String encryptedLicenseCode = EncryptUtils.desEncrypt(activationRequest.getVerifyCode());
 
         if (StringUtils.isNotBlank(oldSysActivCtlModel.getLicenseCode())) {
@@ -422,7 +494,6 @@ public class SysActivationService {
      */
     private void processActivCtlWhenReActiveWithOldLicense(SysActivCtlModel updateSysActivCtlModel, String activeDateStr) {
         // 不更新first_active_date
-        log.info("activeDateStr:{}", activeDateStr);
         updateSysActivCtlModel.setFirstActiveDate(null);
         updateSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         sysActivCtlService.update(updateSysActivCtlModel);
@@ -436,7 +507,6 @@ public class SysActivationService {
      * @param expiredDateStr
      */
     private void processActivCtlWhenReActiveWithNewLicense(String activeDateStr, String expiredDateStr, String encryptedLicenseCode) {
-        log.info("activeDateStr:{}, expiredDateStr:{}", activeDateStr, expiredDateStr);
         SysActivCtlModel newSysActivCtlModel = new SysActivCtlModel();
         Long currTs = System.currentTimeMillis();
         newSysActivCtlModel.setSysTimestamp(currTs);
@@ -463,7 +533,6 @@ public class SysActivationService {
      * @param expiredDateStr
      */
     private void processActivCtlWhenFirstActiveWithNewLicense(SysActivCtlModel updateSysActivCtlModel, String activeDateStr, String expiredDateStr, String encryptedLicenseCode) {
-        log.info("activeDateStr:{}, expiredDateStr:{}", activeDateStr, expiredDateStr);
         updateSysActivCtlModel.setFirstActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         updateSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         updateSysActivCtlModel.setExpireDate(EncryptUtils.desEncrypt(expiredDateStr));
@@ -475,8 +544,52 @@ public class SysActivationService {
     }
 
 
+//    /**
+//     * 查询模块激活信息
+//     * @return
+//     */
+//    public List<ModuleInfoResponse> getModuleInfoList() {
+//        var content = status();
+//        List<ModuleInfoResponse> moduleInfoList = new ArrayList<>();
+//        if (Objects.isNull(content) || CollectionUtil.isEmpty(content.getItems())) {
+//            return moduleInfoList;
+//        }
+//        var items = content.getItems();
+//        // 竞赛
+//        ModuleInfoResponse ad = ModuleInfoResponse.builder().moduleName(ModuleEnums.AD.getCode()).isActived(AdminConstant.STATUS_NOT_ACTIVITED).build();
+//        // 实训
+//        ModuleInfoResponse oj = ModuleInfoResponse.builder().moduleName(ModuleEnums.OJ.getCode()).isActived(AdminConstant.STATUS_NOT_ACTIVITED).build();
+//        // 靶场
+//        ModuleInfoResponse cr = ModuleInfoResponse.builder().moduleName(ModuleEnums.CR.getCode()).isActived(AdminConstant.STATUS_NOT_ACTIVITED).build();
+//        moduleInfoList.addAll(Arrays.asList(ad, oj, cr));
+//
+//        Map<String, ActivationItem> key2ItemMap = items.stream().collect(Collectors.toMap(ActivationItem::getKey, Function.identity()));
+//
+//        // 任意一项激活项勾选，则该模块被激活
+//        for (String key : AD_MODULE_KEYS) {
+//            if (Objects.equals(key2ItemMap.get(key).getValue(), String.valueOf(AdminConstant.STATUS_ACTIVITED))) {
+//                ad.setIsActived(1);
+//            }
+//        }
+//
+//        for (String key : OJ_MODULE_KEYS) {
+//            if (Objects.equals(key2ItemMap.get(key).getValue(), String.valueOf(AdminConstant.STATUS_ACTIVITED))) {
+//                oj.setIsActived(1);
+//            }
+//        }
+//
+//        for (String key : CR_MODULE_KEYS) {
+//            if (Objects.equals(key2ItemMap.get(key).getValue(), String.valueOf(AdminConstant.STATUS_ACTIVITED))) {
+//                cr.setIsActived(1);
+//            }
+//        }
+//
+//        return moduleInfoList;
+//    }
 
 
+
+    @Deprecated
     private ActivationResponse mockActivationContent() {
         ActivationResponse content = new ActivationResponse();
         content.setExpiredDate("2022-05-26");
@@ -493,43 +606,43 @@ public class SysActivationService {
 
         ActivationItem item2 = new ActivationItem();
         item2.setKey("LCS-FUNC-CR-JINGSAI");
-        item2.setValue("1");
+        item2.setValue("0");
         item2.setType(1);
         list.add(item2);
 
         ActivationItem item3 = new ActivationItem();
         item3.setKey("LCS-FUNC-CR-HUOTILOUDONG");
-        item3.setValue("1");
+        item3.setValue("0");
         item3.setType(1);
         list.add(item3);
 
         ActivationItem item4 = new ActivationItem();
         item4.setKey("LCS-FUNC-CR-ZHISHIKU");
-        item4.setValue("1");
+        item4.setValue("0");
         item4.setType(1);
         list.add(item4);
 
         ActivationItem item5 = new ActivationItem();
         item5.setKey("LCS-FUNC-CR-ZONGHEXUNLIAN");
-        item5.setValue("1");
+        item5.setValue("0");
         item5.setType(1);
         list.add(item5);
 
         ActivationItem item6 = new ActivationItem();
         item6.setKey("LCS-FUNC-CR-HONGLANDUIKANG");
-        item6.setValue("1");
+        item6.setValue("0");
         item6.setType(1);
         list.add(item6);
 
         ActivationItem item7 = new ActivationItem();
         item7.setKey("LCS-FUNC-CR-SHENTOUSAI");
-        item7.setValue("1");
+        item7.setValue("0");
         item7.setType(1);
         list.add(item7);
 
         ActivationItem item8 = new ActivationItem();
         item8.setKey("LCS-FUNC-CR-YUNWEISAI");
-        item8.setValue("1");
+        item8.setValue("0");
         item8.setType(1);
         list.add(item8);
 

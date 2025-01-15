@@ -1,22 +1,17 @@
 package cn.cyberpeace.mp.frontadmin.dto.activation;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 /**
  * @Description:
  * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Date：2022/10/26 14:22
  */
 @Data
 public class ActivationStatus {
 
-    private Boolean isActivated;
-
-    private LocalDateTime expiredDate;
-
-    // todo 其他信息
-    private String info;
+    @ApiModelProperty(value = "是否是激活状态 1:是 0:否")
+    private Integer isActived;
 
 }

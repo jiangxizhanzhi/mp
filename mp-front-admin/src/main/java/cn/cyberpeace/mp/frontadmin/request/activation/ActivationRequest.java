@@ -26,15 +26,18 @@ public class ActivationRequest {
     private Integer deadline;
 
     @ApiModelProperty(value = "激活版本 0:标准版 1:专业版")
-    @NotNull
+//    @NotNull
     private Integer edition;
 
     @ApiModelProperty(value = "授权项列表")
-    @NotEmpty
+//    @NotEmpty
     private List<ActivationItem> items;
 
     @ApiModelProperty(value = "校验码，des加密")
-    @NotBlank
+//    @NotBlank
     private String verifyCode;
+
+    @ApiModelProperty(value = "试用7天标志")
+    private Boolean trialFlag = false;
 
 }
