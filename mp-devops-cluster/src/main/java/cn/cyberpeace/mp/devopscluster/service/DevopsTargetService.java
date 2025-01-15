@@ -3,12 +3,7 @@ package cn.cyberpeace.mp.devopscluster.service;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntity;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.converter.SupportExportConvert;
 import cn.cyberpeace.mp.devopscluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
@@ -26,6 +21,9 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +79,17 @@ public class DevopsTargetService {
             deviceTargetPO.setSshConfig(device.getSshConfig());
             deviceTargetPO.setTelnetConfig(device.getTelnetConfig());
             deviceTargetPO.setSyslogConfig(device.getSyslogConfig());
+            if(device.getUpdatedAt() != null){
+                LocalDateTime localDateTime = null;
+                try {
+                    // 解析字符串到 Instant 对象
+                    Instant instant = Instant.parse(device.getUpdatedAt());
+                    // 将 Instant 转换为系统默认时区的 LocalDateTime
+                    localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+                    deviceTargetPO.setCpcloudUpdateTime(localDateTime);
+                } catch (Exception e) {
+                }
+            }
             var ret = deviceTargetMapper.update(deviceTargetPO);
             return ret ? 1 : 0;
         }

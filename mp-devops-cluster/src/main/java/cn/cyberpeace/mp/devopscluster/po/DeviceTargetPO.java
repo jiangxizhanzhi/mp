@@ -213,4 +213,7 @@ public class DeviceTargetPO extends BaseModel {
     @JSONField(name = "syslog_config")
     private String syslogConfig;
 
+    @DefaultGen(DateTimeGenerator.class)
+    private LocalDateTime cpcloudUpdateTime;
+
 }

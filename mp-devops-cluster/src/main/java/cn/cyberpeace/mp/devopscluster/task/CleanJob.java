@@ -8,12 +8,10 @@ import cn.cyberpeace.mp.cscene.model.ScreenshotModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.ScreenshotMapper;
 import cn.cyberpeace.mp.cscene.response.ScreenshotDeleteConfigResponse;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ScreenrecordService;
 import cn.cyberpeace.mp.devopscluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteRequest;
-import cn.cyberpeace.mp.devopscluster.request.ScreenrecordDeleteRequest;
 import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import io.swagger.annotations.ApiModelProperty;
@@ -30,7 +28,6 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.regex.Pattern;
 
 @Slf4j
 @Component
@@ -155,31 +152,8 @@ public class CleanJob implements SchedulingConfigurer {
         if (StringUtils.isEmpty(cron)) {
             return false;
         }
-
         return true;
     }
-
-    //    @Scheduled(cron = "0 0/1 * * * ?")
-//    public void execute() {
-//        // 清除截屏
-//        try {
-//            this.doClearScreenshot();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        // 清除靶标
-//        try {
-//            this.doClearImages();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        // 清除拓扑模板
-//        try {
-//            this.doClearSceneConfig();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     private void doClearScreenshot(SysConfigModel screenshotSwitch) {
         ScreenshotDeleteConfigResponse parse = JsonCommon.parse(screenshotSwitch.getValue(), ScreenshotDeleteConfigResponse.class);
@@ -201,11 +175,25 @@ public class CleanJob implements SchedulingConfigurer {
         var delConfig = JsonCommon.parse(model.getValue(), ImageDelConfig.class);
         var createTime = LocalDateTime.now().minusDays(30);
         var cond = new HumanCondition()
-                .filterLessThan(DeviceTargetPO::getCreateTime, createTime)
+                .filterLessThan(DeviceTargetPO::getCpcloudUpdateTime, createTime)// 筛选出云靶标修改时间小于当前日期 超过30天的记录
                 .filterOrStart()
                 .orEqual(DeviceTargetPO::getReferenceNums, delConfig.getReferenceNums())
                 .orEqual(DeviceTargetPO::getUseDuration, delConfig.getUseDuration())
                 .filterOrEnd();
+
+        String deleteDateTimeField = delConfig.getDeleteDateTimeField();
+        LocalDateTime deleteDateTime = delConfig.getDeleteDateTime();
+        Integer deleteDateTimeRule = delConfig.getDeleteDateTimeRule();// 0:小于 1:等于 2:大于
+        if(deleteDateTimeField != null && deleteDateTime != null && deleteDateTimeRule != null){
+            if(deleteDateTimeRule == 0){
+                cond.filterLessThan(deleteDateTimeField, deleteDateTime);
+            }else if(deleteDateTimeRule == 1){
+                cond.filterEqual(deleteDateTimeField, deleteDateTime);
+            }else if(deleteDateTimeRule == 2){
+                cond.filterGreaterThan(deleteDateTimeField, deleteDateTime);
+            }
+        }
+
         var list = deviceTargetMapper.list(cond);
         if (CollectionUtils.isNotEmpty(list)) {
             for (var m : list) {
@@ -250,8 +238,14 @@ public class CleanJob implements SchedulingConfigurer {
         private Integer useDuration = 0;
         @ApiModelProperty(value = "是否开启")
         private Boolean enable = false;
-        @ApiModelProperty(value = "定时任务执行时间")
-        private String cron = "0 0 * * * ?";
+        @ApiModelProperty(value = "定时任务cron表达式")
+        private String cron = "0 0 * * * ?";// 每小时
+        @ApiModelProperty(value = "需要进行删除比较的日期属性")
+        private String deleteDateTimeField;
+        @ApiModelProperty(value = "需要进行删除的日期期限天数")
+        private LocalDateTime deleteDateTime;
+        @ApiModelProperty(value = "需要进行删除的日期期限规则 0:小于 1:等于 2:大于")
+        private Integer deleteDateTimeRule;
     }
 
     @Getter
@@ -259,7 +253,7 @@ public class CleanJob implements SchedulingConfigurer {
     public static class SceneDelConfig {
         private Integer nodeNum = 0;
         @ApiModelProperty(value = "是否开启")
-        private Boolean enable = false;
+        private Boolean enable = true;
         @ApiModelProperty(value = "定时任务执行时间")
         private String cron = "0 0 * * * ?";
     }

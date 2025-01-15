@@ -903,6 +903,7 @@ public class ImagesController {
         }
         vo.setCreateUserName(model.getCreateUserName());
         vo.setUpdateTime(model.getUpdateTime());
+        vo.setCpcloudUpdateTime(model.getCpcloudUpdateTime());
         return vo;
     }
 

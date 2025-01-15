@@ -2085,7 +2085,7 @@ public class ScenePluginCollectionSceneService {
         }
 
         if (StringUtils.isNotBlank(queryParams.getNodeId())) {
-            boolQueryBuilder.filter(QueryBuilders.termsQuery("node_id", queryParams.getNodeId()));
+            boolQueryBuilder.filter(QueryBuilders.matchQuery("node_id", queryParams.getNodeId()));
         }
         if (StringUtils.isNotBlank(queryParams.getAppName())) {
             boolQueryBuilder.filter(QueryBuilders.termsQuery("log.syslog.facility.name", queryParams.getAppName().toLowerCase()));

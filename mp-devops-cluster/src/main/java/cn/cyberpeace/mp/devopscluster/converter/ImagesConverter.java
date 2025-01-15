@@ -535,6 +535,8 @@ public class ImagesConverter implements BaseConverter {
         target.setBusinessTag(source.getBusinessTag());
         target.setReferenceNums(source.getReferenceNums());
         target.setUseDuration(source.getUseDuration());
+        target.setUpdateTime(source.getUpdateTime());
+        target.setCpcloudUpdateTime(source.getCpcloudUpdateTime());
     }
 
     private void setImageBusinessProperties(Device target, ImageRequest source) {
@@ -551,15 +553,6 @@ public class ImagesConverter implements BaseConverter {
         target.setBusinessTag(source.getBusinessTag());
         target.setUseDuration(source.getUseDuration());
         target.setReferenceNums(source.getReferenceNums());
-        LocalDateTime localDateTime = null;
-        try {
-            // 解析字符串到 Instant 对象
-            Instant instant = Instant.parse(source.getUpdatedAt());
-            // 将 Instant 转换为系统默认时区的 LocalDateTime
-            localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-        } catch (Exception e) {
-        }
-        target.setUpdateTime(localDateTime);
     }
 
 }

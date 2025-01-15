@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.converter.model;
 
+import cn.cyberpeace.mp.base.model.generator.DateTimeGenerator;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
@@ -163,5 +165,8 @@ public class ImageConvertModel extends BasePageConvertModel{
     private Integer useDuration;
 
     private LocalDateTime updateTime;
+
+    @DefaultGen(DateTimeGenerator.class)
+    private LocalDateTime cpcloudUpdateTime;
 
 }

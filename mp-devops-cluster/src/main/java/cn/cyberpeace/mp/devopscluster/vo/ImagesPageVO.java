@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.vo;
 
+import cn.cyberpeace.mp.base.model.generator.DateTimeGenerator;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import io.swagger.annotations.ApiModel;
@@ -143,4 +145,6 @@ public class ImagesPageVO extends ImageVO {
     @ApiModelProperty("更新时间")
     private LocalDateTime updateTime;
 
+    @DefaultGen(DateTimeGenerator.class)
+    private LocalDateTime cpcloudUpdateTime;
 }
