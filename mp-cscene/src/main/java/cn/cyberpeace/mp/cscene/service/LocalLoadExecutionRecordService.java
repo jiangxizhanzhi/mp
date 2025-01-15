@@ -19,4 +19,6 @@ public interface LocalLoadExecutionRecordService extends BaseModelService<LocalL
     List<LocalLoadExecutionRecordModel> processExecutionRecordsByStatus();
 
 
+    List<LocalLoadExecutionRecordModel> getDemoExecutionRecords();
+
 }

@@ -42,6 +42,9 @@ public class LocalLoadExecutionRecordModel extends BaseModel {
     @ApiModelProperty(value = "状态 0 未执行 1 已执行 2 执行失败 3 动效发送 4 无动效")
     private Integer status;
 
+    @ApiModelProperty(value = "演示动效状态 0 未执行 1 已执行 ")
+    private Integer demoStatus;
+
     public enum Status {
         NOT_EXECUTED(0),
         EXECUTED(1),

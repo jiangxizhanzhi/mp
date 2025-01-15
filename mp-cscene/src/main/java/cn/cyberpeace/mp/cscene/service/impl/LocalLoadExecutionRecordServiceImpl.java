@@ -86,10 +86,12 @@ public class LocalLoadExecutionRecordServiceImpl extends BaseModelServiceImpl<Lo
                 if (count > 0) {
 //	有-》发送态势动效-》修改记录状态为已完成态势
                     model.setStatus(LocalLoadExecutionRecordModel.Status.ANIMATION_SENT.getCode());
+                    model.setDemoStatus(LocalLoadExecutionRecordModel.Status.ANIMATION_SENT.getCode());
                     recordModelArrayList.add(model);
                 } else if (model.getUpdateTime().plusMinutes(5).isBefore(endTime)) {
 //	无-》检查创建时间与查询时间间隔是否大于5分钟，大于-》修改记录状态未未执行载荷动效
                     model.setStatus(LocalLoadExecutionRecordModel.Status.NO_ANIMATION.getCode());
+                    model.setDemoStatus(LocalLoadExecutionRecordModel.Status.ANIMATION_SENT.getCode());
                 } else {
                     break;
                 }
@@ -97,6 +99,17 @@ public class LocalLoadExecutionRecordServiceImpl extends BaseModelServiceImpl<Lo
             }
         }
         return recordModelArrayList;
+    }
+
+    @Override
+    public List<LocalLoadExecutionRecordModel> getDemoExecutionRecords() {
+        //        查走完流程的本地载荷执行记录
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(LocalLoadExecutionRecordModel::getDemoStatus,LocalLoadExecutionRecordModel.Status.NOT_EXECUTED.getCode());
+        List<LocalLoadExecutionRecordModel> list = localLoadExecutionRecordMapper.list(humanCondition);
+        list.stream().forEach(model->model.setDemoStatus(LocalLoadExecutionRecordModel.Status.EXECUTED.getCode()));
+        localLoadExecutionRecordMapper.bulkUpdate(list);
+        return list;
     }
 
 

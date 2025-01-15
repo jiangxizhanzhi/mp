@@ -31,4 +31,11 @@ public class LocalLoadExecutionRecordController extends BaseModelController<Loca
         List<LocalLoadExecutionRecordModel> list = getModelService().processExecutionRecordsByStatus();
         return new ServiceResult<>(list).asResult();
     }
+
+    //    查记录用于演示
+    @RequestMapping("/demoExecutionRecords")
+    public ServiceResult<List<LocalLoadExecutionRecordModel>> getDemoExecutionRecords() {
+        List<LocalLoadExecutionRecordModel> list = getModelService().getDemoExecutionRecords();
+        return new ServiceResult<>(list).asResult();
+    }
 }
