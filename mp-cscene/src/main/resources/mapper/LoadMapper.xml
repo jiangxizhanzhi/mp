@@ -12,8 +12,10 @@
          result_type,
          result_log,
          result_status,
+         judgment_status,
          creator_id,
-         create_time)
+         create_time,
+         update_time)
         VALUES (#{param.id},
                 #{param.instanceId},
                 #{param.sceneId},
@@ -22,7 +24,9 @@
                 #{param.resultType},
                 #{param.resultLog},
                 #{param.resultStatus},
+                0,
                 #{param.creatorId},
+                #{param.createTime},
                 #{param.createTime})
     </insert>
 
@@ -319,6 +323,9 @@
             </if>
             <if test="param != null and param.resultStatus != null and param.resultStatus != ''">
                 result_status = #{param.resultStatus},
+            </if>
+            <if test="param != null and param.judgmentStatus != null and param.judgmentStatus != ''">
+                judgment_status = #{param.judgmentStatus},
             </if>
             <if test="param != null and param.resultType != null and param.resultType != ''">
                 result_type = #{param.resultType},

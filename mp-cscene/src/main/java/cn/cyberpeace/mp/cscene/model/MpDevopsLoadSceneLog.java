@@ -45,6 +45,10 @@ public class MpDevopsLoadSceneLog extends MpDevopsLoad {
     private String resultType;
 
     /**
+     * 研判结果(0:未研判 1:成功 2:失败)
+     */
+    private Integer judgmentStatus;
+    /**
      * 阶段id
      */
     private String stageId;
