@@ -869,13 +869,27 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
 
     @ApiOperation("获取场景内部虚拟机ip")
-        @PostMapping("/getInternalVmIp")
-    public ServiceResult<String> getInternalVmIp(@RequestParam String sceneId) {
-//        String sceneId = this.getModelService().getSceneId(csceneId);
-        SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
-        CloudScenePluginHandler handler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        // 获取内部服务上的配置网络ip
-        String frameServerConfigIp = handler.getScene().getInternalVmIp();
-        return new ServiceResult<>(frameServerConfigIp).asResult();
+    @PostMapping("/getInternalVmIp")
+    public ServiceResult<String> getInternalVmIp(@RequestParam String csceneId) {
+
+        try {
+            String sceneId = this.getModelService().getSceneId(csceneId);
+            SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
+            CloudScenePluginHandler handler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+            String internalVmId = handler.getScene().getInternalVmId();
+            // 未开启场景内部服务 则无须执行后续查询信息的步骤
+            if (StringUtils.isEmpty(internalVmId)) {
+                log.info("failed to get_agent_server_biz_ip , because no internalVmId");
+                return new ServiceResult<>("").asResult();
+            }
+
+            // 获取内部服务上的配置网络ip
+            String internalVmIp = handler.getScene().getInternalVmIp();
+            return new ServiceResult<>(internalVmIp).asResult();
+
+        } catch (Exception e) {
+            log.info("failed to get_vm_ip , exception is {}", e.getMessage());
+            return new ServiceResult<>("").asResult();
+        }
     }
 }

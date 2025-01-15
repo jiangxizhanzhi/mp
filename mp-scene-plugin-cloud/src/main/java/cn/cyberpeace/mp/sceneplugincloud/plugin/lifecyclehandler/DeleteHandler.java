@@ -45,11 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -368,6 +364,28 @@ public class DeleteHandler extends HandlerCommon {
                     .map(cloudElement -> (Runnable) () -> deleteElementProcess(cloudElement)).collect(Collectors.toList());
             entities.stream().forEach(e -> deletedNodeIds.add(e.getSrcElement().getId()));
             runSceneProgress(SceneProcess.DELETE_ENTITIES, () -> runTasks(deleteEntities));
+        }
+
+        // 先删除提供内部服务的虚拟机
+        String internalVmId = getPluginHandler().getScene().getInternalVmId();
+        if (StringUtils.isNotEmpty(internalVmId)) {
+            var deleteData = new VirtualMachineDeleteData();
+            deleteData.setVms(Arrays.asList(internalVmId));
+            vmClient.delete(deleteData);
+        }
+        // 删除提供内部服务的内部路由
+        String internalRouterId = getPluginHandler().getScene().getInternalRouterId();
+        if (StringUtils.isNotEmpty(internalRouterId)) {
+            var deleteData = new VirtualRouterDeleteData();
+            deleteData.setIds(Arrays.asList(internalRouterId));
+            vrClient.delete(deleteData);
+        }
+        // 删除提供内部服务的内部网络
+        String internalNetId = getPluginHandler().getScene().getInternalNetId();
+        if (StringUtils.isNotEmpty(internalNetId)) {
+            var deleteData = new VirtualSwitchDeleteData();
+            deleteData.setIds(Arrays.asList(internalNetId));
+            vsClient.delete(deleteData);
         }
 
         // 删除终端

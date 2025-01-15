@@ -19,4 +19,7 @@ public abstract class BaseCloudPluginSceneBO<M extends BaseCloudPluginSceneModel
 
     private String internalVmId;
     private String internalVmIp;
+    private String internalRouterId;
+    private String internalNetId;
+
 }
