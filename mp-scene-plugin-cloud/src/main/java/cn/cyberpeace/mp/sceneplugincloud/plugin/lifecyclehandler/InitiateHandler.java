@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -1153,6 +1154,42 @@ public class InitiateHandler extends HandlerCommon {
             }
         }
         this.initiateForSingleNode(noEventElements);
+
+        boolean createInternalVm = Boolean.TRUE.equals(getPluginHandler().getScene().getCreateInternalVm());
+        if (createInternalVm) {
+            for (var elementBO : getPluginHandler().getElementMap().values()) {
+                for (var networkBO : elementBO.getDeriveNetworks()) {
+                    log.info("init createInternalVm net : {}", JsonCommon.stringify(networkBO.getNetwork()));
+                    // 外部网络不需要处理
+                    if (CloudSingleton.cloudAppConfig.getExternalNetId()
+                            .equals(networkBO.getNetwork().getResourceId())) {
+                        continue;
+                    }
+                    CloudPluginSceneElementNetworkBO networkInfo = networkBO.getNetwork();
+                    List<String> ips = IpUtils.newRandomIps(networkInfo.getCidr(), 1, new ArrayList<>(networkInfo.getExcloudIps()), networkInfo.getAllocationPools(), Boolean.TRUE.equals(networkInfo.getDhcp()));
+                    if (CollectionUtils.isEmpty(ips)) {
+                        log.info("ip pool is empty when initate collection,node {}", elementBO.getSrcElement()
+                                .getName());
+                        return;
+                    }
+                    String ip = ips.get(0);
+                    networkInfo.getExcloudIps().add(ip);
+                    List<HostRoute> hostRoutes = networkBO.getNetwork().getHostRoutes();
+                    if (hostRoutes == null) {
+                        hostRoutes = new ArrayList<>();
+                    }
+                    HostRoute hostRoute = new HostRoute();
+                    hostRoute.setDestination(CloudSingleton.cloudAppConfig.getInternalNetCidr());
+                    hostRoute.setNexthop(ip);
+                    hostRoutes.add(hostRoute);
+                    networkBO.getNetwork().setHostRoutes(hostRoutes);
+
+                    log.info("init createInternalVm net ,cidr : {} , hostroute : {}", networkInfo.getCidr(), JsonCommon.stringify(hostRoute));
+                    getPluginHandler().getHandlerUtils().getHostRouteMap().put(networkInfo.getCidr(), hostRoute);
+                }
+            }
+            log.info("init createInternalVm net : {}", JsonCommon.stringify(getPluginHandler().getHandlerUtils().getHostRouteMap()));
+        }
     }
 
     public void initiateForSingleNode(List<CloudPluginSceneElementBO> noEventElements) {
