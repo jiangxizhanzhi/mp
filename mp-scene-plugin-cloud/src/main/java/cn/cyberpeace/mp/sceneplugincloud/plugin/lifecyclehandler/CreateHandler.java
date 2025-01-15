@@ -1175,6 +1175,7 @@ public class CreateHandler extends HandlerCommon {
         createData.setInterfaces(CollectionUtils.emptyNull(genEntityInterfaces(cloudElement)));
         EntityNodeCreateData entityNode = enClient.create(createData);
 
+        log.info("entity interface is : {}", JsonCommon.snakeStringify(entityNode.getInterfaces()));
         receiveEntityInterfaceInfo(cloudElement, entityNode.getInterfaces());
 
         checkAccessModes(cloudElement);
