@@ -296,8 +296,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
     public void executeSequentially() {
         //1: 微软公有云 2:微软私有云 3:微软混合云
         JSONObject privateTargetResult = synchronousCloudData(2);
-        JSONObject mixTargetResult = synchronousCloudData(3);
-        JSONObject publicTargetResult = synchronousCloudData(1);
+//        JSONObject mixTargetResult = synchronousCloudData(3);
+//        JSONObject publicTargetResult = synchronousCloudData(1);
     }
 
     /**
@@ -340,7 +340,10 @@ public class MicrosoftAzureConverter implements BaseConverter {
             String body = JsonUtils.stringify(formMap);
             synchronousVmImages(azureManagerUrl, body, headersMap, result);
             synchronousVmLocalImages(azureManagerUrl, body, headersMap, result);
-
+//            网络靶标
+            List<JSONObject> getCloudInternetServices = new ArrayList<>();
+            getCloudInternetServices.add(createElement("VNet", "basicNetwork", "VNet"));
+            result.put("getCloudInternetServiceList", getCloudInternetServices);
         } else {
             IAzureResourceManager instance = IAzureResourceManager.getInstance(cloudType);
             //获取微软云市场 网络服务(网络-网络服务)
@@ -488,7 +491,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         List<JSONObject> jsonList = new ArrayList<>();
         jsonList.add(createElement("VNet", "basicNetwork", "VNet"));
         jsonList.add(createElement("fireWall", "networkSecurity", "fireWall"));
-        jsonList.add(createElement("WAF", "networkSecurity", "WAF"));
+//        jsonList.add(createElement("WAF", "networkSecurity", "WAF"));
         return jsonList;
     }
 
