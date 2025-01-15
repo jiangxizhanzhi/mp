@@ -48,6 +48,11 @@ public class MpDevopsLoadSceneLog extends MpDevopsLoad {
      * 研判结果(0:未研判 1:成功 2:失败)
      */
     private Integer judgmentStatus;
+
+    /**
+     * 备注 研判结果原因
+     */
+    private String remark;
     /**
      * 阶段id
      */

@@ -324,8 +324,11 @@
             <if test="param != null and param.resultStatus != null and param.resultStatus != ''">
                 result_status = #{param.resultStatus},
             </if>
-            <if test="param != null and param.judgmentStatus != null and param.judgmentStatus != ''">
+            <if test="param != null and param.judgmentStatus != null ">
                 judgment_status = #{param.judgmentStatus},
+            </if>
+            <if test="param != null and param.remark != null and param.remark != ''">
+                remark = #{param.remark},
             </if>
             <if test="param != null and param.resultType != null and param.resultType != ''">
                 result_type = #{param.resultType},

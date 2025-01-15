@@ -2895,6 +2895,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             localLoadExecutionRecordModel.setDestinationNode(ipNodeMap.get(destinationIp));
             localLoadExecutionRecordModel.setDestinationIp(destinationIp);
             localLoadExecutionRecordModel.setStatus(LocalLoadExecutionRecordModel.Status.NOT_EXECUTED.getCode());
+            localLoadExecutionRecordModel.setDemoStatus(LocalLoadExecutionRecordModel.Status.NOT_EXECUTED.getCode());
             localLoadExecutionRecordMapper.create(localLoadExecutionRecordModel);
         }
 //        业务修改 此处不执行命令
