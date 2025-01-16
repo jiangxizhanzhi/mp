@@ -2917,6 +2917,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 //        result.setOutput(execBO.getOutput());
 //        result.setStatus(execBO.getStatus());
         result.setStatus(true);
+        result.setOutput(localLoadExecutionRecordModel.getId());
         return new ServiceResult<>(result);
     }
 

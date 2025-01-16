@@ -112,6 +112,12 @@ public class LocalLoadExecutionRecordServiceImpl extends BaseModelServiceImpl<Lo
         return list;
     }
 
+    @Override
+    public LocalLoadExecutionRecordModel getExecutionRecord(String id) {
+        LocalLoadExecutionRecordModel localLoadExecutionRecordModel = localLoadExecutionRecordMapper.get(id);
+        return localLoadExecutionRecordModel;
+    }
+
 
     /**
      * 查询指定时间段内，指定源IP和目的IP的流量数据条数

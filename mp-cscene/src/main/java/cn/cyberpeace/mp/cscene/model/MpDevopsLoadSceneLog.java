@@ -53,6 +53,12 @@ public class MpDevopsLoadSceneLog extends MpDevopsLoad {
      * 备注 研判结果原因
      */
     private String remark;
+
+    /**
+     * 载荷执行记录id
+     */
+    private String executionRecordId;
+
     /**
      * 阶段id
      */

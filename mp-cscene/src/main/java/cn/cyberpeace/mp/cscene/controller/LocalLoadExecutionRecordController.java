@@ -7,9 +7,11 @@ import cn.cyberpeace.mp.cscene.model.LocalLoadExecutionRecordModel;
 import cn.cyberpeace.mp.cscene.request.queryparam.ScreenshotQueryParams;
 import cn.cyberpeace.mp.cscene.service.LocalLoadExecutionRecordService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -37,5 +39,12 @@ public class LocalLoadExecutionRecordController extends BaseModelController<Loca
     public ServiceResult<List<LocalLoadExecutionRecordModel>> getDemoExecutionRecords() {
         List<LocalLoadExecutionRecordModel> list = getModelService().getDemoExecutionRecords();
         return new ServiceResult<>(list).asResult();
+    }
+
+    @ApiOperation(value = "根据id获取执行记录")
+    @RequestMapping("/getExecutionRecord")
+    public ServiceResult<LocalLoadExecutionRecordModel> getExecutionRecord(@RequestParam(value = "id") String id) {
+        LocalLoadExecutionRecordModel model = getModelService().getExecutionRecord(id);
+        return new ServiceResult<>(model).asResult();
     }
 }

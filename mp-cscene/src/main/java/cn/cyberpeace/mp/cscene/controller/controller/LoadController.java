@@ -275,7 +275,7 @@ public class LoadController {
      * 修改载荷执行结果
      * */
     @ApiOperation(value = "修改载荷执行结果", notes = "")
-    @PutMapping("/updateLoadExecutionResultByPk")
+    @RequestMapping("/updateLoadExecutionResultByPk")
     public ServiceResult updateLoadExecutionResultByPk(@RequestBody MpDevopsLoadSceneLog request) {
         ServiceResult updateLoadExecutionResultByPk = loadService.updateLoadExecutionResultByPk(request);
         return updateLoadExecutionResultByPk;

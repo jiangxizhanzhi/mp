@@ -10,9 +10,9 @@
          stage_id,
          task_id,
          result_type,
-         result_log,
          result_status,
          judgment_status,
+         execution_record_id,
          creator_id,
          create_time,
          update_time)
@@ -22,9 +22,9 @@
                 #{param.stageId},
                 #{param.taskId},
                 #{param.resultType},
-                #{param.resultLog},
                 #{param.resultStatus},
                 0,
+                #{param.resultLog},
                 #{param.creatorId},
                 #{param.createTime},
                 #{param.createTime})

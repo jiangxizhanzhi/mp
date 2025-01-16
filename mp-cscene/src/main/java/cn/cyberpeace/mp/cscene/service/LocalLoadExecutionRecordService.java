@@ -2,10 +2,7 @@ package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.cscene.model.LocalLoadExecutionRecordModel;
-import cn.cyberpeace.mp.cscene.model.ScreenshotModel;
 import cn.cyberpeace.mp.cscene.request.queryparam.ScreenshotQueryParams;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -21,4 +18,5 @@ public interface LocalLoadExecutionRecordService extends BaseModelService<LocalL
 
     List<LocalLoadExecutionRecordModel> getDemoExecutionRecords();
 
+    LocalLoadExecutionRecordModel getExecutionRecord(String id);
 }
