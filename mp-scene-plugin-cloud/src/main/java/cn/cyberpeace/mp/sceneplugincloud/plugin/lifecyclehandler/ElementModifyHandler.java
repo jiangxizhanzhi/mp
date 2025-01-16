@@ -672,7 +672,13 @@ public class ElementModifyHandler extends HandlerCommon {
             if (net != null) {
                 // 虚拟机容器分开处理
                 if (originCloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
-                    var result = this.vmAddPort(originCloudElement.getResourceId(), net.getResourceId(), addPort.getIp(), null, originCloudElement, addCloudPort);
+                    // 添加新的
+                    VirtualPortCreateData portCreateData = new VirtualPortCreateData();
+                    portCreateData.setFixedIp(addPort.getIp());
+                    portCreateData.setMacAddress(TextUtils.emptyNull(addPort.getMacAddr()));
+                    portCreateData.setNetworkId(net.getResourceId());
+                    var newPortResult = virtualPort.create(portCreateData);
+                    var result = this.vmAddPort(originCloudElement.getResourceId(), net.getResourceId(), addPort.getIp(), newPortResult.getId(), originCloudElement, addCloudPort);
                     addPort.setMacAddr(result.getMacAddress());
                     addCloudPort.setResourceId(result.getPortId());
                 } else {
@@ -768,7 +774,11 @@ public class ElementModifyHandler extends HandlerCommon {
                     // 添加新的
                     VirtualPortCreateData portCreateData = new VirtualPortCreateData();
                     portCreateData.setFixedIp(newIp);
-                    portCreateData.setMacAddress(StringUtils.isEmpty(originPort.getMacAddr()) ? null : originPort.getMacAddr());
+                    String macAddr = TextUtils.emptyNull(newPort.getMacAddr());
+                    if (macAddr == null) {
+                        macAddr = TextUtils.emptyNull(originPort.getMacAddr());
+                    }
+                    portCreateData.setMacAddress(macAddr);
                     portCreateData.setNetworkId(newNet.getResourceId());
                     var newPortResult = virtualPort.create(portCreateData);
                     var result = this.vmAddPort(originCloudElement.getResourceId(), newNet.getResourceId(), newIp, newPortResult.getId(), originCloudElement, newCloudPort);
@@ -825,7 +835,11 @@ public class ElementModifyHandler extends HandlerCommon {
                     // 添加新的
                     VirtualPortCreateData portCreateData = new VirtualPortCreateData();
                     portCreateData.setFixedIp(newIp);
-                    portCreateData.setMacAddress(StringUtils.isEmpty(originPort.getMacAddr()) ? null : originPort.getMacAddr());
+                    String macAddr = TextUtils.emptyNull(newPort.getMacAddr());
+                    if (macAddr == null) {
+                        macAddr = TextUtils.emptyNull(originPort.getMacAddr());
+                    }
+                    portCreateData.setMacAddress(macAddr);
                     portCreateData.setNetworkId(newNet.getResourceId());
                     var newPortResult = virtualPort.create(portCreateData);
                     var result = this.vmAddPort(originCloudElement.getResourceId(), newNet.getResourceId(), newIp, newPortResult.getId(), originCloudElement, newCloudPort);
