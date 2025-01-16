@@ -573,7 +573,7 @@ public class SceneMonitorService {
         Integer cloudType = sceneHandler.getScene().getCloudType();
         if (null != cloudType && BaseSceneModel.CloudType.DEFAULT != cloudType) {
             return allSceneElements.stream()
-                    .filter(basicInfo -> !BaseCloudPluginSceneElementModel.ImageType.CONTAINER_REGISTRY.equals(basicInfo.getImageType()))
+                    .filter(basicInfo -> !BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(basicInfo.getImageType()))
                     .collect(Collectors.toList());
 
         }

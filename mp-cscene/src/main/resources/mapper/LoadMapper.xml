@@ -13,6 +13,7 @@
          result_status,
          judgment_status,
          execution_record_id,
+         result_log,
          creator_id,
          create_time,
          update_time)
@@ -24,6 +25,7 @@
                 #{param.resultType},
                 #{param.resultStatus},
                 0,
+                #{param.executionRecordId},
                 #{param.resultLog},
                 #{param.creatorId},
                 #{param.createTime},
