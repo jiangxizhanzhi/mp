@@ -299,7 +299,7 @@ public class AzureVirtualMachine {
                     cloudElement.setPublicIpAddress(String.valueOf(publicIp));
                 }
             }else {
-                throw new RuntimeException("create vm fault");
+                throw new RuntimeException("create vm fault "+dataMap.get("message"));
             }
         }
 
