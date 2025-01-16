@@ -259,6 +259,8 @@ public class VirtualMachine extends CloudClient {
         url = url.replace("{port_id}", portId);
         cloudDelete(url, null, null, new TypeReference<CloudResponse<VirtualMachineAddPortResult>>() {
         }, true);
+        cloudDelete(CloudUrlConstant.DELETE_PORTS.replace("{port_id}", portId), null, null, new TypeReference<CloudResponse<Object>>() {
+        }, true);
         return true;
     }
 
