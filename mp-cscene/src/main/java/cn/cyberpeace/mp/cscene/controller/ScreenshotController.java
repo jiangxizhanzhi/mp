@@ -104,7 +104,7 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
         if (conf == null) {
             return new ServiceResult<>(result).asResult();
         }
-        result.setMonths(Integer.parseInt(conf.getValue()));
+//        result.setMonths(Integer.parseInt(conf.getValue()));
         return new ServiceResult<>(result).asResult();
     }
 
