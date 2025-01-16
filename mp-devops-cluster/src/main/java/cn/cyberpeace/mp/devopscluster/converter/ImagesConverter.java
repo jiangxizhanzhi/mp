@@ -337,29 +337,30 @@ public class ImagesConverter implements BaseConverter{
      * 创建镜像机器
      * @param uuid
      */
-    public void create(String uuid) {
-        if (StringUtils.isBlank(uuid)) {
-            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
-        }
-        String insctanceCreateUser = Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : StringUtils.EMPTY;
-        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser,""));
-        var updateTargetModel = new DeviceTargetPO();
-        updateTargetModel.setUuid(uuid);
-        updateTargetModel.setInstanceCreateUser(insctanceCreateUser);
-        deviceTargetMapper.updateById(updateTargetModel);
-    }
+//    public void create(String uuid) {
+//        if (StringUtils.isBlank(uuid)) {
+//            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+//        }
+//        String insctanceCreateUser = Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : StringUtils.EMPTY;
+//        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser,""));
+//        var updateTargetModel = new DeviceTargetPO();
+//        updateTargetModel.setUuid(uuid);
+//        updateTargetModel.setInstanceCreateUser(insctanceCreateUser);
+//        deviceTargetMapper.updateById(updateTargetModel);
+//    }
 
     /**
      * 创建镜像机器
      * @param uuid
      */
-    public void createForBJYD(String uuid,String host) {
-        if (StringUtils.isBlank(uuid) || StringUtils.isBlank(host)) {
+    public void createForBJYD(String uuid,String host,ImageCreateRequest im) {
+        if (StringUtils.isBlank(uuid) || StringUtils.isBlank(host)
+                || StringUtils.isEmpty(im.getCidr()) || im.getVlanId() == null) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         String insctanceCreateUser = Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : StringUtils.EMPTY;
         log.info("do createForBJYD : {},{},{}",uuid,insctanceCreateUser,host);
-        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser,host));
+        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, insctanceCreateUser,host,im.getVlanId(),im.getCidr()));
         var updateTargetModel = new DeviceTargetPO();
         updateTargetModel.setUuid(uuid);
         updateTargetModel.setInstanceCreateUser(insctanceCreateUser);

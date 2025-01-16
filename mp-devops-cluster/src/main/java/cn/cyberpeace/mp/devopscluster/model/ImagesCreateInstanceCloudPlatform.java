@@ -31,4 +31,8 @@ public class ImagesCreateInstanceCloudPlatform extends BaseRequest {
      */
     private String host;
 
+    private Integer vlanId;
+
+    private String cidr;
+
 }

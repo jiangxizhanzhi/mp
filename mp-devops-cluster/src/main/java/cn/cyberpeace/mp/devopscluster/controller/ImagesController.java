@@ -47,6 +47,7 @@ import cn.cyberpeace.mp.devopscluster.request.ISOFileRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImageAsyncRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImageByUuidsRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImageInjectFileDeleteRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImageCreateRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImageInjectFilePageRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImageInjectFileRequest;
 import cn.cyberpeace.mp.devopscluster.request.ImagePageRequest;
@@ -349,9 +350,10 @@ public class ImagesController {
     @ApiOperation("编辑镜像")
     @PostMapping("/{id}/{host}/create")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.START, title = "创建虚拟机/容器", target = OpTargetEnums.IMAGE)
-    public ServiceResult create(@PathVariable("id") String uuid,@PathVariable("host") String host){
-        log.info(" do create image bjyd : {},{}",uuid,host);
-        imagesConverter.createForBJYD(uuid,host);
+    public ServiceResult create(@PathVariable("id") String uuid,@PathVariable("host") String host,
+                                @RequestBody ImageCreateRequest imageCreateRequest){
+        log.info(" do create image bjyd : {},{},{}",uuid,host,imageCreateRequest.toString());
+        imagesConverter.createForBJYD(uuid,host,imageCreateRequest);
         return ResultCommon.success();
     }
 
