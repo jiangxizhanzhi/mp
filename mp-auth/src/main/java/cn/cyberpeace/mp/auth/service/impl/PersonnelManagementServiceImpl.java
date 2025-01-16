@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.bo.Personnel.management.PersonnelManagementBo;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.PersonnelManagementModel;
 import cn.cyberpeace.mp.auth.model.TeamModel;
 import cn.cyberpeace.mp.auth.repository.PersonnelManagementMapper;
@@ -77,7 +78,7 @@ public class PersonnelManagementServiceImpl implements PersonnelManagementServic
     public void patchPersonnelManagement(List<PersonnelManagementRequest> personnelManagementRequestList) {
         //1,首先判空
         if (CollectionUtils.isEmpty(personnelManagementRequestList)) {
-            throw new MpRuntimeException(BaseErrorCode.ERROR,"修改成员管理参数不能为空");
+            throw new MpRuntimeException(AuthErrorCode.MODIFYING_MEMBER_MANAGEMENT);
         }
         //2,先查询相关成员有没有战队
         String teamId = personnelManagementRequestList.get(0).getTeamId();
@@ -86,7 +87,7 @@ public class PersonnelManagementServiceImpl implements PersonnelManagementServic
             List<PersonnelManagementModel> userExist = personnelManagementMapper.getUserExist(teamId, userIds);
             //如果查询出结果就抛出异常
             if (!CollectionUtils.isEmpty(userExist)){
-                throw new MpRuntimeException(BaseErrorCode.ERROR,"用户不能关联多支战队");
+                throw new MpRuntimeException(AuthErrorCode.USERS_CANNOT_ASSOCIATE);
             }
         }
         //3,根据集合去查询，删除相关数据，如果有用户关联再进行插入，如果没有就直接返回。

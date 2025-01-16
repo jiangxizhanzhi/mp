@@ -425,8 +425,8 @@ public class ImagesConverter implements BaseConverter{
         device.setImageType(request.getImageType());
         device.setMaintype(MainTypeEnum.NORMAL.ordinal());
         final ExtVm extVm = request.getExtVm();
-        if (request.getRole().equals(8)) {
-            extVm.setCpu(2);
+        if (request.getRole().equals(24)) {
+            extVm.setCpu(8);
         }
         if (Objects.nonNull(extVm) && CollectionUtils.isNotEmpty(request.getAccessProtocolList())) {
             extVm.setAccessProtocols(request.getAccessProtocolList());

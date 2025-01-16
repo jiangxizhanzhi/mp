@@ -131,6 +131,8 @@ public enum AuthErrorCode implements ErrorCode {
 
 
     PERMISSION_DENIED("MP-110140", "permission_denied"),
+    MODIFYING_MEMBER_MANAGEMENT ("MP-110141", "modifying_member_management"),
+    USERS_CANNOT_ASSOCIATE("MP-110142", "users_cannot_associate"),
 
     FILE_OVERSIZE_ERROR("MP-110150", "file_oversize_error"),
     FILE_SUFFIX_TYPE_ERROR("MP-110151", "file_suffix_type_error"),
