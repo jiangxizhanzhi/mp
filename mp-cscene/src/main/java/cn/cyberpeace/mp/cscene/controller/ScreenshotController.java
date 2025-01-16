@@ -114,12 +114,12 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
     public ServiceResult<ScreenshotDeleteConfigResponse> updateDeleteConfig(@RequestBody ScreenshotDeleteConfigResponse params) {
         var conf = sysConfigService.getByKeyName("screenshot_del_conf");
         if (conf != null) {
-            conf.setValue(String.valueOf(params.getMonths()));
+            conf.setValue(JsonCommon.snakeStringify(params));
             sysConfigService.update(conf);
         } else {
             SysConfigModel sysConfigModel = new SysConfigModel();
-            sysConfigModel.setValue(String.valueOf(params.getMonths()));
-            sysConfigModel.setInitValue(String.valueOf(params.getMonths()));
+            sysConfigModel.setValue(String.valueOf(params));
+            sysConfigModel.setInitValue(String.valueOf(params));
             sysConfigModel.setKeyName("screenshot_del_conf");
             sysConfigModel.setTenant("default");
             sysConfigService.create(sysConfigModel);
