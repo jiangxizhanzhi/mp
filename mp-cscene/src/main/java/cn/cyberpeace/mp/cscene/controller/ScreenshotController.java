@@ -105,7 +105,7 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
             return new ServiceResult<>(result).asResult();
         }
 //        result.setMonths(Integer.parseInt(conf.getValue()));
-        return new ServiceResult<>(result).asResult();
+        return new ServiceResult<>(JsonCommon.parse(conf.getValue(), ScreenshotDeleteConfigResponse.class)).asResult();
     }
 
     @ApiOperation("更新或保存自动删除截屏配置")
