@@ -18,6 +18,6 @@ public class TargetIconUploadService extends BaseUploadService {
 
     @Override
     protected List<String> supportUploadType() {
-        return List.of("jpeg","png","jpg");
+        return List.of("jpeg", "png", "jpg", "svg");
     }
 }

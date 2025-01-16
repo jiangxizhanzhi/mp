@@ -2,9 +2,12 @@ package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.base.annotation.AuthTarget;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.constant.TargetEnum;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.FileTypeUtils;
+import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.InitRegisterService;
@@ -416,7 +419,24 @@ public class DevopsTargetController {
     @ApiImplicitParam(name = "file", value = "文件", dataTypeClass = MultipartFile.class)
     @ResponseBody
     public ServiceResult<FileResponseData> uploadIcon(MultipartFile file){
-        return targetIconUploadService.build(file).upload();
+        var result = targetIconUploadService.build(file).upload();
+        // 如果是svg格式的文件，但是文件后缀不对，需要调整为svg后缀
+        if (result.getData() instanceof FileResponseData) {
+            FileResponseData fileResponseData = (FileResponseData) result.getData();
+            var content = FsCommon.downloadRawContent(fileResponseData.getFilePath());
+            if (FileTypeUtils.isSvg(content)) {
+                var filepath = FsCommon.uploadRawContent(content, "svg");
+                String name = FileUtil.getName(filepath);
+                fileResponseData.setFileName(name);
+                fileResponseData.setFilePath(filepath);
+                fileResponseData.setFileType("svg");
+                fileResponseData.setHttpUrl(FsCommon.genHttpUrl(filepath));
+                fileResponseData.setInnerHttpUrl(FsCommon.genInnerHttpUrl(filepath));
+                fileResponseData.setFileSize(file.getSize());
+                return new ServiceResult<>(fileResponseData).asResult();
+            }
+        }
+        return result;
     }
 
 

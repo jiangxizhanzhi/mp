@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.FileTypeUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
@@ -300,9 +301,12 @@ public class SceneExporter {
                         throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
                     }
                     // 判断图片文件类型
-                    if (this.isPng(content)) {
+                    if (FileTypeUtils.isPng(content)) {
                         this.createFile(content, currentImageDir + "/logo.png");
                         image.setLOGO("logo.png");
+                    } else if (FileTypeUtils.isSvg(content)) {
+                        this.createFile(content, currentImageDir + "/logo.svg");
+                        image.setLOGO("logo.svg");
                     } else {
                         this.createFile(content, currentImageDir + "/logo.jpg");
                         image.setLOGO("logo.jpg");
@@ -319,9 +323,12 @@ public class SceneExporter {
                         log.error(detail, e);
                         throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
                     }
-                    if (this.isPng(content)) {
+                    if (FileTypeUtils.isPng(content)) {
                         this.createFile(content, currentImageDir + "/logo.png");
                         image.setLOGO("logo.png");
+                    } else if (FileTypeUtils.isSvg(content)) {
+                        this.createFile(content, currentImageDir + "/logo.svg");
+                        image.setLOGO("logo.svg");
                     } else {
                         this.createFile(content, currentImageDir + "/logo.jpg");
                         image.setLOGO("logo.jpg");
@@ -336,9 +343,12 @@ public class SceneExporter {
                         throw new MpRuntimeException(BaseErrorCode.ERROR, detail);
                     }
                     // 判断图片文件类型
-                    if (this.isPng(content)) {
+                    if (FileTypeUtils.isPng(content)) {
                         this.createFile(content, currentImageDir + "/logo.png");
                         image.setLOGO("logo.png");
+                    } else if(FileTypeUtils.isSvg(content)){
+                        this.createFile(content, currentImageDir + "/logo.svg");
+                        image.setLOGO("logo.svg");
                     } else {
                         this.createFile(content, currentImageDir + "/logo.jpg");
                         image.setLOGO("logo.jpg");
@@ -422,19 +432,6 @@ public class SceneExporter {
                 }
             }
         }
-    }
-
-    private boolean isPng(byte[] content) {
-        if (content == null || content.length < 8) {
-            return false;
-        }
-        int[] pngHeaders = new int[]{0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
-        for (int i = 0; i < pngHeaders.length; i++) {
-            if (Byte.toUnsignedInt(content[i]) != pngHeaders[i]) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private void createFile(byte[] content, String filePath) {

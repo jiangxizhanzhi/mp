@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.FileTypeUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
@@ -100,7 +101,16 @@ class DeviceInfoConverter implements IConverter {
 
         if (StringUtils.isNotEmpty(device.getLogo())) {
             String logo = FsCommon.getFileKey(DefaultImgUtil.pathToFdfsUrl(device.getLogo()));
-            element.setIcon2(logo);
+            byte[] content = FsCommon.downloadRawContent(logo);
+            if (FileTypeUtils.isPng(content)) {
+                var newIcon2Url = FsCommon.uploadRawContent(content, "png");
+                element.setIcon2(newIcon2Url);
+            } else if (FileTypeUtils.isSvg(content)) {
+                var newIcon2Url = FsCommon.uploadRawContent(content, "svg");
+                element.setIcon2(newIcon2Url);
+            } else {
+                element.setIcon2(logo);
+            }
         }
         element.setDescription(device.getDescription());
         pluginElement.setImageUuid(device.getUuid());
