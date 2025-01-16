@@ -174,6 +174,9 @@ public class RealEquipmentService extends BaseCpService {
                 if (StringUtils.isEmpty(config.getPublicNetProxyIp())) {
                     continue;
                 }
+                if (StringUtils.isEmpty(l.getUrl())) {
+                    continue;
+                }
                 URL u = URLUtils.url(l.getUrl());
                 l.setUrl(StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp()));
             }
