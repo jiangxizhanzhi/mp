@@ -253,7 +253,7 @@ public class CleanJob implements SchedulingConfigurer {
     public static class SceneDelConfig {
         private Integer nodeNum = 0;
         @ApiModelProperty(value = "是否开启")
-        private Boolean enable = true;
+        private Boolean enable = false;
         @ApiModelProperty(value = "定时任务执行时间")
         private String cron = "0 0 * * * ?";
     }
