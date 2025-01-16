@@ -568,12 +568,12 @@ public class SceneMonitorService {
         SceneHandler sceneHandler = new SceneHandler(sceneInstanceId, null, null);
 
         // 根据名称模糊筛选
-        var stream = sceneHandler.getElementMap().values().stream();
+
         //        云场景容器无探针信息 去除
         Integer cloudType = sceneHandler.getScene().getCloudType();
         if (null != cloudType && BaseSceneModel.CloudType.DEFAULT != cloudType) {
             return allSceneElements.stream()
-                    .filter(basicInfo -> !BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(basicInfo.getImageType()))
+                    .filter(basicInfo -> BaseCloudPluginSceneElementModel.ImageType.LAAS_VM.equals(basicInfo.getImageType()))
                     .collect(Collectors.toList());
 
         }
