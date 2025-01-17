@@ -1,0 +1,11 @@
+alter table mp_sceneplugincloud_scene add column internal_vm_ip VARCHAR(128) not null default '' comment '场景内部服务的虚拟机ip' ;
+alter table mp_sceneplugincloud_scene add column internal_vm_id VARCHAR(128) not null default '' comment '提供场景内部服务的虚拟机' ;
+alter table mp_sceneplugincloud_scene add column internal_net_id VARCHAR(128) not null default '' comment '提供场景内部服务的网络' ;
+alter table mp_sceneplugincloud_scene add column internal_router_id VARCHAR(128) not null default '' comment '提供场景内部服务的路由器' ;
+alter table mp_sceneplugincloud_scene add column create_internal_vm tinyint(1) not null default 1 comment '是否创建场景内部服务的虚拟机' ;
+
+alter table mp_sceneplugincloud_scene_config add column internal_vm_ip VARCHAR(128) not null default '' comment '场景内部服务的虚拟机ip' ;
+alter table mp_sceneplugincloud_scene_config add column internal_vm_id VARCHAR(128) not null default '' comment '提供场景内部服务的虚拟机' ;
+alter table mp_sceneplugincloud_scene_config add column internal_net_id VARCHAR(128) not null default '' comment '提供场景内部服务的网络' ;
+alter table mp_sceneplugincloud_scene_config add column internal_router_id VARCHAR(128) not null default '' comment '提供场景内部服务的路由器' ;
+alter table mp_sceneplugincloud_scene_config add column create_internal_vm tinyint(1) not null default 1 comment '是否创建场景内部服务的虚拟机' ;

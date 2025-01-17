@@ -1414,6 +1414,7 @@ public class CreateHandler extends HandlerCommon {
                 break;
             }
         }
+        getPluginHandler().saveScene();
     }
 
 

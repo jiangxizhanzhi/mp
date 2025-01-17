@@ -18,8 +18,8 @@ public abstract class BaseCloudPluginSceneBO<M extends BaseCloudPluginSceneModel
     private Boolean createInternalVm;
 
     private String internalVmId;
-    private String internalVmIp;
     private String internalRouterId;
     private String internalNetId;
+    private String internalVmIp;
 
 }
