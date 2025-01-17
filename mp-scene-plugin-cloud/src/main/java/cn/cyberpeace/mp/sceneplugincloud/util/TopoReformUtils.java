@@ -272,7 +272,7 @@ public class TopoReformUtils {
         sceneElementBO.setIsAuxiliary(false);
         sceneElementBO.setType(BaseSceneElementModel.Type.TERMINAL);
         sceneElementBO.setArea("");
-        sceneElementBO.setName("kali-tools-itinfo-230129");
+        sceneElementBO.setName("kali");
 //        需要修改为上海靶标信息
         sceneElementBO.setIcon2("727/701/a4aade52f418bc39965d76b6b6dca305.png");
         sceneElementBO.setCpu(2);
