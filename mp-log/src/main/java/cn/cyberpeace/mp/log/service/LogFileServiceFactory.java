@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name LogFileServiceFactory.java.
+ // File size 4324.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:16 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.log.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -26,12 +36,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * @description:
- * @author：Geek Wang
- * @date: 2022/6/15
- */
-@Component
+ /**
+  * 日志文件服务工厂
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Component
 @RequiredArgsConstructor
 public class LogFileServiceFactory {
 
@@ -42,16 +53,21 @@ public class LogFileServiceFactory {
 
     private Map<String,LogFileService> logFileServiceMap = new ConcurrentHashMap();
 
-    @PostConstruct
+     /**
+      * 初始化
+      */
+     @PostConstruct
     public void init(){
         logFileServiceMap = fileServiceList.stream().collect(Collectors.toMap(LogFileService::logReportType, Function.identity()));
     }
 
-    /**
-     * 查询全部日志上报数据
-     * @return
-     */
-    public List<LogReportDTO> listAll(BasePageRequest basePageRequest) {
+     /**
+      * 查询全部日志上报数据
+      *
+      * @param basePageRequest 基页请求
+      * @return
+      */
+     public List<LogReportDTO> listAll(BasePageRequest basePageRequest) {
         List<LogReportDTO> result = Lists.newArrayList();
         if (Objects.nonNull(basePageRequest.getType())) {
             LogFileService logFileService = logFileServiceMap.get(basePageRequest.getType().name());
@@ -90,18 +106,28 @@ public class LogFileServiceFactory {
         return result;
     }
 
-    private boolean isReportTypeMatch(String reportType, List<String> codes) {
+     /**
+      * 报告类型是否匹配？
+      *
+      * @param reportType 报告类型
+      * @param codes      代码
+      * @return boolean
+      */
+     private boolean isReportTypeMatch(String reportType, List<String> codes) {
         if (codes.contains(reportType)) {
             return true;
         }
         return false;
     }
 
-    /**
-     * 下载日志
-     * @param downloadDTO
-     */
-    public LogFileDownloadBO downLoad(LogDownloadDTO downloadDTO) throws IOException {
+     /**
+      * 下载日志
+      *
+      * @param downloadDTO 下载dto
+      * @return {@link LogFileDownloadBO }
+      * @throws IOException ioexception
+      */
+     public LogFileDownloadBO downLoad(LogDownloadDTO downloadDTO) throws IOException {
         String logReportType = downloadDTO.getType();
         LogFileService logFileService = logFileServiceMap.get(logReportType);
         if (Objects.isNull(logFileService)){

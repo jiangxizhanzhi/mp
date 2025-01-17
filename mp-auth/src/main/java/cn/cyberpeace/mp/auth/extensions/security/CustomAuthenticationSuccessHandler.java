@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name CustomAuthenticationSuccessHandler.java.
+ // File size 8696.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.extensions.security;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
@@ -41,37 +51,69 @@ import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Slf4j
+ /**
+  * 自定义身份验证成功处理程序
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 @Component
 public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
-    private final ObjectMapper mapper;
+     /**
+      * 映射器
+      */
+     private final ObjectMapper mapper;
 
-    @Autowired
+     /**
+      * 用户role服务
+      */
+     @Autowired
     private UserRoleService userRoleService;
 
-    @Autowired
+     /**
+      * 用户permission服务
+      */
+     @Autowired
     private UserPermissionService userPermissionService;
 
-    @Autowired
+     /**
+      * 用户服务
+      */
+     @Autowired
     private UserService userService;
 
-    @Autowired
+     /**
+      * operate日志服务
+      */
+     @Autowired
     private OperateLogService operateLogService;
 
-    @Resource(name = AuthCacheConfig.LOGIN_FAILURE)
+     /**
+      * 登录失败缓存
+      */
+     @Resource(name = AuthCacheConfig.LOGIN_FAILURE)
     private Cache<String, Integer> loginFailureCache;
 
-    @Autowired
+     /**
+      * 自定义身份验证成功处理程序
+      *
+      * @param messageConverter 消息转换器
+      */
+     @Autowired
     public CustomAuthenticationSuccessHandler(MappingJackson2HttpMessageConverter messageConverter) {
         this.mapper = messageConverter.getObjectMapper();
     }
 
-    @Override
+     /**
+      * 认证成功
+      *
+      * @param request        请求
+      * @param response       响应
+      * @param authentication 身份验证
+      * @throws IOException ioexception
+      */
+     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
@@ -142,8 +184,13 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         writer.flush();
     }
 
-
-    private AuthErrorCode checkUserErrorStatus(UserModel user) {
+     /**
+      * 检查用户错误状态
+      *
+      * @param user 用户
+      * @return {@link AuthErrorCode }
+      */
+     private AuthErrorCode checkUserErrorStatus(UserModel user) {
         String errorStatusMsg = null;
         AuthErrorCode errorCode = null;
 
@@ -170,20 +217,25 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         return errorCode;
     }
 
-    /**
-     * 检查系统激活状态
-     *
-     * @return
-     */
-    private boolean checkSysActivationStatus() {
+     /**
+      * 检查系统激活状态
+      *
+      * @return
+      */
+     private boolean checkSysActivationStatus() {
         // 通过spring事件机制，检测系统激活状态
         // 固定每天晚上24时检查激活状态，提前15天，7天，3天，1天提醒，如果过期，则不再允许登录系统，同时考虑撤销所有用户的token授权
         // todo
         return false;
     }
 
-
-    private void recordLoginLog(UserModel user, HttpServletRequest request) {
+     /**
+      * 记录登录日志
+      *
+      * @param user    用户
+      * @param request 请求
+      */
+     private void recordLoginLog(UserModel user, HttpServletRequest request) {
         OperationLogRequest logModel = new OperationLogRequest();
         //操作类型
         logModel.setOpModule(OpModuleEnums.ACCOUNT.ordinal());

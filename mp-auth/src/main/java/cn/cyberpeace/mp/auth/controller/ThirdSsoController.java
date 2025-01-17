@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name ThirdSsoController.java.
+ // File size 2939.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:13 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
@@ -23,22 +33,46 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
-@Api(value = "第三方登录管理接口", tags = "UNAUTH-第三方登录接口")
+ /**
+  * 第三个sso控制器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Api(value = "第三方登录管理接口", tags = "UNAUTH-第三方登录接口")
 @Slf4j
 @Controller
 @RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/third-login")
 public class ThirdSsoController {
 
-    @Resource
+     /**
+      * 第三登录服务
+      */
+     @Resource
     private ThirdSsoService thirdLoginService;
 
-    @Resource
+     /**
+      * auth配置
+      */
+     @Resource
     private AuthConfig authConfig;
 
-    @Resource
+     /**
+      *
+      */
+     @Resource
     private TokenMapper tokenMapper;
 
-    @GetMapping
+     /**
+      * 登录并重定向到主页
+      *
+      * @param code     代码
+      * @param url      url
+      * @param request  请求
+      * @param response 响应
+      * @return {@link String }
+      */
+     @GetMapping
     @ApiOperation("赛宁第三方登录接口，重定向到赛宁个人主页")
     public String loginAndRedirectToHomePage(@RequestParam(value = "code", required = false) String code, @RequestParam(value = "url", required = false) String url, HttpServletRequest request, HttpServletResponse response) {
         if (StringUtils.isEmpty(url)) {
@@ -52,7 +86,14 @@ public class ThirdSsoController {
         }
     }
 
-    private boolean tokenCheck(HttpServletRequest request, HttpServletResponse response) {
+     /**
+      * 令牌检查
+      *
+      * @param request  请求
+      * @param response 响应
+      * @return boolean
+      */
+     private boolean tokenCheck(HttpServletRequest request, HttpServletResponse response) {
         String thirdToken = JwtCommon.getThirdToken(request);
         log.info("thirdToken:{}", thirdToken);
         if (StringUtils.isEmpty(thirdToken)) {

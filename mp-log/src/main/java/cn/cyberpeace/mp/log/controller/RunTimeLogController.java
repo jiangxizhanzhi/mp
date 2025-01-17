@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name RunTimeLogController.java.
+ // File size 3681.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:16 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.log.controller;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -32,10 +42,13 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
-/**
- *
- **/
-@RestController
+ /**
+  * 运行时日志控制器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @RestController
 @Slf4j
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/runtime_log")
 @Api(value = "日志模块", tags = "日志模块")
@@ -49,13 +62,26 @@ public class RunTimeLogController {
     @javax.annotation.Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
-    @GetMapping("/logs")
+     /**
+      * 查询日志
+      *
+      * @param basePageRequest 基页请求
+      * @return {@link ListObjServiceResult }<{@link RunTimeLogDTO }>
+      */
+     @GetMapping("/logs")
     @ApiOperation(value = "分页查询运行时日志", notes = "")
     public ListObjServiceResult<RunTimeLogDTO> queryLogs(BasePageRequest basePageRequest) {
         return new ListObjServiceResult(runTimeLogService.page(basePageRequest)).asResult();
     }
 
-    @GetMapping("/download")
+     /**
+      * 下载日志文件
+      *
+      * @param response 响应
+      * @param request  请求
+      * @return {@link ResponseEntity }<{@link Resource }>
+      */
+     @GetMapping("/download")
     @ApiOperation(value = "日志下载", notes = "")
     public ResponseEntity<Resource> downloadLogFiles(HttpServletResponse response,
                                                      RunTimeLogDownloadRequest request) {
@@ -77,8 +103,12 @@ public class RunTimeLogController {
         return ResponseEntity.ok().headers(httpHeaders).body(resource);
     }
 
-
-    @GetMapping("/types")
+     /**
+      * 得到类型
+      *
+      * @return {@link ServiceResult }<{@link List }<{@link OptionBO }>>
+      */
+     @GetMapping("/types")
     @ApiOperation(value = "查询运行日志类型")
     public ServiceResult<List<OptionBO>> getTypes() {
         return optionService.getStrOptions(LogConstant.MP_COMMON_OPTION_TYPE_RUNTIME_LOG_TYPE);

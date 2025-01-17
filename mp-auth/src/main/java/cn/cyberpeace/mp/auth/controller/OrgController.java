@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name OrgController.java.
+ // File size 4461.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:13 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
@@ -20,21 +30,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * @Description: 组织管理接口
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Api(value = "组织管理接口", tags = "AUTH-组织管理接口")
+ /**
+  * org控制器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Api(value = "组织管理接口", tags = "AUTH-组织管理接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/orgs")
 public class OrgController {
 
-    @Autowired
+     /**
+      * org服务
+      */
+     @Autowired
     private OrgService orgService;
 
-    @ApiOperation(value = "查询指定id数据", notes = "")
+     /**
+      * 得到
+      *
+      * @param id id
+      * @return {@link ObjServiceResult }
+      */
+     @ApiOperation(value = "查询指定id数据", notes = "")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
     })
@@ -45,7 +65,13 @@ public class OrgController {
         return new ObjServiceResult<>(new ObjResult<>(orgService.orgModel2OrgBO(orgModel), null)).asResult();
     }
 
-    @ApiOperation(value = "查询指定id数据", notes = "")
+     /**
+      * 通过参数获取
+      *
+      * @param id id
+      * @return {@link ObjServiceResult }
+      */
+     @ApiOperation(value = "查询指定id数据", notes = "")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
     })
@@ -56,7 +82,14 @@ public class OrgController {
         return new ObjServiceResult<>(new ObjResult<>(orgService.orgModel2OrgBO(orgModel), null)).asResult();
     }
 
-    @ApiOperation("创建组织")
+     /**
+      * 创建
+      *
+      * @param obj    obj
+      * @param fields 字段
+      * @return {@link ObjServiceResult }
+      */
+     @ApiOperation("创建组织")
     @ApiImplicitParams({
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
     })
@@ -68,7 +101,15 @@ public class OrgController {
         return result;
     }
 
-    @ApiOperation("更新指定id组织")
+     /**
+      * 更新
+      *
+      * @param id     id
+      * @param obj    obj
+      * @param fields 字段
+      * @return {@link ObjServiceResult }
+      */
+     @ApiOperation("更新指定id组织")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
@@ -82,7 +123,13 @@ public class OrgController {
         return orgService.update(obj, fields);
     }
 
-    @ApiOperation("删除指定id组织")
+     /**
+      * 删除
+      *
+      * @param id id
+      * @return {@link ServiceResult }<{@link Boolean }>
+      */
+     @ApiOperation("删除指定id组织")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
     })

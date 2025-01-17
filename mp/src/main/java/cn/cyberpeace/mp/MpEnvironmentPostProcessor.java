@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name MpEnvironmentPostProcessor.java.
+ // File size 1965.
+ // File create date Tue Sep 24 15:29:09 CST 2024.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp;
 
 import cn.cyberpeace.mp.log.config.EnvConfig;
@@ -12,14 +22,21 @@ import org.springframework.core.io.FileUrlResource;
 
 import java.io.File;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/11/29
- */
-@Slf4j
+ /**
+  * Mp环境后置处理器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 public class MpEnvironmentPostProcessor implements EnvironmentPostProcessor {
-    @Override
+     /**
+      * 后处理环境
+      *
+      * @param environment 环境
+      * @param application 应用程序
+      */
+     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
 
         EnvConfig.setProfileActive(environment.getProperty("spring.profiles.active"));

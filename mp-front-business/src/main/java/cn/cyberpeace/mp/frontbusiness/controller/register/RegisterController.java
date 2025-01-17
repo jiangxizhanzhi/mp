@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name RegisterController.java.
+ // File size 3501.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontbusiness.controller.register;
 
 
@@ -32,21 +42,31 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
-/**
- * @Description: 注册接口
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Api(value = "注册接口", tags = "AUTH-注册接口")
+ /**
+  * 注册控制器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Api(value = "注册接口", tags = "AUTH-注册接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/register")
 public class RegisterController {
 
-    @Autowired
+     /**
+      * 注册服务
+      */
+     @Autowired
     private RegisterService registerService;
 
-    @ApiOperation(value = "注册接口", notes = "")
+     /**
+      * 注册
+      *
+      * @param req 要求
+      * @return {@link ServiceResult }<{@link UserModel }>
+      */
+     @ApiOperation(value = "注册接口", notes = "")
     @ApiImplicitParam(name = "req", value = "注册请求体", dataTypeClass = RegisterRequest.class, required = true, dataType = "body")
     @PostMapping
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "注册新用户", target = OpTargetEnums.USER)

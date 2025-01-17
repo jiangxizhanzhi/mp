@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name UrlACFilter.java.
+ // File size 9951.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontbusiness.filter;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -26,33 +36,69 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- * @Description: url拦截器
- * @Author zhouxinghuai
- * @Date：2022/5/19 16:43
- */
-@Slf4j
+ /**
+  * url acfilter
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 public class UrlACFilter extends OncePerRequestFilter {
 
-    private static final String NO_AUTH = "no_auth";
+     /**
+      *
+      */
+     private static final String NO_AUTH = "no_auth";
 
-    private static final PathMatcher MATCHER = new AntPathMatcher();
+     /**
+      * 匹配器
+      */
+     private static final PathMatcher MATCHER = new AntPathMatcher();
 
-    private UrlACWrapperService urlACWrapperService;
+     /**
+      * urlacwrapper服务
+      */
+     private UrlACWrapperService urlACWrapperService;
 
-    private OperatePermissionService opPermService;
-    private FrontBusinessConfig frontBusinessConfig;
+     /**
+      * 人事处烫服务
+      */
+     private OperatePermissionService opPermService;
+     /**
+      * 前面业务配置
+      */
+     private FrontBusinessConfig frontBusinessConfig;
 
-    private ObjectMapper mapper;
+     /**
+      * 映射器
+      */
+     private ObjectMapper mapper;
 
-    public UrlACFilter(UrlACWrapperService urlACWrapperService, OperatePermissionService opPermService, FrontBusinessConfig frontBusinessConfig, ObjectMapper mapper) {
+     /**
+      * url acfilter
+      *
+      * @param urlACWrapperService urlacwrapper服务
+      * @param opPermService       人事处烫服务
+      * @param frontBusinessConfig 前面业务配置
+      * @param mapper              映射器
+      */
+     public UrlACFilter(UrlACWrapperService urlACWrapperService, OperatePermissionService opPermService, FrontBusinessConfig frontBusinessConfig, ObjectMapper mapper) {
         this.urlACWrapperService = urlACWrapperService;
         this.opPermService = opPermService;
         this.frontBusinessConfig = frontBusinessConfig;
         this.mapper = mapper;
     }
 
-    @Override
+     /**
+      * 做内部过滤
+      *
+      * @param request     请求
+      * @param response    响应
+      * @param filterChain 过滤器链
+      * @throws ServletException servlet异常
+      * @throws IOException      ioexception
+      */
+     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
@@ -130,8 +176,14 @@ public class UrlACFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-
-    private boolean isMethodMatch(String requestUrl, String method) {
+     /**
+      * 方法匹配
+      *
+      * @param requestUrl 请求url
+      * @param method     方法
+      * @return boolean
+      */
+     private boolean isMethodMatch(String requestUrl, String method) {
         Map<String, List<String>> urlMethodsMap = urlACWrapperService.getUrlMethodsMap();
         Map<String, List<String>> urlPatternMethodsMap = urlACWrapperService.getUrlPatternMethodsMap();
 
@@ -149,8 +201,13 @@ public class UrlACFilter extends OncePerRequestFilter {
         return false;
     }
 
-
-    private boolean isAuthoritiesMatch(String requestUrl) {
+     /**
+      * 当局匹配吗？
+      *
+      * @param requestUrl 请求url
+      * @return boolean
+      */
+     private boolean isAuthoritiesMatch(String requestUrl) {
         Set<String> currentUserAuthorities = UserUtils.getLoginUserAuthorities();
         UserModel currentUser = UserUtils.getLoginUser();
         String currentUsername = Objects.nonNull(currentUser) ? currentUser.getUsername() : "";
@@ -169,13 +226,15 @@ public class UrlACFilter extends OncePerRequestFilter {
         return false;
     }
 
-    /**
-     * 精确url-method匹配
-     *
-     * @param requestUrl
-     * @return
-     */
-    private boolean isAccurateUrlMethodMatch(String requestUrl, String method, Map<String, List<String>> urlMethodsMap) {
+     /**
+      * 精确url-method匹配
+      *
+      * @param requestUrl
+      * @param method        方法
+      * @param urlMethodsMap
+      * @return
+      */
+     private boolean isAccurateUrlMethodMatch(String requestUrl, String method, Map<String, List<String>> urlMethodsMap) {
         List<String> methods = urlMethodsMap.get(requestUrl);
         if (CollectionUtil.isNotEmpty(methods)) {
             return methods.contains(method);
@@ -183,14 +242,15 @@ public class UrlACFilter extends OncePerRequestFilter {
         return false;
     }
 
-
-    /**
-     * 规则url-method匹配
-     *
-     * @param requestUrl
-     * @return
-     */
-    private boolean isPatternUrlMethodMatch(String requestUrl, String method, Map<String, List<String>> patternUrlMethodsMap) {
+     /**
+      * 规则url-method匹配
+      *
+      * @param requestUrl
+      * @param method               方法
+      * @param patternUrlMethodsMap
+      * @return
+      */
+     private boolean isPatternUrlMethodMatch(String requestUrl, String method, Map<String, List<String>> patternUrlMethodsMap) {
         Set<String> urlPatterns = patternUrlMethodsMap.keySet();
         for (String urlPattern : urlPatterns) {
             if (MATCHER.match(urlPattern, requestUrl)) {
@@ -207,25 +267,29 @@ public class UrlACFilter extends OncePerRequestFilter {
         return false;
     }
 
-    /**
-     * 精确url-authority匹配
-     *
-     * @param requestUrl
-     * @return
-     */
-    private boolean isAccurateUrlAuthoritiesMatch(String requestUrl, Map<String, List<String>> urlTargetsMap, Set<String> currentUserAuthorities) {
+     /**
+      * 精确url-authority匹配
+      *
+      * @param requestUrl
+      * @param urlTargetsMap
+      * @param currentUserAuthorities
+      * @return
+      */
+     private boolean isAccurateUrlAuthoritiesMatch(String requestUrl, Map<String, List<String>> urlTargetsMap, Set<String> currentUserAuthorities) {
 
         List<String> urlTargetIds = urlTargetsMap.get(requestUrl);
         return isUserAuthoritiesMatch(currentUserAuthorities, urlTargetIds);
     }
 
-    /**
-     * 规则url-authority匹配
-     *
-     * @param requestUrl
-     * @return
-     */
-    private boolean isPatternUrlAuthoritiesMatch(String requestUrl, Map<String, List<String>> urlTargetsMap, Set<String> currentUserAuthorities) {
+     /**
+      * 规则url-authority匹配
+      *
+      * @param requestUrl
+      * @param urlTargetsMap
+      * @param currentUserAuthorities
+      * @return
+      */
+     private boolean isPatternUrlAuthoritiesMatch(String requestUrl, Map<String, List<String>> urlTargetsMap, Set<String> currentUserAuthorities) {
         Set<String> urlPatterns = urlTargetsMap.keySet();
         for (String urlPattern : urlPatterns) {
             if (MATCHER.match(urlPattern, requestUrl)) {
@@ -238,13 +302,14 @@ public class UrlACFilter extends OncePerRequestFilter {
         return false;
     }
 
-    /**
-     * 用户的权限是否匹配url的权限需求定义
-     * @param currentUserAuthorities
-     * @param urlTargetIds
-     * @return
-     */
-    private boolean isUserAuthoritiesMatch(Set<String> currentUserAuthorities, List<String> urlTargetIds) {
+     /**
+      * 用户的权限是否匹配url的权限需求定义
+      *
+      * @param currentUserAuthorities
+      * @param urlTargetIds
+      * @return
+      */
+     private boolean isUserAuthoritiesMatch(Set<String> currentUserAuthorities, List<String> urlTargetIds) {
         if (CollectionUtil.isNotEmpty(urlTargetIds)) {
             if (urlTargetIds.contains(NO_AUTH)) {
                 return true;

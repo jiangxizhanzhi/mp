@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name SysNoticeServiceImpl.java.
+ // File size 47249.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontadmin.service.sys.impl;
 
 import cn.cyberpeace.mp.auth.bo.org.OrgBO;
@@ -65,68 +75,123 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Service
+ /**
+  * sys请注意服务impl
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Service
 @Slf4j
 public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, SysNoticeMapper, SysNoticeFields, QueryParams>
         implements SysNoticeService {
 
-    @Autowired
+     /**
+      *
+      */
+     @Autowired
     private SysNoticeOrgMapper noticeOrgMapper;
 
-    @Autowired
+     /**
+      *
+      */
+     @Autowired
     private SysNoticeUserMapper noticeUserMapper;
 
-    @Autowired
+     /**
+      * sys请注意用户服务
+      */
+     @Autowired
     private SysNoticeUserService sysNoticeUserService;
 
-    @Autowired
+     /**
+      *
+      */
+     @Autowired
     private SysNoticeRoleMapper noticeRoleMapper;
 
-    @Autowired
+     /**
+      *
+      */
+     @Autowired
     private SysNoticeReadMapper noticeReadMapper;
-    @Autowired
+     /**
+      * org服务
+      */
+     @Autowired
     private OrgService orgService;
 
-    @Autowired
+     /**
+      * 用户角色服务
+      */
+     @Autowired
     private UserRoleService userRoleService;
 
-    @Autowired
+     /**
+      * 用户服务
+      */
+     @Autowired
     private UserService userService;
 
-    @Autowired
+     /**
+      * sys请注意org服务
+      */
+     @Autowired
     private SysNoticeOrgService sysNoticeOrgService;
 
-    @Autowired
+     /**
+      * sys请注意读服务
+      */
+     @Autowired
     private SysNoticeReadService sysNoticeReadService;
 
-    @Autowired
+     /**
+      * sys请注意角色服务
+      */
+     @Autowired
     private SysNoticeRoleService sysNoticeRoleService;
 
-    @Autowired
+     /**
+      * 租户用户服务
+      */
+     @Autowired
     private TenantUserService tenantUserService;
 
-    @Autowired
+     /**
+      *
+      */
+     @Autowired
     private UserMapper userMapper;
 
-    @Autowired
+     /**
+      * sys请注意服务impl
+      *
+      * @param modelMapper 模型映射器
+      * @param modelFields 模型领域
+      */
+     @Autowired
     public SysNoticeServiceImpl(SysNoticeMapper modelMapper, SysNoticeFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
     }
 
-
-    @Override
+     /**
+      * 未读计数
+      *
+      * @return int
+      */
+     @Override
     public int unReadCount() {
         int totalCnt = getCurrentUserNoticeMessagesUnreadCount();
         return totalCnt;
     }
 
-    @Override
+     /**
+      * unpush
+      *
+      * @param noticeIds 注意id
+      */
+     @Override
     public void unpush(List<String> noticeIds) {
         UserModel userModel = UserUtils.getLoginUser();
         if (Objects.isNull(userModel)) {
@@ -152,8 +217,12 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     }
 
-
-    @Override
+     /**
+      * 读
+      *
+      * @param noticeId 注意id
+      */
+     @Override
     public void read(String noticeId) {
         UserModel userModel = UserUtils.getLoginUser();
         if (Objects.isNull(userModel)) {
@@ -178,8 +247,13 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     }
 
-
-    @Override
+     /**
+      * 前
+      *
+      * @param noticeId 注意id
+      * @param type     类型
+      */
+     @Override
     public void top(String noticeId, Integer type) {
         SysNoticeModel noticeModel = getModelMapper().get(noticeId);
         if (Objects.isNull(noticeModel)) {
@@ -203,7 +277,13 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         getModelMapper().update(newModel);
     }
 
-    @Override
+     /**
+      * 添加
+      *
+      * @param sysNoticeRequest 系统通知请求
+      * @return {@link SysNoticeModel }
+      */
+     @Override
     @Transactional(rollbackFor = Exception.class)
     public SysNoticeModel add(SysNoticeRequest sysNoticeRequest) {
         ParamCheck.notNull(sysNoticeRequest, AuthBasei18nCode.REQUEST_PARAMS);
@@ -266,8 +346,14 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return resultModel;
     }
 
-
-    @Override
+     /**
+      * 修改
+      *
+      * @param id               id
+      * @param sysNoticeRequest 系统通知请求
+      * @return {@link SysNoticeModel }
+      */
+     @Override
     @Transactional(rollbackFor = Exception.class)
     public SysNoticeModel modify(String id, SysNoticeRequest sysNoticeRequest) {
         ParamCheck.notNull(sysNoticeRequest, AuthBasei18nCode.REQUEST_PARAMS);
@@ -336,7 +422,13 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return resultModel;
     }
 
-    @Override
+     /**
+      * 页面
+      *
+      * @param req 要求
+      * @return {@link ServiceResult }
+      */
+     @Override
     public ServiceResult page(SysNoticePageRequest req) {
         List<String> ids = null;
         if (Objects.nonNull(req.getIds()) && req.getIds().length > 0) {
@@ -348,7 +440,13 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return result;
     }
 
-    @Override
+     /**
+      * 获取当前用户通知消息页面
+      *
+      * @param req 要求
+      * @return {@link ListObjServiceResult }
+      */
+     @Override
     public ListObjServiceResult getCurrentUserNoticeMessagesPage(SysNoticePageRequest req) {
         UserModel currentUser = UserUtils.getLoginUser();
         if (Objects.isNull(currentUser)) {
@@ -398,7 +496,10 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return result;
     }
 
-    @Override
+     /**
+      * @return int
+      */
+     @Override
     public int getCurrentUserNoticeMessagesUnreadCount() {
         UserModel currentUser = UserUtils.getLoginUser();
         if (Objects.isNull(currentUser)) {
@@ -449,7 +550,11 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return totalCnt;
     }
 
-    @Override
+     /**
+      * @param ids id
+      * @return {@link ServiceResult }<{@link Integer }>
+      */
+     @Override
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Integer> bulkDelete(String[] ids) {
         ServiceResult result = ServiceResult.builder().serviceCode(BaseErrorCode.ERROR).build().asResult();
@@ -463,8 +568,12 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return result;
     }
 
-
-    @Override
+     /**
+      * @param noticeModel
+      * @param checkCurrentUserIsRead
+      * @return {@link SysNoticeDto }
+      */
+     @Override
     public SysNoticeDto noticeModel2NoticeDto(SysNoticeModel noticeModel, boolean checkCurrentUserIsRead) {
         if (Objects.isNull(noticeModel)) {
             return null;
@@ -528,7 +637,11 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return noticeDto;
     }
 
-    private void convert2NoticeDtoPageInfo(PageInfo pageInfo, boolean checkCurrentUserIsRead) {
+     /**
+      * @param pageInfo
+      * @param checkCurrentUserIsRead
+      */
+     private void convert2NoticeDtoPageInfo(PageInfo pageInfo, boolean checkCurrentUserIsRead) {
         List<SysNoticeModel> noticeModels = pageInfo.getList();
 
         List<SysNoticeDto> noticeDtos = noticeModels.stream().map(n -> {
@@ -539,7 +652,13 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         pageInfo.setList(noticeDtos);
     }
 
-    private List<UserModel> listByNoticeIds(List<String> noticeIds) {
+     /**
+      * 按通知编号列出
+      *
+      * @param noticeIds 注意id
+      * @return {@link List }<{@link UserModel }>
+      */
+     private List<UserModel> listByNoticeIds(List<String> noticeIds) {
         HumanCondition humanCondition = new HumanCondition();
         if (CollUtil.isNotEmpty(noticeIds)) {
             humanCondition.link(UserModel.class, SysNoticeUserModel.class)
@@ -552,7 +671,13 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return userModels;
     }
 
-    public ListObjServiceResult listNoticeMessageByCurrentAdminUser(String userId, int page, int pageSize) {
+     /**
+      * @param userId
+      * @param page     页面
+      * @param pageSize 页面大小
+      * @return {@link ListObjServiceResult }
+      */
+     public ListObjServiceResult listNoticeMessageByCurrentAdminUser(String userId, int page, int pageSize) {
         Set<String> noticeIds = new HashSet<>();
         // 查询发给组织的noticeId
         HumanCondition orgNoticeCond = new HumanCondition()
@@ -600,7 +725,14 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return result;
     }
 
-    private List<SysNoticeDto> convert2NoticeDto(List<SysNoticeModel> noticeModels, boolean checkCurrentUserIsRead) {
+     /**
+      * 将通知转换为
+      *
+      * @param noticeModels           注意模型
+      * @param checkCurrentUserIsRead 查看当前用户是否被读取
+      * @return {@link List }<{@link SysNoticeDto }>
+      */
+     private List<SysNoticeDto> convert2NoticeDto(List<SysNoticeModel> noticeModels, boolean checkCurrentUserIsRead) {
         List<SysNoticeDto> noticeDtos = noticeModels.stream().map(n -> {
             SysNoticeDto noticeDto = noticeModel2NoticeDto(n, checkCurrentUserIsRead);
             return noticeDto;
@@ -608,7 +740,13 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return noticeDtos;
     }
 
-    private int getUnreadCountByCurrentAdminUser(String userId) {
+     /**
+      * 获取当前管理员用户未读计数
+      *
+      * @param userId
+      * @return int
+      */
+     private int getUnreadCountByCurrentAdminUser(String userId) {
         Set<String> noticeIds = new HashSet<>();
         HumanCondition orgNoticeCond = new HumanCondition()
                 .select(SysNoticeOrgModel::getNoticeId);
@@ -649,7 +787,18 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return total;
     }
 
-    public ListObjServiceResult listNotices(String title, List<String> ids, List<String> orgs, List<String> roles, String publisher, Integer type, Integer page, Integer pageSize) {
+     /**
+      * @param title
+      * @param ids       id
+      * @param orgs
+      * @param roles
+      * @param publisher
+      * @param type      类型
+      * @param page      页面
+      * @param pageSize  页面大小
+      * @return {@link ListObjServiceResult }
+      */
+     public ListObjServiceResult listNotices(String title, List<String> ids, List<String> orgs, List<String> roles, String publisher, Integer type, Integer page, Integer pageSize) {
         HumanCondition publicCondition = new HumanCondition()
                 .filterEqual(SysNoticeModel::getIsPublic, 1)
                 .select(SysNoticeModel::getId)
@@ -736,7 +885,16 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return result;
     }
 
-    public ListObjServiceResult listNoticeMessageByCurrentNormalUser(List<String> userIds, List<String> orgs, List<String> roles, String userId, int page, int pageSize) {
+     /**
+      * @param userIds
+      * @param orgs
+      * @param roles    角色
+      * @param userId   用户id
+      * @param page     页面
+      * @param pageSize 页面大小
+      * @return {@link ListObjServiceResult }
+      */
+     public ListObjServiceResult listNoticeMessageByCurrentNormalUser(List<String> userIds, List<String> orgs, List<String> roles, String userId, int page, int pageSize) {
         // 查询发送给指定用户的notice
         if (CollUtil.isEmpty(userIds)) {
             userIds.add("");
@@ -846,7 +1004,16 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         return result;
     }
 
-    private int getUnreadCountByCurrentNormalUser(List<String> userIds, List<String> orgs, List<String> roles, String userId) {
+     /**
+      * 获取当前正常用户未读计数
+      *
+      * @param userIds 用户id
+      * @param orgs    组织
+      * @param roles   角色
+      * @param userId  用户id
+      * @return int
+      */
+     private int getUnreadCountByCurrentNormalUser(List<String> userIds, List<String> orgs, List<String> roles, String userId) {
         // 查询发送给指定用户的notice
         if (CollUtil.isEmpty(userIds)) {
             userIds.add("");

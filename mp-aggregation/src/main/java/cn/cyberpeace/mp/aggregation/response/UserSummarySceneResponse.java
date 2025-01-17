@@ -10,9 +10,10 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 
 /**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/9/13 11:09
+ * 用户总结现场响应
+ *
+ * @author 二竹
+ * @date 2025/01/17
  */
 @Data
 @NoArgsConstructor

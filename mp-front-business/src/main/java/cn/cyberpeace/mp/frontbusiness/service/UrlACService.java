@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name UrlACService.java.
+ // File size 12609.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontbusiness.service;
 
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
@@ -32,38 +42,57 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/5/19 19:52
- */
-@Slf4j
+ /**
+  * url acservice
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 @Service
 @CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_LONG)
 public class UrlACService {
 
-    public static final String CACHE_VAL_ALL_URLAC = "ALL_URLAC_DTOS";
+     /**
+      * fa
+      */
+     public static final String CACHE_VAL_ALL_URLAC = "ALL_URLAC_DTOS";
 
-    public static final String CACHE_VAL_ALL_URLAC_PATTERN = "CACHE_VAL_ALL_URLAC_PATTERN";
+     /**
+      * fa
+      */
+     public static final String CACHE_VAL_ALL_URLAC_PATTERN = "CACHE_VAL_ALL_URLAC_PATTERN";
 
-    private static final PathMatcher MATCHER = new AntPathMatcher();
+     /**
+      * 匹配器
+      */
+     private static final PathMatcher MATCHER = new AntPathMatcher();
 
-    @Autowired
+     /**
+      * url acmapper
+      */
+     @Autowired
     private UrlACMapper urlACMapper;
 
-    @Autowired
+     /**
+      * Url目标映射器
+      */
+     @Autowired
     private UrlACTargetMapper urlACTargetMapper;
 
-    @Autowired
+     /**
+      * urlactarget服务
+      */
+     @Autowired
     private UrlACTargetService urlACTargetService;
 
-
-    /**
-     * 根据targetId批量查询
-     * @param targetIds
-     * @return
-     */
-    public List<UrlAccessCtlDto> listByTargetIds(List<String> targetIds) {
+     /**
+      * 根据targetId批量查询
+      *
+      * @param targetIds
+      * @return
+      */
+     public List<UrlAccessCtlDto> listByTargetIds(List<String> targetIds) {
         if (CollUtil.isEmpty(targetIds)) {
             return Collections.emptyList();
         }
@@ -80,30 +109,39 @@ public class UrlACService {
         return dtos;
     }
 
-    /**
-     * 根据url模糊查询
-     * @return
-     */
-    public List<UrlAccessCtlDto> listByUrlFuzzyQuery(String url) {
+     /**
+      * 根据url模糊查询
+      *
+      * @param url url
+      * @return
+      */
+     public List<UrlAccessCtlDto> listByUrlFuzzyQuery(String url) {
         if (StringUtils.isBlank(url)) {
             return Collections.emptyList();
         }
         return listByUrl(url);
     }
 
-    /**
-     * 根据 group 查询
-     * @return
-     */
-    public List<UrlAcCtlGroupBo> listByGroupQuery(String group) {
+     /**
+      * 根据 group 查询
+      *
+      * @param group 集团
+      * @return
+      */
+     public List<UrlAcCtlGroupBo> listByGroupQuery(String group) {
         if (StringUtils.isBlank(group)) {
             return Collections.emptyList();
         }
         return listByGroup(group);
     }
 
-
-    @Transactional(rollbackFor = Exception.class)
+     /**
+      * 添加
+      *
+      * @param addReq 添加请求
+      * @return {@link String }
+      */
+     @Transactional(rollbackFor = Exception.class)
     public String add(UrlAccessCtlRequest addReq) {
         String urlacId = TextUtils.uuid();
 
@@ -140,10 +178,13 @@ public class UrlACService {
         return urlacId;
     }
 
-
-
-
-    @Transactional(rollbackFor = Exception.class)
+     /**
+      * 修改
+      *
+      * @param updateReq 更新请求
+      * @return {@link String }
+      */
+     @Transactional(rollbackFor = Exception.class)
     public String modify(UrlAccessCtlRequest updateReq) {
         String urlacId = updateReq.getId();
         //UrlAccessCtlDto urlAccessCtlDto = urlACMapper.getById(urlacId);
@@ -185,19 +226,25 @@ public class UrlACService {
         return urlacId;
     }
 
-
-    @Transactional(rollbackFor = Exception.class)
+     /**
+      * 删除
+      *
+      * @param ids id
+      * @return int
+      */
+     @Transactional(rollbackFor = Exception.class)
     public int delete(String[] ids) {
         int cnt = urlACMapper.bulkDelete(ids).getSuccessCount();
         urlACTargetService.deleteByUrlACId(ArrayUtils.toArray(ids));
         return cnt;
     }
 
-    /**
-     * 查询所有的urlac不包括pattern
-     * @return
-     */
-    @Cacheable(value = CACHE_VAL_ALL_URLAC)
+     /**
+      * 查询所有的urlac不包括pattern
+      *
+      * @return
+      */
+     @Cacheable(value = CACHE_VAL_ALL_URLAC)
     public List<UrlAccessCtlDto> listAllUrlAccessCtlDtos() {
         List<UrlAccessCtlDto> dtos = urlACMapper.listAllUrlAccessCtlDtos();
         dtos.forEach(d -> {
@@ -213,12 +260,12 @@ public class UrlACService {
         return dtos;
     }
 
-
-    /**
-     * 查询所有的pattern
-     * @return
-     */
-    @Cacheable(value = CACHE_VAL_ALL_URLAC_PATTERN)
+     /**
+      * 查询所有的pattern
+      *
+      * @return
+      */
+     @Cacheable(value = CACHE_VAL_ALL_URLAC_PATTERN)
     public List<UrlAccessCtlDto> listAllUrlACPatternDtos() {
         List<UrlAccessCtlDto> dtos = urlACMapper.listAllUrlAccessCtlPatternDtos();
         dtos.forEach(d -> {
@@ -234,12 +281,12 @@ public class UrlACService {
         return dtos;
     }
 
-
-    /**
-     * 查询所有的
-     * @return
-     */
-    @Cacheable(value = CACHE_VAL_ALL_URLAC)
+     /**
+      * 查询所有的
+      *
+      * @return
+      */
+     @Cacheable(value = CACHE_VAL_ALL_URLAC)
     public List<UrlAccessCtlDto> pageUrlAccessCtlDtos() {
         List<UrlAccessCtlDto> dtos = urlACMapper.listAllUrlAccessCtlDtos();
         //Map<String, List<UrlAccessCtlDto>> urlAcDtoMap = new HashMap<>();
@@ -257,14 +304,20 @@ public class UrlACService {
         return dtos;
     }
 
-
-    @CacheEvict(value = {CACHE_VAL_ALL_URLAC, CACHE_VAL_ALL_URLAC_PATTERN}, allEntries = true)
+     /**
+      * 驱逐urlaccache
+      */
+     @CacheEvict(value = {CACHE_VAL_ALL_URLAC, CACHE_VAL_ALL_URLAC_PATTERN}, allEntries = true)
     public void evictURLACCache() {
         log.info("evict url ac cache...");
     }
 
-
-    @Transactional(rollbackFor = Exception.class)
+     /**
+      * excel导入
+      *
+      * @param importUrlAuths 导入url授权
+      */
+     @Transactional(rollbackFor = Exception.class)
     public void importByExcel(List<ImportUrlAuth> importUrlAuths) {
         if (CollUtil.isNotEmpty(importUrlAuths)) {
             List<UrlACModel> urlACModels = new ArrayList<>();
@@ -297,7 +350,11 @@ public class UrlACService {
 
     }
 
-    private List<UrlAccessCtlDto> listByUrl(String url) {
+     /**
+      * @param url url
+      * @return {@link List }<{@link UrlAccessCtlDto }>
+      */
+     private List<UrlAccessCtlDto> listByUrl(String url) {
         HumanCondition cond = new HumanCondition()
                 .link(UrlACModel.class, UrlACTargetModel.class)
                 .filterLink(UrlACModel.class, UrlACModel::getGroup, UrlACTargetModel.class, UrlACTargetModel::getGroup)
@@ -314,7 +371,11 @@ public class UrlACService {
         return urlACMapper.list(cond, UrlAccessCtlDto.class);
     }
 
-    private List<UrlAcCtlGroupBo> listByGroup(String group) {
+     /**
+      * @param group 集团
+      * @return {@link List }<{@link UrlAcCtlGroupBo }>
+      */
+     private List<UrlAcCtlGroupBo> listByGroup(String group) {
         HumanCondition cond = new HumanCondition()
                 .link(UrlACModel.class, UrlACTargetModel.class)
                 .filterLink(UrlACModel.class, UrlACModel::getGroup, UrlACTargetModel.class, UrlACTargetModel::getGroup)
@@ -330,8 +391,10 @@ public class UrlACService {
         return urlACMapper.list(cond, UrlAcCtlGroupBo.class);
     }
 
-
-    public static void main(String[] args) {
+     /**
+      * @param args arg游戏
+      */
+     public static void main(String[] args) {
         String pattern = "/api/mp/agg/default-img/get-default-img/?defaultImgDirEnum=TARGET";
         String url = "/api/mp/agg/default-img/get-default-img/?defaultImgDirEnum=TARGET";
         boolean match = MATCHER.match(pattern, url);

@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name SysNoticeReadServiceImpl.java.
+ // File size 3227.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontadmin.service.sys.impl;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -15,21 +25,34 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/9/22
- */
-@Service
+ /**
+  * sys请注意读服务impl
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Service
 public class SysNoticeReadServiceImpl extends BaseModelServiceImpl<SysNoticeReadModel, SysNoticeReadMapper, SysNoticeReadFields, QueryParams>
     implements SysNoticeReadService {
 
-    @Autowired
+     /**
+      * sys请注意读服务impl
+      *
+      * @param sysNoticeReadMapper
+      */
+     @Autowired
     public SysNoticeReadServiceImpl(SysNoticeReadMapper sysNoticeReadMapper) {
         setModelMapper(sysNoticeReadMapper);
     }
 
-    @Override
+     /**
+      * 根据用户id和通知id进行选择
+      *
+      * @param user     用户
+      * @param noticeId 注意id
+      * @return {@link SysNoticeReadModel }
+      */
+     @Override
     public SysNoticeReadModel selectByUserIdAndNoticeId(String user, String noticeId) {
         HumanCondition condition = new HumanCondition();
         if (StringUtils.isNotBlank(user)) {
@@ -42,7 +65,13 @@ public class SysNoticeReadServiceImpl extends BaseModelServiceImpl<SysNoticeRead
         return model;
     }
 
-    @Override
+     /**
+      * 增加读计数
+      *
+      * @param id id
+      * @return int
+      */
+     @Override
     public int increaseReadCount(String id) {
         HumanCondition selectCondition = new HumanCondition()
                 .filterEqual(SysNoticeReadModel::getId, id);
@@ -56,7 +85,13 @@ public class SysNoticeReadServiceImpl extends BaseModelServiceImpl<SysNoticeRead
         return rows;
     }
 
-    @Override
+     /**
+      * 计数被读取或被联合国推送
+      *
+      * @param user 用户
+      * @return int
+      */
+     @Override
     public int countIsReadedOrIsUnPush(String user) {
         HumanCondition condition = new HumanCondition();
         condition.filterEqual(SysNoticeReadModel::getUser, user);

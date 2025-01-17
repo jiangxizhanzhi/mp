@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name HttpAuthenticationEntryPoint.java.
+ // File size 1679.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.extensions.security;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
@@ -14,21 +24,38 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Component
+ /**
+  * HTTP身份验证入口点
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Component
 public class HttpAuthenticationEntryPoint implements AuthenticationEntryPoint {
-    private final ObjectMapper mapper;
+     /**
+      * 映射器
+      */
+     private final ObjectMapper mapper;
 
-    @Autowired
+     /**
+      * HTTP身份验证入口点
+      *
+      * @param messageConverter 消息转换器
+      */
+     @Autowired
     public HttpAuthenticationEntryPoint(MappingJackson2HttpMessageConverter messageConverter) {
         this.mapper = messageConverter.getObjectMapper();
     }
 
-    @Override
+     /**
+      * 开始
+      *
+      * @param request       请求
+      * @param response      响应
+      * @param authException 身份验证异常
+      * @throws IOException ioexception
+      */
+     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
         response.setContentType("application/json;charset=UTF-8");

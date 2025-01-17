@@ -30,31 +30,6 @@
             <version>0.0.2-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>cn.cyberpeace.mp.cscene</groupId>
-            <artifactId>mp-cscene</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>cn.cyberpeace.mp.scene</groupId>
-            <artifactId>mp-scene</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>cn.cyberpeace.mp.sceneplugincloud</groupId>
-            <artifactId>mp-scene-plugin-cloud</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>cn.cyberpeace.mp.devopscluster</groupId>
-            <artifactId>mp-devops-cluster</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-
     </dependencies>
 
     <build>

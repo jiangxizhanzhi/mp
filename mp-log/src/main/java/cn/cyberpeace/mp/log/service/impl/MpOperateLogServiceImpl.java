@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name MpOperateLogServiceImpl.java.
+ // File size 3414.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:16 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.log.service.impl;
 
 import cn.cyberpeace.mp.log.enums.SiteTypeEnums;
@@ -21,19 +31,32 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-/**
- * MP中台的操作日志
- * @author wanggang
- */
-@Slf4j
+ /**
+  * MP中台的操作日志
+  *
+  * @author wanggang@date 2025/01/17
+  */
+ @Slf4j
 @Service
 public class MpOperateLogServiceImpl extends BasEsLogService implements MpOperateLogService {
 
-    private static final String INDEX_MP_OPERATE_LOG = "mp_operate_log";
+     /**
+      * 索引mp操作日志
+      */
+     private static final String INDEX_MP_OPERATE_LOG = "mp_operate_log";
 
-    private boolean indexExisted = false;
+     /**
+      *
+      */
+     private boolean indexExisted = false;
 
-    @Override
+     /**
+      * 创建
+      *
+      * @param operationLogModel 操作日志模型
+      * @return {@link IndexResponse }
+      */
+     @Override
     public IndexResponse create(OperationLogModel operationLogModel) {
         if (!isIndexExisted()) {
             return null;
@@ -43,8 +66,13 @@ public class MpOperateLogServiceImpl extends BasEsLogService implements MpOperat
         return super.create(indexRequest);
     }
 
-
-    @Override
+     /**
+      * 搜索
+      *
+      * @param request 请求
+      * @return {@link SearchResponse }
+      */
+     @Override
     public SearchResponse search(OperationLogPageRequest request) {
         if (!isIndexExisted()) {
             return null;
@@ -57,12 +85,22 @@ public class MpOperateLogServiceImpl extends BasEsLogService implements MpOperat
         return super.search(searchRequest);
     }
 
-    @Override
+     /**
+      * 网站类型
+      *
+      * @return {@link SiteTypeEnums }
+      */
+     @Override
     public SiteTypeEnums siteType(){
         return SiteTypeEnums.MP;
     }
 
-    private boolean isIndexExisted() {
+     /**
+      * 是否存在索引？
+      *
+      * @return boolean
+      */
+     private boolean isIndexExisted() {
         if (indexExisted) {
             return true;
         }

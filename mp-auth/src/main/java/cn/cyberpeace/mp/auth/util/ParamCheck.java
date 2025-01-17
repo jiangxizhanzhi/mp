@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name ParamCheck.java.
+ // File size 1445.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:12 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.util;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;

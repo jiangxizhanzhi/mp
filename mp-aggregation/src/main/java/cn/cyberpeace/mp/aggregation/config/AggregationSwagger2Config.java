@@ -11,14 +11,25 @@ import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
+/**
+ * 聚合swagger2配置
+ *
+ * @author 二竹
+ * @date 2025/01/17
+ */
 @Configuration
 public class AggregationSwagger2Config {
 
+    /**
+     * swagger2配置
+     */
     @Autowired
     private Swagger2Config swagger2Config;
 
     /**
-     * @Deprecated
+     * api基础
+     *
+     * @return {@link Docket }
      */
     @Bean
     public Docket apiBase() {
@@ -33,6 +44,11 @@ public class AggregationSwagger2Config {
                 .groupName("base");
     }
 
+    /**
+     * api聚合
+     *
+     * @return {@link Docket }
+     */
     @Bean
     public Docket apiAggregation() {
         return new Docket(DocumentationType.SWAGGER_2)

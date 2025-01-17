@@ -16,9 +16,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/12/3 10:40
+ * 默认img服务
+ *
+ * @author 二竹
+ * @date 2025/01/17
  */
 @Slf4j
 @Service
@@ -56,6 +57,12 @@ public class DefaultImgService {
         return fileList.stream().map(f -> endPathName.concat("/").concat(f.getName())).collect(Collectors.toList());
     }
 
+    /**
+     * 获取默认img文件路径
+     *
+     * @param relativePath 相对路径
+     * @return {@link String }
+     */
     public String getDefaultImgFilePath(String relativePath) {
         String startWithFile = "file:";
         String pathName = AggregationSingleton.aggregationConfig.getStaticLocation();

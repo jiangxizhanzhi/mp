@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name RegisterService.java.
+ // File size 4306.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:13 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
@@ -21,37 +31,65 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Service
+ /**
+  * 注册服务
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Service
 @Slf4j
 public class RegisterService {
 
-    @Autowired
+     /**
+      * 用户服务
+      */
+     @Autowired
     private UserService userService;
 
-    @Autowired
+     /**
+      * 创建检查服务
+      */
+     @Autowired
     private UserCreateCheckService createCheckService;
 
-    @Autowired
+     /**
+      * 管理配置服务
+      */
+     @Autowired
     private AdminConfigService adminConfigService;
 
-    @Autowired
+     /**
+      * 用户缓存服务
+      */
+     @Autowired
     private UserCacheService userCacheService;
 
-    @Autowired
+     /**
+      * 租户用户服务
+      */
+     @Autowired
     private TenantUserService tenantUserService;
 
-    @Autowired
+     /**
+      * 角色服务
+      */
+     @Autowired
     private RoleService roleService;
 
-    @Autowired
+     /**
+      * 用户角色服务
+      */
+     @Autowired
     private UserRoleService userRoleService;
 
-    @Transactional(rollbackFor = Exception.class)
+     /**
+      * 注册
+      *
+      * @param req 要求
+      * @return {@link ObjServiceResult }<{@link UserModel }>
+      */
+     @Transactional(rollbackFor = Exception.class)
     public ObjServiceResult<UserModel> register(RegisterRequest req) {
 
         // 查看系统设置，是否开放注册

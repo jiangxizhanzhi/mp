@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name SysNoticeRoleServiceImpl.java.
+ // File size 2655.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontadmin.service.sys.impl;
 
 import cn.cyberpeace.mp.auth.model.RoleModel;
@@ -16,23 +26,39 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/9/22
- */
-@Service
+ /**
+  * sys请注意角色服务impl
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Service
 public class SysNoticeRoleServiceImpl extends BaseModelServiceImpl<SysNoticeRoleModel, SysNoticeRoleMapper, SysNoticeRoleFields, QueryParams>
     implements SysNoticeRoleService {
 
-    @Autowired
+     /**
+      * sys请注意角色服务impl
+      *
+      * @param sysNoticeRoleMapper
+      */
+     @Autowired
     public SysNoticeRoleServiceImpl(SysNoticeRoleMapper sysNoticeRoleMapper) {
         setModelMapper(sysNoticeRoleMapper);
     }
 
-    @Autowired
+     /**
+      * 角色映射器
+      */
+     @Autowired
     private RoleMapper roleMapper;
-    @Override
+
+     /**
+      * 按通知编号列出
+      *
+      * @param noticeIds 注意id
+      * @return {@link List }<{@link RoleModel }>
+      */
+     @Override
     public List<RoleModel> listByNoticeIds(List<String> noticeIds) {
         HumanCondition humanCondition = new HumanCondition();
         if (CollUtil.isNotEmpty(noticeIds)) {
@@ -46,7 +72,13 @@ public class SysNoticeRoleServiceImpl extends BaseModelServiceImpl<SysNoticeRole
         return models;
     }
 
-    @Override
+     /**
+      * 按通知id删除
+      *
+      * @param noticeIds 注意id
+      * @return int
+      */
+     @Override
     public int deleteByNoticeIds(List<String> noticeIds) {
         HumanCondition condition = new HumanCondition();
         if (CollectionUtil.isNotEmpty(noticeIds)) {
@@ -56,7 +88,11 @@ public class SysNoticeRoleServiceImpl extends BaseModelServiceImpl<SysNoticeRole
         return rows;
     }
 
-    @Override
+     /**
+      * @param roleId
+      * @return int
+      */
+     @Override
     public int deleteByRole(String roleId) {
         HumanCondition condition = new HumanCondition()
                 .filterEqual(SysNoticeRoleModel::getRole, roleId);

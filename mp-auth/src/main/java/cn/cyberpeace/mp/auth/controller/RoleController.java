@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name RoleController.java.
+ // File size 5755.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:13 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.bo.role.RoleBo;
@@ -36,25 +46,37 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * @Description: 角色管理接口
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Api(value = "角色管理接口", tags = "AUTH-角色管理接口")
+ /**
+  * 角色控制器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Api(value = "角色管理接口", tags = "AUTH-角色管理接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/roles")
 public class RoleController {
 
-    @Autowired
+     /**
+      * role服务
+      */
+     @Autowired
     private RoleService roleService;
 
-    @Autowired
+     /**
+      * oprole烫服务
+      */
+     @Autowired
     private OperateRolePermissionService opRolePermService;
 
-
-    @ApiOperation("删除指定id角色")
+     /**
+      * 删除
+      *
+      * @param id id
+      * @return {@link ServiceResult }<{@link Boolean }>
+      */
+     @ApiOperation("删除指定id角色")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="id",dataTypeClass = String.class),
     })
@@ -66,12 +88,13 @@ public class RoleController {
         return roleService.delete(id);
     }
 
-    /**
-     * 批量删除
-     * @param ids 数据id集
-     * @return 成功数量
-     */
-    @ApiOperation("批量删除角色")
+     /**
+      * 批量删除
+      *
+      * @param ids 数据id集
+      * @return 成功数量
+      */
+     @ApiOperation("批量删除角色")
     @ApiImplicitParam(name="ids", value="角色ID列表",dataTypeClass = String[].class)
     @DeleteMapping("/bulk_delete")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
@@ -79,7 +102,13 @@ public class RoleController {
         return roleService.bulkDelete(ids).asResult();
     }
 
-    @GetMapping("/{id}")
+     /**
+      * 得到
+      *
+      * @param id id
+      * @return {@link ObjServiceResult }
+      */
+     @GetMapping("/{id}")
     @ApiOperation(value = "查询指定id数据，附带权限集合", notes = "")
     @ApiImplicitParam(name="id", value="角色ID",dataTypeClass = String.class)
     public ObjServiceResult get(@PathVariable String id) {
@@ -87,7 +116,13 @@ public class RoleController {
         return ResultUtils.obj2ObjServiceResult(roleBo);
     }
 
-    @ApiOperation("获取指定id数据")
+     /**
+      * 通过参数获取
+      *
+      * @param id id
+      * @return {@link ObjServiceResult }<{@link RoleModel }>
+      */
+     @ApiOperation("获取指定id数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class)
     })
@@ -96,7 +131,13 @@ public class RoleController {
         return roleService.get(id).asResult();
     }
 
-    @ApiOperation(value = "创建角色，同时完成角色-权限绑定关系", notes = "")
+     /**
+      * 添加
+      *
+      * @param createRequest
+      * @return {@link ServiceResult }<{@link RoleModel }>
+      */
+     @ApiOperation(value = "创建角色，同时完成角色-权限绑定关系", notes = "")
     @ApiImplicitParam(name = "createRequest", value = "请求", dataTypeClass = RoleRequest.class)
     @PostMapping("/add")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
@@ -106,8 +147,11 @@ public class RoleController {
         return ResultCommon.success(roleModel);
     }
 
-
-    @ApiOperation(value = "更新角色，同时完成角色-权限绑定关系", notes = "")
+     /**
+      * @param modifyRequest
+      * @return {@link ServiceResult }<{@link RoleModel }>
+      */
+     @ApiOperation(value = "更新角色，同时完成角色-权限绑定关系", notes = "")
     @ApiImplicitParam(name = "modifyRequest", value = "修改请求", dataTypeClass = RoleRequest.class)
     @PostMapping("/modify")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
@@ -117,7 +161,11 @@ public class RoleController {
         return ResultCommon.success(roleModel);
     }
 
-    @ApiOperation(value = "查询所有角色，不分页，仅查询角色信息", notes = "")
+     /**
+      * @param rolePageRequest
+      * @return {@link ServiceResult }<{@link List }<{@link RoleModel }>>
+      */
+     @ApiOperation(value = "查询所有角色，不分页，仅查询角色信息", notes = "")
     @GetMapping("/all")
     public ServiceResult<List<RoleModel>> listAll(RolePageRequest rolePageRequest) {
         rolePageRequest.ensure();

@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name FileCheckCommon.java.
+ // File size 3736.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:12 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.common;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
@@ -16,14 +26,22 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/10/26
- */
-public class FileCheckCommon {
+ /**
+  * 文件检查
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ public class FileCheckCommon {
 
-    public static ServiceResult<Boolean> checkFile(MultipartFile file, FileCheckRequest fileCheckRequest) {
+     /**
+      * 检查文件
+      *
+      * @param file             文件
+      * @param fileCheckRequest 文件检查请求
+      * @return {@link ServiceResult }<{@link Boolean }>
+      */
+     public static ServiceResult<Boolean> checkFile(MultipartFile file, FileCheckRequest fileCheckRequest) {
         boolean match = true;
         if (Objects.nonNull(fileCheckRequest.getMaxSize())) {
             // 校验图片大小
@@ -58,20 +76,42 @@ public class FileCheckCommon {
         return new ServiceResult<>(true);
     }
 
-    public static boolean checkSize(MultipartFile file, long maxSize) {
+     /**
+      * 检查尺寸
+      *
+      * @param file    文件
+      * @param maxSize
+      * @return boolean
+      */
+     public static boolean checkSize(MultipartFile file, long maxSize) {
         return file.getSize() <= maxSize;
     }
 
-    public static boolean checkSuffix(String fileName, List<String> suffixList) {
+     /**
+      * @param fileName
+      * @param suffixList
+      * @return boolean
+      */
+     public static boolean checkSuffix(String fileName, List<String> suffixList) {
         String suffix = FileUtil.getSuffix(fileName);
         return suffixList.stream().anyMatch(x -> x.equalsIgnoreCase(suffix));
     }
 
-    public static boolean checkSuffix(MultipartFile file, List<String> suffixList) {
+     /**
+      * @param file       文件
+      * @param suffixList
+      * @return boolean
+      */
+     public static boolean checkSuffix(MultipartFile file, List<String> suffixList) {
         return checkSuffix(file.getOriginalFilename(), suffixList);
     }
 
-    public static boolean checkMagicHeader(InputStream inputStream, List<String> magicHeaderList) {
+     /**
+      * @param inputStream
+      * @param magicHeaderList
+      * @return boolean
+      */
+     public static boolean checkMagicHeader(InputStream inputStream, List<String> magicHeaderList) {
         String type = FileTypeUtil.getType(inputStream);
         if (StringUtils.isBlank(type)) {
             // 无法获取文件头信息，直接返回true
@@ -80,7 +120,12 @@ public class FileCheckCommon {
         return magicHeaderList.stream().anyMatch(x -> x.equalsIgnoreCase(type));
     }
 
-    public static boolean checkMagicHeader(MultipartFile file, List<String> magicHeaderList) {
+     /**
+      * @param file            文件
+      * @param magicHeaderList
+      * @return boolean
+      */
+     public static boolean checkMagicHeader(MultipartFile file, List<String> magicHeaderList) {
         InputStream inputStream = null;
         try {
             inputStream = file.getInputStream();
@@ -90,6 +135,9 @@ public class FileCheckCommon {
         return checkMagicHeader(inputStream, magicHeaderList);
     }
 
-    private FileCheckCommon() {
+     /**
+      * 文件检查
+      */
+     private FileCheckCommon() {
     }
 }

@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name UserExcelController.java.
+ // File size 5871.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:13 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.controller;
 
 
@@ -43,37 +53,62 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-/**
- * @Description: 用户导入导出Excel管理接口
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Api(value = "用户导入导出Excel管理接口", tags = "AUTH-用户导入导出Excel接口")
+ /**
+  * 用户excel控制器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Api(value = "用户导入导出Excel管理接口", tags = "AUTH-用户导入导出Excel接口")
 @Slf4j
 @Controller
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/users")
 public class UserExcelController {
 
-    @Autowired
+     /**
+      * 用户服务
+      */
+     @Autowired
     private UserService userService;
 
-    @Autowired
+     /**
+      * role服务
+      */
+     @Autowired
     private RoleService roleService;
 
-    @Autowired
+     /**
+      * org服务
+      */
+     @Autowired
     private OrgService orgService;
 
-    @Autowired
+     /**
+      * op用户烫检查服务
+      */
+     @Autowired
     private OperateUserPermissionService opUserPermCheckService;
 
-    @Autowired
+     /**
+      * 身份验证配置
+      */
+     @Autowired
     private AuthConfig authConfig;
 
-    @Autowired
+     /**
+      * 租户用户服务
+      */
+     @Autowired
     private TenantUserService tenantUserService;
 
-
-    @ApiOperation(value = "导出用户数据excel", notes = "")
+     /**
+      * 导出excel
+      *
+      * @param response      响应
+      * @param exportRequest 出口要求
+      * @throws IOException ioexception
+      */
+     @ApiOperation(value = "导出用户数据excel", notes = "")
     @ApiImplicitParam(name = "exportRequest", value = "导出请求", dataTypeClass = UserExportRequest.class)
     @PostMapping("/excel/export")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
@@ -107,8 +142,14 @@ public class UserExcelController {
         EasyExcel.write(response.getOutputStream(), exportClz).sheet(sheetName).doWrite(dataLst);
     }
 
-
-    @ApiOperation(value = "通过excel导入用户数据", notes = "")
+     /**
+      * 导入用户
+      *
+      * @param file
+      * @return {@link ServiceResult }
+      * @throws IOException ioexception
+      */
+     @ApiOperation(value = "通过excel导入用户数据", notes = "")
     @ApiImplicitParam(name="file", value="文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/excel/import")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
@@ -126,8 +167,10 @@ public class UserExcelController {
         return ResultCommon.success();
     }
 
-
-    @ApiOperation(value = "下载用户导入excel模板", notes = "")
+     /**
+      *
+      */
+     @ApiOperation(value = "下载用户导入excel模板", notes = "")
     @GetMapping("/excel/template")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public void downloadExcelTemplate() {

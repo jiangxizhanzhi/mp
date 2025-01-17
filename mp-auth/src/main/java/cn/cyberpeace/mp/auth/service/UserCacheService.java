@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name UserCacheService.java.
+ // File size 2592.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:13 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
@@ -11,16 +21,20 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/6/9 11:16
- */
-@Slf4j
+ /**
+  * 用户缓存服务
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 @Service
 public class UserCacheService {
 
-    public static final String[] USER_CACHE_VALUES = {
+     /**
+      * 用户缓存值
+      */
+     public static final String[] USER_CACHE_VALUES = {
             UserServiceImpl.CACHE_VAL_USERMODEL_BY_ID, UserServiceImpl.CACHE_VAL_USERMODEL_BY_USERNAME,
             UserServiceImpl.CACHE_VAL_USERDTO, UserServiceImpl.CACHE_VAL_ORGDTOS_TO_USERDTOS,
             AuthUserDetailsService.CACHE_USER_AUTHORITIES,
@@ -29,36 +43,57 @@ public class UserCacheService {
             UserRoleServiceImpl.CACHE_VAL_ROLES,
             UserPermissionServiceImpl.CACHE_VAL_USER_TARGETS};
 
-    public static final String[] TARGET_CACHE_VALUES = {
+     /**
+      *
+      */
+     public static final String[] TARGET_CACHE_VALUES = {
             TargetServiceImpl.CACHE_VAL_TARGETS,
             RolePermissionModelServiceImpl.CACHE_TARGETS_BY_ROLES};
 
-    @Resource(name = AuthCacheConfig.CACHE_MANAGER_NORMAL)
+     /**
+      *
+      */
+     @Resource(name = AuthCacheConfig.CACHE_MANAGER_NORMAL)
     private CacheManager cacheManagerNormal;
 
-
-    @Resource(name = AuthCacheConfig.CACHE_MANAGER_MEDIUM)
+     /**
+      *
+      */
+     @Resource(name = AuthCacheConfig.CACHE_MANAGER_MEDIUM)
     private CacheManager cacheManagerMedium;
 
-
-    @Resource(name = AuthCacheConfig.CACHE_MANAGER_LONG)
+     /**
+      *
+      */
+     @Resource(name = AuthCacheConfig.CACHE_MANAGER_LONG)
     private CacheManager cacheManagerLong;
 
-    public void evictAllUserCache() {
+     /**
+      * 清空所有用户缓存
+      */
+     public void evictAllUserCache() {
         log.debug("evict user releated cache...");
         for (String cacheValue : USER_CACHE_VALUES) {
             clean(cacheValue);
         }
     }
 
-    public void evictAllTargetsCache() {
+     /**
+      * 退出所有目标缓存
+      */
+     public void evictAllTargetsCache() {
         log.debug("evict targets releated cache...");
         for (String cacheValue : TARGET_CACHE_VALUES) {
             clean(cacheValue);
         }
     }
 
-    private void clean(String cacheValue) {
+     /**
+      * 清洁
+      *
+      * @param cacheValue 缓存值
+      */
+     private void clean(String cacheValue) {
         Cache cacheNormal = cacheManagerNormal.getCache(cacheValue);
         Cache cacheMedium = cacheManagerMedium.getCache(cacheValue);
         Cache cacheLong = cacheManagerLong.getCache(cacheValue);

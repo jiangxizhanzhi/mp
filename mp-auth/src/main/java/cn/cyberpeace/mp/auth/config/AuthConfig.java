@@ -1,3 +1,13 @@
+// Copyright (C) 2024
+// All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name AuthConfig.java.
+ // File size 1671.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:12 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.config;
 
 import cn.cyberpeace.mp.auth.service.impl.ThirdSsoService;
@@ -8,9 +18,10 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 /**
- * @Description
- * @Author shgang
- * @Date 2022/8/31
+ * 身份验证配置
+ *
+ * @author 二竹
+ * @date 2025/01/17
  */
 @Data
 @Configuration

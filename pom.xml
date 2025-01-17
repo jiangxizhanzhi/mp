@@ -37,19 +37,10 @@
         <module>mp-common</module>
         <module>mp-auth-base</module>
         <module>mp-base</module>
-        <module>mp-cscene</module>
-        <module>mp-devops-cluster</module>
-        <module>mp-flow</module>
         <module>mp-log</module>
         <module>mp-front-admin</module>
         <module>mp-front-admin-business</module>
         <module>mp-front-business</module>
-        <module>mp-scene</module>
-        <module>mp-scene-plugin-gns3</module>
-        <module>mp-scene-plugin-cloud</module>
-        <module>mp-scene-plugin-collection</module>
-        <module>mp-scene-plugin-flow</module>
-        <module>mp-situation-aware</module>
         <module>mp</module>
     </modules>
     <dependencies>

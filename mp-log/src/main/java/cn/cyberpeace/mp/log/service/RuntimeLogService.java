@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name RuntimeLogService.java.
+ // File size 2826.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:16 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.log.service;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -17,10 +27,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- *
- **/
-@Service
+ /**
+  * 运行时日志服务
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Service
 @Slf4j
 @RequiredArgsConstructor
 public class RuntimeLogService {
@@ -29,12 +42,13 @@ public class RuntimeLogService {
 
     private final RunTimeLogDTOConverter runTimeLogDTOConverter;
 
-    /**
-     * 分页查询
-     * @param basePageRequest
-     * @return
-     */
-    public ListObjResult<RunTimeLogDTO> page(BasePageRequest basePageRequest) {
+     /**
+      * 分页查询
+      *
+      * @param basePageRequest
+      * @return
+      */
+     public ListObjResult<RunTimeLogDTO> page(BasePageRequest basePageRequest) {
         List<LogReportDTO> allLogReportDTOList = Lists.newArrayList();
         List<LogReportDTO> mpAndCpLogList = logFileServiceFactory.listAll(basePageRequest);
         allLogReportDTOList.addAll(mpAndCpLogList);

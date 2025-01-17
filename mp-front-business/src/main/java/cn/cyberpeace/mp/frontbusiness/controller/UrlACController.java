@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name UrlACController.java.
+ // File size 5027.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
@@ -28,21 +38,30 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/5/23 10:43
- */
-@Api(value = "接口访问控制", tags = "接口访问控制")
+ /**
+  * url accontroller
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Api(value = "接口访问控制", tags = "接口访问控制")
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/urlac")
 public class UrlACController {
 
-    @Autowired
+     /**
+      *
+      */
+     @Autowired
     private UrlACService urlACService;
 
-
-    @ApiOperation(value = "根据url模糊查询", notes = "")
+     /**
+      * 模糊url列表
+      *
+      * @param url url
+      * @return {@link ServiceResult }<{@link List }<{@link UrlAccessCtlDto }>>
+      */
+     @ApiOperation(value = "根据url模糊查询", notes = "")
     @ApiImplicitParam(name = "url", value = "url", dataTypeClass = String.class, required = true, dataType = "query")
     @GetMapping("/by_url")
     public ServiceResult<List<UrlAccessCtlDto>> listByFuzzyUrl(@RequestParam String url) {
@@ -50,14 +69,26 @@ public class UrlACController {
         return ResultCommon.success(urlAccessCtlDtoList);
     }
 
-    @ApiOperation(value = "根据 group 查询", notes = "")
+     /**
+      * 按目标列出
+      *
+      * @param group 集团
+      * @return {@link ServiceResult }<{@link List }<{@link UrlAcCtlGroupBo }>>
+      */
+     @ApiOperation(value = "根据 group 查询", notes = "")
     @ApiImplicitParam(name = "group", value = "菜单", dataTypeClass = String.class, required = true, dataType = "query")
     @GetMapping("/by_group")
     public ServiceResult<List<UrlAcCtlGroupBo>> listByTarget(@RequestParam String group) {
         return ResultCommon.success(urlACService.listByGroupQuery(group));
     }
 
-    @ApiOperation(value = "根据权限绑定的url", notes = "")
+     /**
+      * 按目标id列表
+      *
+      * @param ids id
+      * @return {@link ServiceResult }<{@link List }<{@link UrlAccessCtlDto }>>
+      */
+     @ApiOperation(value = "根据权限绑定的url", notes = "")
     @ApiImplicitParam(name = "ids", value = "id列表", dataTypeClass = String[].class, required = true, dataType = "query")
     @GetMapping("/by_targets")
     public ServiceResult<List<UrlAccessCtlDto>> listByTargetIds(@RequestParam String[] ids) {
@@ -65,8 +96,13 @@ public class UrlACController {
         return ResultCommon.success(urlAccessCtlDtoList);
     }
 
-
-    @ApiOperation(value = "新增URL访问控制", notes = "")
+     /**
+      * 添加
+      *
+      * @param addRequest
+      * @return {@link ServiceResult }<{@link String }>
+      */
+     @ApiOperation(value = "新增URL访问控制", notes = "")
     @ApiImplicitParam(name = "addRequest", value = "请求体", dataTypeClass = UrlAccessCtlRequest.class, required = true, dataType = "body")
     @PostMapping("/add")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
@@ -76,8 +112,13 @@ public class UrlACController {
         return ResultCommon.success(urlACId);
     }
 
-
-    @ApiOperation(value = "更新URL访问控制", notes = "")
+     /**
+      * 修改
+      *
+      * @param updateRequest
+      * @return {@link ServiceResult }<{@link String }>
+      */
+     @ApiOperation(value = "更新URL访问控制", notes = "")
     @ApiImplicitParam(name = "updateRequest", value = "请求体", dataTypeClass = UrlAccessCtlRequest.class, required = true, dataType = "body")
     @PatchMapping("/modify")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
@@ -87,8 +128,13 @@ public class UrlACController {
         return ResultCommon.success(urlACId);
     }
 
-
-    @ApiOperation(value = "删除URL访问控制", notes = "")
+     /**
+      * 删除
+      *
+      * @param ids id
+      * @return {@link ServiceResult }<{@link Integer }>
+      */
+     @ApiOperation(value = "删除URL访问控制", notes = "")
     @ApiImplicitParam(name = "ids", value = "id列表", dataTypeClass = String[].class, required = true, dataType = "query")
     @DeleteMapping
     public ServiceResult<Integer> delete(@RequestParam String[] ids) {
@@ -97,9 +143,10 @@ public class UrlACController {
         return ResultCommon.success(cnt);
     }
 
-
-
-    @ApiOperation(value = "删除缓存", notes = "")
+     /**
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation(value = "删除缓存", notes = "")
     @PostMapping("/evict_cache")
     public ServiceResult evictCache() {
         urlACService.evictURLACCache();

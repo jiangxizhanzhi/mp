@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name LogSettingServiceImpl.java.
+ // File size 19436.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:16 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.log.service.impl;
 
 import ch.qos.logback.classic.Level;
@@ -34,41 +44,93 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * @author wangssh
- * @version 1.0
- * @description 日志级别设置
- * @date 2023/5/30
- **/
-@Slf4j
+ /**
+  * 日志设置服务impl
+  *
+  * @author wangssh
+  * @date 2023/5/30
+  */
+ @Slf4j
 @Service
 public class LogSettingServiceImpl implements ILogSettingService {
 
-    public static final String ROOT = "ROOT";
-    public static final String PROPERTIES = ".properties";
-    public static final String YML = ".yml";
-    public static final String YAML = ".yaml";
-    public static final String LOGGING = "logging";
-    public static final String LEVEL = "level";
-    public static final String EXT_VAR = "ext-var";
-    public static final String ROOT_KEY = "root";
-    public static final String LOGGING_LEVEL_EXT_VAR_ROOT = "logging.level.ext-var.root";
-    public static final String ROOT_KEY_FOR_PROP = "ROOT_LEVEL";
-    public static final String EQUAL_SIGN = "\\=";
+     /**
+      *
+      */
+     public static final String ROOT = "ROOT";
+     /**
+      *
+      */
+     public static final String PROPERTIES = ".properties";
+     /**
+      *
+      */
+     public static final String YML = ".yml";
+     /**
+      *
+      */
+     public static final String YAML = ".yaml";
+     /**
+      *
+      */
+     public static final String LOGGING = "logging";
+     /**
+      *
+      */
+     public static final String LEVEL = "level";
+     /**
+      *
+      */
+     public static final String EXT_VAR = "ext-var";
+     /**
+      * 根键
+      */
+     public static final String ROOT_KEY = "root";
+     /**
+      * 日志级别ext var root
+      */
+     public static final String LOGGING_LEVEL_EXT_VAR_ROOT = "logging.level.ext-var.root";
+     /**
+      * 道具根密钥
+      */
+     public static final String ROOT_KEY_FOR_PROP = "ROOT_LEVEL";
+     /**
+      * 等号
+      */
+     public static final String EQUAL_SIGN = "\\=";
 
-    @Value("${logging.level.root:ERROR}")
+     /**
+      * 默认日志级别
+      */
+     @Value("${logging.level.root:ERROR}")
     private String defaulLogLevel;
 
-    @Value("${mp.log.dynamic-level-keeping:false}")
+     /**
+      *
+      */
+     @Value("${mp.log.dynamic-level-keeping:false}")
     private boolean dynamicLevelKeeping;
 
-    @Value("${logging.level.dynamic-level-only-root:true}")
+     /**
+      *
+      */
+     @Value("${logging.level.dynamic-level-only-root:true}")
     private boolean dynamicLevelOnlyRoot;
 
-    @Autowired
+     /**
+      *
+      */
+     @Autowired
     private MpLogLevelPOMapper mpLogLevelMapper;
 
-    @Transactional(rollbackFor = Exception.class)
+     /**
+      * 设置日志级别
+      *
+      * @param logName  日志名字
+      * @param logLevel 日志级别
+      * @return {@link ServiceResult }<{@link LogLevelResponse }>
+      */
+     @Transactional(rollbackFor = Exception.class)
     @Override
     public ServiceResult<LogLevelResponse> setLogLevel(String logName, String logLevel) {
         if (StringUtils.isEmpty(logName) || StringUtils.isEmpty(logLevel)) {
@@ -90,14 +152,28 @@ public class LogSettingServiceImpl implements ILogSettingService {
         return new ServiceResult<>(batchList.get(0)).asResult();
     }
 
-    private String getUpperLogNameIfRoot(String logName) {
+     /**
+      * 如果是root，则获取上层日志名
+      *
+      * @param logName 日志名字
+      * @return {@link String }
+      */
+     private String getUpperLogNameIfRoot(String logName) {
         if (ROOT.equalsIgnoreCase(logName)) {
             return logName.toUpperCase();
         }
         return logName;
     }
 
-    private Level getTargetLogLevel(String logName, String logLevel, Logger targetLogger) {
+     /**
+      * 获取目标日志级别
+      *
+      * @param logName      日志名字
+      * @param logLevel     日志级别
+      * @param targetLogger 目标日志记录器
+      * @return {@link Level }
+      */
+     private Level getTargetLogLevel(String logName, String logLevel, Logger targetLogger) {
         if (StringUtils.isEmpty(logLevel)) {
             return null;
         }
@@ -110,7 +186,13 @@ public class LogSettingServiceImpl implements ILogSettingService {
         return Level.toLevel(logLevel, curLevel);
     }
 
-    @Transactional(rollbackFor = Exception.class)
+     /**
+      * 设置批处理日志级别
+      *
+      * @param logLevelRequestList 日志级别请求列表
+      * @return {@link ServiceResult }<{@link List }<{@link LogLevelResponse }>>
+      */
+     @Transactional(rollbackFor = Exception.class)
     @Override
     public ServiceResult<List<LogLevelResponse>> setBatchLogLevel(List<LogLevelBO> logLevelRequestList) {
         if (logLevelRequestList.isEmpty()) {
@@ -139,7 +221,14 @@ public class LogSettingServiceImpl implements ILogSettingService {
         return new ServiceResult<>(logLevelList).asResult();
     }
 
-    private void batchSetLogLevel(List<LogLevelBO> logLevelRequestList, List<LogLevelResponse> logLevelList, List<MpLogLevelPO> poList, String[] rootLevel, LoggerContext loggerContext) {
+     /**
+      * @param logLevelRequestList 日志级别请求列表
+      * @param logLevelList
+      * @param poList              订单列表
+      * @param rootLevel           根级别
+      * @param loggerContext       记录器上下文
+      */
+     private void batchSetLogLevel(List<LogLevelBO> logLevelRequestList, List<LogLevelResponse> logLevelList, List<MpLogLevelPO> poList, String[] rootLevel, LoggerContext loggerContext) {
         for (Logger logger : loggerContext.getLoggerList()) {
             try {
                 logLevelRequestList.stream().filter(e -> logger.getName().equals(getUpperLogNameIfRoot(e.getLogName())))
@@ -159,7 +248,12 @@ public class LogSettingServiceImpl implements ILogSettingService {
         }
     }
 
-    @Transactional(rollbackFor = Exception.class)
+     /**
+      * 重置默认日志级别
+      *
+      * @return {@link ServiceResult }<{@link List }<{@link LogLevelResponse }>>
+      */
+     @Transactional(rollbackFor = Exception.class)
     @Override
     public ServiceResult<List<LogLevelResponse>> resetDefualtLogLevel() {
         if (LoggerFactory.getILoggerFactory() instanceof LoggerContext) {
@@ -170,7 +264,10 @@ public class LogSettingServiceImpl implements ILogSettingService {
         return this.getLogLevel(null);
     }
 
-    private void setRootDefaultAndOtherNull() {
+     /**
+      * 设置root默认值，其他为空
+      */
+     private void setRootDefaultAndOtherNull() {
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         for (Logger logger : loggerContext.getLoggerList()) {
             try {
@@ -191,7 +288,11 @@ public class LogSettingServiceImpl implements ILogSettingService {
         }
     }
 
-    @Override
+     /**
+      * @param logName 日志名字
+      * @return {@link ServiceResult }<{@link List }<{@link LogLevelResponse }>>
+      */
+     @Override
     public ServiceResult<List<LogLevelResponse>> getLogLevel(String logName) {
         List<LogLevelResponse> logLevelList = new ArrayList<>();
         logName = getUpperLogNameIfRoot(logName);
@@ -208,7 +309,12 @@ public class LogSettingServiceImpl implements ILogSettingService {
         return new ServiceResult<>(logLevelList).asResult();
     }
 
-    private void setYamlRootLevel(String logName, List<LogLevelResponse> logLevelList, Logger logger) {
+     /**
+      * @param logName      日志名字
+      * @param logLevelList
+      * @param logger
+      */
+     private void setYamlRootLevel(String logName, List<LogLevelResponse> logLevelList, Logger logger) {
         if (StringUtils.isNotEmpty(logName)) {
             //后置星号模糊匹配
             boolean suffixBlurMatch = logName.endsWith("*") && logger.getName().startsWith(logName.substring(0, logName.length() - 1));
@@ -220,7 +326,10 @@ public class LogSettingServiceImpl implements ILogSettingService {
         }
     }
 
-    @Override
+     /**
+      *
+      */
+     @Override
     public void loadDynamicLogLevel() {
         HumanCondition humanCondition = new HumanCondition();
         List<MpLogLevelPO> list = mpLogLevelMapper.list(humanCondition);
@@ -243,18 +352,20 @@ public class LogSettingServiceImpl implements ILogSettingService {
         }
     }
 
-    private String getLevelStr(Logger logger) {
+     /**
+      * @param logger
+      * @return {@link String }
+      */
+     private String getLevelStr(Logger logger) {
         return ObjectUtils.isNotEmpty(logger.getLevel()) ? logger.getLevel().levelStr : "";
     }
 
-    /**
-     * @description: 更新外部配置文件日志级别
-     * @param: rootLevel
-     * @return: void
-     * @author: wangssh
-     * @date: 2023/6/5
-     */
-    private synchronized void setLogLevel2ExtenalConfig(String rootLevel) {
+     /**
+      * 集日志level2extenal配置
+      *
+      * @param rootLevel 根级别
+      */
+     private synchronized void setLogLevel2ExtenalConfig(String rootLevel) {
         if (StringUtils.isEmpty(rootLevel)) {
             return;
         }
@@ -276,7 +387,12 @@ public class LogSettingServiceImpl implements ILogSettingService {
         }
     }
 
-    private synchronized void setNewRootLevel(String rootKey, String rootLevel, String file) {
+     /**
+      * @param rootKey
+      * @param rootLevel 根级别
+      * @param file      文件
+      */
+     private synchronized void setNewRootLevel(String rootKey, String rootLevel, String file) {
         List<String> linkedList = new LinkedList<>();
         String logLevel = "";
         int rootLineNum = -1;
@@ -316,7 +432,12 @@ public class LogSettingServiceImpl implements ILogSettingService {
         updateLogLevel2ExtPropConfig(rootKey, rootLevel, file, logLevel, linkedList, rootLineNum);
     }
 
-    private String getRootKey(String line, String rootKey) {
+     /**
+      * @param line
+      * @param rootKey 根键
+      * @return {@link String }
+      */
+     private String getRootKey(String line, String rootKey) {
         if (StringUtils.isEmpty(line)) {
             return rootKey;
         }
@@ -330,7 +451,17 @@ public class LogSettingServiceImpl implements ILogSettingService {
         return rootKey;
     }
 
-    private synchronized void updateLogLevel2ExtPropConfig(String rootKey, String rootLevel, String file, String logLevel, List<String> linkedList, int rootLineNum) {
+     /**
+      * 更新日志二级ext道具配置
+      *
+      * @param rootKey     根键
+      * @param rootLevel   根级别
+      * @param file        文件
+      * @param logLevel    日志级别
+      * @param linkedList  链表
+      * @param rootLineNum
+      */
+     private synchronized void updateLogLevel2ExtPropConfig(String rootKey, String rootLevel, String file, String logLevel, List<String> linkedList, int rootLineNum) {
         if (!rootLevel.equalsIgnoreCase(logLevel)) {
             if(rootLineNum >= 0 && rootLineNum < linkedList.size()){
                 linkedList.set(rootLineNum, rootKey.concat("=").concat(rootLevel.toUpperCase()));
@@ -356,7 +487,12 @@ public class LogSettingServiceImpl implements ILogSettingService {
         }
     }
 
-    private synchronized boolean setYamlRootLevel(String rootLevel, String file) {
+     /**
+      * @param rootLevel 根级别
+      * @param file      文件
+      * @return boolean
+      */
+     private synchronized boolean setYamlRootLevel(String rootLevel, String file) {
         Map<String, Object> map = null;
         DumperOptions options = new DumperOptions();
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
@@ -377,7 +513,16 @@ public class LogSettingServiceImpl implements ILogSettingService {
         return false;
     }
 
-    private synchronized boolean updateLogLevel2ExtYamlConfig(String rootLevel, String file, Map<String, Object> map, Yaml yaml) {
+     /**
+      * 更新日志二级extyaml配置
+      *
+      * @param rootLevel 根级别
+      * @param file      文件
+      * @param map
+      * @param yaml
+      * @return boolean
+      */
+     private synchronized boolean updateLogLevel2ExtYamlConfig(String rootLevel, String file, Map<String, Object> map, Yaml yaml) {
         String configLogLevel = setMapObjLogLevelAndGet(rootLevel, map);
         if (!rootLevel.equalsIgnoreCase(configLogLevel)) {
             try (FileWriter writer = new FileWriter(file, StandardCharsets.UTF_8)) {
@@ -394,7 +539,12 @@ public class LogSettingServiceImpl implements ILogSettingService {
         return false;
     }
 
-    private String setMapObjLogLevelAndGet(String rootLevel, Map<String, Object> map) {
+     /**
+      * @param rootLevel 根级别
+      * @param map
+      * @return {@link String }
+      */
+     private String setMapObjLogLevelAndGet(String rootLevel, Map<String, Object> map) {
         String logLevel = "";
         Map<String, Object> subMap = (Map<String, Object>) map.get(LOGGING);
         if (subMap != null && subMap.containsKey(LEVEL)) {

@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name SysNoticeController.java.
+ // File size 7809.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontadmin.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
@@ -36,24 +46,37 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description: 系统公告管理接口
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Api(value = "公告管理接口", tags = "AUTH-公告管理接口")
+ /**
+  * 系统通知控制器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Api(value = "公告管理接口", tags = "AUTH-公告管理接口")
 @Slf4j
 @RestController
 @RequestMapping("/sys/notice")
 public class SysNoticeController {
 
-    @Autowired
+     /**
+      * notice服务
+      */
+     @Autowired
     private SysNoticeService noticeService;
 
-    @Resource(name = "sysOptionServiceImpl")
+     /**
+      * 选项服务
+      */
+     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
-    @ApiOperation("查询单个公告")
+     /**
+      * 得到
+      *
+      * @param id id
+      * @return {@link ServiceResult }<{@link SysNoticeDto }>
+      */
+     @ApiOperation("查询单个公告")
     @ApiImplicitParam(name = "id", value = "公告ID", dataTypeClass = String.class)
     @GetMapping("/{id}")
     public ServiceResult<SysNoticeDto> get(@PathVariable String id) {
@@ -67,8 +90,13 @@ public class SysNoticeController {
         }
     }
 
-
-    @ApiOperation("阅读公告接口")
+     /**
+      * 读
+      *
+      * @param id id
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation("阅读公告接口")
     @ApiImplicitParam(name = "id", value = "公告ID", dataTypeClass = String.class)
     @PostMapping("/read/{id}")
     public ServiceResult read(@PathVariable String id) {
@@ -76,7 +104,14 @@ public class SysNoticeController {
         return ResultCommon.success();
     }
 
-    @ApiOperation("置顶公告接口")
+     /**
+      * 前
+      *
+      * @param id   id
+      * @param type 类型
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation("置顶公告接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "公告ID", dataTypeClass = String.class),
             @ApiImplicitParam(name = "type", value = "公告置顶操作类型 1:置顶(默认)  0:取消置顶", dataTypeClass = Integer.class)
@@ -87,8 +122,13 @@ public class SysNoticeController {
         return ResultCommon.success();
     }
 
-
-    @ApiOperation("不再推送公告消息")
+     /**
+      * unpush
+      *
+      * @param ids id
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation("不再推送公告消息")
     @ApiImplicitParam(name = "ids", value = "公告ID列表", dataTypeClass = String.class)
     @PostMapping("/unpush")
     public ServiceResult unpush(@RequestBody String[] ids) {
@@ -96,31 +136,45 @@ public class SysNoticeController {
         return ResultCommon.success();
     }
 
-
-    @ApiOperation("未读公告数量")
+     /**
+      * @return {@link ServiceResult }<{@link Integer }>
+      */
+     @ApiOperation("未读公告数量")
     @GetMapping("/unread_count")
     public ServiceResult<Integer> unReadCount() {
         int unreadCnt = noticeService.unReadCount();
         return ResultCommon.success(unreadCnt);
     }
 
-    @ApiOperation("分页查询所有公告")
+     /**
+      * @param pageRequest
+      * @return {@link ServiceResult }<{@link SysNoticeDto }>
+      */
+     @ApiOperation("分页查询所有公告")
     @GetMapping("/page")
     public ServiceResult<SysNoticeDto> page(SysNoticePageRequest pageRequest) {
         pageRequest.ensure();
         return noticeService.page(pageRequest);
     }
 
-
-    @ApiOperation("分页查询当前用户有权看到的公告（公告消息）")
+     /**
+      * @param pageRequest
+      * @return {@link ServiceResult }<{@link SysNoticeDto }>
+      */
+     @ApiOperation("分页查询当前用户有权看到的公告（公告消息）")
     @GetMapping("/currentuser/page")
     public ServiceResult<SysNoticeDto> currentUserPage(SysNoticePageRequest pageRequest) {
         pageRequest.ensure();
         return noticeService.getCurrentUserNoticeMessagesPage(pageRequest);
     }
 
-
-    @ApiOperation("新增公告")
+     /**
+      * 创建
+      *
+      * @param noticeReq
+      * @return {@link ServiceResult }<{@link SysNoticeModel }>
+      */
+     @ApiOperation("新增公告")
     @ApiImplicitParam(name = "noticeReq", value = "新增公告请求", dataTypeClass = SysNoticeRequest.class)
     @PostMapping
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
@@ -130,7 +184,14 @@ public class SysNoticeController {
         return ResultCommon.success(noticeModel);
     }
 
-    @ApiOperation("更新公告")
+     /**
+      * 修改
+      *
+      * @param id        id
+      * @param noticeReq
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation("更新公告")
     @ApiImplicitParam(name = "noticeReq", value = "更新公告请求", dataTypeClass = SysNoticeRequest.class)
     @PatchMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
@@ -141,8 +202,11 @@ public class SysNoticeController {
         return ServiceResult.builder().source(noticeModel).build().asResult();
     }
 
-
-    @ApiOperation("批量删除公告")
+     /**
+      * @param ids id
+      * @return {@link ServiceResult }<{@link Integer }>
+      */
+     @ApiOperation("批量删除公告")
     @ApiImplicitParam(name = "ids", value = "公告ID列表", dataTypeClass = String[].class)
     @DeleteMapping
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
@@ -152,7 +216,13 @@ public class SysNoticeController {
         return ResultCommon.success(result.getSource());
     }
 
-    @ApiOperation("删除指定id公告")
+     /**
+      * 删除
+      *
+      * @param id id
+      * @return {@link ServiceResult }<{@link Integer }>
+      */
+     @ApiOperation("删除指定id公告")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", paramType = "path", value = "数据id", dataTypeClass = String.class),
     })
@@ -165,7 +235,10 @@ public class SysNoticeController {
         return ResultCommon.success(result.getSource());
     }
 
-    @ApiOperation(value = "查询系统公告类型")
+     /**
+      * @return {@link ServiceResult }<{@link List }<{@link OptionBO }>>
+      */
+     @ApiOperation(value = "查询系统公告类型")
     @GetMapping("/types")
     public ServiceResult<List<OptionBO>> getTypes() {
         return optionService.getIntOptions(FrontAdminConstant.MP_COMMON_OPTION_TYPE_FRONT_ADMIN_NOTICE_TYPE);

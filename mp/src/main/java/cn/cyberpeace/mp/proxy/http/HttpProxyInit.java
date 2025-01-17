@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name HttpProxyInit.java.
+ // File size 1344.
+ // File create date Tue Sep 24 15:29:09 CST 2024.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.proxy.http;
 
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -11,13 +21,28 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
-@Component
+ /**
+  * HTTP代理初始化
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Component
 public class HttpProxyInit implements ServletContextInitializer {
 
-    @Autowired
+     /**
+      * 代理配置
+      */
+     @Autowired
     private ProxyConfig proxyConfig;
 
-    @Override
+     /**
+      * 在启动时
+      *
+      * @param servletContext servlet上下文
+      * @throws ServletException servlet异常
+      */
+     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
         var http = proxyConfig.getHttp();
         if (http == null || http.isEmpty()) {

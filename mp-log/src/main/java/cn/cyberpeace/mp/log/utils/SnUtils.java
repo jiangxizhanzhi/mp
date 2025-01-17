@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name SnUtils.java.
+ // File size 3583.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:16 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.log.utils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -11,20 +21,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-/**
- * 工具类
- * @author wanggang
- */
-@Slf4j
+ /**
+  * 工具类
+  *
+  * @author wanggang@date 2025/01/17
+  */
+ @Slf4j
 public class SnUtils {
 
-    /**
-     * 获取真实的远端IP
-     *
-     * @param request HttpServletRequest
-     * @return ip
-     */
-    public static String getRealRemoteIp(HttpServletRequest request) {
+     /**
+      * 获取真实的远端IP
+      *
+      * @param request HttpServletRequest
+      * @return ip
+      */
+     public static String getRealRemoteIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Real-IP");
         log.debug("X-Real-IP is {}", ip);
 
@@ -73,12 +84,13 @@ public class SnUtils {
         return ip;
     }
 
-    /**
-     * 获取请求Header信息
-     * @param request
-     * @return
-     */
-    public static Map<String, Object> getRequestHeaders(HttpServletRequest request) {
+     /**
+      * 获取请求Header信息
+      *
+      * @param request
+      * @return
+      */
+     public static Map<String, Object> getRequestHeaders(HttpServletRequest request) {
         Map<String, Object> headers = new HashMap<>();
         Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
@@ -89,20 +101,23 @@ public class SnUtils {
 
     }
 
-    /**
-     * 判断字符串是否有内容
-     *
-     * @param str 待判断的字符串
-     * @return 结果
-     */
-    public static boolean hasText(String str) {
+     /**
+      * 判断字符串是否有内容
+      *
+      * @param str 待判断的字符串
+      * @return 结果
+      */
+     public static boolean hasText(String str) {
         return StringUtils.isNotBlank(str);
     }
 
-    /**
-     * 打印异常堆栈
-     */
-    public static String getStackTrace(Throwable throwable) {
+     /**
+      * 打印异常堆栈
+      *
+      * @param throwable throwable
+      * @return {@link String }
+      */
+     public static String getStackTrace(Throwable throwable) {
         if (throwable == null) {
             return null;
         }
@@ -112,10 +127,13 @@ public class SnUtils {
         return sw.toString();
     }
 
-    /**
-     * 获取异常消息
-     */
-    public static String getExceptionMessage(Throwable throwable) {
+     /**
+      * 获取异常消息
+      *
+      * @param throwable throwable
+      * @return {@link String }
+      */
+     public static String getExceptionMessage(Throwable throwable) {
         String msg = throwable.getMessage();
         if (hasText(msg)) {
             return msg;

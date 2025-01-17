@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name VerifyCodeController.java.
+ // File size 2259.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:13 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
@@ -19,21 +29,32 @@ import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/12/27
- */
-@Api(value = "认证相关接口", tags = "AUTH-获取验证码接口")
+ /**
+  * 验证码控制器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Api(value = "认证相关接口", tags = "AUTH-获取验证码接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/kaptcha")
 public class VerifyCodeController {
 
-    @Resource
+     /**
+      * kaptcha生产商
+      */
+     @Resource
     private Producer kaptchaProducer;
 
-    @ApiOperation(value = "获取验证码接口", notes = "")
+     /**
+      * 生成验证代码
+      *
+      * @param request  请求
+      * @param response 响应
+      * @throws IOException ioexception
+      */
+     @ApiOperation(value = "获取验证码接口", notes = "")
     @GetMapping("")
     public void generateVerifyCode(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setDateHeader("Expires", 0);

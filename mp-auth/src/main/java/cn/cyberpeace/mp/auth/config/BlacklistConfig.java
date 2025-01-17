@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name BlacklistConfig.java.
+ // File size 2748.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:13 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.config;
 
 import cn.cyberpeace.mp.auth.model.BlacklistModel;
@@ -16,21 +26,35 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * @author litian
- * 接口访问黑名单配置
- * 应用启动后读取${home}/.mp/resources/blacklist.txt，作为黑名单，禁止用户访问
- */
-@Slf4j
+ /**
+  * 黑名单配置
+  *
+  * @author litian
+  * 接口访问黑名单配置
+  * 应用启动后读取${home}/.mp/resources/blacklist.txt，作为黑名单，禁止用户访问@date 2025/01/17
+  */
+ @Slf4j
 @Component
 public class BlacklistConfig implements ApplicationRunner {
-    @Resource
+     /**
+      * 应用程序配置
+      */
+     @Resource
     private BaseAppConfig appConfig;
 
-    @Resource
+     /**
+      * 黑名单模式
+      */
+     @Resource
     private BlacklistModel blacklistModel;
 
-    @Override
+     /**
+      * 运行
+      *
+      * @param args arg游戏
+      * @throws Exception 异常
+      */
+     @Override
     public void run(ApplicationArguments args) throws Exception {
         String dataPath = appConfig.getResourcesDir() + File.separator + "auth" + File.separator + "blacklist.txt";
         if (new File(dataPath).exists()) {

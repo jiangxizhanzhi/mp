@@ -7,6 +7,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 单IP响应
+ *
+ * @author 二竹
+ * @date 2025/01/17
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

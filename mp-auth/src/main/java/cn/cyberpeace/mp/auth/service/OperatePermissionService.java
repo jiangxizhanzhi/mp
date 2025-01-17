@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name OperatePermissionService.java.
+ // File size 5625.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:13 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
@@ -14,22 +24,23 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/5/13 11:57
- */
-@Slf4j
+ /**
+  * 操作许可服务
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 @Service
 public class OperatePermissionService {
 
-
-    /**
-     * 登录用户是否是普通管理员
-     * client认证的用户都有管理员权限
-     * @return
-     */
-    public boolean isLoginUserAdmin() {
+     /**
+      * 登录用户是否是普通管理员
+      * client认证的用户都有管理员权限
+      *
+      * @return
+      */
+     public boolean isLoginUserAdmin() {
         UserBo currentUserBo = UserUtils.getLoginUserDtoWithoutOrg();
         if (Objects.nonNull(currentUserBo)) {
             // 超级用户拥有管理员权限
@@ -47,12 +58,13 @@ public class OperatePermissionService {
         return false;
     }
 
-    /**
-     * 登录用户是否是超级用户
-     * client认证的用户都有超级用户权限
-     * @return
-     */
-    public boolean isLoginUserSuperUser() {
+     /**
+      * 登录用户是否是超级用户
+      * client认证的用户都有超级用户权限
+      *
+      * @return
+      */
+     public boolean isLoginUserSuperUser() {
         UserBo currentUserBo = UserUtils.getLoginUserDtoWithoutOrg();
         if (Objects.nonNull(currentUserBo)) {
             if (Objects.equals(1, currentUserBo.getIsSuperUser())) {
@@ -70,14 +82,15 @@ public class OperatePermissionService {
         return false;
     }
 
-    /**
-     * 针对查询用户操作，对操作对象的所有角色id集合检查权限
-     * 超级用户不受限制
-     * 管理员可以查询管理员和普通用户，但是不能修改
-     * 普通用户可以查普通用户
-     * @param targetRoleIds
-     */
-    public void checkByTargetRoleIdsForSearching(List<String> targetRoleIds) {
+     /**
+      * 针对查询用户操作，对操作对象的所有角色id集合检查权限
+      * 超级用户不受限制
+      * 管理员可以查询管理员和普通用户，但是不能修改
+      * 普通用户可以查普通用户
+      *
+      * @param targetRoleIds 目标角色id
+      */
+     public void checkByTargetRoleIdsForSearching(List<String> targetRoleIds) {
         if (CollectionUtil.isEmpty(targetRoleIds)) {
             return;
         }
@@ -102,14 +115,15 @@ public class OperatePermissionService {
         }
     }
 
-    /**
-     * 针对修改用户操作，对操作对象的所有角色id集合检查权限
-     * 超级用户不受限制
-     * 管理员可以修改普通用户，不能修改管理员
-     * 普通用户无修改权限
-     * @param targetRoleIds
-     */
-    public void checkByTargetRoleIds(List<String> targetRoleIds) {
+     /**
+      * 针对修改用户操作，对操作对象的所有角色id集合检查权限
+      * 超级用户不受限制
+      * 管理员可以修改普通用户，不能修改管理员
+      * 普通用户无修改权限
+      *
+      * @param targetRoleIds 目标角色id
+      */
+     public void checkByTargetRoleIds(List<String> targetRoleIds) {
         if (CollectionUtil.isEmpty(targetRoleIds)) {
             return;
         }
@@ -147,13 +161,13 @@ public class OperatePermissionService {
 
     }
 
-
-    /**
-     * 判断角色id集合中有无管理员
-     * @param roleIds
-     * @return
-     */
-    private boolean hasAdminRole(List<String> roleIds) {
+     /**
+      * 判断角色id集合中有无管理员
+      *
+      * @param roleIds
+      * @return
+      */
+     private boolean hasAdminRole(List<String> roleIds) {
         return roleIds.stream()
                 .filter(r -> Objects.equals(r.trim(), AuthConstant.ROLE_ADMIN_ID))
                 .findAny().isPresent();

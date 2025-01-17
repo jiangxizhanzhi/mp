@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name OperateLogSqlServiceImpl.java.
+ // File size 11618.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:16 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.log.service.impl;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -34,33 +44,58 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * @Description
- * @Author shgang
- * @Date 2022/9/13
- */
-@Slf4j
+ /**
+  * 操作日志sql服务impl
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 @Component
 @ConditionalOnProperty(prefix = "mp.log", name = "log-db", havingValue = LogConstant.LOG_DB_SQL)
 public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSqlModel, OperateLogSqlMapper, OperateLogSqlFields, QueryParams>
         implements OperateLogDbService {
-    private static final String DEFAULT_LANGUAGE_TAG = "zh-CN";
+     /**
+      * 默认语言标签
+      */
+     private static final String DEFAULT_LANGUAGE_TAG = "zh-CN";
 
-    @Autowired
+     /**
+      * 操作日志sql服务impl
+      *
+      * @param operateLogSqlMapper 操作日志SQL映射器
+      */
+     @Autowired
     public OperateLogSqlServiceImpl(OperateLogSqlMapper operateLogSqlMapper) {
         setModelMapper(operateLogSqlMapper);
     }
 
-    @Autowired
+     /**
+      * 消息来源
+      */
+     @Autowired
     private MessageSource messageSource;
 
-    @Override
+     /**
+      * 创建
+      *
+      * @param request 请求
+      * @param locale  语言环境
+      */
+     @Override
     public void create(OperationLogRequest request, Locale locale) {
         OperateLogSqlModel model = opRequest2Model(request, locale);
         this.create(model);
     }
 
-    @Override
+     /**
+      * 创建
+      *
+      * @param operateLog 操作日志
+      * @param request    请求
+      * @param locale     语言环境
+      */
+     @Override
     public void create(OperateLog operateLog, HttpServletRequest request, Locale locale) {
         Object userId = request.getAttribute(LogConstant.USER_ID_KEY);
         Object userName = request.getAttribute(LogConstant.USER_NAME_KEY);
@@ -117,7 +152,14 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
         this.create(model);
     }
 
-    @Override
+     /**
+      * 搜索
+      *
+      * @param request 请求
+      * @param locale  语言环境
+      * @return {@link ListObjServiceResult }<{@link OperationLogPageResponse }>
+      */
+     @Override
     public ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request, Locale locale) {
         HumanCondition humanCondition = new HumanCondition();
 
@@ -168,7 +210,14 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
         return new ListObjServiceResult(new ListObjResult<>(list, total).asResult()).asResult();
     }
 
-    private List<OperationLogPageResponse> opModel2Response(List<OperateLogSqlModel> models, Locale locale) {
+     /**
+      * Op模型2响应
+      *
+      * @param models 模型
+      * @param locale 语言环境
+      * @return {@link List }<{@link OperationLogPageResponse }>
+      */
+     private List<OperationLogPageResponse> opModel2Response(List<OperateLogSqlModel> models, Locale locale) {
         List<OperationLogPageResponse> list = new ArrayList<>(models.size());
         for (OperateLogSqlModel model : models) {
             OperationLogPageResponse response = JSON.parseObject(JSONObject.toJSON(model).toString(), OperationLogPageResponse.class);
@@ -187,7 +236,14 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
         return list;
     }
 
-    private OperateLogSqlModel opRequest2Model(OperationLogRequest request, Locale locale) {
+     /**
+      * Op请求2模型
+      *
+      * @param request 请求
+      * @param locale  语言环境
+      * @return {@link OperateLogSqlModel }
+      */
+     private OperateLogSqlModel opRequest2Model(OperationLogRequest request, Locale locale) {
         OperateLogSqlModel model = new OperateLogSqlModel();
         model.setFrom(request.getFrom());
         model.setLogType(request.getLogType());
@@ -225,7 +281,12 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
         return model;
     }
 
-    private void processDefaultContent(OperateLogSqlModel model) {
+     /**
+      * 处理默认内容
+      *
+      * @param model 模型
+      */
+     private void processDefaultContent(OperateLogSqlModel model) {
         if (StringUtils.isNotBlank(model.getContent())) {
             return;
         }
@@ -238,7 +299,15 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
         model.setContent(content);
     }
 
-    public String getlocalizedMessage(Locale locale, String msgKey, String... params) {
+     /**
+      * getlocalized消息
+      *
+      * @param locale 语言环境
+      * @param msgKey
+      * @param params
+      * @return {@link String }
+      */
+     public String getlocalizedMessage(Locale locale, String msgKey, String... params) {
         if (Objects.isNull(locale) || locale.toLanguageTag().equals("und")) {
             locale = Locale.forLanguageTag(DEFAULT_LANGUAGE_TAG);
         }

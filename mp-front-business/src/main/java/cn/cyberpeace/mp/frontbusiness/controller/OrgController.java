@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name OrgController.java.
+ // File size 2524.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
@@ -18,21 +28,31 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-/**
- * @Description: 组织管理接口(业务)
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Api(value = "组织管理接口(业务)", tags = "AUTH-组织管理接口(业务)")
+ /**
+  * org控制器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Api(value = "组织管理接口(业务)", tags = "AUTH-组织管理接口(业务)")
 @Slf4j
 @RestController("orgFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/orgs")
 public class OrgController {
 
-    @Autowired
+     /**
+      * org服务
+      */
+     @Autowired
     private OrgService orgService;
 
-    @ApiOperation(value = "根据parent组织获取下级组织", notes = "")
+     /**
+      * 由父母提供
+      *
+      * @param parentId 父id
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation(value = "根据parent组织获取下级组织", notes = "")
     @ApiImplicitParam(name = "parentId", value = "上级组织ID", dataTypeClass = String.class)
     @GetMapping("/byparent")
     public ServiceResult getByParent(@RequestParam String parentId) {
@@ -40,7 +60,13 @@ public class OrgController {
         return ServiceResult.builder().source(orgs).build().asResult();
     }
 
-    @ApiOperation(value = "根据组织路径查询", notes = "")
+     /**
+      * 按路径获取
+      *
+      * @param path 路径
+      * @return {@link ServiceResult }<{@link OrgBO }>
+      */
+     @ApiOperation(value = "根据组织路径查询", notes = "")
     @ApiImplicitParam(name = "path", value = "组织路径", dataTypeClass = String.class)
     @GetMapping("/bypath")
     public ServiceResult<OrgBO> getByPath(@RequestParam String path) {
@@ -48,7 +74,13 @@ public class OrgController {
         return ResultCommon.success(orgBO);
     }
 
-    @ApiOperation(value = "查询组织（树形结构，orgId为空就是查所有组织树形结构）", notes = "")
+     /**
+      * 获取组织树
+      *
+      * @param orgId org id
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation(value = "查询组织（树形结构，orgId为空就是查所有组织树形结构）", notes = "")
     @ApiImplicitParam(name = "orgId", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/tree")
     public ServiceResult getOrgTree(@RequestParam(required = false) String orgId) {

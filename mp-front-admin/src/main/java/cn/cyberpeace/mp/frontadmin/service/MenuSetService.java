@@ -1,3 +1,13 @@
+// Copyright (C) 2024
+// All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name MenuSetService.java.
+ // File size 15377.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontadmin.service;
 
 import cn.cyberpeace.mp.auth.bo.target.TargetActivBo;
@@ -46,49 +56,71 @@ import java.io.Reader;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Service
+ /**
+  * 菜单集服务
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Service
 @Slf4j
 public class MenuSetService {
 
-    @Resource
+     /**
+      * 菜单模板映射器
+      */
+     @Resource
     private MenuTemplateMapper menuTemplateMapper;
 
-    @Resource
+     /**
+      * 用户角色映射器
+      */
+     @Resource
     private UserRoleMapper userRoleMapper;
 
-    @Resource
+     /**
+      * 菜单模板角色映射器
+      */
+     @Resource
     private MenuTemplateRoleMapper menuTemplateRoleMapper;
 
-    @Resource
+     /**
+      * 目标服务
+      */
+     @Resource
     @Qualifier("targetServiceImpl")
     private TargetService targetService;
 
-    @Resource
+     /**
+      * 菜单额外信息服务
+      */
+     @Resource
     private MenuExtraInfoService menuExtraInfoService;
 
-    @Autowired
+     /**
+      * 激活服务
+      */
+     @Autowired
     private SysActivationService activationService;
 
-
-    /**
-     * 查看系统可见的所有菜单
-     *
-     * @return
-     */
-    public Set<String> getSystemAllVisibleMenuIds() {
+     /**
+      * 查看系统可见的所有菜单
+      *
+      * @return
+      */
+     public Set<String> getSystemAllVisibleMenuIds() {
         var activationResponse = activationService.status();
         List<String> allPositiveKeys = this.getPositiveKeys(activationResponse);
         return getVisibleMenuIdsBy(allPositiveKeys);
     }
 
-
-    /**
-     * 根据激活项查看可见的菜单
-     *
-     * @param positiveKeys
-     * @return
-     */
-    public Set<String> getVisibleMenuIdsBy(List<String> positiveKeys) {
+     /**
+      * 根据激活项查看可见的菜单
+      *
+      * @param positiveKeys
+      * @return
+      */
+     public Set<String> getVisibleMenuIdsBy(List<String> positiveKeys) {
         var activationResponse = activationService.status();
         String edition = String.valueOf(activationResponse.getEdition());
 
@@ -115,7 +147,13 @@ public class MenuSetService {
         return visibleMenuIds;
     }
 
-    public List<TargetBo> getSystemTreeMenusBy(Set<String> visibleMenuIds) {
+     /**
+      * 获取系统树菜单
+      *
+      * @param visibleMenuIds 可见菜单id
+      * @return {@link List }<{@link TargetBo }>
+      */
+     public List<TargetBo> getSystemTreeMenusBy(Set<String> visibleMenuIds) {
         var userMenus = listAll(AuthConstant.DEFAULT_TENANT, 1, "1");
         var userVisibleMenus = userMenus.stream().filter(m -> visibleMenuIds.contains(m.getIdentifier())).collect(Collectors.toList());
         List<TargetBo> tree = toTree(userVisibleMenus);
@@ -123,7 +161,13 @@ public class MenuSetService {
         return tree;
     }
 
-    public List<TargetBo> getCurrentUserTreeMenusBy(Set<String> visibleMenuIds) {
+     /**
+      * 获取当前用户树菜单
+      *
+      * @param visibleMenuIds 可见菜单id
+      * @return {@link List }<{@link TargetBo }>
+      */
+     public List<TargetBo> getCurrentUserTreeMenusBy(Set<String> visibleMenuIds) {
         var user = UserUtils.getLoginUser();
         var userMenus = this.getUserAllMenus(user.getId());
         var userVisibleMenus = userMenus.stream().filter(m -> visibleMenuIds.contains(m.getIdentifier())).collect(Collectors.toList());
@@ -132,23 +176,45 @@ public class MenuSetService {
         return tree;
     }
 
-    public MenuTemplate importDefaultTemplate(MultipartFile file) {
+     /**
+      * 导入默认模板
+      *
+      * @param file 文件
+      * @return {@link MenuTemplate }
+      */
+     public MenuTemplate importDefaultTemplate(MultipartFile file) {
         var content = readJsonStrFromMultipartFile(file);
         MenuTemplate menuTemplate = JsonCommon.snakeParse(content, new TypeReference<MenuTemplate>() {
         });
         return this.refreshTemplate(menuTemplate.getMenuTree(), "1");
     }
 
-    public MenuTemplate addTemplate(List<TargetBo> inputTreeTargets) {
+     /**
+      * @param inputTreeTargets
+      * @return {@link MenuTemplate }
+      */
+     public MenuTemplate addTemplate(List<TargetBo> inputTreeTargets) {
         return save2Template(inputTreeTargets, TextUtils.uuid());
     }
 
-    public MenuTemplate refreshTemplate(List<TargetBo> inputTreeTargets, String templateId) {
+     /**
+      * @param inputTreeTargets
+      * @param templateId
+      * @return {@link MenuTemplate }
+      */
+     public MenuTemplate refreshTemplate(List<TargetBo> inputTreeTargets, String templateId) {
         menuTemplateMapper.filterDelete(new HumanCondition().filterEqual(MenuTemplateModel::getTemplateId, templateId));
         return save2Template(inputTreeTargets, templateId);
     }
 
-    private MenuTemplate save2Template(List<TargetBo> inputTreeTargets, String templateId) {
+     /**
+      * save2模板
+      *
+      * @param inputTreeTargets 输入树目标
+      * @param templateId       模板id
+      * @return {@link MenuTemplate }
+      */
+     private MenuTemplate save2Template(List<TargetBo> inputTreeTargets, String templateId) {
         List<TargetBo> listTargets = new ArrayList<>();
         List<TargetBo> queue = new LinkedList<>();
         queue.addAll(inputTreeTargets);
@@ -187,7 +253,13 @@ public class MenuSetService {
         return menuTemplate;
     }
 
-    public void updateRoleMenuTemplate(String roleId, String templateId) {
+     /**
+      * 更新角色菜单模板
+      *
+      * @param roleId     角色id
+      * @param templateId 模板id
+      */
+     public void updateRoleMenuTemplate(String roleId, String templateId) {
         var existModel = menuTemplateRoleMapper.first(new HumanCondition().filterEqual(MenuTemplateRoleModel::getRoleId, roleId));
         if (existModel != null) {
             MenuTemplateRoleModel updateModel = new MenuTemplateRoleModel();
@@ -202,7 +274,11 @@ public class MenuSetService {
         }
     }
 
-    private List<MenuTemplateModel> getUserAllMenus(String userId) {
+     /**
+      * @param userId 用户id
+      * @return {@link List }<{@link MenuTemplateModel }>
+      */
+     private List<MenuTemplateModel> getUserAllMenus(String userId) {
         var roles = userRoleMapper.list(new HumanCondition().filterEqual(UserRoleModel::getUser, userId).orderBy(UserRoleModel::getPk));
         List<MenuTemplateModel> targets = null;
         if (CollectionUtils.isEmpty(roles)) {
@@ -218,7 +294,15 @@ public class MenuSetService {
         return targets;
     }
 
-    private List<MenuTemplateModel> listAll(String tenant, Integer type, String templateId) {
+     /**
+      * 列出所有
+      *
+      * @param tenant     租户
+      * @param type       类型
+      * @param templateId 模板id
+      * @return {@link List }<{@link MenuTemplateModel }>
+      */
+     private List<MenuTemplateModel> listAll(String tenant, Integer type, String templateId) {
         HumanCondition humanCondition = new HumanCondition();
         if (Objects.nonNull(type)) {
             humanCondition.filterEqual(MenuTemplateModel::getType, type);
@@ -232,7 +316,11 @@ public class MenuSetService {
         return targets;
     }
 
-    private List<TargetBo> toTree(List<MenuTemplateModel> targets) {
+     /**
+      * @param targets
+      * @return {@link List }<{@link TargetBo }>
+      */
+     private List<TargetBo> toTree(List<MenuTemplateModel> targets) {
         ParamCheck.notEmpty(targets, AuthBasei18nCode.TARGET_LIST);
         Map<String, List<TargetModel>> map = new HashMap<>();
         Map<String, TargetBo> mapTmp = new HashMap<>();
@@ -275,7 +363,9 @@ public class MenuSetService {
         return parentTargets;
     }
 
-    // 权限树排序
+     /**
+      * @param targets
+      */// 权限树排序
     private void sortTree(List<TargetBo> targets) {
         targets.forEach(t -> {
             if (CollectionUtil.isNotEmpty(t.getChildren())) {
@@ -286,7 +376,13 @@ public class MenuSetService {
         targets.sort(Comparator.comparingInt(BaseModel::getPk));
     }
 
-    @Data
+     /**
+      * 菜单模板
+      *
+      * @author 二竹
+      * @date 2025/01/17
+      */
+     @Data
     public static class MenuTemplate {
         @ApiModelProperty(value = "模板id")
         private String templateId;
@@ -306,7 +402,11 @@ public class MenuSetService {
         private String templateId;
     }
 
-    private List<String> getPositiveKeys(ActivationResponse activationResponse) {
+     /**
+      * @param activationResponse 激活反应
+      * @return {@link List }<{@link String }>
+      */
+     private List<String> getPositiveKeys(ActivationResponse activationResponse) {
         List<ActivationItem> items = activationResponse.getItems();
         List<String> positiveKeys = new ArrayList<>();
         positiveKeys.add(AdminConstant.MENU_NO_AUTH);
@@ -320,7 +420,12 @@ public class MenuSetService {
         return positiveKeys;
     }
 
-    private boolean checkEditionMatch(MenuExtraInfoModel mi, String edition) {
+     /**
+      * @param mi
+      * @param edition
+      * @return boolean
+      */
+     private boolean checkEditionMatch(MenuExtraInfoModel mi, String edition) {
         boolean editionMatch = false;
         if (StringUtils.isNotEmpty(mi.getEditions())) {
             List<String> editions = Arrays.asList(mi.getEditions().split(","));
@@ -329,7 +434,12 @@ public class MenuSetService {
         return editionMatch;
     }
 
-    private boolean checkItemMatch(MenuExtraInfoModel mi, List<String> positiveKeys) {
+     /**
+      * @param mi
+      * @param positiveKeys
+      * @return boolean
+      */
+     private boolean checkItemMatch(MenuExtraInfoModel mi, List<String> positiveKeys) {
         boolean itemMatch = false;
         if (StringUtils.isNotEmpty(mi.getActivKeys())) {
             List<String> activKeys = Arrays.asList(mi.getActivKeys().split(","));
@@ -355,7 +465,13 @@ public class MenuSetService {
         return itemMatch;
     }
 
-    private String readJsonStrFromMultipartFile(MultipartFile file) {
+     /**
+      * 从多部分文件中读取json STR
+      *
+      * @param file 文件
+      * @return {@link String }
+      */
+     private String readJsonStrFromMultipartFile(MultipartFile file) {
         String jsonStr = "";
         try (Reader reader = new InputStreamReader(file.getInputStream(), "utf-8")) {
             int ch = 0;

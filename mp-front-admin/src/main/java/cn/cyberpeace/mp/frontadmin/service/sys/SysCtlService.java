@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name SysCtlService.java.
+ // File size 5436.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontadmin.service.sys;
 
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -13,26 +23,34 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/2/14 18:07
- */
-@Slf4j
+ /**
+  * sys细胞毒性t淋巴细胞服务
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 @Service
 public class SysCtlService {
 
-    @Autowired
+     /**
+      * sys活性细胞毒性t淋巴细胞服务
+      */
+     @Autowired
     private SysActivCtlService sysActivCtlService;
 
-    private volatile boolean isSystemTimestampRollback = false;
+     /**
+      * 系统时间戳回滚
+      */
+     private volatile boolean isSystemTimestampRollback = false;
 
-    /**
-     * 定时任务调度，刷新系统时间，同时更新系统运行时长 sys_run_seconds
-     * 每30分钟执行一次
-     * @return
-     */
-    @Scheduled(initialDelay = 1, fixedRate = 30, timeUnit = TimeUnit.MINUTES)
+     /**
+      * 定时任务调度，刷新系统时间，同时更新系统运行时长 sys_run_seconds
+      * 每30分钟执行一次
+      *
+      * @return
+      */
+     @Scheduled(initialDelay = 1, fixedRate = 30, timeUnit = TimeUnit.MINUTES)
     public boolean updateSysTs() {
 
 //        if (isSystemTimestampRollback) {
@@ -82,21 +100,31 @@ public class SysCtlService {
         return false;
     }
 
-
-    public boolean isSystemTimestampRollback() {
+     /**
+      * 系统时间戳回滚
+      *
+      * @return boolean
+      */
+     public boolean isSystemTimestampRollback() {
         return isSystemTimestampRollback;
     }
 
-    public SysActivCtlModel getUnusedActivCtlModel() {
+     /**
+      * 获得未使用活性CTL模型
+      *
+      * @return {@link SysActivCtlModel }
+      */
+     public SysActivCtlModel getUnusedActivCtlModel() {
         SysActivCtlModel sysActivCtlModel = sysActivCtlService.selectUnused();
         return sysActivCtlModel;
     }
 
-    /**
-     * generate a default with current timestamp as system_ts and activ_ts;
-     * @return
-     */
-    synchronized public SysActivCtlModel generateOrGetUnusedActivCtlModel() {
+     /**
+      * generate a default with current timestamp as system_ts and activ_ts;
+      *
+      * @return
+      */
+     synchronized public SysActivCtlModel generateOrGetUnusedActivCtlModel() {
         SysActivCtlModel sysActivCtlModel = sysActivCtlService.selectUnused();
         if (Objects.isNull(sysActivCtlModel)) {
             sysActivCtlModel = new SysActivCtlModel();
@@ -121,12 +149,12 @@ public class SysCtlService {
         return sysActivCtlModel;
     }
 
-
-    /**
-     * generate a default with current timestamp as system_ts and activ_ts;
-     * @return
-     */
-    public SysActivCtlModel getValidCtlModel() {
+     /**
+      * generate a default with current timestamp as system_ts and activ_ts;
+      *
+      * @return
+      */
+     public SysActivCtlModel getValidCtlModel() {
         SysActivCtlModel sysActivCtlModel = sysActivCtlService.selectValid();
         return sysActivCtlModel;
     }

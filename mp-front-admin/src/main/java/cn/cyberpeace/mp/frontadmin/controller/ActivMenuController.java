@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name ActivMenuController.java.
+ // File size 4554.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontadmin.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
@@ -28,24 +38,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/12/16 19:02
- */
-@Api(value = "SYS-ADMIN", tags = "ADMIN")
+ /**
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Api(value = "SYS-ADMIN", tags = "ADMIN")
 @Slf4j
 @RestController
 @RequestMapping("/sys/admin")
 public class ActivMenuController {
 
-    @Autowired
+     /**
+      *
+      */
+     @Autowired
     private ActivMenuService activMenuService;
 
-    @Autowired
+     /**
+      *
+      */
+     @Autowired
     private MenuSetService menuSetService;
 
-    @PostMapping("/menu/reimport")
+     /**
+      * @param file
+      * @return {@link ServiceResult }
+      */
+     @PostMapping("/menu/reimport")
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "更新菜单列表", target = OpTargetEnums.MENU)
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult activMenu(MultipartFile file) {
@@ -53,7 +72,11 @@ public class ActivMenuController {
         return ResultCommon.success();
     }
 
-    @ApiOperation(value = "根据激活配置查询所有菜单")
+     /**
+      * @param actives
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation(value = "根据激活配置查询所有菜单")
     @GetMapping("/menu/tree")
     public ServiceResult getTree(@RequestParam(required = false) List<String> actives) {
         Set<String> visibleMenuIds = null;
@@ -67,14 +90,22 @@ public class ActivMenuController {
         return new ServiceResult(tree).asResult();
     }
 
-    @ApiOperation(value = "刷新默认菜单模板")
+     /**
+      * @param template
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation(value = "刷新默认菜单模板")
     @PostMapping("/menu/reset_default_menu_template")
     public ServiceResult refreshDefaultMenuTemplate(@RequestBody MenuSetService.MenuTemplate template) {
         var result = menuSetService.refreshTemplate(template.getMenuTree(), "1");
         return new ServiceResult(result).asResult();
     }
 
-    @ApiOperation(value = "新增一套模板,可以同时关联到某个角色")
+     /**
+      * @param template
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation(value = "新增一套模板,可以同时关联到某个角色")
     @PostMapping("/menu/add_template")
     public ServiceResult addMenuTemplate(@RequestBody MenuSetService.MenuTemplate template) {
         MenuSetService.MenuTemplate result;
@@ -87,14 +118,22 @@ public class ActivMenuController {
         return new ServiceResult(result).asResult();
     }
 
-    @ApiOperation(value = "导入并覆盖默认菜单模板")
+     /**
+      * @param file
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation(value = "导入并覆盖默认菜单模板")
     @PostMapping("/menu/import_template")
     public ServiceResult importMenuTemplate(MultipartFile file) {
         var result = menuSetService.importDefaultTemplate(file);
         return new ServiceResult(result).asResult();
     }
 
-    @ApiOperation(value = "修改角色和模板的关联关系")
+     /**
+      * @param roleTemplate
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation(value = "修改角色和模板的关联关系")
     @PostMapping("/menu/update_role_template")
     public ServiceResult updateRoleMenuTemplate(@RequestBody MenuSetService.RoleTemplate roleTemplate) {
         menuSetService.updateRoleMenuTemplate(roleTemplate.getRoleId(), roleTemplate.getTemplateId());

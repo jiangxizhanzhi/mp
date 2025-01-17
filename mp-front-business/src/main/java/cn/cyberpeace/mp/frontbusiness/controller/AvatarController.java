@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name AvatarController.java.
+ // File size 1707.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
@@ -16,21 +26,31 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-/**
- * @Description: 头像管理接口
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Api(value = "头像管理接口(业务)", tags = "AUTH-头像管理接口(业务)")
+ /**
+  * 《阿凡达》控制器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Api(value = "头像管理接口(业务)", tags = "AUTH-头像管理接口(业务)")
 @Slf4j
 @RestController("avatarFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/avatar")
 public class AvatarController {
 
-    @Autowired
+     /**
+      * 《阿凡达》服务
+      */
+     @Autowired
     private AvatarService avatarService;
 
-    @ApiOperation(value = "上传头像，返回url", notes = "")
+     /**
+      * 上传
+      *
+      * @param file 文件
+      * @return {@link ServiceResult }<{@link String }>
+      */
+     @ApiOperation(value = "上传头像，返回url", notes = "")
     @ApiImplicitParam(name = "file", value = "图片文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/upload")
     @ResponseBody

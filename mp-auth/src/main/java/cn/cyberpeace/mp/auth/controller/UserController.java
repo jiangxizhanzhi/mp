@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name UserController.java.
+ // File size 7190.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:13 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
@@ -37,21 +47,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description: 用户管理接口
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Api(value = "用户管理接口", tags = "AUTH-用户管理接口")
+ /**
+  * 用户控制器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Api(value = "用户管理接口", tags = "AUTH-用户管理接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/users")
 public class UserController {
 
-    @Autowired
+     /**
+      * 用户服务
+      */
+     @Autowired
     private UserService userService;
 
-    @ApiOperation("删除指定id用户")
+     /**
+      * 删除
+      *
+      * @param id id
+      * @return {@link ServiceResult }<{@link Boolean }>
+      */
+     @ApiOperation("删除指定id用户")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
     })
@@ -62,12 +82,13 @@ public class UserController {
         return userService.delete(id);
     }
 
-    /**
-     * 批量删除
-     * @param ids 数据id集
-     * @return 成功数量
-     */
-    @ApiOperation("批量删除用户")
+     /**
+      * 批量删除
+      *
+      * @param ids 数据id集
+      * @return 成功数量
+      */
+     @ApiOperation("批量删除用户")
     @ApiImplicitParam(name="ids", value="用户id列表",dataTypeClass = String[].class)
     @DeleteMapping("/bulk_delete")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
@@ -76,8 +97,14 @@ public class UserController {
         return userService.bulkDelete(ids).asResult();
     }
 
-
-    @ApiOperation(value = "查询指定id数据 附带组织，角色信息", notes = "")
+     /**
+      * 得到
+      *
+      * @param id     id
+      * @param fields 字段
+      * @return {@link ObjServiceResult }<{@link UserBo }>
+      */
+     @ApiOperation(value = "查询指定id数据 附带组织，角色信息", notes = "")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
@@ -88,8 +115,13 @@ public class UserController {
         return ResultUtils.obj2ObjServiceResult(userBo);
     }
 
-
-    @ApiOperation(value = "查询指定id数据 返回有限数据，无登录用户权限拦截", notes = "")
+     /**
+      * 得到
+      *
+      * @param id id
+      * @return {@link ObjServiceResult }<{@link UserSimpleBo }>
+      */
+     @ApiOperation(value = "查询指定id数据 返回有限数据，无登录用户权限拦截", notes = "")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
     })
@@ -105,7 +137,13 @@ public class UserController {
         return new ObjServiceResult(null).asResult();
     }
 
-    @ApiOperation(value = "查询指定ids列表 返回有限数据，无登录用户权限拦截", notes = "")
+     /**
+      * 得到
+      *
+      * @param ids id
+      * @return {@link ServiceResult }<{@link List }<{@link UserSimpleBo }>>
+      */
+     @ApiOperation(value = "查询指定ids列表 返回有限数据，无登录用户权限拦截", notes = "")
     @ApiImplicitParams({
             @ApiImplicitParam(name="ids", paramType="body", value="数据ids",dataTypeClass = List.class)
     })
@@ -123,16 +161,25 @@ public class UserController {
         return ResultCommon.success(userSimpleBos);
     }
 
-
-    @ApiOperation(value = "查询当前登录用户信息 附带组织，角色信息", notes = "")
+     /**
+      * 获取当前用户
+      *
+      * @return {@link ServiceResult }<{@link UserBo }>
+      */
+     @ApiOperation(value = "查询当前登录用户信息 附带组织，角色信息", notes = "")
     @GetMapping("/current")
     public ServiceResult<UserBo> getCurrentUser() {
         UserBo userBo = userService.getCurrentUserDto();
         return ResultCommon.success(userBo);
     }
 
-
-    @ApiOperation(value = "创建用户，同时完成组织，角色绑定关系", notes = "")
+     /**
+      * 添加
+      *
+      * @param createRequest 创建请求
+      * @return {@link ServiceResult }<{@link UserModel }>
+      */
+     @ApiOperation(value = "创建用户，同时完成组织，角色绑定关系", notes = "")
     @ApiImplicitParam(name = "createRequest", value = "请求", dataTypeClass = UserRequest.class)
     @PostMapping("/add")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
@@ -143,7 +190,13 @@ public class UserController {
         return ResultCommon.success(userModel);
     }
 
-    @ApiOperation(value = "修改用户，同时完成组织，角色绑定关系", notes = "")
+     /**
+      * 修改
+      *
+      * @param modifyRequest
+      * @return {@link ServiceResult }<{@link UserModel }>
+      */
+     @ApiOperation(value = "修改用户，同时完成组织，角色绑定关系", notes = "")
     @ApiImplicitParam(name = "modifyRequest", value = "修改请求", dataTypeClass = UserRequest.class)
     @PostMapping("/modify")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更新用户", target = OpTargetEnums.USER)

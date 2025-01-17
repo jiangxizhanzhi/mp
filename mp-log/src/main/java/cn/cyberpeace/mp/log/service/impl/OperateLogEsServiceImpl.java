@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name OperateLogEsServiceImpl.java.
+ // File size 10041.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:16 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.log.service.impl;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -41,39 +51,62 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * @author wanggang
- */
-@Slf4j
+ /**
+  * 操作日志西文服务impl
+  *
+  * @author wanggang@date 2025/01/17
+  */
+ @Slf4j
 @Component
 @ConditionalOnProperty(prefix = "mp.log", name = "log-db", havingValue = LogConstant.LOG_DB_ES)
 public class OperateLogEsServiceImpl implements OperateLogDbService {
 
-    private static final String DEFAULT_LANGUAGE_TAG = "zh-CN";
+     /**
+      * 默认语言标签
+      */
+     private static final String DEFAULT_LANGUAGE_TAG = "zh-CN";
 
-    private Map<SiteTypeEnums, MpOperateLogService> operateLogServiceMap = new ConcurrentHashMap();
+     /**
+      * 操作日志服务地图
+      */
+     private Map<SiteTypeEnums, MpOperateLogService> operateLogServiceMap = new ConcurrentHashMap();
 
-    private List<MpOperateLogService> mpOperateLogServiceList;
+     /**
+      * 国会议员操作日志服务列表
+      */
+     private List<MpOperateLogService> mpOperateLogServiceList;
 
-    @Autowired
+     /**
+      * 消息来源
+      */
+     @Autowired
     private MessageSource messageSource;
 
-    @PostConstruct
+     /**
+      * 初始化
+      */
+     @PostConstruct
     public void init(){
         operateLogServiceMap = mpOperateLogServiceList.stream().collect(Collectors.toMap(MpOperateLogService::siteType, Function.identity()));
     }
 
-    @Autowired
+     /**
+      * 操作日志西文服务impl
+      *
+      * @param mpOperateLogServiceList 国会议员操作日志服务列表
+      */
+     @Autowired
     public OperateLogEsServiceImpl(List<MpOperateLogService> mpOperateLogServiceList) {
         this.mpOperateLogServiceList = mpOperateLogServiceList;
     }
 
-    /**
-     * 创建日志
-     * @param request
-     * @return
-     */
-    @Async
+     /**
+      * 创建日志
+      *
+      * @param request
+      * @param locale  语言环境
+      */
+     @Async
     public void create(OperationLogRequest request, Locale locale){
         OperationLogModel model = new OperationLogModel();
         model.setFrom(request.getFrom());
@@ -110,12 +143,14 @@ public class OperateLogEsServiceImpl implements OperateLogDbService {
         this.create(model);
     }
 
-    /**
-     * 创建日志
-     * @param operateLog
-     * @return
-     */
-    @Async
+     /**
+      * 创建日志
+      *
+      * @param operateLog
+      * @param request    请求
+      * @param locale     语言环境
+      */
+     @Async
     public void create(OperateLog operateLog, HttpServletRequest request, Locale locale) {
         Object userId = request.getAttribute(LogConstant.USER_ID_KEY);
         Object userName = request.getAttribute(LogConstant.USER_NAME_KEY);
@@ -167,25 +202,34 @@ public class OperateLogEsServiceImpl implements OperateLogDbService {
         this.create(model);
     }
 
-
-    /**
-     * 创建日志
-     * @param operationLogModel
-     */
-    private IndexResponse create(OperationLogModel operationLogModel){
+     /**
+      * 创建日志
+      *
+      * @param operationLogModel 操作日志模型
+      * @return {@link IndexResponse }
+      */
+     private IndexResponse create(OperationLogModel operationLogModel){
        return operateLogServiceMap.get(operationLogModel.getSiteType()).create(operationLogModel);
     }
 
-    /**
-     * 查询日志
-     * @param request
-     * @return
-     */
-    public SearchResponse search(OperationLogPageRequest request){
+     /**
+      * 查询日志
+      *
+      * @param request
+      * @return
+      */
+     public SearchResponse search(OperationLogPageRequest request){
        return operateLogServiceMap.get(request.getSiteType()).search(request);
     }
 
-    public ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request, Locale locale){
+     /**
+      * 搜索
+      *
+      * @param request 请求
+      * @param locale  语言环境
+      * @return {@link ListObjServiceResult }<{@link OperationLogPageResponse }>
+      */
+     public ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request, Locale locale){
         SearchResponse searchResponse = this.search(request);
         if (Objects.isNull(searchResponse)) {
             return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
@@ -209,7 +253,12 @@ public class OperateLogEsServiceImpl implements OperateLogDbService {
         return new ListObjServiceResult(new ListObjResult<>(list, Integer.valueOf(String.valueOf(searchHits.getTotalHits().value)))).asResult();
     }
 
-    private void processDefaultContent(OperationLogModel model) {
+     /**
+      * 处理默认内容
+      *
+      * @param model 模型
+      */
+     private void processDefaultContent(OperationLogModel model) {
         if (StringUtils.isNotBlank(model.getContent())) {
             return;
         }
@@ -223,8 +272,13 @@ public class OperateLogEsServiceImpl implements OperateLogDbService {
         model.setContent(content);
     }
 
-
-    public String getlocalizedMessage(Locale locale, String msgKey, String... params) {
+     /**
+      * @param locale 语言环境
+      * @param msgKey
+      * @param params
+      * @return {@link String }
+      */
+     public String getlocalizedMessage(Locale locale, String msgKey, String... params) {
         if (Objects.isNull(locale) || locale.toLanguageTag().equals("und")) {
             locale = Locale.forLanguageTag(DEFAULT_LANGUAGE_TAG);
         }

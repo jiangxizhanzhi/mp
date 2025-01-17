@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name AuthUserDetailsService.java.
+ // File size 4132.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.extensions.security.service;
 
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
@@ -23,32 +33,57 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Slf4j
+ /**
+  * 身份验证用户细节服务
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 @Service
 @CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL)
 public class AuthUserDetailsService implements UserDetailsService {
 
-    public static final String CACHE_USER_AUTHORITIES = "USER_AUTHORITIES_CACHE";
+     /**
+      *
+      */
+     public static final String CACHE_USER_AUTHORITIES = "USER_AUTHORITIES_CACHE";
 
-    private final UserService userService;
+     /**
+      * 用户服务
+      */
+     private final UserService userService;
 
-    @Autowired
+     /**
+      * 用户role服务
+      */
+     @Autowired
     private UserRoleService userRoleService;
 
-    @Autowired
+     /**
+      * 用户permission服务
+      */
+     @Autowired
     private UserPermissionService userPermissionService;
 
-    @Autowired
+     /**
+      * 身份验证用户细节服务
+      *
+      * @param userService 用户服务
+      */
+     @Autowired
     public AuthUserDetailsService(UserService userService) {
         this.userService = userService;
     }
 
-    @Override
+     /**
+      * 按用户名加载用户
+      *
+      * @param username 用户名
+      * @return {@link UserDetails }
+      * @throws UsernameNotFoundException 用户名未发现异常
+      */
+     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         if (StringUtils.isEmpty(username)) {
             throw new UsernameNotFoundException(StringUtils.EMPTY);
@@ -70,8 +105,13 @@ public class AuthUserDetailsService implements UserDetailsService {
         return new AuthUserDetails(user, authoritySet);
     }
 
-
-    public UserDetails loadUserByMobile(String mobile) {
+     /**
+      * 按移动设备加载用户
+      *
+      * @param mobile 移动
+      * @return {@link UserDetails }
+      */
+     public UserDetails loadUserByMobile(String mobile) {
         if (StringUtils.isEmpty(mobile)) {
             throw new UsernameNotFoundException(StringUtils.EMPTY);
         }
@@ -92,12 +132,13 @@ public class AuthUserDetailsService implements UserDetailsService {
         return new AuthUserDetails(user, authoritySet);
     }
 
-
-    /**
-     * @param userId
-     * @return
-     */
-    @Cacheable(value = CACHE_USER_AUTHORITIES)
+     /**
+      * 负载当局
+      *
+      * @param userId
+      * @return
+      */
+     @Cacheable(value = CACHE_USER_AUTHORITIES)
     public Set<GrantedAuthority> loadAuthorities(String userId) {
         Set<GrantedAuthority> authoritySet = new HashSet<>();
         if (StringUtils.isBlank(userId)) {

@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name ActivMenuService.java.
+ // File size 18907.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontadmin.service.sys.activmenu;
 
 import cn.cyberpeace.mp.auth.bo.target.TargetActivBo;
@@ -39,48 +49,69 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Service
+ /**
+  * 活性菜单服务
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Service
 @Slf4j
 public class ActivMenuService {
 
-    @Autowired
+     /**
+      * reimportsupport服务
+      */
+     @Autowired
     private MenuReImportSupportService reImportSupportService;
 
-    @Autowired
+     /**
+      * 激活服务
+      */
+     @Autowired
     private SysActivationService activationService;
 
-    @Autowired
+     /**
+      * target服务
+      */
+     @Autowired
     @Qualifier("targetServiceImpl")
     private TargetService targetService;
 
-    @Autowired
+     /**
+      * 菜单extrainfo服务
+      */
+     @Autowired
     private MenuExtraInfoService menuExtraInfoService;
 
-    @Autowired
+     /**
+      * 用户缓存服务
+      */
+     @Autowired
     private UserCacheService userCacheService;
 
-    @Resource(name = "sysOptionServiceImpl")
+     /**
+      * 选项服务
+      */
+     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
-    @Autowired
+     /**
+      *
+      */
+     @Autowired
     private MenuTemplateMapper menuTemplateMapper;
 
-
-    /**
-     * 适用场景：重新导入menu.json
-     * 1. 清空原有menu, keymenu, editionmenu表。
-     * 2. 如果导入menu的时候，系统已经激活，则需要根据查询的激活项目，激活版本，再结合menu自身的active[],edition[]属性，决定visible，再重新导入所有menu。
-     * 3. 如果导入menu的时候，系统还未激活，则所有visible默认为1
-     *
-     * @param jsonFile
-     * @return
-     */
-    public boolean reImportMenus(MultipartFile jsonFile) {
+     /**
+      * 适用场景：重新导入menu.json
+      * 1. 清空原有menu, keymenu, editionmenu表。
+      * 2. 如果导入menu的时候，系统已经激活，则需要根据查询的激活项目，激活版本，再结合menu自身的active[],edition[]属性，决定visible，再重新导入所有menu。
+      * 3. 如果导入menu的时候，系统还未激活，则所有visible默认为1
+      *
+      * @param jsonFile
+      * @return
+      */
+     public boolean reImportMenus(MultipartFile jsonFile) {
         log.info("reImportMenus...");
         String s = readJsonStrFromMultipartFile(jsonFile);
         List<ActivMenuDTO> menus = JSON.parseArray(s, ActivMenuDTO.class);
@@ -121,8 +152,12 @@ public class ActivMenuService {
         return success;
     }
 
-
-    private void check(List<TargetModel> targetModels) {
+     /**
+      * 检查
+      *
+      * @param targetModels 目标模型
+      */
+     private void check(List<TargetModel> targetModels) {
         var notEqualList = targetModels.stream().filter(t -> !Objects.equals(t.getId(), t.getIdentifier())).collect(Collectors.toList());
         if (CollectionUtil.isNotEmpty(notEqualList)) {
             log.error("json file error! value not equals with authority:{}", notEqualList.get(0).getId());
@@ -138,14 +173,14 @@ public class ActivMenuService {
         }
     }
 
-
-    /**
-     * 适用场景：系统中的总menu不变，需要根据重新激活的激活项，激活版本，重新设置所有菜单的visible属性，这一步需要用到menu_extra_info表
-     * 重新设置所有menu的visible属性
-     *
-     * @return
-     */
-    public boolean resetMenusVisibility(ActivationResponse content) {
+     /**
+      * 适用场景：系统中的总menu不变，需要根据重新激活的激活项，激活版本，重新设置所有菜单的visible属性，这一步需要用到menu_extra_info表
+      * 重新设置所有menu的visible属性
+      *
+      * @param content 内容
+      * @return
+      */
+     public boolean resetMenusVisibility(ActivationResponse content) {
         if (Objects.isNull(content)) {
             return false;
         }
@@ -163,14 +198,12 @@ public class ActivMenuService {
         return success;
     }
 
-
-    /**
-     *
-     * 重新设置所有option的visible属性
-     *
-     * @return
-     */
-    public void resetOptionsVisibility(ActivationResponse content) {
+     /**
+      * 重新设置所有option的visible属性
+      *
+      * @param content 内容
+      */
+     public void resetOptionsVisibility(ActivationResponse content) {
         if (Objects.isNull(content)) {
             return;
         }
@@ -183,12 +216,12 @@ public class ActivMenuService {
         doResetOptionsVisibility(activeItemMap);
     }
 
-
-    /**
-     * 重置Option的meta属性，添加修改visible属性
-     * @param activeItemMap
-     */
-    public void doResetOptionsVisibility(Map<String, String> activeItemMap) {
+     /**
+      * 重置Option的meta属性，添加修改visible属性
+      *
+      * @param activeItemMap 活动项目映射
+      */
+     public void doResetOptionsVisibility(Map<String, String> activeItemMap) {
         if (CollectionUtil.isEmpty(activeItemMap)) {
             return;
         }
@@ -242,14 +275,14 @@ public class ActivMenuService {
         }
     }
 
-    /**
-     * 转换 ActivMenuDTO -> TargetActivDto
-     *
-     * @param menuDTO
-     * @param parentId
-     * @return
-     */
-    private TargetModel activMenuDto2TargetActivDto(ActivMenuDTO menuDTO, String parentId) {
+     /**
+      * 转换 ActivMenuDTO -> TargetActivDto
+      *
+      * @param menuDTO
+      * @param parentId
+      * @return
+      */
+     private TargetModel activMenuDto2TargetActivDto(ActivMenuDTO menuDTO, String parentId) {
         TargetModel target = new TargetModel();
         target.setId(menuDTO.getId());
         target.setType(TargetModel.TYPE_MENU);
@@ -260,7 +293,13 @@ public class ActivMenuService {
         return target;
     }
 
-    private MenuTemplateModel activMenuDto2TemplateModel(ActivMenuDTO menuDTO, String parentId, Map<String, String> enNameMap) {
+     /**
+      * @param menuDTO
+      * @param parentId
+      * @param enNameMap
+      * @return {@link MenuTemplateModel }
+      */
+     private MenuTemplateModel activMenuDto2TemplateModel(ActivMenuDTO menuDTO, String parentId, Map<String, String> enNameMap) {
         MenuTemplateModel menuTemplateModel = new MenuTemplateModel();
         menuTemplateModel.setTemplateId("1");
         menuTemplateModel.setMenuId(menuDTO.getId());
@@ -273,7 +312,12 @@ public class ActivMenuService {
         return menuTemplateModel;
     }
 
-    private MenuExtraInfoModel activMenuDto2MenuExtraInfo(ActivMenuDTO menuDTO, String parentId) {
+     /**
+      * @param menuDTO
+      * @param parentId
+      * @return {@link MenuExtraInfoModel }
+      */
+     private MenuExtraInfoModel activMenuDto2MenuExtraInfo(ActivMenuDTO menuDTO, String parentId) {
         MenuExtraInfoModel menuExtraInfo = new MenuExtraInfoModel();
         menuExtraInfo.setMenu(menuDTO.getId());
 
@@ -288,10 +332,15 @@ public class ActivMenuService {
         return menuExtraInfo;
     }
 
-
-
-
-    private void recursion(List<TargetModel> targets, List<MenuTemplateModel> menuTemplateModels, List<MenuExtraInfoModel> menuExtraInfos, ActivMenuDTO menu, String parentId, Map<String, String> enNameMap) {
+     /**
+      * @param targets
+      * @param menuTemplateModels
+      * @param menuExtraInfos
+      * @param menu               菜单
+      * @param parentId           父id
+      * @param enNameMap          全名地图
+      */
+     private void recursion(List<TargetModel> targets, List<MenuTemplateModel> menuTemplateModels, List<MenuExtraInfoModel> menuExtraInfos, ActivMenuDTO menu, String parentId, Map<String, String> enNameMap) {
         List<ActivMenuDTO> children = menu.getChildren();
         if (CollectionUtil.isNotEmpty(children)) {
             for (ActivMenuDTO child : children) {
@@ -307,8 +356,13 @@ public class ActivMenuService {
         menuExtraInfos.add(menuExtraInfo);
     }
 
-
-    private String readJsonStrFromPath(String filePath) {
+     /**
+      * 从path读取json STR
+      *
+      * @param filePath 文件路径
+      * @return {@link String }
+      */
+     private String readJsonStrFromPath(String filePath) {
 //        filePath = "/Users/sternberg/work/saining/all_permissions_json_activ.json";
         String jsonStr = "";
         try {
@@ -329,7 +383,13 @@ public class ActivMenuService {
         }
     }
 
-    private String readJsonStrFromMultipartFile(MultipartFile file) {
+     /**
+      * 从多部分文件中读取json STR
+      *
+      * @param file 文件
+      * @return {@link String }
+      */
+     private String readJsonStrFromMultipartFile(MultipartFile file) {
         String jsonStr = "";
         try (Reader reader = new InputStreamReader(file.getInputStream(), "utf-8")) {
             int ch = 0;
@@ -346,7 +406,11 @@ public class ActivMenuService {
         }
     }
 
-    private List<TargetModel> targetActivDtos2TargetModels(List<TargetActivBo> activDtos) {
+     /**
+      * @param activDtos
+      * @return {@link List }<{@link TargetModel }>
+      */
+     private List<TargetModel> targetActivDtos2TargetModels(List<TargetActivBo> activDtos) {
         List<TargetModel> targetModels =
                 activDtos.stream().map(a -> {
                     TargetModel model = new TargetModel();
@@ -357,13 +421,17 @@ public class ActivMenuService {
         return targetModels;
     }
 
-    /**
-     * 根据系统激活状态更改menu visible属性值
-     * <p>
-     * 逻辑：
-     * 如果一个menu edition[]跟激活状态的edition对应得上，并且active[]内有激活项中value为1的key，或者no_auth的，则最终的visible=1
-     */
-    private void processMenuVisibility(List<TargetModel> targetModels, List<MenuExtraInfoModel> menuExtraInfos, ActivationResponse activationResponse) {
+     /**
+      * 根据系统激活状态更改menu visible属性值
+      * <p>
+      * 逻辑：
+      * 如果一个menu edition[]跟激活状态的edition对应得上，并且active[]内有激活项中value为1的key，或者no_auth的，则最终的visible=1
+      *
+      * @param targetModels       目标模型
+      * @param menuExtraInfos
+      * @param activationResponse 激活反应
+      */
+     private void processMenuVisibility(List<TargetModel> targetModels, List<MenuExtraInfoModel> menuExtraInfos, ActivationResponse activationResponse) {
         List<ActivationItem> items = activationResponse.getItems();
 
         String edition = String.valueOf(activationResponse.getEdition());
@@ -442,8 +510,10 @@ public class ActivMenuService {
 
     }
 
-
-    private void evictCache() {
+     /**
+      *
+      */
+     private void evictCache() {
         userCacheService.evictAllUserCache();
         userCacheService.evictAllTargetsCache();
     }

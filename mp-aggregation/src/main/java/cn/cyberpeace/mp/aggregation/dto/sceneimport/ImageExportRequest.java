@@ -5,9 +5,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * @Description
- * @Author zhanglin
- * @Date 2022/09/19
+ * 图像导出请求
+ *
+ * @author 二竹
+ * @date 2025/01/17
  */
 @Getter
 @Setter

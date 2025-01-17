@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name UserOnlineRecordTask.java.
+ // File size 4714.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.service.task;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -15,21 +25,33 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * @Description: 创建或者更新用户在线记录
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Slf4j
+ /**
+  * 用户在线记录任务
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 public class UserOnlineRecordTask implements Runnable {
 
-    private Map<UserModel, LocalDateTime> userModel2LastTsMap;
+     /**
+      * 用户model2最后一个映射
+      */
+     private Map<UserModel, LocalDateTime> userModel2LastTsMap;
 
-    public UserOnlineRecordTask(Map<UserModel, LocalDateTime> userModel2LastTsMap) {
+     /**
+      * 用户在线记录任务
+      *
+      * @param userModel2LastTsMap 用户model2最后一个映射
+      */
+     public UserOnlineRecordTask(Map<UserModel, LocalDateTime> userModel2LastTsMap) {
         this.userModel2LastTsMap = userModel2LastTsMap;
     }
 
-    @Override
+     /**
+      * 运行
+      */
+     @Override
     public void run() {
         // 更新用户在线记录信息
         // 1. 查询状态为未完成的记录，然后更新duration_minutes, end_time

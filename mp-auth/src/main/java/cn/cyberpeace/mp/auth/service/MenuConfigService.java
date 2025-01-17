@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name MenuConfigService.java.
+ // File size 6471.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:13 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.bo.target.TargetBo;
@@ -26,25 +36,42 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Service
+ /**
+  * 菜单配置服务
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Service
 @Slf4j
 public class MenuConfigService {
 
-    @Resource
+     /**
+      * 模型映射器
+      */
+     @Resource
     private MenuTemplateMapper modelMapper;
 
-    @Resource
+     /**
+      * 用户角色映射器
+      */
+     @Resource
     private UserRoleMapper userRoleMapper;
 
-    @Resource
+     /**
+      * 菜单模板角色映射器
+      */
+     @Resource
     private MenuTemplateRoleMapper menuTemplateRoleMapper;
 
-    public List<TargetBo> getUserTreeMenuBy(String userId, List<String> authorityMenuIds) {
+     /**
+      * 获取用户树菜单
+      *
+      * @param userId           用户id
+      * @param authorityMenuIds 权限菜单id
+      * @return {@link List }<{@link TargetBo }>
+      */
+     public List<TargetBo> getUserTreeMenuBy(String userId, List<String> authorityMenuIds) {
         String userMenuTemplateId = "1";
         var roles = userRoleMapper.list(new HumanCondition().filterEqual(UserRoleModel::getUser, userId).orderBy(UserRoleModel::getPk));
         if (CollectionUtils.isNotEmpty(roles)) {
@@ -65,7 +92,15 @@ public class MenuConfigService {
         return tree;
     }
 
-    public List<MenuTemplateModel> listAll(String tenant, Integer type, String templateId) {
+     /**
+      * 列出所有
+      *
+      * @param tenant     租户
+      * @param type       类型
+      * @param templateId 模板id
+      * @return {@link List }<{@link MenuTemplateModel }>
+      */
+     public List<MenuTemplateModel> listAll(String tenant, Integer type, String templateId) {
         HumanCondition humanCondition = new HumanCondition();
         if (Objects.nonNull(type)) {
             humanCondition.filterEqual(MenuTemplateModel::getType, type);
@@ -79,7 +114,12 @@ public class MenuConfigService {
         return targets;
     }
 
-    public List<TargetBo> getTree() {
+     /**
+      * 让树
+      *
+      * @return {@link List }<{@link TargetBo }>
+      */
+     public List<TargetBo> getTree() {
         var user = UserUtils.getLoginUser();
         var roles = userRoleMapper.list(new HumanCondition().filterEqual(UserRoleModel::getUser, user.getId()).orderBy(UserRoleModel::getPk));
         List<MenuTemplateModel> targets = null;
@@ -98,7 +138,13 @@ public class MenuConfigService {
         return tree;
     }
 
-    private List<TargetBo> toTree(List<MenuTemplateModel> targets) {
+     /**
+      * 到另一棵树
+      *
+      * @param targets 目标
+      * @return {@link List }<{@link TargetBo }>
+      */
+     private List<TargetBo> toTree(List<MenuTemplateModel> targets) {
         ParamCheck.notEmpty(targets, AuthBasei18nCode.TARGET_LIST);
         Map<String, List<TargetModel>> map = new HashMap<>();
         Map<String, TargetBo> mapTmp = new HashMap<>();
@@ -145,7 +191,12 @@ public class MenuConfigService {
         return parentTargets;
     }
 
-    private void sortTree(List<TargetBo> targets) {
+     /**
+      * 排序树
+      *
+      * @param targets 目标
+      */
+     private void sortTree(List<TargetBo> targets) {
         targets.forEach(t -> {
             if (CollectionUtil.isNotEmpty(t.getChildren())) {
                 sortTree(t.getChildren());

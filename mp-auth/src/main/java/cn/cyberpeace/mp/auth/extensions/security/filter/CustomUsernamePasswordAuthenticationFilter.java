@@ -1,3 +1,13 @@
+// Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name CustomUsernamePasswordAuthenticationFilter.java.
+ // File size 5770.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.extensions.security.filter;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
@@ -28,18 +38,27 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Slf4j
+ /**
+  * 自定义用户名密码认证过滤器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 @Data
 public class CustomUsernamePasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private Cache<String, Integer> loginFailureCache;
 
-    @SneakyThrows
+     /**
+      * 尝试验证
+      *
+      * @param request  请求
+      * @param response 响应
+      * @return {@link Authentication }
+      * @throws AuthenticationException 身份验证异常
+      */
+     @SneakyThrows
     @Override
     @SuppressWarnings("unchecked")
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
@@ -64,7 +83,16 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
         }
     }
 
-    private boolean checkVerifyCode(String verifyCode, String username, HttpServletResponse response) throws IOException {
+     /**
+      * 检查验证码
+      *
+      * @param verifyCode 验证代码
+      * @param username
+      * @param response   响应
+      * @return boolean
+      * @throws IOException ioexception
+      */
+     private boolean checkVerifyCode(String verifyCode, String username, HttpServletResponse response) throws IOException {
         String needVerifyCode = AuthConstant.LOGIN_NEED_VERIFY_CODE + ":" + username;
         Integer flag = loginFailureCache.getIfPresent(needVerifyCode);
         if (Objects.nonNull(flag)) { // 需要校验验证码
@@ -79,8 +107,14 @@ public class CustomUsernamePasswordAuthenticationFilter extends UsernamePassword
         return true;
     }
 
-
-    private UsernamePasswordAuthenticationToken processAuthRequest(Map<String, String> loginData, HttpServletRequest request, HttpServletResponse response) throws IOException {
+     /**
+      * @param loginData
+      * @param request   请求
+      * @param response  响应
+      * @return {@link UsernamePasswordAuthenticationToken }
+      * @throws IOException ioexception
+      */
+     private UsernamePasswordAuthenticationToken processAuthRequest(Map<String, String> loginData, HttpServletRequest request, HttpServletResponse response) throws IOException {
         String username = loginData.getOrDefault(getUsernameParameter(), StringUtils.EMPTY);
         String decryptedPwd = loginData.getOrDefault(getPasswordParameter(), StringUtils.EMPTY);
 

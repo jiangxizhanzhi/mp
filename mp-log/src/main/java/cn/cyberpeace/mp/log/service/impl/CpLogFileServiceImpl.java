@@ -1,3 +1,13 @@
+// Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name CpLogFileServiceImpl.java.
+ // File size 6223.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:16 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.log.service.impl;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -29,33 +39,46 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * 云平台日志模块
- *
- * @description:
- * @author：Geek Wang
- * @date: 2022/6/15
- */
-@Slf4j
+ /**
+  * 云平台日志模块
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 @Service
 public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileService {
 
-    /**
-     * cpcloud平台URL前缀
-     */
-    public static final String CPCLOUD_URL = "/cpcloud";
+     /**
+      * cpcloud平台URL前缀
+      */
+     public static final String CPCLOUD_URL = "/cpcloud";
 
-    private static final String LIST_URL = CPCLOUD_URL + "/logger_app/v1/logfile";
+     /**
+      * url列表
+      */
+     private static final String LIST_URL = CPCLOUD_URL + "/logger_app/v1/logfile";
 
-    private static final String DOWNLOAD_URL = CPCLOUD_URL + "/logger_app/v1/download_logfiles";
+     /**
+      *
+      */
+     private static final String DOWNLOAD_URL = CPCLOUD_URL + "/logger_app/v1/download_logfiles";
 
-    @Override
+     /**
+      * @return {@link String }
+      */
+     @Override
     public String logReportType() {
         return LogReportTypeEnum.CP.toValue();
     }
 
-
-    @Override
+     /**
+      * 列表
+      *
+      * @param type 类型
+      * @return {@link List }<{@link LogReportDTO }>
+      */
+     @Override
     public List<LogReportDTO> list(String type) {
         CloudPlatformItemsResult t = null;
         try {
@@ -88,7 +111,14 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
         return reportDTOList;
     }
 
-    @Override
+     /**
+      * 下载
+      *
+      * @param downloadDTO 下载dto
+      * @return {@link LogFileDownloadBO }
+      * @throws IOException ioexception
+      */
+     @Override
     public LogFileDownloadBO download(LogDownloadDTO downloadDTO) throws IOException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("filename",downloadDTO.getFileName());
@@ -133,15 +163,21 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
         return LogFileDownloadBO.builder().inputStream(new ByteArrayInputStream(bos.toByteArray())).downLoadFileName(downLoadFileName).build();
     }
 
-    @Override
+     /**
+      * 得到订单
+      *
+      * @return int
+      */
+     @Override
     public int getOrder() {
         return 30;
     }
 
-    /**
-     *
-     */
-    @Data
+     /**
+      * @author 二竹
+      * @date 2025/01/17
+      */
+     @Data
     @NoArgsConstructor
     private class LogListParams{
 

@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name BlacklistFilter.java.
+ // File size 2920.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.extensions.security.filter;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
@@ -23,25 +33,48 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-/**
- * @author litian
- * @date 2023年09月25 11:18
- */
-@Slf4j
+ /**
+  * 黑名单过滤器
+  *
+  * @author litian
+  * @date 2023年09月25 11:18
+  */
+ @Slf4j
 @Component
 public class BlacklistFilter extends OncePerRequestFilter {
-    @Resource
+     /**
+      * 黑名单模式
+      */
+     @Resource
     private BlacklistModel blacklistModel;
 
-    @Resource
+     /**
+      * base应用程序配置
+      */
+     @Resource
     private BaseAppConfig baseAppConfig;
 
-    private ObjectMapper mapper = null;
+     /**
+      *
+      */
+     private ObjectMapper mapper = null;
 
-    @Resource
+     /**
+      *
+      */
+     @Resource
     private MappingJackson2HttpMessageConverter converter;
 
-    @Override
+     /**
+      * 做内部过滤
+      *
+      * @param request     请求
+      * @param response    响应
+      * @param filterChain 过滤器链
+      * @throws ServletException servlet异常
+      * @throws IOException      ioexception
+      */
+     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (blacklistModel.isEnabled()) {
             String method = request.getMethod();
@@ -61,7 +94,14 @@ public class BlacklistFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void denyAccess(HttpServletResponse response, String uri) throws IOException {
+     /**
+      * 拒绝访问
+      *
+      * @param response 响应
+      * @param uri
+      * @throws IOException ioexception
+      */
+     private void denyAccess(HttpServletResponse response, String uri) throws IOException {
         log.error("access to {} was forbidden！", uri);
         response.setStatus(HttpServletResponse.SC_OK);
         ServiceResult serviceResult = ResultCommon.fail(AuthErrorCode.DEMO_ACCESS_ERROR);

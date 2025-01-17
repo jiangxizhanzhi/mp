@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name SysConfigServiceImpl.java.
+ // File size 7031.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontadmin.service.sys.impl;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -31,30 +41,49 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Service
+ /**
+  * sys配置服务impl
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Service
 @Slf4j
 public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, SysConfigMapper, SysConfigFields, QueryParams>
         implements SysConfigService {
 
-    @Autowired
+     /**
+      * sys配置服务impl
+      *
+      * @param modelMapper 模型映射器
+      * @param modelFields 模型领域
+      */
+     @Autowired
     public SysConfigServiceImpl(SysConfigMapper modelMapper, SysConfigFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
     }
 
-    @Autowired
+     /**
+      * 用户服务
+      */
+     @Autowired
     private UserService userService;
 
-    @Autowired
+     /**
+      * 配置事件publisher
+      */
+     @Autowired
     private ConfigEventPublisher configEventPublisher;
 
-
-    @Override
+     /**
+      * 创建
+      *
+      * @param obj    obj
+      * @param fields 字段
+      * @return {@link ObjServiceResult }<{@link SysConfigModel }>
+      */
+     @Override
     public ObjServiceResult<SysConfigModel> create(SysConfigModel obj, String[] fields) {
         SysConfigModel config = getByKeyName(obj.getKeyName());
         if (Objects.nonNull(config)) {
@@ -64,7 +93,13 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         return create(obj);
     }
 
-    @Override
+     /**
+      * 批量创建
+      *
+      * @param objs obj
+      * @return {@link ServiceResult }<{@link Integer }>
+      */
+     @Override
     @Transactional
     public ServiceResult<Integer> bulkCreate(List<SysConfigModel> objs) {
         for (SysConfigModel obj : objs) {
@@ -73,13 +108,24 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         return new ServiceResult<>(objs.size());
     }
 
-    @Override
+     /**
+      * 列出所有
+      *
+      * @return {@link List }<{@link SysConfigModel }>
+      */
+     @Override
     public List<SysConfigModel> listAll() {
         List<SysConfigModel> sysConfigModels = getModelMapper().list(new HumanCondition());
         return sysConfigModels;
     }
 
-    @Override
+     /**
+      * 按键名获取
+      *
+      * @param keyName 键名
+      * @return {@link SysConfigModel }
+      */
+     @Override
     public SysConfigModel getByKeyName(String keyName) {
         ParamCheck.notEmpty(keyName, AdminBasei18nCode.SYS_CONFIG_KEY_NAME);
         HumanCondition condition = new HumanCondition()
@@ -88,7 +134,13 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         return sysConfigModel;
     }
 
-    @Override
+     /**
+      * 按键名更新
+      *
+      * @param sysConfigModel sys配置model
+      * @return boolean
+      */
+     @Override
     public boolean updateByKeyName(SysConfigModel sysConfigModel) {
         ParamCheck.notEmpty(sysConfigModel.getKeyName(), AdminBasei18nCode.SYS_CONFIG_KEY_NAME);
         sysConfigModel.setInitValue(null);
@@ -108,7 +160,11 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         return true;
     }
 
-    @Override
+     /**
+      * @param configs
+      * @return boolean
+      */
+     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean batchUpdateByKeyname(List<SysConfigModel> configs) {
         try {
@@ -123,8 +179,14 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         return true;
     }
 
-
-    @Override
+     /**
+      * 更新
+      *
+      * @param obj    obj
+      * @param fields 字段
+      * @return {@link ObjServiceResult }<{@link SysConfigModel }>
+      */
+     @Override
     public ObjServiceResult<SysConfigModel> update(SysConfigModel obj, String[] fields) {
         ParamCheck.notBlank(obj.getId(), AdminBasei18nCode.SYS_CONFIG_ID);
         SysConfigModel oldConfigModel = getModelMapper().get(obj.getId());
@@ -146,7 +208,10 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         return super.update(obj, fields);
     }
 
-    @Override
+     /**
+      * @return boolean
+      */
+     @Override
     public boolean isNewUserNeedAudit() {
         SysConfigModel config = getByKeyName(SysConfigConstant.USER_AUDIT_KEY);
         if (Objects.nonNull(config) && Objects.equals(SysConfigConstant.USER_AUDIT_VALUE_YES, config.getValue())) {
@@ -156,7 +221,12 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         return false;
     }
 
-    @Override
+     /**
+      * publish配置更新事件
+      *
+      * @param configs
+      */
+     @Override
     public void publishConfigUpdateEvent(List<SysConfigModel> configs) {
         if (CollectionUtil.isNotEmpty(configs)) {
             Map<String, String> configMap = configs2Map(configs);
@@ -165,7 +235,11 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
         }
     }
 
-    private Map<String, String> configs2Map(List<SysConfigModel> configs) {
+     /**
+      * @param configs
+      * @return {@link Map }<{@link String }, {@link String }>
+      */
+     private Map<String, String> configs2Map(List<SysConfigModel> configs) {
         Map<String, String> configMap = new HashMap();
         configs.forEach(model -> {
             configMap.put(model.getKeyName(), model.getValue());

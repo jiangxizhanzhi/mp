@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name AuthSwagger2Config.java.
+ // File size 1659.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:13 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.config;
 
 import cn.cyberpeace.mp.base.config.Swagger2Config;
@@ -13,10 +23,19 @@ import springfox.documentation.service.RequestParameter;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
-@Configuration
+ /**
+  * 身份验证swagger2配置
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Configuration
 public class AuthSwagger2Config {
 
-    public static RequestParameter authParameter = new RequestParameterBuilder()
+     /**
+      * 身份验证参数
+      */
+     public static RequestParameter authParameter = new RequestParameterBuilder()
             .name("Authorization")
             .description("认证")
             .in(ParameterType.HEADER)
@@ -24,10 +43,18 @@ public class AuthSwagger2Config {
             .required(false)
             .build();
 
-    @Autowired
+     /**
+      * swagger2配置
+      */
+     @Autowired
     private Swagger2Config swagger2Config;
 
-    @Bean
+     /**
+      * api认证
+      *
+      * @return {@link Docket }
+      */
+     @Bean
     public Docket apiAuth() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(swagger2Config.apiInfo())

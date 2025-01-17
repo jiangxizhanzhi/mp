@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name OperateLogController.java.
+ // File size 2850.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:16 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.log.controller;
 
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -23,27 +33,46 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-/**
- * 用户操作日志记录
- * @author wanggang
- */
-@Slf4j
+ /**
+  * 用户操作日志记录
+  *
+  * @author wanggang@date 2025/01/17
+  */
+ @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/operate")
 @Api(tags = "日志模块")
 public class OperateLogController {
 
-    private OperateLogService operateLogService;
+     /**
+      * 操作日志服务
+      */
+     private OperateLogService operateLogService;
 
-    @Resource(name = "sysOptionServiceImpl")
+     /**
+      * 选项服务
+      */
+     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
-    @Autowired
+     /**
+      * 操作日志控制器
+      *
+      * @param operateLogService 操作日志服务
+      */
+     @Autowired
     public OperateLogController(OperateLogService operateLogService) {
         this.operateLogService = operateLogService;
     }
 
-    @ApiOperation(value = "新增操作日志")
+     /**
+      * 添加
+      *
+      * @param request            请求
+      * @param httpServletRequest HTTP servlet请求
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation(value = "新增操作日志")
     @ApiImplicitParam(name = "request", value = "操作日志请求", dataTypeClass = OperationLogRequest.class)
     @PostMapping("/add")
     public ServiceResult add(@RequestBody OperationLogRequest request, HttpServletRequest httpServletRequest){
@@ -52,21 +81,36 @@ public class OperateLogController {
         return ResultCommon.success();
     }
 
-
-    @ApiOperation(value = "查询操作日志")
+     /**
+      * 页面
+      *
+      * @param request 请求
+      * @return {@link ListObjServiceResult }<{@link OperationLogPageResponse }>
+      */
+     @ApiOperation(value = "查询操作日志")
     @GetMapping("/page")
     public ListObjServiceResult<OperationLogPageResponse> page(OperationLogPageRequest request) {
         request.ensure();
         return operateLogService.search(request);
     }
 
-    @GetMapping("/modules")
+     /**
+      * 获取模块
+      *
+      * @return {@link ServiceResult }<{@link List }<{@link OptionBO }>>
+      */
+     @GetMapping("/modules")
     @ApiOperation(value = "查询审计日志操作模块")
     public ServiceResult<List<OptionBO>> getModules() {
         return optionService.getIntOptions(LogConstant.MP_COMMON_OPTION_TYPE_LOG_OP_MODULE);
     }
 
-    @GetMapping("/types")
+     /**
+      * 得到类型
+      *
+      * @return {@link ServiceResult }<{@link List }<{@link OptionBO }>>
+      */
+     @GetMapping("/types")
     @ApiOperation(value = "查询审计日志操作类型")
     public ServiceResult<List<OptionBO>> getTypes() {
         return optionService.getIntOptions(LogConstant.MP_COMMON_OPTION_TYPE_LOG_OP_TYPE);

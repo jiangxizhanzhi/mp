@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name UserOnlineRecordScheduleService.java.
+ // File size 4866.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:13 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.service.task.UserOnlineRecordStatusCheckTask;
@@ -23,32 +33,46 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Service
+ /**
+  * 用户在线记录时间表服务
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Service
 @Slf4j
 public class UserOnlineRecordScheduleService {
 
-    // 每2分钟统计一次
+     /**
+      * 刷新率
+      */// 每2分钟统计一次
     public static final long REFRESH_RATE = 2;
 
-    // 两分钟内，心跳次数大于1
+     /**
+      *
+      */// 两分钟内，心跳次数大于1
     public static final int HEARTBEAT_COUNT_THRESHOLD = 1;
 
-    public static final int BATCH_TASK_USER_SIZE = 10;
+     /**
+      *
+      */
+     public static final int BATCH_TASK_USER_SIZE = 10;
 
-    private static ExecutorService threadPool = null;
+     /**
+      *
+      */
+     private static ExecutorService threadPool = null;
 
-    @Autowired
+     /**
+      * 心跳服务
+      */
+     @Autowired
     private UserHeartbeatService heartbeatService;
 
-    /**
-     * 创建或者更新用户在线记录
-     */
-    @Scheduled(initialDelay = REFRESH_RATE, fixedRate = REFRESH_RATE, timeUnit = TimeUnit.MINUTES)
+     /**
+      * 创建或者更新用户在线记录
+      */
+     @Scheduled(initialDelay = REFRESH_RATE, fixedRate = REFRESH_RATE, timeUnit = TimeUnit.MINUTES)
     public void scheduleUserOlRecord() {
         LocalDateTime begin = LocalDateTime.now();
         if (threadPool == null) {
@@ -93,11 +117,10 @@ public class UserOnlineRecordScheduleService {
         }
     }
 
-
-    /**
-     * 检查状态是否过期，过期状态更新
-     */
-    @Scheduled(initialDelay = 1, fixedRate = 5, timeUnit = TimeUnit.MINUTES)
+     /**
+      * 检查状态是否过期，过期状态更新
+      */
+     @Scheduled(initialDelay = 1, fixedRate = 5, timeUnit = TimeUnit.MINUTES)
     public void checkUserOlRecord() {
         if (threadPool == null) {
             threadPool = getSingletonThreadPool();
@@ -106,18 +129,28 @@ public class UserOnlineRecordScheduleService {
         threadPool.submit(recordStatusCheckTask);
     }
 
-    /**
-     * 静态内部类的单例模式
-     *
-     * @return
-     */
-    public static ExecutorService getSingletonThreadPool() {
+     /**
+      * 静态内部类的单例模式
+      *
+      * @return
+      */
+     public static ExecutorService getSingletonThreadPool() {
         return ThreadPoolHolder.threadPoolExecutor;
     }
 
-    private static class ThreadPoolHolder {
-        static ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("online-report-pool-%d").build();
-        private static ExecutorService threadPoolExecutor = new ThreadPoolExecutor(5, 100, 30, TimeUnit.SECONDS,
+     /**
+      * @author 二竹
+      * @date 2025/01/17
+      */
+     private static class ThreadPoolHolder {
+         /**
+          * 命名螺纹厂
+          */
+         static ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("online-report-pool-%d").build();
+         /**
+          * 线程池执行程序
+          */
+         private static ExecutorService threadPoolExecutor = new ThreadPoolExecutor(5, 100, 30, TimeUnit.SECONDS,
                 new ArrayBlockingQueue(10000), namedThreadFactory, new ThreadPoolExecutor.CallerRunsPolicy());
     }
 

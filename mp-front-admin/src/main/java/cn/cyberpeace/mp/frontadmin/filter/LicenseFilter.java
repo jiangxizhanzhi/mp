@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name LicenseFilter.java.
+ // File size 3572.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontadmin.filter;
 
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -23,28 +33,60 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Objects;
 
-@Slf4j
+ /**
+  * 许可过滤
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 public class LicenseFilter extends OncePerRequestFilter {
 
-    private static final PathMatcher MATCHER = new AntPathMatcher();
+     /**
+      * 匹配器
+      */
+     private static final PathMatcher MATCHER = new AntPathMatcher();
 
-    private ObjectMapper mapper = null;
+     /**
+      * 映射器
+      */
+     private ObjectMapper mapper = null;
 
-//    @Autowired
+     /**
+      * sys激活服务
+      */ //    @Autowired
     // todo 通过构造方法传入
     private SysActivationService sysActivationService;
-    private FrontAdminConfig frontAdminConfig;
+     /**
+      * 前面管理配置
+      */
+     private FrontAdminConfig frontAdminConfig;
 
-
-//    @Autowired
+     /**
+      *
+      */ //    @Autowired
     // todo 通过构造方法传入
     private MappingJackson2HttpMessageConverter converter;
 
-    public LicenseFilter(FrontAdminConfig frontAdminConfig) {
+     /**
+      * 许可过滤
+      *
+      * @param frontAdminConfig 前面管理配置
+      */
+     public LicenseFilter(FrontAdminConfig frontAdminConfig) {
         this.frontAdminConfig = frontAdminConfig;
     }
 
-    @Override
+     /**
+      * 做内部过滤
+      *
+      * @param request
+      * @param response
+      * @param filterChain
+      * @throws ServletException servlet异常
+      * @throws IOException      ioexception
+      */
+     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 

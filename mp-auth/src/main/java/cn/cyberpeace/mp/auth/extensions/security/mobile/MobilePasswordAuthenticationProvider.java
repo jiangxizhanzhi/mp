@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name MobilePasswordAuthenticationProvider.java.
+ // File size 4942.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.extensions.security.mobile;
 
 import cn.cyberpeace.mp.auth.extensions.security.check.CustomPostAuthenticationChecker;
@@ -17,38 +27,73 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Slf4j
+ /**
+  * 移动密码身份验证提供商
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 public class MobilePasswordAuthenticationProvider implements AuthenticationProvider {
 
-    protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
+     /**
+      *
+      */
+     protected MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
 
-    private UserDetailsChecker preAuthenticationChecks = new CustomPreAuthenticationChecker();
+     /**
+      *
+      */
+     private UserDetailsChecker preAuthenticationChecks = new CustomPreAuthenticationChecker();
 
-    private UserDetailsChecker postAuthenticationChecks = new CustomPostAuthenticationChecker();
+     /**
+      *
+      */
+     private UserDetailsChecker postAuthenticationChecks = new CustomPostAuthenticationChecker();
 
-    private PasswordEncoder passwordEncoder;
+     /**
+      * 密码编码器
+      */
+     private PasswordEncoder passwordEncoder;
 
-    private AuthUserDetailsService userDetailsService;
+     /**
+      * 用户细节服务
+      */
+     private AuthUserDetailsService userDetailsService;
 
-    public void setUserDetailsService(AuthUserDetailsService userDetailsService) {
+     /**
+      * 集用户细节服务
+      *
+      * @param userDetailsService 用户细节服务
+      */
+     public void setUserDetailsService(AuthUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 
-    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+     /**
+      * 设置密码编码器
+      *
+      * @param passwordEncoder 密码编码器
+      */
+     public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public MobilePasswordAuthenticationProvider() {
+     /**
+      * 移动密码身份验证提供商
+      */
+     public MobilePasswordAuthenticationProvider() {
         setPasswordEncoder(PasswordUtils.getPasswordEncoder());
     }
 
-
-    @Override
+     /**
+      * 进行身份验证
+      *
+      * @param authentication 身份验证
+      * @return {@link Authentication }
+      * @throws AuthenticationException 身份验证异常
+      */
+     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         MobilePasswordAuthenticationToken authenticationToken = (MobilePasswordAuthenticationToken) authentication;
 
@@ -73,7 +118,13 @@ public class MobilePasswordAuthenticationProvider implements AuthenticationProvi
 
     }
 
-    protected UserDetails retrieveUser(String mobile, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
+     /**
+      * @param mobile
+      * @param authentication 身份验证
+      * @return {@link UserDetails }
+      * @throws AuthenticationException 身份验证异常
+      */
+     protected UserDetails retrieveUser(String mobile, UsernamePasswordAuthenticationToken authentication) throws AuthenticationException {
         try {
             UserDetails loadedUser = userDetailsService.loadUserByMobile(mobile);
             if (loadedUser == null) {
@@ -86,7 +137,12 @@ public class MobilePasswordAuthenticationProvider implements AuthenticationProvi
         }
     }
 
-    protected void additionalAuthenticationChecks(UserDetails userDetails, MobilePasswordAuthenticationToken authentication) throws AuthenticationException {
+     /**
+      * @param userDetails
+      * @param authentication 身份验证
+      * @throws AuthenticationException 身份验证异常
+      */
+     protected void additionalAuthenticationChecks(UserDetails userDetails, MobilePasswordAuthenticationToken authentication) throws AuthenticationException {
         if (authentication.getCredentials() == null) {
             throw new BadCredentialsException(this.messages
                     .getMessage("AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"));
@@ -98,8 +154,11 @@ public class MobilePasswordAuthenticationProvider implements AuthenticationProvi
         }
     }
 
-
-    @Override
+     /**
+      * @param authentication 身份验证
+      * @return boolean
+      */
+     @Override
     public boolean supports(Class<?> authentication) {
         return MobilePasswordAuthenticationToken.class.isAssignableFrom(authentication);
     }

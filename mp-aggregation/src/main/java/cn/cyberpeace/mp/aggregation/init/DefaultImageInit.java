@@ -13,13 +13,27 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
+/**
+ * 默认映像init
+ *
+ * @author 二竹
+ * @date 2025/01/17
+ */
 @Slf4j
 @Component
 public class DefaultImageInit implements ApplicationRunner {
 
+    /**
+     * 基地应用程序配置
+     */
     @Autowired
     private BaseAppConfig baseAppConfig;
 
+    /**
+     * 运行
+     *
+     * @param args arg游戏
+     */
     @Override
     public void run(ApplicationArguments args) {
         log.info("DefaultImageInit init value is {}", baseAppConfig.isRunInit());

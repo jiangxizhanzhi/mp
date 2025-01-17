@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name HttpLogoutSuccessHandler.java.
+ // File size 4867.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.extensions.security;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
@@ -32,34 +42,64 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Slf4j
+ /**
+  * HTTP注销成功处理程序
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 @Component
 public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
-    private final ObjectMapper mapper;
+     /**
+      * 映射器
+      */
+     private final ObjectMapper mapper;
 
-    private final UserService userService;
+     /**
+      * 用户服务
+      */
+     private final UserService userService;
 
-    @Autowired
+     /**
+      * 操作日志服务
+      */
+     @Autowired
     private OperateLogService operateLogService;
 
-    @Autowired
+     /**
+      * 身份验证配置
+      */
+     @Autowired
     private AuthConfig authConfig;
 
-    @Autowired
+     /**
+      * 用户事件发布者
+      */
+     @Autowired
     private UserEventPublisher userEventPublisher ;
 
-    @Autowired
+     /**
+      * HTTP注销成功处理程序
+      *
+      * @param messageConverter 消息转换器
+      * @param userService      用户服务
+      */
+     @Autowired
     public HttpLogoutSuccessHandler(MappingJackson2HttpMessageConverter messageConverter, UserService userService) {
         this.mapper = messageConverter.getObjectMapper();
         this.userService = userService;
     }
 
-    @Override
+     /**
+      * 登出成功
+      *
+      * @param request        请求
+      * @param response       响应
+      * @param authentication 身份验证
+      * @throws IOException ioexception
+      */
+     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException {
         UserModel user = null;
@@ -97,7 +137,13 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
         writer.flush();
     }
 
-    private void recordLogoutLog(UserModel user, HttpServletRequest request) {
+     /**
+      * 记录登出日志
+      *
+      * @param user    用户
+      * @param request 请求
+      */
+     private void recordLogoutLog(UserModel user, HttpServletRequest request) {
         OperationLogRequest logModel = new OperationLogRequest();
         //操作类型
         logModel.setOpModule(OpModuleEnums.ACCOUNT.ordinal());

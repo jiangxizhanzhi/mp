@@ -29,7 +29,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * @author wanggang
+ * 默认img控制器
+ *
+ * @author wanggang@date 2025/01/17
  */
 @Api(value = "默认图片接口", tags = "默认图片接口")
 @Slf4j
@@ -37,9 +39,11 @@ import java.util.stream.Collectors;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/default-img")
 public class DefaultImgController {
 
+    /**
+     * 默认img服务
+     */
     @Autowired
     private DefaultImgService defaultImgService;
-
 
     /**
      * 获取默认图片
@@ -62,6 +66,11 @@ public class DefaultImgController {
         return ResultCommon.success(urlList);
     }
 
+    /**
+     * 获取sys logo img
+     *
+     * @return {@link ServiceResult }<{@link Map }<{@link String }, {@link String }>>
+     */
     @ApiOperation("获取系统图片")
     @GetMapping("/get-sys-logo-img")
     public ServiceResult<Map<String, String>> getSysLogoImg(){
@@ -80,6 +89,7 @@ public class DefaultImgController {
 
     /**
      * 获取多个指定目录下的默认图片
+     *
      * @param defaultImgDirEnums
      * @return
      */

@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name LogFileReportController.java.
+ // File size 1383.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:16 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.log.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -13,10 +23,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * 日志上报接口
- **/
-@RestController
+ /**
+  * 日志上报接口
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/report")
 @Api(value = "日志模块", tags = "日志模块")
 @RequiredArgsConstructor
@@ -24,7 +37,13 @@ public class LogFileReportController {
 
     private final LogReportService logReportService;
 
-    @PostMapping
+     /**
+      * 报告
+      *
+      * @param request 请求
+      * @return {@link ServiceResult }<{@link Integer }>
+      */
+     @PostMapping
     @ApiOperation(value = "上报日志", notes = "")
     @ApiImplicitParam(name = "request", value = "日志上报请求", dataTypeClass = LogReportRequest.class)
     public ServiceResult<Integer> report(@RequestBody LogReportRequest request) {

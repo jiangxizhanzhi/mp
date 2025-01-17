@@ -57,46 +57,6 @@
             <artifactId>mp-base</artifactId>
             <version>0.0.2-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>cn.cyberpeace.mp.cscene</groupId>
-            <artifactId>mp-cscene</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>cn.cyberpeace.mp.devopscluster</groupId>
-            <artifactId>mp-devops-cluster</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>cn.cyberpeace.mp.flow</groupId>
-            <artifactId>mp-flow</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>cn.cyberpeace.mp.scene</groupId>
-            <artifactId>mp-scene</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>cn.cyberpeace.mp.sceneplugincloud</groupId>
-            <artifactId>mp-scene-plugin-cloud</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>cn.cyberpeace.mp.sceneplugincollection</groupId>
-            <artifactId>mp-scene-plugin-collection</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>cn.cyberpeace.mp.scenepluginflow</groupId>
-            <artifactId>mp-scene-plugin-flow</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>cn.cyberpeace.mp.situationaware</groupId>
-            <artifactId>mp-situation-aware</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
     <build>

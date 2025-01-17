@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name SysNoticeUserServiceImpl.java.
+ // File size 2027.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontadmin.service.sys.impl;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -16,22 +26,35 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/9/20 13:56
- */
-@Service
+ /**
+  * sys请注意用户服务impl
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Service
 @Slf4j
 public class SysNoticeUserServiceImpl extends BaseModelServiceImpl<SysNoticeUserModel, SysNoticeUserMapper, SysNoticeUserFields, QueryParams> implements SysNoticeUserService {
 
-    @Autowired
+     /**
+      * sys请注意用户服务impl
+      *
+      * @param modelMapper 模型映射器
+      * @param modelFields 模型领域
+      */
+     @Autowired
     public SysNoticeUserServiceImpl(SysNoticeUserMapper modelMapper, SysNoticeUserFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
     }
 
-    @Override
+     /**
+      * 按通知id删除
+      *
+      * @param noticeIds 注意id
+      * @return int
+      */
+     @Override
     public int deleteByNoticeIds(List<String> noticeIds) {
         if (CollectionUtil.isEmpty(noticeIds)) {
             return 0;
@@ -41,7 +64,13 @@ public class SysNoticeUserServiceImpl extends BaseModelServiceImpl<SysNoticeUser
 
     }
 
-    @Override
+     /**
+      * 按用户删除
+      *
+      * @param userId 用户id
+      * @return int
+      */
+     @Override
     public int deleteByUser(String userId) {
         if (StringUtils.isBlank(userId)) {
             return 0;

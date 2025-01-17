@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name BasePermissionMapper.java.
+ // File size 10758.
+ // File create date Fri Jan 17 09:57:14 CST 2025.
+ // File update date Fri Jan 17 11:23:12 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.authbase.repository;
 
 import cn.cyberpeace.mp.authbase.model.BasePermissionModel;

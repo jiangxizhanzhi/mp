@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name LicenseService.java.
+ // File size 3777.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontadmin.service.sys;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -17,47 +27,87 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Service
+ /**
+  * 许可证服务
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Service
 @Slf4j
 public class LicenseService {
 
-    private static Awesome INSTANCE = null;
+     /**
+      * 实例
+      */
+     private static Awesome INSTANCE = null;
 
-    @Autowired
+     /**
+      * 前面管理配置
+      */
+     @Autowired
     private FrontAdminConfig frontAdminConfig;
 
-    public interface Awesome extends Library {
+     /**
+      * 很棒
+      *
+      * @author 二竹
+      * @date 2025/01/17
+      */
+     public interface Awesome extends Library {
 
 //        Awesome INSTANCE = (Awesome) Native.loadLibrary("/home/mp/config/license/license.so", Awesome.class);
 
-        public class GoString extends Structure {
-            public static class ByValue extends GoString implements Structure.ByValue {
+         /**
+          * @author 二竹
+          * @date 2025/01/17
+          */
+         public class GoString extends Structure {
+             /**
+              * 价值
+              *
+              * @author 二竹
+              * @date 2025/01/17
+              */
+             public static class ByValue extends GoString implements Structure.ByValue {
             }
 
-            public String p;
-            public long n;
+             /**
+              * p
+              */
+             public String p;
+             /**
+              * n
+              */
+             public long n;
 
-            protected List getFieldOrder() {
+             /**
+              * @return {@link List }
+              */
+             protected List getFieldOrder() {
                 return Arrays.asList(new String[]{"p", "n"});
             }
 
         }
 
-        public int Verify(GoString.ByValue js, GoString.ByValue code);
+         /**
+          * 验证
+          *
+          * @param js   js
+          * @param code 代码
+          * @return int
+          */
+         public int Verify(GoString.ByValue js, GoString.ByValue code);
     }
 
-
-    /**
-     * @param verifyStr  校验json串，如 "{\"machinecode\": \"CHTF-12H1-34S8-HV23-123S\", \"deadline\": 1, \"info\": {\"thj\":2}}"
-     * @param verifyCode 校验码
-     * @return
-     */
-    public boolean verify(String verifyStr, String verifyCode) {
+     /**
+      * 验证
+      *
+      * @param verifyStr  校验json串，如 "
+      * @param verifyCode 校验码
+      * @return
+      */
+     public boolean verify(String verifyStr, String verifyCode) {
 //        verifyStr = "{\"machinecode\": \"CHTF-12H1-34S8-HV23-123S\", \"deadline\": 1, \"info\": {\"thj\":2}}";
         if (StringUtils.isEmpty(verifyCode)) {
             log.info("verifyCode is empty!");

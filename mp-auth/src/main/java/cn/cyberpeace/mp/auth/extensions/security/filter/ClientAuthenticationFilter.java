@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name ClientAuthenticationFilter.java.
+ // File size 2849.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.extensions.security.filter;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
@@ -20,26 +30,48 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Component
+ /**
+  * 客户端身份验证过滤器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Component
 @Slf4j
 public class ClientAuthenticationFilter extends OncePerRequestFilter {
 
-    public static final String CLIENT_ID_HEADER = "clientId";
+     /**
+      * 客户端id报头
+      */
+     public static final String CLIENT_ID_HEADER = "clientId";
 
-    public static final String CLIENT_SECRET_HEADER = "clientSecret";
+     /**
+      * 客户端秘密头
+      */
+     public static final String CLIENT_SECRET_HEADER = "clientSecret";
 
-    @Autowired
+     /**
+      * 客户端细节服务
+      */
+     @Autowired
     private ClientDetailsService clientDetailsService;
 
-    @Autowired
+     /**
+      * 用户服务
+      */
+     @Autowired
     private UserService userService;
 
-    @Override
+     /**
+      * 做内部过滤
+      *
+      * @param request     请求
+      * @param response    响应
+      * @param filterChain 过滤器链
+      * @throws ServletException servlet异常
+      * @throws IOException      ioexception
+      */
+     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String clientId = request.getHeader(CLIENT_ID_HEADER);

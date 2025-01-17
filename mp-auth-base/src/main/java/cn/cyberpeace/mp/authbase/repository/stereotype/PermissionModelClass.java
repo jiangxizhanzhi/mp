@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name PermissionModelClass.java.
+ // File size 498.
+ // File create date Fri Jan 17 09:57:14 CST 2025.
+ // File update date Fri Jan 17 11:23:12 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.authbase.repository.stereotype;
 
 import java.lang.annotation.Documented;

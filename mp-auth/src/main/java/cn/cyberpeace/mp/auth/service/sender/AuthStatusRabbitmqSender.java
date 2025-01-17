@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name AuthStatusRabbitmqSender.java.
+ // File size 1892.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.service.sender;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
@@ -12,23 +22,51 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-@Component
+ /**
+  * 验证状态rabbitmq发送方
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Component
 public class AuthStatusRabbitmqSender extends BaseSimpleMessageSender {
 
-    @Autowired
+     /**
+      * 身份验证配置
+      */
+     @Autowired
     private AuthConfig authConfig;
 
-    @Autowired
+     /**
+      * 验证状态rabbitmq发送方
+      *
+      * @param amqpTemplate     amqp模板
+      * @param messageConverter 消息转换器
+      */
+     @Autowired
     public AuthStatusRabbitmqSender(AmqpTemplate amqpTemplate, SnakeJsonMessageConverter messageConverter) {
         super(amqpTemplate, messageConverter, new SimpleMessageConfig(AuthConstant.AUTH_EXCHANGE_NAME, null, null));
     }
 
-    @Bean
+     /**
+      * 专题交流
+      *
+      * @return {@link TopicExchange }
+      */
+     @Bean
     public TopicExchange authTopicExchange() {
         return getMessageConfig().topicExchange();
     }
 
-    public <T> void send(T data, String type, String routingKey, Long timeout) {
+     /**
+      * 发送
+      *
+      * @param data       数据
+      * @param type       类型
+      * @param routingKey
+      * @param timeout    超时
+      */
+     public <T> void send(T data, String type, String routingKey, Long timeout) {
         FormatMessage<T> formatMessage = new FormatMessage<>(data, type, null);
         formatMessage.setContext(null);
 

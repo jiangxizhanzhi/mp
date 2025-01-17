@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name Application.java.
+ // File size 3628.
+ // File create date Tue Sep 24 15:29:09 CST 2024.
+ // File update date Fri Jan 17 11:23:11 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
@@ -21,7 +31,13 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
+ /**
+  * 应用程序
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 @EnableAsync
 @EnableScheduling
 @EnableCaching
@@ -29,11 +45,22 @@ import java.util.List;
 @SpringBootApplication(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class} )
 public class Application {
 
-    public static void main(String[] args) {
+     /**
+      * 主要
+      *
+      * @param args arg游戏
+      */
+     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
 
-    @Bean
+     /**
+      * 命令行运行器
+      *
+      * @param ctx ctx
+      * @return {@link CommandLineRunner }
+      */
+     @Bean
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
             var localHost = "localhost";

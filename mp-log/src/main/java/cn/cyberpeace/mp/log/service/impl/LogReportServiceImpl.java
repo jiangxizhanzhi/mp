@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name LogReportServiceImpl.java.
+ // File size 2419.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:16 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.log.service.impl;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -15,12 +25,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * @description: 日志文件上报接口
- * @author：Geek Wang
- * @date: 2022/6/15
- */
-@Slf4j
+ /**
+  * 日志报告服务impl
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 @Service
 @RequiredArgsConstructor
 public class LogReportServiceImpl implements LogReportService {
@@ -29,7 +40,14 @@ public class LogReportServiceImpl implements LogReportService {
 
     private final LogReportDTOConverter logReportDTOConverter;
 
-    @Transactional
+     /**
+      * 报告
+      *
+      * @param logReportTypeEnum 日志报表类型enum
+      * @param list              列表
+      * @return int
+      */
+     @Transactional
     @Override
     public int report(LogReportTypeEnum logReportTypeEnum, List<LogReportDTO> list) {
         HumanCondition condition = new HumanCondition();
@@ -41,7 +59,13 @@ public class LogReportServiceImpl implements LogReportService {
         return logReportMapper.bulkCreate(logReportPOS).getSuccessCount();
     }
 
-    @Override
+     /**
+      * 列表
+      *
+      * @param type 类型
+      * @return {@link List }<{@link LogReportDTO }>
+      */
+     @Override
     public List<LogReportDTO> list(String type){
         HumanCondition humanCondition = new HumanCondition();
         if (StringUtils.isNotBlank(type)) {

@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name WebSecurityConfig.java.
+ // File size 9061.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.config.security;
 
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
@@ -29,35 +39,87 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import javax.annotation.Resource;
 
-/**
- * @Description: Security配置化类
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Configuration
+ /**
+  * 网络安全配置
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    private static final String LOGIN_PATH = ControllerConstant.BASE_API_PATH + "/login";
-    private static final String LOGIN_MOBILE_PATH = ControllerConstant.BASE_API_PATH + "/login/mobile";
-    private static final String LOGOUT_PATH = ControllerConstant.BASE_API_PATH + "/logout";
+     /**
+      * 登录路径
+      */
+     private static final String LOGIN_PATH = ControllerConstant.BASE_API_PATH + "/login";
+     /**
+      * 登录移动路径
+      */
+     private static final String LOGIN_MOBILE_PATH = ControllerConstant.BASE_API_PATH + "/login/mobile";
+     /**
+      *
+      */
+     private static final String LOGOUT_PATH = ControllerConstant.BASE_API_PATH + "/logout";
 
-    private AuthUserDetailsService userDetailsService;
-    private HttpAuthenticationEntryPoint authenticationEntryPoint;
-    private HttpLogoutSuccessHandler logoutSuccessHandler;
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-    private CustomAuthenticationSuccessHandler authenticationSuccessHandler;
-    private CustomAuthenticationFailureHandler authenticationFailureHandler;
-    private ClientAuthenticationFilter clientAuthenticationFilter;
-    private LoadAuthoritiesFilter loadAuthoritiesFilter;
+     /**
+      * 用户细节服务
+      */
+     private AuthUserDetailsService userDetailsService;
+     /**
+      * 身份验证入口点
+      */
+     private HttpAuthenticationEntryPoint authenticationEntryPoint;
+     /**
+      * 注销成功处理程序
+      */
+     private HttpLogoutSuccessHandler logoutSuccessHandler;
+     /**
+      *
+      */
+     private JwtAuthenticationFilter jwtAuthenticationFilter;
+     /**
+      *
+      */
+     private CustomAuthenticationSuccessHandler authenticationSuccessHandler;
+     /**
+      *
+      */
+     private CustomAuthenticationFailureHandler authenticationFailureHandler;
+     /**
+      *
+      */
+     private ClientAuthenticationFilter clientAuthenticationFilter;
+     /**
+      *
+      */
+     private LoadAuthoritiesFilter loadAuthoritiesFilter;
 
-    @Autowired
+     /**
+      * 身份验证配置
+      */
+     @Autowired
     private AuthConfig authConfig;
 
-    @Resource(name = AuthCacheConfig.LOGIN_FAILURE)
+     /**
+      *
+      */
+     @Resource(name = AuthCacheConfig.LOGIN_FAILURE)
     private Cache<String, Integer> loginFailureCache;
 
-    @Autowired
+     /**
+      * 网络安全配置
+      *
+      * @param userDetailsService           用户细节服务
+      * @param authenticationEntryPoint     身份验证入口点
+      * @param logoutSuccessHandler         注销成功处理程序
+      * @param jwtAuthenticationFilter
+      * @param authenticationSuccessHandler
+      * @param authenticationFailureHandler
+      * @param clientAuthenticationFilter
+      * @param loadAuthoritiesFilter
+      */
+     @Autowired
     public WebSecurityConfig(AuthUserDetailsService userDetailsService,
                              HttpAuthenticationEntryPoint authenticationEntryPoint,
                              HttpLogoutSuccessHandler logoutSuccessHandler,
@@ -76,12 +138,24 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         this.loadAuthoritiesFilter = loadAuthoritiesFilter;
     }
 
-    @Override
+     /**
+      * 配置
+      *
+      * @param auth 身份验证
+      * @throws Exception 异常
+      */
+     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(PasswordUtils.getPasswordEncoder());
     }
 
-    @Override
+     /**
+      * 配置
+      *
+      * @param http http
+      * @throws Exception 异常
+      */
+     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
         // custom authenticate urls

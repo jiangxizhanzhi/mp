@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name MpLogFileServiceImpl.java.
+ // File size 5477.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:16 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.log.service.impl;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -31,28 +41,45 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-/**
- * MP中台日志模块
- * @description:
- * @author：Geek Wang
- * @date: 2022/6/15
- */
-@Service
+ /**
+  * MP中台日志模块
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Service
 @Slf4j
 public class MpLogFileServiceImpl implements LogFileService {
 
-    @Value("${logging.file.path}")
+     /**
+      * 日志路径
+      */
+     @Value("${logging.file.path}")
     private String logPath;
 
-    @Autowired
+     /**
+      * 日志配置
+      */
+     @Autowired
     private LogConfig logConfig;
 
-    @Override
+     /**
+      * 日志报表类型
+      *
+      * @return {@link String }
+      */
+     @Override
     public String logReportType() {
         return LogReportTypeEnum.MP.toValue();
     }
 
-    @Override
+     /**
+      * 列表
+      *
+      * @param type 类型
+      * @return {@link List }<{@link LogReportDTO }>
+      */
+     @Override
     public List<LogReportDTO> list(String type) {
         var logFile = new File(logPath);
         List<File> fileList = Arrays.stream(Objects.requireNonNull(logFile.listFiles())).filter(File::isFile).collect(Collectors.toList());
@@ -80,8 +107,14 @@ public class MpLogFileServiceImpl implements LogFileService {
         return logReportDTOList;
     }
 
-
-    @Override
+     /**
+      * 下载
+      *
+      * @param downloadDTO 下载dto
+      * @return {@link LogFileDownloadBO }
+      * @throws IOException ioexception
+      */
+     @Override
     public LogFileDownloadBO download(LogDownloadDTO downloadDTO) throws IOException{
         String fileName = downloadDTO.getFileName();
         var bos = new ByteArrayOutputStream();
@@ -129,7 +162,12 @@ public class MpLogFileServiceImpl implements LogFileService {
         return LogFileDownloadBO.builder().inputStream(new ByteArrayInputStream(bos.toByteArray())).downLoadFileName(downLoadFileName).build();
     }
 
-    @Override
+     /**
+      * 得到订单
+      *
+      * @return int
+      */
+     @Override
     public int getOrder() {
         return 10;
     }

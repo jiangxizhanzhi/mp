@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name SysActivationService.java.
+ // File size 28910.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontadmin.service.sys;
 
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
@@ -53,56 +63,96 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * @Description: 系统激活相关service
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Service
+ /**
+  * sys激活服务
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Service
 @Slf4j
 public class SysActivationService {
 
-    private static ActivationResponse ACTIVATION_CONTENT = null;
+     /**
+      *
+      */
+     private static ActivationResponse ACTIVATION_CONTENT = null;
 
-    public static final String ACTIVATION_FILE = "activation";
+     /**
+      *
+      */
+     public static final String ACTIVATION_FILE = "activation";
 
-    private static DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+     /**
+      * 日期格式化程序
+      */
+     private static DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    private static final Integer TRIAL_DAYS = 7;
+     /**
+      * 审判日子
+      */
+     private static final Integer TRIAL_DAYS = 7;
 
-    public static final String TRIAL_USE_SYS_CONFIG = "trial_use_sys_config";
+     /**
+      * 试验使用sys配置
+      */
+     public static final String TRIAL_USE_SYS_CONFIG = "trial_use_sys_config";
 
-    // 竞赛相关激活项目
+     /**
+      * AD模块密钥
+      */// 竞赛相关激活项目
     private static List<String> AD_MODULE_KEYS = Arrays.asList(ActivationItemKeyEnums.JINGSAI.getCode(), ActivationItemKeyEnums.SHENTOUSAI.getCode(), ActivationItemKeyEnums.YUNWEISAI.getCode());
-    // 实训相关激活项
+     /**
+      *
+      */// 实训相关激活项
     private static List<String> OJ_MODULE_KEYS = Arrays.asList(ActivationItemKeyEnums.SHIXUN.getCode());
-    // 靶场相关激活项
+     /**
+      *
+      */// 靶场相关激活项
     private static List<String> CR_MODULE_KEYS = Arrays.asList(ActivationItemKeyEnums.HUOTILOUDONG.getCode(),ActivationItemKeyEnums.ZHISHIKU.getCode(),ActivationItemKeyEnums.ZONGHEXUNLIAN.getCode(),ActivationItemKeyEnums.HONGLANDUIKANG.getCode(),ActivationItemKeyEnums.CEPING.getCode());
 
-    @Autowired
+     /**
+      * 许可证服务
+      */
+     @Autowired
     private LicenseService licenseService;
 
-    @Autowired
+     /**
+      * 前面管理配置
+      */
+     @Autowired
     private FrontAdminConfig frontAdminConfig;
 
-    @Autowired
+     /**
+      * 活性菜单服务
+      */
+     @Autowired
     private ActivMenuService activMenuService;
 
-    @Autowired
+     /**
+      * sys细胞毒性t淋巴细胞服务
+      */
+     @Autowired
     private SysCtlService sysCtlService;
 
-    @Autowired
+     /**
+      * sys活性细胞毒性t淋巴细胞服务
+      */
+     @Autowired
     private SysActivCtlService sysActivCtlService;
 
-    @Autowired
+     /**
+      * sys配置映射器
+      */
+     @Autowired
     private SysConfigMapper sysConfigMapper;
 
-    /**
-     * 激活
-     *
-     * @param activationRequest
-     */
-    public void activate(ActivationRequest activationRequest) {
+     /**
+      * 激活
+      *
+      * @param activationRequest 激活请求
+      */
+     public void activate(ActivationRequest activationRequest) {
         ActivationResponse content = status();
         boolean isSysActivited = false;
         if (Objects.nonNull(content) && Objects.equals(AdminConstant.STATUS_ACTIVITED, content.getIsActived())) {
@@ -189,18 +239,20 @@ public class SysActivationService {
 
     }
 
-
-    public void resetMenuVisibility() {
+     /**
+      * 重置菜单可见性
+      */
+     public void resetMenuVisibility() {
         ACTIVATION_CONTENT = status();
         activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
     }
 
-
-    /**
-     * 查询系统激活状态
-     * @return
-     */
-    public ActivationResponse status() {
+     /**
+      * 查询系统激活状态
+      *
+      * @return
+      */
+     public ActivationResponse status() {
 
         if (Objects.isNull(ACTIVATION_CONTENT)) {
             ActivationResponse activationResponse = parseContentFromDecrpytedFile();
@@ -214,9 +266,13 @@ public class SysActivationService {
         return ACTIVATION_CONTENT;
     }
 
-
-
-    public String getValueByKey(String key) {
+     /**
+      * 按键获取值
+      *
+      * @param key 关键
+      * @return {@link String }
+      */
+     public String getValueByKey(String key) {
         ActivationResponse activationResponse = status();
         if (Objects.isNull(activationResponse) || !Objects.equals(AdminConstant.STATUS_ACTIVITED, activationResponse.getIsActived())) {
             throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR);
@@ -240,13 +296,12 @@ public class SysActivationService {
         return itemOptional.get().getValue();
     }
 
-
-    /**
-     * 查询系统UUID
-     *
-     * @return
-     */
-    public String querySysUUID() {
+     /**
+      * 查询系统UUID
+      *
+      * @return
+      */
+     public String querySysUUID() {
         status();
         SysActivCtlModel sysActivCtlModel = null;
         if (Objects.isNull(ACTIVATION_CONTENT) || Objects.equals(AdminConstant.STATUS_NOT_ACTIVITED, ACTIVATION_CONTENT.getIsActived())) {
@@ -275,7 +330,14 @@ public class SysActivationService {
         return uuid;
     }
 
-    @Deprecated
+     /**
+      * 生成自定义验证jsoninfo
+      *
+      * @param moduleItems
+      * @param resourceItems
+      * @return {@link String }
+      */
+     @Deprecated
     public String generateCustomizedVerifyJSONInfo(List<ActivationModuleItem> moduleItems, List<ActivationResourceItem> resourceItems) {
         JSONObject jsonObject = new JSONObject();
 
@@ -304,10 +366,10 @@ public class SysActivationService {
         return jsonStr;
     }
 
-    /**
-     * 判断是否过期有两种方法，1. 过期日期超限  2.系统运行时长超限
-     */
-    private void processActivedStatus() {
+     /**
+      * 判断是否过期有两种方法，1. 过期日期超限  2.系统运行时长超限
+      */
+     private void processActivedStatus() {
         if (Objects.nonNull(ACTIVATION_CONTENT)) {
             //默认状态为未激活
             LocalDate expireDate = LocalDate.parse(ACTIVATION_CONTENT.getExpiredDate(), dateFormatter);
@@ -360,11 +422,12 @@ public class SysActivationService {
         }
     }
 
-    /**
-     * 生成加密文件，存磁盘
-     * @param activationRequest
-     */
-    private void generateEncryptedFile(ActivationRequest activationRequest) {
+     /**
+      * 生成加密文件，存磁盘
+      *
+      * @param activationRequest 激活请求
+      */
+     private void generateEncryptedFile(ActivationRequest activationRequest) {
         String verifyCode = activationRequest.getVerifyCode();
         String encryptedVerifyCode = EncryptUtils.desEncrypt(verifyCode);
         ActivationResponse activationResponse = new ActivationResponse();
@@ -395,8 +458,12 @@ public class SysActivationService {
         log.info("activation file has been generated! filePath:{}", filePath);
     }
 
-
-    private ActivationResponse parseContentFromDecrpytedFile() {
+     /**
+      * 解析解密文件中内容
+      *
+      * @return {@link ActivationResponse }
+      */
+     private ActivationResponse parseContentFromDecrpytedFile() {
         File activationFile = new File(frontAdminConfig.getLicenseDir() + File.separator + ACTIVATION_FILE);
         if (!activationFile.exists()) {
             log.error("activation file not exist!");
@@ -419,8 +486,13 @@ public class SysActivationService {
         return activationResponse;
     }
 
-
-    private Map<String, String> convertActivationItems2CustomVerifyInfoMap(List<ActivationItem> items) {
+     /**
+      * 转换激活项2自定义验证信息映射
+      *
+      * @param items 项目
+      * @return {@link Map }<{@link String }, {@link String }>
+      */
+     private Map<String, String> convertActivationItems2CustomVerifyInfoMap(List<ActivationItem> items) {
         ParamCheck.notEmpty(items, AuthBasei18nCode.REQUEST_PARAMS);
         Map<String, String> map = new HashMap<>();
         items.forEach(i -> {
@@ -429,23 +501,34 @@ public class SysActivationService {
         return map;
     }
 
-    private String getExpiredDateStr(Integer months) {
+     /**
+      * 获取过期日期STR
+      *
+      * @param months 个月
+      * @return {@link String }
+      */
+     private String getExpiredDateStr(Integer months) {
         LocalDate localDate = LocalDate.now().plusMonths(months);
         String expiredDate = localDate.format(dateFormatter);
         return expiredDate;
     }
 
-    private String getExpiredDateStrDay(Integer days) {
+     /**
+      * @param days
+      * @return {@link String }
+      */
+     private String getExpiredDateStrDay(Integer days) {
         LocalDate localDate = LocalDate.now().plusDays(days);
         String expiredDate = localDate.format(dateFormatter);
         return expiredDate;
     }
 
-    /**
-     * 激活成功，变更数据库激活限制相关配置信息
-     * @param activationRequest
-     */
-    private void processActivCtlAfterActivationSuccess(ActivationRequest activationRequest) {
+     /**
+      * 激活成功，变更数据库激活限制相关配置信息
+      *
+      * @param activationRequest 激活请求
+      */
+     private void processActivCtlAfterActivationSuccess(ActivationRequest activationRequest) {
         SysActivCtlModel oldSysActivCtlModel = sysCtlService.getUnusedActivCtlModel();
         SysActivCtlModel updateSysActivCtlModel = new SysActivCtlModel();
         updateSysActivCtlModel.setId(oldSysActivCtlModel.getId());
@@ -489,27 +572,29 @@ public class SysActivationService {
         }
     }
 
-    /**
-     * 用旧的license再次激活
-     * last_active_date，active_count变动
-     *
-     * @param activeDateStr
-     */
-    private void processActivCtlWhenReActiveWithOldLicense(SysActivCtlModel updateSysActivCtlModel, String activeDateStr) {
+     /**
+      * 用旧的license再次激活
+      * last_active_date，active_count变动
+      *
+      * @param updateSysActivCtlModel
+      * @param activeDateStr
+      */
+     private void processActivCtlWhenReActiveWithOldLicense(SysActivCtlModel updateSysActivCtlModel, String activeDateStr) {
         // 不更新first_active_date
         updateSysActivCtlModel.setFirstActiveDate(null);
         updateSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         sysActivCtlService.update(updateSysActivCtlModel);
     }
 
-
-    /**
-     * 用新的license再次激活
-     * 当做一次全新的激活，先将其他激活状态都设置成status=0
-     * @param activeDateStr
-     * @param expiredDateStr
-     */
-    private void processActivCtlWhenReActiveWithNewLicense(String activeDateStr, String expiredDateStr, String encryptedLicenseCode) {
+     /**
+      * 用新的license再次激活
+      * 当做一次全新的激活，先将其他激活状态都设置成status=0
+      *
+      * @param activeDateStr
+      * @param expiredDateStr
+      * @param encryptedLicenseCode
+      */
+     private void processActivCtlWhenReActiveWithNewLicense(String activeDateStr, String expiredDateStr, String encryptedLicenseCode) {
         SysActivCtlModel newSysActivCtlModel = new SysActivCtlModel();
         Long currTs = System.currentTimeMillis();
         newSysActivCtlModel.setSysTimestamp(currTs);
@@ -529,13 +614,15 @@ public class SysActivationService {
         }
     }
 
-    /**
-     * 用新的license第一次激活
-     * @param updateSysActivCtlModel
-     * @param activeDateStr
-     * @param expiredDateStr
-     */
-    private void processActivCtlWhenFirstActiveWithNewLicense(SysActivCtlModel updateSysActivCtlModel, String activeDateStr, String expiredDateStr, String encryptedLicenseCode) {
+     /**
+      * 用新的license第一次激活
+      *
+      * @param updateSysActivCtlModel
+      * @param activeDateStr
+      * @param expiredDateStr
+      * @param encryptedLicenseCode
+      */
+     private void processActivCtlWhenFirstActiveWithNewLicense(SysActivCtlModel updateSysActivCtlModel, String activeDateStr, String expiredDateStr, String encryptedLicenseCode) {
         updateSysActivCtlModel.setFirstActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         updateSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         updateSysActivCtlModel.setExpireDate(EncryptUtils.desEncrypt(expiredDateStr));
@@ -546,12 +633,12 @@ public class SysActivationService {
         sysActivCtlService.update(updateSysActivCtlModel);
     }
 
-
-    /**
-     * 查询模块激活信息
-     * @return
-     */
-    public List<ModuleInfoResponse> getModuleInfoList() {
+     /**
+      * 查询模块激活信息
+      *
+      * @return
+      */
+     public List<ModuleInfoResponse> getModuleInfoList() {
         var content = status();
         List<ModuleInfoResponse> moduleInfoList = new ArrayList<>();
         if (Objects.isNull(content) || CollectionUtil.isEmpty(content.getItems())) {
@@ -590,9 +677,10 @@ public class SysActivationService {
         return moduleInfoList;
     }
 
-
-
-    @Deprecated
+     /**
+      * @return {@link ActivationResponse }
+      */
+     @Deprecated
     private ActivationResponse mockActivationContent() {
         ActivationResponse content = new ActivationResponse();
         content.setExpiredDate("2022-05-26");

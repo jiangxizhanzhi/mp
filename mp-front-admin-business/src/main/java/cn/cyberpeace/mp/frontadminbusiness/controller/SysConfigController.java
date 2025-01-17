@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name SysConfigController.java.
+ // File size 6632.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:13 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontadminbusiness.controller;
 
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -39,40 +49,54 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * @Description: 系统配置管理接口
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Api(value = "配置管理接口", tags = "AUTH-配置管理接口")
+ /**
+  * sys配置控制器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Api(value = "配置管理接口", tags = "AUTH-配置管理接口")
 @Slf4j
 @RestController
 @RequestMapping("/sys/config")
 @UnlimitPagination("list")
 public class SysConfigController {
 
-    @Autowired
+     /**
+      * sys配置服务
+      */
+     @Autowired
     private SysConfigService sysConfigService;
 
-    @Autowired
+     /**
+      * 检查服务
+      */
+     @Autowired
     private SysConfigCheckService checkService;
 
-    /**
-     * 文件上传客户端
-     */
-    @Qualifier("fastDfsFileServiceImpl")
+     /**
+      * 文件上传客户端
+      */
+     @Qualifier("fastDfsFileServiceImpl")
     @Autowired
     private FileService fileService;
 
-
-    @ApiOperation(value = "查询所有系统设置", notes = "")
+     /**
+      * 列出所有
+      *
+      * @return {@link ServiceResult }<{@link List }<{@link SysConfigModel }>>
+      */
+     @ApiOperation(value = "查询所有系统设置", notes = "")
     @GetMapping("/all")
     public ServiceResult<List<SysConfigModel>> listAll() {
         List<SysConfigModel> configs = sysConfigService.listAll();
         return ResultCommon.success(configs);
     }
 
-    @ApiOperation(value = "查询系统名称", notes = "")
+     /**
+      * @return {@link ServiceResult }<{@link List }<{@link SysConfigModel }>>
+      */
+     @ApiOperation(value = "查询系统名称", notes = "")
     @GetMapping("/public")
     public ServiceResult<List<SysConfigModel>> getSystemName() {
         List<SysConfigModel> configs = new ArrayList<>();
@@ -83,7 +107,13 @@ public class SysConfigController {
         return ResultCommon.success(configs);
     }
 
-    @ApiOperation(value = "根据keyname更新单条sysconfig", notes = "")
+     /**
+      * 按键名更新
+      *
+      * @param updateConfig 更新配置
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation(value = "根据keyname更新单条sysconfig", notes = "")
     @ApiImplicitParam(name = "updateConfig", value = "更新请求体", dataTypeClass = SysConfigModel.class)
     @PostMapping("/update/bykeyname")
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "更新系统配置", target = OpTargetEnums.SYS_CONFIG)
@@ -101,7 +131,13 @@ public class SysConfigController {
         }
     }
 
-    @ApiOperation(value = "根据keyname批量更新sysconfig", notes = "")
+     /**
+      * 更新所有
+      *
+      * @param configs 配置
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation(value = "根据keyname批量更新sysconfig", notes = "")
     @ApiImplicitParam(name = "configs", value = "配置列表", dataTypeClass = List.class)
     @PostMapping("/updateall")
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "更新系统配置", target = OpTargetEnums.SYS_CONFIG)
@@ -119,13 +155,13 @@ public class SysConfigController {
         }
     }
 
-    /**
-     * 系统logo导入
-     *
-     * @param file
-     * @return
-     */
-    @ApiOperation("系统logo导入")
+     /**
+      * 系统logo导入
+      *
+      * @param file
+      * @return
+      */
+     @ApiOperation("系统logo导入")
     @ApiImplicitParam(name = "file", value = "logo图片", dataTypeClass = MultipartFile.class)
     @PostMapping(value = "/logo/upload")
     @ResponseBody
@@ -137,13 +173,13 @@ public class SysConfigController {
         return fileService.uploadFile(file);
     }
 
-    /**
-     * VPN软件包导入
-     *
-     * @param file
-     * @return
-     */
-    @ApiOperation("VPN软件包导入")
+     /**
+      * VPN软件包导入
+      *
+      * @param file
+      * @return
+      */
+     @ApiOperation("VPN软件包导入")
     @ApiImplicitParam(name = "file", value = "vpn软件包", dataTypeClass = MultipartFile.class)
     @PostMapping(value = "/vpn/upload")
     @ResponseBody

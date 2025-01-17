@@ -1,3 +1,13 @@
+// Copyright (C) 2024
+// All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name RegisterRequest.java.
+ // File size 1138.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.request.register;
 
 import io.swagger.annotations.ApiModel;
@@ -5,12 +15,14 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@ApiModel(value = "注册请求")
+
+ /**
+  * 注册请求
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @ApiModel(value = "注册请求")
 @Data
 public class RegisterRequest {
 

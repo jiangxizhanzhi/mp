@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name CustomAuthenticationFailureHandler.java.
+ // File size 5383.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.extensions.security;
 
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
@@ -27,24 +37,44 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Component
+ /**
+  * 自定义身份验证失败处理程序
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Component
 public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
-    private final ObjectMapper mapper;
+     /**
+      * 映射器
+      */
+     private final ObjectMapper mapper;
 
-    @Autowired
+     /**
+      * 自定义身份验证失败处理程序
+      *
+      * @param messageConverter 消息转换器
+      */
+     @Autowired
     public CustomAuthenticationFailureHandler(MappingJackson2HttpMessageConverter messageConverter) {
         this.mapper = messageConverter.getObjectMapper();
     }
 
-    @Resource(name = AuthCacheConfig.LOGIN_FAILURE)
+     /**
+      * 登录失败缓存
+      */
+     @Resource(name = AuthCacheConfig.LOGIN_FAILURE)
     private Cache<String, Integer> loginFailureCache;
 
-    @Override
+     /**
+      * 鉴权失败
+      *
+      * @param request   请求
+      * @param response  响应
+      * @param exception 异常
+      * @throws IOException ioexception
+      */
+     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) throws IOException {
         response.setContentType("application/json;charset=UTF-8");
@@ -101,7 +131,13 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
         writer.flush();
     }
 
-    private String getUserName(HttpServletRequest request) {
+     /**
+      * 获取用户名
+      *
+      * @param request 请求
+      * @return {@link String }
+      */
+     private String getUserName(HttpServletRequest request) {
         if (Objects.equals(request.getContentType(), MediaType.APPLICATION_JSON_VALUE)) {
             return (String) request.getAttribute(AuthConstant.REQUEST_PARAMETER_USERNAME);
         } else {

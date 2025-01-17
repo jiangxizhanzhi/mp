@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name SysOptionServiceImpl.java.
+ // File size 13128.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontadmin.service.sys.activmenu;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
@@ -27,31 +37,42 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.function.Function;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/8/15 15:57
- */
-@Slf4j
+ /**
+  * sys选项服务impl
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 @Service
 public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionMapper, OptionFields, OptionQueryParams>
         implements OptionService {
 
-    @Autowired
+     /**
+      * 选择映射器
+      */
+     @Autowired
     private OptionMapper optionMapper;
 
-    @Autowired
+     /**
+      * sys选项服务impl
+      *
+      * @param optionMapper 选择映射器
+      * @param optionFields 选择字段
+      */
+     @Autowired
     public SysOptionServiceImpl(OptionMapper optionMapper, OptionFields optionFields) {
         setModelFields(optionFields);
         setModelMapper(optionMapper);
     }
 
-    /**
-     * 补充list查询条件
-     * @param humanCondition
-     * @param queryParams
-     */
-    @Override
+     /**
+      * 补充list查询条件
+      *
+      * @param humanCondition
+      * @param queryParams    查询参数
+      */
+     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, OptionQueryParams queryParams) {
         if (StringUtils.isNotEmpty(queryParams.getType())) {
             humanCondition.filterEqual("type", queryParams.getType());
@@ -61,13 +82,15 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         }
     }
 
-    /**
-     *
-     * @param type
-     * @param intFlag bo中code字段是否转为int类型
-     * @return
-     */
-    private List<OptionBO> getOptionsByType(String type, boolean intFlag, boolean filterByMetaVisible) {
+     /**
+      * 按类型获取选项
+      *
+      * @param type
+      * @param intFlag             bo中code字段是否转为int类型
+      * @param filterByMetaVisible
+      * @return
+      */
+     private List<OptionBO> getOptionsByType(String type, boolean intFlag, boolean filterByMetaVisible) {
         List<OptionModel> models = findByType(type);
         Function<String, ?> function = null;
 
@@ -84,7 +107,11 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         return flatModels2NestedBos(models, function);
     }
 
-    @Override
+     /**
+      * @param type 类型
+      * @return {@link List }<{@link OptionModel }>
+      */
+     @Override
     public List<OptionModel> findByType(String type) {
         HumanCondition condition = new HumanCondition();
         condition.filterEqual(OptionModel::getType, type);
@@ -94,23 +121,31 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         return optionModels;
     }
 
-    @Override
+     /**
+      * @param type 类型
+      * @return {@link ServiceResult }<{@link List }<{@link OptionBO }>>
+      */
+     @Override
     public ServiceResult<List<OptionBO>> getStrOptions(String type) {
         return new ServiceResult<>(getOptionsByType(type, false, true)).asResult();
     }
 
-
-    @Override
+     /**
+      * @param type 类型
+      * @return {@link ServiceResult }<{@link List }<{@link OptionBO }>>
+      */
+     @Override
     public ServiceResult<List<OptionBO>> getIntOptions(String type) {
         return new ServiceResult<>(getOptionsByType(type, true, true)).asResult();
     }
 
-    /**
-     * 分页查询OptionModel列表
-     * @param queryParams
-     * @return
-     */
-    @Override
+     /**
+      * 分页查询OptionModel列表
+      *
+      * @param queryParams
+      * @return
+      */
+     @Override
     public ListObjServiceResult<OptionModelBO> page(OptionQueryParams queryParams) {
         log.info("SysOptionServiceImpl.page begin. queryParams:{}", queryParams);
         ListObjServiceResult<OptionModel> listObjServiceResult = this.list(queryParams);
@@ -133,11 +168,12 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         return result;
     }
 
-    /**
-     * 新增选项
-     * @param optionModelBO
-     */
-    @Override
+     /**
+      * 新增选项
+      *
+      * @param optionModelBO 期权模型bo
+      */
+     @Override
     public void addOption(OptionModelBO optionModelBO) {
         log.info("SysOptionServiceImpl.addOption begin. optionModelBO:{}", optionModelBO);
         if (StringUtils.isEmpty(optionModelBO.getName())) {
@@ -158,11 +194,12 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         log.info("SysOptionServiceImpl.addOption end.");
     }
 
-    /**
-     * 编辑选项
-     * @param optionModelBO
-     */
-    @Override
+     /**
+      * 编辑选项
+      *
+      * @param optionModelBO 期权模型bo
+      */
+     @Override
     public void editOption(OptionModelBO optionModelBO) {
         log.info("SysOptionServiceImpl.editOption begin. optionModelBO:{}", optionModelBO);
         if (StringUtils.isEmpty(optionModelBO.getName()) || StringUtils.isEmpty(optionModelBO.getId())) {
@@ -183,23 +220,25 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         log.info("SysOptionServiceImpl.editOption end.");
     }
 
-    /**
-     * 删除选项
-     * @param ids
-     */
-    @Override
+     /**
+      * 删除选项
+      *
+      * @param ids id
+      */
+     @Override
     public void deleteOptions(List<String> ids) {
         log.info("SysOptionServiceImpl.deleteOptions begin. ids:{}", ids);
         this.bulkDelete(ids.toArray(new String[ids.size()]));
         log.info("SysOptionServiceImpl.deleteOptions end.");
     }
 
-    /**
-     * 根据id查询
-     * @param id
-     * @return
-     */
-    @Override
+     /**
+      * 根据id查询
+      *
+      * @param id
+      * @return
+      */
+     @Override
     public OptionModelBO findById(String id) {
         log.info("SysOptionServiceImpl.findById begin. id:{}", id);
         OptionModelBO optionModelBO = new OptionModelBO();
@@ -215,12 +254,13 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         return optionModelBO;
     }
 
-    /**
-     * 根据ids查询列表
-     * @param ids
-     * @return
-     */
-    @Override
+     /**
+      * 根据ids查询列表
+      *
+      * @param ids
+      * @return
+      */
+     @Override
     public List<OptionModel> findByIds(List<String> ids) {
         log.info("SysOptionServiceImpl.findByIds begin. ids:{}", ids);
         HumanCondition condition = new HumanCondition();
@@ -231,12 +271,13 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         return optionModels;
     }
 
-    /**
-     * 根据type类型获取最大的code值（只对数字类型的code有效）
-     * @param type
-     * @return
-     */
-    @Override
+     /**
+      * 根据type类型获取最大的code值（只对数字类型的code有效）
+      *
+      * @param type
+      * @return
+      */
+     @Override
     public Integer getMaxCode(String type) {
         log.info("SysOptionServiceImpl.getMaxCode begin. type:{}", type);
         Integer result = optionMapper.getMaxCode(type);
@@ -245,12 +286,13 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         return result;
     }
 
-    /**
-     * 根据type类型获取最大的sort值
-     * @param type
-     * @return
-     */
-    @Override
+     /**
+      * 根据type类型获取最大的sort值
+      *
+      * @param type
+      * @return
+      */
+     @Override
     public Integer getMaxSort(String type) {
         log.info("SysOptionServiceImpl.getMaxSort begin. type:{}", type);
         Integer result = optionMapper.getMaxSort(type);
@@ -259,7 +301,12 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         return result;
     }
 
-    private void filterByVisibility(List<OptionModel> optionModels) {
+     /**
+      * 按能见度筛选
+      *
+      * @param optionModels 选择模型
+      */
+     private void filterByVisibility(List<OptionModel> optionModels) {
         Iterator<OptionModel> iter = optionModels.iterator();
         while (iter.hasNext()) {
             String metaStr = iter.next().getMeta();
@@ -270,7 +317,14 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         }
     }
 
-    private List<OptionBO> flatModels2NestedBos(List<OptionModel> models, Function<String, ?> function) {
+     /**
+      * 平面模型2嵌套bos
+      *
+      * @param models   模型
+      * @param function
+      * @return {@link List }<{@link OptionBO }>
+      */
+     private List<OptionBO> flatModels2NestedBos(List<OptionModel> models, Function<String, ?> function) {
         Locale locale = LocaleContextHolder.getLocale();
         List<OptionBO> rootBos = new ArrayList<>();
         Map<String, OptionBO> optionBoMap = new HashMap<>(models.size());
@@ -302,13 +356,14 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         return rootBos;
     }
 
-    /**
-     * 检查是否存在重名
-     * @param optionModelBO
-     * @param exceptOwn
-     * @return
-     */
-    private boolean checkNameExist(OptionModelBO optionModelBO, boolean exceptOwn) {
+     /**
+      * 检查是否存在重名
+      *
+      * @param optionModelBO
+      * @param exceptOwn
+      * @return
+      */
+     private boolean checkNameExist(OptionModelBO optionModelBO, boolean exceptOwn) {
         log.info("SysOptionServiceImpl.checkNameExist begin. optionModelBO:{}, exceptOwn:{}", optionModelBO, exceptOwn);
         if (StringUtils.isEmpty(optionModelBO.getType()) || StringUtils.isEmpty(optionModelBO.getName())) {
             return false;

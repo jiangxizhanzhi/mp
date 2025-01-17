@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name ReportLogFileServiceImpl.java.
+ // File size 1242.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:16 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.log.service.impl;
 
 import cn.cyberpeace.mp.log.bo.LogFileDownloadBO;
@@ -13,35 +23,58 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * MP中台日志模块
- * @description:
- * @author：Geek Wang
- * @date: 2022/6/15
- */
-@Service
+ /**
+  * MP中台日志模块
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Service
 @Slf4j
 @RequiredArgsConstructor
 public class ReportLogFileServiceImpl implements LogFileService {
 
     private final LogReportService logReportService;
 
-    @Override
+     /**
+      * 日志报表类型
+      *
+      * @return {@link String }
+      */
+     @Override
     public String logReportType() {
         return LogReportTypeEnum.REPORT.toValue();
     }
 
-    @Override
+     /**
+      * 列表
+      *
+      * @param type 类型
+      * @return {@link List }<{@link LogReportDTO }>
+      */
+     @Override
     public List<LogReportDTO> list(String type) {
         return logReportService.list(type);
     }
 
-    @Override
+     /**
+      * 下载
+      *
+      * @param downloadDTO 下载dto
+      * @return {@link LogFileDownloadBO }
+      * @throws IOException ioexception
+      */
+     @Override
     public LogFileDownloadBO download(LogDownloadDTO downloadDTO) throws IOException{
         return null;
     }
 
-    @Override
+     /**
+      * 得到订单
+      *
+      * @return int
+      */
+     @Override
     public int getOrder() {
         return 20;
     }

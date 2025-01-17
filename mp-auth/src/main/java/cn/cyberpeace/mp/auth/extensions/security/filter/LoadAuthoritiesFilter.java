@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name LoadAuthoritiesFilter.java.
+ // File size 4036.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.extensions.security.filter;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
@@ -27,22 +37,38 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/8/22 15:47
- */
-@Component
+ /**
+  * 负载权威过滤器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Component
 @Slf4j
 public class LoadAuthoritiesFilter extends OncePerRequestFilter {
 
-    @Autowired
+     /**
+      * 身份验证用户细节服务
+      */
+     @Autowired
     private AuthUserDetailsService authUserDetailsService;
 
-    @Autowired
+     /**
+      * 客户端细节服务
+      */
+     @Autowired
     private ClientDetailsService clientDetailsService;
 
-    @Override
+     /**
+      * 做内部过滤
+      *
+      * @param request     请求
+      * @param response    响应
+      * @param filterChain 过滤器链
+      * @throws ServletException servlet异常
+      * @throws IOException      ioexception
+      */
+     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         Object userId = request.getAttribute(LogConstant.USER_ID_KEY);

@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name JwtAuthenticationFilter.java.
+ // File size 7045.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.extensions.security.filter;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
@@ -34,28 +44,52 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.Objects;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Component
+ /**
+  * JWT认证过滤器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Component
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Resource(name = "authCacheManager_6H")
+     /**
+      *
+      */
+     @Resource(name = "authCacheManager_6H")
     private CacheManager cacheManager;
 
-    private final ObjectMapper mapper;
+     /**
+      *
+      */
+     private final ObjectMapper mapper;
 
-    @Autowired
+     /**
+      * JWT认证过滤器
+      *
+      * @param messageConverter 消息转换器
+      */
+     @Autowired
     public JwtAuthenticationFilter(MappingJackson2HttpMessageConverter messageConverter) {
         this.mapper = messageConverter.getObjectMapper();
     }
 
-    public static final String SKIP_JWT_FILTER = "SKIP_JWT_FILTER";
+     /**
+      *
+      */
+     public static final String SKIP_JWT_FILTER = "SKIP_JWT_FILTER";
 
-    @Override
+     /**
+      * 做内部过滤
+      *
+      * @param request     请求
+      * @param response    响应
+      * @param filterChain 过滤器链
+      * @throws ServletException servlet异常
+      * @throws IOException      ioexception
+      */
+     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         Object skipJwtFilter = request.getAttribute(JwtAuthenticationFilter.SKIP_JWT_FILTER);
@@ -92,8 +126,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-
-    private void refreshToken(HttpServletResponse response, String token, UserModel userModel) {
+     /**
+      * 刷新令牌
+      *
+      * @param response  响应
+      * @param token     令牌
+      * @param userModel 用户模型
+      */
+     private void refreshToken(HttpServletResponse response, String token, UserModel userModel) {
         Cache tokenCache = cacheManager.getCache("_token");
         String newJwt = tokenCache.get(token, String.class);
         if (StringUtils.isBlank(newJwt)) {
@@ -119,8 +159,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-
-    private void setCookie(HttpServletResponse response, String name, String value, String path, String domain, int maxAge) {
+     /**
+      * 集饼干
+      *
+      * @param response 响应
+      * @param name
+      * @param value
+      * @param path
+      * @param domain
+      * @param maxAge
+      */
+     private void setCookie(HttpServletResponse response, String name, String value, String path, String domain, int maxAge) {
         Cookie cookie = new Cookie(name, null);
         cookie.setPath(path);
         if (StringUtils.isNotBlank(domain)) {
@@ -137,7 +186,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.addCookie(cookie);
     }
 
-    public static void addJWTCookieToResponse(HttpServletResponse response, String newJwt) {
+     /**
+      * @param response 响应
+      * @param newJwt
+      */
+     public static void addJWTCookieToResponse(HttpServletResponse response, String newJwt) {
         Cookie cookie = new Cookie("cr_jwttoken", null);
         cookie.setPath("/");
         cookie.setMaxAge(Integer.MAX_VALUE);
@@ -152,7 +205,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     }
 
-    public static void addThirdTokenToResponse(HttpServletResponse response, String token) {
+     /**
+      * @param response 响应
+      * @param token    令牌
+      */
+     public static void addThirdTokenToResponse(HttpServletResponse response, String token) {
         Cookie cookie = new Cookie("third_token", null);
         cookie.setPath("/");
         cookie.setMaxAge(Integer.MAX_VALUE);

@@ -7,9 +7,10 @@ import lombok.Setter;
 import java.util.List;
 
 /**
- * @Description
- * @Author maojun
- * @Date 2021/10/11
+ * 场景导入请求
+ *
+ * @author 二竹
+ * @date 2025/01/17
  */
 @Getter
 @Setter

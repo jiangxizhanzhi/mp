@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name UserOnlineRecordService.java.
+ // File size 1795.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:13 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.bo.user.UserOnlineCntBo;
@@ -11,30 +21,39 @@ import com.github.pagehelper.PageInfo;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-public interface UserOnlineRecordService extends BaseModelService<UserOnlineRecordModel, QueryParams> {
+ /**
+  * 用户在线记录服务
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ public interface UserOnlineRecordService extends BaseModelService<UserOnlineRecordModel, QueryParams> {
 
-    PageInfo<UserOnlineReportBo> recordSummaryPage(UserOnlineRecordSummaryPageRequest req);
+     /**
+      * 记录汇总页
+      *
+      * @param req 要求
+      * @return {@link PageInfo }<{@link UserOnlineReportBo }>
+      */
+     PageInfo<UserOnlineReportBo> recordSummaryPage(UserOnlineRecordSummaryPageRequest req);
 
-    /**
-     * 判断在线的依据：
-     * end_time > (now() - 5m) && status = 0
-     *
-     * @return
-     */
-    List<UserOnlineRecordModel> listCurrentOnlined(List<String> userIds);
+     /**
+      * 判断在线的依据：
+      * end_time > (now() - 5m) && status = 0
+      *
+      * @param userIds 用户id
+      * @return
+      */
+     List<UserOnlineRecordModel> listCurrentOnlined(List<String> userIds);
 
-    /**
-     * 判断离线的依据:
-     * end_time <= (now() - 5m) && status = 0
-     *
-     * @return
-     */
-    List<UserOnlineRecordModel> listCurrentOfflined(List<String> userIds);
+     /**
+      * 判断离线的依据:
+      * end_time <= (now() - 5m) && status = 0
+      *
+      * @param userIds 用户id
+      * @return
+      */
+     List<UserOnlineRecordModel> listCurrentOfflined(List<String> userIds);
 
 
     /**
@@ -57,14 +76,20 @@ public interface UserOnlineRecordService extends BaseModelService<UserOnlineReco
      */
     //List<UserOnlineRecordModel> listOnlinedUserByPeriod();
 
+     /**
+      * 根据时间段查找在线用户数量
+      *
+      * @param startTime 开始时间
+      * @param endTime   结束时间
+      * @return
+      */
+     Integer getOnlinedUserCntByPeriod(LocalDateTime startTime, LocalDateTime endTime);
 
-    /**
-     * 根据时间段查找在线用户数量
-     *
-     * @return
-     */
-    Integer getOnlinedUserCntByPeriod(LocalDateTime startTime, LocalDateTime endTime);
-
-    UserOnlineCntBo onlineUserCnt();
+     /**
+      * 在线用户CNT
+      *
+      * @return {@link UserOnlineCntBo }
+      */
+     UserOnlineCntBo onlineUserCnt();
 
 }

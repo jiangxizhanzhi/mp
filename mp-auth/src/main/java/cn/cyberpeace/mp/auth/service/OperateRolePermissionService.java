@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name OperateRolePermissionService.java.
+ // File size 2054.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:13 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
@@ -12,26 +22,40 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * @Description: 查看当前用户，是否有权对角色进行增删改查
- * @Author zhouxinghuai
- * @Date：2022/05/12 11:15
- */
-@Slf4j
+ /**
+  * 操作角色许可服务
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Slf4j
 @Service
 public class OperateRolePermissionService extends OperatePermissionService {
 
-    @Autowired
+     /**
+      * 用户服务
+      */
+     @Autowired
     private UserService userService;
 
-    @Autowired
+     /**
+      * 角色服务
+      */
+     @Autowired
     private RoleService roleService;
 
-    @Autowired
+     /**
+      * 用户角色服务
+      */
+     @Autowired
     private UserRoleService userRoleService;
 
-
-    public List<String> getExcludeRoleIdsByLoginUserForSearchingRoles() {
+     /**
+      * 通过登录用户获取排除角色id，用于搜索角色
+      *
+      * @return {@link List }<{@link String }>
+      */
+     public List<String> getExcludeRoleIdsByLoginUserForSearchingRoles() {
 
         boolean isSupserUser = isLoginUserSuperUser();
         if (isSupserUser) {
@@ -49,12 +73,13 @@ public class OperateRolePermissionService extends OperatePermissionService {
         return Arrays.asList(AuthConstant.ROLE_ADMIN_ID);
     }
 
-    /**
-     * 根据操作对象的所有角色名称检查权限
-     * 如：excel批量导入
-     * @param targetRoleNames
-     */
-    public void checkByTargetRoleNames(List<String> targetRoleNames) {
+     /**
+      * 根据操作对象的所有角色名称检查权限
+      * 如：excel批量导入
+      *
+      * @param targetRoleNames 目标角色名称
+      */
+     public void checkByTargetRoleNames(List<String> targetRoleNames) {
         if (CollectionUtil.isEmpty(targetRoleNames)) {
             return;
         }

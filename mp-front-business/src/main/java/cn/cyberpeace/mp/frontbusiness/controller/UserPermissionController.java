@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name UserPermissionController.java.
+ // File size 4306.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
@@ -19,22 +29,31 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * @Description: 用户权限管理接口
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Api(value = "用户-权限管理接口(业务)", tags = "AUTH-用户-权限管理接口(业务)")
+ /**
+  * 用户权限控制器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Api(value = "用户-权限管理接口(业务)", tags = "AUTH-用户-权限管理接口(业务)")
 @Slf4j
 @RestController("userPermissionFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/user_permissions")
 public class UserPermissionController {
 
-    @Autowired
+     /**
+      * 用户许可服务
+      */
+     @Autowired
     private UserPermissionService userPermissionService;
 
-
-    @ApiOperation(value = "根据userId查询所有权限", notes = "")
+     /**
+      * 按用户获取目标
+      *
+      * @param userId 用户id
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation(value = "根据userId查询所有权限", notes = "")
     @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/byuser")
     public ServiceResult getTargetsByUser(String userId) {
@@ -42,8 +61,13 @@ public class UserPermissionController {
         return ServiceResult.builder().source(targets).build().asResult();
     }
 
-
-    @ApiOperation(value = "根据userId查询所有权限", notes = "")
+     /**
+      * 按用户获取目标树
+      *
+      * @param userId 用户id
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation(value = "根据userId查询所有权限", notes = "")
     @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/tree/byuser")
     public ServiceResult getTargetsTreeByUser(@RequestParam String userId) {
@@ -51,9 +75,13 @@ public class UserPermissionController {
         return ServiceResult.builder().source(tree).build().asResult();
     }
 
-
-
-    @ApiOperation(value = "根据userId查询所有菜单权限（对象集合）", notes = "")
+     /**
+      * 按用户获取菜单目标
+      *
+      * @param userId 用户id
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation(value = "根据userId查询所有菜单权限（对象集合）", notes = "")
     @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/menus/byuser")
     public ServiceResult getMenuTargetsByUser(@RequestParam String userId) {
@@ -61,24 +89,33 @@ public class UserPermissionController {
         return ServiceResult.builder().source(targets).build().asResult();
     }
 
-
-    @ApiOperation(value = "查询当前登录用户所有菜单权限（对象集合）", notes = "")
+     /**
+      * 通过登录用户获取菜单目标
+      *
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation(value = "查询当前登录用户所有菜单权限（对象集合）", notes = "")
     @GetMapping("/menus/byloginuser")
     public ServiceResult getMenuTargetsByLoginUser() {
         List<TargetModel> targets = userPermissionService.listMenusByLoginUser();
         return ServiceResult.builder().source(targets).build().asResult();
     }
 
-
-    @ApiOperation(value = "查询当前登录用户所有菜单权限（编码集合）", notes = "")
+     /**
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation(value = "查询当前登录用户所有菜单权限（编码集合）", notes = "")
     @GetMapping("/menuidents/byloginuser")
     public ServiceResult listMenuIdentsByLoginUser() {
         List<String> menuIdents = userPermissionService.listMenuIdentsByLoginUser();
         return ServiceResult.builder().source(menuIdents).build().asResult();
     }
 
-
-    @ApiOperation(value = "绑定用户-资源关系，注意，该操作会清除用户原来绑定的权限。如果targetIds为空，表示删除用户所有角色！", notes = "")
+     /**
+      * @param userTargetsReq 用户目标要求
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation(value = "绑定用户-资源关系，注意，该操作会清除用户原来绑定的权限。如果targetIds为空，表示删除用户所有角色！", notes = "")
     @ApiImplicitParam(name="userTargetsReq", value="绑定请求", dataTypeClass = BindUserTargetsRequest.class)
     @PostMapping("/bind")
     public ServiceResult bindUserPermissions(@RequestBody @Validated BindUserTargetsRequest userTargetsReq) {

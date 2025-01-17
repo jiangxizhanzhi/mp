@@ -8,7 +8,9 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotNull;
 
 /**
- * @author wanggang
+ * 默认img请求
+ *
+ * @author wanggang@date 2025/01/17
  */
 @Data
 @NoArgsConstructor

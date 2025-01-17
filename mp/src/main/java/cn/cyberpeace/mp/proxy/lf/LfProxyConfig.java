@@ -1,9 +1,25 @@
+// Copyright (C) 2024
+// All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name LfProxyConfig.java.
+ // File size 1560.
+ // File create date Tue Sep 24 15:29:09 CST 2024.
+ // File update date Fri Jan 17 11:23:14 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.proxy.lf;
 
 import cn.hutool.core.io.FileUtil;
 import lombok.Data;
 
-@Data
+ /**
+  * 低频代理配置
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Data
 public class LfProxyConfig {
     public static final String URL_SEPARATOR = "/";
     public static final String FILE_LOCATION_PREFIX = "file:";
@@ -14,7 +30,12 @@ public class LfProxyConfig {
     private String location;
     private Boolean urlPatternEnabled;
 
-    public String getUrl() {
+     /**
+      * 获取url
+      *
+      * @return {@link String }
+      */
+     public String getUrl() {
         if (Boolean.TRUE.equals(urlPatternEnabled)) {
             return url;
         }
@@ -27,7 +48,12 @@ public class LfProxyConfig {
         return formattedUrl;
     }
 
-    public String getLocation() {
+     /**
+      * 得到位置
+      *
+      * @return {@link String }
+      */
+     public String getLocation() {
         var formattedLocation = location;
         if (!(formattedLocation.startsWith(FILE_LOCATION_PREFIX) || formattedLocation.startsWith(CLASSPATH_LOCATION_PREFIX))) {
             formattedLocation = FILE_LOCATION_PREFIX + formattedLocation;

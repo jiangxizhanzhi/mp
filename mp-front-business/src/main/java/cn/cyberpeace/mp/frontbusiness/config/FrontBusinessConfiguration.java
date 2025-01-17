@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name FrontBusinessConfiguration.java.
+ // File size 1843.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontbusiness.config;
 
 import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
@@ -13,30 +23,51 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.servlet.DispatcherType;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/12/10 21:15
- */
-@Configuration
+ /**
+  * 前台业务配置
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Configuration
 public class FrontBusinessConfiguration {
 
-    @Autowired
+     /**
+      * 消息来源
+      */
+     @Autowired
     private MessageSource messageSource;
 
-    @Autowired
+     /**
+      * urlacwrapper服务
+      */
+     @Autowired
     private UrlACWrapperService urlACWrapperService;
 
-    @Autowired
+     /**
+      * 人事处烫服务
+      */
+     @Autowired
     private OperateUserPermissionService opPermService;
 
-    @Autowired
+     /**
+      * 前面业务配置
+      */
+     @Autowired
     private FrontBusinessConfig frontBusinessConfig;
 
-    @Autowired
+     /**
+      * 映射器
+      */
+     @Autowired
     private ObjectMapper mapper;
 
-    @Bean
+     /**
+      * Url验证过滤器注册bean
+      *
+      * @return {@link FilterRegistrationBean }
+      */
+     @Bean
     public FilterRegistrationBean urlAuthFilterRegistrationBean() {
         FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
         filterRegistrationBean.setFilter(new UrlACFilter(urlACWrapperService, opPermService, frontBusinessConfig, mapper));

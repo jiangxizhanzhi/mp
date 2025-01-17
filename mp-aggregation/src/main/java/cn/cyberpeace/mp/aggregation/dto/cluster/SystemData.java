@@ -6,9 +6,10 @@ import lombok.Builder;
 import lombok.Data;
 
 /**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/9/13 13:58
+ * 系统数据
+ *
+ * @author 二竹
+ * @date 2025/01/17
  */
 
 @Data

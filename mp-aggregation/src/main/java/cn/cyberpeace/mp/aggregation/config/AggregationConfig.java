@@ -7,7 +7,14 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * 模块下定义的独立配置信息
- * 约定：各模块的独立配置命名 {模块名}AppConfig
+ * 约定：各模块的独立配置命名
+ * {
+ * 模块名
+ * }
+ * AppConfig
+ *
+ * @author 二竹
+ * @date 2025/01/17
  */
 @Configuration
 @ConfigurationProperties(prefix = "spring")

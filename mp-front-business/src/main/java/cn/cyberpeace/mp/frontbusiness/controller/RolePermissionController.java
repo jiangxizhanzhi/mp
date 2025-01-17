@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name RolePermissionController.java.
+ // File size 2636.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:15 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
@@ -19,21 +29,31 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * @Description: 角色权限管理接口
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
- */
-@Api(value = "角色-权限管理接口(业务)", tags = "AUTH-角色-权限管理接口(业务)")
+ /**
+  * 角色权限控制器
+  *
+  * @author 二竹
+  * @date 2025/01/17
+  */
+ @Api(value = "角色-权限管理接口(业务)", tags = "AUTH-角色-权限管理接口(业务)")
 @Slf4j
 @RestController("rolePermissionFrontController")
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/role_permissions")
 public class RolePermissionController {
 
-    @Autowired
+     /**
+      * 角色许可模型服务
+      */
+     @Autowired
     private RolePermissionModelService rolePermissionModelService;
 
-    @ApiOperation(value = "查询角色权限", notes = "")
+     /**
+      * 按角色获取目标
+      *
+      * @param roleId 角色id
+      * @return {@link ServiceResult }<{@link List }<{@link TargetModel }>>
+      */
+     @ApiOperation(value = "查询角色权限", notes = "")
     @ApiImplicitParam(name="roleId", value="角色ID", dataTypeClass = String.class)
     @GetMapping("/byrole")
     public ServiceResult<List<TargetModel>> getTargetsByRole(@RequestParam String roleId) {
@@ -42,7 +62,13 @@ public class RolePermissionController {
         return ResultCommon.success(targets);
     }
 
-    @ApiOperation(value = "绑定角色-权限关系，注意，如果targetIds为空，表示删除角色所有权限！", notes = "")
+     /**
+      * 绑定角色权限
+      *
+      * @param bindRoleTargetsReq 需要绑定角色目标
+      * @return {@link ServiceResult }
+      */
+     @ApiOperation(value = "绑定角色-权限关系，注意，如果targetIds为空，表示删除角色所有权限！", notes = "")
     @ApiImplicitParam(name = "bindRoleTargetsReq", value = "角色权限绑定请求", dataTypeClass = BindRoleTargetsRequest.class)
     @PostMapping("/bind")
     public ServiceResult bindRolePermission(@RequestBody @Validated BindRoleTargetsRequest bindRoleTargetsReq) {

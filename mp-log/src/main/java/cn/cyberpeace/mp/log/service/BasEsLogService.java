@@ -1,3 +1,13 @@
+ // Copyright (C) 2024
+ // All rights reserved.
+ // Project name mp
+ // Description:
+ // Author:
+ // File name BasEsLogService.java.
+ // File size 1775.
+ // File create date Fri Jan 17 09:57:15 CST 2025.
+ // File update date Fri Jan 17 11:23:16 CST 2025.
+ // @Version 1.0.0
 package cn.cyberpeace.mp.log.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -13,22 +23,27 @@ import org.elasticsearch.rest.RestStatus;
 import javax.annotation.Resource;
 import java.io.IOException;
 
-/**
- * 基础ES操作接口
- * @author wanggang
- */
-@Slf4j
+ /**
+  * 基础ES操作接口
+  *
+  * @author wanggang@date 2025/01/17
+  */
+ @Slf4j
 public abstract class BasEsLogService {
 
-    @Resource(name = "logRestHighLevelClient")
+     /**
+      * Rest高级客户端
+      */
+     @Resource(name = "logRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
 
-    /**
-     * 创建索引并新增数据
-     * @param indexRequest
-     * @return
-     */
-    protected IndexResponse create(IndexRequest indexRequest) {
+     /**
+      * 创建索引并新增数据
+      *
+      * @param indexRequest
+      * @return
+      */
+     protected IndexResponse create(IndexRequest indexRequest) {
         try {
             IndexResponse response = restHighLevelClient.index(indexRequest, RequestOptions.DEFAULT);
             if (response.status() == RestStatus.CREATED) {
@@ -40,12 +55,13 @@ public abstract class BasEsLogService {
         return null;
     }
 
-    /**
-     * 查询
-     * @param searchRequest
-     * @return
-     */
-    protected SearchResponse search(SearchRequest searchRequest){
+     /**
+      * 查询
+      *
+      * @param searchRequest
+      * @return
+      */
+     protected SearchResponse search(SearchRequest searchRequest){
         try {
             return restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {
@@ -53,7 +69,12 @@ public abstract class BasEsLogService {
         }
     }
 
-    protected RestHighLevelClient getRestHighLevelClient() {
+     /**
+      * 得到休息高级客户
+      *
+      * @return {@link RestHighLevelClient }
+      */
+     protected RestHighLevelClient getRestHighLevelClient() {
         return restHighLevelClient;
     }
 
