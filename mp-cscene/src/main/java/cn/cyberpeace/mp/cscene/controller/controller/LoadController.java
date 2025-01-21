@@ -31,8 +31,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static org.springframework.web.bind.annotation.RequestMethod.*;
-
 @Api(value = "载荷页面", tags = "载荷页面管理")
 @Slf4j
 @RestController

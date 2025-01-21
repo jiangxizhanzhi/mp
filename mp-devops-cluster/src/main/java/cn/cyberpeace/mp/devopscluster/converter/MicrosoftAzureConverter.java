@@ -179,6 +179,11 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 total = (Integer) net.get("total");
                 break;
             case "2":
+            case "4":
+            case "5":
+            case "6":
+            case "7":
+            case "8":
                 calculate = getReturnData(request.getCloudServiceType(), "calculate", request);
                 vos = (List<DeviceCloudTargetVO>) calculate.get("data");
                 total = (Integer) calculate.get("total");
@@ -187,31 +192,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 JSONObject container = getReturnData(request.getCloudServiceType(), "container", request);
                 vos = (List<DeviceCloudTargetVO>) container.get("data");
                 total = (Integer) container.get("total");
-                break;
-            case "4":
-                calculate = getReturnData(request.getCloudServiceType(), "calculate", request);
-                vos = (List<DeviceCloudTargetVO>) calculate.get("data");
-                total = (Integer) calculate.get("total");
-                break;
-            case "5":
-                calculate = getReturnData(request.getCloudServiceType(), "calculate", request);
-                vos = (List<DeviceCloudTargetVO>) calculate.get("data");
-                total = (Integer) calculate.get("total");
-                break;
-            case "6":
-                calculate = getReturnData(request.getCloudServiceType(), "calculate", request);
-                vos = (List<DeviceCloudTargetVO>) calculate.get("data");
-                total = (Integer) calculate.get("total");
-                break;
-            case "7":
-                calculate = getReturnData(request.getCloudServiceType(), "calculate", request);
-                vos = (List<DeviceCloudTargetVO>) calculate.get("data");
-                total = (Integer) calculate.get("total");
-                break;
-            case "8":
-                calculate = getReturnData(request.getCloudServiceType(), "calculate", request);
-                vos = (List<DeviceCloudTargetVO>) calculate.get("data");
-                total = (Integer) calculate.get("total");
                 break;
             default:
         }
