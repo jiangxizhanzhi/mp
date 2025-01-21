@@ -552,7 +552,7 @@
             inner join mp_devops_cloud_target_net net on target.id = net.link_id
         </if>
 
-        <if test="cloudServiceType != null and cloudServiceType == 2">
+        <if test="cloudServiceType != null and (cloudServiceType == 2 or cloudServiceType == 4 or cloudServiceType == 5 or cloudServiceType == 6 or cloudServiceType == 7 or cloudServiceType == 8)">
             SELECT
             target.id,
             target.name,
@@ -583,6 +583,9 @@
                 </foreach>
             </if>
             and target.cloud_type = #{cloudType}
+            <if test="cloudServiceType != null and (cloudServiceType == 2 or cloudServiceType == 4 or cloudServiceType == 5 or cloudServiceType == 6 or cloudServiceType == 7 or cloudServiceType == 8)">
+                and target.cloud_service_type like CONCAT('%', #{cloudServiceType}, '%')
+            </if>
         </where>
         <if test="offset != null and pageSize != null">
             limit #{offset}, #{pageSize}
@@ -598,7 +601,7 @@
             inner join mp_devops_cloud_target_net net on target.id = net.link_id
         </if>
 
-        <if test="cloudServiceType != null and cloudServiceType == 2">
+        <if test="cloudServiceType != null and (cloudServiceType == 2 or cloudServiceType == 4 or cloudServiceType == 5 or cloudServiceType == 6 or cloudServiceType == 7 or cloudServiceType == 8)">
             SELECT
             count(0)
             FROM
@@ -621,6 +624,9 @@
                 </foreach>
             </if>
             and target.cloud_type = #{cloudType}
+            <if test="cloudServiceType != null and (cloudServiceType == 2 or cloudServiceType == 4 or cloudServiceType == 5 or cloudServiceType == 6 or cloudServiceType == 7 or cloudServiceType == 8)">
+                and target.cloud_service_type like CONCAT('%', #{cloudServiceType}, '%')
+            </if>
         </where>
     </select>
 

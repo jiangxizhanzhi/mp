@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
 import cn.cyberpeace.mp.cscene.model.MpDevopsBoundaryNetworkEquipment;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.CloudDevice;
+import cn.cyberpeace.mp.devopscluster.constant.MicrosoftAzureCategoryEnum;
 import cn.cyberpeace.mp.devopscluster.dto.CloudImageAddDTO;
 import cn.cyberpeace.mp.devopscluster.po.*;
 import cn.cyberpeace.mp.devopscluster.repository.MicrosoftAzureMapper;
@@ -25,6 +26,7 @@ import cn.cyberpeace.mp.devopscluster.vo.MpSysCodeMenuVO;
 import cn.cyberpeace.mp.devopscluster.vo.TargerRequestVO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceManager;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.azure.containers.containerregistry.ContainerRegistryClient;
 import com.azure.containers.containerregistry.ContainerRegistryClientBuilder;
@@ -79,6 +81,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
     // 镜像同步白名单路径
     private static final String filePath = "/whitelist/whitelist.xlsx";
+
+    private static final String AZURE_IMAGES_URL = "https://catalogapi.azure.com/search?api-version=2023-01-01-preview&language=zh-hans&market=all&select=all&gallery=azure&productTypes=VirtualMachine&categoryIds=%s&top=1000&skip=%s";
 
     /**
      * 云镜像管理页面分页查询
@@ -164,6 +168,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         List<DeviceCloudTargetVO> vos = null;
         //分页时计算总数
         Integer total = 0;
+        JSONObject calculate = null;
         if (request.getCloudServiceType() == null || request.getCloudServiceType().isEmpty()) {
             return new ArrayList<>();
         }
@@ -174,7 +179,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 total = (Integer) net.get("total");
                 break;
             case "2":
-                JSONObject calculate = getReturnData(request.getCloudServiceType(), "calculate", request);
+                calculate = getReturnData(request.getCloudServiceType(), "calculate", request);
                 vos = (List<DeviceCloudTargetVO>) calculate.get("data");
                 total = (Integer) calculate.get("total");
                 break;
@@ -184,12 +189,29 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 total = (Integer) container.get("total");
                 break;
             case "4":
+                calculate = getReturnData(request.getCloudServiceType(), "calculate", request);
+                vos = (List<DeviceCloudTargetVO>) calculate.get("data");
+                total = (Integer) calculate.get("total");
                 break;
             case "5":
+                calculate = getReturnData(request.getCloudServiceType(), "calculate", request);
+                vos = (List<DeviceCloudTargetVO>) calculate.get("data");
+                total = (Integer) calculate.get("total");
                 break;
             case "6":
+                calculate = getReturnData(request.getCloudServiceType(), "calculate", request);
+                vos = (List<DeviceCloudTargetVO>) calculate.get("data");
+                total = (Integer) calculate.get("total");
                 break;
             case "7":
+                calculate = getReturnData(request.getCloudServiceType(), "calculate", request);
+                vos = (List<DeviceCloudTargetVO>) calculate.get("data");
+                total = (Integer) calculate.get("total");
+                break;
+            case "8":
+                calculate = getReturnData(request.getCloudServiceType(), "calculate", request);
+                vos = (List<DeviceCloudTargetVO>) calculate.get("data");
+                total = (Integer) calculate.get("total");
                 break;
             default:
         }
@@ -251,40 +273,30 @@ public class MicrosoftAzureConverter implements BaseConverter {
                 device.setCloudServiceType(target.getCloudServiceType());
 //                //1:操作系统 2:应用系统 3:网络设备 4:安全设备
 //                device.setCategory(null);
-                //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储)
-                switch (target.getCloudServiceType()) {
-                    case "1":
-                        device.setServiceType(target.getNetType());
-                        device.setSubType(target.getSubType());
-                        if (target.getSubType() != null && target.getSubType().equals("VNet")) {
-                            cloudTargetConverter.convertExtNet(device, target);
-                        } else if (target.getSubType() != null && target.getSubType().equals("fireWall")) {
-                            cloudTargetConverter.convertExtNetFW(device, target);
-                        } else if (target.getSubType() != null && target.getSubType().equals("WAF")) {
-                            cloudTargetConverter.convertExtNetWAF(device, target);
-                        }
-                        break;
-                    case "2":
-                        device.setServiceType(target.getCalculateType());
-                        device.setSubType(target.getSubType());
-                        if (target.getSubType() != null && target.getSubType().equals("vm")) {
-                            cloudTargetConverter.convertExtVm(device, target, cloudType);
-                        } else {
-                        }
-                        break;
-                    case "3":
-                        device.setServiceType(target.getContainerType());
-                        device.setSubType(target.getSubType());
-                        if (target.getSubType() != null && target.getSubType().equals("containerRegistry")) {
-                            cloudTargetConverter.convertExtDocker(device, target);
-                        } else {
-                        }
-                        break;
-                    case "4":
-                    case "5":
-                    case "6":
-                    case "7":
-                    default:
+                //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储,8:Web)
+                if("1".equals(target.getCloudServiceType())){
+                    device.setServiceType(target.getNetType());
+                    device.setSubType(target.getSubType());
+                    if (target.getSubType() != null && target.getSubType().equals("VNet")) {
+                        cloudTargetConverter.convertExtNet(device, target);
+                    } else if (target.getSubType() != null && target.getSubType().equals("fireWall")) {
+                        cloudTargetConverter.convertExtNetFW(device, target);
+                    } else if (target.getSubType() != null && target.getSubType().equals("WAF")) {
+                        cloudTargetConverter.convertExtNetWAF(device, target);
+                    }
+                }else if("3".equals(target.getCloudServiceType())){
+                    device.setServiceType(target.getContainerType());
+                    device.setSubType(target.getSubType());
+                    if (target.getSubType() != null && target.getSubType().equals("containerRegistry")) {
+                        cloudTargetConverter.convertExtDocker(device, target);
+                    }
+                }else {
+//                    2 4 5 6 7 8
+                    device.setServiceType(target.getCalculateType());
+                    device.setSubType(target.getSubType());
+                    if (target.getSubType() != null && target.getSubType().equals("vm")) {
+                        cloudTargetConverter.convertExtVm(device, target, cloudType);
+                    }
                 }
                 deviceList.add(device);
             }
@@ -295,8 +307,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
     @Async
     public void executeSequentially() {
         //1: 微软公有云 2:微软私有云 3:微软混合云
-        JSONObject privateTargetResult = synchronousCloudData(2);
-        JSONObject mixTargetResult = synchronousCloudData(3);
+//        JSONObject privateTargetResult = synchronousCloudData(2);
+//        JSONObject mixTargetResult = synchronousCloudData(3);
         JSONObject publicTargetResult = synchronousCloudData(1);
     }
 
@@ -330,7 +342,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             MicrosoftAzureUserModel localAzurer = sceneElementPluginConfigMapper.getLocalAzurer(jsonObject);
 // 创建微软云的资源组
             String azureManagerUrl = situationAwareConfig.getMixAzureManagerUrl();
-            if(cloudType == 2){
+            if (cloudType == 2) {
                 azureManagerUrl = situationAwareConfig.getPrivateAzureManagerUrl();
             }
             Map<String, Object> formMap = new HashMap();
@@ -361,7 +373,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
 //        result.put("dockerInstanceList", dockerInstances);
             //获取微软云市场 虚拟机镜像(计算-lass-映像)
             List images = null;
-            images = getImages(instance);
+//            images = getImages(instance);
+            images = getPublicAzureImages();
             result.put("imageList", images);
         }
 
@@ -406,6 +419,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
     /**
      * 混合云/私有云虚拟机镜像同步
+     *
      * @param azureManagerUrl
      * @param body
      * @param headersMap
@@ -421,17 +435,18 @@ public class MicrosoftAzureConverter implements BaseConverter {
         }
         Map<String, Object> dataMap = JsonUtils.parseMap(res);
         if (BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
-            List<Map> data = (List)dataMap.get("data");
+            List<Map> data = (List) dataMap.get("data");
             result.put("imageList", data.stream()
                     .map(JSONObject::new)
                     .collect(Collectors.toList()));
-        }else {
+        } else {
             throw new RuntimeException("synchronous vm images fault");
         }
     }
 
     /**
      * 混合云/私有云虚拟机本地上传镜像同步
+     *
      * @param azureManagerUrl
      * @param body
      * @param headersMap
@@ -447,11 +462,11 @@ public class MicrosoftAzureConverter implements BaseConverter {
         }
         Map<String, Object> dataMap = JsonUtils.parseMap(res);
         if (BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
-            List<Map> data = (List)dataMap.get("data");
+            List<Map> data = (List) dataMap.get("data");
             result.put("localImageList", data.stream()
                     .map(JSONObject::new)
                     .collect(Collectors.toList()));
-        }else {
+        } else {
             throw new RuntimeException("synchronous vm local images fault");
         }
     }
@@ -617,6 +632,103 @@ public class MicrosoftAzureConverter implements BaseConverter {
     }
 
     /**
+     * 公有云虚拟机市场镜像
+     */
+    public List getPublicAzureImages() {
+        List<JSONObject> publicAzureComputeImages = getPublicAzureImages(MicrosoftAzureCategoryEnum.ALL_COMPUTE_MP);
+        List<JSONObject> publicAzureStorageImages = getPublicAzureImages(MicrosoftAzureCategoryEnum.ALL_STORAGE_MP);
+        List<JSONObject> publicAzureDatabasesImages = getPublicAzureImages(MicrosoftAzureCategoryEnum.ALL_DATABASES_MP);
+        List<JSONObject> publicAzureAnalyticsImages = getPublicAzureImages(MicrosoftAzureCategoryEnum.ALL_ANALYTICS_MP);
+        List<JSONObject> publicAzureSecurityImages = getPublicAzureImages(MicrosoftAzureCategoryEnum.ALL_SECURITY_MP);
+        List<JSONObject> publicAzureWebAndMobileImages = getPublicAzureImages(MicrosoftAzureCategoryEnum.ALL_WEBANDMOBILE_MP);
+
+        HashMap<String, JSONObject> publicAzureImageMap = new HashMap<>();
+        mergePublicAzureImages(publicAzureComputeImages, publicAzureImageMap);
+        mergePublicAzureImages(publicAzureStorageImages, publicAzureImageMap);
+        mergePublicAzureImages(publicAzureDatabasesImages, publicAzureImageMap);
+        mergePublicAzureImages(publicAzureAnalyticsImages, publicAzureImageMap);
+        mergePublicAzureImages(publicAzureSecurityImages, publicAzureImageMap);
+        mergePublicAzureImages(publicAzureWebAndMobileImages, publicAzureImageMap);
+
+        return Arrays.asList(publicAzureImageMap.values().toArray());
+    }
+
+    /**
+     * 合并公有云镜像
+     * @param publicAzureImages
+     * @param publicAzureImageMap
+     */
+    private static void mergePublicAzureImages(List<JSONObject> publicAzureImages, HashMap<String, JSONObject> publicAzureImageMap) {
+        publicAzureImages.stream().forEach(image -> {
+            String key = image.getString("publisherName") + image.getString("offerName") + image.getString("skuName");
+            if(publicAzureImageMap.containsKey(key)){
+                JSONObject value = publicAzureImageMap.get(key);
+                value.put("categoryIds", mergeCategoryIds(value.getString("categoryIds"), image.getString("categoryIds")));
+                publicAzureImageMap.put(key, value);
+            }else {
+                publicAzureImageMap.put(key, image);
+            }
+        });
+    }
+
+    // 合并标签，避免重复
+    private static String mergeCategoryIds(String existingCategoryId, String newCategoryId) {
+        Set<String> tagSet = new HashSet<>(Arrays.asList(existingCategoryId.split("、")));
+        tagSet.add(newCategoryId);
+        return String.join("、", tagSet);
+    }
+
+    public List<JSONObject> getPublicAzureImages(MicrosoftAzureCategoryEnum categoryIds) {
+        HashMap<String, String> headersMap = new HashMap<>();
+        headersMap.put("x-api-key", "514df00a-1576-4881-9461-58440d9039f4");
+        headersMap.put("x-ms-app", "ibiza-marketplace");
+        int skip = 0;
+        ArrayList<JSONObject> arrayList = new ArrayList<>();
+        while (true) {
+            String url = String.format(AZURE_IMAGES_URL, categoryIds.getName(), skip);
+            try {
+                String res = HttpUtils.sendHttpGet(url, headersMap, 2000);
+                Map<String, Object> resMap = JsonUtils.parseMap(res);
+                List<Map> results = (List) resMap.get("results");
+                if (results.isEmpty()) break;
+                List<JSONObject> data = results.stream()
+                        .map(JSONObject::new)
+                        .filter(result -> {
+                            JSONArray pricingTypes = result.getJSONArray("pricingTypes");
+                            if (pricingTypes.isEmpty() && result.getJSONArray("plans").size() > 0) {
+                                return true;
+                            } else if (pricingTypes.size() == 1 && pricingTypes.get(0).equals("Byol") && result.getJSONArray("plans").size() > 0) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        })
+                        .map(result -> {
+                            JSONArray jsonArray = result.getJSONArray("operatingSystems");
+                            String[] array = jsonArray.toArray(new String[0]);
+                            String operatingSystem = String.join("、", array);
+                            String[] split = result.getString("uniqueProductId").split("\\.");
+                            JSONObject forth = new JSONObject();
+                            forth.put("name", result.getString("displayName"));
+                            forth.put("publisherName", result.getString("publisherId"));
+                            forth.put("offerName", split[1]);
+                            forth.put("skuName", result.getJSONArray("plans").getJSONObject(0).getString("planId"));
+                            forth.put("operatingSystem", operatingSystem.contains("linux") ? "linux" : "windows");
+                            forth.put("categoryIds",categoryIds.getCode());
+                            return forth;
+                        })
+                        .collect(Collectors.toList());
+                arrayList.addAll(data);
+            } catch (IOException e) {
+                throw new RuntimeException("synchronous vm images fault");
+            }
+            skip += 1000;
+            break;
+        }
+        return arrayList;
+    }
+
+    /**
      * 虚拟机市场镜像
      */
     public List getImages(IAzureResourceManager instance) {
@@ -650,29 +762,6 @@ public class MicrosoftAzureConverter implements BaseConverter {
                     .distinct()
                     .collect(Collectors.toList());
         }
-
-//        //只分地区的所有镜像
-//        PagedIterable<VirtualMachineImage> virtualMachineImages = azureResourceManager.virtualMachineImages().listByRegion(region);
-//        AtomicInteger no = new AtomicInteger();
-//        for (VirtualMachineImage image : virtualMachineImages) {
-//            no.addAndGet(1);
-//            String publisherName = image.publisherName();
-//            String offerName = image.offer();
-//            String skuName = image.sku();
-//            OperatingSystemTypes operatingSystemTypes = image.osDiskImage().operatingSystem();
-//            JSONObject third = new JSONObject();
-//            third.put("imageName", offerName);
-//            third.put("imageVersion", image.version());
-//            third.put("publisherName", publisherName);
-//            third.put("offerName", offerName);
-//            third.put("skuName", skuName);
-//            third.put("operatingSystem", operatingSystemTypes);
-//            result.add(third);
-//            // 每20次暂停5秒(暂停失效)
-//            if (no.get() % 20 == 0) {
-//                sleep(5000);
-//            }
-//        }
 
         // 获取所有虚拟机发布者
         PagedIterable<VirtualMachinePublisher> virtualMachinePublishers = azureResourceManager.virtualMachineImages()
