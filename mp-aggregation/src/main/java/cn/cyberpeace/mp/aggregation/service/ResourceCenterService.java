@@ -139,10 +139,22 @@ public class ResourceCenterService {
             if (StringUtils.isNotEmpty(imageName) && imageName.endsWith(ElementTypeUtils.CORE_ROUTER_IMAGE_NAME)) {
                 imageName = ElementTypeUtils.CORE_ROUTER_IMAGE_NAME;
                 pluginElement.setImage(imageName);
+                pluginElement.setIsBuildIn(true);
             }
             Device device = this.getByImageName(imageName);
             if (device != null) {
                 pluginElement.setImageUuid(device.getUuid());
+            }
+
+            var pluginData = sceneConfigHandler.getScenePluginData().get("cpcloud");
+            if (pluginData != null && pluginData.getElements() != null) {
+                var dbElement = pluginData.getElements().get(nodeId);
+                if (dbElement != null) {
+                    dbElement.put("image", pluginElement.getImage());
+                    dbElement.put("is_build_in", pluginElement.getIsBuildIn());
+                    dbElement.put("image_uuid", pluginElement.getImageUuid());
+                    pluginData.getElements().put(nodeId, dbElement);
+                }
             }
 
             // 处理图片和附件
