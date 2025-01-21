@@ -789,15 +789,16 @@ public class AsyncPlatFlowTaskService {
                 .build();
 
         try {
+            // 跟流量执行器建立ws连接，用于接收任务状态信息
+            FlowWebSocketClientUtil wsClient = FlowWebSocketClientUtil.getWebSocketClient(flowActuatorModel.getIp().split(BaseConstants.COLON)[0]);
+
             String startTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/v2/tasks/action",
                     JsonUtils.snakeStringify(startFlowTaskRequest));
             JSONObject startTaskObj = JSONObject.parseObject(startTaskRsp);
             log.info("start task response:{}", startTaskObj.toJSONString());
             if (ResponseUtils.checkResponse(startTaskObj)) {
                 log.info("start task success for {}", taskId);
-
-                // 跟流量执行器建立ws连接，用于接收任务状态信息
-                FlowWebSocketClientUtil wsClient = FlowWebSocketClientUtil.getWebSocketClient(flowActuatorModel.getIp().split(BaseConstants.COLON)[0]);
+                // 避免接口调用成功后，ws建立失败问题
                 wsClient.sendMessage(taskId);
 
                 // 更新任务状态为运行中

@@ -229,9 +229,7 @@ public class CsceneFlowController implements BaseModelListControllerBase {
     @PostMapping("/task/start")
     public ServiceResult startTask(@RequestParam String taskId) {
         log.info("FlowInfoController.startTask begin. taskId:{}", taskId);
-        csceneFlowService.startTask(taskId);
-        log.info("FlowInfoController.startTask end.");
-        return ResultCommon.success();
+        return csceneFlowService.startTask(taskId);
     }
 
     /**

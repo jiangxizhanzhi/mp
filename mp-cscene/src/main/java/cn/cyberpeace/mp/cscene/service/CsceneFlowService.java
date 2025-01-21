@@ -539,10 +539,10 @@ public class CsceneFlowService {
      *
      * @param taskId
      */
-    public void startTask(String taskId) {
+    public ServiceResult<Boolean> startTask(String taskId) {
         log.debug("CsceneFlowService.startTask begin. taskId:{}", taskId);
-        asyncPlatFlowTaskService.startTask(taskId, null);
-        log.debug("CsceneFlowService.startTask end.");
+        ServiceResult<Boolean> booleanServiceResult = asyncPlatFlowTaskService.startTask(taskId, null);
+        return booleanServiceResult;
     }
 
     /**
