@@ -41,8 +41,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * @Description
@@ -80,14 +82,19 @@ public class ResourceCenterService {
     private Environment environment ;
 
     public ServiceResult<CsceneBO> importByConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
-        String mpPropertiesPath = environment.getProperty("MP_SCENE_IMPORT_MODE");
-        if (StringUtils.isNotEmpty(mpPropertiesPath) && mpPropertiesPath.equals("json")) {
-            log.info("使用json文件导入");
-            return this.importByJsonConfig(ymlFilePath, imageFilePath, imageFilePathList, sceneFilePath);
-        } else {
-            log.info("使用yml文件导入");
-            return this.importByYmlConfig(ymlFilePath, imageFilePath, imageFilePathList, sceneFilePath);
+        String importResMode = getImportMode();
+        if ("json".equals(importResMode)) {
+            log.info("开启使用json文件导入场景");
+            String jsonFilePath = ymlFilePath + "/topo.json";
+            if (new File(jsonFilePath).exists()) {
+                log.info("使用json文件导入");
+                return this.importByJsonConfig(ymlFilePath, imageFilePath, imageFilePathList, sceneFilePath);
+            } else {
+                log.info("topo.json不存在");
+            }
         }
+        log.info("使用yml文件导入");
+        return this.importByYmlConfig(ymlFilePath, imageFilePath, imageFilePathList, sceneFilePath);
     }
 
     public ServiceResult<CsceneBO> importByJsonConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
@@ -295,5 +302,21 @@ public class ResourceCenterService {
             log.error("Exec shell error! command=[{}], catch error:{}", shell, ExceptionUtils.getStackTrace(e));
         }
         log.info("End exec shell!");
+    }
+
+    private String getImportMode() {
+        String mpPropertiesPath = environment.getProperty("MP_ENV_PATH");
+        // 创建Properties对象
+        FileInputStream input = null;
+        try {
+            input = new FileInputStream(mpPropertiesPath);
+            Properties properties = new Properties();
+            properties.load(input);
+            String propModeKey = "MP_SCENE_IMPORT_MODE";
+            return properties.getProperty(propModeKey, "");
+        } catch (Exception e) {
+            log.error("failed to get import scene mode ", e);
+            return "";
+        }
     }
 }
