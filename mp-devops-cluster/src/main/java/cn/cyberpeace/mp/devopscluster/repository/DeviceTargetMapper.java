@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
+import cn.cyberpeace.mp.devopscluster.task.CleanJob;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -108,4 +109,6 @@ public interface DeviceTargetMapper extends BaseModelMapper<DeviceTargetPO> {
      * @return
      */
     Integer deleteAllTarget();
+
+    List<DeviceTargetPO> getList(@Param("param") CleanJob.ImageDelConfig delConfig);
 }

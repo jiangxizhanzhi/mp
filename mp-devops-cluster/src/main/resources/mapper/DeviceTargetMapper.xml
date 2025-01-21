@@ -534,4 +534,31 @@
             sum(case when t.image_type = 'entity' and t.main_category = 4 then 1 else 0 end ) as '4'
         from mp_devops_target t where t.is_hide = 0
     </select>
+
+    <select id="getList" resultMap="BaseResultMap">
+        select
+        <include refid="commonTargetColumn"/>
+        from
+        mp_devops_target i
+        <where>
+            <if test="param != null and param.referenceNums != null">
+                and i.reference_nums &lt;= #{param.referenceNums}
+            </if>
+            <if test="param != null and param.useDuration != null">
+                and i.use_duration &lt;= #{param.useDuration}
+            </if>
+            <if test="param != null and param.deleteDateTimeField != null and param.deleteDateTime != null and param.deleteDateTimeRule != null">
+                <if test="param.deleteDateTimeRule == 0">
+                    and i.${param.deleteDateTimeField} &lt; #{param.deleteDateTime}
+                </if>
+                <if test="param.deleteDateTimeRule == 1">
+                    and i.${param.deleteDateTimeField} = #{param.deleteDateTime}
+                </if>
+                <if test="param.deleteDateTimeRule == 2">
+                    and i.${param.deleteDateTimeField} &gt; #{param.deleteDateTime}
+                </if>
+            </if>
+            and i.cpcloud_update_time &lt; DATE_SUB(NOW(), INTERVAL 30 DAY)
+        </where>
+    </select>
 </mapper>

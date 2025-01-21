@@ -56,7 +56,7 @@ public class CleanJob implements SchedulingConfigurer {
     private ImagesConverter imagesConverter;
 
     @Resource
-    private CsceneMapper csceneMapper ;
+    private CsceneMapper csceneMapper;
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
@@ -145,6 +145,7 @@ public class CleanJob implements SchedulingConfigurer {
 
     /**
      * 校验cron表达式是否合法
+     *
      * @param cron
      * @return
      */
@@ -173,28 +174,29 @@ public class CleanJob implements SchedulingConfigurer {
             return;
         }
         var delConfig = JsonCommon.parse(model.getValue(), ImageDelConfig.class);
-        var createTime = LocalDateTime.now().minusDays(30);
-        var cond = new HumanCondition()
-                .filterLessThan(DeviceTargetPO::getCpcloudUpdateTime, createTime)// 筛选出云靶标修改时间小于当前日期 超过30天的记录
-                .filterOrStart()
-                .orEqual(DeviceTargetPO::getReferenceNums, delConfig.getReferenceNums())
-                .orEqual(DeviceTargetPO::getUseDuration, delConfig.getUseDuration())
-                .filterOrEnd();
+//        var createTime = LocalDateTime.now().minusDays(30);
+//        var cond = new HumanCondition()
+//                .filterLessThan(DeviceTargetPO::getCpcloudUpdateTime, createTime)// 筛选出云靶标修改时间小于当前日期 超过30天的记录
+//                .filterOrStart()
+//                .orEqual(DeviceTargetPO::getReferenceNums, delConfig.getReferenceNums())
+//                .orEqual(DeviceTargetPO::getUseDuration, delConfig.getUseDuration())
+//                .filterOrEnd();
+//
+//        String deleteDateTimeField = delConfig.getDeleteDateTimeField();
+//        LocalDateTime deleteDateTime = delConfig.getDeleteDateTime();
+//        Integer deleteDateTimeRule = delConfig.getDeleteDateTimeRule();// 0:小于 1:等于 2:大于
+//        if(deleteDateTimeField != null && deleteDateTime != null && deleteDateTimeRule != null){
+//            if(deleteDateTimeRule == 0){
+//                cond.filterLessThan(deleteDateTimeField, deleteDateTime);
+//            }else if(deleteDateTimeRule == 1){
+//                cond.filterEqual(deleteDateTimeField, deleteDateTime);
+//            }else if(deleteDateTimeRule == 2){
+//                cond.filterGreaterThan(deleteDateTimeField, deleteDateTime);
+//            }
+//        }
 
-        String deleteDateTimeField = delConfig.getDeleteDateTimeField();
-        LocalDateTime deleteDateTime = delConfig.getDeleteDateTime();
-        Integer deleteDateTimeRule = delConfig.getDeleteDateTimeRule();// 0:小于 1:等于 2:大于
-        if(deleteDateTimeField != null && deleteDateTime != null && deleteDateTimeRule != null){
-            if(deleteDateTimeRule == 0){
-                cond.filterLessThan(deleteDateTimeField, deleteDateTime);
-            }else if(deleteDateTimeRule == 1){
-                cond.filterEqual(deleteDateTimeField, deleteDateTime);
-            }else if(deleteDateTimeRule == 2){
-                cond.filterGreaterThan(deleteDateTimeField, deleteDateTime);
-            }
-        }
-
-        var list = deviceTargetMapper.list(cond);
+//        var list = deviceTargetMapper.list(cond);
+        List<DeviceTargetPO> list = deviceTargetMapper.getList(delConfig);
         if (CollectionUtils.isNotEmpty(list)) {
             for (var m : list) {
                 ImagesDeleteRequest request = new ImagesDeleteRequest();
