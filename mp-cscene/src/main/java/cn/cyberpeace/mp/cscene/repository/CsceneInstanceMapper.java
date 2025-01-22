@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountActivitySceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.repository.base.BaseCsceneMapper;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneModel;
 import org.apache.ibatis.annotations.Mapper;
@@ -18,6 +19,9 @@ import java.util.List;
 @Repository
 @ModelClass(CsceneInstanceModel.class)
 public interface CsceneInstanceMapper extends BaseCsceneMapper<CsceneInstanceModel> {
+
+    List<CloudPluginSceneConnectionModel> selectVmHistoryByMpSceneId(@Param("mpSceneId") String mpSceneId);
+
 
     /**
      * 根据引用类型分组统计

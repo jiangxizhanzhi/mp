@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
@@ -38,6 +39,8 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.cscene.model.SceneSwitchInfoModel;
+import cn.cyberpeace.mp.cscene.repository.SceneSwitchInfoMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -47,10 +50,12 @@ import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.log.utils.SnUtils;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventTypeBO;
@@ -62,6 +67,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataCountParams;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
+import com.alibaba.fastjson.JSONArray;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -69,6 +75,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -83,11 +90,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Api(value = "场景实例", tags = "CSCENE-场景实例")
 @Slf4j
@@ -907,4 +912,51 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             }
         }
     }
+
+    @ApiOperation("虚拟终端管理")
+    @GetMapping("/vmmanagement")
+    public ServiceResult<String> getVmManagement(String mpSceneId) {
+        if (Objects.isNull(mpSceneId)) {
+            return null;
+        }
+        List<CloudPluginSceneConnectionModel> models = modelService.selectVmHistoryByMpSceneId(mpSceneId);
+        String jsonString = JSONArray.toJSONString(models);
+        return new ServiceResult<>(jsonString).asResult();
+    }
+
+
+    @ApiOperation("保存接入信息")
+    @PostMapping("/saveinfo")
+    public ServiceResult saveSwitchInfo(
+            //id是指场景id
+                @RequestParam(required = false) String id,
+                @RequestParam(required = false) String nodeId,
+                @RequestParam(required = false) String userId,
+                                        HttpServletRequest request){
+        String realRemoteIp = SnUtils.getRealRemoteIp(request);
+        SceneSwitchInfoModel sceneSwitchInfoModel = new SceneSwitchInfoModel();
+        sceneSwitchInfoModel.setSceneId(id);
+        sceneSwitchInfoModel.setNodeId(nodeId);
+        sceneSwitchInfoModel.setUserId(userId);
+        sceneSwitchInfoModel.setUserIp(realRemoteIp);
+        SceneSwitchInfoMapper switchInfoMapper = BeanCommon.getBean(SceneSwitchInfoMapper.class);
+        return new ServiceResult(switchInfoMapper.create(sceneSwitchInfoModel)).asResult();
+    }
+
+    @ApiOperation("查询接入信息")
+    @GetMapping("/saveinfo")
+    //id是指场景id
+    public ServiceResult getSwitchInfo(@RequestParam(required = false) String id,
+                                       @RequestParam(required = false) String nodeId){
+        if (StringUtils.isEmpty(nodeId)) {
+            return new ServiceResult<>(Lists.newArrayList()).asResult();
+        }
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(SceneSwitchInfoModel::getSceneId,id).filterEqual(SceneSwitchInfoModel::getNodeId,nodeId);
+        SceneSwitchInfoMapper switchInfoMapper = BeanCommon.getBean(SceneSwitchInfoMapper.class);
+        List<SceneSwitchInfoModel> list = switchInfoMapper.list(humanCondition);
+        String jsonString = JSONArray.toJSONString(list);
+        return new ServiceResult(jsonString).asResult();
+    }
+
 }

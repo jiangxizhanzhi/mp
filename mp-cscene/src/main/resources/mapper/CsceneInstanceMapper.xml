@@ -95,5 +95,10 @@
             #{item}
         </foreach>
     </select>
+    <select id="selectVmHistoryByMpSceneId"
+            resultType="cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel"
+            parameterType="java.lang.String">
+        select mssc.* from mp_cscene_cscene_instance as mcci left join mp_sceneplugincloud_scene_connection as mssc on mcci.scene = mssc.scene where mcci.id = #{mpSceneId}
+    </select>
 
 </mapper>

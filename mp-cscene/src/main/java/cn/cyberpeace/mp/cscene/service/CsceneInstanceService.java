@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -97,6 +98,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -1753,5 +1755,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         csceneElementCommon.setNodeId(nodeId);
         csceneElementCommon.setData(accessUsers);
         CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportElementCommon(csceneElementCommon));
+    }
+
+    public List<CloudPluginSceneConnectionModel> selectVmHistoryByMpSceneId(String mpSceneId) {
+        CsceneInstanceMapper csceneInstanceMapper = BeanCommon.getBean(CsceneInstanceMapper.class);
+        return csceneInstanceMapper.selectVmHistoryByMpSceneId(mpSceneId);
     }
 }
