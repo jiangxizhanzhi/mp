@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonConvertStatusEnum;
 import cn.cyberpeace.mp.common.constant.codeEnum.CommonFunctionCodeEnum;
@@ -13,6 +14,7 @@ import cn.cyberpeace.mp.common.constant.codeEnum.CommonStatusCodeEnum;
 import cn.cyberpeace.mp.common.service.impl.CommonCodeServiceImpl;
 import cn.cyberpeace.mp.common.service.impl.CommonConfigServiceImpl;
 import cn.cyberpeace.mp.common.service.impl.CommonFileServiceImpl;
+import cn.cyberpeace.mp.cscene.dto.element.LoadFileInfo;
 import cn.cyberpeace.mp.cscene.model.*;
 import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
@@ -24,15 +26,20 @@ import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.websocket.LoadResultWebSocketServer;
 import cn.cyberpeace.mp.cscene.websocket.WebSocketServer;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
-import cn.cyberpeace.mp.situationaware.utils.JsonUtils;
+import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.jcraft.jsch.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
@@ -41,6 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -57,6 +65,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -87,6 +96,8 @@ public class LoadServiceImpl {
 
     @Autowired
     private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
+
+    private final static String FILEPATH = "/home/file/";
 
 
     // 载荷改造地址
@@ -1270,6 +1281,101 @@ public class LoadServiceImpl {
 
     public Boolean batchAddLoadResult(List<MpDevopsLoadSceneLog> list) {
         return loadMapper.batchAddLoadResult(list);
+    }
+
+    public LoadFileInfo loadFile(MultipartFile multiFile) {
+        Map<String, Object> map = new HashMap<>();
+        //构建文件对象
+        File file = new File(FILEPATH);
+        //文件目录不存在则创建目录
+        if (!file.exists()) {
+            boolean mkdirs = file.mkdirs();
+            if (!mkdirs) {
+                log.error("创建文件夹异常");
+                map.put("return", false);
+                return null;
+            }
+        }
+        try {
+            //获取文件输入流
+            InputStream inputStream = multiFile.getInputStream();
+            //构建文件输出流
+            String name = multiFile.getOriginalFilename();
+            FileOutputStream outputStream = new FileOutputStream(FILEPATH + name);
+            int copy = FileCopyUtils.copy(inputStream, outputStream);
+            log.info("载荷文件上传成功,文件大小：{}", copy);
+
+            StringBuilder result = new StringBuilder();
+            // 构造一个BufferedReader类来读取文件
+            BufferedReader br = new BufferedReader(new FileReader(FILEPATH + name));
+            String s = null;
+            // 使用readLine方法，一次读一行
+            while((s = br.readLine())!=null){
+                result.append(System.lineSeparator()+s);
+            }
+
+            LoadFileInfo loadFileInfo = new LoadFileInfo();
+            loadFileInfo.setFilePath(FILEPATH + name);
+            loadFileInfo.setFileName(name);
+            loadFileInfo.setFileContent(result.toString());
+            return loadFileInfo;
+        } catch (IOException e) {
+            log.error("载荷文件上传异常", e);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void loadFileKali(String loadId, String sceneId) {
+        MpDevopsLoad loadById = loadMapper.getLoadById(loadId);
+
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
+        CloudScenePluginHandler handler = sceneHandler.getPluginHandler(PluginConstant.CPCLOUD);
+        Map<String, CloudPluginSceneElementPortBO> elementPortMap = handler.getElementPortMap();
+        Map<String, CloudPluginSceneElementPortBO> elementNameMap = new HashMap<>();
+        if (CollectionUtil.isNotEmpty(elementPortMap)) {
+            for (CloudPluginSceneElementPortBO value : elementPortMap.values()) {
+                elementNameMap.put(value.getSrcPort().getElement().getName(), value);
+            }
+        }
+
+        // 获取kali机器信息
+        CloudPluginSceneElementPortBO kali = elementNameMap.get("kali");
+        Map<String, CloudAccessMode> cloudAccessModeMap = new HashMap<>();
+        for (CloudAccessMode accessMode : kali.getAccessModes()) {
+            cloudAccessModeMap.put(accessMode.getProtocol(), accessMode);
+        }
+        // 获取ssh链接信息
+        CloudAccessMode ssh = cloudAccessModeMap.get("ssh");
+        String remoteHost = ssh.getAccessIp();
+        Integer port = ssh.getAccessPort();
+        String username = ssh.getUsername();
+        String password = ssh.getPassword();
+        String remoteDir = "/tmp/";
+        String localFile = loadById.getScriptFilePath();
+        try {
+            JSch jsch = new JSch();
+            com.jcraft.jsch.Session session = jsch.getSession(username, remoteHost, port);
+            session.setPassword(password);
+            // 配置会话的其他选项,如主机密钥检查等
+            java.util.Properties config = new java.util.Properties();
+            config.put("StrictHostKeyChecking", "no");
+            session.setConfig(config);
+            session.connect();
+            Channel channel = session.openChannel("sftp");
+            channel.connect();
+            ChannelSftp sftpChannel = (ChannelSftp) channel;
+            // 切换到远程目录
+            sftpChannel.cd(remoteDir);
+            // 上传文件
+            File file = new File(localFile);
+            sftpChannel.put(new FileInputStream(file), file.getName());
+            session.disconnect();
+            sftpChannel.exit();
+            log.info("载荷文件上传成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
 

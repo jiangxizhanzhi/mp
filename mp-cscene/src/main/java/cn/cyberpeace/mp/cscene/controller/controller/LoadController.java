@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.dto.element.LoadFileInfo;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoad;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneLog;
 import cn.cyberpeace.mp.cscene.model.MpDevopsLoadSceneUploadLogFile;
@@ -69,10 +70,17 @@ public class LoadController {
      * */
     @ApiOperation(value = "载荷列表", notes = "")
     @GetMapping("/getLoadListByMp")
-    public ListObjServiceResult getLoadListByMp() {
+    public ListObjServiceResult getLoadListByMp(@RequestParam(value = "vulne_code", required = false) String vulneCode,
+                                                @RequestParam(value = "technology", required = false) String technology) {
         JSONObject requestData = new JSONObject();
         requestData.put("pageNum", 1);
         requestData.put("pageSize", 1000);
+        if (vulneCode != null) {
+            requestData.put("vulneCode", vulneCode);
+        }
+        if (technology != null) {
+            requestData.put("technology", technology);
+        }
         JSONObject result = loadService.getLoadList(requestData);
         return new ListObjServiceResult((List) result.get("source"), (int) result.get("total")).asResult();
     }
@@ -392,5 +400,25 @@ public class LoadController {
                                                 @RequestParam(value = "end_time") String endTime) {
         List<MpDevopsLoadSceneLog> log = loadService.getLoadResultByNodeIds(sceneId, nodeIds, interval, endTime);
         return new ServiceResult(log, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+    }
+
+    /*
+     * 查询该场景绑定的载荷及记录
+     * */
+    @ApiOperation(value = "载荷文件上传", notes = "")
+    @PostMapping("/loadFile")
+    public ServiceResult loadFile(MultipartFile file) {
+        LoadFileInfo loadFileInfo = loadService.loadFile(file);
+        return new ServiceResult(loadFileInfo, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
+    }
+
+    /*
+     * 查询该场景绑定的载荷及记录
+     * */
+    @ApiOperation(value = "载荷文件上传kali机", notes = "")
+    @GetMapping("/loadFileKali")
+    public ServiceResult loadFileKali(@RequestParam(value = "load_id") String loadId, @RequestParam(value = "scene_id") String sceneId) {
+        loadService.loadFileKali(loadId, sceneId);
+        return new ServiceResult(true, BaseErrorCode.SUCCESS, "SUCCESS").asResult();
     }
 }

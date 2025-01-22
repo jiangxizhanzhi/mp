@@ -120,6 +120,30 @@ public class MpDevopsLoad extends BaseModel {
      * role
      */
     private Integer role;
+    /**
+     * 漏洞编号
+     */
+    private String vulneCode;
+    /**
+     * 脚本文件地址
+     */
+    private String scriptFilePath;
+    /**
+     * 脚本文件名称
+     */
+    private String scriptFile;
+    /**
+     * 脚本类型
+     */
+    private Integer scriptType;
+    /**
+     * 脚本代码
+     */
+    private String scriptCode;
+    /**
+     * 技战法
+     */
+    private Integer technology;
 
     public void setConvertRunTable(String runTable) {
         String s = LoadConvertCode.getRunTableConvertMap().get(runTable);
