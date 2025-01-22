@@ -22,19 +22,7 @@ import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.ElementModifyBO;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeAccessModeActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeCommandActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeConnectionActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeDelSnapshotRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowRecordsRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowsActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeProbeActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeSnapshotRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodesActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstancesActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.*;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
@@ -927,17 +915,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("保存接入信息")
     @PostMapping("/saveinfo")
-    public ServiceResult saveSwitchInfo(
-            //id是指场景id
-                @RequestParam(required = false) String id,
-                @RequestParam(required = false) String nodeId,
-                @RequestParam(required = false) String userId,
+    public ServiceResult saveSwitchInfo(@RequestBody SaveInfoReq saveInfoReq,
                                         HttpServletRequest request){
         String realRemoteIp = SnUtils.getRealRemoteIp(request);
         SceneSwitchInfoModel sceneSwitchInfoModel = new SceneSwitchInfoModel();
-        sceneSwitchInfoModel.setSceneId(id);
-        sceneSwitchInfoModel.setNodeId(nodeId);
-        sceneSwitchInfoModel.setUserId(userId);
+        sceneSwitchInfoModel.setSceneId(saveInfoReq.getId());
+        sceneSwitchInfoModel.setNodeId(saveInfoReq.getNodeId());
+        sceneSwitchInfoModel.setUserId(saveInfoReq.getUserId());
         sceneSwitchInfoModel.setUserIp(realRemoteIp);
         SceneSwitchInfoMapper switchInfoMapper = BeanCommon.getBean(SceneSwitchInfoMapper.class);
         return new ServiceResult(switchInfoMapper.create(sceneSwitchInfoModel)).asResult();
