@@ -536,7 +536,10 @@
                 and control_type = #{param.controlType}
             </if>
             <if test="param != null and param.vulneCode != null and param.vulneCode != ''">
-                and vulne_code = #{param.vulneCode}
+                and vulne_code in
+                <foreach collection="param.vulneCode" item="vulneCode" separator="," open="(" close=")">
+                    #{vulneCode}
+                </foreach>
             </if>
             <if test="param != null and param.technology != null and param.technology != ''">
                 and technology = #{param.technology}

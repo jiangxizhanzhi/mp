@@ -76,7 +76,8 @@ public class LoadController {
         requestData.put("pageNum", 1);
         requestData.put("pageSize", 1000);
         if (vulneCode != null) {
-            requestData.put("vulneCode", vulneCode);
+            String[] vulneCodes = vulneCode.split(",");
+            requestData.put("vulneCode", vulneCodes);
         }
         if (technology != null) {
             requestData.put("technology", technology);
