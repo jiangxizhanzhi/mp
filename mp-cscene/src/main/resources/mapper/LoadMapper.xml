@@ -107,7 +107,13 @@
          attachment,
          attachment_name,
          create_time,
-         update_time)
+         update_time,
+         vulne_code,
+         script_file_path,
+         script_file,
+         script_type,
+         script_code,
+         technology)
         VALUES (UUID(),
                 #{param.toolName},
                 #{param.toolDescription},
@@ -125,7 +131,13 @@
                 #{param.attachment},
                 #{param.attachmentName},
                 now(),
-                now())
+                now(),
+                #{param.vulneCode},
+                #{param.scriptFilePath},
+                #{param.scriptFile},
+                #{param.scriptType},
+                #{param.scriptCode},
+                #{param.technology})
     </insert>
 
     <insert id="addSynchronousDataSource">
@@ -304,6 +316,24 @@
             </if>
             <if test="param != null and param.defaultCmd != null">
                 default_cmd = #{param.defaultCmd},
+            </if>
+            <if test="param != null and param.vulneCode != null">
+                vulne_code = #{param.vulneCode},
+            </if>
+            <if test="param != null and param.scriptFilePath != null">
+                script_file_path = #{param.scriptFilePath},
+            </if>
+            <if test="param != null and param.scriptFile != null">
+                script_file = #{param.scriptFile},
+            </if>
+            <if test="param != null and param.scriptType != null">
+                script_type = #{param.scriptType},
+            </if>
+            <if test="param != null and param.scriptCode != null">
+                script_code = #{param.scriptCode},
+            </if>
+            <if test="param != null and param.technology != null">
+                technology = #{param.technology},
             </if>
             update_time= now()
         </set>
@@ -504,6 +534,12 @@
             </if>
             <if test="param != null and param.controlType != null and param.controlType != ''">
                 and control_type = #{param.controlType}
+            </if>
+            <if test="param != null and param.vulneCode != null and param.vulneCode != ''">
+                and vulne_code = #{param.vulneCode}
+            </if>
+            <if test="param != null and param.technology != null and param.technology != ''">
+                and technology = #{param.technology}
             </if>
         </where>
         order by create_time desc
