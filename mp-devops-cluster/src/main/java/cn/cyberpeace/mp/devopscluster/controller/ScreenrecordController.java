@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.devopscluster.vo.ScreenRecordRestoreConfigVO;
 import cn.cyberpeace.mp.devopscluster.vo.ScreenRecordUsedSpaceVO;
 import cn.cyberpeace.mp.devopscluster.vo.ScreenrecordVO;
 import cn.cyberpeace.mp.devopscluster.vo.SpaceStaticsVO;
+import com.alibaba.fastjson.JSONArray;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -27,6 +28,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @Description 录屏文件管理controller
@@ -104,4 +107,21 @@ public class ScreenrecordController {
         return new ServiceResult<>(result).asResult();
     }
 
+    @ApiOperation("训练运维中录屏管理")
+    @GetMapping("/management")
+    public ServiceResult getRecordManagement(String mpSceneId) {
+        String csceneId = csceneInstanceMapper.selectCsceneByMpSceneId(mpSceneId);
+        ScreenrecordQueryParams queryParams = new ScreenrecordQueryParams();
+        queryParams.setCsceneId(csceneId);
+        queryParams.setPage(1);
+        queryParams.setPageSize(999);
+        String sceneId = null;
+        if (StringUtils.isNotEmpty(queryParams.getCsceneId())) {
+            var csceneModel = csceneInstanceMapper.get(queryParams.getCsceneId());
+            sceneId = csceneModel == null ? null : csceneModel.getScene();
+        }
+        ListObjServiceResult<ScreenrecordVO> screenrecordVOListObjServiceResult = screenrecordService.pageScreenrecord(queryParams, sceneId);
+
+        return new ServiceResult<>(JSONArray.toJSONString(screenrecordVOListObjServiceResult.getData().getList())).asResult();
+    }
 }
