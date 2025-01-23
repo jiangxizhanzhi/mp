@@ -1208,4 +1208,25 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void removeUnUsePlugin(CsceneInstanceBO csceneInstanceBO) {
+        // 团队训练 红蓝对抗 靶场测评 可以开启采集 , 其他不开启采集
+        if (csceneInstanceBO == null || csceneInstanceBO.getScene() == null || csceneInstanceBO.getScene()
+                .getPlugins() == null) {
+            return;
+        }
+        CsceneAppConfig csceneAppConfig = BeanCommon.getBean(CsceneAppConfig.class);
+        String supportCollect = csceneAppConfig.getSupportCollect();
+        Set<String> supportCollectScenesSet = new HashSet<>();
+        if (StringUtils.isNotEmpty(supportCollect)) {
+            var supportCollectScenes = supportCollect.split(",");
+            for (var s : supportCollectScenes) {
+                supportCollectScenesSet.add(s);
+            }
+        }
+        String referenceType = String.valueOf(csceneInstanceBO.getReferenceType());
+        if (!supportCollectScenesSet.contains(referenceType)) {
+            csceneInstanceBO.getScene().getPlugins().remove("cpcollection");
+        }
+    }
+
 }

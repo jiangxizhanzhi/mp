@@ -53,6 +53,7 @@ mp:
       default-container-disk-count: ${MP_DEFAULT_CONTAINER_DISK_COUNT:10}
       cp-ip: ${CP_IP:10.100.27.1}
       cp-port: ${CP_PORT:11111}
+      support-collect: ${MP_SUPPORT_COLLECT:213,214,236}
   frontbusiness:
     ext-var:
       url-ac-filter-enabled: ${MP_FRONTBUSINESS_URLACFILTER_ENABLED:true}

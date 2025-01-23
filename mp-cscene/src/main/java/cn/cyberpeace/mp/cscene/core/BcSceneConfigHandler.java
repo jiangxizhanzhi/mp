@@ -149,6 +149,10 @@ public class BcSceneConfigHandler extends BaseCsceneHandler<
             throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT.format(String.valueOf(updateResult.getLimitNode()),
                     String.valueOf(updateResult.getExistNode()), String.valueOf(updateResult.getCurrentNode())));
         }
+
+        // 团队训练 红蓝对抗 靶场测评 可以开启采集 , 其他不开启采集
+        CsceneDataModifier.removeUnUsePlugin(csceneInstance);
+
         instanceHandler.create();
         CsceneInstanceBO result = instanceHandler.toData();
         if (result.getScene() != null && result.getScene().getTopology() != null && result.getScene().getTopology().getScene() != null) {

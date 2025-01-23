@@ -123,6 +123,8 @@ public class InitiateHandler extends HandlerCommon {
                     if (collectionElement == null) {
                         collectionElement = new CollectionPluginSceneElementBO();
                         getPluginHandler().addElement(nodeId, collectionElement);
+                        getPluginHandler().getSceneHandler()
+                                .addElementPlugin(PluginConstant.PLUGIN_KEY, nodeId, JsonCommon.beanToSnakeMap(collectionElement));
                         collectionElement.setEnableProbeCollect(true);
                         String defaultBizProbesContent = CollectionCommonConfigUtil.getConfigString(CollectionCommonConfigUtil.DEFAULT_BIZ_PROBES);
                         List<Probe> defaultBizProbes = JsonCommon.snakeParse(defaultBizProbesContent, new TypeReference<List<Probe>>() {

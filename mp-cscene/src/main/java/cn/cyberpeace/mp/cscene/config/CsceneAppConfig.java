@@ -61,6 +61,9 @@ public class CsceneAppConfig {
     @Value("${mp.cscene.has-own-recording-set:213,214,236}")
     private String hasOwnRecordingSet;
 
+    @Value("${mp.cscene.support-collect:213,214,236}")
+    private String supportCollect;
+
     @Value("${mp.cscene.scene-error-creating-seconds:3600}")
     private Integer sceneErrorCreatingSeconds;
 
