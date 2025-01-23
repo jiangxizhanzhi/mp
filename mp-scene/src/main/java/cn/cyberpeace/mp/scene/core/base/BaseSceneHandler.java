@@ -1388,7 +1388,7 @@ public abstract class BaseSceneHandler<
             Set<String> allPorts = topologyBO.getElements().stream().flatMap(element -> Optional.of(element).map(BaseSceneElementBO::getPorts).orElse(new ArrayList<>())
                     .stream()).map(BaseSceneElementPortBO::getId).collect(Collectors.toSet());
             Iterator<TSceneElementPortConnectionBO> connectionBOIterator = topologyBO.getConnections().iterator();
-            if (connectionBOIterator.hasNext()) {
+            while (connectionBOIterator.hasNext()) {
                 TSceneElementPortConnectionBO connection = connectionBOIterator.next();
                 boolean connectPortsExistFlag = allPorts.contains(connection.getSource()) && allPorts.contains(connection.getTarget());
                 if (!connectPortsExistFlag) {
