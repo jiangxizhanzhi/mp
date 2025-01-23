@@ -128,10 +128,10 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
         // 获取数据和总数
         List<DeviceCloudTargetVO> list = microsoftAzureMapper.getCloudTargetListByCodes(
-                Integer.parseInt(cloudServiceType), filteredList, offset, pageSize, request.getCloudType()
+                Integer.parseInt(cloudServiceType), filteredList, offset, pageSize, request.getCloudType(),tableOtherName
         );
         Integer totalNum = microsoftAzureMapper.getCloudTargetListByCodesNum(
-                Integer.parseInt(cloudServiceType), filteredList, request.getCloudType()
+                Integer.parseInt(cloudServiceType), filteredList, request.getCloudType(),tableOtherName
         );
 
         // 构建返回的JSON对象
@@ -172,23 +172,19 @@ public class MicrosoftAzureConverter implements BaseConverter {
         if (request.getCloudServiceType() == null || request.getCloudServiceType().isEmpty()) {
             return new ArrayList<>();
         }
-        switch (request.getCloudServiceType()) {
-            case "1":
+        String code = MicrosoftAzureCategoryEnum.getTypeByCode(Integer.parseInt(request.getCloudServiceType()));
+        switch (code) {
+            case "net":
                 JSONObject net = getReturnData(request.getCloudServiceType(), "net", request);
                 vos = (List<DeviceCloudTargetVO>) net.get("data");
                 total = (Integer) net.get("total");
                 break;
-            case "2":
-            case "4":
-            case "5":
-            case "6":
-            case "7":
-            case "8":
+            case "vm":
                 calculate = getReturnData(request.getCloudServiceType(), "calculate", request);
                 vos = (List<DeviceCloudTargetVO>) calculate.get("data");
                 total = (Integer) calculate.get("total");
                 break;
-            case "3":
+            case "container":
                 JSONObject container = getReturnData(request.getCloudServiceType(), "container", request);
                 vos = (List<DeviceCloudTargetVO>) container.get("data");
                 total = (Integer) container.get("total");
@@ -254,7 +250,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
 //                //1:操作系统 2:应用系统 3:网络设备 4:安全设备
 //                device.setCategory(null);
                 //云服务类型(1:网络,2:计算,3:容器,4:数据库,5:分析,6:安全性,7:存储,8:Web)
-                if("1".equals(target.getCloudServiceType())){
+                if ("1".equals(target.getCloudServiceType())) {
                     device.setServiceType(target.getNetType());
                     device.setSubType(target.getSubType());
                     if (target.getSubType() != null && target.getSubType().equals("VNet")) {
@@ -264,13 +260,13 @@ public class MicrosoftAzureConverter implements BaseConverter {
                     } else if (target.getSubType() != null && target.getSubType().equals("WAF")) {
                         cloudTargetConverter.convertExtNetWAF(device, target);
                     }
-                }else if("3".equals(target.getCloudServiceType())){
+                } else if ("3".equals(target.getCloudServiceType())) {
                     device.setServiceType(target.getContainerType());
                     device.setSubType(target.getSubType());
                     if (target.getSubType() != null && target.getSubType().equals("containerRegistry")) {
                         cloudTargetConverter.convertExtDocker(device, target);
                     }
-                }else {
+                } else {
 //                    2 4 5 6 7 8
                     device.setServiceType(target.getCalculateType());
                     device.setSubType(target.getSubType());
@@ -287,8 +283,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
     @Async
     public void executeSequentially() {
         //1: 微软公有云 2:微软私有云 3:微软混合云
-//        JSONObject privateTargetResult = synchronousCloudData(2);
-//        JSONObject mixTargetResult = synchronousCloudData(3);
+        JSONObject privateTargetResult = synchronousCloudData(2);
+        JSONObject mixTargetResult = synchronousCloudData(3);
         JSONObject publicTargetResult = synchronousCloudData(1);
     }
 
@@ -330,7 +326,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
             //请求头设置
             HashMap<String, String> headersMap = new HashMap<>();
             String body = JsonUtils.stringify(formMap);
-            synchronousVmImages(azureManagerUrl, body, headersMap, result);
+            synchronousVmImages(azureManagerUrl, formMap, headersMap, result);
             synchronousVmLocalImages(azureManagerUrl, body, headersMap, result);
 //            网络靶标
             List<JSONObject> getCloudInternetServices = new ArrayList<>();
@@ -401,14 +397,39 @@ public class MicrosoftAzureConverter implements BaseConverter {
      * 混合云/私有云虚拟机镜像同步
      *
      * @param azureManagerUrl
-     * @param body
+     * @param formMap
      * @param headersMap
      * @param result
      */
-    private static void synchronousVmImages(String azureManagerUrl, String body, HashMap<String, String> headersMap, JSONObject result) {
+    private void synchronousVmImages(String azureManagerUrl, Map<String, Object> formMap, HashMap<String, String> headersMap, JSONObject result) {
+        List<JSONObject> computeAzureImages = getAzureImages(azureManagerUrl, formMap, headersMap, MicrosoftAzureCategoryEnum.COMPUTE_MP);
+        List<JSONObject> dataStorageAzureImages = getAzureImages(azureManagerUrl, formMap, headersMap, MicrosoftAzureCategoryEnum.DATA_STORAGE);
+        List<JSONObject> securityIdentityAzureImages = getAzureImages(azureManagerUrl, formMap, headersMap, MicrosoftAzureCategoryEnum.SECURITY_IDENTITY);
+        List<JSONObject> webAndMobileAzureImages = getAzureImages(azureManagerUrl, formMap, headersMap, MicrosoftAzureCategoryEnum.WEBANDMOBILE_MP);
+        List<JSONObject> developerServicesAzureImages = getAzureImages(azureManagerUrl, formMap, headersMap, MicrosoftAzureCategoryEnum.DEVELOPER_SERVICES);
+        List<JSONObject> managementAzureImages = getAzureImages(azureManagerUrl, formMap, headersMap, MicrosoftAzureCategoryEnum.MANAGEMENT);
+        List<JSONObject> mediaCdnAzureImages = getAzureImages(azureManagerUrl, formMap, headersMap, MicrosoftAzureCategoryEnum.MEDIA_CDN);
+        List<JSONObject> dataAnalyticsAzureImages = getAzureImages(azureManagerUrl, formMap, headersMap, MicrosoftAzureCategoryEnum.DATA_ANALYTICS);
+        HashMap<String, JSONObject> publicAzureImageMap = new HashMap<>();
+        mergePublicAzureImages(computeAzureImages, publicAzureImageMap);
+        mergePublicAzureImages(dataStorageAzureImages, publicAzureImageMap);
+        mergePublicAzureImages(webAndMobileAzureImages, publicAzureImageMap);
+        mergePublicAzureImages(developerServicesAzureImages, publicAzureImageMap);
+        mergePublicAzureImages(managementAzureImages, publicAzureImageMap);
+        mergePublicAzureImages(mediaCdnAzureImages, publicAzureImageMap);
+        mergePublicAzureImages(securityIdentityAzureImages, publicAzureImageMap);
+        mergePublicAzureImages(dataAnalyticsAzureImages, publicAzureImageMap);
+        result.put("imageList", Arrays.asList(publicAzureImageMap.values().toArray()));
+    }
+
+    private List<JSONObject> getAzureImages(String azureManagerUrl, Map<String, Object> formMap, HashMap<String, String> headersMap, MicrosoftAzureCategoryEnum categoryIds) {
+        formMap.put("categoryCode", categoryIds.getCode());
+        formMap.put("categoryName", categoryIds.getName());
+
         String res = null;
         try {
-            String url = azureManagerUrl + "/cloud/vm_images";
+            String body = JsonUtils.stringify(formMap);
+            String url = azureManagerUrl + "/cloud/item_vm_images";
             res = HttpUtils.sendHttpPost(url, body, headersMap);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -416,9 +437,9 @@ public class MicrosoftAzureConverter implements BaseConverter {
         Map<String, Object> dataMap = JsonUtils.parseMap(res);
         if (BaseErrorCode.SUCCESS.getCode().equals(dataMap.get("code"))) {
             List<Map> data = (List) dataMap.get("data");
-            result.put("imageList", data.stream()
+            return data.stream()
                     .map(JSONObject::new)
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList());
         } else {
             throw new RuntimeException("synchronous vm images fault");
         }
@@ -635,17 +656,18 @@ public class MicrosoftAzureConverter implements BaseConverter {
 
     /**
      * 合并公有云镜像
+     *
      * @param publicAzureImages
      * @param publicAzureImageMap
      */
     private static void mergePublicAzureImages(List<JSONObject> publicAzureImages, HashMap<String, JSONObject> publicAzureImageMap) {
         publicAzureImages.stream().forEach(image -> {
             String key = image.getString("publisherName") + image.getString("offerName") + image.getString("skuName");
-            if(publicAzureImageMap.containsKey(key)){
+            if (publicAzureImageMap.containsKey(key)) {
                 JSONObject value = publicAzureImageMap.get(key);
                 value.put("categoryIds", mergeCategoryIds(value.getString("categoryIds"), image.getString("categoryIds")));
                 publicAzureImageMap.put(key, value);
-            }else {
+            } else {
                 publicAzureImageMap.put(key, image);
             }
         });
@@ -694,7 +716,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
                             forth.put("offerName", split[1]);
                             forth.put("skuName", result.getJSONArray("plans").getJSONObject(0).getString("planId"));
                             forth.put("operatingSystem", operatingSystem.contains("linux") ? "linux" : "windows");
-                            forth.put("categoryIds",categoryIds.getCode());
+                            forth.put("categoryIds", categoryIds.getCode());
                             return forth;
                         })
                         .collect(Collectors.toList());

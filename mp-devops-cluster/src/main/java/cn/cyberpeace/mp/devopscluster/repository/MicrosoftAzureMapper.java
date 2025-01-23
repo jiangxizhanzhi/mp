@@ -49,9 +49,11 @@ public interface MicrosoftAzureMapper extends BaseModelMapper<DeviceCloudTargetP
 
     List<DeviceCloudTargetVO> getCloudTargetListByCodes(@Param("cloudServiceType") Integer cloudServiceType,
                                                         @Param("param") List<MpSysCodeMenu> filteredList, @Param("offset") Integer offset,
-                                                        @Param("pageSize") Integer pageSize, @Param("cloudType") String cloudType);
+                                                        @Param("pageSize") Integer pageSize, @Param("cloudType") String cloudType,
+                                                        @Param("tableOtherName") String tableOtherName);
 
-    Integer getCloudTargetListByCodesNum(@Param("cloudServiceType") Integer cloudServiceType, @Param("param") List<MpSysCodeMenu> filteredList, @Param("cloudType") String cloudType);
+    Integer getCloudTargetListByCodesNum(@Param("cloudServiceType") Integer cloudServiceType, @Param("param") List<MpSysCodeMenu> filteredList,
+                                         @Param("cloudType") String cloudType, @Param("tableOtherName") String tableOtherName);
 
 
     Boolean deleteCloudTarget(@Param("param") List<DeviceCloudTargetPO> cloudTargetList, @Param("cloudType") String cloudType);
