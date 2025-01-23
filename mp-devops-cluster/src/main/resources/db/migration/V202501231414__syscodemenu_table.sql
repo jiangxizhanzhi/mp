@@ -33,13 +33,13 @@ UPDATE mp.mp_sys_code_menu t SET t.supplement = 'target.name like \'%**%\'' WHER
 UPDATE mp.mp_sys_code_menu t SET t.supplement = 'target.name like \'%**%\'' WHERE t.code LIKE '1004010801' ESCAPE '#' AND t.supplement IS NULL;
 UPDATE mp.mp_sys_code_menu t SET t.supplement = 'target.name like \'%**%\'' WHERE t.code LIKE '1004010501' ESCAPE '#' AND t.supplement IS NULL;
 # 混合云靶标查询修改
-UPDATE mp.mp_sys_code_menu t SET t.code_name = '开发人员服务' WHERE t.CODE LIKE '10020106' ESCAPE '#' AND t.code_name LIKE '安全性' ESCAPE '#' AND t.parent_code LIKE '100201' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '6' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
-UPDATE mp.mp_sys_code_menu t SET t.code_name = '数据 + 存储器' WHERE t.CODE LIKE '10020103' ESCAPE '#' AND t.code_name LIKE '容器' ESCAPE '#' AND t.parent_code LIKE '100201' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '3' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
-UPDATE mp.mp_sys_code_menu t SET t.code_name = '“安全性”和“标识”' WHERE t.CODE LIKE '10020104' ESCAPE '#' AND t.code_name LIKE '数据库' ESCAPE '#' AND t.parent_code LIKE '100201' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '4' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
-UPDATE mp.mp_sys_code_menu t SET t.code_name = '管理' WHERE t.CODE LIKE '10020107' ESCAPE '#' AND t.code_name LIKE '存储' ESCAPE '#' AND t.parent_code LIKE '100201' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '7' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
-UPDATE mp.mp_sys_code_menu t SET t.code_name = 'Web + 移动' WHERE t.CODE LIKE '10020105' ESCAPE '#' AND t.code_name LIKE '分析' ESCAPE '#' AND t.parent_code LIKE '100201' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '5' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
-INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) VALUES ('10020108', '介质 + CDN', '100201', '01', '8', 1, 3);
-INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) VALUES ('10020109', '数据 + 分析', '100201', '01', '9', 1, 3);
+UPDATE mp.mp_sys_code_menu t SET t.code_name = '开发人员服务',remark = '15' WHERE t.CODE LIKE '10020106' ESCAPE '#' AND t.code_name LIKE '安全性' ESCAPE '#' AND t.parent_code LIKE '100201' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '6' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
+UPDATE mp.mp_sys_code_menu t SET t.code_name = '数据 + 存储器',remark = '12' WHERE t.CODE LIKE '10020103' ESCAPE '#' AND t.code_name LIKE '容器' ESCAPE '#' AND t.parent_code LIKE '100201' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '3' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
+UPDATE mp.mp_sys_code_menu t SET t.code_name = '“安全性”和“标识”',remark = '13' WHERE t.CODE LIKE '10020104' ESCAPE '#' AND t.code_name LIKE '数据库' ESCAPE '#' AND t.parent_code LIKE '100201' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '4' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
+UPDATE mp.mp_sys_code_menu t SET t.code_name = '管理',remark = '16' WHERE t.CODE LIKE '10020107' ESCAPE '#' AND t.code_name LIKE '存储' ESCAPE '#' AND t.parent_code LIKE '100201' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '7' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
+UPDATE mp.mp_sys_code_menu t SET t.code_name = 'Web + 移动',remark = '14' WHERE t.CODE LIKE '10020105' ESCAPE '#' AND t.code_name LIKE '分析' ESCAPE '#' AND t.parent_code LIKE '100201' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '5' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
+INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) VALUES ('10020108', '介质 + CDN', '100201', '01', '17', 1, 3);
+INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) VALUES ('10020109', '数据 + 分析', '100201', '01', '18', 1, 3);
 
 INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) VALUES ('1002010401', '关键字搜索', '10020104', '02', '', 1, 4);
 INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) VALUES ('1002010403', '操作系统', '10020104', '01', '', 1, 4);
@@ -71,20 +71,15 @@ INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STA
 INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) VALUES ('100201090301', '全部', '1002010903', '', '', 1, 5);
 INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) VALUES ('100201090302', 'windows', '1002010903', '', '', 1, 5);
 INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) VALUES ('100201090303', 'linux', '1002010903', '', '', 1, 5);
-UPDATE mp.mp_sys_code_menu t SET t.supplement = 'target.name like \'%**%\'' WHERE t.code LIKE '1002010401' ESCAPE '#' AND t.supplement IS NULL;
-UPDATE mp.mp_sys_code_menu t SET t.supplement = 'target.name like \'%**%\'' WHERE t.code LIKE '1002010701' ESCAPE '#' AND t.supplement IS NULL;
-UPDATE mp.mp_sys_code_menu t SET t.supplement = 'target.name like \'%**%\'' WHERE t.code LIKE '1002010601' ESCAPE '#' AND t.supplement IS NULL;
-UPDATE mp.mp_sys_code_menu t SET t.supplement = 'target.name like \'%**%\'' WHERE t.code LIKE '1002010801' ESCAPE '#' AND t.supplement IS NULL;
-UPDATE mp.mp_sys_code_menu t SET t.supplement = 'target.name like \'%**%\'' WHERE t.code LIKE '1002010501' ESCAPE '#' AND t.supplement IS NULL;
-UPDATE mp.mp_sys_code_menu t SET t.supplement = 'target.name like \'%**%\'' WHERE t.code LIKE '1002010901' ESCAPE '#' AND t.supplement IS NULL;
+
 #  私有云靶标查询修改
-UPDATE mp.mp_sys_code_menu t SET t.code_name = '开发人员服务' WHERE t.CODE LIKE '10030106' ESCAPE '#' AND t.code_name LIKE '安全性' ESCAPE '#' AND t.parent_code LIKE '100301' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '6' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
-UPDATE mp.mp_sys_code_menu t SET t.code_name = '数据 + 存储器' WHERE t.CODE LIKE '10030103' ESCAPE '#' AND t.code_name LIKE '容器' ESCAPE '#' AND t.parent_code LIKE '100301' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '3' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
-UPDATE mp.mp_sys_code_menu t SET t.code_name = '“安全性”和“标识”' WHERE t.CODE LIKE '10030104' ESCAPE '#' AND t.code_name LIKE '数据库' ESCAPE '#' AND t.parent_code LIKE '100301' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '4' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
-UPDATE mp.mp_sys_code_menu t SET t.code_name = '管理' WHERE t.CODE LIKE '10030107' ESCAPE '#' AND t.code_name LIKE '存储' ESCAPE '#' AND t.parent_code LIKE '100301' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '7' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
-UPDATE mp.mp_sys_code_menu t SET t.code_name = 'Web + 移动' WHERE t.CODE LIKE '10030105' ESCAPE '#' AND t.code_name LIKE '分析' ESCAPE '#' AND t.parent_code LIKE '100301' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '5' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
-INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) VALUES ('10030108', '介质 + CDN', '100301', '01', '8', 1, 3);
-INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) VALUES ('10030109', '数据 + 分析', '100301', '01', '9', 1, 3);
+UPDATE mp.mp_sys_code_menu t SET t.code_name = '开发人员服务',remark = '15' WHERE t.CODE LIKE '10030106' ESCAPE '#' AND t.code_name LIKE '安全性' ESCAPE '#' AND t.parent_code LIKE '100301' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '6' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
+UPDATE mp.mp_sys_code_menu t SET t.code_name = '数据 + 存储器',remark = '12' WHERE t.CODE LIKE '10030103' ESCAPE '#' AND t.code_name LIKE '容器' ESCAPE '#' AND t.parent_code LIKE '100301' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '3' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
+UPDATE mp.mp_sys_code_menu t SET t.code_name = '“安全性”和“标识”',remark = '13' WHERE t.CODE LIKE '10030104' ESCAPE '#' AND t.code_name LIKE '数据库' ESCAPE '#' AND t.parent_code LIKE '100301' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '4' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
+UPDATE mp.mp_sys_code_menu t SET t.code_name = '管理',remark = '16' WHERE t.CODE LIKE '10030107' ESCAPE '#' AND t.code_name LIKE '存储' ESCAPE '#' AND t.parent_code LIKE '100301' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '7' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
+UPDATE mp.mp_sys_code_menu t SET t.code_name = 'Web + 移动',remark = '14' WHERE t.CODE LIKE '10030105' ESCAPE '#' AND t.code_name LIKE '分析' ESCAPE '#' AND t.parent_code LIKE '100301' ESCAPE '#' AND t.type LIKE '01' ESCAPE '#' AND t.remark LIKE '5' ESCAPE '#' AND t.STATUS = 1 AND t.LEVEL = 3;
+INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) VALUES ('10030108', '介质 + CDN', '100301', '01', '17', 1, 3);
+INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) VALUES ('10030109', '数据 + 分析', '100301', '01', '18', 1, 3);
 
 INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) VALUES ('1003010401', '关键字搜索', '10030104', '02', '', 1, 4);
 INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) VALUES ('1003010403', '操作系统', '10030104', '01', '', 1, 4);
@@ -116,7 +111,6 @@ INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STA
 INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) VALUES ('100301090301', '全部', '1003010903', '', '', 1, 5);
 INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) VALUES ('100301090302', 'windows', '1003010903', '', '', 1, 5);
 INSERT INTO mp.mp_sys_code_menu (CODE, code_name, parent_code, type, remark, STATUS, LEVEL) VALUES ('100301090303', 'linux', '1003010903', '', '', 1, 5);
-
 
 delete from mp_sys_code_menu where parent_code = '1002010202' or code = '1002010202';
 delete from mp_sys_code_menu where parent_code = '1003010202' or code = '1003010202';
