@@ -372,18 +372,20 @@ public class AzureCreateHandler extends CreateHandler {
                     .collect(Collectors.toList());
             log.info("当前本地载荷信息：{}", JSON.toJSONString(cloudPlugins));
             for (CloudPluginSceneElementBO cloudPlugin : cloudPlugins) {
+                log.info("cloudPlugin info：{}", JSON.toJSONString(cloudPlugin));
                 String loadToolId = cloudPlugin.getLoadToolId();
                 if (StringUtils.isNotBlank(loadToolId)) {
-                    DevopsLoadModel loadById = devopsLoadSourceMapper.findById(loadToolId);
-                    if (loadById != null && loadById.getScriptFilePath() != null) {
-                        log.info("需要添加文件的载荷信息：{}", JSON.toJSONString(loadById));
+                    String scriptFilePath = devopsLoadSourceMapper.findById(loadToolId);
+                    log.info("loadById info：{}", scriptFilePath);
+                    if (StringUtils.isNotBlank(scriptFilePath)) {
+                        log.info("需要添加文件的载荷信息：{}", scriptFilePath);
                         // 获取ssh链接信息
                         String remoteHost = collect.get(0).getAccessIp();
                         Integer port = collect.get(0).getAccessPort();
                         String username = collect.get(0).getUsername();
                         String password = collect.get(0).getPassword();
                         String remoteDir = "/tmp/";
-                        String localFile = loadById.getScriptFilePath();
+                        String localFile = scriptFilePath;
                         try {
                             JSch jsch = new JSch();
                             com.jcraft.jsch.Session session = jsch.getSession(username, remoteHost, port);
@@ -403,7 +405,7 @@ public class AzureCreateHandler extends CreateHandler {
                             sftpChannel.put(new FileInputStream(file), file.getName());
                             session.disconnect();
                             sftpChannel.exit();
-                            log.info("载荷文件上传成功{}", loadById.getScriptFilePath());
+                            log.info("载荷文件上传成功{}", scriptFilePath);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

@@ -12,7 +12,7 @@
             LIMIT 1
     </select>
 
-    <select id="findById" resultType="cn.cyberpeace.mp.sceneplugincloud.model.DevopsLoadModel">
-        SELECT * FROM mp_devops_load WHERE id = #{loadId}
+    <select id="findById">
+        SELECT script_file_path FROM mp_devops_load WHERE id = #{loadId}
     </select>
 </mapper>
