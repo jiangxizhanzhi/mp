@@ -11,4 +11,8 @@
             create_time DESC
             LIMIT 1
     </select>
+
+    <select id="findById" resultType="cn.cyberpeace.mp.sceneplugincloud.model.DevopsLoadModel">
+        SELECT * FROM mp_devops_load WHERE id = #{loadId}
+    </select>
 </mapper>

@@ -9,12 +9,20 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.LoadUrlConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.DevopsLoadModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.DevopsLoadSourceModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.repository.DevopsLoadSourceMapper;
 import com.alibaba.fastjson.JSON;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +38,8 @@ import static com.google.common.net.HttpHeaders.ACCEPT_LANGUAGE;
  */
 @Slf4j
 public class Load {
+    @Autowired
+    private DevopsLoadSourceMapper devopsLoadSourceMapper;
 
     private String loadUrl;
 
@@ -48,6 +58,41 @@ public class Load {
                 List<CloudAccessMode> collect = ports.get(0).getAccessModes().stream().filter(cloudAccessMode -> AccessMode.Protocol.RDP.equals(cloudAccessMode.getProtocol())).collect(Collectors.toList());
                 if("shell".equals(cloudElement.getSrcElement().getControlTypeName())){
                     collect = ports.get(0).getAccessModes().stream().filter(cloudAccessMode -> AccessMode.Protocol.SSH.equals(cloudAccessMode.getProtocol())).collect(Collectors.toList());
+                    String loadToolId = cloudElement.getLoadToolId();
+                    DevopsLoadModel loadById = devopsLoadSourceMapper.findById(loadToolId);
+                    if (loadById != null && loadById.getScriptFilePath() != null) {
+                        log.info("需要添加文件的载荷信息：{}", loadById.toString());
+                        // 获取ssh链接信息
+                        String remoteHost = collect.get(0).getAccessIp();
+                        Integer port = collect.get(0).getAccessPort();
+                        String username = collect.get(0).getUsername();
+                        String password = collect.get(0).getPassword();
+                        String remoteDir = "/tmp/";
+                        String localFile = loadById.getScriptFilePath();
+                        try {
+                            JSch jsch = new JSch();
+                            com.jcraft.jsch.Session session = jsch.getSession(username, remoteHost, port);
+                            session.setPassword(password);
+                            // 配置会话的其他选项,如主机密钥检查等
+                            java.util.Properties config = new java.util.Properties();
+                            config.put("StrictHostKeyChecking", "no");
+                            session.setConfig(config);
+                            session.connect();
+                            Channel channel = session.openChannel("sftp");
+                            channel.connect();
+                            ChannelSftp sftpChannel = (ChannelSftp) channel;
+                            // 切换到远程目录
+                            sftpChannel.cd(remoteDir);
+                            // 上传文件
+                            File file = new File(localFile);
+                            sftpChannel.put(new FileInputStream(file), file.getName());
+                            session.disconnect();
+                            sftpChannel.exit();
+                            log.info("载荷文件上传成功{}", loadById.getScriptFilePath());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
                 if(collect.size()>0){
                     cloudElement.setLoadAccessModel(collect.get(0).getId());
