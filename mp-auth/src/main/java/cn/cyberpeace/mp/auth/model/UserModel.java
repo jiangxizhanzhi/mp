@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
+import com.alibaba.fastjson.JSONArray;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
@@ -18,6 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
@@ -134,12 +136,12 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime lastLogin;
 
-    private String bcIds;
+    private String bcIds = JSONArray.toJSONString(Lists.newArrayList());
 
-    private String bcName;
+    private String bcName = JSONArray.toJSONString(Lists.newArrayList());
 
     @Builder
-    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin) {
+    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin,String bcIds, String bcName) {
         super(id, createTime, updateTime);
         this.tenant = tenant;
         this.username = username;
@@ -161,6 +163,22 @@ public class UserModel extends BaseModel implements Serializable {
         this.idCard = idCard;
         this.mobile = mobile;
         this.address = address;
+        this.bcIds = initBcIds(bcIds);
+        this.bcIds = initBcName(bcName);
+
+    }
+
+    private String initBcIds(String bcIds) {
+        if (StringUtils.isBlank(bcIds)) {
+            bcIds = JSONArray.toJSONString(Lists.newArrayList());
+        }
+        return bcIds;
+    }
+    private String initBcName(String bcName) {
+        if (StringUtils.isBlank(bcName)) {
+            bcName = JSONArray.toJSONString(Lists.newArrayList());
+        }
+        return bcName;
     }
 
     public static class Status {

@@ -48,6 +48,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -339,6 +340,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
         if (StringUtils.isNotBlank(userModel.getAvatar())) {
             userModel.setAvatar(DefaultImgUtil.fdfsUrlToPath(userModel.getAvatar()));
+        }
+        if (StringUtils.isEmpty(userModel.getBcIds())) {
+            userModel.setBcIds(JSONArray.toJSONString(Lists.newArrayList()));
+        }
+        if (StringUtils.isEmpty(userModel.getBcName())) {
+            userModel.setBcName(JSONArray.toJSONString(Lists.newArrayList()));
         }
 
         createCheckService.check(userModel);
