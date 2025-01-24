@@ -12,7 +12,7 @@
             LIMIT 1
     </select>
 
-    <select id="findById">
+    <select id="getLoadId" resultType="java.lang.String">
         SELECT script_file_path FROM mp_devops_load WHERE id = #{loadId}
     </select>
 </mapper>

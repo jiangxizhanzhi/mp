@@ -375,7 +375,7 @@ public class AzureCreateHandler extends CreateHandler {
                 log.info("cloudPlugin info：{}", JSON.toJSONString(cloudPlugin));
                 String loadToolId = cloudPlugin.getLoadToolId();
                 if (StringUtils.isNotBlank(loadToolId)) {
-                    String scriptFilePath = devopsLoadSourceMapper.findById(loadToolId);
+                    String scriptFilePath = devopsLoadSourceMapper.getLoadId(loadToolId);
                     log.info("loadById info：{}", scriptFilePath);
                     if (StringUtils.isNotBlank(scriptFilePath)) {
                         log.info("需要添加文件的载荷信息：{}", scriptFilePath);
