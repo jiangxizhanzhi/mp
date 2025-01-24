@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSceneStage;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
+import cn.cyberpeace.mp.sceneplugincloud.model.DevopsLoadModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.api.AzureResourceGroup;
@@ -33,6 +34,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.azure.manager.IAzureResourceMana
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
+import cn.cyberpeace.mp.sceneplugincloud.repository.DevopsLoadSourceMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementNetworkUtils;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import com.alibaba.fastjson.JSONObject;
@@ -45,9 +47,15 @@ import com.azure.resourcemanager.loganalytics.models.WorkspaceSkuNameEnum;
 import com.azure.resourcemanager.monitor.fluent.models.DataCollectionRuleResourceInner;
 import com.azure.resourcemanager.monitor.models.*;
 import com.azure.resourcemanager.network.models.Network;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,6 +69,9 @@ public class AzureCreateHandler extends CreateHandler {
     private String privateAzureManagerUrl;
 
     private MicrosoftAzureLoginMapper sceneElementPluginConfigMapper;
+
+    @Autowired
+    private DevopsLoadSourceMapper devopsLoadSourceMapper;
 
     public static class ElementProcess {
         public static final EventProcess CREATE_WEBAPP = new EventProcess("create_webapp", "sceneplugincloud.event" + ".CREATE_WEBAPP");
@@ -324,6 +335,7 @@ public class AzureCreateHandler extends CreateHandler {
                 createTerminalTasks.addAll(createFireWallTasks);
             }
 
+            // kali机器信息
             List<CloudPluginSceneElementBO> terminalExcludeNpcElements = getPluginHandler().getTerminalExcludeNpcCloudElements();
             var createKaliTasks = getPluginHandler().getTerminalExcludeNpcElements().stream()
                     .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement)).collect(Collectors.toList());
@@ -347,6 +359,53 @@ public class AzureCreateHandler extends CreateHandler {
             }
             createTerminalTasks.addAll(createLoadTasks);
 
+            List<CloudPluginSceneElementPortBO> ports = getPluginHandler().getPorts(loadToolElementBO.getSrcElement());
+            List<CloudAccessMode> collect = ports.get(0).getAccessModes().stream()
+                    .filter(cloudAccessMode -> AccessMode.Protocol.SSH.equals(cloudAccessMode.getProtocol()))
+                    .collect(Collectors.toList());
+            log.info("kali机ssh信息：{}", collect.toString());
+
+            // 获取本地载荷
+            List<CloudPluginSceneElementBO> cloudPlugins = filteredLoadElements.stream()
+                    .filter(element -> BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL == element.getLoadSource())
+                    .collect(Collectors.toList());
+            for (CloudPluginSceneElementBO cloudPlugin : cloudPlugins) {
+                String loadToolId = cloudPlugin.getLoadToolId();
+                DevopsLoadModel loadById = devopsLoadSourceMapper.findById(loadToolId);
+                if (loadById != null && loadById.getScriptFilePath() != null) {
+                    log.info("需要添加文件的载荷信息：{}", loadById.toString());
+                    // 获取ssh链接信息
+                    String remoteHost = collect.get(0).getAccessIp();
+                    Integer port = collect.get(0).getAccessPort();
+                    String username = collect.get(0).getUsername();
+                    String password = collect.get(0).getPassword();
+                    String remoteDir = "/tmp/";
+                    String localFile = loadById.getScriptFilePath();
+                    try {
+                        JSch jsch = new JSch();
+                        com.jcraft.jsch.Session session = jsch.getSession(username, remoteHost, port);
+                        session.setPassword(password);
+                        // 配置会话的其他选项,如主机密钥检查等
+                        java.util.Properties config = new java.util.Properties();
+                        config.put("StrictHostKeyChecking", "no");
+                        session.setConfig(config);
+                        session.connect();
+                        Channel channel = session.openChannel("sftp");
+                        channel.connect();
+                        ChannelSftp sftpChannel = (ChannelSftp) channel;
+                        // 切换到远程目录
+                        sftpChannel.cd(remoteDir);
+                        // 上传文件
+                        File file = new File(localFile);
+                        sftpChannel.put(new FileInputStream(file), file.getName());
+                        session.disconnect();
+                        sftpChannel.exit();
+                        log.info("载荷文件上传成功{}", loadById.getScriptFilePath());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
             List<Runnable> createNetworkEquipmentTasks = new ArrayList<>();
             for (CloudPluginSceneElementBO element : filteredNetworkEquipmentElements) {
                 String nodeId = element.getSrcElement().getId();
