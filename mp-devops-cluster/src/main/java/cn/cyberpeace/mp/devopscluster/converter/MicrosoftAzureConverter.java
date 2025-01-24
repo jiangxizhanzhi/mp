@@ -283,9 +283,9 @@ public class MicrosoftAzureConverter implements BaseConverter {
     @Async
     public void executeSequentially() {
         //1: 微软公有云 2:微软私有云 3:微软混合云
+        JSONObject publicTargetResult = synchronousCloudData(1);
         JSONObject privateTargetResult = synchronousCloudData(2);
         JSONObject mixTargetResult = synchronousCloudData(3);
-        JSONObject publicTargetResult = synchronousCloudData(1);
     }
 
     /**
