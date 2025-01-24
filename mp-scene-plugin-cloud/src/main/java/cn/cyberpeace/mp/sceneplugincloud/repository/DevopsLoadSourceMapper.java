@@ -19,5 +19,5 @@ import java.util.List;
 public interface DevopsLoadSourceMapper extends BaseModelMapper<DevopsLoadSourceModel> {
     DevopsLoadSourceModel getSynchronousDataSource();
 
-    DevopsLoadModel findById(String loadId);
+    DevopsLoadModel findById(@Param("loadId") String loadId);
 }

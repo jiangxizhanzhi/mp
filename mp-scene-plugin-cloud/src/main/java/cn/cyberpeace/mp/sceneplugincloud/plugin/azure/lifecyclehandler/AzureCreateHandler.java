@@ -369,6 +369,7 @@ public class AzureCreateHandler extends CreateHandler {
             List<CloudPluginSceneElementBO> cloudPlugins = filteredLoadElements.stream()
                     .filter(element -> BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL == element.getLoadSource())
                     .collect(Collectors.toList());
+            log.info("当前本地载荷信息：{}", cloudPlugins.toString());
             for (CloudPluginSceneElementBO cloudPlugin : cloudPlugins) {
                 String loadToolId = cloudPlugin.getLoadToolId();
                 DevopsLoadModel loadById = devopsLoadSourceMapper.findById(loadToolId);
