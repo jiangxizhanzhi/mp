@@ -284,8 +284,8 @@ public class MicrosoftAzureConverter implements BaseConverter {
     public void executeSequentially() {
         //1: 微软公有云 2:微软私有云 3:微软混合云
         JSONObject publicTargetResult = synchronousCloudData(1);
-        JSONObject privateTargetResult = synchronousCloudData(2);
-        JSONObject mixTargetResult = synchronousCloudData(3);
+//        JSONObject privateTargetResult = synchronousCloudData(2);
+//        JSONObject mixTargetResult = synchronousCloudData(3);
     }
 
     /**
@@ -636,6 +636,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
      * 公有云虚拟机市场镜像
      */
     public List getPublicAzureImages() {
+        log.info("getPublicAzureImages begin");
         List<JSONObject> publicAzureComputeImages = getPublicAzureImages(MicrosoftAzureCategoryEnum.ALL_COMPUTE_MP);
         List<JSONObject> publicAzureStorageImages = getPublicAzureImages(MicrosoftAzureCategoryEnum.ALL_STORAGE_MP);
         List<JSONObject> publicAzureDatabasesImages = getPublicAzureImages(MicrosoftAzureCategoryEnum.ALL_DATABASES_MP);
@@ -651,6 +652,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         mergePublicAzureImages(publicAzureSecurityImages, publicAzureImageMap);
         mergePublicAzureImages(publicAzureWebAndMobileImages, publicAzureImageMap);
 
+        log.info("getPublicAzureImages end data:{}", Arrays.asList(publicAzureImageMap.values().toArray()));
         return Arrays.asList(publicAzureImageMap.values().toArray());
     }
 
