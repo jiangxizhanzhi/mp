@@ -37,9 +37,12 @@ import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.IdUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.hutool.core.collection.CollUtil;
+import com.alibaba.fastjson.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -279,6 +282,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         if (StringUtils.isBlank(roleModel.getIdentifier())) {
             // 如果ident为空，则随机生成一个
             roleModel.setIdentifier(IdUtils.globalId());
+        }
+        if (StringUtils.isBlank(roleModel.getBcIds())) {
+            roleModel.setBcIds(JSONArray.toJSONString(Lists.newArrayList()));
+        }
+        if (StringUtils.isBlank(roleModel.getBcName())) {
+            roleModel.setBcName(JSONArray.toJSONString(Lists.newArrayList()));
         }
 
         ObjServiceResult<RoleModel> result = create(roleModel);
