@@ -18,8 +18,10 @@ import cn.cyberpeace.mp.base.util.FileTypeUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaNodeConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigPieceBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -124,26 +126,71 @@ public class SceneExporter {
             String k = entry.getKey();
             String v = entry.getValue();
             ExportResult.ConvertInfo convertInfo = new ExportResult.ConvertInfo();
-            convertInfo.setId(k);
+            convertInfo.setId(v);
             convertInfo.setOriginId(k);
             convertInfos.add(convertInfo);
         }
         exportResult.setConvertInfos(convertInfos);
 
-        // 生成json格式的tuop导入资源
-        var sceneConfigHandler = this.createTopoJson(sceneId, sceneNumber, envPath + "/topo.json");
+        // 生成json格式的toop导入资源
+        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, null, null);
+        this.removeEid(sceneConfigHandler);
+        SceneConfigDataBO sceneConfigDataBO = sceneConfigHandler.toData();
+        // 替换各个节点的id ， 保持节点id和使用yml时的一致
+        this.changeNodeId(sceneConfigDataBO, convertInfos);
+        this.createTopoJson(sceneConfigDataBO, sceneNumber, envPath + "/topo.json");
         // 生成各个节点的图片和附件
-        this.createElementFiles(sceneConfigHandler, envPath);
+        this.createElementFiles(sceneConfigHandler, envPath + "/topo_json/elements");
+        // 生成各个区域中使用的图片
+        this.createAreaFiles(sceneConfigHandler, envPath + "/topo_json/areas");
 
         return exportResult;
     }
 
-    private SceneConfigHandler createTopoJson(String sceneId,String sceneNum, String filePath) {
-        SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, null, null);
-        this.removeEid(sceneConfigHandler);
-        SceneConfigDataBO sceneConfigDataBO = sceneConfigHandler.toData();
+    private void changeNodeId(SceneConfigDataBO sceneConfigDataBO, List<ExportResult.ConvertInfo> convertInfos) {
+        Map<String, String> nodeIdMap = new HashMap<>();
+        for (ExportResult.ConvertInfo convertInfo : convertInfos) {
+            nodeIdMap.put(convertInfo.getOriginId(), convertInfo.getId());
+        }
+        var cloudPlugin = sceneConfigDataBO.getPlugins().get("cpcloud");
+        for (SceneConfigElementBO element : sceneConfigDataBO.getTopology().getElements()) {
+            String originId = element.getId();
+            String newId = nodeIdMap.getOrDefault(originId, originId);
+            // 更新节点的id
+            element.setId(newId);
+            var cloudPluginElement = cloudPlugin.getElements().remove(originId);
+            if (cloudPluginElement != null) {
+                cloudPlugin.getElements().put(newId, cloudPluginElement);
+            }
+            // 更新端口的id
+            for (SceneConfigElementPortBO port : element.getPorts()) {
+                String originPortId = port.getId();
+                String newPortId = StringUtils.replace(originPortId, originId, newId);
+                port.setId(newPortId);
+                var cloudPluginPort = cloudPlugin.getElementPorts().remove(originPortId);
+                if (cloudPluginPort != null) {
+                    cloudPlugin.getElementPorts().put(newPortId, cloudPluginPort);
+                }
+            }
+            // 更新连线数据里的id
+            for (SceneConfigElementPortConnectionBO c : sceneConfigDataBO.getTopology().getConnections()) {
+                c.setSource(StringUtils.replace(c.getSource(), originId, newId));
+                c.setTarget(StringUtils.replace(c.getTarget(), originId, newId));
+                c.setInfo(StringUtils.replace(c.getInfo(), originId, newId));
+                c.setName(StringUtils.replace(c.getName(), originId, newId));
+            }
+            // 更新层节点和靶标节点连线的id
+            for (SceneConfigAreaNodeConnectionBO n : sceneConfigDataBO.getTopology().getNodeConnections()) {
+                n.setSource(StringUtils.replace(n.getSource(), originId, newId));
+                n.setTarget(StringUtils.replace(n.getTarget(), originId, newId));
+                n.setName(StringUtils.replace(n.getName(), originId, newId));
+            }
+        }
+    }
+
+    private void createTopoJson(SceneConfigDataBO sceneConfigDataBO, String sceneNum, String filePath) {
         sceneConfigDataBO.getPlugins().remove("cpflow");
-        sceneConfigDataBO.getPlugins().remove("collection");
+        sceneConfigDataBO.getPlugins().remove("cpcollection");
         var cloudData = sceneConfigDataBO.getPlugins().get("cpcloud");
         for (Map<String, Object> cloudElement : cloudData.getElements().values()) {
             var imageType = cloudElement.get("image_type");
@@ -165,28 +212,52 @@ public class SceneExporter {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
-        return sceneConfigHandler;
     }
 
-    private void createElementFiles(SceneConfigHandler sceneConfigHandler, String envPath) {
+    private void createElementFiles(SceneConfigHandler sceneConfigHandler, String envElementsPath) {
         for (var e : sceneConfigHandler.getElementMap().values()) {
+            if (StringUtils.isNotEmpty(e.getIcon2()) || StringUtils.isNotEmpty(e.getIcon3()) || StringUtils.isNotEmpty(e.getFile())) {
+                // 确保目录上层目录存在
+                new File(envElementsPath).mkdirs();
+            }
             String nodeId = e.getId();
             if (StringUtils.isNotEmpty(e.getIcon2())) {
                 var p = new ParseFileKey(e.getIcon2(), "png");
                 byte[] content = FsCommon.downloadRawContent(p.getFilePath());
-                writeFile(content, envPath + "/" + nodeId + "/icon2." + p.getSuffix(), 3);
+                writeFile(content, envElementsPath + "/" + nodeId + "/icon2." + p.getSuffix(), 3);
             }
             String icon3 = e.getIcon3();
             if (StringUtils.isNotEmpty(icon3)) {
                 var p = new ParseFileKey(e.getIcon3(), "png");
                 byte[] content = FsCommon.downloadRawContent(p.getFilePath());
-                writeFile(content, envPath + "/" + nodeId + "/icon3." + p.getSuffix(), 3);
+                writeFile(content, envElementsPath + "/" + nodeId + "/icon3." + p.getSuffix(), 3);
             }
             String file = e.getFile();
             if (StringUtils.isNotEmpty(file)) {
                 var p = new ParseFileKey(e.getFile(), "zip");
                 byte[] content = FsCommon.downloadRawContent(p.getFilePath());
-                writeFile(content, envPath + "/" + nodeId + "/attachment." + p.getSuffix(), 3);
+                String fileName = FileUtil.getName(p.getFilePath());
+                writeFile(content, envElementsPath + "/" + nodeId + "/attachment." + p.getSuffix(), 3);
+            }
+        }
+    }
+
+    private void createAreaFiles(SceneConfigHandler sceneConfigHandler, String envAreasPath) {
+        if (sceneConfigHandler.getAreaMap() == null) {
+            return;
+        }
+        for (var a : sceneConfigHandler.getAreaMap().values()) {
+            String display = a.getDisplayContext();
+            if (StringUtils.isNotEmpty(display)) {
+                var map = JsonCommon.parseMap(display);
+                if (map != null && map.containsKey("fillPic")) {
+                    String fillPic = map.get("fillPic").toString();
+                    if (StringUtils.isNotEmpty(fillPic)) {
+                        var p = new ParseFileKey(fillPic, "png");
+                        byte[] content = FsCommon.downloadRawContent(p.getFilePath());
+                        writeFile(content, envAreasPath + "/" + a.getId() + "/fillPic." + p.getSuffix(), 3);
+                    }
+                }
             }
         }
     }

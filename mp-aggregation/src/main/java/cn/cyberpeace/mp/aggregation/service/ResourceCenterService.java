@@ -88,7 +88,7 @@ public class ResourceCenterService {
             String jsonFilePath = ymlFilePath + "/topo.json";
             if (new File(jsonFilePath).exists()) {
                 log.info("使用json文件导入");
-                return this.importByJsonConfig(ymlFilePath, imageFilePath, imageFilePathList, sceneFilePath);
+                return this.importByJsonConfig(ymlFilePath , sceneFilePath);
             } else {
                 log.info("topo.json不存在");
             }
@@ -97,19 +97,7 @@ public class ResourceCenterService {
         return this.importByYmlConfig(ymlFilePath, imageFilePath, imageFilePathList, sceneFilePath);
     }
 
-    public ServiceResult<CsceneBO> importByJsonConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
-        // 处理附件
-        String fdfsSceneFilePath = null;
-        if (StringUtils.isNotEmpty(sceneFilePath)) {
-            File file = new File(sceneFilePath);
-            if (file.exists()) {
-                String fdfsPath = FsCommon.upload(sceneFilePath);
-                String fileName = file.getName();
-                fdfsSceneFilePath = String.format(FDFS_SCENE_FILEPATH_FORMAT, fdfsPath, fileName);
-            } else {
-                log.info("import scene , no scene file for path {}", sceneFilePath);
-            }
-        }
+    public ServiceResult<CsceneBO> importByJsonConfig(String ymlFilePath, String sceneFilePath) {
         String logoPath = ymlFilePath + "/" + LOGO_NAME;
         // 处理logo
         String fdfsLogoFilePath = null;
@@ -128,11 +116,36 @@ public class ResourceCenterService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        SceneConfigDataBO sceneConfigDataBO = JsonCommon.parse(content, SceneConfigDataBO.class);
+        SceneConfigDataBO sceneConfigDataBO  = JsonCommon.parse(content, SceneConfigDataBO.class);
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneConfigDataBO, null);
         CloudSceneConfigPluginHandler pluginHandler = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        this.handlerElementFiles(sceneConfigHandler, pluginHandler, ymlFilePath + "/topo_json/elements");
+        this.handlerAreaFiles(sceneConfigHandler, pluginHandler, ymlFilePath + "/topo_json/areas");
+        CsceneBO csceneBO = new CsceneBO();
+        csceneBO.setSceneConfig(sceneConfigHandler.toData());
+        csceneBO.setLogo(fdfsLogoFilePath);
+
+        // 保存
+        return csceneService.syncForImport(csceneBO, new CsceneContextBO());
+    }
+
+    private void handlerAreaFiles(SceneConfigHandler sceneConfigHandler, CloudSceneConfigPluginHandler pluginHandler, String envAreaPath) {
+        if (sceneConfigHandler.getAreaMap() != null) {
+            return;
+        }
+        for (String nodeId : sceneConfigHandler.getAreaMap().keySet()) {
+            // 处理图片和附件
+            File nodeDir = new File(envAreaPath + "/" + nodeId);
+            if (nodeDir.exists()) {
+                for (var nodeFile : nodeDir.listFiles()) {
+                    FsCommon.upload(nodeFile.getAbsolutePath());
+                }
+            }
+        }
+    }
+
+    private void handlerElementFiles(SceneConfigHandler sceneConfigHandler, CloudSceneConfigPluginHandler pluginHandler, String envElementPath) {
         for (String nodeId : sceneConfigHandler.getElementMap().keySet()) {
-            var element = pluginHandler.getSceneHandler().getElement(nodeId);
             CloudPluginSceneConfigElementBO pluginElement = pluginHandler.getElement(nodeId);
             // 处理image和image_uuid字段
             String imageName = pluginElement.getImage();
@@ -158,26 +171,13 @@ public class ResourceCenterService {
             }
 
             // 处理图片和附件
-            File nodeDir = new File(ymlFilePath + "/" + nodeId);
+            File nodeDir = new File(envElementPath + "/" + nodeId);
             if (nodeDir.exists()) {
                 for (var nodeFile : nodeDir.listFiles()) {
-                    var fileKey = FsCommon.upload(nodeFile.getAbsolutePath());
-                    if (nodeFile.getName().startsWith("icon2")) {
-                        element.setIcon2(fileKey);
-                    } else if (nodeFile.getName().startsWith("icon3")) {
-                        element.setIcon3(fileKey);
-                    } else if (nodeFile.getName().startsWith("attachment")) {
-                        element.setFile(fileKey + "?filename=" + nodeFile.getName());
-                    }
+                    FsCommon.upload(nodeFile.getAbsolutePath());
                 }
             }
         }
-        CsceneBO csceneBO = new CsceneBO();
-        csceneBO.setSceneConfig(sceneConfigHandler.toData());
-        csceneBO.setLogo(fdfsLogoFilePath);
-
-        // 保存
-        return csceneService.syncForImport(csceneBO, new CsceneContextBO());
     }
 
     private Device getByImageName(String imageName){
