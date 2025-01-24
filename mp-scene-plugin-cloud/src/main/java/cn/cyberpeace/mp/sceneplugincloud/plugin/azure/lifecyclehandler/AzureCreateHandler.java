@@ -37,6 +37,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.repository.DevopsLoadSourceMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementNetworkUtils;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.azure.core.http.rest.Response;
 import com.azure.core.management.Region;
@@ -363,47 +364,49 @@ public class AzureCreateHandler extends CreateHandler {
             List<CloudAccessMode> collect = ports.get(0).getAccessModes().stream()
                     .filter(cloudAccessMode -> AccessMode.Protocol.SSH.equals(cloudAccessMode.getProtocol()))
                     .collect(Collectors.toList());
-            log.info("kali机ssh信息：{}", collect.toString());
+            log.info("kali机ssh信息：{}", JSON.toJSONString(collect));
 
             // 获取本地载荷
             List<CloudPluginSceneElementBO> cloudPlugins = filteredLoadElements.stream()
                     .filter(element -> BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL == element.getLoadSource())
                     .collect(Collectors.toList());
-            log.info("当前本地载荷信息：{}", cloudPlugins.toString());
+            log.info("当前本地载荷信息：{}", JSON.toJSONString(cloudPlugins));
             for (CloudPluginSceneElementBO cloudPlugin : cloudPlugins) {
                 String loadToolId = cloudPlugin.getLoadToolId();
-                DevopsLoadModel loadById = devopsLoadSourceMapper.findById(loadToolId);
-                if (loadById != null && loadById.getScriptFilePath() != null) {
-                    log.info("需要添加文件的载荷信息：{}", loadById.toString());
-                    // 获取ssh链接信息
-                    String remoteHost = collect.get(0).getAccessIp();
-                    Integer port = collect.get(0).getAccessPort();
-                    String username = collect.get(0).getUsername();
-                    String password = collect.get(0).getPassword();
-                    String remoteDir = "/tmp/";
-                    String localFile = loadById.getScriptFilePath();
-                    try {
-                        JSch jsch = new JSch();
-                        com.jcraft.jsch.Session session = jsch.getSession(username, remoteHost, port);
-                        session.setPassword(password);
-                        // 配置会话的其他选项,如主机密钥检查等
-                        java.util.Properties config = new java.util.Properties();
-                        config.put("StrictHostKeyChecking", "no");
-                        session.setConfig(config);
-                        session.connect();
-                        Channel channel = session.openChannel("sftp");
-                        channel.connect();
-                        ChannelSftp sftpChannel = (ChannelSftp) channel;
-                        // 切换到远程目录
-                        sftpChannel.cd(remoteDir);
-                        // 上传文件
-                        File file = new File(localFile);
-                        sftpChannel.put(new FileInputStream(file), file.getName());
-                        session.disconnect();
-                        sftpChannel.exit();
-                        log.info("载荷文件上传成功{}", loadById.getScriptFilePath());
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                if (StringUtils.isNotBlank(loadToolId)) {
+                    DevopsLoadModel loadById = devopsLoadSourceMapper.findById(loadToolId);
+                    if (loadById != null && loadById.getScriptFilePath() != null) {
+                        log.info("需要添加文件的载荷信息：{}", JSON.toJSONString(loadById));
+                        // 获取ssh链接信息
+                        String remoteHost = collect.get(0).getAccessIp();
+                        Integer port = collect.get(0).getAccessPort();
+                        String username = collect.get(0).getUsername();
+                        String password = collect.get(0).getPassword();
+                        String remoteDir = "/tmp/";
+                        String localFile = loadById.getScriptFilePath();
+                        try {
+                            JSch jsch = new JSch();
+                            com.jcraft.jsch.Session session = jsch.getSession(username, remoteHost, port);
+                            session.setPassword(password);
+                            // 配置会话的其他选项,如主机密钥检查等
+                            java.util.Properties config = new java.util.Properties();
+                            config.put("StrictHostKeyChecking", "no");
+                            session.setConfig(config);
+                            session.connect();
+                            Channel channel = session.openChannel("sftp");
+                            channel.connect();
+                            ChannelSftp sftpChannel = (ChannelSftp) channel;
+                            // 切换到远程目录
+                            sftpChannel.cd(remoteDir);
+                            // 上传文件
+                            File file = new File(localFile);
+                            sftpChannel.put(new FileInputStream(file), file.getName());
+                            session.disconnect();
+                            sftpChannel.exit();
+                            log.info("载荷文件上传成功{}", loadById.getScriptFilePath());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
