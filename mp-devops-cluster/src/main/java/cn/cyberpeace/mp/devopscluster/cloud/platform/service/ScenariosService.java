@@ -45,7 +45,7 @@ public class ScenariosService extends BaseCpService {
             String body = JsonUtils.toUnderlineJSONString(snapshotCreate);
             HttpClient client = HttpClientBuilder.create().build();
             HttpPost post = new HttpPost(url);
-            post.setEntity(new StringEntity(body));
+            post.setEntity(new StringEntity(body, StandardCharsets.UTF_8));
             post.addHeader("Content-Type", "application/json");
             log.info("create snapshot , params: {}", body);
             var response = client.execute(post);
