@@ -71,9 +71,6 @@ public class AzureCreateHandler extends CreateHandler {
 
     private MicrosoftAzureLoginMapper sceneElementPluginConfigMapper;
 
-    @Autowired
-    private DevopsLoadSourceMapper devopsLoadSourceMapper;
-
     public static class ElementProcess {
         public static final EventProcess CREATE_WEBAPP = new EventProcess("create_webapp", "sceneplugincloud.event" + ".CREATE_WEBAPP");
         public static final EventProcess CREATE_FIRE_WALL = new EventProcess("create_fire_wall", "sceneplugincloud.event.create_fire_wall");
@@ -374,7 +371,10 @@ public class AzureCreateHandler extends CreateHandler {
             for (CloudPluginSceneElementBO cloudPlugin : cloudPlugins) {
                 log.info("cloudPlugin info：{}", JSON.toJSONString(cloudPlugin));
                 String loadToolId = cloudPlugin.getLoadToolId();
+                log.info("loadToolId info：{}", JSON.toJSONString(loadToolId));
                 if (StringUtils.isNotBlank(loadToolId)) {
+                    log.info("isNotBlank loadToolId info：{}", JSON.toJSONString(loadToolId));
+                    DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
                     String scriptFilePath = devopsLoadSourceMapper.getLoadId(loadToolId);
                     log.info("loadById info：{}", scriptFilePath);
                     if (StringUtils.isNotBlank(scriptFilePath)) {
