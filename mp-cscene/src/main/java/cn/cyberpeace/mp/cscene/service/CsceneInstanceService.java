@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.MicrosoftAzureLoginMapper;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -24,6 +25,7 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.base.util.mptool.CacheUtil;
 import cn.cyberpeace.mp.base.util.mptool.CollUtil;
+import cn.cyberpeace.mp.base.util.mptool.CollectionUtil;
 import cn.cyberpeace.mp.cscene.CscenePluginDataRecordService;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
@@ -67,6 +69,7 @@ import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.scene.util.ResourceClearHandler;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.*;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
@@ -79,6 +82,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
+import cn.cyberpeace.mp.sceneplugincloud.repository.DevopsLoadSourceMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -118,6 +122,7 @@ import cn.cyberpeace.mp.situationaware.repository.WazuhProbeDataMapper;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.azure.resourcemanager.compute.models.ComputeResourceType;
@@ -127,6 +132,9 @@ import com.azure.resourcemanager.resourcegraph.models.QueryResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.cache.Cache;
 import com.google.common.collect.Lists;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -137,6 +145,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
@@ -2645,6 +2655,61 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 .filterEqual(CloudPluginSceneElementModel::getScene, csceneInstanceModel.getScene())
                 .filterEqual(CloudPluginSceneElementModel::getLoadToolId, loadToolId);
         List<CloudPluginSceneElementModel> list = cloudPluginSceneElementMapper.list(selectHumanCondition);
+
+        DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
+        String scriptFilePath = devopsLoadSourceMapper.getLoadId(loadToolId);
+        log.info("loadById info：{}", scriptFilePath);
+        if (StringUtils.isNotBlank(scriptFilePath)) {
+            log.info("需要添加文件的载荷信息：{}", scriptFilePath);
+            SceneHandler sceneHandler = new SceneHandler(instanceHandler.getSceneId(), null, false, null);
+            CloudScenePluginHandler handler = sceneHandler.getPluginHandler(PluginConstant.CPCLOUD);
+            Map<String, CloudPluginSceneElementPortBO> elementPortMap = handler.getElementPortMap();
+            Map<String, CloudPluginSceneElementPortBO> elementNameMap = new HashMap<>();
+            if (CollectionUtil.isNotEmpty(elementPortMap)) {
+                for (CloudPluginSceneElementPortBO value : elementPortMap.values()) {
+                    elementNameMap.put(value.getSrcPort().getElement().getName(), value);
+                }
+            }
+
+            CloudPluginSceneElementPortBO kali = elementNameMap.get("kali");
+            Map<String, CloudAccessMode> cloudAccessModeMap = new HashMap<>();
+            for (CloudAccessMode accessMode : kali.getAccessModes()) {
+                cloudAccessModeMap.put(accessMode.getProtocol(), accessMode);
+            }
+            CloudAccessMode ssh = cloudAccessModeMap.get("ssh");
+            String remoteHost = ssh.getAccessIp();
+            Integer port = ssh.getAccessPort();
+            String username = ssh.getUsername();
+            String password = ssh.getPassword();
+            String remoteDir = "/tmp/";
+            String localFile = scriptFilePath;
+            log.info("kali 主机ip:{} 端口:{} 用户名:{} 密码:{}", remoteHost, port, username, password);
+            try {
+                JSch jsch = new JSch();
+                com.jcraft.jsch.Session session = jsch.getSession(username, remoteHost, port);
+                session.setPassword(password);
+                // 配置会话的其他选项,如主机密钥检查等
+                java.util.Properties config = new java.util.Properties();
+                config.put("StrictHostKeyChecking", "no");
+                log.info("config info:{}", JSON.toJSONString(config));
+                session.setConfig(config);
+                session.connect();
+                Channel channel = session.openChannel("sftp");
+                channel.connect();
+                ChannelSftp sftpChannel = (ChannelSftp) channel;
+                // 切换到远程目录
+                sftpChannel.cd(remoteDir);
+                // 上传文件
+                File file = new File(localFile);
+                sftpChannel.put(new FileInputStream(file), file.getName());
+                session.disconnect();
+                sftpChannel.exit();
+                log.info("载荷文件上传成功{}", scriptFilePath);
+            } catch (Exception e) {
+                log.error("exception:{}", e);
+                e.printStackTrace();
+            }
+        }
 
         if (list.isEmpty()) {
 //            增加载荷
