@@ -64,6 +64,7 @@ public class ActivMenuController {
             visibleMenuIds = menuSetService.getVisibleMenuIdsBy(actives);
         }
         var tree = menuSetService.getSystemTreeMenusBy(visibleMenuIds);
+        log.info("菜单的结果信息:{}", tree);
         return new ServiceResult(tree).asResult();
     }
 

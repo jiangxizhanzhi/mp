@@ -94,6 +94,8 @@ public class MenuSetService {
 
         var targetModels = targetService.listAll(null, null);
         var menuExtraInfos = menuExtraInfoService.listAll();
+        log.info("mp_front_admin_menu_extra_info:{}", menuExtraInfos);
+        log.info("mp_auth_target:{}", targetModels);
 
         Set<String> visibleMenuIds = new HashSet<>();
         for (var mi : menuExtraInfos) {
