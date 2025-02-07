@@ -402,6 +402,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
      * @param result
      */
     private void synchronousVmImages(String azureManagerUrl, Map<String, Object> formMap, HashMap<String, String> headersMap, JSONObject result) {
+        log.info("synchronousVmImages begin");
         List<JSONObject> computeAzureImages = getAzureImages(azureManagerUrl, formMap, headersMap, MicrosoftAzureCategoryEnum.COMPUTE_MP);
         List<JSONObject> dataStorageAzureImages = getAzureImages(azureManagerUrl, formMap, headersMap, MicrosoftAzureCategoryEnum.DATA_STORAGE);
         List<JSONObject> securityIdentityAzureImages = getAzureImages(azureManagerUrl, formMap, headersMap, MicrosoftAzureCategoryEnum.SECURITY_IDENTITY);
@@ -419,6 +420,7 @@ public class MicrosoftAzureConverter implements BaseConverter {
         mergePublicAzureImages(mediaCdnAzureImages, publicAzureImageMap);
         mergePublicAzureImages(securityIdentityAzureImages, publicAzureImageMap);
         mergePublicAzureImages(dataAnalyticsAzureImages, publicAzureImageMap);
+        log.info("synchronousVmImages end data:{}", Arrays.asList(publicAzureImageMap.values().toArray()));
         result.put("imageList", Arrays.asList(publicAzureImageMap.values().toArray()));
     }
 
