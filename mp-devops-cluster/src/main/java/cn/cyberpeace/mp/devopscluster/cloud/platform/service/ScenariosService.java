@@ -47,9 +47,11 @@ public class ScenariosService extends BaseCpService {
             HttpPost post = new HttpPost(url);
             post.setEntity(new StringEntity(body));
             post.addHeader("Content-Type", "application/json");
+            log.info("create snapshot , params: {}", body);
             var response = client.execute(post);
             String ss = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
             BaseCloudPlatformResult result = JsonCommon.parse(ss,BaseCloudPlatformResult.class);
+            log.info("create result , result: {}", ss);
             super.checkResult(result);
             return result;
         }catch (Exception e){
