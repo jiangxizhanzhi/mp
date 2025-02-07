@@ -1394,8 +1394,9 @@ public class CreateHandler extends HandlerCommon {
             return;
         }
         if (cloudElement.getRole()==24){
-            virtualType= 8;
-            cloudElement.setVirtualType(virtualType);
+            virtualType= 9;
+//            cloudElement.setVirtualType(virtualType);
+            cloudElement.getSrcElement().setType(8);
         }
         //Todo
 
