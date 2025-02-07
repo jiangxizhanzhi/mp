@@ -386,6 +386,7 @@ public class AzureCreateHandler extends CreateHandler {
                             String password = collect.get(0).getPassword();
                             String remoteDir = "/tmp/";
                             String localFile = scriptFilePath;
+                            log.info("kali 主机ip:{} 端口:{} 用户名:{} 密码:{}", remoteHost, port, username, password);
                             try {
                                 JSch jsch = new JSch();
                                 com.jcraft.jsch.Session session = jsch.getSession(username, remoteHost, port);
