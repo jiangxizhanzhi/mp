@@ -22,6 +22,6 @@ public class FileTypeUtils {
         for (int i = 0; i < 4; i++) {
             header[i] = content[i];
         }
-        return new String(header).equals("<svg");
+        return new String(header).equals("<svg") || new String(header).equals("<?xml");
     }
 }
