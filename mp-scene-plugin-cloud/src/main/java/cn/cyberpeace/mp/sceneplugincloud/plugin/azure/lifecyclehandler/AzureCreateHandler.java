@@ -394,6 +394,7 @@ public class AzureCreateHandler extends CreateHandler {
                                 // 配置会话的其他选项,如主机密钥检查等
                                 java.util.Properties config = new java.util.Properties();
                                 config.put("StrictHostKeyChecking", "no");
+                                log.info("config info:{}", JSON.toJSONString(config));
                                 session.setConfig(config);
                                 session.connect();
                                 Channel channel = session.openChannel("sftp");
@@ -408,6 +409,7 @@ public class AzureCreateHandler extends CreateHandler {
                                 sftpChannel.exit();
                                 log.info("载荷文件上传成功{}", scriptFilePath);
                             } catch (Exception e) {
+                                log.error("exception:{}", e);
                                 e.printStackTrace();
                             }
                         }
