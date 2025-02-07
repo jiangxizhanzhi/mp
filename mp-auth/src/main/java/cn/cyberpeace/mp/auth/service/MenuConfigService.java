@@ -54,7 +54,8 @@ public class MenuConfigService {
                 userMenuTemplateId = roleMenuTemplate.getTemplateId();
             }
         }
-        List<MenuTemplateModel> targets = listAll(AuthConstant.DEFAULT_TENANT, 1, userMenuTemplateId);
+//        List<MenuTemplateModel> targets = listAll(AuthConstant.DEFAULT_TENANT, 1, userMenuTemplateId);
+        List<MenuTemplateModel> targets = listAll(AuthConstant.DEFAULT_TENANT, 1, "1");
         Set<String> authorityMenuIdsSet = new HashSet<>(authorityMenuIds);
         targets = targets.stream().filter(t -> authorityMenuIdsSet.contains(t.getIdentifier())).collect(Collectors.toList());
         if (CollectionUtil.isEmpty(targets)) {
