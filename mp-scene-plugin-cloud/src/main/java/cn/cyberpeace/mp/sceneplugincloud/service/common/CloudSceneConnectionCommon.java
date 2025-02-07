@@ -259,6 +259,7 @@ public class CloudSceneConnectionCommon {
             guacamoleCreateConnectionData.setConnectionParams(connectionParams);
             var result = remoteClient.createConnection(guacamoleCreateConnectionData);
             String s = JsonUtils.snakeStringify(guacamoleCreateConnectionData);
+            log.info("Create scene connection[{}] with result: {}", s, result);
             if (result == null || StringUtils.isEmpty(result.getConnectionId())) {
                 log.error("Create scene connection[{}] with empty result: {}", guacamoleCreateConnectionData, result);
                 return null;
