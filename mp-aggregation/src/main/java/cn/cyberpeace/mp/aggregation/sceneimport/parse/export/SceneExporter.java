@@ -227,7 +227,7 @@ public class SceneExporter {
                 writeFile(content, envElementsPath + "/" + nodeId + "/icon2." + p.getSuffix(), 3);
             }
             String icon3 = e.getIcon3();
-            if (StringUtils.isNotEmpty(icon3)) {
+            if (StringUtils.isNotEmpty(icon3) && icon3.contains("/")) {
                 var p = new ParseFileKey(e.getIcon3(), "png");
                 byte[] content = FsCommon.downloadRawContent(p.getFilePath());
                 writeFile(content, envElementsPath + "/" + nodeId + "/icon3." + p.getSuffix(), 3);
