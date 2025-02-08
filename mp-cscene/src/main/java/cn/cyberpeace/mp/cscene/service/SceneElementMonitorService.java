@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.base.common.BaseCommon;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -46,6 +48,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionScene
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.TimeListPageInfoQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.util.EsHttpUtil;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SicLaunchConfig;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
@@ -659,6 +662,9 @@ public class SceneElementMonitorService {
         request.setPageSize(pageRequest.getPageSize());
         request.setAgentNames(agentNames);
         request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
+
+        EsHttpUtil.updateWazuhDataMaxQueryNum(DataCollectionService.WAZUH_ALERT_INDEX_PREFIX, BaseAppConfig.getWazuhMaxWindow());
+
         ListObjResult<WazuhVulnerabilityInfoModel> result = dataCollectionService.queryVulnerabilityInfo(request, true);
         List<ElementVulnerabilityInfo> vulnerabilityInfos = new ArrayList<>();
         for (WazuhVulnerabilityInfoModel r : result.getObjs()) {

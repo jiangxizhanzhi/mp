@@ -1,15 +1,20 @@
 package cn.cyberpeace.mp.base.config;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.util.mptool.FileUtil;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
+import java.io.FileInputStream;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * 模块下定义的独立配置信息
@@ -19,6 +24,7 @@ import java.util.List;
 @Configuration
 @ConfigurationProperties(prefix = "mp.base")
 @Data
+@Slf4j
 public class BaseAppConfig {
 
     @Autowired
@@ -133,6 +139,45 @@ public class BaseAppConfig {
 
         fileServerDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, getHomeDir(), "files");
         return fileServerDir;
+    }
+
+    public static String getImportMode() {
+        Environment environment = BeanCommon.getBean(Environment.class);
+        String mpPropertiesPath = environment.getProperty("MP_ENV_PATH");
+        // 创建Properties对象
+        FileInputStream input = null;
+        try {
+            input = new FileInputStream(mpPropertiesPath);
+            Properties properties = new Properties();
+            properties.load(input);
+            String propModeKey = "MP_SCENE_IMPORT_MODE";
+            return properties.getProperty(propModeKey, "");
+        } catch (Exception e) {
+            log.error("failed to get import scene mode ", e);
+            return "";
+        }
+    }
+
+    public static Integer getWazuhMaxWindow() {
+        Environment environment = BeanCommon.getBean(Environment.class);
+        String mpPropertiesPath = environment.getProperty("MP_ENV_PATH");
+        // 创建Properties对象
+        FileInputStream input = null;
+        try {
+            input = new FileInputStream(mpPropertiesPath);
+            Properties properties = new Properties();
+            properties.load(input);
+            String propModeKey = "MP_WAZUH_MAX_WINDOW";
+            var res = properties.get(propModeKey);
+            if (res != null && res instanceof Integer) {
+                return (Integer) res;
+            } else {
+                return 100000;
+            }
+        } catch (Exception e) {
+            log.error("failed to get import scen e mode ", e);
+            return 100000;
+        }
     }
 
 }

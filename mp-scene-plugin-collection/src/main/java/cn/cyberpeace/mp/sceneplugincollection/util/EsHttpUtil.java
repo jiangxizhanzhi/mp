@@ -31,6 +31,23 @@ public class EsHttpUtil {
         client.put("/" + indexPrefix + "_sessions3-*/_settings", params, null, new HashMap<>(), null);
     }
 
+    public static void updateWazuhDataMaxQueryNum(String indexPrefix, int total) {
+        if (client == null) {
+            synchronized (EsHttpUtil.class) {
+                if (client == null) {
+                    SituationAwareConfig config = BeanCommon.getBean(SituationAwareConfig.class);
+                    String protocol = StringUtils.isEmpty(config.getArkimeEsProtocol()) ? "http" : config.getArkimeEsProtocol();
+                    client = HttpClient.builder().configServer(protocol + "://" + config.getArkimeEsHost() + ":" + config.getArkimeEsPort()).build();
+                }
+            }
+        }
+        IndexParams indexParams = new IndexParams();
+        indexParams.setMaxResultWindow(total);
+        Params params = new Params();
+        params.setIndex(indexParams);
+        client.put("/" + indexPrefix + "*/_settings", params, null, new HashMap<>(), null);
+    }
+
     @Getter
     @Setter
     private static class Params implements SnakeHttpData {

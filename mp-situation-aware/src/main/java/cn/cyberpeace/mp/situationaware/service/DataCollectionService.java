@@ -133,7 +133,7 @@ public class DataCollectionService extends CollectionBaseService {
     @Autowired
     private SituationAwareConfig situationAwareConfig;
 
-    private static final String WAZUH_ALERT_INDEX_PREFIX = "wazuh-alerts-4.x-";
+    public static final String WAZUH_ALERT_INDEX_PREFIX = "wazuh-alerts-4.x-";
 
     private static final String CUSTOM_PROBE_ID_PATH = "data.sic_launch_id";
 
@@ -423,6 +423,7 @@ public class DataCollectionService extends CollectionBaseService {
             // 按时间顺序
             sourceBuilder.sort(SituationalAwareConstant.ES_TIMESTAMP_FIELD, SortOrder.ASC);
         }
+        sourceBuilder.trackTotalHits(true);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         // 配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));

@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.YmlParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageParseResult;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -82,7 +83,7 @@ public class ResourceCenterService {
     private Environment environment ;
 
     public ServiceResult<CsceneBO> importByConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
-        String importResMode = getImportMode();
+        String importResMode = BaseAppConfig.getImportMode();
         if ("json".equals(importResMode)) {
             log.info("开启使用json文件导入场景");
             String jsonFilePath = ymlFilePath + "/topo.json";
@@ -316,19 +317,4 @@ public class ResourceCenterService {
         log.info("End exec shell!");
     }
 
-    private String getImportMode() {
-        String mpPropertiesPath = environment.getProperty("MP_ENV_PATH");
-        // 创建Properties对象
-        FileInputStream input = null;
-        try {
-            input = new FileInputStream(mpPropertiesPath);
-            Properties properties = new Properties();
-            properties.load(input);
-            String propModeKey = "MP_SCENE_IMPORT_MODE";
-            return properties.getProperty(propModeKey, "");
-        } catch (Exception e) {
-            log.error("failed to get import scene mode ", e);
-            return "";
-        }
-    }
 }
