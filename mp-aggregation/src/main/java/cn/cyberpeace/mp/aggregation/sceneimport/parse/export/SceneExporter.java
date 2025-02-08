@@ -206,7 +206,7 @@ public class SceneExporter {
                 }
             }
         }
-        String content = JsonCommon.stringify(sceneConfigDataBO);
+        String content = JsonCommon.snakeStringify(sceneConfigDataBO);
         try {
             this.createFile(content.getBytes("utf8"), filePath);
         } catch (UnsupportedEncodingException e) {

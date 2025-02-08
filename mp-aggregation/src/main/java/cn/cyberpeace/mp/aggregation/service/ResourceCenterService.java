@@ -116,7 +116,7 @@ public class ResourceCenterService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        SceneConfigDataBO sceneConfigDataBO  = JsonCommon.parse(content, SceneConfigDataBO.class);
+        SceneConfigDataBO sceneConfigDataBO  = JsonCommon.snakeParse(content, SceneConfigDataBO.class);
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneConfigDataBO, null);
         CloudSceneConfigPluginHandler pluginHandler = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         this.handlerElementFiles(sceneConfigHandler, pluginHandler, ymlFilePath + "/topo_json/elements");
