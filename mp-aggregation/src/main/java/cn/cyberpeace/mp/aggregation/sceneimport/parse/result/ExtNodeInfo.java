@@ -51,6 +51,7 @@ public class ExtNodeInfo {
         private Integer loss;
         private String connectMode;
         private String type;
+        private String portConnectNetCidr;
 
         public boolean isNotEmpty() {
             return StringUtils.isNotEmpty(bgpAs)
@@ -68,7 +69,8 @@ public class ExtNodeInfo {
                     || ingress != null
                     || loss != null
                     || delay != null
-                    || StringUtils.isNotEmpty(type);
+                    || StringUtils.isNotEmpty(type)
+                    || StringUtils.isNotEmpty(portConnectNetCidr);
         }
     }
 }

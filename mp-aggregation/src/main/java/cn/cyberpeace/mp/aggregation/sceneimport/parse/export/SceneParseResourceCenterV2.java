@@ -422,6 +422,7 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter {
                 if (StringUtils.isNotEmpty(cloudPort.getConnectMode())) {
                     exportInfo.setConnectMode(cloudPort.getConnectMode());
                 }
+                exportInfo.setPortConnectNetCidr(p.getPortConnectNetCidr());
                 exportInfo.setBgpAs(cloudPort.getBgpAs());
                 exportInfo.setBgpIp(cloudPort.getBgpIp());
                 exportInfo.setBgpPeer(cloudPort.getBgpPeer());

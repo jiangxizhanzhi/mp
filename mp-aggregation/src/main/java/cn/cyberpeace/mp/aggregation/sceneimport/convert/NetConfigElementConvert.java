@@ -72,6 +72,7 @@ class NetConfigElementConvert implements IConverter {
                                     port.setLoss(portProtocol.getLoss());
                                     port.setEgress(portProtocol.getEgress());
                                     port.setIngress(portProtocol.getIngress());
+                                    port.setPortConnectNetCidr(portProtocol.getPortConnectNetCidr());
                                     cloudPort.setConnectMode(portProtocol.getConnectMode());
                                     cloudPort.setBgpAs(portProtocol.getBgpAs());
                                     cloudPort.setBgpIp(portProtocol.getBgpIp());
