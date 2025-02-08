@@ -206,6 +206,15 @@ public class AzureVirtualMachine {
                 .withProtocol(SecurityRuleProtocol.ASTERISK)
                 .withPriority(3400)
                 .attach()
+                .defineRule("allow-8443")
+                .allowInbound()
+                .fromAnyAddress()
+                .fromAnyPort()
+                .toAnyAddress()
+                .toPort(8443)
+                .withProtocol(SecurityRuleProtocol.ASTERISK)
+                .withPriority(3500)
+                .attach()
                 .create();
         primaryNetworkInterface.update().withExistingNetworkSecurityGroup(nsg).apply();
 
