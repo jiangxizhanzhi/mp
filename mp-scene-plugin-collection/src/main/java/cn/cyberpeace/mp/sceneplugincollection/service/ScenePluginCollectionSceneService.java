@@ -650,6 +650,9 @@ public class ScenePluginCollectionSceneService {
             request.setEndTime(LocalDateTime.now());
         } else {
             request.setEndTime(TimeUtils.stringToLocalDateTime(queryParams.getEndTime()));
+            if (request.getStartTime() != null && !request.getEndTime().isAfter(request.getStartTime())) {
+                request.setEndTime(request.getEndTime().plusDays(1));
+            }
         }
         if (CollectionUtils.isNotEmpty(queryParams.getLevels())) {
             request.setLevels(queryParams.getLevels());
