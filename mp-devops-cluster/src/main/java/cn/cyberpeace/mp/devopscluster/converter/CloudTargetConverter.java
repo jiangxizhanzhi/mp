@@ -109,7 +109,7 @@ public class CloudTargetConverter {
         extVm.setFlavor("1CPU/1G内存/30G磁盘/2网卡");
         extVm.setCpu(1);
         extVm.setRam(1);
-        if (operatingSystem!= null && "Linux".equals(operatingSystem)) {
+        if (operatingSystem!= null && operatingSystem.toLowerCase().equals("linux")) {
             extVm.setFlavor("1CPU/1G内存/30G磁盘/2网卡");
             extVm.setCpu(1);
             extVm.setRam(1);
@@ -146,10 +146,10 @@ public class CloudTargetConverter {
         AccessProtocol accessProtocol = new AccessProtocol();
         //ip地址
         accessProtocol.setHostname("");
-        if (operatingSystem!= null && "Linux".equals(operatingSystem)) {
+        if (operatingSystem!= null && operatingSystem.toLowerCase().equals("linux")) {
             accessProtocol.setProtocol("SSH");
             extVm.setProtocols("SSH");
-        } else if (operatingSystem!= null && "Windows".equals(operatingSystem)) {
+        } else if (operatingSystem!= null && operatingSystem.toLowerCase().equals("windows")) {
             accessProtocol.setProtocol("RDP");
             extVm.setProtocols("RDP");
         } else {
@@ -176,9 +176,9 @@ public class CloudTargetConverter {
          */
         ExtImageInfo extImageInfo = new ExtImageInfo();
         //云靶标只能拿到linux和windows两类
-        if (operatingSystem!= null && "Linux".equals(operatingSystem)) {
+        if (operatingSystem!= null && operatingSystem.toLowerCase().equals("linux")) {
             extSystemInfo.setSystemType(306);
-        } else if (operatingSystem!= null && "Windows".equals(operatingSystem)) {
+        } else if (operatingSystem!= null && operatingSystem.toLowerCase().equals("windows")) {
             extSystemInfo.setSystemType(106);
         }
         device.setExtImageInfo(extImageInfo);
@@ -227,9 +227,9 @@ public class CloudTargetConverter {
         extSystemInfo.setLanguage("en");
         //云靶标只能拿到linux和windows两类
         String operatingSystem = target.getOperatingSystem();
-        if (operatingSystem!= null && "Linux".equals(operatingSystem)) {
+        if (operatingSystem!= null && operatingSystem.toLowerCase().equals("linux")) {
             extSystemInfo.setSystemType(306);
-        } else if (operatingSystem!= null && "Windows".equals(operatingSystem)) {
+        } else if (operatingSystem!= null && operatingSystem.toLowerCase().equals("windows")) {
             extSystemInfo.setSystemType(106);
         }
         extSystemInfo.setSystemArchitecture("64");
