@@ -35,10 +35,17 @@ public interface WazuhDataQueryParamsBuilder {
     }
 
     default BoolQueryBuilder getTimeRangeQueryBuilder(LocalDateTime startTime, LocalDateTime endTime) {
+        LocalDateTime finalEndTime = endTime ;
+        //如果开始开始时间和节数时间的时分秒都为0、则认为前端传入的是日期，需修正结束时间
+        if (startTime.getHour() == 0 && startTime.getMinute() == 0 && startTime.getSecond() == 0 &&
+                endTime.getHour() == 0 && endTime.getMinute() == 0 && endTime.getSecond() == 0) {
+            finalEndTime = endTime.plusDays(1);
+        }
+
         BoolQueryBuilder timeQuery = QueryBuilders.boolQuery()
                 .must(QueryBuilders.rangeQuery(SituationalAwareConstant.ES_TIMESTAMP_FIELD)
                         .from(startTime.atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter))
-                        .to(endTime.atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter)));
+                        .to(finalEndTime.atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter)));
         return timeQuery;
     }
 }
