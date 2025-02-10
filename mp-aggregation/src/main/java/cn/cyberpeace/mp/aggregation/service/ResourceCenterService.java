@@ -131,7 +131,7 @@ public class ResourceCenterService {
     }
 
     private void handlerAreaFiles(SceneConfigHandler sceneConfigHandler, CloudSceneConfigPluginHandler pluginHandler, String envAreaPath) {
-        if (sceneConfigHandler.getAreaMap() != null) {
+        if (sceneConfigHandler.getAreaMap() == null) {
             return;
         }
         for (String nodeId : sceneConfigHandler.getAreaMap().keySet()) {
