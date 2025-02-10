@@ -102,7 +102,8 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
                 TaskCommon.executeTask(() -> {
                     boolean flag = NetworkUtils.probePort(protocol, ip, port);
                     if (flag) {
-                        this.checkSuccessCallback(ipAccessModesMap, nodeId);
+                        // 检测成功后 只需将该端口对应的接入协议的 available 调整为 true
+                        this.checkSuccessCallback(accessModes, nodeId);
                     } else {
                         this.checkTimeoutCallback(ipAccessModesMap, nodeId);
                     }
@@ -194,6 +195,14 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
                 getPluginHandler().getSceneHandler().updateSceneElementWithPlugins(nodeId);
             }
         });
+    }
+
+    private void checkSuccessCallback(List<CloudAccessMode> ipAccessModes, String nodeId) {
+        ipAccessModes.forEach(accessMode -> accessMode.setAvailable(true));
+        getPluginHandler().asyncAckElementChanged(nodeId, true);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            getPluginHandler().getSceneHandler().updateSceneElementWithPlugins(nodeId);
+        }
     }
 
     private void checkTimeoutCallback(Map<String, List<CloudAccessMode>> ipAccessModesMap, String nodeId) {
