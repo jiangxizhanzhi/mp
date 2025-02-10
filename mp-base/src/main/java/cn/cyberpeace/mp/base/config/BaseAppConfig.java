@@ -169,8 +169,9 @@ public class BaseAppConfig {
             properties.load(input);
             String propModeKey = "MP_WAZUH_MAX_WINDOW";
             var res = properties.get(propModeKey);
-            if (res != null && res instanceof Integer) {
-                return (Integer) res;
+            log.debug("get MP_WAZUH_MAX_WINDOW value {}", res);
+            if (res != null) {
+                return Integer.valueOf(res.toString());
             } else {
                 return 100000;
             }
