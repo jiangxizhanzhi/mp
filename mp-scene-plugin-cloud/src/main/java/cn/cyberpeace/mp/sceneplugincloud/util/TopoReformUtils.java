@@ -317,9 +317,9 @@ public class TopoReformUtils {
         cloudPluginSceneElementBO.setCategory3(306);
         cloudPluginSceneElementBO.setInitSupport(true);
         //        需要修改为上海靶标信息
-        cloudPluginSceneElementBO.setImage("kali-tools-itinfo-230129");
-        cloudPluginSceneElementBO.setDefaultLaunchImageName("kali-tools-itinfo-230129");
-        cloudPluginSceneElementBO.setImageUuid("44c2c620-17ea-4af3-b895-6be328543913");
+        cloudPluginSceneElementBO.setImage("Kali_tool_tw_230104");
+        cloudPluginSceneElementBO.setDefaultLaunchImageName("Kali_tool_tw_230104");
+        cloudPluginSceneElementBO.setImageUuid("3f83f45e-c6a6-45e3-bf10-cf6404b9c52b");
 
         return new ElementWrapper(sceneElementBO, cloudPluginSceneElementBO);
     }
