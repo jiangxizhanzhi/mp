@@ -1764,7 +1764,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public ServiceResult<String> execCheck(String frameServerConfigIp, List<String> scriptParams, SshFtpRequest sshFtpRequest, File file) {
         String url = "http://{ip}:8001/agent/checker/exec/pycmd".replace("{ip}", frameServerConfigIp);
 
-        String command = "python3 " + file.getAbsolutePath() + " " + sshFtpRequest.getHost();
+        String command = "python3 /data/scripts/" + file.getName() + " " + sshFtpRequest.getHost();
         if (scriptParams != null && !scriptParams.isEmpty()) {
             command = command + " " + Strings.join(scriptParams, ' ');
         }
