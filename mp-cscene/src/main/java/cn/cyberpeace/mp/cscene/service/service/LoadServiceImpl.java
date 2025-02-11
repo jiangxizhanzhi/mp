@@ -97,7 +97,7 @@ public class LoadServiceImpl {
     @Autowired
     private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
 
-    private final static String FILEPATH = "/home/file/";
+    private final static String FILEPATH = "/data/resource/";
 
 
     // 载荷改造地址
