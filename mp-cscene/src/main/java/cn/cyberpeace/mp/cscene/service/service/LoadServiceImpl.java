@@ -41,6 +41,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.jcraft.jsch.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.BeanUtils;
@@ -48,7 +49,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -1301,9 +1301,9 @@ public class LoadServiceImpl {
             InputStream inputStream = multiFile.getInputStream();
             //构建文件输出流
             String name = multiFile.getOriginalFilename();
-            FileOutputStream outputStream = new FileOutputStream(FILEPATH + name);
-            int copy = FileCopyUtils.copy(inputStream, outputStream);
-            log.info("载荷文件上传成功,文件大小：{}", copy);
+            File outputStream = new File(FILEPATH + name);
+            FileUtils.copyInputStreamToFile(inputStream, outputStream);
+            log.info("载荷文件上传成功");
 
             StringBuilder result = new StringBuilder();
             // 构造一个BufferedReader类来读取文件
