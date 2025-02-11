@@ -1,12 +1,15 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.cscene.bo.*;
@@ -17,6 +20,7 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.cscene.request.SshFtpRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -27,12 +31,23 @@ import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.ElementCommandExecBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineExecCommandData;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementNetworkMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
+import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventTypeBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
@@ -43,11 +58,14 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.QueryCollectionDataCountParams;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
+import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -56,6 +74,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -869,27 +888,145 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
 
     @ApiOperation("获取场景内部虚拟机ip")
-    @PostMapping("/getInternalVmIp")
-    public ServiceResult<String> getInternalVmIp(@RequestParam String csceneId) {
+    @PostMapping("/exec_check_script")
+    public ServiceResult<String> execCheckScript(@RequestBody CsceneInstanceCheckRequest checkRequest) {
 
-        try {
-            String sceneId = this.getModelService().getSceneId(csceneId);
-            SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
-            CloudScenePluginHandler handler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-            String internalVmId = handler.getScene().getInternalVmId();
-            // 未开启场景内部服务 则无须执行后续查询信息的步骤
-            if (StringUtils.isEmpty(internalVmId)) {
-                log.info("failed to get_agent_server_biz_ip , because no internalVmId");
-                return new ServiceResult<>("").asResult();
+        // 参数校验
+        String csceneId = checkRequest.getCsceneId();
+        String nodeId = checkRequest.getNodeId();
+        File file = new File(checkRequest.getScriptFilePath());
+        if (!file.exists()) {
+            log.error("脚本文件不存在!");
+            throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST.format("脚本文件不存在!"));
+        }
+        Info info = this.getParsedInfo(csceneId, nodeId, true);
+        // 必须开启了场景内部服务
+        String internalVmId = info.getInternalVmId();
+        if (StringUtils.isEmpty(internalVmId)) {
+            log.error("未开启场景内部服务!");
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("未开启场景内部服务!"));
+        }
+
+        SshFtpRequest sshFtpRequest = info.getSshFtpRequest();
+        String frameServerConfigIp = info.getFrameServerConfigIp();
+//        String frameServerBizIp = info.getFrameServerBizIp();
+
+        return modelService.execCheck(frameServerConfigIp, checkRequest.getScriptParams(), sshFtpRequest, file);
+    }
+
+
+    private Info getParsedInfo(String csceneId, String nodeId, boolean throwException) {
+        Info info = new Info();
+
+        String sceneId = this.getModelService().getSceneId(csceneId);
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
+        CloudScenePluginHandler handler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        info.setNode(sceneHandler.getElement(nodeId));
+        info.setPluginNode(handler.getElement(nodeId));
+        info.setInternalVmId(handler.getScene().getInternalVmId());
+        // 未开启场景内部服务 则无须执行后续查询信息的步骤
+        if (StringUtils.isEmpty(info.getInternalVmId())) {
+            return info;
+        }
+
+        // 获取目标设备上ssh协议的ip、端口、用户名、密码
+        var sshFtpRequest = this.getSshFtpRequest(info.getNode(),throwException);
+        log.info("目标设备信息：{}" + JsonCommon.stringify(sshFtpRequest));
+        info.setSshFtpRequest(sshFtpRequest);
+
+        // 获取内部服务上的配置网络ip、和目标设备同网段的业务网络ip
+        String frameServerConfigIp = handler.getScene().getInternalVmIp();
+        String frameServerBizIp = this.getFrameConfigIp(sceneId, info.getInternalVmId(), sshFtpRequest.getHost());
+        log.info("内部服务虚拟机信息，配置ip：{}，业务ip：{}", frameServerConfigIp, frameServerBizIp);
+        info.setFrameServerBizIp(frameServerBizIp);
+        info.setFrameServerConfigIp(frameServerConfigIp);
+        info.setName(sceneHandler.getElement(nodeId).getName());
+        return info;
+    }
+
+    private SshFtpRequest getSshFtpRequest(SceneElementBO node, boolean throwException) {
+        String host = null, user = null, password = null;
+        int port = 22;
+        for (var p : node.getPorts()) {
+            if (StringUtils.isNotEmpty(p.getIp())) {
+                for (var a : p.getAccessModes()) {
+                    if (StringUtils.equals(a.getProtocol(), AccessMode.Protocol.SSH)) {
+                        host = p.getIp();
+                        user = a.getUsername();
+                        password = a.getPassword();
+                        if (a.getPort() != null) {
+                            port = a.getPort();
+                        }
+                        break;
+                    }
+                }
+                if (host != null) {
+                    break;
+                }
             }
+        }
+        if (host == null && throwException) {
+            log.error("场景中的节点{}无可使用的ssh协议", node.getId());
+            throw new MpRuntimeException(BaseErrorCode.CUSTOM_ERROR.format("场景中的节点" + node.getName() + "无可使用的ssh协议"));
+        }
 
-            // 获取内部服务上的配置网络ip
-            String internalVmIp = handler.getScene().getInternalVmIp();
-            return new ServiceResult<>(internalVmIp).asResult();
+        SshFtpRequest sshFtpRequest = new SshFtpRequest();
+        sshFtpRequest.setHost(host);
+        sshFtpRequest.setPort(port);
+        sshFtpRequest.setUser(user);
+        sshFtpRequest.setPassword(password);
+        return sshFtpRequest;
+    }
 
-        } catch (Exception e) {
-            log.info("failed to get_vm_ip , exception is {}", e.getMessage());
-            return new ServiceResult<>("").asResult();
+    private String getFrameConfigIp(String sceneId, String frameServerId, String bizTargetIp) {
+        // 找到内部服务虚拟机中和目标设备同网段的ip地址
+        var nets = BeanCommon.getBean(CloudPluginSceneElementNetworkMapper.class)
+                .list(new HumanCondition().filterEqual(CloudPluginSceneElementNetworkModel::getScene, sceneId));
+        var vm = new VirtualMachine().get(frameServerId);
+        String cidr = null;
+        for (var net : nets) {
+            if (IpUtils.newIsInCidr2(bizTargetIp, net.getCidr())) {
+                cidr = net.getCidr();
+                break;
+            }
+        }
+
+        String frameServerBizIp = null;
+        for (var address : vm.getAddresses()) {
+            String ip = address.getIp();
+            if (IpUtils.newIsInCidr2(ip, cidr)) {
+                frameServerBizIp = ip;
+                break;
+            }
+        }
+        return frameServerBizIp;
+    }
+
+    @Getter
+    @Setter
+    class Info {
+        private String internalVmId;
+        private SceneElementBO node;
+        private CloudPluginSceneElementBO pluginNode;
+        private SshFtpRequest sshFtpRequest;
+        private String frameServerConfigIp;
+        private String frameServerBizIp;
+        private String brand;
+        private SceneHandler sceneHandler ;
+        private String name ;
+
+        public boolean isCisco() {
+            return StringUtils.equals("Cisco", brand);
+        }
+
+        public boolean isJuniper(){
+            return StringUtils.equals("Juniper", brand);
+        }
+
+        public boolean isFortinet() {
+            return StringUtils.equals("Fortinet", brand);
         }
     }
+
+
 }

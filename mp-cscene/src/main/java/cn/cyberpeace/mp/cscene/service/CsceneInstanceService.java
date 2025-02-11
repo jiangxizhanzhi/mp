@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
@@ -38,6 +39,7 @@ import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
+import cn.cyberpeace.mp.cscene.request.SshFtpRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
@@ -90,16 +92,19 @@ import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.json.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -1754,4 +1759,19 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         csceneElementCommon.setData(accessUsers);
         CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportElementCommon(csceneElementCommon));
     }
+
+
+    public ServiceResult<String> execCheck(String frameServerConfigIp, List<String> scriptParams, SshFtpRequest sshFtpRequest, File file) {
+        String url = "http://{ip}:8001/agent/checker/exec/pycmd".replace("{ip}", frameServerConfigIp);
+
+        String command = "python3 " + file.getAbsolutePath() + " " + sshFtpRequest.getHost();
+        if (scriptParams != null && !scriptParams.isEmpty()) {
+            command = command + " " + Strings.join(scriptParams, ' ');
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("command", command);
+        String res = HttpUtils.sendUpload(url, map, file);
+        return new ServiceResult<>(res);
+    }
+
 }

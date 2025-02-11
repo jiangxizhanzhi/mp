@@ -1050,4 +1050,36 @@ public class ScenePluginCloudSceneService {
         log.info("ScenePluginCloudSceneService.networkFlowRate end. result:{}", result);
         return result;
     }
+
+
+    private VirtualMachinePrivateOperateData getVirtualMachineProxyInfo(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO node) {
+        var ports = node.getSrcElement().getPorts();
+        if (CollectionUtils.isNotEmpty(ports)) {
+            for (var port : ports) {
+                if (CollectionUtils.isNotEmpty(port.getAccessModes())) {
+                    for (var mode : port.getAccessModes()) {
+                        if (Boolean.TRUE.equals(mode.getManageMode()) && AccessMode.Protocol.SSH.equals(mode.getProtocol())) {
+                            String networkId = pluginHandler.getPort(port.getId()).getAuxiliaryNetworkId();
+                            VirtualMachinePrivateOperateData result = new VirtualMachineUploadFileData();
+                            result.setPublicNetProxyIp(mode.getPublicNetProxyIp());
+                            result.setPublicNetProxyPort(mode.getPublicNetProxyPort());
+                            if (StringUtils.isNotEmpty(networkId)) {
+                                result.setNetworkId(networkId);
+                                result.setUsername(mode.getUsername());
+                                if (Boolean.TRUE.equals(mode.getPrivateKeyEnable())) {
+                                    result.setPrivateKeyPath(mode.getPrivateKeyPath());
+                                } else {
+                                    result.setPassword(mode.getPassword());
+                                }
+                                result.setPort(mode.getPort() != null ? mode.getPort() : AccessMode.Protocol.DEFAULT_PORT_MAP.get(AccessMode.Protocol.SSH));
+                                result.setInstanceIp(port.getIp());
+                            }
+                            return result;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
 }
