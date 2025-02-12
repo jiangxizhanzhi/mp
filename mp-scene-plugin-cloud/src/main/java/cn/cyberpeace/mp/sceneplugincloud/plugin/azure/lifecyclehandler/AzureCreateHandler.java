@@ -356,6 +356,28 @@ public class AzureCreateHandler extends CreateHandler {
                 createLoadTasks.add(formatTask);
             }
             createTerminalTasks.addAll(createLoadTasks);
+            List<Runnable> createNetworkEquipmentTasks = new ArrayList<>();
+            for (CloudPluginSceneElementBO element : filteredNetworkEquipmentElements) {
+                String nodeId = element.getSrcElement().getId();
+                Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+//                        边界设备无需处理
+                    }
+                };
+                Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_NETWORK_EQUIPMENT, task);
+                createNetworkEquipmentTasks.add(formatTask);
+            }
+            createTerminalTasks.addAll(createNetworkEquipmentTasks);
+
+            if (!createTerminalTasks.isEmpty()) {
+                runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
+            }
+
+            getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_INSTANCE);
+            getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CONFIG);
+            getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CONFIG);
+
             if(loadToolElementBO!=null) {
                 List<CloudPluginSceneElementPortBO> ports = getPluginHandler().getPorts(loadToolElementBO.getSrcElement());
                 List<CloudAccessMode> collect = ports.get(0).getAccessModes().stream()
@@ -394,6 +416,7 @@ public class AzureCreateHandler extends CreateHandler {
                                 // 配置会话的其他选项,如主机密钥检查等
                                 java.util.Properties config = new java.util.Properties();
                                 config.put("StrictHostKeyChecking", "no");
+                                config.put("ConnectionTimeout", Integer.toString(60 * 1000));
                                 log.info("config info:{}", JSON.toJSONString(config));
                                 session.setConfig(config);
                                 session.connect();
@@ -416,27 +439,6 @@ public class AzureCreateHandler extends CreateHandler {
                     }
                 }
             }
-            List<Runnable> createNetworkEquipmentTasks = new ArrayList<>();
-            for (CloudPluginSceneElementBO element : filteredNetworkEquipmentElements) {
-                String nodeId = element.getSrcElement().getId();
-                Runnable task = new Runnable() {
-                    @Override
-                    public void run() {
-//                        边界设备无需处理
-                    }
-                };
-                Runnable formatTask = this.formatElementTask(nodeId, stepPercentage, CreateHandler.ElementProcess.CREATE_NETWORK_EQUIPMENT, task);
-                createNetworkEquipmentTasks.add(formatTask);
-            }
-            createTerminalTasks.addAll(createNetworkEquipmentTasks);
-
-            if (!createTerminalTasks.isEmpty()) {
-                runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
-            }
-
-            getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CREATE_INSTANCE);
-            getPluginHandler().getSceneHandler().getSceneStageRecorder().startStage(CloudSceneStage.CONFIG);
-            getPluginHandler().getSceneHandler().getSceneStageRecorder().endStage(CloudSceneStage.CONFIG);
 
         } catch (Exception e) {
             log.error("创建场景失败", e);
