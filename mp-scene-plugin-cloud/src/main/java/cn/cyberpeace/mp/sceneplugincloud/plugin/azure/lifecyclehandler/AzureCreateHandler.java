@@ -416,9 +416,9 @@ public class AzureCreateHandler extends CreateHandler {
                                 // 配置会话的其他选项,如主机密钥检查等
                                 java.util.Properties config = new java.util.Properties();
                                 config.put("StrictHostKeyChecking", "no");
+                                config.put("ConnectionTimeout", Integer.toString(120 * 1000));
                                 log.info("config info:{}", JSON.toJSONString(config));
                                 session.setConfig(config);
-                                session.setTimeout(120 * 1000);
                                 session.connect();
                                 Channel channel = session.openChannel("sftp");
                                 channel.connect();
