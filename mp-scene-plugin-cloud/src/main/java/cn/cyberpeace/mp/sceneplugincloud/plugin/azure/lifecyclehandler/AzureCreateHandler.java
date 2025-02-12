@@ -3,10 +3,12 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.azure.lifecyclehandler;
 import cn.cyberpeace.mp.auth.model.MicrosoftAzureUserModel;
 import cn.cyberpeace.mp.auth.repository.MicrosoftAzureLoginMapper;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
@@ -390,54 +392,58 @@ public class AzureCreateHandler extends CreateHandler {
                         .filter(element -> BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL == element.getLoadSource())
                         .collect(Collectors.toList());
                 log.info("当前本地载荷信息：{}", JSON.toJSONString(cloudPlugins));
-                for (CloudPluginSceneElementBO cloudPlugin : cloudPlugins) {
-                    log.info("cloudPlugin info：{}", JSON.toJSONString(cloudPlugin));
-                    String loadToolId = cloudPlugin.getLoadToolId();
-                    log.info("loadToolId info：{}", JSON.toJSONString(loadToolId));
-                    if (StringUtils.isNotBlank(loadToolId)) {
-                        log.info("isNotBlank loadToolId info：{}", JSON.toJSONString(loadToolId));
-                        DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
-                        String scriptFilePath = devopsLoadSourceMapper.getLoadId(loadToolId);
-                        log.info("loadById info：{}", scriptFilePath);
-                        if (StringUtils.isNotBlank(scriptFilePath)) {
-                            log.info("需要添加文件的载荷信息：{}", scriptFilePath);
-                            // 获取ssh链接信息
-                            String remoteHost = collect.get(0).getAccessIp();
-                            Integer port = collect.get(0).getAccessPort();
-                            String username = collect.get(0).getUsername();
-                            String password = collect.get(0).getPassword();
-                            String remoteDir = "/tmp/";
-                            String localFile = scriptFilePath;
-                            log.info("kali 主机ip:{} 端口:{} 用户名:{} 密码:{}", remoteHost, port, username, password);
-                            try {
-                                JSch jsch = new JSch();
-                                com.jcraft.jsch.Session session = jsch.getSession(username, remoteHost, port);
-                                session.setPassword(password);
-                                // 配置会话的其他选项,如主机密钥检查等
-                                java.util.Properties config = new java.util.Properties();
-                                config.put("StrictHostKeyChecking", "no");
-                                config.put("ConnectionTimeout", Integer.toString(120 * 1000));
-                                log.info("config info:{}", JSON.toJSONString(config));
-                                session.setConfig(config);
-                                session.connect();
-                                Channel channel = session.openChannel("sftp");
-                                channel.connect();
-                                ChannelSftp sftpChannel = (ChannelSftp) channel;
-                                // 切换到远程目录
-                                sftpChannel.cd(remoteDir);
-                                // 上传文件
-                                File file = new File(localFile);
-                                sftpChannel.put(new FileInputStream(file), file.getName());
-                                session.disconnect();
-                                sftpChannel.exit();
-                                log.info("载荷文件上传成功{}", scriptFilePath);
-                            } catch (Exception e) {
-                                log.error("exception:{}", e);
-                                e.printStackTrace();
+                Runnable checkSuccessCallback = () -> {
+                    for (CloudPluginSceneElementBO cloudPlugin : cloudPlugins) {
+                        log.info("cloudPlugin info：{}", JSON.toJSONString(cloudPlugin));
+                        String loadToolId = cloudPlugin.getLoadToolId();
+                        log.info("loadToolId info：{}", JSON.toJSONString(loadToolId));
+                        if (StringUtils.isNotBlank(loadToolId)) {
+                            log.info("isNotBlank loadToolId info：{}", JSON.toJSONString(loadToolId));
+                            DevopsLoadSourceMapper devopsLoadSourceMapper = BeanCommon.getBean(DevopsLoadSourceMapper.class);
+                            String scriptFilePath = devopsLoadSourceMapper.getLoadId(loadToolId);
+                            log.info("loadById info：{}", scriptFilePath);
+                            if (StringUtils.isNotBlank(scriptFilePath)) {
+                                log.info("需要添加文件的载荷信息：{}", scriptFilePath);
+                                // 获取ssh链接信息
+                                String remoteHost = collect.get(0).getAccessIp();
+                                Integer port = collect.get(0).getAccessPort();
+                                String username = collect.get(0).getUsername();
+                                String password = collect.get(0).getPassword();
+                                String remoteDir = "/tmp/";
+                                String localFile = scriptFilePath;
+                                log.info("kali 主机ip:{} 端口:{} 用户名:{} 密码:{}", remoteHost, port, username, password);
+                                try {
+                                    JSch jsch = new JSch();
+                                    com.jcraft.jsch.Session session = jsch.getSession(username, remoteHost, port);
+                                    session.setPassword(password);
+                                    // 配置会话的其他选项,如主机密钥检查等
+                                    java.util.Properties config = new java.util.Properties();
+                                    config.put("StrictHostKeyChecking", "no");
+                                    config.put("ConnectionTimeout", Integer.toString(120 * 1000));
+                                    log.info("config info:{}", JSON.toJSONString(config));
+                                    session.setConfig(config);
+                                    session.connect();
+                                    Channel channel = session.openChannel("sftp");
+                                    channel.connect();
+                                    ChannelSftp sftpChannel = (ChannelSftp) channel;
+                                    // 切换到远程目录
+                                    sftpChannel.cd(remoteDir);
+                                    // 上传文件
+                                    File file = new File(localFile);
+                                    sftpChannel.put(new FileInputStream(file), file.getName());
+                                    session.disconnect();
+                                    sftpChannel.exit();
+                                    log.info("载荷文件上传成功{}", scriptFilePath);
+                                } catch (Exception e) {
+                                    log.error("exception:{}", e);
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     }
-                }
+                };
+
+                TaskCommon.executeTask(() -> NetworkUtils.probeHost(collect.get(0).getAccessIp(), checkSuccessCallback, checkSuccessCallback));
             }
 
         } catch (Exception e) {
