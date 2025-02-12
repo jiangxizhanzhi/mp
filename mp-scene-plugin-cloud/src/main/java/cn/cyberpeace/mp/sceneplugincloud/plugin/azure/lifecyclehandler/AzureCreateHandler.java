@@ -392,6 +392,12 @@ public class AzureCreateHandler extends CreateHandler {
                         .filter(element -> BaseCloudPluginSceneElementModel.LoadSourceType.LOCAL == element.getLoadSource())
                         .collect(Collectors.toList());
                 log.info("当前本地载荷信息：{}", JSON.toJSONString(cloudPlugins));
+                // 获取ssh链接信息
+                String remoteHost = collect.get(0).getAccessIp();
+                Integer port = collect.get(0).getAccessPort();
+                String username = collect.get(0).getUsername();
+                String password = collect.get(0).getPassword();
+                String protocol = collect.get(0).getProtocol();
                 Runnable checkSuccessCallback = () -> {
                     for (CloudPluginSceneElementBO cloudPlugin : cloudPlugins) {
                         log.info("cloudPlugin info：{}", JSON.toJSONString(cloudPlugin));
@@ -404,14 +410,9 @@ public class AzureCreateHandler extends CreateHandler {
                             log.info("loadById info：{}", scriptFilePath);
                             if (StringUtils.isNotBlank(scriptFilePath)) {
                                 log.info("需要添加文件的载荷信息：{}", scriptFilePath);
-                                // 获取ssh链接信息
-                                String remoteHost = collect.get(0).getAccessIp();
-                                Integer port = collect.get(0).getAccessPort();
-                                String username = collect.get(0).getUsername();
-                                String password = collect.get(0).getPassword();
                                 String remoteDir = "/tmp/";
                                 String localFile = scriptFilePath;
-                                log.info("kali 主机ip:{} 端口:{} 用户名:{} 密码:{}", remoteHost, port, username, password);
+                                log.info("kali 主机ip:{} 端口:{} 用户名:{} 密码:{} 协议:{}", remoteHost, port, username, password, protocol);
                                 try {
                                     JSch jsch = new JSch();
                                     com.jcraft.jsch.Session session = jsch.getSession(username, remoteHost, port);
@@ -443,7 +444,12 @@ public class AzureCreateHandler extends CreateHandler {
                     }
                 };
 
-                TaskCommon.executeTask(() -> NetworkUtils.probeHost(collect.get(0).getAccessIp(), checkSuccessCallback, checkSuccessCallback));
+                if (port == null || port.compareTo(0) <= 0) {
+                    TaskCommon.executeTask(() -> NetworkUtils.probeHost(remoteHost, checkSuccessCallback, checkSuccessCallback));
+                } else {
+                    TaskCommon.executeTask(
+                            () -> NetworkUtils.probePort(protocol, remoteHost, port, checkSuccessCallback, checkSuccessCallback));
+                }
             }
 
         } catch (Exception e) {
