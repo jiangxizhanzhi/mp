@@ -419,7 +419,6 @@ public class AzureCreateHandler extends CreateHandler {
                                 log.info("config info:{}", JSON.toJSONString(config));
                                 session.setConfig(config);
                                 session.setTimeout(120 * 1000);
-                                log.info("session info:{}", JSON.toJSONString(session));
                                 session.connect();
                                 Channel channel = session.openChannel("sftp");
                                 channel.connect();
