@@ -140,6 +140,7 @@ public interface FileSuffixConstant {
         add("json");
         add("xml");
         add("xlsx");
+        add("txt");
     }};
 
 }
