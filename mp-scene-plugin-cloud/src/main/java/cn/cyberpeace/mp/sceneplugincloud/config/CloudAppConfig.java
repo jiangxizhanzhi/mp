@@ -189,7 +189,7 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.internal_vm_ip:10.108.109.10}")
     private String internalVmIp;
 
-    @Value("${mp.sceneplugincloud.internal_vm_image:info_center_adk}")
+    @Value("${mp.sceneplugincloud.internal_vm_image:info_center_adk2}")
     private String internalVmImage;
 
     @Value("${mp.sceneplugincloud.internal_net_cidr:10.108.109.254}")

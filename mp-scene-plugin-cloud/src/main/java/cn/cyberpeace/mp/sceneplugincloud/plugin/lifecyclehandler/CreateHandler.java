@@ -1397,7 +1397,7 @@ public class CreateHandler extends HandlerCommon {
         builder.addUser("dev", "123456");
         List<String> initCommands = new ArrayList<>();
 //        initCommands.addAll(this.getLogstashInstallCmds());
-//        initCommands.addAll(this.getFrameInstallCmds());
+        initCommands.addAll(this.getFrameInstallCmds());
         builder.setInitCommands(initCommands);
         var cloudInitCommands = builder.build();
         String command = SystemTypeCommandUtils.joinCommands(BaseSceneElementModel.SystemType.LINUX, cloudInitCommands.toArray(new String[0]));
@@ -1417,6 +1417,20 @@ public class CreateHandler extends HandlerCommon {
         getPluginHandler().saveScene();
     }
 
+    private List<String> getFrameInstallCmds() {
+        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+        List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings("wazuh_agent_installer");
+        Map<String, String> nameFileMap = new HashMap<>();
+        for (LocalFileMappingModel localFileMappingModel : mappings) {
+            nameFileMap.put(localFileMappingModel.getName(), localFileMappingModel.getRemoteFile());
+        }
+        // frame 安装包的下载地址
+        String frameInstallResourceUrl = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, nameFileMap.getOrDefault("frame.tar.gz", StringUtils.EMPTY));
+        var installCommands = BeanCommon.getBean(CloudCommonConfigService.class)
+                .getInstallFrameCmds(frameInstallResourceUrl);
+
+        return installCommands;
+    }
 
 
     protected void prepareEventProcess() {

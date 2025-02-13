@@ -11,7 +11,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -24,6 +26,8 @@ public class CloudCommonConfigService {
     private static String CLOUD_MESSAGE_CONVERT = "cloud_message_convert";
 
     private static String SYSTEM_TYPE_TO_AGENT_SUPPORT = "system_type_to_agent_support";
+
+    private static String FRAME_INSTALL_CMDS = "install_frame.sh";
 
     private static String[] CONFIGS = new String[]{ CLOUD_MESSAGE_CONVERT, SYSTEM_TYPE_TO_AGENT_SUPPORT };
 
@@ -64,5 +68,17 @@ public class CloudCommonConfigService {
             }
             LOADED = true;
         }
+    }
+
+    public List<String> getInstallFrameCmds(String frameInstallResourceUrl) {
+        this.init();
+        String content = CONFIG_MAP.get(FRAME_INSTALL_CMDS);
+        content = content.replace("${frame_install_resource_url}", frameInstallResourceUrl);
+        String[] cmds = content.split("\n");
+        List<String> list = new ArrayList<>();
+        for (var cmd : cmds) {
+            list.add(cmd);
+        }
+        return list;
     }
 }
