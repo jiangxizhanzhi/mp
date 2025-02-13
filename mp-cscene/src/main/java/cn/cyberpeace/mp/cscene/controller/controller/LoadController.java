@@ -245,6 +245,15 @@ public class LoadController {
     }
 
     /*
+     * 载荷执行结果
+     * */
+    @ApiOperation(value = "载荷执行结果", notes = "")
+    @GetMapping("/load_execution_result_list")
+    public ListObjServiceResult getLoadExecutionResultList(@RequestParam(value = "scene_id") String sceneId) {
+        return loadService.getLoadExecutionResultList(sceneId);
+    }
+
+    /*
      * 3D态势-载荷攻击TOP5
      * */
     @ApiOperation(value = "3D态势-载荷攻击TOP5", notes = "")

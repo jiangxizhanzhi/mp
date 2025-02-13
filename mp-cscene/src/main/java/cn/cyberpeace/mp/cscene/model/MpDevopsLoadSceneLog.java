@@ -88,4 +88,9 @@ public class MpDevopsLoadSceneLog extends MpDevopsLoad {
      * 结果状态名称
      */
     private String resultStatusName;
+
+    /**
+     * 命令
+     */
+    private String command;
 }

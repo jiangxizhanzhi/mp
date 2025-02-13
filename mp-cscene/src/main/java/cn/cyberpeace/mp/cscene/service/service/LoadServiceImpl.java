@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.common.service.impl.CommonConfigServiceImpl;
 import cn.cyberpeace.mp.common.service.impl.CommonFileServiceImpl;
 import cn.cyberpeace.mp.cscene.dto.element.LoadFileInfo;
 import cn.cyberpeace.mp.cscene.model.*;
+import cn.cyberpeace.mp.cscene.repository.mapper.DevopsLoadSceneLogMapper;
 import cn.cyberpeace.mp.cscene.repository.mapper.LoadMapper;
 import cn.cyberpeace.mp.cscene.request.load.LoadRequest;
 import cn.cyberpeace.mp.cscene.request.load.LoadResultExportRequest;
@@ -96,6 +97,9 @@ public class LoadServiceImpl {
 
     @Autowired
     private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
+
+    @Autowired
+    private DevopsLoadSceneLogMapper devopsLoadSceneLogMapper;
 
     private final static String FILEPATH = "/data/resource/";
 
@@ -522,6 +526,29 @@ public class LoadServiceImpl {
         //总数量
         Integer num = loadMapper.getLoadExecutionResultNum(requestData);
         return new ListObjServiceResult(list, num).asResult();
+    }
+
+    public ListObjServiceResult getLoadExecutionResultList(String sceneId) {
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(MpDevopsLoadSceneLog::getSceneId, sceneId)
+                .orderBy(MpDevopsLoadSceneLog::getCreateTime, true);
+        List<MpDevopsLoadSceneLog> list = devopsLoadSceneLogMapper.list(humanCondition);
+        String[] codes = {CommonStatusCodeEnum.RESULT_STATUS.getCode(), CommonStatusCodeEnum.ACTION_TYPE.getCode(),
+                CommonStatusCodeEnum.RESULT_TYPE.getCode(), CommonStatusCodeEnum.CONTROL_TYPE.getCode()};
+        Map<String, String> codeMap = commonCodeService.convertNextLevelDatasByCodes(codes);
+        //将list中的resultStatus转换成codeName
+        list = list.stream()
+                .map(log -> {
+                    log.setControlTypeName(log.getControlType() != null ? codeMap.get(log.getControlType()) : log.getControlType());
+                    if (StringUtils.hasText(log.getActionType())) {
+                        log.setActionTypeConvertName(log.getActionType(), codeMap);
+                    }
+                    log.setResultTypeName(log.getResultType() != null ? codeMap.get(log.getResultType()) : log.getResultType());
+                    log.setResultStatusName(log.getResultStatus() != null ? codeMap.get(log.getResultStatus()) : log.getResultStatus());
+                    return log;
+                })
+                .collect(Collectors.toList());
+        return new ListObjServiceResult(list, list.size()).asResult();
     }
 
     /*
